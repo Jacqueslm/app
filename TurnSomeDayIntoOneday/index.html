@@ -21,6 +21,13 @@
   --ok:#04342C;--ok-t:#5DCAA5;--acc:#26215C;--acc-t:#AFA9EC;
   --warn:#2e1f05;--warn-t:#EFA527;
 }}
+.app.force-dark{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
+  --ok:#04342C;--ok-t:#5DCAA5;--acc:#26215C;--acc-t:#AFA9EC;
+  --warn:#2e1f05;--warn-t:#EFA527;
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 .ti{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle}
 .ti svg{width:1em;height:1em;flex-shrink:0}
@@ -373,7 +380,7 @@ body{display:flex;justify-content:center}
     <div class="mini-stats">
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
-      <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Streak</div></div>
+      <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Longest streak</div></div>
     </div>
   </div>
 
@@ -521,27 +528,31 @@ body{display:flex;justify-content:center}
         <button onclick="submitPost()"><i class="ti ti-send" style="font-size:15px"></i></button>
       </div>
       <div class="sec" style="padding-top:14px">
+        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--acc-t);line-height:1.5">
+          This space is for encouragement and honesty — no shaming, no glamorizing use. Tap <strong>Report</strong> on anything that feels unsafe or triggering; it'll be hidden from your feed right away.
+        </div>
+        <div id="userPostList"></div>
         <div id="postList">
           <div class="post">
             <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days sober · 2h ago</div></div></div>
             <div class="mile-tag"><i class="ti ti-trophy" style="font-size:12px"></i> 90-day milestone</div>
             <div class="pb">Just hit 90 days! Three months ago I couldn't imagine getting through a single weekend. If you're on day 1 or day 10, keep going. It gets so much easier.</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>47</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>12 replies</span></button></div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>47</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>12 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
             <div class="ph"><div class="av av-c">MK</div><div><div class="pu">Mike K.</div><div class="pm">14 days sober · 5h ago</div></div></div>
             <div class="pb">Went to a wedding, everyone was drinking. Stayed strong and left early. Day 14 still intact. The urge passes if you just hold on long enough.</div>
-            <div class="pacts"><button class="pa liked" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>31</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>8 replies</span></button></div>
+            <div class="pacts"><button class="pa liked" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>31</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>8 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
             <div class="ph"><div class="av av-b">AL</div><div><div class="pu">Alex L.</div><div class="pm">6 months sober · 1d ago</div></div></div>
             <div class="pb">6 months. I got my life back. My kids smile at me differently. My mornings are clear. You don't have to do this alone — this community is real.</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>102</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>24 replies</span></button></div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>102</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>24 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
             <div class="ph"><div class="av av-o">TR</div><div><div class="pu">Taylor R.</div><div class="pm">3 days sober · 3h ago</div></div></div>
             <div class="pb">Day 3 and honestly terrified. Every hour feels like a mountain. But I found this app and I'm not quitting. Anyone else on their first week?</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>19</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>5 replies</span></button></div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>19</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>5 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
         </div>
       </div>
@@ -589,7 +600,8 @@ body{display:flex;justify-content:center}
           <div class="prog-stats">
             <div class="ps"><div class="ps-n" id="prog-hours">0</div><div class="ps-l">Hours sober</div></div>
             <div class="ps"><div class="ps-n" id="prog-saved" style="color:#1D9E75">$0</div><div class="ps-l">Money saved</div></div>
-            <div class="ps"><div class="ps-n" id="prog-streak">0</div><div class="ps-l">Day streak</div></div>
+            <div class="ps"><div class="ps-n" id="prog-streak">0</div><div class="ps-l">Current streak</div></div>
+            <div class="ps"><div class="ps-n" id="prog-longest">0</div><div class="ps-l">Longest streak ever</div></div>
           </div>
         </div>
       </div>
@@ -766,7 +778,7 @@ let S = {
   startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
-  currentAddiction:'',currentDay:1,
+  currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -1046,6 +1058,8 @@ function finishOnboard(){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
+  applyDarkMode();
+  document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   updateLessonPromo();
   updateUserUI();
   updateStats();
@@ -1101,11 +1115,13 @@ function updateStats(){
   const hours=Math.max(0,Math.floor(diff/3600000));
   const saved=(days*S.dailySpend).toFixed(0);
 
+  if(days>(S.longestStreak||0)){S.longestStreak=days;save();}
+
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
-  document.getElementById('h-streak').textContent=days;
+  document.getElementById('h-streak').textContent=S.longestStreak||days;
 
   // next milestone
   const milestones=[1,3,7,14,30,60,90,180,365];
@@ -1124,6 +1140,7 @@ function updateStats(){
     document.getElementById('prog-hours').textContent=hours.toLocaleString();
     document.getElementById('prog-saved').textContent='$'+Number(saved).toLocaleString();
     document.getElementById('prog-streak').textContent=days;
+    document.getElementById('prog-longest').textContent=S.longestStreak||days;
     const pct90=Math.min(days/90,1);
     const circ=339.3;
     document.getElementById('prog-circle').setAttribute('stroke-dashoffset',circ-(circ*pct90));
@@ -1187,13 +1204,19 @@ function renderJournal(){
   if(!list)return;
   list.innerHTML='';
   const moodColors={'Amazing':'#E1F5EE #085041','Great':'#E6F1FB #0C447C','Good':'#E6F1FB #0C447C','Okay':'#FAEEDA #633806','Rough':'#FDECEA #861B18'};
-  S.journals.forEach(j=>{
+  S.journals.forEach((j,idx)=>{
     const colors=(moodColors[j.moodLabel]||'#E6F1FB #0C447C').split(' ');
     const ds=new Date(j.date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
     const div=document.createElement('div');div.className='jcard';
-    div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span></div><div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
+    div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span style="display:flex;align-items:center;gap:8px"><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span><button onclick="deleteJournalEntry(${idx})" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0">×</button></span></div><div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
     list.appendChild(div);
   });
+}
+function deleteJournalEntry(idx){
+  if(!confirm('Delete this journal entry? This cannot be undone.'))return;
+  S.journals.splice(idx,1);
+  save();
+  renderJournal();
 }
 function renderTodayMood(){/* placeholder */}
 
@@ -1261,12 +1284,18 @@ function renderCravings(){
   const log=document.getElementById('cravingLog');
   if(!log)return;
   log.innerHTML='';
-  S.cravings.slice(0,8).forEach(c=>{
+  S.cravings.slice(0,8).forEach((c,idx)=>{
     const dot=c.val>=7?'hi':c.val>=4?'mi':'lo';
     const ds=new Date(c.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-    log.innerHTML+=`<div class="ci"><div class="cdot ${dot}"></div><div class="ci-lbl"><strong style="font-weight:500">${c.val}/10</strong> · ${c.trigger}</div><div class="ci-time">${ds}</div></div>`;
+    log.innerHTML+=`<div class="ci"><div class="cdot ${dot}"></div><div class="ci-lbl"><strong style="font-weight:500">${c.val}/10</strong> · ${c.trigger}</div><div class="ci-time">${ds}</div><button onclick="deleteCraving(${idx})" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0;margin-left:4px">×</button></div>`;
   });
   renderCrvChart();
+}
+function deleteCraving(idx){
+  if(!confirm('Delete this craving log entry?'))return;
+  S.cravings.splice(idx,1);
+  save();
+  renderCravings();
 }
 function renderCrvChart(){
   const chart=document.getElementById('crvChart');
@@ -1292,15 +1321,38 @@ function renderCrvChart(){
 function submitPost(){
   const inp=document.getElementById('postInput');
   const txt=inp.value.trim();if(!txt)return;
-  const days=getDays();
-  const p=document.createElement('div');p.className='post';
-  p.innerHTML=`<div class="ph"><div class="av av-p">${(S.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${S.name||'You'}</div><div class="pm">${days} days sober · just now</div></div></div><div class="pb">${txt.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>0</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button></div>`;
-  document.getElementById('postList').prepend(p);inp.value='';
+  S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0});
+  save();
+  inp.value='';
+  renderCommunityPosts();
 }
 function likePost(btn){
   const span=btn.querySelector('span');
   const liked=btn.classList.toggle('liked');
   span.textContent=parseInt(span.textContent)+(liked?1:-1);
+}
+function reportPost(btn){
+  if(!confirm("Hide this post? You won't see it again, and it helps us know what to review."))return;
+  const wrapper=btn.closest('[data-post-idx]');
+  if(wrapper){
+    S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
+    save();
+    renderCommunityPosts();
+  }else{
+    btn.closest('.post').remove();
+  }
+}
+function renderCommunityPosts(){
+  const container=document.getElementById('userPostList');
+  if(!container)return;
+  container.innerHTML='';
+  S.communityPosts.forEach((p,idx)=>{
+    const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
+    div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days sober · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+    container.appendChild(div);
+  });
+  renderIcons(container);
 }
 
 // ─── TIMELINE ─────────────────────────────────────────────────────────────────
@@ -1551,6 +1603,7 @@ function switchTo(id){
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){renderTodayLesson();}
+  if(id==='community'){renderCommunityPosts();}
   // highlight tab bar
   const tabMap={home:0,nova:1,journal:2,craving:3,community:4,timeline:5,progress:6,plans:7};
   const tabs=document.querySelectorAll('.tab');
@@ -1604,7 +1657,15 @@ function updateTierUI(){
 
 // ─── PROFILE / SETTINGS ──────────────────────────────────────────────────────
 function toggleNotif(){const t=document.getElementById('notif-toggle');t.classList.toggle('on');}
-function toggleDark(){const t=document.getElementById('dark-toggle');t.classList.toggle('on');}
+function toggleDark(){
+  S.darkMode=!S.darkMode;
+  document.getElementById('dark-toggle').classList.toggle('on',S.darkMode);
+  applyDarkMode();
+  save();
+}
+function applyDarkMode(){
+  document.getElementById('app').classList.toggle('force-dark',!!S.darkMode);
+}
 function resetApp(){
   if(!confirm('Reset your sobriety date? This cannot be undone.'))return;
   const dt=prompt('Enter your new start date (YYYY-MM-DD):');

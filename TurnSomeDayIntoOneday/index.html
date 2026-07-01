@@ -264,11 +264,82 @@ body{display:flex;justify-content:center}
 .toggle-sw.on .toggle-knob{left:21px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
-<!-- ONBOARDING --> <div id="onboarding" class="ob"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div> </div>
+<!-- ONBOARDING --> <div id="onboarding" class="ob"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
 <div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> <button class="ob-btn outline" onclick="obSkip()">I already have an account</button> </div>
-<div class="ob-step" id="obs1"> <div style="font-size:15px;color:#c0caff;margin-bottom:20px;font-weight:500">What's your name?</div> <div class="ob-label">First name</div> <input class="ob-input" id="ob-name" placeholder="Your name" type="text"> <div class="ob-label">What are you recovering from?</div> <div class="addiction-grid" id="addGrid"> <div class="add-chip sel" onclick="selAdd(this)">🍺 Alcohol</div> <div class="add-chip" onclick="selAdd(this)">🚬 Smoking</div> <div class="add-chip" onclick="selAdd(this)">💊 Substances</div> <div class="add-chip" onclick="selAdd(this)">🎰 Gambling</div> <div class="add-chip" onclick="selAdd(this)">📱 Social media</div> <div class="add-chip" onclick="selAdd(this)">🍕 Food / eating</div> <div class="add-chip" onclick="selAdd(this)">🎮 Gaming</div> <div class="add-chip" onclick="selAdd(this)">✨ Other</div> </div> <button class="ob-btn" onclick="obNext(2)">Continue</button> </div>
-<div class="ob-step" id="obs2"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div class="ob-label" style="margin-top:4px">Daily spend on your addiction (optional)</div> <input class="ob-input" id="ob-spend" type="number" placeholder="e.g. 15 (dollars per day)"> <button class="ob-btn" onclick="obNext(3)">Continue</button> </div>
-<div class="ob-step" id="obs3"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
+
+<!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
+<div class="ob-step" id="obs1">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What's your first name?</div>
+  <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
+
+  <div class="ob-label" style="margin-bottom: 8px;">I identify as:</div>
+  <div class="gender-identity-container" style="display: flex; gap: 8px; margin-bottom: 24px;">
+    <div class="gender-chip" id="gc-male" onclick="selectUserGender('Male')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Man</div>
+    <div class="gender-chip" id="gc-female" onclick="selectUserGender('Female')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Woman</div>
+    <div class="gender-chip" id="gc-nb" onclick="selectUserGender('Non-Binary')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Non-Binary</div>
+  </div>
+
+  <div class="ob-label">What are you recovering from? (Select all that apply)</div>
+  <div class="addiction-grid" id="addGrid">
+    <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Smoking')">🚬 Smoking / Vaping</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Substances')">💊 Substances</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+  </div>
+  <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
+</div>
+
+<!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
+<div class="ob-step" id="obs2">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
+  <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
+  <div id="dynamic-behavior-questions"></div>
+  <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
+</div>
+
+<!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
+<div class="ob-step" id="obs2_5">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Nova's Presence</div>
+  <p style="font-size:12px; color:#8892c0; text-align: left; margin-bottom: 20px;">
+    Select the voice and presence you feel most secure opening up to. Trust is everything—you can change this at any time.
+  </p>
+
+  <div class="voice-selection-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+    <div class="voice-card" id="vc-female" onclick="selectVoice('female')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">👩‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Female Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Deeply perceptive, warm, and protective therapeutic tone.</div>
+      </div>
+    </div>
+    <div class="voice-card" id="vc-male" onclick="selectVoice('male')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">👨‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Male Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Grounding, steady, and firmly analytical protective tone.</div>
+      </div>
+    </div>
+    <div class="voice-card" id="vc-neutral" onclick="selectVoice('neutral')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">🧑‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Neutral Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Blended, objective, hyper-focused environmental coach.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
+</div>
+
+<!-- STEP 3: COMMITMENT DATE & COST -->
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div class="ob-label" style="margin-top:4px">Daily spend on this (optional)</div> <input class="ob-input" id="ob-spend" type="number" placeholder="e.g. 15 (dollars per day)"> <div class="ob-label" style="margin-top:4px">Daily hours lost to this (optional)</div> <input class="ob-input" id="ob-hours-lost" type="number" placeholder="e.g. 2 (hours per day)"> <button class="ob-btn" onclick="obNext(4)">Continue</button> </div>
+
+<!-- STEP 4: READY / PERSONALIZED SUMMARY -->
+<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
 <div class="topbar"> <span>9:41</span> <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span> </div> <div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0"></i> </div> </div> <div class="tabs" id="main-tabs"> <div class="tab on" onclick="switchTo('home');actBn('bn-home')">Home</div> <div class="tab" onclick="switchTo('nova');actBn('bn-nova')">Nova AI</div> <div class="tab" onclick="switchTo('journal');actBn('bn-journal')">Journal</div> <div class="tab" onclick="switchTo('craving');actBn('bn-craving')">Cravings</div> <div class="tab" onclick="switchTo('community');actBn('bn-comm')">Community</div> <div class="tab" onclick="switchTo('timeline');actBn('')">Timeline</div> <div class="tab" onclick="switchTo('progress');actBn('')">Progress</div> <div class="tab" onclick="switchTo('plans');actBn('bn-plans')">Plans</div> </div> <div class="screens" id="screens">
 
@@ -632,7 +703,9 @@ body{display:flex;justify-content:center}
 
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
-  name:'',addiction:'Alcohol',startDate:null,dailySpend:7,
+  name:'',userGender:'Not Specified',
+  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'female',
+  startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',
   journals:[
@@ -656,23 +729,125 @@ function load(){try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.p
 let obStep=0;
 function obNext(n){
   document.getElementById('obs'+obStep).classList.remove('on');
-  document.getElementById('od'+obStep).classList.remove('on');
+  if(document.getElementById('od'+obStep))document.getElementById('od'+obStep).classList.remove('on');
   obStep=n;
   document.getElementById('obs'+n).classList.add('on');
-  document.getElementById('od'+n).classList.add('on');
-  if(n===3){
-    S.name=document.getElementById('ob-name').value.trim()||'Friend';
-    const sel=document.querySelector('.add-chip.sel');
-    if(sel)S.addiction=sel.textContent.replace(/./u,'').trim();
+  if(document.getElementById('od'+n))document.getElementById('od'+n).classList.add('on');
+  if(n===4){
     const dt=document.getElementById('ob-date').value;
     S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
-    const sp=parseFloat(document.getElementById('ob-spend').value);
-    if(!isNaN(sp)&&sp>0)S.dailySpend=sp;
-    document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Every day you choose this is a day you win.`;
+    S.dailySpend=parseFloat(document.getElementById('ob-spend').value)||0;
+    S.dailyHoursLost=parseFloat(document.getElementById('ob-hours-lost').value)||0;
+    document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
+    const blueprintVals=Object.values(S.behavioralBlueprint);
+    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
+    document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
   }
 }
-function selAdd(el){document.querySelectorAll('.add-chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+
+function toggleAddiction(element,name){
+  element.classList.toggle('sel');
+  if(S.selectedAddictions.includes(name)){
+    S.selectedAddictions=S.selectedAddictions.filter(item=>item!==name);
+  }else{
+    S.selectedAddictions.push(name);
+  }
+}
+
+function selectUserGender(gender){
+  S.userGender=gender;
+  ['gc-male','gc-female','gc-nb'].forEach(id=>{
+    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+  });
+  let targetedId='gc-nb';
+  if(gender==='Male')targetedId='gc-male';
+  if(gender==='Female')targetedId='gc-female';
+  document.getElementById(targetedId).style.borderColor='var(--green)';
+  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
+}
+
+function goToBehavioralStep(){
+  S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  if(S.selectedAddictions.length===0){
+    alert('Please select at least one area to focus on.');
+    return;
+  }
+  const container=document.getElementById('dynamic-behavior-questions');
+  container.innerHTML='';
+  S.selectedAddictions.forEach(addiction=>{
+    let htmlBlock=`<div style="margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;"> <div style="font-size:13px; color:var(--green); font-weight:600; margin-bottom:6px;">Focus: ${addiction}</div>`;
+    if(addiction==='Porn & Sex'){
+      htmlBlock+=`
+        <div class="ob-label">When are you most vulnerable to acting out?</div>
+        <select class="ob-input" id="behavior-porn-time">
+          <option value="Late at night when isolated">Late at night when isolated</option>
+          <option value="During high stress or work anxiety">During high stress or work anxiety</option>
+          <option value="When bored during random downtime">When bored during random downtime</option>
+        </select>
+        <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
+        <select class="ob-input" id="behavior-porn-root">
+          <option value="Anesthetizing loneliness / lack of connection">Anesthetizing loneliness / lack of connection</option>
+          <option value="Dopamine hunting to escape boredom">Dopamine hunting to escape boredom</option>
+          <option value="Decompressing from intense performance anxiety">Decompressing from intense performance anxiety</option>
+        </select>`;
+    }else if(addiction==='Alcohol'||addiction==='Substances'){
+      htmlBlock+=`
+        <div class="ob-label">How do you usually engage in this cycle?</div>
+        <select class="ob-input" id="behavior-sub-style">
+          <option value="Socially to mask social anxiety">Socially to mask social anxiety</option>
+          <option value="Secretly alone to numb the day">Secretly alone to numb the day</option>
+          <option value="Binging during high stress crashes">Binging during high stress crashes</option>
+        </select>`;
+    }else if(addiction==='Gambling'||addiction==='Social media'||addiction==='Gaming'){
+      htmlBlock+=`
+        <div class="ob-label">What is the destructive loop trigger?</div>
+        <select class="ob-input" id="behavior-loop-trigger">
+          <option value="Escaping real-world financial or life responsibilities">Escaping real-world responsibilities</option>
+          <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
+          <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
+        </select>`;
+    }else{
+      htmlBlock+=`
+        <div class="ob-label">What feels like the driving root cause here?</div>
+        <select class="ob-input" id="behavior-gen-root">
+          <option value="Stress & emotional burnout">Stress &amp; emotional burnout</option>
+          <option value="Habitual routine patterns that are hardwired">Habitual hardwired routines</option>
+          <option value="Isolation and a lack of true real-world accountability">Isolation &amp; lack of accountability</option>
+        </select>`;
+    }
+    htmlBlock+=`</div>`;
+    container.innerHTML+=htmlBlock;
+  });
+  obNext(2);
+}
+
+function showVoiceStep(){
+  S.behavioralBlueprint={};
+  if(document.getElementById('behavior-porn-time'))S.behavioralBlueprint.pornTime=document.getElementById('behavior-porn-time').value;
+  if(document.getElementById('behavior-porn-root'))S.behavioralBlueprint.pornRoot=document.getElementById('behavior-porn-root').value;
+  if(document.getElementById('behavior-sub-style'))S.behavioralBlueprint.subStyle=document.getElementById('behavior-sub-style').value;
+  if(document.getElementById('behavior-loop-trigger'))S.behavioralBlueprint.loopTrigger=document.getElementById('behavior-loop-trigger').value;
+  if(document.getElementById('behavior-gen-root'))S.behavioralBlueprint.genRoot=document.getElementById('behavior-gen-root').value;
+
+  document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
+  document.getElementById('obs2_5').classList.add('on');
+  if(document.getElementById('od2'))document.getElementById('od2').classList.remove('on');
+  obStep='2_5';
+  selectVoice(S.novaVoice);
+}
+
+function selectVoice(variant){
+  S.novaVoice=variant;
+  ['female','male','neutral'].forEach(v=>{
+    document.getElementById('vc-'+v).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById('vc-'+v).style.background='rgba(255,255,255,0.03)';
+  });
+  document.getElementById('vc-'+variant).style.borderColor='var(--green)';
+  document.getElementById('vc-'+variant).style.background='rgba(126,232,162,0.12)';
+}
+
 function obSkip(){finishOnboard();}
 function finishOnboard(){
   if(!S.startDate)S.startDate=new Date().toISOString();
@@ -1070,7 +1245,20 @@ async function sendMsg(){
   S.chatHistory.push({role:'user',content:text});
   showTyping(true);
   try{
-    const msgs=[{role:'user',content:`[Context: User is ${S.name||'recovering'}, ${getDays()} days sober from ${S.addiction||'addiction'}]`},...S.chatHistory];
+    const blueprintSummary=Object.entries(S.behavioralBlueprint).map(([k,v])=>`${k}: ${v}`).join(', ');
+    const msgs=[
+      {role:'user',content:`[System Context - PERSONALIZATION PROTOCOL]:
+User Name: ${S.name||'Recovering Individual'}
+User Gender Identity: ${S.userGender||'Not Specified'} (respect this identity naturally)
+Sober Since: ${S.startDate||'today'}
+Target Areas: ${S.selectedAddictions.join(', ')||'general recovery'}
+Behavioral Profile: ${blueprintSummary||'not yet specified'}
+Nova Voice Selection: ${(S.novaVoice||'female').toUpperCase()}
+Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
+
+[Persona Tone Guide]: The user chose this presence because it makes them feel safe opening up. Adjust tone accordingly — MALE: grounding, steady, firmly analytical. FEMALE: deeply perceptive, warm but honest. NEUTRAL: blended, objective, matter-of-fact. Never break character. Address the specific interactions between their triggers and root causes, and suggest concrete real-world actions tailored to these parameters.`},
+      ...S.chatHistory
+    ];
     const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},

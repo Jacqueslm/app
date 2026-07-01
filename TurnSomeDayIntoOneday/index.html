@@ -446,6 +446,7 @@ body{display:flex;justify-content:center}
       <div class="sec">
         <div class="sec-hd">Your journal</div>
         <div class="jour-new" id="newJourBtn" onclick="openJour()"><i class="ti ti-pencil" style="font-size:18px"></i> Write today's entry</div>
+        <div class="jour-new" id="voiceJourBtn" onclick="startVoiceJournal()" style="margin-top:8px"><i class="ti ti-microphone" style="font-size:18px"></i> Speak today's entry <span class="badge badge-acc" style="margin-left:4px">Pro</span></div>
         <div class="jour-form" id="jourForm">
           <div style="font-size:13px;color:var(--tm);margin-bottom:10px">How are you feeling today?</div>
           <div class="mood-row" id="jour-mood-row">
@@ -737,10 +738,10 @@ body{display:flex;justify-content:center}
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
   name:'',userGender:'Not Specified',accountEmail:null,
-  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'female',
+  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
-  chatsLeft:3,chatHistory:[],chatDate:'',
+  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -1043,6 +1044,54 @@ function renderJournal(){
 }
 function renderTodayMood(){/* placeholder */}
 
+function startVoiceJournal(){
+  if(!S.isPro){
+    addBubble('nova',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
+    return;
+  }
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    addBubble('nova',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
+    return;
+  }
+  if(S.voiceJournalActive)return;
+
+  S.voiceJournalActive=true;
+  addBubble('nova',"I'm listening. Speak your journal entry whenever you're ready.");
+
+  const rec=new SpeechRecognition();
+  rec.lang='en-US';
+  rec.interimResults=false;
+
+  rec.onresult=e=>{
+    const text=e.results[0][0].transcript;
+    saveVoiceJournal(text);
+  };
+
+  rec.onerror=()=>{
+    addBubble('nova',"Something went wrong with the microphone. Try again when you're ready.");
+    S.voiceJournalActive=false;
+  };
+
+  rec.onend=()=>{
+    S.voiceJournalActive=false;
+  };
+
+  rec.start();
+}
+
+function saveVoiceJournal(text){
+  S.journals.unshift({
+    date:new Date().toISOString(),
+    mood:'🗣️',
+    moodLabel:'Voice Entry',
+    body:text
+  });
+  save();
+  renderJournal();
+  addBubble('nova',"Your voice journal has been saved.");
+}
+
 // ─── CRAVINGS ─────────────────────────────────────────────────────────────────
 function logCraving(){
   const v=parseInt(document.getElementById('cSlider').value);
@@ -1283,16 +1332,21 @@ async function sendMsg(){
   try{
     const blueprintSummary=Object.entries(S.behavioralBlueprint).map(([k,v])=>`${k}: ${v}`).join(', ');
     const msgs=[
-      {role:'user',content:`[System Context - PERSONALIZATION PROTOCOL]:
+      {role:'user',content:`[System Context - EXPLICIT PERSONALIZATION PROTOCOL]:
 User Name: ${S.name||'Recovering Individual'}
-User Gender Identity: ${S.userGender||'Not Specified'} (respect this identity naturally)
+User Gender Identity: ${S.userGender||'Not Specified'}
 Sober Since: ${S.startDate||'today'}
-Target Areas: ${S.selectedAddictions.join(', ')||'general recovery'}
-Behavioral Profile: ${blueprintSummary||'not yet specified'}
-Nova Voice Selection: ${(S.novaVoice||'female').toUpperCase()}
+Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
+Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
+Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
 
-[Persona Tone Guide]: The user chose this presence because it makes them feel safe opening up. Adjust tone accordingly — MALE: grounding, steady, firmly analytical. FEMALE: deeply perceptive, warm but honest. NEUTRAL: blended, objective, matter-of-fact. Never break character. Address the specific interactions between their triggers and root causes, and suggest concrete real-world actions tailored to these parameters.`},
+[Nova Clinical Archetype Deployment Guide]:
+- MALE: grounding, steady, analytical, protective.
+- FEMALE: deeply perceptive, validating, warm, honest.
+- NEUTRAL: blended, objective, environmental accountability coach.
+
+Address the interactions of their unique blueprint and assign structured daily real-world actions. Never break character.`},
       ...S.chatHistory
     ];
     const res=await fetch('/api/chat',{

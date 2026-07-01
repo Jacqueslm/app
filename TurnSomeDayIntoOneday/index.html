@@ -1008,6 +1008,31 @@ Core traits:
 - Safety first — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7."
 - You know the user's sobriety journey and reference it naturally when relevant.`;
 
+// ─── LOCAL FALLBACK (used when /api/chat is unreachable or unconfigured) ─────
+const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
+const FALLBACK_PATTERNS=[
+  {test:/suicid|kill myself|self.?harm|end my life|hurt myself/i,
+   reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
+  {test:/relaps|slipped|used again|drank again|smoked again/i,
+   reply:`Relapse doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
+  {test:/craving|urge|want to (drink|use|smoke)|tempted/i,
+   reply:`Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`},
+  {test:/proud|good day|great day|did it|feeling good|amazing/i,
+   reply:`I'm really glad you're feeling proud — that matters, and you should let yourself feel it fully.\n\nWhat's one thing you did recently that you want to remember on harder days?`},
+  {test:/motivat|inspir|give up|can'?t do this|losing hope|pointless/i,
+   reply:`Motivation comes and goes, and that's normal — it doesn't mean you're failing. Let's anchor to your reasons instead of waiting for motivation to show up.\n\nWhy did you decide to start this in the first place?`},
+  {test:/paws|post.?acute|withdrawal/i,
+   reply:`PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`},
+  {test:/struggl|hard|rough|bad day|tough|heavy|overwhelm/i,
+   reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
+];
+function localFallbackReply(userText){
+  const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
+  if(match)return match.reply;
+  const days=getDays();
+  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.\n\n(I'm running in offline mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+}
+
 function addBubble(who,text){
   const area=document.getElementById('chatArea');
   const d=document.createElement('div');
@@ -1051,12 +1076,18 @@ async function sendMsg(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1000,system:SYSTEM,messages:msgs})
     });
+    if(!res.ok)throw new Error('api-unavailable');
     const data=await res.json();
-    const reply=(data.content&&data.content[0]&&data.content[0].text)||"I'm right here with you. Something went wrong on my end — please try again.";
+    const reply=(data.content&&data.content[0]&&data.content[0].text)||localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-  }catch(e){showTyping(false);addBubble('nova',"I'm here. Something went wrong connecting — please check your internet and try again.");}
+  }catch(e){
+    const reply=localFallbackReply(text);
+    S.chatHistory.push({role:'assistant',content:reply});
+    if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
+    save();showTyping(false);addBubble('nova',reply);
+  }
 }
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────

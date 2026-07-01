@@ -1046,10 +1046,10 @@ async function sendMsg(){
   showTyping(true);
   try{
     const msgs=[{role:'user',content:`[Context: User is ${S.name||'recovering'}, ${getDays()} days sober from ${S.addiction||'addiction'}]`},...S.chatHistory];
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:SYSTEM,messages:msgs})
+      body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1000,system:SYSTEM,messages:msgs})
     });
     const data=await res.json();
     const reply=(data.content&&data.content[0]&&data.content[0].text)||"I'm right here with you. Something went wrong on my end — please try again.";

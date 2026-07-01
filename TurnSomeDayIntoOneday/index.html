@@ -393,6 +393,12 @@ body{display:flex;justify-content:center}
     <i class="ti ti-arrow-right" style="font-size:18px;color:var(--accent)"></i>
   </div>
 
+  <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
+    <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:#0F6E56"></i>
+  </div>
+
   <div class="sec">
     <div class="sec-hd">Today's mood</div>
     <div class="mood-row">
@@ -548,6 +554,23 @@ body{display:flex;justify-content:center}
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:13px;color:var(--acc-t)" id="tl-current-msg">Your body is healing.</div>
       </div>
       <div class="tl" id="tl-container"></div>
+    </div>
+
+    <!-- LESSON -->
+    <div id="s-lesson" class="scr">
+      <div class="sec">
+        <div class="sec-hd">Today's lesson</div>
+        <div class="card" id="lesson-card">
+          <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lessonTitle">Loading…</div>
+          <div style="font-size:12px;color:var(--tm);margin-top:2px" id="lessonMeta"></div>
+          <div id="lessonBody" style="font-size:13px;color:var(--ts);line-height:1.6;margin-top:10px;white-space:pre-wrap"></div>
+          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Today's action</div>
+          <div id="lessonAction" style="font-size:13px;color:var(--ts);line-height:1.6"></div>
+          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Reflect</div>
+          <div id="lessonReflection" style="font-size:13px;color:var(--ts);line-height:1.6;font-style:italic"></div>
+          <button class="log-btn" id="lessonCompleteBtn" style="margin-top:16px" onclick="completeLessonForToday()">Mark as done</button>
+        </div>
+      </div>
     </div>
 
     <!-- PROGRESS -->
@@ -743,6 +766,7 @@ let S = {
   startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
+  currentAddiction:'',currentDay:1,
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -810,6 +834,81 @@ function renderIcons(root){
     if(!paths)return;
     el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
   });
+}
+
+// ─── DAILY LESSONS ─────────────────────────────────────────────────────────────
+// Lesson content is static reference data (not per-user), so it's kept out of S
+// entirely rather than synced/duplicated into every user's saved state blob.
+let LESSON_PACKS={};
+let lessonPacksLoaded=false;
+async function loadLessonPacks(){
+  try{
+    const res=await fetch('data/lessons.json');
+    if(res.ok){LESSON_PACKS=await res.json();lessonPacksLoaded=true;}
+  }catch(e){/* offline - lesson screen will show a friendly message */}
+  updateLessonPromo();
+}
+
+function getTodayLesson(){
+  const pack=LESSON_PACKS[S.currentAddiction]||[];
+  return pack.find(l=>l.day===S.currentDay)||null;
+}
+
+function updateLessonPromo(){
+  const title=document.getElementById('lesson-promo-title');
+  const sub=document.getElementById('lesson-promo-sub');
+  if(!title||!sub)return;
+  if(!lessonPacksLoaded){sub.textContent='Loading your program…';return;}
+  const lesson=getTodayLesson();
+  if(lesson){
+    title.textContent=`Day ${lesson.day}: ${lesson.title}`;
+    sub.textContent=`Your ${S.currentAddiction||'recovery'} program`;
+  }else{
+    title.textContent="Today's lesson";
+    sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this track';
+  }
+}
+
+function renderTodayLesson(){
+  const lesson=getTodayLesson();
+  const titleEl=document.getElementById('lessonTitle');
+  const metaEl=document.getElementById('lessonMeta');
+  const bodyEl=document.getElementById('lessonBody');
+  const actionEl=document.getElementById('lessonAction');
+  const reflectionEl=document.getElementById('lessonReflection');
+  const btn=document.getElementById('lessonCompleteBtn');
+  if(!lesson){
+    const hasTrack=(LESSON_PACKS[S.currentAddiction]||[]).length>0;
+    titleEl.textContent=hasTrack?"You're all caught up":'Lessons coming soon';
+    metaEl.textContent=S.currentAddiction||'';
+    bodyEl.textContent=hasTrack
+      ?"You've completed every lesson available in this track so far. Check back soon for more."
+      :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
+    actionEl.textContent='';
+    reflectionEl.textContent='';
+    btn.style.display='none';
+    return;
+  }
+  titleEl.textContent=`Day ${lesson.day}: ${lesson.title}`;
+  metaEl.textContent=S.currentAddiction;
+  bodyEl.textContent=lesson.content;
+  actionEl.textContent=lesson.action||'';
+  reflectionEl.textContent=lesson.reflection||'';
+  btn.style.display='block';
+  btn.textContent='Mark as done';
+  btn.disabled=false;
+}
+
+function completeLessonForToday(){
+  const lesson=getTodayLesson();
+  if(!lesson)return;
+  S.currentDay++;
+  save();
+  const btn=document.getElementById('lessonCompleteBtn');
+  btn.textContent='Nice work — day complete ✓';
+  btn.disabled=true;
+  updateLessonPromo();
+  setTimeout(()=>{renderTodayLesson();},1200);
 }
 
 // ─── ONBOARDING ──────────────────────────────────────────────────────────────
@@ -937,6 +1036,7 @@ function selectVoice(variant){
 
 function finishOnboard(){
   if(!S.startDate)S.startDate=new Date().toISOString();
+  if(!S.currentAddiction)S.currentAddiction=S.selectedAddictions[0]||'';
   save();
   document.getElementById('onboarding').style.display='none';
   document.getElementById('main-app').style.display='flex';
@@ -945,6 +1045,8 @@ function finishOnboard(){
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
+  if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
+  updateLessonPromo();
   updateUserUI();
   updateStats();
   renderMilestones();
@@ -1432,9 +1534,9 @@ Address the interactions of their unique blueprint and assign structured daily r
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
-  plans:'s-plans',profile:'s-profile'
+  plans:'s-plans',profile:'s-profile',lesson:'s-lesson'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Community',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Community',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson"};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
@@ -1448,6 +1550,7 @@ function switchTo(id){
   if(id==='journal'){renderJournal();}
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
+  if(id==='lesson'){renderTodayLesson();}
   // highlight tab bar
   const tabMap={home:0,nova:1,journal:2,craving:3,community:4,timeline:5,progress:6,plans:7};
   const tabs=document.querySelectorAll('.tab');
@@ -1608,6 +1711,7 @@ function showAuthGate(){
 function enterApp(){
   document.getElementById('auth-gate').style.display='none';
   updateAccountUI();
+  loadLessonPacks();
   if(S.startDate){
     document.getElementById('onboarding').style.display='none';
     document.getElementById('main-app').style.display='flex';

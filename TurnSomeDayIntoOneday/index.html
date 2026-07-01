@@ -264,8 +264,25 @@ body{display:flex;justify-content:center}
 .toggle-sw.on .toggle-knob{left:21px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
-<!-- ONBOARDING --> <div id="onboarding" class="ob"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
-<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> <button class="ob-btn outline" onclick="obSkip()">I already have an account</button> </div>
+<!-- MANDATORY ACCOUNT GATE -->
+<div id="auth-gate" class="ob">
+  <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div>
+  <h1>Turn Someday<br>Into Day One</h1>
+  <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.<br><br>Create an account or log in to continue — your data syncs to it automatically.</p>
+  <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
+    <button class="nova-mode active" id="gate-tab-login" onclick="setGateMode('login')">Log In</button>
+    <button class="nova-mode" id="gate-tab-signup" onclick="setGateMode('signup')">Sign Up</button>
+  </div>
+  <div class="ob-label" style="text-align:left">Email</div>
+  <input class="ob-input" id="gate-email" placeholder="you@example.com" type="text" autocomplete="email">
+  <div class="ob-label" style="text-align:left">Password</div>
+  <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
+  <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
+  <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
+</div>
+
+<!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
+<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
 
 <!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
 <div class="ob-step" id="obs1">
@@ -691,28 +708,10 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
-<!-- ACCOUNT / AUTH MODAL -->
+<!-- ACCOUNT / AUTH MODAL (signed-in only - an account is required to reach this screen at all) -->
 <div class="sos-modal" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="sos-sheet">
-    <div id="auth-signed-out-view">
-      <div class="sos-title" style="color:var(--accent)">Account &amp; Sync</div>
-      <div class="sos-sub">Create an account to back up your data and sync it across devices. Your app keeps working fully without one.</div>
-      <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
-        <button class="nova-mode active" id="auth-tab-login" onclick="setAuthMode('login')">Log In</button>
-        <button class="nova-mode" id="auth-tab-signup" onclick="setAuthMode('signup')">Sign Up</button>
-      </div>
-      <div class="input-row">
-        <label>Email</label>
-        <input type="text" id="auth-email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="input-row" style="margin-top:8px">
-        <label>Password</label>
-        <input type="password" id="auth-password" placeholder="At least 8 characters" autocomplete="current-password">
-      </div>
-      <div class="small-text" id="auth-error" style="color:#E24B4A;min-height:14px;margin-top:8px"></div>
-      <button class="ob-btn" style="margin-top:8px" id="auth-submit-btn" onclick="submitAuth()">Log In</button>
-    </div>
-    <div id="auth-signed-in-view" style="display:none">
+    <div id="auth-signed-in-view">
       <div class="sos-title" style="color:var(--accent)">Account &amp; Sync</div>
       <div class="sos-sub">Signed in as <strong id="auth-current-email"></strong>. Your data syncs to this account automatically.</div>
       <button class="ob-btn" style="margin-top:8px" onclick="manualSync()">Sync now</button>
@@ -885,7 +884,6 @@ function selectVoice(variant){
   document.getElementById('vc-'+variant).style.background='rgba(126,232,162,0.12)';
 }
 
-function obSkip(){openAuthModal();}
 function finishOnboard(){
   if(!S.startDate)S.startDate=new Date().toISOString();
   save();
@@ -1405,35 +1403,24 @@ function resetApp(){
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────
-let authMode='login';
+let gateMode='login';
 
 function updateAccountUI(){
   const sub=document.getElementById('account-row-sub');
   if(!sub)return;
-  sub.textContent=S.accountEmail?('Signed in as '+S.accountEmail):'Not signed in — data stays on this device only';
+  sub.textContent=S.accountEmail?('Signed in as '+S.accountEmail):'';
 }
 
-function setAuthMode(mode){
-  authMode=mode;
-  document.getElementById('auth-tab-login').classList.toggle('active',mode==='login');
-  document.getElementById('auth-tab-signup').classList.toggle('active',mode==='signup');
-  document.getElementById('auth-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
-  document.getElementById('auth-error').textContent='';
+function setGateMode(mode){
+  gateMode=mode;
+  document.getElementById('gate-tab-login').classList.toggle('active',mode==='login');
+  document.getElementById('gate-tab-signup').classList.toggle('active',mode==='signup');
+  document.getElementById('gate-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
+  document.getElementById('gate-error').textContent='';
 }
 
 function openAuthModal(){
-  if(S.accountEmail){
-    document.getElementById('auth-signed-out-view').style.display='none';
-    document.getElementById('auth-signed-in-view').style.display='block';
-    document.getElementById('auth-current-email').textContent=S.accountEmail;
-  }else{
-    document.getElementById('auth-signed-out-view').style.display='block';
-    document.getElementById('auth-signed-in-view').style.display='none';
-    document.getElementById('auth-email').value='';
-    document.getElementById('auth-password').value='';
-    document.getElementById('auth-error').textContent='';
-    setAuthMode('login');
-  }
+  document.getElementById('auth-current-email').textContent=S.accountEmail||'';
   document.getElementById('auth-modal').classList.add('open');
 }
 function closeAuthModal(){document.getElementById('auth-modal').classList.remove('open');}
@@ -1454,8 +1441,10 @@ async function signOutAccount(){
   try{await fetch('/api/auth/logout',{method:'POST'});}catch(e){}
   S.accountEmail=null;
   save();
-  updateAccountUI();
   closeAuthModal();
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('onboarding').style.display='none';
+  showAuthGate();
 }
 
 async function exportAccountData(){
@@ -1493,22 +1482,46 @@ async function deleteAccountFlow(){
     }
     S.accountEmail=null;
     save();
-    updateAccountUI();
     closeAuthModal();
-    alert('Your account has been deleted. This device still has your local data.');
+    alert("Your account has been deleted. You'll need a new account to keep using the app.");
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('onboarding').style.display='none';
+    showAuthGate();
   }catch(e){
     alert('Could not reach the server to delete your account.');
   }
 }
 
-async function submitAuth(){
-  const email=document.getElementById('auth-email').value.trim();
-  const password=document.getElementById('auth-password').value;
-  const errEl=document.getElementById('auth-error');
+function showAuthGate(){
+  document.getElementById('auth-gate').style.display='flex';
+  document.getElementById('gate-email').value='';
+  document.getElementById('gate-password').value='';
+  setGateMode('login');
+}
+
+function enterApp(){
+  document.getElementById('auth-gate').style.display='none';
+  updateAccountUI();
+  if(S.startDate){
+    document.getElementById('onboarding').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    initApp();
+  }else{
+    document.getElementById('onboarding').style.display='flex';
+    // set default date for demo
+    const today=new Date();today.setDate(today.getDate()-47);
+    document.getElementById('ob-date').value=today.toISOString().split('T')[0];
+  }
+}
+
+async function submitGateAuth(){
+  const email=document.getElementById('gate-email').value.trim();
+  const password=document.getElementById('gate-password').value;
+  const errEl=document.getElementById('gate-error');
   errEl.textContent='';
   if(!email||!password){errEl.textContent='Enter an email and password.';return;}
   try{
-    const res=await fetch(`/api/auth/${authMode}`,{
+    const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({email,password})
     });
@@ -1516,76 +1529,43 @@ async function submitAuth(){
     if(!res.ok){errEl.textContent=data.error||'Something went wrong.';return;}
     S.accountEmail=data.email;
 
-    if(authMode==='signup'){
-      await pushStateToServer();
+    if(gateMode==='signup'){
+      // Brand-new account - anything already cached in this browser becomes this account's data.
       save();
-      updateAccountUI();
-      closeAuthModal();
-      alert('Account created. Your data on this device is now backed up.');
+      enterApp();
       return;
     }
 
-    // login: check whether the account already has data saved from elsewhere
+    // Log in - the account's saved data (if any) is the source of truth going forward.
     const stateRes=await fetch('/api/state');
     const stateData=stateRes.ok?await stateRes.json():{state:null};
     if(stateData.state){
-      const remote=JSON.parse(stateData.state);
-      let useRemote=true;
-      if(S.startDate){
-        useRemote=confirm("Your account already has saved data.\n\nOK = load your account's data (replaces what's on this device).\nCancel = keep this device's data (it will overwrite your account next time it saves).");
-      }
-      if(useRemote){
-        Object.assign(S,remote);
-        S.accountEmail=data.email;
-      }
+      Object.assign(S,JSON.parse(stateData.state));
+      S.accountEmail=data.email;
     }
     save();
-    closeAuthModal();
-    location.reload();
+    enterApp();
   }catch(e){
     errEl.textContent='Could not reach the server. Check your connection and try again.';
   }
 }
 
-async function checkAccountSession(){
+async function boot(){
+  load();
   try{
     const meRes=await fetch('/api/auth/me');
-    if(!meRes.ok){
-      if(S.accountEmail){S.accountEmail=null;save();updateAccountUI();}
+    if(meRes.ok){
+      const me=await meRes.json();
+      S.accountEmail=me.email;
+      enterApp();
       return;
     }
-    const me=await meRes.json();
-    S.accountEmail=me.email;
-    updateAccountUI();
-    if(!S.startDate){
-      // No local progress on this device/browser yet - pull existing account data automatically.
-      const stateRes=await fetch('/api/state');
-      if(stateRes.ok){
-        const {state}=await stateRes.json();
-        if(state){
-          Object.assign(S,JSON.parse(state));
-          S.accountEmail=me.email;
-          save();
-          location.reload();
-        }
-      }
-    }
-  }catch(e){/* offline or server unavailable - app keeps working from local data */}
+  }catch(e){/* server unreachable - fall through to the gate */}
+  showAuthGate();
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
-load();
-if(S.startDate){
-  document.getElementById('onboarding').style.display='none';
-  document.getElementById('main-app').style.display='flex';
-  initApp();
-} else {
-  // set default date for demo
-  const today=new Date();today.setDate(today.getDate()-47);
-  document.getElementById('ob-date').value=today.toISOString().split('T')[0];
-}
-updateAccountUI();
-checkAccountSession();
+boot();
 </script>
 </body>
 </html>

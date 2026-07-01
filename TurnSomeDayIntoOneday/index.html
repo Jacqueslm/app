@@ -313,6 +313,9 @@ body{display:flex;justify-content:center}
     <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Food / eating')">🍽️ Food / Eating</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / spending')">🛍️ Shopping / Spending</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
   </div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
@@ -1006,6 +1009,30 @@ function goToBehavioralStep(){
           <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
           <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
         </select>`;
+    }else if(addiction==='Food / eating'){
+      htmlBlock+=`
+        <div class="ob-label">When do you feel the pull most strongly?</div>
+        <select class="ob-input" id="behavior-food-trigger">
+          <option value="Late at night after a stressful day">Late at night after a stressful day</option>
+          <option value="Alone, away from others watching">Alone, away from others watching</option>
+          <option value="After an emotional trigger like sadness or anger">After an emotional trigger like sadness or anger</option>
+        </select>`;
+    }else if(addiction==='Shopping / spending'){
+      htmlBlock+=`
+        <div class="ob-label">What drives the urge to spend?</div>
+        <select class="ob-input" id="behavior-shopping-trigger">
+          <option value="Chasing the thrill of a new purchase">Chasing the thrill of a new purchase</option>
+          <option value="Escaping stress or sadness through buying">Escaping stress or sadness through buying</option>
+          <option value="Filling a void or boredom with acquiring things">Filling a void or boredom with acquiring things</option>
+        </select>`;
+    }else if(addiction==='Work'){
+      htmlBlock+=`
+        <div class="ob-label">What's really driving the overworking?</div>
+        <select class="ob-input" id="behavior-work-trigger">
+          <option value="Fear of not being enough without constant achievement">Fear of not being enough without constant achievement</option>
+          <option value="Avoiding personal life or relationships through busyness">Avoiding personal life or relationships through busyness</option>
+          <option value="Difficulty sitting still or resting without guilt">Difficulty sitting still or resting without guilt</option>
+        </select>`;
     }else{
       htmlBlock+=`
         <div class="ob-label">What feels like the driving root cause here?</div>
@@ -1027,6 +1054,9 @@ function showVoiceStep(){
   if(document.getElementById('behavior-porn-root'))S.behavioralBlueprint.pornRoot=document.getElementById('behavior-porn-root').value;
   if(document.getElementById('behavior-sub-style'))S.behavioralBlueprint.subStyle=document.getElementById('behavior-sub-style').value;
   if(document.getElementById('behavior-loop-trigger'))S.behavioralBlueprint.loopTrigger=document.getElementById('behavior-loop-trigger').value;
+  if(document.getElementById('behavior-food-trigger'))S.behavioralBlueprint.foodTrigger=document.getElementById('behavior-food-trigger').value;
+  if(document.getElementById('behavior-shopping-trigger'))S.behavioralBlueprint.shoppingTrigger=document.getElementById('behavior-shopping-trigger').value;
+  if(document.getElementById('behavior-work-trigger'))S.behavioralBlueprint.workTrigger=document.getElementById('behavior-work-trigger').value;
   if(document.getElementById('behavior-gen-root'))S.behavioralBlueprint.genRoot=document.getElementById('behavior-gen-root').value;
 
   document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));

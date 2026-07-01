@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Turn Someday Into Day One</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 :root{
   --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
@@ -23,6 +22,8 @@
   --warn:#2e1f05;--warn-t:#EFA527;
 }}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+.ti{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle}
+.ti svg{width:1em;height:1em;flex-shrink:0}
 html,body{height:100%;background:#0f0c29;font-family:var(--f)}
 body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
@@ -762,6 +763,55 @@ function save(){
 }
 function load(){try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}}
 
+// ─── ICONS (inline SVG, no external font/CDN dependency) ─────────────────────
+const ICON_PATHS={
+'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
+'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
+'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
+'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
+'ti-battery-2':'<rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="10" x2="22" y2="14"/><rect x="4" y="9" width="9" height="6" fill="currentColor" stroke="none"/>',
+'ti-bell':'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+'ti-brain':'<path d="M9.5 2A3.5 3.5 0 0 0 6 5.5c-1.7 0-3 1.4-3 3 0 1 .4 1.9 1 2.5-1 .6-1.5 1.6-1.5 2.6a3 3 0 0 0 3 3h.5A3.5 3.5 0 0 0 9.5 20"/><path d="M14.5 2A3.5 3.5 0 0 1 18 5.5c1.7 0 3 1.4 3 3 0 1-.4 1.9-1 2.5 1 .6 1.5 1.6 1.5 2.6a3 3 0 0 1-3 3h-.5a3.5 3.5 0 0 1-3.5 3.5"/><line x1="12" y1="2" x2="12" y2="22"/>',
+'ti-calendar-week':'<rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="15" x2="17" y2="15"/>',
+'ti-check':'<polyline points="20 6 9 17 4 12"/>',
+'ti-chevron-right':'<polyline points="9 18 15 12 9 6"/>',
+'ti-circle-filled':'<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
+'ti-cloud':'<path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4 2A4 4 0 0 0 6.5 19h11z"/>',
+'ti-crown':'<path d="M2 20L4 8l4 5 4-8 4 8 4-5 2 12z"/><line x1="4" y1="20" x2="20" y2="20"/>',
+'ti-diamond':'<path d="M12 2l7 7-7 13-7-13z"/>',
+'ti-flame':'<path d="M12 2c2 4-3 5-3 9a3 3 0 0 0 6 0c0-1-1-2-1-3 2 1 3 3 3 5a5 5 0 0 1-10 0c0-5 3-6 5-11z"/>',
+'ti-hand-stop':'<path d="M8 12V6a1.5 1.5 0 0 1 3 0v5"/><path d="M11 11V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 11.5V6a1.5 1.5 0 0 1 3 0v7.5"/><path d="M8 12l-1.5 1.5a2 2 0 0 0 0 3l3 3A5 5 0 0 0 13 21h1a5 5 0 0 0 5-5v-3.5"/>',
+'ti-heart':'<path d="M12 20.5s-7-4.35-9.33-8.8A4.9 4.9 0 0 1 4.5 5a5 5 0 0 1 7.5 1.5A5 5 0 0 1 19.5 5a4.9 4.9 0 0 1 1.83 6.7C19 16.15 12 20.5 12 20.5z"/>',
+'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
+'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
+'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+'ti-moon':'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+'ti-notebook':'<path d="M4 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2V5a2 2 0 0 1 2-2z"/>',
+'ti-pencil':'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+'ti-phone':'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2.1z"/>',
+'ti-seedling':'<path d="M12 22v-8"/><path d="M12 14c-4 0-7-3-7-7 4 0 7 3 7 7z"/><path d="M12 14c4 0 7-3 7-7-4 0-7 3-7 7z"/>',
+'ti-send':'<path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2z"/>',
+'ti-share':'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>',
+'ti-sparkles':'<path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2z"/><path d="M19 15l.6 2 2 .6-2 .6-.6 2-.6-2-2-.6 2-.6z"/>',
+'ti-star':'<polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21 12 17.5 5.5 21 7 14.5 2 9.5 9 8.5"/>',
+'ti-trophy':'<path d="M8 21h8"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a3 3 0 0 0 3 5"/><path d="M17 5h3a3 3 0 0 1-3 5"/>',
+'ti-user-circle':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/>',
+'ti-users':'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4.5 3.3-6.5 6.5-6.5s5.7 2 6.5 6.5"/><circle cx="17" cy="9" r="3"/><path d="M15.5 13.2c2.6.3 4 2.2 4.6 5.8"/>',
+'ti-wifi':'<path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>',
+'ti-wind':'<path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2"/>',
+};
+function renderIcons(root){
+  (root||document).querySelectorAll('i.ti').forEach(el=>{
+    if(el.querySelector('svg'))return;
+    const cls=[...el.classList].find(c=>c!=='ti'&&c.indexOf('ti-')===0);
+    const paths=ICON_PATHS[cls];
+    if(!paths)return;
+    el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  });
+}
+
 // ─── ONBOARDING ──────────────────────────────────────────────────────────────
 let obStep=0;
 function obNext(n){
@@ -1012,6 +1062,7 @@ function renderMilestones(){
       <span class="badge ${done?'badge-ok':diff<=14?'badge-acc':'badge-dim'}">${done?'Done':diff<=14?'Next':diff+'d'}</span>
     </div>`;
   });
+  renderIcons(el);
 }
 
 // ─── JOURNAL ─────────────────────────────────────────────────────────────────
@@ -1181,6 +1232,7 @@ function buildTimeline(){
       <div class="tl-body"><div class="tl-title ${titleCls}">${item.range}</div><div class="tl-range">${item.phase}</div><div class="tl-desc">${item.desc}</div>${warn}<span class="tl-badge ${badgeCls}">${badgeTxt}</span></div>
     </div>`;
   });
+  renderIcons(tl);
   updateTimelineHighlight(days);
 }
 function updateTimelineHighlight(days){
@@ -1619,6 +1671,7 @@ async function boot(){
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
+renderIcons();
 boot();
 </script>
 </body>

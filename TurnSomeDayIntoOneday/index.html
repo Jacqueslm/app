@@ -716,7 +716,9 @@ body{display:flex;justify-content:center}
       <div class="sos-title" style="color:var(--accent)">Account &amp; Sync</div>
       <div class="sos-sub">Signed in as <strong id="auth-current-email"></strong>. Your data syncs to this account automatically.</div>
       <button class="ob-btn" style="margin-top:8px" onclick="manualSync()">Sync now</button>
+      <button class="ob-btn outline" style="margin-top:8px" onclick="exportAccountData()">Export my data</button>
       <button class="ob-btn outline" style="margin-top:8px;color:#E24B4A;border-color:#E24B4A" onclick="signOutAccount()">Sign out</button>
+      <button class="ob-btn outline" style="margin-top:16px;color:#E24B4A;border-color:#E24B4A" onclick="deleteAccountFlow()">Delete my account</button>
     </div>
     <button class="sos-close" onclick="closeAuthModal()">Close</button>
   </div>
@@ -1300,6 +1302,14 @@ Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1000,system:SYSTEM,messages:msgs})
     });
+    if(res.status===429){
+      const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
+      S.chatHistory.push({role:'assistant',content:reply});
+      S.chatsLeft=0;
+      document.getElementById('chatsLeft').textContent=0;
+      save();showTyping(false);addBubble('nova',reply);
+      return;
+    }
     if(!res.ok)throw new Error('api-unavailable');
     const data=await res.json();
     const reply=(data.content&&data.content[0]&&data.content[0].text)||localFallbackReply(text);
@@ -1446,6 +1456,49 @@ async function signOutAccount(){
   save();
   updateAccountUI();
   closeAuthModal();
+}
+
+async function exportAccountData(){
+  try{
+    const res=await fetch('/api/account/export');
+    if(!res.ok){alert('Could not export your data. Try again in a moment.');return;}
+    const data=await res.json();
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`turn-someday-into-oneday-export-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('Could not reach the server to export your data.');
+  }
+}
+
+async function deleteAccountFlow(){
+  if(!confirm('Delete your account permanently? Your synced data will be erased from our servers. This cannot be undone.\n\n(The data on this device will stay put unless you clear it yourself.)'))return;
+  const password=prompt('Confirm your password to delete your account:');
+  if(!password)return;
+  try{
+    const res=await fetch('/api/account',{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password})
+    });
+    if(!res.ok){
+      const data=await res.json().catch(()=>({}));
+      alert(data.error||'Could not delete your account.');
+      return;
+    }
+    S.accountEmail=null;
+    save();
+    updateAccountUI();
+    closeAuthModal();
+    alert('Your account has been deleted. This device still has your local data.');
+  }catch(e){
+    alert('Could not reach the server to delete your account.');
+  }
 }
 
 async function submitAuth(){

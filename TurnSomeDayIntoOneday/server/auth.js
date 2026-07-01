@@ -41,4 +41,18 @@ function requireAuth(req, res, next) {
   next();
 }
 
-module.exports = { COOKIE_NAME, hashPassword, verifyPassword, signSession, verifySession, requireAuth };
+function getOptionalUserId(req) {
+  const token = req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  return payload ? payload.userId : null;
+}
+
+module.exports = {
+  COOKIE_NAME,
+  hashPassword,
+  verifyPassword,
+  signSession,
+  verifySession,
+  requireAuth,
+  getOptionalUserId,
+};

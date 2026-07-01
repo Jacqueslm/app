@@ -851,6 +851,7 @@ function selectVoice(variant){
 function obSkip(){finishOnboard();}
 function finishOnboard(){
   if(!S.startDate)S.startDate=new Date().toISOString();
+  save();
   document.getElementById('onboarding').style.display='none';
   document.getElementById('main-app').style.display='flex';
   initApp();

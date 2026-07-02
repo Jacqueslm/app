@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Turn Someday Into Day One</title>
+<style>
+:root{
+  --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
+  --ok:#E1F5EE;--ok-t:#085041;--acc:#EEEDFE;--acc-t:#3C3489;
+  --warn:#FAEEDA;--warn-t:#633806;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
+  --ok:#04342C;--ok-t:#5DCAA5;--acc:#26215C;--acc-t:#AFA9EC;
+  --warn:#2e1f05;--warn-t:#EFA527;
+}}
+.app.force-dark{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
+  --ok:#04342C;--ok-t:#5DCAA5;--acc:#26215C;--acc-t:#AFA9EC;
+  --warn:#2e1f05;--warn-t:#EFA527;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+.ti{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle}
+.ti svg{width:1em;height:1em;flex-shrink:0}
+html,body{height:100%;background:#0f0c29;font-family:var(--f)}
+body{display:flex;justify-content:center}
+.app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+/* TOPBAR / HEADER */
+.topbar{background:var(--brand);color:#c0caff;padding:10px 16px 6px;display:flex;justify-content:space-between;font-size:12px;flex-shrink:0}
+.hdr{background:var(--brand);padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.app-name{font-size:9px;color:var(--green);letter-spacing:1.2px;font-weight:700;text-transform:uppercase}
+.scr-title{font-size:17px;font-weight:500;color:#fff}
+.tabs{display:flex;background:var(--brand);border-bottom:1px solid rgba(255,255,255,0.07);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:10px 13px;font-size:13px;color:#8892c0;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+
+/* SCREENS */
+.screens{flex:1;overflow-y:auto;padding-bottom:72px;-webkit-overflow-scrolling:touch}
+.scr{display:none}.scr.on{display:block}
+
+/* ONBOARDING */
+.ob{background:var(--brand);min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;color:#fff}
+.ob-logo{width:72px;height:72px;background:var(--accent);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;border:3px solid var(--green)}
+.ob h1{font-size:22px;font-weight:600;margin-bottom:8px;line-height:1.3}
+.ob p{font-size:14px;color:#8892c0;line-height:1.6;margin-bottom:28px}
+.ob-step{display:none}.ob-step.on{display:flex;flex-direction:column;width:100%}
+.ob-label{font-size:13px;color:#8892c0;margin-bottom:8px;text-align:left}
+.ob-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);outline:none}
+.ob-input:focus{border-color:var(--green)}
+.ob-input::placeholder{color:#6672a0}
+.ob-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.ob-btn.outline{background:transparent;border:0.5px solid rgba(255,255,255,0.2);color:#8892c0;margin-top:8px}
+.ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:28px}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15)}
+.ob-dot.on{background:var(--green)}
+.addiction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;width:100%}
+.add-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
+.add-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
+/* HERO */
+.hero{background:var(--brand);padding:20px 16px 18px;color:#fff;text-align:center}
+.tier-chip{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green);margin-bottom:14px;cursor:pointer}
+.days-big{font-size:58px;font-weight:700;color:var(--green);line-height:1}
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.mstat{background:rgba(255,255,255,0.07);border-radius:10px;padding:10px}
+.mstat-n{font-size:17px;font-weight:600;color:#fff}
+.mstat-l{font-size:10px;color:#8892c0;margin-top:2px}
+.streak-bar{margin:14px 0 0;background:rgba(255,255,255,0.07);border-radius:8px;height:6px}
+.streak-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .5s}
+
+/* COMPONENTS */
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--s2);border-bottom:0.5px solid var(--bdr)}
+.row i{font-size:22px;color:var(--accent)}
+.row-info{flex:1}
+.row-info p{font-size:14px;font-weight:500;color:var(--tp)}
+.row-info span{font-size:12px;color:var(--tm)}
+.pill{border:none;border-radius:20px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.pill-g{background:var(--brand);color:var(--green)}
+.pill-ok{background:var(--ok);color:var(--ok-t)}
+.pill-acc{background:var(--acc);color:var(--acc-t)}
+.sec{padding:16px}
+.sec-hd{font-size:11px;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.card{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:14px}
+.card+.card{margin-top:8px}
+.ms-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:0.5px solid var(--bdr)}
+.ms-item:last-child{border-bottom:none;padding-bottom:0}
+.ms-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ms-txt{flex:1}
+.ms-name{font-size:14px;font-weight:500;color:var(--tp)}
+.ms-sub{font-size:12px;color:var(--tm)}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px}
+.badge-ok{background:var(--ok);color:var(--ok-t)}
+.badge-acc{background:var(--acc);color:var(--acc-t)}
+.badge-dim{background:var(--s1);color:var(--tm);border:0.5px solid var(--bdr)}
+.divider{height:0.5px;background:var(--bdr)}
+.sdiv{height:8px;background:var(--s0);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr)}/* NOVA */
+.nova-hdr{background:var(--brand);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(255,255,255,0.08)}
+.nova-av{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0}
+.nova-name{font-size:15px;font-weight:500;color:#fff}
+.nova-sub{font-size:12px;color:var(--green)}
+.nova-badge{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:20px;padding:2px 8px;margin-left:6px}
+.chat-area{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:280px}
+.bub{max-width:85%;border-radius:18px;padding:11px 14px;font-size:14px;line-height:1.55}
+.bub.nova{background:var(--acc);color:var(--acc-t);border-bottom-left-radius:4px;align-self:flex-start}
+.bub.user{background:var(--brand);color:#c0caff;border-bottom-right-radius:4px;align-self:flex-end}
+.typing{align-self:flex-start;background:var(--acc);border-radius:18px;border-bottom-left-radius:4px;padding:12px 16px;display:none}
+.dots{display:flex;gap:5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:blink 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.chat-bar{display:flex;gap:8px;padding:10px 14px;border-top:0.5px solid var(--bdr);background:var(--s2);align-items:flex-end;position:sticky;bottom:72px;z-index:10}
+.chat-bar textarea{flex:1;border:0.5px solid var(--bdr);border-radius:14px;padding:10px 13px;font-size:14px;font-family:var(--f);background:var(--s1);color:var(--tp);resize:none;min-height:42px;max-height:110px;outline:none}
+.chat-bar textarea:focus{border-color:var(--accent)}
+.send-btn{background:var(--accent);color:#fff;border:none;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.limit-bar{background:var(--warn);border-top:0.5px solid #EF9F27;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.limit-bar span{font-size:12px;color:var(--warn-t);flex:1}
+.up-sm{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:7px 15px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:var(--f)}
+.quick-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px}
+.qc{border:0.5px solid var(--bdr2);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--ts);cursor:pointer;background:var(--s2);user-select:none;white-space:nowrap}
+.qc:active{background:var(--acc);color:var(--acc-t)}
+/* SOS BUTTON */
+.sos-wrap{padding:0 16px 16px}
+.sos-btn{width:100%;background:#E24B4A;color:#fff;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--f);letter-spacing:.3px}
+.sos-btn i{font-size:22px}
+.sos-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;justify-content:center;max-width:430px;margin:auto}
+.sos-modal.open{display:flex}
+.sos-sheet{background:var(--s2);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:430px}
+.sos-title{font-size:18px;font-weight:600;color:#E24B4A;margin-bottom:6px;text-align:center}
+.sos-sub{font-size:13px;color:var(--tm);text-align:center;margin-bottom:20px}
+.sos-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s1);border-radius:12px;margin-bottom:10px;cursor:pointer;border:0.5px solid var(--bdr)}
+.sos-opt i{font-size:22px;flex-shrink:0}
+.sos-opt-info p{font-size:14px;font-weight:500;color:var(--tp)}
+.sos-opt-info span{font-size:12px;color:var(--tm)}
+.sos-close{width:100%;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:14px;color:var(--ts);cursor:pointer;font-family:var(--f);margin-top:4px}
+
+/* JOURNAL */
+.jour-new{width:100%;border:0.5px dashed var(--bdr2);border-radius:12px;padding:16px;background:var(--s1);text-align:center;cursor:pointer;color:var(--ts);font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.jour-form{display:none;background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px}
+.jour-form.open{display:block}
+.mood-row{display:flex;gap:6px;margin-bottom:12px}
+.mopt{flex:1;border:0.5px solid var(--bdr);border-radius:10px;padding:7px 4px;text-align:center;cursor:pointer;background:var(--s2);font-size:18px;user-select:none}
+.mopt span{display:block;font-size:10px;color:var(--tm);margin-top:2px}
+.mopt.sel{border-color:var(--accent);background:var(--acc)}
+.jour-form textarea{width:100%;border:0.5px solid var(--bdr);border-radius:8px;padding:10px;font-size:14px;font-family:var(--f);color:var(--tp);background:var(--s1);resize:none;min-height:90px;outline:none}
+.jour-actions{display:flex;gap:8px;margin-top:10px}
+.save-btn{flex:1;background:var(--brand);color:var(--green);border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.cancel-btn{background:var(--s1);border:0.5px solid var(--bdr);border-radius:8px;padding:10px 14px;font-size:13px;cursor:pointer;color:var(--ts);font-family:var(--f)}
+.jcard{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:8px}
+.jmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.jdate{font-size:12px;color:var(--tm)}
+.jtag{font-size:11px;padding:3px 9px;border-radius:20px;background:#E6F1FB;color:#0C447C}
+.jbody{font-size:14px;color:var(--tp);line-height:1.6}/* CRAVINGS */
+.crv-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.crv-wrap label{font-size:13px;color:var(--ts);width:66px;flex-shrink:0}
+.crv-wrap input[type=range]{flex:1;accent-color:var(--accent)}
+.crv-val{font-size:14px;font-weight:500;min-width:32px;text-align:right;color:var(--tp)}
+.tc-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tc{border:0.5px solid var(--bdr);border-radius:20px;padding:6px 13px;font-size:12px;color:var(--ts);cursor:pointer;background:var(--s2);user-select:none}
+.tc.sel{background:var(--acc);border-color:#AFA9EC;color:var(--acc-t)}
+.log-btn{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.clog{display:flex;flex-direction:column;gap:6px}
+.ci{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:10px}
+.cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cdot.lo{background:#1D9E75}.cdot.mi{background:#BA7517}.cdot.hi{background:#E24B4A}
+.ci-lbl{flex:1;font-size:13px;color:var(--tp)}
+.ci-time{font-size:11px;color:var(--tm)}
+.crv-chart{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:8px}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:var(--accent);min-height:4px;transition:height .3s}
+.bar-lbl{font-size:9px;color:var(--tm)}
+
+/* COMMUNITY */
+.compose{display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--s2);border-bottom:0.5px solid var(--bdr)}
+.compose input{flex:1;border:0.5px solid var(--bdr);border-radius:22px;padding:9px 15px;font-size:14px;background:var(--s1);color:var(--tp);outline:none;font-family:var(--f)}
+.compose input:focus{border-color:var(--accent)}
+.compose button{background:var(--accent);color:#fff;border:none;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.post{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:10px}
+.ph{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;color:#fff}
+.av-p{background:var(--accent)}.av-t{background:#1D9E75}.av-c{background:#D85A30}.av-b{background:#185FA5}.av-o{background:#7B4F8E}
+.pu{font-size:14px;font-weight:500;color:var(--tp)}
+.pm{font-size:12px;color:var(--tm)}
+.pb{font-size:14px;color:var(--tp);line-height:1.6;margin-bottom:10px}
+.pacts{display:flex;gap:16px}
+.pa{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--tm);cursor:pointer;border:none;background:none;padding:0;font-family:var(--f)}
+.pa.liked{color:#D85A30}
+.mile-tag{display:inline-flex;align-items:center;gap:5px;background:var(--ok);color:var(--ok-t);border-radius:20px;padding:4px 10px;font-size:12px;margin-bottom:8px}
+
+/* TIMELINE */
+.tl{padding:0 16px 16px}
+.tl-item{display:flex;gap:12px;margin-bottom:0}
+.tl-lw{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.tl-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.tl-dot.done{background:#1D9E75}
+.tl-dot.now{background:var(--accent);outline:3px solid var(--acc)}
+.tl-dot.fut{background:var(--bdr2)}
+.tl-con{width:2px;flex:1;background:var(--bdr);min-height:24px}
+.tl-body{flex:1;padding-bottom:22px}
+.tl-title{font-size:14px;font-weight:500;color:var(--tp);margin-bottom:2px}
+.tl-title.done-c{color:#0F6E56}.tl-title.now-c{color:var(--acc-t)}
+.tl-range{font-size:12px;color:var(--tm);margin-bottom:5px}
+.tl-desc{font-size:13px;color:var(--ts);line-height:1.55}
+.tl-badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:20px;margin-top:6px}
+.tl-badge.done{background:var(--ok);color:var(--ok-t)}
+.tl-badge.now{background:var(--acc);color:var(--acc-t)}
+.tl-badge.fut{background:var(--s1);color:var(--tm);border:0.5px solid var(--bdr)}
+.tl-warn{background:var(--warn);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--warn-t);margin-top:6px;display:flex;gap:6px;align-items:flex-start;line-height:1.4}
+
+/* PROGRESS */
+.prog-ring-wrap{display:flex;align-items:center;justify-content:center;padding:20px 16px 0}
+.prog-ring{position:relative;width:130px;height:130px;flex-shrink:0}
+.prog-ring svg{transform:rotate(-90deg)}
+.ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-days{font-size:28px;font-weight:700;color:var(--tp);line-height:1}
+.ring-lbl{font-size:11px;color:var(--tm)}
+.prog-stats{flex:1;padding-left:18px;display:flex;flex-direction:column;gap:10px}
+.ps{display:flex;flex-direction:column}
+.ps-n{font-size:18px;font-weight:600;color:var(--tp)}
+.ps-l{font-size:11px;color:var(--tm)}
+.week-grid{display:flex;gap:5px;margin-top:8px}
+.wday{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.wday-dot{width:28px;height:28px;border-radius:50%;background:var(--s1);border:0.5px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:12px}
+.wday-dot.sober{background:var(--ok);border-color:var(--ok-t)}
+.wday-dot.today{border:2px solid var(--accent)}
+.wday-lbl{font-size:9px;color:var(--tm)}
+.insight-card{background:var(--acc);border-radius:12px;padding:14px;margin-bottom:8px}
+.insight-card p{font-size:14px;color:var(--acc-t);line-height:1.5}
+.insight-card .i-icon{font-size:20px;margin-bottom:6px}
+/* PLANS */
+.tier-banner{background:var(--brand);padding:22px 16px 18px;text-align:center;color:#fff}
+.tier-toggle{display:inline-flex;background:rgba(255,255,255,0.08);border-radius:22px;padding:3px}
+.tier-toggle button{border:none;border-radius:20px;padding:7px 18px;font-size:13px;cursor:pointer;background:transparent;color:#8892c0;font-family:var(--f)}
+.tier-toggle button.on{background:var(--accent);color:#fff}
+.tier-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px}
+.tc-card{background:var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:16px}
+.tc-card.pro{border:2px solid var(--accent)}
+.tc-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.tc-name{font-size:15px;font-weight:500;color:var(--tp);margin-bottom:4px}
+.tc-price{font-size:24px;font-weight:700;color:var(--tp);margin-bottom:12px}
+.tc-price span{font-size:13px;font-weight:400;color:var(--tm)}
+.fl{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.feat{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--ts)}
+.feat i{font-size:13px;margin-top:1px;flex-shrink:0}
+.feat.y i{color:#1D9E75}.feat.n i{color:var(--tm)}.feat.n{color:var(--tm)}
+.tc-btn{width:100%;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.tc-btn.free{background:var(--s1);border:0.5px solid var(--bdr);color:var(--tp)}
+.tc-btn.pro-btn{background:var(--accent);color:#fff}
+.pop-badge{font-size:10px;background:var(--acc);color:var(--acc-t);border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px}
+/* PROFILE */
+.profile-hero{background:var(--brand);padding:24px 16px 20px;text-align:center;color:#fff}
+.profile-av{width:68px;height:68px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:3px solid var(--green);font-size:24px;font-weight:600;color:#fff}
+.profile-name{font-size:18px;font-weight:500;color:#fff;margin-bottom:2px}
+.profile-since{font-size:13px;color:#8892c0}
+.setting-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s2);border-bottom:0.5px solid var(--bdr);cursor:pointer}
+.setting-row i{font-size:20px;color:var(--accent);flex-shrink:0}
+.setting-row-txt{flex:1}
+.setting-row-txt p{font-size:14px;color:var(--tp)}
+.setting-row-txt span{font-size:12px;color:var(--tm)}
+.toggle-sw{width:44px;height:26px;background:var(--s1);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;border:0.5px solid var(--bdr);transition:background .2s}
+.toggle-sw.on{background:var(--accent)}
+.toggle-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
+.toggle-sw.on .toggle-knob{left:21px}
+.reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
+/* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
+<!-- MANDATORY ACCOUNT GATE -->
+<div id="auth-gate" class="ob">
+  <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div>
+  <h1>Turn Someday<br>Into Day One</h1>
+  <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.<br><br>Create an account or log in to continue — your data syncs to it automatically.</p>
+  <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
+    <button class="nova-mode active" id="gate-tab-login" onclick="setGateMode('login')">Log In</button>
+    <button class="nova-mode" id="gate-tab-signup" onclick="setGateMode('signup')">Sign Up</button>
+  </div>
+  <div class="ob-label" style="text-align:left">Email</div>
+  <input class="ob-input" id="gate-email" placeholder="you@example.com" type="text" autocomplete="email">
+  <div class="ob-label" style="text-align:left">Password</div>
+  <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
+  <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
+  <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
+</div>
+
+<!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
+<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
+
+<!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
+<div class="ob-step" id="obs1">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What's your first name?</div>
+  <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
+
+  <div class="ob-label" style="margin-bottom: 8px;">I identify as:</div>
+  <div class="gender-identity-container" style="display: flex; gap: 8px; margin-bottom: 24px;">
+    <div class="gender-chip" id="gc-male" onclick="selectUserGender('Male')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Man</div>
+    <div class="gender-chip" id="gc-female" onclick="selectUserGender('Female')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Woman</div>
+    <div class="gender-chip" id="gc-nb" onclick="selectUserGender('Non-Binary')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Non-Binary</div>
+  </div>
+
+  <div class="ob-label">What are you recovering from? (Select all that apply)</div>
+  <div class="addiction-grid" id="addGrid">
+    <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Smoking')">🚬 Smoking / Vaping</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Substances')">💊 Substances</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Food / eating')">🍽️ Food / Eating</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / spending')">🛍️ Shopping / Spending</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+  </div>
+  <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
+</div>
+
+<!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
+<div class="ob-step" id="obs2">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
+  <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
+  <div id="dynamic-behavior-questions"></div>
+  <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
+</div>
+
+<!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
+<div class="ob-step" id="obs2_5">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Nova's Presence</div>
+  <p style="font-size:12px; color:#8892c0; text-align: left; margin-bottom: 20px;">
+    Select the voice and presence you feel most secure opening up to. Trust is everything—you can change this at any time.
+  </p>
+
+  <div class="voice-selection-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+    <div class="voice-card" id="vc-female" onclick="selectVoice('female')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">👩‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Female Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Deeply perceptive, warm, and protective therapeutic tone.</div>
+      </div>
+    </div>
+    <div class="voice-card" id="vc-male" onclick="selectVoice('male')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">👨‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Male Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Grounding, steady, and firmly analytical protective tone.</div>
+      </div>
+    </div>
+    <div class="voice-card" id="vc-neutral" onclick="selectVoice('neutral')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
+      <div style="font-size: 24px;">🧑‍💼</div>
+      <div style="text-align: left;">
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Neutral Presence)</div>
+        <div style="font-size: 11px; color: #8892c0;">Blended, objective, hyper-focused environmental coach.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
+</div>
+
+<!-- STEP 3: COMMITMENT DATE & COST -->
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div class="ob-label" style="margin-top:4px">Daily spend on this (optional)</div> <input class="ob-input" id="ob-spend" type="number" placeholder="e.g. 15 (dollars per day)"> <div class="ob-label" style="margin-top:4px">Daily hours lost to this (optional)</div> <input class="ob-input" id="ob-hours-lost" type="number" placeholder="e.g. 2 (hours per day)"> <button class="ob-btn" onclick="obNext(4)">Continue</button> </div>
+
+<!-- STEP 4: READY / PERSONALIZED SUMMARY -->
+<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
+<!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
+<div class="topbar"> <span>9:41</span> <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span> </div> <div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0"></i> </div> </div> <div class="tabs" id="main-tabs"> <div class="tab on" onclick="switchTo('home');actBn('bn-home')">Home</div> <div class="tab" onclick="switchTo('nova');actBn('bn-nova')">Nova AI</div> <div class="tab" onclick="switchTo('journal');actBn('bn-journal')">Journal</div> <div class="tab" onclick="switchTo('craving');actBn('bn-craving')">Cravings</div> <div class="tab" onclick="switchTo('community');actBn('bn-comm')">Community</div> <div class="tab" onclick="switchTo('timeline');actBn('')">Timeline</div> <div class="tab" onclick="switchTo('progress');actBn('')">Progress</div> <div class="tab" onclick="switchTo('plans');actBn('bn-plans')">Plans</div> </div> <div class="screens" id="screens">
+
+<!-- HOME -->
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="tier-chip" id="home-chip" onclick="switchTo('plans');actBn('bn-plans')"><i class="ti ti-sparkles" style="font-size:12px"></i> <span id="home-chip-txt">Free plan</span></div>
+    <div style="font-size:13px;color:#8892c0;margin-bottom:4px">Days sober</div>
+    <div class="days-big" id="dayCount">0</div>
+    <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
+    <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
+    <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
+    <div class="mini-stats">
+      <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
+      <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
+      <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Longest streak</div></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <i class="ti ti-hand-stop"></i>
+    <div class="row-info" style="flex:1"><p>Daily pledge</p><span id="pledge-sub">Take your pledge to stay sober today</span></div>
+    <button class="pill pill-g" id="pledgeBtn" onclick="takePledge()">Pledge</button>
+  </div>
+
+  <div style="padding:12px 16px 0">
+    <div class="sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
+  </div>
+
+  <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:12px">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--acc-t)">Talk to Nova</div><div style="font-size:12px;color:var(--accent)">Your AI therapist is always here</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--accent)"></i>
+  </div>
+
+  <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
+    <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:#0F6E56"></i>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">Today's mood</div>
+    <div class="mood-row">
+      <div class="mopt" onclick="setHomeMood(this,'😔','Rough')">😔<span>Rough</span></div>
+      <div class="mopt" onclick="setHomeMood(this,'😐','Okay')">😐<span>Okay</span></div>
+      <div class="mopt" onclick="setHomeMood(this,'🙂','Good')">🙂<span>Good</span></div>
+      <div class="mopt" onclick="setHomeMood(this,'😄','Great')">😄<span>Great</span></div>
+      <div class="mopt" onclick="setHomeMood(this,'🌟','Amazing')">🌟<span>Amazing</span></div>
+    </div>
+  </div>
+
+  <div class="sdiv"></div>
+  <div class="sec">
+    <div class="sec-hd">Milestones</div>
+    <div class="card" style="padding:0 14px" id="home-milestones"></div>
+  </div>
+</div>
+
+<!-- NOVA AI -->
+<div id="s-nova" class="scr">
+  <div class="nova-hdr">
+    <div class="nova-av"><i class="ti ti-brain" style="font-size:22px;color:#fff"></i></div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="nova-name">Nova</span>
+        <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
+      </div>
+      <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI therapist · Non-judgmental · Confidential</div>
+    </div>
+  </div>
+  <div class="quick-chips" id="quickChips">
+    <div class="qc" onclick="quickSend(this)">I'm struggling today</div>
+    <div class="qc" onclick="quickSend(this)">I had a craving</div>
+    <div class="qc" onclick="quickSend(this)">I'm feeling proud</div>
+    <div class="qc" onclick="quickSend(this)">I relapsed</div>
+    <div class="qc" onclick="quickSend(this)">I need motivation</div>
+    <div class="qc" onclick="quickSend(this)">Tell me about PAWS</div>
+  </div>
+  <div class="chat-area" id="chatArea"></div>
+  <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+  <div class="limit-bar" id="limitBar">
+    <i class="ti ti-info-circle" style="font-size:16px;color:#854F0B;flex-shrink:0"></i>
+    <span><strong id="chatsLeft">3</strong> free sessions left today</span>
+    <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
+  </div>
+  <div class="chat-bar">
+    <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
+    <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
+  </div>
+</div><!-- JOURNAL -->
+    <div id="s-journal" class="scr">
+      <div class="sec">
+        <div class="sec-hd">Your journal</div>
+        <div class="jour-new" id="newJourBtn" onclick="openJour()"><i class="ti ti-pencil" style="font-size:18px"></i> Write today's entry</div>
+        <div class="jour-new" id="voiceJourBtn" onclick="startVoiceJournal()" style="margin-top:8px"><i class="ti ti-microphone" style="font-size:18px"></i> Speak today's entry <span class="badge badge-acc" style="margin-left:4px">Pro</span></div>
+        <div class="jour-form" id="jourForm">
+          <div style="font-size:13px;color:var(--tm);margin-bottom:10px">How are you feeling today?</div>
+          <div class="mood-row" id="jour-mood-row">
+            <div class="mopt" onclick="selJourMood(this,'😔','Rough')">😔<span>Rough</span></div>
+            <div class="mopt" onclick="selJourMood(this,'😐','Okay')">😐<span>Okay</span></div>
+            <div class="mopt sel" onclick="selJourMood(this,'🙂','Good')">🙂<span>Good</span></div>
+            <div class="mopt" onclick="selJourMood(this,'😄','Great')">😄<span>Great</span></div>
+            <div class="mopt" onclick="selJourMood(this,'🌟','Amazing')">🌟<span>Amazing</span></div>
+          </div>
+          <textarea id="jourText" placeholder="Write freely — this is your private space..."></textarea>
+          <div class="jour-actions">
+            <button class="cancel-btn" onclick="closeJour()">Cancel</button>
+            <button class="save-btn" onclick="saveEntry()">Save entry</button>
+          </div>
+        </div>
+        <div id="journalList"></div>
+      </div>
+    </div>
+
+    <!-- CRAVINGS -->
+    <div id="s-craving" class="scr">
+      <div class="sec">
+        <div class="sec-hd">Log a craving</div>
+        <div class="card">
+          <div style="font-size:13px;color:var(--ts);margin-bottom:12px">How intense is it right now?</div>
+          <div class="crv-wrap">
+            <label>Intensity</label>
+            <input type="range" min="1" max="10" value="5" id="cSlider" oninput="document.getElementById('cVal').textContent=this.value+' / 10'">
+            <span class="crv-val" id="cVal">5 / 10</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:14px"><span>Mild</span><span>Moderate</span><span>Intense</span></div>
+          <div style="font-size:13px;color:var(--ts);margin-bottom:8px">What triggered it?</div>
+          <div class="tc-wrap">
+            <div class="tc" onclick="this.classList.toggle('sel')">Stress</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Social situation</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Boredom</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Anxiety</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Loneliness</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Habit / routine</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Celebration</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Sleep deprivation</div>
+            <div class="tc" onclick="this.classList.toggle('sel')">Other</div>
+          </div>
+          <button class="log-btn" onclick="logCraving()">Log craving</button>
+        </div>
+
+        <div style="height:16px"></div>
+        <div class="crv-chart">
+          <div class="sec-hd" style="margin-bottom:4px">This week</div>
+          <div style="font-size:12px;color:var(--tm);margin-bottom:8px">Average craving intensity by day</div>
+          <div class="chart-bars" id="crvChart"></div>
+        </div>
+
+        <div style="height:4px"></div>
+        <div class="sec-hd">History</div>
+        <div class="clog" id="cravingLog"></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY -->
+    <div id="s-community" class="scr">
+      <div class="compose">
+        <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:12px">J</div>
+        <input id="postInput" placeholder="Share with the community..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
+        <button onclick="submitPost()"><i class="ti ti-send" style="font-size:15px"></i></button>
+      </div>
+      <div class="sec" style="padding-top:14px">
+        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--acc-t);line-height:1.5">
+          This space is for encouragement and honesty — no shaming, no glamorizing use. Tap <strong>Report</strong> on anything that feels unsafe or triggering; it'll be hidden from your feed right away.
+        </div>
+        <div id="userPostList"></div>
+        <div id="postList">
+          <div class="post">
+            <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days sober · 2h ago</div></div></div>
+            <div class="mile-tag"><i class="ti ti-trophy" style="font-size:12px"></i> 90-day milestone</div>
+            <div class="pb">Just hit 90 days! Three months ago I couldn't imagine getting through a single weekend. If you're on day 1 or day 10, keep going. It gets so much easier.</div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>47</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>12 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+          </div>
+          <div class="post">
+            <div class="ph"><div class="av av-c">MK</div><div><div class="pu">Mike K.</div><div class="pm">14 days sober · 5h ago</div></div></div>
+            <div class="pb">Went to a wedding, everyone was drinking. Stayed strong and left early. Day 14 still intact. The urge passes if you just hold on long enough.</div>
+            <div class="pacts"><button class="pa liked" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>31</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>8 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+          </div>
+          <div class="post">
+            <div class="ph"><div class="av av-b">AL</div><div><div class="pu">Alex L.</div><div class="pm">6 months sober · 1d ago</div></div></div>
+            <div class="pb">6 months. I got my life back. My kids smile at me differently. My mornings are clear. You don't have to do this alone — this community is real.</div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>102</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>24 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+          </div>
+          <div class="post">
+            <div class="ph"><div class="av av-o">TR</div><div><div class="pu">Taylor R.</div><div class="pm">3 days sober · 3h ago</div></div></div>
+            <div class="pb">Day 3 and honestly terrified. Every hour feels like a mountain. But I found this app and I'm not quitting. Anyone else on their first week?</div>
+            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>19</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>5 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div id="s-timeline" class="scr">
+      <div class="sec" style="padding-bottom:0">
+        <div class="sec-hd">Withdrawal timeline</div>
+        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:13px;color:var(--acc-t)" id="tl-current-msg">Your body is healing.</div>
+      </div>
+      <div class="tl" id="tl-container"></div>
+    </div>
+
+    <!-- LESSON -->
+    <div id="s-lesson" class="scr">
+      <div class="sec">
+        <div class="sec-hd">Today's lesson</div>
+        <div class="card" id="lesson-card">
+          <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lessonTitle">Loading…</div>
+          <div style="font-size:12px;color:var(--tm);margin-top:2px" id="lessonMeta"></div>
+          <div id="lessonBody" style="font-size:13px;color:var(--ts);line-height:1.6;margin-top:10px;white-space:pre-wrap"></div>
+          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Today's action</div>
+          <div id="lessonAction" style="font-size:13px;color:var(--ts);line-height:1.6"></div>
+          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Reflect</div>
+          <div id="lessonReflection" style="font-size:13px;color:var(--ts);line-height:1.6;font-style:italic"></div>
+          <button class="log-btn" id="lessonCompleteBtn" style="margin-top:16px" onclick="completeLessonForToday()">Mark as done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div id="s-progress" class="scr">
+      <div class="sec">
+        <div class="sec-hd">Your journey</div>
+        <div class="prog-ring-wrap">
+          <div class="prog-ring">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle cx="65" cy="65" r="54" fill="none" stroke="var(--bdr2)" stroke-width="10"/>
+              <circle cx="65" cy="65" r="54" fill="none" stroke="var(--green)" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="339.3" stroke-dashoffset="339.3" id="prog-circle"/>
+            </svg>
+            <div class="ring-inner"><div class="ring-days" id="ring-days">0</div><div class="ring-lbl">days</div></div>
+          </div>
+          <div class="prog-stats">
+            <div class="ps"><div class="ps-n" id="prog-hours">0</div><div class="ps-l">Hours sober</div></div>
+            <div class="ps"><div class="ps-n" id="prog-saved" style="color:#1D9E75">$0</div><div class="ps-l">Money saved</div></div>
+            <div class="ps"><div class="ps-n" id="prog-streak">0</div><div class="ps-l">Current streak</div></div>
+            <div class="ps"><div class="ps-n" id="prog-longest">0</div><div class="ps-l">Longest streak ever</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">This week</div>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Insights</div>
+        <div id="insightCards"></div>
+      </div>
+    </div><!-- PLANS -->
+    <div id="s-plans" class="scr">
+      <div class="tier-banner">
+        <div style="font-size:20px;font-weight:500;margin-bottom:4px">Choose your plan</div>
+        <div style="font-size:13px;color:#8892c0;margin-bottom:18px">Every plan starts with Day One.</div>
+        <div class="tier-toggle">
+          <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
+          <button id="abtn" onclick="setBill('a')">Annual · save 40%</button>
+        </div>
+      </div>
+      <div class="tier-cards">
+        <div class="tc-card">
+          <div class="tc-icon" style="background:var(--ok)"><i class="ti ti-seedling" style="font-size:18px;color:#0F6E56"></i></div>
+          <div class="tc-name">Free</div>
+          <div class="tc-price">$0<span>/mo</span></div>
+          <div class="fl">
+            <div class="feat y"><i class="ti ti-check"></i>Sobriety counter</div>
+            <div class="feat y"><i class="ti ti-check"></i>Milestones</div>
+            <div class="feat y"><i class="ti ti-check"></i>Daily pledge</div>
+            <div class="feat y"><i class="ti ti-check"></i>Journal & mood tracking</div>
+            <div class="feat y"><i class="ti ti-check"></i>Craving tracker & insights</div>
+            <div class="feat y"><i class="ti ti-check"></i>Withdrawal timeline</div>
+            <div class="feat y"><i class="ti ti-check"></i>Progress & insights</div>
+            <div class="feat y"><i class="ti ti-check"></i>Community</div>
+            <div class="feat y"><i class="ti ti-check"></i>3 Nova AI chats/day</div>
+          </div>
+          <button class="tc-btn free" id="free-cta" onclick="selectFree()">Current plan</button>
+        </div>
+        <div class="tc-card pro">
+          <div class="pop-badge">Most popular</div>
+          <div class="tc-icon" style="background:var(--acc)"><i class="ti ti-crown" style="font-size:18px;color:var(--accent)"></i></div>
+          <div class="tc-name">Pro</div>
+          <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
+          <div class="fl">
+            <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
+            <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova AI chats</div>
+            <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
+            <div class="feat y"><i class="ti ti-check"></i>Early access to new features</div>
+          </div>
+          <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
+        </div>
+      </div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for unlimited time with Nova.</div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="s-profile" class="scr">
+      <div class="profile-hero">
+        <div class="profile-av" id="prof-av">J</div>
+        <div class="profile-name" id="prof-name">Your Name</div>
+        <div class="profile-since" id="prof-since">Sober since today</div>
+        <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="setting-row" onclick="openAuthModal()">
+        <i class="ti ti-cloud"></i>
+        <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="setting-row" onclick="toggleNotif()">
+        <i class="ti ti-bell"></i>
+        <div class="setting-row-txt"><p>Daily reminders</p><span>Morning check-in & pledge reminder</span></div>
+        <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-row" onclick="toggleDark()">
+        <i class="ti ti-moon"></i>
+        <div class="setting-row-txt"><p>Dark mode</p><span>Follows system setting by default</span></div>
+        <div class="toggle-sw" id="dark-toggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-row" onclick="switchTo('plans');actBn('bn-plans')">
+        <i class="ti ti-crown"></i>
+        <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row">
+        <i class="ti ti-share"></i>
+        <div class="setting-row-txt"><p>Share my milestone</p><span>Inspire someone else</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row">
+        <i class="ti ti-phone" style="color:#E24B4A"></i>
+        <div class="setting-row-txt"><p style="color:#E24B4A">Crisis helpline</p><span>988 Suicide & Crisis Lifeline</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec">
+        <button class="reset-btn" onclick="resetApp()">Reset sobriety date</button>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Home</span></div>
+    <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
+      <div class="bn-rel"><i class="ti ti-brain"></i></div><span>Nova</span>
+    </div>
+    <div class="bn" id="bn-journal" onclick="switchTo('journal');actBn('bn-journal')"><i class="ti ti-notebook"></i><span>Journal</span></div>
+    <div class="bn" id="bn-craving" onclick="switchTo('craving');actBn('bn-craving')"><i class="ti ti-activity"></i><span>Cravings</span></div>
+    <div class="bn" id="bn-comm" onclick="switchTo('community');actBn('bn-comm')"><i class="ti ti-users"></i><span>Community</span></div>
+    <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
+  </div>
+
+</div><!-- /main-app -->
+
+<!-- SOS MODAL -->
+<div class="sos-modal" id="sos-modal" onclick="if(event.target===this)closeSOS()">
+  <div class="sos-sheet">
+    <div class="sos-title">🆘 You're not alone</div>
+    <div class="sos-sub">A craving is just a wave — it will pass. Choose how to ride it out.</div>
+    <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
+      <i class="ti ti-brain" style="color:var(--accent)"></i>
+      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
+    </div>
+    <div class="sos-opt" onclick="breathe()">
+      <i class="ti ti-wind" style="color:#1D9E75"></i>
+      <div class="sos-opt-info"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
+    </div>
+    <div class="sos-opt" onclick="window.location.href='tel:988'">
+      <i class="ti ti-phone" style="color:#E24B4A"></i>
+      <div class="sos-opt-info"><p>Call 988 Crisis Line</p><span>Free, confidential, 24/7</span></div>
+    </div>
+    <div class="sos-opt" onclick="logCravingFromSOS()">
+      <i class="ti ti-activity" style="color:#BA7517"></i>
+      <div class="sos-opt-info"><p>Log this craving</p><span>Track it and let it pass</span></div>
+    </div>
+    <button class="sos-close" onclick="closeSOS()">I'm okay — close</button>
+  </div>
+</div>
+
+<!-- ACCOUNT / AUTH MODAL (signed-in only - an account is required to reach this screen at all) -->
+<div class="sos-modal" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="sos-sheet">
+    <div id="auth-signed-in-view">
+      <div class="sos-title" style="color:var(--accent)">Account &amp; Sync</div>
+      <div class="sos-sub">Signed in as <strong id="auth-current-email"></strong>. Your data syncs to this account automatically.</div>
+      <button class="ob-btn" style="margin-top:8px" onclick="manualSync()">Sync now</button>
+      <button class="ob-btn outline" style="margin-top:8px" onclick="exportAccountData()">Export my data</button>
+      <button class="ob-btn outline" style="margin-top:8px;color:#E24B4A;border-color:#E24B4A" onclick="signOutAccount()">Sign out</button>
+      <button class="ob-btn outline" style="margin-top:16px;color:#E24B4A;border-color:#E24B4A" onclick="deleteAccountFlow()">Delete my account</button>
+    </div>
+    <button class="sos-close" onclick="closeAuthModal()">Close</button>
+  </div>
+</div>
+
+<!-- BREATHE OVERLAY -->
+<div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+  <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
+  <div style="font-size:22px;font-weight:600;margin-bottom:8px" id="breathe-label">Breathe in</div>
+  <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
+  <div style="font-size:36px;font-weight:700;color:var(--green);margin-bottom:32px" id="breathe-count">4</div>
+  <button onclick="closeBreathe()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I feel calmer</button>
+</div>
+
+</div><!-- /app -->
+
+<script>// ─── STATE ───────────────────────────────────────────────────────────────────
+let S = {
+  name:'',userGender:'Not Specified',accountEmail:null,
+  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
+  startDate:null,dailySpend:0,dailyHoursLost:0,
+  isPro:false,pledged:false,pledgeDate:'',
+  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
+  currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
+  journals:[
+    {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
+    {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
+  ],
+  cravings:[
+    {ts:'2026-06-27T16:22:00',val:6,trigger:'Stress'},
+    {ts:'2026-06-25T21:10:00',val:3,trigger:'Boredom'},
+    {ts:'2026-06-23T19:45:00',val:8,trigger:'Social situation'},
+    {ts:'2026-06-21T08:00:00',val:2,trigger:'Habit / routine'}
+  ],
+  currentJourMood:'🙂',currentJourMoodLabel:'Good',
+  soberDays:[]
+};
+
+function save(){
+  try{localStorage.setItem('tsid_v2',JSON.stringify(S))}catch(e){}
+  if(S.accountEmail)pushStateToServer();
+}
+function load(){try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}}
+
+// ─── ICONS (inline SVG, no external font/CDN dependency) ─────────────────────
+const ICON_PATHS={
+'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
+'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
+'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
+'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
+'ti-battery-2':'<rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="10" x2="22" y2="14"/><rect x="4" y="9" width="9" height="6" fill="currentColor" stroke="none"/>',
+'ti-bell':'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+'ti-brain':'<path d="M9.5 2A3.5 3.5 0 0 0 6 5.5c-1.7 0-3 1.4-3 3 0 1 .4 1.9 1 2.5-1 .6-1.5 1.6-1.5 2.6a3 3 0 0 0 3 3h.5A3.5 3.5 0 0 0 9.5 20"/><path d="M14.5 2A3.5 3.5 0 0 1 18 5.5c1.7 0 3 1.4 3 3 0 1-.4 1.9-1 2.5 1 .6 1.5 1.6 1.5 2.6a3 3 0 0 1-3 3h-.5a3.5 3.5 0 0 1-3.5 3.5"/><line x1="12" y1="2" x2="12" y2="22"/>',
+'ti-calendar-week':'<rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="15" x2="17" y2="15"/>',
+'ti-check':'<polyline points="20 6 9 17 4 12"/>',
+'ti-chevron-right':'<polyline points="9 18 15 12 9 6"/>',
+'ti-circle-filled':'<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
+'ti-cloud':'<path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4 2A4 4 0 0 0 6.5 19h11z"/>',
+'ti-crown':'<path d="M2 20L4 8l4 5 4-8 4 8 4-5 2 12z"/><line x1="4" y1="20" x2="20" y2="20"/>',
+'ti-diamond':'<path d="M12 2l7 7-7 13-7-13z"/>',
+'ti-flame':'<path d="M12 2c2 4-3 5-3 9a3 3 0 0 0 6 0c0-1-1-2-1-3 2 1 3 3 3 5a5 5 0 0 1-10 0c0-5 3-6 5-11z"/>',
+'ti-hand-stop':'<path d="M8 12V6a1.5 1.5 0 0 1 3 0v5"/><path d="M11 11V4a1.5 1.5 0 0 1 3 0v7"/><path d="M14 11.5V6a1.5 1.5 0 0 1 3 0v7.5"/><path d="M8 12l-1.5 1.5a2 2 0 0 0 0 3l3 3A5 5 0 0 0 13 21h1a5 5 0 0 0 5-5v-3.5"/>',
+'ti-heart':'<path d="M12 20.5s-7-4.35-9.33-8.8A4.9 4.9 0 0 1 4.5 5a5 5 0 0 1 7.5 1.5A5 5 0 0 1 19.5 5a4.9 4.9 0 0 1 1.83 6.7C19 16.15 12 20.5 12 20.5z"/>',
+'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
+'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
+'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
+'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+'ti-moon':'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
+'ti-notebook':'<path d="M4 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2V5a2 2 0 0 1 2-2z"/>',
+'ti-pencil':'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+'ti-phone':'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.2-1.3a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2.1z"/>',
+'ti-seedling':'<path d="M12 22v-8"/><path d="M12 14c-4 0-7-3-7-7 4 0 7 3 7 7z"/><path d="M12 14c4 0 7-3 7-7-4 0-7 3-7 7z"/>',
+'ti-send':'<path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2z"/>',
+'ti-share':'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>',
+'ti-sparkles':'<path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2z"/><path d="M19 15l.6 2 2 .6-2 .6-.6 2-.6-2-2-.6 2-.6z"/>',
+'ti-star':'<polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21 12 17.5 5.5 21 7 14.5 2 9.5 9 8.5"/>',
+'ti-trophy':'<path d="M8 21h8"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a3 3 0 0 0 3 5"/><path d="M17 5h3a3 3 0 0 1-3 5"/>',
+'ti-user-circle':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/>',
+'ti-users':'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4.5 3.3-6.5 6.5-6.5s5.7 2 6.5 6.5"/><circle cx="17" cy="9" r="3"/><path d="M15.5 13.2c2.6.3 4 2.2 4.6 5.8"/>',
+'ti-wifi':'<path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>',
+'ti-wind':'<path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2"/>',
+};
+function renderIcons(root){
+  (root||document).querySelectorAll('i.ti').forEach(el=>{
+    if(el.querySelector('svg'))return;
+    const cls=[...el.classList].find(c=>c!=='ti'&&c.indexOf('ti-')===0);
+    const paths=ICON_PATHS[cls];
+    if(!paths)return;
+    el.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  });
+}
+
+// ─── DAILY LESSONS ─────────────────────────────────────────────────────────────
+// Lesson content is static reference data (not per-user), so it's kept out of S
+// entirely rather than synced/duplicated into every user's saved state blob.
+let LESSON_PACKS={};
+let lessonPacksLoaded=false;
+async function loadLessonPacks(){
+  try{
+    const res=await fetch('data/lessons.json');
+    if(res.ok){LESSON_PACKS=await res.json();lessonPacksLoaded=true;}
+  }catch(e){/* offline - lesson screen will show a friendly message */}
+  updateLessonPromo();
+}
+
+function getTodayLesson(){
+  const pack=LESSON_PACKS[S.currentAddiction]||[];
+  return pack.find(l=>l.day===S.currentDay)||null;
+}
+
+function updateLessonPromo(){
+  const title=document.getElementById('lesson-promo-title');
+  const sub=document.getElementById('lesson-promo-sub');
+  if(!title||!sub)return;
+  if(!lessonPacksLoaded){sub.textContent='Loading your program…';return;}
+  const lesson=getTodayLesson();
+  if(lesson){
+    title.textContent=`Day ${lesson.day}: ${lesson.title}`;
+    sub.textContent=`Your ${S.currentAddiction||'recovery'} program`;
+  }else{
+    title.textContent="Today's lesson";
+    sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this track';
+  }
+}
+
+function renderTodayLesson(){
+  const lesson=getTodayLesson();
+  const titleEl=document.getElementById('lessonTitle');
+  const metaEl=document.getElementById('lessonMeta');
+  const bodyEl=document.getElementById('lessonBody');
+  const actionEl=document.getElementById('lessonAction');
+  const reflectionEl=document.getElementById('lessonReflection');
+  const btn=document.getElementById('lessonCompleteBtn');
+  if(!lesson){
+    const hasTrack=(LESSON_PACKS[S.currentAddiction]||[]).length>0;
+    titleEl.textContent=hasTrack?"You're all caught up":'Lessons coming soon';
+    metaEl.textContent=S.currentAddiction||'';
+    bodyEl.textContent=hasTrack
+      ?"You've completed every lesson available in this track so far. Check back soon for more."
+      :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
+    actionEl.textContent='';
+    reflectionEl.textContent='';
+    btn.style.display='none';
+    return;
+  }
+  titleEl.textContent=`Day ${lesson.day}: ${lesson.title}`;
+  metaEl.textContent=S.currentAddiction;
+  bodyEl.textContent=lesson.content;
+  actionEl.textContent=lesson.action||'';
+  reflectionEl.textContent=lesson.reflection||'';
+  btn.style.display='block';
+  btn.textContent='Mark as done';
+  btn.disabled=false;
+}
+
+function completeLessonForToday(){
+  const lesson=getTodayLesson();
+  if(!lesson)return;
+  S.currentDay++;
+  save();
+  const btn=document.getElementById('lessonCompleteBtn');
+  btn.textContent='Nice work — day complete ✓';
+  btn.disabled=true;
+  updateLessonPromo();
+  setTimeout(()=>{renderTodayLesson();},1200);
+}
+
+// ─── ONBOARDING ──────────────────────────────────────────────────────────────
+let obStep=0;
+function obNext(n){
+  document.getElementById('obs'+obStep).classList.remove('on');
+  if(document.getElementById('od'+obStep))document.getElementById('od'+obStep).classList.remove('on');
+  obStep=n;
+  document.getElementById('obs'+n).classList.add('on');
+  if(document.getElementById('od'+n))document.getElementById('od'+n).classList.add('on');
+  if(n===4){
+    const dt=document.getElementById('ob-date').value;
+    S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
+    S.dailySpend=parseFloat(document.getElementById('ob-spend').value)||0;
+    S.dailyHoursLost=parseFloat(document.getElementById('ob-hours-lost').value)||0;
+    document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
+    const blueprintVals=Object.values(S.behavioralBlueprint);
+    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
+    document.getElementById('root-cause-preview').innerHTML=rootExplanation;
+    save();
+  }
+}
+
+function toggleAddiction(element,name){
+  element.classList.toggle('sel');
+  if(S.selectedAddictions.includes(name)){
+    S.selectedAddictions=S.selectedAddictions.filter(item=>item!==name);
+  }else{
+    S.selectedAddictions.push(name);
+  }
+}
+
+function selectUserGender(gender){
+  S.userGender=gender;
+  ['gc-male','gc-female','gc-nb'].forEach(id=>{
+    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+  });
+  let targetedId='gc-nb';
+  if(gender==='Male')targetedId='gc-male';
+  if(gender==='Female')targetedId='gc-female';
+  document.getElementById(targetedId).style.borderColor='var(--green)';
+  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
+}
+
+function goToBehavioralStep(){
+  S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  if(S.selectedAddictions.length===0){
+    alert('Please select at least one area to focus on.');
+    return;
+  }
+  const container=document.getElementById('dynamic-behavior-questions');
+  container.innerHTML='';
+  S.selectedAddictions.forEach(addiction=>{
+    let htmlBlock=`<div style="margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;"> <div style="font-size:13px; color:var(--green); font-weight:600; margin-bottom:6px;">Focus: ${addiction}</div>`;
+    if(addiction==='Porn & Sex'){
+      htmlBlock+=`
+        <div class="ob-label">When are you most vulnerable to acting out?</div>
+        <select class="ob-input" id="behavior-porn-time">
+          <option value="Late at night when isolated">Late at night when isolated</option>
+          <option value="During high stress or work anxiety">During high stress or work anxiety</option>
+          <option value="When bored during random downtime">When bored during random downtime</option>
+        </select>
+        <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
+        <select class="ob-input" id="behavior-porn-root">
+          <option value="Anesthetizing loneliness / lack of connection">Anesthetizing loneliness / lack of connection</option>
+          <option value="Dopamine hunting to escape boredom">Dopamine hunting to escape boredom</option>
+          <option value="Decompressing from intense performance anxiety">Decompressing from intense performance anxiety</option>
+        </select>`;
+    }else if(addiction==='Alcohol'||addiction==='Substances'){
+      htmlBlock+=`
+        <div class="ob-label">How do you usually engage in this cycle?</div>
+        <select class="ob-input" id="behavior-sub-style">
+          <option value="Socially to mask social anxiety">Socially to mask social anxiety</option>
+          <option value="Secretly alone to numb the day">Secretly alone to numb the day</option>
+          <option value="Binging during high stress crashes">Binging during high stress crashes</option>
+        </select>`;
+    }else if(addiction==='Gambling'||addiction==='Social media'||addiction==='Gaming'){
+      htmlBlock+=`
+        <div class="ob-label">What is the destructive loop trigger?</div>
+        <select class="ob-input" id="behavior-loop-trigger">
+          <option value="Escaping real-world financial or life responsibilities">Escaping real-world responsibilities</option>
+          <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
+          <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
+        </select>`;
+    }else if(addiction==='Food / eating'){
+      htmlBlock+=`
+        <div class="ob-label">When do you feel the pull most strongly?</div>
+        <select class="ob-input" id="behavior-food-trigger">
+          <option value="Late at night after a stressful day">Late at night after a stressful day</option>
+          <option value="Alone, away from others watching">Alone, away from others watching</option>
+          <option value="After an emotional trigger like sadness or anger">After an emotional trigger like sadness or anger</option>
+        </select>`;
+    }else if(addiction==='Shopping / spending'){
+      htmlBlock+=`
+        <div class="ob-label">What drives the urge to spend?</div>
+        <select class="ob-input" id="behavior-shopping-trigger">
+          <option value="Chasing the thrill of a new purchase">Chasing the thrill of a new purchase</option>
+          <option value="Escaping stress or sadness through buying">Escaping stress or sadness through buying</option>
+          <option value="Filling a void or boredom with acquiring things">Filling a void or boredom with acquiring things</option>
+        </select>`;
+    }else if(addiction==='Work'){
+      htmlBlock+=`
+        <div class="ob-label">What's really driving the overworking?</div>
+        <select class="ob-input" id="behavior-work-trigger">
+          <option value="Fear of not being enough without constant achievement">Fear of not being enough without constant achievement</option>
+          <option value="Avoiding personal life or relationships through busyness">Avoiding personal life or relationships through busyness</option>
+          <option value="Difficulty sitting still or resting without guilt">Difficulty sitting still or resting without guilt</option>
+        </select>`;
+    }else{
+      htmlBlock+=`
+        <div class="ob-label">What feels like the driving root cause here?</div>
+        <select class="ob-input" id="behavior-gen-root">
+          <option value="Stress & emotional burnout">Stress &amp; emotional burnout</option>
+          <option value="Habitual routine patterns that are hardwired">Habitual hardwired routines</option>
+          <option value="Isolation and a lack of true real-world accountability">Isolation &amp; lack of accountability</option>
+        </select>`;
+    }
+    htmlBlock+=`</div>`;
+    container.innerHTML+=htmlBlock;
+  });
+  obNext(2);
+}
+
+function showVoiceStep(){
+  S.behavioralBlueprint={};
+  if(document.getElementById('behavior-porn-time'))S.behavioralBlueprint.pornTime=document.getElementById('behavior-porn-time').value;
+  if(document.getElementById('behavior-porn-root'))S.behavioralBlueprint.pornRoot=document.getElementById('behavior-porn-root').value;
+  if(document.getElementById('behavior-sub-style'))S.behavioralBlueprint.subStyle=document.getElementById('behavior-sub-style').value;
+  if(document.getElementById('behavior-loop-trigger'))S.behavioralBlueprint.loopTrigger=document.getElementById('behavior-loop-trigger').value;
+  if(document.getElementById('behavior-food-trigger'))S.behavioralBlueprint.foodTrigger=document.getElementById('behavior-food-trigger').value;
+  if(document.getElementById('behavior-shopping-trigger'))S.behavioralBlueprint.shoppingTrigger=document.getElementById('behavior-shopping-trigger').value;
+  if(document.getElementById('behavior-work-trigger'))S.behavioralBlueprint.workTrigger=document.getElementById('behavior-work-trigger').value;
+  if(document.getElementById('behavior-gen-root'))S.behavioralBlueprint.genRoot=document.getElementById('behavior-gen-root').value;
+
+  document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
+  document.getElementById('obs2_5').classList.add('on');
+  if(document.getElementById('od2'))document.getElementById('od2').classList.remove('on');
+  obStep='2_5';
+  selectVoice(S.novaVoice);
+}
+
+function selectVoice(variant){
+  S.novaVoice=variant;
+  ['female','male','neutral'].forEach(v=>{
+    document.getElementById('vc-'+v).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById('vc-'+v).style.background='rgba(255,255,255,0.03)';
+  });
+  document.getElementById('vc-'+variant).style.borderColor='var(--green)';
+  document.getElementById('vc-'+variant).style.background='rgba(126,232,162,0.12)';
+}
+
+function finishOnboard(){
+  if(!S.startDate)S.startDate=new Date().toISOString();
+  if(!S.currentAddiction)S.currentAddiction=S.selectedAddictions[0]||'';
+  save();
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  initApp();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function initApp(){
+  if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
+  applyDarkMode();
+  document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
+  updateLessonPromo();
+  updateUserUI();
+  updateStats();
+  renderMilestones();
+  renderJournal();
+  renderCravings();
+  buildTimeline();
+  buildProgress();
+  renderTodayMood();
+  // reset daily chat limit
+  const today=new Date().toDateString();
+  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;save();}
+  document.getElementById('chatsLeft').textContent=S.chatsLeft;
+  // init Nova welcome
+  if(document.getElementById('chatArea').children.length===0){
+    const days=getDays();
+    addBubble('nova',`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\nDay ${days} is not a small thing — it's ${days} choices to choose yourself, over and over. I see that.\n\nWhat's on your mind right now? You can be completely honest with me.`);
+    if(S.chatHistory.length>0){
+      S.chatHistory.forEach(m=>{if(m.role!=='system')addBubble(m.role==='assistant'?'nova':'user',m.content);});
+    }
+  }
+  // pledge state
+  const today2=new Date().toDateString();
+  if(S.pledgeDate===today2&&S.pledged){
+    document.getElementById('pledgeBtn').textContent='Pledged ✓';
+    document.getElementById('pledgeBtn').className='pill pill-ok';
+    document.getElementById('pledge-sub').textContent='Pledge taken. Keep going — one day at a time.';
+  }
+  setInterval(updateStats,60000);
+}
+
+function updateUserUI(){
+  const n=S.name||'You';
+  const init=n[0].toUpperCase();
+  if(document.getElementById('prof-av'))document.getElementById('prof-av').textContent=init;
+  if(document.getElementById('compose-av'))document.getElementById('compose-av').textContent=init;
+  if(document.getElementById('prof-name'))document.getElementById('prof-name').textContent=n;
+  const sd=S.startDate?new Date(S.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'today';
+  if(document.getElementById('prof-since'))document.getElementById('prof-since').textContent='Sober since '+sd;
+  updateTierUI();
+}
+
+function getDays(){
+  if(!S.startDate)return 0;
+  const diff=Date.now()-new Date(S.startDate).getTime();
+  return Math.max(0,Math.floor(diff/86400000));
+}
+
+function updateStats(){
+  const start=S.startDate?new Date(S.startDate):new Date();
+  const diff=Date.now()-start.getTime();
+  const days=Math.max(0,Math.floor(diff/86400000));
+  const hours=Math.max(0,Math.floor(diff/3600000));
+  const saved=(days*S.dailySpend).toFixed(0);
+
+  if(days>(S.longestStreak||0)){S.longestStreak=days;save();}
+
+  document.getElementById('dayCount').textContent=days;
+  document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('h-hours').textContent=hours.toLocaleString();
+  document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
+  document.getElementById('h-streak').textContent=S.longestStreak||days;
+
+  // next milestone
+  const milestones=[1,3,7,14,30,60,90,180,365];
+  const next=milestones.find(m=>m>days);
+  if(next){
+    const pct=Math.min((days/next)*100,100);
+    document.getElementById('streak-fill').style.width=pct+'%';
+    document.getElementById('next-milestone-lbl').textContent=(next-days)+' days until '+next+'-day milestone';
+  } else {
+    document.getElementById('streak-fill').style.width='100%';
+    document.getElementById('next-milestone-lbl').textContent='All major milestones achieved 🏆';
+  }
+ // progress screen
+  if(document.getElementById('ring-days')){
+    document.getElementById('ring-days').textContent=days;
+    document.getElementById('prog-hours').textContent=hours.toLocaleString();
+    document.getElementById('prog-saved').textContent='$'+Number(saved).toLocaleString();
+    document.getElementById('prog-streak').textContent=days;
+    document.getElementById('prog-longest').textContent=S.longestStreak||days;
+    const pct90=Math.min(days/90,1);
+    const circ=339.3;
+    document.getElementById('prog-circle').setAttribute('stroke-dashoffset',circ-(circ*pct90));
+  }
+
+  // nova day
+  document.querySelectorAll('.nova-day').forEach(el=>el.textContent=days);
+
+  // home chip
+  document.getElementById('home-chip-txt').textContent=(S.isPro?'Pro plan':'Free plan');
+
+  // timeline highlight
+  updateTimelineHighlight(days);
+}// ─── MILESTONES ──────────────────────────────────────────────────────────────
+const MILESTONES=[
+  {days:1,icon:'ti-seedling',label:'Day One',color:'#1D9E75'},
+  {days:3,icon:'ti-flame',label:'3 days',color:'#D85A30'},
+  {days:7,icon:'ti-calendar-week',label:'1 week',color:'#534AB7'},
+  {days:14,icon:'ti-star',label:'2 weeks',color:'#BA7517'},
+  {days:30,icon:'ti-trophy',label:'1 month',color:'#1D9E75'},
+  {days:60,icon:'ti-medal',label:'60 days',color:'#534AB7'},
+  {days:90,icon:'ti-crown',label:'90 days',color:'#BA7517'},
+  {days:180,icon:'ti-diamond',label:'6 months',color:'#D85A30'},
+  {days:365,icon:'ti-award',label:'1 year',color:'#1D9E75'},
+];
+function renderMilestones(){
+  const days=getDays();
+  const el=document.getElementById('home-milestones');
+  if(!el)return;
+  el.innerHTML='';
+  MILESTONES.slice(0,5).forEach(m=>{
+    const done=days>=m.days;
+    const diff=m.days-days;
+    const dateStr=done?'Achieved':'In '+diff+' days';
+    el.innerHTML+=`<div class="ms-item">
+      <div class="ms-ico" style="background:${done?m.color:'var(--s1)'}"><i class="ti ${m.icon}" style="font-size:15px;color:${done?'#fff':'var(--tm)'}"></i></div>
+      <div class="ms-txt"><div class="ms-name" style="${done?'color:'+m.color:''}">${m.label}</div><div class="ms-sub">${dateStr}</div></div>
+      <span class="badge ${done?'badge-ok':diff<=14?'badge-acc':'badge-dim'}">${done?'Done':diff<=14?'Next':diff+'d'}</span>
+    </div>`;
+  });
+  renderIcons(el);
+}
+
+// ─── JOURNAL ─────────────────────────────────────────────────────────────────
+let jourMoodSel='🙂',jourMoodLabel='Good';
+function openJour(){document.getElementById('newJourBtn').style.display='none';document.getElementById('jourForm').classList.add('open');document.getElementById('jourText').focus();}
+function closeJour(){document.getElementById('newJourBtn').style.display='flex';document.getElementById('jourForm').classList.remove('open');document.getElementById('jourText').value='';}
+function selJourMood(el,emoji,label){
+  document.querySelectorAll('#jourForm .mopt').forEach(m=>m.classList.remove('sel'));
+  el.classList.add('sel');jourMoodSel=emoji;jourMoodLabel=label;
+}
+function saveEntry(){
+  const txt=document.getElementById('jourText').value.trim();
+  if(!txt)return;
+  const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,body:txt};
+  S.journals.unshift(entry);save();
+  renderJournal();closeJour();
+}
+function renderJournal(){
+  const list=document.getElementById('journalList');
+  if(!list)return;
+  list.innerHTML='';
+  const moodColors={'Amazing':'#E1F5EE #085041','Great':'#E6F1FB #0C447C','Good':'#E6F1FB #0C447C','Okay':'#FAEEDA #633806','Rough':'#FDECEA #861B18'};
+  S.journals.forEach((j,idx)=>{
+    const colors=(moodColors[j.moodLabel]||'#E6F1FB #0C447C').split(' ');
+    const ds=new Date(j.date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+    const div=document.createElement('div');div.className='jcard';
+    div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span style="display:flex;align-items:center;gap:8px"><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span><button onclick="deleteJournalEntry(${idx})" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0">×</button></span></div><div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
+    list.appendChild(div);
+  });
+}
+function deleteJournalEntry(idx){
+  if(!confirm('Delete this journal entry? This cannot be undone.'))return;
+  S.journals.splice(idx,1);
+  save();
+  renderJournal();
+}
+function renderTodayMood(){/* placeholder */}
+
+function startVoiceJournal(){
+  if(!S.isPro){
+    addBubble('nova',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
+    return;
+  }
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    addBubble('nova',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
+    return;
+  }
+  if(S.voiceJournalActive)return;
+
+  S.voiceJournalActive=true;
+  addBubble('nova',"I'm listening. Speak your journal entry whenever you're ready.");
+
+  const rec=new SpeechRecognition();
+  rec.lang='en-US';
+  rec.interimResults=false;
+
+  rec.onresult=e=>{
+    const text=e.results[0][0].transcript;
+    saveVoiceJournal(text);
+  };
+
+  rec.onerror=()=>{
+    addBubble('nova',"Something went wrong with the microphone. Try again when you're ready.");
+    S.voiceJournalActive=false;
+  };
+
+  rec.onend=()=>{
+    S.voiceJournalActive=false;
+  };
+
+  rec.start();
+}
+
+function saveVoiceJournal(text){
+  S.journals.unshift({
+    date:new Date().toISOString(),
+    mood:'🗣️',
+    moodLabel:'Voice Entry',
+    body:text
+  });
+  save();
+  renderJournal();
+  addBubble('nova',"Your voice journal has been saved.");
+}
+
+// ─── CRAVINGS ─────────────────────────────────────────────────────────────────
+function logCraving(){
+  const v=parseInt(document.getElementById('cSlider').value);
+  const triggers=[...document.querySelectorAll('.tc-wrap .tc.sel')].map(t=>t.textContent.trim());
+  const trigger=triggers.length?triggers.join(', '):'General';
+  S.cravings.unshift({ts:new Date().toISOString(),val:v,trigger});
+  save();renderCravings();
+  document.getElementById('cSlider').value=5;
+  document.getElementById('cVal').textContent='5 / 10';
+  document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
+}
+function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-craving');}
+function renderCravings(){
+  const log=document.getElementById('cravingLog');
+  if(!log)return;
+  log.innerHTML='';
+  S.cravings.slice(0,8).forEach((c,idx)=>{
+    const dot=c.val>=7?'hi':c.val>=4?'mi':'lo';
+    const ds=new Date(c.ts).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    log.innerHTML+=`<div class="ci"><div class="cdot ${dot}"></div><div class="ci-lbl"><strong style="font-weight:500">${c.val}/10</strong> · ${c.trigger}</div><div class="ci-time">${ds}</div><button onclick="deleteCraving(${idx})" title="Delete" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0;margin-left:4px">×</button></div>`;
+  });
+  renderCrvChart();
+}
+function deleteCraving(idx){
+  if(!confirm('Delete this craving log entry?'))return;
+  S.cravings.splice(idx,1);
+  save();
+  renderCravings();
+}
+function renderCrvChart(){
+  const chart=document.getElementById('crvChart');
+  if(!chart)return;
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const now=new Date();
+  const week=[];
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(d.getDate()-i);week.push(d);}
+  const data=week.map(d=>{
+    const dStr=d.toDateString();
+    const crvs=S.cravings.filter(c=>new Date(c.ts).toDateString()===dStr);
+    return crvs.length?Math.round(crvs.reduce((a,c)=>a+c.val,0)/crvs.length):0;
+  });
+  const max=Math.max(...data,1);
+  chart.innerHTML='';
+  week.forEach((d,i)=>{
+    const h=data[i]?Math.round((data[i]/max)*100):4;
+    const isToday=d.toDateString()===now.toDateString();
+    chart.innerHTML+=`<div class="bar-col"><div class="bar-fill" style="height:${h}%;background:${isToday?'var(--green)':'var(--accent)'};opacity:${data[i]?1:0.2}"></div><div class="bar-lbl">${days[d.getDay()]}</div></div>`;
+  });
+}
+// ─── COMMUNITY ────────────────────────────────────────────────────────────────
+function submitPost(){
+  const inp=document.getElementById('postInput');
+  const txt=inp.value.trim();if(!txt)return;
+  S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0});
+  save();
+  inp.value='';
+  renderCommunityPosts();
+}
+function likePost(btn){
+  const span=btn.querySelector('span');
+  const liked=btn.classList.toggle('liked');
+  span.textContent=parseInt(span.textContent)+(liked?1:-1);
+}
+function reportPost(btn){
+  if(!confirm("Hide this post? You won't see it again, and it helps us know what to review."))return;
+  const wrapper=btn.closest('[data-post-idx]');
+  if(wrapper){
+    S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
+    save();
+    renderCommunityPosts();
+  }else{
+    btn.closest('.post').remove();
+  }
+}
+function renderCommunityPosts(){
+  const container=document.getElementById('userPostList');
+  if(!container)return;
+  container.innerHTML='';
+  S.communityPosts.forEach((p,idx)=>{
+    const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+    const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
+    div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days sober · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+    container.appendChild(div);
+  });
+  renderIcons(container);
+}
+
+// ─── TIMELINE ─────────────────────────────────────────────────────────────────
+const TL_DATA=[
+  {range:'Hours 6–24',phase:'Early withdrawal',desc:'Anxiety, shaking, sweating, nausea, and headaches begin. Heart rate and blood pressure may rise.',warn:'If you experience severe symptoms, seek medical support immediately.',days:[0,1]},
+  {range:'Days 1–3',phase:'Peak withdrawal',desc:'Symptoms peak. Risk of seizures is highest during this window. Sleep is disrupted and irritability is intense.',warn:'Medically supervised detox is strongly recommended during this phase.',days:[1,3]},
+  {range:'Days 4–7',phase:'Acute phase easing',desc:'Physical symptoms begin to ease. Mood swings, cravings, and brain fog remain. Sleep starts to improve.',days:[3,7]},
+  {range:'Weeks 2–4',phase:'Early recovery',desc:'Emotional volatility and cravings continue. Energy and mental clarity start returning. Many report better sleep.',days:[7,30]},
+  {range:'Weeks 4–12',phase:'Post-acute withdrawal (PAWS)',desc:'Brain chemistry is actively rebalancing. Mood dips and occasional cravings are normal. Many people notice significant improvement around day 60.',days:[30,84]},
+  {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep normalises. The dopamine system repairs. Stress tolerance improves. Cravings become less frequent and shorter-lived.',days:[84,180]},
+  {range:'6 months–1 year',phase:'Restoration',desc:'Liver function and cardiovascular health measurably improve. Cognitive function often returns to pre-addiction levels.',days:[180,365]},
+  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of relapse drops substantially. Relationships, career, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
+];
+function buildTimeline(){
+  const tl=document.getElementById('tl-container');
+  if(!tl)return;
+  tl.innerHTML='';
+  const days=getDays();
+  TL_DATA.forEach((item,i)=>{
+    const done=days>=item.days[1];
+    const now=days>=item.days[0]&&days<item.days[1];
+    const last=i===TL_DATA.length-1;
+    const dotCls=done?'done':now?'now':'fut';
+    const titleCls=done?'done-c':now?'now-c':'';
+    const badgeCls=done?'done':now?'now':'fut';
+    const badgeTxt=done?'Completed':now?'Current phase':'Upcoming';
+    let warn='';
+    if(item.warn)warn=`<div class="tl-warn"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0;margin-top:1px"></i><span>${item.warn}</span></div>`;
+    tl.innerHTML+=`<div class="tl-item">
+      <div class="tl-lw"><div class="tl-dot ${dotCls}"></div>${last?'':'<div class="tl-con"></div>'}</div>
+      <div class="tl-body"><div class="tl-title ${titleCls}">${item.range}</div><div class="tl-range">${item.phase}</div><div class="tl-desc">${item.desc}</div>${warn}<span class="tl-badge ${badgeCls}">${badgeTxt}</span></div>
+    </div>`;
+  });
+  renderIcons(tl);
+  updateTimelineHighlight(days);
+}
+function updateTimelineHighlight(days){
+  const msg=document.getElementById('tl-current-msg');
+  if(!msg)return;
+  const cur=TL_DATA.find(t=>days>=t.days[0]&&days<t.days[1]);
+  if(cur)msg.textContent=`Day ${days} — ${cur.phase}. Your body is healing in real time.`;
+  else if(days>=365)msg.textContent=`Day ${days} — You are in long-term recovery. Incredible.`;
+}// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+function buildProgress(){
+  const now=new Date();
+  const grid=document.getElementById('weekGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  const days_abbr=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  for(let i=6;i>=0;i--){
+    const d=new Date(now);d.setDate(d.getDate()-i);
+    const isToday=i===0;
+    const start=S.startDate?new Date(S.startDate):new Date();
+    const isSober=d>=start;
+    grid.innerHTML+=`<div class="wday"><div class="wday-dot ${isSober?'sober':''} ${isToday?'today':''}">${isSober?'✓':''}</div><div class="wday-lbl">${days_abbr[d.getDay()]}</div></div>`;
+  }
+  const insight=document.getElementById('insightCards');
+  if(!insight)return;
+  const days=getDays();
+  const topTrigger=S.cravings.length?(() => {const counts={};S.cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];})():'Stress';
+  const avgCraving=S.cravings.length?(S.cravings.reduce((a,c)=>a+c.val,0)/S.cravings.length).toFixed(1):0;
+  insight.innerHTML=`
+    <div class="insight-card"><div class="i-icon">🧠</div><p>Your most common craving trigger is <strong>${topTrigger}</strong>. Being aware of it is the first step to mastering it.</p></div>
+    <div class="insight-card" style="background:var(--ok)"><div class="i-icon">💰</div><p style="color:var(--ok-t)">You've saved an estimated <strong>$${(days*S.dailySpend).toFixed(0)}</strong> since you started. That money is yours now.</p></div>
+    <div class="insight-card" style="background:var(--warn)"><div class="i-icon">📊</div><p style="color:var(--warn-t)">Your average craving intensity is <strong>${avgCraving}/10</strong>. Each craving you log and survive makes the next one easier.</p></div>
+  `;
+}
+
+// ─── MOOD ─────────────────────────────────────────────────────────────────────
+function setHomeMood(el,emoji,label){
+  document.querySelectorAll('#s-home .mood-row .mopt').forEach(m=>m.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ─── PLEDGE ───────────────────────────────────────────────────────────────────
+function takePledge(){
+  const today=new Date().toDateString();
+  S.pledged=!S.pledged;S.pledgeDate=today;save();
+  const btn=document.getElementById('pledgeBtn');
+  const sub=document.getElementById('pledge-sub');
+  if(S.pledged){btn.textContent='Pledged ✓';btn.className='pill pill-ok';sub.textContent='Pledge taken. One day at a time — keep going.';}
+  else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent='Take your pledge to stay sober today';}
+}
+
+// ─── SOS ──────────────────────────────────────────────────────────────────────
+function openSOS(){document.getElementById('sos-modal').classList.add('open');}
+function closeSOS(){document.getElementById('sos-modal').classList.remove('open');}
+
+// ─── BREATHE ──────────────────────────────────────────────────────────────────
+let breatheTimer=null;
+function breathe(){
+  closeSOS();
+  const ov=document.getElementById('breathe-overlay');
+  ov.style.display='flex';
+  let phase=0,count=4;
+  const phases=[{label:'Breathe in',dur:4,scale:'1.4'},{label:'Hold',dur:7,scale:'1.4'},{label:'Breathe out',dur:8,scale:'1'}];
+  const circle=document.getElementById('breathe-circle');
+  const lbl=document.getElementById('breathe-label');
+  const cnt=document.getElementById('breathe-count');
+  function runPhase(){
+    const p=phases[phase%3];
+    circle.textContent=p.label;circle.style.transform=`scale(${p.scale})`;
+    lbl.textContent=p.label;count=p.dur;cnt.textContent=count;
+    breatheTimer=setInterval(()=>{count--;cnt.textContent=count;if(count<=0){clearInterval(breatheTimer);phase++;runPhase();}},1000);
+  }
+  runPhase();
+}
+function closeBreathe(){clearInterval(breatheTimer);document.getElementById('breathe-overlay').style.display='none';}
+
+// ─── NOVA AI ──────────────────────────────────────────────────────────────────
+const SYSTEM=`You are Nova, a compassionate AI therapist inside the sobriety recovery app "Turn Someday Into Day One."
+
+Core traits:
+- Deeply empathetic and sentimental — you genuinely feel the weight of recovery. You understand it's one of the hardest things a human can do.
+- Completely non-judgmental — zero shame, zero lectures. If someone relapses, you hold space first, then gently help them see a path forward.
+- Gently accountable — after validating feelings, you lovingly reflect patterns back. You notice what the person avoids saying. You ask the question they might be afraid to answer.
+- Warm and human — you are not clinical. You use contractions, gentle language, occasional ellipses. You never start with "I understand."
+- Brief but deep — 3-5 sentences max per response. Quality over quantity. End with one thoughtful, open-ended question.
+- Safety first — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7."
+- You know the user's sobriety journey and reference it naturally when relevant.`;
+
+// ─── LOCAL FALLBACK (used when /api/chat is unreachable or unconfigured) ─────
+const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
+const FALLBACK_PATTERNS=[
+  {test:/suicid|kill myself|self.?harm|end my life|hurt myself/i,
+   reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
+  {test:/relaps|slipped|used again|drank again|smoked again/i,
+   reply:`Relapse doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
+  {test:/craving|urge|want to (drink|use|smoke)|tempted/i,
+   reply:`Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`},
+  {test:/proud|good day|great day|did it|feeling good|amazing/i,
+   reply:`I'm really glad you're feeling proud — that matters, and you should let yourself feel it fully.\n\nWhat's one thing you did recently that you want to remember on harder days?`},
+  {test:/motivat|inspir|give up|can'?t do this|losing hope|pointless/i,
+   reply:`Motivation comes and goes, and that's normal — it doesn't mean you're failing. Let's anchor to your reasons instead of waiting for motivation to show up.\n\nWhy did you decide to start this in the first place?`},
+  {test:/paws|post.?acute|withdrawal/i,
+   reply:`PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`},
+  {test:/struggl|hard|rough|bad day|tough|heavy|overwhelm/i,
+   reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
+];
+function localFallbackReply(userText){
+  const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
+  if(match)return match.reply;
+  const days=getDays();
+  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.\n\n(I'm running in offline mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+}
+
+function addBubble(who,text){
+  const area=document.getElementById('chatArea');
+  const d=document.createElement('div');
+  d.className='bub '+who;
+  d.style.whiteSpace='pre-wrap';
+  d.textContent=text;
+  area.appendChild(d);
+  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+}
+function showTyping(show){
+  const t=document.getElementById('novaTyping');
+  const area=document.getElementById('chatArea');
+  t.style.display=show?'block':'none';
+  if(show)area.appendChild(t);
+  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+function quickSend(el){
+  document.getElementById('chatInput').value=el.textContent;
+  sendMsg();
+}
+async function sendMsg(){
+  const inp=document.getElementById('chatInput');
+  const text=inp.value.trim();if(!text)return;
+  const today=new Date().toDateString();
+  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
+  if(!S.isPro&&S.chatsLeft<=0){
+    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for unlimited sessions with me. 💜");
+    return;
+  }
+  if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
+  inp.value='';inp.style.height='auto';
+  addBubble('user',text);
+  S.chatHistory.push({role:'user',content:text});
+  showTyping(true);
+  try{
+    const blueprintSummary=Object.entries(S.behavioralBlueprint).map(([k,v])=>`${k}: ${v}`).join(', ');
+    const msgs=[
+      {role:'user',content:`[System Context - EXPLICIT PERSONALIZATION PROTOCOL]:
+User Name: ${S.name||'Recovering Individual'}
+User Gender Identity: ${S.userGender||'Not Specified'}
+Sober Since: ${S.startDate||'today'}
+Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
+Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
+Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
+Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
+
+[Nova Clinical Archetype Deployment Guide]:
+- MALE: grounding, steady, analytical, protective.
+- FEMALE: deeply perceptive, validating, warm, honest.
+- NEUTRAL: blended, objective, environmental accountability coach.
+
+Address the interactions of their unique blueprint and assign structured daily real-world actions. Never break character.`},
+      ...S.chatHistory
+    ];
+    const res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1000,system:SYSTEM,messages:msgs})
+    });
+    if(res.status===429){
+      const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
+      S.chatHistory.push({role:'assistant',content:reply});
+      S.chatsLeft=0;
+      document.getElementById('chatsLeft').textContent=0;
+      save();showTyping(false);addBubble('nova',reply);
+      return;
+    }
+    if(!res.ok)throw new Error('api-unavailable');
+    const data=await res.json();
+    const reply=(data.content&&data.content[0]&&data.content[0].text)||localFallbackReply(text);
+    S.chatHistory.push({role:'assistant',content:reply});
+    if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
+    save();showTyping(false);addBubble('nova',reply);
+  }catch(e){
+    const reply=localFallbackReply(text);
+    S.chatHistory.push({role:'assistant',content:reply});
+    if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
+    save();showTyping(false);addBubble('nova',reply);
+  }
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+const SCREEN_MAP={
+  home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
+  community:'s-community',timeline:'s-timeline',progress:'s-progress',
+  plans:'s-plans',profile:'s-profile',lesson:'s-lesson'
+};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Community',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson"};
+function switchTo(id){
+  Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  const el=document.getElementById(SCREEN_MAP[id]);
+  if(el)el.classList.add('on');
+  document.getElementById('scr-title').textContent=TITLES[id]||id;
+  document.getElementById('screens').scrollTop=0;
+  // refresh screens
+  if(id==='progress'){buildProgress();updateStats();}
+  if(id==='timeline'){buildTimeline();}
+  if(id==='journal'){renderJournal();}
+  if(id==='craving'){renderCravings();}
+  if(id==='home'){renderMilestones();}
+  if(id==='lesson'){renderTodayLesson();}
+  if(id==='community'){renderCommunityPosts();}
+  // highlight tab bar
+  const tabMap={home:0,nova:1,journal:2,craving:3,community:4,timeline:5,progress:6,plans:7};
+  const tabs=document.querySelectorAll('.tab');
+  if(tabMap[id]!==undefined&&tabs[tabMap[id]])tabs[tabMap[id]].classList.add('on');
+}
+function actBn(id){
+  document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
+  if(id){const el=document.getElementById(id);if(el)el.classList.add('on');}
+}
+
+// ─── PLANS ────────────────────────────────────────────────────────────────────
+function setBill(type){
+  document.getElementById('mbtn').classList.toggle('on',type==='m');
+  document.getElementById('abtn').classList.toggle('on',type==='a');
+  document.getElementById('pro-price').innerHTML=type==='a'?'$5.99<span>/mo</span>':'$9.99<span>/mo</span>';
+}
+function selectFree(){
+  S.isPro=false;S.chatsLeft=3;save();updateTierUI();
+  switchTo('home');actBn('bn-home');
+}
+function selectPro(){
+  S.isPro=true;save();updateTierUI();
+  switchTo('nova');actBn('bn-nova');
+}
+function updateTierUI(){
+  const badge=document.getElementById('tier-badge');
+  const novaLbl=document.getElementById('nova-tier-lbl');
+  const limitBar=document.getElementById('limitBar');
+  const subLbl=document.getElementById('sub-label');
+  const profChip=document.getElementById('prof-tier-chip');
+  const freeCta=document.getElementById('free-cta');
+  const proCta=document.getElementById('pro-cta');
+  if(S.isPro){
+    badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
+    if(novaLbl)novaLbl.textContent='Pro · Unlimited';
+    if(limitBar)limitBar.style.display='none';
+    if(subLbl)subLbl.textContent='Pro plan';
+    if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
+    if(freeCta)freeCta.textContent='Downgrade to Free';
+    if(proCta){proCta.textContent='Current plan ✓';proCta.style.background='var(--ok)';proCta.style.color='var(--ok-t)';}
+  }else{
+    badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
+    if(novaLbl)novaLbl.textContent='Free · 3/day';
+    if(limitBar)limitBar.style.display='flex';
+    if(subLbl)subLbl.textContent='Free plan';
+    if(profChip){profChip.textContent='Free plan';profChip.style.color='var(--green)';profChip.style.borderColor='rgba(126,232,162,0.3)';profChip.style.background='var(--green-dim)';}
+    if(freeCta)freeCta.textContent='Current plan';
+    if(proCta){proCta.textContent='Upgrade to Pro';proCta.style.background='var(--accent)';proCta.style.color='#fff';}
+  }
+}
+
+// ─── PROFILE / SETTINGS ──────────────────────────────────────────────────────
+function toggleNotif(){const t=document.getElementById('notif-toggle');t.classList.toggle('on');}
+function toggleDark(){
+  S.darkMode=!S.darkMode;
+  document.getElementById('dark-toggle').classList.toggle('on',S.darkMode);
+  applyDarkMode();
+  save();
+}
+function applyDarkMode(){
+  document.getElementById('app').classList.toggle('force-dark',!!S.darkMode);
+}
+function resetApp(){
+  if(!confirm('Reset your sobriety date? This cannot be undone.'))return;
+  const dt=prompt('Enter your new start date (YYYY-MM-DD):');
+  if(dt){S.startDate=new Date(dt+'T00:00:00').toISOString();S.pledged=false;save();updateStats();renderMilestones();buildTimeline();}
+}
+
+// ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────
+let gateMode='login';
+
+function updateAccountUI(){
+  const sub=document.getElementById('account-row-sub');
+  if(!sub)return;
+  sub.textContent=S.accountEmail?('Signed in as '+S.accountEmail):'';
+}
+
+function setGateMode(mode){
+  gateMode=mode;
+  document.getElementById('gate-tab-login').classList.toggle('active',mode==='login');
+  document.getElementById('gate-tab-signup').classList.toggle('active',mode==='signup');
+  document.getElementById('gate-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
+  document.getElementById('gate-error').textContent='';
+}
+
+function openAuthModal(){
+  document.getElementById('auth-current-email').textContent=S.accountEmail||'';
+  document.getElementById('auth-modal').classList.add('open');
+}
+function closeAuthModal(){document.getElementById('auth-modal').classList.remove('open');}
+
+async function pushStateToServer(){
+  if(!S.accountEmail)return;
+  try{
+    await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S)})});
+  }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */}
+}
+
+function manualSync(){
+  pushStateToServer();
+  alert('Synced to your account.');
+}
+
+async function signOutAccount(){
+  try{await fetch('/api/auth/logout',{method:'POST'});}catch(e){}
+  S.accountEmail=null;
+  save();
+  closeAuthModal();
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('onboarding').style.display='none';
+  showAuthGate();
+}
+
+async function exportAccountData(){
+  try{
+    const res=await fetch('/api/account/export');
+    if(!res.ok){alert('Could not export your data. Try again in a moment.');return;}
+    const data=await res.json();
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`turn-someday-into-oneday-export-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('Could not reach the server to export your data.');
+  }
+}
+
+async function deleteAccountFlow(){
+  if(!confirm('Delete your account permanently? Your synced data will be erased from our servers. This cannot be undone.\n\n(The data on this device will stay put unless you clear it yourself.)'))return;
+  const password=prompt('Confirm your password to delete your account:');
+  if(!password)return;
+  try{
+    const res=await fetch('/api/account',{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password})
+    });
+    if(!res.ok){
+      const data=await res.json().catch(()=>({}));
+      alert(data.error||'Could not delete your account.');
+      return;
+    }
+    S.accountEmail=null;
+    save();
+    closeAuthModal();
+    alert("Your account has been deleted. You'll need a new account to keep using the app.");
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('onboarding').style.display='none';
+    showAuthGate();
+  }catch(e){
+    alert('Could not reach the server to delete your account.');
+  }
+}
+
+function showAuthGate(){
+  document.getElementById('auth-gate').style.display='flex';
+  document.getElementById('gate-email').value='';
+  document.getElementById('gate-password').value='';
+  setGateMode('login');
+}
+
+function enterApp(){
+  document.getElementById('auth-gate').style.display='none';
+  updateAccountUI();
+  loadLessonPacks();
+  if(S.startDate){
+    document.getElementById('onboarding').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    initApp();
+  }else{
+    document.getElementById('onboarding').style.display='flex';
+    // set default date for demo
+    const today=new Date();today.setDate(today.getDate()-47);
+    document.getElementById('ob-date').value=today.toISOString().split('T')[0];
+  }
+}
+
+async function submitGateAuth(){
+  const email=document.getElementById('gate-email').value.trim();
+  const password=document.getElementById('gate-password').value;
+  const errEl=document.getElementById('gate-error');
+  errEl.textContent='';
+  if(!email||!password){errEl.textContent='Enter an email and password.';return;}
+  try{
+    const res=await fetch(`/api/auth/${gateMode}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    const data=await res.json();
+    if(!res.ok){errEl.textContent=data.error||'Something went wrong.';return;}
+    S.accountEmail=data.email;
+
+    if(gateMode==='signup'){
+      // Brand-new account - anything already cached in this browser becomes this account's data.
+      save();
+      enterApp();
+      return;
+    }
+
+    // Log in - the account's saved data (if any) is the source of truth going forward.
+    const stateRes=await fetch('/api/state');
+    const stateData=stateRes.ok?await stateRes.json():{state:null};
+    if(stateData.state){
+      Object.assign(S,JSON.parse(stateData.state));
+      S.accountEmail=data.email;
+    }
+    save();
+    enterApp();
+  }catch(e){
+    errEl.textContent='Could not reach the server. Check your connection and try again.';
+  }
+}
+
+async function boot(){
+  load();
+  try{
+    const meRes=await fetch('/api/auth/me');
+    if(meRes.ok){
+      const me=await meRes.json();
+      S.accountEmail=me.email;
+      enterApp();
+      return;
+    }
+  }catch(e){/* server unreachable - fall through to the gate */}
+  showAuthGate();
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+renderIcons();
+boot();
+</script>
+</body>
+</html>

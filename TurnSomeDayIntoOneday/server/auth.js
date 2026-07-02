@@ -41,12 +41,6 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function getOptionalUserId(req) {
-  const token = req.cookies[COOKIE_NAME];
-  const payload = token && verifySession(token);
-  return payload ? payload.userId : null;
-}
-
 module.exports = {
   COOKIE_NAME,
   hashPassword,
@@ -54,5 +48,4 @@ module.exports = {
   signSession,
   verifySession,
   requireAuth,
-  getOptionalUserId,
 };

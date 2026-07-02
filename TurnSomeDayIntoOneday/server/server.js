@@ -11,7 +11,6 @@ const {
   verifyPassword,
   signSession,
   requireAuth,
-  getOptionalUserId,
 } = require('./auth');
 
 const app = express();
@@ -128,9 +127,11 @@ app.delete('/api/account', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', requireAuth, async (req, res) => {
   if (!ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not configured on the server.' });
+    // No key configured (e.g. running without the API wired up yet) - the client falls back to
+    // its offline local-reply mode whenever this endpoint isn't a 2xx, so this is a normal state.
+    return res.status(503).json({ error: 'AI chat is not available on this server right now.' });
   }
 
   const { model, max_tokens, system, messages } = req.body || {};
@@ -138,29 +139,12 @@ app.post('/api/chat', async (req, res) => {
     return res.status(400).json({ error: 'messages array is required.' });
   }
 
-  // Server-side daily limit for signed-in free-tier users. Anonymous (not signed in) users have
-  // no stable server-side identity, so they're only bounded by the client-side counter, same as
-  // before accounts existed. "Pro" isn't a real paid subscription yet (no billing is wired up),
-  // so this trusts the isPro flag from the user's last-synced state rather than any client claim.
-  const userId = getOptionalUserId(req);
-  let countsTowardLimit = false;
-  if (userId) {
-    const stateJson = db.getState(userId);
-    let isPro = false;
-    if (stateJson) {
-      try {
-        isPro = !!JSON.parse(stateJson).isPro;
-      } catch (e) {
-        isPro = false;
-      }
-    }
-    if (!isPro) {
-      const used = db.getChatCount(userId, todayUTC());
-      if (used >= FREE_CHAT_LIMIT) {
-        return res.status(429).json({ error: 'Daily Nova AI chat limit reached. Upgrade to Pro for unlimited chats.' });
-      }
-      countsTowardLimit = true;
-    }
+  // Server-side daily limit for signed-in users. "Pro" isn't a real paid subscription yet (no
+  // billing is wired up), so every account is treated as free-tier here - a client-reported isPro
+  // flag must never be trusted to bypass this, since the client fully controls its own state.
+  const used = db.getChatCount(req.userId, todayUTC());
+  if (used >= FREE_CHAT_LIMIT) {
+    return res.status(429).json({ error: 'Daily Nova AI chat limit reached. Upgrade to Pro for unlimited chats.' });
   }
 
   try {
@@ -182,8 +166,8 @@ app.post('/api/chat', async (req, res) => {
     const data = await anthropicRes.json();
     // Only spend the user's daily quota on a response that actually succeeded - a bad server
     // config or a transient Anthropic outage shouldn't cost them one of their free chats.
-    if (countsTowardLimit && anthropicRes.ok) {
-      db.incrementChatCount(userId, todayUTC());
+    if (anthropicRes.ok) {
+      db.incrementChatCount(req.userId, todayUTC());
     }
     res.status(anthropicRes.status).json(data);
   } catch (err) {

@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Turn Someday Into Day One</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0c29">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Day One">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
 <style>
 :root{
   --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
@@ -39,10 +46,6 @@ body{display:flex;justify-content:center}
 .hdr{background:var(--brand);padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .app-name{font-size:9px;color:var(--green);letter-spacing:1.2px;font-weight:700;text-transform:uppercase}
 .scr-title{font-size:17px;font-weight:500;color:#fff}
-.tabs{display:flex;background:var(--brand);border-bottom:1px solid rgba(255,255,255,0.07);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{flex:none;padding:10px 13px;font-size:13px;color:#8892c0;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;user-select:none}
-.tab.on{color:var(--green);border-bottom-color:var(--green)}
 
 /* SCREENS */
 .screens{flex:1;overflow-y:auto;padding-bottom:72px;-webkit-overflow-scrolling:touch}
@@ -61,6 +64,18 @@ body{display:flex;justify-content:center}
 .ob-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--f)}
 .ob-btn.outline{background:transparent;border:0.5px solid rgba(255,255,255,0.2);color:#8892c0;margin-top:8px}
 .ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:28px}
+
+/* PIN LOCK */
+.pin-dots{display:flex;gap:16px;justify-content:center;margin-bottom:8px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.35);transition:background .12s,border-color .12s}
+.pin-dot.filled{background:var(--green);border-color:var(--green)}
+.pin-dot.err{background:#E24B4A;border-color:#E24B4A}
+.pin-error{font-size:12.5px;color:#E24B4A;height:16px;margin-bottom:18px}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px;justify-content:center}
+.pin-key{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.12);color:#fff;font-size:22px;font-family:var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pin-key:active{background:rgba(255,255,255,0.14)}
+#pin-cancel-btn{font-size:13px;color:#8892c0;background:transparent;border:none}
+.reset-date-error{font-size:12.5px;color:#E24B4A;text-align:left;min-height:16px;margin:-4px 0 12px}
 .ob-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.15)}
 .ob-dot.on{background:var(--green)}
 .addiction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;width:100%}
@@ -108,6 +123,8 @@ body{display:flex;justify-content:center}
 .nova-name{font-size:15px;font-weight:500;color:#fff}
 .nova-sub{font-size:12px;color:var(--green)}
 .nova-badge{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:20px;padding:2px 8px;margin-left:6px}
+.nova-mode-chip{font-size:10px;background:rgba(255,255,255,0.12);color:#c0caff;border-radius:20px;padding:2px 8px}
+.nova-mode-chip.live{background:var(--green-dim);color:var(--green)}
 .chat-area{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:280px}
 .bub{max-width:85%;border-radius:18px;padding:11px 14px;font-size:14px;line-height:1.55}
 .bub.nova{background:var(--acc);color:var(--acc-t);border-bottom-left-radius:4px;align-self:flex-start}
@@ -137,6 +154,12 @@ body{display:flex;justify-content:center}
 .sos-title{font-size:18px;font-weight:600;color:#E24B4A;margin-bottom:6px;text-align:center}
 .sos-sub{font-size:13px;color:var(--tm);text-align:center;margin-bottom:20px}
 .sos-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s1);border-radius:12px;margin-bottom:10px;cursor:pointer;border:0.5px solid var(--bdr)}
+.sos-opt-crisis{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.4)}
+.crisis-bar{display:flex;align-items:center;gap:12px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.35);border-radius:12px;padding:12px 14px;text-decoration:none;margin:0 16px 4px}
+.crisis-bar i{font-size:20px;color:#E24B4A;flex-shrink:0}
+.crisis-bar .cb-title{font-size:13.5px;font-weight:600;color:#E24B4A}
+.crisis-bar .cb-sub{font-size:11.5px;color:var(--tm)}
+.crisis-bar .ti-chevron-right{font-size:16px;color:#E24B4A;opacity:.7}
 .sos-opt i{font-size:22px;flex-shrink:0}
 .sos-opt-info p{font-size:14px;font-weight:500;color:var(--tp)}
 .sos-opt-info span{font-size:12px;color:var(--tm)}
@@ -368,8 +391,31 @@ body{display:flex;justify-content:center}
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
 <div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
+<!-- PIN LOCK -->
+<div id="pin-lock" class="ob" style="display:none">
+  <div class="ob-logo"><i class="ti ti-lock" style="font-size:32px;color:#fff"></i></div>
+  <h1 id="pin-title" style="margin-bottom:6px">Enter your PIN</h1>
+  <p id="pin-sub" style="margin-bottom:24px">Your recovery data is private</p>
+  <div class="pin-dots" id="pin-dots"><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span></div>
+  <div class="pin-error" id="pin-error">&nbsp;</div>
+  <div class="pin-pad" id="pin-pad">
+    <button class="pin-key" onclick="pinPress('1')">1</button>
+    <button class="pin-key" onclick="pinPress('2')">2</button>
+    <button class="pin-key" onclick="pinPress('3')">3</button>
+    <button class="pin-key" onclick="pinPress('4')">4</button>
+    <button class="pin-key" onclick="pinPress('5')">5</button>
+    <button class="pin-key" onclick="pinPress('6')">6</button>
+    <button class="pin-key" onclick="pinPress('7')">7</button>
+    <button class="pin-key" onclick="pinPress('8')">8</button>
+    <button class="pin-key" onclick="pinPress('9')">9</button>
+    <button class="pin-key" id="pin-cancel-btn" onclick="cancelPinFlow()" style="visibility:hidden">Cancel</button>
+    <button class="pin-key" onclick="pinPress('0')">0</button>
+    <button class="pin-key" onclick="pinBackspace()"><i class="ti ti-backspace"></i></button>
+  </div>
+</div>
+
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
-<div class="topbar"> <span>9:41</span> <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span> </div> <div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0"></i> </div> </div> <div class="tabs" id="main-tabs"> <div class="tab on" onclick="switchTo('home');actBn('bn-home')">Home</div> <div class="tab" onclick="switchTo('nova');actBn('bn-nova')">Nova AI</div> <div class="tab" onclick="switchTo('journal');actBn('bn-journal')">Journal</div> <div class="tab" onclick="switchTo('craving');actBn('bn-craving')">Cravings</div> <div class="tab" onclick="switchTo('community');actBn('bn-comm')">Community</div> <div class="tab" onclick="switchTo('timeline');actBn('')">Timeline</div> <div class="tab" onclick="switchTo('progress');actBn('')">Progress</div> <div class="tab" onclick="switchTo('plans');actBn('bn-plans')">Plans</div> </div> <div class="screens" id="screens">
+<div class="topbar"> <span>9:41</span> <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span> </div> <div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0"></i> </div> </div> <div class="screens" id="screens">
 
 <!-- HOME -->
 <div id="s-home" class="scr on">
@@ -384,6 +430,15 @@ body{display:flex;justify-content:center}
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
       <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Longest streak</div></div>
+    </div>
+  </div>
+
+  <div class="sec" style="padding-bottom:0">
+    <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
+    <div class="card" style="display:flex;justify-content:space-around;text-align:center">
+      <div class="ps" style="align-items:center"><div class="ps-n" id="h-total-days">0</div><div class="ps-l">Total sober days</div></div>
+      <div class="ps" style="align-items:center"><div class="ps-n" id="h-lessons">0</div><div class="ps-l">Lessons done</div></div>
+      <div class="ps" style="align-items:center"><div class="ps-n" id="h-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
     </div>
   </div>
 
@@ -422,6 +477,26 @@ body{display:flex;justify-content:center}
 
   <div class="sdiv"></div>
   <div class="sec">
+    <div class="sec-hd">More tools</div>
+  </div>
+  <div class="setting-row" onclick="switchTo('craving');actBn('bn-home')">
+    <i class="ti ti-activity"></i>
+    <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+  </div>
+  <div class="setting-row" onclick="switchTo('timeline');actBn('bn-home')">
+    <i class="ti ti-clock"></i>
+    <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+  </div>
+  <div class="setting-row" onclick="switchTo('progress');actBn('bn-home')">
+    <i class="ti ti-chart-line"></i>
+    <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+  </div>
+
+  <div class="sdiv"></div>
+  <div class="sec">
     <div class="sec-hd">Milestones</div>
     <div class="card" style="padding:0 14px" id="home-milestones"></div>
   </div>
@@ -435,6 +510,7 @@ body{display:flex;justify-content:center}
       <div style="display:flex;align-items:center;gap:6px">
         <span class="nova-name">Nova</span>
         <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
+        <span class="nova-mode-chip" id="nova-mode-chip">Guided mode</span>
       </div>
       <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI therapist · Non-judgmental · Confidential</div>
     </div>
@@ -485,6 +561,13 @@ body{display:flex;justify-content:center}
 
     <!-- CRAVINGS -->
     <div id="s-craving" class="scr">
+      <div style="padding:14px 0 4px">
+        <a href="tel:988" class="crisis-bar">
+          <i class="ti ti-phone"></i>
+          <div style="flex:1"><div class="cb-title">Need to talk to someone right now?</div><div class="cb-sub">Call or text 988 — free, confidential, 24/7</div></div>
+          <i class="ti ti-chevron-right"></i>
+        </a>
+      </div>
       <div class="sec">
         <div class="sec-hd">Log a craving</div>
         <div class="card">
@@ -527,14 +610,16 @@ body{display:flex;justify-content:center}
     <div id="s-community" class="scr">
       <div class="compose">
         <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:12px">J</div>
-        <input id="postInput" placeholder="Share with the community..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
+        <input id="postInput" placeholder="Write a private reflection..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
         <button onclick="submitPost()"><i class="ti ti-send" style="font-size:15px"></i></button>
       </div>
       <div class="sec" style="padding-top:14px">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--acc-t);line-height:1.5">
-          This space is for encouragement and honesty — no shaming, no glamorizing use. Tap <strong>Report</strong> on anything that feels unsafe or triggering; it'll be hidden from your feed right away.
+          This is your private space — reflections you write here stay on this device and aren't shared with other users yet. Write with the same honesty you'd want to read from someone else.
         </div>
         <div id="userPostList"></div>
+        <div class="sec-hd" style="margin:18px 0 8px">Featured recovery stories</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">Curated stories from the recovery community, shown to everyone — not a live feed of other app users.</div>
         <div id="postList">
           <div class="post">
             <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days sober · 2h ago</div></div></div>
@@ -639,7 +724,7 @@ body{display:flex;justify-content:center}
             <div class="feat y"><i class="ti ti-check"></i>Craving tracker & insights</div>
             <div class="feat y"><i class="ti ti-check"></i>Withdrawal timeline</div>
             <div class="feat y"><i class="ti ti-check"></i>Progress & insights</div>
-            <div class="feat y"><i class="ti ti-check"></i>Community</div>
+            <div class="feat y"><i class="ti ti-check"></i>Stories &amp; reflections</div>
             <div class="feat y"><i class="ti ti-check"></i>3 Nova AI chats/day</div>
           </div>
           <button class="tc-btn free" id="free-cta" onclick="selectFree()">Current plan</button>
@@ -686,6 +771,11 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Dark mode</p><span>Follows system setting by default</span></div>
         <div class="toggle-sw" id="dark-toggle"><div class="toggle-knob"></div></div>
       </div>
+      <div class="setting-row" onclick="toggleAppLock()">
+        <i class="ti ti-lock"></i>
+        <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
+        <div class="toggle-sw" id="applock-toggle"><div class="toggle-knob"></div></div>
+      </div>
       <div class="setting-row" onclick="switchTo('plans');actBn('bn-plans')">
         <i class="ti ti-crown"></i>
         <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
@@ -716,8 +806,7 @@ body{display:flex;justify-content:center}
       <div class="bn-rel"><i class="ti ti-brain"></i></div><span>Nova</span>
     </div>
     <div class="bn" id="bn-journal" onclick="switchTo('journal');actBn('bn-journal')"><i class="ti ti-notebook"></i><span>Journal</span></div>
-    <div class="bn" id="bn-craving" onclick="switchTo('craving');actBn('bn-craving')"><i class="ti ti-activity"></i><span>Cravings</span></div>
-    <div class="bn" id="bn-comm" onclick="switchTo('community');actBn('bn-comm')"><i class="ti ti-users"></i><span>Community</span></div>
+    <div class="bn" id="bn-comm" onclick="switchTo('community');actBn('bn-comm')"><i class="ti ti-users"></i><span>Stories</span></div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
 
@@ -728,6 +817,10 @@ body{display:flex;justify-content:center}
   <div class="sos-sheet">
     <div class="sos-title">🆘 You're not alone</div>
     <div class="sos-sub">A craving is just a wave — it will pass. Choose how to ride it out.</div>
+    <div class="sos-opt sos-opt-crisis" onclick="window.location.href='tel:988'">
+      <i class="ti ti-phone" style="color:#E24B4A"></i>
+      <div class="sos-opt-info"><p style="color:#E24B4A">Call or text 988</p><span>Suicide &amp; Crisis Lifeline — free, confidential, 24/7</span></div>
+    </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-brain" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
@@ -735,10 +828,6 @@ body{display:flex;justify-content:center}
     <div class="sos-opt" onclick="breathe()">
       <i class="ti ti-wind" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
-    </div>
-    <div class="sos-opt" onclick="window.location.href='tel:988'">
-      <i class="ti ti-phone" style="color:#E24B4A"></i>
-      <div class="sos-opt-info"><p>Call 988 Crisis Line</p><span>Free, confidential, 24/7</span></div>
     </div>
     <div class="sos-opt" onclick="logCravingFromSOS()">
       <i class="ti ti-activity" style="color:#BA7517"></i>
@@ -763,6 +852,21 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- RESET SOBRIETY DATE MODAL -->
+<div class="sos-modal" id="reset-date-modal" onclick="if(event.target===this)closeResetDate()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Set your sobriety date</div>
+    <div class="sos-sub">Use this to correct a relapse or start date — your streak and stats recalculate from here.</div>
+    <div class="ob-label" style="text-align:left;margin-top:4px">Date</div>
+    <input class="ob-input" id="reset-date-input" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Time</div>
+    <input class="ob-input" id="reset-time-input" type="time" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="reset-date-error" id="reset-date-error">&nbsp;</div>
+    <button class="ob-btn" style="margin-top:4px" onclick="confirmResetDate()">Save date</button>
+    <button class="sos-close" onclick="closeResetDate()">Cancel</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -782,6 +886,8 @@ let S = {
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
+  pinHash:null,pinEnabled:false,
+  totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -808,12 +914,15 @@ const ICON_PATHS={
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
 'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
+'ti-backspace':'<path d="M20 6H8l-6 6 6 6h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z"/><line x1="12.5" y1="9.5" x2="17" y2="14.5"/><line x1="17" y1="9.5" x2="12.5" y2="14.5"/>',
 'ti-battery-2':'<rect x="2" y="7" width="18" height="10" rx="2"/><line x1="22" y1="10" x2="22" y2="14"/><rect x="4" y="9" width="9" height="6" fill="currentColor" stroke="none"/>',
 'ti-bell':'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
 'ti-brain':'<path d="M9.5 2A3.5 3.5 0 0 0 6 5.5c-1.7 0-3 1.4-3 3 0 1 .4 1.9 1 2.5-1 .6-1.5 1.6-1.5 2.6a3 3 0 0 0 3 3h.5A3.5 3.5 0 0 0 9.5 20"/><path d="M14.5 2A3.5 3.5 0 0 1 18 5.5c1.7 0 3 1.4 3 3 0 1-.4 1.9-1 2.5 1 .6 1.5 1.6 1.5 2.6a3 3 0 0 1-3 3h-.5a3.5 3.5 0 0 1-3.5 3.5"/><line x1="12" y1="2" x2="12" y2="22"/>',
 'ti-calendar-week':'<rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="15" x2="17" y2="15"/>',
+'ti-chart-line':'<polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/>',
 'ti-check':'<polyline points="20 6 9 17 4 12"/>',
 'ti-chevron-right':'<polyline points="9 18 15 12 9 6"/>',
+'ti-clock':'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
 'ti-circle-filled':'<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
 'ti-cloud':'<path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4 2A4 4 0 0 0 6.5 19h11z"/>',
 'ti-crown':'<path d="M2 20L4 8l4 5 4-8 4 8 4-5 2 12z"/><line x1="4" y1="20" x2="20" y2="20"/>',
@@ -823,6 +932,7 @@ const ICON_PATHS={
 'ti-heart':'<path d="M12 20.5s-7-4.35-9.33-8.8A4.9 4.9 0 0 1 4.5 5a5 5 0 0 1 7.5 1.5A5 5 0 0 1 19.5 5a4.9 4.9 0 0 1 1.83 6.7C19 16.15 12 20.5 12 20.5z"/>',
 'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
 'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
+'ti-lock':'<rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
 'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
 'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
 'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
@@ -918,7 +1028,9 @@ function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
   S.currentDay++;
+  S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   save();
+  updateStats();
   const btn=document.getElementById('lessonCompleteBtn');
   btn.textContent='Nice work — day complete ✓';
   btn.disabled=true;
@@ -1090,6 +1202,7 @@ function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
+  document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
   updateLessonPromo();
   updateUserUI();
   updateStats();
@@ -1152,6 +1265,14 @@ function updateStats(){
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
   document.getElementById('h-streak').textContent=S.longestStreak||days;
+
+  // lifetime stats - sum the current streak on top of every streak already banked at reset time,
+  // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
+  if(document.getElementById('h-total-days')){
+    document.getElementById('h-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
+    document.getElementById('h-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
+    document.getElementById('h-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
+  }
 
   // next milestone
   const milestones=[1,3,7,14,30,60,90,180,365];
@@ -1304,12 +1425,13 @@ function logCraving(){
   const triggers=[...document.querySelectorAll('.tc-wrap .tc.sel')].map(t=>t.textContent.trim());
   const trigger=triggers.length?triggers.join(', '):'General';
   S.cravings.unshift({ts:new Date().toISOString(),val:v,trigger});
-  save();renderCravings();
+  S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
+  save();renderCravings();updateStats();
   document.getElementById('cSlider').value=5;
   document.getElementById('cVal').textContent='5 / 10';
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
 }
-function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-craving');}
+function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-home');}
 function renderCravings(){
   const log=document.getElementById('cravingLog');
   if(!log)return;
@@ -1526,7 +1648,13 @@ function localFallbackReply(userText){
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
   if(match)return match.reply;
   const days=getDays();
-  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.\n\n(I'm running in offline mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+}
+function setNovaMode(isLive){
+  const chip=document.getElementById('nova-mode-chip');
+  if(!chip)return;
+  chip.textContent=isLive?'AI mode':'Guided mode';
+  chip.classList.toggle('live',isLive);
 }
 
 function addBubble(who,text){
@@ -1588,7 +1716,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-5',max_tokens:1000,system:SYSTEM,messages:msgs})
+      body:JSON.stringify({system:SYSTEM,messages:msgs})
     });
     if(res.status===429){
       const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
@@ -1600,11 +1728,14 @@ Address the interactions of their unique blueprint and assign structured daily r
     }
     if(!res.ok)throw new Error('api-unavailable');
     const data=await res.json();
-    const reply=(data.content&&data.content[0]&&data.content[0].text)||localFallbackReply(text);
+    const liveText=data.content&&data.content[0]&&data.content[0].text;
+    const reply=liveText||localFallbackReply(text);
+    setNovaMode(!!liveText);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
   }catch(e){
+    setNovaMode(false);
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
@@ -1618,10 +1749,9 @@ const SCREEN_MAP={
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Community',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson"};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson"};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
   document.getElementById('scr-title').textContent=TITLES[id]||id;
@@ -1634,10 +1764,6 @@ function switchTo(id){
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){renderTodayLesson();}
   if(id==='community'){renderCommunityPosts();}
-  // highlight tab bar
-  const tabMap={home:0,nova:1,journal:2,craving:3,community:4,timeline:5,progress:6,plans:7};
-  const tabs=document.querySelectorAll('.tab');
-  if(tabMap[id]!==undefined&&tabs[tabMap[id]])tabs[tabMap[id]].classList.add('on');
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -1685,6 +1811,118 @@ function updateTierUI(){
   }
 }
 
+// ─── APP LOCK (PIN) ─────────────────────────────────────────────────────────
+let pinFlow=null,pinBuffer='',pinFirstEntry='';
+
+function toggleAppLock(){
+  openPinFlow(S.pinEnabled?'disable':'setup1');
+}
+
+function setPinTitles(mode){
+  const cancelBtn=document.getElementById('pin-cancel-btn');
+  const titleEl=document.getElementById('pin-title');
+  const subEl=document.getElementById('pin-sub');
+  if(mode==='setup1'){
+    titleEl.textContent='Create a PIN';
+    subEl.textContent="You'll need this to open the app";
+    cancelBtn.style.visibility='visible';
+  }else if(mode==='disable'){
+    titleEl.textContent='Enter your PIN';
+    subEl.textContent='Confirm to turn off App lock';
+    cancelBtn.style.visibility='visible';
+  }else{
+    titleEl.textContent='Enter your PIN';
+    subEl.textContent='Your recovery data is private';
+    cancelBtn.style.visibility='hidden';
+  }
+}
+
+function openPinFlow(mode){
+  pinFlow=mode;pinBuffer='';pinFirstEntry='';
+  setPinTitles(mode);
+  document.getElementById('pin-error').textContent=' ';
+  updatePinDots();
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('pin-lock').style.display='flex';
+}
+
+function cancelPinFlow(){
+  pinFlow=null;pinBuffer='';pinFirstEntry='';
+  document.getElementById('pin-lock').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+}
+
+function updatePinDots(err){
+  document.querySelectorAll('#pin-dots .pin-dot').forEach((d,i)=>{
+    d.classList.toggle('filled',!err&&i<pinBuffer.length);
+    d.classList.toggle('err',!!err);
+  });
+}
+
+function pinPress(d){
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=d;
+  document.getElementById('pin-error').textContent=' ';
+  updatePinDots();
+  if(pinBuffer.length===4)submitPinEntry();
+}
+
+function pinBackspace(){
+  pinBuffer=pinBuffer.slice(0,-1);
+  updatePinDots();
+}
+
+async function hashPin(pin){
+  const enc=new TextEncoder().encode('tsid-pin:'+pin);
+  const buf=await crypto.subtle.digest('SHA-256',enc);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function pinMismatch(msg,resetTo){
+  updatePinDots(true);
+  document.getElementById('pin-error').textContent=msg;
+  pinBuffer='';
+  if(resetTo){pinFlow=resetTo;setPinTitles(resetTo);}
+  setTimeout(()=>{updatePinDots();},900);
+}
+
+async function submitPinEntry(){
+  if(pinFlow==='setup1'){
+    pinFirstEntry=pinBuffer;
+    pinBuffer='';
+    pinFlow='setup2';
+    document.getElementById('pin-title').textContent='Confirm your PIN';
+    document.getElementById('pin-sub').textContent='Enter it one more time';
+    updatePinDots();
+    return;
+  }
+  if(pinFlow==='setup2'){
+    if(pinBuffer!==pinFirstEntry){pinMismatch("PINs didn't match — try again",'setup1');return;}
+    S.pinHash=await hashPin(pinBuffer);
+    S.pinEnabled=true;
+    save();
+    document.getElementById('applock-toggle').classList.add('on');
+    pinFlow=null;pinBuffer='';pinFirstEntry='';
+    document.getElementById('pin-lock').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+    return;
+  }
+  // unlock or disable: verify against the stored PIN
+  const attempt=await hashPin(pinBuffer);
+  if(attempt!==S.pinHash){pinMismatch('Incorrect PIN — try again',pinFlow);return;}
+  if(pinFlow==='disable'){
+    S.pinHash=null;
+    S.pinEnabled=false;
+    save();
+    document.getElementById('applock-toggle').classList.remove('on');
+  }
+  const wasUnlock=pinFlow==='unlock';
+  pinFlow=null;pinBuffer='';
+  document.getElementById('pin-lock').style.display='none';
+  document.getElementById('main-app').style.display='flex';
+  if(wasUnlock)initApp();
+}
+
 // ─── PROFILE / SETTINGS ──────────────────────────────────────────────────────
 function toggleNotif(){const t=document.getElementById('notif-toggle');t.classList.toggle('on');}
 function toggleDark(){
@@ -1697,9 +1935,28 @@ function applyDarkMode(){
   document.getElementById('app').classList.toggle('force-dark',!!S.darkMode);
 }
 function resetApp(){
-  if(!confirm('Reset your sobriety date? This cannot be undone.'))return;
-  const dt=prompt('Enter your new start date (YYYY-MM-DD):');
-  if(dt){S.startDate=new Date(dt+'T00:00:00').toISOString();S.pledged=false;save();updateStats();renderMilestones();buildTimeline();}
+  const current=S.startDate?new Date(S.startDate):new Date();
+  document.getElementById('reset-date-input').value=current.toISOString().slice(0,10);
+  document.getElementById('reset-time-input').value=current.toTimeString().slice(0,5);
+  document.getElementById('reset-date-error').textContent=' ';
+  document.getElementById('reset-date-modal').classList.add('open');
+}
+function closeResetDate(){
+  document.getElementById('reset-date-modal').classList.remove('open');
+}
+function confirmResetDate(){
+  const dateVal=document.getElementById('reset-date-input').value;
+  const timeVal=document.getElementById('reset-time-input').value||'00:00';
+  const errEl=document.getElementById('reset-date-error');
+  if(!dateVal){errEl.textContent='Enter a date.';return;}
+  const chosen=new Date(`${dateVal}T${timeVal}:00`);
+  if(isNaN(chosen.getTime())){errEl.textContent='That date/time is not valid.';return;}
+  if(chosen.getTime()>Date.now()){errEl.textContent='That date is in the future.';return;}
+  S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+getDays();
+  S.startDate=chosen.toISOString();
+  S.pledged=false;
+  save();updateStats();renderMilestones();buildTimeline();
+  closeResetDate();
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────
@@ -1805,8 +2062,12 @@ function enterApp(){
   loadLessonPacks();
   if(S.startDate){
     document.getElementById('onboarding').style.display='none';
-    document.getElementById('main-app').style.display='flex';
-    initApp();
+    if(S.pinEnabled&&S.pinHash){
+      openPinFlow('unlock');
+    }else{
+      document.getElementById('main-app').style.display='flex';
+      initApp();
+    }
   }else{
     document.getElementById('onboarding').style.display='flex';
     // set default date for demo
@@ -1868,6 +2129,9 @@ async function boot(){
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
 renderIcons();
 boot();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{/* offline install just isn't available this run */})});
+}
 </script>
 </body>
 </html>

@@ -17,6 +17,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_VERSION = '2023-06-01';
+const ANTHROPIC_MODEL = 'claude-sonnet-5';
+const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 
@@ -134,7 +136,7 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     return res.status(503).json({ error: 'AI chat is not available on this server right now.' });
   }
 
-  const { model, max_tokens, system, messages } = req.body || {};
+  const { system, messages } = req.body || {};
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'messages array is required.' });
   }
@@ -156,8 +158,8 @@ app.post('/api/chat', requireAuth, async (req, res) => {
         'anthropic-version': ANTHROPIC_VERSION,
       },
       body: JSON.stringify({
-        model: model || 'claude-sonnet-5',
-        max_tokens: max_tokens || 1000,
+        model: ANTHROPIC_MODEL,
+        max_tokens: ANTHROPIC_MAX_TOKENS,
         system,
         messages,
       }),

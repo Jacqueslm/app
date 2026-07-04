@@ -728,7 +728,85 @@ body{display:flex;justify-content:center}
         <div class="sec-hd">Insights</div>
         <div id="insightCards"></div>
       </div>
-    </div><!-- PLANS -->
+    </div>
+
+    <!-- RELAPSE TOOLKIT -->
+    <div id="s-relapse-toolkit" class="scr">
+      <div style="padding:14px 0 4px">
+        <a href="tel:988" class="crisis-bar">
+          <i class="ti ti-phone"></i>
+          <div style="flex:1"><div class="cb-title">Need to talk to someone right now?</div><div class="cb-sub">Call or text 988 — free, confidential, 24/7</div></div>
+          <i class="ti ti-chevron-right"></i>
+        </a>
+      </div>
+      <div class="sec">
+        <div class="sec-hd">Free tools — always available</div>
+        <div class="setting-row" onclick="breathe()">
+          <i class="ti ti-wind" style="color:#1D9E75"></i>
+          <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="open5to1()">
+          <i class="ti ti-hand-stop" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Step-by-step sensory grounding</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openTriggeredFlow()">
+          <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
+          <div class="setting-row-txt"><p>I'm triggered</p><span>Name it, get simple coping steps</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openSlippedFlow()">
+          <i class="ti ti-heart" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>I slipped</p><span>No judgment — here's what's next</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
+          <i class="ti ti-activity" style="color:#BA7517"></i>
+          <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Advanced Pro tools</div>
+        <div class="setting-row" onclick="openProTool('urgeSurf')">
+          <i class="ti ti-clock" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Urge Surfing Timer</p><span>Guided countdown to ride out an urge</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('panic')">
+          <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Panic Mode</p><span>Rapid stabilization + advanced breathing coach</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('emergency')">
+          <i class="ti ti-phone" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Emergency Plan</p><span>Your contact and steps, ready when it's hard</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('patterns')">
+          <i class="ti ti-chart-line" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Relapse Pattern Detection</p><span>A real report from your own logged data</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('scripts')">
+          <i class="ti ti-notebook" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Category-Specific Relapse Scripts</p><span>Prevention steps written for your focus area</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('distraction')">
+          <i class="ti ti-sparkles" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Distraction Generator</p><span>Quick, doable distractions on demand</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('reminders')">
+          <i class="ti ti-bell" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Accountability Reminders</p><span>A real daily check-in when you open the app</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+      </div>
+    </div>
+    <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:4px">Choose your plan</div>
@@ -827,6 +905,11 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-plans')">
+        <i class="ti ti-hand-stop"></i>
+        <div class="setting-row-txt"><p>Relapse toolkit</p><span>Grounding tools, plus advanced Pro tools for hard moments</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
@@ -905,6 +988,14 @@ body{display:flex;justify-content:center}
       <i class="ti ti-brain" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
     </div>
+    <div class="sos-opt" onclick="openTriggeredFlow()">
+      <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
+      <div class="sos-opt-info"><p>I'm triggered</p><span>Name it, get simple coping steps</span></div>
+    </div>
+    <div class="sos-opt" onclick="openSlippedFlow()">
+      <i class="ti ti-heart" style="color:#534AB7"></i>
+      <div class="sos-opt-info"><p>I slipped</p><span>No judgment — here's what's next</span></div>
+    </div>
     <div class="sos-opt" onclick="breathe()">
       <i class="ti ti-wind" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
@@ -914,6 +1005,198 @@ body{display:flex;justify-content:center}
       <div class="sos-opt-info"><p>Log this craving</p><span>Track it and let it pass</span></div>
     </div>
     <button class="sos-close" onclick="closeSOS()">I'm okay — close</button>
+  </div>
+</div>
+
+<!-- TRIGGERED FLOW (Free) -->
+<div class="sos-modal" id="triggered-modal" onclick="if(event.target===this)closeTriggeredFlow()">
+  <div class="sos-sheet">
+    <div id="trig-step-pick">
+      <div class="sos-title">What's triggering this?</div>
+      <div class="sos-sub">Naming it takes some of its power away. Pick what's closest.</div>
+      <div class="tc-wrap" id="trig-chip-wrap" style="margin-bottom:14px">
+        <div class="tc" onclick="selectTriggerType('Stress')">Stress</div>
+        <div class="tc" onclick="selectTriggerType('Social situation')">Social situation</div>
+        <div class="tc" onclick="selectTriggerType('Boredom')">Boredom</div>
+        <div class="tc" onclick="selectTriggerType('Anxiety')">Anxiety</div>
+        <div class="tc" onclick="selectTriggerType('Loneliness')">Loneliness</div>
+        <div class="tc" onclick="selectTriggerType('Habit / routine')">Habit / routine</div>
+        <div class="tc" onclick="selectTriggerType('Celebration')">Celebration</div>
+        <div class="tc" onclick="selectTriggerType('Sleep deprivation')">Sleep deprivation</div>
+        <div class="tc" onclick="selectTriggerType('Other')">Other</div>
+      </div>
+      <button class="sos-close" onclick="closeTriggeredFlow()">Never mind — close</button>
+    </div>
+    <div id="trig-step-tip" style="display:none">
+      <div class="sos-title" id="trig-tip-title">Stress</div>
+      <div class="sos-sub" id="trig-tip-text" style="margin-bottom:16px"></div>
+      <button class="ob-btn" style="margin-bottom:8px" onclick="open5to1()">Try 5-4-3-2-1 grounding</button>
+      <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeTriggeredFlow();breathe()">Breathing exercise</button>
+      <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="goLogCravingWithTrigger()">Log this as a craving</button>
+      <button class="sos-close" onclick="finishTriggeredFlow()">I'm steadier now — close</button>
+    </div>
+  </div>
+</div>
+
+<!-- SLIPPED FLOW (Free) -->
+<div class="sos-modal" id="slipped-modal" onclick="if(event.target===this)closeSlippedFlow()">
+  <div class="sos-sheet">
+    <div class="sos-title">You slipped. That's not the end of anything.</div>
+    <div class="sos-sub" id="slipped-sub" style="margin-bottom:16px">However this happened, it doesn't erase the days you already put in. What matters now is the next choice, not this one.</div>
+    <div style="font-size:12.5px;color:var(--ts);line-height:1.7;margin-bottom:16px">
+      <strong style="color:var(--tp);font-weight:500">A few honest next steps:</strong><br>
+      1. Get to a safe space, away from whatever's around you right now.<br>
+      2. Reach out to one person you trust — even just to say what happened.<br>
+      3. Reset your date when you're ready. No rush, no shame.
+    </div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-journal');openJour()">Write about it in your journal</button>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp()">Reset my date &amp; restart</button>
+    <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Nova</button>
+    <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
+  </div>
+</div>
+
+<!-- GENERIC PRO-TOOL PREVIEW (locked-tool teaser for free users) -->
+<div class="sos-modal" id="pro-tool-preview-modal" onclick="if(event.target===this)closeProToolPreview()">
+  <div class="sos-sheet">
+    <div class="sos-title" id="ptp-title" style="color:var(--accent)">Pro tool</div>
+    <div class="sos-sub" id="ptp-teaser" style="margin-bottom:14px"></div>
+    <div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:16px;border:0.5px solid var(--bdr)">
+      <div id="ptp-mock" style="padding:20px;background:var(--s1);filter:blur(4px);user-select:none;pointer-events:none"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15)">
+        <i class="ti ti-lock" style="font-size:24px;color:#fff"></i>
+      </div>
+    </div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeProToolPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
+    <button class="sos-close" onclick="closeProToolPreview()">Go back</button>
+  </div>
+</div>
+
+<!-- 5-4-3-2-1 SENSORY GROUNDING (Free) -->
+<div id="grounding54321-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+  <div style="font-size:40px;font-weight:700;color:var(--green);margin-bottom:16px" id="g54-count">5</div>
+  <div style="font-size:20px;font-weight:600;margin-bottom:10px" id="g54-prompt">Name 5 things you can see right now</div>
+  <div style="font-size:13px;color:#8892c0;margin-bottom:32px;max-width:280px">Say them out loud or in your head — really look for them.</div>
+  <button class="ob-btn" style="max-width:280px" onclick="next54321()" id="g54-next-btn">Next</button>
+  <button class="ob-btn outline" style="max-width:280px" onclick="close54321()">Stop here</button>
+</div>
+
+<!-- URGE SURFING TIMER (Pro) -->
+<div id="urgesurf-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+  <div id="us-setup">
+    <div style="font-size:20px;font-weight:600;margin-bottom:8px">Urge Surfing Timer</div>
+    <div style="font-size:13px;color:#8892c0;margin-bottom:24px;max-width:280px">Urges rise, peak, and fall — usually within minutes. Pick how long you want to ride this one out.</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;max-width:280px">
+      <button class="ob-btn outline" style="width:auto;flex:1;margin:0;color:#fff" onclick="startUrgeSurf(1)">1 min</button>
+      <button class="ob-btn outline" style="width:auto;flex:1;margin:0;color:#fff" onclick="startUrgeSurf(3)">3 min</button>
+      <button class="ob-btn outline" style="width:auto;flex:1;margin:0;color:#fff" onclick="startUrgeSurf(5)">5 min</button>
+      <button class="ob-btn outline" style="width:auto;flex:1;margin:0;color:#fff" onclick="startUrgeSurf(10)">10 min</button>
+    </div>
+    <button class="ob-btn" style="max-width:280px" onclick="closeUrgeSurf()">Not now</button>
+  </div>
+  <div id="us-active" style="display:none">
+    <div style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:22px;color:var(--green);font-weight:600" id="us-clock">05:00</div>
+    <div style="font-size:14px;color:#fff;margin-bottom:32px;max-width:280px;min-height:40px" id="us-encourage">You're already surfing it.</div>
+    <button class="ob-btn outline" style="max-width:280px;color:#fff" onclick="stopUrgeSurf()">Stop</button>
+  </div>
+  <div id="us-done" style="display:none">
+    <div style="font-size:20px;font-weight:600;margin-bottom:12px;color:var(--green)">You surfed it.</div>
+    <div style="font-size:13px;color:#8892c0;margin-bottom:28px;max-width:280px">That urge had a lifespan, and you outlasted it — real proof you can do this again.</div>
+    <button class="ob-btn" style="max-width:280px" onclick="finishUrgeSurf()">Done</button>
+  </div>
+</div>
+
+<!-- PANIC MODE (Pro) -->
+<div id="panic-overlay" style="display:none;position:fixed;inset:0;background:#2E0F0F;z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:28px;overflow-y:auto">
+  <div style="font-size:20px;font-weight:600;margin-bottom:6px;color:#FF8A80">Panic Mode</div>
+  <div style="font-size:13px;color:#e8c4c0;margin-bottom:20px;max-width:290px">You're safe right now, even if it doesn't feel like it. Let's slow this down together, one step at a time.</div>
+  <div style="text-align:left;font-size:13.5px;line-height:2;margin-bottom:24px;max-width:290px;background:rgba(255,255,255,0.06);border-radius:12px;padding:16px">
+    1. Put both feet flat on the floor. Feel the ground.<br>
+    2. Splash cold water on your face or hold something cold.<br>
+    3. Name out loud where you are right now.<br>
+    4. Start box breathing below.
+  </div>
+  <div style="width:110px;height:110px;border-radius:50%;background:rgba(255,138,128,0.15);border:3px solid #FF8A80;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:15px;color:#FF8A80;transition:transform 4s ease;font-weight:500" id="panic-circle">Breathe in</div>
+  <div style="font-size:28px;font-weight:700;color:#FF8A80;margin-bottom:24px" id="panic-count">4</div>
+  <button class="ob-btn outline" style="max-width:280px;color:#fff;margin-bottom:8px" onclick="window.location.href='tel:988'">Call or text 988</button>
+  <button class="ob-btn" style="max-width:280px;background:#FF8A80;color:#2E0F0F" onclick="closePanicMode()">I'm more stable now</button>
+</div>
+
+<!-- EMERGENCY PLAN (Pro) -->
+<div class="sos-modal" id="emergency-modal" onclick="if(event.target===this)closeEmergencyPlan()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Your emergency plan</div>
+    <div class="sos-sub">Build this ahead of time so it's ready the instant you need it — not something you have to think up in the moment.</div>
+    <div id="ep-quick-actions" style="display:none;margin-bottom:14px">
+      <button class="log-btn" style="margin-bottom:8px" onclick="callEmergencyContact()">Call <span id="ep-quick-name"></span></button>
+      <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" onclick="closeEmergencyPlan();open5to1()">Open grounding tool now</button>
+    </div>
+    <div class="ob-label" style="text-align:left;margin-top:4px">Safe contact's name</div>
+    <input class="ob-input" id="ep-contact-name" type="text" placeholder="e.g. Mom, Alex, my sponsor" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Their phone number</div>
+    <input class="ob-input" id="ep-contact-phone" type="tel" placeholder="e.g. 555-123-4567" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Your steps, in order</div>
+    <textarea class="ob-input" id="ep-steps" rows="4" placeholder="e.g. 1. Leave the room. 2. Call my contact. 3. Go for a walk outside." style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f)"></textarea>
+    <button class="ob-btn" style="margin-top:4px" onclick="saveEmergencyPlan()">Save plan</button>
+    <button class="sos-close" onclick="closeEmergencyPlan()">Close</button>
+  </div>
+</div>
+
+<!-- RELAPSE PATTERN DETECTION (Pro) -->
+<div class="sos-modal" id="pattern-report-modal" onclick="if(event.target===this)closePatternReport()">
+  <div class="sos-sheet" style="max-height:80vh;overflow-y:auto">
+    <div class="sos-title" style="color:var(--accent)">Your relapse pattern report</div>
+    <div class="sos-sub" style="margin-bottom:12px">Built entirely from what you've actually logged — no guessing.</div>
+    <div id="pattern-report-body"></div>
+    <button class="sos-close" style="margin-top:12px" onclick="closePatternReport()">Close</button>
+  </div>
+</div>
+
+<!-- CATEGORY-SPECIFIC RELAPSE SCRIPTS (Pro) -->
+<div class="sos-modal" id="category-scripts-modal" onclick="if(event.target===this)closeCategoryScripts()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)" id="cs-title">Relapse prevention script</div>
+    <div class="sos-sub" id="cs-body" style="margin-bottom:8px"></div>
+    <button class="sos-close" style="margin-top:8px" onclick="closeCategoryScripts()">Close</button>
+  </div>
+</div>
+
+<!-- DISTRACTION GENERATOR (Pro) -->
+<div class="sos-modal" id="distraction-modal" onclick="if(event.target===this)closeDistractionGen()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Distraction generator</div>
+    <div class="sos-sub">A quick, doable thing to do with the next few minutes instead.</div>
+    <div style="background:var(--acc);border-radius:12px;padding:20px;text-align:center;font-size:15px;color:var(--acc-t);margin-bottom:16px;min-height:56px;display:flex;align-items:center;justify-content:center" id="dg-current"></div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="nextDistraction()">Give me another</button>
+    <button class="sos-close" onclick="closeDistractionGen()">Close</button>
+  </div>
+</div>
+
+<!-- ACCOUNTABILITY REMINDERS (Pro) -->
+<div class="sos-modal" id="accountability-modal" onclick="if(event.target===this)closeAccountabilityReminders()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Accountability reminders</div>
+    <div class="sos-sub">A real check-in prompt that greets you here whenever you open the app — not a push notification, since this app can't send those yet. Honest and simple.</div>
+    <div class="setting-row" style="margin-bottom:4px" onclick="toggleAccountabilityReminders()">
+      <i class="ti ti-bell" style="color:var(--accent)"></i>
+      <div class="setting-row-txt"><p>Daily check-in on open</p><span>Ask me how I'm feeling each time I open the app</span></div>
+      <div class="toggle-sw" id="accountability-toggle"><div class="toggle-knob"></div></div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeAccountabilityReminders()">Close</button>
+  </div>
+</div>
+
+<!-- DAILY ACCOUNTABILITY CHECK-IN BANNER (Pro, shown once per day on app open) -->
+<div class="sos-modal" id="accountability-checkin-modal" onclick="if(event.target===this)dismissAccountabilityCheckin()">
+  <div class="sos-sheet">
+    <div class="sos-title">Good to see you today</div>
+    <div class="sos-sub" style="margin-bottom:14px">How are you feeling about today, honestly?</div>
+    <div class="tc-wrap" style="margin-bottom:8px">
+      <div class="tc" onclick="answerAccountabilityCheckin('Good')">Good</div>
+      <div class="tc" onclick="answerAccountabilityCheckin('Shaky')">Shaky</div>
+      <div class="tc" onclick="answerAccountabilityCheckin('Struggling')">Struggling</div>
+    </div>
+    <button class="sos-close" onclick="dismissAccountabilityCheckin()">Skip for now</button>
   </div>
 </div>
 
@@ -1054,6 +1337,8 @@ let S = {
   currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
   pinHash:null,pinEnabled:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
+  emergencyPlan:{contactName:'',contactPhone:'',steps:''},
+  accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -1514,6 +1799,7 @@ function initApp(){
   }
   updateRecoveryTermLabels();
   setInterval(updateStats,60000);
+  maybeShowAccountabilityCheckin();
 }
 
 function updateUserUI(){
@@ -1722,6 +2008,93 @@ function logCraving(){
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
 }
 function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-plans');}
+
+// ─── TRIGGERED FLOW (Free) ────────────────────────────────────────────────────
+const TRIGGER_COPING_TIPS={
+  'Stress':'Stress cravings fade faster with movement. Try 10 slow breaths, or step outside for a minute before deciding anything.',
+  'Social situation':"You don't owe anyone an explanation. Step outside, text someone safe, or just leave early — that's a complete plan on its own.",
+  'Boredom':'Boredom cravings are really "I need stimulation." Pick one small task right now — dishes, a walk, a text to a friend.',
+  'Anxiety':'Anxiety spikes and drops on its own, usually within minutes. Try box breathing: in for 4, hold for 4, out for 4, hold for 4.',
+  'Loneliness':'Loneliness is real, but using won\'t actually fix it. Reach out to one person right now, even just to say "thinking of you."',
+  'Habit / routine':"This is autopilot, not a real decision. Change your environment for the next 15 minutes — different room, different activity.",
+  'Celebration':"Good moments don't need to be marked the old way. What's one way to celebrate this that you'll be proud of tomorrow?",
+  'Sleep deprivation':'Tired brains crave shortcuts. If you can, lie down for 10 minutes first — a lot of urges are really just exhaustion.',
+  'Other':"Whatever this is, it's temporary. Name it out loud, then try one grounding step before deciding anything.",
+};
+let currentTriggerType='';
+function openTriggeredFlow(){
+  closeSOS();
+  currentTriggerType='';
+  document.getElementById('trig-step-pick').style.display='block';
+  document.getElementById('trig-step-tip').style.display='none';
+  document.getElementById('triggered-modal').classList.add('open');
+}
+function closeTriggeredFlow(){
+  document.getElementById('triggered-modal').classList.remove('open');
+}
+function selectTriggerType(type){
+  currentTriggerType=type;
+  document.getElementById('trig-step-pick').style.display='none';
+  document.getElementById('trig-step-tip').style.display='block';
+  document.getElementById('trig-tip-title').textContent=type;
+  document.getElementById('trig-tip-text').textContent=TRIGGER_COPING_TIPS[type]||TRIGGER_COPING_TIPS['Other'];
+  novaNudge(`Just so you know I'm here — you named "${type}" as what's triggering you right now. That's a real coping skill in action.\n\n${TRIGGER_COPING_TIPS[type]||TRIGGER_COPING_TIPS['Other']}`);
+}
+function goLogCravingWithTrigger(){
+  const type=currentTriggerType;
+  closeTriggeredFlow();
+  switchTo('craving');actBn('bn-plans');
+  document.querySelectorAll('.tc-wrap .tc').forEach(c=>{
+    c.classList.toggle('sel',c.textContent.trim()===type);
+  });
+}
+function finishTriggeredFlow(){
+  closeTriggeredFlow();
+}
+
+// ─── SLIPPED FLOW (Free) ──────────────────────────────────────────────────────
+function openSlippedFlow(){
+  closeSOS();
+  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${categoryFallbackNote()} What matters now is the next choice, not this one.`;
+  document.getElementById('slipped-modal').classList.add('open');
+  novaNudge("I saw you check in after a slip. I'm not here to judge you — relapse is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
+}
+function closeSlippedFlow(){
+  document.getElementById('slipped-modal').classList.remove('open');
+}
+
+// ─── 5-4-3-2-1 SENSORY GROUNDING (Free) ───────────────────────────────────────
+const GROUNDING_54321_STEPS=[
+  {n:'5',prompt:'Name 5 things you can see right now'},
+  {n:'4',prompt:'Name 4 things you can feel or touch'},
+  {n:'3',prompt:'Name 3 things you can hear'},
+  {n:'2',prompt:'Name 2 things you can smell'},
+  {n:'1',prompt:'Name 1 thing you appreciate about yourself'},
+];
+let groundingStepIdx=0;
+function open5to1(){
+  groundingStepIdx=0;
+  renderGrounding54321Step();
+  document.getElementById('grounding54321-overlay').style.display='flex';
+}
+function renderGrounding54321Step(){
+  const step=GROUNDING_54321_STEPS[groundingStepIdx];
+  document.getElementById('g54-count').textContent=step.n;
+  document.getElementById('g54-prompt').textContent=step.prompt;
+  document.getElementById('g54-next-btn').textContent=groundingStepIdx<GROUNDING_54321_STEPS.length-1?'Next':'I feel more grounded';
+}
+function next54321(){
+  if(groundingStepIdx<GROUNDING_54321_STEPS.length-1){
+    groundingStepIdx++;
+    renderGrounding54321Step();
+  }else{
+    close54321();
+  }
+}
+function close54321(){
+  document.getElementById('grounding54321-overlay').style.display='none';
+  closeTriggeredFlow();
+}
 function renderCravings(){
   const log=document.getElementById('cravingLog');
   if(!log)return;
@@ -1985,6 +2358,226 @@ function breathe(){
 }
 function closeBreathe(){clearInterval(breatheTimer);document.getElementById('breathe-overlay').style.display='none';}
 
+// ─── URGE SURFING TIMER (Pro) ─────────────────────────────────────────────────
+const URGE_SURF_ENCOURAGEMENT=[
+  "You're already surfing it — urges are a wave, not a wall.",
+  "This feeling will peak, then it will fall. You're still here.",
+  "Nothing you're feeling right now requires you to act on it.",
+  "You've outlasted every craving so far. This one is no different.",
+  "Notice the urge without fighting it — just let it move through you.",
+  "You're proving something to yourself right now, one second at a time.",
+];
+let urgeSurfTimer=null,urgeSurfEncourageTimer=null,urgeSurfSecondsLeft=0;
+function openUrgeSurf(){
+  document.getElementById('us-setup').style.display='block';
+  document.getElementById('us-active').style.display='none';
+  document.getElementById('us-done').style.display='none';
+  document.getElementById('urgesurf-overlay').style.display='flex';
+}
+function startUrgeSurf(minutes){
+  urgeSurfSecondsLeft=minutes*60;
+  document.getElementById('us-setup').style.display='none';
+  document.getElementById('us-active').style.display='block';
+  updateUrgeSurfClock();
+  let encourageIdx=0;
+  document.getElementById('us-encourage').textContent=URGE_SURF_ENCOURAGEMENT[0];
+  urgeSurfEncourageTimer=setInterval(()=>{
+    encourageIdx=(encourageIdx+1)%URGE_SURF_ENCOURAGEMENT.length;
+    document.getElementById('us-encourage').textContent=URGE_SURF_ENCOURAGEMENT[encourageIdx];
+  },15000);
+  urgeSurfTimer=setInterval(()=>{
+    urgeSurfSecondsLeft--;
+    updateUrgeSurfClock();
+    if(urgeSurfSecondsLeft<=0){
+      clearInterval(urgeSurfTimer);clearInterval(urgeSurfEncourageTimer);
+      document.getElementById('us-active').style.display='none';
+      document.getElementById('us-done').style.display='block';
+    }
+  },1000);
+}
+function updateUrgeSurfClock(){
+  const m=Math.floor(urgeSurfSecondsLeft/60),s=urgeSurfSecondsLeft%60;
+  document.getElementById('us-clock').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function stopUrgeSurf(){
+  clearInterval(urgeSurfTimer);clearInterval(urgeSurfEncourageTimer);
+  closeUrgeSurf();
+}
+function finishUrgeSurf(){
+  S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
+  save();updateStats();
+  closeUrgeSurf();
+}
+function closeUrgeSurf(){
+  document.getElementById('urgesurf-overlay').style.display='none';
+}
+
+// ─── PANIC MODE + ADVANCED BREATHING COACH (Pro) ──────────────────────────────
+let panicTimer=null;
+function openPanicMode(){
+  document.getElementById('panic-overlay').style.display='flex';
+  let phase=0,count=4;
+  const phases=[{label:'Breathe in',dur:4,scale:'1.3'},{label:'Hold',dur:4,scale:'1.3'},{label:'Breathe out',dur:4,scale:'1'},{label:'Hold',dur:4,scale:'1'}];
+  const circle=document.getElementById('panic-circle');
+  const cnt=document.getElementById('panic-count');
+  function runPhase(){
+    const p=phases[phase%4];
+    circle.textContent=p.label;circle.style.transform=`scale(${p.scale})`;
+    count=p.dur;cnt.textContent=count;
+    panicTimer=setInterval(()=>{count--;cnt.textContent=count;if(count<=0){clearInterval(panicTimer);phase++;runPhase();}},1000);
+  }
+  runPhase();
+}
+function closePanicMode(){
+  clearInterval(panicTimer);
+  document.getElementById('panic-overlay').style.display='none';
+}
+
+// ─── EMERGENCY PLAN (Pro) ──────────────────────────────────────────────────────
+function openEmergencyPlan(){
+  const p=S.emergencyPlan||{contactName:'',contactPhone:'',steps:''};
+  document.getElementById('ep-contact-name').value=p.contactName||'';
+  document.getElementById('ep-contact-phone').value=p.contactPhone||'';
+  document.getElementById('ep-steps').value=p.steps||'';
+  const hasContact=!!(p.contactName&&p.contactPhone);
+  document.getElementById('ep-quick-actions').style.display=hasContact?'block':'none';
+  if(hasContact)document.getElementById('ep-quick-name').textContent=p.contactName;
+  document.getElementById('emergency-modal').classList.add('open');
+}
+function closeEmergencyPlan(){
+  document.getElementById('emergency-modal').classList.remove('open');
+}
+function saveEmergencyPlan(){
+  S.emergencyPlan={
+    contactName:document.getElementById('ep-contact-name').value.trim(),
+    contactPhone:document.getElementById('ep-contact-phone').value.trim(),
+    steps:document.getElementById('ep-steps').value.trim(),
+  };
+  save();
+  closeEmergencyPlan();
+}
+function callEmergencyContact(){
+  const p=S.emergencyPlan||{};
+  if(p.contactPhone)window.location.href='tel:'+p.contactPhone.replace(/[^0-9+]/g,'');
+}
+
+// ─── RELAPSE PATTERN DETECTION (Pro) ───────────────────────────────────────────
+function buildPatternReportHTML(){
+  let html='';
+  html+=`<div class="sec-hd" style="margin-top:0">Trigger patterns</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px;white-space:pre-wrap">${analyzeCravingPatterns()}</div>`;
+  html+=`<div class="sec-hd">Mood trend</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px;white-space:pre-wrap">${analyzeMoodTrend()}</div>`;
+  const blueprintVals=Object.values(S.behavioralBlueprint||{});
+  if(blueprintVals.length){
+    html+=`<div class="sec-hd">What you told us early on</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px">"${blueprintVals[0]}" — that context often explains more about a relapse than the trigger that day does.</div>`;
+  }
+  const cravings=S.cravings||[];
+  if(cravings.length){
+    const counts={};
+    cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+    const [topTrigger]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+    const firstType=topTrigger.split(',')[0].trim();
+    const strategy=TRIGGER_COPING_TIPS[firstType]||TRIGGER_COPING_TIPS['Other'];
+    html+=`<div class="sec-hd">Prevention strategy</div><div style="font-size:13px;line-height:1.7;color:var(--ts)">Since "${firstType}" is your most logged trigger: ${strategy}</div>`;
+  }
+  return html;
+}
+function openPatternReport(){
+  document.getElementById('pattern-report-body').innerHTML=buildPatternReportHTML();
+  document.getElementById('pattern-report-modal').classList.add('open');
+}
+function closePatternReport(){
+  document.getElementById('pattern-report-modal').classList.remove('open');
+}
+
+// ─── CATEGORY-SPECIFIC RELAPSE SCRIPTS (Pro) ───────────────────────────────────
+const CATEGORY_RELAPSE_SCRIPTS={
+  'Porn & Sex':"If the urge hits: leave the device or room you're in immediately. Say out loud: \"This isn't about pleasure, it's about escape.\" Text one person you trust that you're struggling — you don't need to explain, just say the word \"struggling.\" Then do one physical thing (walk, shower, push-ups) before deciding anything else.",
+  'Alcohol':"If the urge hits: get out of arm's reach of alcohol — leave the room, store, or event. Drink a full glass of water first, every time. Call your sober contact or text \"urge\" to someone who knows your situation. Remind yourself: this feeling passes in under 20 minutes whether you drink or not.",
+  'Smoking':"If the urge hits: change your hands and your mouth — hold something, chew gum, or drink cold water. Set a timer for 10 minutes and do anything else until it goes off. Most nicotine cravings peak and fade within a few minutes. Text someone that you're fighting one off right now.",
+  'Substances':"If the urge hits: get to a safe, using-free space immediately. Call your sober contact or sponsor before you do anything else. Remove yourself physically from wherever the substance is accessible. Remind yourself of exactly why you started this — say it out loud.",
+  'Gambling':"If the urge hits: close every app, tab, or site immediately — don't \"just check.\" Move your money-access further away (log out, hand your card to someone). Call your accountability contact and say the word \"urge.\" Do something with your hands for the next 15 minutes.",
+  'Social media':"If the urge hits: put your phone in another room, not just face-down. Do one offline task for 10 minutes before you touch it again. Ask yourself what you're actually avoiding by wanting to scroll. Text a real person instead of opening the app.",
+  'Gaming':"If the urge hits: physically leave the room your setup is in. Set a 15-minute timer and do a different activity before deciding anything. Ask what feeling you're trying to numb — boredom, stress, loneliness? Message someone instead of logging in.",
+  'Food / Binging':"If the urge hits: pause and drink a full glass of water first. Leave the kitchen or food area for 10 minutes. Ask yourself: am I actually hungry, or is this something else? Call or text someone instead of eating alone right now.",
+  'Shopping / Spending':"If the urge hits: close the app or tab and put your card/wallet out of reach. Wait 30 minutes before any purchase — set a timer. Ask what feeling you're trying to buy your way out of. Text your accountability contact the word \"urge.\"",
+  'Work':"If the urge hits to overwork past your limits: physically close the laptop or leave your desk. Set a hard stop time and tell someone you're stopping. Do one non-work activity for 15 minutes. Ask what you're avoiding by staying busy.",
+  'Other':"If the urge hits: physically leave the environment tied to it. Do one grounding action (cold water, a walk, deep breaths) before deciding anything. Text or call someone you trust and say the word \"urge.\" Remind yourself this feeling has a lifespan — it will pass.",
+};
+function openCategoryScripts(){
+  const cat=S.currentAddiction||'Other';
+  document.getElementById('cs-title').textContent=`Your ${cat} relapse-prevention script`;
+  document.getElementById('cs-body').textContent=CATEGORY_RELAPSE_SCRIPTS[cat]||CATEGORY_RELAPSE_SCRIPTS['Other'];
+  document.getElementById('category-scripts-modal').classList.add('open');
+}
+function closeCategoryScripts(){
+  document.getElementById('category-scripts-modal').classList.remove('open');
+}
+
+// ─── DISTRACTION GENERATOR (Pro) ───────────────────────────────────────────────
+const DISTRACTIONS=[
+  "Go for a brisk 10-minute walk, no phone.",
+  "Do 20 push-ups or jumping jacks, right now.",
+  "Text a friend something completely unrelated to how you feel.",
+  "Wash the dishes in your sink, start to finish.",
+  "Take a cold shower or splash cold water on your face.",
+  "Write down 3 things you're grateful for today.",
+  "Rearrange or tidy one small area near you.",
+  "Put on a song that has nothing to do with your mood and really listen to it.",
+  "Stretch for 5 minutes, slowly.",
+  "Step outside and name 5 things you notice that you've never noticed before.",
+  "Call someone just to check in on them, not about you.",
+  "Make a cup of tea or coffee and drink it slowly, with no screen.",
+];
+let lastDistractionIdx=-1;
+function openDistractionGen(){
+  nextDistraction();
+  document.getElementById('distraction-modal').classList.add('open');
+}
+function nextDistraction(){
+  let idx;
+  do{idx=Math.floor(Math.random()*DISTRACTIONS.length);}while(idx===lastDistractionIdx&&DISTRACTIONS.length>1);
+  lastDistractionIdx=idx;
+  document.getElementById('dg-current').textContent=DISTRACTIONS[idx];
+}
+function closeDistractionGen(){
+  document.getElementById('distraction-modal').classList.remove('open');
+}
+
+// ─── ACCOUNTABILITY REMINDERS (Pro, honest in-app daily check-in) ─────────────
+function openAccountabilityReminders(){
+  document.getElementById('accountability-toggle').classList.toggle('on',!!S.accountabilityRemindersEnabled);
+  document.getElementById('accountability-modal').classList.add('open');
+}
+function closeAccountabilityReminders(){
+  document.getElementById('accountability-modal').classList.remove('open');
+}
+function toggleAccountabilityReminders(){
+  S.accountabilityRemindersEnabled=!S.accountabilityRemindersEnabled;
+  document.getElementById('accountability-toggle').classList.toggle('on',S.accountabilityRemindersEnabled);
+  save();
+}
+function maybeShowAccountabilityCheckin(){
+  if(!S.isPro||!S.accountabilityRemindersEnabled)return;
+  const today=new Date().toDateString();
+  if(S.lastAccountabilityCheckinDate===today)return;
+  document.getElementById('accountability-checkin-modal').classList.add('open');
+}
+function dismissAccountabilityCheckin(){
+  S.lastAccountabilityCheckinDate=new Date().toDateString();
+  save();
+  document.getElementById('accountability-checkin-modal').classList.remove('open');
+}
+function answerAccountabilityCheckin(feeling){
+  dismissAccountabilityCheckin();
+  if(feeling==='Struggling'){
+    novaNudge("Thanks for being honest about today — that's not nothing. Want to talk through it, or would a grounding tool help more right now?");
+  }else if(feeling==='Shaky'){
+    novaNudge("Shaky days are still days you're showing up for. I'm here if you want to talk through what's making it feel that way.");
+  }else{
+    novaNudge("Good to hear. Keep noticing what's working today — it's worth remembering on the harder ones.");
+  }
+}
+
 // ─── NOVA AI ──────────────────────────────────────────────────────────────────
 const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
 
@@ -2033,7 +2626,19 @@ const FALLBACK_PATTERNS=[
    reply:`Motivation comes and goes, and that's normal — it doesn't mean you're failing. Let's anchor to your reasons instead of waiting for motivation to show up.\n\nWhy did you decide to start this in the first place?`},
   {test:/paws|post.?acute|withdrawal/i,
    reply:`PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`},
-  {test:/struggl|hard|rough|bad day|tough|heavy|overwhelm/i,
+  {test:/stress(ed)?|overwhelm|too much (pressure|going on)/i,
+   reply:`Stress is one of the most common paths back to old habits — you naming it is you catching it before it catches you.\n\nWhat's the biggest source of the stress right now, and is there one piece of it you can actually put down today?`},
+  {test:/lonel|isolat|no one (understands|gets it)|alone in this/i,
+   reply:`Loneliness is a real, physical kind of pain — it makes sense it would push you toward old coping habits. You reaching out here is already you refusing to be fully alone with it.\n\nIs there one person you trust that you could message today, even just a small hello?`},
+  {test:/bored|nothing to do|so restless/i,
+   reply:`Boredom cravings are often really just "I need stimulation" in disguise — and that's a solvable problem.\n\nWhat's one small thing, even a 10-minute thing, you could do with your hands or body right now?`},
+  {test:/asham|guilt|disgust(ed)? with myself|hate myself|so embarrass/i,
+   reply:`Shame convinces you that you ARE the mistake instead of someone who made one — but that's not true, and it's not a fair trade for how hard you're working.\n\nWhat would you say to a friend who told you exactly what you just told me?`},
+  {test:/anxious|anxiety|panicking|can'?t (calm down|stop worrying)|racing thoughts/i,
+   reply:`Anxiety spikes hard and then it genuinely does come back down, even when it doesn't feel that way right now. A minute of slow, controlled breathing can take the edge off while it passes.\n\nWhat's the thought that's looping the loudest right now?`},
+  {test:/confus(ed|ing)|don'?t know what i'?m feeling|mixed up|can'?t (figure|make sense) (it|this) out/i,
+   reply:`It's okay not to have this fully sorted out yet — a lot of recovery is sitting with confusing feelings without rushing to resolve them.\n\nCan you describe what's confusing without trying to make it neat yet? Sometimes just saying it out loud untangles part of it.`},
+  {test:/struggl|hard|rough|bad day|tough|heavy/i,
    reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
 ];
 function localFallbackReply(userText){
@@ -2087,6 +2692,67 @@ const CATEGORY_FALLBACK_NOTES={
 function categoryFallbackNote(){
   return CATEGORY_FALLBACK_NOTES[S.currentAddiction]||'';
 }
+
+// ─── RELAPSE TOOLKIT: PRO TOOL GATING (generic teaser+blur+upgrade pattern) ───
+const PRO_TOOLS={
+  urgeSurf:{
+    title:'Urge Surfing Timer',
+    teaser:"A guided 1-10 minute countdown with rotating encouragement to help you ride out an urge instead of acting on it — most urges peak and pass within minutes.",
+    mock:'<div style="text-align:center"><div style="font-size:34px;font-weight:700;color:var(--green)">04:32</div><div style="font-size:12px;color:var(--tm);margin-top:6px">"You\'re already past the hardest part..."</div></div>',
+    open:'openUrgeSurf'
+  },
+  panic:{
+    title:'Panic Mode',
+    teaser:"Rapid stabilization steps plus a faster guided breathing coach, for moments that feel like an emergency, not just a craving.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">1. ●●●●●●●●●●●●●●<br>2. ●●●●●●●●●●●●●●●●●<br>3. Box breathing — in 4, hold 4...</div>',
+    open:'openPanicMode'
+  },
+  emergency:{
+    title:'Emergency Plan',
+    teaser:"A plan you build once, ahead of time — your safe contact and your steps, ready to open the instant things get hard.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Contact: ●●●● ●●●●●●<br>Step 1: ●●●●●●●●●●●●<br>Step 2: ●●●●●●●●●●●●●●●</div>',
+    open:'openEmergencyPlan'
+  },
+  patterns:{
+    title:'Relapse Pattern Detection',
+    teaser:"A real report built from your own logged cravings and journal entries — your top triggers, riskiest times, and a prevention strategy written around your actual data.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top trigger: ●●●●●● (●●%)<br>Riskiest time: ●●●●●●●●●<br>Strategy: ●●●●●●●●●●●●●●●●●●</div>',
+    open:'openPatternReport'
+  },
+  scripts:{
+    title:'Category-Specific Relapse Scripts',
+    teaser:()=>`Step-by-step relapse-prevention scripts written specifically for ${recoveryTerm()==='sober'?'your recovery focus':S.currentAddiction||'your focus area'} — not generic advice.`,
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">If ●●●●●● happens: ●●●●●●●●●●●●●●<br>Say to yourself: "●●●●●●●●●●●●"</div>',
+    open:'openCategoryScripts'
+  },
+  distraction:{
+    title:'Distraction Generator',
+    teaser:"An always-ready list of quick, doable distractions for the exact moment you need one — tap for another suggestion any time.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">→ ●●●●●●●●●●●●●●●<br>→ ●●●●●●●●●●●●●<br><span style="color:var(--accent)">Give me another →</span></div>',
+    open:'openDistractionGen'
+  },
+  reminders:{
+    title:'Accountability Reminders',
+    teaser:"A real daily check-in that greets you when you open the app — not a fake notification, an honest nudge to reflect every day.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">"Good morning — how are you feeling about today?"</div>',
+    open:'openAccountabilityReminders'
+  }
+};
+function openProTool(key){
+  if(S.isPro){window[PRO_TOOLS[key].open]();return;}
+  showProToolPreview(key);
+}
+function showProToolPreview(key){
+  const t=PRO_TOOLS[key];
+  document.getElementById('ptp-title').textContent=t.title;
+  document.getElementById('ptp-teaser').textContent=typeof t.teaser==='function'?t.teaser():t.teaser;
+  document.getElementById('ptp-mock').innerHTML=t.mock;
+  document.getElementById('pro-tool-preview-modal').classList.add('open');
+}
+function closeProToolPreview(){
+  document.getElementById('pro-tool-preview-modal').classList.remove('open');
+}
+
 function setNovaMode(isLive){
   const chip=document.getElementById('nova-mode-chip');
   if(!chip)return;
@@ -2237,9 +2903,9 @@ Address the interactions of their unique blueprint and assign structured daily r
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
-  plans:'s-plans',profile:'s-profile',lesson:'s-lesson'
+  plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson"};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);

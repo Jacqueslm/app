@@ -423,7 +423,7 @@ body{display:flex;justify-content:center}
 <div id="s-home" class="scr on">
   <div class="hero">
     <div class="tier-chip" id="home-chip" onclick="switchTo('plans');actBn('bn-plans')"><i class="ti ti-sparkles" style="font-size:12px"></i> <span id="home-chip-txt">Free plan</span></div>
-    <div style="font-size:13px;color:#8892c0;margin-bottom:4px">Days sober</div>
+    <div style="font-size:13px;color:#8892c0;margin-bottom:4px" id="days-term-lbl">Days sober</div>
     <div class="days-big" id="dayCount">0</div>
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
@@ -595,9 +595,9 @@ body{display:flex;justify-content:center}
         <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">Curated stories from the recovery community, shown to everyone — not a live feed of other app users.</div>
         <div id="postList">
           <div class="post">
-            <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days sober · 2h ago</div></div></div>
+            <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days social-media-free · 2h ago</div></div></div>
             <div class="mile-tag"><i class="ti ti-trophy" style="font-size:12px"></i> 90-day milestone</div>
-            <div class="pb">Just hit 90 days! Three months ago I couldn't imagine getting through a single weekend. If you're on day 1 or day 10, keep going. It gets so much easier.</div>
+            <div class="pb">Just hit 90 days off the apps! Three months ago I couldn't imagine getting through a single evening without checking my phone every five minutes. If you're on day 1 or day 10, keep going. It gets so much easier.</div>
             <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>47</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>12 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
@@ -606,13 +606,13 @@ body{display:flex;justify-content:center}
             <div class="pacts"><button class="pa liked" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>31</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>8 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
-            <div class="ph"><div class="av av-b">AL</div><div><div class="pu">Alex L.</div><div class="pm">6 months sober · 1d ago</div></div></div>
+            <div class="ph"><div class="av av-b">AL</div><div><div class="pu">Alex L.</div><div class="pm">6 months clean · 1d ago</div></div></div>
             <div class="pb">6 months. I got my life back. My kids smile at me differently. My mornings are clear. You don't have to do this alone — this community is real.</div>
             <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>102</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>24 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
           <div class="post">
-            <div class="ph"><div class="av av-o">TR</div><div><div class="pu">Taylor R.</div><div class="pm">3 days sober · 3h ago</div></div></div>
-            <div class="pb">Day 3 and honestly terrified. Every hour feels like a mountain. But I found this app and I'm not quitting. Anyone else on their first week?</div>
+            <div class="ph"><div class="av av-o">TR</div><div><div class="pu">Taylor R.</div><div class="pm">3 days spend-free · 3h ago</div></div></div>
+            <div class="pb">Day 3 and honestly terrified I'll cave the second I feel stressed. Every hour feels like a mountain. But I found this app and I'm not quitting. Anyone else on their first week?</div>
             <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>19</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>5 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
           </div>
         </div>
@@ -659,7 +659,7 @@ body{display:flex;justify-content:center}
             <div class="ring-inner"><div class="ring-days" id="ring-days">0</div><div class="ring-lbl">days</div></div>
           </div>
           <div class="prog-stats">
-            <div class="ps"><div class="ps-n" id="prog-hours">0</div><div class="ps-l">Hours sober</div></div>
+            <div class="ps"><div class="ps-n" id="prog-hours">0</div><div class="ps-l" id="prog-hours-lbl">Hours sober</div></div>
             <div class="ps"><div class="ps-n" id="prog-saved" style="color:#1D9E75">$0</div><div class="ps-l">Money saved</div></div>
             <div class="ps"><div class="ps-n" id="prog-streak">0</div><div class="ps-l">Current streak</div></div>
             <div class="ps"><div class="ps-n" id="prog-longest">0</div><div class="ps-l">Longest streak ever</div></div>
@@ -669,7 +669,7 @@ body{display:flex;justify-content:center}
       <div class="sec" style="padding-top:0">
         <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
         <div class="card" style="display:flex;justify-content:space-around;text-align:center">
-          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l">Total sober days</div></div>
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l" id="prog-total-days-lbl">Total sober days</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
         </div>
@@ -1352,6 +1352,7 @@ function initApp(){
     document.getElementById('pledgeBtn').className='pill pill-ok';
     document.getElementById('pledge-sub').textContent='Pledge taken. Keep going — one day at a time.';
   }
+  updateRecoveryTermLabels();
   setInterval(updateStats,60000);
 }
 
@@ -1362,7 +1363,7 @@ function updateUserUI(){
   if(document.getElementById('compose-av'))document.getElementById('compose-av').textContent=init;
   if(document.getElementById('prof-name'))document.getElementById('prof-name').textContent=n;
   const sd=S.startDate?new Date(S.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'today';
-  if(document.getElementById('prof-since'))document.getElementById('prof-since').textContent='Sober since '+sd;
+  if(document.getElementById('prof-since'))document.getElementById('prof-since').textContent=`${capitalize(recoveryTerm())} since ${sd}`;
   updateTierUI();
 }
 
@@ -1373,6 +1374,7 @@ function getDays(){
 }
 
 function updateStats(){
+  updateRecoveryTermLabels();
   const start=S.startDate?new Date(S.startDate):new Date();
   const diff=Date.now()-start.getTime();
   const days=Math.max(0,Math.floor(diff/86400000));
@@ -1621,7 +1623,7 @@ function renderCommunityPosts(){
   S.communityPosts.forEach((p,idx)=>{
     const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
     const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
-    div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days sober · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+    div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days ${recoveryTerm()} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
     container.appendChild(div);
   });
   renderIcons(container);
@@ -1655,6 +1657,41 @@ const TL_DATA_BEHAVIORAL=[
 const TL_CHEMICAL_CATEGORIES=['Alcohol','Smoking','Substances'];
 function getTimelineData(){
   return TL_CHEMICAL_CATEGORIES.includes(S.currentAddiction)?TL_DATA_CHEMICAL:TL_DATA_BEHAVIORAL;
+}
+
+// "Sober" only fits Alcohol/Substances - every other category gets its own term so labels like
+// "Days sober" and "stay sober today" actually match what the user is recovering from.
+const RECOVERY_TERMS={
+  'Porn & Sex':'clean',
+  'Alcohol':'sober',
+  'Smoking':'smoke-free',
+  'Substances':'clean',
+  'Gambling':'gambling-free',
+  'Social media':'social-media-free',
+  'Gaming':'gaming-free',
+  'Food / Binging':'binge-free',
+  'Shopping / Spending':'spend-free',
+  'Work':'balanced',
+  'Other':'steady',
+};
+function recoveryTerm(){
+  return RECOVERY_TERMS[S.currentAddiction]||'sober';
+}
+function capitalize(str){
+  return str.charAt(0).toUpperCase()+str.slice(1);
+}
+function updateRecoveryTermLabels(){
+  const term=recoveryTerm();
+  const daysLbl=document.getElementById('days-term-lbl');
+  if(daysLbl)daysLbl.textContent=`Days ${term}`;
+  const hoursLbl=document.getElementById('prog-hours-lbl');
+  if(hoursLbl)hoursLbl.textContent=`Hours ${term}`;
+  const totalLbl=document.getElementById('prog-total-days-lbl');
+  if(totalLbl)totalLbl.textContent=`Total ${term} days`;
+  if(!S.pledged){
+    const pledgeSub=document.getElementById('pledge-sub');
+    if(pledgeSub)pledgeSub.textContent=`Take your pledge to stay ${term} today`;
+  }
 }
 function buildTimeline(){
   const tl=document.getElementById('tl-container');
@@ -1745,7 +1782,7 @@ function takePledge(){
   const btn=document.getElementById('pledgeBtn');
   const sub=document.getElementById('pledge-sub');
   if(S.pledged){btn.textContent='Pledged ✓';btn.className='pill pill-ok';sub.textContent='Pledge taken. One day at a time — keep going.';}
-  else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent='Take your pledge to stay sober today';}
+  else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent=`Take your pledge to stay ${recoveryTerm()} today`;}
 }
 
 // ─── SOS ──────────────────────────────────────────────────────────────────────
@@ -1858,7 +1895,7 @@ async function sendMsg(){
       {role:'user',content:`[System Context - EXPLICIT PERSONALIZATION PROTOCOL]:
 User Name: ${S.name||'Recovering Individual'}
 User Gender Identity: ${S.userGender||'Not Specified'}
-Sober Since: ${S.startDate||'today'}
+${capitalize(recoveryTerm())} Since: ${S.startDate||'today'}
 Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
 Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}

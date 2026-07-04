@@ -750,6 +750,23 @@ body{display:flex;justify-content:center}
         <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Personalize</div></div>
+      <div class="setting-row" onclick="openNameModal()">
+        <i class="ti ti-pencil"></i>
+        <div class="setting-row-txt"><p>Name</p><span id="name-row-sub">Not set</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openGenderModal()">
+        <i class="ti ti-user-circle"></i>
+        <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Not specified</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openVoiceModal()">
+        <i class="ti ti-brain"></i>
+        <div class="setting-row-txt"><p>Nova's presence</p><span id="voice-row-sub">Neutral</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Recovery tools</div></div>
       <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
         <i class="ti ti-activity"></i>
@@ -816,6 +833,7 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec">
         <button class="reset-btn" onclick="resetApp()">Reset sobriety date</button>
+        <button class="reset-btn" style="margin-top:8px" onclick="restartOnboarding()">Restart setup</button>
       </div>
     </div>
 
@@ -918,6 +936,52 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- NAME MODAL -->
+<div class="sos-modal" id="name-modal" onclick="if(event.target===this)closeNameModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Your name</div>
+    <input class="ob-input" id="name-input" placeholder="Your name" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);margin-top:8px">
+    <button class="ob-btn" style="margin-top:8px" onclick="saveNameModal()">Save</button>
+    <button class="sos-close" onclick="closeNameModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- GENDER MODAL -->
+<div class="sos-modal" id="gender-modal" onclick="if(event.target===this)closeGenderModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Gender identity</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div class="gender-chip" onclick="chooseGender('Male')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Man</div>
+      <div class="gender-chip" onclick="chooseGender('Female')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Woman</div>
+      <div class="gender-chip" onclick="chooseGender('Non-Binary')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Non-Binary</div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeGenderModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- NOVA VOICE MODAL -->
+<div class="sos-modal" id="voice-modal" onclick="if(event.target===this)closeVoiceModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Nova's presence</div>
+    <div class="sos-sub">You can change this any time.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <div class="voice-card" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">👩‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
+      </div>
+      <div class="voice-card" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">👨‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
+      </div>
+      <div class="voice-card" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">🧑‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
+      </div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- GENERIC CONFIRM MODAL -->
 <div class="sos-modal" id="confirm-modal" onclick="if(event.target===this)closeConfirmModal()">
   <div class="sos-sheet">
@@ -984,6 +1048,7 @@ const ICON_PATHS={
 'ti-check':'<polyline points="20 6 9 17 4 12"/>',
 'ti-chevron-right':'<polyline points="9 18 15 12 9 6"/>',
 'ti-clock':'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
+'ti-coin':'<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.3c0-1.3-1.5-1.8-3-1.8s-3 .6-3 1.8 1.5 1.7 3 1.7 3 .6 3 1.8-1.5 1.8-3 1.8-3-.5-3-1.8"/>',
 'ti-circle-filled':'<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
 'ti-cloud':'<path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4 2A4 4 0 0 0 6.5 19h11z"/>',
 'ti-crown':'<path d="M2 20L4 8l4 5 4-8 4 8 4-5 2 12z"/><line x1="4" y1="20" x2="20" y2="20"/>',
@@ -1290,6 +1355,7 @@ function initApp(){
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
   updateRelationshipStatusUI();
+  updateProfileEditUI();
   updateLessonPromo();
   updateUserUI();
   updateStats();
@@ -2116,6 +2182,90 @@ function confirmModalYes(){
   const cb=_confirmModalCallback;
   closeConfirmModal();
   if(cb)cb();
+}
+
+// ─── PROFILE PERSONALIZATION ──────────────────────────────────────────────────
+function updateProfileEditUI(){
+  const nameEl=document.getElementById('name-row-sub');
+  if(nameEl)nameEl.textContent=S.name||'Not set';
+  const genderEl=document.getElementById('gender-row-sub');
+  if(genderEl)genderEl.textContent=S.userGender||'Not specified';
+  const voiceEl=document.getElementById('voice-row-sub');
+  if(voiceEl){
+    const labels={female:'Female',male:'Male',neutral:'Neutral'};
+    voiceEl.textContent=labels[S.novaVoice]||'Neutral';
+  }
+}
+
+function openNameModal(){
+  document.getElementById('name-input').value=S.name||'';
+  document.getElementById('name-modal').classList.add('open');
+}
+function closeNameModal(){document.getElementById('name-modal').classList.remove('open');}
+function saveNameModal(){
+  const val=document.getElementById('name-input').value.trim();
+  if(val)S.name=val;
+  save();
+  updateUserUI();
+  updateProfileEditUI();
+  closeNameModal();
+}
+
+function openGenderModal(){document.getElementById('gender-modal').classList.add('open');}
+function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}
+function chooseGender(g){
+  S.userGender=g;
+  save();
+  updateProfileEditUI();
+  closeGenderModal();
+}
+
+function openVoiceModal(){document.getElementById('voice-modal').classList.add('open');}
+function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
+function chooseVoice(v){
+  S.novaVoice=v;
+  save();
+  updateProfileEditUI();
+  closeVoiceModal();
+}
+
+function restartOnboarding(){
+  appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your name, focus areas, and preferences.",()=>{
+    S.name='';
+    S.userGender='Not Specified';
+    S.relationshipStatus=null;
+    S.selectedAddictions=[];
+    S.behavioralBlueprint={};
+    S.novaVoice='neutral';
+    S.startDate=null;
+    S.currentAddiction='';
+    save();
+
+    document.getElementById('ob-name').value='';
+    document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
+    ['gc-male','gc-female','gc-nb'].forEach(id=>{
+      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+    });
+    ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
+      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+    });
+    const errEl=document.getElementById('obs1-error');
+    if(errEl)errEl.textContent='';
+
+    document.getElementById('main-app').style.display='none';
+    document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
+    document.getElementById('obs0').classList.add('on');
+    ['od0','od1','od2','od3','od4'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.classList.remove('on');
+    });
+    const dot0=document.getElementById('od0');
+    if(dot0)dot0.classList.add('on');
+    obStep=0;
+    document.getElementById('onboarding').style.display='flex';
+  });
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

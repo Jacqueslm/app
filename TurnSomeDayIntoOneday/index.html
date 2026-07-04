@@ -350,6 +350,7 @@ body{display:flex;justify-content:center}
     <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
   </div>
+  <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
 </div>
 
@@ -911,6 +912,16 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- GENERIC CONFIRM MODAL -->
+<div class="sos-modal" id="confirm-modal" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Are you sure?</div>
+    <div class="sos-sub" id="confirm-modal-msg"></div>
+    <button class="ob-btn" style="margin-top:8px;background:#E24B4A" onclick="confirmModalYes()">Yes, continue</button>
+    <button class="sos-close" onclick="closeConfirmModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -1152,10 +1163,12 @@ function selectRelationshipStatus(status){
 
 function goToBehavioralStep(){
   S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  const errEl=document.getElementById('obs1-error');
   if(S.selectedAddictions.length===0){
-    alert('Please select at least one area to focus on.');
+    if(errEl)errEl.textContent='Please select at least one area to focus on.';
     return;
   }
+  if(errEl)errEl.textContent='';
   const container=document.getElementById('dynamic-behavior-questions');
   container.innerHTML='';
   S.selectedAddictions.forEach(addiction=>{
@@ -1430,10 +1443,11 @@ function renderJournal(){
   });
 }
 function deleteJournalEntry(idx){
-  if(!confirm('Delete this journal entry? This cannot be undone.'))return;
-  S.journals.splice(idx,1);
-  save();
-  renderJournal();
+  appConfirm('Delete this journal entry? This cannot be undone.',()=>{
+    S.journals.splice(idx,1);
+    save();
+    renderJournal();
+  });
 }
 function renderTodayMood(){/* placeholder */}
 
@@ -1510,10 +1524,11 @@ function renderCravings(){
   renderCrvChart();
 }
 function deleteCraving(idx){
-  if(!confirm('Delete this craving log entry?'))return;
-  S.cravings.splice(idx,1);
-  save();
-  renderCravings();
+  appConfirm('Delete this craving log entry?',()=>{
+    S.cravings.splice(idx,1);
+    save();
+    renderCravings();
+  });
 }
 function renderCrvChart(){
   const chart=document.getElementById('crvChart');
@@ -1550,15 +1565,16 @@ function likePost(btn){
   span.textContent=parseInt(span.textContent)+(liked?1:-1);
 }
 function reportPost(btn){
-  if(!confirm("Hide this post? You won't see it again, and it helps us know what to review."))return;
-  const wrapper=btn.closest('[data-post-idx]');
-  if(wrapper){
-    S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
-    save();
-    renderCommunityPosts();
-  }else{
-    btn.closest('.post').remove();
-  }
+  appConfirm("Hide this post? You won't see it again, and it helps us know what to review.",()=>{
+    const wrapper=btn.closest('[data-post-idx]');
+    if(wrapper){
+      S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
+      save();
+      renderCommunityPosts();
+    }else{
+      btn.closest('.post').remove();
+    }
+  });
 }
 function renderCommunityPosts(){
   const container=document.getElementById('userPostList');
@@ -2077,6 +2093,25 @@ function updateRelationshipStatusUI(){
   if(!el)return;
   const labels={in_relationship:'In a relationship',married:'Married',single:'Single',complicated:"It's complicated"};
   el.textContent=labels[S.relationshipStatus]||'In a relationship';
+}
+
+// ─── GENERIC CONFIRM ───────────────────────────────────────────────────────────
+// window.confirm() is silently suppressed in sandboxed embeds (no allow-modals), which would
+// make every delete/hide action a dead click with zero feedback - this in-app modal always works.
+let _confirmModalCallback=null;
+function appConfirm(message,onConfirm){
+  document.getElementById('confirm-modal-msg').textContent=message;
+  _confirmModalCallback=onConfirm;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirmModal(){
+  document.getElementById('confirm-modal').classList.remove('open');
+  _confirmModalCallback=null;
+}
+function confirmModalYes(){
+  const cb=_confirmModalCallback;
+  closeConfirmModal();
+  if(cb)cb();
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

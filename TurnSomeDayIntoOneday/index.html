@@ -806,6 +806,16 @@ body{display:flex;justify-content:center}
         </div>
       </div>
     </div>
+
+    <!-- WEEKLY RECOVERY REPORTS (Pro) -->
+    <div id="s-weekly-reports" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Your weekly reports</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">A new report generates automatically every 7 days, built entirely from what you've actually logged. You can also generate one early for a snapshot of this week so far.</div>
+        <button class="log-btn" style="margin-bottom:18px" onclick="manualGenerateWeeklyReport();renderWeeklyReports()">Generate report now</button>
+        <div id="weekly-reports-list"></div>
+      </div>
+    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
@@ -908,6 +918,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-plans')">
         <i class="ti ti-hand-stop"></i>
         <div class="setting-row-txt"><p>Relapse toolkit</p><span>Grounding tools, plus advanced Pro tools for hard moments</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('weeklyReports')">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Weekly Reports</p><span>Your emotional patterns, triggers, and progress each week</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1339,6 +1354,7 @@ let S = {
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
+  activityLog:[],weeklyReports:[],
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -1358,6 +1374,14 @@ function save(){
   if(S.accountEmail)pushStateToServer();
 }
 function load(){try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}}
+
+// ─── ACTIVITY LOG (backs weekly reports with real, already-logged events) ────
+function logActivity(type,extra){
+  S.activityLog=S.activityLog||[];
+  S.activityLog.push(Object.assign({type,ts:new Date().toISOString()},extra||{}));
+  if(S.activityLog.length>1000)S.activityLog=S.activityLog.slice(-1000);
+  save();
+}
 
 // ─── ICONS (inline SVG, no external font/CDN dependency) ─────────────────────
 const ICON_PATHS={
@@ -1579,6 +1603,7 @@ function completeLessonForToday(){
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
   S.currentDay++;
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
+  logActivity('lesson_completed',{day:lesson.day});
   save();
   updateStats();
   const btn=document.getElementById('lessonCompleteBtn');
@@ -1836,6 +1861,8 @@ function updateStats(){
     maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
   }
 
+  maybeAutoGenerateWeeklyReport();
+
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   document.getElementById('h-hours').textContent=hours.toLocaleString();
@@ -1919,7 +1946,9 @@ function saveEntry(){
   const txt=document.getElementById('jourText').value.trim();
   if(!txt)return;
   const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,body:txt};
-  S.journals.unshift(entry);save();
+  S.journals.unshift(entry);
+  logActivity('journal',{moodLabel:jourMoodLabel});
+  save();
   renderJournal();closeJour();
   if(txt.length>=150){
     maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Nova Pro can go deeper on with you — I'm always here either way.");
@@ -1990,6 +2019,7 @@ function saveVoiceJournal(text){
     moodLabel:'Voice Entry',
     body:text
   });
+  logActivity('journal',{moodLabel:'Voice Entry'});
   save();
   renderJournal();
   addBubble('nova',"Your voice journal has been saved.");
@@ -2002,6 +2032,7 @@ function logCraving(){
   const trigger=triggers.length?triggers.join(', '):'General';
   S.cravings.unshift({ts:new Date().toISOString(),val:v,trigger});
   S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
+  logActivity('craving',{trigger,val:v});
   save();renderCravings();updateStats();
   document.getElementById('cSlider').value=5;
   document.getElementById('cVal').textContent='5 / 10';
@@ -2057,6 +2088,7 @@ function openSlippedFlow(){
   closeSOS();
   document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${categoryFallbackNote()} What matters now is the next choice, not this one.`;
   document.getElementById('slipped-modal').classList.add('open');
+  logActivity('slip_reported');
   novaNudge("I saw you check in after a slip. I'm not here to judge you — relapse is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
 }
 function closeSlippedFlow(){
@@ -2074,6 +2106,7 @@ const GROUNDING_54321_STEPS=[
 let groundingStepIdx=0;
 function open5to1(){
   groundingStepIdx=0;
+  logActivity('grounding',{tool:'5-4-3-2-1'});
   renderGrounding54321Step();
   document.getElementById('grounding54321-overlay').style.display='flex';
 }
@@ -2341,6 +2374,7 @@ function closeSOS(){document.getElementById('sos-modal').classList.remove('open'
 let breatheTimer=null;
 function breathe(){
   closeSOS();
+  logActivity('grounding',{tool:'breathing'});
   const ov=document.getElementById('breathe-overlay');
   ov.style.display='flex';
   let phase=0,count=4;
@@ -2375,6 +2409,7 @@ function openUrgeSurf(){
   document.getElementById('urgesurf-overlay').style.display='flex';
 }
 function startUrgeSurf(minutes){
+  logActivity('grounding',{tool:'urge_surf',minutes});
   urgeSurfSecondsLeft=minutes*60;
   document.getElementById('us-setup').style.display='none';
   document.getElementById('us-active').style.display='block';
@@ -2405,6 +2440,7 @@ function stopUrgeSurf(){
 }
 function finishUrgeSurf(){
   S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
+  logActivity('urge_survived');
   save();updateStats();
   closeUrgeSurf();
 }
@@ -2415,6 +2451,7 @@ function closeUrgeSurf(){
 // ─── PANIC MODE + ADVANCED BREATHING COACH (Pro) ──────────────────────────────
 let panicTimer=null;
 function openPanicMode(){
+  logActivity('grounding',{tool:'panic'});
   document.getElementById('panic-overlay').style.display='flex';
   let phase=0,count=4;
   const phases=[{label:'Breathe in',dur:4,scale:'1.3'},{label:'Hold',dur:4,scale:'1.3'},{label:'Breathe out',dur:4,scale:'1'},{label:'Hold',dur:4,scale:'1'}];
@@ -2578,6 +2615,228 @@ function answerAccountabilityCheckin(feeling){
   }
 }
 
+// ─── WEEKLY RECOVERY REPORTS (Pro) ─────────────────────────────────────────────
+const MOOD_SCORES={'Amazing':5,'Great':4,'Good':3,'Okay':2,'Rough':1};
+function buildEmotionalPatternText(journalsInWindow){
+  if(!journalsInWindow.length)return "No journal entries this week yet, so I don't have mood data to reflect back — the more you journal, the sharper this section gets.";
+  const counts={};
+  journalsInWindow.forEach(j=>{counts[j.moodLabel]=(counts[j.moodLabel]||0)+1;});
+  const [topMood,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const dayNames=[...new Set(journalsInWindow.filter(j=>j.moodLabel===topMood).map(j=>new Date(j.date).toLocaleDateString('en-US',{weekday:'long'})))];
+  let text=`"${topMood}" was your most logged mood this week (${topCount} of ${journalsInWindow.length} entr${journalsInWindow.length===1?'y':'ies'})${dayNames.length?`, most often on ${dayNames.slice(0,2).join(' and ')}`:''}.`;
+  const scored=journalsInWindow.filter(j=>MOOD_SCORES[j.moodLabel]).slice().reverse();
+  if(scored.length>=2){
+    const mid=Math.floor(scored.length/2);
+    const firstAvg=scored.slice(0,mid).reduce((s,j)=>s+MOOD_SCORES[j.moodLabel],0)/Math.max(1,mid);
+    const secondAvg=scored.slice(mid).reduce((s,j)=>s+MOOD_SCORES[j.moodLabel],0)/Math.max(1,scored.length-mid);
+    if(secondAvg-firstAvg>=0.75)text+=' Your mood trended upward as the week went on.';
+    else if(firstAvg-secondAvg>=0.75)text+=' Your mood dipped a bit as the week went on — worth keeping an eye on.';
+  }
+  return text;
+}
+function buildTriggerAnalysisText(cravingsInWindow){
+  if(!cravingsInWindow.length)return "No cravings logged this week — either a genuinely calm week, or a good time to log them as they come up so this section has real data to work with.";
+  const counts={};
+  cravingsInWindow.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [topTrigger,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  let text=`"${topTrigger}" was your most common trigger this week (${topCount} of ${cravingsInWindow.length} craving${cravingsInWindow.length===1?'':'s'} logged).`;
+  const eveningCravings=cravingsInWindow.filter(c=>{const h=new Date(c.ts).getHours();return h>=18||h<4;});
+  if(eveningCravings.length>=2){
+    const nightCounts={};
+    eveningCravings.forEach(c=>{nightCounts[c.trigger]=(nightCounts[c.trigger]||0)+1;});
+    const [nightTrigger,nightCount]=Object.entries(nightCounts).sort((a,b)=>b[1]-a[1])[0];
+    text+=` Late-night ${nightTrigger.toLowerCase()} triggered urges ${nightCount} time${nightCount===1?'':'s'} this week.`;
+  }
+  if((counts['Loneliness']||0)>=2)text+=' Loneliness was a recurring theme.';
+  return text;
+}
+function buildRelapseRiskInfo(cravingsInWindow,activityInWindow){
+  const slipCount=activityInWindow.filter(a=>a.type==='slip_reported'||a.type==='relapse_reset').length;
+  const groundingCount=activityInWindow.filter(a=>a.type==='grounding'||a.type==='urge_survived').length;
+  const avgIntensity=cravingsInWindow.length?(cravingsInWindow.reduce((s,c)=>s+c.val,0)/cravingsInWindow.length):0;
+  let level='Low';
+  if(slipCount>0||avgIntensity>=7)level='Elevated';
+  else if(avgIntensity>=4||cravingsInWindow.length>=4)level='Moderate';
+  let text=`${cravingsInWindow.length} craving${cravingsInWindow.length===1?'':'s'} logged this week`;
+  if(cravingsInWindow.length)text+=`, averaging ${avgIntensity.toFixed(1)}/10 intensity`;
+  text+='.';
+  if(slipCount>0)text+=` You reported ${slipCount} slip${slipCount===1?'':'s'} this week — that's real information, not a failure.`;
+  if(groundingCount>0)text+=` You used grounding tools ${groundingCount} time${groundingCount===1?'':'s'} this week, which is a real protective factor.`;
+  return {level,text};
+}
+function buildProgressHighlights(activityInWindow){
+  const lessons=activityInWindow.filter(a=>a.type==='lesson_completed').length;
+  const journalsCount=activityInWindow.filter(a=>a.type==='journal').length;
+  const groundingCount=activityInWindow.filter(a=>a.type==='grounding'||a.type==='urge_survived').length;
+  const highlights=[];
+  if(lessons)highlights.push(`You completed ${lessons} lesson${lessons===1?'':'s'} this week.`);
+  if(journalsCount)highlights.push(`You journaled ${journalsCount} time${journalsCount===1?'':'s'}.`);
+  if(groundingCount)highlights.push(`You used relapse tools or grounding techniques ${groundingCount} time${groundingCount===1?'':'s'}.`);
+  if(!highlights.length)highlights.push('This was a quieter week for logged activity — showing up again this week already counts.');
+  return highlights;
+}
+function buildRecommendations(cravingsInWindow){
+  const recs=[];
+  if(cravingsInWindow.length){
+    const counts={};
+    cravingsInWindow.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+    const [topTrigger]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+    const firstType=topTrigger.split(',')[0].trim();
+    recs.push(TRIGGER_COPING_TIPS[firstType]||TRIGGER_COPING_TIPS['Other']);
+  }
+  const cat=S.currentAddiction||'Other';
+  const script=CATEGORY_RELAPSE_SCRIPTS[cat]||CATEGORY_RELAPSE_SCRIPTS['Other'];
+  recs.push(`For ${cat==='Other'?'your focus area':cat}: ${script.split('. ')[0]}.`);
+  const blueprintVals=Object.values(S.behavioralBlueprint||{});
+  if(blueprintVals.length)recs.push(`Keep in mind what you shared early on — "${blueprintVals[0]}" — it's often more relevant than the surface trigger.`);
+  return recs;
+}
+function buildNovaWeeklySummary(report){
+  const days=getDays();
+  let opening;
+  if(report.riskLevel==='Elevated')opening='This was a harder week, and you showed up for it anyway.';
+  else if(report.riskLevel==='Low'&&report.highlights.some(h=>!h.includes('quieter')))opening='You made meaningful progress this week.';
+  else opening="This week had its ups and downs — that's normal, not a setback.";
+  return `${opening} Your consistency is what's actually building the kind of change that lasts, and your emotional awareness is growing the more you show up here. You're on Day ${days} — let's build on this momentum next week.`;
+}
+function buildReportForWindow(startTs,endTs,weekNumber){
+  const journalsInWindow=(S.journals||[]).filter(j=>{const t=new Date(j.date).getTime();return t>=startTs&&t<endTs;});
+  const cravingsInWindow=(S.cravings||[]).filter(c=>{const t=new Date(c.ts).getTime();return t>=startTs&&t<endTs;});
+  const activityInWindow=(S.activityLog||[]).filter(a=>{const t=new Date(a.ts).getTime();return t>=startTs&&t<endTs;});
+  const risk=buildRelapseRiskInfo(cravingsInWindow,activityInWindow);
+  const report={
+    weekNumber,
+    startDate:new Date(startTs).toISOString(),
+    endDate:new Date(endTs).toISOString(),
+    generatedAt:new Date().toISOString(),
+    lessonsCompletedCount:activityInWindow.filter(a=>a.type==='lesson_completed').length,
+    emotionalPatternText:buildEmotionalPatternText(journalsInWindow),
+    triggerAnalysisText:buildTriggerAnalysisText(cravingsInWindow),
+    relapseRiskText:risk.text,
+    riskLevel:risk.level,
+    highlights:buildProgressHighlights(activityInWindow),
+    recommendations:buildRecommendations(cravingsInWindow),
+  };
+  report.novaSummary=buildNovaWeeklySummary(report);
+  return report;
+}
+function maybeAutoGenerateWeeklyReport(){
+  if(!S.isPro||!S.startDate)return;
+  const completedWeeks=Math.floor(getDays()/7);
+  if(completedWeeks<1)return;
+  const start=new Date(S.startDate).getTime();
+  S.weeklyReports=S.weeklyReports||[];
+  let changed=false;
+  for(let weekNumber=1;weekNumber<=completedWeeks;weekNumber++){
+    const existing=S.weeklyReports.find(r=>r.weekNumber===weekNumber);
+    if(existing&&!existing.partial)continue;
+    const windowStart=start+(weekNumber-1)*7*86400000;
+    const windowEnd=start+weekNumber*7*86400000;
+    const report=buildReportForWindow(windowStart,windowEnd,weekNumber);
+    report.partial=false;
+    if(existing)Object.assign(existing,report);
+    else S.weeklyReports.push(report);
+    changed=true;
+  }
+  if(changed){
+    S.weeklyReports.sort((a,b)=>a.weekNumber-b.weekNumber);
+    save();
+  }
+}
+function manualGenerateWeeklyReport(){
+  if(!S.startDate)return null;
+  S.weeklyReports=S.weeklyReports||[];
+  const start=new Date(S.startDate).getTime();
+  const lastReport=S.weeklyReports.length?S.weeklyReports[S.weeklyReports.length-1]:null;
+  const targetWeek=lastReport?(lastReport.partial?lastReport.weekNumber:lastReport.weekNumber+1):1;
+  const windowStart=start+(targetWeek-1)*7*86400000;
+  const windowEnd=Date.now();
+  const report=buildReportForWindow(windowStart,windowEnd,targetWeek);
+  report.partial=windowEnd<start+targetWeek*7*86400000;
+  const existingIdx=S.weeklyReports.findIndex(r=>r.weekNumber===targetWeek);
+  if(existingIdx>=0)S.weeklyReports[existingIdx]=report;
+  else S.weeklyReports.push(report);
+  S.weeklyReports.sort((a,b)=>a.weekNumber-b.weekNumber);
+  save();
+  return report;
+}
+function explainLatestWeeklyReport(){
+  const reports=S.weeklyReports||[];
+  if(!reports.length)return "You don't have a weekly report yet — once you're 7 days in, or you generate one early from the Weekly Reports screen, I can walk through it with you.";
+  const r=reports[reports.length-1];
+  const rec=r.recommendations&&r.recommendations[0]?` One thing I'd suggest: ${r.recommendations[0]}`:'';
+  return `Looking at your Week ${r.weekNumber} report: ${r.emotionalPatternText} ${r.triggerAnalysisText}\n\n${r.relapseRiskText}${rec}\n\n${r.novaSummary}`;
+}
+function discussLatestReportWithNova(){
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value='Can you explain my latest weekly report and give me recommendations?';
+  sendMsg();
+}
+function openWeeklyReportsScreen(){
+  maybeAutoGenerateWeeklyReport();
+  switchTo('weekly-reports');actBn('bn-plans');
+}
+function fmtReportDate(iso){
+  return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function riskBadgeHTML(level){
+  if(level==='Elevated')return `<span class="badge" style="background:rgba(226,75,74,0.15);color:#E24B4A">Elevated risk</span>`;
+  if(level==='Moderate')return `<span class="badge badge-acc">Moderate risk</span>`;
+  return `<span class="badge badge-ok">Low risk</span>`;
+}
+function renderReportCard(report,idx,expanded){
+  const range=`${fmtReportDate(report.startDate)} – ${fmtReportDate(report.endDate)}`;
+  const highlightsHTML=report.highlights.map(h=>`<div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:4px">• ${h}</div>`).join('');
+  const recsHTML=report.recommendations.map(r=>`<div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:4px">• ${r}</div>`).join('');
+  return `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleReportCard(${idx})">
+      <div>
+        <div style="font-size:14px;font-weight:500;color:var(--tp)">Week ${report.weekNumber}${report.partial?' (in progress)':''}</div>
+        <div style="font-size:11.5px;color:var(--tm)">${range}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${riskBadgeHTML(report.riskLevel)}
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--tm);transform:rotate(${expanded?90:0}deg);transition:transform .15s" id="report-chevron-${idx}"></i>
+      </div>
+    </div>
+    <div id="report-body-${idx}" style="display:${expanded?'block':'none'};margin-top:14px">
+      <div class="sec-hd" style="margin-top:0">A. Lessons completed</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:12px">${report.lessonsCompletedCount} lesson${report.lessonsCompletedCount===1?'':'s'} completed this week.</div>
+      <div class="sec-hd">B. Emotional patterns</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.emotionalPatternText}</div>
+      <div class="sec-hd">C. Trigger analysis</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.triggerAnalysisText}</div>
+      <div class="sec-hd">D. Relapse risk indicators</div>
+      <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.relapseRiskText}</div>
+      <div class="sec-hd">E. Progress highlights</div>
+      <div style="margin-bottom:12px">${highlightsHTML}</div>
+      <div class="sec-hd">F. Personalized recommendations</div>
+      <div style="margin-bottom:12px">${recsHTML}</div>
+      <div class="sec-hd">G. Nova Pro summary</div>
+      <div style="background:var(--acc);border-radius:10px;padding:12px;color:var(--acc-t);font-size:13px;line-height:1.6;margin-bottom:10px">${report.novaSummary}</div>
+      <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussLatestReportWithNova()">Ask Nova to explain this report</button>
+    </div>
+  </div>`;
+}
+function toggleReportCard(idx){
+  const body=document.getElementById('report-body-'+idx);
+  const chevron=document.getElementById('report-chevron-'+idx);
+  const isOpen=body.style.display==='block';
+  body.style.display=isOpen?'none':'block';
+  if(chevron)chevron.style.transform=`rotate(${isOpen?0:90}deg)`;
+}
+function renderWeeklyReports(){
+  const wrap=document.getElementById('weekly-reports-list');
+  if(!wrap)return;
+  const reports=(S.weeklyReports||[]).slice().sort((a,b)=>b.weekNumber-a.weekNumber);
+  if(!reports.length){
+    wrap.innerHTML=`<div class="card" style="text-align:center;color:var(--tm);font-size:13px;padding:24px 16px">Your first weekly report unlocks after 7 days, or tap "Generate report now" above for a snapshot of this week so far.</div>`;
+    return;
+  }
+  wrap.innerHTML=reports.map((r,i)=>renderReportCard(r,i,i===0)).join('');
+  renderIcons(wrap);
+}
+
 // ─── NOVA AI ──────────────────────────────────────────────────────────────────
 const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
 
@@ -2593,7 +2852,7 @@ const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Nova Free mode. In this mode:
 - Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
-- Do NOT provide deep pattern analysis, relapse-pattern breakdowns, weekly summaries, emotional trend analysis, category-specific deep coaching scripts, or blueprint-based coaching plans.
+- Do NOT provide deep pattern analysis, relapse-pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, relapse risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
 - Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
 - Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.`;
 
@@ -2605,6 +2864,7 @@ You are running in Nova Pro mode - the user has unlocked full coaching. In this 
 - Help identify triggers, emotional cycles, vulnerable times of day, and relapse loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
 - Adapt your tone and examples to their specific focus area(s) and the behavioral-blueprint answers they gave during onboarding.
 - Offer a real weekly-style check-in (mood trend, craving trend, progress highlights) when it's relevant or asked for.
+- The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, relapse risk, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
 Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
 
 function buildSystemPrompt(){
@@ -2645,8 +2905,9 @@ function localFallbackReply(userText){
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
   if(match)return match.reply;
   if(S.isPro){
+    if(/report/i.test(userText))return explainLatestWeeklyReport();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
-    if(/trend|weekly (summary|check-?in|report)|mood/i.test(userText))return analyzeMoodTrend();
+    if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
   const days=getDays();
   return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
@@ -2736,6 +2997,12 @@ const PRO_TOOLS={
     teaser:"A real daily check-in that greets you when you open the app — not a fake notification, an honest nudge to reflect every day.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">"Good morning — how are you feeling about today?"</div>',
     open:'openAccountabilityReminders'
+  },
+  weeklyReports:{
+    title:'Weekly Recovery Reports',
+    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus Nova Pro's personalized recommendations.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top mood: ●●●●●● (●●%)<br>Top trigger: ●●●●●●<br>Risk level: ●●●●●●●●</div>',
+    open:'openWeeklyReportsScreen'
   }
 };
 function openProTool(key){
@@ -2771,13 +3038,14 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
 function proFeaturePreviewText(text){
   if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/weekly (summary|check-?in|report)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, relapse risk, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
 }
@@ -2903,9 +3171,10 @@ Address the interactions of their unique blueprint and assign structured daily r
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
-  plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit'
+  plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
+  'weekly-reports':'s-weekly-reports'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
@@ -2920,6 +3189,7 @@ function switchTo(id){
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){viewingDay=null;renderTodayLesson();}
   if(id==='community'){renderCommunityPosts();}
+  if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -3118,6 +3388,7 @@ function confirmResetDate(){
   S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+getDays();
   S.startDate=chosen.toISOString();
   S.pledged=false;
+  logActivity('relapse_reset');
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
   maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");

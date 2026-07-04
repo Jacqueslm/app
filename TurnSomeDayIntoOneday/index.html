@@ -631,17 +631,62 @@ body{display:flex;justify-content:center}
     <!-- LESSON -->
     <div id="s-lesson" class="scr">
       <div class="sec">
-        <div class="sec-hd">Today's lesson</div>
-        <div class="card" id="lesson-card">
-          <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lessonTitle">Loading…</div>
-          <div style="font-size:12px;color:var(--tm);margin-top:2px" id="lessonMeta"></div>
-          <div id="lessonBody" style="font-size:13px;color:var(--ts);line-height:1.6;margin-top:10px;white-space:pre-wrap"></div>
-          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Today's action</div>
-          <div id="lessonAction" style="font-size:13px;color:var(--ts);line-height:1.6"></div>
-          <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Reflect</div>
-          <div id="lessonReflection" style="font-size:13px;color:var(--ts);line-height:1.6;font-style:italic"></div>
-          <button class="log-btn" id="lessonCompleteBtn" style="margin-top:16px" onclick="completeLessonForToday()">Mark as done</button>
+        <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLessonList()">
+          <span>Today's lesson</span>
+          <span id="lesson-list-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">View all lessons</span>
         </div>
+        <div id="lesson-list-wrap" style="display:none;margin-bottom:12px"></div>
+        <div class="card" id="lesson-card">
+          <div id="lesson-normal">
+            <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lessonTitle">Loading…</div>
+            <div style="font-size:12px;color:var(--tm);margin-top:2px" id="lessonMeta"></div>
+            <div id="lessonBody" style="font-size:13px;color:var(--ts);line-height:1.6;margin-top:10px;white-space:pre-wrap"></div>
+            <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Today's action</div>
+            <div id="lessonAction" style="font-size:13px;color:var(--ts);line-height:1.6"></div>
+            <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Reflect</div>
+            <div id="lessonReflection" style="font-size:13px;color:var(--ts);line-height:1.6;font-style:italic"></div>
+            <button class="log-btn" id="lessonCompleteBtn" style="margin-top:16px" onclick="completeLessonForToday()">Mark as done</button>
+            <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
+          </div>
+          <div id="lesson-locked" style="display:none">
+            <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lockedTitle"></div>
+            <div style="font-size:12px;color:var(--tm);margin-top:2px">Part of the Pro program</div>
+            <div style="position:relative;margin-top:10px;max-height:80px;overflow:hidden">
+              <div id="lockedTeaser" style="font-size:13px;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none"></div>
+              <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
+            </div>
+            <div style="font-size:13px;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">Days 16–30 are part of the Pro program. Upgrade to keep going deeper into patterns, triggers, and long-term change.</div>
+            <button class="log-btn" style="margin-top:16px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+            <button class="ob-btn outline" style="margin-top:8px" onclick="viewLessonDay(15)">Back to Day 15</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAY 15 MILESTONE / UPGRADE OVERLAY -->
+    <div id="day15-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;overflow-y:auto;padding:32px 24px;color:#fff">
+      <div style="max-width:400px;margin:0 auto;text-align:center">
+        <div style="font-size:40px;margin-bottom:12px">🌱</div>
+        <h1 style="margin-bottom:10px">You've completed the foundation.</h1>
+        <p style="color:#c0caff;margin-bottom:24px">Day 15 is a real achievement.</p>
+        <div id="day15-nova-msg" style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:left;font-size:13px;line-height:1.6;color:#c0caff;margin-bottom:28px"></div>
+
+        <div style="text-align:left;margin-bottom:20px">
+          <div class="ob-label">Coming up in the full program</div>
+          <div id="day15-preview-list"></div>
+        </div>
+
+        <div style="text-align:left;margin-bottom:28px">
+          <div class="ob-label">With Pro, you get</div>
+          <div style="font-size:13px;color:#c0caff;line-height:2">
+            <div>✓ Days 16–30, the rest of your program</div>
+            <div>✓ Unlimited Nova AI chats</div>
+            <div>✓ Priority support</div>
+          </div>
+        </div>
+
+        <button class="ob-btn" onclick="upgradeFromDay15Overlay()">Continue with Pro</button>
+        <button class="ob-btn outline" onclick="closeDay15Overlay()">Stay on Day 15 for now</button>
       </div>
     </div>
 
@@ -698,6 +743,7 @@ body{display:flex;justify-content:center}
           <div class="tc-name">Free</div>
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
+            <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
             <div class="feat y"><i class="ti ti-check"></i>Sobriety counter</div>
             <div class="feat y"><i class="ti ti-check"></i>Milestones</div>
             <div class="feat y"><i class="ti ti-check"></i>Daily pledge</div>
@@ -717,6 +763,7 @@ body{display:flex;justify-content:center}
           <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
             <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova AI chats</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
             <div class="feat y"><i class="ti ti-check"></i>Early access to new features</div>
@@ -1092,10 +1139,21 @@ async function loadLessonPacks(){
   updateLessonPromo();
 }
 
-function getTodayLesson(){
+const FREE_LESSON_CAP=15;
+let viewingDay=null; // null = showing S.currentDay; otherwise re-reading a specific past/locked day
+
+function isLessonLocked(day){
+  return !S.isPro&&day>FREE_LESSON_CAP;
+}
+
+function getLessonForDay(day){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
-  const lesson=pack.find(l=>l.day===S.currentDay)||null;
+  const lesson=pack.find(l=>l.day===day)||null;
   return applyRelationshipVariant(lesson);
+}
+
+function getTodayLesson(){
+  return getLessonForDay(S.currentDay);
 }
 
 // Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
@@ -1120,7 +1178,7 @@ function updateLessonPromo(){
   const lesson=getTodayLesson();
   if(lesson){
     title.textContent=`Day ${lesson.day}: ${lesson.title}`;
-    sub.textContent=`Your ${S.currentAddiction||'recovery'} program`;
+    sub.textContent=isLessonLocked(lesson.day)?'Part of the Pro program':`Your ${S.currentAddiction||'recovery'} program`;
   }else{
     title.textContent="Today's lesson";
     sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this track';
@@ -1128,13 +1186,30 @@ function updateLessonPromo(){
 }
 
 function renderTodayLesson(){
-  const lesson=getTodayLesson();
+  const day=viewingDay||S.currentDay;
+  const normalEl=document.getElementById('lesson-normal');
+  const lockedEl=document.getElementById('lesson-locked');
   const titleEl=document.getElementById('lessonTitle');
   const metaEl=document.getElementById('lessonMeta');
   const bodyEl=document.getElementById('lessonBody');
   const actionEl=document.getElementById('lessonAction');
   const reflectionEl=document.getElementById('lessonReflection');
   const btn=document.getElementById('lessonCompleteBtn');
+  const backBtn=document.getElementById('lessonBackBtn');
+
+  if(isLessonLocked(day)){
+    normalEl.style.display='none';
+    lockedEl.style.display='block';
+    const lesson=getLessonForDay(day);
+    document.getElementById('lockedTitle').textContent=lesson?`Day ${lesson.day}: ${lesson.title}`:`Day ${day}`;
+    document.getElementById('lockedTeaser').textContent=lesson?lesson.content.slice(0,140)+'…':'';
+    renderLessonList();
+    return;
+  }
+  normalEl.style.display='block';
+  lockedEl.style.display='none';
+
+  const lesson=getLessonForDay(day);
   if(!lesson){
     const hasTrack=(LESSON_PACKS[S.currentAddiction]||[]).length>0;
     titleEl.textContent=hasTrack?"You're all caught up":'Lessons coming soon';
@@ -1145,21 +1220,76 @@ function renderTodayLesson(){
     actionEl.textContent='';
     reflectionEl.textContent='';
     btn.style.display='none';
+    backBtn.style.display=viewingDay?'block':'none';
+    renderLessonList();
     return;
   }
+
   titleEl.textContent=`Day ${lesson.day}: ${lesson.title}`;
   metaEl.textContent=S.currentAddiction;
   bodyEl.textContent=lesson.content;
   actionEl.textContent=lesson.action||'';
   reflectionEl.textContent=lesson.reflection||'';
-  btn.style.display='block';
-  btn.textContent='Mark as done';
-  btn.disabled=false;
+
+  const isPastDay=day<S.currentDay;
+  if(isPastDay){
+    btn.style.display='none';
+    backBtn.style.display='block';
+  }else{
+    btn.style.display='block';
+    btn.textContent='Mark as done';
+    btn.disabled=false;
+    backBtn.style.display='none';
+  }
+  renderLessonList();
+}
+
+function viewLessonDay(day){
+  viewingDay=day;
+  renderTodayLesson();
+}
+
+function toggleLessonList(){
+  const wrap=document.getElementById('lesson-list-wrap');
+  const lbl=document.getElementById('lesson-list-toggle-lbl');
+  const show=wrap.style.display==='none';
+  wrap.style.display=show?'block':'none';
+  lbl.textContent=show?'Hide':'View all lessons';
+  if(show)renderLessonList();
+}
+
+function renderLessonList(){
+  const wrap=document.getElementById('lesson-list-wrap');
+  if(!wrap||wrap.style.display==='none')return;
+  const pack=LESSON_PACKS[S.currentAddiction]||[];
+  const rows=pack.map(l=>{
+    const locked=isLessonLocked(l.day);
+    const completed=l.day<S.currentDay;
+    const current=l.day===S.currentDay;
+    const icon=locked?'<i class="ti ti-lock" style="font-size:14px;color:var(--tm)"></i>':completed?'<i class="ti ti-check" style="font-size:14px;color:var(--green)"></i>':'';
+    return `<div class="setting-row" style="padding:10px 0" onclick="viewLessonDay(${l.day})">
+      <div class="setting-row-txt" style="flex:1"><p style="font-size:13px;${current?'font-weight:600':''}">Day ${l.day}: ${l.title}</p></div>
+      ${icon}
+    </div>`;
+  }).join('');
+  wrap.innerHTML=rows+`<div style="text-align:center;padding-top:10px"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="restartLessonProgram()">Restart program from Day 1</span></div>`;
+  renderIcons(wrap);
+}
+
+function restartLessonProgram(){
+  appConfirm('Restart your lesson program from Day 1? Your lifetime lesson-completion count stays as it is — this just lets you go through the days again.',()=>{
+    S.currentDay=1;
+    viewingDay=null;
+    save();
+    updateLessonPromo();
+    renderTodayLesson();
+  });
 }
 
 function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
+  const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
   S.currentDay++;
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   save();
@@ -1168,7 +1298,35 @@ function completeLessonForToday(){
   btn.textContent='Nice work — day complete ✓';
   btn.disabled=true;
   updateLessonPromo();
-  setTimeout(()=>{renderTodayLesson();},1200);
+  if(justHitFreeCap){
+    setTimeout(()=>{openDay15Overlay();},1200);
+  }else{
+    setTimeout(()=>{renderTodayLesson();},1200);
+  }
+}
+
+// ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
+function novaDay15Message(){
+  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. If you want me to guide you through the rest of the journey, you can unlock the full program with Pro.";
+}
+function openDay15Overlay(){
+  document.getElementById('day15-nova-msg').textContent=novaDay15Message();
+  const pack=LESSON_PACKS[S.currentAddiction]||[];
+  const upcoming=pack.filter(l=>l.day>=16&&l.day<=20);
+  document.getElementById('day15-preview-list').innerHTML=upcoming.map(l=>
+    `<div style="font-size:13px;color:#c0caff;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08)">Day ${l.day}: ${l.title}</div>`
+  ).join('');
+  document.getElementById('day15-overlay').style.display='block';
+}
+function closeDay15Overlay(){
+  document.getElementById('day15-overlay').style.display='none';
+  renderTodayLesson();
+}
+function upgradeFromDay15Overlay(){
+  becomePro();
+  closeDay15Overlay();
+  viewingDay=null;
+  switchTo('lesson');
 }
 
 // ─── ONBOARDING ──────────────────────────────────────────────────────────────
@@ -1958,7 +2116,7 @@ function switchTo(id){
   if(id==='journal'){renderJournal();}
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
-  if(id==='lesson'){renderTodayLesson();}
+  if(id==='lesson'){viewingDay=null;renderTodayLesson();}
   if(id==='community'){renderCommunityPosts();}
 }
 function actBn(id){
@@ -1976,8 +2134,11 @@ function selectFree(){
   S.isPro=false;S.chatsLeft=3;save();updateTierUI();
   switchTo('home');actBn('bn-home');
 }
-function selectPro(){
+function becomePro(){
   S.isPro=true;save();updateTierUI();
+}
+function selectPro(){
+  becomePro();
   switchTo('nova');actBn('bn-nova');
 }
 function updateTierUI(){

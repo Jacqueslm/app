@@ -944,6 +944,76 @@ body{display:flex;justify-content:center}
         <div id="analytics-content"></div>
       </div>
     </div>
+
+    <!-- CUSTOM LESSON PACKS (Pro) -->
+    <div id="s-pack-list" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Lesson packs</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Go deeper with specialized packs, or build your own from scratch.</div>
+        <div id="pack-list-content"></div>
+      </div>
+    </div>
+
+    <div id="s-pack-lesson" class="scr">
+      <div class="sec">
+        <div class="setting-row" onclick="backToPackList()" style="margin-bottom:8px">
+          <i class="ti ti-arrow-right" style="transform:rotate(180deg);color:var(--tm)"></i>
+          <div class="setting-row-txt"><p style="font-size:13px;color:var(--ts)">Back to lesson packs</p></div>
+        </div>
+        <div class="sec-hd" style="margin-top:0" id="pack-lesson-title-bar"></div>
+        <div id="pack-lesson-content"></div>
+      </div>
+    </div>
+
+    <div id="s-pack-wizard" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Build your own pack</div>
+        <div class="ob-label" style="text-align:left;color:var(--tm)">Pack name (optional)</div>
+        <input id="wiz-pack-name" type="text" placeholder="e.g. My focus pack" style="width:100%;border:0.5px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--tp);background:var(--s2);margin-bottom:14px;font-family:var(--f)">
+
+        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Length</div>
+        <div class="tc-wrap" id="wiz-length-wrap" style="margin-bottom:16px">
+          <div class="tc" data-len="7" onclick="wizSelectSingle(this,'wiz-length-wrap')">7 days</div>
+          <div class="tc" data-len="14" onclick="wizSelectSingle(this,'wiz-length-wrap')">14 days</div>
+          <div class="tc" data-len="30" onclick="wizSelectSingle(this,'wiz-length-wrap')">30 days</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Focus areas (choose one or more)</div>
+        <div class="tc-wrap" id="wiz-focus-wrap" style="margin-bottom:16px">
+          <div class="tc" onclick="wizToggleFocus(this,'emotional regulation')">Emotional regulation</div>
+          <div class="tc" onclick="wizToggleFocus(this,'triggers')">Triggers</div>
+          <div class="tc" onclick="wizToggleFocus(this,'relationships')">Relationships</div>
+          <div class="tc" onclick="wizToggleFocus(this,'trauma')">Trauma</div>
+          <div class="tc" onclick="wizToggleFocus(this,'confidence')">Confidence</div>
+          <div class="tc" onclick="wizToggleFocus(this,'discipline')">Discipline</div>
+          <div class="tc" onclick="wizToggleFocus(this,'relapse-proofing')">Relapse-proofing</div>
+          <div class="tc" onclick="wizToggleFocus(this,'anxiety')">Anxiety</div>
+          <div class="tc" onclick="wizToggleFocus(this,'depression')">Depression</div>
+          <div class="tc" onclick="wizToggleFocus(this,'sleep')">Sleep</div>
+          <div class="tc" onclick="wizToggleFocus(this,'identity')">Identity</div>
+          <div class="tc" onclick="wizToggleFocus(this,'self-worth')">Self-worth</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Lesson style</div>
+        <div class="tc-wrap" id="wiz-style-wrap" style="margin-bottom:16px">
+          <div class="tc" data-style="educational" onclick="wizSelectSingle(this,'wiz-style-wrap')">Educational</div>
+          <div class="tc" data-style="reflective" onclick="wizSelectSingle(this,'wiz-style-wrap')">Reflective</div>
+          <div class="tc" data-style="practical" onclick="wizSelectSingle(this,'wiz-style-wrap')">Practical</div>
+          <div class="tc" data-style="emotional" onclick="wizSelectSingle(this,'wiz-style-wrap')">Emotional</div>
+          <div class="tc" data-style="behavioral" onclick="wizSelectSingle(this,'wiz-style-wrap')">Behavioral</div>
+        </div>
+
+        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Difficulty</div>
+        <div class="tc-wrap" id="wiz-difficulty-wrap" style="margin-bottom:20px">
+          <div class="tc" data-diff="beginner" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Beginner</div>
+          <div class="tc" data-diff="intermediate" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Intermediate</div>
+          <div class="tc" data-diff="advanced" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Advanced</div>
+        </div>
+
+        <button class="log-btn" onclick="saveBuiltPack()">Build my pack</button>
+        <button class="cancel-btn" style="width:100%;margin-top:8px" onclick="openLessonPacksScreen()">Cancel</button>
+      </div>
+    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
@@ -1061,6 +1131,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="openProTool('analytics')">
         <i class="ti ti-chart-line"></i>
         <div class="setting-row-txt"><p>Analytics</p><span>Simple insights on your triggers, patterns, and emotional trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openLessonPacksScreen()">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1227,6 +1302,23 @@ body{display:flex;justify-content:center}
     </div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeProToolPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
     <button class="sos-close" onclick="closeProToolPreview()">Go back</button>
+  </div>
+</div>
+
+<!-- CUSTOM LESSON PACK PREVIEW (Free) -->
+<div class="sos-modal" id="pack-preview-modal" onclick="if(event.target===this)closePackPreview()">
+  <div class="sos-sheet">
+    <div class="sos-title" id="pp-title" style="color:var(--accent)">Pack</div>
+    <div class="sos-sub" id="pp-description" style="margin-bottom:14px"></div>
+    <div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:16px;border:0.5px solid var(--bdr);max-height:180px">
+      <div id="pp-lesson-list" style="padding:14px;background:var(--s1);filter:blur(4px);user-select:none;pointer-events:none;max-height:180px;overflow:hidden"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15)">
+        <i class="ti ti-lock" style="font-size:24px;color:#fff"></i>
+      </div>
+    </div>
+    <div class="sos-sub" style="margin-bottom:12px">Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more.</div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closePackPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
+    <button class="sos-close" onclick="closePackPreview()">Go back</button>
   </div>
 </div>
 
@@ -1533,6 +1625,7 @@ let S = {
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
+  activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
@@ -1829,6 +1922,419 @@ function upgradeFromDay15Overlay(){
   closeDay15Overlay();
   viewingDay=null;
   switchTo('lesson');
+}
+
+// ─── CUSTOM LESSON PACKS (Pro) ─────────────────────────────────────────────────
+// Fully parallel to the addiction-category lesson system above (S.currentDay,
+// LESSON_PACKS, getTodayLesson/renderTodayLesson/completeLessonForToday) so that
+// system stays completely untouched. Packs track their own per-pack day.
+const PREDEFINED_PACKS={
+  relationships:{
+    title:'Relationships Pack',
+    icon:'ti-heart',
+    description:'Attachment, communication, boundaries, conflict, trust, and emotional safety.',
+    lessons:[
+      {day:1,title:`Your Attachment Style`,content:`How you connect now was shaped early — by whether closeness felt safe or unpredictable. Naming your pattern (anxious, avoidant, secure, or a mix) isn't a label to hide behind, it's information you can actually use.`,action:`Write down how you typically react when someone you care about pulls away emotionally.`,reflection:`Does your reaction protect the relationship, or protect you from feeling exposed?`},
+      {day:2,title:`Saying What You Actually Mean`,content:`Most relationship damage isn't caused by big betrayals — it's caused by years of saying "it's fine" when it wasn't. Clear, direct communication feels riskier than staying vague, but vagueness is what actually erodes trust over time.`,action:`Say one true, specific thing today that you would normally soften or avoid.`,reflection:`What are you afraid would happen if you said exactly what you meant?`},
+      {day:3,title:`Boundaries Are Not Walls`,content:`A wall says "stay away." A boundary says "here's how you can stay close to me safely." Boundaries protect the relationship, not just you — without them, resentment quietly builds until it comes out sideways.`,action:`Identify one boundary you have been meaning to set, and set it in one clear sentence.`,reflection:`What has it cost you to leave this boundary unspoken?`},
+      {day:4,title:`Repair Over Avoidance`,content:`Every relationship has conflict — the ones that last aren't conflict-free, they're just good at repair. Avoiding the hard conversation doesn't make the rupture disappear, it just moves it underground.`,action:`Reach out about one unresolved moment and offer to talk it through, without needing to win the point.`,reflection:`What's harder for you: starting the repair, or staying in the disconnection?`},
+      {day:5,title:`Rebuilding Trust in Small Increments`,content:`Trust isn't rebuilt with one grand gesture — it's rebuilt the same way it was broken: in small, repeated moments. Consistency over time is the only thing that actually works, and it can't be rushed.`,action:`Do one small thing today that you said you would do, exactly when you said you would do it.`,reflection:`What would it look like to trust the process of rebuilding instead of demanding proof all at once?`},
+      {day:6,title:`What Emotional Safety Feels Like`,content:`Emotional safety means you can be fully honest without expecting punishment for it. If you're constantly editing yourself around someone, that's real information about the relationship, not a personal failing.`,action:`Notice one place in your life where you feel fully able to be honest, and one where you edit yourself. Write down the difference.`,reflection:`What would you say to the people in your life if you felt completely safe saying it?`},
+      {day:7,title:`Bringing It Together`,content:`Attachment, honesty, boundaries, repair, trust, and safety aren't separate skills — they're all expressions of the same thing: showing up as your real self and letting others do the same. That's the actual work of connection.`,action:`Pick the one theme from this week that felt most relevant to your life right now, and take one real step on it today.`,reflection:`Which relationship in your life would benefit most from what you learned this week?`},
+    ],
+  },
+  trauma:{
+    title:'Trauma Pack',
+    icon:'ti-info-circle',
+    description:'Trauma responses, triggers, emotional wounds, healing steps, grounding, and self-compassion.',
+    lessons:[
+      {day:1,title:`Understanding Trauma Responses`,content:`Fight, flight, freeze, and fawn aren't character flaws — they're your nervous system's best attempt to keep you safe, based on what it learned it needed to survive. Recognizing your default response is the first step to having more choice around it.`,action:`Notice which response (fight, flight, freeze, or fawn) shows up most for you under stress today.`,reflection:`Where do you think that response was first learned?`},
+      {day:2,title:`Naming Your Triggers`,content:`A trigger isn't overreacting — it's your nervous system recognizing a pattern from something real that happened before. Naming a trigger specifically, instead of just feeling swept up in it, is what starts to loosen its grip.`,action:`Write down one specific trigger and the earliest moment you can remember it connecting to.`,reflection:`What does this trigger seem to be trying to protect you from?`},
+      {day:3,title:`The Wound Underneath the Behavior`,content:`Behaviors that look self-destructive from the outside are often the most creative solution a hurting person could find at the time. Compassion for the wound doesn't excuse harm — it just makes healing possible instead of just white-knuckling through shame.`,action:`Write one sentence of compassion to the younger version of you who first developed this coping pattern.`,reflection:`What did that version of you need that they didn't get?`},
+      {day:4,title:`Healing Is Not Linear`,content:`Healing doesn't move in a straight line upward — it moves in a spiral, revisiting the same themes at deeper levels each time. A hard day doesn't mean you're back at square one; it usually means you're circling back with more capacity than before.`,action:`Look back at a hard moment from months ago and name one way you would handle it differently today.`,reflection:`What progress have you made that doesn't show up as a straight line?`},
+      {day:5,title:`Grounding in the Body`,content:`Trauma lives in the body, not just the mind — which is why thinking your way out of a flashback or panic rarely works. Physical grounding (cold water, feet on the floor, naming what you see) interrupts the loop faster than reasoning does.`,action:`Practice one grounding technique right now, even if you don't feel activated, so it's familiar when you need it.`,reflection:`Which grounding technique felt most accessible to your body specifically?`},
+      {day:6,title:`Self-Compassion Over Self-Judgment`,content:`Judging yourself for having a trauma response is like judging a smoke alarm for going off — it's doing exactly what it was built to do. Self-compassion isn't about excusing everything, it's about responding to yourself the way you'd respond to someone you love.`,action:`The next time you notice self-judgment today, replace it with one sentence you'd say to a close friend in the same situation.`,reflection:`What would change in your healing if judgment wasn't part of the process?`},
+      {day:7,title:`Integration`,content:`You don't have to have this fully figured out to keep going — healing is built from small, repeated moments of noticing, naming, and responding with more care than before. That's already what you've been practicing this week.`,action:`Choose one grounding or self-compassion practice from this week to keep doing beyond today.`,reflection:`What's one thing you understand about your own responses now that you didn't a week ago?`},
+    ],
+  },
+  anxiety:{
+    title:'Anxiety Pack',
+    icon:'ti-alert-triangle',
+    description:'Panic, worry cycles, avoidance, grounding, and cognitive reframing.',
+    lessons:[
+      {day:1,title:`What Panic Actually Is`,content:`A panic response is your body's alarm system firing at full volume, often based on a false alarm rather than real danger. It always peaks and comes back down — usually within minutes — even though it can feel endless while it's happening.`,action:`Next time anxiety spikes, time it. Notice that it does, in fact, come back down.`,reflection:`What does panic usually convince you is about to happen?`},
+      {day:2,title:`The Worry Cycle`,content:`Worry promises safety through preparation, but it rarely delivers — it just keeps your mind busy while your body stays tense. Most worry cycles are really trying to gain control over something that was never fully controllable in the first place.`,action:`Write down your biggest worry right now, then write down what is actually in your control about it today.`,reflection:`How much of your worry is about today versus an imagined future?`},
+      {day:3,title:`How Avoidance Backfires`,content:`Avoiding what scares you brings short-term relief and long-term growth of the fear — every time you avoid, your brain learns the thing really was too dangerous to face. Small, deliberate exposure is what actually shrinks anxiety over time.`,action:`Do one small version of the thing you've been avoiding, even in a scaled-down way.`,reflection:`What is avoidance actually costing you right now?`},
+      {day:4,title:`Grounding Through the Senses`,content:`When anxiety spikes, your thinking brain goes offline faster than you'd expect — which is why sensory grounding (5-4-3-2-1, cold water, textured objects) works better than trying to reason your way out in the moment.`,action:`Practice the 5-4-3-2-1 grounding technique right now, even at a calm baseline.`,reflection:`Which sense brings you back to the present fastest?`},
+      {day:5,title:`Catching the Catastrophic Thought`,content:`Anxious thinking often jumps straight to the worst-case scenario and treats it as the most likely one. Catching that specific thought — "what if the worst happens" — and asking what's actually most likely is real, practical reframing.`,action:`Write down one catastrophic thought from today, then write the most realistic outcome next to it.`,reflection:`How often does the worst-case scenario you imagine actually happen?`},
+      {day:6,title:`Befriending Uncertainty`,content:`Anxiety is fundamentally a fight against uncertainty — but certainty was never actually available, even before the anxiety started. Practicing tolerance for "I don't know yet" is uncomfortable, but it's the real skill underneath all the others.`,action:`Notice one uncertain situation today and practice sitting with it without needing to resolve it immediately.`,reflection:`What would it feel like to trust that you can handle not knowing?`},
+      {day:7,title:`Building Your Toolkit`,content:`You now have real, practiced tools — grounding, reframing, small exposures, and tolerance for uncertainty. The goal isn't zero anxiety; it's having a toolkit you trust enough to reach for instead of panicking about the panic.`,action:`Write your personal top-3 anxiety tools from this week somewhere you'll actually see them.`,reflection:`Which tool from this week do you most want to keep practicing?`},
+    ],
+  },
+  depression:{
+    title:'Depression Pack',
+    icon:'ti-cloud',
+    description:'Low motivation, negative thinking, emotional numbness, and behavioral activation.',
+    lessons:[
+      {day:1,title:`Motivation Follows Action, Not the Other Way Around`,content:`Waiting to feel motivated before acting is one of depression's most effective traps — motivation usually shows up after you start, not before. Small action, even without motivation, is what actually moves the needle.`,action:`Do one small task today before you feel ready, purely as an experiment.`,reflection:`Did motivation show up before or after you started?`},
+      {day:2,title:`Naming the Negative Thought Loop`,content:`Depression narrates in absolutes — "always," "never," "everyone," "nothing." Catching the exact wording of the thought, instead of just feeling crushed by it, is the first step to questioning whether it's actually true.`,action:`Write down one negative thought exactly as it occurred, then underline any absolute words in it.`,reflection:`Is that thought entirely true, or does it feel true right now?`},
+      {day:3,title:`Emotional Numbness Is Protective, Not Broken`,content:`Numbness often shows up when feeling everything became too overwhelming — it's a nervous system dialing things down to survive, not a sign that something is wrong with you. Small, safe reconnection to feeling, at your own pace, is the way through.`,action:`Notice one small sensation today — warmth, a taste, a sound — and stay with it for ten seconds.`,reflection:`What might your numbness have been protecting you from?`},
+      {day:4,title:`Behavioral Activation, Not Willpower`,content:`You don't need to fix your entire mindset to get moving — behavioral activation means picking one small, values-aligned action and doing it regardless of mood. The mood often follows the action, slowly.`,action:`Choose one tiny action connected to something you used to enjoy, and do it today.`,reflection:`What's one activity that used to matter to you before things got heavy?`},
+      {day:5,title:`Self-Compassion When You're Struggling`,content:`Depression often comes with a harsh inner critic that treats low energy as laziness. Speaking to yourself the way you'd speak to a friend who was struggling this much is not indulgent — it's often what actually creates room for change.`,action:`Write one compassionate sentence to yourself about today, even if today was hard.`,reflection:`What would you say to someone you love who was going through exactly this?`},
+      {day:6,title:`Small Wins Count`,content:`When everything feels heavy, getting out of bed, eating a meal, or replying to a text are real wins, not "just the basics." Depression minimizes effort that took real energy — naming it as effort pushes back against that.`,action:`Write down three things you did today, no matter how small, and count them as real.`,reflection:`What did today actually take out of you that isn't visible from the outside?`},
+      {day:7,title:`One Small Thread Forward`,content:`You don't need a complete turnaround this week — you need one small thread of connection, movement, or honesty to carry forward. That's what actually builds momentum over time.`,action:`Pick one practice from this week (naming thoughts, small action, self-compassion) to keep doing tomorrow.`,reflection:`What's one small thing that felt even slightly lighter this week?`},
+    ],
+  },
+  confidence:{
+    title:'Confidence Pack',
+    icon:'ti-sparkles',
+    description:'Self-worth, identity, inner voice, and personal power.',
+    lessons:[
+      {day:1,title:`Self-Worth Isn't Earned by Performance`,content:`If your sense of worth rises and falls with your output, achievements, or how others react to you, it was never actually stable — it was borrowed. Real self-worth is something you build underneath performance, not through it.`,action:`Write down one thing you value about yourself that has nothing to do with achievement or approval.`,reflection:`What have you been using as proof of your worth that isn't actually reliable?`},
+      {day:2,title:`Who You Are Underneath the Habit`,content:`Whatever you've been struggling with may have taken up a lot of space in how you see yourself — but it was never the whole story. Reconnecting with your actual identity, apart from the struggle, is part of building real confidence.`,action:`Write three words that describe who you are outside of the thing you're recovering from.`,reflection:`What part of your identity has felt buried lately?`},
+      {day:3,title:`Your Inner Voice Is Learnable`,content:`The tone of your inner voice was largely learned — from parents, past relationships, past failures — which means it can be relearned too. Confidence isn't a personality trait, it's a practiced relationship with your own internal narrator.`,action:`Catch your inner voice being harsh today and consciously rephrase it once, out loud if possible.`,reflection:`Whose voice does your harshest self-talk actually sound like?`},
+      {day:4,title:`Personal Power Is Not Control Over Others`,content:`Real personal power looks like being able to say what you mean, set a boundary, and follow through on your word — not dominating a room or controlling outcomes. That kind of power is available to you right now, regardless of circumstances.`,action:`Take one action today that's fully within your control and follow through on it completely.`,reflection:`Where have you been giving your power away to things outside your control?`},
+      {day:5,title:`Comparison Steals Confidence`,content:`Comparing your real, full life to someone else's highlight reel is a rigged game you can't win. Confidence grows by measuring yourself against your own past, not against a curated version of someone else's present.`,action:`Notice one moment of comparison today and redirect it to comparing yourself only to who you were a year ago.`,reflection:`Who do you compare yourself to most, and what do you actually know about their full story?`},
+      {day:6,title:`Taking Up Space`,content:`Many people shrink themselves to avoid conflict or rejection — but shrinking rarely earns respect, it just costs you presence. Practicing taking up appropriate space (speaking up, having preferences, being seen) is a confidence skill, not arrogance.`,action:`Voice one honest opinion or preference today that you would normally keep to yourself.`,reflection:`What are you afraid would happen if you took up more space?`},
+      {day:7,title:`Confidence as a Practice`,content:`Confidence isn't a fixed trait you either have or don't — it's built the same way any skill is: through repeated small reps of showing up honestly, even when it's uncomfortable. This week was a set of reps, not a final exam.`,action:`Write down one confidence rep from this week you're proud of, no matter how small.`,reflection:`What's one way you'll keep practicing this after today?`},
+    ],
+  },
+  intimacy:{
+    title:'Intimacy Pack',
+    icon:'ti-users',
+    description:'Emotional closeness, vulnerability, and trust-building.',
+    lessons:[
+      {day:1,title:`Emotional Closeness Isn't Automatic`,content:`Closeness doesn't happen just from spending time near someone — it happens from being known by them, which requires actually letting yourself be seen. That's a decision, made repeatedly, not a feeling that either shows up or doesn't.`,action:`Share one true, slightly vulnerable thing with someone you trust today.`,reflection:`What usually stops you from letting people get emotionally close?`},
+      {day:2,title:`Vulnerability Is Not Weakness`,content:`Vulnerability is often confused with oversharing or being fragile — but real vulnerability is choosing honesty when you could hide, with someone who has earned the access. It's one of the most courageous things a person can do.`,action:`Identify one person who has earned more honesty from you than you've given them, and give a little more.`,reflection:`What's the difference between oversharing and real vulnerability, for you specifically?`},
+      {day:3,title:`Building Trust Requires Consistency`,content:`Trust isn't built through big declarations — it's built through small, repeated moments where you show up the way you said you would. That consistency, over time, is what makes real intimacy possible.`,action:`Do one thing today that quietly proves your word means something, even if no one is watching closely.`,reflection:`Where in your life has consistency mattered more than grand gestures?`},
+      {day:4,title:`Fear of Being Truly Known`,content:`A common fear underneath avoiding intimacy is: if they really knew me, they'd leave. That fear often predates the current relationship entirely — it's worth naming directly instead of letting it quietly run the show.`,action:`Write down the specific thing you're most afraid someone would think if they truly knew you.`,reflection:`Is that fear based on something that has actually happened, or something you're anticipating?`},
+      {day:5,title:`Intimacy With Yourself First`,content:`It's hard to be close to someone else while staying at arm's length from your own feelings. Practicing honesty with yourself — about what you actually want and feel — makes real intimacy with others more possible, not less.`,action:`Write one honest sentence to yourself about what you actually want in your closest relationship.`,reflection:`Where have you been more honest with others than with yourself?`},
+      {day:6,title:`Repairing After Distance`,content:`Every close relationship goes through periods of distance — the skill isn't avoiding distance, it's knowing how to reach back across it. A simple, honest re-connection attempt matters more than a perfect one.`,action:`Reach out to someone you've felt distant from, even with something small.`,reflection:`What usually stops you from being the one to reach out first?`},
+      {day:7,title:`Choosing Closeness on Purpose`,content:`Intimacy isn't something that just happens to lucky people — it's built by people willing to choose honesty and presence again and again, even when it's uncomfortable. That's a decision available to you starting today.`,action:`Choose one relationship to be more deliberately close in, starting with one small act today.`,reflection:`What would it look like to choose closeness on purpose this week?`},
+    ],
+  },
+  discipline:{
+    title:'Discipline Pack',
+    icon:'ti-check',
+    description:'Habits, consistency, structure, and accountability.',
+    lessons:[
+      {day:1,title:`Discipline Is a Skill, Not a Personality`,content:`Discipline isn't something certain people are born with and others aren't — it's a trained skill, built through small repeated practice, just like a muscle. Anyone can build it, including you, starting from wherever you are now.`,action:`Pick one small habit to practice today, regardless of motivation.`,reflection:`What have you told yourself about discipline that might not actually be true?`},
+      {day:2,title:`Systems Beat Willpower`,content:`Willpower is a limited resource that runs out under stress — which is exactly when you need it most. Systems (removing friction, setting up your environment in advance) work when willpower doesn't.`,action:`Set up one small piece of your environment today to make a good habit easier tomorrow.`,reflection:`Where have you been relying on willpower where a system would work better?`},
+      {day:3,title:`Consistency Over Intensity`,content:`A small habit done daily beats an intense effort done once. Consistency compounds — showing up imperfectly every day builds more real change than one perfect burst followed by burnout.`,action:`Do the smallest possible version of your goal today, but actually do it.`,reflection:`Where have you chosen intensity over consistency in the past, and what happened?`},
+      {day:4,title:`Structure Creates Freedom`,content:`Structure can feel restrictive, but real structure — set times, clear routines — actually reduces the number of decisions you have to make under willpower, freeing up energy for what matters. Structure isn't the opposite of freedom, it protects it.`,action:`Build one simple routine around your highest-risk time of day.`,reflection:`What decision could you remove entirely by building it into a routine?`},
+      {day:5,title:`Accountability That Actually Works`,content:`Accountability works best when it's specific, real, and slightly uncomfortable to skip — not vague good intentions. Telling one real person your specific commitment makes follow-through far more likely.`,action:`Tell one person a specific commitment you're making this week.`,reflection:`Who in your life would actually hold you to something, kindly but firmly?`},
+      {day:6,title:`What to Do After You Break the Streak`,content:`Discipline isn't about never missing a day — it's about what you do the day after you miss one. The people who succeed aren't the ones who never slip, they're the ones who get back on track fast, without turning one missed day into a lost month.`,action:`If you've missed something this week, restart it today without waiting for Monday or a "fresh start."`,reflection:`What story do you usually tell yourself after breaking a streak?`},
+      {day:7,title:`Your Discipline, Built Your Way`,content:`Discipline that lasts isn't copied from someone else's routine — it's built around your actual life, energy, and values. This week gave you real building blocks; the shape they take from here is yours to decide.`,action:`Choose the one system or habit from this week to keep building on.`,reflection:`What does discipline look like for you specifically, not for anyone else?`},
+    ],
+  },
+  sleep:{
+    title:'Sleep Pack',
+    icon:'ti-moon',
+    description:'Sleep hygiene, nighttime triggers, and circadian rhythm.',
+    lessons:[
+      {day:1,title:`Why Sleep Matters More Than You Think`,content:`Poor sleep doesn't just make you tired — it weakens impulse control and emotional regulation, which makes cravings and urges genuinely harder to resist. Protecting your sleep is a real relapse-prevention strategy, not a side issue.`,action:`Set one specific bedtime for tonight and treat it like an appointment.`,reflection:`How does your sleep quality actually track with your hardest days?`},
+      {day:2,title:`Your Circadian Rhythm`,content:`Your body has an internal clock that runs on light exposure, consistency, and routine — fighting it with irregular sleep times makes everything, including cravings, harder to manage. Working with it, not against it, is the goal.`,action:`Get natural light within 30 minutes of waking up tomorrow.`,reflection:`How irregular has your sleep schedule been lately, and what's driving that?`},
+      {day:3,title:`Nighttime Is a Vulnerable Window`,content:`Late at night, willpower is lowest, isolation is highest, and impulsivity is easiest — which is exactly why so many urges show up after dark. Planning for that window in advance is far more effective than hoping willpower holds up.`,action:`Plan one specific replacement activity for your hardest nighttime hour tonight.`,reflection:`What does the hour before your urges usually spike actually look like?`},
+      {day:4,title:`Wind-Down Routines`,content:`A consistent wind-down routine signals your brain that it's safe to power down, the same way a routine signals a child it's bedtime. Without one, your nervous system stays activated far longer than it needs to.`,action:`Build a simple 15-minute wind-down routine and use it tonight.`,reflection:`What does your current transition into bed actually look like?`},
+      {day:5,title:`Screens and Sleep`,content:`Screens right before bed do double duty against you — the light delays melatonin, and the content (scrolling, notifications) keeps your mind activated. A real screen cutoff before bed is one of the highest-leverage sleep changes available.`,action:`Put your phone outside arm's reach at least 30 minutes before bed tonight.`,reflection:`What are you usually looking for on your phone right before bed?`},
+      {day:6,title:`What to Do With a Racing Mind at Night`,content:`A racing mind at night usually isn't solved by trying harder to sleep — it's solved by giving the thoughts somewhere to go, like a notebook, so your brain doesn't have to hold onto them all night. Trying to force sleep usually backfires.`,action:`Keep a notepad by your bed tonight and write down anything that's looping instead of holding it mentally.`,reflection:`What thoughts tend to show up most when you're trying to fall asleep?`},
+      {day:7,title:`Sleep as Self-Respect`,content:`Protecting your sleep isn't indulgent — it's one of the most concrete ways you can support your own recovery and emotional stability. This week gave you real tools; consistency with them is what makes the difference.`,action:`Choose the one sleep practice from this week to keep doing beyond today.`,reflection:`How do you think your recovery would change with genuinely better sleep?`},
+    ],
+  },
+  relapseProofing:{
+    title:'Relapse-Proofing Pack',
+    icon:'ti-lock',
+    description:'Long-term stability, relapse prevention, and emotional resilience.',
+    lessons:[
+      {day:1,title:`Relapse Starts Long Before the Moment`,content:`The moment of relapse is usually the last step in a much longer chain — stress builds, isolation creeps in, self-care slips, and the actual moment just looks like the final domino. Real prevention happens upstream of that moment.`,action:`Trace your own chain backward from your last hardest moment — what happened days before, not just minutes before?`,reflection:`Where upstream could you have intervened earlier?`},
+      {day:2,title:`Your Personal Warning Signs`,content:`Long before a slip, most people show real, specific warning signs — skipping routines, isolating, irritability, all-or-nothing thinking. Naming your specific signs turns a vague sense of "something's off" into something you can actually act on.`,action:`Write down your top three personal warning signs, based on real past experience.`,reflection:`Which warning sign do you tend to ignore the longest?`},
+      {day:3,title:`Building Real Redundancy`,content:`Long-term stability doesn't rely on one single coping tool — it relies on having several, so if one fails, you're not left with nothing. Redundancy, not perfection, is what makes a plan actually hold up under pressure.`,action:`List three different tools you could use in a hard moment, not just your usual one.`,reflection:`What happens for you when your one go-to tool isn't available?`},
+      {day:4,title:`Emotional Resilience Is Built, Not Born`,content:`Resilience isn't about never being affected by hard things — it's about your capacity to be affected and still recover. That capacity grows the same way physical strength does: through manageable, repeated stress followed by real recovery.`,action:`Identify one recent hard moment you actually recovered from, and name what helped.`,reflection:`What is your recovery process usually missing?`},
+      {day:5,title:`Isolation Is a Warning Sign, Not a Solution`,content:`Withdrawing when things get hard feels protective, but it usually removes the exact support that would help. Reaching out earlier, before you're in crisis, is one of the strongest relapse-prevention moves available.`,action:`Reach out to one person today, before you're in crisis, just to stay connected.`,reflection:`What stops you from reaching out earlier than you usually do?`},
+      {day:6,title:`Planning for Success, Not Just Failure`,content:`Relapse-proofing isn't only about crisis planning — it's also about protecting the good days, since complacency after a win is its own risk. Long-term stability means staying attentive even when things are going well.`,action:`Name one thing you'll keep doing specifically because it's working, even though things feel stable right now.`,reflection:`Have you ever let your guard down specifically because things were going well?`},
+      {day:7,title:`Your Long-Term Plan`,content:`You now have real language for your chain, your warning signs, your redundant tools, and your recovery process. Long-term stability is built from exactly this kind of specific, personal groundwork — not generic willpower.`,action:`Write your personal relapse-proofing plan in three sentences and save it somewhere you'll actually see it again.`,reflection:`What's the one part of this plan you most need to remember on a hard day?`},
+    ],
+  },
+};
+const CUSTOM_PACK_LENGTHS=[7,14,30];
+const CUSTOM_PACK_FOCUS_AREAS=['emotional regulation','triggers','relationships','trauma','confidence','discipline','relapse-proofing','anxiety','depression','sleep','identity','self-worth'];
+const CUSTOM_PACK_STYLES=['educational','reflective','practical','emotional','behavioral'];
+const CUSTOM_PACK_DIFFICULTIES=['beginner','intermediate','advanced'];
+const PACK_FOCUS_CONTENT={
+  'emotional regulation':{
+    educational:'Emotions are signals, not commands — the goal is widening the gap between feeling something and reacting to it.',
+    practical:'Name the emotion out loud before you act on it today, without judging it.',
+    reflective:'What emotion do you tend to push down instead of feel?',
+    emotional:'Notice one emotion today and let yourself actually feel it, fully, for just sixty seconds.',
+    behavioral:'The next time a strong emotion hits, pause and take three slow breaths before responding.',
+  },
+  'triggers':{
+    educational:'A trigger is your nervous system recognizing an old pattern — naming it specifically is what starts to loosen its grip.',
+    practical:'Write down the last trigger you noticed and exactly what happened right before it.',
+    reflective:'What is this trigger usually trying to warn or protect you from?',
+    emotional:'Sit with the feeling under your most recent trigger instead of reacting to the trigger itself.',
+    behavioral:'Change one small piece of your environment today to reduce exposure to a known trigger.',
+  },
+  'relationships':{
+    educational:'Real connection is built through honesty and repair, not through avoiding conflict entirely.',
+    practical:'Say one true, specific thing today that you would normally soften.',
+    reflective:'Where have you been editing yourself to keep the peace?',
+    emotional:'Let yourself feel what comes up the next time you\'re honest with someone close to you.',
+    behavioral:'Reach out to repair one small disconnection today.',
+  },
+  'trauma':{
+    educational:'Trauma responses are survival adaptations, not character flaws — they made sense given what you experienced.',
+    practical:'Practice one grounding technique right now, even at a calm baseline.',
+    reflective:'What did the younger version of you need that they didn\'t get?',
+    emotional:'Offer yourself one sentence of real compassion about something hard from your past.',
+    behavioral:'Notice one trauma response today and name it out loud instead of acting on it automatically.',
+  },
+  'confidence':{
+    educational:'Confidence is a practiced skill built through small reps of honesty, not a fixed personality trait.',
+    practical:'Voice one honest opinion today that you would normally keep to yourself.',
+    reflective:'What are you using as proof of your worth that isn\'t actually reliable?',
+    emotional:'Notice a moment of self-doubt today and respond to yourself the way you would to someone you love.',
+    behavioral:'Take up a little more space today — physically, verbally, or both.',
+  },
+  'discipline':{
+    educational:'Discipline is built through small, repeated practice, the same way a muscle is trained.',
+    practical:'Do the smallest possible version of your goal today, but actually do it.',
+    reflective:'Where have you relied on willpower where a system would work better?',
+    emotional:'Notice how it feels to follow through on a small commitment today, even without motivation.',
+    behavioral:'Set up one piece of your environment today to make a good habit easier tomorrow.',
+  },
+  'relapse-proofing':{
+    educational:'Relapse usually starts long before the moment itself — real prevention happens upstream.',
+    practical:'Write down your top three personal warning signs based on real past experience.',
+    reflective:'Where upstream, before your last hard moment, could you have intervened earlier?',
+    emotional:'Notice what isolation feels like today, and reach out before it deepens.',
+    behavioral:'List three different coping tools you could use today, not just your usual one.',
+  },
+  'anxiety':{
+    educational:'Anxiety spikes always peak and come back down, even when it feels endless in the moment.',
+    practical:'Practice the 5-4-3-2-1 grounding technique right now.',
+    reflective:'What does your anxiety usually convince you is about to happen?',
+    emotional:'Sit with today\'s anxious feeling for one full minute without trying to fix it.',
+    behavioral:'Do one small version of something you\'ve been avoiding because of anxiety.',
+  },
+  'depression':{
+    educational:'Motivation usually follows action, not the other way around — small action moves first.',
+    practical:'Do one small task today before you feel ready, purely as an experiment.',
+    reflective:'What negative thought loop has been repeating for you lately?',
+    emotional:'Notice one small sensation today and stay with it for ten seconds.',
+    behavioral:'Choose one tiny action connected to something you used to enjoy, and do it today.',
+  },
+  'sleep':{
+    educational:'Poor sleep weakens impulse control, which makes cravings and urges genuinely harder to resist.',
+    practical:'Set one specific bedtime tonight and treat it like a real appointment.',
+    reflective:'How does your sleep quality actually track with your hardest days?',
+    emotional:'Notice what your mind does right when you try to fall asleep tonight, without judging it.',
+    behavioral:'Put your phone outside arm\'s reach at least 30 minutes before bed tonight.',
+  },
+  'identity':{
+    educational:'Whatever you\'ve struggled with was never the whole story of who you are.',
+    practical:'Write three words that describe you outside of what you\'re recovering from.',
+    reflective:'What part of your identity has felt buried lately?',
+    emotional:'Notice a moment today that felt like the real you, underneath everything else.',
+    behavioral:'Do one small thing today that reflects who you actually want to be.',
+  },
+  'self-worth':{
+    educational:'Real self-worth is built underneath performance and approval, not through them.',
+    practical:'Write down one thing you value about yourself that has nothing to do with achievement.',
+    reflective:'What have you been using as proof of your worth that isn\'t reliable?',
+    emotional:'Notice a moment of self-criticism today and respond with real compassion instead.',
+    behavioral:'Do one thing today purely because it\'s good for you, not to prove anything to anyone.',
+  },
+};
+const CUSTOM_PACK_DIFFICULTY_ACTION={
+  beginner:'Keep it small and simple: ',
+  intermediate:'Push slightly past your comfort zone: ',
+  advanced:'Go deeper than feels automatically comfortable: ',
+};
+function generateCustomPackLessons(focusAreas,style,difficulty,lengthDays){
+  const areas=(focusAreas&&focusAreas.length)?focusAreas:['emotional regulation'];
+  const lessons=[];
+  for(let day=1;day<=lengthDays;day++){
+    const area=areas[(day-1)%areas.length];
+    const bank=PACK_FOCUS_CONTENT[area]||PACK_FOCUS_CONTENT['emotional regulation'];
+    const content=bank[style]||bank.educational;
+    const actionPrefix=CUSTOM_PACK_DIFFICULTY_ACTION[difficulty]||'';
+    lessons.push({
+      day,
+      title:`${capitalize(area)} — Day ${day}`,
+      content,
+      action:actionPrefix+bank.practical,
+      reflection:bank.reflective,
+    });
+  }
+  return lessons;
+}
+function getPackMeta(packKey){
+  if(!packKey)return null;
+  if(PREDEFINED_PACKS[packKey])return PREDEFINED_PACKS[packKey];
+  const custom=(S.userBuiltPacks||[]).find(p=>p.id===packKey);
+  if(!custom)return null;
+  return {title:custom.name,icon:'ti-notebook',description:`${custom.lengthDays}-day custom pack — ${custom.focusAreas.join(', ')}`,lessons:custom.lessons};
+}
+function getPackDay(packKey){
+  return (S.customPackProgress&&S.customPackProgress[packKey])||1;
+}
+function getPackLessonForDay(packKey,day){
+  const meta=getPackMeta(packKey);
+  if(!meta)return null;
+  return meta.lessons.find(l=>l.day===day)||null;
+}
+function openPack(packKey){
+  if(!S.isPro){showPackPreview(packKey);return;}
+  S.activeCustomPack=packKey;
+  save();
+  switchTo('pack-lesson');actBn('bn-plans');
+}
+function showPackPreview(packKey){
+  const meta=getPackMeta(packKey);
+  if(!meta)return;
+  document.getElementById('pp-title').textContent=meta.title;
+  document.getElementById('pp-description').textContent=meta.description;
+  document.getElementById('pp-lesson-list').innerHTML=meta.lessons.map(l=>`<div style="font-size:13px;color:var(--ts);padding:6px 0;border-bottom:0.5px solid var(--bdr)">Day ${l.day}: ${l.title}</div>`).join('');
+  document.getElementById('pack-preview-modal').classList.add('open');
+}
+function closePackPreview(){
+  document.getElementById('pack-preview-modal').classList.remove('open');
+}
+function renderPackList(){
+  const wrap=document.getElementById('pack-list-content');
+  if(!wrap)return;
+  let html='<div class="sec-hd" style="margin-top:0">Predefined packs</div>';
+  Object.entries(PREDEFINED_PACKS).forEach(([key,pack])=>{
+    const day=getPackDay(key);
+    const started=!!(S.customPackProgress&&S.customPackProgress[key]);
+    html+=`<div class="setting-row" onclick="openPack('${key}')">
+      <i class="ti ${pack.icon}" style="color:var(--accent)"></i>
+      <div class="setting-row-txt"><p>${pack.title}</p><span>${started?`Day ${day} of ${pack.lessons.length}`:pack.description}</span></div>
+      <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+    </div>`;
+  });
+  html+='<div style="height:8px"></div><div class="sec-hd">Your custom packs</div>';
+  if(!(S.userBuiltPacks||[]).length){
+    html+='<div style="font-size:13px;color:var(--tm);padding:8px 0">You haven\'t built a custom pack yet.</div>';
+  }else{
+    S.userBuiltPacks.forEach(p=>{
+      const day=getPackDay(p.id);
+      html+=`<div class="setting-row" onclick="openPack('${p.id}')">
+        <i class="ti ti-notebook" style="color:var(--accent)"></i>
+        <div class="setting-row-txt"><p>${p.name}</p><span>Day ${day} of ${p.lengthDays} · ${p.focusAreas.join(', ')}</span></div>
+        <button onclick="event.stopPropagation();deleteCustomPack('${p.id}')" title="Delete pack" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0 8px">×</button>
+      </div>`;
+    });
+  }
+  html+='<button class="log-btn" style="margin-top:14px" onclick="openBuildPackWizard()">Build your own pack</button>';
+  wrap.innerHTML=html;
+  renderIcons(wrap);
+}
+function deleteCustomPack(packId){
+  appConfirm('Delete this custom pack? This cannot be undone.',()=>{
+    S.userBuiltPacks=(S.userBuiltPacks||[]).filter(p=>p.id!==packId);
+    if(S.customPackProgress)delete S.customPackProgress[packId];
+    if(S.activeCustomPack===packId)S.activeCustomPack='';
+    save();
+    renderPackList();
+  });
+}
+function renderPackLesson(){
+  const meta=getPackMeta(S.activeCustomPack);
+  const wrap=document.getElementById('pack-lesson-content');
+  if(!wrap)return;
+  if(!meta){wrap.innerHTML='<div style="font-size:13px;color:var(--tm)">Pack not found.</div>';return;}
+  const day=getPackDay(S.activeCustomPack);
+  const lesson=getPackLessonForDay(S.activeCustomPack,day);
+  document.getElementById('pack-lesson-title-bar').textContent=meta.title;
+  if(!lesson){
+    wrap.innerHTML=`<div class="card"><div class="sec-hd" style="margin-top:0">Pack complete</div><div style="font-size:13px;color:var(--ts);line-height:1.6">You've completed every lesson in this pack. Nice work seeing it through.</div></div>`;
+    return;
+  }
+  wrap.innerHTML=`<div class="card">
+    <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
+    <div style="font-size:14px;color:var(--tp);line-height:1.6;margin-bottom:14px">${lesson.content}</div>
+    <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Try this</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:14px">${lesson.action}</div>
+    <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Reflect</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:16px">${lesson.reflection}</div>
+    <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
+    <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Nova to guide this reflection</button>
+  </div>`;
+}
+function completePackLessonToday(){
+  const key=S.activeCustomPack;
+  if(!key)return;
+  S.customPackProgress=S.customPackProgress||{};
+  S.customPackProgress[key]=getPackDay(key)+1;
+  logActivity('lesson_completed',{day:getPackDay(key),pack:key});
+  save();
+  renderPackLesson();
+}
+function backToPackList(){
+  S.activeCustomPack='';
+  save();
+  switchTo('pack-list');actBn('bn-plans');
+}
+function buildPackReflectionGuidance(){
+  if(!S.activeCustomPack)return "You don't have an active lesson pack right now — open one from Lesson Packs in your Profile, and I can help you reflect on it as you go.";
+  const meta=getPackMeta(S.activeCustomPack);
+  const day=getPackDay(S.activeCustomPack);
+  const lesson=getPackLessonForDay(S.activeCustomPack,day);
+  if(!meta||!lesson)return "You've completed everything in this pack so far — nice work seeing it through.";
+  return `You're on Day ${lesson.day} of your ${meta.title}: "${lesson.title}." ${lesson.content}\n\nHere's the reflection to sit with: ${lesson.reflection}\n\nWhat comes up for you when you actually sit with that?`;
+}
+function discussPackLessonWithNova(){
+  const meta=getPackMeta(S.activeCustomPack);
+  const day=getPackDay(S.activeCustomPack);
+  const lesson=getPackLessonForDay(S.activeCustomPack,day);
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value=lesson?`Can you help me reflect on today's "${lesson.title}" lesson from my ${meta.title}?`:'Can you help me reflect on my lesson pack?';
+  sendMsg();
+}
+
+// Build Your Own Pack wizard
+let wizardFocusSel=[];
+function openBuildPackWizard(){
+  if(!S.isPro){showProToolPreview('buildOwnPack');return;}
+  wizardFocusSel=[];
+  document.getElementById('wiz-pack-name').value='';
+  document.querySelectorAll('#wiz-length-wrap .tc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#wiz-focus-wrap .tc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#wiz-style-wrap .tc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#wiz-difficulty-wrap .tc').forEach(c=>c.classList.remove('sel'));
+  const first=document.querySelector('#wiz-length-wrap .tc');if(first)first.classList.add('sel');
+  const firstStyle=document.querySelector('#wiz-style-wrap .tc');if(firstStyle)firstStyle.classList.add('sel');
+  const firstDiff=document.querySelector('#wiz-difficulty-wrap .tc');if(firstDiff)firstDiff.classList.add('sel');
+  switchTo('pack-wizard');actBn('bn-plans');
+}
+function wizSelectSingle(el,wrapId){
+  document.querySelectorAll('#'+wrapId+' .tc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function wizToggleFocus(el,area){
+  const sel=el.classList.toggle('sel');
+  if(sel)wizardFocusSel.push(area);
+  else wizardFocusSel=wizardFocusSel.filter(a=>a!==area);
+}
+function saveBuiltPack(){
+  const name=document.getElementById('wiz-pack-name').value.trim()||'My Custom Pack';
+  const lengthEl=document.querySelector('#wiz-length-wrap .tc.sel');
+  const styleEl=document.querySelector('#wiz-style-wrap .tc.sel');
+  const diffEl=document.querySelector('#wiz-difficulty-wrap .tc.sel');
+  const lengthDays=lengthEl?Number(lengthEl.getAttribute('data-len')):7;
+  const style=styleEl?styleEl.getAttribute('data-style'):'educational';
+  const difficulty=diffEl?diffEl.getAttribute('data-diff'):'beginner';
+  if(!wizardFocusSel.length){appConfirm('Pick at least one focus area before building your pack.',()=>{});return;}
+  const lessons=generateCustomPackLessons(wizardFocusSel,style,difficulty,lengthDays);
+  const pack={id:'custom_'+Date.now(),name,lengthDays,focusAreas:wizardFocusSel.slice(),style,difficulty,createdAt:new Date().toISOString(),lessons};
+  S.userBuiltPacks=(S.userBuiltPacks||[]).concat([pack]);
+  save();
+  backToPackList();
+}
+function openLessonPacksScreen(){
+  switchTo('pack-list');actBn('bn-plans');
 }
 
 // ─── ONBOARDING ──────────────────────────────────────────────────────────────
@@ -3985,16 +4491,22 @@ const FALLBACK_PATTERNS=[
    reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
 ];
 function localFallbackReply(userText){
-  const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
-  if(match)return match.reply;
+  // Crisis language always takes priority over everything else, including structured Pro requests below.
+  if(FALLBACK_PATTERNS[0].test.test(userText))return FALLBACK_PATTERNS[0].reply;
+  // Structured Pro-feature requests are checked before the generic emotional-keyword fallbacks,
+  // since a specific request (e.g. "my Anxiety Pack") can otherwise collide with a generic keyword
+  // match (e.g. the general "anxiety" support pattern) and mask the more relevant, specific answer.
   if(S.isPro){
     if(/report/i.test(userText))return explainLatestWeeklyReport();
     if(/journal/i.test(userText))return buildJournalAnalysis();
+    if(/\bpack\b/i.test(userText))return buildPackReflectionGuidance();
     if(/streaks?|milestones?/i.test(userText))return buildStreakAnalysis();
     if(/analytics|insights?/i.test(userText))return buildAnalyticsExplanation();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
+  const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
+  if(match)return match.reply;
   const days=getDays();
   return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
 }
@@ -4113,6 +4625,12 @@ const PRO_TOOLS={
     teaser:'Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you\'ve actually logged, not charts or dashboards.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Strongest trigger: ●●●●●●●●<br>Vulnerable time: ●●pm<br>Emotional trend: ●●●●●●●●</div>',
     open:'openAnalyticsScreen'
+  },
+  buildOwnPack:{
+    title:'Build Your Own Pack',
+    teaser:'Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more — choose your own topics, style, and difficulty, generated just for you.',
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Length: ●● days<br>Focus: ●●●●●●●●, ●●●●●●●●<br>Style: ●●●●●●●● · Difficulty: ●●●●●●●●</div>',
+    open:'openBuildPackWizard'
   }
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
@@ -4149,7 +4667,7 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?|\bpacks?\b/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
@@ -4160,6 +4678,7 @@ function proFeaturePreviewText(text){
   if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, relapse recovery tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
 }
@@ -4287,9 +4806,9 @@ const SCREEN_MAP={
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
-  analytics:'s-analytics'
+  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
@@ -4308,6 +4827,8 @@ function switchTo(id){
   if(id==='reminder-settings'){renderSmartReminderSettings();}
   if(id==='streaks'){renderAdvancedStreaks();}
   if(id==='analytics'){renderAnalytics();}
+  if(id==='pack-list'){renderPackList();}
+  if(id==='pack-lesson'){renderPackLesson();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));

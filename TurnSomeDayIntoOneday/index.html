@@ -935,6 +935,15 @@ body{display:flex;justify-content:center}
         <div id="streaks-content"></div>
       </div>
     </div>
+
+    <!-- ANALYTICS (Pro) -->
+    <div id="s-analytics" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Analytics</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Simple, calm insights from what you've actually logged this week — no charts, no dashboards.</div>
+        <div id="analytics-content"></div>
+      </div>
+    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
@@ -1047,6 +1056,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="openProTool('streaks')">
         <i class="ti ti-flame"></i>
         <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and relapse recovery tracking</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('analytics')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Analytics</p><span>Simple insights on your triggers, patterns, and emotional trends</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -2608,6 +2622,183 @@ function discussStreaksWithNova(){
   sendMsg();
 }
 
+// ─── ANALYTICS (Pro) ────────────────────────────────────────────────────────
+// Simple, calm, text-based insights - no charts, no dashboards. Reuses the same
+// underlying data (cravings, journals, activityLog) already powering Weekly
+// Reports, Smart Reminders, Pro Journal, and Advanced Streaks.
+const CATEGORY_ANALYTICS_INSIGHTS={
+  'Porn & Sex':'Your urges increase when you feel disconnected.',
+  'Alcohol':'Social events increase your risk.',
+  'Smoking':'Stress and boredom are your biggest drivers.',
+  'Substances':'Unstructured time increases your risk.',
+  'Gambling':'Stress and the urge to "win back" losses increase your risk.',
+  'Social media':'Boredom and loneliness increase your urge to scroll.',
+  'Gaming':'Avoidance of other tasks increases your urge to play.',
+  'Food / Binging':'Stress leads to emotional eating.',
+  'Shopping / Spending':'Low mood increases your urge to spend.',
+  'Work':'Avoidance of rest increases your urge to overwork.',
+  'Other':'Stress and low structure increase your risk.',
+};
+const CATEGORY_LOOP_VERBS={
+  'Porn & Sex':'seeking it out',
+  'Alcohol':'wanting a drink',
+  'Smoking':'wanting a cigarette',
+  'Substances':'wanting to use',
+  'Gambling':'wanting to bet',
+  'Social media':'scrolling',
+  'Gaming':'wanting to play',
+  'Food / Binging':'eating emotionally',
+  'Shopping / Spending':'wanting to spend',
+  'Work':'overworking',
+  'Other':'the urge itself',
+};
+function analyticsWindow(days){
+  const cutoff=Date.now()-days*86400000;
+  return {
+    cravings:(S.cravings||[]).filter(c=>new Date(c.ts).getTime()>=cutoff),
+    journals:(S.journals||[]).filter(j=>new Date(j.date).getTime()>=cutoff),
+    activity:(S.activityLog||[]).filter(a=>new Date(a.ts).getTime()>=cutoff),
+  };
+}
+function timeBucketLabel(hour){
+  if(hour>=5&&hour<12)return 'morning';
+  if(hour>=12&&hour<17)return 'afternoon';
+  if(hour>=17&&hour<21)return 'evening';
+  return 'late night';
+}
+function analyticsStrongestTrigger(cravings){
+  if(!cravings.length)return null;
+  const counts={};
+  cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [top]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  return top;
+}
+function analyticsTriggerPattern(cravings){
+  if(!cravings.length)return null;
+  const counts={};
+  cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [top,count]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  if(count<2)return null;
+  return `${top} triggered urges ${count} time${count===1?'':'s'} this week.`;
+}
+function analyticsVulnerableTime(cravings){
+  if(cravings.length<3)return null;
+  const hourCounts={};
+  cravings.forEach(c=>{const h=new Date(c.ts).getHours();hourCounts[h]=(hourCounts[h]||0)+1;});
+  const [peakHour,count]=Object.entries(hourCounts).sort((a,b)=>b[1]-a[1])[0];
+  if(count<2)return null;
+  const h12=Number(peakHour)%12===0?12:Number(peakHour)%12;
+  const ampm=Number(peakHour)<12?'am':'pm';
+  return `${h12}${ampm}`;
+}
+function analyticsSafestTime(cravings){
+  if(cravings.length<3)return null;
+  const bucketCounts={morning:0,afternoon:0,evening:0,'late night':0};
+  cravings.forEach(c=>{bucketCounts[timeBucketLabel(new Date(c.ts).getHours())]++;});
+  const sorted=Object.entries(bucketCounts).sort((a,b)=>a[1]-b[1]);
+  if(sorted[0][1]===sorted[sorted.length-1][1])return null;
+  return sorted[0][0];
+}
+function analyticsEmotionalTrend(journals){
+  const scored=journals.filter(j=>MOOD_SCORES[j.moodLabel]);
+  if(scored.length<3)return null;
+  const sorted=scored.slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const mid=Math.floor(sorted.length/2);
+  const firstAvg=sorted.slice(0,mid).reduce((s,j)=>s+MOOD_SCORES[j.moodLabel],0)/Math.max(1,mid);
+  const secondAvg=sorted.slice(mid).reduce((s,j)=>s+MOOD_SCORES[j.moodLabel],0)/Math.max(1,sorted.length-mid);
+  if(secondAvg-firstAvg>=0.75)return 'improving mood';
+  if(firstAvg-secondAvg>=0.75)return 'rising stress';
+  return 'holding steady';
+}
+function analyticsConsistency(activity){
+  const lessons=activity.filter(a=>a.type==='lesson_completed').length;
+  const journaled=activity.filter(a=>a.type==='journal').length;
+  const tools=activity.filter(a=>a.type==='grounding'||a.type==='urge_survived').length;
+  const parts=[];
+  if(lessons)parts.push(`${lessons} lesson${lessons===1?'':'s'} completed`);
+  if(journaled)parts.push(`journaling ${journaled} time${journaled===1?'':'s'}`);
+  if(tools)parts.push(`relapse tools used ${tools} time${tools===1?'':'s'}`);
+  if(!parts.length)return null;
+  return parts.join(', ');
+}
+function analyticsRelapseLoop(cravings){
+  if(cravings.length<3)return null;
+  const counts={};
+  cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [topTrigger,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  if(topCount<2)return null;
+  const hours=cravings.filter(c=>c.trigger===topTrigger).map(c=>new Date(c.ts).getHours());
+  const bucketCounts={};
+  hours.forEach(h=>{const b=timeBucketLabel(h);bucketCounts[b]=(bucketCounts[b]||0)+1;});
+  const [topBucket]=Object.entries(bucketCounts).sort((a,b)=>b[1]-a[1])[0];
+  const cat=S.currentAddiction||'Other';
+  const verb=CATEGORY_LOOP_VERBS[cat]||CATEGORY_LOOP_VERBS['Other'];
+  return `Your relapse loop often starts with ${topTrigger.toLowerCase()} in the ${topBucket} → ${verb}.`;
+}
+function buildAnalyticsInsights(){
+  const {cravings,journals,activity}=analyticsWindow(7);
+  const cat=S.currentAddiction||'Other';
+  return {
+    strongestTrigger:analyticsStrongestTrigger(cravings),
+    vulnerableTime:analyticsVulnerableTime(cravings),
+    safestTime:analyticsSafestTime(cravings),
+    emotionalTrend:analyticsEmotionalTrend(journals),
+    consistency:analyticsConsistency(activity),
+    triggerPattern:analyticsTriggerPattern(cravings),
+    categoryInsight:CATEGORY_ANALYTICS_INSIGHTS[cat]||CATEGORY_ANALYTICS_INSIGHTS['Other'],
+    relapseLoop:analyticsRelapseLoop(cravings),
+  };
+}
+function buildAnalyticsExplanation(){
+  const i=buildAnalyticsInsights();
+  const parts=[];
+  if(i.vulnerableTime)parts.push(`Your urges spike around ${i.vulnerableTime}.`);
+  if(i.strongestTrigger)parts.push(`"${i.strongestTrigger}" has been your strongest trigger this week.`);
+  if(i.emotionalTrend)parts.push(`Emotionally, you've been ${i.emotionalTrend}.`);
+  if(i.relapseLoop)parts.push(i.relapseLoop);
+  if(!parts.length)return "You don't have enough logged data yet this week for me to explain real patterns — the more you log, the sharper this gets.";
+  parts.push(`Let's build a grounding routine around ${i.vulnerableTime?i.vulnerableTime:'your hardest moments'} — that's usually the highest-leverage place to focus.`);
+  return parts.join(' ');
+}
+function renderAnalytics(){
+  const wrap=document.getElementById('analytics-content');
+  if(!wrap)return;
+  const i=buildAnalyticsInsights();
+  const cat=S.currentAddiction;
+  const rows=[
+    ['Strongest trigger',i.strongestTrigger],
+    ['Vulnerable time',i.vulnerableTime],
+    ['Safest time',i.safestTime],
+    ['Emotional trend',i.emotionalTrend],
+    ['Consistency',i.consistency],
+    ['Pattern',i.triggerPattern],
+    [`For ${cat&&cat!=='Other'?cat:'your focus area'}`,i.categoryInsight],
+  ];
+  if(i.relapseLoop)rows.push(['Relapse loop',i.relapseLoop]);
+  const anyRealData=!!(i.strongestTrigger||i.vulnerableTime||i.safestTime||i.emotionalTrend||i.consistency||i.triggerPattern);
+  let html='<div class="card">';
+  html+='<div class="sec-hd" style="margin-top:0">Your insights this week</div>';
+  if(!anyRealData){
+    html+='<div style="font-size:13px;color:var(--tm)">Not enough logged data yet this week — the more you log cravings, journal entries, and lessons, the sharper these insights get.</div>';
+  }else{
+    rows.forEach(([label,val])=>{
+      if(!val)return;
+      html+=`<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--bdr)"><span style="font-size:12.5px;color:var(--tm);flex-shrink:0">${label}</span><span style="font-size:13px;color:var(--tp);text-align:right">${val}</span></div>`;
+    });
+  }
+  html+='</div>';
+  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussAnalyticsWithNova()">Ask Nova to explain my insights</button>';
+  wrap.innerHTML=html;
+}
+function openAnalyticsScreen(){
+  switchTo('analytics');actBn('bn-plans');
+}
+function discussAnalyticsWithNova(){
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value='Can you explain my analytics and insights?';
+  sendMsg();
+}
+
 function startVoiceJournal(){
   if(!S.isPro){
     addBubble('nova',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
@@ -3800,6 +3991,7 @@ function localFallbackReply(userText){
     if(/report/i.test(userText))return explainLatestWeeklyReport();
     if(/journal/i.test(userText))return buildJournalAnalysis();
     if(/streaks?|milestones?/i.test(userText))return buildStreakAnalysis();
+    if(/analytics|insights?/i.test(userText))return buildAnalyticsExplanation();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
@@ -3915,6 +4107,12 @@ const PRO_TOOLS={
     teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, relapse recovery tracking, and Nova Pro streak coaching, all built from your real data.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
     open:'openAdvancedStreaksScreen'
+  },
+  analytics:{
+    title:'Analytics',
+    teaser:'Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you\'ve actually logged, not charts or dashboards.',
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Strongest trigger: ●●●●●●●●<br>Vulnerable time: ●●pm<br>Emotional trend: ●●●●●●●●</div>',
+    open:'openAnalyticsScreen'
   }
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
@@ -3951,7 +4149,7 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
@@ -3961,6 +4159,7 @@ function proFeaturePreviewText(text){
   if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, relapse recovery tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
 }
@@ -4087,9 +4286,10 @@ const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
-  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks'
+  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
+  analytics:'s-analytics'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
@@ -4107,6 +4307,7 @@ function switchTo(id){
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
   if(id==='streaks'){renderAdvancedStreaks();}
+  if(id==='analytics'){renderAnalytics();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));

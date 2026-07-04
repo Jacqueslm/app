@@ -81,6 +81,9 @@ body{display:flex;justify-content:center}
 .addiction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;width:100%}
 .add-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
 .add-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
+.behavior-chip-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.behavior-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:left;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
+.behavior-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
 /* HERO */
 .hero{background:var(--brand);padding:20px 16px 18px;color:#fff;text-align:center}
 .tier-chip{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green);margin-bottom:14px;cursor:pointer}
@@ -352,6 +355,7 @@ body{display:flex;justify-content:center}
   </div>
   <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
+  <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
@@ -360,6 +364,7 @@ body{display:flex;justify-content:center}
   <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
   <div id="dynamic-behavior-questions"></div>
   <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
+  <button class="ob-btn outline" onclick="obBack(1)">Back</button>
 </div>
 
 <!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
@@ -394,13 +399,14 @@ body{display:flex;justify-content:center}
   </div>
 
   <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
+  <button class="ob-btn outline" onclick="obBack(2)">Back</button>
 </div>
 
 <!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> </div>
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
-<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
+<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> <button class="ob-btn outline" onclick="obBack(3)">Back</button> </div> </div>
 <!-- PIN LOCK -->
 <div id="pin-lock" class="ob" style="display:none">
   <div class="ob-logo"><i class="ti ti-lock" style="font-size:32px;color:#fff"></i></div>
@@ -1127,6 +1133,18 @@ function obNext(n){
   }
 }
 
+function obBack(n){
+  document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
+  document.getElementById('obs'+n).classList.add('on');
+  ['od0','od1','od2','od3','od4'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.remove('on');
+  });
+  const dotEl=document.getElementById('od'+n);
+  if(dotEl)dotEl.classList.add('on');
+  obStep=n;
+}
+
 function toggleAddiction(element,name){
   element.classList.toggle('sel');
   if(S.selectedAddictions.includes(name)){
@@ -1161,6 +1179,24 @@ function selectRelationshipStatus(status){
   document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
 }
 
+// Chip-based picker for behavioral blueprint questions - replaces native <select> dropdowns,
+// whose popup list can render unreliably (or appear to offer only one option) inside constrained
+// or embedded viewports.
+function renderBehaviorChips(key,options){
+  const chips=options.map((opt,i)=>`<div class="behavior-chip${i===0?' sel':''}" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
+  return `<div class="behavior-chip-group" data-key="${key}">${chips}</div>`;
+}
+function selectBehaviorChip(el){
+  const group=el.closest('.behavior-chip-group');
+  group.querySelectorAll('.behavior-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function getBehaviorAnswer(key){
+  const group=document.querySelector(`.behavior-chip-group[data-key="${key}"]`);
+  const sel=group&&group.querySelector('.behavior-chip.sel');
+  return sel?sel.getAttribute('data-value'):null;
+}
+
 function goToBehavioralStep(){
   S.name=document.getElementById('ob-name').value.trim()||'Friend';
   const errEl=document.getElementById('obs1-error');
@@ -1176,65 +1212,33 @@ function goToBehavioralStep(){
     if(addiction==='Porn & Sex'){
       htmlBlock+=`
         <div class="ob-label">When are you most vulnerable to acting out?</div>
-        <select class="ob-input" id="behavior-porn-time">
-          <option value="Late at night when isolated">Late at night when isolated</option>
-          <option value="During high stress or work anxiety">During high stress or work anxiety</option>
-          <option value="When bored during random downtime">When bored during random downtime</option>
-        </select>
+        ${renderBehaviorChips('behavior-porn-time',['Late at night when isolated','During high stress or work anxiety','When bored during random downtime'])}
         <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
-        <select class="ob-input" id="behavior-porn-root">
-          <option value="Anesthetizing loneliness / lack of connection">Anesthetizing loneliness / lack of connection</option>
-          <option value="Dopamine hunting to escape boredom">Dopamine hunting to escape boredom</option>
-          <option value="Decompressing from intense performance anxiety">Decompressing from intense performance anxiety</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-porn-root',['Anesthetizing loneliness / lack of connection','Dopamine hunting to escape boredom','Decompressing from intense performance anxiety'])}`;
     }else if(addiction==='Alcohol'||addiction==='Substances'){
       htmlBlock+=`
         <div class="ob-label">How do you usually engage in this cycle?</div>
-        <select class="ob-input" id="behavior-sub-style">
-          <option value="Socially to mask social anxiety">Socially to mask social anxiety</option>
-          <option value="Secretly alone to numb the day">Secretly alone to numb the day</option>
-          <option value="Binging during high stress crashes">Binging during high stress crashes</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-sub-style',['Socially to mask social anxiety','Secretly alone to numb the day','Binging during high stress crashes'])}`;
     }else if(addiction==='Gambling'||addiction==='Social media'||addiction==='Gaming'){
       htmlBlock+=`
         <div class="ob-label">What is the destructive loop trigger?</div>
-        <select class="ob-input" id="behavior-loop-trigger">
-          <option value="Escaping real-world financial or life responsibilities">Escaping real-world responsibilities</option>
-          <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
-          <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-loop-trigger',['Escaping real-world financial or life responsibilities','Chasing immediate wins or instant validation spikes','Losing hours blindly due to lack of strict daily routine'])}`;
     }else if(addiction==='Food / Binging'){
       htmlBlock+=`
         <div class="ob-label">When do you feel the pull most strongly?</div>
-        <select class="ob-input" id="behavior-food-trigger">
-          <option value="Late at night after a stressful day">Late at night after a stressful day</option>
-          <option value="Alone, away from others watching">Alone, away from others watching</option>
-          <option value="After an emotional trigger like sadness or anger">After an emotional trigger like sadness or anger</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-food-trigger',['Late at night after a stressful day','Alone, away from others watching','After an emotional trigger like sadness or anger'])}`;
     }else if(addiction==='Shopping / Spending'){
       htmlBlock+=`
         <div class="ob-label">What drives the urge to spend?</div>
-        <select class="ob-input" id="behavior-shopping-trigger">
-          <option value="Chasing the thrill of a new purchase">Chasing the thrill of a new purchase</option>
-          <option value="Escaping stress or sadness through buying">Escaping stress or sadness through buying</option>
-          <option value="Filling a void or boredom with acquiring things">Filling a void or boredom with acquiring things</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-shopping-trigger',['Chasing the thrill of a new purchase','Escaping stress or sadness through buying','Filling a void or boredom with acquiring things'])}`;
     }else if(addiction==='Work'){
       htmlBlock+=`
         <div class="ob-label">What's really driving the overworking?</div>
-        <select class="ob-input" id="behavior-work-trigger">
-          <option value="Fear of not being enough without constant achievement">Fear of not being enough without constant achievement</option>
-          <option value="Avoiding personal life or relationships through busyness">Avoiding personal life or relationships through busyness</option>
-          <option value="Difficulty sitting still or resting without guilt">Difficulty sitting still or resting without guilt</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-work-trigger',['Fear of not being enough without constant achievement','Avoiding personal life or relationships through busyness','Difficulty sitting still or resting without guilt'])}`;
     }else{
       htmlBlock+=`
         <div class="ob-label">What feels like the driving root cause here?</div>
-        <select class="ob-input" id="behavior-gen-root">
-          <option value="Stress & emotional burnout">Stress &amp; emotional burnout</option>
-          <option value="Habitual routine patterns that are hardwired">Habitual hardwired routines</option>
-          <option value="Isolation and a lack of true real-world accountability">Isolation &amp; lack of accountability</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-gen-root',['Stress & emotional burnout','Habitual routine patterns that are hardwired','Isolation and a lack of true real-world accountability'])}`;
     }
     htmlBlock+=`</div>`;
     container.innerHTML+=htmlBlock;
@@ -1244,14 +1248,14 @@ function goToBehavioralStep(){
 
 function showVoiceStep(){
   S.behavioralBlueprint={};
-  if(document.getElementById('behavior-porn-time'))S.behavioralBlueprint.pornTime=document.getElementById('behavior-porn-time').value;
-  if(document.getElementById('behavior-porn-root'))S.behavioralBlueprint.pornRoot=document.getElementById('behavior-porn-root').value;
-  if(document.getElementById('behavior-sub-style'))S.behavioralBlueprint.subStyle=document.getElementById('behavior-sub-style').value;
-  if(document.getElementById('behavior-loop-trigger'))S.behavioralBlueprint.loopTrigger=document.getElementById('behavior-loop-trigger').value;
-  if(document.getElementById('behavior-food-trigger'))S.behavioralBlueprint.foodTrigger=document.getElementById('behavior-food-trigger').value;
-  if(document.getElementById('behavior-shopping-trigger'))S.behavioralBlueprint.shoppingTrigger=document.getElementById('behavior-shopping-trigger').value;
-  if(document.getElementById('behavior-work-trigger'))S.behavioralBlueprint.workTrigger=document.getElementById('behavior-work-trigger').value;
-  if(document.getElementById('behavior-gen-root'))S.behavioralBlueprint.genRoot=document.getElementById('behavior-gen-root').value;
+  const pornTime=getBehaviorAnswer('behavior-porn-time');if(pornTime)S.behavioralBlueprint.pornTime=pornTime;
+  const pornRoot=getBehaviorAnswer('behavior-porn-root');if(pornRoot)S.behavioralBlueprint.pornRoot=pornRoot;
+  const subStyle=getBehaviorAnswer('behavior-sub-style');if(subStyle)S.behavioralBlueprint.subStyle=subStyle;
+  const loopTrigger=getBehaviorAnswer('behavior-loop-trigger');if(loopTrigger)S.behavioralBlueprint.loopTrigger=loopTrigger;
+  const foodTrigger=getBehaviorAnswer('behavior-food-trigger');if(foodTrigger)S.behavioralBlueprint.foodTrigger=foodTrigger;
+  const shoppingTrigger=getBehaviorAnswer('behavior-shopping-trigger');if(shoppingTrigger)S.behavioralBlueprint.shoppingTrigger=shoppingTrigger;
+  const workTrigger=getBehaviorAnswer('behavior-work-trigger');if(workTrigger)S.behavioralBlueprint.workTrigger=workTrigger;
+  const genRoot=getBehaviorAnswer('behavior-gen-root');if(genRoot)S.behavioralBlueprint.genRoot=genRoot;
 
   document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
   document.getElementById('obs2_5').classList.add('on');

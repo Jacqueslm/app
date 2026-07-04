@@ -387,7 +387,7 @@ body{display:flex;justify-content:center}
 </div>
 
 <!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div class="ob-label" style="margin-top:4px">Daily spend on this (optional)</div> <input class="ob-input" id="ob-spend" type="number" placeholder="e.g. 15 (dollars per day)"> <div class="ob-label" style="margin-top:4px">Daily hours lost to this (optional)</div> <input class="ob-input" id="ob-hours-lost" type="number" placeholder="e.g. 2 (hours per day)"> <button class="ob-btn" onclick="obNext(4)">Continue</button> </div>
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> </div>
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
 <div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
@@ -429,17 +429,8 @@ body{display:flex;justify-content:center}
     <div class="mini-stats">
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
-      <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Longest streak</div></div>
     </div>
-  </div>
-
-  <div class="sec" style="padding-bottom:0">
-    <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
-    <div class="card" style="display:flex;justify-content:space-around;text-align:center">
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-total-days">0</div><div class="ps-l">Total sober days</div></div>
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-lessons">0</div><div class="ps-l">Lessons done</div></div>
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
-    </div>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-plans')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
   </div>
 
   <div class="row">
@@ -452,12 +443,6 @@ body{display:flex;justify-content:center}
     <div class="sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
   </div>
 
-  <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:12px">
-    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
-    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--acc-t)">Talk to Nova</div><div style="font-size:12px;color:var(--accent)">Your AI therapist is always here</div></div>
-    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--accent)"></i>
-  </div>
-
   <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
     <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
@@ -465,8 +450,11 @@ body{display:flex;justify-content:center}
   </div>
 
   <div class="sec">
-    <div class="sec-hd">Today's mood</div>
-    <div class="mood-row">
+    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMood()">
+      <span>Today's mood</span>
+      <span id="mood-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Log mood</span>
+    </div>
+    <div class="mood-row" id="home-mood-row" style="display:none">
       <div class="mopt" onclick="setHomeMood(this,'😔','Rough')">😔<span>Rough</span></div>
       <div class="mopt" onclick="setHomeMood(this,'😐','Okay')">😐<span>Okay</span></div>
       <div class="mopt" onclick="setHomeMood(this,'🙂','Good')">🙂<span>Good</span></div>
@@ -477,28 +465,11 @@ body{display:flex;justify-content:center}
 
   <div class="sdiv"></div>
   <div class="sec">
-    <div class="sec-hd">More tools</div>
-  </div>
-  <div class="setting-row" onclick="switchTo('craving');actBn('bn-home')">
-    <i class="ti ti-activity"></i>
-    <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-  <div class="setting-row" onclick="switchTo('timeline');actBn('bn-home')">
-    <i class="ti ti-clock"></i>
-    <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-  <div class="setting-row" onclick="switchTo('progress');actBn('bn-home')">
-    <i class="ti ti-chart-line"></i>
-    <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-
-  <div class="sdiv"></div>
-  <div class="sec">
-    <div class="sec-hd">Milestones</div>
-    <div class="card" style="padding:0 14px" id="home-milestones"></div>
+    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
+      <span>Milestones</span>
+      <span id="milestones-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Show all</span>
+    </div>
+    <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
   </div>
 </div>
 
@@ -694,6 +665,14 @@ body{display:flex;justify-content:center}
         </div>
       </div>
       <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
+        <div class="card" style="display:flex;justify-content:space-around;text-align:center">
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l">Total sober days</div></div>
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
         <div class="sec-hd">This week</div>
         <div class="week-grid" id="weekGrid"></div>
       </div>
@@ -753,6 +732,28 @@ body{display:flex;justify-content:center}
         <div class="profile-name" id="prof-name">Your Name</div>
         <div class="profile-since" id="prof-since">Sober since today</div>
         <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Recovery tools</div></div>
+      <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
+        <i class="ti ti-activity"></i>
+        <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('timeline');actBn('bn-plans')">
+        <i class="ti ti-clock"></i>
+        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('progress');actBn('bn-plans')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openCostModal()">
+        <i class="ti ti-coin"></i>
+        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="openAuthModal()">
@@ -864,6 +865,20 @@ body{display:flex;justify-content:center}
     <div class="reset-date-error" id="reset-date-error">&nbsp;</div>
     <button class="ob-btn" style="margin-top:4px" onclick="confirmResetDate()">Save date</button>
     <button class="sos-close" onclick="closeResetDate()">Cancel</button>
+  </div>
+</div>
+
+<!-- DAILY COST & TIME MODAL -->
+<div class="sos-modal" id="cost-modal" onclick="if(event.target===this)closeCostModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Daily cost &amp; time</div>
+    <div class="sos-sub">Used to calculate the Saved stat and hours reclaimed on your Progress screen. Both are optional.</div>
+    <div class="ob-label" style="text-align:left;margin-top:4px">Daily spend on this (optional)</div>
+    <input class="ob-input" id="cost-spend-input" type="number" placeholder="e.g. 15 (dollars per day)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Daily hours lost to this (optional)</div>
+    <input class="ob-input" id="cost-hours-input" type="number" placeholder="e.g. 2 (hours per day)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <button class="ob-btn" style="margin-top:4px" onclick="saveCostModal()">Save</button>
+    <button class="sos-close" onclick="closeCostModal()">Cancel</button>
   </div>
 </div>
 
@@ -1049,8 +1064,6 @@ function obNext(n){
   if(n===4){
     const dt=document.getElementById('ob-date').value;
     S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
-    S.dailySpend=parseFloat(document.getElementById('ob-spend').value)||0;
-    S.dailyHoursLost=parseFloat(document.getElementById('ob-hours-lost').value)||0;
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
     const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
@@ -1264,15 +1277,6 @@ function updateStats(){
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
-  document.getElementById('h-streak').textContent=S.longestStreak||days;
-
-  // lifetime stats - sum the current streak on top of every streak already banked at reset time,
-  // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
-  if(document.getElementById('h-total-days')){
-    document.getElementById('h-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
-    document.getElementById('h-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
-    document.getElementById('h-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
-  }
 
   // next milestone
   const milestones=[1,3,7,14,30,60,90,180,365];
@@ -1292,6 +1296,11 @@ function updateStats(){
     document.getElementById('prog-saved').textContent='$'+Number(saved).toLocaleString();
     document.getElementById('prog-streak').textContent=days;
     document.getElementById('prog-longest').textContent=S.longestStreak||days;
+    // lifetime stats - sum the current streak on top of every streak already banked at reset time,
+    // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
+    document.getElementById('prog-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
+    document.getElementById('prog-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
+    document.getElementById('prog-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
     const pct90=Math.min(days/90,1);
     const circ=339.3;
     document.getElementById('prog-circle').setAttribute('stroke-dashoffset',circ-(circ*pct90));
@@ -1431,7 +1440,7 @@ function logCraving(){
   document.getElementById('cVal').textContent='5 / 10';
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
 }
-function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-home');}
+function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-plans');}
 function renderCravings(){
   const log=document.getElementById('cravingLog');
   if(!log)return;
@@ -1577,6 +1586,22 @@ function buildProgress(){
 function setHomeMood(el,emoji,label){
   document.querySelectorAll('#s-home .mood-row .mopt').forEach(m=>m.classList.remove('sel'));
   el.classList.add('sel');
+}
+
+function toggleHomeMood(){
+  const row=document.getElementById('home-mood-row');
+  const lbl=document.getElementById('mood-toggle-lbl');
+  const show=row.style.display==='none';
+  row.style.display=show?'flex':'none';
+  lbl.textContent=show?'Hide':'Log mood';
+}
+
+function toggleHomeMilestones(){
+  const wrap=document.getElementById('home-milestones');
+  const lbl=document.getElementById('milestones-toggle-lbl');
+  const show=wrap.style.display==='none';
+  wrap.style.display=show?'block':'none';
+  lbl.textContent=show?'Hide':'Show all';
 }
 
 // ─── PLEDGE ───────────────────────────────────────────────────────────────────
@@ -1957,6 +1982,22 @@ function confirmResetDate(){
   S.pledged=false;
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
+}
+
+// ─── DAILY COST & TIME ────────────────────────────────────────────────────────
+function openCostModal(){
+  document.getElementById('cost-spend-input').value=S.dailySpend||'';
+  document.getElementById('cost-hours-input').value=S.dailyHoursLost||'';
+  document.getElementById('cost-modal').classList.add('open');
+}
+function closeCostModal(){
+  document.getElementById('cost-modal').classList.remove('open');
+}
+function saveCostModal(){
+  S.dailySpend=parseFloat(document.getElementById('cost-spend-input').value)||0;
+  S.dailyHoursLost=parseFloat(document.getElementById('cost-hours-input').value)||0;
+  save();updateStats();
+  closeCostModal();
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

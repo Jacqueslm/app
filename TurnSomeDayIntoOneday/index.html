@@ -515,6 +515,15 @@ body{display:flex;justify-content:center}
         <div class="jour-new" id="newJourBtn" onclick="openJour()"><i class="ti ti-pencil" style="font-size:18px"></i> Write today's entry</div>
         <div class="jour-new" id="voiceJourBtn" onclick="startVoiceJournal()" style="margin-top:8px"><i class="ti ti-microphone" style="font-size:18px"></i> Speak today's entry <span class="badge badge-acc" style="margin-left:4px">Pro</span></div>
         <div class="jour-form" id="jourForm">
+          <input id="jourTitle" type="text" placeholder="Title (optional)" style="width:100%;border:0.5px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--tp);background:var(--s2);margin-bottom:10px;font-family:var(--f)">
+          <div id="jour-prompt-pro" style="display:none;background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer" onclick="useGuidedPrompt()">
+            <div style="font-size:11px;color:var(--acc-t);opacity:0.8;margin-bottom:2px" id="jour-prompt-kind">Guided prompt</div>
+            <div style="font-size:13px;color:var(--acc-t);line-height:1.5" id="jour-prompt-text"></div>
+            <div style="font-size:11px;color:var(--accent);margin-top:6px">Tap to use this prompt</div>
+          </div>
+          <div id="jour-prompt-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;text-align:center;color:var(--ts);font-size:12.5px" onclick="openProTool('proJournal')">
+            Guided prompts and emotional insights are part of <span style="color:var(--accent);font-weight:500">Pro</span>
+          </div>
           <div style="font-size:13px;color:var(--tm);margin-bottom:10px">How are you feeling today?</div>
           <div class="mood-row" id="jour-mood-row">
             <div class="mopt" onclick="selJourMood(this,'😔','Rough')">😔<span>Rough</span></div>
@@ -523,11 +532,42 @@ body{display:flex;justify-content:center}
             <div class="mopt" onclick="selJourMood(this,'😄','Great')">😄<span>Great</span></div>
             <div class="mopt" onclick="selJourMood(this,'🌟','Amazing')">🌟<span>Amazing</span></div>
           </div>
+          <div id="jour-promood-row-wrap" style="display:none">
+            <div style="font-size:12px;color:var(--tm);margin-bottom:8px">More specifically <span class="badge badge-acc" style="margin-left:2px">Pro</span></div>
+            <div class="tc-wrap" id="jour-promood-row" style="margin-bottom:12px">
+              <div class="tc" onclick="selJourProMood(this,'calm')">Calm</div>
+              <div class="tc" onclick="selJourProMood(this,'stressed')">Stressed</div>
+              <div class="tc" onclick="selJourProMood(this,'lonely')">Lonely</div>
+              <div class="tc" onclick="selJourProMood(this,'bored')">Bored</div>
+              <div class="tc" onclick="selJourProMood(this,'anxious')">Anxious</div>
+              <div class="tc" onclick="selJourProMood(this,'ashamed')">Ashamed</div>
+              <div class="tc" onclick="selJourProMood(this,'hopeful')">Hopeful</div>
+              <div class="tc" onclick="selJourProMood(this,'proud')">Proud</div>
+            </div>
+          </div>
           <textarea id="jourText" placeholder="Write freely — this is your private space..."></textarea>
+          <div style="font-size:12px;color:var(--tm);margin:10px 0 8px">Tag a category (optional)</div>
+          <div class="tc-wrap" id="jour-category-row" style="margin-bottom:4px">
+            <div class="tc" onclick="selJourCategory(this,'Porn & Sex')">Porn &amp; Sex</div>
+            <div class="tc" onclick="selJourCategory(this,'Alcohol')">Alcohol</div>
+            <div class="tc" onclick="selJourCategory(this,'Smoking')">Smoking</div>
+            <div class="tc" onclick="selJourCategory(this,'Substances')">Substances</div>
+            <div class="tc" onclick="selJourCategory(this,'Gambling')">Gambling</div>
+            <div class="tc" onclick="selJourCategory(this,'Social media')">Social media</div>
+            <div class="tc" onclick="selJourCategory(this,'Gaming')">Gaming</div>
+            <div class="tc" onclick="selJourCategory(this,'Food / Binging')">Food / Binging</div>
+            <div class="tc" onclick="selJourCategory(this,'Shopping / Spending')">Shopping / Spending</div>
+            <div class="tc" onclick="selJourCategory(this,'Work')">Work</div>
+            <div class="tc" onclick="selJourCategory(this,'Other')">Other</div>
+          </div>
           <div class="jour-actions">
             <button class="cancel-btn" onclick="closeJour()">Cancel</button>
-            <button class="save-btn" onclick="saveEntry()">Save entry</button>
+            <button class="save-btn" onclick="saveEntry()" id="jourSaveBtn">Save entry</button>
           </div>
+        </div>
+        <div id="jour-insights-pro" style="display:none"></div>
+        <div id="jour-insights-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:12px;padding:14px;margin-bottom:14px;cursor:pointer;text-align:center;color:var(--ts);font-size:12.5px" onclick="openProTool('proJournal')">
+          Nova Pro insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
         </div>
         <div id="journalList"></div>
       </div>
@@ -2048,16 +2088,123 @@ function renderMilestones(){
 
 // ─── JOURNAL ─────────────────────────────────────────────────────────────────
 let jourMoodSel='🙂',jourMoodLabel='Good';
-function openJour(){document.getElementById('newJourBtn').style.display='none';document.getElementById('jourForm').classList.add('open');document.getElementById('jourText').focus();}
-function closeJour(){document.getElementById('newJourBtn').style.display='flex';document.getElementById('jourForm').classList.remove('open');document.getElementById('jourText').value='';}
+let jourCategorySel='';
+let jourProMoodSel='';
+let journalEditingIdx=null;
+let jourPromptShown='';
+const PRO_MOOD_LABELS={calm:'Calm',stressed:'Stressed',lonely:'Lonely',bored:'Bored',anxious:'Anxious',ashamed:'Ashamed',hopeful:'Hopeful',proud:'Proud'};
+
+function resetJourForm(){
+  document.getElementById('jourTitle').value='';
+  document.getElementById('jourText').value='';
+  jourCategorySel='';
+  jourProMoodSel='';
+  document.querySelectorAll('#jour-category-row .tc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#jour-promood-row .tc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#jourForm .mopt').forEach(m=>m.classList.remove('sel'));
+  const goodOpt=[...document.querySelectorAll('#jourForm .mopt')].find(m=>m.textContent.includes('Good'));
+  if(goodOpt)goodOpt.classList.add('sel');
+  jourMoodSel='🙂';jourMoodLabel='Good';
+  document.getElementById('jourSaveBtn').textContent='Save entry';
+}
+function openJour(){
+  journalEditingIdx=null;
+  resetJourForm();
+  document.getElementById('newJourBtn').style.display='none';
+  document.getElementById('jourForm').classList.add('open');
+  updateJourFormProUI();
+  document.getElementById('jourText').focus();
+}
+function editJournalEntry(idx){
+  const j=S.journals[idx];
+  if(!j)return;
+  journalEditingIdx=idx;
+  resetJourForm();
+  document.getElementById('jourTitle').value=j.title||'';
+  document.getElementById('jourText').value=j.body||'';
+  document.getElementById('jourSaveBtn').textContent='Save changes';
+  if(j.moodLabel){
+    const opt=[...document.querySelectorAll('#jourForm .mopt')].find(m=>m.textContent.includes(j.moodLabel));
+    if(opt){document.querySelectorAll('#jourForm .mopt').forEach(m=>m.classList.remove('sel'));opt.classList.add('sel');jourMoodSel=j.mood;jourMoodLabel=j.moodLabel;}
+  }
+  if(j.category){
+    const catOpt=[...document.querySelectorAll('#jour-category-row .tc')].find(c=>c.textContent.trim()===j.category);
+    if(catOpt){catOpt.classList.add('sel');jourCategorySel=j.category;}
+  }
+  if(j.proMood&&S.isPro){
+    const pmOpt=[...document.querySelectorAll('#jour-promood-row .tc')].find(c=>c.textContent.trim()===PRO_MOOD_LABELS[j.proMood]);
+    if(pmOpt){pmOpt.classList.add('sel');jourProMoodSel=j.proMood;}
+  }
+  document.getElementById('newJourBtn').style.display='none';
+  document.getElementById('jourForm').classList.add('open');
+  updateJourFormProUI();
+  document.getElementById('jourText').focus();
+}
+function closeJour(){
+  journalEditingIdx=null;
+  document.getElementById('newJourBtn').style.display='flex';
+  document.getElementById('jourForm').classList.remove('open');
+  document.getElementById('jourText').value='';
+}
 function selJourMood(el,emoji,label){
   document.querySelectorAll('#jourForm .mopt').forEach(m=>m.classList.remove('sel'));
   el.classList.add('sel');jourMoodSel=emoji;jourMoodLabel=label;
 }
+function selJourCategory(el,cat){
+  const alreadySel=el.classList.contains('sel');
+  document.querySelectorAll('#jour-category-row .tc').forEach(c=>c.classList.remove('sel'));
+  if(!alreadySel){el.classList.add('sel');jourCategorySel=cat;}else{jourCategorySel='';}
+}
+function selJourProMood(el,mood){
+  const alreadySel=el.classList.contains('sel');
+  document.querySelectorAll('#jour-promood-row .tc').forEach(c=>c.classList.remove('sel'));
+  if(!alreadySel){el.classList.add('sel');jourProMoodSel=mood;}else{jourProMoodSel='';}
+}
+function updateJourFormProUI(){
+  const promoodWrap=document.getElementById('jour-promood-row-wrap');
+  const promptPro=document.getElementById('jour-prompt-pro');
+  const promptFree=document.getElementById('jour-prompt-free');
+  if(S.isPro){
+    promoodWrap.style.display='block';
+    promptFree.style.display='none';
+    const prompt=getGuidedPrompt();
+    jourPromptShown=prompt.text;
+    document.getElementById('jour-prompt-kind').textContent=PROMPT_KIND_LABELS[prompt.kind]||'Guided prompt';
+    document.getElementById('jour-prompt-text').textContent=prompt.text;
+    promptPro.style.display='block';
+  }else{
+    promoodWrap.style.display='none';
+    promptPro.style.display='none';
+    promptFree.style.display='block';
+    jourPromptShown='';
+  }
+}
+function useGuidedPrompt(){
+  const ta=document.getElementById('jourText');
+  if(!ta.value.trim())ta.value=jourPromptShown+'\n\n';
+  ta.focus();
+}
 function saveEntry(){
   const txt=document.getElementById('jourText').value.trim();
   if(!txt)return;
-  const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,body:txt};
+  const title=document.getElementById('jourTitle').value.trim();
+  if(journalEditingIdx!==null){
+    const existing=S.journals[journalEditingIdx];
+    existing.title=title;
+    existing.body=txt;
+    existing.mood=jourMoodSel;existing.moodLabel=jourMoodLabel;
+    existing.category=jourCategorySel||'';
+    if(S.isPro)existing.proMood=jourProMoodSel||'';
+    existing.editedAt=new Date().toISOString();
+    save();
+    renderJournal();closeJour();
+    return;
+  }
+  const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,title,body:txt,category:jourCategorySel||''};
+  if(S.isPro){
+    entry.proMood=jourProMoodSel||'';
+    if(jourPromptShown)entry.promptUsed=jourPromptShown;
+  }
   S.journals.unshift(entry);
   logActivity('journal',{moodLabel:jourMoodLabel});
   save();
@@ -2075,9 +2222,15 @@ function renderJournal(){
     const colors=(moodColors[j.moodLabel]||'#E6F1FB #0C447C').split(' ');
     const ds=new Date(j.date).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
     const div=document.createElement('div');div.className='jcard';
-    div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span style="display:flex;align-items:center;gap:8px"><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span><button onclick="deleteJournalEntry(${idx})" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0">×</button></span></div><div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
+    const titleHTML=j.title?`<div style="font-size:14.5px;font-weight:500;color:var(--tp);margin-bottom:4px">${j.title.replace(/</g,'&lt;')}</div>`:'';
+    const catHTML=j.category?`<span class="jtag" style="background:var(--s1);color:var(--ts);border:0.5px solid var(--bdr)">${j.category}</span>`:'';
+    const proMoodHTML=(j.proMood&&PRO_MOOD_LABELS[j.proMood])?`<span class="jtag" style="background:var(--acc);color:var(--acc-t)">${PRO_MOOD_LABELS[j.proMood]}</span>`:'';
+    const promptHTML=j.promptUsed?`<div style="font-size:11.5px;color:var(--tm);font-style:italic;margin-bottom:6px">Prompt: "${j.promptUsed.replace(/</g,'&lt;')}"</div>`:'';
+    div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span>${proMoodHTML}${catHTML}<button onclick="editJournalEntry(${idx})" title="Edit entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:14px;line-height:1;padding:0"><i class="ti ti-pencil" style="font-size:14px"></i></button><button onclick="deleteJournalEntry(${idx})" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0">×</button></span></div>${titleHTML}${promptHTML}<div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
     list.appendChild(div);
   });
+  renderIcons(list);
+  renderJournalInsights();
 }
 function deleteJournalEntry(idx){
   appConfirm('Delete this journal entry? This cannot be undone.',()=>{
@@ -2085,6 +2238,131 @@ function deleteJournalEntry(idx){
     save();
     renderJournal();
   });
+}
+
+// ─── PRO JOURNAL: GUIDED PROMPTS ───────────────────────────────────────────────
+const PROMPT_KIND_LABELS={'relapse-aware':'Relapse-aware prompt','lesson':"Today's lesson prompt",category:'Category prompt',emotion:'Emotion prompt',reflection:'Reflection prompt'};
+const CATEGORY_JOURNAL_PROMPTS={
+  'Porn & Sex':'What emotion usually comes before the urge?',
+  'Alcohol':'Did social pressure affect you today?',
+  'Smoking':'What moment today made you want to reach for a cigarette?',
+  'Substances':'What was happening right before you thought about using today?',
+  'Gambling':'Was there a moment today you felt the pull to bet or check odds?',
+  'Social media':'What were you actually looking for when you picked up your phone today?',
+  'Gaming':'What feeling were you trying to escape by wanting to play today?',
+  'Food / Binging':'Did you eat emotionally today?',
+  'Shopping / Spending':'Was there a moment today you wanted to buy something to feel better?',
+  'Work':'Did work become a way to avoid something today?',
+  'Other':'What moment today felt the hardest to sit with?',
+};
+const EMOTION_JOURNAL_PROMPTS=[
+  'What emotion hit you hardest today?',
+  'Describe a moment you felt tempted.',
+  'What helped you stay grounded today?',
+  'What emotion are you avoiding right now?',
+  'When did you feel most like yourself today?',
+];
+const REFLECTION_JOURNAL_PROMPTS=[
+  'What is one thing you handled better today than you would have a month ago?',
+  'What would you tell someone just starting this journey?',
+  'What are you most proud of this week?',
+];
+function getGuidedPrompt(){
+  const recentSlip=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<2*86400000);
+  if(recentSlip)return {text:'What led up to the moment? What can we adjust next time?',kind:'relapse-aware'};
+  const lesson=getTodayLesson();
+  const pool=[];
+  if(lesson&&lesson.reflection)pool.push({text:lesson.reflection,kind:'lesson'});
+  pool.push({text:CATEGORY_JOURNAL_PROMPTS[S.currentAddiction]||CATEGORY_JOURNAL_PROMPTS['Other'],kind:'category'});
+  pool.push({text:EMOTION_JOURNAL_PROMPTS[Math.floor(Math.random()*EMOTION_JOURNAL_PROMPTS.length)],kind:'emotion'});
+  pool.push({text:REFLECTION_JOURNAL_PROMPTS[Math.floor(Math.random()*REFLECTION_JOURNAL_PROMPTS.length)],kind:'reflection'});
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// ─── PRO JOURNAL: EMOTIONAL TREND + PATTERN DETECTION ─────────────────────────
+function detectJournalEmotionalTrend(){
+  const recent=(S.journals||[]).filter(j=>j.proMood).slice(0,10);
+  if(recent.length<3)return null;
+  const counts={};
+  recent.forEach(j=>{counts[j.proMood]=(counts[j.proMood]||0)+1;});
+  const [topEmotion,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  if(topCount<3)return null;
+  const TREND_TEXT={
+    stressed:"You've been feeling stressed more often lately.",
+    lonely:"You've been feeling lonely more often this week.",
+    bored:'Boredom has been showing up as a recurring theme in your entries.',
+    ashamed:"Shame has come up repeatedly in your recent entries — that's worth talking through, not carrying alone.",
+    anxious:'Anxiety has been spiking in several of your recent entries.',
+    calm:"You've been feeling calm more consistently lately — that's real progress.",
+    hopeful:'Hope has been a recurring thread in your recent entries.',
+    proud:'Pride in your progress has come up again and again lately — let that sink in.',
+  };
+  return TREND_TEXT[topEmotion]||null;
+}
+function detectJournalPattern(){
+  const cravings=S.cravings||[];
+  if(cravings.length<3)return null;
+  const eveningBoredom=cravings.filter(c=>{
+    const h=new Date(c.ts).getHours();
+    return c.trigger==='Boredom'&&(h>=18||h<4);
+  });
+  if(eveningBoredom.length>=2)return "Your urges increase when you're bored at night.";
+  const counts={};
+  cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [topTrigger]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const hours=cravings.filter(c=>c.trigger===topTrigger).map(c=>new Date(c.ts).getHours());
+  const eveningCount=hours.filter(h=>h>=18||h<4).length;
+  if(eveningCount>hours.length/2)return `Your "${topTrigger.toLowerCase()}" urges tend to show up in the evening or overnight.`;
+  return null;
+}
+function buildJournalAnalysis(){
+  const journals=S.journals||[];
+  if(!journals.length)return "You haven't written any journal entries yet — once you do, I can reflect real themes and patterns back to you instead of guessing.";
+  const trend=detectJournalEmotionalTrend();
+  const pattern=detectJournalPattern();
+  const recent=journals.slice(0,5);
+  const moodCounts={};
+  recent.forEach(j=>{moodCounts[j.moodLabel]=(moodCounts[j.moodLabel]||0)+1;});
+  const [topMood]=Object.entries(moodCounts).sort((a,b)=>b[1]-a[1])[0];
+  let text=`Looking at your last ${recent.length} entries, "${topMood}" has been the most common overall mood.`;
+  if(trend)text+=` ${trend}`;
+  if(pattern)text+=` ${pattern}`;
+  text+=" Your entries show real progress in self-awareness — you're noticing what's underneath things earlier than you probably give yourself credit for.\n\nWhat feels most true about that when you read it back?";
+  return text;
+}
+function buildJournalWeeklySummary(){
+  const cutoff=Date.now()-7*86400000;
+  const recent=(S.journals||[]).filter(j=>new Date(j.date).getTime()>=cutoff);
+  if(!recent.length)return 'No journal entries yet this week — even one entry gives me real material to reflect back to you.';
+  const trend=detectJournalEmotionalTrend();
+  const pattern=detectJournalPattern();
+  const parts=[`You've written ${recent.length} entr${recent.length===1?'y':'ies'} this week.`];
+  if(trend)parts.push(trend);
+  if(pattern)parts.push(pattern);
+  return parts.join(' ');
+}
+function renderJournalInsights(){
+  const proBox=document.getElementById('jour-insights-pro');
+  const freeBox=document.getElementById('jour-insights-free');
+  if(!proBox||!freeBox)return;
+  if(!S.isPro){
+    proBox.style.display='none';
+    freeBox.style.display='block';
+    return;
+  }
+  freeBox.style.display='none';
+  if(!(S.journals||[]).length){proBox.style.display='none';return;}
+  proBox.style.display='block';
+  proBox.innerHTML=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">Nova Pro journal insights</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:10px">${buildJournalWeeklySummary()}</div>
+    <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussJournalWithNova()">Ask Nova about my journal</button>
+  </div>`;
+}
+function discussJournalWithNova(){
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value='Can you analyze my journal entries and tell me what patterns you notice?';
+  sendMsg();
 }
 function renderTodayMood(){/* placeholder */}
 
@@ -3278,6 +3556,7 @@ function localFallbackReply(userText){
   if(match)return match.reply;
   if(S.isPro){
     if(/report/i.test(userText))return explainLatestWeeklyReport();
+    if(/journal/i.test(userText))return buildJournalAnalysis();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
@@ -3381,8 +3660,15 @@ const PRO_TOOLS={
     teaser:"Smart reminders help you stay grounded during urges and emotional spikes — personalized to your patterns, triggers, and preferred times.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">You usually feel urges around ●●pm.<br>Your ●●●●●● was high today.<br>Good morning. What\'s ●●●●●●●●●?</div>',
     open:'openSmartReminderSettings'
+  },
+  proJournal:{
+    title:'Pro Journal',
+    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and relapse-aware prompts, mood tracking, and Nova Pro analysis of your own entries.',
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
+    open:'openProJournalWhenPro'
   }
 };
+function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
 function openProTool(key){
   if(S.isPro){window[PRO_TOOLS[key].open]();return;}
   showProToolPreview(key);
@@ -3416,7 +3702,7 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
@@ -3424,6 +3710,7 @@ function proFeaturePreviewText(text){
   if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, relapse risk, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
 }

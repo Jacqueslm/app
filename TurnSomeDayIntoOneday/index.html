@@ -926,6 +926,15 @@ body{display:flex;justify-content:center}
         </div>
       </div>
     </div>
+
+    <!-- ADVANCED STREAKS (Pro) -->
+    <div id="s-streaks" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Advanced streaks</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Built entirely from what you've actually logged — insights, milestones, and patterns behind your streak.</div>
+        <div id="streaks-content"></div>
+      </div>
+    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
@@ -1033,6 +1042,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="openProTool('weeklyReports')">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Weekly Reports</p><span>Your emotional patterns, triggers, and progress each week</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('streaks')">
+        <i class="ti ti-flame"></i>
+        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and relapse recovery tracking</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1357,6 +1371,18 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- MILESTONE CELEBRATION (Pro) -->
+<div class="sos-modal" id="milestone-celebration-modal" onclick="if(event.target===this)closeMilestoneCelebration()">
+  <div class="sos-sheet" style="text-align:center">
+    <div style="font-size:40px;margin-bottom:8px">🎉</div>
+    <div class="sos-title" style="justify-content:center"><span id="mc-days">0</span> days</div>
+    <div class="sos-sub" id="mc-message" style="margin-bottom:16px"></div>
+    <textarea class="ob-input" id="mc-reflection-input" rows="3" placeholder="Optional: what's one thing that got you here? (saved to your journal)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f);text-align:left"></textarea>
+    <button class="ob-btn" style="margin-top:4px" onclick="saveMilestoneReflection()">Save &amp; close</button>
+    <button class="sos-close" onclick="closeMilestoneCelebration()">Close</button>
+  </div>
+</div>
+
 <!-- ACCOUNT / AUTH MODAL (signed-in only - an account is required to reach this screen at all) -->
 <div class="sos-modal" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="sos-sheet">
@@ -1491,7 +1517,8 @@ let S = {
   notifiedMilestones:[],lastProNudgeDate:'',
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
-  currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
+  currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
+  streakHistory:[],notifiedProMilestones:[],
   pinHash:null,pinEnabled:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
@@ -2003,7 +2030,7 @@ function updateStats(){
   const hours=Math.max(0,Math.floor(diff/3600000));
   const saved=(days*S.dailySpend).toFixed(0);
 
-  if(days>(S.longestStreak||0)){S.longestStreak=days;save();}
+  if(days>(S.longestStreak||0)){S.longestStreak=days;S.longestStreakDate=new Date().toISOString();save();}
 
   const justHitMilestone=MILESTONES.find(m=>m.days===days&&!(S.notifiedMilestones||[]).includes(m.days));
   if(justHitMilestone){
@@ -2011,6 +2038,7 @@ function updateStats(){
     save();
     maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
   }
+  maybeShowProMilestoneCelebration(days);
 
   maybeAutoGenerateWeeklyReport();
   evaluateSmartReminders();
@@ -2068,6 +2096,9 @@ const MILESTONES=[
   {days:180,icon:'ti-diamond',label:'6 months',color:'#D85A30'},
   {days:365,icon:'ti-award',label:'1 year',color:'#1D9E75'},
 ];
+// Pro milestone celebration thresholds - separate from the free-tier badge list above
+// (adds 21 days, per spec) so the existing simple Home-screen milestone strip is unaffected.
+const PRO_MILESTONE_DAYS=[3,7,14,21,30,60,90,180,365];
 function renderMilestones(){
   const days=getDays();
   const el=document.getElementById('home-milestones');
@@ -2365,6 +2396,217 @@ function discussJournalWithNova(){
   sendMsg();
 }
 function renderTodayMood(){/* placeholder */}
+
+// ─── ADVANCED STREAK SYSTEM (Pro) ──────────────────────────────────────────────
+const CATEGORY_STREAK_MESSAGES={
+  'Porn & Sex':'Your streak shows stronger emotional regulation.',
+  'Alcohol':'Your weekends are improving — great job.',
+  'Smoking':'Your cravings are getting shorter and easier to ride out.',
+  'Substances':'Your body and mind are getting real time to reset.',
+  'Gambling':'Your urges to check odds or bet are showing up less often.',
+  'Social media':'Your relationship with your phone is getting healthier.',
+  'Gaming':"You're reclaiming real hours for the rest of your life.",
+  'Food / Binging':"You've been consistent with mindful eating.",
+  'Shopping / Spending':'Your impulse spending is showing real improvement.',
+  'Work':'Your relationship with rest is improving.',
+  'Other':'Your consistency here is building real momentum.',
+};
+function buildStreakInsights(){
+  const insights=[];
+  const history=S.streakHistory||[];
+  if(history.length>=2){
+    const weekendSlips=history.filter(h=>{const d=new Date(h.endedAt).getDay();return d===0||d===5||d===6;}).length;
+    if(weekendSlips>history.length/2)insights.push('Your streak is strongest on weekdays — weekends have historically been the harder stretch.');
+  }
+  const now=Date.now();
+  const thisWeek=new Set((S.activityLog||[]).filter(a=>now-new Date(a.ts).getTime()<7*86400000).map(a=>new Date(a.ts).toDateString()));
+  const lastWeek=new Set((S.activityLog||[]).filter(a=>{const t=now-new Date(a.ts).getTime();return t>=7*86400000&&t<14*86400000;}).map(a=>new Date(a.ts).toDateString()));
+  if(thisWeek.size>lastWeek.size&&lastWeek.size>0)insights.push('Your consistency improved this week compared to last week.');
+  const streakStart=S.startDate?new Date(S.startDate).getTime():now;
+  const cravingsThisStreak=(S.cravings||[]).filter(c=>new Date(c.ts).getTime()>=streakStart);
+  const cravingsBefore=(S.cravings||[]).filter(c=>new Date(c.ts).getTime()<streakStart);
+  if(cravingsThisStreak.length&&cravingsBefore.length){
+    const avgNow=cravingsThisStreak.reduce((s,c)=>s+c.val,0)/cravingsThisStreak.length;
+    const avgBefore=cravingsBefore.reduce((s,c)=>s+c.val,0)/cravingsBefore.length;
+    if(avgNow<avgBefore-0.5)insights.push('Your urges have decreased in intensity during this streak compared to before it.');
+  }
+  if(!insights.length)insights.push('Keep logging cravings and journal entries — the more real data you give me, the sharper these insights get.');
+  return insights;
+}
+function buildStreakBreakPattern(){
+  const history=S.streakHistory||[];
+  if(history.length<2)return null;
+  const eveningResets=history.filter(h=>{const hr=new Date(h.endedAt).getHours();return hr>=18||hr<4;});
+  if(eveningResets.length>history.length/2){
+    const boredomEvening=(S.cravings||[]).filter(c=>{const hr=new Date(c.ts).getHours();return c.trigger==='Boredom'&&(hr>=18||hr<4);});
+    if(boredomEvening.length>=2)return 'Your streaks usually break during late-night boredom — that\'s worth planning around specifically.';
+    return 'Your streaks usually break in the evening or overnight — that\'s worth planning around specifically.';
+  }
+  return null;
+}
+function buildStreakAnalysis(){
+  const insights=buildStreakInsights();
+  const pattern=buildStreakBreakPattern();
+  const cat=S.currentAddiction||'Other';
+  const catMsg=CATEGORY_STREAK_MESSAGES[cat]||CATEGORY_STREAK_MESSAGES['Other'];
+  let text=insights.join(' ');
+  if(pattern)text+=` ${pattern}`;
+  text+=` ${catMsg}`;
+  return text;
+}
+function buildRelapseRecoveryInfo(){
+  const history=S.streakHistory||[];
+  if(!history.length)return null;
+  const last=history[history.length-1];
+  const daysSinceSlip=Math.floor((Date.now()-new Date(last.endedAt).getTime())/86400000);
+  const journalsAfter=(S.journals||[]).filter(j=>new Date(j.date).getTime()>new Date(last.endedAt).getTime()).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const stableEntry=journalsAfter.find(j=>['Good','Great','Amazing'].includes(j.moodLabel));
+  let recoveryText;
+  if(stableEntry){
+    const recoveryDays=Math.max(0,Math.floor((new Date(stableEntry.date).getTime()-new Date(last.endedAt).getTime())/86400000));
+    recoveryText=`You recovered from your last slip in ${recoveryDays} day${recoveryDays===1?'':'s'} — that's progress, not just a reset.`;
+  }else{
+    recoveryText="You're still in the stabilizing window after your last slip — that's normal, not a sign you're behind.";
+  }
+  return {daysSinceSlip,previousStreakLength:last.length,recoveryText};
+}
+function buildRecoveryCoachingMessage(priorStreakLength){
+  const cat=S.currentAddiction||'Other';
+  const catMsg=CATEGORY_STREAK_MESSAGES[cat]||CATEGORY_STREAK_MESSAGES['Other'];
+  return `That took real honesty to acknowledge. Your previous streak was ${priorStreakLength} day${priorStreakLength===1?'':'s'} — that's not erased, it's real information for what comes next.\n\n${catMsg}\n\nWhat's one thing that was different about today versus the days before it?`;
+}
+function buildLongestStreakDetail(){
+  const longest=S.longestStreak||0;
+  const dateStr=S.longestStreakDate?new Date(S.longestStreakDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):null;
+  const days=getDays();
+  let reflection;
+  if(days>=longest&&longest>0)reflection="You're matching or extending your all-time best right now — this is genuinely new ground.";
+  else if(longest>0)reflection=`You've done ${longest} days before, which means you already know you're capable of it — this stretch can go just as far.`;
+  else reflection='Your longest streak is still being written — right now.';
+  return {longest,dateStr,reflection};
+}
+function buildUrgeFreeStreakText(){
+  const cravings=S.cravings||[];
+  const lastCravingTs=cravings.length?new Date(cravings[0].ts).getTime():(S.startDate?new Date(S.startDate).getTime():Date.now());
+  const diffMs=Date.now()-lastCravingTs;
+  const hours=Math.floor(diffMs/3600000);
+  if(hours<48)return `You've gone ${hours} hour${hours===1?'':'s'} without a logged urge.`;
+  const days=Math.floor(hours/24);
+  return `You've gone ${days} day${days===1?'':'s'} without a logged urge.`;
+}
+function buildStreakHistoryList(){
+  return (S.streakHistory||[]).slice().reverse().map(h=>{
+    const dateStr=new Date(h.endedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return {length:h.length,dateStr,note:`Ended after ${h.length} day${h.length===1?'':'s'} on ${dateStr}.`};
+  });
+}
+
+// Pro milestone celebration
+function maybeShowProMilestoneCelebration(days){
+  if(!S.isPro)return;
+  if(!PRO_MILESTONE_DAYS.includes(days))return;
+  if((S.notifiedProMilestones||[]).includes(days))return;
+  S.notifiedProMilestones=(S.notifiedProMilestones||[]).concat(days);
+  save();
+  openMilestoneCelebration(days);
+}
+function openMilestoneCelebration(days){
+  document.getElementById('mc-days').textContent=days;
+  document.getElementById('mc-message').textContent=buildMilestoneEncouragement(days);
+  document.getElementById('mc-reflection-input').value='';
+  document.getElementById('milestone-celebration-modal').classList.add('open');
+}
+function buildMilestoneEncouragement(days){
+  const cat=S.currentAddiction||'Other';
+  const catMsg=CATEGORY_STREAK_MESSAGES[cat]||CATEGORY_STREAK_MESSAGES['Other'];
+  return `${days} days — that's real, hard-won progress. ${catMsg}`;
+}
+function closeMilestoneCelebration(){
+  document.getElementById('milestone-celebration-modal').classList.remove('open');
+}
+function saveMilestoneReflection(){
+  const text=document.getElementById('mc-reflection-input').value.trim();
+  if(text){
+    S.journals.unshift({date:new Date().toISOString(),mood:'🎉',moodLabel:'Milestone Reflection',body:text});
+    logActivity('journal',{moodLabel:'Milestone Reflection'});
+    save();
+  }
+  closeMilestoneCelebration();
+}
+
+// Advanced Streaks screen (Pro)
+function openAdvancedStreaksScreen(){
+  switchTo('streaks');actBn('bn-plans');
+}
+function renderAdvancedStreaks(){
+  const wrap=document.getElementById('streaks-content');
+  if(!wrap)return;
+  const days=getDays();
+  const insights=buildStreakInsights();
+  const recovery=buildRelapseRecoveryInfo();
+  const longestDetail=buildLongestStreakDetail();
+  const urgeFreeText=buildUrgeFreeStreakText();
+  const history=buildStreakHistoryList();
+  const pattern=buildStreakBreakPattern();
+  const cat=S.currentAddiction||'Other';
+  const catMsg=CATEGORY_STREAK_MESSAGES[cat]||CATEGORY_STREAK_MESSAGES['Other'];
+
+  let html='';
+  html+=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">Streak insights</div>
+    ${insights.map(i=>`<div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:6px">${i}</div>`).join('')}
+  </div>`;
+
+  if(recovery){
+    html+=`<div class="card" style="margin-bottom:14px">
+      <div class="sec-hd" style="margin-top:0">Relapse recovery streak</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.6">${recovery.recoveryText}</div>
+      <div style="font-size:12px;color:var(--tm);margin-top:6px">Previous streak: ${recovery.previousStreakLength} day${recovery.previousStreakLength===1?'':'s'} · ${recovery.daysSinceSlip} day${recovery.daysSinceSlip===1?'':'s'} since your last slip</div>
+    </div>`;
+  }
+
+  html+=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">Longest streak</div>
+    <div style="font-size:24px;font-weight:700;color:var(--green)">${longestDetail.longest} day${longestDetail.longest===1?'':'s'}</div>
+    ${longestDetail.dateStr?`<div style="font-size:12px;color:var(--tm);margin-bottom:8px">Achieved ${longestDetail.dateStr}</div>`:''}
+    <div style="font-size:13px;color:var(--ts);line-height:1.6">${longestDetail.reflection}</div>
+  </div>`;
+
+  html+=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">Urge-free streak</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.6">${urgeFreeText}</div>
+  </div>`;
+
+  if(pattern){
+    html+=`<div class="card" style="margin-bottom:14px">
+      <div class="sec-hd" style="margin-top:0">Pattern detection</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.6">${pattern}</div>
+    </div>`;
+  }
+
+  html+=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">For ${cat==='Other'?'your focus area':cat}</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.6">${catMsg}</div>
+  </div>`;
+
+  html+=`<div class="card" style="margin-bottom:14px">
+    <div class="sec-hd" style="margin-top:0">Streak history</div>`;
+  if(!history.length){
+    html+='<div style="font-size:13px;color:var(--tm)">No past streaks yet — your current streak is the first entry in this history.</div>';
+  }else{
+    html+=history.map(h=>`<div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:6px">• ${h.note}</div>`).join('');
+  }
+  html+=`</div>`;
+
+  html+=`<button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussStreaksWithNova()">Ask Nova about my streaks</button>`;
+
+  wrap.innerHTML=html;
+}
+function discussStreaksWithNova(){
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value='Can you analyze my streaks and tell me what patterns you notice?';
+  sendMsg();
+}
 
 function startVoiceJournal(){
   if(!S.isPro){
@@ -3557,6 +3799,7 @@ function localFallbackReply(userText){
   if(S.isPro){
     if(/report/i.test(userText))return explainLatestWeeklyReport();
     if(/journal/i.test(userText))return buildJournalAnalysis();
+    if(/streaks?|milestones?/i.test(userText))return buildStreakAnalysis();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
@@ -3666,6 +3909,12 @@ const PRO_TOOLS={
     teaser:'Guided prompts and emotional insights are part of Pro — category-specific and relapse-aware prompts, mood tracking, and Nova Pro analysis of your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
+  },
+  streaks:{
+    title:'Advanced Streaks',
+    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, relapse recovery tracking, and Nova Pro streak coaching, all built from your real data.',
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
+    open:'openAdvancedStreaksScreen'
   }
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
@@ -3702,7 +3951,7 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
@@ -3711,6 +3960,7 @@ function proFeaturePreviewText(text){
   if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, relapse risk, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, relapse recovery tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
 }
@@ -3837,9 +4087,9 @@ const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
-  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings'
+  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
@@ -3856,6 +4106,7 @@ function switchTo(id){
   if(id==='community'){renderCommunityPosts();}
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
+  if(id==='streaks'){renderAdvancedStreaks();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -4051,13 +4302,19 @@ function confirmResetDate(){
   const chosen=new Date(`${dateVal}T${timeVal}:00`);
   if(isNaN(chosen.getTime())){errEl.textContent='That date/time is not valid.';return;}
   if(chosen.getTime()>Date.now()){errEl.textContent='That date is in the future.';return;}
-  S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+getDays();
+  const priorStreakLength=getDays();
+  S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
+  S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
+  if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
   S.startDate=chosen.toISOString();
   S.pledged=false;
   logActivity('relapse_reset');
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
   maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");
+  if(S.isPro){
+    novaNudge(buildRecoveryCoachingMessage(priorStreakLength));
+  }
 }
 
 // ─── DAILY COST & TIME ────────────────────────────────────────────────────────

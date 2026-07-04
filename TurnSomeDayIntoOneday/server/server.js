@@ -24,6 +24,7 @@ const FREE_CHAT_LIMIT = 3;
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+app.use('/preview', requireAuth);
 app.use(express.static(path.join(__dirname, '..')));
 
 const loginLimiter = rateLimit({

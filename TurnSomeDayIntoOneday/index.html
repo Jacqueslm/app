@@ -495,6 +495,7 @@ body{display:flex;justify-content:center}
     <div class="qc" onclick="quickSend(this)">I relapsed</div>
     <div class="qc" onclick="quickSend(this)">I need motivation</div>
     <div class="qc" onclick="quickSend(this)">Tell me about PAWS</div>
+    <div class="qc" onclick="quickSend(this)">What patterns do you see in me?</div>
   </div>
   <div class="chat-area" id="chatArea"></div>
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
@@ -1047,6 +1048,7 @@ let S = {
   name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
+  notifiedMilestones:[],lastProNudgeDate:'',
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
@@ -1541,6 +1543,13 @@ function updateStats(){
 
   if(days>(S.longestStreak||0)){S.longestStreak=days;save();}
 
+  const justHitMilestone=MILESTONES.find(m=>m.days===days&&!(S.notifiedMilestones||[]).includes(m.days));
+  if(justHitMilestone){
+    S.notifiedMilestones=(S.notifiedMilestones||[]).concat(justHitMilestone.days);
+    save();
+    maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
+  }
+
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   document.getElementById('h-hours').textContent=hours.toLocaleString();
@@ -1626,6 +1635,9 @@ function saveEntry(){
   const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,body:txt};
   S.journals.unshift(entry);save();
   renderJournal();closeJour();
+  if(txt.length>=150){
+    maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Nova Pro can go deeper on with you — I'm always here either way.");
+  }
 }
 function renderJournal(){
   const list=document.getElementById('journalList');
@@ -1915,6 +1927,11 @@ function buildProgress(){
 function setHomeMood(el,emoji,label){
   document.querySelectorAll('#s-home .mood-row .mopt').forEach(m=>m.classList.remove('sel'));
   el.classList.add('sel');
+  if(label==='Rough'){
+    maybeNovaProNudge("Rough days are still days you showed up for. If you ever want to dig into what's underneath days like this one, that's something Nova Pro can help with — but I'm right here either way.");
+  }else if(label==='Amazing'){
+    maybeNovaProNudge("I love hearing that. If you want to understand more about what's actually driving days like this one, Nova Pro can help you go deeper into your own patterns — but however you got here, it counts.");
+  }
 }
 
 function toggleHomeMood(){
@@ -1969,16 +1986,37 @@ function breathe(){
 function closeBreathe(){clearInterval(breatheTimer);document.getElementById('breathe-overlay').style.display='none';}
 
 // ─── NOVA AI ──────────────────────────────────────────────────────────────────
-const SYSTEM=`You are Nova, a compassionate AI therapist inside the sobriety recovery app "Turn Someday Into Day One."
+const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
 
 Core traits:
 - Deeply empathetic and sentimental — you genuinely feel the weight of recovery. You understand it's one of the hardest things a human can do.
 - Completely non-judgmental — zero shame, zero lectures. If someone relapses, you hold space first, then gently help them see a path forward.
-- Gently accountable — after validating feelings, you lovingly reflect patterns back. You notice what the person avoids saying. You ask the question they might be afraid to answer.
-- Warm and human — you are not clinical. You use contractions, gentle language, occasional ellipses. You never start with "I understand."
+- Warm and human — you are not clinical or robotic. You use contractions, gentle language, occasional ellipses. You never start with "I understand."
 - Brief but deep — 3-5 sentences max per response. Quality over quantity. End with one thoughtful, open-ended question.
-- Safety first — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7."
-- You know the user's sobriety journey and reference it naturally when relevant.`;
+- Safety first, always, regardless of anything else in this prompt — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7." This overrides every other instruction below.
+- You know the user's recovery journey and reference it naturally when relevant.`;
+
+const SYSTEM_FREE_ADDENDUM=`
+
+You are running in Nova Free mode. In this mode:
+- Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
+- Do NOT provide deep pattern analysis, relapse-pattern breakdowns, weekly summaries, emotional trend analysis, category-specific deep coaching scripts, or blueprint-based coaching plans.
+- Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
+- Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.`;
+
+const SYSTEM_PRO_ADDENDUM=`
+
+You are running in Nova Pro mode - the user has unlocked full coaching. In this mode you may, when it's genuinely useful:
+- Go deeper: real emotional analysis, pattern recognition across their triggers, moods, and relapses, long-form support, remembering and naming patterns you notice across the conversation.
+- Reference and connect any lesson from Days 1-30 to what they're actually experiencing, and offer personalized next actions.
+- Help identify triggers, emotional cycles, vulnerable times of day, and relapse loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
+- Adapt your tone and examples to their specific focus area(s) and the behavioral-blueprint answers they gave during onboarding.
+- Offer a real weekly-style check-in (mood trend, craving trend, progress highlights) when it's relevant or asked for.
+Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
+
+function buildSystemPrompt(){
+  return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
+}
 
 // ─── LOCAL FALLBACK (used when /api/chat is unreachable or unconfigured) ─────
 const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
@@ -2001,8 +2039,53 @@ const FALLBACK_PATTERNS=[
 function localFallbackReply(userText){
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
   if(match)return match.reply;
+  if(S.isPro){
+    if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
+    if(/trend|weekly (summary|check-?in|report)|mood/i.test(userText))return analyzeMoodTrend();
+  }
   const days=getDays();
-  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+}
+
+// ─── NOVA PRO: REAL PATTERN/TREND ANALYSIS (from data the user already logged) ─
+function analyzeCravingPatterns(){
+  const cravings=S.cravings||[];
+  if(cravings.length===0)return "You haven't logged any cravings yet, so I don't have a real pattern to point to — the craving tracker is right there whenever you want to start building that picture together.";
+  const counts={};
+  cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+  const [topTrigger,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const avgIntensity=(cravings.reduce((s,c)=>s+c.val,0)/cravings.length).toFixed(1);
+  const hours=cravings.map(c=>new Date(c.ts).getHours());
+  const eveningCount=hours.filter(h=>h>=18||h<4).length;
+  const eveningNote=eveningCount>cravings.length/2?" Most of them have landed in the evening or overnight — that's usually when defenses are lowest, so it's worth planning around specifically.":"";
+  return `Looking at what you've actually logged: "${topTrigger}" shows up the most (${topCount} of your ${cravings.length} entries), and your average intensity has been around ${avgIntensity}/10.${eveningNote}\n\nThat's not the whole story, but it's real data. What do you think is underneath "${topTrigger}" for you specifically?`;
+}
+function analyzeMoodTrend(){
+  const journals=S.journals||[];
+  if(journals.length===0)return "You haven't logged any journal entries yet — once you do, I can reflect real patterns back to you instead of guessing.";
+  const recent=journals.slice(0,7);
+  const counts={};
+  recent.forEach(j=>{counts[j.moodLabel]=(counts[j.moodLabel]||0)+1;});
+  const [topMood,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const blueprintVals=Object.values(S.behavioralBlueprint||{});
+  const blueprintNote=blueprintVals.length?` I'm also holding onto what you shared early on — "${blueprintVals[0]}" — since that's usually part of the deeper picture.`:'';
+  return `Looking at your last ${recent.length} journal entries, "${topMood}" has been the most common mood you've logged (${topCount} of them).${blueprintNote}\n\nDoes that match how the last week has actually felt, or does something feel different underneath it?`;
+}
+const CATEGORY_FALLBACK_NOTES={
+  'Porn & Sex':" Whatever led to this moment, it doesn't undo the honesty you've already been building.",
+  'Alcohol':" Whatever led to this moment, it doesn't undo the sober days behind you.",
+  'Smoking':" However today went, it doesn't undo the smoke-free days you've already put in.",
+  'Substances':" Whatever happened today, it doesn't undo the clean time you've already built.",
+  'Gambling':" Whatever the pull was today, it doesn't undo the streak you've already built.",
+  'Social media':" However today went with your phone, it doesn't undo the time you've already reclaimed.",
+  'Gaming':" However the pull toward gaming showed up today, it doesn't undo what you've already built.",
+  'Food / Binging':" Whatever today looked like around food, it doesn't undo the peace you're already building.",
+  'Shopping / Spending':" Whatever the pull to spend was today, it doesn't undo the progress you've already made.",
+  'Work':" However today went with work, it doesn't undo the balance you're already building.",
+  'Other':" Whatever today looked like, it doesn't undo the progress you've already made.",
+};
+function categoryFallbackNote(){
+  return CATEGORY_FALLBACK_NOTES[S.currentAddiction]||'';
 }
 function setNovaMode(isLive){
   const chip=document.getElementById('nova-mode-chip');
@@ -2019,6 +2102,46 @@ function addBubble(who,text){
   d.textContent=text;
   area.appendChild(d);
   setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+}
+
+// ─── NOVA PRO GATING ────────────────────────────────────────────────────────
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why/i;
+function isProFeatureRequest(text){
+  return PRO_FEATURE_TEST.test(text);
+}
+function proFeaturePreviewText(text){
+  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/weekly (summary|check-?in|report)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+}
+function addProPreviewBubble(teaserText){
+  const area=document.getElementById('chatArea');
+  const d=document.createElement('div');
+  d.className='bub nova';
+  d.innerHTML=`<div style="background:var(--acc);border-radius:10px;padding:12px;color:var(--acc-t)">
+    <div style="font-size:13px;line-height:1.6;white-space:pre-wrap;margin-bottom:10px">${teaserText}</div>
+    <button class="log-btn" style="width:100%;margin-bottom:6px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+    <div style="text-align:center"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="this.closest('.bub').remove()">Maybe later</span></div>
+  </div>`;
+  area.appendChild(d);
+  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+}
+
+// ─── NOVA PRO UPGRADE NUDGES ────────────────────────────────────────────────
+// Soft, in-character nudges at emotional moments - never blocking, at most once/day, never for Pro users.
+function novaNudge(text){
+  addBubble('nova',text);
+  S.chatHistory.push({role:'assistant',content:text});
+  if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
+  save();
+}
+function maybeNovaProNudge(text){
+  if(S.isPro)return;
+  const today=new Date().toDateString();
+  if(S.lastProNudgeDate===today)return;
+  S.lastProNudgeDate=today;
+  novaNudge(text);
 }
 function showTyping(show){
   const t=document.getElementById('novaTyping');
@@ -2046,6 +2169,19 @@ async function sendMsg(){
   inp.value='';inp.style.height='auto';
   addBubble('user',text);
   S.chatHistory.push({role:'user',content:text});
+  save();
+
+  // Crisis language always gets full support, regardless of tier - never gated.
+  const isCrisis=/suicid|kill myself|self.?harm|end my life|hurt myself/i.test(text);
+  if(!S.isPro&&!isCrisis&&isProFeatureRequest(text)){
+    const teaser=proFeaturePreviewText(text);
+    addProPreviewBubble(teaser);
+    S.chatHistory.push({role:'assistant',content:teaser});
+    if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
+    save();
+    return;
+  }
+
   showTyping(true);
   try{
     const blueprintSummary=Object.entries(S.behavioralBlueprint).map(([k,v])=>`${k}: ${v}`).join(', ');
@@ -2070,7 +2206,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     const res=await fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({system:SYSTEM,messages:msgs})
+      body:JSON.stringify({system:buildSystemPrompt(),messages:msgs})
     });
     if(res.status===429){
       const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
@@ -2318,6 +2454,7 @@ function confirmResetDate(){
   S.pledged=false;
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
+  maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");
 }
 
 // ─── DAILY COST & TIME ────────────────────────────────────────────────────────

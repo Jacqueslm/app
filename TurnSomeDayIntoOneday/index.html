@@ -52,7 +52,7 @@ body{display:flex;justify-content:center}
 .scr{display:none}.scr.on{display:block}
 
 /* ONBOARDING */
-.ob{background:var(--brand);min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;color:#fff}
+.ob{background:var(--brand);min-height:100dvh;max-height:100dvh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;color:#fff}
 .ob-logo{width:72px;height:72px;background:var(--accent);border-radius:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;border:3px solid var(--green)}
 .ob h1{font-size:22px;font-weight:600;margin-bottom:8px;line-height:1.3}
 .ob p{font-size:14px;color:#8892c0;line-height:1.6;margin-bottom:28px}
@@ -81,6 +81,9 @@ body{display:flex;justify-content:center}
 .addiction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;width:100%}
 .add-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
 .add-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
+.behavior-chip-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.behavior-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:left;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
+.behavior-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
 /* HERO */
 .hero{background:var(--brand);padding:20px 16px 18px;color:#fff;text-align:center}
 .tier-chip{display:inline-flex;align-items:center;gap:5px;background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green);margin-bottom:14px;cursor:pointer}
@@ -327,6 +330,15 @@ body{display:flex;justify-content:center}
     <div class="gender-chip" id="gc-nb" onclick="selectUserGender('Non-Binary')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Non-Binary</div>
   </div>
 
+  <div class="ob-label" style="margin-bottom: 8px;">Relationship status:</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px;">
+    <div class="gender-chip" id="rc-relationship" onclick="selectRelationshipStatus('in_relationship')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">In a relationship</div>
+    <div class="gender-chip" id="rc-married" onclick="selectRelationshipStatus('married')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Married</div>
+    <div class="gender-chip" id="rc-single" onclick="selectRelationshipStatus('single')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Single</div>
+    <div class="gender-chip" id="rc-complicated" onclick="selectRelationshipStatus('complicated')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">It's complicated</div>
+  </div>
+  <div style="font-size:11px;color:#6672a0;margin-top:-16px;margin-bottom:20px">Some lessons mention a partner — this lets us tailor them to your situation.</div>
+
   <div class="ob-label">What are you recovering from? (Select all that apply)</div>
   <div class="addiction-grid" id="addGrid">
     <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
@@ -336,12 +348,14 @@ body{display:flex;justify-content:center}
     <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Food / eating')">🍽️ Food / Eating</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / spending')">🛍️ Shopping / Spending</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
   </div>
+  <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
+  <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
@@ -350,6 +364,7 @@ body{display:flex;justify-content:center}
   <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
   <div id="dynamic-behavior-questions"></div>
   <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
+  <button class="ob-btn outline" onclick="obBack(1)">Back</button>
 </div>
 
 <!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
@@ -384,13 +399,14 @@ body{display:flex;justify-content:center}
   </div>
 
   <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
+  <button class="ob-btn outline" onclick="obBack(2)">Back</button>
 </div>
 
 <!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div class="ob-label" style="margin-top:4px">Daily spend on this (optional)</div> <input class="ob-input" id="ob-spend" type="number" placeholder="e.g. 15 (dollars per day)"> <div class="ob-label" style="margin-top:4px">Daily hours lost to this (optional)</div> <input class="ob-input" id="ob-hours-lost" type="number" placeholder="e.g. 2 (hours per day)"> <button class="ob-btn" onclick="obNext(4)">Continue</button> </div>
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
-<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> </div> </div>
+<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> <button class="ob-btn outline" onclick="obBack(3)">Back</button> </div> </div>
 <!-- PIN LOCK -->
 <div id="pin-lock" class="ob" style="display:none">
   <div class="ob-logo"><i class="ti ti-lock" style="font-size:32px;color:#fff"></i></div>
@@ -429,17 +445,8 @@ body{display:flex;justify-content:center}
     <div class="mini-stats">
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
-      <div class="mstat"><div class="mstat-n" id="h-streak">0</div><div class="mstat-l">Longest streak</div></div>
     </div>
-  </div>
-
-  <div class="sec" style="padding-bottom:0">
-    <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
-    <div class="card" style="display:flex;justify-content:space-around;text-align:center">
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-total-days">0</div><div class="ps-l">Total sober days</div></div>
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-lessons">0</div><div class="ps-l">Lessons done</div></div>
-      <div class="ps" style="align-items:center"><div class="ps-n" id="h-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
-    </div>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-plans')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
   </div>
 
   <div class="row">
@@ -452,12 +459,6 @@ body{display:flex;justify-content:center}
     <div class="sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
   </div>
 
-  <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:12px">
-    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
-    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--acc-t)">Talk to Nova</div><div style="font-size:12px;color:var(--accent)">Your AI therapist is always here</div></div>
-    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--accent)"></i>
-  </div>
-
   <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
     <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
@@ -465,8 +466,11 @@ body{display:flex;justify-content:center}
   </div>
 
   <div class="sec">
-    <div class="sec-hd">Today's mood</div>
-    <div class="mood-row">
+    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMood()">
+      <span>Today's mood</span>
+      <span id="mood-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Log mood</span>
+    </div>
+    <div class="mood-row" id="home-mood-row" style="display:none">
       <div class="mopt" onclick="setHomeMood(this,'😔','Rough')">😔<span>Rough</span></div>
       <div class="mopt" onclick="setHomeMood(this,'😐','Okay')">😐<span>Okay</span></div>
       <div class="mopt" onclick="setHomeMood(this,'🙂','Good')">🙂<span>Good</span></div>
@@ -477,28 +481,11 @@ body{display:flex;justify-content:center}
 
   <div class="sdiv"></div>
   <div class="sec">
-    <div class="sec-hd">More tools</div>
-  </div>
-  <div class="setting-row" onclick="switchTo('craving');actBn('bn-home')">
-    <i class="ti ti-activity"></i>
-    <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-  <div class="setting-row" onclick="switchTo('timeline');actBn('bn-home')">
-    <i class="ti ti-clock"></i>
-    <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-  <div class="setting-row" onclick="switchTo('progress');actBn('bn-home')">
-    <i class="ti ti-chart-line"></i>
-    <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
-    <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-  </div>
-
-  <div class="sdiv"></div>
-  <div class="sec">
-    <div class="sec-hd">Milestones</div>
-    <div class="card" style="padding:0 14px" id="home-milestones"></div>
+    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
+      <span>Milestones</span>
+      <span id="milestones-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Show all</span>
+    </div>
+    <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
   </div>
 </div>
 
@@ -694,6 +681,14 @@ body{display:flex;justify-content:center}
         </div>
       </div>
       <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
+        <div class="card" style="display:flex;justify-content:space-around;text-align:center">
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l">Total sober days</div></div>
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
+          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
         <div class="sec-hd">This week</div>
         <div class="week-grid" id="weekGrid"></div>
       </div>
@@ -755,6 +750,50 @@ body{display:flex;justify-content:center}
         <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Personalize</div></div>
+      <div class="setting-row" onclick="openNameModal()">
+        <i class="ti ti-pencil"></i>
+        <div class="setting-row-txt"><p>Name</p><span id="name-row-sub">Not set</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openGenderModal()">
+        <i class="ti ti-user-circle"></i>
+        <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Not specified</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openVoiceModal()">
+        <i class="ti ti-brain"></i>
+        <div class="setting-row-txt"><p>Nova's presence</p><span id="voice-row-sub">Neutral</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Recovery tools</div></div>
+      <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
+        <i class="ti ti-activity"></i>
+        <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('timeline');actBn('bn-plans')">
+        <i class="ti ti-clock"></i>
+        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('progress');actBn('bn-plans')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openCostModal()">
+        <i class="ti ti-coin"></i>
+        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openRelationshipModal()">
+        <i class="ti ti-heart"></i>
+        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
@@ -794,6 +833,7 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec">
         <button class="reset-btn" onclick="resetApp()">Reset sobriety date</button>
+        <button class="reset-btn" style="margin-top:8px" onclick="restartOnboarding()">Restart setup</button>
       </div>
     </div>
 
@@ -867,6 +907,91 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- DAILY COST & TIME MODAL -->
+<div class="sos-modal" id="cost-modal" onclick="if(event.target===this)closeCostModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Daily cost &amp; time</div>
+    <div class="sos-sub">Used to calculate the Saved stat and hours reclaimed on your Progress screen. Both are optional.</div>
+    <div class="ob-label" style="text-align:left;margin-top:4px">Daily spend on this (optional)</div>
+    <input class="ob-input" id="cost-spend-input" type="number" placeholder="e.g. 15 (dollars per day)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Daily hours lost to this (optional)</div>
+    <input class="ob-input" id="cost-hours-input" type="number" placeholder="e.g. 2 (hours per day)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <button class="ob-btn" style="margin-top:4px" onclick="saveCostModal()">Save</button>
+    <button class="sos-close" onclick="closeCostModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- RELATIONSHIP STATUS MODAL -->
+<div class="sos-modal" id="relationship-modal" onclick="if(event.target===this)closeRelationshipModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Relationship status</div>
+    <div class="sos-sub">Some lessons mention a partner — this lets us tailor them to your situation.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div class="gender-chip" onclick="chooseRelationshipStatus('in_relationship')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">In a relationship</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('married')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Married</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('single')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Single</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('complicated')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">It's complicated</div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeRelationshipModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="sos-modal" id="name-modal" onclick="if(event.target===this)closeNameModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Your name</div>
+    <input class="ob-input" id="name-input" placeholder="Your name" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);margin-top:8px">
+    <button class="ob-btn" style="margin-top:8px" onclick="saveNameModal()">Save</button>
+    <button class="sos-close" onclick="closeNameModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- GENDER MODAL -->
+<div class="sos-modal" id="gender-modal" onclick="if(event.target===this)closeGenderModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Gender identity</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div class="gender-chip" onclick="chooseGender('Male')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Man</div>
+      <div class="gender-chip" onclick="chooseGender('Female')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Woman</div>
+      <div class="gender-chip" onclick="chooseGender('Non-Binary')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Non-Binary</div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeGenderModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- NOVA VOICE MODAL -->
+<div class="sos-modal" id="voice-modal" onclick="if(event.target===this)closeVoiceModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Nova's presence</div>
+    <div class="sos-sub">You can change this any time.</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+      <div class="voice-card" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">👩‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
+      </div>
+      <div class="voice-card" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">👨‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
+      </div>
+      <div class="voice-card" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+        <div style="font-size:24px">🧑‍💼</div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
+      </div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- GENERIC CONFIRM MODAL -->
+<div class="sos-modal" id="confirm-modal" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Are you sure?</div>
+    <div class="sos-sub" id="confirm-modal-msg"></div>
+    <button class="ob-btn" style="margin-top:8px;background:#E24B4A" onclick="confirmModalYes()">Yes, continue</button>
+    <button class="sos-close" onclick="closeConfirmModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -880,7 +1005,7 @@ body{display:flex;justify-content:center}
 
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
-  name:'',userGender:'Not Specified',accountEmail:null,
+  name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
@@ -923,6 +1048,7 @@ const ICON_PATHS={
 'ti-check':'<polyline points="20 6 9 17 4 12"/>',
 'ti-chevron-right':'<polyline points="9 18 15 12 9 6"/>',
 'ti-clock':'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/>',
+'ti-coin':'<circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.3c0-1.3-1.5-1.8-3-1.8s-3 .6-3 1.8 1.5 1.7 3 1.7 3 .6 3 1.8-1.5 1.8-3 1.8-3-.5-3-1.8"/>',
 'ti-circle-filled':'<circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/>',
 'ti-cloud':'<path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4 2A4 4 0 0 0 6.5 19h11z"/>',
 'ti-crown':'<path d="M2 20L4 8l4 5 4-8 4 8 4-5 2 12z"/><line x1="4" y1="20" x2="20" y2="20"/>',
@@ -976,7 +1102,22 @@ async function loadLessonPacks(){
 
 function getTodayLesson(){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
-  return pack.find(l=>l.day===S.currentDay)||null;
+  const lesson=pack.find(l=>l.day===S.currentDay)||null;
+  return applyRelationshipVariant(lesson);
+}
+
+// Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
+// user told us they're single, swap in the lesson's single_variant fields where one is authored.
+function applyRelationshipVariant(lesson){
+  const usesSingleVariant=S.relationshipStatus==='single'||S.relationshipStatus==='complicated';
+  if(!lesson||!usesSingleVariant||!lesson.single_variant)return lesson;
+  const v=lesson.single_variant;
+  return Object.assign({},lesson,{
+    title:v.title||lesson.title,
+    content:v.content||lesson.content,
+    action:v.action||lesson.action,
+    reflection:v.reflection||lesson.reflection,
+  });
 }
 
 function updateLessonPromo(){
@@ -1049,14 +1190,24 @@ function obNext(n){
   if(n===4){
     const dt=document.getElementById('ob-date').value;
     S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
-    S.dailySpend=parseFloat(document.getElementById('ob-spend').value)||0;
-    S.dailyHoursLost=parseFloat(document.getElementById('ob-hours-lost').value)||0;
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
     const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
     document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
   }
+}
+
+function obBack(n){
+  document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
+  document.getElementById('obs'+n).classList.add('on');
+  ['od0','od1','od2','od3','od4'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.remove('on');
+  });
+  const dotEl=document.getElementById('od'+n);
+  if(dotEl)dotEl.classList.add('on');
+  obStep=n;
 }
 
 function toggleAddiction(element,name){
@@ -1081,12 +1232,44 @@ function selectUserGender(gender){
   document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
 }
 
+function selectRelationshipStatus(status){
+  S.relationshipStatus=status;
+  ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
+    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+  });
+  const idMap={in_relationship:'rc-relationship',married:'rc-married',single:'rc-single',complicated:'rc-complicated'};
+  const targetedId=idMap[status]||'rc-relationship';
+  document.getElementById(targetedId).style.borderColor='var(--green)';
+  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
+}
+
+// Chip-based picker for behavioral blueprint questions - replaces native <select> dropdowns,
+// whose popup list can render unreliably (or appear to offer only one option) inside constrained
+// or embedded viewports.
+function renderBehaviorChips(key,options){
+  const chips=options.map((opt,i)=>`<div class="behavior-chip${i===0?' sel':''}" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
+  return `<div class="behavior-chip-group" data-key="${key}">${chips}</div>`;
+}
+function selectBehaviorChip(el){
+  const group=el.closest('.behavior-chip-group');
+  group.querySelectorAll('.behavior-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function getBehaviorAnswer(key){
+  const group=document.querySelector(`.behavior-chip-group[data-key="${key}"]`);
+  const sel=group&&group.querySelector('.behavior-chip.sel');
+  return sel?sel.getAttribute('data-value'):null;
+}
+
 function goToBehavioralStep(){
   S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  const errEl=document.getElementById('obs1-error');
   if(S.selectedAddictions.length===0){
-    alert('Please select at least one area to focus on.');
+    if(errEl)errEl.textContent='Please select at least one area to focus on.';
     return;
   }
+  if(errEl)errEl.textContent='';
   const container=document.getElementById('dynamic-behavior-questions');
   container.innerHTML='';
   S.selectedAddictions.forEach(addiction=>{
@@ -1094,65 +1277,33 @@ function goToBehavioralStep(){
     if(addiction==='Porn & Sex'){
       htmlBlock+=`
         <div class="ob-label">When are you most vulnerable to acting out?</div>
-        <select class="ob-input" id="behavior-porn-time">
-          <option value="Late at night when isolated">Late at night when isolated</option>
-          <option value="During high stress or work anxiety">During high stress or work anxiety</option>
-          <option value="When bored during random downtime">When bored during random downtime</option>
-        </select>
+        ${renderBehaviorChips('behavior-porn-time',['Late at night when isolated','During high stress or work anxiety','When bored during random downtime'])}
         <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
-        <select class="ob-input" id="behavior-porn-root">
-          <option value="Anesthetizing loneliness / lack of connection">Anesthetizing loneliness / lack of connection</option>
-          <option value="Dopamine hunting to escape boredom">Dopamine hunting to escape boredom</option>
-          <option value="Decompressing from intense performance anxiety">Decompressing from intense performance anxiety</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-porn-root',['Anesthetizing loneliness / lack of connection','Dopamine hunting to escape boredom','Decompressing from intense performance anxiety'])}`;
     }else if(addiction==='Alcohol'||addiction==='Substances'){
       htmlBlock+=`
         <div class="ob-label">How do you usually engage in this cycle?</div>
-        <select class="ob-input" id="behavior-sub-style">
-          <option value="Socially to mask social anxiety">Socially to mask social anxiety</option>
-          <option value="Secretly alone to numb the day">Secretly alone to numb the day</option>
-          <option value="Binging during high stress crashes">Binging during high stress crashes</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-sub-style',['Socially to mask social anxiety','Secretly alone to numb the day','Binging during high stress crashes'])}`;
     }else if(addiction==='Gambling'||addiction==='Social media'||addiction==='Gaming'){
       htmlBlock+=`
         <div class="ob-label">What is the destructive loop trigger?</div>
-        <select class="ob-input" id="behavior-loop-trigger">
-          <option value="Escaping real-world financial or life responsibilities">Escaping real-world responsibilities</option>
-          <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
-          <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
-        </select>`;
-    }else if(addiction==='Food / eating'){
+        ${renderBehaviorChips('behavior-loop-trigger',['Escaping real-world financial or life responsibilities','Chasing immediate wins or instant validation spikes','Losing hours blindly due to lack of strict daily routine'])}`;
+    }else if(addiction==='Food / Binging'){
       htmlBlock+=`
         <div class="ob-label">When do you feel the pull most strongly?</div>
-        <select class="ob-input" id="behavior-food-trigger">
-          <option value="Late at night after a stressful day">Late at night after a stressful day</option>
-          <option value="Alone, away from others watching">Alone, away from others watching</option>
-          <option value="After an emotional trigger like sadness or anger">After an emotional trigger like sadness or anger</option>
-        </select>`;
-    }else if(addiction==='Shopping / spending'){
+        ${renderBehaviorChips('behavior-food-trigger',['Late at night after a stressful day','Alone, away from others watching','After an emotional trigger like sadness or anger'])}`;
+    }else if(addiction==='Shopping / Spending'){
       htmlBlock+=`
         <div class="ob-label">What drives the urge to spend?</div>
-        <select class="ob-input" id="behavior-shopping-trigger">
-          <option value="Chasing the thrill of a new purchase">Chasing the thrill of a new purchase</option>
-          <option value="Escaping stress or sadness through buying">Escaping stress or sadness through buying</option>
-          <option value="Filling a void or boredom with acquiring things">Filling a void or boredom with acquiring things</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-shopping-trigger',['Chasing the thrill of a new purchase','Escaping stress or sadness through buying','Filling a void or boredom with acquiring things'])}`;
     }else if(addiction==='Work'){
       htmlBlock+=`
         <div class="ob-label">What's really driving the overworking?</div>
-        <select class="ob-input" id="behavior-work-trigger">
-          <option value="Fear of not being enough without constant achievement">Fear of not being enough without constant achievement</option>
-          <option value="Avoiding personal life or relationships through busyness">Avoiding personal life or relationships through busyness</option>
-          <option value="Difficulty sitting still or resting without guilt">Difficulty sitting still or resting without guilt</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-work-trigger',['Fear of not being enough without constant achievement','Avoiding personal life or relationships through busyness','Difficulty sitting still or resting without guilt'])}`;
     }else{
       htmlBlock+=`
         <div class="ob-label">What feels like the driving root cause here?</div>
-        <select class="ob-input" id="behavior-gen-root">
-          <option value="Stress & emotional burnout">Stress &amp; emotional burnout</option>
-          <option value="Habitual routine patterns that are hardwired">Habitual hardwired routines</option>
-          <option value="Isolation and a lack of true real-world accountability">Isolation &amp; lack of accountability</option>
-        </select>`;
+        ${renderBehaviorChips('behavior-gen-root',['Stress & emotional burnout','Habitual routine patterns that are hardwired','Isolation and a lack of true real-world accountability'])}`;
     }
     htmlBlock+=`</div>`;
     container.innerHTML+=htmlBlock;
@@ -1162,14 +1313,14 @@ function goToBehavioralStep(){
 
 function showVoiceStep(){
   S.behavioralBlueprint={};
-  if(document.getElementById('behavior-porn-time'))S.behavioralBlueprint.pornTime=document.getElementById('behavior-porn-time').value;
-  if(document.getElementById('behavior-porn-root'))S.behavioralBlueprint.pornRoot=document.getElementById('behavior-porn-root').value;
-  if(document.getElementById('behavior-sub-style'))S.behavioralBlueprint.subStyle=document.getElementById('behavior-sub-style').value;
-  if(document.getElementById('behavior-loop-trigger'))S.behavioralBlueprint.loopTrigger=document.getElementById('behavior-loop-trigger').value;
-  if(document.getElementById('behavior-food-trigger'))S.behavioralBlueprint.foodTrigger=document.getElementById('behavior-food-trigger').value;
-  if(document.getElementById('behavior-shopping-trigger'))S.behavioralBlueprint.shoppingTrigger=document.getElementById('behavior-shopping-trigger').value;
-  if(document.getElementById('behavior-work-trigger'))S.behavioralBlueprint.workTrigger=document.getElementById('behavior-work-trigger').value;
-  if(document.getElementById('behavior-gen-root'))S.behavioralBlueprint.genRoot=document.getElementById('behavior-gen-root').value;
+  const pornTime=getBehaviorAnswer('behavior-porn-time');if(pornTime)S.behavioralBlueprint.pornTime=pornTime;
+  const pornRoot=getBehaviorAnswer('behavior-porn-root');if(pornRoot)S.behavioralBlueprint.pornRoot=pornRoot;
+  const subStyle=getBehaviorAnswer('behavior-sub-style');if(subStyle)S.behavioralBlueprint.subStyle=subStyle;
+  const loopTrigger=getBehaviorAnswer('behavior-loop-trigger');if(loopTrigger)S.behavioralBlueprint.loopTrigger=loopTrigger;
+  const foodTrigger=getBehaviorAnswer('behavior-food-trigger');if(foodTrigger)S.behavioralBlueprint.foodTrigger=foodTrigger;
+  const shoppingTrigger=getBehaviorAnswer('behavior-shopping-trigger');if(shoppingTrigger)S.behavioralBlueprint.shoppingTrigger=shoppingTrigger;
+  const workTrigger=getBehaviorAnswer('behavior-work-trigger');if(workTrigger)S.behavioralBlueprint.workTrigger=workTrigger;
+  const genRoot=getBehaviorAnswer('behavior-gen-root');if(genRoot)S.behavioralBlueprint.genRoot=genRoot;
 
   document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
   document.getElementById('obs2_5').classList.add('on');
@@ -1203,6 +1354,8 @@ function initApp(){
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
+  updateRelationshipStatusUI();
+  updateProfileEditUI();
   updateLessonPromo();
   updateUserUI();
   updateStats();
@@ -1264,15 +1417,6 @@ function updateStats(){
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
-  document.getElementById('h-streak').textContent=S.longestStreak||days;
-
-  // lifetime stats - sum the current streak on top of every streak already banked at reset time,
-  // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
-  if(document.getElementById('h-total-days')){
-    document.getElementById('h-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
-    document.getElementById('h-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
-    document.getElementById('h-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
-  }
 
   // next milestone
   const milestones=[1,3,7,14,30,60,90,180,365];
@@ -1292,6 +1436,11 @@ function updateStats(){
     document.getElementById('prog-saved').textContent='$'+Number(saved).toLocaleString();
     document.getElementById('prog-streak').textContent=days;
     document.getElementById('prog-longest').textContent=S.longestStreak||days;
+    // lifetime stats - sum the current streak on top of every streak already banked at reset time,
+    // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
+    document.getElementById('prog-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
+    document.getElementById('prog-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
+    document.getElementById('prog-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
     const pct90=Math.min(days/90,1);
     const circ=339.3;
     document.getElementById('prog-circle').setAttribute('stroke-dashoffset',circ-(circ*pct90));
@@ -1364,10 +1513,11 @@ function renderJournal(){
   });
 }
 function deleteJournalEntry(idx){
-  if(!confirm('Delete this journal entry? This cannot be undone.'))return;
-  S.journals.splice(idx,1);
-  save();
-  renderJournal();
+  appConfirm('Delete this journal entry? This cannot be undone.',()=>{
+    S.journals.splice(idx,1);
+    save();
+    renderJournal();
+  });
 }
 function renderTodayMood(){/* placeholder */}
 
@@ -1431,7 +1581,7 @@ function logCraving(){
   document.getElementById('cVal').textContent='5 / 10';
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
 }
-function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-home');}
+function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-plans');}
 function renderCravings(){
   const log=document.getElementById('cravingLog');
   if(!log)return;
@@ -1444,10 +1594,11 @@ function renderCravings(){
   renderCrvChart();
 }
 function deleteCraving(idx){
-  if(!confirm('Delete this craving log entry?'))return;
-  S.cravings.splice(idx,1);
-  save();
-  renderCravings();
+  appConfirm('Delete this craving log entry?',()=>{
+    S.cravings.splice(idx,1);
+    save();
+    renderCravings();
+  });
 }
 function renderCrvChart(){
   const chart=document.getElementById('crvChart');
@@ -1484,15 +1635,16 @@ function likePost(btn){
   span.textContent=parseInt(span.textContent)+(liked?1:-1);
 }
 function reportPost(btn){
-  if(!confirm("Hide this post? You won't see it again, and it helps us know what to review."))return;
-  const wrapper=btn.closest('[data-post-idx]');
-  if(wrapper){
-    S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
-    save();
-    renderCommunityPosts();
-  }else{
-    btn.closest('.post').remove();
-  }
+  appConfirm("Hide this post? You won't see it again, and it helps us know what to review.",()=>{
+    const wrapper=btn.closest('[data-post-idx]');
+    if(wrapper){
+      S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
+      save();
+      renderCommunityPosts();
+    }else{
+      btn.closest('.post').remove();
+    }
+  });
 }
 function renderCommunityPosts(){
   const container=document.getElementById('userPostList');
@@ -1577,6 +1729,22 @@ function buildProgress(){
 function setHomeMood(el,emoji,label){
   document.querySelectorAll('#s-home .mood-row .mopt').forEach(m=>m.classList.remove('sel'));
   el.classList.add('sel');
+}
+
+function toggleHomeMood(){
+  const row=document.getElementById('home-mood-row');
+  const lbl=document.getElementById('mood-toggle-lbl');
+  const show=row.style.display==='none';
+  row.style.display=show?'flex':'none';
+  lbl.textContent=show?'Hide':'Log mood';
+}
+
+function toggleHomeMilestones(){
+  const wrap=document.getElementById('home-milestones');
+  const lbl=document.getElementById('milestones-toggle-lbl');
+  const show=wrap.style.display==='none';
+  wrap.style.display=show?'block':'none';
+  lbl.textContent=show?'Hide':'Show all';
 }
 
 // ─── PLEDGE ───────────────────────────────────────────────────────────────────
@@ -1957,6 +2125,147 @@ function confirmResetDate(){
   S.pledged=false;
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
+}
+
+// ─── DAILY COST & TIME ────────────────────────────────────────────────────────
+function openCostModal(){
+  document.getElementById('cost-spend-input').value=S.dailySpend||'';
+  document.getElementById('cost-hours-input').value=S.dailyHoursLost||'';
+  document.getElementById('cost-modal').classList.add('open');
+}
+function closeCostModal(){
+  document.getElementById('cost-modal').classList.remove('open');
+}
+function saveCostModal(){
+  S.dailySpend=parseFloat(document.getElementById('cost-spend-input').value)||0;
+  S.dailyHoursLost=parseFloat(document.getElementById('cost-hours-input').value)||0;
+  save();updateStats();
+  closeCostModal();
+}
+
+// ─── RELATIONSHIP STATUS ──────────────────────────────────────────────────────
+function openRelationshipModal(){
+  document.getElementById('relationship-modal').classList.add('open');
+}
+function closeRelationshipModal(){
+  document.getElementById('relationship-modal').classList.remove('open');
+}
+function chooseRelationshipStatus(status){
+  S.relationshipStatus=status;
+  save();
+  updateRelationshipStatusUI();
+  updateLessonPromo();
+  if(document.getElementById('s-lesson').classList.contains('on'))renderTodayLesson();
+  closeRelationshipModal();
+}
+function updateRelationshipStatusUI(){
+  const el=document.getElementById('rel-status-sub');
+  if(!el)return;
+  const labels={in_relationship:'In a relationship',married:'Married',single:'Single',complicated:"It's complicated"};
+  el.textContent=labels[S.relationshipStatus]||'In a relationship';
+}
+
+// ─── GENERIC CONFIRM ───────────────────────────────────────────────────────────
+// window.confirm() is silently suppressed in sandboxed embeds (no allow-modals), which would
+// make every delete/hide action a dead click with zero feedback - this in-app modal always works.
+let _confirmModalCallback=null;
+function appConfirm(message,onConfirm){
+  document.getElementById('confirm-modal-msg').textContent=message;
+  _confirmModalCallback=onConfirm;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirmModal(){
+  document.getElementById('confirm-modal').classList.remove('open');
+  _confirmModalCallback=null;
+}
+function confirmModalYes(){
+  const cb=_confirmModalCallback;
+  closeConfirmModal();
+  if(cb)cb();
+}
+
+// ─── PROFILE PERSONALIZATION ──────────────────────────────────────────────────
+function updateProfileEditUI(){
+  const nameEl=document.getElementById('name-row-sub');
+  if(nameEl)nameEl.textContent=S.name||'Not set';
+  const genderEl=document.getElementById('gender-row-sub');
+  if(genderEl)genderEl.textContent=S.userGender||'Not specified';
+  const voiceEl=document.getElementById('voice-row-sub');
+  if(voiceEl){
+    const labels={female:'Female',male:'Male',neutral:'Neutral'};
+    voiceEl.textContent=labels[S.novaVoice]||'Neutral';
+  }
+}
+
+function openNameModal(){
+  document.getElementById('name-input').value=S.name||'';
+  document.getElementById('name-modal').classList.add('open');
+}
+function closeNameModal(){document.getElementById('name-modal').classList.remove('open');}
+function saveNameModal(){
+  const val=document.getElementById('name-input').value.trim();
+  if(val)S.name=val;
+  save();
+  updateUserUI();
+  updateProfileEditUI();
+  closeNameModal();
+}
+
+function openGenderModal(){document.getElementById('gender-modal').classList.add('open');}
+function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}
+function chooseGender(g){
+  S.userGender=g;
+  save();
+  updateProfileEditUI();
+  closeGenderModal();
+}
+
+function openVoiceModal(){document.getElementById('voice-modal').classList.add('open');}
+function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
+function chooseVoice(v){
+  S.novaVoice=v;
+  save();
+  updateProfileEditUI();
+  closeVoiceModal();
+}
+
+function restartOnboarding(){
+  appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your name, focus areas, and preferences.",()=>{
+    S.name='';
+    S.userGender='Not Specified';
+    S.relationshipStatus=null;
+    S.selectedAddictions=[];
+    S.behavioralBlueprint={};
+    S.novaVoice='neutral';
+    S.startDate=null;
+    S.currentAddiction='';
+    save();
+
+    document.getElementById('ob-name').value='';
+    document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
+    ['gc-male','gc-female','gc-nb'].forEach(id=>{
+      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+    });
+    ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
+      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+    });
+    const errEl=document.getElementById('obs1-error');
+    if(errEl)errEl.textContent='';
+
+    document.getElementById('main-app').style.display='none';
+    document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
+    document.getElementById('obs0').classList.add('on');
+    ['od0','od1','od2','od3','od4'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el)el.classList.remove('on');
+    });
+    const dot0=document.getElementById('od0');
+    if(dot0)dot0.classList.add('on');
+    obStep=0;
+    document.getElementById('onboarding').style.display='flex';
+  });
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

@@ -328,9 +328,11 @@ body{display:flex;justify-content:center}
   </div>
 
   <div class="ob-label" style="margin-bottom: 8px;">Relationship status:</div>
-  <div style="display: flex; gap: 8px; margin-bottom: 24px;">
-    <div class="gender-chip" id="rc-relationship" onclick="selectRelationshipStatus('in_relationship')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">In a relationship</div>
-    <div class="gender-chip" id="rc-single" onclick="selectRelationshipStatus('single')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Single</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px;">
+    <div class="gender-chip" id="rc-relationship" onclick="selectRelationshipStatus('in_relationship')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">In a relationship</div>
+    <div class="gender-chip" id="rc-married" onclick="selectRelationshipStatus('married')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Married</div>
+    <div class="gender-chip" id="rc-single" onclick="selectRelationshipStatus('single')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Single</div>
+    <div class="gender-chip" id="rc-complicated" onclick="selectRelationshipStatus('complicated')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">It's complicated</div>
   </div>
   <div style="font-size:11px;color:#6672a0;margin-top:-16px;margin-bottom:20px">Some lessons mention a partner — this lets us tailor them to your situation.</div>
 
@@ -762,7 +764,7 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="toggleRelationshipStatus()">
+      <div class="setting-row" onclick="openRelationshipModal()">
         <i class="ti ti-heart"></i>
         <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -894,6 +896,21 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- RELATIONSHIP STATUS MODAL -->
+<div class="sos-modal" id="relationship-modal" onclick="if(event.target===this)closeRelationshipModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Relationship status</div>
+    <div class="sos-sub">Some lessons mention a partner — this lets us tailor them to your situation.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+      <div class="gender-chip" onclick="chooseRelationshipStatus('in_relationship')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">In a relationship</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('married')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Married</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('single')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Single</div>
+      <div class="gender-chip" onclick="chooseRelationshipStatus('complicated')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">It's complicated</div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeRelationshipModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -1010,7 +1027,8 @@ function getTodayLesson(){
 // Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
 // user told us they're single, swap in the lesson's single_variant fields where one is authored.
 function applyRelationshipVariant(lesson){
-  if(!lesson||S.relationshipStatus!=='single'||!lesson.single_variant)return lesson;
+  const usesSingleVariant=S.relationshipStatus==='single'||S.relationshipStatus==='complicated';
+  if(!lesson||!usesSingleVariant||!lesson.single_variant)return lesson;
   const v=lesson.single_variant;
   return Object.assign({},lesson,{
     title:v.title||lesson.title,
@@ -1122,11 +1140,12 @@ function selectUserGender(gender){
 
 function selectRelationshipStatus(status){
   S.relationshipStatus=status;
-  ['rc-relationship','rc-single'].forEach(id=>{
+  ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
     document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
     document.getElementById(id).style.background='rgba(255,255,255,0.03)';
   });
-  const targetedId=status==='single'?'rc-single':'rc-relationship';
+  const idMap={in_relationship:'rc-relationship',married:'rc-married',single:'rc-single',complicated:'rc-complicated'};
+  const targetedId=idMap[status]||'rc-relationship';
   document.getElementById(targetedId).style.borderColor='var(--green)';
   document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
 }
@@ -2039,16 +2058,25 @@ function saveCostModal(){
 }
 
 // ─── RELATIONSHIP STATUS ──────────────────────────────────────────────────────
-function toggleRelationshipStatus(){
-  S.relationshipStatus=(S.relationshipStatus==='single')?'in_relationship':'single';
+function openRelationshipModal(){
+  document.getElementById('relationship-modal').classList.add('open');
+}
+function closeRelationshipModal(){
+  document.getElementById('relationship-modal').classList.remove('open');
+}
+function chooseRelationshipStatus(status){
+  S.relationshipStatus=status;
   save();
   updateRelationshipStatusUI();
   updateLessonPromo();
   if(document.getElementById('s-lesson').classList.contains('on'))renderTodayLesson();
+  closeRelationshipModal();
 }
 function updateRelationshipStatusUI(){
   const el=document.getElementById('rel-status-sub');
-  if(el)el.textContent=S.relationshipStatus==='single'?'Single':'In a relationship';
+  if(!el)return;
+  const labels={in_relationship:'In a relationship',married:'Married',single:'Single',complicated:"It's complicated"};
+  el.textContent=labels[S.relationshipStatus]||'In a relationship';
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

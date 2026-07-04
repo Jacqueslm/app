@@ -336,8 +336,8 @@ body{display:flex;justify-content:center}
     <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Food / binging')">🍽️ Food / Binging</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / spending')">🛍️ Shopping / Spending</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
+    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
     <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
   </div>
@@ -1134,7 +1134,7 @@ function goToBehavioralStep(){
           <option value="Chasing immediate wins or instant validation spikes">Chasing immediate validation spikes</option>
           <option value="Losing hours blindly due to lack of strict daily routine">Blind time-wasting due to lack of routine</option>
         </select>`;
-    }else if(addiction==='Food / binging'){
+    }else if(addiction==='Food / Binging'){
       htmlBlock+=`
         <div class="ob-label">When do you feel the pull most strongly?</div>
         <select class="ob-input" id="behavior-food-trigger">
@@ -1142,7 +1142,7 @@ function goToBehavioralStep(){
           <option value="Alone, away from others watching">Alone, away from others watching</option>
           <option value="After an emotional trigger like sadness or anger">After an emotional trigger like sadness or anger</option>
         </select>`;
-    }else if(addiction==='Shopping / spending'){
+    }else if(addiction==='Shopping / Spending'){
       htmlBlock+=`
         <div class="ob-label">What drives the urge to spend?</div>
         <select class="ob-input" id="behavior-shopping-trigger">

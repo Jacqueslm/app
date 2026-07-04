@@ -323,21 +323,7 @@ body{display:flex;justify-content:center}
   <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What's your first name?</div>
   <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
 
-  <div class="ob-label" style="margin-bottom: 8px;">I identify as:</div>
-  <div class="gender-identity-container" style="display: flex; gap: 8px; margin-bottom: 24px;">
-    <div class="gender-chip" id="gc-male" onclick="selectUserGender('Male')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Man</div>
-    <div class="gender-chip" id="gc-female" onclick="selectUserGender('Female')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Woman</div>
-    <div class="gender-chip" id="gc-nb" onclick="selectUserGender('Non-Binary')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Non-Binary</div>
-  </div>
-
-  <div class="ob-label" style="margin-bottom: 8px;">Relationship status:</div>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:24px;">
-    <div class="gender-chip" id="rc-relationship" onclick="selectRelationshipStatus('in_relationship')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">In a relationship</div>
-    <div class="gender-chip" id="rc-married" onclick="selectRelationshipStatus('married')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Married</div>
-    <div class="gender-chip" id="rc-single" onclick="selectRelationshipStatus('single')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Single</div>
-    <div class="gender-chip" id="rc-complicated" onclick="selectRelationshipStatus('complicated')" style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">It's complicated</div>
-  </div>
-  <div style="font-size:11px;color:#6672a0;margin-top:-16px;margin-bottom:20px">Some lessons mention a partner — this lets us tailor them to your situation.</div>
+  <div style="font-size:11px;color:#6672a0;margin-bottom:20px">You can set your gender identity and relationship status any time in Profile — some lessons mention a partner, and that lets us tailor them to your situation.</div>
 
   <div class="ob-label">What are you recovering from? (Select all that apply)</div>
   <div class="addiction-grid" id="addGrid">
@@ -636,7 +622,7 @@ body{display:flex;justify-content:center}
     <!-- TIMELINE -->
     <div id="s-timeline" class="scr">
       <div class="sec" style="padding-bottom:0">
-        <div class="sec-hd">Withdrawal timeline</div>
+        <div class="sec-hd" id="tl-title">Withdrawal timeline</div>
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:13px;color:var(--acc-t)" id="tl-current-msg">Your body is healing.</div>
       </div>
       <div class="tl" id="tl-container"></div>
@@ -766,6 +752,16 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Nova's presence</p><span id="voice-row-sub">Neutral</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="openRelationshipModal()">
+        <i class="ti ti-heart"></i>
+        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openCostModal()">
+        <i class="ti ti-coin"></i>
+        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Recovery tools</div></div>
       <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
@@ -783,16 +779,6 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openCostModal()">
-        <i class="ti ti-coin"></i>
-        <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openRelationshipModal()">
-        <i class="ti ti-heart"></i>
-        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
@@ -802,7 +788,7 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="toggleNotif()">
         <i class="ti ti-bell"></i>
-        <div class="setting-row-txt"><p>Daily reminders</p><span>Morning check-in & pledge reminder</span></div>
+        <div class="setting-row-txt"><p>Daily reminders</p><span>Morning check-in & pledge reminder (coming soon — saved for when it ships)</span></div>
         <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
       </div>
       <div class="setting-row" onclick="toggleDark()">
@@ -820,12 +806,12 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row">
+      <div class="setting-row" onclick="shareMyMilestone()">
         <i class="ti ti-share"></i>
-        <div class="setting-row-txt"><p>Share my milestone</p><span>Inspire someone else</span></div>
+        <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Inspire someone else</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row">
+      <div class="setting-row" onclick="window.location.href='tel:988'">
         <i class="ti ti-phone" style="color:#E24B4A"></i>
         <div class="setting-row-txt"><p style="color:#E24B4A">Crisis helpline</p><span>988 Suicide & Crisis Lifeline</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -833,7 +819,13 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec">
         <button class="reset-btn" onclick="resetApp()">Reset sobriety date</button>
-        <button class="reset-btn" style="margin-top:8px" onclick="restartOnboarding()">Restart setup</button>
+        <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Corrects your start date and streak. Nothing else changes.</div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec">
+        <div class="sec-hd" style="color:#E24B4A">Danger zone</div>
+        <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
+        <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
       </div>
     </div>
 
@@ -1007,7 +999,7 @@ body{display:flex;justify-content:center}
 let S = {
   name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
-  startDate:null,dailySpend:0,dailyHoursLost:0,
+  startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   isPro:false,pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,communityPosts:[],darkMode:false,
@@ -1219,31 +1211,6 @@ function toggleAddiction(element,name){
   }
 }
 
-function selectUserGender(gender){
-  S.userGender=gender;
-  ['gc-male','gc-female','gc-nb'].forEach(id=>{
-    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
-    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
-  });
-  let targetedId='gc-nb';
-  if(gender==='Male')targetedId='gc-male';
-  if(gender==='Female')targetedId='gc-female';
-  document.getElementById(targetedId).style.borderColor='var(--green)';
-  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
-}
-
-function selectRelationshipStatus(status){
-  S.relationshipStatus=status;
-  ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
-    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
-    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
-  });
-  const idMap={in_relationship:'rc-relationship',married:'rc-married',single:'rc-single',complicated:'rc-complicated'};
-  const targetedId=idMap[status]||'rc-relationship';
-  document.getElementById(targetedId).style.borderColor='var(--green)';
-  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
-}
-
 // Chip-based picker for behavioral blueprint questions - replaces native <select> dropdowns,
 // whose popup list can render unreliably (or appear to offer only one option) inside constrained
 // or embedded viewports.
@@ -1354,6 +1321,7 @@ function initApp(){
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
+  document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled!==false);
   updateRelationshipStatusUI();
   updateProfileEditUI();
   updateLessonPromo();
@@ -1660,7 +1628,8 @@ function renderCommunityPosts(){
 }
 
 // ─── TIMELINE ─────────────────────────────────────────────────────────────────
-const TL_DATA=[
+// Physical-dependency timeline - only accurate for substances the body actually withdraws from.
+const TL_DATA_CHEMICAL=[
   {range:'Hours 6–24',phase:'Early withdrawal',desc:'Anxiety, shaking, sweating, nausea, and headaches begin. Heart rate and blood pressure may rise.',warn:'If you experience severe symptoms, seek medical support immediately.',days:[0,1]},
   {range:'Days 1–3',phase:'Peak withdrawal',desc:'Symptoms peak. Risk of seizures is highest during this window. Sleep is disrupted and irritability is intense.',warn:'Medically supervised detox is strongly recommended during this phase.',days:[1,3]},
   {range:'Days 4–7',phase:'Acute phase easing',desc:'Physical symptoms begin to ease. Mood swings, cravings, and brain fog remain. Sleep starts to improve.',days:[3,7]},
@@ -1670,15 +1639,35 @@ const TL_DATA=[
   {range:'6 months–1 year',phase:'Restoration',desc:'Liver function and cardiovascular health measurably improve. Cognitive function often returns to pre-addiction levels.',days:[180,365]},
   {range:'1 year+',phase:'Long-term recovery',desc:'Risk of relapse drops substantially. Relationships, career, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
 ];
+// Behavioral-addiction timeline - no organs involved, so this is framed around urge intensity and
+// habit rewiring instead of borrowing chemical-withdrawal language (seizures, detox, liver) that
+// doesn't apply to gambling, gaming, social media, work, shopping, porn/sex, or binge eating.
+const TL_DATA_BEHAVIORAL=[
+  {range:'Hours 6–24',phase:'Early urge spike',desc:'The pull toward the behavior often gets sharper before it eases — a normal "extinction burst," not a sign anything is going wrong.',days:[0,1]},
+  {range:'Days 1–3',phase:'Peak psychological pull',desc:'Cravings and restlessness typically peak here. Sleep and mood may be disrupted as your brain adjusts to the missing reward pattern.',warn:'If urges feel unmanageable, use the SOS button or talk to Nova right now — you do not have to ride this out alone.',days:[1,3]},
+  {range:'Days 4–7',phase:'Early stabilising',desc:'The sharpest urges begin to ease. Boredom, irritability, and the pull to "just check" or "just this once" remain common.',days:[3,7]},
+  {range:'Weeks 2–4',phase:'Early recovery',desc:'Mood swings and occasional strong urges continue, but usually less often and less intensely. Energy and focus often start improving.',days:[7,30]},
+  {range:'Weeks 4–12',phase:'Habit rewiring',desc:'Your brain is actively building new default responses to the situations that used to trigger the behavior. Strong pulls around old triggers are still normal here.',days:[30,84]},
+  {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep and mood normalise further. Old triggers carry less automatic pull, and new coping habits start feeling natural instead of effortful.',days:[84,180]},
+  {range:'6 months–1 year',phase:'Restoration',desc:'Confidence in handling triggers grows substantially. Relationships and structure the behavior damaged often continue to repair.',days:[180,365]},
+  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of relapse drops substantially. Relationships, purpose, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
+];
+const TL_CHEMICAL_CATEGORIES=['Alcohol','Smoking','Substances'];
+function getTimelineData(){
+  return TL_CHEMICAL_CATEGORIES.includes(S.currentAddiction)?TL_DATA_CHEMICAL:TL_DATA_BEHAVIORAL;
+}
 function buildTimeline(){
   const tl=document.getElementById('tl-container');
   if(!tl)return;
   tl.innerHTML='';
   const days=getDays();
-  TL_DATA.forEach((item,i)=>{
+  const data=getTimelineData();
+  const titleEl=document.getElementById('tl-title');
+  if(titleEl)titleEl.textContent=TL_CHEMICAL_CATEGORIES.includes(S.currentAddiction)?'Withdrawal timeline':'Recovery timeline';
+  data.forEach((item,i)=>{
     const done=days>=item.days[1];
     const now=days>=item.days[0]&&days<item.days[1];
-    const last=i===TL_DATA.length-1;
+    const last=i===data.length-1;
     const dotCls=done?'done':now?'now':'fut';
     const titleCls=done?'done-c':now?'now-c':'';
     const badgeCls=done?'done':now?'now':'fut';
@@ -1696,8 +1685,10 @@ function buildTimeline(){
 function updateTimelineHighlight(days){
   const msg=document.getElementById('tl-current-msg');
   if(!msg)return;
-  const cur=TL_DATA.find(t=>days>=t.days[0]&&days<t.days[1]);
-  if(cur)msg.textContent=`Day ${days} — ${cur.phase}. Your body is healing in real time.`;
+  const isChemical=TL_CHEMICAL_CATEGORIES.includes(S.currentAddiction);
+  const healText=isChemical?'Your body is healing in real time.':'Your brain is rewiring in real time.';
+  const cur=getTimelineData().find(t=>days>=t.days[0]&&days<t.days[1]);
+  if(cur)msg.textContent=`Day ${days} — ${cur.phase}. ${healText}`;
   else if(days>=365)msg.textContent=`Day ${days} — You are in long-term recovery. Incredible.`;
 }// ─── PROGRESS ─────────────────────────────────────────────────────────────────
 function buildProgress(){
@@ -2092,7 +2083,11 @@ async function submitPinEntry(){
 }
 
 // ─── PROFILE / SETTINGS ──────────────────────────────────────────────────────
-function toggleNotif(){const t=document.getElementById('notif-toggle');t.classList.toggle('on');}
+function toggleNotif(){
+  S.remindersEnabled=!S.remindersEnabled;
+  document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled);
+  save();
+}
 function toggleDark(){
   S.darkMode=!S.darkMode;
   document.getElementById('dark-toggle').classList.toggle('on',S.darkMode);
@@ -2184,6 +2179,28 @@ function confirmModalYes(){
   if(cb)cb();
 }
 
+// ─── SHARE ─────────────────────────────────────────────────────────────────────
+function shareMyMilestone(){
+  const days=getDays();
+  const text=`I'm ${days} day${days===1?'':'s'} into my recovery journey with Turn Someday Into Day One. One day at a time.`;
+  if(navigator.share){
+    navigator.share({text}).catch(()=>{});
+    return;
+  }
+  const sub=document.getElementById('share-row-sub');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      if(sub){
+        const original=sub.textContent;
+        sub.textContent='Copied to clipboard';
+        setTimeout(()=>{sub.textContent=original;},2000);
+      }
+    }).catch(()=>{
+      if(sub)sub.textContent='Could not copy — try again';
+    });
+  }
+}
+
 // ─── PROFILE PERSONALIZATION ──────────────────────────────────────────────────
 function updateProfileEditUI(){
   const nameEl=document.getElementById('name-row-sub');
@@ -2243,14 +2260,6 @@ function restartOnboarding(){
 
     document.getElementById('ob-name').value='';
     document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
-    ['gc-male','gc-female','gc-nb'].forEach(id=>{
-      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
-      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
-    });
-    ['rc-relationship','rc-married','rc-single','rc-complicated'].forEach(id=>{
-      document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
-      document.getElementById(id).style.background='rgba(255,255,255,0.03)';
-    });
     const errEl=document.getElementById('obs1-error');
     if(errEl)errEl.textContent='';
 

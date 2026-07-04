@@ -327,6 +327,13 @@ body{display:flex;justify-content:center}
     <div class="gender-chip" id="gc-nb" onclick="selectUserGender('Non-Binary')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Non-Binary</div>
   </div>
 
+  <div class="ob-label" style="margin-bottom: 8px;">Relationship status:</div>
+  <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+    <div class="gender-chip" id="rc-relationship" onclick="selectRelationshipStatus('in_relationship')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">In a relationship</div>
+    <div class="gender-chip" id="rc-single" onclick="selectRelationshipStatus('single')" style="flex:1; padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:8px; text-align:center; cursor:pointer; font-size:13px; color:#fff;">Single</div>
+  </div>
+  <div style="font-size:11px;color:#6672a0;margin-top:-16px;margin-bottom:20px">Some lessons mention a partner — this lets us tailor them to your situation.</div>
+
   <div class="ob-label">What are you recovering from? (Select all that apply)</div>
   <div class="addiction-grid" id="addGrid">
     <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
@@ -755,6 +762,11 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="toggleRelationshipStatus()">
+        <i class="ti ti-heart"></i>
+        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
@@ -895,7 +907,7 @@ body{display:flex;justify-content:center}
 
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
-  name:'',userGender:'Not Specified',accountEmail:null,
+  name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,
   isPro:false,pledged:false,pledgeDate:'',
@@ -991,7 +1003,21 @@ async function loadLessonPacks(){
 
 function getTodayLesson(){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
-  return pack.find(l=>l.day===S.currentDay)||null;
+  const lesson=pack.find(l=>l.day===S.currentDay)||null;
+  return applyRelationshipVariant(lesson);
+}
+
+// Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
+// user told us they're single, swap in the lesson's single_variant fields where one is authored.
+function applyRelationshipVariant(lesson){
+  if(!lesson||S.relationshipStatus!=='single'||!lesson.single_variant)return lesson;
+  const v=lesson.single_variant;
+  return Object.assign({},lesson,{
+    title:v.title||lesson.title,
+    content:v.content||lesson.content,
+    action:v.action||lesson.action,
+    reflection:v.reflection||lesson.reflection,
+  });
 }
 
 function updateLessonPromo(){
@@ -1090,6 +1116,17 @@ function selectUserGender(gender){
   let targetedId='gc-nb';
   if(gender==='Male')targetedId='gc-male';
   if(gender==='Female')targetedId='gc-female';
+  document.getElementById(targetedId).style.borderColor='var(--green)';
+  document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
+}
+
+function selectRelationshipStatus(status){
+  S.relationshipStatus=status;
+  ['rc-relationship','rc-single'].forEach(id=>{
+    document.getElementById(id).style.borderColor='rgba(255,255,255,0.1)';
+    document.getElementById(id).style.background='rgba(255,255,255,0.03)';
+  });
+  const targetedId=status==='single'?'rc-single':'rc-relationship';
   document.getElementById(targetedId).style.borderColor='var(--green)';
   document.getElementById(targetedId).style.background='rgba(126,232,162,0.12)';
 }
@@ -1216,6 +1253,7 @@ function initApp(){
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
+  updateRelationshipStatusUI();
   updateLessonPromo();
   updateUserUI();
   updateStats();
@@ -1998,6 +2036,19 @@ function saveCostModal(){
   S.dailyHoursLost=parseFloat(document.getElementById('cost-hours-input').value)||0;
   save();updateStats();
   closeCostModal();
+}
+
+// ─── RELATIONSHIP STATUS ──────────────────────────────────────────────────────
+function toggleRelationshipStatus(){
+  S.relationshipStatus=(S.relationshipStatus==='single')?'in_relationship':'single';
+  save();
+  updateRelationshipStatusUI();
+  updateLessonPromo();
+  if(document.getElementById('s-lesson').classList.contains('on'))renderTodayLesson();
+}
+function updateRelationshipStatusUI(){
+  const el=document.getElementById('rel-status-sub');
+  if(el)el.textContent=S.relationshipStatus==='single'?'Single':'In a relationship';
 }
 
 // ─── ACCOUNT & SYNC ───────────────────────────────────────────────────────────

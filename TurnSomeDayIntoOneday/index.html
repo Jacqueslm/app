@@ -816,6 +816,76 @@ body{display:flex;justify-content:center}
         <div id="weekly-reports-list"></div>
       </div>
     </div>
+
+    <!-- SMART REMINDER SETTINGS (Pro) -->
+    <div id="s-reminder-settings" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Smart reminder types</div>
+        <div class="setting-row" onclick="toggleSmartReminderType('urgeWindow')">
+          <i class="ti ti-clock" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Urge window alerts</p><span>Based on your past urge and relapse times</span></div>
+          <div class="toggle-sw" id="sr-toggle-urgeWindow"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('relapseRisk')">
+          <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Relapse risk alerts</p><span>When stress, mood, or cravings spike</span></div>
+          <div class="toggle-sw" id="sr-toggle-relapseRisk"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('morningCheckin')">
+          <i class="ti ti-sparkles" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Morning check-in</p><span>Mood check and intention-setting</span></div>
+          <div class="toggle-sw" id="sr-toggle-morningCheckin"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('bedtimeReflection')">
+          <i class="ti ti-moon" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Bedtime reflection</p><span>An end-of-day reflection prompt</span></div>
+          <div class="toggle-sw" id="sr-toggle-bedtimeReflection"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('motivational')">
+          <i class="ti ti-heart" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Nova motivational messages</p><span>Encouragement based on your consistency</span></div>
+          <div class="toggle-sw" id="sr-toggle-motivational"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('categorySpecific')">
+          <i class="ti ti-notebook" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Category-specific reminders</p><span>Tailored to your focus area</span></div>
+          <div class="toggle-sw" id="sr-toggle-categorySpecific"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('emotionalTrend')">
+          <i class="ti ti-chart-line" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Emotional trend alerts</p><span>When a mood or trigger pattern emerges</span></div>
+          <div class="toggle-sw" id="sr-toggle-emotionalTrend"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="setting-row" onclick="toggleSmartReminderType('lessonIntegration')">
+          <i class="ti ti-pencil" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Lesson integration reminders</p><span>Connects today's lesson to real life</span></div>
+          <div class="toggle-sw" id="sr-toggle-lessonIntegration"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Preferred times</div>
+        <div class="ob-label" style="text-align:left;margin-top:4px;color:var(--tm)">Morning check-in time</div>
+        <input class="ob-input" id="sr-morning-time" type="time" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);margin-bottom:10px" onchange="saveSmartReminderTimes()">
+        <div class="ob-label" style="text-align:left;color:var(--tm)">Bedtime reflection time</div>
+        <input class="ob-input" id="sr-bedtime-time" type="time" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)" onchange="saveSmartReminderTimes()">
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Tone</div>
+        <div class="tc-wrap" id="sr-tone-wrap">
+          <div class="tc" data-tone="gentle" onclick="setSmartReminderTone('gentle')">Gentle</div>
+          <div class="tc" data-tone="direct" onclick="setSmartReminderTone('direct')">Direct</div>
+          <div class="tc" data-tone="motivational" onclick="setSmartReminderTone('motivational')">Motivational</div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Frequency</div>
+        <div class="tc-wrap" id="sr-freq-wrap">
+          <div class="tc" data-freq="daily" onclick="setSmartReminderFrequency('daily')">Daily</div>
+          <div class="tc" data-freq="every3days" onclick="setSmartReminderFrequency('every3days')">Every 3 days</div>
+          <div class="tc" data-freq="weekly" onclick="setSmartReminderFrequency('weekly')">Weekly</div>
+        </div>
+      </div>
+    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div class="tier-banner">
@@ -934,8 +1004,13 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="toggleNotif()">
         <i class="ti ti-bell"></i>
-        <div class="setting-row-txt"><p>Daily reminders</p><span>Morning check-in & pledge reminder (coming soon — saved for when it ships)</span></div>
+        <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
         <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-row" onclick="openProTool('smartReminders')">
+        <i class="ti ti-bell" style="color:var(--accent)"></i>
+        <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleDark()">
         <i class="ti ti-moon"></i>
@@ -1215,6 +1290,33 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- MORNING CHECK-IN (Pro, smart reminder) -->
+<div class="sos-modal" id="morning-checkin-modal" onclick="if(event.target===this)closeMorningCheckin()">
+  <div class="sos-sheet">
+    <div class="sos-title">Good morning</div>
+    <div class="sos-sub" style="margin-bottom:14px">How are you feeling, and what's one thing you want to focus on today?</div>
+    <div class="tc-wrap" style="margin-bottom:12px">
+      <div class="tc" onclick="document.querySelectorAll('#morning-checkin-modal .tc').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">Good</div>
+      <div class="tc" onclick="document.querySelectorAll('#morning-checkin-modal .tc').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">Shaky</div>
+      <div class="tc" onclick="document.querySelectorAll('#morning-checkin-modal .tc').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')">Struggling</div>
+    </div>
+    <input class="ob-input" id="morning-intention-input" type="text" placeholder="One thing I want to focus on today..." style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <button class="ob-btn" style="margin-top:4px" onclick="submitMorningCheckin()">Set my intention</button>
+    <button class="sos-close" onclick="closeMorningCheckin()">Skip for now</button>
+  </div>
+</div>
+
+<!-- BEDTIME REFLECTION (Pro, smart reminder) -->
+<div class="sos-modal" id="bedtime-reflection-modal" onclick="if(event.target===this)closeBedtimeReflection()">
+  <div class="sos-sheet">
+    <div class="sos-title">Before you sleep</div>
+    <div class="sos-sub" style="margin-bottom:14px">Take a moment to reflect on how today felt.</div>
+    <textarea class="ob-input" id="bedtime-reflection-input" rows="3" placeholder="How did today actually feel?" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f)"></textarea>
+    <button class="ob-btn" style="margin-top:4px" onclick="submitBedtimeReflection()">Save reflection</button>
+    <button class="sos-close" onclick="closeBedtimeReflection()">Skip for now</button>
+  </div>
+</div>
+
 <!-- ACCOUNT / AUTH MODAL (signed-in only - an account is required to reach this screen at all) -->
 <div class="sos-modal" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="sos-sheet">
@@ -1355,6 +1457,13 @@ let S = {
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
   activityLog:[],weeklyReports:[],
+  lastDailyLessonReminderDate:'',
+  smartReminders:{
+    urgeWindow:true,relapseRisk:true,morningCheckin:true,bedtimeReflection:true,
+    motivational:true,categorySpecific:true,emotionalTrend:true,lessonIntegration:true,
+    morningTime:'08:00',bedtimeTime:'21:00',tone:'gentle',frequency:'daily'
+  },
+  lastSmartReminderSent:{},
   journals:[
     {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
     {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
@@ -1825,6 +1934,8 @@ function initApp(){
   updateRecoveryTermLabels();
   setInterval(updateStats,60000);
   maybeShowAccountabilityCheckin();
+  maybeShowDailyLessonReminder();
+  evaluateSmartReminders();
 }
 
 function updateUserUI(){
@@ -1862,6 +1973,7 @@ function updateStats(){
   }
 
   maybeAutoGenerateWeeklyReport();
+  evaluateSmartReminders();
 
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
@@ -2837,6 +2949,266 @@ function renderWeeklyReports(){
   renderIcons(wrap);
 }
 
+// ─── FREE DAILY LESSON REMINDER (honest, in-app) ──────────────────────────────
+function maybeShowDailyLessonReminder(){
+  if(S.isPro)return;
+  if(S.remindersEnabled===false)return;
+  const today=new Date().toDateString();
+  if(S.lastDailyLessonReminderDate===today)return;
+  const completedToday=(S.activityLog||[]).some(a=>a.type==='lesson_completed'&&new Date(a.ts).toDateString()===today);
+  if(completedToday)return;
+  S.lastDailyLessonReminderDate=today;
+  save();
+  novaNudge(`Quick reminder — today's lesson (Day ${S.currentDay}) is ready whenever you are.`);
+}
+
+// ─── SMART REMINDERS (Pro) ──────────────────────────────────────────────────
+const TONE_CLOSERS={
+  gentle:"I'm here whenever you need me.",
+  direct:'Take one concrete step now.',
+  motivational:"You've got this — keep going."
+};
+function applyTone(text){
+  const tone=(S.smartReminders&&S.smartReminders.tone)||'gentle';
+  return `${text} ${TONE_CLOSERS[tone]||TONE_CLOSERS.gentle}`;
+}
+function smartReminderFrequencyDays(){
+  const freq=(S.smartReminders&&S.smartReminders.frequency)||'daily';
+  return freq==='weekly'?7:freq==='every3days'?3:1;
+}
+function daysSinceSmartReminderSent(type){
+  const last=(S.lastSmartReminderSent||{})[type];
+  if(!last)return Infinity;
+  return Math.floor((Date.now()-new Date(last).getTime())/86400000);
+}
+function canSendSmartReminder(type){
+  if(!S.isPro)return false;
+  const sr=S.smartReminders||{};
+  if(!sr[type])return false;
+  return daysSinceSmartReminderSent(type)>=smartReminderFrequencyDays();
+}
+function markSmartReminderSent(type){
+  S.lastSmartReminderSent=S.lastSmartReminderSent||{};
+  S.lastSmartReminderSent[type]=new Date().toISOString();
+  save();
+}
+
+// A. Urge Window Alerts - based on time-of-day clustering of past cravings/relapses
+function buildUrgeWindowAlert(){
+  const events=[
+    ...(S.cravings||[]).map(c=>new Date(c.ts)),
+    ...(S.activityLog||[]).filter(a=>a.type==='relapse_reset'||a.type==='slip_reported').map(a=>new Date(a.ts))
+  ];
+  if(events.length<3)return null;
+  const hourCounts={};
+  events.forEach(d=>{const h=d.getHours();hourCounts[h]=(hourCounts[h]||0)+1;});
+  const [peakHour,peakCount]=Object.entries(hourCounts).sort((a,b)=>b[1]-a[1])[0];
+  if(peakCount<2)return null;
+  const nowHour=new Date().getHours();
+  if(Math.abs(nowHour-Number(peakHour))>1)return null;
+  const h12=Number(peakHour)%12===0?12:Number(peakHour)%12;
+  const ampm=Number(peakHour)<12?'am':'pm';
+  return applyTone(`You usually feel urges around ${h12}${ampm}. I'm here if you need support.`);
+}
+
+// B. Relapse Risk Alerts - based on today's stress/mood/craving signals
+function buildRelapseRiskAlert(){
+  const today=new Date().toDateString();
+  const todayCravings=(S.cravings||[]).filter(c=>new Date(c.ts).toDateString()===today);
+  const todayJournals=(S.journals||[]).filter(j=>new Date(j.date).toDateString()===today);
+  const slipToday=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today);
+  const roughMoodToday=todayJournals.some(j=>j.moodLabel==='Rough'||j.moodLabel==='Okay');
+  const avgIntensityToday=todayCravings.length?todayCravings.reduce((s,c)=>s+c.val,0)/todayCravings.length:0;
+  if(slipToday)return applyTone("Today was a hard one. Let's stay grounded and take the next hour at a time.");
+  if(avgIntensityToday>=6)return applyTone("Your cravings were intense today. Let's stay grounded.");
+  if(roughMoodToday)return applyTone("Your mood was rough today. Let's stay grounded.");
+  return null;
+}
+
+// E. Nova Motivational Messages - based on real consistency in the activity log
+function buildMotivationalMessage(){
+  const cutoff=Date.now()-7*86400000;
+  const activeDays=new Set((S.activityLog||[]).filter(a=>new Date(a.ts).getTime()>=cutoff).map(a=>new Date(a.ts).toDateString()));
+  if(activeDays.size<4)return null;
+  return applyTone(`You've been consistent this week — ${activeDays.size} different days of showing up. I'm proud of your effort.`);
+}
+
+// F. Category-Specific Reminders - tailored to focus area, evening risk window
+const CATEGORY_REMINDER_TEXT={
+  'Porn & Sex':'Evening boredom is a common trigger for this. Let\'s stay mindful tonight.',
+  'Alcohol':'Weekends and evenings can be tough for this. I\'m here if you need grounding.',
+  'Smoking':'Stress and evening routines are common smoking triggers. Notice the urge before you act on it tonight.',
+  'Substances':'Evenings and unstructured time can raise risk. Stay close to your support tonight.',
+  'Gambling':'Evenings alone are a common risk window for this. Consider reaching out to someone tonight.',
+  'Social media':'Late-evening scrolling is a common pattern. Try putting your phone in another room tonight.',
+  'Gaming':'Late-night sessions are a common risk window. Consider a hard stop time tonight.',
+  'Food / Binging':'Evenings can be a vulnerable time for this. Check in with yourself before you eat tonight.',
+  'Shopping / Spending':'Evening browsing is a common trigger for this. Consider staying off shopping apps tonight.',
+  'Work':'Evenings can blur into more work. Consider a real stop time tonight.',
+  'Other':'Evenings can be a vulnerable time. Stay mindful tonight.',
+};
+function buildCategorySpecificReminder(){
+  const hour=new Date().getHours();
+  if(hour<18)return null;
+  const cat=S.currentAddiction||'Other';
+  return applyTone(CATEGORY_REMINDER_TEXT[cat]||CATEGORY_REMINDER_TEXT['Other']);
+}
+
+// G. Emotional Trend Alerts - based on real trigger frequency and mood history
+function buildEmotionalTrendAlert(){
+  const cravings=(S.cravings||[]).slice(0,10);
+  if(cravings.length>=3){
+    const counts={};
+    cravings.forEach(c=>{counts[c.trigger]=(counts[c.trigger]||0)+1;});
+    const [topTrigger,topCount]=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+    if(topTrigger==='Loneliness'&&topCount>=2)return applyTone("You've been feeling lonely lately. Let's talk about it.");
+    if(topTrigger==='Stress'&&topCount>=3)return applyTone("Stress has been a recurring theme lately. Let's talk about what's underneath it.");
+  }
+  const recentJournals=(S.journals||[]).slice(0,5).filter(j=>MOOD_SCORES[j.moodLabel]);
+  if(recentJournals.length>=3){
+    const avg=recentJournals.reduce((s,j)=>s+MOOD_SCORES[j.moodLabel],0)/recentJournals.length;
+    if(avg<=2)return applyTone('Your recent mood entries have been on the harder side. Let\'s talk about it.');
+  }
+  return null;
+}
+
+// H. Lesson Integration Reminders - grounded in today's real lesson content
+function buildLessonIntegrationReminder(){
+  const lesson=getTodayLesson();
+  if(!lesson)return null;
+  const today=new Date().toDateString();
+  const completedToday=(S.activityLog||[]).some(a=>a.type==='lesson_completed'&&new Date(a.ts).toDateString()===today);
+  if(completedToday)return null;
+  const hour=new Date().getHours();
+  if(hour<12)return null;
+  return applyTone(`Today's lesson is about "${lesson.title}." ${lesson.action||'Try noticing one small trigger today.'}`);
+}
+
+// C. Morning Check-In (modal)
+function openMorningCheckin(){
+  document.getElementById('morning-intention-input').value='';
+  document.querySelectorAll('#morning-checkin-modal .tc').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('morning-checkin-modal').classList.add('open');
+}
+function closeMorningCheckin(){
+  document.getElementById('morning-checkin-modal').classList.remove('open');
+}
+function submitMorningCheckin(){
+  const selEl=document.querySelector('#morning-checkin-modal .tc.sel');
+  const feeling=selEl?selEl.textContent.trim():'';
+  const intention=document.getElementById('morning-intention-input').value.trim();
+  closeMorningCheckin();
+  let msg='Good morning';
+  msg+=intention?`. Focusing on "${intention}" today is a real, concrete anchor`:'';
+  msg+=feeling==='Struggling'?" — and it's okay that today already feels hard.":feeling==='Shaky'?' — shaky mornings can still turn into steady days.':'.';
+  novaNudge(applyTone(msg));
+}
+
+// D. Bedtime Reflection (modal)
+function openBedtimeReflection(){
+  document.getElementById('bedtime-reflection-input').value='';
+  document.getElementById('bedtime-reflection-modal').classList.add('open');
+}
+function closeBedtimeReflection(){
+  document.getElementById('bedtime-reflection-modal').classList.remove('open');
+}
+function submitBedtimeReflection(){
+  const text=document.getElementById('bedtime-reflection-input').value.trim();
+  closeBedtimeReflection();
+  if(text){
+    S.journals.unshift({date:new Date().toISOString(),mood:'🌙',moodLabel:'Bedtime Reflection',body:text});
+    logActivity('journal',{moodLabel:'Bedtime Reflection'});
+    save();
+  }
+  novaNudge(applyTone(text?"Thank you for reflecting honestly tonight — that kind of awareness is exactly what builds change over time.":'Even without writing it down, pausing to notice how today felt matters. Rest well.'));
+}
+
+// Dispatcher - checked on app load and every 60s while the app stays open
+function evaluateSmartReminders(){
+  if(!S.isPro)return;
+  const sr=S.smartReminders||{};
+  const now=new Date();
+  const hour=now.getHours(),minute=now.getMinutes();
+
+  if(sr.morningCheckin&&canSendSmartReminder('morningCheckin')){
+    const [mh,mm]=(sr.morningTime||'08:00').split(':').map(Number);
+    if(hour>mh||(hour===mh&&minute>=mm)){
+      markSmartReminderSent('morningCheckin');
+      openMorningCheckin();
+      return;
+    }
+  }
+  if(sr.bedtimeReflection&&canSendSmartReminder('bedtimeReflection')){
+    const [bh,bm]=(sr.bedtimeTime||'21:00').split(':').map(Number);
+    if(hour>bh||(hour===bh&&minute>=bm)){
+      markSmartReminderSent('bedtimeReflection');
+      openBedtimeReflection();
+      return;
+    }
+  }
+  const candidates=[
+    ['relapseRisk',buildRelapseRiskAlert],
+    ['urgeWindow',buildUrgeWindowAlert],
+    ['emotionalTrend',buildEmotionalTrendAlert],
+    ['categorySpecific',buildCategorySpecificReminder],
+    ['lessonIntegration',buildLessonIntegrationReminder],
+    ['motivational',buildMotivationalMessage],
+  ];
+  for(const [key,builder] of candidates){
+    if(sr[key]&&canSendSmartReminder(key)){
+      const text=builder();
+      if(text){
+        novaNudge(text);
+        markSmartReminderSent(key);
+        break;
+      }
+    }
+  }
+}
+
+// Reminder Settings screen (Pro only)
+function openSmartReminderSettings(){
+  renderSmartReminderSettings();
+  switchTo('reminder-settings');actBn('bn-plans');
+}
+function renderSmartReminderSettings(){
+  const sr=S.smartReminders||{};
+  ['urgeWindow','relapseRisk','morningCheckin','bedtimeReflection','motivational','categorySpecific','emotionalTrend','lessonIntegration'].forEach(key=>{
+    const el=document.getElementById('sr-toggle-'+key);
+    if(el)el.classList.toggle('on',!!sr[key]);
+  });
+  const morningInput=document.getElementById('sr-morning-time');
+  if(morningInput)morningInput.value=sr.morningTime||'08:00';
+  const bedtimeInput=document.getElementById('sr-bedtime-time');
+  if(bedtimeInput)bedtimeInput.value=sr.bedtimeTime||'21:00';
+  document.querySelectorAll('#sr-tone-wrap .tc').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-tone')===(sr.tone||'gentle')));
+  document.querySelectorAll('#sr-freq-wrap .tc').forEach(el=>el.classList.toggle('sel',el.getAttribute('data-freq')===(sr.frequency||'daily')));
+}
+function toggleSmartReminderType(key){
+  S.smartReminders=S.smartReminders||{};
+  S.smartReminders[key]=!S.smartReminders[key];
+  save();
+  renderSmartReminderSettings();
+}
+function saveSmartReminderTimes(){
+  S.smartReminders=S.smartReminders||{};
+  S.smartReminders.morningTime=document.getElementById('sr-morning-time').value||'08:00';
+  S.smartReminders.bedtimeTime=document.getElementById('sr-bedtime-time').value||'21:00';
+  save();
+}
+function setSmartReminderTone(tone){
+  S.smartReminders=S.smartReminders||{};
+  S.smartReminders.tone=tone;
+  save();
+  renderSmartReminderSettings();
+}
+function setSmartReminderFrequency(freq){
+  S.smartReminders=S.smartReminders||{};
+  S.smartReminders.frequency=freq;
+  save();
+  renderSmartReminderSettings();
+}
+
 // ─── NOVA AI ──────────────────────────────────────────────────────────────────
 const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
 
@@ -3003,6 +3375,12 @@ const PRO_TOOLS={
     teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus Nova Pro's personalized recommendations.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top mood: ●●●●●● (●●%)<br>Top trigger: ●●●●●●<br>Risk level: ●●●●●●●●</div>',
     open:'openWeeklyReportsScreen'
+  },
+  smartReminders:{
+    title:'Smart Reminders',
+    teaser:"Smart reminders help you stay grounded during urges and emotional spikes — personalized to your patterns, triggers, and preferred times.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">You usually feel urges around ●●pm.<br>Your ●●●●●● was high today.<br>Good morning. What\'s ●●●●●●●●●?</div>',
+    open:'openSmartReminderSettings'
   }
 };
 function openProTool(key){
@@ -3172,9 +3550,9 @@ const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
-  'weekly-reports':'s-weekly-reports'
+  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings'};
 function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
@@ -3190,6 +3568,7 @@ function switchTo(id){
   if(id==='lesson'){viewingDay=null;renderTodayLesson();}
   if(id==='community'){renderCommunityPosts();}
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
+  if(id==='reminder-settings'){renderSmartReminderSettings();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const db = require('./db');
 
 const COOKIE_NAME = 'tsid_session';
 
@@ -37,6 +38,10 @@ function requireAuth(req, res, next) {
   const token = req.cookies[COOKIE_NAME];
   const payload = token && verifySession(token);
   if (!payload) return res.status(401).json({ error: 'Not signed in.' });
+  // A JWT stays cryptographically valid for its full 30-day lifetime regardless of logout or
+  // account deletion on another device, since sessions aren't tracked server-side - checking the
+  // user still exists closes that gap instead of letting deleted accounts keep writing state/chat data.
+  if (!db.getUserById(payload.userId)) return res.status(401).json({ error: 'Not signed in.' });
   req.userId = payload.userId;
   next();
 }

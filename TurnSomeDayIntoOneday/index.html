@@ -947,6 +947,15 @@ body{display:flex;justify-content:center}
       </div>
     </div>
 
+    <!-- HABIT COACH (Pro) -->
+    <div id="s-habit-coach" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Habit Coach</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Consistency insights, vulnerability windows, and personalized habit suggestions — built from what you've actually logged.</div>
+        <div id="habit-coach-content"></div>
+      </div>
+    </div>
+
     <!-- CUSTOM LESSON PACKS (Pro) -->
     <div id="s-pack-list" class="scr">
       <div class="sec">
@@ -1167,6 +1176,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="openLessonPacksScreen()">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('habitCoach')">
+        <i class="ti ti-flame"></i>
+        <div class="setting-row-txt"><p>Habit Coach</p><span>Consistency insights, vulnerability windows, and personalized habit suggestions</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1668,6 +1682,7 @@ let S = {
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
+  notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -2537,6 +2552,7 @@ function initApp(){
   updateProfileEditUI();
   updateLessonPromo();
   updateUserUI();
+  maybeShowMissedLessonHabitCoaching();
   updateStats();
   renderMilestones();
   renderJournal();
@@ -2605,6 +2621,8 @@ function updateStats(){
     maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
   }
   maybeShowProMilestoneCelebration(days);
+  maybeShowHabitCelebration(days);
+  maybeShowHabitAlert();
 
   maybeAutoGenerateWeeklyReport();
   evaluateSmartReminders();
@@ -2808,6 +2826,7 @@ function saveEntry(){
   renderJournal();closeJour();
   if(txt.length>=150){
     maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Nova Pro can go deeper on with you — I'm always here either way.");
+    if(S.isPro)novaNudge(buildHabitReinforcement());
   }
 }
 function renderJournal(){
@@ -3351,6 +3370,234 @@ function discussAnalyticsWithNova(){
   sendMsg();
 }
 
+// ─── HABIT INTELLIGENCE (Pro) ──────────────────────────────────────────────────
+const WEEKDAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const HABIT_CELEBRATION_DAYS=[3,7,14,21];
+const CATEGORY_HABIT_COACHING={
+  'Porn & Sex':{weakSpot:'Nighttime boredom is your weak spot.',suggestion:'Build a calming wind-down routine for the hour before bed.'},
+  'Alcohol':{weakSpot:'Weekends need structure.',suggestion:"Plan your Friday and Saturday evenings ahead of time."},
+  'Smoking':{weakSpot:'Stress breaks are your weak spot.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
+  'Substances':{weakSpot:'Unstructured evenings are your weak spot.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
+  'Gambling':{weakSpot:'Idle moments checking odds are your weak spot.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
+  'Social media':{weakSpot:'Boredom scrolling is your weak spot.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
+  'Gaming':{weakSpot:'Avoidance of other tasks is your weak spot.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
+  'Food / Binging':{weakSpot:'Stress eating spikes mid-week.',suggestion:"Add a grounding habit — a short walk or a few slow breaths — before meals."},
+  'Shopping / Spending':{weakSpot:'Low-mood moments are your weak spot.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
+  'Work':{weakSpot:'Avoiding rest is your weak spot.',suggestion:'Set one hard stop time in the evening, every day this week.'},
+  'Other':{weakSpot:'Unstructured moments are your weak spot.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+};
+const HABIT_MICRO_SUGGESTIONS={
+  morning:['Start the day with a 2-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
+  evening:['Try a 2-minute grounding exercise before bed.','Put your phone outside the bedroom 30 minutes before sleep.','Write down one honest sentence about how today went.'],
+  grounding:['Take 5 slow breaths whenever you notice the urge building.','Step outside for 60 seconds when things feel tight.','Name one thing you can see, hear, and feel, right where you are.'],
+};
+function buildWeekdayLessonConsistency(){
+  if(!S.startDate)return null;
+  const startDay=new Date(S.startDate);startDay.setHours(0,0,0,0);
+  const today=new Date();today.setHours(0,0,0,0);
+  const totalDays=Math.floor((today-startDay)/86400000)+1;
+  if(totalDays<7)return null;
+  const completedDates=new Set((S.activityLog||[]).filter(a=>a.type==='lesson_completed').map(a=>new Date(a.ts).toDateString()));
+  const weekdayTotal=[0,0,0,0,0,0,0],weekdayCompleted=[0,0,0,0,0,0,0];
+  for(let i=0;i<totalDays;i++){
+    const d=new Date(startDay);d.setDate(d.getDate()+i);
+    const wd=d.getDay();
+    weekdayTotal[wd]++;
+    if(completedDates.has(d.toDateString()))weekdayCompleted[wd]++;
+  }
+  const rates=weekdayTotal.map((t,i)=>t>0?{i,r:weekdayCompleted[i]/t}:null).filter(Boolean);
+  if(rates.length<2)return null;
+  const sorted=rates.slice().sort((a,b)=>b.r-a.r);
+  const best=sorted[0],worst=sorted[sorted.length-1];
+  if(best.r===worst.r)return null;
+  return {bestDay:WEEKDAY_NAMES[best.i],bestRate:best.r,worstDay:WEEKDAY_NAMES[worst.i],worstRate:worst.r};
+}
+function buildConsistencyInsights(){
+  const parts=[];
+  const wd=buildWeekdayLessonConsistency();
+  if(wd){
+    parts.push(`You're most consistent on ${wd.bestDay}s.`);
+    if(wd.worstRate<wd.bestRate)parts.push(`${wd.worstDay}s tend to be your hardest day to keep up with lessons.`);
+  }
+  const activity=(S.activityLog||[]).slice().sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+  if(activity.length>=2){
+    let maxGapDays=0,maxGapEnd=null;
+    for(let i=1;i<activity.length;i++){
+      const gap=(new Date(activity[i].ts)-new Date(activity[i-1].ts))/86400000;
+      if(gap>maxGapDays){maxGapDays=gap;maxGapEnd=activity[i].ts;}
+    }
+    if(maxGapDays>=3){
+      parts.push(`Your longest quiet stretch was about ${Math.round(maxGapDays)} days, ending around ${new Date(maxGapEnd).toLocaleDateString('en-US',{month:'short',day:'numeric'})} — that's usually where drop-off starts.`);
+    }
+  }
+  return parts.length?parts:null;
+}
+function buildVulnerabilityWindows(){
+  const windows=[];
+  const {cravings}=analyticsWindow(14);
+  const urgeTime=analyticsVulnerableTime(cravings);
+  if(urgeTime)windows.push(`You're most likely to feel urges around ${urgeTime}.`);
+  const wd=buildWeekdayLessonConsistency();
+  if(wd&&wd.worstRate<wd.bestRate)windows.push(`You often skip lessons on ${wd.worstDay}s.`);
+  const history=S.streakHistory||[];
+  if(history.length>=2){
+    const dayCounts={};
+    history.forEach(h=>{const d=WEEKDAY_NAMES[new Date(h.endedAt).getDay()];dayCounts[d]=(dayCounts[d]||0)+1;});
+    const [topDay,topCount]=Object.entries(dayCounts).sort((a,b)=>b[1]-a[1])[0];
+    if(topCount>=2)windows.push(`Relapses have most often happened on ${topDay}s.`);
+  }
+  return windows.length?windows:null;
+}
+function buildHabitSuggestions(){
+  const cat=S.currentAddiction||'Other';
+  const coaching=CATEGORY_HABIT_COACHING[cat]||CATEGORY_HABIT_COACHING['Other'];
+  const wd=buildWeekdayLessonConsistency();
+  const suggestions=[coaching.suggestion];
+  const bucket=timeBucketLabel(new Date().getHours());
+  const timeKey=(bucket==='evening'||bucket==='late night')?'evening':'morning';
+  suggestions.push(HABIT_MICRO_SUGGESTIONS[timeKey][Math.floor(Math.random()*HABIT_MICRO_SUGGESTIONS[timeKey].length)]);
+  suggestions.push(HABIT_MICRO_SUGGESTIONS.grounding[Math.floor(Math.random()*HABIT_MICRO_SUGGESTIONS.grounding.length)]);
+  if(wd&&wd.worstRate<wd.bestRate)suggestions.push(`Since ${wd.worstDay}s are harder, try setting a specific time that day just for your lesson.`);
+  return suggestions;
+}
+function buildHabitTrackingSummary(){
+  const {activity,journals}=analyticsWindow(7);
+  const lessons=activity.filter(a=>a.type==='lesson_completed').length;
+  const journaled=activity.filter(a=>a.type==='journal').length;
+  const tools=activity.filter(a=>a.type==='grounding'||a.type==='urge_survived').length;
+  const chatCount=(S.chatHistory||[]).filter(m=>m.role==='user').length;
+  const scored=journals.filter(j=>MOOD_SCORES[j.moodLabel]).map(j=>MOOD_SCORES[j.moodLabel]);
+  let stability=null;
+  if(scored.length>=3){
+    const avg=scored.reduce((a,b)=>a+b,0)/scored.length;
+    const variance=scored.reduce((s,v)=>s+Math.pow(v-avg,2),0)/scored.length;
+    stability=variance<0.5?'Steady':variance<1.5?'Somewhat variable':'Quite variable';
+  }
+  return {lessons,journaled,tools,chatCount,stability};
+}
+function buildHabitCoachExplanation(){
+  const consistency=buildConsistencyInsights();
+  const windows=buildVulnerabilityWindows();
+  const parts=[];
+  if(consistency)parts.push(consistency[0]);
+  if(windows)parts.push(windows[0]);
+  if(!parts.length)return "You don't have enough logged data yet for me to spot real habit patterns — the more you log lessons, journals, and cravings, the sharper this gets.";
+  const suggestions=buildHabitSuggestions();
+  parts.push(`One thing to try: ${suggestions[0]}`);
+  return parts.join(' ');
+}
+function renderHabitCoach(){
+  const wrap=document.getElementById('habit-coach-content');
+  if(!wrap)return;
+  const consistency=buildConsistencyInsights();
+  const windows=buildVulnerabilityWindows();
+  const suggestions=buildHabitSuggestions();
+  const tracking=buildHabitTrackingSummary();
+  const cat=S.currentAddiction||'Other';
+  const coaching=CATEGORY_HABIT_COACHING[cat]||CATEGORY_HABIT_COACHING['Other'];
+  const anyRealData=!!(consistency||windows);
+  let html='<div class="card">';
+  html+='<div class="sec-hd" style="margin-top:0">Consistency insights</div>';
+  if(!consistency){
+    html+='<div style="font-size:13px;color:var(--tm)">Not enough logged data yet — keep completing lessons and I\'ll start spotting your patterns.</div>';
+  }else{
+    consistency.forEach(p=>{html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6;padding:6px 0;border-bottom:0.5px solid var(--bdr)">${p}</div>`;});
+  }
+  html+='</div><div style="height:12px"></div><div class="card">';
+  html+='<div class="sec-hd" style="margin-top:0">Vulnerability windows</div>';
+  if(!windows){
+    html+='<div style="font-size:13px;color:var(--tm)">Not enough logged data yet to spot your riskiest times.</div>';
+  }else{
+    windows.forEach(w=>{html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6;padding:6px 0;border-bottom:0.5px solid var(--bdr)">${w}</div>`;});
+  }
+  html+='</div><div style="height:12px"></div><div class="card">';
+  html+='<div class="sec-hd" style="margin-top:0">Personalized habit suggestions</div>';
+  suggestions.forEach(s=>{html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6;padding:6px 0;border-bottom:0.5px solid var(--bdr)">${s}</div>`;});
+  html+='</div><div style="height:12px"></div><div class="card">';
+  html+=`<div class="sec-hd" style="margin-top:0">For ${cat&&cat!=='Other'?cat:'your focus area'}</div>`;
+  html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6">${coaching.weakSpot} ${coaching.suggestion}</div>`;
+  html+='</div><div style="height:12px"></div><div class="card">';
+  html+='<div class="sec-hd" style="margin-top:0">Habit tracking (this week)</div>';
+  const rows=[
+    ['Lesson consistency',tracking.lessons?`${tracking.lessons} lesson${tracking.lessons===1?'':'s'} completed`:null],
+    ['Journaling consistency',tracking.journaled?`${tracking.journaled} entr${tracking.journaled===1?'y':'ies'} logged`:null],
+    ['Relapse tool usage',tracking.tools?`${tracking.tools} time${tracking.tools===1?'':'s'}`:null],
+    ['Nova conversations',tracking.chatCount?`${tracking.chatCount} total`:null],
+    ['Emotional stability',tracking.stability],
+  ];
+  const anyTracking=rows.some(([,v])=>v);
+  if(!anyTracking){
+    html+='<div style="font-size:13px;color:var(--tm)">Not enough logged data yet this week.</div>';
+  }else{
+    rows.forEach(([label,val])=>{
+      if(!val)return;
+      html+=`<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--bdr)"><span style="font-size:12.5px;color:var(--tm);flex-shrink:0">${label}</span><span style="font-size:13px;color:var(--tp);text-align:right">${val}</span></div>`;
+    });
+  }
+  html+='</div>';
+  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussHabitsWithNova()">Ask Nova about my habits</button>';
+  wrap.innerHTML=html;
+}
+function openHabitCoachScreen(){
+  switchTo('habit-coach');actBn('bn-plans');
+}
+function discussHabitsWithNova(){
+  switchTo('nova');actBn('bn-nova');
+  document.getElementById('chatInput').value='Can you help me understand my habits and consistency?';
+  sendMsg();
+}
+// Missed-lesson (Pro) + weekly consistency check-in share one daily cap so habit
+// coaching never stacks into more than one nudge per day - stays supportive, not naggy.
+function maybeShowMissedLessonHabitCoaching(){
+  if(!S.isPro)return;
+  const today=new Date().toDateString();
+  if(S.lastHabitAlertDate===today)return;
+  const lessonEvents=(S.activityLog||[]).filter(a=>a.type==='lesson_completed');
+  if(!lessonEvents.length)return;
+  const last=new Date(lessonEvents[lessonEvents.length-1].ts);
+  const daysSince=Math.floor((Date.now()-last.getTime())/86400000);
+  if(daysSince<2)return;
+  S.lastHabitAlertDate=today;save();
+  const cat=S.currentAddiction||'Other';
+  const coaching=CATEGORY_HABIT_COACHING[cat]||CATEGORY_HABIT_COACHING['Other'];
+  novaNudge(`It's been a few days since your last lesson — no judgment, life happens. ${coaching.weakSpot} ${coaching.suggestion}`);
+}
+function buildHabitAlertMessage(){
+  const now=Date.now();
+  const thisWeek=(S.activityLog||[]).filter(a=>now-new Date(a.ts).getTime()<7*86400000).length;
+  const lastWeek=(S.activityLog||[]).filter(a=>{const t=now-new Date(a.ts).getTime();return t>=7*86400000&&t<14*86400000;}).length;
+  if(lastWeek===0&&thisWeek===0)return null;
+  if(lastWeek>=2&&thisWeek<lastWeek*0.5)return "You're slipping in consistency compared to last week — that's okay, let's rebuild your routine one small step at a time.";
+  if(lastWeek>0&&thisWeek>=lastWeek*1.2)return "Great job staying consistent this week — that steadiness is exactly what builds lasting change.";
+  if(lastWeek===0&&thisWeek>=3)return "You're building real momentum this week — keep going.";
+  return null;
+}
+function maybeShowHabitAlert(){
+  if(!S.isPro)return;
+  const today=new Date().toDateString();
+  if(S.lastHabitAlertDate===today)return;
+  const msg=buildHabitAlertMessage();
+  if(!msg)return;
+  S.lastHabitAlertDate=today;save();
+  novaNudge(msg);
+}
+function buildHabitReinforcement(){
+  return "That's the kind of honest reflection that actually builds the habit long-term — writing it down like this, even when it's hard, is exactly what makes the next hard moment easier.";
+}
+function buildHabitRebuildPlan(priorStreakLength){
+  const cat=S.currentAddiction||'Other';
+  const coaching=CATEGORY_HABIT_COACHING[cat]||CATEGORY_HABIT_COACHING['Other'];
+  return `Let's rebuild your routine from here. ${coaching.weakSpot} One small habit to restart with: ${coaching.suggestion}`;
+}
+function maybeShowHabitCelebration(days){
+  if(!S.isPro)return;
+  if(!HABIT_CELEBRATION_DAYS.includes(days))return;
+  S.notifiedHabitCelebrations=S.notifiedHabitCelebrations||[];
+  if(S.notifiedHabitCelebrations.includes(days))return;
+  S.notifiedHabitCelebrations.push(days);save();
+  novaNudge(`${days} days of showing up for this habit — that consistency is the real work, and it's paying off.`);
+}
+
 function startVoiceJournal(){
   if(!S.isPro){
     addBubble('nova',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
@@ -3408,7 +3655,16 @@ function logCraving(){
   S.cravings.unshift({ts:new Date().toISOString(),val:v,trigger});
   S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
   logActivity('craving',{trigger,val:v});
+  let habitSuggestionNudge=null;
+  if(S.isPro&&/stress|loneliness/i.test(trigger)){
+    const today=new Date().toDateString();
+    if(S.lastHabitAlertDate!==today){
+      S.lastHabitAlertDate=today;
+      habitSuggestionNudge=`I noticed that. ${buildHabitSuggestions()[0]}`;
+    }
+  }
   save();renderCravings();updateStats();
+  if(habitSuggestionNudge)novaNudge(habitSuggestionNudge);
   document.getElementById('cSlider').value=5;
   document.getElementById('cVal').textContent='5 / 10';
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
@@ -4547,6 +4803,7 @@ function localFallbackReply(userText){
     if(/journal/i.test(userText))return buildJournalAnalysis();
     if(/\bpack\b/i.test(userText))return buildPackReflectionGuidance();
     if(/streaks?|milestones?/i.test(userText))return buildStreakAnalysis();
+    if(/habits?|consistency|routines?/i.test(userText))return buildHabitCoachExplanation();
     if(/analytics|insights?/i.test(userText))return buildAnalyticsExplanation();
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
@@ -4677,6 +4934,12 @@ const PRO_TOOLS={
     teaser:'Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more — choose your own topics, style, and difficulty, generated just for you.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Length: ●● days<br>Focus: ●●●●●●●●, ●●●●●●●●<br>Style: ●●●●●●●● · Difficulty: ●●●●●●●●</div>',
     open:'openBuildPackWizard'
+  },
+  habitCoach:{
+    title:'Habit Coach',
+    teaser:'Pro helps you build stronger habits with personalized guidance — consistency insights, vulnerability windows, and habit suggestions built from what you\'ve actually logged.',
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Most consistent: ●●●●●●●●<br>Vulnerable window: ●●●●●●●●<br>Suggestion: ●●●●●●●●●●●●●●●●</div>',
+    open:'openHabitCoachScreen'
   }
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
@@ -4713,7 +4976,7 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?|\bpacks?\b/i;
+const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?|\bpacks?\b|habits?|consistency|routines?/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
@@ -4723,6 +4986,7 @@ function proFeaturePreviewText(text){
   if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, relapse recovery tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Nova Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
@@ -4854,9 +5118,10 @@ const SCREEN_MAP={
   community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
-  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard'
+  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
+  'habit-coach':'s-habit-coach'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack'};
+const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-journal',community:'bn-comm'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -4888,6 +5153,7 @@ function switchTo(id){
   if(id==='pack-list'){renderPackList();}
   if(id==='pack-lesson'){renderPackLesson();}
   if(id==='plans'){renderPlansScreen();}
+  if(id==='habit-coach'){renderHabitCoach();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -5231,6 +5497,7 @@ function confirmResetDate(){
   maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");
   if(S.isPro){
     novaNudge(buildRecoveryCoachingMessage(priorStreakLength));
+    novaNudge(buildHabitRebuildPlan(priorStreakLength));
   }
 }
 

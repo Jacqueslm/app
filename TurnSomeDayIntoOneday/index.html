@@ -445,6 +445,7 @@ body{display:flex;justify-content:center}
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
     <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
+    <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
     <div class="mini-stats">
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
@@ -732,6 +733,34 @@ body{display:flex;justify-content:center}
         <div class="mini-pricing-row" style="font-size:11.5px;color:#8892c0;text-align:center;margin-bottom:10px"></div>
         <button class="ob-btn" onclick="upgradeFromDay15Overlay()">Continue with Pro</button>
         <button class="ob-btn outline" onclick="closeDay15Overlay()">Stay on Day 15 for now</button>
+      </div>
+    </div>
+
+    <!-- DAY 30 COMPLETION / LONG-TERM RECOVERY OVERLAY -->
+    <div id="day30-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;overflow-y:auto;padding:32px 24px;color:#fff">
+      <div style="max-width:400px;margin:0 auto;text-align:center">
+        <div style="font-size:40px;margin-bottom:12px">🏆</div>
+        <h1 style="margin-bottom:10px">You've completed the core program.</h1>
+        <p style="color:#c0caff;margin-bottom:24px">30 days of real, hard-won work. This is a lasting achievement.</p>
+        <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:left;font-size:13px;line-height:1.6;color:#c0caff;margin-bottom:28px">You've built the foundation and done the deeper work. What comes next isn't more lessons — it's making this stick for good. That's what long-term recovery is about.</div>
+
+        <div style="text-align:left;margin-bottom:16px">
+          <div class="ob-label">Your long-term tools</div>
+          <div class="setting-row" style="background:rgba(255,255,255,0.05);border-radius:10px;margin-bottom:8px" onclick="closeDay30Overlay();switchTo('habit-coach');actBn('bn-tools')">
+            <i class="ti ti-repeat" style="color:#fff"></i>
+            <div class="setting-row-txt"><p style="color:#fff">Habit Coach</p><span style="color:#8892c0">Consistency insights and vulnerability windows</span></div>
+          </div>
+          <div class="setting-row" style="background:rgba(255,255,255,0.05);border-radius:10px;margin-bottom:8px" onclick="closeDay30Overlay();switchTo('streaks');actBn('bn-tools')">
+            <i class="ti ti-flame" style="color:#fff"></i>
+            <div class="setting-row-txt"><p style="color:#fff">Advanced Streaks</p><span style="color:#8892c0">Long-term streak history and pattern tracking</span></div>
+          </div>
+          <div class="setting-row" style="background:rgba(255,255,255,0.05);border-radius:10px" onclick="closeDay30Overlay();openLessonPacksScreen()">
+            <i class="ti ti-notebook" style="color:#fff"></i>
+            <div class="setting-row-txt"><p style="color:#fff">Relapse-Proofing Pack</p><span style="color:#8892c0">A 7-day pack built for lasting stability</span></div>
+          </div>
+        </div>
+
+        <button class="ob-btn" style="margin-top:12px" onclick="closeDay30Overlay()">Continue</button>
       </div>
     </div>
 
@@ -1215,7 +1244,7 @@ body{display:flex;justify-content:center}
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Category</div></div>
-      <div class="setting-row" onclick="openCategoryInfo()">
+      <div class="setting-row" onclick="openCategorySwitcher()">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Category</p><span id="category-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1667,6 +1696,28 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- CATEGORY SWITCHER MODAL -->
+<div class="sos-modal" id="category-modal" onclick="if(event.target===this)closeCategorySwitcher()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Change your focus</div>
+    <div class="sos-sub" id="category-modal-sub">Tap a category to switch. Your streak, journal, and progress stay exactly the same.</div>
+    <div class="addiction-grid" id="categorySwitchGrid" style="margin-top:12px">
+      <div class="add-chip" style="grid-column: span 2;" onclick="switchCategory('Porn & Sex')">🔞 Porn &amp; Sex</div>
+      <div class="add-chip" onclick="switchCategory('Alcohol')">🍺 Alcohol</div>
+      <div class="add-chip" onclick="switchCategory('Smoking')">🚬 Smoking / Vaping</div>
+      <div class="add-chip" onclick="switchCategory('Substances')">💊 Substances</div>
+      <div class="add-chip" onclick="switchCategory('Gambling')">🎰 Gambling</div>
+      <div class="add-chip" onclick="switchCategory('Social media')">📱 Social media</div>
+      <div class="add-chip" onclick="switchCategory('Gaming')">🎮 Gaming</div>
+      <div class="add-chip" onclick="switchCategory('Food / Binging')">🍽️ Food / Binging</div>
+      <div class="add-chip" onclick="switchCategory('Shopping / Spending')">🛍️ Shopping / Spending</div>
+      <div class="add-chip" onclick="switchCategory('Work')">💼 Work</div>
+      <div class="add-chip" onclick="switchCategory('Other')">✨ Other</div>
+    </div>
+    <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Cancel</button>
+  </div>
+</div>
+
 <!-- NOVA VOICE MODAL -->
 <div class="sos-modal" id="voice-modal" onclick="if(event.target===this)closeVoiceModal()">
   <div class="sos-sheet">
@@ -1841,6 +1892,18 @@ async function loadLessonPacks(){
 }
 
 const FREE_LESSON_CAP=15;
+// Journey phase — gives the user a predictable sense of where they are in the
+// program (Feature 16: no dead ends, always know what's next), without adding
+// extra screens or clutter.
+function getJourneyPhase(day){
+  if(day<=15)return{stage:1,label:'Foundation'};
+  if(day<=30)return{stage:2,label:'Deep Work'};
+  return{stage:3,label:'Long-Term Growth'};
+}
+function journeyPhaseLabelText(day){
+  const phase=getJourneyPhase(day);
+  return `${phase.label} phase${phase.stage<3?` · Day ${day} of 30`:''}`;
+}
 let viewingDay=null; // null = showing S.currentDay; otherwise re-reading a specific past/locked day
 
 function isLessonLocked(day){
@@ -1913,11 +1976,14 @@ function renderTodayLesson(){
   const lesson=getLessonForDay(day);
   if(!lesson){
     const hasTrack=(LESSON_PACKS[S.currentAddiction]||[]).length>0;
-    titleEl.textContent=hasTrack?"You're all caught up":'Lessons coming soon';
+    const programDone=hasTrack&&day>30;
+    titleEl.textContent=programDone?"You've completed the program":hasTrack?"You're all caught up":'Lessons coming soon';
     metaEl.textContent=S.currentAddiction||'';
-    bodyEl.textContent=hasTrack
-      ?"You've completed every lesson available in this track so far. Check back soon for more."
-      :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
+    bodyEl.textContent=programDone
+      ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Relapse-Proofing Pack (in Lesson Packs) are built for exactly this stage."
+      :hasTrack
+        ?"You've completed every lesson available in this track so far. Check back soon for more."
+        :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
     actionEl.textContent='';
     reflectionEl.textContent='';
     btn.style.display='none';
@@ -1991,9 +2057,11 @@ function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
+  const justFinishedProgram=lesson.day===30&&!S.notifiedDay30Overlay;
   S.currentDay++;
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   logActivity('lesson_completed',{day:lesson.day});
+  if(justFinishedProgram)S.notifiedDay30Overlay=true;
   save();
   updateStats();
   const btn=document.getElementById('lessonCompleteBtn');
@@ -2002,6 +2070,8 @@ function completeLessonForToday(){
   updateLessonPromo();
   if(justHitFreeCap){
     setTimeout(()=>{openDay15Overlay();},1200);
+  }else if(justFinishedProgram){
+    setTimeout(()=>{openDay30Overlay();},1200);
   }else{
     setTimeout(()=>{renderTodayLesson();},1200);
   }
@@ -2029,6 +2099,15 @@ function upgradeFromDay15Overlay(){
   closeDay15Overlay();
   viewingDay=null;
   switchTo('lesson');
+}
+
+// ─── DAY 30 COMPLETION / LONG-TERM RECOVERY ────────────────────────────────────
+function openDay30Overlay(){
+  document.getElementById('day30-overlay').style.display='block';
+}
+function closeDay30Overlay(){
+  document.getElementById('day30-overlay').style.display='none';
+  renderTodayLesson();
 }
 
 // ─── CUSTOM LESSON PACKS (Pro) ─────────────────────────────────────────────────
@@ -2715,6 +2794,10 @@ function updateStats(){
 
   // home chip
   document.getElementById('home-chip-txt').textContent=(S.isPro?'Pro plan':'Free plan');
+
+  // journey phase (predictability - always know what stage you're in)
+  const phaseLbl=document.getElementById('journey-phase-lbl');
+  if(phaseLbl)phaseLbl.textContent=journeyPhaseLabelText(S.currentDay||1);
 
   // timeline highlight
   updateTimelineHighlight(days);
@@ -5661,7 +5744,32 @@ const CATEGORY_DESCRIPTIONS={
 function openCategoryInfo(){
   const cat=S.currentAddiction||'Other';
   const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
-  appInfo(cat==='Other'?'Your focus':cat,`${desc}\n\nTo change your focus, use "Restart setup" in the Danger zone below — it re-runs onboarding without losing your journal, cravings, or progress.`);
+  appInfo(cat==='Other'?'Your focus':cat,desc);
+}
+
+function openCategorySwitcher(){
+  const cat=S.currentAddiction||'Other';
+  const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
+  document.getElementById('category-modal-sub').textContent=`Currently: ${cat==='Other'?'Your focus':cat} — ${desc} Tap a category below to switch. Your streak, journal, and progress stay exactly the same.`;
+  document.querySelectorAll('#categorySwitchGrid .add-chip').forEach(chip=>{
+    chip.classList.toggle('sel',chip.textContent.trim().includes(cat));
+  });
+  document.getElementById('category-modal').classList.add('open');
+}
+function closeCategorySwitcher(){
+  document.getElementById('category-modal').classList.remove('open');
+}
+function switchCategory(name){
+  if(S.currentAddiction===name){closeCategorySwitcher();return;}
+  S.currentAddiction=name;
+  S.selectedAddictions=[name];
+  save();
+  updateProfileEditUI();
+  if(typeof renderTodayLesson==='function'&&document.getElementById('s-lesson').classList.contains('on')){
+    viewingDay=null;
+    renderTodayLesson();
+  }
+  closeCategorySwitcher();
 }
 
 function openNameModal(){

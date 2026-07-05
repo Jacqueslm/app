@@ -4837,12 +4837,14 @@ Address the interactions of their unique blueprint and assign structured daily r
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
+    if(!S.isPro&&!isCrisis)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
   }catch(e){
     setNovaMode(false);
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
+    if(!S.isPro&&!isCrisis)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
   }
 }
 
@@ -4855,7 +4857,17 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard'
 };
 const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-journal',community:'bn-comm'};
+function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
+let preUpgradeScreen='home';
 function switchTo(id){
+  if(id==='plans'){
+    const activeEl=document.querySelector('.scr.on');
+    if(activeEl){
+      const activeId=Object.keys(SCREEN_MAP).find(k=>SCREEN_MAP[k]===activeEl.id);
+      if(activeId&&activeId!=='plans')preUpgradeScreen=activeId;
+    }
+  }
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
@@ -4914,12 +4926,12 @@ function scrollToPricingCards(){
   if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function stayFreeForNow(){
-  switchTo('home');actBn('bn-home');
+  switchTo(preUpgradeScreen);actBn(bnForScreen(preUpgradeScreen));
 }
 function selectFree(){
   if(S.isPro){cancelProSubscription();return;}
   S.isPro=false;S.chatsLeft=3;save();updateTierUI();
-  switchTo('home');actBn('bn-home');
+  stayFreeForNow();
 }
 function becomePro(plan){
   plan=plan||billTypeToPlan(currentBillSelection);

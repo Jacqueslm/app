@@ -697,7 +697,8 @@ body{display:flex;justify-content:center}
               <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
             </div>
             <div style="font-size:13px;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">Days 16–30 are part of the Pro program. Upgrade to keep going deeper into patterns, triggers, and long-term change.</div>
-            <button class="log-btn" style="margin-top:16px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+            <div class="mini-pricing-row" style="font-size:11.5px;color:var(--tm);text-align:center;margin-top:10px"></div>
+            <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
             <button class="ob-btn outline" style="margin-top:8px" onclick="viewLessonDay(15)">Back to Day 15</button>
           </div>
         </div>
@@ -726,6 +727,7 @@ body{display:flex;justify-content:center}
           </div>
         </div>
 
+        <div class="mini-pricing-row" style="font-size:11.5px;color:#8892c0;text-align:center;margin-bottom:10px"></div>
         <button class="ob-btn" onclick="upgradeFromDay15Overlay()">Continue with Pro</button>
         <button class="ob-btn outline" onclick="closeDay15Overlay()">Stay on Day 15 for now</button>
       </div>
@@ -1016,30 +1018,45 @@ body{display:flex;justify-content:center}
     </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
+      <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:12.5px;line-height:1.6"></div>
       <div class="tier-banner">
-        <div style="font-size:20px;font-weight:500;margin-bottom:4px">Choose your plan</div>
-        <div style="font-size:13px;color:#8892c0;margin-bottom:18px">Every plan starts with Day One.</div>
+        <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">If you want deeper support, you can unlock the full program with Pro. There's no pressure either way — every core recovery tool stays free.</div>
+        <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
+          <div>✓ Unlock Days 16–30</div>
+          <div>✓ Nova Pro coaching</div>
+          <div>✓ Advanced relapse tools</div>
+          <div>✓ Weekly reports</div>
+          <div>✓ Smart reminders</div>
+          <div>✓ Pro journal</div>
+          <div>✓ Advanced streaks</div>
+          <div>✓ Analytics</div>
+          <div>✓ Custom lesson packs</div>
+        </div>
+        <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
+        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:var(--ts);border-color:var(--bdr)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
         <div class="tier-toggle">
           <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
-          <button id="abtn" onclick="setBill('a')">Annual · save 40%</button>
+          <button id="abtn" onclick="setBill('a')">Yearly · save 40%</button>
+          <button id="lbtn" onclick="setBill('l')">Lifetime</button>
         </div>
       </div>
-      <div class="tier-cards">
+      <div class="tier-cards" id="pricing-cards">
         <div class="tc-card">
           <div class="tc-icon" style="background:var(--ok)"><i class="ti ti-seedling" style="font-size:18px;color:#0F6E56"></i></div>
           <div class="tc-name">Free</div>
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Sobriety counter</div>
-            <div class="feat y"><i class="ti ti-check"></i>Milestones</div>
-            <div class="feat y"><i class="ti ti-check"></i>Daily pledge</div>
-            <div class="feat y"><i class="ti ti-check"></i>Journal & mood tracking</div>
-            <div class="feat y"><i class="ti ti-check"></i>Craving tracker & insights</div>
+            <div class="feat y"><i class="ti ti-check"></i>Basic Nova (3 chats/day)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Basic relapse tools</div>
+            <div class="feat y"><i class="ti ti-check"></i>Sobriety counter &amp; milestones</div>
+            <div class="feat y"><i class="ti ti-check"></i>Journal (plain text + mood)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Craving tracker</div>
             <div class="feat y"><i class="ti ti-check"></i>Withdrawal timeline</div>
-            <div class="feat y"><i class="ti ti-check"></i>Progress & insights</div>
-            <div class="feat y"><i class="ti ti-check"></i>Stories &amp; reflections</div>
-            <div class="feat y"><i class="ti ti-check"></i>3 Nova AI chats/day</div>
+            <div class="feat y"><i class="ti ti-check"></i>Lesson history</div>
+            <div class="feat y"><i class="ti ti-check"></i>Daily lesson reminder</div>
+            <div class="feat y"><i class="ti ti-check"></i>Restart program &amp; switch categories</div>
           </div>
           <button class="tc-btn free" id="free-cta" onclick="selectFree()">Current plan</button>
         </div>
@@ -1048,16 +1065,30 @@ body{display:flex;justify-content:center}
           <div class="tc-icon" style="background:var(--acc)"><i class="ti ti-crown" style="font-size:18px;color:var(--accent)"></i></div>
           <div class="tc-name">Pro</div>
           <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
+          <div style="font-size:11.5px;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova AI chats</div>
+            <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova Pro coaching</div>
+            <div class="feat y"><i class="ti ti-check"></i>Advanced relapse tools</div>
+            <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
+            <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
+            <div class="feat y"><i class="ti ti-check"></i>Pro journal &amp; guided prompts</div>
+            <div class="feat y"><i class="ti ti-check"></i>Advanced streak system</div>
+            <div class="feat y"><i class="ti ti-check"></i>Analytics</div>
+            <div class="feat y"><i class="ti ti-check"></i>Custom lesson packs &amp; Build Your Own Pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Emotional trend &amp; pattern detection</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
-            <div class="feat y"><i class="ti ti-check"></i>Early access to new features</div>
           </div>
           <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
         </div>
       </div>
+      <div id="sub-status-section" style="display:none;margin:4px 16px 8px;padding:14px;border-radius:12px;background:var(--s1);border:0.5px solid var(--bdr)">
+        <div style="font-size:13px;font-weight:500;color:var(--tp);margin-bottom:4px" id="sub-status-title">Pro plan</div>
+        <div style="font-size:12px;color:var(--ts);line-height:1.6;margin-bottom:10px" id="sub-status-detail"></div>
+        <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
+      </div>
+      <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
       <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for unlimited time with Nova.</div>
     </div>
 
@@ -1300,6 +1331,7 @@ body{display:flex;justify-content:center}
         <i class="ti ti-lock" style="font-size:24px;color:#fff"></i>
       </div>
     </div>
+    <div class="mini-pricing-row" style="font-size:11.5px;color:var(--tm);text-align:center;margin-bottom:10px"></div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeProToolPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
     <button class="sos-close" onclick="closeProToolPreview()">Go back</button>
   </div>
@@ -1317,6 +1349,7 @@ body{display:flex;justify-content:center}
       </div>
     </div>
     <div class="sos-sub" style="margin-bottom:12px">Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more.</div>
+    <div class="mini-pricing-row" style="font-size:11.5px;color:var(--tm);text-align:center;margin-bottom:10px"></div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closePackPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
     <button class="sos-close" onclick="closePackPreview()">Go back</button>
   </div>
@@ -1604,6 +1637,15 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- GENERIC INFO MODAL (single acknowledgement, no false choice) -->
+<div class="sos-modal" id="info-modal" onclick="if(event.target===this)closeInfoModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)" id="info-modal-title">Pro</div>
+    <div class="sos-sub" id="info-modal-msg"></div>
+    <button class="ob-btn" style="margin-top:8px" onclick="closeInfoModal()">OK</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -1621,7 +1663,8 @@ let S = {
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   notifiedMilestones:[],lastProNudgeDate:'',
-  isPro:false,pledged:false,pledgeDate:'',
+  isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
+  pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
@@ -2484,6 +2527,8 @@ function finishOnboard(){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
+  evaluateProSubscription();
+  renderMiniPricingRows();
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
@@ -2544,6 +2589,7 @@ function getDays(){
 
 function updateStats(){
   updateRecoveryTermLabels();
+  evaluateProSubscription();
   const start=S.startDate?new Date(S.startDate):new Date();
   const diff=Date.now()-start.getTime();
   const days=Math.max(0,Math.floor(diff/86400000));
@@ -4829,28 +4875,165 @@ function switchTo(id){
   if(id==='analytics'){renderAnalytics();}
   if(id==='pack-list'){renderPackList();}
   if(id==='pack-lesson'){renderPackLesson();}
+  if(id==='plans'){renderPlansScreen();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
   if(id){const el=document.getElementById(id);if(el)el.classList.add('on');}
 }
 
-// ─── PLANS ────────────────────────────────────────────────────────────────────
+// ─── PLANS / PRICING (one Pro plan, three billing options) ───────────────────
+const PRO_PRICE_MONTHLY=9.99,PRO_PRICE_YEARLY=71.99,PRO_PRICE_LIFETIME=149.99;
+const PRO_GRACE_DAYS=3;
+let currentBillSelection='m';
+function billTypeToPlan(t){return t==='a'?'yearly':t==='l'?'lifetime':'monthly';}
 function setBill(type){
+  currentBillSelection=type;
   document.getElementById('mbtn').classList.toggle('on',type==='m');
   document.getElementById('abtn').classList.toggle('on',type==='a');
-  document.getElementById('pro-price').innerHTML=type==='a'?'$5.99<span>/mo</span>':'$9.99<span>/mo</span>';
+  document.getElementById('lbtn').classList.toggle('on',type==='l');
+  const priceEl=document.getElementById('pro-price');
+  const subEl=document.getElementById('pro-price-sub');
+  if(type==='a'){
+    priceEl.innerHTML='$5.99<span>/mo</span>';
+    if(subEl)subEl.textContent=`Billed $${PRO_PRICE_YEARLY}/yr — save 40% vs monthly`;
+  }else if(type==='l'){
+    priceEl.innerHTML=`$${PRO_PRICE_LIFETIME}<span> one-time</span>`;
+    if(subEl)subEl.textContent='One-time payment. Yours for good, no renewals.';
+  }else{
+    priceEl.innerHTML=`$${PRO_PRICE_MONTHLY}<span>/mo</span>`;
+    if(subEl)subEl.textContent='Billed monthly. Cancel anytime.';
+  }
+}
+function renderMiniPricingRows(){
+  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save 40%) · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
+  document.querySelectorAll('.mini-pricing-row').forEach(el=>{el.textContent=text;});
+}
+function scrollToPricingCards(){
+  const el=document.getElementById('pricing-cards');
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function stayFreeForNow(){
+  switchTo('home');actBn('bn-home');
 }
 function selectFree(){
+  if(S.isPro){cancelProSubscription();return;}
   S.isPro=false;S.chatsLeft=3;save();updateTierUI();
   switchTo('home');actBn('bn-home');
 }
-function becomePro(){
-  S.isPro=true;save();updateTierUI();
+function becomePro(plan){
+  plan=plan||billTypeToPlan(currentBillSelection);
+  const now=new Date();
+  S.isPro=true;S.proPlan=plan;S.proSince=S.proSince||now.toISOString();
+  S.proCancelled=false;S.proGraceUntil='';
+  if(plan==='lifetime'){
+    S.proRenewsAt='';
+  }else{
+    const renew=new Date(now);
+    renew.setDate(renew.getDate()+(plan==='yearly'?365:30));
+    S.proRenewsAt=renew.toISOString();
+  }
+  save();updateTierUI();renderPlansScreen();
 }
 function selectPro(){
-  becomePro();
+  becomePro(billTypeToPlan(currentBillSelection));
   switchTo('nova');actBn('bn-nova');
+}
+function cancelProSubscription(){
+  if(S.proPlan==='lifetime'){
+    appInfo('Lifetime Pro','Lifetime Pro is a one-time purchase that never renews, so there\'s nothing to cancel — it\'s yours for good.');
+    return;
+  }
+  const renewDate=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'the end of your billing period';
+  appConfirm(`You'll keep full Pro access until ${renewDate}. After that you'll move to Free — nothing you've saved gets deleted, and you can resume anytime before then.`,()=>{
+    S.proCancelled=true;save();updateTierUI();renderPlansScreen();
+  });
+}
+function resumeProSubscription(){
+  S.proCancelled=false;save();updateTierUI();renderPlansScreen();
+}
+async function restorePurchases(){
+  if(!S.accountEmail){
+    appInfo('Restore purchases','Restore purchases works once you\'re signed in, so your Pro status can sync from your account. Sign in from Profile > Account & Sync, then try again.');
+    return;
+  }
+  try{
+    const res=await fetch('/api/state');
+    if(res.ok){
+      const data=await res.json();
+      const remote=data&&data.state?JSON.parse(data.state):null;
+      if(remote&&remote.isPro){
+        S.isPro=true;S.proPlan=remote.proPlan||'monthly';S.proSince=remote.proSince||new Date().toISOString();
+        S.proRenewsAt=remote.proRenewsAt||'';S.proCancelled=!!remote.proCancelled;S.proGraceUntil=remote.proGraceUntil||'';
+        save();updateTierUI();renderPlansScreen();
+        appInfo('Restore purchases','Your Pro subscription was found and restored on this device.');
+        return;
+      }
+    }
+    appInfo('Restore purchases','No active Pro subscription was found for this account.');
+  }catch(e){
+    appInfo('Restore purchases','Couldn\'t reach the server to restore purchases right now. Please try again in a moment.');
+  }
+}
+// Honest grace-period + cancellation-expiry engine. No real payment processor exists in this
+// demo, so a missed renewal is simulated as: proRenewsAt has passed and the plan wasn't cancelled.
+function evaluateProSubscription(){
+  if(!S.isPro||S.proPlan==='lifetime'||!S.proRenewsAt)return;
+  const now=new Date(),renew=new Date(S.proRenewsAt);
+  if(now<renew)return;
+  if(S.proCancelled){
+    S.isPro=false;S.proGraceUntil='';save();updateTierUI();renderPlansScreen();
+    return;
+  }
+  if(!S.proGraceUntil){
+    const g=new Date(renew);g.setDate(g.getDate()+PRO_GRACE_DAYS);
+    S.proGraceUntil=g.toISOString();save();
+    renderPlansScreen();
+    return;
+  }
+  if(now>new Date(S.proGraceUntil)){
+    S.isPro=false;S.proGraceUntil='';save();updateTierUI();renderPlansScreen();
+  }
+}
+function renderPlansScreen(){
+  setBill(currentBillSelection);
+  const graceBanner=document.getElementById('grace-banner');
+  const statusSection=document.getElementById('sub-status-section');
+  const statusTitle=document.getElementById('sub-status-title');
+  const statusDetail=document.getElementById('sub-status-detail');
+  const statusBtn=document.getElementById('sub-status-btn');
+  if(!graceBanner||!statusSection)return;
+  const inGrace=S.isPro&&S.proGraceUntil&&new Date()<=new Date(S.proGraceUntil);
+  if(inGrace){
+    const graceDate=new Date(S.proGraceUntil).toLocaleDateString(undefined,{month:'long',day:'numeric'});
+    graceBanner.style.display='block';
+    graceBanner.textContent=`We couldn't confirm your last renewal. Pro stays active until ${graceDate} — update your billing anytime before then to keep it going.`;
+  }else{
+    graceBanner.style.display='none';
+  }
+  if(S.isPro){
+    statusSection.style.display='block';
+    const planLabel=S.proPlan==='yearly'?'Yearly':S.proPlan==='lifetime'?'Lifetime':'Monthly';
+    statusTitle.textContent=`Pro plan — ${planLabel}`;
+    if(S.proPlan==='lifetime'){
+      statusDetail.textContent='One-time payment. Permanent access, no renewals.';
+      statusBtn.style.display='none';
+    }else if(S.proCancelled){
+      const d=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'';
+      statusDetail.textContent=`Cancelling — you'll keep Pro until ${d}, then move to Free. You can resume anytime before then.`;
+      statusBtn.style.display='block';statusBtn.textContent='Resume subscription';
+    }else{
+      const d=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'';
+      statusDetail.textContent=`Renews ${d}.`;
+      statusBtn.style.display='block';statusBtn.textContent='Cancel subscription';
+    }
+  }else{
+    statusSection.style.display='none';
+  }
+}
+function handleSubStatusAction(){
+  if(S.proCancelled)resumeProSubscription();
+  else cancelProSubscription();
 }
 function updateTierUI(){
   const badge=document.getElementById('tier-badge');
@@ -4866,7 +5049,7 @@ function updateTierUI(){
     if(limitBar)limitBar.style.display='none';
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
-    if(freeCta)freeCta.textContent='Downgrade to Free';
+    if(freeCta)freeCta.textContent=S.proPlan==='lifetime'?'Lifetime plan':'Cancel subscription';
     if(proCta){proCta.textContent='Current plan ✓';proCta.style.background='var(--ok)';proCta.style.color='var(--ok-t)';}
   }else{
     badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
@@ -5094,6 +5277,14 @@ function confirmModalYes(){
   const cb=_confirmModalCallback;
   closeConfirmModal();
   if(cb)cb();
+}
+function appInfo(title,message){
+  document.getElementById('info-modal-title').textContent=title;
+  document.getElementById('info-modal-msg').textContent=message;
+  document.getElementById('info-modal').classList.add('open');
+}
+function closeInfoModal(){
+  document.getElementById('info-modal').classList.remove('open');
 }
 
 // ─── SHARE ─────────────────────────────────────────────────────────────────────

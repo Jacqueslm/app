@@ -432,7 +432,7 @@ body{display:flex;justify-content:center}
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
     </div>
-    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-plans')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
+    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-tools')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
   </div>
 
   <div class="row">
@@ -451,28 +451,13 @@ body{display:flex;justify-content:center}
     <i class="ti ti-arrow-right" style="font-size:18px;color:#0F6E56"></i>
   </div>
 
-  <div class="sec">
-    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMood()">
-      <span>Today's mood</span>
-      <span id="mood-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Log mood</span>
-    </div>
-    <div class="mood-row" id="home-mood-row" style="display:none">
-      <div class="mopt" onclick="setHomeMood(this,'😔','Rough')">😔<span>Rough</span></div>
-      <div class="mopt" onclick="setHomeMood(this,'😐','Okay')">😐<span>Okay</span></div>
-      <div class="mopt" onclick="setHomeMood(this,'🙂','Good')">🙂<span>Good</span></div>
-      <div class="mopt" onclick="setHomeMood(this,'😄','Great')">😄<span>Great</span></div>
-      <div class="mopt" onclick="setHomeMood(this,'🌟','Amazing')">🌟<span>Amazing</span></div>
-    </div>
+  <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Nova</div><div style="font-size:12px;color:var(--tm)">Your AI recovery companion, right now</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
 
-  <div class="sdiv"></div>
-  <div class="sec">
-    <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
-      <span>Milestones</span>
-      <span id="milestones-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Show all</span>
-    </div>
-    <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
-  </div>
+  <div style="padding:14px 16px 8px;text-align:center;font-size:11.5px;color:var(--tm)" id="home-reminder-status"></div>
 </div>
 
 <!-- NOVA AI -->
@@ -803,7 +788,7 @@ body{display:flex;justify-content:center}
           <div class="setting-row-txt"><p>I slipped</p><span>No judgment — here's what's next</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
+        <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
           <i class="ti ti-activity" style="color:#BA7517"></i>
           <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -956,6 +941,69 @@ body{display:flex;justify-content:center}
       </div>
     </div>
 
+    <!-- TOOLS (hub) -->
+    <div id="s-tools" class="scr">
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0">Relapse tools</div></div>
+      <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
+        <i class="ti ti-hand-stop"></i>
+        <div class="setting-row-txt"><p>Relapse Toolkit</p><span>Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
+        <i class="ti ti-activity"></i>
+        <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Journal</div></div>
+      <div class="setting-row" onclick="switchTo('journal');actBn('bn-tools')">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Streak</div></div>
+      <div class="setting-row" onclick="switchTo('progress');actBn('bn-tools')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('streaks')">
+        <i class="ti ti-flame"></i>
+        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and relapse recovery tracking</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="sec" style="padding-bottom:0;padding-top:4px">
+        <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
+          <span>Milestones</span>
+          <span id="milestones-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">Show all</span>
+        </div>
+        <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Understand your patterns</div></div>
+      <div class="setting-row" onclick="openProTool('analytics')">
+        <i class="ti ti-chart-line"></i>
+        <div class="setting-row-txt"><p>Analytics</p><span>Simple insights on your triggers, patterns, and emotional trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('weeklyReports')">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Weekly Reports</p><span>Your emotional patterns, triggers, and progress each week</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openProTool('habitCoach')">
+        <i class="ti ti-flame"></i>
+        <div class="setting-row-txt"><p>Habit Coach</p><span>Consistency insights, vulnerability windows, and personalized habit suggestions</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('timeline');actBn('bn-tools')">
+        <i class="ti ti-clock"></i>
+        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+    </div>
+
     <!-- CUSTOM LESSON PACKS (Pro) -->
     <div id="s-pack-list" class="scr">
       <div class="sec">
@@ -1071,7 +1119,7 @@ body{display:flex;justify-content:center}
         </div>
         <div class="tc-card pro">
           <div class="pop-badge">Most popular</div>
-          <div class="tc-icon" style="background:var(--acc)"><i class="ti ti-crown" style="font-size:18px;color:var(--accent)"></i></div>
+          <div class="tc-icon" style="background:var(--acc)"><i class="ti ti-sparkles" style="font-size:18px;color:var(--accent)"></i></div>
           <div class="tc-name">Pro</div>
           <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
           <div style="font-size:11.5px;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
@@ -1137,59 +1185,38 @@ body{display:flex;justify-content:center}
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Recovery tools</div></div>
-      <div class="setting-row" onclick="switchTo('craving');actBn('bn-plans')">
-        <i class="ti ti-activity"></i>
-        <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Subscription</div></div>
+      <div class="setting-row" onclick="switchTo('plans');actBn('bn-plans')">
+        <i class="ti ti-sparkles"></i>
+        <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('timeline');actBn('bn-plans')">
-        <i class="ti ti-clock"></i>
-        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+      <div class="setting-row" onclick="restorePurchases()">
+        <i class="ti ti-cloud"></i>
+        <div class="setting-row-txt"><p>Restore purchases</p><span>Sync your Pro status from your account</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('progress');actBn('bn-plans')">
-        <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Category</div></div>
+      <div class="setting-row" onclick="openCategoryInfo()">
+        <i class="ti ti-info-circle"></i>
+        <div class="setting-row-txt"><p>Category</p><span id="category-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-plans')">
-        <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p>Relapse toolkit</p><span>Grounding tools, plus advanced Pro tools for hard moments</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openProTool('weeklyReports')">
-        <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Weekly Reports</p><span>Your emotional patterns, triggers, and progress each week</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openProTool('streaks')">
-        <i class="ti ti-flame"></i>
-        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and relapse recovery tracking</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openProTool('analytics')">
-        <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Analytics</p><span>Simple insights on your triggers, patterns, and emotional trends</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
       <div class="setting-row" onclick="openLessonPacksScreen()">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openProTool('habitCoach')">
-        <i class="ti ti-flame"></i>
-        <div class="setting-row-txt"><p>Habit Coach</p><span>Consistency insights, vulnerability windows, and personalized habit suggestions</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
       <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Settings</div></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div style="height:8px;background:var(--s0)"></div>
       <div class="setting-row" onclick="toggleNotif()">
         <i class="ti ti-bell"></i>
         <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
@@ -1210,9 +1237,9 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
         <div class="toggle-sw" id="applock-toggle"><div class="toggle-knob"></div></div>
       </div>
-      <div class="setting-row" onclick="switchTo('plans');actBn('bn-plans')">
-        <i class="ti ti-crown"></i>
-        <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
+      <div class="setting-row" onclick="switchTo('community');actBn('bn-plans')">
+        <i class="ti ti-users"></i>
+        <div class="setting-row-txt"><p>Stories</p><span>Read recovery stories from others</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="shareMyMilestone()">
@@ -1236,18 +1263,23 @@ body{display:flex;justify-content:center}
         <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
       </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
+      <div class="setting-row" style="cursor:default">
+        <i class="ti ti-info-circle"></i>
+        <div class="setting-row-txt"><p>Turn Someday Into Day One</p><span>Version <span id="app-version-txt"></span></span></div>
+      </div>
     </div>
 
   </div><!-- /screens -->
 
   <!-- BOTTOM NAV -->
   <div class="bnav">
-    <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Home</span></div>
+    <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
+    <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-brain"></i></div><span>Nova</span>
     </div>
-    <div class="bn" id="bn-journal" onclick="switchTo('journal');actBn('bn-journal')"><i class="ti ti-notebook"></i><span>Journal</span></div>
-    <div class="bn" id="bn-comm" onclick="switchTo('community');actBn('bn-comm')"><i class="ti ti-users"></i><span>Stories</span></div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
 
@@ -1327,7 +1359,7 @@ body{display:flex;justify-content:center}
       2. Reach out to one person you trust — even just to say what happened.<br>
       3. Reset your date when you're ready. No rush, no shame.
     </div>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-journal');openJour()">Write about it in your journal</button>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-tools');openJour()">Write about it in your journal</button>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp()">Reset my date &amp; restart</button>
     <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Nova</button>
     <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
@@ -2548,6 +2580,7 @@ function initApp(){
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
   document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled!==false);
+  updateHomeReminderStatus();
   updateRelationshipStatusUI();
   updateProfileEditUI();
   updateLessonPromo();
@@ -3121,7 +3154,7 @@ function saveMilestoneReflection(){
 
 // Advanced Streaks screen (Pro)
 function openAdvancedStreaksScreen(){
-  switchTo('streaks');actBn('bn-plans');
+  switchTo('streaks');actBn('bn-tools');
 }
 function renderAdvancedStreaks(){
   const wrap=document.getElementById('streaks-content');
@@ -3362,7 +3395,7 @@ function renderAnalytics(){
   wrap.innerHTML=html;
 }
 function openAnalyticsScreen(){
-  switchTo('analytics');actBn('bn-plans');
+  switchTo('analytics');actBn('bn-tools');
 }
 function discussAnalyticsWithNova(){
   switchTo('nova');actBn('bn-nova');
@@ -3539,7 +3572,7 @@ function renderHabitCoach(){
   wrap.innerHTML=html;
 }
 function openHabitCoachScreen(){
-  switchTo('habit-coach');actBn('bn-plans');
+  switchTo('habit-coach');actBn('bn-tools');
 }
 function discussHabitsWithNova(){
   switchTo('nova');actBn('bn-nova');
@@ -3669,7 +3702,7 @@ function logCraving(){
   document.getElementById('cVal').textContent='5 / 10';
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>c.classList.remove('sel'));
 }
-function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-plans');}
+function logCravingFromSOS(){closeSOS();switchTo('craving');actBn('bn-tools');}
 
 // ─── TRIGGERED FLOW (Free) ────────────────────────────────────────────────────
 const TRIGGER_COPING_TIPS={
@@ -3705,7 +3738,7 @@ function selectTriggerType(type){
 function goLogCravingWithTrigger(){
   const type=currentTriggerType;
   closeTriggeredFlow();
-  switchTo('craving');actBn('bn-plans');
+  switchTo('craving');actBn('bn-tools');
   document.querySelectorAll('.tc-wrap .tc').forEach(c=>{
     c.classList.toggle('sel',c.textContent.trim()===type);
   });
@@ -3960,23 +3993,11 @@ function buildProgress(){
   `;
 }
 
-// ─── MOOD ─────────────────────────────────────────────────────────────────────
-function setHomeMood(el,emoji,label){
-  document.querySelectorAll('#s-home .mood-row .mopt').forEach(m=>m.classList.remove('sel'));
-  el.classList.add('sel');
-  if(label==='Rough'){
-    maybeNovaProNudge("Rough days are still days you showed up for. If you ever want to dig into what's underneath days like this one, that's something Nova Pro can help with — but I'm right here either way.");
-  }else if(label==='Amazing'){
-    maybeNovaProNudge("I love hearing that. If you want to understand more about what's actually driving days like this one, Nova Pro can help you go deeper into your own patterns — but however you got here, it counts.");
-  }
-}
-
-function toggleHomeMood(){
-  const row=document.getElementById('home-mood-row');
-  const lbl=document.getElementById('mood-toggle-lbl');
-  const show=row.style.display==='none';
-  row.style.display=show?'flex':'none';
-  lbl.textContent=show?'Hide':'Log mood';
+// ─── TODAY TAB: REMINDER STATUS ────────────────────────────────────────────────
+function updateHomeReminderStatus(){
+  const el=document.getElementById('home-reminder-status');
+  if(!el)return;
+  el.textContent=S.remindersEnabled!==false?'Daily lesson reminder: On':'Daily lesson reminder: Off';
 }
 
 function toggleHomeMilestones(){
@@ -4405,7 +4426,7 @@ function discussLatestReportWithNova(){
 }
 function openWeeklyReportsScreen(){
   maybeAutoGenerateWeeklyReport();
-  switchTo('weekly-reports');actBn('bn-plans');
+  switchTo('weekly-reports');actBn('bn-tools');
 }
 function fmtReportDate(iso){
   return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});
@@ -4942,7 +4963,7 @@ const PRO_TOOLS={
     open:'openHabitCoachScreen'
   }
 };
-function openProJournalWhenPro(){switchTo('journal');actBn('bn-journal');}
+function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   if(S.isPro){window[PRO_TOOLS[key].open]();return;}
   showProToolPreview(key);
@@ -5119,10 +5140,10 @@ const SCREEN_MAP={
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
-  'habit-coach':'s-habit-coach'
+  'habit-coach':'s-habit-coach',tools:'s-tools'
 };
-const TITLES={home:'My recovery',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-journal',community:'bn-comm'};
+const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
@@ -5154,6 +5175,7 @@ function switchTo(id){
   if(id==='pack-lesson'){renderPackLesson();}
   if(id==='plans'){renderPlansScreen();}
   if(id==='habit-coach'){renderHabitCoach();}
+  if(id==='tools'){renderMilestones();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -5457,6 +5479,7 @@ function toggleNotif(){
   S.remindersEnabled=!S.remindersEnabled;
   document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled);
   save();
+  updateHomeReminderStatus();
 }
 function toggleDark(){
   S.darkMode=!S.darkMode;
@@ -5599,6 +5622,29 @@ function updateProfileEditUI(){
     const labels={female:'Female',male:'Male',neutral:'Neutral'};
     voiceEl.textContent=labels[S.novaVoice]||'Neutral';
   }
+  const catEl=document.getElementById('category-row-sub');
+  if(catEl)catEl.textContent=S.currentAddiction||'Not set';
+  const verEl=document.getElementById('app-version-txt');
+  if(verEl)verEl.textContent=APP_VERSION;
+}
+const APP_VERSION='1.0.0';
+const CATEGORY_DESCRIPTIONS={
+  'Porn & Sex':'Focused on compulsive porn use and sexual behavior patterns that feel out of your control.',
+  'Alcohol':"Focused on reducing or stopping drinking and rebuilding a life that doesn't depend on it.",
+  'Smoking':'Focused on quitting cigarettes, vaping, or other nicotine use for good.',
+  'Substances':'Focused on stepping away from drug or substance use and building lasting stability.',
+  'Gambling':'Focused on stopping compulsive betting, gaming for money, or checking odds.',
+  'Social media':'Focused on rebuilding a healthier relationship with your phone and social feeds.',
+  'Gaming':'Focused on reclaiming time and energy from compulsive gaming.',
+  'Food / Binging':'Focused on breaking the cycle of emotional or binge eating.',
+  'Shopping / Spending':'Focused on curbing impulsive spending and rebuilding financial peace of mind.',
+  'Work':'Focused on breaking the cycle of overworking and reclaiming rest.',
+  'Other':"A general recovery focus, tailored to whatever pattern you're working to change.",
+};
+function openCategoryInfo(){
+  const cat=S.currentAddiction||'Other';
+  const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
+  appInfo(cat==='Other'?'Your focus':cat,`${desc}\n\nTo change your focus, use "Restart setup" in the Danger zone below — it re-runs onboarding without losing your journal, cravings, or progress.`);
 }
 
 function openNameModal(){

@@ -195,6 +195,9 @@ body{display:flex;justify-content:center}
 .tc{border:0.5px solid var(--bdr);border-radius:20px;padding:6px 13px;font-size:12px;color:var(--ts);cursor:pointer;background:var(--s2);user-select:none}
 .tc.sel{background:var(--acc);border-color:#AFA9EC;color:var(--acc-t)}
 .log-btn{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)}
+.nova-modes{display:flex;gap:8px}
+.nova-mode{flex:1;border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:14px;color:#8892c0;font-family:var(--f)}
+.nova-mode.active{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
 .clog{display:flex;flex-direction:column;gap:6px}
 .ci{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:10px}
 .cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -2539,7 +2542,8 @@ function obNext(n){
     S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
-    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
+    const triggerSentence=blueprintVals.length?`Nova has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
+    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>${triggerSentence}Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
     document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
   }
@@ -2570,7 +2574,9 @@ function toggleAddiction(element,name){
 // whose popup list can render unreliably (or appear to offer only one option) inside constrained
 // or embedded viewports.
 function renderBehaviorChips(key,options){
-  const chips=options.map((opt,i)=>`<div class="behavior-chip${i===0?' sel':''}" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
+  // No option is pre-selected - defaulting a sensitive self-assessment answer without the
+  // user ever tapping it would let Nova confidently "register a trigger" they never confirmed.
+  const chips=options.map(opt=>`<div class="behavior-chip" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
   return `<div class="behavior-chip-group" data-key="${key}">${chips}</div>`;
 }
 function selectBehaviorChip(el){
@@ -5688,7 +5694,7 @@ function updateRelationshipStatusUI(){
   const el=document.getElementById('rel-status-sub');
   if(!el)return;
   const labels={in_relationship:'In a relationship',married:'Married',single:'Single',complicated:"It's complicated"};
-  el.textContent=labels[S.relationshipStatus]||'In a relationship';
+  el.textContent=labels[S.relationshipStatus]||'Not set';
 }
 
 // ─── GENERIC CONFIRM ───────────────────────────────────────────────────────────
@@ -5987,9 +5993,7 @@ function enterApp(){
     }
   }else{
     document.getElementById('onboarding').style.display='flex';
-    // set default date for demo
-    const today=new Date();today.setDate(today.getDate()-47);
-    document.getElementById('ob-date').value=today.toISOString().split('T')[0];
+    document.getElementById('ob-date').value=new Date().toISOString().split('T')[0];
   }
 }
 

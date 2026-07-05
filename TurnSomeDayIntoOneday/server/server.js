@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
 const db = require('./db');
+const billing = require('./billing');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -21,6 +22,17 @@ const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
+
+// Stripe webhook signature verification needs the raw request body, so this route is
+// registered with express.raw() before the global express.json() middleware below.
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  try {
+    await billing.handleWebhookEvent(req.body, req.headers['stripe-signature']);
+    res.json({ received: true });
+  } catch (err) {
+    res.status(400).json({ error: `Webhook error: ${err.message}` });
+  }
+});
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
@@ -120,15 +132,57 @@ app.get('/api/account/export', requireAuth, (req, res) => {
   });
 });
 
-app.delete('/api/account', requireAuth, (req, res) => {
+app.delete('/api/account', requireAuth, async (req, res) => {
   const { password } = req.body || {};
   const user = db.getUserById(req.userId);
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect password.' });
   }
+  if (billing.isConfigured()) {
+    await billing.cancelStripeSubscriptionForUser(user);
+  }
   db.deleteUser(req.userId);
   res.clearCookie(COOKIE_NAME);
   res.json({ ok: true });
+});
+
+function getOrigin(req) {
+  return req.headers.origin || `${req.protocol}://${req.get('host')}`;
+}
+
+app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) => {
+  if (!billing.isConfigured()) {
+    return res.status(503).json({ error: 'Billing is not available on this server right now.' });
+  }
+  const { plan } = req.body || {};
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  try {
+    const url = await billing.createCheckoutSession(user, plan, getOrigin(req));
+    res.json({ url });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Could not start checkout.' });
+  }
+});
+
+app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => {
+  if (!billing.isConfigured()) {
+    return res.status(503).json({ error: 'Billing is not available on this server right now.' });
+  }
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  try {
+    const url = await billing.createPortalSession(user, getOrigin(req));
+    res.json({ url });
+  } catch (err) {
+    res.status(400).json({ error: err.message || 'Could not open billing management.' });
+  }
+});
+
+app.get('/api/billing/status', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  res.json(billing.getBillingStatus(user));
 });
 
 app.post('/api/chat', requireAuth, async (req, res) => {
@@ -143,11 +197,12 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'messages array is required.' });
   }
 
-  // Server-side daily limit for signed-in users. "Pro" isn't a real paid subscription yet (no
-  // billing is wired up), so every account is treated as free-tier here - a client-reported isPro
-  // flag must never be trusted to bypass this, since the client fully controls its own state.
+  // Server-side daily limit for signed-in users. Only a server-confirmed paid plan (never a
+  // client-reported isPro flag, which the client fully controls) can bypass this.
+  const user = db.getUserById(req.userId);
+  const isPro = user && billing.getBillingStatus(user).isPro;
   const used = db.getChatCount(req.userId, todayUTC());
-  if (used >= FREE_CHAT_LIMIT) {
+  if (!isPro && used >= FREE_CHAT_LIMIT) {
     return res.status(429).json({ error: 'Daily Nova AI chat limit reached. Upgrade to Pro for unlimited chats.' });
   }
 

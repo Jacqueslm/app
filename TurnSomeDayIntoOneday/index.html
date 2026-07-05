@@ -298,11 +298,11 @@ body{display:flex;justify-content:center}
 .toggle-sw.on .toggle-knob{left:21px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
-<!-- MANDATORY ACCOUNT GATE -->
-<div id="auth-gate" class="ob">
+<!-- OPTIONAL ACCOUNT CREATION (never shown before Day 1) -->
+<div id="auth-gate" class="ob" style="display:none">
   <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div>
-  <h1>Turn Someday<br>Into Day One</h1>
-  <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.<br><br>Create an account or log in to continue — your data syncs to it automatically.</p>
+  <h1>Save your progress</h1>
+  <p>Create an account to sync your progress across devices — completely optional, and your data stays right here on this device either way.</p>
   <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
     <button class="nova-mode active" id="gate-tab-login" onclick="setGateMode('login')">Log In</button>
     <button class="nova-mode" id="gate-tab-signup" onclick="setGateMode('signup')">Sign Up</button>
@@ -313,86 +313,53 @@ body{display:flex;justify-content:center}
   <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
+  <button class="ob-btn outline" style="margin-top:8px" onclick="dismissAuthGate()">Not now</button>
 </div>
 
 <!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
-<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
+<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>You're here to make a change. I'm with you.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
 
-<!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
+<!-- STEP 2: CATEGORY (single tap) -->
 <div class="ob-step" id="obs1">
-  <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What's your first name?</div>
-  <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
-
-  <div style="font-size:11px;color:#6672a0;margin-bottom:20px">You can set your gender identity and relationship status any time in Profile — some lessons mention a partner, and that lets us tailor them to your situation.</div>
-
-  <div class="ob-label">What are you recovering from? (Select all that apply)</div>
+  <div class="ob-label">What are you here to work on?</div>
   <div class="addiction-grid" id="addGrid">
-    <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Smoking')">🚬 Smoking / Vaping</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Substances')">💊 Substances</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+    <div class="add-chip" style="grid-column: span 2;" onclick="selectCategoryChip(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Alcohol')">🍺 Alcohol</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Smoking')">🚬 Smoking / Vaping</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Substances')">💊 Substances</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Gambling')">🎰 Gambling</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Social media')">📱 Social media</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Gaming')">🎮 Gaming</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Food / Binging')">🍽️ Food / Binging</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Work')">💼 Work</div>
+    <div class="add-chip" onclick="selectCategoryChip(this, 'Other')">✨ Other</div>
   </div>
-  <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
-  <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
   <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
-<!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
+<!-- STEP 3: GOAL (single tap) -->
 <div class="ob-step" id="obs2">
-  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
-  <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
-  <div id="dynamic-behavior-questions"></div>
-  <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
+  <div class="ob-label">What's your goal?</div>
+  <div class="addiction-grid" id="goalGrid" style="grid-template-columns:1fr">
+    <div class="add-chip" onclick="selectGoalChip(this, 'quit')">Quit completely</div>
+    <div class="add-chip" onclick="selectGoalChip(this, 'reduce')">Reduce gradually</div>
+    <div class="add-chip" onclick="selectGoalChip(this, 'build')">Build healthier habits</div>
+  </div>
   <button class="ob-btn outline" onclick="obBack(1)">Back</button>
 </div>
 
-<!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
+<!-- STEP 4: DAILY REMINDER TIME -->
 <div class="ob-step" id="obs2_5">
-  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Nova's Presence</div>
-  <p style="font-size:12px; color:#8892c0; text-align: left; margin-bottom: 20px;">
-    Select the voice and presence you feel most secure opening up to. Trust is everything—you can change this at any time.
-  </p>
-
-  <div class="voice-selection-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-    <div class="voice-card" id="vc-female" onclick="selectVoice('female')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 24px;">👩‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Female Presence)</div>
-        <div style="font-size: 11px; color: #8892c0;">Deeply perceptive, warm, and protective therapeutic tone.</div>
-      </div>
-    </div>
-    <div class="voice-card" id="vc-male" onclick="selectVoice('male')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 24px;">👨‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Male Presence)</div>
-        <div style="font-size: 11px; color: #8892c0;">Grounding, steady, and firmly analytical protective tone.</div>
-      </div>
-    </div>
-    <div class="voice-card" id="vc-neutral" onclick="selectVoice('neutral')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 24px;">🧑‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Neutral Presence)</div>
-        <div style="font-size: 11px; color: #8892c0;">Blended, objective, hyper-focused environmental coach.</div>
-      </div>
-    </div>
-  </div>
-
-  <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
-  <button class="ob-btn outline" onclick="obBack(2)">Back</button>
+  <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What time should I remind you each day?</div>
+  <input class="ob-input" id="ob-reminder-time" type="time" value="09:00">
+  <div style="font-size:11px;color:#6672a0;margin-top:10px">Defaults to 9:00 AM if you skip this. You can change it later.</div>
+  <button class="ob-btn" style="margin-top:14px" onclick="goToFinalStep()">Continue</button>
+  <button class="ob-btn outline" onclick="obBackToGoal()">Back</button>
 </div>
 
-<!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
-
-<!-- STEP 4: READY / PERSONALIZED SUMMARY -->
-<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> <button class="ob-btn outline" onclick="obBack(3)">Back</button> </div> </div>
+<!-- STEP 5: START DAY 1 -->
+<div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You're ready.</h1> <p>Let's begin with Day 1. You're not alone in this.</p> <div style="margin-top:18px;font-size:12px;color:var(--accent);cursor:pointer" id="ob-startdate-toggle" onclick="toggleObStartDate()">Already been at this a while? Set your real start date</div> <div id="ob-startdate-wrap" style="display:none;margin-top:10px;text-align:left"> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date-optional" type="date"> </div> <button class="ob-btn" style="margin-top:18px" onclick="finishOnboard()">Start Day 1</button> <button class="ob-btn outline" onclick="obBackToReminder()">Back</button> </div> </div>
 <!-- PIN LOCK -->
 <div id="pin-lock" class="ob" style="display:none">
   <div class="ob-logo"><i class="ti ti-lock" style="font-size:32px;color:#fff"></i></div>
@@ -1203,6 +1170,11 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Category</p><span id="category-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="openGoalModal()">
+        <i class="ti ti-flag"></i>
+        <div class="setting-row-txt"><p>Goal</p><span id="goal-row-sub">Not set</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
       <div class="setting-row" onclick="openLessonPacksScreen()">
@@ -1217,10 +1189,11 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="toggleNotif()">
+      <div class="setting-row">
         <i class="ti ti-bell"></i>
-        <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
-        <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
+        <div class="setting-row-txt" onclick="toggleNotif()"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
+        <input type="time" id="reminder-time-input" value="09:00" onchange="setDailyReminderTime(this.value)" onclick="event.stopPropagation()" style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:6px;color:var(--tp);font-size:12px;padding:2px 4px;margin-right:8px;font-family:var(--f)">
+        <div class="toggle-sw on" id="notif-toggle" onclick="toggleNotif()"><div class="toggle-knob"></div></div>
       </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
         <i class="ti ti-bell" style="color:var(--accent)"></i>
@@ -1583,6 +1556,28 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
+<!-- GOAL MODAL -->
+<div class="sos-modal" id="goal-modal" onclick="if(event.target===this)closeGoalModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Your goal</div>
+    <div class="sos-sub">You can change this anytime.</div>
+    <button class="ob-btn outline" style="margin-top:8px" onclick="setGoal('quit')">Quit completely</button>
+    <button class="ob-btn outline" style="margin-top:8px" onclick="setGoal('reduce')">Reduce gradually</button>
+    <button class="ob-btn outline" style="margin-top:8px" onclick="setGoal('build')">Build healthier habits</button>
+    <button class="sos-close" onclick="closeGoalModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- OPTIONAL SAVE-PROGRESS PROMPT (shown once, after Day 1) -->
+<div class="sos-modal" id="save-progress-modal" onclick="if(event.target===this)closeSaveProgressPrompt()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Nice work on Day 1</div>
+    <div class="sos-sub">Want to save your progress across devices?</div>
+    <button class="ob-btn" style="margin-top:8px" onclick="closeSaveProgressPrompt();showAuthGate('signup')">Create Account</button>
+    <button class="sos-close" onclick="closeSaveProgressPrompt()">Not Now</button>
+  </div>
+</div>
+
 <!-- RESET SOBRIETY DATE MODAL -->
 <div class="sos-modal" id="reset-date-modal" onclick="if(event.target===this)closeResetDate()">
   <div class="sos-sheet">
@@ -1715,6 +1710,7 @@ let S = {
   currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
+  goal:'',dailyReminderTime:'09:00',shownSaveProgressPrompt:false,
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -1758,6 +1754,7 @@ function logActivity(type,extra){
 
 // ─── ICONS (inline SVG, no external font/CDN dependency) ─────────────────────
 const ICON_PATHS={
+'ti-flag':'<path d="M4 3v18"/><path d="M4 4h13l-2.5 4L17 12H4"/>',
 'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
@@ -1974,6 +1971,7 @@ function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
+  const justFinishedDayOne=lesson.day===1;
   S.currentDay++;
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   logActivity('lesson_completed',{day:lesson.day});
@@ -1988,6 +1986,17 @@ function completeLessonForToday(){
   }else{
     setTimeout(()=>{renderTodayLesson();},1200);
   }
+  if(justFinishedDayOne){
+    setTimeout(()=>{maybeShowSaveProgressPrompt();},1800);
+  }
+}
+function maybeShowSaveProgressPrompt(){
+  if(S.accountEmail||S.shownSaveProgressPrompt)return;
+  S.shownSaveProgressPrompt=true;save();
+  document.getElementById('save-progress-modal').classList.add('open');
+}
+function closeSaveProgressPrompt(){
+  document.getElementById('save-progress-modal').classList.remove('open');
 }
 
 // ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
@@ -2435,15 +2444,6 @@ function obNext(n){
   obStep=n;
   document.getElementById('obs'+n).classList.add('on');
   if(document.getElementById('od'+n))document.getElementById('od'+n).classList.add('on');
-  if(n===4){
-    const dt=document.getElementById('ob-date').value;
-    S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
-    document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
-    const blueprintVals=Object.values(S.behavioralBlueprint);
-    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>Nova has registered your personal triggers${blueprintVals.length?`, including: "${blueprintVals.join(' and ')}"`:''}. Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
-    document.getElementById('root-cause-preview').innerHTML=rootExplanation;
-    save();
-  }
 }
 
 function obBack(n){
@@ -2457,113 +2457,70 @@ function obBack(n){
   if(dotEl)dotEl.classList.add('on');
   obStep=n;
 }
-
-function toggleAddiction(element,name){
-  element.classList.toggle('sel');
-  if(S.selectedAddictions.includes(name)){
-    S.selectedAddictions=S.selectedAddictions.filter(item=>item!==name);
-  }else{
-    S.selectedAddictions.push(name);
-  }
-}
-
-// Chip-based picker for behavioral blueprint questions - replaces native <select> dropdowns,
-// whose popup list can render unreliably (or appear to offer only one option) inside constrained
-// or embedded viewports.
-function renderBehaviorChips(key,options){
-  const chips=options.map((opt,i)=>`<div class="behavior-chip${i===0?' sel':''}" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
-  return `<div class="behavior-chip-group" data-key="${key}">${chips}</div>`;
-}
-function selectBehaviorChip(el){
-  const group=el.closest('.behavior-chip-group');
-  group.querySelectorAll('.behavior-chip').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function getBehaviorAnswer(key){
-  const group=document.querySelector(`.behavior-chip-group[data-key="${key}"]`);
-  const sel=group&&group.querySelector('.behavior-chip.sel');
-  return sel?sel.getAttribute('data-value'):null;
-}
-
-function goToBehavioralStep(){
-  S.name=document.getElementById('ob-name').value.trim()||'Friend';
-  const errEl=document.getElementById('obs1-error');
-  if(S.selectedAddictions.length===0){
-    if(errEl)errEl.textContent='Please select at least one area to focus on.';
-    return;
-  }
-  if(errEl)errEl.textContent='';
-  const container=document.getElementById('dynamic-behavior-questions');
-  container.innerHTML='';
-  S.selectedAddictions.forEach(addiction=>{
-    let htmlBlock=`<div style="margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;"> <div style="font-size:13px; color:var(--green); font-weight:600; margin-bottom:6px;">Focus: ${addiction}</div>`;
-    if(addiction==='Porn & Sex'){
-      htmlBlock+=`
-        <div class="ob-label">When are you most vulnerable to acting out?</div>
-        ${renderBehaviorChips('behavior-porn-time',['Late at night when isolated','During high stress or work anxiety','When bored during random downtime'])}
-        <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
-        ${renderBehaviorChips('behavior-porn-root',['Anesthetizing loneliness / lack of connection','Dopamine hunting to escape boredom','Decompressing from intense performance anxiety'])}`;
-    }else if(addiction==='Alcohol'||addiction==='Substances'){
-      htmlBlock+=`
-        <div class="ob-label">How do you usually engage in this cycle?</div>
-        ${renderBehaviorChips('behavior-sub-style',['Socially to mask social anxiety','Secretly alone to numb the day','Binging during high stress crashes'])}`;
-    }else if(addiction==='Gambling'||addiction==='Social media'||addiction==='Gaming'){
-      htmlBlock+=`
-        <div class="ob-label">What is the destructive loop trigger?</div>
-        ${renderBehaviorChips('behavior-loop-trigger',['Escaping real-world financial or life responsibilities','Chasing immediate wins or instant validation spikes','Losing hours blindly due to lack of strict daily routine'])}`;
-    }else if(addiction==='Food / Binging'){
-      htmlBlock+=`
-        <div class="ob-label">When do you feel the pull most strongly?</div>
-        ${renderBehaviorChips('behavior-food-trigger',['Late at night after a stressful day','Alone, away from others watching','After an emotional trigger like sadness or anger'])}`;
-    }else if(addiction==='Shopping / Spending'){
-      htmlBlock+=`
-        <div class="ob-label">What drives the urge to spend?</div>
-        ${renderBehaviorChips('behavior-shopping-trigger',['Chasing the thrill of a new purchase','Escaping stress or sadness through buying','Filling a void or boredom with acquiring things'])}`;
-    }else if(addiction==='Work'){
-      htmlBlock+=`
-        <div class="ob-label">What's really driving the overworking?</div>
-        ${renderBehaviorChips('behavior-work-trigger',['Fear of not being enough without constant achievement','Avoiding personal life or relationships through busyness','Difficulty sitting still or resting without guilt'])}`;
-    }else{
-      htmlBlock+=`
-        <div class="ob-label">What feels like the driving root cause here?</div>
-        ${renderBehaviorChips('behavior-gen-root',['Stress & emotional burnout','Habitual routine patterns that are hardwired','Isolation and a lack of true real-world accountability'])}`;
-    }
-    htmlBlock+=`</div>`;
-    container.innerHTML+=htmlBlock;
-  });
-  obNext(2);
-}
-
-function showVoiceStep(){
-  S.behavioralBlueprint={};
-  const pornTime=getBehaviorAnswer('behavior-porn-time');if(pornTime)S.behavioralBlueprint.pornTime=pornTime;
-  const pornRoot=getBehaviorAnswer('behavior-porn-root');if(pornRoot)S.behavioralBlueprint.pornRoot=pornRoot;
-  const subStyle=getBehaviorAnswer('behavior-sub-style');if(subStyle)S.behavioralBlueprint.subStyle=subStyle;
-  const loopTrigger=getBehaviorAnswer('behavior-loop-trigger');if(loopTrigger)S.behavioralBlueprint.loopTrigger=loopTrigger;
-  const foodTrigger=getBehaviorAnswer('behavior-food-trigger');if(foodTrigger)S.behavioralBlueprint.foodTrigger=foodTrigger;
-  const shoppingTrigger=getBehaviorAnswer('behavior-shopping-trigger');if(shoppingTrigger)S.behavioralBlueprint.shoppingTrigger=shoppingTrigger;
-  const workTrigger=getBehaviorAnswer('behavior-work-trigger');if(workTrigger)S.behavioralBlueprint.workTrigger=workTrigger;
-  const genRoot=getBehaviorAnswer('behavior-gen-root');if(genRoot)S.behavioralBlueprint.genRoot=genRoot;
-
+// obs2_5 doesn't fit the numeric obs+n/od+n pattern obNext/obBack rely on, so its
+// transitions (in both directions) are handled explicitly, same as the rest of this group.
+function setObStep(stepId,dotId){
   document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
-  document.getElementById('obs2_5').classList.add('on');
-  if(document.getElementById('od2'))document.getElementById('od2').classList.remove('on');
-  obStep='2_5';
-  selectVoice(S.novaVoice);
+  document.getElementById('obs'+stepId).classList.add('on');
+  ['od0','od1','od2','od3','od4'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.remove('on');
+  });
+  const dotEl=document.getElementById('od'+dotId);
+  if(dotEl)dotEl.classList.add('on');
+  obStep=stepId;
 }
 
-function selectVoice(variant){
-  S.novaVoice=variant;
-  ['female','male','neutral'].forEach(v=>{
-    document.getElementById('vc-'+v).style.borderColor='rgba(255,255,255,0.1)';
-    document.getElementById('vc-'+v).style.background='rgba(255,255,255,0.03)';
-  });
-  document.getElementById('vc-'+variant).style.borderColor='var(--green)';
-  document.getElementById('vc-'+variant).style.background='rgba(126,232,162,0.12)';
+function selectCategoryChip(el,name){
+  document.querySelectorAll('#addGrid .add-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.selectedAddictions=[name];
+  S.currentAddiction=name;
+  setTimeout(()=>obNext(2),200);
+}
+
+function selectGoalChip(el,goal){
+  document.querySelectorAll('#goalGrid .add-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.goal=goal;
+  setTimeout(()=>{
+    document.getElementById('ob-reminder-time').value=S.dailyReminderTime||'09:00';
+    setObStep('2_5',3);
+  },200);
+}
+
+function obBackToGoal(){
+  setObStep(2,2);
+}
+
+function goToFinalStep(){
+  const t=document.getElementById('ob-reminder-time').value;
+  S.dailyReminderTime=t||'09:00';
+  document.getElementById('ob-date-optional').value='';
+  document.getElementById('ob-startdate-wrap').style.display='none';
+  document.getElementById('ob-startdate-toggle').textContent='Already been at this a while? Set your real start date';
+  setObStep(4,4);
+  save();
+}
+
+function obBackToReminder(){
+  setObStep('2_5',3);
+}
+
+function toggleObStartDate(){
+  const wrap=document.getElementById('ob-startdate-wrap');
+  const show=wrap.style.display==='none';
+  wrap.style.display=show?'block':'none';
+  document.getElementById('ob-startdate-toggle').textContent=show?'Hide':'Already been at this a while? Set your real start date';
 }
 
 function finishOnboard(){
-  if(!S.startDate)S.startDate=new Date().toISOString();
+  const dateVal=document.getElementById('ob-date-optional').value;
+  if(dateVal){
+    S.startDate=new Date(dateVal+'T00:00:00').toISOString();
+  }else if(!S.startDate){
+    S.startDate=new Date().toISOString();
+  }
   if(!S.currentAddiction)S.currentAddiction=S.selectedAddictions[0]||'';
   save();
   document.getElementById('onboarding').style.display='none';
@@ -3994,10 +3951,21 @@ function buildProgress(){
 }
 
 // ─── TODAY TAB: REMINDER STATUS ────────────────────────────────────────────────
+function formatTime12h(t){
+  const [h,m]=(t||'09:00').split(':').map(Number);
+  const h12=h%12===0?12:h%12;
+  const ampm=h<12?'AM':'PM';
+  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+}
 function updateHomeReminderStatus(){
   const el=document.getElementById('home-reminder-status');
   if(!el)return;
-  el.textContent=S.remindersEnabled!==false?'Daily lesson reminder: On':'Daily lesson reminder: Off';
+  el.textContent=S.remindersEnabled!==false?`Daily lesson reminder: On (${formatTime12h(S.dailyReminderTime)})`:'Daily lesson reminder: Off';
+}
+function setDailyReminderTime(val){
+  S.dailyReminderTime=val||'09:00';
+  save();
+  updateHomeReminderStatus();
 }
 
 function toggleHomeMilestones(){
@@ -4495,6 +4463,9 @@ function maybeShowDailyLessonReminder(){
   if(S.remindersEnabled===false)return;
   const today=new Date().toDateString();
   if(S.lastDailyLessonReminderDate===today)return;
+  const now=new Date();
+  const [rh,rm]=(S.dailyReminderTime||'09:00').split(':').map(Number);
+  if(now.getHours()*60+now.getMinutes()<rh*60+rm)return;
   const completedToday=(S.activityLog||[]).some(a=>a.type==='lesson_completed'&&new Date(a.ts).toDateString()===today);
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
@@ -5624,6 +5595,10 @@ function updateProfileEditUI(){
   }
   const catEl=document.getElementById('category-row-sub');
   if(catEl)catEl.textContent=S.currentAddiction||'Not set';
+  const goalEl=document.getElementById('goal-row-sub');
+  if(goalEl)goalEl.textContent=GOAL_LABELS[S.goal]||'Not set';
+  const reminderTimeEl=document.getElementById('reminder-time-input');
+  if(reminderTimeEl)reminderTimeEl.value=S.dailyReminderTime||'09:00';
   const verEl=document.getElementById('app-version-txt');
   if(verEl)verEl.textContent=APP_VERSION;
 }
@@ -5645,6 +5620,14 @@ function openCategoryInfo(){
   const cat=S.currentAddiction||'Other';
   const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
   appInfo(cat==='Other'?'Your focus':cat,`${desc}\n\nTo change your focus, use "Restart setup" in the Danger zone below — it re-runs onboarding without losing your journal, cravings, or progress.`);
+}
+const GOAL_LABELS={quit:'Quit completely',reduce:'Reduce gradually',build:'Build healthier habits'};
+function openGoalModal(){document.getElementById('goal-modal').classList.add('open');}
+function closeGoalModal(){document.getElementById('goal-modal').classList.remove('open');}
+function setGoal(g){
+  S.goal=g;save();
+  updateProfileEditUI();
+  closeGoalModal();
 }
 
 function openNameModal(){
@@ -5680,21 +5663,15 @@ function chooseVoice(v){
 }
 
 function restartOnboarding(){
-  appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your name, focus areas, and preferences.",()=>{
-    S.name='';
-    S.userGender='Not Specified';
-    S.relationshipStatus=null;
+  appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your category, goal, and reminder time.",()=>{
     S.selectedAddictions=[];
-    S.behavioralBlueprint={};
-    S.novaVoice='neutral';
-    S.startDate=null;
     S.currentAddiction='';
+    S.goal='';
+    S.startDate=null;
     save();
 
-    document.getElementById('ob-name').value='';
     document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
-    const errEl=document.getElementById('obs1-error');
-    if(errEl)errEl.textContent='';
+    document.querySelectorAll('#goalGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
 
     document.getElementById('main-app').style.display='none';
     document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
@@ -5728,6 +5705,7 @@ function setGateMode(mode){
 }
 
 function openAuthModal(){
+  if(!S.accountEmail){showAuthGate('signup');return;}
   document.getElementById('auth-current-email').textContent=S.accountEmail||'';
   document.getElementById('auth-modal').classList.add('open');
 }
@@ -5750,9 +5728,7 @@ async function signOutAccount(){
   S.accountEmail=null;
   save();
   closeAuthModal();
-  document.getElementById('main-app').style.display='none';
-  document.getElementById('onboarding').style.display='none';
-  showAuthGate();
+  updateAccountUI();
 }
 
 async function exportAccountData(){
@@ -5791,20 +5767,23 @@ async function deleteAccountFlow(){
     S.accountEmail=null;
     save();
     closeAuthModal();
-    alert("Your account has been deleted. You'll need a new account to keep using the app.");
-    document.getElementById('main-app').style.display='none';
-    document.getElementById('onboarding').style.display='none';
-    showAuthGate();
+    alert('Your account has been deleted. Your data stays on this device — you can create a new account anytime from Profile.');
+    updateAccountUI();
   }catch(e){
     alert('Could not reach the server to delete your account.');
   }
 }
 
-function showAuthGate(){
+function showAuthGate(mode){
+  document.getElementById('main-app').style.display='none';
   document.getElementById('auth-gate').style.display='flex';
   document.getElementById('gate-email').value='';
   document.getElementById('gate-password').value='';
-  setGateMode('login');
+  setGateMode(mode||'login');
+}
+function dismissAuthGate(){
+  document.getElementById('auth-gate').style.display='none';
+  document.getElementById('main-app').style.display='flex';
 }
 
 function enterApp(){
@@ -5821,9 +5800,6 @@ function enterApp(){
     }
   }else{
     document.getElementById('onboarding').style.display='flex';
-    // set default date for demo
-    const today=new Date();today.setDate(today.getDate()-47);
-    document.getElementById('ob-date').value=today.toISOString().split('T')[0];
   }
 }
 
@@ -5870,11 +5846,14 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
-      enterApp();
-      return;
+      // Already have a synced account - a newer copy of the state may exist on the server.
+      const stateRes=await fetch('/api/state');
+      const stateData=stateRes.ok?await stateRes.json():{state:null};
+      if(stateData.state)Object.assign(S,JSON.parse(stateData.state));
+      S.accountEmail=me.email;
     }
-  }catch(e){/* server unreachable - fall through to the gate */}
-  showAuthGate();
+  }catch(e){/* no account, or server unreachable - continue locally, that's fine */}
+  enterApp();
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────

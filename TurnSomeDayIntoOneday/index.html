@@ -3507,17 +3507,17 @@ function discussAnalyticsWithNova(){
 const WEEKDAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const HABIT_CELEBRATION_DAYS=[3,7,14,21];
 const CATEGORY_HABIT_COACHING={
-  'Porn & Sex':{weakSpot:'Nighttime boredom is your weak spot.',suggestion:'Build a calming wind-down routine for the hour before bed.'},
+  'Porn & Sex':{weakSpot:'Nighttime boredom tends to be your highest-risk time.',suggestion:'Build a calming wind-down routine for the hour before bed.'},
   'Alcohol':{weakSpot:'Weekends need structure.',suggestion:"Plan your Friday and Saturday evenings ahead of time."},
-  'Smoking':{weakSpot:'Stress breaks are your weak spot.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
-  'Substances':{weakSpot:'Unstructured evenings are your weak spot.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
-  'Gambling':{weakSpot:'Idle moments checking odds are your weak spot.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
-  'Social media':{weakSpot:'Boredom scrolling is your weak spot.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
-  'Gaming':{weakSpot:'Avoidance of other tasks is your weak spot.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
+  'Smoking':{weakSpot:'Stress breaks tend to be your highest-risk moments.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
+  'Substances':{weakSpot:'Unstructured evenings tend to be your highest-risk time.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
+  'Gambling':{weakSpot:'Idle moments checking odds tend to be your highest-risk time.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
+  'Social media':{weakSpot:'Boredom scrolling tends to be your highest-risk pattern.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
+  'Gaming':{weakSpot:'Avoiding other tasks tends to be your highest-risk pattern.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
   'Food / Binging':{weakSpot:'Stress eating spikes mid-week.',suggestion:"Add a grounding habit — a short walk or a few slow breaths — before meals."},
-  'Shopping / Spending':{weakSpot:'Low-mood moments are your weak spot.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
-  'Work':{weakSpot:'Avoiding rest is your weak spot.',suggestion:'Set one hard stop time in the evening, every day this week.'},
-  'Other':{weakSpot:'Unstructured moments are your weak spot.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+  'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
+  'Work':{weakSpot:'Avoiding rest tends to be your highest-risk pattern.',suggestion:'Set one hard stop time in the evening, every day this week.'},
+  'Other':{weakSpot:'Unstructured moments tend to be your highest-risk time.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
 };
 const HABIT_MICRO_SUGGESTIONS={
   morning:['Start the day with a 2-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
@@ -4786,6 +4786,13 @@ function evaluateSmartReminders(){
       return;
     }
   }
+  // Cap text nudges to one total per day across all types - each type has its own
+  // cooldown too, but without this a user with signal on several fronts at once
+  // (e.g. right after going Pro with existing data) could get stacked with several
+  // different automated nudges in the same session as evaluateSmartReminders() is
+  // re-run on every updateStats() tick. One calm nudge a day, never more.
+  const today=now.toDateString();
+  if(S.lastCandidateNudgeDate===today)return;
   const candidates=[
     ['relapseRisk',buildRelapseRiskAlert],
     ['urgeWindow',buildUrgeWindowAlert],
@@ -4800,6 +4807,8 @@ function evaluateSmartReminders(){
       if(text){
         novaNudge(text);
         markSmartReminderSent(key);
+        S.lastCandidateNudgeDate=today;
+        save();
         break;
       }
     }
@@ -5615,6 +5624,11 @@ function confirmResetDate(){
   S.startDate=chosen.toISOString();
   S.pledged=false;
   logActivity('relapse_reset');
+  // Suppress today's generic habit-consistency alert - it's a "keep going" momentum
+  // message that has nothing to do with a reset and would otherwise land in the same
+  // batch as the recovery-coaching messages below, reading as a contradictory pile-up
+  // at the most sensitive moment. The reset-specific messages below cover this moment instead.
+  S.lastHabitAlertDate=new Date().toDateString();
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
   maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");

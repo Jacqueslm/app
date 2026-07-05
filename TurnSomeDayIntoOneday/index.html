@@ -2679,7 +2679,8 @@ function finishOnboard(){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
-  evaluateProSubscription();
+  handleCheckoutReturn();
+  syncBillingStatus(true);
   renderMiniPricingRows();
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
@@ -5315,7 +5316,6 @@ function actBn(id){
 
 // ─── PLANS / PRICING (one Pro plan, three billing options) ───────────────────
 const PRO_PRICE_MONTHLY=9.99,PRO_PRICE_YEARLY=71.99,PRO_PRICE_LIFETIME=149.99;
-const PRO_GRACE_DAYS=3;
 let currentBillSelection='m';
 function billTypeToPlan(t){return t==='a'?'yearly':t==='l'?'lifetime':'monthly';}
 function setBill(type){
@@ -5352,78 +5352,93 @@ function selectFree(){
   S.isPro=false;S.chatsLeft=3;save();updateTierUI();
   stayFreeForNow();
 }
-function becomePro(plan){
+async function becomePro(plan){
   plan=plan||billTypeToPlan(currentBillSelection);
-  const now=new Date();
-  S.isPro=true;S.proPlan=plan;S.proSince=S.proSince||now.toISOString();
-  S.proCancelled=false;S.proGraceUntil='';
-  if(plan==='lifetime'){
-    S.proRenewsAt='';
-  }else{
-    const renew=new Date(now);
-    renew.setDate(renew.getDate()+(plan==='yearly'?365:30));
-    S.proRenewsAt=renew.toISOString();
+  if(!S.accountEmail){
+    appInfo('Sign in required','Create a free account first so your Pro purchase can be linked to you and restored on any device. Go to Profile > Account & Sync, then come back to upgrade.');
+    return;
   }
-  save();updateTierUI();renderPlansScreen();
+  try{
+    const res=await fetch('/api/billing/create-checkout-session',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan})
+    });
+    const data=await res.json();
+    if(res.ok&&data.url){
+      window.location.href=data.url;
+    }else{
+      appInfo('Upgrade unavailable',data.error||'Could not start checkout right now. Please try again in a moment.');
+    }
+  }catch(e){
+    appInfo('Upgrade unavailable','Could not reach the server to start checkout. Please try again in a moment.');
+  }
 }
 function selectPro(){
   becomePro(billTypeToPlan(currentBillSelection));
-  switchTo('nova');actBn('bn-nova');
+}
+async function openBillingPortal(){
+  try{
+    const res=await fetch('/api/billing/create-portal-session',{method:'POST'});
+    const data=await res.json();
+    if(res.ok&&data.url){
+      window.location.href=data.url;
+    }else{
+      appInfo('Billing',data.error||'Could not open billing management right now. Please try again in a moment.');
+    }
+  }catch(e){
+    appInfo('Billing','Could not reach the server to manage billing. Please try again in a moment.');
+  }
 }
 function cancelProSubscription(){
   if(S.proPlan==='lifetime'){
     appInfo('Lifetime Pro','Lifetime Pro is a one-time purchase that never renews, so there\'s nothing to cancel — it\'s yours for good.');
     return;
   }
-  const renewDate=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'the end of your billing period';
-  appConfirm(`You'll keep full Pro access until ${renewDate}. After that you'll move to Free — nothing you've saved gets deleted, and you can resume anytime before then.`,()=>{
-    S.proCancelled=true;save();updateTierUI();renderPlansScreen();
-  });
+  openBillingPortal();
 }
 function resumeProSubscription(){
-  S.proCancelled=false;save();updateTierUI();renderPlansScreen();
+  openBillingPortal();
 }
 async function restorePurchases(){
   if(!S.accountEmail){
     appInfo('Restore purchases','Restore purchases works once you\'re signed in, so your Pro status can sync from your account. Sign in from Profile > Account & Sync, then try again.');
     return;
   }
-  try{
-    const res=await fetch('/api/state');
-    if(res.ok){
-      const data=await res.json();
-      const remote=data&&data.state?JSON.parse(data.state):null;
-      if(remote&&remote.isPro){
-        S.isPro=true;S.proPlan=remote.proPlan||'monthly';S.proSince=remote.proSince||new Date().toISOString();
-        S.proRenewsAt=remote.proRenewsAt||'';S.proCancelled=!!remote.proCancelled;S.proGraceUntil=remote.proGraceUntil||'';
-        save();updateTierUI();renderPlansScreen();
-        appInfo('Restore purchases','Your Pro subscription was found and restored on this device.');
-        return;
-      }
-    }
-    appInfo('Restore purchases','No active Pro subscription was found for this account.');
-  }catch(e){
-    appInfo('Restore purchases','Couldn\'t reach the server to restore purchases right now. Please try again in a moment.');
-  }
+  await syncBillingStatus(true);
+  appInfo('Restore purchases',S.isPro?'Your Pro subscription was found and restored on this device.':'No active Pro subscription was found for this account.');
 }
-// Honest grace-period + cancellation-expiry engine. No real payment processor exists in this
-// demo, so a missed renewal is simulated as: proRenewsAt has passed and the plan wasn't cancelled.
+// Server-verified billing status - the client never decides isPro on its own; it only ever
+// reflects what /api/billing/status (backed by real Stripe subscription/payment state) reports.
+let lastBillingSyncAt=0;
+async function syncBillingStatus(force){
+  if(!S.accountEmail)return;
+  const now=Date.now();
+  if(!force&&now-lastBillingSyncAt<120000)return;
+  lastBillingSyncAt=now;
+  try{
+    const res=await fetch('/api/billing/status');
+    if(!res.ok)return;
+    const data=await res.json();
+    S.isPro=!!data.isPro;
+    if(data.plan&&data.plan!=='free')S.proPlan=data.plan;
+    S.proRenewsAt=data.currentPeriodEnd||'';
+    S.proCancelled=!!data.cancelAtPeriodEnd;
+    S.proGraceUntil='';
+    save();updateTierUI();
+    if(document.getElementById('pro-price'))renderPlansScreen();
+  }catch(e){/* offline - keep last known local state until the next sync succeeds */}
+}
 function evaluateProSubscription(){
-  if(!S.isPro||S.proPlan==='lifetime'||!S.proRenewsAt)return;
-  const now=new Date(),renew=new Date(S.proRenewsAt);
-  if(now<renew)return;
-  if(S.proCancelled){
-    S.isPro=false;S.proGraceUntil='';save();updateTierUI();renderPlansScreen();
-    return;
-  }
-  if(!S.proGraceUntil){
-    const g=new Date(renew);g.setDate(g.getDate()+PRO_GRACE_DAYS);
-    S.proGraceUntil=g.toISOString();save();
-    renderPlansScreen();
-    return;
-  }
-  if(now>new Date(S.proGraceUntil)){
-    S.isPro=false;S.proGraceUntil='';save();updateTierUI();renderPlansScreen();
+  syncBillingStatus();
+}
+function handleCheckoutReturn(){
+  const params=new URLSearchParams(window.location.search);
+  const checkout=params.get('checkout');
+  if(!checkout)return;
+  history.replaceState(null,'',window.location.pathname);
+  if(checkout==='success'){
+    syncBillingStatus(true).then(()=>{
+      appInfo('Welcome to Pro',S.isPro?'Payment confirmed — Pro is now active on your account.':'Payment received. It can take a few seconds to confirm — check Profile > Plans shortly if Pro isn\'t showing yet.');
+    });
   }
 }
 function renderPlansScreen(){

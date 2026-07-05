@@ -24,6 +24,20 @@ db.exec(`
   );
 `);
 
+const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
+function addColumnIfMissing(name, ddl) {
+  if (!userColumns.includes(name)) {
+    db.exec(`ALTER TABLE users ADD COLUMN ${ddl}`);
+  }
+}
+addColumnIfMissing('stripe_customer_id', 'stripe_customer_id TEXT');
+addColumnIfMissing('stripe_subscription_id', 'stripe_subscription_id TEXT');
+addColumnIfMissing('plan', "plan TEXT NOT NULL DEFAULT 'free'");
+addColumnIfMissing('subscription_status', 'subscription_status TEXT');
+addColumnIfMissing('current_period_end', 'current_period_end TEXT');
+addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NULL DEFAULT 0');
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
+
 function createUser(email, passwordHash) {
   const info = db
     .prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)')
@@ -71,6 +85,40 @@ function incrementChatCount(userId, usageDate) {
   ).run(userId, usageDate);
 }
 
+function getUserByStripeCustomerId(stripeCustomerId) {
+  return db.prepare('SELECT * FROM users WHERE stripe_customer_id = ?').get(stripeCustomerId);
+}
+
+function setStripeCustomerId(userId, stripeCustomerId) {
+  db.prepare('UPDATE users SET stripe_customer_id = ? WHERE id = ?').run(stripeCustomerId, userId);
+}
+
+function updateSubscriptionFromStripe(userId, fields) {
+  const {
+    plan,
+    subscriptionStatus,
+    stripeSubscriptionId,
+    currentPeriodEnd,
+    cancelAtPeriodEnd,
+  } = fields;
+  db.prepare(
+    `UPDATE users SET
+       plan = ?,
+       subscription_status = ?,
+       stripe_subscription_id = ?,
+       current_period_end = ?,
+       cancel_at_period_end = ?
+     WHERE id = ?`
+  ).run(
+    plan,
+    subscriptionStatus || null,
+    stripeSubscriptionId || null,
+    currentPeriodEnd || null,
+    cancelAtPeriodEnd ? 1 : 0,
+    userId
+  );
+}
+
 module.exports = {
   createUser,
   getUserByEmail,
@@ -80,4 +128,7 @@ module.exports = {
   deleteUser,
   getChatCount,
   incrementChatCount,
+  getUserByStripeCustomerId,
+  setStripeCustomerId,
+  updateSubscriptionFromStripe,
 };

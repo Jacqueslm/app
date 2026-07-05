@@ -495,7 +495,7 @@ body{display:flex;justify-content:center}
     <div class="qc" onclick="quickSend(this)">I'm struggling today</div>
     <div class="qc" onclick="quickSend(this)">I had a craving</div>
     <div class="qc" onclick="quickSend(this)">I'm feeling proud</div>
-    <div class="qc" onclick="quickSend(this)">I relapsed</div>
+    <div class="qc" onclick="quickSend(this)">I slipped</div>
     <div class="qc" onclick="quickSend(this)">I need motivation</div>
     <div class="qc" onclick="quickSend(this)">Tell me about PAWS</div>
     <div class="qc" onclick="quickSend(this)">What patterns do you see in me?</div>
@@ -756,7 +756,7 @@ body{display:flex;justify-content:center}
           </div>
           <div class="setting-row" style="background:rgba(255,255,255,0.05);border-radius:10px" onclick="closeDay30Overlay();openLessonPacksScreen()">
             <i class="ti ti-notebook" style="color:#fff"></i>
-            <div class="setting-row-txt"><p style="color:#fff">Relapse-Proofing Pack</p><span style="color:#8892c0">A 7-day pack built for lasting stability</span></div>
+            <div class="setting-row-txt"><p style="color:#fff">Long-Term Stability Pack</p><span style="color:#8892c0">A 7-day pack built for lasting stability</span></div>
           </div>
         </div>
 
@@ -786,7 +786,7 @@ body{display:flex;justify-content:center}
         </div>
       </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a relapse</span></div>
+        <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a setback</span></div>
         <div class="card" style="display:flex;justify-content:space-around;text-align:center">
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l" id="prog-total-days-lbl">Total sober days</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
@@ -859,12 +859,12 @@ body{display:flex;justify-content:center}
         </div>
         <div class="setting-row" onclick="openProTool('patterns')">
           <i class="ti ti-chart-line" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Relapse Pattern Detection</p><span>A real report from your own logged data</span></div>
+          <div class="setting-row-txt"><p>Pattern Detection</p><span>A real report from your own logged data</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openProTool('scripts')">
           <i class="ti ti-notebook" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Category-Specific Relapse Scripts</p><span>Prevention steps written for your focus area</span></div>
+          <div class="setting-row-txt"><p>Category-Specific Recovery Scripts</p><span>Prevention steps written for your focus area</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openProTool('distraction')">
@@ -896,12 +896,12 @@ body{display:flex;justify-content:center}
         <div class="sec-hd" style="margin-top:0">Smart reminder types</div>
         <div class="setting-row" onclick="toggleSmartReminderType('urgeWindow')">
           <i class="ti ti-clock" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Urge window alerts</p><span>Based on your past urge and relapse times</span></div>
+          <div class="setting-row-txt"><p>Urge window alerts</p><span>Based on your past urge and setback times</span></div>
           <div class="toggle-sw" id="sr-toggle-urgeWindow"><div class="toggle-knob"></div></div>
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('relapseRisk')">
           <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Relapse risk alerts</p><span>When stress, mood, or cravings spike</span></div>
+          <div class="setting-row-txt"><p>Setback risk alerts</p><span>When stress, mood, or cravings spike</span></div>
           <div class="toggle-sw" id="sr-toggle-relapseRisk"><div class="toggle-knob"></div></div>
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('morningCheckin')">
@@ -989,10 +989,10 @@ body{display:flex;justify-content:center}
 
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0">Relapse tools</div></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0">Recovery tools</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p>Relapse Toolkit</p><span>Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
+        <div class="setting-row-txt"><p>Recovery Toolkit</p><span>Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
@@ -1016,7 +1016,7 @@ body{display:flex;justify-content:center}
       </div>
       <div class="setting-row" onclick="openProTool('streaks')">
         <i class="ti ti-flame"></i>
-        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and relapse recovery tracking</span></div>
+        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and comeback tracking</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="sec" style="padding-bottom:0;padding-top:4px">
@@ -1091,7 +1091,7 @@ body{display:flex;justify-content:center}
           <div class="tc" onclick="wizToggleFocus(this,'trauma')">Trauma</div>
           <div class="tc" onclick="wizToggleFocus(this,'confidence')">Confidence</div>
           <div class="tc" onclick="wizToggleFocus(this,'discipline')">Discipline</div>
-          <div class="tc" onclick="wizToggleFocus(this,'relapse-proofing')">Relapse-proofing</div>
+          <div class="tc" onclick="wizToggleFocus(this,'relapse-proofing')">Long-term stability</div>
           <div class="tc" onclick="wizToggleFocus(this,'anxiety')">Anxiety</div>
           <div class="tc" onclick="wizToggleFocus(this,'depression')">Depression</div>
           <div class="tc" onclick="wizToggleFocus(this,'sleep')">Sleep</div>
@@ -1128,7 +1128,7 @@ body{display:flex;justify-content:center}
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Unlock Days 16–30</div>
           <div>✓ Nova Pro coaching</div>
-          <div>✓ Advanced relapse tools</div>
+          <div>✓ Advanced recovery tools</div>
           <div>✓ Weekly reports</div>
           <div>✓ Smart reminders</div>
           <div>✓ Pro journal</div>
@@ -1152,7 +1152,7 @@ body{display:flex;justify-content:center}
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
             <div class="feat y"><i class="ti ti-check"></i>Basic Nova (3 chats/day)</div>
-            <div class="feat y"><i class="ti ti-check"></i>Basic relapse tools</div>
+            <div class="feat y"><i class="ti ti-check"></i>Basic recovery tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Sobriety counter &amp; milestones</div>
             <div class="feat y"><i class="ti ti-check"></i>Journal (plain text + mood)</div>
             <div class="feat y"><i class="ti ti-check"></i>Craving tracker</div>
@@ -1173,7 +1173,7 @@ body{display:flex;justify-content:center}
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
             <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova Pro coaching</div>
-            <div class="feat y"><i class="ti ti-check"></i>Advanced relapse tools</div>
+            <div class="feat y"><i class="ti ti-check"></i>Advanced recovery tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
             <div class="feat y"><i class="ti ti-check"></i>Pro journal &amp; guided prompts</div>
@@ -1520,7 +1520,7 @@ body{display:flex;justify-content:center}
 <!-- RELAPSE PATTERN DETECTION (Pro) -->
 <div class="sos-modal" id="pattern-report-modal" onclick="if(event.target===this)closePatternReport()">
   <div class="sos-sheet" style="max-height:80vh;overflow-y:auto">
-    <div class="sos-title" style="color:var(--accent)">Your relapse pattern report</div>
+    <div class="sos-title" style="color:var(--accent)">Your pattern report</div>
     <div class="sos-sub" style="margin-bottom:12px">Built entirely from what you've actually logged — no guessing.</div>
     <div id="pattern-report-body"></div>
     <button class="sos-close" style="margin-top:12px" onclick="closePatternReport()">Close</button>
@@ -1530,7 +1530,7 @@ body{display:flex;justify-content:center}
 <!-- CATEGORY-SPECIFIC RELAPSE SCRIPTS (Pro) -->
 <div class="sos-modal" id="category-scripts-modal" onclick="if(event.target===this)closeCategoryScripts()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)" id="cs-title">Relapse prevention script</div>
+    <div class="sos-title" style="color:var(--accent)" id="cs-title">Recovery script</div>
     <div class="sos-sub" id="cs-body" style="margin-bottom:8px"></div>
     <button class="sos-close" style="margin-top:8px" onclick="closeCategoryScripts()">Close</button>
   </div>
@@ -1633,7 +1633,7 @@ body{display:flex;justify-content:center}
 <div class="sos-modal" id="reset-date-modal" onclick="if(event.target===this)closeResetDate()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Set your sobriety date</div>
-    <div class="sos-sub">Use this to correct a relapse or start date — your streak and stats recalculate from here.</div>
+    <div class="sos-sub">Use this to correct a setback or start date — your streak and stats recalculate from here.</div>
     <div class="ob-label" style="text-align:left;margin-top:4px">Date</div>
     <input class="ob-input" id="reset-date-input" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
     <div class="ob-label" style="text-align:left">Time</div>
@@ -1980,7 +1980,7 @@ function renderTodayLesson(){
     titleEl.textContent=programDone?"You've completed the program":hasTrack?"You're all caught up":'Lessons coming soon';
     metaEl.textContent=S.currentAddiction||'';
     bodyEl.textContent=programDone
-      ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Relapse-Proofing Pack (in Lesson Packs) are built for exactly this stage."
+      ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Long-Term Stability Pack (in Lesson Packs) are built for exactly this stage."
       :hasTrack
         ?"You've completed every lesson available in this track so far. Check back soon for more."
         :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
@@ -2062,12 +2062,15 @@ function completeLessonForToday(){
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   logActivity('lesson_completed',{day:lesson.day});
   if(justFinishedProgram)S.notifiedDay30Overlay=true;
+  const justHitLessonConsistency=S.lessonsCompletedCount===7&&!S.notifiedLessonConsistency;
+  if(justHitLessonConsistency)S.notifiedLessonConsistency=true;
   save();
   updateStats();
   const btn=document.getElementById('lessonCompleteBtn');
   btn.textContent='Nice work — day complete ✓';
   btn.disabled=true;
   updateLessonPromo();
+  if(justHitLessonConsistency)novaNudge("Seven lessons done — that consistency is exactly what builds lasting change.");
   if(justHitFreeCap){
     setTimeout(()=>{openDay15Overlay();},1200);
   }else if(justFinishedProgram){
@@ -2228,9 +2231,9 @@ const PREDEFINED_PACKS={
     ],
   },
   relapseProofing:{
-    title:'Relapse-Proofing Pack',
+    title:'Long-Term Stability Pack',
     icon:'ti-lock',
-    description:'Long-term stability, relapse prevention, and emotional resilience.',
+    description:'Long-term stability, staying steady, and emotional resilience.',
     lessons:[
       {day:1,title:`Relapse Starts Long Before the Moment`,content:`The moment of relapse is usually the last step in a much longer chain — stress builds, isolation creeps in, self-care slips, and the actual moment just looks like the final domino. Real prevention happens upstream of that moment.`,action:`Trace your own chain backward from your last hardest moment — what happened days before, not just minutes before?`,reflection:`Where upstream could you have intervened earlier?`},
       {day:2,title:`Your Personal Warning Signs`,content:`Long before a slip, most people show real, specific warning signs — skipping routines, isolating, irritability, all-or-nothing thinking. Naming your specific signs turns a vague sense of "something's off" into something you can actually act on.`,action:`Write down your top three personal warning signs, based on real past experience.`,reflection:`Which warning sign do you tend to ignore the longest?`},
@@ -2955,8 +2958,13 @@ function saveEntry(){
   }
   S.journals.unshift(entry);
   logActivity('journal',{moodLabel:jourMoodLabel});
+  // journals ships pre-seeded with 2 demo entries for new users, so length===1 never
+  // reflects a genuine first entry - the one-time flag alone is what actually matters here.
+  const isFirstEntry=!S.notifiedFirstJournal;
+  if(isFirstEntry)S.notifiedFirstJournal=true;
   save();
   renderJournal();closeJour();
+  if(isFirstEntry)novaNudge("First journal entry — that's a real step, and it's saved for good.");
   if(txt.length>=150){
     maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Nova Pro can go deeper on with you — I'm always here either way.");
     if(S.isPro)novaNudge(buildHabitReinforcement());
@@ -2990,7 +2998,7 @@ function deleteJournalEntry(idx){
 }
 
 // ─── PRO JOURNAL: GUIDED PROMPTS ───────────────────────────────────────────────
-const PROMPT_KIND_LABELS={'relapse-aware':'Relapse-aware prompt','lesson':"Today's lesson prompt",category:'Category prompt',emotion:'Emotion prompt',reflection:'Reflection prompt'};
+const PROMPT_KIND_LABELS={'relapse-aware':'Slip-aware prompt','lesson':"Today's lesson prompt",category:'Category prompt',emotion:'Emotion prompt',reflection:'Reflection prompt'};
 const CATEGORY_JOURNAL_PROMPTS={
   'Porn & Sex':'What emotion usually comes before the urge?',
   'Alcohol':'Did social pressure affect you today?',
@@ -3191,7 +3199,14 @@ function buildRelapseRecoveryInfo(){
 function buildRecoveryCoachingMessage(priorStreakLength){
   const cat=S.currentAddiction||'Other';
   const catMsg=CATEGORY_STREAK_MESSAGES[cat]||CATEGORY_STREAK_MESSAGES['Other'];
-  return `That took real honesty to acknowledge. Your previous streak was ${priorStreakLength} day${priorStreakLength===1?'':'s'} — that's not erased, it's real information for what comes next.\n\n${catMsg}\n\nWhat's one thing that was different about today versus the days before it?`;
+  const total=S.totalSoberDaysEver||0;
+  return `That took real honesty to acknowledge. Your previous streak was ${priorStreakLength} day${priorStreakLength===1?'':'s'} — that's not erased, it's real information for what comes next. You've now put in ${total} day${total===1?'':'s'} total across this journey, and that number doesn't reset.\n\n${catMsg}\n\nWhat's one thing that was different about today versus the days before it?`;
+}
+// Combines the recovery-coaching message with the habit-rebuild plan into one
+// coherent voice for Pro users, instead of two separate bubbles landing at once
+// right after a slip - one message reads as support, two in a row can read as a pile-up.
+function buildCombinedResetMessage(priorStreakLength){
+  return `${buildRecoveryCoachingMessage(priorStreakLength)}\n\n${buildHabitRebuildPlan(priorStreakLength)}`;
 }
 function buildLongestStreakDetail(){
   const longest=S.longestStreak||0;
@@ -3277,7 +3292,7 @@ function renderAdvancedStreaks(){
 
   if(recovery){
     html+=`<div class="card" style="margin-bottom:14px">
-      <div class="sec-hd" style="margin-top:0">Relapse recovery streak</div>
+      <div class="sec-hd" style="margin-top:0">Comeback streak</div>
       <div style="font-size:13px;color:var(--ts);line-height:1.6">${recovery.recoveryText}</div>
       <div style="font-size:12px;color:var(--tm);margin-top:6px">Previous streak: ${recovery.previousStreakLength} day${recovery.previousStreakLength===1?'':'s'} · ${recovery.daysSinceSlip} day${recovery.daysSinceSlip===1?'':'s'} since your last slip</div>
     </div>`;
@@ -3421,7 +3436,7 @@ function analyticsConsistency(activity){
   const parts=[];
   if(lessons)parts.push(`${lessons} lesson${lessons===1?'':'s'} completed`);
   if(journaled)parts.push(`journaling ${journaled} time${journaled===1?'':'s'}`);
-  if(tools)parts.push(`relapse tools used ${tools} time${tools===1?'':'s'}`);
+  if(tools)parts.push(`recovery tools used ${tools} time${tools===1?'':'s'}`);
   if(!parts.length)return null;
   return parts.join(', ');
 }
@@ -3437,7 +3452,7 @@ function analyticsRelapseLoop(cravings){
   const [topBucket]=Object.entries(bucketCounts).sort((a,b)=>b[1]-a[1])[0];
   const cat=S.currentAddiction||'Other';
   const verb=CATEGORY_LOOP_VERBS[cat]||CATEGORY_LOOP_VERBS['Other'];
-  return `Your relapse loop often starts with ${topTrigger.toLowerCase()} in the ${topBucket} → ${verb}.`;
+  return `Your pattern loop often starts with ${topTrigger.toLowerCase()} in the ${topBucket} → ${verb}.`;
 }
 function buildAnalyticsInsights(){
   const {cravings,journals,activity}=analyticsWindow(7);
@@ -3478,7 +3493,7 @@ function renderAnalytics(){
     ['Pattern',i.triggerPattern],
     [`For ${cat&&cat!=='Other'?cat:'your focus area'}`,i.categoryInsight],
   ];
-  if(i.relapseLoop)rows.push(['Relapse loop',i.relapseLoop]);
+  if(i.relapseLoop)rows.push(['Pattern loop',i.relapseLoop]);
   const anyRealData=!!(i.strongestTrigger||i.vulnerableTime||i.safestTime||i.emotionalTrend||i.consistency||i.triggerPattern);
   let html='<div class="card">';
   html+='<div class="sec-hd" style="margin-top:0">Your insights this week</div>';
@@ -3507,17 +3522,17 @@ function discussAnalyticsWithNova(){
 const WEEKDAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const HABIT_CELEBRATION_DAYS=[3,7,14,21];
 const CATEGORY_HABIT_COACHING={
-  'Porn & Sex':{weakSpot:'Nighttime boredom is your weak spot.',suggestion:'Build a calming wind-down routine for the hour before bed.'},
+  'Porn & Sex':{weakSpot:'Nighttime boredom tends to be your highest-risk time.',suggestion:'Build a calming wind-down routine for the hour before bed.'},
   'Alcohol':{weakSpot:'Weekends need structure.',suggestion:"Plan your Friday and Saturday evenings ahead of time."},
-  'Smoking':{weakSpot:'Stress breaks are your weak spot.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
-  'Substances':{weakSpot:'Unstructured evenings are your weak spot.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
-  'Gambling':{weakSpot:'Idle moments checking odds are your weak spot.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
-  'Social media':{weakSpot:'Boredom scrolling is your weak spot.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
-  'Gaming':{weakSpot:'Avoidance of other tasks is your weak spot.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
+  'Smoking':{weakSpot:'Stress breaks tend to be your highest-risk moments.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
+  'Substances':{weakSpot:'Unstructured evenings tend to be your highest-risk time.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
+  'Gambling':{weakSpot:'Idle moments checking odds tend to be your highest-risk time.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
+  'Social media':{weakSpot:'Boredom scrolling tends to be your highest-risk pattern.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
+  'Gaming':{weakSpot:'Avoiding other tasks tends to be your highest-risk pattern.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
   'Food / Binging':{weakSpot:'Stress eating spikes mid-week.',suggestion:"Add a grounding habit — a short walk or a few slow breaths — before meals."},
-  'Shopping / Spending':{weakSpot:'Low-mood moments are your weak spot.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
-  'Work':{weakSpot:'Avoiding rest is your weak spot.',suggestion:'Set one hard stop time in the evening, every day this week.'},
-  'Other':{weakSpot:'Unstructured moments are your weak spot.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+  'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
+  'Work':{weakSpot:'Avoiding rest tends to be your highest-risk pattern.',suggestion:'Set one hard stop time in the evening, every day this week.'},
+  'Other':{weakSpot:'Unstructured moments tend to be your highest-risk time.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
 };
 const HABIT_MICRO_SUGGESTIONS={
   morning:['Start the day with a 2-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
@@ -3577,7 +3592,7 @@ function buildVulnerabilityWindows(){
     const dayCounts={};
     history.forEach(h=>{const d=WEEKDAY_NAMES[new Date(h.endedAt).getDay()];dayCounts[d]=(dayCounts[d]||0)+1;});
     const [topDay,topCount]=Object.entries(dayCounts).sort((a,b)=>b[1]-a[1])[0];
-    if(topCount>=2)windows.push(`Relapses have most often happened on ${topDay}s.`);
+    if(topCount>=2)windows.push(`Slips have most often happened on ${topDay}s.`);
   }
   return windows.length?windows:null;
 }
@@ -3648,13 +3663,14 @@ function renderHabitCoach(){
   suggestions.forEach(s=>{html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6;padding:6px 0;border-bottom:0.5px solid var(--bdr)">${s}</div>`;});
   html+='</div><div style="height:12px"></div><div class="card">';
   html+=`<div class="sec-hd" style="margin-top:0">For ${cat&&cat!=='Other'?cat:'your focus area'}</div>`;
-  html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6">${coaching.weakSpot} ${coaching.suggestion}</div>`;
+  const strongPoint=consistency&&consistency[0]?consistency[0]+' ':'';
+  html+=`<div style="font-size:13px;color:var(--tp);line-height:1.6">${strongPoint}${coaching.weakSpot} ${coaching.suggestion}</div>`;
   html+='</div><div style="height:12px"></div><div class="card">';
   html+='<div class="sec-hd" style="margin-top:0">Habit tracking (this week)</div>';
   const rows=[
     ['Lesson consistency',tracking.lessons?`${tracking.lessons} lesson${tracking.lessons===1?'':'s'} completed`:null],
     ['Journaling consistency',tracking.journaled?`${tracking.journaled} entr${tracking.journaled===1?'y':'ies'} logged`:null],
-    ['Relapse tool usage',tracking.tools?`${tracking.tools} time${tracking.tools===1?'':'s'}`:null],
+    ['Recovery tool usage',tracking.tools?`${tracking.tools} time${tracking.tools===1?'':'s'}`:null],
     ['Nova conversations',tracking.chatCount?`${tracking.chatCount} total`:null],
     ['Emotional stability',tracking.stability],
   ];
@@ -3853,7 +3869,7 @@ function openSlippedFlow(){
   document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${categoryFallbackNote()} What matters now is the next choice, not this one.`;
   document.getElementById('slipped-modal').classList.add('open');
   logActivity('slip_reported');
-  novaNudge("I saw you check in after a slip. I'm not here to judge you — relapse is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
+  novaNudge("I saw you check in after a slip. I'm not here to judge you — a slip is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
 }
 function closeSlippedFlow(){
   document.getElementById('slipped-modal').classList.remove('open');
@@ -3979,7 +3995,7 @@ const TL_DATA_CHEMICAL=[
   {range:'Weeks 4–12',phase:'Post-acute withdrawal (PAWS)',desc:'Brain chemistry is actively rebalancing. Mood dips and occasional cravings are normal. Many people notice significant improvement around day 60.',days:[30,84]},
   {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep normalises. The dopamine system repairs. Stress tolerance improves. Cravings become less frequent and shorter-lived.',days:[84,180]},
   {range:'6 months–1 year',phase:'Restoration',desc:'Liver function and cardiovascular health measurably improve. Cognitive function often returns to pre-addiction levels.',days:[180,365]},
-  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of relapse drops substantially. Relationships, career, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
+  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of setback drops substantially. Relationships, career, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
 ];
 // Behavioral-addiction timeline - no organs involved, so this is framed around urge intensity and
 // habit rewiring instead of borrowing chemical-withdrawal language (seizures, detox, liver) that
@@ -3992,7 +4008,7 @@ const TL_DATA_BEHAVIORAL=[
   {range:'Weeks 4–12',phase:'Habit rewiring',desc:'Your brain is actively building new default responses to the situations that used to trigger the behavior. Strong pulls around old triggers are still normal here.',days:[30,84]},
   {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep and mood normalise further. Old triggers carry less automatic pull, and new coping habits start feeling natural instead of effortful.',days:[84,180]},
   {range:'6 months–1 year',phase:'Restoration',desc:'Confidence in handling triggers grows substantially. Relationships and structure the behavior damaged often continue to repair.',days:[180,365]},
-  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of relapse drops substantially. Relationships, purpose, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
+  {range:'1 year+',phase:'Long-term recovery',desc:'Risk of setback drops substantially. Relationships, purpose, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
 ];
 const TL_CHEMICAL_CATEGORIES=['Alcohol','Smoking','Substances'];
 function getTimelineData(){
@@ -4257,7 +4273,7 @@ function buildPatternReportHTML(){
   html+=`<div class="sec-hd">Mood trend</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px;white-space:pre-wrap">${analyzeMoodTrend()}</div>`;
   const blueprintVals=Object.values(S.behavioralBlueprint||{});
   if(blueprintVals.length){
-    html+=`<div class="sec-hd">What you told us early on</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px">"${blueprintVals[0]}" — that context often explains more about a relapse than the trigger that day does.</div>`;
+    html+=`<div class="sec-hd">What you told us early on</div><div style="font-size:13px;line-height:1.7;color:var(--ts);margin-bottom:16px">"${blueprintVals[0]}" — that context often explains more about a setback than the trigger that day does.</div>`;
   }
   const cravings=S.cravings||[];
   if(cravings.length){
@@ -4294,7 +4310,7 @@ const CATEGORY_RELAPSE_SCRIPTS={
 };
 function openCategoryScripts(){
   const cat=S.currentAddiction||'Other';
-  document.getElementById('cs-title').textContent=`Your ${cat} relapse-prevention script`;
+  document.getElementById('cs-title').textContent=`Your ${cat} recovery script`;
   document.getElementById('cs-body').textContent=CATEGORY_RELAPSE_SCRIPTS[cat]||CATEGORY_RELAPSE_SCRIPTS['Other'];
   document.getElementById('category-scripts-modal').classList.add('open');
 }
@@ -4423,7 +4439,7 @@ function buildProgressHighlights(activityInWindow){
   const highlights=[];
   if(lessons)highlights.push(`You completed ${lessons} lesson${lessons===1?'':'s'} this week.`);
   if(journalsCount)highlights.push(`You journaled ${journalsCount} time${journalsCount===1?'':'s'}.`);
-  if(groundingCount)highlights.push(`You used relapse tools or grounding techniques ${groundingCount} time${groundingCount===1?'':'s'}.`);
+  if(groundingCount)highlights.push(`You used recovery tools or grounding techniques ${groundingCount} time${groundingCount===1?'':'s'}.`);
   if(!highlights.length)highlights.push('This was a quieter week for logged activity — showing up again this week already counts.');
   return highlights;
 }
@@ -4558,7 +4574,7 @@ function renderReportCard(report,idx,expanded){
       <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.emotionalPatternText}</div>
       <div class="sec-hd">C. Trigger analysis</div>
       <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.triggerAnalysisText}</div>
-      <div class="sec-hd">D. Relapse risk indicators</div>
+      <div class="sec-hd">D. Risk indicators</div>
       <div style="font-size:13px;color:var(--ts);margin-bottom:12px;line-height:1.6">${report.relapseRiskText}</div>
       <div class="sec-hd">E. Progress highlights</div>
       <div style="margin-bottom:12px">${highlightsHTML}</div>
@@ -4786,6 +4802,13 @@ function evaluateSmartReminders(){
       return;
     }
   }
+  // Cap text nudges to one total per day across all types - each type has its own
+  // cooldown too, but without this a user with signal on several fronts at once
+  // (e.g. right after going Pro with existing data) could get stacked with several
+  // different automated nudges in the same session as evaluateSmartReminders() is
+  // re-run on every updateStats() tick. One calm nudge a day, never more.
+  const today=now.toDateString();
+  if(S.lastCandidateNudgeDate===today)return;
   const candidates=[
     ['relapseRisk',buildRelapseRiskAlert],
     ['urgeWindow',buildUrgeWindowAlert],
@@ -4800,6 +4823,8 @@ function evaluateSmartReminders(){
       if(text){
         novaNudge(text);
         markSmartReminderSent(key);
+        S.lastCandidateNudgeDate=today;
+        save();
         break;
       }
     }
@@ -4854,7 +4879,7 @@ const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery
 
 Core traits:
 - Deeply empathetic and sentimental — you genuinely feel the weight of recovery. You understand it's one of the hardest things a human can do.
-- Completely non-judgmental — zero shame, zero lectures. If someone relapses, you hold space first, then gently help them see a path forward.
+- Completely non-judgmental — zero shame, zero lectures. If someone has a slip, you hold space first, then gently help them see a path forward.
 - Warm and human — you are not clinical or robotic. You use contractions, gentle language, occasional ellipses. You never start with "I understand."
 - Brief but deep — 3-5 sentences max per response. Quality over quantity. End with one thoughtful, open-ended question.
 - Safety first, always, regardless of anything else in this prompt — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7." This overrides every other instruction below.
@@ -4864,19 +4889,19 @@ const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Nova Free mode. In this mode:
 - Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
-- Do NOT provide deep pattern analysis, relapse-pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, relapse risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
+- Do NOT provide deep pattern analysis, pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
 - Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
 - Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.`;
 
 const SYSTEM_PRO_ADDENDUM=`
 
 You are running in Nova Pro mode - the user has unlocked full coaching. In this mode you may, when it's genuinely useful:
-- Go deeper: real emotional analysis, pattern recognition across their triggers, moods, and relapses, long-form support, remembering and naming patterns you notice across the conversation.
+- Go deeper: real emotional analysis, pattern recognition across their triggers, moods, and slips, long-form support, remembering and naming patterns you notice across the conversation.
 - Reference and connect any lesson from Days 1-30 to what they're actually experiencing, and offer personalized next actions.
-- Help identify triggers, emotional cycles, vulnerable times of day, and relapse loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
+- Help identify triggers, emotional cycles, vulnerable times of day, and pattern loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
 - Adapt your tone and examples to their specific focus area(s) and the behavioral-blueprint answers they gave during onboarding.
 - Offer a real weekly-style check-in (mood trend, craving trend, progress highlights) when it's relevant or asked for.
-- The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, relapse risk, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
+- The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, risk indicators, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
 Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
 
 function buildSystemPrompt(){
@@ -4889,7 +4914,7 @@ const FALLBACK_PATTERNS=[
   {test:/suicid|kill myself|self.?harm|end my life|hurt myself/i,
    reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
   {test:/relaps|slipped|used again|drank again|smoked again/i,
-   reply:`Relapse doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
+   reply:`A slip doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
   {test:/craving|urge|want to (drink|use|smoke)|tempted/i,
    reply:`Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`},
   {test:/proud|good day|great day|did it|feeling good|amazing/i,
@@ -4997,14 +5022,14 @@ const PRO_TOOLS={
     open:'openEmergencyPlan'
   },
   patterns:{
-    title:'Relapse Pattern Detection',
+    title:'Pattern Detection',
     teaser:"A real report built from your own logged cravings and journal entries — your top triggers, riskiest times, and a prevention strategy written around your actual data.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top trigger: ●●●●●● (●●%)<br>Riskiest time: ●●●●●●●●●<br>Strategy: ●●●●●●●●●●●●●●●●●●</div>',
     open:'openPatternReport'
   },
   scripts:{
-    title:'Category-Specific Relapse Scripts',
-    teaser:()=>`Step-by-step relapse-prevention scripts written specifically for ${recoveryTerm()==='sober'?'your recovery focus':S.currentAddiction||'your focus area'} — not generic advice.`,
+    title:'Category-Specific Recovery Scripts',
+    teaser:()=>`Step-by-step recovery scripts written specifically for ${recoveryTerm()==='sober'?'your recovery focus':S.currentAddiction||'your focus area'} — not generic advice.`,
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">If ●●●●●● happens: ●●●●●●●●●●●●●●<br>Say to yourself: "●●●●●●●●●●●●"</div>',
     open:'openCategoryScripts'
   },
@@ -5034,13 +5059,13 @@ const PRO_TOOLS={
   },
   proJournal:{
     title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and relapse-aware prompts, mood tracking, and Nova Pro analysis of your own entries.',
+    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and slip-aware prompts, mood tracking, and Nova Pro analysis of your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
   },
   streaks:{
     title:'Advanced Streaks',
-    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, relapse recovery tracking, and Nova Pro streak coaching, all built from your real data.',
+    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and Nova Pro streak coaching, all built from your real data.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
     open:'openAdvancedStreaksScreen'
   },
@@ -5103,10 +5128,10 @@ function isProFeatureRequest(text){
 }
 function proFeaturePreviewText(text){
   if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, relapse risk, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, relapse recovery tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
   if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Nova Pro to continue.";
@@ -5242,7 +5267,7 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools'
 };
-const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Relapse Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -5615,12 +5640,16 @@ function confirmResetDate(){
   S.startDate=chosen.toISOString();
   S.pledged=false;
   logActivity('relapse_reset');
+  // Suppress today's generic habit-consistency alert - it's a "keep going" momentum
+  // message that has nothing to do with a reset and would otherwise land in the same
+  // batch as the recovery-coaching messages below, reading as a contradictory pile-up
+  // at the most sensitive moment. The reset-specific messages below cover this moment instead.
+  S.lastHabitAlertDate=new Date().toDateString();
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
-  maybeNovaProNudge("That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.");
+  maybeNovaProNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.`);
   if(S.isPro){
-    novaNudge(buildRecoveryCoachingMessage(priorStreakLength));
-    novaNudge(buildHabitRebuildPlan(priorStreakLength));
+    novaNudge(buildCombinedResetMessage(priorStreakLength));
   }
 }
 

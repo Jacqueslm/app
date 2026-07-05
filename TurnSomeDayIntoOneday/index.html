@@ -1215,7 +1215,7 @@ body{display:flex;justify-content:center}
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Category</div></div>
-      <div class="setting-row" onclick="openCategoryInfo()">
+      <div class="setting-row" onclick="openCategorySwitcher()">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Category</p><span id="category-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1664,6 +1664,28 @@ body{display:flex;justify-content:center}
       <div class="gender-chip" onclick="chooseGender('Non-Binary')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Non-Binary</div>
     </div>
     <button class="sos-close" style="margin-top:12px" onclick="closeGenderModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- CATEGORY SWITCHER MODAL -->
+<div class="sos-modal" id="category-modal" onclick="if(event.target===this)closeCategorySwitcher()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Change your focus</div>
+    <div class="sos-sub" id="category-modal-sub">Tap a category to switch. Your streak, journal, and progress stay exactly the same.</div>
+    <div class="addiction-grid" id="categorySwitchGrid" style="margin-top:12px">
+      <div class="add-chip" style="grid-column: span 2;" onclick="switchCategory('Porn & Sex')">🔞 Porn &amp; Sex</div>
+      <div class="add-chip" onclick="switchCategory('Alcohol')">🍺 Alcohol</div>
+      <div class="add-chip" onclick="switchCategory('Smoking')">🚬 Smoking / Vaping</div>
+      <div class="add-chip" onclick="switchCategory('Substances')">💊 Substances</div>
+      <div class="add-chip" onclick="switchCategory('Gambling')">🎰 Gambling</div>
+      <div class="add-chip" onclick="switchCategory('Social media')">📱 Social media</div>
+      <div class="add-chip" onclick="switchCategory('Gaming')">🎮 Gaming</div>
+      <div class="add-chip" onclick="switchCategory('Food / Binging')">🍽️ Food / Binging</div>
+      <div class="add-chip" onclick="switchCategory('Shopping / Spending')">🛍️ Shopping / Spending</div>
+      <div class="add-chip" onclick="switchCategory('Work')">💼 Work</div>
+      <div class="add-chip" onclick="switchCategory('Other')">✨ Other</div>
+    </div>
+    <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Cancel</button>
   </div>
 </div>
 
@@ -5661,7 +5683,32 @@ const CATEGORY_DESCRIPTIONS={
 function openCategoryInfo(){
   const cat=S.currentAddiction||'Other';
   const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
-  appInfo(cat==='Other'?'Your focus':cat,`${desc}\n\nTo change your focus, use "Restart setup" in the Danger zone below — it re-runs onboarding without losing your journal, cravings, or progress.`);
+  appInfo(cat==='Other'?'Your focus':cat,desc);
+}
+
+function openCategorySwitcher(){
+  const cat=S.currentAddiction||'Other';
+  const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
+  document.getElementById('category-modal-sub').textContent=`Currently: ${cat==='Other'?'Your focus':cat} — ${desc} Tap a category below to switch. Your streak, journal, and progress stay exactly the same.`;
+  document.querySelectorAll('#categorySwitchGrid .add-chip').forEach(chip=>{
+    chip.classList.toggle('sel',chip.textContent.trim().includes(cat));
+  });
+  document.getElementById('category-modal').classList.add('open');
+}
+function closeCategorySwitcher(){
+  document.getElementById('category-modal').classList.remove('open');
+}
+function switchCategory(name){
+  if(S.currentAddiction===name){closeCategorySwitcher();return;}
+  S.currentAddiction=name;
+  S.selectedAddictions=[name];
+  save();
+  updateProfileEditUI();
+  if(typeof renderTodayLesson==='function'&&document.getElementById('s-lesson').classList.contains('on')){
+    viewingDay=null;
+    renderTodayLesson();
+  }
+  closeCategorySwitcher();
 }
 
 function openNameModal(){

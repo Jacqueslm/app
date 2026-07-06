@@ -5893,10 +5893,22 @@ function restartOnboarding(){
     S.novaVoice='neutral';
     S.startDate=null;
     S.currentAddiction='';
+    // These are all day-count/journey-dependent and would otherwise leave stale traces of
+    // the previous run behind - e.g. the lesson screen jumping straight to an old day, or a
+    // milestone silently failing to re-celebrate because it's already marked as notified.
+    S.currentDay=1;
+    S.notifiedMilestones=[];
+    S.notifiedProMilestones=[];
+    S.chatHistory=[];
+    S.chatDate='';
+    S.dailySpend=0;
+    S.dailyHoursLost=0;
+    S.lastDailyLessonReminderDate='';
     save();
 
     document.getElementById('ob-name').value='';
     document.getElementById('ob-gender').value='';
+    document.getElementById('chatArea').innerHTML='';
     document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
     const errEl=document.getElementById('obs1-error');
     if(errEl)errEl.textContent='';

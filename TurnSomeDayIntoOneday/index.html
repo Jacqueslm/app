@@ -343,7 +343,15 @@ body{display:flex;justify-content:center}
   <div style="font-size:15px;color:#c0caff;margin-bottom:8px;font-weight:500">What's your first name?</div>
   <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
 
-  <div style="font-size:11px;color:#6672a0;margin-bottom:20px">You can set your gender identity and relationship status any time in Profile — some lessons mention a partner, and that lets us tailor them to your situation.</div>
+  <div class="ob-label" style="text-align:left">Gender identity</div>
+  <select id="ob-gender" class="ob-input" style="margin-bottom:20px">
+    <option value="Not Specified">Prefer not to say</option>
+    <option value="Male">Man</option>
+    <option value="Female">Woman</option>
+    <option value="Non-Binary">Non-Binary</option>
+  </select>
+
+  <div style="font-size:11px;color:#6672a0;margin-bottom:20px">You can update this, and set a relationship status, any time in Profile — some lessons mention a partner, and that lets us tailor them to your situation.</div>
 
   <div class="ob-label">What are you recovering from? (Select all that apply)</div>
   <div class="addiction-grid" id="addGrid">
@@ -1708,11 +1716,12 @@ body{display:flex;justify-content:center}
 <div class="sos-modal" id="gender-modal" onclick="if(event.target===this)closeGenderModal()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Gender identity</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-      <div class="gender-chip" onclick="chooseGender('Male')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Man</div>
-      <div class="gender-chip" onclick="chooseGender('Female')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Woman</div>
-      <div class="gender-chip" onclick="chooseGender('Non-Binary')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Non-Binary</div>
-    </div>
+    <select id="gender-select" class="ob-input" style="margin-top:12px;color:var(--tp);background:var(--s1);border-color:var(--bdr)" onchange="chooseGender(this.value)">
+      <option value="" disabled>Select...</option>
+      <option value="Male">Man</option>
+      <option value="Female">Woman</option>
+      <option value="Non-Binary">Non-Binary</option>
+    </select>
     <button class="sos-close" style="margin-top:12px" onclick="closeGenderModal()">Cancel</button>
   </div>
 </div>
@@ -2611,6 +2620,7 @@ function getBehaviorAnswer(key){
 
 function goToBehavioralStep(){
   S.name=document.getElementById('ob-name').value.trim()||'Friend';
+  S.userGender=document.getElementById('ob-gender').value||'Not Specified';
   const errEl=document.getElementById('obs1-error');
   if(S.selectedAddictions.length===0){
     if(errEl)errEl.textContent='Please select at least one area to focus on.';
@@ -5858,7 +5868,11 @@ function saveNameModal(){
   closeNameModal();
 }
 
-function openGenderModal(){document.getElementById('gender-modal').classList.add('open');}
+function openGenderModal(){
+  const sel=document.getElementById('gender-select');
+  sel.value=['Male','Female','Non-Binary'].includes(S.userGender)?S.userGender:'';
+  document.getElementById('gender-modal').classList.add('open');
+}
 function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}
 function chooseGender(g){
   S.userGender=g;
@@ -5889,6 +5903,7 @@ function restartOnboarding(){
     save();
 
     document.getElementById('ob-name').value='';
+    document.getElementById('ob-gender').value='Not Specified';
     document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
     const errEl=document.getElementById('obs1-error');
     if(errEl)errEl.textContent='';

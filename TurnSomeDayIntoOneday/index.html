@@ -5870,7 +5870,7 @@ function saveNameModal(){
 
 function openGenderModal(){
   const sel=document.getElementById('gender-select');
-  sel.value=['Male','Female','Non-Binary','Not Specified'].includes(S.userGender)?S.userGender:'';
+  sel.value=['Male','Female','Non-Binary'].includes(S.userGender)?S.userGender:'';
   document.getElementById('gender-modal').classList.add('open');
 }
 function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}

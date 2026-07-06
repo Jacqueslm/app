@@ -678,6 +678,10 @@ body{display:flex;justify-content:center}
     <!-- LESSON -->
     <div id="s-lesson" class="scr">
       <div class="sec">
+        <div id="lesson-track-switch-row" style="display:none;justify-content:space-between;align-items:center;padding:10px 2px;cursor:pointer" onclick="openLessonTrackSwitcher()">
+          <span style="font-size:12px;color:var(--tm)">Focus: <span id="lesson-track-switch-lbl" style="color:var(--tp);font-weight:600"></span></span>
+          <span style="font-size:12px;color:var(--accent)">Switch track</span>
+        </div>
         <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLessonList()">
           <span>Today's lesson</span>
           <span id="lesson-list-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">View all lessons</span>
@@ -1251,10 +1255,15 @@ body{display:flex;justify-content:center}
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Category</div></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Focus areas</div></div>
       <div class="setting-row" onclick="openCategorySwitcher()">
         <i class="ti ti-info-circle"></i>
-        <div class="setting-row-txt"><p>Category</p><span id="category-row-sub">Not set</span></div>
+        <div class="setting-row-txt"><p>Focus areas</p><span id="category-row-sub">Not set</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" id="lesson-track-row" style="display:none" onclick="openLessonTrackSwitcher()">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Lesson track</p><span id="lesson-track-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1724,25 +1733,36 @@ body{display:flex;justify-content:center}
   </div>
 </div>
 
-<!-- CATEGORY SWITCHER MODAL -->
+<!-- FOCUS AREAS MODAL (multi-select) -->
 <div class="sos-modal" id="category-modal" onclick="if(event.target===this)closeCategorySwitcher()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">Change your focus</div>
-    <div class="sos-sub" id="category-modal-sub">Tap a category to switch. Your streak, journal, and progress stay exactly the same.</div>
+    <div class="sos-title" style="color:var(--accent)">Your focus areas</div>
+    <div class="sos-sub" id="category-modal-sub">Tap to add or remove a focus area. Each one keeps its own lesson progress — nothing is lost when you add or remove one.</div>
     <div class="addiction-grid" id="categorySwitchGrid" style="margin-top:12px">
-      <div class="add-chip" style="grid-column: span 2;" onclick="switchCategory('Porn & Sex')">🔞 Porn &amp; Sex</div>
-      <div class="add-chip" onclick="switchCategory('Alcohol')">🍺 Alcohol</div>
-      <div class="add-chip" onclick="switchCategory('Smoking')">🚬 Smoking / Vaping</div>
-      <div class="add-chip" onclick="switchCategory('Substances')">💊 Substances</div>
-      <div class="add-chip" onclick="switchCategory('Gambling')">🎰 Gambling</div>
-      <div class="add-chip" onclick="switchCategory('Social media')">📱 Social media</div>
-      <div class="add-chip" onclick="switchCategory('Gaming')">🎮 Gaming</div>
-      <div class="add-chip" onclick="switchCategory('Food / Binging')">🍽️ Food / Binging</div>
-      <div class="add-chip" onclick="switchCategory('Shopping / Spending')">🛍️ Shopping / Spending</div>
-      <div class="add-chip" onclick="switchCategory('Work')">💼 Work</div>
-      <div class="add-chip" onclick="switchCategory('Other')">✨ Other</div>
+      <div class="add-chip" style="grid-column: span 2;" onclick="toggleCategorySwitch(this,'Porn & Sex')">🔞 Porn &amp; Sex</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Alcohol')">🍺 Alcohol</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Smoking')">🚬 Smoking / Vaping</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Substances')">💊 Substances</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Gambling')">🎰 Gambling</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Social media')">📱 Social media</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Gaming')">🎮 Gaming</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Food / Binging')">🍽️ Food / Binging</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Shopping / Spending')">🛍️ Shopping / Spending</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Work')">💼 Work</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Other')">✨ Other</div>
     </div>
-    <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Cancel</button>
+    <div class="pin-error" id="category-switch-error" style="text-align:left">&nbsp;</div>
+    <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Done</button>
+  </div>
+</div>
+
+<!-- LESSON TRACK SWITCHER MODAL -->
+<div class="sos-modal" id="lesson-track-modal" onclick="if(event.target===this)closeLessonTrackSwitcher()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Switch lesson track</div>
+    <div class="sos-sub">Pick which focus area's daily lessons you want to see and complete. Progress in each track is saved separately.</div>
+    <div class="addiction-grid" id="lessonTrackGrid" style="margin-top:12px"></div>
+    <button class="sos-close" style="margin-top:4px" onclick="closeLessonTrackSwitcher()">Cancel</button>
   </div>
 </div>
 
@@ -1808,7 +1828,7 @@ let S = {
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
-  currentAddiction:'',currentDay:1,longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
+  currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
@@ -1842,7 +1862,31 @@ function save(){
   try{localStorage.setItem('tsid_v2',JSON.stringify(S))}catch(e){}
   if(S.accountEmail)pushStateToServer();
 }
-function load(){try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}}
+function load(){
+  try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}
+  // Migrate the old single global lesson-day counter into a per-focus-area map, so
+  // users who picked multiple focus areas before this existed don't lose their spot
+  // in the track they were already on.
+  if(!S.lessonProgress||typeof S.lessonProgress!=='object')S.lessonProgress={};
+  (S.selectedAddictions||[]).forEach(a=>{
+    if(!S.lessonProgress[a])S.lessonProgress[a]=(a===S.currentAddiction&&S.currentDay)?S.currentDay:1;
+  });
+  if(S.currentAddiction&&!S.lessonProgress[S.currentAddiction]){
+    S.lessonProgress[S.currentAddiction]=S.currentDay||1;
+  }
+  if(!S.notifiedDay30Tracks)S.notifiedDay30Tracks=[];
+}
+function getLessonDayFor(addiction){
+  if(!addiction)return 1;
+  if(!S.lessonProgress)S.lessonProgress={};
+  if(!S.lessonProgress[addiction])S.lessonProgress[addiction]=1;
+  return S.lessonProgress[addiction];
+}
+function setLessonDayFor(addiction,day){
+  if(!addiction)return;
+  if(!S.lessonProgress)S.lessonProgress={};
+  S.lessonProgress[addiction]=day;
+}
 
 // ─── ACTIVITY LOG (backs weekly reports with real, already-logged events) ────
 function logActivity(type,extra){
@@ -1933,7 +1977,7 @@ function journeyPhaseLabelText(day){
   const phase=getJourneyPhase(day);
   return `${phase.label} phase${phase.stage<3?` · Day ${day} of 30`:''}`;
 }
-let viewingDay=null; // null = showing S.currentDay; otherwise re-reading a specific past/locked day
+let viewingDay=null; // null = showing the current track's lesson day; otherwise re-reading a specific past/locked day
 
 function isLessonLocked(day){
   return !S.isPro&&day>FREE_LESSON_CAP;
@@ -1946,7 +1990,7 @@ function getLessonForDay(day){
 }
 
 function getTodayLesson(){
-  return getLessonForDay(S.currentDay);
+  return getLessonForDay(getLessonDayFor(S.currentAddiction));
 }
 
 // Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
@@ -1979,7 +2023,13 @@ function updateLessonPromo(){
 }
 
 function renderTodayLesson(){
-  const day=viewingDay||S.currentDay;
+  const switchRow=document.getElementById('lesson-track-switch-row');
+  if(switchRow){
+    switchRow.style.display=S.selectedAddictions.length>1?'flex':'none';
+    const lbl=document.getElementById('lesson-track-switch-lbl');
+    if(lbl)lbl.textContent=S.currentAddiction||'';
+  }
+  const day=viewingDay||getLessonDayFor(S.currentAddiction);
   const normalEl=document.getElementById('lesson-normal');
   const lockedEl=document.getElementById('lesson-locked');
   const titleEl=document.getElementById('lessonTitle');
@@ -2027,7 +2077,7 @@ function renderTodayLesson(){
   actionEl.textContent=lesson.action||'';
   reflectionEl.textContent=lesson.reflection||'';
 
-  const isPastDay=day<S.currentDay;
+  const isPastDay=day<getLessonDayFor(S.currentAddiction);
   if(isPastDay){
     btn.style.display='none';
     backBtn.style.display='block';
@@ -2058,10 +2108,11 @@ function renderLessonList(){
   const wrap=document.getElementById('lesson-list-wrap');
   if(!wrap||wrap.style.display==='none')return;
   const pack=LESSON_PACKS[S.currentAddiction]||[];
+  const trackDay=getLessonDayFor(S.currentAddiction);
   const rows=pack.map(l=>{
     const locked=isLessonLocked(l.day);
-    const completed=l.day<S.currentDay;
-    const current=l.day===S.currentDay;
+    const completed=l.day<trackDay;
+    const current=l.day===trackDay;
     const icon=locked?'<i class="ti ti-lock" style="font-size:14px;color:var(--tm)"></i>':completed?'<i class="ti ti-check" style="font-size:14px;color:var(--green)"></i>':'';
     return `<div class="setting-row" style="padding:10px 0" onclick="viewLessonDay(${l.day})">
       <div class="setting-row-txt" style="flex:1"><p style="font-size:13px;${current?'font-weight:600':''}">Day ${l.day}: ${l.title}</p></div>
@@ -2073,8 +2124,8 @@ function renderLessonList(){
 }
 
 function restartLessonProgram(){
-  appConfirm('Restart your lesson program from Day 1? Your lifetime lesson-completion count stays as it is — this just lets you go through the days again.',()=>{
-    S.currentDay=1;
+  appConfirm(`Restart your ${S.currentAddiction||'lesson'} program from Day 1? Your lifetime lesson-completion count stays as it is — this just lets you go through the days again.`,()=>{
+    setLessonDayFor(S.currentAddiction,1);
     viewingDay=null;
     save();
     updateLessonPromo();
@@ -2086,11 +2137,11 @@ function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
-  const justFinishedProgram=lesson.day===30&&!S.notifiedDay30Overlay;
-  S.currentDay++;
+  const justFinishedProgram=lesson.day===30&&!S.notifiedDay30Tracks.includes(S.currentAddiction);
+  setLessonDayFor(S.currentAddiction,getLessonDayFor(S.currentAddiction)+1);
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
-  logActivity('lesson_completed',{day:lesson.day});
-  if(justFinishedProgram)S.notifiedDay30Overlay=true;
+  logActivity('lesson_completed',{day:lesson.day,track:S.currentAddiction});
+  if(justFinishedProgram)S.notifiedDay30Tracks.push(S.currentAddiction);
   const justHitLessonConsistency=S.lessonsCompletedCount===7&&!S.notifiedLessonConsistency;
   if(justHitLessonConsistency)S.notifiedLessonConsistency=true;
   save();
@@ -2143,7 +2194,7 @@ function closeDay30Overlay(){
 }
 
 // ─── CUSTOM LESSON PACKS (Pro) ─────────────────────────────────────────────────
-// Fully parallel to the addiction-category lesson system above (S.currentDay,
+// Fully parallel to the addiction-category lesson system above (S.lessonProgress,
 // LESSON_PACKS, getTodayLesson/renderTodayLesson/completeLessonForToday) so that
 // system stays completely untouched. Packs track their own per-pack day.
 const PREDEFINED_PACKS={
@@ -2886,7 +2937,7 @@ function updateStats(){
 
   // journey phase (predictability - always know what stage you're in)
   const phaseLbl=document.getElementById('journey-phase-lbl');
-  if(phaseLbl)phaseLbl.textContent=journeyPhaseLabelText(S.currentDay||1);
+  if(phaseLbl)phaseLbl.textContent=journeyPhaseLabelText(getLessonDayFor(S.currentAddiction));
 
   // timeline highlight
   updateTimelineHighlight(days);
@@ -4701,7 +4752,7 @@ function maybeShowDailyLessonReminder(){
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
   save();
-  novaNudge(`Quick reminder — today's lesson (Day ${S.currentDay}) is ready whenever you are.`);
+  novaNudge(`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`);
 }
 
 // ─── SMART REMINDERS (Pro) ──────────────────────────────────────────────────
@@ -5855,11 +5906,20 @@ function updateProfileEditUI(){
     voiceEl.textContent=labels[S.novaVoice]||'Neutral';
   }
   const catEl=document.getElementById('category-row-sub');
-  if(catEl)catEl.textContent=S.currentAddiction||'Not set';
+  if(catEl)catEl.textContent=S.selectedAddictions.length?S.selectedAddictions.join(', '):'Not set';
+  const trackRow=document.getElementById('lesson-track-row');
+  const trackSub=document.getElementById('lesson-track-row-sub');
+  if(trackRow)trackRow.style.display=S.selectedAddictions.length>1?'flex':'none';
+  if(trackSub)trackSub.textContent=S.currentAddiction||'Not set';
   const verEl=document.getElementById('app-version-txt');
   if(verEl)verEl.textContent=APP_VERSION;
 }
 const APP_VERSION='1.0.0';
+const CATEGORY_EMOJI={
+  'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
+  'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
+  Work:'💼',Other:'✨'
+};
 const CATEGORY_DESCRIPTIONS={
   'Porn & Sex':'Focused on compulsive porn use and sexual behavior patterns that feel out of your control.',
   'Alcohol':"Focused on reducing or stopping drinking and rebuilding a life that doesn't depend on it.",
@@ -5879,29 +5939,65 @@ function openCategoryInfo(){
   appInfo(cat==='Other'?'Your focus':cat,desc);
 }
 
+function refreshLessonScreenIfOpen(){
+  if(typeof renderTodayLesson==='function'&&document.getElementById('s-lesson').classList.contains('on')){
+    viewingDay=null;
+    renderTodayLesson();
+    updateLessonPromo();
+  }
+}
+
 function openCategorySwitcher(){
-  const cat=S.currentAddiction||'Other';
-  const desc=CATEGORY_DESCRIPTIONS[cat]||CATEGORY_DESCRIPTIONS['Other'];
-  document.getElementById('category-modal-sub').textContent=`Currently: ${cat==='Other'?'Your focus':cat} — ${desc} Tap a category below to switch. Your streak, journal, and progress stay exactly the same.`;
+  document.getElementById('category-modal-sub').textContent="Tap to add or remove a focus area. Each one keeps its own lesson progress — nothing is lost when you add or remove one.";
+  document.getElementById('category-switch-error').textContent='';
   document.querySelectorAll('#categorySwitchGrid .add-chip').forEach(chip=>{
-    chip.classList.toggle('sel',chip.textContent.trim().includes(cat));
+    const name=chip.getAttribute('onclick').match(/'([^']+)'/)[1];
+    chip.classList.toggle('sel',S.selectedAddictions.includes(name));
   });
   document.getElementById('category-modal').classList.add('open');
 }
 function closeCategorySwitcher(){
   document.getElementById('category-modal').classList.remove('open');
+  updateProfileEditUI();
+  refreshLessonScreenIfOpen();
 }
-function switchCategory(name){
-  if(S.currentAddiction===name){closeCategorySwitcher();return;}
+function toggleCategorySwitch(el,name){
+  const errEl=document.getElementById('category-switch-error');
+  if(S.selectedAddictions.includes(name)){
+    if(S.selectedAddictions.length===1){
+      if(errEl)errEl.textContent='You need at least one focus area.';
+      return;
+    }
+    S.selectedAddictions=S.selectedAddictions.filter(a=>a!==name);
+    el.classList.remove('sel');
+    if(S.currentAddiction===name)S.currentAddiction=S.selectedAddictions[0];
+  }else{
+    S.selectedAddictions.push(name);
+    el.classList.add('sel');
+    if(!S.currentAddiction)S.currentAddiction=name;
+  }
+  if(errEl)errEl.textContent='';
+  save();
+}
+
+function openLessonTrackSwitcher(){
+  const grid=document.getElementById('lessonTrackGrid');
+  grid.innerHTML=S.selectedAddictions.map(name=>{
+    const emoji=CATEGORY_EMOJI[name]||'✨';
+    const sel=name===S.currentAddiction?' sel':'';
+    return `<div class="add-chip${sel}" style="grid-column: span 2;" onclick="selectLessonTrack('${name.replace(/'/g,"\\'")}')">${emoji} ${name} — Day ${getLessonDayFor(name)}</div>`;
+  }).join('');
+  document.getElementById('lesson-track-modal').classList.add('open');
+}
+function closeLessonTrackSwitcher(){
+  document.getElementById('lesson-track-modal').classList.remove('open');
+}
+function selectLessonTrack(name){
   S.currentAddiction=name;
-  S.selectedAddictions=[name];
   save();
   updateProfileEditUI();
-  if(typeof renderTodayLesson==='function'&&document.getElementById('s-lesson').classList.contains('on')){
-    viewingDay=null;
-    renderTodayLesson();
-  }
-  closeCategorySwitcher();
+  refreshLessonScreenIfOpen();
+  closeLessonTrackSwitcher();
 }
 
 function openNameModal(){
@@ -5953,7 +6049,8 @@ function restartOnboarding(){
     // These are all day-count/journey-dependent and would otherwise leave stale traces of
     // the previous run behind - e.g. the lesson screen jumping straight to an old day, or a
     // milestone silently failing to re-celebrate because it's already marked as notified.
-    S.currentDay=1;
+    S.lessonProgress={};
+    S.notifiedDay30Tracks=[];
     S.notifiedMilestones=[];
     S.notifiedProMilestones=[];
     S.chatHistory=[];

@@ -85,6 +85,10 @@ function incrementChatCount(userId, usageDate) {
   ).run(userId, usageDate);
 }
 
+function updatePassword(userId, passwordHash) {
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
+}
+
 function getUserByStripeCustomerId(stripeCustomerId) {
   return db.prepare('SELECT * FROM users WHERE stripe_customer_id = ?').get(stripeCustomerId);
 }
@@ -128,6 +132,7 @@ module.exports = {
   deleteUser,
   getChatCount,
   incrementChatCount,
+  updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,

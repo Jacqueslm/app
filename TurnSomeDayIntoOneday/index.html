@@ -1201,10 +1201,15 @@ body{display:flex;justify-content:center}
     <!-- PROFILE -->
     <div id="s-profile" class="scr">
       <div class="profile-hero">
-        <div class="profile-av" id="prof-av">J</div>
+        <div class="profile-av" id="prof-av" onclick="openProfilePhotoPicker()" style="cursor:pointer;position:relative;background-size:cover;background-position:center">
+          <span id="prof-av-initial">J</span>
+          <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--brand);display:flex;align-items:center;justify-content:center"><i class="ti ti-pencil" style="font-size:11px;color:#fff"></i></div>
+        </div>
+        <input type="file" id="profile-photo-input" accept="image/*" style="display:none" onchange="handleProfilePhotoSelected(this)">
         <div class="profile-name" id="prof-name">Your Name</div>
         <div class="profile-since" id="prof-since">Sober since today</div>
         <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
+        <div style="margin-top:6px;font-size:12px;color:var(--accent);cursor:pointer;display:none" id="remove-photo-link" onclick="removeProfilePhoto()">Remove photo</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Personalize</div></div>
@@ -1796,7 +1801,7 @@ body{display:flex;justify-content:center}
 
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
-  name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,
+  name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   notifiedMilestones:[],lastProNudgeDate:'',
@@ -2750,12 +2755,64 @@ function initApp(){
 function updateUserUI(){
   const n=S.name||'You';
   const init=n[0].toUpperCase();
-  if(document.getElementById('prof-av'))document.getElementById('prof-av').textContent=init;
-  if(document.getElementById('compose-av'))document.getElementById('compose-av').textContent=init;
+  const profAvInitial=document.getElementById('prof-av-initial');
+  const profAv=document.getElementById('prof-av');
+  const composeAv=document.getElementById('compose-av');
+  if(profAvInitial)profAvInitial.textContent=init;
+  if(profAv)profAv.style.backgroundImage=S.profilePhoto?`url(${S.profilePhoto})`:'';
+  if(profAvInitial)profAvInitial.style.display=S.profilePhoto?'none':'';
+  if(composeAv){
+    if(S.profilePhoto){
+      composeAv.textContent='';
+      composeAv.style.backgroundImage=`url(${S.profilePhoto})`;
+      composeAv.style.backgroundSize='cover';
+      composeAv.style.backgroundPosition='center';
+    }else{
+      composeAv.style.backgroundImage='';
+      composeAv.textContent=init;
+    }
+  }
+  const removeLink=document.getElementById('remove-photo-link');
+  if(removeLink)removeLink.style.display=S.profilePhoto?'block':'none';
   if(document.getElementById('prof-name'))document.getElementById('prof-name').textContent=n;
   const sd=S.startDate?new Date(S.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'today';
   if(document.getElementById('prof-since'))document.getElementById('prof-since').textContent=`${capitalize(recoveryTerm())} since ${sd}`;
   updateTierUI();
+}
+
+function openProfilePhotoPicker(){
+  document.getElementById('profile-photo-input').click();
+}
+function handleProfilePhotoSelected(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  if(!file.type.startsWith('image/')){appInfo('Photo','Please choose an image file.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const maxDim=300;
+      let w=img.width,h=img.height;
+      if(w>h){if(w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}}
+      else{if(h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      S.profilePhoto=canvas.toDataURL('image/jpeg',0.82);
+      save();
+      updateUserUI();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function removeProfilePhoto(){
+  appConfirm('Remove your profile photo? You can always add a new one later.',()=>{
+    S.profilePhoto='';
+    save();
+    updateUserUI();
+  });
 }
 
 function getDays(){

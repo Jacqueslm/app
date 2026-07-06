@@ -306,22 +306,16 @@ body{display:flex;justify-content:center}
 <!-- PREVIEW (shown before the mandatory account gate) -->
 <div id="preview-gate" class="ob">
   <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div>
-  <h1>Change Is A Choice</h1>
+  <h1>Turn Someday<br>Into Day One</h1>
   <p>No Pressure. No Worries. Just Progress. One Day At A Time.</p>
-  <div style="width:100%;margin-bottom:14px">
-    <div class="preview-feat"><i class="ti ti-check"></i><span>A simple daily lesson, one step at a time</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Track your streak — honest progress, no gimmicks</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Nova is here whenever you need to talk</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Your data stays private, always</span></div>
-  </div>
-  <button class="ob-btn" onclick="proceedFromPreview('signup')">Get Started</button>
+  <button class="ob-btn" onclick="proceedFromPreview('signup')">Sign Up</button>
   <button class="ob-btn outline" onclick="proceedFromPreview('login')">I already have an account</button>
 </div>
 
 <!-- MANDATORY ACCOUNT GATE -->
 <div id="auth-gate" class="ob" style="display:none">
   <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div>
-  <h1>Change Is A Choice</h1>
+  <h1>Turn Someday<br>Into Day One</h1>
   <p>No Pressure. No Worries. Just Progress. One Day At A Time.<br><br>Create an account or log in to continue — your data syncs to it automatically.</p>
   <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
     <button class="nova-mode active" id="gate-tab-login" onclick="setGateMode('login')">Log In</button>
@@ -5910,14 +5904,14 @@ function restartOnboarding(){
 
     document.getElementById('main-app').style.display='none';
     document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
-    document.getElementById('obs0').classList.add('on');
+    document.getElementById('obs1').classList.add('on');
     ['od0','od1','od2','od3','od4'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.classList.remove('on');
     });
-    const dot0=document.getElementById('od0');
-    if(dot0)dot0.classList.add('on');
-    obStep=0;
+    const dot1=document.getElementById('od1');
+    if(dot1)dot1.classList.add('on');
+    obStep=1;
     document.getElementById('onboarding').style.display='flex';
   });
 }
@@ -6076,6 +6070,7 @@ function enterApp(){
   }else{
     document.getElementById('onboarding').style.display='flex';
     document.getElementById('ob-date').value=new Date().toISOString().split('T')[0];
+    obNext(1);
   }
 }
 

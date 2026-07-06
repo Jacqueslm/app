@@ -625,8 +625,29 @@ body{display:flex;justify-content:center}
       </div>
     </div>
 
-    <!-- COMMUNITY -->
+    <!-- ROOMS LIST -->
+    <div id="s-rooms" class="scr">
+      <div class="sec">
+        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--acc-t);line-height:1.5">
+          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
+        </div>
+        <div id="your-rooms-wrap" style="display:none">
+          <div class="sec-hd" style="margin-bottom:8px">Your rooms</div>
+          <div id="your-rooms-list" style="margin-bottom:18px"></div>
+        </div>
+        <div class="sec-hd" style="margin-bottom:8px">All rooms</div>
+        <div id="all-rooms-list"></div>
+      </div>
+    </div>
+
+    <!-- COMMUNITY (single room) -->
     <div id="s-community" class="scr">
+      <div class="sec" style="padding-bottom:0">
+        <div class="setting-row" style="border-radius:10px;margin-bottom:12px" onclick="switchTo('rooms');actBn('bn-plans')">
+          <i class="ti ti-chevron-right" style="transform:rotate(180deg)"></i>
+          <div class="setting-row-txt"><p id="room-title">Room</p><span id="room-sub"></span></div>
+        </div>
+      </div>
       <div class="compose">
         <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:12px">J</div>
         <input id="postInput" placeholder="Write a private reflection..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
@@ -634,34 +655,12 @@ body{display:flex;justify-content:center}
       </div>
       <div class="sec" style="padding-top:14px">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--acc-t);line-height:1.5">
-          This is your private space — reflections you write here stay on this device and aren't shared with other users yet. Write with the same honesty you'd want to read from someone else.
+          This is your private space — reflections you write here stay on this device (and sync to your account if you're signed in) but aren't shown to other users. Write with the same honesty you'd want to read from someone else.
         </div>
         <div id="userPostList"></div>
         <div class="sec-hd" style="margin:18px 0 8px">Featured recovery stories</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">Curated stories from the recovery community, shown to everyone — not a live feed of other app users.</div>
-        <div id="postList">
-          <div class="post">
-            <div class="ph"><div class="av av-t">SM</div><div><div class="pu">Sarah M.</div><div class="pm">90 days social-media-free · 2h ago</div></div></div>
-            <div class="mile-tag"><i class="ti ti-trophy" style="font-size:12px"></i> 90-day milestone</div>
-            <div class="pb">Just hit 90 days off the apps! Three months ago I couldn't imagine getting through a single evening without checking my phone every five minutes. If you're on day 1 or day 10, keep going. It gets so much easier.</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>47</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>12 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
-          </div>
-          <div class="post">
-            <div class="ph"><div class="av av-c">MK</div><div><div class="pu">Mike K.</div><div class="pm">14 days sober · 5h ago</div></div></div>
-            <div class="pb">Went to a wedding, everyone was drinking. Stayed strong and left early. Day 14 still intact. The urge passes if you just hold on long enough.</div>
-            <div class="pacts"><button class="pa liked" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>31</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>8 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
-          </div>
-          <div class="post">
-            <div class="ph"><div class="av av-b">AL</div><div><div class="pu">Alex L.</div><div class="pm">6 months clean · 1d ago</div></div></div>
-            <div class="pb">6 months. I got my life back. My kids smile at me differently. My mornings are clear. You don't have to do this alone — this community is real.</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>102</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>24 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
-          </div>
-          <div class="post">
-            <div class="ph"><div class="av av-o">TR</div><div><div class="pu">Taylor R.</div><div class="pm">3 days spend-free · 3h ago</div></div></div>
-            <div class="pb">Day 3 and honestly terrified I'll cave the second I feel stressed. Every hour feels like a mountain. But I found this app and I'm not quitting. Anyone else on their first week?</div>
-            <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>19</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>5 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
-          </div>
-        </div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">Curated stories for this room, shown to everyone here — not a live feed of other app users.</div>
+        <div id="postList"></div>
       </div>
     </div>
 
@@ -1299,9 +1298,9 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
         <div class="toggle-sw" id="applock-toggle"><div class="toggle-knob"></div></div>
       </div>
-      <div class="setting-row" onclick="switchTo('community');actBn('bn-plans')">
+      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-plans')">
         <i class="ti ti-users"></i>
-        <div class="setting-row-txt"><p>Stories</p><span>Read recovery stories from others</span></div>
+        <div class="setting-row-txt"><p>Rooms</p><span>Recovery stories, grouped by focus area</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="shareMyMilestone()">
@@ -1874,6 +1873,11 @@ function load(){
     S.lessonProgress[S.currentAddiction]=S.currentDay||1;
   }
   if(!S.notifiedDay30Tracks)S.notifiedDay30Tracks=[];
+  // Migrate private reflections written before Rooms existed - tag them with
+  // whatever the user's focus was at the time so they still show up somewhere.
+  (S.communityPosts||[]).forEach(p=>{
+    if(!p.category)p.category=S.currentAddiction||'Other';
+  });
 }
 function getLessonDayFor(addiction){
   if(!addiction)return 1;
@@ -4110,11 +4114,108 @@ function renderCrvChart(){
     chart.innerHTML+=`<div class="bar-col"><div class="bar-fill" style="height:${h}%;background:${isToday?'var(--green)':'var(--accent)'};opacity:${data[i]?1:0.2}"></div><div class="bar-lbl">${days[d.getDay()]}</div></div>`;
   });
 }
-// ─── COMMUNITY ────────────────────────────────────────────────────────────────
+// ─── ROOMS / COMMUNITY ────────────────────────────────────────────────────────
+// Curated stories, grouped by focus area so nobody has to read (or be judged
+// against) a struggle that isn't theirs. This content ships inside the app
+// itself - no network fetch - so every room is available offline and never
+// changes on its own. Posts a user writes save locally the instant they hit
+// send (and sync to their account when online) but are never shown to anyone
+// else - there's no live cross-user feed here.
+const ROOM_STORIES={
+  'Porn & Sex':[
+    {name:'James T.',tag:'60 days clean · 3h ago',body:"60 days clean today. The hardest part wasn't the urges, it was the shame keeping me isolated. Talking about it honestly, even just in an app, took the power out of the secret.",likes:58},
+    {name:'Chris D.',tag:'21 days clean · 6h ago',body:'Deleted every trigger and blocked what I needed to block. Three weeks in and mornings finally feel like mine instead of something controlling me.',likes:34},
+    {name:'Morgan P.',tag:'120 days clean · 1d ago',body:"Four months. My relationship is healing because I stopped lying to the people I love. If you're white-knuckling day one, it does get easier.",likes:91},
+  ],
+  'Alcohol':[
+    {name:'Dana R.',tag:'45 days sober · 2h ago',body:"45 days. Went to my best friend's wedding and didn't touch a drop. Danced all night with a completely clear head. Didn't think that was possible six months ago.",likes:63},
+    {name:'Tom H.',tag:'200 days sober · 5h ago',body:'200 days sober today. My liver enzymes are back in normal range — my doctor was thrilled. Physical healing is real, it just takes time.',likes:88},
+    {name:'Priya S.',tag:'10 days sober · 8h ago',body:'Day 10. The insomnia is rough but the mental fog is already lifting. One day at a time really is the only way I can think about this.',likes:27},
+  ],
+  'Smoking':[
+    {name:'Ben O.',tag:'90 days smoke-free · 3h ago',body:'3 months without a cigarette. Climbed a flight of stairs yesterday without getting winded for the first time in years.',likes:52},
+    {name:'Lena K.',tag:'14 days smoke-free · 7h ago',body:'Two weeks in and the cravings still hit hard after meals, but they get shorter every time. Chewing gum has been a lifesaver.',likes:22},
+    {name:'Marcus J.',tag:'365 days smoke-free · 1d ago',body:'One year smoke-free today. Saved enough money to take my kids on a real vacation. Every craving I said no to added up to this.',likes:114},
+  ],
+  'Substances':[
+    {name:'Angela F.',tag:'30 days clean · 4h ago',body:"30 days clean. Detox was the hardest thing I've ever done, but I had support and made it through. Asking for help wasn't weakness, it was the only way.",likes:71},
+    {name:'Derek W.',tag:'180 days clean · 9h ago',body:"6 months clean. Rebuilding trust with my family one small promise kept at a time. It's slow, but it's real progress.",likes:95},
+    {name:'Nicole B.',tag:'7 days clean · 12h ago',body:'One week clean. Still shaky and my sleep is a mess, but I made it through the hardest physical part. Grateful for every hour.',likes:33},
+  ],
+  'Gambling':[
+    {name:'Steve M.',tag:'60 days gambling-free · 3h ago',body:'2 months without placing a single bet. Blocked every gambling site and app, and gave my card details to my wife to hold. Whatever it takes.',likes:47},
+    {name:'Rachel T.',tag:'300 days gambling-free · 6h ago',body:"300 days. Paid off the debt that almost cost me my marriage. The urge to 'win it back' finally went quiet after the first few months.",likes:102},
+    {name:'Carlos D.',tag:'5 days gambling-free · 10h ago',body:'Day 5. Almost opened the app during a bad moment last night. Used the SOS tool instead and it actually helped. One craving beaten is still a win.',likes:19},
+  ],
+  'Social media':[
+    {name:'Sarah M.',tag:'90 days social-media-free · 2h ago',body:"Just hit 90 days off the apps! Three months ago I couldn't imagine getting through a single evening without checking my phone every five minutes. It gets so much easier.",likes:47},
+    {name:'Jordan A.',tag:'21 days social-media-free · 5h ago',body:"3 weeks off Instagram. My anxiety about how I look and what people think has dropped so much. Didn't expect that.",likes:29},
+    {name:'Wei L.',tag:'45 days social-media-free · 1d ago',body:'45 days. Started reading books again for the first time since college. Turns out I had a lot more free time than I thought.',likes:41},
+  ],
+  'Gaming':[
+    {name:'Alex P.',tag:'30 days gaming-free · 4h ago',body:"30 days without logging in. Didn't realize how many hours I was losing until I actually had them back. Started exercising again.",likes:36},
+    {name:'Tyler B.',tag:'100 days gaming-free · 8h ago',body:'100 days. Grades are up, actually seeing friends in person again instead of just voice chat. No regrets uninstalling.',likes:58},
+    {name:'Sam K.',tag:'10 days gaming-free · 11h ago',body:'Day 10, and honestly the boredom is the hardest part. Trying to fill it with anything else instead of caving.',likes:15},
+  ],
+  'Food / Binging':[
+    {name:'Taylor R.',tag:'3 days binge-free · 3h ago',body:"Day 3 and honestly terrified I'll cave the second I feel stressed. Every hour feels like a mountain. But I found this app and I'm not quitting.",likes:19},
+    {name:'Monica G.',tag:'60 days binge-free · 6h ago',body:'2 months. Learning to actually feel my emotions instead of eating them away. Therapy plus this app has made a real difference.',likes:44},
+    {name:'Diego F.',tag:'14 days binge-free · 1d ago',body:'Two weeks. Stopped weighing myself every day — it was making everything worse. Focusing on how I feel instead of a number.',likes:26},
+  ],
+  'Shopping / Spending':[
+    {name:'Grace L.',tag:'30 days spend-free · 3h ago',body:'30 days without an impulse purchase. Deleted my saved cards from every app. My bank account has never looked better.',likes:38},
+    {name:'Omar H.',tag:'90 days spend-free · 7h ago',body:"3 months. Paid off a credit card I thought I'd be stuck with forever. The urge to buy something when I'm stressed is still there, but I recognize it now.",likes:53},
+    {name:'Elise W.',tag:'7 days spend-free · 10h ago',body:"One week in. Unsubscribed from every retail email list — it's helped more than I expected.",likes:17},
+  ],
+  'Work':[
+    {name:'Priya N.',tag:'6 weeks in · 4h ago',body:"Six weeks of eating lunch away from my desk every single day. Sounds small, but it's the first boundary I've held in years.",likes:31},
+    {name:'Ahmed K.',tag:'45 days in · 9h ago',body:'45 days without checking email after dinner. My kids noticed before I did that I was actually present again.',likes:49},
+    {name:'Liz M.',tag:'Day 10 · 12h ago',body:"Day 10 of not opening my laptop on Saturday or Sunday. It felt wrong at first, like I was falling behind. I wasn't.",likes:22},
+  ],
+  'Other':[
+    {name:'Jamie R.',tag:'21 days steady · 5h ago',body:"21 days of choosing the harder right thing over the easier wrong thing. Whatever you're working on, it's worth it.",likes:24},
+    {name:'Casey V.',tag:'90 days steady · 9h ago',body:"3 months steady. Recovery doesn't fit one neat label some days — it's just choosing better, one hour at a time.",likes:37},
+    {name:'Robin T.',tag:'5 days steady · 1d ago',body:"Day 5. New to this and still figuring out what my triggers even are. Glad this space exists for people who don't fit one category.",likes:14},
+  ],
+};
+const ROOM_AV_CLASSES=['av-t','av-c','av-b','av-o'];
+
+let currentRoom=null;
+
+function renderRoomsList(){
+  const yourWrap=document.getElementById('your-rooms-wrap');
+  const yourList=document.getElementById('your-rooms-list');
+  const allList=document.getElementById('all-rooms-list');
+  const mine=S.selectedAddictions||[];
+  const rowHtml=(name)=>{
+    const emoji=CATEGORY_EMOJI[name]||'✨';
+    const desc=CATEGORY_DESCRIPTIONS[name]||CATEGORY_DESCRIPTIONS['Other'];
+    return `<div class="setting-row" onclick="openRoom('${name.replace(/'/g,"\\'")}')">
+      <div style="font-size:20px">${emoji}</div>
+      <div class="setting-row-txt"><p>${name==='Other'?'Other / general recovery':name}</p><span>${desc}</span></div>
+      <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+    </div>`;
+  };
+  if(mine.length){
+    yourWrap.style.display='block';
+    yourList.innerHTML=mine.map(rowHtml).join('');
+  }else{
+    yourWrap.style.display='none';
+  }
+  allList.innerHTML=Object.keys(CATEGORY_EMOJI).filter(name=>!mine.includes(name)).map(rowHtml).join('');
+  renderIcons(document.getElementById('s-rooms'));
+}
+
+function openRoom(category){
+  currentRoom=category;
+  switchTo('community');
+  actBn('bn-plans');
+}
+
 function submitPost(){
   const inp=document.getElementById('postInput');
   const txt=inp.value.trim();if(!txt)return;
-  S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0});
+  S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0,category:currentRoom||S.currentAddiction||'Other'});
   save();
   inp.value='';
   renderCommunityPosts();
@@ -4137,16 +4238,39 @@ function reportPost(btn){
   });
 }
 function renderCommunityPosts(){
+  const room=currentRoom||S.currentAddiction||'Other';
+  const titleEl=document.getElementById('room-title');
+  const subEl=document.getElementById('room-sub');
+  if(titleEl)titleEl.textContent=`${CATEGORY_EMOJI[room]||'✨'} ${room==='Other'?'Other / general recovery':room}`;
+  if(subEl)subEl.textContent='Back to Rooms';
+
   const container=document.getElementById('userPostList');
-  if(!container)return;
-  container.innerHTML='';
-  S.communityPosts.forEach((p,idx)=>{
-    const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
-    const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
-    div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days ${recoveryTerm()} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
-    container.appendChild(div);
-  });
-  renderIcons(container);
+  if(container){
+    container.innerHTML='';
+    const roomTerm=RECOVERY_TERMS[room]||'sober';
+    S.communityPosts.forEach((p,idx)=>{
+      if((p.category||'Other')!==room)return;
+      const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
+      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+      container.appendChild(div);
+    });
+  }
+
+  const roomContainer=document.getElementById('postList');
+  if(roomContainer){
+    const stories=ROOM_STORIES[room]||[];
+    roomContainer.innerHTML=stories.map((s,i)=>{
+      const initials=s.name.split(' ').map(w=>w[0]).join('').toUpperCase();
+      const avClass=ROOM_AV_CLASSES[i%ROOM_AV_CLASSES.length];
+      return `<div class="post">
+        <div class="ph"><div class="av ${avClass}">${initials}</div><div><div class="pu">${s.name}</div><div class="pm">${s.tag}</div></div></div>
+        <div class="pb">${s.body}</div>
+        <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${s.likes}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+      </div>`;
+    }).join('');
+  }
+  renderIcons(document.getElementById('s-community'));
 }
 
 // ─── TIMELINE ─────────────────────────────────────────────────────────────────
@@ -5425,14 +5549,14 @@ Address the interactions of their unique blueprint and assign structured daily r
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
-  community:'s-community',timeline:'s-timeline',progress:'s-progress',
+  rooms:'s-rooms',community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools'
 };
-const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',community:'Stories',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
+const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
@@ -5460,6 +5584,7 @@ function switchTo(id){
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){viewingDay=null;renderTodayLesson();}
+  if(id==='rooms'){renderRoomsList();}
   if(id==='community'){renderCommunityPosts();}
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}

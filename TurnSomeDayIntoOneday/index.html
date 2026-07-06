@@ -5447,7 +5447,12 @@ function switchTo(id){
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
   document.getElementById('scr-title').textContent=TITLES[id]||id;
-  document.getElementById('screens').scrollTop=0;
+  const screensEl=document.getElementById('screens');
+  screensEl.scrollTop=0;
+  // Some mobile browsers (notably iOS Safari) haven't finished laying out the
+  // newly-visible screen yet at this point, so an immediate scrollTop reset can
+  // silently no-op. Re-apply it after layout settles.
+  requestAnimationFrame(()=>{screensEl.scrollTop=0;});
   // refresh screens
   if(id==='progress'){buildProgress();updateStats();}
   if(id==='timeline'){buildTimeline();}

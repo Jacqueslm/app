@@ -101,6 +101,19 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+app.post('/api/auth/change-password', loginLimiter, requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  const user = db.getUserById(req.userId);
+  if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  }
+  db.updatePassword(req.userId, hashPassword(newPassword));
+  res.json({ ok: true });
+});
+
 app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });

@@ -1625,10 +1625,28 @@ body{display:flex;justify-content:center}
       <div class="sos-sub">Signed in as <strong id="auth-current-email"></strong>. Your data syncs to this account automatically.</div>
       <button class="ob-btn" style="margin-top:8px" onclick="manualSync()">Sync now</button>
       <button class="ob-btn outline" style="margin-top:8px" onclick="exportAccountData()">Export my data</button>
+      <button class="ob-btn outline" style="margin-top:8px" onclick="closeAuthModal();openChangePasswordModal()">Change password</button>
       <button class="ob-btn outline" style="margin-top:8px;color:#E24B4A;border-color:#E24B4A" onclick="signOutAccount()">Sign out</button>
       <button class="ob-btn outline" style="margin-top:16px;color:#E24B4A;border-color:#E24B4A" onclick="deleteAccountFlow()">Delete my account</button>
     </div>
     <button class="sos-close" onclick="closeAuthModal()">Close</button>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="sos-modal" id="change-password-modal" onclick="if(event.target===this)closeChangePasswordModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Change password</div>
+    <div class="sos-sub">Your new password takes effect immediately.</div>
+    <div class="ob-label" style="text-align:left;margin-top:4px">Current password</div>
+    <input class="ob-input" id="cp-current" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">New password</div>
+    <input class="ob-input" id="cp-new" type="password" placeholder="At least 8 characters" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="ob-label" style="text-align:left">Confirm new password</div>
+    <input class="ob-input" id="cp-confirm" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="reset-date-error" id="cp-error">&nbsp;</div>
+    <button class="ob-btn" style="margin-top:4px" onclick="submitChangePassword()">Save new password</button>
+    <button class="sos-close" onclick="closeChangePasswordModal()">Cancel</button>
   </div>
 </div>
 
@@ -5910,6 +5928,36 @@ function openAuthModal(){
   document.getElementById('auth-modal').classList.add('open');
 }
 function closeAuthModal(){document.getElementById('auth-modal').classList.remove('open');}
+
+function openChangePasswordModal(){
+  document.getElementById('cp-current').value='';
+  document.getElementById('cp-new').value='';
+  document.getElementById('cp-confirm').value='';
+  document.getElementById('cp-error').textContent=' ';
+  document.getElementById('change-password-modal').classList.add('open');
+}
+function closeChangePasswordModal(){document.getElementById('change-password-modal').classList.remove('open');}
+async function submitChangePassword(){
+  const currentPassword=document.getElementById('cp-current').value;
+  const newPassword=document.getElementById('cp-new').value;
+  const confirmPassword=document.getElementById('cp-confirm').value;
+  const errEl=document.getElementById('cp-error');
+  if(!currentPassword||!newPassword){errEl.textContent='Enter your current and new password.';return;}
+  if(newPassword.length<8){errEl.textContent='New password must be at least 8 characters.';return;}
+  if(newPassword!==confirmPassword){errEl.textContent='New passwords do not match.';return;}
+  try{
+    const res=await fetch('/api/auth/change-password',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({currentPassword,newPassword})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){errEl.textContent=data.error||'Could not change your password.';return;}
+    closeChangePasswordModal();
+    appInfo('Password changed','Your password has been updated.');
+  }catch(e){
+    errEl.textContent='Could not reach the server. Check your connection and try again.';
+  }
+}
 
 async function pushStateToServer(){
   if(!S.accountEmail)return;

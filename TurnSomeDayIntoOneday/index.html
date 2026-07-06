@@ -361,7 +361,6 @@ body{display:flex;justify-content:center}
   </div>
   <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
-  <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
@@ -2638,6 +2637,33 @@ function obBack(n){
   obStep=n;
 }
 
+// Lets the phone/browser back button step back through onboarding one screen at
+// a time (matching the in-screen Back buttons) instead of exiting or reloading
+// the app, which used to look like the whole thing had started over.
+const OB_PREV_STEP={2:1,'2_5':2,3:'2_5',4:3};
+let obBackTrapArmed=false;
+function handleOnboardingPopstate(){
+  if(document.getElementById('onboarding').style.display!=='flex')return;
+  const prev=OB_PREV_STEP[obStep];
+  if(prev===undefined){
+    obBackTrapArmed=false;
+    window.removeEventListener('popstate',handleOnboardingPopstate);
+    return;
+  }
+  obBack(prev);
+  try{history.pushState({tsidOnboarding:true},'');}catch(e){}
+}
+function armOnboardingBackTrap(){
+  if(obBackTrapArmed)return;
+  obBackTrapArmed=true;
+  try{history.pushState({tsidOnboarding:true},'');}catch(e){}
+  window.addEventListener('popstate',handleOnboardingPopstate);
+}
+function disarmOnboardingBackTrap(){
+  obBackTrapArmed=false;
+  window.removeEventListener('popstate',handleOnboardingPopstate);
+}
+
 function toggleAddiction(element,name){
   element.classList.toggle('sel');
   if(S.selectedAddictions.includes(name)){
@@ -2749,6 +2775,7 @@ function finishOnboard(){
   if(!S.startDate)S.startDate=new Date().toISOString();
   if(!S.currentAddiction)S.currentAddiction=S.selectedAddictions[0]||'';
   save();
+  disarmOnboardingBackTrap();
   document.getElementById('onboarding').style.display='none';
   document.getElementById('main-app').style.display='flex';
   initApp();
@@ -6078,6 +6105,7 @@ function restartOnboarding(){
     if(dot1)dot1.classList.add('on');
     obStep=1;
     document.getElementById('onboarding').style.display='flex';
+    armOnboardingBackTrap();
   });
 }
 
@@ -6236,6 +6264,7 @@ function enterApp(){
     document.getElementById('onboarding').style.display='flex';
     document.getElementById('ob-date').value=new Date().toISOString().split('T')[0];
     obNext(1);
+    armOnboardingBackTrap();
   }
 }
 

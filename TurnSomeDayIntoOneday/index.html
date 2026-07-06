@@ -306,23 +306,16 @@ body{display:flex;justify-content:center}
 <!-- PREVIEW (shown before the mandatory account gate) -->
 <div id="preview-gate" class="ob">
   <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div>
-  <h1>Change Is A Choice</h1>
+  <h1>Turn Someday<br>Into Day One</h1>
   <p>No Pressure. No Worries. Just Progress. One Day At A Time.</p>
-  <div style="width:100%;margin-bottom:14px">
-    <div class="preview-feat"><i class="ti ti-check"></i><span>A simple daily lesson, one step at a time</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Track your streak — honest progress, no gimmicks</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Nova is here whenever you need to talk</span></div>
-    <div class="preview-feat"><i class="ti ti-check"></i><span>Your data stays private, always</span></div>
-  </div>
-  <button class="ob-btn" onclick="proceedFromPreview('signup')">Get Started</button>
+  <button class="ob-btn" onclick="proceedFromPreview('signup')">Sign Up</button>
   <button class="ob-btn outline" onclick="proceedFromPreview('login')">I already have an account</button>
 </div>
 
 <!-- MANDATORY ACCOUNT GATE -->
 <div id="auth-gate" class="ob" style="display:none">
-  <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div>
+  <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div>
   <h1>Turn Someday<br>Into Day One</h1>
-  <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.<br><br>Create an account or log in to continue — your data syncs to it automatically.</p>
   <div class="nova-modes" style="justify-content:center;margin-bottom:16px">
     <button class="nova-mode active" id="gate-tab-login" onclick="setGateMode('login')">Log In</button>
     <button class="nova-mode" id="gate-tab-signup" onclick="setGateMode('signup')">Sign Up</button>
@@ -335,7 +328,7 @@ body{display:flex;justify-content:center}
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
 </div>
 
-<!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-brain" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
+<!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
 <div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
 
 <!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
@@ -480,7 +473,7 @@ body{display:flex;justify-content:center}
   </div>
 
   <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
-    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-brain" style="font-size:20px;color:#fff"></i></div>
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-handshake" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Nova</div><div style="font-size:12px;color:var(--tm)">Your AI recovery companion, right now</div></div>
     <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
@@ -491,7 +484,7 @@ body{display:flex;justify-content:center}
 <!-- NOVA AI -->
 <div id="s-nova" class="scr">
   <div class="nova-hdr">
-    <div class="nova-av"><i class="ti ti-brain" style="font-size:22px;color:#fff"></i></div>
+    <div class="nova-av"><i class="ti ti-handshake" style="font-size:22px;color:#fff"></i></div>
     <div>
       <div style="display:flex;align-items:center;gap:6px">
         <span class="nova-name">Nova</span>
@@ -1226,7 +1219,7 @@ body{display:flex;justify-content:center}
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openVoiceModal()">
-        <i class="ti ti-brain"></i>
+        <i class="ti ti-handshake"></i>
         <div class="setting-row-txt"><p>Nova's presence</p><span id="voice-row-sub">Neutral</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
@@ -1334,7 +1327,7 @@ body{display:flex;justify-content:center}
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
-      <div class="bn-rel"><i class="ti ti-brain"></i></div><span>Nova</span>
+      <div class="bn-rel"><i class="ti ti-handshake"></i></div><span>Nova</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
@@ -1351,7 +1344,7 @@ body{display:flex;justify-content:center}
       <div class="sos-opt-info"><p style="color:#E24B4A">Call or text 988</p><span>Suicide &amp; Crisis Lifeline — free, confidential, 24/7</span></div>
     </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
-      <i class="ti ti-brain" style="color:var(--accent)"></i>
+      <i class="ti ti-handshake" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
     </div>
     <div class="sos-opt" onclick="openTriggeredFlow()">
@@ -5910,14 +5903,14 @@ function restartOnboarding(){
 
     document.getElementById('main-app').style.display='none';
     document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
-    document.getElementById('obs0').classList.add('on');
+    document.getElementById('obs1').classList.add('on');
     ['od0','od1','od2','od3','od4'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.classList.remove('on');
     });
-    const dot0=document.getElementById('od0');
-    if(dot0)dot0.classList.add('on');
-    obStep=0;
+    const dot1=document.getElementById('od1');
+    if(dot1)dot1.classList.add('on');
+    obStep=1;
     document.getElementById('onboarding').style.display='flex';
   });
 }
@@ -6076,6 +6069,7 @@ function enterApp(){
   }else{
     document.getElementById('onboarding').style.display='flex';
     document.getElementById('ob-date').value=new Date().toISOString().split('T')[0];
+    obNext(1);
   }
 }
 

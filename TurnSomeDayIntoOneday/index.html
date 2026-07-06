@@ -345,13 +345,12 @@ body{display:flex;justify-content:center}
 
   <div class="ob-label" style="text-align:left">Gender identity</div>
   <select id="ob-gender" class="ob-input" style="margin-bottom:20px">
+    <option value="" disabled selected>Select</option>
     <option value="Not Specified">Prefer not to say</option>
     <option value="Male">Man</option>
     <option value="Female">Woman</option>
     <option value="Non-Binary">Non-Binary</option>
   </select>
-
-  <div style="font-size:11px;color:#6672a0;margin-bottom:20px">You can update this, and set a relationship status, any time in Profile — some lessons mention a partner, and that lets us tailor them to your situation.</div>
 
   <div class="ob-label">What are you recovering from? (Select all that apply)</div>
   <div class="addiction-grid" id="addGrid">
@@ -1717,7 +1716,8 @@ body{display:flex;justify-content:center}
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Gender identity</div>
     <select id="gender-select" class="ob-input" style="margin-top:12px;color:var(--tp);background:var(--s1);border-color:var(--bdr)" onchange="chooseGender(this.value)">
-      <option value="" disabled>Select...</option>
+      <option value="" disabled selected>Select</option>
+      <option value="Not Specified">Prefer not to say</option>
       <option value="Male">Man</option>
       <option value="Female">Woman</option>
       <option value="Non-Binary">Non-Binary</option>
@@ -5870,7 +5870,7 @@ function saveNameModal(){
 
 function openGenderModal(){
   const sel=document.getElementById('gender-select');
-  sel.value=['Male','Female','Non-Binary'].includes(S.userGender)?S.userGender:'';
+  sel.value=['Male','Female','Non-Binary','Not Specified'].includes(S.userGender)?S.userGender:'';
   document.getElementById('gender-modal').classList.add('open');
 }
 function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}
@@ -5903,7 +5903,7 @@ function restartOnboarding(){
     save();
 
     document.getElementById('ob-name').value='';
-    document.getElementById('ob-gender').value='Not Specified';
+    document.getElementById('ob-gender').value='';
     document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
     const errEl=document.getElementById('obs1-error');
     if(errEl)errEl.textContent='';

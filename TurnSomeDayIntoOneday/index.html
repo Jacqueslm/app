@@ -5661,11 +5661,14 @@ function confirmResetDate(){
   S.startDate=chosen.toISOString();
   S.pledged=false;
   logActivity('relapse_reset');
-  // Suppress today's generic habit-consistency alert - it's a "keep going" momentum
-  // message that has nothing to do with a reset and would otherwise land in the same
-  // batch as the recovery-coaching messages below, reading as a contradictory pile-up
-  // at the most sensitive moment. The reset-specific messages below cover this moment instead.
+  // Suppress today's generic habit-consistency alert and smart-reminder dispatch (the
+  // latter would otherwise see slipToday flip true from the relapse_reset activity just
+  // logged above and fire its own "Today was a hard one" nudge) - neither has anything to
+  // do with a reset and both would otherwise land in the same batch as the recovery-coaching
+  // messages below, reading as a contradictory pile-up at the most sensitive moment. The
+  // reset-specific messages below cover this moment instead.
   S.lastHabitAlertDate=new Date().toDateString();
+  S.lastCandidateNudgeDate=new Date().toDateString();
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
   maybeNovaProNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.`);

@@ -141,7 +141,7 @@ body{display:flex;justify-content:center}
 .nova-badge{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:20px;padding:2px 8px;margin-left:6px}
 .nova-mode-chip{font-size:10px;background:rgba(255,255,255,0.12);color:#c0caff;border-radius:20px;padding:2px 8px}
 .nova-mode-chip.live{background:var(--green-dim);color:var(--green)}
-.chat-area{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:280px}
+.chat-area{padding:14px 16px 20px;display:flex;flex-direction:column;gap:10px;min-height:280px}
 .bub{max-width:85%;border-radius:18px;padding:11px 14px;font-size:14px;line-height:1.55}
 .bub.nova{background:var(--acc);color:var(--acc-t);border-bottom-left-radius:4px;align-self:flex-start}
 .bub.user{background:var(--brand);color:#c0caff;border-bottom-right-radius:4px;align-self:flex-end}
@@ -514,10 +514,12 @@ body{display:flex;justify-content:center}
     <span><strong id="chatsLeft">3</strong> free sessions left today</span>
     <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
   </div>
-  <div style="text-align:center;font-size:10.5px;color:var(--tm);padding:6px 16px;background:var(--s0)">Nova is here to support your journey — not replace real human help</div>
-  <div class="chat-bar">
-    <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
-    <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
+  <div style="position:sticky;bottom:72px;z-index:10">
+    <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Nova is here to support your journey — not replace real human help</div>
+    <div class="chat-bar" style="position:static;bottom:auto">
+      <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
+      <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
+    </div>
   </div>
 </div>
 
@@ -747,7 +749,7 @@ body{display:flex;justify-content:center}
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
             <div>✓ Days 16–30, the rest of your program</div>
-            <div>✓ Unlimited Nova AI chats</div>
+            <div>✓ 100 Nova AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
         </div>
@@ -1194,7 +1196,7 @@ body{display:flex;justify-content:center}
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova Pro coaching</div>
+            <div class="feat y"><i class="ti ti-check"></i>100 Nova AI chats/day</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced recovery tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
@@ -1214,7 +1216,7 @@ body{display:flex;justify-content:center}
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for unlimited time with Nova.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 100 chats a day with Nova.</div>
     </div>
 
     <!-- PROFILE -->
@@ -5545,7 +5547,7 @@ function addBubble(who,text){
   d.style.whiteSpace='pre-wrap';
   d.textContent=text;
   area.appendChild(d);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
@@ -5575,7 +5577,7 @@ function addProPreviewBubble(teaserText){
     <div style="text-align:center"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="this.closest('.bub').remove()">Maybe later</span></div>
   </div>`;
   area.appendChild(d);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
 }
 
 // ─── NOVA SAFETY DISCLAIMER ────────────────────────────────────────────────────
@@ -5627,7 +5629,7 @@ function showTyping(show){
   const area=document.getElementById('chatArea');
   t.style.display=show?'block':'none';
   if(show)area.appendChild(t);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
 }
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
@@ -5641,7 +5643,7 @@ async function sendMsg(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
-    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for unlimited sessions with me. 💜");
+    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 100 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -5688,10 +5690,14 @@ Address the interactions of their unique blueprint and assign structured daily r
       body:JSON.stringify({system:buildSystemPrompt(),messages:msgs})
     });
     if(res.status===429){
-      const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
+      const reply=S.isPro
+        ?"Looks like you've reached today's 100-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
+        :"Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 100 chats a day. 💜";
       S.chatHistory.push({role:'assistant',content:reply});
-      S.chatsLeft=0;
-      document.getElementById('chatsLeft').textContent=0;
+      if(!S.isPro){
+        S.chatsLeft=0;
+        document.getElementById('chatsLeft').textContent=0;
+      }
       save();showTyping(false);addBubble('nova',reply);
       return;
     }
@@ -5947,7 +5953,7 @@ function updateTierUI(){
   const proCta=document.getElementById('pro-cta');
   if(S.isPro){
     badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
-    if(novaLbl)novaLbl.textContent='Pro · Unlimited';
+    if(novaLbl)novaLbl.textContent='Pro · 100/day';
     if(limitBar)limitBar.style.display='none';
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
@@ -5968,7 +5974,13 @@ function updateTierUI(){
 let pinFlow=null,pinBuffer='',pinFirstEntry='';
 
 function toggleAppLock(){
-  openPinFlow(S.pinEnabled?'disable':'setup1');
+  if(S.pinEnabled){
+    openPinFlow('disable');
+    return;
+  }
+  appConfirm('Require a PIN to open the app? You\'ll set a 4-digit PIN on the next screen. This is optional — you can turn it off again any time from here.',()=>{
+    openPinFlow('setup1');
+  });
 }
 
 function setPinTitles(mode){

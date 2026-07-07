@@ -22,6 +22,7 @@ const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
+const PRO_CHAT_LIMIT = 100;
 
 // Stripe webhook signature verification needs the raw request body, so this route is
 // registered with express.raw() before the global express.json() middleware below.
@@ -216,7 +217,10 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   const isPro = user && billing.getBillingStatus(user).isPro;
   const used = db.getChatCount(req.userId, todayUTC());
   if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: 'Daily Nova AI chat limit reached. Upgrade to Pro for unlimited chats.' });
+    return res.status(429).json({ error: `Daily Nova AI chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
+  }
+  if (isPro && used >= PRO_CHAT_LIMIT) {
+    return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });
   }
 
   try {

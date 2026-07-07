@@ -41,6 +41,12 @@
 html,body{height:100%;background:#0f0c29;font-family:var(--f)}
 body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.app.fs-smaller{zoom:0.88}
+.app.fs-bigger{zoom:1.18}
+@supports not (zoom: 1){
+  .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
+  .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
+}
 /* TOPBAR / HEADER */
 .topbar{background:var(--brand);color:#c0caff;padding:10px 16px 6px;display:flex;justify-content:space-between;font-size:12px;flex-shrink:0}
 .hdr{background:var(--brand);padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -61,6 +67,11 @@ body{display:flex;justify-content:center}
 .ob-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);outline:none}
 .ob-input:focus{border-color:var(--green)}
 .ob-input::placeholder{color:#6672a0}
+.dd-btn{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;box-sizing:border-box}
+.dd-btn.placeholder{color:#6672a0}
+.dd-btn i{font-size:14px;color:#6672a0;transform:rotate(90deg);flex-shrink:0}
+.dd-opt{padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp)}
+.dd-opt.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
 .ob-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:var(--f)}
 .ob-btn.outline{background:transparent;border:0.5px solid rgba(255,255,255,0.2);color:#8892c0;margin-top:8px}
 .ob-dots{display:flex;gap:6px;justify-content:center;margin-bottom:28px}
@@ -130,7 +141,7 @@ body{display:flex;justify-content:center}
 .nova-badge{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:20px;padding:2px 8px;margin-left:6px}
 .nova-mode-chip{font-size:10px;background:rgba(255,255,255,0.12);color:#c0caff;border-radius:20px;padding:2px 8px}
 .nova-mode-chip.live{background:var(--green-dim);color:var(--green)}
-.chat-area{padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:280px}
+.chat-area{padding:14px 16px 20px;display:flex;flex-direction:column;gap:10px;min-height:280px}
 .bub{max-width:85%;border-radius:18px;padding:11px 14px;font-size:14px;line-height:1.55}
 .bub.nova{background:var(--acc);color:var(--acc-t);border-bottom-left-radius:4px;align-self:flex-start}
 .bub.user{background:var(--brand);color:#c0caff;border-bottom-right-radius:4px;align-self:flex-end}
@@ -337,27 +348,21 @@ body{display:flex;justify-content:center}
   <input class="ob-input" id="ob-name" placeholder="Your name" type="text" style="margin-bottom: 20px;">
 
   <div class="ob-label" style="text-align:left">Gender identity</div>
-  <select id="ob-gender" class="ob-input" style="margin-bottom:20px">
-    <option value="" disabled selected>Select</option>
-    <option value="Not Specified">Prefer not to say</option>
-    <option value="Male">Man</option>
-    <option value="Female">Woman</option>
-    <option value="Non-Binary">Non-Binary</option>
-  </select>
+  <div class="dd-btn placeholder" id="ob-gender-btn" onclick="openGenderModal('onboarding')">
+    <span id="ob-gender-btn-label">Choose gender</span>
+    <i class="ti ti-chevron-right"></i>
+  </div>
 
-  <div class="ob-label">What are you recovering from? (Select all that apply)</div>
-  <div class="addiction-grid" id="addGrid">
-    <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Smoking')">🚬 Smoking / Vaping</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Substances')">💊 Substances</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
-    <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+  <div class="ob-label" style="text-align:left">Relationship status</div>
+  <div class="dd-btn placeholder" id="ob-relationship-btn" onclick="openRelationshipModal('onboarding')">
+    <span id="ob-relationship-btn-label">Choose relationship</span>
+    <i class="ti ti-chevron-right"></i>
+  </div>
+
+  <div class="ob-label">What are you recovering from?</div>
+  <div class="dd-btn placeholder" id="ob-addiction-btn" onclick="openAddictionModal()">
+    <span id="ob-addiction-btn-label">Choose your focus areas</span>
+    <i class="ti ti-chevron-right"></i>
   </div>
   <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
@@ -509,11 +514,25 @@ body{display:flex;justify-content:center}
     <span><strong id="chatsLeft">3</strong> free sessions left today</span>
     <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
   </div>
-  <div class="chat-bar">
-    <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
-    <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
+  <div style="position:sticky;bottom:72px;z-index:10">
+    <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Nova is here to support your journey — not replace real human help</div>
+    <div class="chat-bar" style="position:static;bottom:auto">
+      <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
+      <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
+    </div>
   </div>
-</div><!-- JOURNAL -->
+</div>
+
+<!-- NOVA SAFETY DISCLAIMER (brief flash on opening Nova) -->
+<div id="nova-disclaimer-flash" style="display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:24px">
+  <div style="max-width:380px;background:var(--s2);border:1px solid var(--bdr);border-radius:16px;padding:22px 20px;text-align:center;position:relative">
+    <div style="position:absolute;top:8px;right:12px;cursor:pointer;color:var(--tm);font-size:20px;padding:4px;line-height:1" onclick="dismissNovaDisclaimer()">&times;</div>
+    <i class="ti ti-alert-triangle" style="font-size:24px;color:var(--accent);margin-bottom:10px"></i>
+    <div style="font-size:13px;color:var(--ts);line-height:1.6">Nova is not a therapist, doctor, or emergency service. It cannot diagnose, treat, or respond to crises. If you ever feel unsafe or in danger, please contact local emergency services or a licensed professional immediately.</div>
+    <div style="font-size:12px;color:var(--accent);margin-top:14px;cursor:pointer" onclick="dontShowNovaDisclaimerAgain()">Don't show this again</div>
+  </div>
+</div>
+<!-- JOURNAL -->
     <div id="s-journal" class="scr">
       <div class="sec">
         <div class="sec-hd">Your journal</div>
@@ -730,7 +749,7 @@ body{display:flex;justify-content:center}
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
             <div>✓ Days 16–30, the rest of your program</div>
-            <div>✓ Unlimited Nova AI chats</div>
+            <div>✓ 100 Nova AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
         </div>
@@ -1177,7 +1196,7 @@ body{display:flex;justify-content:center}
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Unlimited Nova Pro coaching</div>
+            <div class="feat y"><i class="ti ti-check"></i>100 Nova AI chats/day</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced recovery tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
@@ -1197,7 +1216,7 @@ body{display:flex;justify-content:center}
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for unlimited time with Nova.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 100 chats a day with Nova.</div>
     </div>
 
     <!-- PROFILE -->
@@ -1222,7 +1241,7 @@ body{display:flex;justify-content:center}
       </div>
       <div class="setting-row" onclick="openGenderModal()">
         <i class="ti ti-user-circle"></i>
-        <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Not specified</span></div>
+        <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Choose gender</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openVoiceModal()">
@@ -1232,7 +1251,7 @@ body{display:flex;justify-content:center}
       </div>
       <div class="setting-row" onclick="openRelationshipModal()">
         <i class="ti ti-heart"></i>
-        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">In a relationship</span></div>
+        <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">Choose relationship</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openCostModal()">
@@ -1283,6 +1302,16 @@ body{display:flex;justify-content:center}
         <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
         <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
       </div>
+      <div class="setting-row" onclick="requestNotificationPermission()">
+        <i class="ti ti-bell"></i>
+        <div class="setting-row-txt"><p>Reminder sound</p><span id="notif-sound-sub">Tap to enable your phone's notification sound</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="toggleNovaDisclaimer()">
+        <i class="ti ti-alert-triangle"></i>
+        <div class="setting-row-txt"><p>Nova safety reminder</p><span>Brief disclaimer shown when opening Nova</span></div>
+        <div class="toggle-sw on" id="nova-disclaimer-toggle"><div class="toggle-knob"></div></div>
+      </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
         <i class="ti ti-bell" style="color:var(--accent)"></i>
         <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
@@ -1292,6 +1321,11 @@ body{display:flex;justify-content:center}
         <i class="ti ti-moon"></i>
         <div class="setting-row-txt"><p>Dark mode</p><span>Follows system setting by default</span></div>
         <div class="toggle-sw" id="dark-toggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="setting-row" onclick="openFontSizeModal()">
+        <i class="ti ti-text-size"></i>
+        <div class="setting-row-txt"><p>Text size</p><span id="fontsize-row-sub">Default</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleAppLock()">
         <i class="ti ti-lock"></i>
@@ -1315,7 +1349,7 @@ body{display:flex;justify-content:center}
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec">
-        <button class="reset-btn" onclick="resetApp()">Reset sobriety date</button>
+        <button class="reset-btn" onclick="resetApp()">Reset Recovery</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Corrects your start date and streak. Nothing else changes.</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1665,7 +1699,7 @@ body{display:flex;justify-content:center}
 <!-- RESET SOBRIETY DATE MODAL -->
 <div class="sos-modal" id="reset-date-modal" onclick="if(event.target===this)closeResetDate()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">Set your sobriety date</div>
+    <div class="sos-title" style="color:var(--accent)">Reset Recovery</div>
     <div class="sos-sub">Use this to correct a setback or start date — your streak and stats recalculate from here.</div>
     <div class="ob-label" style="text-align:left;margin-top:4px">Date</div>
     <input class="ob-input" id="reset-date-input" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
@@ -1696,11 +1730,14 @@ body{display:flex;justify-content:center}
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Relationship status</div>
     <div class="sos-sub">Some lessons mention a partner — this lets us tailor them to your situation.</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
-      <div class="gender-chip" onclick="chooseRelationshipStatus('in_relationship')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">In a relationship</div>
-      <div class="gender-chip" onclick="chooseRelationshipStatus('married')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Married</div>
-      <div class="gender-chip" onclick="chooseRelationshipStatus('single')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">Single</div>
-      <div class="gender-chip" onclick="chooseRelationshipStatus('complicated')" style="padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:8px;text-align:center;cursor:pointer;font-size:14px;color:var(--tp);">It's complicated</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px" id="relationship-opt-list">
+      <div class="dd-opt" data-value="single" onclick="chooseRelationshipStatus('single')">Single</div>
+      <div class="dd-opt" data-value="in_relationship" onclick="chooseRelationshipStatus('in_relationship')">In a relationship</div>
+      <div class="dd-opt" data-value="married" onclick="chooseRelationshipStatus('married')">Married</div>
+      <div class="dd-opt" data-value="divorced" onclick="chooseRelationshipStatus('divorced')">Divorced</div>
+      <div class="dd-opt" data-value="separated" onclick="chooseRelationshipStatus('separated')">Separated</div>
+      <div class="dd-opt" data-value="complicated" onclick="chooseRelationshipStatus('complicated')">Complicated</div>
+      <div class="dd-opt" data-value="not_specified" onclick="chooseRelationshipStatus('not_specified')">Prefer not to say</div>
     </div>
     <button class="sos-close" style="margin-top:12px" onclick="closeRelationshipModal()">Cancel</button>
   </div>
@@ -1720,14 +1757,35 @@ body{display:flex;justify-content:center}
 <div class="sos-modal" id="gender-modal" onclick="if(event.target===this)closeGenderModal()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Gender identity</div>
-    <select id="gender-select" class="ob-input" style="margin-top:12px;color:var(--tp);background:var(--s1);border-color:var(--bdr)" onchange="chooseGender(this.value)">
-      <option value="" disabled selected>Select</option>
-      <option value="Not Specified">Prefer not to say</option>
-      <option value="Male">Man</option>
-      <option value="Female">Woman</option>
-      <option value="Non-Binary">Non-Binary</option>
-    </select>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px" id="gender-opt-list">
+      <div class="dd-opt" data-value="Male" onclick="chooseGender('Male')">Male</div>
+      <div class="dd-opt" data-value="Female" onclick="chooseGender('Female')">Female</div>
+      <div class="dd-opt" data-value="Non-Binary" onclick="chooseGender('Non-Binary')">Non-Binary</div>
+      <div class="dd-opt" data-value="Not Specified" onclick="chooseGender('Not Specified')">Prefer not to say</div>
+    </div>
     <button class="sos-close" style="margin-top:12px" onclick="closeGenderModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- ADDICTION PICKER MODAL (onboarding, multi-select) -->
+<div class="sos-modal" id="addiction-modal" onclick="if(event.target===this)closeAddictionModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">What are you recovering from?</div>
+    <div class="sos-sub">Select all that apply.</div>
+    <div class="addiction-grid" id="addiction-opt-grid">
+      <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Smoking')">🚬 Smoking / Vaping</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Substances')">💊 Substances</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Gambling')">🎰 Gambling</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Social media')">📱 Social media</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Gaming')">🎮 Gaming</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+    </div>
+    <button class="ob-btn" style="margin-top:4px" onclick="closeAddictionModal()">Done</button>
   </div>
 </div>
 
@@ -1761,6 +1819,20 @@ body{display:flex;justify-content:center}
     <div class="sos-sub">Pick which focus area's daily lessons you want to see and complete. Progress in each track is saved separately.</div>
     <div class="addiction-grid" id="lessonTrackGrid" style="margin-top:12px"></div>
     <button class="sos-close" style="margin-top:4px" onclick="closeLessonTrackSwitcher()">Cancel</button>
+  </div>
+</div>
+
+<!-- FONT SIZE MODAL -->
+<div class="sos-modal" id="fontsize-modal" onclick="if(event.target===this)closeFontSizeModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">Text size</div>
+    <div class="sos-sub">Changes text size across the whole app.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px" id="fontsize-opt-list">
+      <div class="dd-opt" data-value="smaller" onclick="chooseFontSize('smaller')">Smaller</div>
+      <div class="dd-opt" data-value="default" onclick="chooseFontSize('default')">Default</div>
+      <div class="dd-opt" data-value="bigger" onclick="chooseFontSize('bigger')">Bigger</div>
+    </div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeFontSizeModal()">Cancel</button>
   </div>
 </div>
 
@@ -1819,9 +1891,10 @@ body{display:flex;justify-content:center}
 
 <script>// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
-  name:'',userGender:'Not Specified',relationshipStatus:null,accountEmail:null,profilePhoto:'',
+  name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
+  novaDisclaimerDismissed:false,fontSize:'default',
   notifiedMilestones:[],lastProNudgeDate:'',
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
@@ -1938,6 +2011,7 @@ const ICON_PATHS={
 'ti-share':'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/>',
 'ti-sparkles':'<path d="M12 2l1.5 5L19 9l-5.5 2L12 16l-1.5-5L5 9l5.5-2z"/><path d="M19 15l.6 2 2 .6-2 .6-.6 2-.6-2-2-.6 2-.6z"/>',
 'ti-star':'<polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21 12 17.5 5.5 21 7 14.5 2 9.5 9 8.5"/>',
+'ti-text-size':'<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
 'ti-trophy':'<path d="M8 21h8"/><line x1="12" y1="17" x2="12" y2="21"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a3 3 0 0 0 3 5"/><path d="M17 5h3a3 3 0 0 1-3 5"/>',
 'ti-user-circle':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.5 19a6 6 0 0 1 11 0"/>',
 'ti-users':'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4.5 3.3-6.5 6.5-6.5s5.7 2 6.5 6.5"/><circle cx="17" cy="9" r="3"/><path d="M15.5 13.2c2.6.3 4 2.2 4.6 5.8"/>',
@@ -2675,6 +2749,25 @@ function toggleAddiction(element,name){
   }else{
     S.selectedAddictions.push(name);
   }
+  updateAddictionBtnLabel();
+}
+function updateAddictionBtnLabel(){
+  const lbl=document.getElementById('ob-addiction-btn-label');
+  const btn=document.getElementById('ob-addiction-btn');
+  if(!lbl||!btn)return;
+  if(S.selectedAddictions.length){
+    lbl.textContent=S.selectedAddictions.join(', ');
+    btn.classList.remove('placeholder');
+  }else{
+    lbl.textContent='Choose your focus areas';
+    btn.classList.add('placeholder');
+  }
+}
+function openAddictionModal(){
+  document.getElementById('addiction-modal').classList.add('open');
+}
+function closeAddictionModal(){
+  document.getElementById('addiction-modal').classList.remove('open');
 }
 
 // Chip-based picker for behavioral blueprint questions - replaces native <select> dropdowns,
@@ -2699,7 +2792,8 @@ function getBehaviorAnswer(key){
 
 function goToBehavioralStep(){
   S.name=document.getElementById('ob-name').value.trim()||'Friend';
-  S.userGender=document.getElementById('ob-gender').value||'Not Specified';
+  S.userGender=obGenderChoice||'';
+  S.relationshipStatus=obRelationshipChoice||null;
   const errEl=document.getElementById('obs1-error');
   if(S.selectedAddictions.length===0){
     if(errEl)errEl.textContent='Please select at least one area to focus on.';
@@ -2794,6 +2888,10 @@ function initApp(){
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
+  updateNotificationPermissionUI();
+  updateNovaDisclaimerToggleUI();
+  applyFontSize();
+  updateFontSizeUI();
   document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled!==false);
   updateHomeReminderStatus();
   updateRelationshipStatusUI();
@@ -4893,7 +4991,48 @@ function renderWeeklyReports(){
   renderIcons(wrap);
 }
 
-// ─── FREE DAILY LESSON REMINDER (honest, in-app) ──────────────────────────────
+// ─── FREE DAILY LESSON REMINDER (in-app + real phone notification) ────────────
+// A website can't offer a picker of arbitrary custom ringtone files - the Notification
+// API has no such option in any browser. What we *can* do honestly is fire a real system
+// notification, which plays whatever sound the user's phone/browser is already set to use
+// for this site's notifications (changeable in their phone's own notification settings).
+function sendPhoneNotification(title,body){
+  if(typeof Notification==='undefined'||Notification.permission!=='granted')return;
+  const opts={body,icon:'icons/icon-192.png',badge:'icons/icon-192.png'};
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+    navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,opts)).catch(()=>{
+      try{new Notification(title,opts);}catch(e){}
+    });
+  }else{
+    try{new Notification(title,opts);}catch(e){}
+  }
+}
+async function requestNotificationPermission(){
+  if(typeof Notification==='undefined'){
+    appInfo('Not available','Your browser does not support notifications.');
+    return;
+  }
+  const perm=await Notification.requestPermission();
+  updateNotificationPermissionUI();
+  if(perm==='granted'){
+    sendPhoneNotification('Notifications on','You\'ll hear your phone\'s notification sound for reminders like this one.');
+  }else if(perm==='denied'){
+    appInfo('Notifications blocked','Your phone/browser blocked notifications for this app. You can re-enable them in your device or browser site settings.');
+  }
+}
+function updateNotificationPermissionUI(){
+  const sub=document.getElementById('notif-sound-sub');
+  if(!sub)return;
+  if(typeof Notification==='undefined'){
+    sub.textContent='Not supported in this browser';
+  }else if(Notification.permission==='granted'){
+    sub.textContent='On — uses your phone\'s notification sound';
+  }else if(Notification.permission==='denied'){
+    sub.textContent='Blocked — enable in your device settings';
+  }else{
+    sub.textContent='Tap to enable your phone\'s notification sound';
+  }
+}
 function maybeShowDailyLessonReminder(){
   if(S.isPro)return;
   if(S.remindersEnabled===false)return;
@@ -4903,7 +5042,9 @@ function maybeShowDailyLessonReminder(){
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
   save();
-  novaNudge(`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`);
+  const reminderText=`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
+  novaNudge(reminderText);
+  sendPhoneNotification("Today's lesson is ready",reminderText);
 }
 
 // ─── SMART REMINDERS (Pro) ──────────────────────────────────────────────────
@@ -5406,7 +5547,7 @@ function addBubble(who,text){
   d.style.whiteSpace='pre-wrap';
   d.textContent=text;
   area.appendChild(d);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
@@ -5436,7 +5577,36 @@ function addProPreviewBubble(teaserText){
     <div style="text-align:center"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="this.closest('.bub').remove()">Maybe later</span></div>
   </div>`;
   area.appendChild(d);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
+}
+
+// ─── NOVA SAFETY DISCLAIMER ────────────────────────────────────────────────────
+let novaDisclaimerTimer=null;
+function maybeShowNovaDisclaimer(){
+  if(S.novaDisclaimerDismissed)return;
+  const el=document.getElementById('nova-disclaimer-flash');
+  el.style.display='flex';
+  clearTimeout(novaDisclaimerTimer);
+  novaDisclaimerTimer=setTimeout(()=>{el.style.display='none';},3000);
+}
+function dismissNovaDisclaimer(){
+  clearTimeout(novaDisclaimerTimer);
+  document.getElementById('nova-disclaimer-flash').style.display='none';
+}
+function dontShowNovaDisclaimerAgain(){
+  S.novaDisclaimerDismissed=true;
+  save();
+  updateNovaDisclaimerToggleUI();
+  dismissNovaDisclaimer();
+}
+function toggleNovaDisclaimer(){
+  S.novaDisclaimerDismissed=!S.novaDisclaimerDismissed;
+  save();
+  updateNovaDisclaimerToggleUI();
+}
+function updateNovaDisclaimerToggleUI(){
+  const el=document.getElementById('nova-disclaimer-toggle');
+  if(el)el.classList.toggle('on',!S.novaDisclaimerDismissed);
 }
 
 // ─── NOVA PRO UPGRADE NUDGES ────────────────────────────────────────────────
@@ -5459,7 +5629,7 @@ function showTyping(show){
   const area=document.getElementById('chatArea');
   t.style.display=show?'block':'none';
   if(show)area.appendChild(t);
-  setTimeout(()=>{area.scrollTop=area.scrollHeight;},50);
+  setTimeout(()=>{const scr=document.getElementById('screens');if(scr)scr.scrollTop=scr.scrollHeight;},50);
 }
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
@@ -5473,7 +5643,7 @@ async function sendMsg(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
-    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for unlimited sessions with me. 💜");
+    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 100 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -5520,10 +5690,14 @@ Address the interactions of their unique blueprint and assign structured daily r
       body:JSON.stringify({system:buildSystemPrompt(),messages:msgs})
     });
     if(res.status===429){
-      const reply="Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for unlimited chats. 💜";
+      const reply=S.isPro
+        ?"Looks like you've reached today's 100-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
+        :"Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 100 chats a day. 💜";
       S.chatHistory.push({role:'assistant',content:reply});
-      S.chatsLeft=0;
-      document.getElementById('chatsLeft').textContent=0;
+      if(!S.isPro){
+        S.chatsLeft=0;
+        document.getElementById('chatsLeft').textContent=0;
+      }
       save();showTyping(false);addBubble('nova',reply);
       return;
     }
@@ -5585,6 +5759,7 @@ function switchTo(id){
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){viewingDay=null;renderTodayLesson();}
   if(id==='rooms'){renderRoomsList();}
+  if(id==='nova'){maybeShowNovaDisclaimer();}
   if(id==='community'){renderCommunityPosts();}
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
@@ -5778,7 +5953,7 @@ function updateTierUI(){
   const proCta=document.getElementById('pro-cta');
   if(S.isPro){
     badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
-    if(novaLbl)novaLbl.textContent='Pro · Unlimited';
+    if(novaLbl)novaLbl.textContent='Pro · 100/day';
     if(limitBar)limitBar.style.display='none';
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
@@ -5799,7 +5974,13 @@ function updateTierUI(){
 let pinFlow=null,pinBuffer='',pinFirstEntry='';
 
 function toggleAppLock(){
-  openPinFlow(S.pinEnabled?'disable':'setup1');
+  if(S.pinEnabled){
+    openPinFlow('disable');
+    return;
+  }
+  appConfirm('Require a PIN to open the app? You\'ll set a 4-digit PIN on the next screen. This is optional — you can turn it off again any time from here.',()=>{
+    openPinFlow('setup1');
+  });
 }
 
 function setPinTitles(mode){
@@ -5920,6 +6101,33 @@ function toggleDark(){
   applyDarkMode();
   save();
 }
+
+const FONT_SIZE_LABELS={smaller:'Smaller',default:'Default',bigger:'Bigger'};
+function applyFontSize(){
+  const el=document.getElementById('app');
+  if(!el)return;
+  el.classList.remove('fs-smaller','fs-bigger');
+  if(S.fontSize==='smaller')el.classList.add('fs-smaller');
+  if(S.fontSize==='bigger')el.classList.add('fs-bigger');
+}
+function updateFontSizeUI(){
+  const sub=document.getElementById('fontsize-row-sub');
+  if(sub)sub.textContent=FONT_SIZE_LABELS[S.fontSize]||'Default';
+}
+function openFontSizeModal(){
+  document.querySelectorAll('#fontsize-opt-list .dd-opt').forEach(o=>{
+    o.classList.toggle('sel',o.getAttribute('data-value')===(S.fontSize||'default'));
+  });
+  document.getElementById('fontsize-modal').classList.add('open');
+}
+function closeFontSizeModal(){document.getElementById('fontsize-modal').classList.remove('open');}
+function chooseFontSize(size){
+  S.fontSize=size;
+  save();
+  applyFontSize();
+  updateFontSizeUI();
+  closeFontSizeModal();
+}
 function applyDarkMode(){
   document.getElementById('app').classList.toggle('force-dark',!!S.darkMode);
 }
@@ -5981,25 +6189,38 @@ function saveCostModal(){
 }
 
 // ─── RELATIONSHIP STATUS ──────────────────────────────────────────────────────
-function openRelationshipModal(){
+const RELATIONSHIP_LABELS={single:'Single',in_relationship:'In a relationship',married:'Married',divorced:'Divorced',separated:'Separated',complicated:'Complicated',not_specified:'Prefer not to say'};
+let relationshipModalContext=null;
+let obRelationshipChoice='';
+function openRelationshipModal(context){
+  relationshipModalContext=context||'profile';
+  const current=context==='onboarding'?obRelationshipChoice:(S.relationshipStatus||'');
+  document.querySelectorAll('#relationship-opt-list .dd-opt').forEach(o=>{
+    o.classList.toggle('sel',o.getAttribute('data-value')===current);
+  });
   document.getElementById('relationship-modal').classList.add('open');
 }
 function closeRelationshipModal(){
   document.getElementById('relationship-modal').classList.remove('open');
 }
 function chooseRelationshipStatus(status){
-  S.relationshipStatus=status;
-  save();
-  updateRelationshipStatusUI();
-  updateLessonPromo();
-  if(document.getElementById('s-lesson').classList.contains('on'))renderTodayLesson();
+  if(relationshipModalContext==='onboarding'){
+    obRelationshipChoice=status;
+    document.getElementById('ob-relationship-btn-label').textContent=RELATIONSHIP_LABELS[status];
+    document.getElementById('ob-relationship-btn').classList.remove('placeholder');
+  }else{
+    S.relationshipStatus=status;
+    save();
+    updateRelationshipStatusUI();
+    updateLessonPromo();
+    if(document.getElementById('s-lesson').classList.contains('on'))renderTodayLesson();
+  }
   closeRelationshipModal();
 }
 function updateRelationshipStatusUI(){
   const el=document.getElementById('rel-status-sub');
   if(!el)return;
-  const labels={in_relationship:'In a relationship',married:'Married',single:'Single',complicated:"It's complicated"};
-  el.textContent=labels[S.relationshipStatus]||'Not set';
+  el.textContent=RELATIONSHIP_LABELS[S.relationshipStatus]||'Choose relationship';
 }
 
 // ─── GENERIC CONFIRM ───────────────────────────────────────────────────────────
@@ -6056,7 +6277,7 @@ function updateProfileEditUI(){
   const nameEl=document.getElementById('name-row-sub');
   if(nameEl)nameEl.textContent=S.name||'Not set';
   const genderEl=document.getElementById('gender-row-sub');
-  if(genderEl)genderEl.textContent=S.userGender||'Not specified';
+  if(genderEl)genderEl.textContent=GENDER_LABELS[S.userGender]||'Choose gender';
   const voiceEl=document.getElementById('voice-row-sub');
   if(voiceEl){
     const labels={female:'Female',male:'Male',neutral:'Neutral'};
@@ -6171,16 +6392,28 @@ function saveNameModal(){
   closeNameModal();
 }
 
-function openGenderModal(){
-  const sel=document.getElementById('gender-select');
-  sel.value=['Male','Female','Non-Binary'].includes(S.userGender)?S.userGender:'';
+const GENDER_LABELS={'Male':'Male','Female':'Female','Non-Binary':'Non-Binary','Not Specified':'Prefer not to say'};
+let genderModalContext=null;
+let obGenderChoice='';
+function openGenderModal(context){
+  genderModalContext=context||'profile';
+  const current=context==='onboarding'?obGenderChoice:(S.userGender||'');
+  document.querySelectorAll('#gender-opt-list .dd-opt').forEach(o=>{
+    o.classList.toggle('sel',o.getAttribute('data-value')===current);
+  });
   document.getElementById('gender-modal').classList.add('open');
 }
 function closeGenderModal(){document.getElementById('gender-modal').classList.remove('open');}
 function chooseGender(g){
-  S.userGender=g;
-  save();
-  updateProfileEditUI();
+  if(genderModalContext==='onboarding'){
+    obGenderChoice=g;
+    document.getElementById('ob-gender-btn-label').textContent=GENDER_LABELS[g];
+    document.getElementById('ob-gender-btn').classList.remove('placeholder');
+  }else{
+    S.userGender=g;
+    save();
+    updateProfileEditUI();
+  }
   closeGenderModal();
 }
 
@@ -6196,7 +6429,7 @@ function chooseVoice(v){
 function restartOnboarding(){
   appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your name, focus areas, and preferences.",()=>{
     S.name='';
-    S.userGender='Not Specified';
+    S.userGender='';
     S.relationshipStatus=null;
     S.selectedAddictions=[];
     S.behavioralBlueprint={};
@@ -6218,9 +6451,16 @@ function restartOnboarding(){
     save();
 
     document.getElementById('ob-name').value='';
-    document.getElementById('ob-gender').value='';
+    obGenderChoice='';
+    document.getElementById('ob-gender-btn-label').textContent='Choose gender';
+    document.getElementById('ob-gender-btn').classList.add('placeholder');
+    obRelationshipChoice='';
+    document.getElementById('ob-relationship-btn-label').textContent='Choose relationship';
+    document.getElementById('ob-relationship-btn').classList.add('placeholder');
+    document.getElementById('ob-addiction-btn-label').textContent='Choose your focus areas';
+    document.getElementById('ob-addiction-btn').classList.add('placeholder');
     document.getElementById('chatArea').innerHTML='';
-    document.querySelectorAll('#addGrid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
+    document.querySelectorAll('#addiction-opt-grid .add-chip.sel').forEach(c=>c.classList.remove('sel'));
     const errEl=document.getElementById('obs1-error');
     if(errEl)errEl.textContent='';
 
@@ -6436,6 +6676,7 @@ async function submitGateAuth(){
 
 async function boot(){
   load();
+  applyFontSize();
   try{
     const meRes=await fetch('/api/auth/me');
     if(meRes.ok){

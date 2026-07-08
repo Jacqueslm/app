@@ -49,8 +49,11 @@ const loginLimiter = rateLimit({
 });
 
 const signupLimiter = rateLimit({
+  // IP-based, so shared connections (office/campus wifi, carrier-grade NAT on mobile) can
+  // legitimately produce several signups an hour from unrelated people - keep this generous
+  // enough to absorb that, while still capping scripted bulk account creation.
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many accounts created from this network. Try again later.' },

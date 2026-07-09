@@ -6,7 +6,7 @@ A recovery companion app: daily lessons, journaling, streak tracking, an AI chat
 
 ```bash
 git clone https://github.com/Jacqueslm/app.git
-cd app/TurnSomeDayIntoOneday/server
+cd app/TurnSomeDayIntoDayOne/server
 npm install
 ```
 

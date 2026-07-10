@@ -14,12 +14,23 @@ if (!JWT_SECRET) {
   );
 }
 
+// bcrypt only looks at the first 72 bytes of the input - anything beyond that is silently
+// ignored, so two different passwords sharing the same first 72 bytes would hash identically.
+const MAX_PASSWORD_BYTES = 72;
+
+function isValidPassword(password) {
+  return typeof password === 'string' && password.length >= 8 && Buffer.byteLength(password, 'utf8') <= MAX_PASSWORD_BYTES;
+}
+
+// Async (not *Sync) so hashing/comparing doesn't block the single event-loop thread for the
+// duration of each call - under concurrent signup/login traffic the Sync variants stall every
+// other in-flight request (chat, journal sync, etc.) until each hash finishes.
 function hashPassword(password) {
-  return bcrypt.hashSync(password, 10);
+  return bcrypt.hash(password, 10);
 }
 
 function verifyPassword(password, hash) {
-  return bcrypt.compareSync(password, hash);
+  return bcrypt.compare(password, hash);
 }
 
 function signSession(userId) {
@@ -48,6 +59,8 @@ function requireAuth(req, res, next) {
 
 module.exports = {
   COOKIE_NAME,
+  MAX_PASSWORD_BYTES,
+  isValidPassword,
   hashPassword,
   verifyPassword,
   signSession,

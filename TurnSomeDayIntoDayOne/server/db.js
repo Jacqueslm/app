@@ -71,17 +71,29 @@ function deleteUser(userId) {
   db.prepare('DELETE FROM users WHERE id = ?').run(userId);
 }
 
-function getChatCount(userId, usageDate) {
+// Atomically checks-and-increments in one statement, so concurrent requests for the same
+// user/day can't all read the count before any of them writes it back (the classic
+// read-then-write race). The WHERE clause only gates the ON CONFLICT branch - a brand-new
+// row for this user/day always inserts count=1 regardless of `limit`, which is correct since
+// limit is never less than 1. Returns the new count if the request was allowed, or null if
+// the user was already at/over `limit`.
+function tryConsumeChatQuota(userId, usageDate, limit) {
   const row = db
-    .prepare('SELECT count FROM chat_usage WHERE user_id = ? AND usage_date = ?')
-    .get(userId, usageDate);
-  return row ? row.count : 0;
+    .prepare(
+      `INSERT INTO chat_usage (user_id, usage_date, count) VALUES (?, ?, 1)
+       ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1 WHERE count < ?
+       RETURNING count`
+    )
+    .get(userId, usageDate, limit);
+  return row ? row.count : null;
 }
 
-function incrementChatCount(userId, usageDate) {
+// Un-does a tryConsumeChatQuota() call for a request that turned out not to actually use a
+// chat (e.g. the upstream Anthropic call failed) - so a bad server config or a transient
+// outage doesn't cost the user one of their free chats.
+function refundChatQuota(userId, usageDate) {
   db.prepare(
-    `INSERT INTO chat_usage (user_id, usage_date, count) VALUES (?, ?, 1)
-     ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
+    'UPDATE chat_usage SET count = count - 1 WHERE user_id = ? AND usage_date = ? AND count > 0'
   ).run(userId, usageDate);
 }
 
@@ -130,8 +142,8 @@ module.exports = {
   getState,
   saveState,
   deleteUser,
-  getChatCount,
-  incrementChatCount,
+  tryConsumeChatQuota,
+  refundChatQuota,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

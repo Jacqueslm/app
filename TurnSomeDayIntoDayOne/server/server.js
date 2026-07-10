@@ -8,6 +8,7 @@ const db = require('./db');
 const billing = require('./billing');
 const {
   COOKIE_NAME,
+  isValidPassword,
   hashPassword,
   verifyPassword,
   signSession,
@@ -48,6 +49,16 @@ const loginLimiter = rateLimit({
   message: { error: 'Too many login attempts. Try again in a few minutes.' },
 });
 
+// Separate from loginLimiter - they used to share one bucket, so a few failed login attempts
+// could lock a user out of changing their password too (and vice versa).
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Try again in a few minutes.' },
+});
+
 const signupLimiter = rateLimit({
   // IP-based, so shared connections (office/campus wifi, carrier-grade NAT on mobile) can
   // legitimately produce several signups an hour from unrelated people - keep this generous
@@ -72,28 +83,28 @@ function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
 
-app.post('/api/auth/signup', signupLimiter, (req, res) => {
+app.post('/api/auth/signup', signupLimiter, async (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !EMAIL_RE.test(email)) {
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  if (!normalizedEmail || !EMAIL_RE.test(normalizedEmail)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
-  if (!password || password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  if (!isValidPassword(password)) {
+    return res.status(400).json({ error: 'Password must be between 8 and 72 characters.' });
   }
-  const normalizedEmail = email.trim().toLowerCase();
   if (db.getUserByEmail(normalizedEmail)) {
     return res.status(409).json({ error: 'An account with that email already exists.' });
   }
-  const userId = db.createUser(normalizedEmail, hashPassword(password));
+  const userId = db.createUser(normalizedEmail, await hashPassword(password));
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
 });
 
-app.post('/api/auth/login', loginLimiter, (req, res) => {
+app.post('/api/auth/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body || {};
   const normalizedEmail = (email || '').trim().toLowerCase();
   const user = db.getUserByEmail(normalizedEmail);
-  if (!user || !verifyPassword(password || '', user.password_hash)) {
+  if (!user || !(await verifyPassword(password || '', user.password_hash))) {
     return res.status(401).json({ error: 'Incorrect email or password.' });
   }
   setSessionCookie(res, user.id);
@@ -105,16 +116,16 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/auth/change-password', loginLimiter, requireAuth, (req, res) => {
+app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   const user = db.getUserById(req.userId);
-  if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
+  if (!user || !(await verifyPassword(currentPassword || '', user.password_hash))) {
     return res.status(401).json({ error: 'Current password is incorrect.' });
   }
-  if (!newPassword || newPassword.length < 8) {
-    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  if (!isValidPassword(newPassword)) {
+    return res.status(400).json({ error: 'New password must be between 8 and 72 characters.' });
   }
-  db.updatePassword(req.userId, hashPassword(newPassword));
+  db.updatePassword(req.userId, await hashPassword(newPassword));
   res.json({ ok: true });
 });
 
@@ -134,6 +145,11 @@ app.put('/api/state', requireAuth, (req, res) => {
   if (typeof state !== 'string') {
     return res.status(400).json({ error: 'state must be a JSON string.' });
   }
+  try {
+    JSON.parse(state);
+  } catch (e) {
+    return res.status(400).json({ error: 'state must be valid JSON.' });
+  }
   db.saveState(req.userId, state);
   res.json({ ok: true });
 });
@@ -142,17 +158,19 @@ app.get('/api/account/export', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   const stateJson = db.getState(req.userId);
-  res.json({
-    email: user.email,
-    created_at: user.created_at,
-    state: stateJson ? JSON.parse(stateJson) : null,
-  });
+  // Defense in depth: PUT /api/state already rejects non-JSON strings, but degrade to null
+  // instead of a 500 for any state saved before that guard existed.
+  let state = null;
+  if (stateJson) {
+    try { state = JSON.parse(stateJson); } catch (e) { state = null; }
+  }
+  res.json({ email: user.email, created_at: user.created_at, state });
 });
 
 app.delete('/api/account', requireAuth, async (req, res) => {
   const { password } = req.body || {};
   const user = db.getUserById(req.userId);
-  if (!user || !verifyPassword(password || '', user.password_hash)) {
+  if (!user || !(await verifyPassword(password || '', user.password_hash))) {
     return res.status(401).json({ error: 'Incorrect password.' });
   }
   if (billing.isConfigured()) {
@@ -218,12 +236,19 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   // client-reported isPro flag, which the client fully controls) can bypass this.
   const user = db.getUserById(req.userId);
   const isPro = user && billing.getBillingStatus(user).isPro;
-  const used = db.getChatCount(req.userId, todayUTC());
-  if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: `Daily Nova AI chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
-  }
-  if (isPro && used >= PRO_CHAT_LIMIT) {
-    return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });
+  const limit = isPro ? PRO_CHAT_LIMIT : FREE_CHAT_LIMIT;
+
+  // Reserve the slot atomically *before* calling Anthropic (not read-count-then-later-increment)
+  // so concurrent requests (double-tapped send, multiple tabs) can't all read the same "count
+  // so far" and all slip through - only one wins the atomic increment past `limit`. If the
+  // upstream call then fails, the reservation is refunded below.
+  const today = todayUTC();
+  const newCount = db.tryConsumeChatQuota(req.userId, today, limit);
+  if (newCount === null) {
+    const message = isPro
+      ? `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.`
+      : `Daily Nova AI chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.`;
+    return res.status(429).json({ error: message });
   }
 
   try {
@@ -245,11 +270,12 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     const data = await anthropicRes.json();
     // Only spend the user's daily quota on a response that actually succeeded - a bad server
     // config or a transient Anthropic outage shouldn't cost them one of their free chats.
-    if (anthropicRes.ok) {
-      db.incrementChatCount(req.userId, todayUTC());
+    if (!anthropicRes.ok) {
+      db.refundChatQuota(req.userId, today);
     }
     res.status(anthropicRes.status).json(data);
   } catch (err) {
+    db.refundChatQuota(req.userId, today);
     res.status(502).json({ error: 'Failed to reach Anthropic API.' });
   }
 });

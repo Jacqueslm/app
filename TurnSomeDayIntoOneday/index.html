@@ -5788,7 +5788,7 @@ function setBill(type){
   const priceEl=document.getElementById('pro-price');
   const subEl=document.getElementById('pro-price-sub');
   if(type==='a'){
-    priceEl.innerHTML='$5.99<span>/mo</span>';
+    priceEl.innerHTML=`$${(PRO_PRICE_YEARLY/12).toFixed(2)}<span>/mo</span>`;
     if(subEl)subEl.textContent=`Billed $${PRO_PRICE_YEARLY}/yr — save 40% vs monthly`;
   }else if(type==='l'){
     priceEl.innerHTML=`$${PRO_PRICE_LIFETIME}<span> one-time</span>`;

@@ -23,6 +23,11 @@ const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 const PRO_CHAT_LIMIT = 100;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_IMAGE_MODEL = 'gpt-image-1';
+const FREE_IMAGE_LIMIT = 3;
+const PRO_IMAGE_LIMIT = 20;
+const STUDIO_IMAGE_SIZES = new Set(['1024x1024', '1024x1536', '1536x1024']);
 
 // Stripe webhook signature verification needs the raw request body, so this route is
 // registered with express.raw() before the global express.json() middleware below.
@@ -248,6 +253,75 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     res.status(anthropicRes.status).json(data);
   } catch (err) {
     res.status(502).json({ error: 'Failed to reach Anthropic API.' });
+  }
+});
+
+app.get('/api/studio/status', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  const isPro = billing.getBillingStatus(user).isPro;
+  res.json({
+    aiAvailable: Boolean(OPENAI_API_KEY),
+    used: db.getImageCount(req.userId, todayUTC()),
+    limit: isPro ? PRO_IMAGE_LIMIT : FREE_IMAGE_LIMIT,
+  });
+});
+
+app.post('/api/studio/generate', requireAuth, async (req, res) => {
+  if (!OPENAI_API_KEY) {
+    // Same normal-state pattern as /api/chat: without a key the Studio client simply never
+    // offers AI mode (its canvas styles are fully local), so a 503 here is expected.
+    return res.status(503).json({ error: 'AI image generation is not available on this server right now.' });
+  }
+
+  const { prompt, size } = req.body || {};
+  if (typeof prompt !== 'string' || !prompt.trim()) {
+    return res.status(400).json({ error: 'prompt is required.' });
+  }
+  if (!STUDIO_IMAGE_SIZES.has(size)) {
+    return res.status(400).json({ error: 'size must be one of 1024x1024, 1024x1536, 1536x1024.' });
+  }
+
+  const user = db.getUserById(req.userId);
+  const isPro = user && billing.getBillingStatus(user).isPro;
+  const limit = isPro ? PRO_IMAGE_LIMIT : FREE_IMAGE_LIMIT;
+  const used = db.getImageCount(req.userId, todayUTC());
+  if (used >= limit) {
+    return res.status(429).json({
+      error: isPro
+        ? `You've reached today's ${PRO_IMAGE_LIMIT}-image Pro limit. It resets tomorrow.`
+        : `Daily AI image limit reached. Upgrade to Pro for up to ${PRO_IMAGE_LIMIT} images a day.`,
+    });
+  }
+
+  try {
+    const openaiRes = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: OPENAI_IMAGE_MODEL,
+        prompt: prompt.trim().slice(0, 2000),
+        size,
+        n: 1,
+      }),
+    });
+    const data = await openaiRes.json();
+    if (!openaiRes.ok) {
+      const message = (data && data.error && data.error.message) || 'AI image generation failed.';
+      return res.status(openaiRes.status === 429 ? 429 : 502).json({ error: message });
+    }
+    const image = data.data && data.data[0] && data.data[0].b64_json;
+    if (!image) {
+      return res.status(502).json({ error: 'AI image generation returned no image.' });
+    }
+    // Like chat, only count generations that actually succeeded against the daily quota.
+    db.incrementImageCount(req.userId, todayUTC());
+    res.json({ image });
+  } catch (err) {
+    res.status(502).json({ error: 'Failed to reach the image generation API.' });
   }
 });
 

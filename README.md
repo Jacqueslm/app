@@ -21,6 +21,7 @@ Optional, if you want these features working too:
 
 ```
 ANTHROPIC_API_KEY=<your key>              # without this, Nova falls back to local canned replies
+OPENAI_API_KEY=<your key>                 # without this, the Studio's "AI Photo" mode stays hidden (local art styles still work)
 STRIPE_PUBLISHABLE_KEY=<pk_test_... or pk_live_...>
 STRIPE_SECRET_KEY=<sk_test_... or sk_live_...>
 STRIPE_WEBHOOK_SECRET=<whsec_...>         # from `stripe listen` (local) or your webhook endpoint (production)
@@ -48,3 +49,4 @@ Open `http://localhost:4300` in a browser and sign up.
 
 - Data is stored locally in `server/data.sqlite` (SQLite).
 - The free tier (Days 1–15, basic Nova, journal, streaks, SOS tools) works fully with no optional keys configured. Pro screens show an upgrade preview until Stripe is configured and a real subscription/purchase completes.
+- **Studio** (`/studio/`, also linked from Profile → Creative studio): an image & video generator. Type a prompt, pick a style (Aurora, Nebula, Waves, Flow, Mosaic) and palette, and it renders downloadable PNG wallpapers or short looping WebM videos — all generated locally in the browser, no keys needed. If `OPENAI_API_KEY` is set, a signed-in user also gets an "AI Photo" mode (real text-to-image; 3/day free, 20/day Pro).

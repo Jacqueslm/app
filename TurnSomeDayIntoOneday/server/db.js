@@ -22,6 +22,12 @@ db.exec(`
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, usage_date)
   );
+  CREATE TABLE IF NOT EXISTS image_usage (
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    usage_date TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, usage_date)
+  );
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -66,6 +72,7 @@ function saveState(userId, stateJson) {
 }
 
 function deleteUser(userId) {
+  db.prepare('DELETE FROM image_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM chat_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM user_state WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM users WHERE id = ?').run(userId);
@@ -81,6 +88,20 @@ function getChatCount(userId, usageDate) {
 function incrementChatCount(userId, usageDate) {
   db.prepare(
     `INSERT INTO chat_usage (user_id, usage_date, count) VALUES (?, ?, 1)
+     ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
+  ).run(userId, usageDate);
+}
+
+function getImageCount(userId, usageDate) {
+  const row = db
+    .prepare('SELECT count FROM image_usage WHERE user_id = ? AND usage_date = ?')
+    .get(userId, usageDate);
+  return row ? row.count : 0;
+}
+
+function incrementImageCount(userId, usageDate) {
+  db.prepare(
+    `INSERT INTO image_usage (user_id, usage_date, count) VALUES (?, ?, 1)
      ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
   ).run(userId, usageDate);
 }
@@ -132,6 +153,8 @@ module.exports = {
   deleteUser,
   getChatCount,
   incrementChatCount,
+  getImageCount,
+  incrementImageCount,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

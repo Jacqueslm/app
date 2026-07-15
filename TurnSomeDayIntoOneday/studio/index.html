@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f0c29">
+<title>Studio — Turn Someday Into Day One</title>
+<link rel="icon" href="/icons/icon-192.png">
+<style>
+:root{
+  --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
+  --acc:#EEEDFE;--acc-t:#3C3489;
+  --f:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
+  --acc:#26215C;--acc-t:#AFA9EC;
+}}
+:root[data-theme="dark"]{
+  --s0:#141412;--s1:#1e1e1b;--s2:#272724;
+  --tp:#f0efe9;--ts:#b4b2a9;--tm:#888780;
+  --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
+  --acc:#26215C;--acc-t:#AFA9EC;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:var(--brand);font-family:var(--f)}
+body{display:flex;justify-content:center}
+.app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column}
+.hdr{background:var(--brand);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+.hdr a{color:#8892c0;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px 4px 0}
+.hdr h1{font-size:17px;font-weight:600;flex:1}
+.hdr .ai-badge{font-size:11px;font-weight:600;letter-spacing:.4px;background:var(--green-dim);color:var(--green);border:0.5px solid rgba(126,232,162,0.4);border-radius:20px;padding:4px 10px;display:none}
+.body{flex:1;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
+.tabs{display:flex;background:var(--s1);border-radius:12px;padding:4px;gap:4px}
+.tabs button{flex:1;border:none;background:transparent;color:var(--tm);font-family:var(--f);font-size:14px;font-weight:500;padding:10px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--s2);color:var(--tp);box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+label.lbl{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--tm)}
+.prompt-wrap{position:relative}
+textarea{width:100%;background:var(--s2);border:0.5px solid var(--bdr2);border-radius:12px;padding:13px 44px 13px 14px;font-size:15px;color:var(--tp);font-family:var(--f);outline:none;resize:none;min-height:74px}
+textarea:focus{border-color:var(--accent)}
+textarea::placeholder{color:var(--tm)}
+.dice{position:absolute;right:8px;top:8px;border:none;background:var(--s1);color:var(--ts);border-radius:8px;width:32px;height:32px;font-size:16px;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:0.5px solid var(--bdr2);background:var(--s2);color:var(--ts);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.ai{border-style:dashed}
+.chip.ai.on{border-style:solid}
+.row{display:flex;flex-direction:column;gap:8px}
+.gen-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.gen-btn:disabled{opacity:.55;cursor:default}
+.stage{background:var(--brand);border-radius:16px;overflow:hidden;display:none;position:relative}
+.stage.show{display:block}
+.stage canvas,.stage video,.stage img{display:block;width:100%;height:auto}
+.stage .prog{position:absolute;left:0;bottom:0;height:4px;background:var(--green);width:0%;transition:width .2s linear}
+.stage .rec-dot{position:absolute;top:10px;right:12px;display:none;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff;background:rgba(0,0,0,0.45);border-radius:20px;padding:4px 10px}
+.stage .rec-dot::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff5f57;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+.dl-btn{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--f);display:none}
+.dl-btn.show{display:block}
+.note{font-size:12px;color:var(--tm);line-height:1.5;text-align:center}
+.err{display:none;background:#FAEEDA;color:#633806;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.45}
+@media(prefers-color-scheme:dark){.err{background:#2e1f05;color:#EFA527}}
+.err.show{display:block}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <a href="/" aria-label="Back">&#8249;</a>
+    <h1>Studio</h1>
+    <span class="ai-badge" id="ai-badge">AI READY</span>
+  </div>
+  <div class="body">
+    <div class="tabs">
+      <button id="tab-image" class="on">Image</button>
+      <button id="tab-video">Video</button>
+    </div>
+
+    <div class="row">
+      <label class="lbl" for="prompt">Describe your vibe</label>
+      <div class="prompt-wrap">
+        <textarea id="prompt" placeholder="e.g. calm ocean at dawn, soft light, a fresh start"></textarea>
+        <button class="dice" id="dice" title="Random idea">&#127922;</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="lbl">Style</label>
+      <div class="chips" id="styles"></div>
+    </div>
+
+    <div class="row">
+      <label class="lbl">Palette</label>
+      <div class="chips" id="palettes"></div>
+    </div>
+
+    <div class="row" id="size-row">
+      <label class="lbl">Size</label>
+      <div class="chips" id="sizes"></div>
+    </div>
+
+    <div class="row" id="dur-row" style="display:none">
+      <label class="lbl">Length</label>
+      <div class="chips" id="durations"></div>
+    </div>
+
+    <button class="gen-btn" id="gen">Generate image</button>
+    <div class="err" id="err"></div>
+
+    <div class="stage" id="stage">
+      <canvas id="canvas"></canvas>
+      <img id="ai-img" alt="" style="display:none">
+      <video id="video" controls loop playsinline style="display:none"></video>
+      <div class="rec-dot" id="rec-dot">REC</div>
+      <div class="prog" id="prog"></div>
+    </div>
+    <button class="dl-btn" id="dl">Download</button>
+
+    <p class="note" id="foot-note">Everything is generated on your device — nothing you type here is uploaded.</p>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = (s) => document.querySelector(s);
+
+/* ---------- seeded randomness ---------- */
+function xmur3(str){
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++){
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+function mulberry32(a){
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- palettes ---------- */
+const PALETTES = {
+  dusk:   { label: 'Dusk',   bg: '#0f0c29', colors: ['#534AB7', '#8f7ae5', '#e0709b', '#f7b267', '#7ee8a2'] },
+  ocean:  { label: 'Ocean',  bg: '#04121f', colors: ['#125d98', '#3c8dad', '#5fc9c9', '#a7e8e1', '#f4f1de'] },
+  ember:  { label: 'Ember',  bg: '#1a0a08', colors: ['#7a1e0c', '#c1440e', '#e8871e', '#f5c26b', '#ffe8c2'] },
+  forest: { label: 'Forest', bg: '#08130c', colors: ['#1f4d2e', '#3a7d44', '#69b578', '#a3e0af', '#e6f5d0'] },
+  candy:  { label: 'Candy',  bg: '#1c1024', colors: ['#b95dd9', '#ee6ea7', '#ffa9c5', '#8fd8ff', '#fff3b0'] },
+  mono:   { label: 'Mono',   bg: '#101012', colors: ['#3a3a40', '#63636c', '#94949e', '#c4c4cc', '#efeff4'] },
+};
+const PALETTE_HINTS = [
+  [/ocean|sea|wave|water|beach|coast|rain|river|lake/i, 'ocean'],
+  [/fire|ember|sunset|sunrise|autumn|desert|warm|gold/i, 'ember'],
+  [/forest|tree|leaf|nature|jungle|meadow|spring|green/i, 'forest'],
+  [/candy|pink|dream|pastel|bloom|flower|soft/i, 'candy'],
+  [/mono|noir|ink|black|white|minimal|fog|mist/i, 'mono'],
+];
+function autoPalette(prompt, rng){
+  for (const [re, key] of PALETTE_HINTS) if (re.test(prompt)) return key;
+  const keys = Object.keys(PALETTES);
+  return keys[Math.floor(rng() * keys.length)];
+}
+
+/* ---------- scene builders ----------
+   Each builder consumes the seeded rng ONCE to lay out the scene, then returns
+   a pure render(ctx, w, h, t) with t in [0,1) so video loops are seamless. */
+const TAU = Math.PI * 2;
+
+function buildAurora(rng, pal){
+  const ribbons = [];
+  const n = 4 + Math.floor(rng() * 3);
+  for (let i = 0; i < n; i++){
+    ribbons.push({
+      color: pal.colors[i % pal.colors.length],
+      baseY: 0.2 + rng() * 0.6,
+      amp: 0.06 + rng() * 0.14,
+      freq: 1 + rng() * 2.2,
+      phase: rng() * TAU,
+      drift: (rng() < 0.5 ? -1 : 1) * (1 + Math.floor(rng() * 2)),
+      thick: 0.08 + rng() * 0.16,
+      alpha: 0.32 + rng() * 0.3,
+    });
+  }
+  const stars = [];
+  for (let i = 0; i < 130; i++) stars.push({ x: rng(), y: rng(), r: 0.4 + rng() * 1.4, tw: rng() * TAU });
+  return (ctx, w, h, t) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, pal.bg);
+    g.addColorStop(1, shade(pal.bg, 1.9));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#fff';
+    for (const s of stars){
+      ctx.globalAlpha = 0.35 + 0.55 * Math.abs(Math.sin(s.tw + t * TAU));
+      ctx.beginPath(); ctx.arc(s.x * w, s.y * h * 0.9, s.r * (w / 900), 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'lighter';
+    for (const r of ribbons){
+      ctx.globalAlpha = r.alpha;
+      const grad = ctx.createLinearGradient(0, (r.baseY - r.thick) * h, 0, (r.baseY + r.thick) * h);
+      grad.addColorStop(0, 'transparent'); grad.addColorStop(0.5, r.color); grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      const steps = 60;
+      for (let i = 0; i <= steps; i++){
+        const x = (i / steps) * w;
+        const y = (r.baseY + r.amp * Math.sin(r.phase + r.freq * TAU * (i / steps) + r.drift * TAU * t)) * h;
+        i === 0 ? ctx.moveTo(x, y - r.thick * h) : ctx.lineTo(x, y - r.thick * h);
+      }
+      for (let i = steps; i >= 0; i--){
+        const x = (i / steps) * w;
+        const y = (r.baseY + r.amp * Math.sin(r.phase + r.freq * TAU * (i / steps) + r.drift * TAU * t)) * h;
+        ctx.lineTo(x, y + r.thick * h);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  };
+}
+
+function buildFlow(rng, pal){
+  const orbs = [];
+  const n = 90 + Math.floor(rng() * 60);
+  for (let i = 0; i < n; i++){
+    orbs.push({
+      cx: rng(), cy: rng(),
+      rx: 0.04 + rng() * 0.22, ry: 0.04 + rng() * 0.22,
+      speed: (rng() < 0.5 ? -1 : 1) * (1 + Math.floor(rng() * 3)),
+      phase: rng() * TAU,
+      r: 1.2 + rng() * 3.4,
+      color: pal.colors[Math.floor(rng() * pal.colors.length)],
+      trail: 5 + Math.floor(rng() * 7),
+    });
+  }
+  return (ctx, w, h, t) => {
+    ctx.fillStyle = pal.bg; ctx.fillRect(0, 0, w, h);
+    const vg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
+    vg.addColorStop(0, shade(pal.bg, 1.6)); vg.addColorStop(1, pal.bg);
+    ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    const scale = w / 900;
+    for (const o of orbs){
+      for (let k = 0; k < o.trail; k++){
+        const tt = t - k * 0.012;
+        const a = o.phase + o.speed * TAU * tt;
+        const x = (o.cx + o.rx * Math.cos(a)) * w;
+        const y = (o.cy + o.ry * Math.sin(a * 1.3)) * h;
+        ctx.globalAlpha = 0.5 * (1 - k / o.trail);
+        ctx.fillStyle = o.color;
+        ctx.beginPath(); ctx.arc(x, y, o.r * scale * (1 - k / (o.trail * 2)), 0, TAU); ctx.fill();
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  };
+}
+
+function buildWaves(rng, pal){
+  const layers = [];
+  const n = pal.colors.length;
+  for (let i = 0; i < n; i++){
+    layers.push({
+      color: pal.colors[i],
+      baseY: 0.35 + (i / n) * 0.55,
+      amp: 0.03 + rng() * 0.06,
+      freq: 1.2 + rng() * 2.4,
+      phase: rng() * TAU,
+      dir: rng() < 0.5 ? -1 : 1,
+    });
+  }
+  const glowY = 0.18 + rng() * 0.12, glowX = 0.25 + rng() * 0.5;
+  return (ctx, w, h, t) => {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, shade(pal.bg, 2.2)); g.addColorStop(1, pal.bg);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    const sun = ctx.createRadialGradient(glowX * w, glowY * h, 0, glowX * w, glowY * h, w * 0.4);
+    sun.addColorStop(0, pal.colors[pal.colors.length - 1]); sun.addColorStop(1, 'transparent');
+    ctx.globalAlpha = 0.5; ctx.fillStyle = sun; ctx.fillRect(0, 0, w, h); ctx.globalAlpha = 1;
+    for (const l of layers){
+      ctx.fillStyle = l.color;
+      ctx.globalAlpha = 0.82;
+      ctx.beginPath();
+      const steps = 70;
+      for (let i = 0; i <= steps; i++){
+        const x = (i / steps) * w;
+        const y = (l.baseY + l.amp * Math.sin(l.phase + l.freq * TAU * (i / steps) + l.dir * TAU * t)
+                          + l.amp * 0.5 * Math.sin(l.phase * 2 + l.freq * 2.7 * TAU * (i / steps) - l.dir * TAU * t)) * h;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  };
+}
+
+function buildMosaic(rng, pal){
+  const cols = 6 + Math.floor(rng() * 4);
+  const cells = [];
+  for (let i = 0; i < cols * cols * 2; i++){
+    cells.push({
+      shape: Math.floor(rng() * 3), // 0 circle, 1 square, 2 triangle
+      color: pal.colors[Math.floor(rng() * pal.colors.length)],
+      rot: rng() * TAU,
+      spin: (rng() < 0.5 ? -1 : 1) * (rng() < 0.8 ? 1 : 2),
+      scale: 0.5 + rng() * 0.42,
+      pulse: rng() * TAU,
+    });
+  }
+  return (ctx, w, h, t) => {
+    ctx.fillStyle = pal.bg; ctx.fillRect(0, 0, w, h);
+    const size = w / cols;
+    const rows = Math.ceil(h / size);
+    for (let r = 0; r < rows; r++){
+      for (let c = 0; c < cols; c++){
+        const cell = cells[(r * cols + c) % cells.length];
+        const s = size * cell.scale * (0.9 + 0.1 * Math.sin(cell.pulse + TAU * t));
+        ctx.save();
+        ctx.translate(c * size + size / 2, r * size + size / 2);
+        ctx.rotate(cell.rot + cell.spin * TAU * t * 0.25);
+        ctx.fillStyle = cell.color;
+        if (cell.shape === 0){
+          ctx.beginPath(); ctx.arc(0, 0, s / 2, 0, TAU); ctx.fill();
+        } else if (cell.shape === 1){
+          ctx.fillRect(-s / 2, -s / 2, s, s);
+        } else {
+          ctx.beginPath(); ctx.moveTo(0, -s / 2); ctx.lineTo(s / 2, s / 2); ctx.lineTo(-s / 2, s / 2);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+  };
+}
+
+function buildNebula(rng, pal){
+  const blobs = [];
+  const n = 7 + Math.floor(rng() * 5);
+  for (let i = 0; i < n; i++){
+    blobs.push({
+      cx: 0.15 + rng() * 0.7, cy: 0.15 + rng() * 0.7,
+      r: 0.14 + rng() * 0.3,
+      color: pal.colors[Math.floor(rng() * pal.colors.length)],
+      orbit: 0.015 + rng() * 0.05,
+      speed: (rng() < 0.5 ? -1 : 1) * (1 + Math.floor(rng() * 2)),
+      phase: rng() * TAU,
+      alpha: 0.3 + rng() * 0.35,
+    });
+  }
+  const stars = [];
+  for (let i = 0; i < 220; i++) stars.push({ x: rng(), y: rng(), r: 0.3 + rng() * 1.3, tw: rng() * TAU, fast: rng() < 0.3 });
+  return (ctx, w, h, t) => {
+    ctx.fillStyle = pal.bg; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'lighter';
+    for (const b of blobs){
+      const a = b.phase + b.speed * TAU * t;
+      const x = (b.cx + b.orbit * Math.cos(a)) * w;
+      const y = (b.cy + b.orbit * Math.sin(a)) * h;
+      const rad = b.r * Math.min(w, h) * (1 + 0.06 * Math.sin(a * 2));
+      const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+      g.addColorStop(0, b.color); g.addColorStop(1, 'transparent');
+      ctx.globalAlpha = b.alpha;
+      ctx.fillStyle = g;
+      ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#fff';
+    for (const s of stars){
+      const tw = Math.abs(Math.sin(s.tw + (s.fast ? 2 : 1) * TAU * t));
+      ctx.globalAlpha = 0.25 + 0.65 * tw;
+      ctx.beginPath(); ctx.arc(s.x * w, s.y * h, s.r * (w / 900), 0, TAU); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  };
+}
+
+function shade(hex, mul){
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.round(((n >> 16) & 255) * mul));
+  const g = Math.min(255, Math.round(((n >> 8) & 255) * mul));
+  const b = Math.min(255, Math.round((n & 255) * mul));
+  return `rgb(${r},${g},${b})`;
+}
+
+const STYLES = {
+  aurora: { label: 'Aurora', build: buildAurora },
+  nebula: { label: 'Nebula', build: buildNebula },
+  waves:  { label: 'Waves',  build: buildWaves },
+  flow:   { label: 'Flow',   build: buildFlow },
+  mosaic: { label: 'Mosaic', build: buildMosaic },
+};
+
+const IMG_SIZES = [
+  { label: 'Square',    w: 1024, h: 1024, ai: '1024x1024' },
+  { label: 'Portrait',  w: 1080, h: 1920, ai: '1024x1536' },
+  { label: 'Wide',      w: 1920, h: 1080, ai: '1536x1024' },
+];
+const VID_SIZES = [
+  { label: 'Square',   w: 720,  h: 720 },
+  { label: 'Portrait', w: 720,  h: 1280 },
+  { label: 'Wide',     w: 1280, h: 720 },
+];
+const DURATIONS = [3, 5, 10];
+const IDEAS = [
+  'calm ocean at dawn, soft light, a fresh start',
+  'northern lights over a quiet pine forest',
+  'warm sunset over rolling hills, golden hour',
+  'gentle rain on a night city, neon reflections',
+  'a slow deep breath, drifting clouds, stillness',
+  'stars over the desert, vast and peaceful',
+  'morning fog lifting off a mirror-still lake',
+  'one small step forward, sunrise energy',
+];
+
+/* ---------- state ---------- */
+const state = {
+  mode: 'image',
+  style: 'aurora',
+  palette: 'auto',
+  imgSize: 0,
+  vidSize: 0,
+  duration: 1, // index into DURATIONS (5s)
+  variant: 0,
+  ai: { available: false, used: 0, limit: 0 },
+  busy: false,
+  downloadUrl: null,
+  downloadName: '',
+};
+
+/* ---------- chip rendering ---------- */
+function chipRow(el, items, activeKey, onPick){
+  el.innerHTML = '';
+  for (const it of items){
+    const b = document.createElement('button');
+    b.className = 'chip' + (it.key === activeKey ? ' on' : '') + (it.aiChip ? ' ai' : '');
+    b.textContent = it.label;
+    b.onclick = () => onPick(it.key);
+    el.appendChild(b);
+  }
+}
+function renderControls(){
+  const styleItems = Object.entries(STYLES).map(([key, s]) => ({ key, label: s.label }));
+  if (state.mode === 'image' && state.ai.available){
+    styleItems.push({ key: 'ai', label: `AI Photo (${Math.max(0, state.ai.limit - state.ai.used)} left today)`, aiChip: true });
+  }
+  chipRow($('#styles'), styleItems, state.style, (k) => { state.style = k; renderControls(); });
+
+  const palItems = [{ key: 'auto', label: 'Auto' }].concat(
+    Object.entries(PALETTES).map(([key, p]) => ({ key, label: p.label }))
+  );
+  chipRow($('#palettes'), palItems, state.palette, (k) => { state.palette = k; renderControls(); });
+  $('#palettes').closest('.row').style.display = state.style === 'ai' ? 'none' : '';
+
+  const sizes = state.mode === 'image' ? IMG_SIZES : VID_SIZES;
+  const sizeKey = state.mode === 'image' ? 'imgSize' : 'vidSize';
+  chipRow($('#sizes'), sizes.map((s, i) => ({ key: i, label: `${s.label} ${s.w}×${s.h}` })), state[sizeKey],
+    (k) => { state[sizeKey] = k; renderControls(); });
+
+  $('#dur-row').style.display = state.mode === 'video' ? '' : 'none';
+  chipRow($('#durations'), DURATIONS.map((d, i) => ({ key: i, label: `${d}s` })), state.duration,
+    (k) => { state.duration = k; renderControls(); });
+
+  $('#tab-image').classList.toggle('on', state.mode === 'image');
+  $('#tab-video').classList.toggle('on', state.mode === 'video');
+  $('#gen').textContent = state.busy ? 'Working…' : (state.mode === 'image' ? 'Generate image' : 'Generate video');
+  $('#foot-note').textContent = state.style === 'ai'
+    ? 'AI Photo mode sends your prompt to the server to create a real AI image.'
+    : 'Everything is generated on your device — nothing you type here is uploaded.';
+}
+
+/* ---------- generation ---------- */
+function sceneFor(prompt){
+  const seedFn = xmur3(prompt + '::' + state.style + '::' + state.variant);
+  const rng = mulberry32(seedFn());
+  const palKey = state.palette === 'auto' ? autoPalette(prompt, rng) : state.palette;
+  const pal = PALETTES[palKey];
+  return STYLES[state.style].build(rng, pal);
+}
+function showStage(kind){ // 'canvas' | 'img' | 'video'
+  $('#stage').classList.add('show');
+  $('#canvas').style.display = kind === 'canvas' ? 'block' : 'none';
+  $('#ai-img').style.display = kind === 'img' ? 'block' : 'none';
+  $('#video').style.display = kind === 'video' ? 'block' : 'none';
+}
+function setDownload(blob, name){
+  if (state.downloadUrl) URL.revokeObjectURL(state.downloadUrl);
+  state.downloadUrl = URL.createObjectURL(blob);
+  state.downloadName = name;
+  $('#dl').classList.add('show');
+}
+function slug(prompt){
+  return (prompt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'studio');
+}
+function showError(msg){
+  const el = $('#err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function clearError(){ $('#err').classList.remove('show'); }
+
+function generateImage(prompt){
+  const size = IMG_SIZES[state.imgSize];
+  const canvas = $('#canvas');
+  canvas.width = size.w; canvas.height = size.h;
+  const ctx = canvas.getContext('2d');
+  const render = sceneFor(prompt);
+  render(ctx, size.w, size.h, mulberry32(xmur3(prompt + state.variant)())());
+  showStage('canvas');
+  canvas.toBlob((blob) => setDownload(blob, `${slug(prompt)}.png`), 'image/png');
+}
+
+async function generateAIImage(prompt){
+  state.busy = true; renderControls(); $('#gen').disabled = true;
+  $('#gen').innerHTML = '<span class="spinner"></span>Creating with AI…';
+  try {
+    const res = await fetch('/api/studio/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, size: IMG_SIZES[state.imgSize].ai }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'AI generation failed. Try again in a moment.');
+    const img = $('#ai-img');
+    img.src = 'data:image/png;base64,' + data.image;
+    showStage('img');
+    const bin = atob(data.image);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    setDownload(new Blob([bytes], { type: 'image/png' }), `${slug(prompt)}-ai.png`);
+    state.ai.used += 1;
+  } catch (e) {
+    showError(e.message);
+  } finally {
+    state.busy = false; $('#gen').disabled = false; renderControls();
+  }
+}
+
+function pickVideoMime(){
+  const options = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+  for (const m of options) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+  return null;
+}
+
+function generateVideo(prompt){
+  const mime = pickVideoMime();
+  if (!mime){
+    showError('Video recording is not supported in this browser. Try Chrome, or generate an image instead.');
+    return;
+  }
+  const size = VID_SIZES[state.vidSize];
+  const seconds = DURATIONS[state.duration];
+  const canvas = $('#canvas');
+  canvas.width = size.w; canvas.height = size.h;
+  const ctx = canvas.getContext('2d');
+  const render = sceneFor(prompt);
+  showStage('canvas');
+
+  const fps = 30;
+  const stream = canvas.captureStream(fps);
+  const recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  const chunks = [];
+  recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const ext = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
+    const blob = new Blob(chunks, { type: mime.split(';')[0] });
+    const video = $('#video');
+    video.src = URL.createObjectURL(blob);
+    showStage('video');
+    video.play().catch(() => {});
+    setDownload(blob, `${slug(prompt)}.${ext}`);
+    $('#rec-dot').style.display = 'none';
+    $('#prog').style.width = '0%';
+    state.busy = false; $('#gen').disabled = false; renderControls();
+  };
+
+  state.busy = true; $('#gen').disabled = true; renderControls();
+  $('#rec-dot').style.display = 'flex';
+  recorder.start();
+  const start = performance.now();
+  const total = seconds * 1000;
+  (function frame(now){
+    const elapsed = now - start;
+    const t = (elapsed / total) % 1;
+    render(ctx, size.w, size.h, t);
+    $('#prog').style.width = Math.min(100, (elapsed / total) * 100) + '%';
+    if (elapsed < total){
+      requestAnimationFrame(frame);
+    } else {
+      recorder.stop();
+      stream.getTracks().forEach((tr) => tr.stop());
+    }
+  })(start);
+}
+
+/* ---------- wiring ---------- */
+$('#tab-image').onclick = () => { state.mode = 'image'; renderControls(); };
+$('#tab-video').onclick = () => { state.mode = 'video'; if (state.style === 'ai') state.style = 'aurora'; renderControls(); };
+$('#dice').onclick = () => { $('#prompt').value = IDEAS[Math.floor(Math.random() * IDEAS.length)]; };
+$('#dl').onclick = () => {
+  const a = document.createElement('a');
+  a.href = state.downloadUrl; a.download = state.downloadName;
+  document.body.appendChild(a); a.click(); a.remove();
+};
+$('#gen').onclick = () => {
+  if (state.busy) return;
+  clearError();
+  const prompt = $('#prompt').value.trim() || 'day one';
+  state.variant += 1; // same prompt, new take on every press
+  $('#dl').classList.remove('show');
+  if (state.mode === 'video') generateVideo(prompt);
+  else if (state.style === 'ai') generateAIImage(prompt);
+  else generateImage(prompt);
+};
+
+// Match the main app's manual dark-mode preference if one was saved there.
+try {
+  const saved = JSON.parse(localStorage.getItem('tsid_v2') || 'null');
+  if (saved && saved.darkMode === true) document.documentElement.dataset.theme = 'dark';
+} catch (_) {}
+
+// AI mode lights up only when signed in AND the server has an image key configured.
+fetch('/api/studio/status')
+  .then((r) => (r.ok ? r.json() : null))
+  .then((s) => {
+    if (s && s.aiAvailable){
+      state.ai = { available: true, used: s.used, limit: s.limit };
+      $('#ai-badge').style.display = 'inline-block';
+      renderControls();
+    }
+  })
+  .catch(() => {});
+
+renderControls();
+</script>
+</body>
+</html>

@@ -22,6 +22,8 @@ const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/
 const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-pro/kontext';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 const MODEL_IMAGE_TO_VIDEO = process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video';
+const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
+const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.
@@ -227,6 +229,8 @@ router.get('/config', (req, res) => {
       characterImage: MODEL_CHARACTER_IMAGE,
       loraImage: MODEL_LORA_IMAGE,
       imageToVideo: MODEL_IMAGE_TO_VIDEO,
+      lipsyncImage: MODEL_LIPSYNC_IMAGE,
+      lipsyncVideo: MODEL_LIPSYNC_VIDEO,
     },
   });
 });
@@ -532,6 +536,65 @@ router.post('/kenburns', (req, res) => {
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), dur,
     `${still.label} · ${move}`, { source: 'kenburns', move, fromAssetId: still.id });
   res.status(202).json({ job: jobJson(job) });
+});
+
+// Cut a slice of a song into an mp3 data URI to send along with a lip-sync job.
+function extractAudioSegment(file, start, len) {
+  return new Promise((resolve, reject) => {
+    const out = path.join(MEDIA_DIR, `tmp-${crypto.randomBytes(6).toString('hex')}.mp3`);
+    const proc = spawn(ffmpegBin(), [
+      '-ss', start.toFixed(2), '-t', len.toFixed(2), '-i', file,
+      '-vn', '-c:a', 'libmp3lame', '-b:a', '192k', '-y', out,
+    ]);
+    proc.on('error', reject);
+    proc.on('close', (code) => {
+      if (code !== 0 || !fs.existsSync(out)) return reject(new Error('Could not cut that part of the song.'));
+      const buf = fs.readFileSync(out);
+      try { fs.unlinkSync(out); } catch (_) {}
+      resolve(`data:audio/mpeg;base64,${buf.toString('base64')}`);
+    });
+  });
+}
+
+router.post('/lipsync', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
+  }
+  const { assetId, audioAssetId, start, len } = req.body || {};
+  const subject = db.getAsset(req.userId, Number(assetId));
+  if (!subject || (subject.kind !== 'image' && subject.kind !== 'video')) {
+    return res.status(404).json({ error: 'Pick an image or video from your library first.' });
+  }
+  const song = db.getAsset(req.userId, Number(audioAssetId));
+  if (!song || song.kind !== 'audio') return res.status(404).json({ error: 'Pick a song for the vocal.' });
+  const segStart = Math.max(0, Number(start) || 0);
+  const segLen = Math.min(30, Math.max(1, Number(len) || 10)); // short clips: cost + model limits
+  if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
+    return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
+  }
+
+  try {
+    const audioUri = await extractAudioSegment(mediaPath(song.filename), segStart, segLen);
+    const isImage = subject.kind === 'image';
+    const model = isImage ? MODEL_LIPSYNC_IMAGE : MODEL_LIPSYNC_VIDEO;
+    const input = isImage
+      ? { source_image_url: fileToDataUri(subject.filename), driven_audio_url: audioUri }
+      : { video_url: fileToDataUri(subject.filename), audio_url: audioUri };
+    const submitted = await falSubmit(model, input);
+    const job = createJob(req.userId, 'ai-video', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'video',
+        label: `${subject.label} · sings`,
+        characterId: subject.character_id,
+        meta: { source: 'lipsync', model, fromAssetId: subject.id, songAssetId: song.id, segStart, segLen },
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
 });
 
 /* ---------------- Sequencer render ---------------- */

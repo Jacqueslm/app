@@ -934,6 +934,7 @@ const st = {
   beats: null,          // {bpm, beats[]} from the analyzer
   kb: { fx: 0.5, fy: 0.5 },
   animTarget: null,     // assetId with the animate panel open
+  singTarget: null,     // assetId with the lip-sync panel open
   busyScene: false,
   busyRender: false,
 };
@@ -1126,7 +1127,8 @@ function renderLibrary() {
       b.textContent = label; if (cls) b.className = cls; b.onclick = fn;
       actions.appendChild(b); return b;
     };
-    if (a.kind === 'image' && st.cfg?.falAvailable) btn('Animate', 'primary', () => { st.animTarget = st.animTarget === a.id ? null : a.id; renderLibrary(); });
+    if (a.kind === 'image' && st.cfg?.falAvailable) btn('Animate', 'primary', () => { st.animTarget = st.animTarget === a.id ? null : a.id; st.singTarget = null; renderLibrary(); });
+    if (st.cfg?.falAvailable) btn('Sing', '', () => { st.singTarget = st.singTarget === a.id ? null : a.id; st.animTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Motion', 'primary', () => {
       $('#kb-image').value = String(a.id);
       kbSelectImage();
@@ -1151,6 +1153,50 @@ function renderLibrary() {
       panel.querySelectorAll('button[data-sec]').forEach((b) => {
         b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel);
       });
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.singTarget === a.id) {
+      const songs = st.assets.filter((x) => x.kind === 'audio');
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      panel.innerHTML = songs.length ? `
+        <select class="input sg-song" style="padding:8px 10px;font-size:12px">
+          ${songs.map((s) => `<option value="${s.id}">♪ ${escapeHtml(s.label)}</option>`).join('')}
+        </select>
+        <div class="trim" style="font-size:11px">
+          <span>vocal from</span><input type="number" class="sg-start" min="0" step="0.5" value="0">
+          <span>s, for</span><input type="number" class="sg-len" min="1" max="30" step="0.5" value="10"><span>s</span>
+        </div>
+        <button class="btn2 sg-go">🎤 Make it sing</button>
+        <div class="progress-line sg-prog"><div></div></div>
+        <span class="usage">Lip-syncs the face to that part of the song (AI, uses your fal balance). Keep it short.</span>`
+        : '<span class="usage">Upload a song first (Music card or Quick Video).</span>';
+      const go = panel.querySelector('.sg-go');
+      if (go) go.onclick = async () => {
+        setErr('#scenes-err', null);
+        go.disabled = true;
+        const prog = panel.querySelector('.sg-prog');
+        prog.classList.add('show');
+        try {
+          const { job } = await jfetch('/api/studio/lipsync', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              assetId: a.id,
+              audioAssetId: Number(panel.querySelector('.sg-song').value),
+              start: Number(panel.querySelector('.sg-start').value) || 0,
+              len: Number(panel.querySelector('.sg-len').value) || 10,
+            }),
+          });
+          await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+          st.singTarget = null;
+          st.cfg.videosUsed += 1; updateScenesUsage();
+          await loadAssets();
+        } catch (e) {
+          setErr('#scenes-err', e.message);
+          go.disabled = false;
+          prog.classList.remove('show');
+        }
+      };
       el.querySelector('.li-meta').appendChild(panel);
     }
     grid.appendChild(el);

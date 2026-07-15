@@ -182,6 +182,22 @@ textarea::placeholder{color:var(--tm)}
       <p class="usage" id="scenes-usage"></p>
       <p class="note" style="text-align:left">Tip: keep the environment wording identical between shots and change only the action — it keeps the scene assets consistent.</p>
     </div>
+    <div class="card" id="dance-card" style="display:none">
+      <h3>🕺 Dance Transfer <span class="usage">— you dance, your character dances</span></h3>
+      <select class="input" id="dn-image"></select>
+      <select class="input" id="dn-video"></select>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="dn-upload" style="flex:1">Upload your dance recording</button>
+      </div>
+      <div class="trim" style="font-size:12px">
+        <span>use moves from</span><input type="number" id="dn-start" min="0" step="0.5" value="0">
+        <span>s, for</span><input type="number" id="dn-len" min="2" max="30" step="0.5" value="10"><span>s</span>
+      </div>
+      <button class="btn2" id="dn-go">🕺 Make my character do it</button>
+      <div class="progress-line" id="dn-prog"><div></div></div>
+      <p class="usage">Film yourself phone-upright, full body in frame, good light, one person only. Short clips (5–15s) look best and cost least. The result lands in your library below.</p>
+    </div>
+
     <div class="err" id="scenes-err"></div>
     <div class="row"><label class="lbl">Library</label><div class="lib-grid" id="lib-grid"></div></div>
   </div>
@@ -1044,6 +1060,7 @@ async function bootStudio() {
   if (st.cfg.falAvailable) {
     $('#ai-badge').style.display = 'inline-block';
     $('#scenes-form').style.display = 'flex';
+    $('#dance-card').style.display = 'flex';
   } else {
     $('#scenes-banner').innerHTML = 'AI scene generation is off. Get a key at <b>fal.ai</b>, add <b>FAL_KEY=...</b> to <b>server/.env</b>, restart the server, and this tab lights up. Uploads and the Sequencer work right now without it.';
     $('#scenes-banner').style.display = 'block';
@@ -1099,6 +1116,46 @@ $('#scene-gen').onclick = async () => {
     $('#scene-gen').disabled = false;
     $('#scene-gen').textContent = 'Generate scene image';
     setProg('#scene-prog', null);
+  }
+};
+
+/* ---------------- dance transfer ---------------- */
+$('#dn-upload').onclick = () => pickFile('video/*', async (file) => {
+  setErr('#scenes-err', null);
+  try {
+    const asset = await uploadFile(file, 'video');
+    await loadAssets();
+    $('#dn-video').value = String(asset.id);
+  } catch (e) { setErr('#scenes-err', e.message); }
+});
+$('#dn-go').onclick = async () => {
+  setErr('#scenes-err', null);
+  const imageAssetId = Number($('#dn-image').value);
+  const videoAssetId = Number($('#dn-video').value);
+  if (!imageAssetId) return setErr('#scenes-err', 'Pick your character image first.');
+  if (!videoAssetId) return setErr('#scenes-err', 'Pick (or upload) your dance recording.');
+  const btn = $('#dn-go');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Teaching your character the moves…';
+  setProg('#dn-prog', 3);
+  try {
+    const { job } = await jfetch('/api/studio/dance', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageAssetId, videoAssetId,
+        start: Number($('#dn-start').value) || 0,
+        len: Number($('#dn-len').value) || 10,
+      }),
+    });
+    await pollJob(job.id, (j) => setProg('#dn-prog', j.progress));
+    st.cfg.videosUsed += 1; updateScenesUsage();
+    await loadAssets();
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🕺 Make my character do it';
+    setProg('#dn-prog', null);
   }
 };
 
@@ -1382,6 +1439,15 @@ function renderSeqPickers() {
   $('#kb-image').innerHTML = '<option value="">Choose a still image…</option>' +
     imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
   if ([...$('#kb-image').options].some((o) => o.value === kbCurrent)) $('#kb-image').value = kbCurrent;
+
+  const dnImg = $('#dn-image'), dnVid = $('#dn-video');
+  const dnImgCur = dnImg.value, dnVidCur = dnVid.value;
+  dnImg.innerHTML = '<option value="">Your character (pick an image)…</option>' +
+    imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
+  dnVid.innerHTML = '<option value="">Your dance recording (pick a video)…</option>' +
+    vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
+  if ([...dnImg.options].some((o) => o.value === dnImgCur)) dnImg.value = dnImgCur;
+  if ([...dnVid.options].some((o) => o.value === dnVidCur)) dnVid.value = dnVidCur;
 
   const projects = st.assets.filter((a) => a.kind === 'project' && !a.label.endsWith('[template]'));
   $('#proj-select').innerHTML = projects.length

@@ -745,7 +745,7 @@ function eqFilter(eq) {
 }
 
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
+  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -821,17 +821,26 @@ router.post('/render', async (req, res) => {
     };
   }
 
-  // --- overlays (full-frame transparent PNGs the client rendered)
-  const ovs = [];
-  for (const o of (Array.isArray(overlays) ? overlays : []).slice(0, 24)) {
-    const row = db.getAsset(req.userId, Number(o.assetId));
-    if (!row || row.kind !== 'image') return res.status(404).json({ error: 'Overlay image not found.' });
-    const start = Math.max(0, Number(o.start) || 0);
-    const end = Math.max(start + 0.2, Number(o.end) || start + 3);
-    const fade = Math.min(2, Math.max(0, o.fade == null ? 0.4 : Number(o.fade)));
-    if (start >= winEnd || end <= winStart) continue; // fully outside the window
-    ovs.push({ file: mediaPath(row.filename), start, end, fade });
-  }
+  // --- overlays (full-frame transparent PNGs the client rendered) and lyric
+  // captions (same mechanics, but they never duck the music - lyrics ARE the music)
+  const resolveOverlayList = (list, cap) => {
+    const out = [];
+    for (const o of (Array.isArray(list) ? list : []).slice(0, cap)) {
+      const row = db.getAsset(req.userId, Number(o.assetId));
+      if (!row || row.kind !== 'image') return null;
+      const start = Math.max(0, Number(o.start) || 0);
+      const end = Math.max(start + 0.2, Number(o.end) || start + 3);
+      const fade = Math.min(2, Math.max(0, o.fade == null ? 0.4 : Number(o.fade)));
+      if (start >= winEnd || end <= winStart) continue; // fully outside the window
+      out.push({ file: mediaPath(row.filename), start, end, fade });
+    }
+    return out;
+  };
+  const ovs = resolveOverlayList(overlays, 24);
+  if (!ovs) return res.status(404).json({ error: 'Overlay image not found.' });
+  const caps = resolveOverlayList(captions, 120);
+  if (!caps) return res.status(404).json({ error: 'Caption image not found.' });
+  const allOverlays = ovs.concat(caps);
 
   // --- inputs: clips, then music, then overlays
   const args = [];
@@ -842,7 +851,7 @@ router.post('/render', async (req, res) => {
   const musicIdx = resolved.length;
   if (musicIn) for (const t of musicIn.tracks) args.push('-i', t.file);
   const ovBase = musicIdx + (musicIn ? musicIn.tracks.length : 0);
-  for (const o of ovs) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
+  for (const o of allOverlays) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
 
   // --- filter graph
   const filters = [];
@@ -874,7 +883,7 @@ router.post('/render', async (req, res) => {
 
   // Overlays ride on the assembled timeline (before windowing, so their times
   // stay in timeline coordinates).
-  ovs.forEach((o, k) => {
+  allOverlays.forEach((o, k) => {
     const fin = o.fade > 0 ? `,fade=t=in:st=${o.start.toFixed(3)}:d=${o.fade.toFixed(3)}:alpha=1` : '';
     const fout = o.fade > 0 ? `,fade=t=out:st=${(o.end - o.fade).toFixed(3)}:d=${o.fade.toFixed(3)}:alpha=1` : '';
     filters.push(`[${ovBase + k}:v]scale=${W}:${H},format=rgba,fps=${FPS}${fin}${fout}[ov${k}]`);

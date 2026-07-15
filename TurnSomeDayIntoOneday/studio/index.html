@@ -171,6 +171,14 @@ textarea::placeholder{color:var(--tm)}
   </div><!-- /view-art -->
 
   <div class="view" id="view-scenes">
+    <div class="card" id="falkey-card" style="display:none">
+      <h3>🔑 Turn on AI <span class="usage">(one-time setup)</span></h3>
+      <p class="usage" id="falkey-hint">Create a free account at <b>fal.ai</b>, add some credit, copy your API key, and paste it here. That's the whole setup — AI Scenes, Sing, and Dance Transfer light up instantly.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="input" id="falkey-input" placeholder="Paste your fal.ai key" style="flex:1;min-width:140px" autocomplete="off">
+        <button class="btn2" id="falkey-save">Save</button>
+      </div>
+    </div>
     <div class="banner" id="scenes-banner" style="display:none"></div>
     <div class="card" id="scenes-form" style="display:none">
       <h3>Generate a scene</h3>
@@ -386,6 +394,18 @@ textarea::placeholder{color:var(--tm)}
       <button class="gen-btn" id="cp-export">Export campaign (ZIP)</button>
       <p class="usage" id="cp-status"></p>
       <p class="usage">The ZIP contains your videos, thumbnails, a posts.csv with every caption + suggested time, and campaign.json (ready for the Buffer API hookup later). Upload to Buffer post-by-post — everything's pre-written.</p>
+    </div>
+
+    <div class="card adv-card">
+      <h3>Storage &amp; Backup</h3>
+      <p class="usage" id="stor-total">…</p>
+      <div id="stor-list" class="row"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="stor-refresh">Refresh</button>
+        <button class="btn2" id="stor-backup">⬇ Download full backup (ZIP)</button>
+      </div>
+      <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
+      <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
     </div>
 
     <div class="card adv-card">
@@ -1061,10 +1081,13 @@ async function bootStudio() {
     $('#ai-badge').style.display = 'inline-block';
     $('#scenes-form').style.display = 'flex';
     $('#dance-card').style.display = 'flex';
+    $('#falkey-card').style.display = 'none';
+    $('#falkey-manage').style.display = 'block';
   } else {
-    $('#scenes-banner').innerHTML = 'AI scene generation is off. Get a key at <b>fal.ai</b>, add <b>FAL_KEY=...</b> to <b>server/.env</b>, restart the server, and this tab lights up. Uploads and the Sequencer work right now without it.';
-    $('#scenes-banner').style.display = 'block';
+    $('#falkey-card').style.display = 'flex';
+    $('#falkey-manage').style.display = 'none';
   }
+  loadStorage();
   $('#chars-form').style.display = 'flex';
   await Promise.all([loadAssets(), loadCharacters()]);
 }
@@ -1118,6 +1141,64 @@ $('#scene-gen').onclick = async () => {
     setProg('#scene-prog', null);
   }
 };
+
+/* ---------------- AI key setup + storage & backup ---------------- */
+$('#falkey-save').onclick = async () => {
+  setErr('#scenes-err', null);
+  const key = $('#falkey-input').value.trim();
+  if (!key) return setErr('#scenes-err', 'Paste your fal.ai key first.');
+  $('#falkey-save').disabled = true;
+  try {
+    await jfetch('/api/studio/settings/falkey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }),
+    });
+    $('#falkey-input').value = '';
+    location.reload(); // simplest way to light everything up
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+    $('#falkey-save').disabled = false;
+  }
+};
+$('#falkey-remove').onclick = async (e) => {
+  e.preventDefault();
+  if (!confirm('Remove the AI key from this server? AI features will turn off (your fal balance is untouched).')) return;
+  try {
+    await jfetch('/api/studio/settings/falkey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: '' }),
+    });
+    location.reload();
+  } catch (err) { setErr('#seq-err', err.message); }
+};
+
+function fmtBytes(n) {
+  if (n > 1e9) return (n / 1e9).toFixed(2) + ' GB';
+  if (n > 1e6) return (n / 1e6).toFixed(1) + ' MB';
+  return Math.round(n / 1e3) + ' KB';
+}
+async function loadStorage() {
+  try {
+    const s = await jfetch('/api/studio/storage');
+    $('#stor-total').textContent = `${fmtBytes(s.total)} used across ${s.count} files. Biggest first:`;
+    const list = $('#stor-list');
+    list.innerHTML = '';
+    s.items.filter((it) => it.size > 0).slice(0, 15).forEach((it) => {
+      const row = document.createElement('div');
+      row.className = 'trim';
+      row.style.fontSize = '12px';
+      row.innerHTML = `<span style="color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${escapeHtml(it.label)}</span>
+        <span style="color:var(--tm)">${it.kind} · ${fmtBytes(it.size)}</span>
+        <button class="st-del" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button>`;
+      row.querySelector('.st-del').onclick = async () => {
+        if (!confirm(`Delete "${it.label}" (${fmtBytes(it.size)})? This can't be undone.`)) return;
+        try { await jfetch(`/api/studio/assets/${it.id}`, { method: 'DELETE' }); await loadAssets(); await loadStorage(); }
+        catch (e) { setErr('#seq-err', e.message); }
+      };
+      list.appendChild(row);
+    });
+  } catch (_) { /* not signed in */ }
+}
+$('#stor-refresh').onclick = loadStorage;
+$('#stor-backup').onclick = () => { location.href = '/api/studio/backup'; };
 
 /* ---------------- dance transfer ---------------- */
 $('#dn-upload').onclick = () => pickFile('video/*', async (file) => {

@@ -14,8 +14,19 @@ const db = require('./db');
 const billing = require('./billing');
 const { requireAuth } = require('./auth');
 
-const FAL_KEY = process.env.FAL_KEY;
+let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
 const FAL_QUEUE_BASE = 'https://queue.fal.run';
+const ENV_PATH = path.join(__dirname, '.env');
+
+// Persist (or remove) FAL_KEY in server/.env so it survives restarts, keeping
+// every other line (PORT, SESSION_SECRET, ...) untouched.
+function persistFalKey(key) {
+  let lines = [];
+  try { lines = fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/); } catch (_) {}
+  lines = lines.filter((l) => !l.startsWith('FAL_KEY=') && l.trim() !== '');
+  if (key) lines.push(`FAL_KEY=${key}`);
+  fs.writeFileSync(ENV_PATH, lines.join('\n') + '\n');
+}
 
 // Model ids move fast in this space - override any of these in .env without code changes.
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
@@ -235,6 +246,67 @@ router.get('/config', (req, res) => {
       motion: MODEL_MOTION,
     },
   });
+});
+
+/* ---------------- settings: AI key from the app ---------------- */
+router.post('/settings/falkey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 10 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a fal.ai key. Copy it from fal.ai → Keys." });
+  }
+  try {
+    persistFalKey(clean || null);
+    FAL_KEY = clean || undefined;
+    res.json({ falAvailable: Boolean(FAL_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+/* ---------------- storage manager ---------------- */
+router.get('/storage', (req, res) => {
+  let total = 0;
+  const items = db.getAssets(req.userId).map((row) => {
+    let size = 0;
+    try { size = fs.statSync(mediaPath(row.filename)).size; } catch (_) {}
+    total += size;
+    return { id: row.id, kind: row.kind, label: row.label, size, createdAt: row.created_at };
+  });
+  items.sort((a, b) => b.size - a.size);
+  res.json({ total, count: items.length, items: items.slice(0, 30) });
+});
+
+/* ---------------- full backup (streamed, nothing extra stored) ---------------- */
+router.get('/backup', (req, res) => {
+  try {
+    const archiverMod = require('archiver');
+    const archive = typeof archiverMod === 'function'
+      ? archiverMod('zip', { zlib: { level: 0 } })
+      : new archiverMod.ZipArchive({ zlib: { level: 0 } });
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="studio-backup-${stamp}.zip"`);
+    archive.on('error', () => { try { res.end(); } catch (_) {} });
+    archive.pipe(res);
+
+    const assets = db.getAssets(req.userId);
+    for (const a of assets) {
+      const file = mediaPath(a.filename);
+      if (fs.existsSync(file)) {
+        archive.file(file, { name: `backup/${a.kind}s/${a.id}-${a.label.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50)}${path.extname(a.filename)}` });
+      }
+    }
+    const manifest = {
+      exportedAt: new Date().toISOString(),
+      assets: assets.map((a) => ({ id: a.id, kind: a.kind, label: a.label, meta: a.meta ? JSON.parse(a.meta) : null, createdAt: a.created_at })),
+      characters: db.getCharacters(req.userId).map((c) => ({ id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word })),
+    };
+    archive.append(JSON.stringify(manifest, null, 2), { name: 'backup/manifest.json' });
+    archive.finalize();
+  } catch (err) {
+    if (!res.headersSent) res.status(500).json({ error: `Backup failed: ${err.message}` });
+  }
 });
 
 /* ---------------- assets ---------------- */

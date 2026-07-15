@@ -201,6 +201,29 @@ textarea::placeholder{color:var(--tm)}
   <div class="view" id="view-seq">
     <div class="banner" id="seq-banner" style="display:none"></div>
 
+    <div class="card" style="border-color:var(--accent);border-width:1.5px">
+      <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
+      <button class="btn2" id="qk-add-imgs">1️⃣ &nbsp;Add your pictures</button>
+      <div id="qk-shots" class="row"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
+        <span class="usage" id="qk-music-label">no song yet (that's ok too)</span>
+      </div>
+      <div class="chips" id="qk-format"></div>
+      <button class="gen-btn" id="qk-assemble">3️⃣ &nbsp;Assemble my video</button>
+      <div class="progress-line" id="qk-prog"><div></div></div>
+      <p class="usage" id="qk-status"></p>
+      <div class="stage" id="qk-stage"><video id="qk-video" controls playsinline></video></div>
+      <button class="dl-btn" id="qk-dl">Download my video</button>
+      <div class="trim" style="font-size:12px">
+        <input class="input" id="qk-tpl-name" placeholder="template name" style="flex:1;min-width:80px">
+        <button class="btn2 quiet" id="qk-tpl-save" style="padding:7px 10px;font-size:12px">Save template</button>
+        <select class="input" id="qk-tpl-select" style="flex:1;min-width:80px"></select>
+        <button class="btn2 quiet" id="qk-tpl-apply" style="padding:7px 10px;font-size:12px">Use</button>
+      </div>
+      <p class="usage">A template remembers your camera moves, timings and words — next time, drop in new pictures, hit Use, then Assemble.</p>
+    </div>
+
     <div class="card">
       <h3>Stills → Motion <span class="usage">(Ken Burns camera moves, free)</span></h3>
       <select class="input" id="kb-image"></select>
@@ -915,7 +938,15 @@ async function pollJob(jobId, onTick) {
 function pickFile(accept, cb) {
   const input = $('#file-input');
   input.accept = accept;
+  input.multiple = false;
   input.onchange = () => { if (input.files[0]) cb(input.files[0]); input.value = ''; };
+  input.click();
+}
+function pickFiles(accept, cb) {
+  const input = $('#file-input');
+  input.accept = accept;
+  input.multiple = true;
+  input.onchange = () => { if (input.files.length) cb([...input.files]); input.value = ''; input.multiple = false; };
   input.click();
 }
 
@@ -1262,10 +1293,15 @@ function renderSeqPickers() {
     imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
   if ([...$('#kb-image').options].some((o) => o.value === kbCurrent)) $('#kb-image').value = kbCurrent;
 
-  const projects = st.assets.filter((a) => a.kind === 'project');
+  const projects = st.assets.filter((a) => a.kind === 'project' && !a.label.endsWith('[template]'));
   $('#proj-select').innerHTML = projects.length
     ? projects.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
     : '<option value="">No saved projects</option>';
+
+  const templates = st.assets.filter((a) => a.kind === 'project' && a.label.endsWith('[template]'));
+  $('#qk-tpl-select').innerHTML = templates.length
+    ? templates.map((a) => `<option value="${a.id}">${escapeHtml(a.label.replace(' [template]', ''))}</option>`).join('')
+    : '<option value="">No templates yet</option>';
 }
 
 /* ---------------- Ken Burns panel ---------------- */
@@ -1656,7 +1692,8 @@ async function uploadOverlayPngs() {
   return out;
 }
 
-async function runRender(windowOpt, btnSel) {
+async function runRender(windowOpt, btnSel, opts) {
+  const ui = { prog: '#seq-prog', stage: '#seq-stage', video: '#seq-video', dl: '#seq-dl', ...(opts || {}) };
   if (st.busyRender) return;
   setErr('#seq-err', null);
   if (!st.seq.length) return setErr('#seq-err', 'Add at least one clip to the timeline.');
@@ -1670,9 +1707,9 @@ async function runRender(windowOpt, btnSel) {
   st.busyRender = true;
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Rendering…';
-  setProg('#seq-prog', 2);
-  $('#seq-stage').classList.remove('show');
-  $('#seq-dl').classList.remove('show');
+  setProg(ui.prog, 2);
+  $(ui.stage).classList.remove('show');
+  $(ui.dl).classList.remove('show');
   try {
     const overlays = await uploadOverlayPngs();
     const spec = collectSpec();
@@ -1689,24 +1726,30 @@ async function runRender(windowOpt, btnSel) {
         fadeFromBlack: spec.fadeFromBlack,
         fadeToBlack: spec.fadeToBlack,
         window: windowOpt || null,
+        name: ui.name || null,
       }),
     });
-    const done = await pollJob(job.id, (j) => setProg('#seq-prog', j.progress));
+    const done = await pollJob(job.id, (j) => {
+      setProg(ui.prog, j.progress);
+      if (ui.onProgress) ui.onProgress(j.progress);
+    });
     await loadAssets();
     const asset = st.assets.find((a) => a.id === done.assetId);
     if (asset) {
-      $('#seq-video').src = asset.url;
-      $('#seq-stage').classList.add('show');
-      $('#seq-dl').classList.add('show');
-      $('#seq-dl').onclick = () => { const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.mp4'; l.click(); };
+      $(ui.video).src = asset.url;
+      $(ui.stage).classList.add('show');
+      $(ui.dl).classList.add('show');
+      $(ui.dl).onclick = () => { const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.mp4'; l.click(); };
     }
+    return asset;
   } catch (e) {
     setErr('#seq-err', e.message);
+    return null;
   } finally {
     st.busyRender = false;
     btn.disabled = false;
     btn.textContent = oldLabel;
-    setProg('#seq-prog', null);
+    setProg(ui.prog, null);
   }
 }
 $('#seq-render').onclick = () => runRender(null, '#seq-render');
@@ -1935,6 +1978,203 @@ $('#sh-render').onclick = async () => {
   }
 };
 
+/* ---------------- Quick Video: one-click assemble ---------------- */
+const QK_MOVES = [
+  ['push', 'Zoom in'], ['pull', 'Zoom out'], ['pan_right', 'Slide →'], ['pan_left', 'Slide ←'],
+  ['pan_up', 'Slide ↑'], ['pan_down', 'Slide ↓'], ['drift', 'Float'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
+];
+const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
+const qk = { shots: [], format: '9:16', busy: false };
+
+function renderQkFormat() {
+  chipRow($('#qk-format'), [
+    { key: '9:16', label: 'Phone 9:16' }, { key: '16:9', label: 'YouTube 16:9' }, { key: '1:1', label: 'Square 1:1' },
+  ], qk.format, (k) => { qk.format = k; renderQkFormat(); });
+}
+
+function renderQkShots() {
+  const list = $('#qk-shots');
+  list.innerHTML = '';
+  qk.shots.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'seq-item';
+    row.innerHTML = `
+      <img src="${s.url}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0" alt="">
+      <div class="seq-mid">
+        <div class="trim" style="font-size:12px">
+          <select class="input q-move" style="width:auto;padding:5px 8px;font-size:12px">
+            ${QK_MOVES.map(([v, l]) => `<option value="${v}"${v === s.move ? ' selected' : ''}>${l}</option>`).join('')}
+          </select>
+          <select class="input q-dur" style="width:auto;padding:5px 8px;font-size:12px">
+            ${[2, 3, 4, 5, 6, 8].map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d}s</option>`).join('')}
+          </select>
+          ${i < qk.shots.length - 1 ? `<span>then</span>
+          <select class="input q-tr" style="width:auto;padding:5px 8px;font-size:12px">
+            <option value="fade"${s.transAfter === 'fade' ? ' selected' : ''}>blend</option>
+            <option value="cut"${s.transAfter === 'cut' ? ' selected' : ''}>cut</option>
+            <option value="fadeblack"${s.transAfter === 'fadeblack' ? ' selected' : ''}>black</option>
+          </select>` : ''}
+        </div>
+        <input class="input q-text" placeholder="words on screen (optional)" value="${escapeHtml(s.text)}" style="padding:7px 10px;font-size:12px">
+      </div>
+      <div class="seq-btns">
+        <button class="q-up">↑</button><button class="q-dn">↓</button><button class="q-rm">✕</button>
+      </div>`;
+    row.querySelector('.q-move').onchange = (e) => { s.move = e.target.value; };
+    row.querySelector('.q-dur').onchange = (e) => { s.dur = Number(e.target.value); };
+    const tr = row.querySelector('.q-tr');
+    if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; };
+    row.querySelector('.q-text').oninput = (e) => { s.text = e.target.value; };
+    row.querySelector('.q-up').onclick = () => { if (i > 0) { [qk.shots[i - 1], qk.shots[i]] = [qk.shots[i], qk.shots[i - 1]]; renderQkShots(); } };
+    row.querySelector('.q-dn').onclick = () => { if (i < qk.shots.length - 1) { [qk.shots[i + 1], qk.shots[i]] = [qk.shots[i], qk.shots[i + 1]]; renderQkShots(); } };
+    row.querySelector('.q-rm').onclick = () => { qk.shots.splice(i, 1); renderQkShots(); };
+    list.appendChild(row);
+  });
+}
+
+$('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
+  setErr('#seq-err', null);
+  $('#qk-status').textContent = 'Adding your pictures…';
+  try {
+    for (const file of files) {
+      const asset = await uploadFile(file, 'image');
+      qk.shots.push({
+        assetId: asset.id, url: asset.url, label: asset.label,
+        move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
+        dur: 4, text: '', transAfter: 'fade',
+      });
+    }
+    await loadAssets();
+    renderQkShots();
+    $('#qk-status').textContent = `${qk.shots.length} picture${qk.shots.length > 1 ? 's' : ''} ready. Add your song, then press Assemble!`;
+  } catch (e) {
+    $('#qk-status').textContent = '';
+    setErr('#seq-err', e.message);
+  }
+});
+
+$('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
+  setErr('#seq-err', null);
+  try {
+    const asset = await uploadFile(file, 'audio');
+    await loadAssets();
+    $('#seq-music').value = String(asset.id);
+    $('#qk-music-label').textContent = `♪ ${asset.label}`;
+    persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
+});
+
+$('#qk-assemble').onclick = async () => {
+  if (qk.busy || st.busyRender) return;
+  setErr('#seq-err', null);
+  if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures first (button 1).');
+  qk.busy = true;
+  const btn = $('#qk-assemble');
+  btn.disabled = true;
+  $('#qk-stage').classList.remove('show');
+  $('#qk-dl').classList.remove('show');
+  try {
+    // step 1: give every picture its camera move
+    st.seqFormat = qk.format;
+    st.seqRes = '1080';
+    renderOutputChips();
+    const clipAssets = [];
+    for (let i = 0; i < qk.shots.length; i++) {
+      const s = qk.shots[i];
+      $('#qk-status').textContent = `Making picture ${i + 1} of ${qk.shots.length} move…`;
+      btn.innerHTML = `<span class="spinner"></span>Picture ${i + 1} of ${qk.shots.length}…`;
+      const { job } = await jfetch('/api/studio/kenburns', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: s.assetId, move: s.move, duration: s.dur, intensity: 2, size: currentSize() }),
+      });
+      const done = await pollJob(job.id, (j) => setProg('#qk-prog', ((i + j.progress / 100) / qk.shots.length) * 100));
+      clipAssets.push(done.assetId);
+    }
+    await loadAssets();
+
+    // step 2: build the timeline (also fills the editor below, so you can tweak)
+    st.seq = clipAssets.map((id) => {
+      const a = st.assets.find((x) => x.id === id);
+      return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: null };
+    });
+    st.trans = qk.shots.slice(0, -1).map((s) => ({ type: s.transAfter, duration: 0.5 }));
+    // words on screen, timed to each picture
+    st.overlays = [];
+    let cum = 0;
+    qk.shots.forEach((s, i) => {
+      const td = i < st.trans.length && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0;
+      if (s.text.trim()) {
+        st.overlays.push({
+          text: s.text, font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 8,
+          start: Math.round((cum + 0.3) * 10) / 10,
+          end: Math.round((cum + Math.min(s.dur - 0.2, 4.3)) * 10) / 10,
+          fade: 0.3,
+        });
+      }
+      cum += s.dur - td;
+    });
+    syncTrans(); renderSeq(); renderOverlays(); persistDraft();
+
+    // step 3: render the finished video
+    $('#qk-status').textContent = 'Adding your music and putting it all together…';
+    setProg('#qk-prog', 2);
+    const asset = await runRender(null, '#qk-assemble', {
+      prog: '#qk-prog', stage: '#qk-stage', video: '#qk-video', dl: '#qk-dl',
+      name: `quick_video_${qk.format.replace(':', 'x')}`,
+    });
+    $('#qk-status').textContent = asset
+      ? 'Done! 🎉 Press play, or Download your video below. Want to change something? Everything is in the Timeline below — tweak and press Render again.'
+      : '';
+  } catch (e) {
+    $('#qk-status').textContent = '';
+    setErr('#seq-err', e.message);
+  } finally {
+    qk.busy = false;
+    btn.disabled = false;
+    btn.innerHTML = '3️⃣ &nbsp;Assemble my video';
+    setProg('#qk-prog', null);
+  }
+};
+
+/* ---------------- quick video templates ---------------- */
+$('#qk-tpl-save').onclick = async () => {
+  setErr('#seq-err', null);
+  if (!qk.shots.length) return setErr('#seq-err', 'Set up some pictures first, then save them as a template.');
+  const name = ($('#qk-tpl-name').value.trim() || 'My video style').slice(0, 50);
+  try {
+    const tpl = {
+      v: 1, type: 'quick-template', format: qk.format,
+      slots: qk.shots.map((s) => ({ move: s.move, dur: s.dur, text: s.text, transAfter: s.transAfter })),
+    };
+    const blob = new Blob([JSON.stringify(tpl)], { type: 'application/json' });
+    await uploadFile(new File([blob], `${name} [template].json`, { type: 'application/json' }), 'project');
+    await loadAssets();
+    $('#qk-tpl-name').value = '';
+    $('#qk-status').textContent = `Template "${name}" saved. Next time: add pictures → pick it → Use → Assemble.`;
+  } catch (e) { setErr('#seq-err', e.message); }
+};
+
+$('#qk-tpl-apply').onclick = async () => {
+  setErr('#seq-err', null);
+  const asset = st.assets.find((a) => a.id === Number($('#qk-tpl-select').value));
+  if (!asset) return setErr('#seq-err', 'No template picked.');
+  if (!qk.shots.length) return setErr('#seq-err', 'Add your pictures first, then apply the template.');
+  try {
+    const tpl = await (await fetch(asset.url)).json();
+    if (!tpl || tpl.type !== 'quick-template' || !Array.isArray(tpl.slots)) throw new Error('Not a valid template file.');
+    qk.shots.forEach((s, i) => {
+      const slot = tpl.slots[i % tpl.slots.length];
+      s.move = slot.move || s.move;
+      s.dur = slot.dur || s.dur;
+      s.transAfter = slot.transAfter || s.transAfter;
+      if (slot.text) s.text = slot.text;
+    });
+    if (SIZE_MAP[tpl.format]) { qk.format = tpl.format; renderQkFormat(); }
+    renderQkShots();
+    $('#qk-status').textContent = 'Template applied — press Assemble!';
+  } catch (e) { setErr('#seq-err', `Could not load that template: ${e.message}`); }
+};
+
 /* ---------------- projects ---------------- */
 $('#proj-save').onclick = async () => {
   setErr('#seq-err', null);
@@ -1960,6 +2200,7 @@ renderOutputChips();
 renderSeq();
 renderOverlays();
 renderHighlights();
+renderQkFormat();
 bootStudio().then(() => {
   updateScenesUsage();
   // restore the browser draft if the timeline is empty

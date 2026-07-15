@@ -337,6 +337,12 @@ body{display:flex;justify-content:center}
   <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
+  <div id="gate-google-wrap" style="display:none;margin-top:16px">
+    <div style="display:flex;align-items:center;gap:10px;color:#6672a0;font-size:12px;margin-bottom:14px">
+      <div style="flex:1;height:1px;background:var(--bdr)"></div>or<div style="flex:1;height:1px;background:var(--bdr)"></div>
+    </div>
+    <div id="gate-google-btn" style="display:flex;justify-content:center"></div>
+  </div>
 </div>
 
 <!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
@@ -6821,6 +6827,55 @@ function showAuthGate(mode){
   document.getElementById('gate-email').value='';
   document.getElementById('gate-password').value='';
   setGateMode(mode||'login');
+  initGoogleSignIn();
+}
+
+// ─── CONTINUE WITH GOOGLE ─────────────────────────────────────────────────────
+// The button only appears if the server has a Google client id configured; otherwise the
+// app stays fully self-contained (no external script is loaded).
+let googleClientId=null,googleInited=false,googleScriptRequested=false;
+async function initGoogleSignIn(){
+  if(googleClientId===null){
+    try{const res=await fetch('/api/auth/google/config');const d=await res.json();googleClientId=d.clientId||'';}
+    catch(e){googleClientId='';}
+  }
+  if(!googleClientId)return; // not configured -> button stays hidden
+  if(window.google&&window.google.accounts)return renderGoogleButton();
+  if(googleScriptRequested)return;
+  googleScriptRequested=true;
+  const s=document.createElement('script');
+  s.src='https://accounts.google.com/gsi/client';s.async=true;s.defer=true;
+  s.onload=renderGoogleButton;
+  s.onerror=()=>{/* offline or blocked - leave the button hidden, email/password still works */};
+  document.head.appendChild(s);
+}
+function renderGoogleButton(){
+  if(!window.google||!window.google.accounts||!googleClientId)return;
+  if(!googleInited){
+    google.accounts.id.initialize({client_id:googleClientId,callback:handleGoogleCredential});
+    googleInited=true;
+  }
+  const wrap=document.getElementById('gate-google-btn');
+  if(!wrap)return;
+  wrap.innerHTML='';
+  google.accounts.id.renderButton(wrap,{theme:'outline',size:'large',width:280,text:'continue_with'});
+  document.getElementById('gate-google-wrap').style.display='block';
+}
+async function handleGoogleCredential(response){
+  const errEl=document.getElementById('gate-error');errEl.textContent='';
+  try{
+    const res=await fetch('/api/auth/google',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credential:response.credential})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){errEl.textContent=data.error||'Google sign-in failed. Try again.';return;}
+    S.accountEmail=data.email;
+    // Merge the account's server state the same way a normal login does.
+    const stateRes=await fetch('/api/state');
+    const stateData=stateRes.ok?await stateRes.json():{state:null,version:0};
+    serverStateVersion=stateData.version||0;
+    if(stateData.state){let ss={};try{ss=JSON.parse(stateData.state);}catch(_){}Object.assign(S,mergeStates(ss,S));S.accountEmail=data.email;}
+    save();
+    enterApp();
+  }catch(e){errEl.textContent='Could not reach the server. Check your connection and try again.';}
 }
 
 function enterApp(){

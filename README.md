@@ -24,7 +24,13 @@ ANTHROPIC_API_KEY=<your key>              # without this, Nova falls back to loc
 STRIPE_PUBLISHABLE_KEY=<pk_test_... or pk_live_...>
 STRIPE_SECRET_KEY=<sk_test_... or sk_live_...>
 STRIPE_WEBHOOK_SECRET=<whsec_...>         # from `stripe listen` (local) or your webhook endpoint (production)
+GOOGLE_CLIENT_ID=<...apps.googleusercontent.com>   # enables "Continue with Google"; button is hidden without it
 ```
+
+To enable **Continue with Google**: create an OAuth 2.0 Web client at
+[Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials),
+add your app's origin (e.g. `http://localhost:4300`) under *Authorized JavaScript origins*,
+and put the client ID in `GOOGLE_CLIENT_ID`. Email/password sign-in works with or without it.
 
 ## Run
 

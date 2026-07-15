@@ -1,5 +1,6 @@
 require('dotenv').config();
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
@@ -26,6 +27,7 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_VERSION = '2023-06-01';
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
@@ -235,6 +237,55 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   res.json({ email: user.email });
+});
+
+// Lets the client decide whether to show the "Continue with Google" button, and with which
+// client id. Returns null when Google sign-in isn't configured on this server.
+app.get('/api/auth/google/config', (req, res) => {
+  res.json({ clientId: GOOGLE_CLIENT_ID || null });
+});
+
+// Verifies a Google ID token (the credential from Google Identity Services) and signs the
+// user in, creating the account on first use. Verification goes through Google's tokeninfo
+// endpoint, so no client secret or extra dependency is needed.
+app.post('/api/auth/google', loginLimiter, async (req, res) => {
+  if (!GOOGLE_CLIENT_ID) {
+    return res.status(503).json({ error: 'Google sign-in is not available on this server right now.' });
+  }
+  const { credential } = req.body || {};
+  if (!credential || typeof credential !== 'string') {
+    return res.status(400).json({ error: 'Missing Google credential.' });
+  }
+  try {
+    const infoRes = await fetch(
+      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential)
+    );
+    if (!infoRes.ok) {
+      return res.status(401).json({ error: 'Google sign-in could not be verified.' });
+    }
+    const info = await infoRes.json();
+    // The token must have been minted for THIS app, and the email must be verified.
+    if (info.aud !== GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ error: 'Google sign-in could not be verified.' });
+    }
+    if (info.email_verified !== 'true' && info.email_verified !== true) {
+      return res.status(401).json({ error: 'Your Google email is not verified.' });
+    }
+    const email = (info.email || '').trim().toLowerCase();
+    if (!email) return res.status(401).json({ error: 'Google account has no email.' });
+
+    let user = db.getUserByEmail(email);
+    if (!user) {
+      // First sign-in with this Google email creates the account. It gets an unusable random
+      // password hash - the user authenticates through Google, not a password.
+      const userId = db.createUser(email, hashPassword(crypto.randomBytes(24).toString('hex')));
+      user = { id: userId };
+    }
+    setSessionCookie(res, user.id);
+    res.json({ email });
+  } catch (err) {
+    res.status(502).json({ error: 'Could not reach Google to verify sign-in.' });
+  }
 });
 
 app.get('/api/state', requireAuth, (req, res) => {

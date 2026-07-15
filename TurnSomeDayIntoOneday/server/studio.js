@@ -36,12 +36,13 @@ const EXT_BY_KIND = {
   image: new Set(['.png', '.jpg', '.jpeg', '.webp']),
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
   audio: new Set(['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']),
+  project: new Set(['.json']),
 };
 const CONTENT_TYPES = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
   '.mp4': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/quicktime', '.m4v': 'video/mp4',
   '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.aac': 'audio/aac',
-  '.ogg': 'audio/ogg', '.flac': 'audio/flac',
+  '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.json': 'application/json',
 };
 
 function todayUTC() {
@@ -231,7 +232,7 @@ router.get('/config', (req, res) => {
 
 /* ---------------- assets ---------------- */
 router.get('/assets', (req, res) => {
-  const kind = ['image', 'video', 'audio'].includes(req.query.kind) ? req.query.kind : null;
+  const kind = ['image', 'video', 'audio', 'project'].includes(req.query.kind) ? req.query.kind : null;
   res.json({ assets: db.getAssets(req.userId, kind).map(assetJson) });
 });
 
@@ -263,15 +264,20 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   if (!EXT_BY_KIND[kind].has(ext)) {
     return res.status(400).json({ error: `Unsupported ${kind} file type: ${ext || '(none)'}` });
   }
-  if (!req.body || !req.body.length) return res.status(400).json({ error: 'Empty upload.' });
+  // If a JSON-typed body slipped through express.json() first, req.body is a
+  // parsed object rather than a Buffer - re-serialize it.
+  let body = req.body;
+  if (body && !Buffer.isBuffer(body) && typeof body === 'object') body = Buffer.from(JSON.stringify(body));
+  if (!body || !body.length) return res.status(400).json({ error: 'Empty upload.' });
   if (characterId && !db.getCharacter(req.userId, characterId)) {
     return res.status(404).json({ error: 'Character not found.' });
   }
   const filename = newFilename(req.userId, ext);
-  fs.writeFileSync(mediaPath(filename), req.body);
+  fs.writeFileSync(mediaPath(filename), body);
   const label = path.basename(name, ext).slice(0, 80) || 'Upload';
   const meta = { source: 'upload' };
-  if (kind !== 'image') meta.duration = await probeMediaDuration(mediaPath(filename));
+  if (req.query.overlay === '1') meta.overlay = true; // text-card PNGs stay out of the pickers
+  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(mediaPath(filename));
   const id = db.createAsset(req.userId, kind, label, filename, characterId, meta);
   res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
 });
@@ -418,88 +424,31 @@ router.post('/animate', async (req, res) => {
   }
 });
 
-/* ---------------- Sequencer (ffmpeg) ---------------- */
-const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080']);
-
-router.post('/render', async (req, res) => {
-  const { clips, musicAssetId, size, fadeAudio } = req.body || {};
-  if (!Array.isArray(clips) || !clips.length) {
-    return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
-  }
-  if (clips.length > 120) return res.status(400).json({ error: 'Timeline is limited to 120 clips.' });
-  const target = RENDER_SIZES.has(size) ? size : '1920x1080';
-  const [W, H] = target.split('x').map(Number);
-
-  const resolved = [];
-  for (const c of clips) {
-    const row = db.getAsset(req.userId, Number(c.assetId));
-    if (!row || row.kind !== 'video') return res.status(404).json({ error: `Clip ${c.assetId} not found.` });
-    const file = mediaPath(row.filename);
-    const start = Math.max(0, Number(c.start) || 0);
-    let end = Number(c.end);
-    if (!Number.isFinite(end) || end <= 0) {
-      // No trim end from the client - fall back to the clip's real length.
-      const meta = row.meta ? JSON.parse(row.meta) : {};
-      end = meta.duration || (await probeMediaDuration(file));
-    }
-    if (!end || end <= start) {
-      return res.status(400).json({ error: `Clip "${row.label}" has an invalid trim range.` });
-    }
-    resolved.push({ file, start, end, dur: end - start });
-  }
-
-  let music = null;
-  if (musicAssetId) {
-    const row = db.getAsset(req.userId, Number(musicAssetId));
-    if (!row || row.kind !== 'audio') return res.status(404).json({ error: 'Music track not found.' });
-    music = mediaPath(row.filename);
-  }
-
-  const totalDur = resolved.reduce((s, c) => s + c.dur, 0);
-  const outFile = newFilename(req.userId, '.mp4');
+/* ---------------- ffmpeg job runner ---------------- */
+// Spawn ffmpeg with the given args, track progress against expectedDur, and
+// register the output as a video asset when it succeeds.
+function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
+  const job = createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
-
-  const args = [];
-  for (const c of resolved) args.push('-ss', String(c.start), '-to', String(c.end), '-i', c.file);
-  if (music) args.push('-i', music);
-
-  // Normalize every clip to the target frame, then hard-cut concat. Music (if
-  // any) replaces all audio and fades out over the last 2 seconds.
-  const filters = resolved.map((_, i) =>
-    `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p[v${i}]`
-  );
-  const concatIn = resolved.map((_, i) => `[v${i}]`).join('');
-  filters.push(`${concatIn}concat=n=${resolved.length}:v=1:a=0[vout]`);
-  if (music) {
-    const fade = fadeAudio === false ? '' : `,afade=t=out:st=${Math.max(0, totalDur - 2).toFixed(2)}:d=2`;
-    filters.push(`[${resolved.length}:a]atrim=0:${totalDur.toFixed(2)}${fade}[aout]`);
-  }
-
-  args.push('-filter_complex', filters.join(';'), '-map', '[vout]');
-  if (music) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
-  args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart', '-y', outPath);
-
-  const job = createJob(req.userId, 'render', {});
-  const proc = spawn(ffmpegBin(), args);
+  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]));
   let stderrTail = '';
   proc.stderr.on('data', (chunk) => {
     const text = chunk.toString();
     stderrTail = (stderrTail + text).slice(-4000);
     const m = text.match(/time=(\d+):(\d+):(\d+\.?\d*)/);
-    if (m) {
+    if (m && expectedDur > 0) {
       const secs = Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
-      job.progress = Math.min(99, Math.round((secs / totalDur) * 100));
+      job.progress = Math.min(99, Math.round((secs / expectedDur) * 100));
     }
   });
   proc.on('error', (err) => {
     job.status = 'error';
-    job.error = `Could not start ffmpeg: ${err.message}. Run npm install in server/ to fetch it.`;
+    job.error = `Could not start ffmpeg: ${err.message}. Run npm install in server/ (or install ffmpeg / set FFMPEG_PATH).`;
   });
   proc.on('close', (code) => {
     if (job.status === 'error') return;
     if (code === 0) {
-      job.assetId = db.createAsset(req.userId, 'video', `Sequence ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`, outFile, null,
-        { source: 'render', clips: resolved.length, seconds: Math.round(totalDur) });
+      job.assetId = db.createAsset(userId, 'video', label, outFile, null, { ...meta, duration: expectedDur });
       job.progress = 100;
       job.status = 'done';
     } else {
@@ -508,7 +457,242 @@ router.post('/render', async (req, res) => {
       job.error = `ffmpeg exited with code ${code}: …${stderrTail.slice(-500)}`;
     }
   });
+  return job;
+}
 
+/* ---------------- output sizes ---------------- */
+const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
+const FPS = 30;
+
+function parseSize(size, fallback) {
+  const target = RENDER_SIZES.has(size) ? size : fallback;
+  const [W, H] = target.split('x').map(Number);
+  return { W, H, target };
+}
+
+/* ---------------- Ken Burns: stills to motion clips ---------------- */
+// Every move is a zoompan expression over p = on/(d-1) (progress 0..1).
+// Intensity 1..3 scales how far the camera travels.
+function kenBurnsExprs(move, intensity, fx, fy) {
+  const i = Math.min(3, Math.max(1, Math.round(intensity || 2)));
+  const zoomAmt = [0.12, 0.25, 0.45][i - 1];   // how far push/pull travels
+  const panZoom = [1.12, 1.22, 1.4][i - 1];    // fixed zoom that gives pans room to move
+  const shakeAmp = [0.0025, 0.005, 0.009][i - 1];
+  const driftAmt = [0.18, 0.3, 0.42][i - 1];
+  const p = 'on/(duration-1)'; // zoompan calls the total frame count "duration"
+  const cx = '(iw-iw/zoom)/2', cy = '(ih-ih/zoom)/2';
+  switch (move) {
+    case 'push':      return { z: `1+${zoomAmt}*${p}`, x: cx, y: cy };
+    case 'pull':      return { z: `${1 + zoomAmt}-${zoomAmt}*${p}`, x: cx, y: cy };
+    case 'pan_right': return { z: `${panZoom}`, x: `(iw-iw/zoom)*${p}`, y: cy };
+    case 'pan_left':  return { z: `${panZoom}`, x: `(iw-iw/zoom)*(1-${p})`, y: cy };
+    case 'pan_down':  return { z: `${panZoom}`, x: cx, y: `(ih-ih/zoom)*${p}` };
+    case 'pan_up':    return { z: `${panZoom}`, x: cx, y: `(ih-ih/zoom)*(1-${p})` };
+    case 'focal':     return { z: `1+${zoomAmt}*${p}`, x: `${fx}*(iw-iw/zoom)`, y: `${fy}*(ih-ih/zoom)` };
+    case 'shake':     return {
+      z: `${panZoom - 0.06}+0.015*sin(on/2.9)`,
+      x: `${cx}+iw*${shakeAmp}*(sin(on/2.1)+0.7*sin(on/0.9))`,
+      y: `${cy}+ih*${shakeAmp}*(cos(on/1.7)+0.7*sin(on/1.3))`,
+    };
+    case 'drift':     return {
+      z: `${panZoom - 0.04}+0.02*sin(3.14159*${p})`,
+      x: `(iw-iw/zoom)*(0.5+${driftAmt / 2}*sin(3.14159*${p}))`,
+      y: `(ih-ih/zoom)*(0.5-${driftAmt / 3}*sin(3.14159*${p}))`,
+    };
+    case 'push_pan':  return { z: `1+${zoomAmt}*${p}`, x: `(iw-iw/zoom)*${p}`, y: cy };
+    default: return null;
+  }
+}
+
+router.post('/kenburns', (req, res) => {
+  const { assetId, move, duration, intensity, focalX, focalY, size } = req.body || {};
+  const still = db.getAsset(req.userId, Number(assetId));
+  if (!still || still.kind !== 'image') {
+    return res.status(404).json({ error: 'Pick an image from your library first.' });
+  }
+  const dur = Math.min(30, Math.max(1, Number(duration) || 5));
+  const fx = Math.min(1, Math.max(0, Number(focalX) || 0.5));
+  const fy = Math.min(1, Math.max(0, Number(focalY) || 0.5));
+  const exprs = kenBurnsExprs(move, intensity, fx.toFixed(3), fy.toFixed(3));
+  if (!exprs) return res.status(400).json({ error: `Unknown camera move: ${move}` });
+  const { W, H } = parseSize(size, '1920x1080');
+  const frames = Math.round(dur * FPS);
+
+  // Upscale + crop to the target aspect first so zoompan never distorts, and
+  // has 2x headroom for smooth sub-pixel motion.
+  const chain =
+    `[0:v]scale=${2 * W}:${2 * H}:force_original_aspect_ratio=increase,crop=${2 * W}:${2 * H},` +
+    `zoompan=z='${exprs.z}':x='${exprs.x}':y='${exprs.y}':d=${frames}:s=${W}x${H}:fps=${FPS},format=yuv420p[v]`;
+  const args = [
+    '-i', mediaPath(still.filename),
+    '-filter_complex', chain, '-map', '[v]',
+    '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart',
+  ];
+  const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), dur,
+    `${still.label} · ${move}`, { source: 'kenburns', move, fromAssetId: still.id });
+  res.status(202).json({ job: jobJson(job) });
+});
+
+/* ---------------- Sequencer render ---------------- */
+const TRANSITIONS = { cut: null, fade: 'fade', fadeblack: 'fadeblack' };
+
+function eqFilter(eq) {
+  if (!eq) return '';
+  const b = Math.min(0.3, Math.max(-0.3, Number(eq.brightness) || 0));
+  const c = Math.min(1.6, Math.max(0.6, Number(eq.contrast) || 1));
+  const s = Math.min(2.5, Math.max(0, eq.saturation == null ? 1 : Number(eq.saturation)));
+  if (!b && c === 1 && s === 1) return '';
+  return `,eq=brightness=${b}:contrast=${c}:saturation=${s}`;
+}
+
+router.post('/render', async (req, res) => {
+  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win } = req.body || {};
+  if (!Array.isArray(clips) || !clips.length) {
+    return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
+  }
+  if (clips.length > 120) return res.status(400).json({ error: 'Timeline is limited to 120 clips.' });
+  const { W, H, target } = parseSize(size, '1920x1080');
+
+  // --- resolve timeline items (videos with trims, stills with hold durations)
+  const resolved = [];
+  for (const c of clips) {
+    const row = db.getAsset(req.userId, Number(c.assetId));
+    if (!row || (row.kind !== 'video' && row.kind !== 'image')) {
+      return res.status(404).json({ error: `Timeline item ${c.assetId} not found.` });
+    }
+    const file = mediaPath(row.filename);
+    if (row.kind === 'image') {
+      const dur = Math.min(60, Math.max(0.4, Number(c.duration) || 4));
+      resolved.push({ kind: 'image', file, dur, eq: c.eq, label: row.label });
+    } else {
+      const start = Math.max(0, Number(c.start) || 0);
+      let end = Number(c.end);
+      if (!Number.isFinite(end) || end <= 0) {
+        const meta = row.meta ? JSON.parse(row.meta) : {};
+        end = meta.duration || (await probeMediaDuration(file));
+      }
+      if (!end || end <= start) {
+        return res.status(400).json({ error: `Clip "${row.label}" has an invalid trim range.` });
+      }
+      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label });
+    }
+  }
+
+  // --- transitions between consecutive clips
+  const trans = [];
+  for (let i = 0; i < resolved.length - 1; i++) {
+    const t = (Array.isArray(transitions) && transitions[i]) || {};
+    const type = TRANSITIONS[t.type] !== undefined ? t.type : 'cut';
+    let td = Math.min(2, Math.max(0.2, Number(t.duration) || 0.5));
+    // A transition can't be longer than either neighbour.
+    td = Math.min(td, resolved[i].dur * 0.9, resolved[i + 1].dur * 0.9);
+    trans.push({ type, td: type === 'cut' ? 0 : td });
+  }
+  const totalDur = resolved.reduce((s, c) => s + c.dur, 0) - trans.reduce((s, t) => s + t.td, 0);
+
+  // --- optional cutdown window (timeline seconds)
+  let winStart = 0, winEnd = totalDur;
+  if (win && (Number(win.start) || Number(win.end))) {
+    winStart = Math.min(Math.max(0, Number(win.start) || 0), totalDur - 0.5);
+    winEnd = Math.min(totalDur, Math.max(winStart + 0.5, Number(win.end) || totalDur));
+  }
+  const outDur = winEnd - winStart;
+
+  // --- music
+  let musicIn = null;
+  if (music && music.assetId) {
+    const row = db.getAsset(req.userId, Number(music.assetId));
+    if (!row || row.kind !== 'audio') return res.status(404).json({ error: 'Music track not found.' });
+    musicIn = {
+      file: mediaPath(row.filename),
+      start: Math.max(0, Number(music.start) || 0),
+      volume: Math.min(2, Math.max(0, music.volume == null ? 1 : Number(music.volume))),
+      fadeIn: music.fadeIn !== false,
+      fadeOut: music.fadeOut !== false,
+    };
+  }
+
+  // --- overlays (full-frame transparent PNGs the client rendered)
+  const ovs = [];
+  for (const o of (Array.isArray(overlays) ? overlays : []).slice(0, 24)) {
+    const row = db.getAsset(req.userId, Number(o.assetId));
+    if (!row || row.kind !== 'image') return res.status(404).json({ error: 'Overlay image not found.' });
+    const start = Math.max(0, Number(o.start) || 0);
+    const end = Math.max(start + 0.2, Number(o.end) || start + 3);
+    const fade = Math.min(2, Math.max(0, o.fade == null ? 0.4 : Number(o.fade)));
+    if (start >= winEnd || end <= winStart) continue; // fully outside the window
+    ovs.push({ file: mediaPath(row.filename), start, end, fade });
+  }
+
+  // --- inputs: clips, then music, then overlays
+  const args = [];
+  for (const c of resolved) {
+    if (c.kind === 'image') args.push('-loop', '1', '-t', c.dur.toFixed(3), '-i', c.file);
+    else args.push('-ss', String(c.start), '-to', String(c.end), '-i', c.file);
+  }
+  const musicIdx = resolved.length;
+  if (musicIn) args.push('-i', musicIn.file);
+  const ovBase = musicIdx + (musicIn ? 1 : 0);
+  for (const o of ovs) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
+
+  // --- filter graph
+  const filters = [];
+  resolved.forEach((c, i) => {
+    filters.push(
+      `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
+      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)},` +
+      `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
+    );
+  });
+
+  // Join clips left to right: plain concat on cuts, xfade on dissolves.
+  let current = '[v0]';
+  let joined = resolved[0].dur;
+  trans.forEach((t, i) => {
+    const next = `[v${i + 1}]`, out = `[j${i}]`;
+    if (t.type === 'cut') {
+      filters.push(`${current}${next}concat=n=2:v=1:a=0${out}`);
+      joined += resolved[i + 1].dur;
+    } else {
+      filters.push(`${current}${next}xfade=transition=${TRANSITIONS[t.type]}:duration=${t.td.toFixed(3)}:offset=${(joined - t.td).toFixed(3)}${out}`);
+      joined += resolved[i + 1].dur - t.td;
+    }
+    current = out;
+  });
+
+  // Overlays ride on the assembled timeline (before windowing, so their times
+  // stay in timeline coordinates).
+  ovs.forEach((o, k) => {
+    const fin = o.fade > 0 ? `,fade=t=in:st=${o.start.toFixed(3)}:d=${o.fade.toFixed(3)}:alpha=1` : '';
+    const fout = o.fade > 0 ? `,fade=t=out:st=${(o.end - o.fade).toFixed(3)}:d=${o.fade.toFixed(3)}:alpha=1` : '';
+    filters.push(`[${ovBase + k}:v]scale=${W}:${H},format=rgba,fps=${FPS}${fin}${fout}[ov${k}]`);
+    filters.push(`${current}[ov${k}]overlay=0:0:eof_action=pass:enable='between(t\\,${o.start.toFixed(3)}\\,${o.end.toFixed(3)})'[vo${k}]`);
+    current = `[vo${k}]`;
+  });
+
+  // Cutdown window, then the final fades so they always sit at the output's edges.
+  let vchain = `${current}trim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},setpts=PTS-STARTPTS`;
+  if (fadeFromBlack) vchain += `,fade=t=in:st=0:d=0.8`;
+  if (fadeToBlack) vchain += `,fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`;
+  filters.push(`${vchain}[vout]`);
+
+  if (musicIn) {
+    let achain = `[${musicIdx}:a]atrim=start=${musicIn.start.toFixed(3)},asetpts=PTS-STARTPTS` +
+      `,atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
+      `,volume=${musicIn.volume.toFixed(2)}`;
+    if (musicIn.fadeIn) achain += `,afade=t=in:st=0:d=1`;
+    if (musicIn.fadeOut) achain += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
+    filters.push(`${achain}[aout]`);
+  }
+
+  args.push('-filter_complex', filters.join(';'), '-map', '[vout]');
+  if (musicIn) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
+  args.push('-t', outDur.toFixed(3), '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart');
+
+  const isCutdown = outDur < totalDur - 0.01;
+  const label = `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
+  const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
+    { source: 'render', clips: resolved.length, cutdown: isCutdown });
   res.status(202).json({ job: jobJson(job) });
 });
 

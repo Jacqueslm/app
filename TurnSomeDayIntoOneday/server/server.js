@@ -66,6 +66,43 @@ function buildSystemPrompt(isPro) {
   return SYSTEM_BASE + (isPro ? SYSTEM_PRO_ADDENDUM : SYSTEM_FREE_ADDENDUM);
 }
 
+// Server-side crisis safety net. The system prompt already instructs the model to surface
+// 988, but a model can be imperfect and an upstream outage returns no model text at all, so
+// this makes the crisis line DETERMINISTIC: whenever the user's latest message signals
+// crisis, the server guarantees 988 is in the reply regardless of what the model said (or
+// whether it responded), and crisis replies never count against the daily quota.
+const CRISIS_LINE =
+  '988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.';
+const CRISIS_RE = /suicid|kill(ing)? myself|end(ing)? my life|hurt(ing)? myself|harm(ing)? myself|self.?harm|want to die|wanna die|better off dead|take my (own )?life|don'?t want to (be here|live|be alive)/i;
+const CRISIS_FALLBACK_TEXT =
+  "I'm really glad you told me, and I don't want you facing this alone. Please reach out right now — " +
+  CRISIS_LINE +
+  " If you're in immediate danger, call 911. I'm staying right here with you.";
+
+function lastUserText(messages) {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m && m.role === 'user' && typeof m.content === 'string') return m.content;
+  }
+  return '';
+}
+
+function anthropicShaped(text) {
+  return { content: [{ type: 'text', text }] };
+}
+
+// Guarantee the 988 line is present in a successful model reply.
+function ensureCrisisLine(data) {
+  if (!data || !Array.isArray(data.content)) return anthropicShaped(CRISIS_FALLBACK_TEXT);
+  const block = data.content.find((c) => c && c.type === 'text' && typeof c.text === 'string');
+  if (block) {
+    if (!block.text.includes('988')) block.text = block.text.trimEnd() + '\n\n' + CRISIS_LINE;
+  } else {
+    data.content.push({ type: 'text', text: CRISIS_LINE });
+  }
+  return data;
+}
+
 // Stripe webhook signature verification needs the raw request body, so this route is
 // registered with express.raw() before the global express.json() middleware below.
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -294,13 +331,15 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   const isPro = user && billing.getBillingStatus(user).isPro;
   const limit = isPro ? PRO_CHAT_LIMIT : FREE_CHAT_LIMIT;
   const today = todayUTC();
+  const isCrisis = CRISIS_RE.test(lastUserText(messages));
 
   // Atomically reserve this call's slot BEFORE the network round-trip, so concurrent
   // requests can't all read the same pre-increment count and slip past the cap. If the
   // reservation puts us over the limit, or the downstream call never succeeds, refund it -
-  // a transient outage or a rejected request shouldn't cost the user a real chat.
+  // a transient outage or a rejected request shouldn't cost the user a real chat. Crisis
+  // messages are NEVER blocked on quota - safety overrides the limit.
   const reserved = db.reserveChatSlot(req.userId, today);
-  if (reserved > limit) {
+  if (reserved > limit && !isCrisis) {
     db.decrementChatCount(req.userId, today);
     if (!isPro) {
       return res.status(429).json({ error: `Daily Nova AI chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
@@ -308,7 +347,8 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });
   }
 
-  let succeeded = false;
+  // Only a successful, non-crisis reply spends a chat. Crisis support is always free.
+  let charge = false;
   try {
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -326,13 +366,20 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     });
 
     const data = await anthropicRes.json();
-    succeeded = anthropicRes.ok;
-    res.status(anthropicRes.status).json(data);
+    if (anthropicRes.ok) {
+      charge = !isCrisis;
+      return res.status(200).json(isCrisis ? ensureCrisisLine(data) : data);
+    }
+    // Upstream returned an error. If the user is in crisis, never let them hit a dead end -
+    // deterministically return the crisis-support message instead of the error.
+    if (isCrisis) return res.status(200).json(anthropicShaped(CRISIS_FALLBACK_TEXT));
+    return res.status(anthropicRes.status).json(data);
   } catch (err) {
-    res.status(502).json({ error: 'Failed to reach Anthropic API.' });
+    if (isCrisis) return res.status(200).json(anthropicShaped(CRISIS_FALLBACK_TEXT));
+    return res.status(502).json({ error: 'Failed to reach Anthropic API.' });
   } finally {
-    // Refund the reserved slot unless the call actually succeeded.
-    if (!succeeded) db.decrementChatCount(req.userId, today);
+    // Refund the reserved slot unless this was a billable, successful reply.
+    if (!charge) db.decrementChatCount(req.userId, today);
   }
 });
 

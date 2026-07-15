@@ -68,6 +68,43 @@ textarea::placeholder{color:var(--tm)}
 .err.show{display:block}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.mtabs{background:var(--brand);display:flex;gap:8px;padding:2px 14px 12px;overflow-x:auto;scrollbar-width:none}
+.mtabs::-webkit-scrollbar{display:none}
+.mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#8892c0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
+.mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.view{display:none;flex-direction:column;gap:14px}
+.view.on{display:flex}
+.card{background:var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:14px;color:var(--tp)}
+.input{width:100%;background:var(--s0);border:0.5px solid var(--bdr2);border-radius:10px;padding:11px 12px;font-size:14px;color:var(--tp);font-family:var(--f);outline:none}
+.input:focus{border-color:var(--accent)}
+.btn2{border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;font-family:var(--f);cursor:pointer;background:var(--acc);color:var(--acc-t)}
+.btn2.quiet{background:transparent;border:0.5px solid var(--bdr2);color:var(--tm)}
+.btn2:disabled{opacity:.5;cursor:default}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lib-item{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.lib-item img,.lib-item video{width:100%;aspect-ratio:1/1;object-fit:cover;background:#000}
+.li-meta{padding:8px;font-size:11px;color:var(--ts);display:flex;flex-direction:column;gap:6px}
+.li-meta p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--tp)}
+.li-actions{display:flex;flex-wrap:wrap;gap:6px}
+.li-actions button{flex:1;border:none;background:var(--s1);color:var(--ts);border-radius:8px;padding:6px 4px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)}
+.li-actions button.primary{background:var(--accent);color:#fff}
+.banner{background:var(--acc);color:var(--acc-t);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5}
+.banner a{color:inherit}
+.seq-item{display:flex;gap:10px;align-items:center;background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:8px}
+.seq-item video{width:64px;height:64px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0}
+.seq-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.seq-mid p{font-size:12px;font-weight:600;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trim{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--tm);flex-wrap:wrap}
+.trim input{width:54px;background:var(--s0);border:0.5px solid var(--bdr2);border-radius:6px;padding:4px 6px;font-size:11px;color:var(--tp);font-family:var(--f)}
+.seq-btns{display:flex;flex-direction:column;gap:4px}
+.seq-btns button{border:none;background:var(--s1);color:var(--ts);border-radius:6px;width:26px;height:26px;font-size:12px;cursor:pointer}
+.char-refs{display:flex;gap:8px;flex-wrap:wrap}
+.char-refs img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:0.5px solid var(--bdr)}
+.progress-line{height:4px;background:var(--s1);border-radius:2px;overflow:hidden;display:none}
+.progress-line.show{display:block}
+.progress-line div{height:100%;background:var(--green);width:0%;transition:width .3s}
+.usage{font-size:11px;color:var(--tm)}
 </style>
 </head>
 <body>
@@ -77,7 +114,14 @@ textarea::placeholder{color:var(--tm)}
     <h1>Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
   </div>
+  <div class="mtabs" id="mtabs">
+    <button data-view="art" class="on">Art</button>
+    <button data-view="scenes">AI Scenes</button>
+    <button data-view="chars">Characters</button>
+    <button data-view="seq">Sequencer</button>
+  </div>
   <div class="body">
+  <div class="view on" id="view-art">
     <div class="tabs">
       <button id="tab-image" class="on">Image</button>
       <button id="tab-video">Video</button>
@@ -124,8 +168,68 @@ textarea::placeholder{color:var(--tm)}
     <button class="dl-btn" id="dl">Download</button>
 
     <p class="note" id="foot-note">Everything is generated on your device — nothing you type here is uploaded.</p>
+  </div><!-- /view-art -->
+
+  <div class="view" id="view-scenes">
+    <div class="banner" id="scenes-banner" style="display:none"></div>
+    <div class="card" id="scenes-form" style="display:none">
+      <h3>Generate a scene</h3>
+      <select class="input" id="scene-char"><option value="">No character (plain scene)</option></select>
+      <textarea id="scene-prompt" placeholder="e.g. medium shot, gritty industrial warehouse, cyberpunk style, character turning around" style="min-height:64px"></textarea>
+      <div class="chips" id="scene-sizes"></div>
+      <button class="gen-btn" id="scene-gen">Generate scene image</button>
+      <div class="progress-line" id="scene-prog"><div></div></div>
+      <p class="usage" id="scenes-usage"></p>
+      <p class="note" style="text-align:left">Tip: keep the environment wording identical between shots and change only the action — it keeps the scene assets consistent.</p>
+    </div>
+    <div class="err" id="scenes-err"></div>
+    <div class="row"><label class="lbl">Library</label><div class="lib-grid" id="lib-grid"></div></div>
   </div>
+
+  <div class="view" id="view-chars">
+    <div class="banner" id="chars-banner" style="display:none"></div>
+    <div class="card" id="chars-form" style="display:none">
+      <h3>New character</h3>
+      <input class="input" id="char-name" placeholder="Character name (e.g. Nova)">
+      <button class="btn2" id="char-create">Create character</button>
+      <p class="note" style="text-align:left">Then upload 1–6 clean reference photos (face clearly visible, different angles). Scenes will lock onto the first photo. For the strongest consistency, train a LoRA on fal.ai with 10–20 photos and paste its URL below the character.</p>
+    </div>
+    <div class="err" id="chars-err"></div>
+    <div id="chars-list" class="row"></div>
+  </div>
+
+  <div class="view" id="view-seq">
+    <div class="banner" id="seq-banner" style="display:none"></div>
+    <div class="card">
+      <h3>Timeline</h3>
+      <div id="seq-list" class="row"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="input" id="seq-add-select" style="flex:1;min-width:140px"></select>
+        <button class="btn2" id="seq-add">Add clip</button>
+        <button class="btn2 quiet" id="seq-upload-clip">Upload video</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Music</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="input" id="seq-music" style="flex:1;min-width:140px"><option value="">No music</option></select>
+        <button class="btn2 quiet" id="seq-upload-music">Upload track</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ts)"><input type="checkbox" id="seq-fade" checked> Fade music out at the end</label>
+    </div>
+    <div class="card">
+      <h3>Output</h3>
+      <div class="chips" id="seq-sizes"></div>
+      <button class="gen-btn" id="seq-render">Render video</button>
+      <div class="progress-line" id="seq-prog"><div></div></div>
+    </div>
+    <div class="err" id="seq-err"></div>
+    <div class="stage" id="seq-stage"><video id="seq-video" controls playsinline></video></div>
+    <button class="dl-btn" id="seq-dl">Download</button>
+  </div>
+  </div><!-- /body -->
 </div>
+<input type="file" id="file-input" style="display:none">
 
 <script>
 'use strict';
@@ -646,6 +750,427 @@ fetch('/api/studio/status')
   .catch(() => {});
 
 renderControls();
+
+/* ================================================================
+   Studio pipeline: AI Scenes, Characters, Sequencer
+   ================================================================ */
+const st = {
+  view: 'art',
+  signedIn: false,
+  cfg: null,            // /api/studio/config payload
+  assets: [],
+  characters: [],
+  sceneSize: 'landscape_16_9',
+  seq: [],              // [{assetId,label,url,duration,start,end}]
+  seqSize: '1920x1080',
+  animTarget: null,     // assetId with the animate panel open
+  busyScene: false,
+  busyRender: false,
+};
+const SCENE_SIZES = [
+  { key: 'landscape_16_9', label: 'Wide 16:9' },
+  { key: 'portrait_16_9', label: 'Portrait 9:16' },
+  { key: 'square_hd', label: 'Square' },
+];
+const SEQ_SIZES = ['1920x1080', '1080x1920', '1080x1080'];
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function jfetch(url, opts) {
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.error || `Request failed (${res.status})`); e.status = res.status; throw e; }
+  return data;
+}
+
+async function pollJob(jobId, onTick) {
+  for (;;) {
+    await sleep(2500);
+    const { job } = await jfetch(`/api/studio/jobs/${jobId}`);
+    if (onTick) onTick(job);
+    if (job.status === 'done') return job;
+    if (job.status === 'error') throw new Error(job.error || 'Generation failed.');
+  }
+}
+
+function pickFile(accept, cb) {
+  const input = $('#file-input');
+  input.accept = accept;
+  input.onchange = () => { if (input.files[0]) cb(input.files[0]); input.value = ''; };
+  input.click();
+}
+
+async function uploadFile(file, kind, characterId) {
+  const q = new URLSearchParams({ kind, name: file.name });
+  if (characterId) q.set('characterId', characterId);
+  return (await jfetch(`/api/studio/upload?${q}`, { method: 'PUT', body: file })).asset;
+}
+
+// Canvas-recorded WebM files report Infinity until you seek, and codecs the
+// browser can't parse may fire no events at all - always resolve within 5s.
+function probeDuration(url) {
+  return new Promise((resolve) => {
+    const v = document.createElement('video');
+    let settled = false;
+    const finish = (val) => { if (!settled) { settled = true; resolve(val); } };
+    setTimeout(() => finish(isFinite(v.duration) ? v.duration : null), 5000);
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => {
+      if (isFinite(v.duration)) return finish(v.duration);
+      v.currentTime = 1e7; // seek past the end to force the real duration
+      v.ondurationchange = () => { if (isFinite(v.duration)) finish(v.duration); };
+    };
+    v.onerror = () => finish(null);
+    v.src = url;
+  });
+}
+
+function setErr(sel, msg) { const el = $(sel); el.textContent = msg || ''; el.classList.toggle('show', !!msg); }
+function setProg(sel, pct) {
+  const el = $(sel);
+  el.classList.toggle('show', pct != null);
+  el.firstElementChild.style.width = (pct || 0) + '%';
+}
+
+/* ---------------- view switching ---------------- */
+$('#mtabs').onclick = (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  st.view = btn.dataset.view;
+  document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b === btn));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === `view-${st.view}`));
+};
+
+/* ---------------- boot: config + data ---------------- */
+async function bootStudio() {
+  try {
+    st.cfg = await jfetch('/api/studio/config');
+    st.signedIn = true;
+  } catch (e) {
+    const msg = e.status === 401
+      ? 'Sign in from the <a href="/">main app</a> first — your Studio library is tied to your account.'
+      : `Could not reach the server: ${e.message}`;
+    for (const id of ['#scenes-banner', '#chars-banner', '#seq-banner']) { $(id).innerHTML = msg; $(id).style.display = 'block'; }
+    return;
+  }
+  if (st.cfg.falAvailable) {
+    $('#ai-badge').style.display = 'inline-block';
+    $('#scenes-form').style.display = 'flex';
+  } else {
+    $('#scenes-banner').innerHTML = 'AI scene generation is off. Get a key at <b>fal.ai</b>, add <b>FAL_KEY=...</b> to <b>server/.env</b>, restart the server, and this tab lights up. Uploads and the Sequencer work right now without it.';
+    $('#scenes-banner').style.display = 'block';
+  }
+  $('#chars-form').style.display = 'flex';
+  await Promise.all([loadAssets(), loadCharacters()]);
+}
+
+async function loadAssets() {
+  st.assets = (await jfetch('/api/studio/assets')).assets;
+  renderLibrary(); renderSeqPickers();
+}
+async function loadCharacters() {
+  st.characters = (await jfetch('/api/studio/characters')).characters;
+  renderCharacters(); renderSceneCharSelect();
+}
+
+/* ---------------- AI Scenes ---------------- */
+function renderSceneChips() {
+  chipRow($('#scene-sizes'), SCENE_SIZES, st.sceneSize, (k) => { st.sceneSize = k; renderSceneChips(); });
+}
+function renderSceneCharSelect() {
+  const sel = $('#scene-char');
+  sel.innerHTML = '<option value="">No character (plain scene)</option>' +
+    st.characters.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}${c.loraUrl ? ' (LoRA)' : ''}</option>`).join('');
+}
+function updateScenesUsage() {
+  if (!st.cfg) return;
+  $('#scenes-usage').textContent =
+    `Today: ${st.cfg.imagesUsed}/${st.cfg.imageLimit} AI images · ${st.cfg.videosUsed}/${st.cfg.videoLimit} AI videos`;
+}
+$('#scene-gen').onclick = async () => {
+  if (st.busyScene) return;
+  setErr('#scenes-err', null);
+  const prompt = $('#scene-prompt').value.trim();
+  if (!prompt) return setErr('#scenes-err', 'Describe the shot first.');
+  st.busyScene = true;
+  $('#scene-gen').disabled = true;
+  $('#scene-gen').innerHTML = '<span class="spinner"></span>Generating…';
+  setProg('#scene-prog', 3);
+  try {
+    const { job } = await jfetch('/api/studio/scene', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, characterId: $('#scene-char').value || null, imageSize: st.sceneSize }),
+    });
+    await pollJob(job.id, (j) => setProg('#scene-prog', j.progress));
+    st.cfg.imagesUsed += 1; updateScenesUsage();
+    await loadAssets();
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+  } finally {
+    st.busyScene = false;
+    $('#scene-gen').disabled = false;
+    $('#scene-gen').textContent = 'Generate scene image';
+    setProg('#scene-prog', null);
+  }
+};
+
+/* ---------------- library ---------------- */
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+function renderLibrary() {
+  const grid = $('#lib-grid');
+  const items = st.assets.filter((a) => a.kind !== 'audio');
+  if (!items.length) {
+    grid.innerHTML = '<p class="note" style="grid-column:1/-1;text-align:left">Nothing here yet. Generate a scene above, or make something in the Art tab and upload it.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  for (const a of items) {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    const charName = a.characterId && st.characters.find((c) => c.id === a.characterId)?.name;
+    el.innerHTML = (a.kind === 'image'
+      ? `<img src="${a.url}" loading="lazy" alt="">`
+      : `<video src="${a.url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`)
+      + `<div class="li-meta"><p>${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}</p><div class="li-actions"></div></div>`;
+    const actions = el.querySelector('.li-actions');
+    const btn = (label, cls, fn) => {
+      const b = document.createElement('button');
+      b.textContent = label; if (cls) b.className = cls; b.onclick = fn;
+      actions.appendChild(b); return b;
+    };
+    if (a.kind === 'image' && st.cfg?.falAvailable) btn('Animate', 'primary', () => { st.animTarget = st.animTarget === a.id ? null : a.id; renderLibrary(); });
+    if (a.kind === 'video') btn('+ Sequence', 'primary', () => addToSeq(a));
+    btn('Save', '', () => { const l = document.createElement('a'); l.href = a.url; l.download = a.label; l.click(); });
+    btn('✕', '', async () => {
+      if (!confirm(`Delete "${a.label}" from your library?`)) return;
+      try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); }
+      catch (e) { setErr('#scenes-err', e.message); }
+    });
+    if (st.animTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      panel.innerHTML = `<input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind">
+        <div style="display:flex;gap:6px">
+          <button class="btn2" style="flex:1" data-sec="5">5s clip</button>
+          <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip</button>
+        </div>
+        <div class="progress-line" id="anim-prog"><div></div></div>`;
+      panel.querySelectorAll('button[data-sec]').forEach((b) => {
+        b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel);
+      });
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    grid.appendChild(el);
+  }
+}
+
+async function animateAsset(assetId, motion, seconds, panel) {
+  setErr('#scenes-err', null);
+  panel.querySelectorAll('button').forEach((b) => (b.disabled = true));
+  const prog = panel.querySelector('.progress-line');
+  prog.classList.add('show');
+  try {
+    const { job } = await jfetch('/api/studio/animate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId, prompt: motion, duration: seconds }),
+    });
+    await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+    st.animTarget = null;
+    st.cfg.videosUsed += 1; updateScenesUsage();
+    await loadAssets();
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+    panel.querySelectorAll('button').forEach((b) => (b.disabled = false));
+    prog.classList.remove('show');
+  }
+}
+
+/* ---------------- characters ---------------- */
+$('#char-create').onclick = async () => {
+  setErr('#chars-err', null);
+  const name = $('#char-name').value.trim();
+  if (!name) return setErr('#chars-err', 'Give the character a name.');
+  try {
+    await jfetch('/api/studio/characters', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+    });
+    $('#char-name').value = '';
+    await loadCharacters();
+  } catch (e) { setErr('#chars-err', e.message); }
+};
+
+function renderCharacters() {
+  const list = $('#chars-list');
+  list.innerHTML = '';
+  if (!st.characters.length) {
+    list.innerHTML = '<p class="note" style="text-align:left">No characters yet. This is the anti-drift core: every AI scene generated with a character locks onto their reference photos (or LoRA).</p>';
+    return;
+  }
+  for (const c of st.characters) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <h3>${escapeHtml(c.name)}</h3>
+      <div class="char-refs">${c.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="">`).join('') || '<span class="usage">No reference photos yet</span>'}</div>
+      <input class="input ch-lora" placeholder="LoRA URL from fal.ai (optional, strongest consistency)" value="${escapeHtml(c.loraUrl || '')}">
+      <input class="input ch-trig" placeholder="LoRA trigger word (optional, e.g. NOVA01)" value="${escapeHtml(c.triggerWord || '')}">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 ch-upload" style="flex:1">Add photos</button>
+        <button class="btn2 ch-save" style="flex:1">Save</button>
+        <button class="btn2 quiet ch-del">Delete</button>
+      </div>`;
+    card.querySelector('.ch-upload').onclick = () => pickFile('image/*', async (file) => {
+      try { await uploadFile(file, 'image', c.id); await Promise.all([loadCharacters(), loadAssets()]); }
+      catch (e) { setErr('#chars-err', e.message); }
+    });
+    card.querySelector('.ch-save').onclick = async () => {
+      try {
+        await jfetch(`/api/studio/characters/${c.id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: c.name, loraUrl: card.querySelector('.ch-lora').value, triggerWord: card.querySelector('.ch-trig').value }),
+        });
+        await loadCharacters();
+      } catch (e) { setErr('#chars-err', e.message); }
+    };
+    card.querySelector('.ch-del').onclick = async () => {
+      if (!confirm(`Delete ${c.name}? Their reference photos stay in your library.`)) return;
+      try { await jfetch(`/api/studio/characters/${c.id}`, { method: 'DELETE' }); await loadCharacters(); }
+      catch (e) { setErr('#chars-err', e.message); }
+    };
+    list.appendChild(card);
+  }
+}
+
+/* ---------------- sequencer ---------------- */
+function renderSeqPickers() {
+  const vids = st.assets.filter((a) => a.kind === 'video');
+  $('#seq-add-select').innerHTML = vids.length
+    ? vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
+    : '<option value="">No clips in library yet</option>';
+  const music = st.assets.filter((a) => a.kind === 'audio');
+  const current = $('#seq-music').value;
+  $('#seq-music').innerHTML = '<option value="">No music</option>' +
+    music.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
+  if ([...$('#seq-music').options].some((o) => o.value === current)) $('#seq-music').value = current;
+}
+
+async function addToSeq(asset) {
+  // Prefer the browser's read of the file; fall back to the duration the
+  // server probed with ffmpeg at upload time (e.g. codecs the browser can't decode).
+  const duration = (await probeDuration(asset.url)) || asset.meta?.duration || null;
+  st.seq.push({
+    assetId: asset.id, label: asset.label, url: asset.url,
+    duration, start: 0, end: duration ? Math.round(duration * 100) / 100 : null,
+  });
+  renderSeq();
+  document.querySelector('#mtabs button[data-view="seq"]').click();
+}
+
+function renderSeq() {
+  const list = $('#seq-list');
+  list.innerHTML = '';
+  if (!st.seq.length) {
+    list.innerHTML = '<p class="note" style="text-align:left">Empty timeline. Add clips from your library below — they play top to bottom with hard cuts.</p>';
+    return;
+  }
+  st.seq.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'seq-item';
+    row.innerHTML = `
+      <video src="${item.url}" muted playsinline preload="metadata"></video>
+      <div class="seq-mid">
+        <p>${i + 1}. ${escapeHtml(item.label)}</p>
+        <div class="trim">
+          <span>from</span><input type="number" min="0" step="0.1" value="${item.start}" class="t-start">
+          <span>to</span><input type="number" min="0" step="0.1" value="${item.end ?? ''}" class="t-end">
+          <span>s${item.duration ? ' · clip ' + item.duration.toFixed(1) + 's' : ''}</span>
+        </div>
+      </div>
+      <div class="seq-btns">
+        <button class="mv-up">↑</button>
+        <button class="mv-dn">↓</button>
+        <button class="rm">✕</button>
+      </div>`;
+    row.querySelector('.t-start').onchange = (e) => { item.start = Math.max(0, Number(e.target.value) || 0); };
+    row.querySelector('.t-end').onchange = (e) => { item.end = Number(e.target.value) || item.end; };
+    row.querySelector('.mv-up').onclick = () => { if (i > 0) { [st.seq[i - 1], st.seq[i]] = [st.seq[i], st.seq[i - 1]]; renderSeq(); } };
+    row.querySelector('.mv-dn').onclick = () => { if (i < st.seq.length - 1) { [st.seq[i + 1], st.seq[i]] = [st.seq[i], st.seq[i + 1]]; renderSeq(); } };
+    row.querySelector('.rm').onclick = () => { st.seq.splice(i, 1); renderSeq(); };
+    list.appendChild(row);
+  });
+}
+
+function renderSeqSizeChips() {
+  chipRow($('#seq-sizes'), SEQ_SIZES.map((s) => ({ key: s, label: s.replace('x', '×') })), st.seqSize,
+    (k) => { st.seqSize = k; renderSeqSizeChips(); });
+}
+
+$('#seq-add').onclick = () => {
+  const id = Number($('#seq-add-select').value);
+  const asset = st.assets.find((a) => a.id === id);
+  if (asset) addToSeq(asset);
+};
+$('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
+  setErr('#seq-err', null);
+  try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }
+  catch (e) { setErr('#seq-err', e.message); }
+});
+$('#seq-upload-music').onclick = () => pickFile('audio/*', async (file) => {
+  setErr('#seq-err', null);
+  try { const asset = await uploadFile(file, 'audio'); await loadAssets(); $('#seq-music').value = String(asset.id); }
+  catch (e) { setErr('#seq-err', e.message); }
+});
+
+$('#seq-render').onclick = async () => {
+  if (st.busyRender) return;
+  setErr('#seq-err', null);
+  if (!st.seq.length) return setErr('#seq-err', 'Add at least one clip to the timeline.');
+  for (const item of st.seq) {
+    // A blank "to" is fine - the server fills in the clip's full length.
+    if (item.end != null && item.end <= item.start) {
+      return setErr('#seq-err', `"${item.label}" has an invalid trim range.`);
+    }
+  }
+  st.busyRender = true;
+  $('#seq-render').disabled = true;
+  $('#seq-render').innerHTML = '<span class="spinner"></span>Rendering…';
+  setProg('#seq-prog', 2);
+  $('#seq-stage').classList.remove('show');
+  $('#seq-dl').classList.remove('show');
+  try {
+    const { job } = await jfetch('/api/studio/render', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clips: st.seq.map((c) => ({ assetId: c.assetId, start: c.start, end: c.end })),
+        musicAssetId: $('#seq-music').value || null,
+        size: st.seqSize,
+        fadeAudio: $('#seq-fade').checked,
+      }),
+    });
+    const done = await pollJob(job.id, (j) => setProg('#seq-prog', j.progress));
+    await loadAssets();
+    const asset = st.assets.find((a) => a.id === done.assetId);
+    if (asset) {
+      $('#seq-video').src = asset.url;
+      $('#seq-stage').classList.add('show');
+      $('#seq-dl').classList.add('show');
+      $('#seq-dl').onclick = () => { const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.mp4'; l.click(); };
+    }
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  } finally {
+    st.busyRender = false;
+    $('#seq-render').disabled = false;
+    $('#seq-render').textContent = 'Render video';
+    setProg('#seq-prog', null);
+  }
+};
+
+renderSceneChips();
+renderSeqSizeChips();
+renderSeq();
+bootStudio().then(updateScenesUsage);
 </script>
 </body>
 </html>

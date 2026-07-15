@@ -85,6 +85,28 @@ function incrementChatCount(userId, usageDate) {
   ).run(userId, usageDate);
 }
 
+// Atomically reserve a chat slot and return the new count. Doing the read and the
+// increment as one statement closes the check-then-increment race where several
+// concurrent requests could all read the same pre-increment count and slip past the
+// daily limit. Callers reject when the returned count exceeds the limit and refund
+// with decrementChatCount() if the downstream call never actually happened.
+function reserveChatSlot(userId, usageDate) {
+  const row = db
+    .prepare(
+      `INSERT INTO chat_usage (user_id, usage_date, count) VALUES (?, ?, 1)
+       ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1
+       RETURNING count`
+    )
+    .get(userId, usageDate);
+  return row ? row.count : 1;
+}
+
+function decrementChatCount(userId, usageDate) {
+  db.prepare(
+    'UPDATE chat_usage SET count = MAX(0, count - 1) WHERE user_id = ? AND usage_date = ?'
+  ).run(userId, usageDate);
+}
+
 function updatePassword(userId, passwordHash) {
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
 }
@@ -132,6 +154,8 @@ module.exports = {
   deleteUser,
   getChatCount,
   incrementChatCount,
+  reserveChatSlot,
+  decrementChatCount,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

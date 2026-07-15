@@ -2061,7 +2061,45 @@ async function loadLessonPacks(){
     const res=await fetch('data/lessons.json');
     if(res.ok){LESSON_PACKS=await res.json();lessonPacksLoaded=true;}
   }catch(e){/* offline - lesson screen will show a friendly message */}
+  loadCachedProLessons();
   updateLessonPromo();
+}
+
+// Days 16-30 ship publicly as title+teaser only; the full paid content is fetched from the
+// server behind the Pro check and merged in here (replacing the teaser stubs).
+let proLessonsLoaded=false;
+function mergeProLessons(pro){
+  for(const[category,items]of Object.entries(pro||{})){
+    const pack=LESSON_PACKS[category]?LESSON_PACKS[category].slice():[];
+    items.forEach(full=>{
+      const idx=pack.findIndex(l=>l.day===full.day);
+      if(idx>=0)pack[idx]=full;else pack.push(full);
+    });
+    pack.sort((a,b)=>a.day-b.day);
+    LESSON_PACKS[category]=pack;
+  }
+  proLessonsLoaded=true;
+}
+function loadCachedProLessons(){
+  // Apply any previously-fetched Pro content so it opens offline.
+  try{const c=localStorage.getItem('tsid_pro_lessons');if(c)mergeProLessons(JSON.parse(c));}catch(_){}
+}
+let proLessonsFetching=false;
+async function loadProLessons(){
+  if(!S.accountEmail||proLessonsFetching)return;
+  proLessonsFetching=true;
+  try{
+    const res=await fetch('/api/lessons/pro');
+    if(res.status===200){
+      const pro=await res.json();
+      mergeProLessons(pro);
+      try{localStorage.setItem('tsid_pro_lessons',JSON.stringify(pro));}catch(_){}
+      if(document.querySelector('#s-lesson.on'))renderTodayLesson();
+      updateLessonPromo();
+    }
+    // 403 (not Pro) / 401 / 503 -> nothing to merge; the teaser stubs stay in place.
+  }catch(e){/* offline - cached Pro content (if any) was already applied */}
+  finally{proLessonsFetching=false;}
 }
 
 const FREE_LESSON_CAP=15;
@@ -2145,7 +2183,7 @@ function renderTodayLesson(){
     lockedEl.style.display='block';
     const lesson=getLessonForDay(day);
     document.getElementById('lockedTitle').textContent=lesson?`Day ${lesson.day}: ${lesson.title}`:`Day ${day}`;
-    document.getElementById('lockedTeaser').textContent=lesson?lesson.content.slice(0,140)+'…':'';
+    document.getElementById('lockedTeaser').textContent=lesson?(lesson.teaser||(lesson.content?lesson.content.slice(0,140)+'…':'')):'';
     renderLessonList();
     return;
   }
@@ -2167,6 +2205,21 @@ function renderTodayLesson(){
     reflectionEl.textContent='';
     btn.style.display='none';
     backBtn.style.display=viewingDay?'block':'none';
+    renderLessonList();
+    return;
+  }
+
+  if(lesson.pro&&!lesson.content){
+    // Pro user, but the full paid content for this day hasn't been fetched yet (e.g. offline
+    // on first open). Show a friendly prompt and try to load it now; once fetched it's cached
+    // on-device and opens offline thereafter.
+    titleEl.textContent=`Day ${lesson.day}: ${lesson.title}`;
+    metaEl.textContent=S.currentAddiction||'';
+    bodyEl.textContent="Connect to the internet once to load this lesson — it'll then be saved for offline too.";
+    actionEl.textContent='';reflectionEl.textContent='';
+    btn.style.display='none';
+    backBtn.style.display=viewingDay?'block':'none';
+    loadProLessons();
     renderLessonList();
     return;
   }
@@ -5924,6 +5977,8 @@ async function syncBillingStatus(force){
     S.proCancelled=!!data.cancelAtPeriodEnd;
     S.proGraceUntil='';
     save();updateTierUI();
+    // Server confirmed Pro -> pull the paid lesson content (cached on-device after first load).
+    if(S.isPro&&!proLessonsLoaded)loadProLessons();
     if(document.getElementById('pro-price'))renderPlansScreen();
   }catch(e){/* offline - keep last known local state until the next sync succeeds */}
 }

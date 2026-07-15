@@ -4,6 +4,10 @@ A recovery companion app: daily lessons, journaling, streak tracking, an AI chat
 
 ## Setup
 
+**Easiest way:** clone the repo, then just double-click the launcher — `Start My App.command` (Mac), `Start My App.bat` (Windows), or `start-app.sh` (Linux). It installs what's needed on first run, creates `server/.env` with a session secret automatically, starts the server, and opens Studio in your browser. (Only requirement: [Node.js](https://nodejs.org) installed.)
+
+**Manual way:**
+
 ```bash
 git clone https://github.com/Jacqueslm/app.git
 cd app/TurnSomeDayIntoOneday/server
@@ -55,7 +59,8 @@ Open `http://localhost:4300` in a browser and sign up.
   - **AI Scenes** (needs `FAL_KEY` + sign-in) — the music-video pipeline: generate scene stills with Flux, keep characters consistent via reference photos (Flux Kontext) or a pasted LoRA URL, then animate any still into a 5s/10s clip with Kling image-to-video. Results land in your library. Daily caps default to 300 images / 60 videos (`STUDIO_DAILY_IMAGE_LIMIT` / `STUDIO_DAILY_VIDEO_LIMIT`); fal model ids can be overridden via `FAL_MODEL_*` env vars if fal renames them.
   - **Characters** — create a character, upload 1–6 reference photos (or train a LoRA on fal.ai with 10–20 photos and paste its URL + trigger word) so every scene locks onto the same face.
   - **Sequencer** — a full on-device video production suite (no keys, $0 per use, everything renders locally with ffmpeg):
-    - *Quick Video (one-click assemble)*: add pictures → each gets a camera move, duration, and optional on-screen words (per-cut transition override, crossfade by default) → add your song → press Assemble. The app motion-izes every still, sequences them, syncs the music with auto fade-out, and renders a finished 9:16/16:9/1:1 MP4 with a progress bar. Shot lists save as reusable templates, and the assembled timeline lands in the editor below for tweaking.
+    - *Quick Video (one-click assemble)*: add pictures → each gets a camera move, duration, and optional on-screen words (per-cut transition override, crossfade by default) → add your song → press Assemble. The app motion-izes every still, sequences them, syncs the music with auto fade-out, and renders a finished 9:16/16:9/1:1 MP4 with a progress bar. "Cut on the beat" snaps every picture's time to whole musical bars of your song. Shot lists save as reusable templates, and the assembled timeline lands in the editor below for tweaking.
+    - *Simple mode*: the Sequencer opens showing only Quick Video and the Shorts Generator; one tap on "Show studio tools" reveals the full editor (timeline, transitions, color, text, output, projects).
     - *Stills → Motion*: Ken Burns camera moves turn any still into a moving clip — push-in, pull-back, pan in 4 directions, push toward a tap-chosen focal point, zoom+pan combo, slow drift, handheld shake; adjustable intensity and duration.
     - *Timeline*: drag-and-drop reorder, per-clip trims, still images with hold times (slideshow), per-clip brightness/contrast/saturation, and per-cut transitions (hard cut, crossfade, fade-to-black).
     - *Music*: your own tracks with start-offset, volume, and fade in/out; a WebAudio beat analyzer estimates BPM and snaps your cuts to the beat.

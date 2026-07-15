@@ -60,6 +60,7 @@ Open `http://localhost:4300` in a browser and sign up.
     - *Music*: your own tracks with start-offset, volume, and fade in/out; a WebAudio beat analyzer estimates BPM and snaps your cuts to the beat.
     - *Text & titles*: overlay cards ("OUT NOW", lyrics, artist name) with font/size/color/bold, 9-position grid, timing, and fade — rendered with your browser's fonts, composited by ffmpeg.
     - *Export*: MP4 (H.264 + AAC) in YouTube 16:9 / Reels 9:16 / Square, 1080p or 720p, optional fade from/to black — plus one-click 15/30/60s cutdown exports so a music video yields shorts for free.
+    - *Shorts Generator*: mark highlights (hook/drop/chorus) or auto-detect them from the music's loudest sections, then batch-build 15/30/60s 9:16 1080p shorts — each opens right on its highlight, gets its own A/B hook caption, optional seamless loop (last frame = first frame), music stays synced to that part of the song, and files export clearly named (`short_hook_15s.mp4`, `short_drop_30s.mp4`, …) with a download-all button.
     - *Projects*: save/load timelines to your account; the browser also keeps an auto-draft.
     - `npm install` fetches an ffmpeg binary automatically (`ffmpeg-static`); if that download is blocked, install ffmpeg yourself (`brew`/`apt`/`winget install ffmpeg`) or set `FFMPEG_PATH`.
   - Generated media is stored in `server/media/` and tied to your signed-in account.

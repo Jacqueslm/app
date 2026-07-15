@@ -270,14 +270,14 @@ textarea::placeholder{color:var(--tm)}
     </div>
 
     <div class="card adv-card">
-      <h3>Music</h3>
+      <h3>Music <span class="usage">(add several songs — they play in order)</span></h3>
+      <div id="mus-list" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <select class="input" id="seq-music" style="flex:1;min-width:140px"><option value="">No music</option></select>
+        <select class="input" id="mus-add-select" style="flex:1;min-width:120px"></select>
+        <button class="btn2" id="mus-add">Add song</button>
         <button class="btn2 quiet" id="seq-upload-music">Upload track</button>
       </div>
-      <div class="trim" style="font-size:12px">
-        <span>Start track at</span><input type="number" id="music-start" min="0" step="0.1" value="0"><span>s into the song</span>
-      </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="music-crossfade" checked> Blend songs into each other</label>
       <div class="trim" style="font-size:12px">
         <span>Volume</span><input type="range" id="music-volume" min="0" max="150" step="5" value="100" style="flex:1"><span id="music-vol-label">100%</span>
       </div>
@@ -341,6 +341,35 @@ textarea::placeholder{color:var(--tm)}
       <button class="gen-btn" id="sh-render" style="display:none">Render all shorts</button>
       <div id="sh-results" class="row"></div>
       <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
+    </div>
+
+    <div class="card">
+      <h3>📦 Campaign Export <span class="usage">(one video → a ready-to-post campaign)</span></h3>
+      <input class="input" id="cp-title" placeholder="Song title">
+      <input class="input" id="cp-artist" placeholder="Artist name">
+      <input class="input" id="cp-link" placeholder="Link (Spotify / YouTube / linktree…)">
+      <input class="input" id="cp-tags" placeholder="#yourhashtags #music #newmusic">
+      <div class="row">
+        <label class="lbl">Main video</label>
+        <select class="input" id="cp-main"></select>
+      </div>
+      <div class="row">
+        <label class="lbl">Shorts to include <span style="text-transform:none;font-weight:400">(tap to toggle)</span></label>
+        <div class="chips" id="cp-shorts"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="cp-thumbs">Make thumbnails</button>
+        <button class="btn2" id="cp-captions">Write my captions</button>
+      </div>
+      <div class="char-refs" id="cp-thumb-row"></div>
+      <div id="cp-posts" class="row"></div>
+      <div class="trim" style="font-size:12px">
+        <span>Start posting on</span><input type="date" id="cp-date" class="input" style="width:auto;padding:6px 8px;font-size:12px">
+        <span>· one post per day, main video first</span>
+      </div>
+      <button class="gen-btn" id="cp-export">Export campaign (ZIP)</button>
+      <p class="usage" id="cp-status"></p>
+      <p class="usage">The ZIP contains your videos, thumbnails, a posts.csv with every caption + suggested time, and campaign.json (ready for the Buffer API hookup later). Upload to Buffer post-by-post — everything's pre-written.</p>
     </div>
 
     <div class="card adv-card">
@@ -899,6 +928,7 @@ const st = {
   overlays: [],         // text overlay specs (rendered to PNG at export time)
   highlights: [],       // shorts generator markers [{label, time}]
   shorts: [],           // built short specs [{name, start, len, text, loop}]
+  musicList: [],        // playlist [{assetId, start, len}] - songs play in order
   seqFormat: '16:9',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
@@ -1235,12 +1265,15 @@ function collectSpec() {
     format: st.seqFormat, res: st.seqRes,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     music: {
-      assetId: $('#seq-music').value || null,
-      start: Number($('#music-start').value) || 0,
+      tracks: st.musicList,
       volume: (Number($('#music-volume').value) || 100) / 100,
       fadeIn: $('#music-fadein').checked, fadeOut: $('#music-fadeout').checked,
+      crossfade: $('#music-crossfade').checked,
     },
   };
+}
+function firstMusicAsset() {
+  return st.musicList.length ? st.assets.find((a) => a.id === st.musicList[0].assetId) : null;
 }
 function applySpec(spec) {
   if (!spec || !Array.isArray(spec.seq)) return;
@@ -1261,14 +1294,17 @@ function applySpec(spec) {
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
   $('#fade-black-out').checked = !!spec.fadeToBlack;
   if (spec.music) {
-    $('#seq-music').value = spec.music.assetId ? String(spec.music.assetId) : '';
-    $('#music-start').value = spec.music.start || 0;
+    // new playlist shape, with fallback for older single-track projects
+    if (Array.isArray(spec.music.tracks)) st.musicList = spec.music.tracks.filter((t) => t && t.assetId);
+    else if (spec.music.assetId) st.musicList = [{ assetId: spec.music.assetId, start: spec.music.start || 0, len: null }];
+    else st.musicList = [];
     $('#music-volume').value = Math.round((spec.music.volume ?? 1) * 100);
     $('#music-fadein').checked = spec.music.fadeIn !== false;
     $('#music-fadeout').checked = spec.music.fadeOut !== false;
+    $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -1286,10 +1322,15 @@ function renderSeqPickers() {
     '<option value="">Library is empty</option>';
 
   const music = st.assets.filter((a) => a.kind === 'audio');
-  const current = $('#seq-music').value;
-  $('#seq-music').innerHTML = '<option value="">No music</option>' +
-    music.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
-  if ([...$('#seq-music').options].some((o) => o.value === current)) $('#seq-music').value = current;
+  $('#mus-add-select').innerHTML = music.length
+    ? music.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
+    : '<option value="">No songs uploaded yet</option>';
+
+  const fullVids = st.assets.filter((a) => a.kind === 'video' && !a.label.startsWith('short_'));
+  $('#cp-main').innerHTML = fullVids.length
+    ? fullVids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
+    : '<option value="">Render a video first</option>';
+  renderCampaignShorts();
 
   const kbCurrent = $('#kb-image').value;
   $('#kb-image').innerHTML = '<option value="">Choose a still image…</option>' +
@@ -1489,13 +1530,52 @@ $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }
   catch (e) { setErr('#seq-err', e.message); }
 });
+function renderMusicList() {
+  const list = $('#mus-list');
+  list.innerHTML = st.musicList.length ? '' : '<p class="note" style="text-align:left">No songs yet. Songs play in order — add two or three for longer videos.</p>';
+  st.musicList.forEach((t, i) => {
+    const asset = st.assets.find((a) => a.id === t.assetId);
+    const row = document.createElement('div');
+    row.className = 'trim';
+    row.style.fontSize = '12px';
+    row.innerHTML = `
+      <b style="color:var(--tp)">${i + 1}. ♪ ${escapeHtml(asset ? asset.label : '(missing)')}</b>
+      <span style="margin-left:auto">from</span><input type="number" class="m-start" min="0" step="1" value="${t.start || 0}">
+      <span>s, play</span><input type="number" class="m-len" min="1" step="1" value="${t.len || ''}" placeholder="all">
+      <span>s</span>
+      <button class="m-up" style="border:none;background:var(--s1);color:var(--ts);border-radius:6px;width:24px;height:24px;cursor:pointer">↑</button>
+      <button class="m-dn" style="border:none;background:var(--s1);color:var(--ts);border-radius:6px;width:24px;height:24px;cursor:pointer">↓</button>
+      <button class="m-rm" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;width:24px;height:24px;cursor:pointer">✕</button>`;
+    row.querySelector('.m-start').onchange = (e) => { t.start = Math.max(0, Number(e.target.value) || 0); persistDraft(); };
+    row.querySelector('.m-len').onchange = (e) => { t.len = Number(e.target.value) > 0 ? Number(e.target.value) : null; persistDraft(); };
+    row.querySelector('.m-up').onclick = () => { if (i > 0) { [st.musicList[i - 1], st.musicList[i]] = [st.musicList[i], st.musicList[i - 1]]; renderMusicList(); persistDraft(); } };
+    row.querySelector('.m-dn').onclick = () => { if (i < st.musicList.length - 1) { [st.musicList[i + 1], st.musicList[i]] = [st.musicList[i], st.musicList[i + 1]]; renderMusicList(); persistDraft(); } };
+    row.querySelector('.m-rm').onclick = () => { st.musicList.splice(i, 1); renderMusicList(); updateQkMusicLabel(); persistDraft(); };
+    list.appendChild(row);
+  });
+}
+function updateQkMusicLabel() {
+  const n = st.musicList.length;
+  $('#qk-music-label').textContent = n === 0 ? 'no song yet (that\'s ok too)'
+    : n === 1 ? `♪ ${firstMusicAsset()?.label || 'song'}` : `♪ ${n} songs, in order`;
+}
+$('#mus-add').onclick = () => {
+  const id = Number($('#mus-add-select').value);
+  if (!id) return;
+  st.musicList.push({ assetId: id, start: 0, len: null });
+  renderMusicList(); updateQkMusicLabel(); persistDraft();
+};
 $('#seq-upload-music').onclick = () => pickFile('audio/*', async (file) => {
   setErr('#seq-err', null);
-  try { const asset = await uploadFile(file, 'audio'); await loadAssets(); $('#seq-music').value = String(asset.id); persistDraft(); }
-  catch (e) { setErr('#seq-err', e.message); }
+  try {
+    const asset = await uploadFile(file, 'audio');
+    await loadAssets();
+    st.musicList.push({ assetId: asset.id, start: 0, len: null });
+    renderMusicList(); updateQkMusicLabel(); persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
 });
 $('#music-volume').oninput = () => { $('#music-vol-label').textContent = $('#music-volume').value + '%'; };
-['seq-music', 'music-start', 'music-volume', 'music-fadein', 'music-fadeout', 'fade-black-in', 'fade-black-out']
+['music-volume', 'music-fadein', 'music-fadeout', 'music-crossfade', 'fade-black-in', 'fade-black-out']
   .forEach((id) => { document.getElementById(id).addEventListener('change', persistDraft); });
 
 /* ---------------- beat detection (pure WebAudio, on-device) ---------------- */
@@ -1537,8 +1617,8 @@ async function analyzeBeats(url) {
 
 $('#beats-analyze').onclick = async () => {
   setErr('#seq-err', null);
-  const asset = st.assets.find((a) => a.id === Number($('#seq-music').value));
-  if (!asset) return setErr('#seq-err', 'Pick a music track first.');
+  const asset = firstMusicAsset();
+  if (!asset) return setErr('#seq-err', 'Add a music track first.');
   $('#beats-analyze').disabled = true;
   $('#beats-info').textContent = 'Listening…';
   try {
@@ -1555,7 +1635,7 @@ $('#beats-analyze').onclick = async () => {
 
 $('#beats-snap').onclick = () => {
   if (!st.beats || st.seq.length < 2) return;
-  const musicStart = Number($('#music-start').value) || 0;
+  const musicStart = st.musicList[0]?.start || 0; // beats come from the first song
   const beats = st.beats.beats.map((b) => b - musicStart).filter((b) => b > 0.3);
   if (!beats.length) return setErr('#seq-err', 'No beats after the track start point.');
   let cum = 0;
@@ -1723,7 +1803,7 @@ async function runRender(windowOpt, btnSel, opts) {
           ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
           : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq }),
         transitions: st.trans,
-        music: spec.music.assetId ? spec.music : null,
+        music: spec.music.tracks.length ? spec.music : null,
         overlays,
         size: currentSize(),
         fadeFromBlack: spec.fadeFromBlack,
@@ -1793,8 +1873,8 @@ $('#hl-add').onclick = () => {
 // and mark them as highlights, mapped into timeline time.
 $('#hl-auto').onclick = async () => {
   setErr('#seq-err', null);
-  const asset = st.assets.find((a) => a.id === Number($('#seq-music').value));
-  if (!asset) return setErr('#seq-err', 'Pick a music track first (Music card above).');
+  const asset = firstMusicAsset();
+  if (!asset) return setErr('#seq-err', 'Add a music track first.');
   const total = timelineTotal();
   if (!total) return setErr('#seq-err', 'Build your timeline first.');
   $('#hl-auto').disabled = true;
@@ -1813,7 +1893,7 @@ $('#hl-auto').onclick = async () => {
       rms.push({ t: i, v: Math.sqrt(s / (win / 16)) });
     }
     ac.close();
-    const musicStart = Number($('#music-start').value) || 0;
+    const musicStart = st.musicList[0]?.start || 0;
     // candidates in timeline coords, loudest first, at least 15s apart
     const picked = [];
     for (const c of [...rms].sort((a, b) => b.v - a.v)) {
@@ -1914,7 +1994,7 @@ async function renderOneShort(s, statusEl) {
         ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
         : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq }),
       transitions: st.trans,
-      music: spec.music.assetId ? spec.music : null,
+      music: spec.music.tracks.length ? spec.music : null,
       overlays,
       size: '1080x1920',
       window: { start: s.start, end: s.start + s.len },
@@ -2073,9 +2153,8 @@ $('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
   try {
     const asset = await uploadFile(file, 'audio');
     await loadAssets();
-    $('#seq-music').value = String(asset.id);
-    $('#qk-music-label').textContent = `♪ ${asset.label}`;
-    persistDraft();
+    st.musicList.push({ assetId: asset.id, start: 0, len: null }); // press again to add a 2nd song
+    renderMusicList(); updateQkMusicLabel(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
 });
 
@@ -2095,7 +2174,7 @@ $('#qk-assemble').onclick = async () => {
     st.seqRes = '1080';
     renderOutputChips();
     let durs = qk.shots.map((s) => s.dur);
-    const musicAsset = st.assets.find((a) => a.id === Number($('#seq-music').value));
+    const musicAsset = firstMusicAsset();
     if ($('#qk-beat').checked && musicAsset) {
       $('#qk-status').textContent = 'Listening to your song…';
       try {
@@ -2210,6 +2289,140 @@ $('#qk-tpl-apply').onclick = async () => {
   } catch (e) { setErr('#seq-err', `Could not load that template: ${e.message}`); }
 };
 
+/* ---------------- campaign export ---------------- */
+const cp = { thumbs: [], posts: [], shortsSel: new Set() };
+const CP_HOOKS = ['This part 🔥', 'Turn it up 🔊', 'New one out now 🎵', 'On repeat ♾️', 'Wait for the drop 👀'];
+
+function renderCampaignShorts() {
+  const el = $('#cp-shorts');
+  if (!el) return;
+  const shorts = st.assets.filter((a) => a.kind === 'video' && a.label.startsWith('short_'));
+  // newly rendered shorts start selected
+  shorts.forEach((a) => { if (!cp.seen?.has(a.id)) cp.shortsSel.add(a.id); });
+  cp.seen = new Set(shorts.map((a) => a.id));
+  el.innerHTML = shorts.length ? '' : '<span class="usage">No shorts yet — the Shorts Generator above makes them.</span>';
+  shorts.forEach((a) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (cp.shortsSel.has(a.id) ? ' on' : '');
+    b.textContent = a.label;
+    b.onclick = () => {
+      cp.shortsSel.has(a.id) ? cp.shortsSel.delete(a.id) : cp.shortsSel.add(a.id);
+      renderCampaignShorts();
+    };
+    el.appendChild(b);
+  });
+}
+
+$('#cp-thumbs').onclick = async () => {
+  setErr('#seq-err', null);
+  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
+  if (!main) return setErr('#seq-err', 'Pick a main video first.');
+  const dur = main.meta?.duration || 30;
+  $('#cp-thumbs').disabled = true;
+  $('#cp-status').textContent = 'Grabbing your best frames…';
+  try {
+    cp.thumbs = [];
+    for (const frac of [0.2, 0.5, 0.8]) {
+      const { asset } = await jfetch('/api/studio/thumbnail', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: main.id, time: Math.round(dur * frac * 10) / 10 }),
+      });
+      cp.thumbs.push(asset);
+    }
+    $('#cp-thumb-row').innerHTML = cp.thumbs.map((t) => `<img src="${t.url}" alt="">`).join('');
+    $('#cp-status').textContent = `${cp.thumbs.length} thumbnails ready — they'll be in the ZIP.`;
+    await loadAssets();
+  } catch (e) {
+    setErr('#seq-err', e.message);
+    $('#cp-status').textContent = '';
+  } finally {
+    $('#cp-thumbs').disabled = false;
+  }
+};
+
+function cpFields() {
+  return {
+    title: $('#cp-title').value.trim() || 'New track',
+    artist: $('#cp-artist').value.trim() || '',
+    link: $('#cp-link').value.trim(),
+    tags: $('#cp-tags').value.trim(),
+  };
+}
+
+$('#cp-captions').onclick = () => {
+  setErr('#seq-err', null);
+  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
+  if (!main) return setErr('#seq-err', 'Pick a main video first.');
+  const f = cpFields();
+  const by = f.artist ? ` — ${f.artist}` : '';
+  cp.posts = [{
+    assetId: main.id, label: main.label, platform: 'YouTube',
+    caption: `${f.title}${by} (Official Video)\n\n${f.link ? f.link + '\n\n' : ''}${f.tags}`.trim(),
+  }];
+  const shorts = st.assets.filter((a) => a.kind === 'video' && cp.shortsSel.has(a.id));
+  shorts.forEach((a, i) => {
+    cp.posts.push({
+      assetId: a.id, label: a.label, platform: 'TikTok / Reels / Shorts',
+      caption: `${CP_HOOKS[i % CP_HOOKS.length]}\n${f.title}${by}, out now${f.link ? '\n' + f.link : ''}\n\n${f.tags}`.trim(),
+    });
+  });
+  renderCpPosts();
+  $('#cp-status').textContent = 'Captions written — tweak any of them, then export.';
+};
+
+function renderCpPosts() {
+  const list = $('#cp-posts');
+  list.innerHTML = '';
+  cp.posts.forEach((p) => {
+    const row = document.createElement('div');
+    row.className = 'seq-item';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = 'stretch';
+    row.innerHTML = `
+      <div class="trim" style="font-size:12px"><b style="color:var(--tp)">${escapeHtml(p.label)}</b>
+        <select class="input p-platform" style="width:auto;padding:5px 8px;font-size:12px;margin-left:auto">
+          ${['YouTube', 'TikTok / Reels / Shorts', 'Instagram', 'X / Twitter', 'Facebook'].map((pl) => `<option${pl === p.platform ? ' selected' : ''}>${pl}</option>`).join('')}
+        </select></div>
+      <textarea class="p-caption" style="min-height:84px;padding:8px 10px;font-size:12px">${escapeHtml(p.caption)}</textarea>`;
+    row.querySelector('.p-platform').onchange = (e) => { p.platform = e.target.value; };
+    row.querySelector('.p-caption').oninput = (e) => { p.caption = e.target.value; };
+    list.appendChild(row);
+  });
+}
+
+$('#cp-export').onclick = async () => {
+  setErr('#seq-err', null);
+  if (!cp.posts.length) $('#cp-captions').click();
+  if (!cp.posts.length) return;
+  const f = cpFields();
+  const startDate = $('#cp-date').value ? new Date($('#cp-date').value + 'T18:00:00') : new Date();
+  const btn = $('#cp-export');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Packing your campaign…';
+  try {
+    const { asset } = await jfetch('/api/studio/campaign', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: f.title,
+        posts: cp.posts.map((p, i) => ({
+          assetId: p.assetId, platform: p.platform, caption: p.caption,
+          scheduledAt: new Date(startDate.getTime() + i * 86400000).toISOString(),
+        })),
+        thumbnails: cp.thumbs.map((t) => t.id),
+        info: f,
+      }),
+    });
+    await loadAssets();
+    const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.zip'; l.click();
+    $('#cp-status').textContent = `Campaign packed: ${cp.posts.length} posts + ${cp.thumbs.length} thumbnails, one per day starting ${startDate.toDateString()}. The ZIP is downloading — open README.txt inside.`;
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Export campaign (ZIP)';
+  }
+};
+
 /* ---------------- projects ---------------- */
 $('#proj-save').onclick = async () => {
   setErr('#seq-err', null);
@@ -2236,6 +2449,7 @@ renderSeq();
 renderOverlays();
 renderHighlights();
 renderQkFormat();
+renderMusicList();
 applySimpleMode();
 bootStudio().then(() => {
   updateScenesUsage();
@@ -2246,6 +2460,7 @@ bootStudio().then(() => {
       if (draft && draft.seq && draft.seq.length) applySpec(draft);
     } catch (_) {}
   }
+  updateQkMusicLabel();
   draftReady = true;
 });
 </script>

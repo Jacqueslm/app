@@ -37,12 +37,13 @@ const EXT_BY_KIND = {
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
   audio: new Set(['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']),
   project: new Set(['.json']),
+  archive: new Set(['.zip']),
 };
 const CONTENT_TYPES = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
   '.mp4': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/quicktime', '.m4v': 'video/mp4',
   '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.aac': 'audio/aac',
-  '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.json': 'application/json',
+  '.ogg': 'audio/ogg', '.flac': 'audio/flac', '.json': 'application/json', '.zip': 'application/zip',
 };
 
 function todayUTC() {
@@ -232,7 +233,7 @@ router.get('/config', (req, res) => {
 
 /* ---------------- assets ---------------- */
 router.get('/assets', (req, res) => {
-  const kind = ['image', 'video', 'audio', 'project'].includes(req.query.kind) ? req.query.kind : null;
+  const kind = ['image', 'video', 'audio', 'project', 'archive'].includes(req.query.kind) ? req.query.kind : null;
   res.json({ assets: db.getAssets(req.userId, kind).map(assetJson) });
 });
 
@@ -598,17 +599,27 @@ router.post('/render', async (req, res) => {
   }
   const outDur = winEnd - winStart;
 
-  // --- music
+  // --- music: one track, or a playlist that plays back to back (multi-song
+  // videos). Old single-track project files still work via the assetId shape.
   let musicIn = null;
-  if (music && music.assetId) {
-    const row = db.getAsset(req.userId, Number(music.assetId));
-    if (!row || row.kind !== 'audio') return res.status(404).json({ error: 'Music track not found.' });
+  if (music && (music.assetId || (Array.isArray(music.tracks) && music.tracks.length))) {
+    const rawTracks = Array.isArray(music.tracks) && music.tracks.length
+      ? music.tracks.slice(0, 10)
+      : [{ assetId: music.assetId, start: music.start }];
+    const tracks = [];
+    for (const t of rawTracks) {
+      const row = db.getAsset(req.userId, Number(t.assetId));
+      if (!row || row.kind !== 'audio') return res.status(404).json({ error: 'Music track not found.' });
+      const start = Math.max(0, Number(t.start) || 0);
+      const len = Number(t.len) > 0 ? Number(t.len) : null; // null = play the whole song
+      tracks.push({ file: mediaPath(row.filename), start, len });
+    }
     musicIn = {
-      file: mediaPath(row.filename),
-      start: Math.max(0, Number(music.start) || 0),
+      tracks,
       volume: Math.min(2, Math.max(0, music.volume == null ? 1 : Number(music.volume))),
       fadeIn: music.fadeIn !== false,
       fadeOut: music.fadeOut !== false,
+      crossfade: music.crossfade !== false && tracks.length > 1,
     };
   }
 
@@ -631,8 +642,8 @@ router.post('/render', async (req, res) => {
     else args.push('-ss', String(c.start), '-to', String(c.end), '-i', c.file);
   }
   const musicIdx = resolved.length;
-  if (musicIn) args.push('-i', musicIn.file);
-  const ovBase = musicIdx + (musicIn ? 1 : 0);
+  if (musicIn) for (const t of musicIn.tracks) args.push('-i', t.file);
+  const ovBase = musicIdx + (musicIn ? musicIn.tracks.length : 0);
   for (const o of ovs) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
 
   // --- filter graph
@@ -689,8 +700,20 @@ router.post('/render', async (req, res) => {
   filters.push(`${vcur}${postFades.length ? postFades.join(',') : 'null'}[vout]`);
 
   if (musicIn) {
-    let achain = `[${musicIdx}:a]atrim=start=${musicIn.start.toFixed(3)},asetpts=PTS-STARTPTS` +
-      `,atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
+    // Normalize every track so they can be joined regardless of source format.
+    musicIn.tracks.forEach((t, i) => {
+      const trim = `atrim=start=${t.start.toFixed(3)}${t.len ? `:end=${(t.start + t.len).toFixed(3)}` : ''}`;
+      filters.push(`[${musicIdx + i}:a]${trim},asetpts=PTS-STARTPTS,` +
+        `aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[mt${i}]`);
+    });
+    let mcur = '[mt0]';
+    for (let i = 1; i < musicIn.tracks.length; i++) {
+      const out = `[mj${i}]`;
+      if (musicIn.crossfade) filters.push(`${mcur}[mt${i}]acrossfade=d=1:c1=tri:c2=tri${out}`);
+      else filters.push(`${mcur}[mt${i}]concat=n=2:v=0:a=1${out}`);
+      mcur = out;
+    }
+    let achain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
       `,volume=${musicIn.volume.toFixed(2)}`;
     if (musicIn.fadeIn) achain += `,afade=t=in:st=0:d=1`;
     if (musicIn.fadeOut) achain += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
@@ -708,6 +731,133 @@ router.post('/render', async (req, res) => {
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
     { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
   res.status(202).json({ job: jobJson(job) });
+});
+
+/* ---------------- thumbnails ---------------- */
+router.post('/thumbnail', (req, res) => {
+  const { assetId, time } = req.body || {};
+  const video = db.getAsset(req.userId, Number(assetId));
+  if (!video || video.kind !== 'video') return res.status(404).json({ error: 'Video not found.' });
+  const t = Math.max(0, Number(time) || 0);
+  const outFile = newFilename(req.userId, '.png');
+  const proc = spawn(ffmpegBin(), [
+    '-ss', t.toFixed(2), '-i', mediaPath(video.filename), '-frames:v', '1', '-y', mediaPath(outFile),
+  ]);
+  proc.on('error', () => res.status(500).json({ error: 'Could not start ffmpeg.' }));
+  proc.on('close', (code) => {
+    if (res.headersSent) return;
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Could not grab that frame.' });
+    }
+    const id = db.createAsset(req.userId, 'image', `${video.label} thumb @${t.toFixed(0)}s`, outFile, null,
+      { source: 'thumbnail', overlay: true }); // overlay flag keeps thumbs out of the pickers
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
+/* ---------------- campaign export ---------------- */
+function csvCell(s) {
+  return `"${String(s == null ? '' : s).replace(/"/g, '""')}"`;
+}
+
+router.post('/campaign', async (req, res) => {
+  const { name, posts, thumbnails, info } = req.body || {};
+  const cleanName = (typeof name === 'string' && name.trim() ? name.trim() : 'campaign')
+    .replace(/[^a-zA-Z0-9 _-]/g, '').slice(0, 50) || 'campaign';
+  if (!Array.isArray(posts) || !posts.length) {
+    return res.status(400).json({ error: 'A campaign needs at least one post.' });
+  }
+  if (posts.length > 40) return res.status(400).json({ error: 'Campaigns are limited to 40 posts.' });
+
+  const resolvedPosts = [];
+  for (const p of posts) {
+    const row = db.getAsset(req.userId, Number(p.assetId));
+    if (!row || row.kind !== 'video') return res.status(404).json({ error: `Post video ${p.assetId} not found.` });
+    resolvedPosts.push({
+      file: mediaPath(row.filename),
+      mediaName: `${row.label.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60)}.mp4`,
+      platform: String(p.platform || 'any').slice(0, 30),
+      caption: String(p.caption || '').slice(0, 5000),
+      scheduledAt: typeof p.scheduledAt === 'string' ? p.scheduledAt.slice(0, 40) : '',
+    });
+  }
+  const resolvedThumbs = [];
+  for (const id of (Array.isArray(thumbnails) ? thumbnails : []).slice(0, 12)) {
+    const row = db.getAsset(req.userId, Number(id));
+    if (row && row.kind === 'image') resolvedThumbs.push({ file: mediaPath(row.filename), ext: path.extname(row.filename) });
+  }
+
+  try {
+    const archiverMod = require('archiver');
+    const zipFile = newFilename(req.userId, '.zip');
+    const output = fs.createWriteStream(mediaPath(zipFile));
+    // archiver v8 exports classes; older versions export a factory function.
+    // Level 0 (store) because mp4/png don't compress - packing stays fast.
+    const archive = typeof archiverMod === 'function'
+      ? archiverMod('zip', { zlib: { level: 0 } })
+      : new archiverMod.ZipArchive({ zlib: { level: 0 } });
+    const done = new Promise((resolve, reject) => {
+      output.on('close', resolve);
+      archive.on('error', reject);
+    });
+    archive.pipe(output);
+
+    const root = cleanName;
+    const seenNames = new Set();
+    resolvedPosts.forEach((p) => {
+      // keep filenames unique inside the zip
+      let n = p.mediaName, bump = 2;
+      while (seenNames.has(n)) n = p.mediaName.replace(/\.mp4$/, `-${bump++}.mp4`);
+      seenNames.add(n);
+      p.mediaName = n;
+      archive.file(p.file, { name: `${root}/videos/${n}` });
+    });
+    resolvedThumbs.forEach((t, i) => archive.file(t.file, { name: `${root}/thumbnails/thumbnail-${i + 1}${t.ext}` }));
+
+    const csv = ['platform,media_file,scheduled_at,caption']
+      .concat(resolvedPosts.map((p) =>
+        [csvCell(p.platform), csvCell(`videos/${p.mediaName}`), csvCell(p.scheduledAt), csvCell(p.caption)].join(',')))
+      .join('\r\n');
+    archive.append(csv, { name: `${root}/posts.csv` });
+
+    const campaignJson = {
+      version: 1,
+      name: cleanName,
+      createdAt: new Date().toISOString(),
+      info: info && typeof info === 'object' ? info : {},
+      posts: resolvedPosts.map((p) => ({
+        platform: p.platform, mediaFile: `videos/${p.mediaName}`,
+        scheduledAt: p.scheduledAt || null, caption: p.caption,
+      })),
+      thumbnails: resolvedThumbs.map((_, i) => `thumbnails/thumbnail-${i + 1}${resolvedThumbs[i].ext}`),
+      // Reserved for the future Buffer API integration - this file is the
+      // machine-readable version of posts.csv.
+      buffer: { uploaded: false, profileIds: [] },
+    };
+    archive.append(JSON.stringify(campaignJson, null, 2), { name: `${root}/campaign.json` });
+
+    archive.append(
+      `${cleanName} - campaign package\n` +
+      `================================\n\n` +
+      `videos/       every video in this campaign, named per post\n` +
+      `thumbnails/   cover image candidates for YouTube/posts\n` +
+      `posts.csv     one row per post: platform, file, suggested time, caption\n` +
+      `campaign.json machine-readable version (used for Buffer API upload later)\n\n` +
+      `To publish with Buffer today:\n` +
+      `1. Open buffer.com -> Create Post\n` +
+      `2. Drag in the video for the post, paste its caption from posts.csv\n` +
+      `3. Set the suggested time (or your own) and add to queue\n` +
+      `4. Repeat down the CSV - everything is pre-written, it takes minutes\n`,
+      { name: `${root}/README.txt` });
+
+    await archive.finalize();
+    await done;
+    const id = db.createAsset(req.userId, 'archive', `${cleanName} campaign`, zipFile, null,
+      { source: 'campaign', posts: resolvedPosts.length, thumbnails: resolvedThumbs.length });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not build the campaign zip: ${err.message}` });
+  }
 });
 
 /* ---------------- job polling ---------------- */

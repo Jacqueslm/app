@@ -6570,31 +6570,120 @@ async function submitChangePassword(){
   }
 }
 
+// ─── MULTI-DEVICE SYNC ───────────────────────────────────────────────────────
+// The server keeps a version number per account. Each save is a compare-and-swap: if
+// another device advanced the version since we last synced, the server rejects our write
+// (409) and hands back its copy so we MERGE instead of silently clobbering it. We also pull
+// on focus/reconnect so a device that's been sitting open picks up other devices' changes.
 let syncSizeWarned=false;
+let serverStateVersion=0;   // last version we know the server holds (0 = never synced)
+let syncing=false;          // a push/pull is in flight
+let syncPending=false;      // a save arrived mid-sync; re-push when the current one finishes
+
+// Append-only collections are merged by unioning their entries (deduped by a natural key);
+// lifetime counters take the max so progress is never lost; scalar settings come from
+// `primary` (the side we want to win — normally the local, just-edited copy).
+const SYNC_ARRAYS={
+  journals:j=>`${j.date}|${j.title||''}|${j.body||''}`,
+  cravings:c=>`${c.ts}|${c.val}|${c.trigger||''}`,
+  communityPosts:p=>`${p.date}|${p.body||''}`,
+  activityLog:a=>`${a.ts}|${a.type}`,
+};
+const SYNC_MAX_COUNTERS=['cravingsSurvivedCount','lessonsCompletedCount','totalSoberDaysEver'];
+function mergeStates(primary,secondary){
+  const out=Object.assign({},secondary,primary); // primary's scalar settings win
+  for(const[key,keyFn]of Object.entries(SYNC_ARRAYS)){
+    const a=Array.isArray(primary[key])?primary[key]:[];
+    const b=Array.isArray(secondary[key])?secondary[key]:[];
+    const seen=new Set();const merged=[];
+    [...a,...b].forEach(it=>{const k=keyFn(it);if(!seen.has(k)){seen.add(k);merged.push(it);}});
+    // keep newest-first where the entries carry a timestamp
+    merged.sort((x,y)=>new Date(y.date||y.ts||0)-new Date(x.date||x.ts||0));
+    out[key]=merged;
+  }
+  SYNC_MAX_COUNTERS.forEach(k=>{out[k]=Math.max(Number(primary[k]||0),Number(secondary[k]||0));});
+  return out;
+}
+function refreshAfterSync(){
+  try{
+    updateStats();
+    const active=document.querySelector('.scr.on');
+    if(active){
+      if(active.id==='s-journal')renderJournal();
+      else if(active.id==='s-craving'){renderCravings();}
+      else if(active.id==='s-community')renderCommunityPosts();
+      else if(active.id==='s-home')renderMilestones();
+    }
+  }catch(_){}
+}
+function persistLocal(){try{localStorage.setItem('tsid_v2',JSON.stringify(S));}catch(_){}}
+
 async function pushStateToServer(){
   if(!S.accountEmail)return false;
+  if(syncing){syncPending=true;return false;}
+  syncing=true;
   try{
-    const res=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S)})});
+    const res=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S),baseVersion:serverStateVersion})});
+    if(res.status===409){
+      // Another device saved first. Merge their copy into ours (ours wins on settings),
+      // adopt their version, and push the union back once.
+      const data=await res.json().catch(()=>({}));
+      let serverState={};try{serverState=JSON.parse(data.state||'{}');}catch(_){}
+      Object.assign(S,mergeStates(S,serverState));
+      serverStateVersion=data.version||serverStateVersion;
+      persistLocal();refreshAfterSync();
+      const retry=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S),baseVersion:serverStateVersion})});
+      if(retry.ok){const rd=await retry.json().catch(()=>({}));if(rd.version)serverStateVersion=rd.version;return true;}
+      return false;
+    }
     if(res.status===413){
-      // Payload exceeds the server's size limit - usually a large profile photo. Data is
-      // still safe locally; warn once so the user knows cloud sync has stalled.
       if(!syncSizeWarned){
         syncSizeWarned=true;
         try{appInfo('Sync paused',"Your data is too large to back up to your account right now — usually a large profile photo. It's still saved on this device; using a smaller photo re-enables cloud sync.");}catch(_){}
       }
       return false;
     }
-    return res.ok;
+    if(res.ok){const d=await res.json().catch(()=>({}));if(d.version)serverStateVersion=d.version;return true;}
+    return false;
   }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */
     return false;
+  }finally{
+    syncing=false;
+    if(syncPending){syncPending=false;pushStateToServer();}
   }
+}
+
+// Pull the server's copy and merge it in if another device has advanced it. Called on tab
+// focus and on reconnect so a long-open device stays current.
+async function pullStateFromServer(){
+  if(!S.accountEmail||syncing)return;
+  try{
+    const res=await fetch('/api/state');
+    if(!res.ok)return;
+    const data=await res.json().catch(()=>({}));
+    if(!data.version)return;
+    if(data.version!==serverStateVersion&&data.state){
+      let serverState={};try{serverState=JSON.parse(data.state);}catch(_){return;}
+      Object.assign(S,mergeStates(S,serverState));
+      serverStateVersion=data.version;
+      persistLocal();refreshAfterSync();
+      pushStateToServer(); // persist the merged union (may carry local-only entries too)
+    }else{
+      serverStateVersion=data.version;
+    }
+  }catch(e){/* offline */}
 }
 
 async function manualSync(){
   if(!S.accountEmail){appInfo('Not signed in','Sign in under Account & Sync to back up your data to your account.');return;}
+  await pullStateFromServer();
   const ok=await pushStateToServer();
   appInfo('Sync',ok?'Synced to your account.':"Couldn't sync right now — your data is still saved on this device and will sync when you're back online.");
 }
+
+// Keep devices current without the user thinking about it.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)pullStateFromServer();});
+window.addEventListener('online',()=>{pullStateFromServer();});
 
 async function signOutAccount(){
   try{await fetch('/api/auth/logout',{method:'POST'});}catch(e){}
@@ -6722,11 +6811,14 @@ async function submitGateAuth(){
       return;
     }
 
-    // Log in - the account's saved data (if any) is the source of truth going forward.
+    // Log in - the account's saved data is the source of truth going forward, but union in
+    // any local arrays so entries made on this device before signing in aren't lost.
     const stateRes=await fetch('/api/state');
-    const stateData=stateRes.ok?await stateRes.json():{state:null};
+    const stateData=stateRes.ok?await stateRes.json():{state:null,version:0};
+    serverStateVersion=stateData.version||0;
     if(stateData.state){
-      Object.assign(S,JSON.parse(stateData.state));
+      let serverState={};try{serverState=JSON.parse(stateData.state);}catch(_){}
+      Object.assign(S,mergeStates(serverState,S)); // server account's settings win on login
       S.accountEmail=data.email;
     }
     save();
@@ -6744,7 +6836,18 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
+      // Merge the account's latest server state so a device reopened after changes were
+      // made elsewhere picks them up (union arrays; keep this device's own settings).
+      try{
+        const sr=await fetch('/api/state');
+        if(sr.ok){
+          const sd=await sr.json();
+          serverStateVersion=sd.version||0;
+          if(sd.state){let ss={};try{ss=JSON.parse(sd.state);}catch(_){}Object.assign(S,mergeStates(S,ss));S.accountEmail=me.email;persistLocal();}
+        }
+      }catch(_){}
       enterApp();
+      pushStateToServer(); // persist any merged/local-only entries back
       return;
     }
   }catch(e){/* server unreachable - fall through to the gate */}

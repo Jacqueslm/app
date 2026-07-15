@@ -14,7 +14,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS user_state (
     user_id INTEGER PRIMARY KEY REFERENCES users(id),
     state_json TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1
   );
   CREATE TABLE IF NOT EXISTS chat_usage (
     user_id INTEGER NOT NULL REFERENCES users(id),
@@ -29,6 +30,11 @@ function addColumnIfMissing(name, ddl) {
   if (!userColumns.includes(name)) {
     db.exec(`ALTER TABLE users ADD COLUMN ${ddl}`);
   }
+}
+// user_state.version was added after launch; backfill it on existing databases.
+const stateColumns = db.prepare('PRAGMA table_info(user_state)').all().map((c) => c.name);
+if (!stateColumns.includes('version')) {
+  db.exec('ALTER TABLE user_state ADD COLUMN version INTEGER NOT NULL DEFAULT 1');
 }
 addColumnIfMissing('stripe_customer_id', 'stripe_customer_id TEXT');
 addColumnIfMissing('stripe_subscription_id', 'stripe_subscription_id TEXT');
@@ -58,11 +64,44 @@ function getState(userId) {
   return row ? row.state_json : null;
 }
 
-function saveState(userId, stateJson) {
+// Returns { state, version } (state null if the user has never saved).
+function getStateWithVersion(userId) {
+  const row = db
+    .prepare('SELECT state_json, version FROM user_state WHERE user_id = ?')
+    .get(userId);
+  return row ? { state: row.state_json, version: row.version } : { state: null, version: 0 };
+}
+
+// Optimistic-concurrency save. The client sends the version it last loaded; if the server
+// has moved on since (another device saved), this returns a conflict WITHOUT overwriting, so
+// the client can merge and retry instead of silently clobbering the other device's data.
+// baseVersion === null forces an unconditional overwrite (used by trusted server paths).
+// Read-then-write runs synchronously with no await between, so it is atomic per request.
+function saveStateVersioned(userId, stateJson, baseVersion) {
+  const now = new Date().toISOString();
+  const cur = db.prepare('SELECT version FROM user_state WHERE user_id = ?').get(userId);
+  if (!cur) {
+    db.prepare(
+      'INSERT INTO user_state (user_id, state_json, updated_at, version) VALUES (?, ?, ?, 1)'
+    ).run(userId, stateJson, now);
+    return { ok: true, version: 1 };
+  }
+  if (baseVersion !== null && baseVersion !== undefined && baseVersion !== cur.version) {
+    const row = db
+      .prepare('SELECT state_json, version FROM user_state WHERE user_id = ?')
+      .get(userId);
+    return { ok: false, conflict: true, version: row.version, state: row.state_json };
+  }
+  const nextVersion = cur.version + 1;
   db.prepare(
-    `INSERT INTO user_state (user_id, state_json, updated_at) VALUES (?, ?, ?)
-     ON CONFLICT(user_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at`
-  ).run(userId, stateJson, new Date().toISOString());
+    'UPDATE user_state SET state_json = ?, updated_at = ?, version = ? WHERE user_id = ?'
+  ).run(stateJson, now, nextVersion, userId);
+  return { ok: true, version: nextVersion };
+}
+
+// Unconditional save (kept for internal callers that don't do concurrency control).
+function saveState(userId, stateJson) {
+  saveStateVersioned(userId, stateJson, null);
 }
 
 function deleteUser(userId) {
@@ -150,7 +189,9 @@ module.exports = {
   getUserByEmail,
   getUserById,
   getState,
+  getStateWithVersion,
   saveState,
+  saveStateVersioned,
   deleteUser,
   getChatCount,
   incrementChatCount,

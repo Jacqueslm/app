@@ -228,17 +228,26 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 });
 
 app.get('/api/state', requireAuth, (req, res) => {
-  const stateJson = db.getState(req.userId);
-  res.json({ state: stateJson || null });
+  const { state, version } = db.getStateWithVersion(req.userId);
+  res.json({ state: state || null, version });
 });
 
 app.put('/api/state', requireAuth, (req, res) => {
-  const { state } = req.body || {};
+  const { state, baseVersion } = req.body || {};
   if (typeof state !== 'string') {
     return res.status(400).json({ error: 'state must be a JSON string.' });
   }
-  db.saveState(req.userId, state);
-  res.json({ ok: true });
+  const result = db.saveStateVersioned(
+    req.userId,
+    state,
+    baseVersion === undefined ? null : baseVersion
+  );
+  if (!result.ok && result.conflict) {
+    // Another device saved since this client last synced. Hand back the current server
+    // state + version so the client can merge and retry, instead of clobbering it.
+    return res.status(409).json({ conflict: true, version: result.version, state: result.state });
+  }
+  res.json({ ok: true, version: result.version });
 });
 
 app.get('/api/account/export', requireAuth, (req, res) => {

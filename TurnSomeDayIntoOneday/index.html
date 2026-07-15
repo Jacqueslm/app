@@ -1929,8 +1929,18 @@ let S = {
   soberDays:[]
 };
 
+let storageWarned=false;
 function save(){
-  try{localStorage.setItem('tsid_v2',JSON.stringify(S))}catch(e){}
+  try{
+    localStorage.setItem('tsid_v2',JSON.stringify(S));
+  }catch(e){
+    // Out of local storage (e.g. a large profile photo plus a long history). Don't fail
+    // silently - the user would believe their data was saved. Warn once per session.
+    if(!storageWarned){
+      storageWarned=true;
+      try{appInfo('Storage full',"This device is out of space to save app data, so your most recent changes may not be kept here. Signing in backs your data up to your account, and removing your profile photo frees space.");}catch(_){}
+    }
+  }
   if(S.accountEmail)pushStateToServer();
 }
 function load(){
@@ -6539,16 +6549,30 @@ async function submitChangePassword(){
   }
 }
 
+let syncSizeWarned=false;
 async function pushStateToServer(){
-  if(!S.accountEmail)return;
+  if(!S.accountEmail)return false;
   try{
-    await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S)})});
-  }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */}
+    const res=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:JSON.stringify(S)})});
+    if(res.status===413){
+      // Payload exceeds the server's size limit - usually a large profile photo. Data is
+      // still safe locally; warn once so the user knows cloud sync has stalled.
+      if(!syncSizeWarned){
+        syncSizeWarned=true;
+        try{appInfo('Sync paused',"Your data is too large to back up to your account right now — usually a large profile photo. It's still saved on this device; using a smaller photo re-enables cloud sync.");}catch(_){}
+      }
+      return false;
+    }
+    return res.ok;
+  }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */
+    return false;
+  }
 }
 
-function manualSync(){
-  pushStateToServer();
-  alert('Synced to your account.');
+async function manualSync(){
+  if(!S.accountEmail){appInfo('Not signed in','Sign in under Account & Sync to back up your data to your account.');return;}
+  const ok=await pushStateToServer();
+  appInfo('Sync',ok?'Synced to your account.':"Couldn't sync right now — your data is still saved on this device and will sync when you're back online.");
 }
 
 async function signOutAccount(){

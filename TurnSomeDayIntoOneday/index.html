@@ -2568,7 +2568,7 @@ function renderPackList(){
       const day=getPackDay(p.id);
       html+=`<div class="setting-row" onclick="openPack('${p.id}')">
         <i class="ti ti-notebook" style="color:var(--accent)"></i>
-        <div class="setting-row-txt"><p>${p.name}</p><span>Day ${day} of ${p.lengthDays} · ${p.focusAreas.join(', ')}</span></div>
+        <div class="setting-row-txt"><p>${(p.name||'').replace(/</g,'&lt;')}</p><span>Day ${day} of ${p.lengthDays} · ${p.focusAreas.join(', ')}</span></div>
         <button onclick="event.stopPropagation();deleteCustomPack('${p.id}')" title="Delete pack" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0 8px">×</button>
       </div>`;
     });
@@ -4350,7 +4350,7 @@ function renderCommunityPosts(){
       if((p.category||'Other')!==room)return;
       const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
       const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
-      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${(p.name||'').replace(/</g,'&lt;')}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
       container.appendChild(div);
     });
   }

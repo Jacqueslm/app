@@ -546,7 +546,7 @@ function eqFilter(eq) {
 }
 
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win } = req.body || {};
+  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win, loop, name } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -670,11 +670,23 @@ router.post('/render', async (req, res) => {
     current = `[vo${k}]`;
   });
 
-  // Cutdown window, then the final fades so they always sit at the output's edges.
-  let vchain = `${current}trim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},setpts=PTS-STARTPTS`;
-  if (fadeFromBlack) vchain += `,fade=t=in:st=0:d=0.8`;
-  if (fadeToBlack) vchain += `,fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`;
-  filters.push(`${vchain}[vout]`);
+  // Cutdown window, then loop treatment, then the final fades so they always
+  // sit at the output's edges.
+  filters.push(`${current}trim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},setpts=PTS-STARTPTS,settb=AVTB[vwin]`);
+  let vcur = '[vwin]';
+  if (loop && outDur > 2) {
+    // Seamless replay: freeze the very first frame and crossfade the ending
+    // into it, so the last frame of the file IS the first frame.
+    const LD = Math.min(0.6, outDur / 4);
+    filters.push(`[vwin]split=2[vwa][vwb]`);
+    filters.push(`[vwb]trim=end_frame=1,tpad=stop_mode=clone:stop_duration=${LD.toFixed(3)},fps=${FPS},setpts=PTS-STARTPTS,settb=AVTB[vfrz]`);
+    filters.push(`[vwa][vfrz]xfade=transition=fade:duration=${LD.toFixed(3)}:offset=${(outDur - LD).toFixed(3)}[vloop]`);
+    vcur = '[vloop]';
+  }
+  const postFades = [];
+  if (fadeFromBlack) postFades.push(`fade=t=in:st=0:d=0.8`);
+  if (fadeToBlack) postFades.push(`fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`);
+  filters.push(`${vcur}${postFades.length ? postFades.join(',') : 'null'}[vout]`);
 
   if (musicIn) {
     let achain = `[${musicIdx}:a]atrim=start=${musicIn.start.toFixed(3)},asetpts=PTS-STARTPTS` +
@@ -690,9 +702,11 @@ router.post('/render', async (req, res) => {
   args.push('-t', outDur.toFixed(3), '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart');
 
   const isCutdown = outDur < totalDur - 0.01;
-  const label = `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
+  const label = (typeof name === 'string' && name.trim())
+    ? name.trim().slice(0, 80)
+    : `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
-    { source: 'render', clips: resolved.length, cutdown: isCutdown });
+    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
   res.status(202).json({ job: jobJson(job) });
 });
 

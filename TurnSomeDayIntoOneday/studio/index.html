@@ -292,6 +292,32 @@ textarea::placeholder{color:var(--tm)}
     </div>
 
     <div class="card">
+      <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
+      <div class="row">
+        <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
+        <div class="chips" id="hl-chips"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <input class="input" id="hl-label" placeholder="hook / drop / chorus" style="flex:1;min-width:90px">
+          <input class="input" id="hl-time" type="number" min="0" step="0.5" placeholder="time (s)" style="width:90px">
+          <button class="btn2" id="hl-add">Mark</button>
+          <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
+        </div>
+      </div>
+      <div class="trim" style="font-size:12px">
+        <span>Lengths</span>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="30" checked>30s</label>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="60">60s</label>
+        <label style="display:flex;align-items:center;gap:4px;margin-left:auto"><input type="checkbox" id="sh-loop-default" checked>seamless loop</label>
+      </div>
+      <button class="btn2" id="sh-build">Build shorts list</button>
+      <div id="sh-list" class="row"></div>
+      <button class="gen-btn" id="sh-render" style="display:none">Render all shorts</button>
+      <div id="sh-results" class="row"></div>
+      <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
+    </div>
+
+    <div class="card">
       <h3>Project</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="input" id="proj-name" placeholder="Project name" style="flex:1;min-width:120px">
@@ -845,6 +871,8 @@ const st = {
   seq: [],              // timeline items (video: start/end trims, image: holdDur)
   trans: [],            // transitions between consecutive items
   overlays: [],         // text overlay specs (rendered to PNG at export time)
+  highlights: [],       // shorts generator markers [{label, time}]
+  shorts: [],           // built short specs [{name, start, len, text, loop}]
   seqFormat: '16:9',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
@@ -1169,6 +1197,7 @@ function collectSpec() {
     seq: st.seq.map((c) => ({ assetId: c.assetId, kind: c.kind, start: c.start, end: c.end, holdDur: c.holdDur, eq: c.eq })),
     trans: st.trans,
     overlays: st.overlays,
+    highlights: st.highlights,
     format: st.seqFormat, res: st.seqRes,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     music: {
@@ -1192,6 +1221,7 @@ function applySpec(spec) {
   }).filter(Boolean);
   st.trans = Array.isArray(spec.trans) ? spec.trans : [];
   st.overlays = Array.isArray(spec.overlays) ? spec.overlays : [];
+  st.highlights = Array.isArray(spec.highlights) ? spec.highlights : [];
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
   st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
@@ -1204,7 +1234,7 @@ function applySpec(spec) {
     $('#music-fadeout').checked = spec.music.fadeOut !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -1516,8 +1546,12 @@ function drawOverlay(spec, W, H, canvas) {
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, W, H);
-  const size = (spec.size || 80) * (H / 1080);
-  ctx.font = `${spec.bold ? '800' : '400'} ${size}px ${spec.font || 'system-ui'}`;
+  let size = (spec.size || 80) * (H / 1080);
+  const setFont = () => { ctx.font = `${spec.bold ? '800' : '400'} ${size}px ${spec.font || 'system-ui'}`; };
+  setFont();
+  // shrink-to-fit: long captions scale down instead of running off the frame
+  const widest = Math.max(...String(spec.text || ' ').split('\n').map((l) => ctx.measureText(l).width));
+  if (widest > W * 0.86) { size *= (W * 0.86) / widest; setFont(); }
   ctx.fillStyle = spec.color || '#ffffff';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = size / 7;
@@ -1682,6 +1716,225 @@ $('#seq-render-cut').onclick = () => {
   runRender({ start, end: start + len }, '#seq-render-cut');
 };
 
+/* ---------------- shorts generator ---------------- */
+function slugName(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'short';
+}
+
+function renderHighlights() {
+  const el = $('#hl-chips');
+  el.innerHTML = st.highlights.length ? '' : '<span class="usage">No highlights marked yet.</span>';
+  st.highlights.forEach((h, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = `${h.label} @ ${h.time.toFixed(1)}s ✕`;
+    b.onclick = () => { st.highlights.splice(i, 1); renderHighlights(); persistDraft(); };
+    el.appendChild(b);
+  });
+}
+
+$('#hl-add').onclick = () => {
+  const label = $('#hl-label').value.trim() || `mark${st.highlights.length + 1}`;
+  const time = Math.max(0, Number($('#hl-time').value) || 0);
+  const total = timelineTotal();
+  if (total && time >= total) return setErr('#seq-err', `That's past the end of the timeline (${total.toFixed(1)}s).`);
+  st.highlights.push({ label, time });
+  $('#hl-label').value = ''; $('#hl-time').value = '';
+  renderHighlights(); persistDraft();
+};
+
+// Find the loudest sustained sections of the song (drop/chorus candidates)
+// and mark them as highlights, mapped into timeline time.
+$('#hl-auto').onclick = async () => {
+  setErr('#seq-err', null);
+  const asset = st.assets.find((a) => a.id === Number($('#seq-music').value));
+  if (!asset) return setErr('#seq-err', 'Pick a music track first (Music card above).');
+  const total = timelineTotal();
+  if (!total) return setErr('#seq-err', 'Build your timeline first.');
+  $('#hl-auto').disabled = true;
+  $('#hl-auto').textContent = 'Listening…';
+  try {
+    const buf = await (await fetch(asset.url)).arrayBuffer();
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const audio = await ac.decodeAudioData(buf);
+    const data = audio.getChannelData(0);
+    const win = audio.sampleRate; // 1s windows
+    const n = Math.floor(data.length / win);
+    const rms = [];
+    for (let i = 0; i < n; i++) {
+      let s = 0;
+      for (let j = i * win; j < (i + 1) * win; j += 16) s += data[j] * data[j];
+      rms.push({ t: i, v: Math.sqrt(s / (win / 16)) });
+    }
+    ac.close();
+    const musicStart = Number($('#music-start').value) || 0;
+    // candidates in timeline coords, loudest first, at least 15s apart
+    const picked = [];
+    for (const c of [...rms].sort((a, b) => b.v - a.v)) {
+      const tl = c.t - musicStart;
+      if (tl < 0 || tl > total - 5) continue;
+      if (picked.some((p) => Math.abs(p - tl) < 15)) continue;
+      picked.push(tl);
+      if (picked.length >= 3) break;
+    }
+    if (!picked.length) return setErr('#seq-err', 'Could not find distinct loud sections inside the timeline.');
+    picked.sort((a, b) => a - b).forEach((t, i) => {
+      st.highlights.push({ label: ['drop', 'peak2', 'peak3'][i] || `peak${i + 1}`, time: Math.round(t * 10) / 10 });
+    });
+    renderHighlights(); persistDraft();
+  } catch (e) {
+    setErr('#seq-err', `Could not analyze that track: ${e.message}`);
+  } finally {
+    $('#hl-auto').disabled = false;
+    $('#hl-auto').textContent = 'Auto-detect from music';
+  }
+};
+
+$('#sh-build').onclick = () => {
+  setErr('#seq-err', null);
+  const total = timelineTotal();
+  if (!total) return setErr('#seq-err', 'Build your timeline first.');
+  const lens = [...document.querySelectorAll('.sh-len:checked')].map((el) => Number(el.value));
+  if (!lens.length) return setErr('#seq-err', 'Pick at least one short length.');
+  const loop = $('#sh-loop-default').checked;
+  // No highlights marked? Spread starts across the video so you still get variations.
+  const marks = st.highlights.length ? st.highlights
+    : [{ label: 'open', time: 0 }, { label: 'mid', time: total / 2 }, { label: 'end', time: Math.max(0, total - 20) }];
+  st.shorts = [];
+  const seen = new Set();
+  for (const h of marks) {
+    for (const len of lens) {
+      const effLen = Math.min(len, Math.floor(total * 10) / 10);
+      // the short OPENS on the highlight - the marked moment is your scroll-stopper
+      const start = Math.round(Math.min(Math.max(0, h.time), Math.max(0, total - effLen)) * 10) / 10;
+      const key = `${start}-${effLen}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      let name = `short_${slugName(h.label)}_${len}s`;
+      let bump = 2;
+      while (st.shorts.some((x) => x.name === name)) name = `short_${slugName(h.label)}${bump++}_${len}s`;
+      st.shorts.push({ name, start, len: effLen, text: '', loop });
+    }
+  }
+  renderShortsList();
+};
+
+function renderShortsList() {
+  const list = $('#sh-list');
+  list.innerHTML = '';
+  $('#sh-render').style.display = st.shorts.length ? 'block' : 'none';
+  st.shorts.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'seq-item';
+    row.style.flexDirection = 'column';
+    row.style.alignItems = 'stretch';
+    row.innerHTML = `
+      <div class="trim" style="font-size:12px">
+        <b style="color:var(--tp)">${escapeHtml(s.name)}</b>
+        <span style="margin-left:auto">from</span><input type="number" class="s-start" min="0" step="0.5" value="${s.start}">
+        <span>s · ${s.len}s</span>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="s-loop" ${s.loop ? 'checked' : ''}>loop</label>
+        <button class="s-del" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button>
+      </div>
+      <input class="input s-text" placeholder="Hook caption for this short (optional, A/B test different ones)" value="${escapeHtml(s.text)}" style="padding:8px 10px;font-size:12px">`;
+    row.querySelector('.s-start').onchange = (e) => {
+      const total = timelineTotal();
+      s.start = Math.min(Math.max(0, Number(e.target.value) || 0), Math.max(0, total - s.len));
+      e.target.value = s.start;
+    };
+    row.querySelector('.s-loop').onchange = (e) => { s.loop = e.target.checked; };
+    row.querySelector('.s-text').oninput = (e) => { s.text = e.target.value; };
+    row.querySelector('.s-del').onclick = () => { st.shorts.splice(i, 1); renderShortsList(); };
+    list.appendChild(row);
+  });
+}
+
+async function renderOneShort(s, statusEl) {
+  const overlays = [];
+  if (s.text.trim()) {
+    const canvas = drawOverlay(
+      { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 2, },
+      1080, 1920);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+    const asset = await uploadFile(new File([blob], `${s.name}-caption.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
+    // caption shows over the start of the short (timeline coords = window start + offset)
+    overlays.push({ assetId: asset.id, start: s.start + 0.2, end: s.start + Math.min(4.2, s.len - 0.3), fade: 0.3 });
+  }
+  const spec = collectSpec();
+  const { job } = await jfetch('/api/studio/render', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clips: st.seq.map((c) => c.kind === 'image'
+        ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
+        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq }),
+      transitions: st.trans,
+      music: spec.music.assetId ? spec.music : null,
+      overlays,
+      size: '1080x1920',
+      window: { start: s.start, end: s.start + s.len },
+      loop: s.loop,
+      name: s.name,
+    }),
+  });
+  const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });
+  return done.assetId;
+}
+
+$('#sh-render').onclick = async () => {
+  if (st.busyRender) return;
+  setErr('#seq-err', null);
+  if (!st.shorts.length) return;
+  st.busyRender = true;
+  $('#sh-render').disabled = true;
+  const results = $('#sh-results');
+  results.innerHTML = '';
+  $('#sh-dl-all').style.display = 'none';
+  const rows = st.shorts.map((s) => {
+    const row = document.createElement('div');
+    row.className = 'trim';
+    row.style.fontSize = '12px';
+    row.innerHTML = `<b style="color:var(--tp)">${escapeHtml(s.name)}</b> <span class="s-status" style="margin-left:auto">queued</span>`;
+    results.appendChild(row);
+    return row;
+  });
+  const doneAssets = [];
+  // two at a time keeps the CPU sane while still finishing a batch quickly
+  let idx = 0;
+  const worker = async () => {
+    while (idx < st.shorts.length) {
+      const my = idx++;
+      const statusEl = rows[my].querySelector('.s-status');
+      try {
+        const assetId = await renderOneShort(st.shorts[my], statusEl);
+        await loadAssets();
+        const asset = st.assets.find((a) => a.id === assetId);
+        statusEl.textContent = '';
+        const dl = document.createElement('button');
+        dl.className = 'btn2';
+        dl.style.cssText = 'padding:4px 10px;font-size:11px';
+        dl.textContent = 'Download';
+        dl.onclick = () => { const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.mp4'; l.click(); };
+        rows[my].appendChild(dl);
+        doneAssets.push(asset);
+      } catch (e) {
+        statusEl.textContent = `error: ${e.message.slice(0, 80)}`;
+      }
+    }
+  };
+  await Promise.all([worker(), worker()]);
+  st.busyRender = false;
+  $('#sh-render').disabled = false;
+  if (doneAssets.length) {
+    $('#sh-dl-all').style.display = 'block';
+    $('#sh-dl-all').onclick = async () => {
+      for (const a of doneAssets) {
+        const l = document.createElement('a'); l.href = a.url; l.download = a.label + '.mp4'; l.click();
+        await sleep(400); // browsers drop rapid-fire downloads
+      }
+    };
+  }
+};
+
 /* ---------------- projects ---------------- */
 $('#proj-save').onclick = async () => {
   setErr('#seq-err', null);
@@ -1706,6 +1959,7 @@ renderSceneChips();
 renderOutputChips();
 renderSeq();
 renderOverlays();
+renderHighlights();
 bootStudio().then(() => {
   updateScenesUsage();
   // restore the browser draft if the timeline is empty

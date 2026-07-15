@@ -24,6 +24,7 @@ const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 const MODEL_IMAGE_TO_VIDEO = process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video';
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
+const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.
@@ -231,6 +232,7 @@ router.get('/config', (req, res) => {
       imageToVideo: MODEL_IMAGE_TO_VIDEO,
       lipsyncImage: MODEL_LIPSYNC_IMAGE,
       lipsyncVideo: MODEL_LIPSYNC_VIDEO,
+      motion: MODEL_MOTION,
     },
   });
 });
@@ -589,6 +591,67 @@ router.post('/lipsync', async (req, res) => {
         label: `${subject.label} · sings`,
         characterId: subject.character_id,
         meta: { source: 'lipsync', model, fromAssetId: subject.id, songAssetId: song.id, segStart, segLen },
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// Cut + shrink a slice of a driving video (your dance recording) so the
+// upload to the motion model stays small: 720p, 24fps, no audio.
+function extractVideoSegment(file, start, len) {
+  return new Promise((resolve, reject) => {
+    const out = path.join(MEDIA_DIR, `tmp-${crypto.randomBytes(6).toString('hex')}.mp4`);
+    const proc = spawn(ffmpegBin(), [
+      '-ss', start.toFixed(2), '-t', len.toFixed(2), '-i', file,
+      '-vf', 'scale=-2:720,fps=24', '-c:v', 'libx264', '-preset', 'fast', '-crf', '26', '-an',
+      '-movflags', '+faststart', '-y', out,
+    ]);
+    proc.on('error', reject);
+    proc.on('close', (code) => {
+      if (code !== 0 || !fs.existsSync(out)) return reject(new Error('Could not cut that part of the dance video.'));
+      const buf = fs.readFileSync(out);
+      try { fs.unlinkSync(out); } catch (_) {}
+      resolve(`data:video/mp4;base64,${buf.toString('base64')}`);
+    });
+  });
+}
+
+router.post('/dance', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
+  }
+  const { imageAssetId, videoAssetId, start, len } = req.body || {};
+  const character = db.getAsset(req.userId, Number(imageAssetId));
+  if (!character || character.kind !== 'image') {
+    return res.status(404).json({ error: 'Pick a character image from your library first.' });
+  }
+  const dance = db.getAsset(req.userId, Number(videoAssetId));
+  if (!dance || dance.kind !== 'video') {
+    return res.status(404).json({ error: 'Pick your recorded dance video from the library.' });
+  }
+  const segStart = Math.max(0, Number(start) || 0);
+  const segLen = Math.min(30, Math.max(2, Number(len) || 10)); // motion transfer is priced per second - keep clips short
+  if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
+    return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
+  }
+
+  try {
+    const drivingUri = await extractVideoSegment(mediaPath(dance.filename), segStart, segLen);
+    const submitted = await falSubmit(MODEL_MOTION, {
+      image_url: fileToDataUri(character.filename),
+      video_url: drivingUri,
+    });
+    const job = createJob(req.userId, 'ai-video', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'video',
+        label: `${character.label} · dance`,
+        characterId: character.character_id,
+        meta: { source: 'motion', model: MODEL_MOTION, fromAssetId: character.id, drivingAssetId: dance.id, segStart, segLen },
       },
     });
     res.status(202).json({ job: jobJson(job) });

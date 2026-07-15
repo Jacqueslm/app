@@ -209,6 +209,7 @@ textarea::placeholder{color:var(--tm)}
         <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
         <span class="usage" id="qk-music-label">no song yet (that's ok too)</span>
       </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="qk-beat" checked> ⚡ Cut on the beat of the song</label>
       <div class="chips" id="qk-format"></div>
       <button class="gen-btn" id="qk-assemble">3️⃣ &nbsp;Assemble my video</button>
       <div class="progress-line" id="qk-prog"><div></div></div>
@@ -224,7 +225,9 @@ textarea::placeholder{color:var(--tm)}
       <p class="usage">A template remembers your camera moves, timings and words — next time, drop in new pictures, hit Use, then Assemble.</p>
     </div>
 
-    <div class="card">
+    <button class="btn2 quiet" id="mode-toggle" style="width:100%">🛠 Show studio tools</button>
+
+    <div class="card adv-card">
       <h3>Stills → Motion <span class="usage">(Ken Burns camera moves, free)</span></h3>
       <select class="input" id="kb-image"></select>
       <div id="kb-preview-wrap" style="position:relative;display:none">
@@ -255,7 +258,7 @@ textarea::placeholder{color:var(--tm)}
       <div class="progress-line" id="kb-prog"><div></div></div>
     </div>
 
-    <div class="card">
+    <div class="card adv-card">
       <h3>Timeline <span class="usage" id="seq-total"></span></h3>
       <div id="seq-list" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -266,7 +269,7 @@ textarea::placeholder{color:var(--tm)}
       <p class="usage">Drag items to reorder (or use the arrows). Stills sit on the timeline with a hold time — or give them a camera move above first.</p>
     </div>
 
-    <div class="card">
+    <div class="card adv-card">
       <h3>Music</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select class="input" id="seq-music" style="flex:1;min-width:140px"><option value="">No music</option></select>
@@ -289,13 +292,13 @@ textarea::placeholder{color:var(--tm)}
       </div>
     </div>
 
-    <div class="card">
+    <div class="card adv-card">
       <h3>Text &amp; titles</h3>
       <div id="ovl-list" class="row"></div>
       <button class="btn2 quiet" id="ovl-add">+ Add text</button>
     </div>
 
-    <div class="card">
+    <div class="card adv-card">
       <h3>Output</h3>
       <div class="chips" id="seq-formats"></div>
       <div class="chips" id="seq-res"></div>
@@ -340,7 +343,7 @@ textarea::placeholder{color:var(--tm)}
       <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
     </div>
 
-    <div class="card">
+    <div class="card adv-card">
       <h3>Project</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="input" id="proj-name" placeholder="Project name" style="flex:1;min-width:120px">
@@ -1986,6 +1989,18 @@ const QK_MOVES = [
 const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
 const qk = { shots: [], format: '9:16', busy: false };
 
+// Simple mode (default): only Quick Video + Shorts show; studio tools are one tap away.
+function applySimpleMode() {
+  const simple = localStorage.getItem('tsid-studio-simple') !== '0';
+  document.querySelectorAll('#view-seq .adv-card').forEach((c) => { c.style.display = simple ? 'none' : ''; });
+  $('#mode-toggle').textContent = simple ? '🛠 Show studio tools' : '✨ Back to simple mode';
+}
+$('#mode-toggle').onclick = () => {
+  const simple = localStorage.getItem('tsid-studio-simple') !== '0';
+  localStorage.setItem('tsid-studio-simple', simple ? '0' : '1');
+  applySimpleMode();
+};
+
 function renderQkFormat() {
   chipRow($('#qk-format'), [
     { key: '9:16', label: 'Phone 9:16' }, { key: '16:9', label: 'YouTube 16:9' }, { key: '1:1', label: 'Square 1:1' },
@@ -2074,10 +2089,28 @@ $('#qk-assemble').onclick = async () => {
   $('#qk-stage').classList.remove('show');
   $('#qk-dl').classList.remove('show');
   try {
-    // step 1: give every picture its camera move
+    // step 1: if a song is loaded, snap every picture's time to whole musical
+    // bars so the cuts land on the beat
     st.seqFormat = qk.format;
     st.seqRes = '1080';
     renderOutputChips();
+    let durs = qk.shots.map((s) => s.dur);
+    const musicAsset = st.assets.find((a) => a.id === Number($('#seq-music').value));
+    if ($('#qk-beat').checked && musicAsset) {
+      $('#qk-status').textContent = 'Listening to your song…';
+      try {
+        if (!qk.beatsCache || qk.beatsCache.id !== musicAsset.id) {
+          qk.beatsCache = { id: musicAsset.id, data: await analyzeBeats(musicAsset.url) };
+        }
+        const bar = 4 * 60 / qk.beatsCache.data.bpm; // one musical bar (4 beats)
+        durs = durs.map((d) => {
+          const snapped = Math.max(1, Math.round(d / bar)) * bar;
+          return Math.round(Math.min(12, Math.max(1.5, snapped)) * 100) / 100;
+        });
+      } catch (_) { /* song won't decode? just use the chosen times */ }
+    }
+
+    // step 2: give every picture its camera move
     const clipAssets = [];
     for (let i = 0; i < qk.shots.length; i++) {
       const s = qk.shots[i];
@@ -2085,7 +2118,7 @@ $('#qk-assemble').onclick = async () => {
       btn.innerHTML = `<span class="spinner"></span>Picture ${i + 1} of ${qk.shots.length}…`;
       const { job } = await jfetch('/api/studio/kenburns', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: s.assetId, move: s.move, duration: s.dur, intensity: 2, size: currentSize() }),
+        body: JSON.stringify({ assetId: s.assetId, move: s.move, duration: durs[i], intensity: 2, size: currentSize() }),
       });
       const done = await pollJob(job.id, (j) => setProg('#qk-prog', ((i + j.progress / 100) / qk.shots.length) * 100));
       clipAssets.push(done.assetId);
@@ -2107,12 +2140,14 @@ $('#qk-assemble').onclick = async () => {
         st.overlays.push({
           text: s.text, font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 8,
           start: Math.round((cum + 0.3) * 10) / 10,
-          end: Math.round((cum + Math.min(s.dur - 0.2, 4.3)) * 10) / 10,
+          end: Math.round((cum + Math.min(durs[i] - 0.2, 4.3)) * 10) / 10,
           fade: 0.3,
         });
       }
-      cum += s.dur - td;
+      cum += durs[i] - td;
     });
+    // tasteful defaults for a finished video: end on a fade to black
+    $('#fade-black-out').checked = true;
     syncTrans(); renderSeq(); renderOverlays(); persistDraft();
 
     // step 3: render the finished video
@@ -2201,6 +2236,7 @@ renderSeq();
 renderOverlays();
 renderHighlights();
 renderQkFormat();
+applySimpleMode();
 bootStudio().then(() => {
   updateScenesUsage();
   // restore the browser draft if the timeline is empty

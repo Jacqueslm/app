@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 
 const db = require('./db');
 const billing = require('./billing');
+const studio = require('./studio');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -160,6 +161,7 @@ app.delete('/api/account', requireAuth, async (req, res) => {
   if (billing.isConfigured()) {
     await billing.cancelStripeSubscriptionForUser(user);
   }
+  studio.deleteUserAssets(req.userId);
   db.deleteUser(req.userId);
   res.clearCookie(COOKIE_NAME);
   res.json({ ok: true });
@@ -324,6 +326,11 @@ app.post('/api/studio/generate', requireAuth, async (req, res) => {
     res.status(502).json({ error: 'Failed to reach the image generation API.' });
   }
 });
+
+// Studio library, character pipeline, and Sequencer. Registered after the
+// /api/studio/status and /api/studio/generate routes above so those keep
+// matching first (the router adds /config, /scene, /animate, /render, etc.).
+app.use('/api/studio', studio.router);
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

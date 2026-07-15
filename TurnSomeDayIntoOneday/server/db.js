@@ -28,6 +28,31 @@ db.exec(`
     count INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, usage_date)
   );
+  CREATE TABLE IF NOT EXISTS video_usage (
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    usage_date TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, usage_date)
+  );
+  CREATE TABLE IF NOT EXISTS studio_characters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    name TEXT NOT NULL,
+    lora_url TEXT,
+    trigger_word TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS studio_assets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    kind TEXT NOT NULL,
+    label TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    character_id INTEGER REFERENCES studio_characters(id),
+    meta TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_studio_assets_user ON studio_assets(user_id, kind);
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -72,6 +97,9 @@ function saveState(userId, stateJson) {
 }
 
 function deleteUser(userId) {
+  db.prepare('DELETE FROM studio_assets WHERE user_id = ?').run(userId);
+  db.prepare('DELETE FROM studio_characters WHERE user_id = ?').run(userId);
+  db.prepare('DELETE FROM video_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM image_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM chat_usage WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM user_state WHERE user_id = ?').run(userId);
@@ -104,6 +132,66 @@ function incrementImageCount(userId, usageDate) {
     `INSERT INTO image_usage (user_id, usage_date, count) VALUES (?, ?, 1)
      ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
   ).run(userId, usageDate);
+}
+
+function getVideoCount(userId, usageDate) {
+  const row = db
+    .prepare('SELECT count FROM video_usage WHERE user_id = ? AND usage_date = ?')
+    .get(userId, usageDate);
+  return row ? row.count : 0;
+}
+
+function incrementVideoCount(userId, usageDate) {
+  db.prepare(
+    `INSERT INTO video_usage (user_id, usage_date, count) VALUES (?, ?, 1)
+     ON CONFLICT(user_id, usage_date) DO UPDATE SET count = count + 1`
+  ).run(userId, usageDate);
+}
+
+function createCharacter(userId, name, loraUrl, triggerWord) {
+  const info = db
+    .prepare('INSERT INTO studio_characters (user_id, name, lora_url, trigger_word, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(userId, name, loraUrl || null, triggerWord || null, new Date().toISOString());
+  return Number(info.lastInsertRowid);
+}
+
+function getCharacters(userId) {
+  return db.prepare('SELECT * FROM studio_characters WHERE user_id = ? ORDER BY id DESC').all(userId);
+}
+
+function getCharacter(userId, id) {
+  return db.prepare('SELECT * FROM studio_characters WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateCharacter(userId, id, fields) {
+  db.prepare('UPDATE studio_characters SET name = ?, lora_url = ?, trigger_word = ? WHERE user_id = ? AND id = ?')
+    .run(fields.name, fields.loraUrl || null, fields.triggerWord || null, userId, id);
+}
+
+function deleteCharacter(userId, id) {
+  db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND character_id = ?').run(userId, id);
+  db.prepare('DELETE FROM studio_characters WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
+function createAsset(userId, kind, label, filename, characterId, meta) {
+  const info = db
+    .prepare('INSERT INTO studio_assets (user_id, kind, label, filename, character_id, meta, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(userId, kind, label, filename, characterId || null, meta ? JSON.stringify(meta) : null, new Date().toISOString());
+  return Number(info.lastInsertRowid);
+}
+
+function getAssets(userId, kind) {
+  return kind
+    ? db.prepare('SELECT * FROM studio_assets WHERE user_id = ? AND kind = ? ORDER BY id DESC').all(userId, kind)
+    : db.prepare('SELECT * FROM studio_assets WHERE user_id = ? ORDER BY id DESC').all(userId);
+}
+
+function getAsset(userId, id) {
+  return db.prepare('SELECT * FROM studio_assets WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function deleteAsset(userId, id) {
+  db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
 function updatePassword(userId, passwordHash) {
@@ -155,6 +243,17 @@ module.exports = {
   incrementChatCount,
   getImageCount,
   incrementImageCount,
+  getVideoCount,
+  incrementVideoCount,
+  createCharacter,
+  getCharacters,
+  getCharacter,
+  updateCharacter,
+  deleteCharacter,
+  createAsset,
+  getAssets,
+  getAsset,
+  deleteAsset,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

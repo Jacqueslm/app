@@ -2880,6 +2880,7 @@ function finishOnboard(){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
+let statsInterval=null;
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
   handleCheckoutReturn();
@@ -2926,7 +2927,10 @@ function initApp(){
     document.getElementById('pledge-sub').textContent='Pledge taken. Keep going — one day at a time.';
   }
   updateRecoveryTermLabels();
-  setInterval(updateStats,60000);
+  // initApp() runs on every unlock/login/onboarding-finish; clear any prior timer first so
+  // the 60s stats loop can't stack into multiple copies over a long-lived session.
+  if(statsInterval)clearInterval(statsInterval);
+  statsInterval=setInterval(updateStats,60000);
   maybeShowAccountabilityCheckin();
   maybeShowDailyLessonReminder();
   evaluateSmartReminders();
@@ -4527,6 +4531,7 @@ function closeSOS(){document.getElementById('sos-modal').classList.remove('open'
 // ─── BREATHE ──────────────────────────────────────────────────────────────────
 let breatheTimer=null;
 function breathe(){
+  clearInterval(breatheTimer); // guard against re-opening while a cycle is already running
   closeSOS();
   logActivity('grounding',{tool:'breathing'});
   const ov=document.getElementById('breathe-overlay');
@@ -4563,6 +4568,7 @@ function openUrgeSurf(){
   document.getElementById('urgesurf-overlay').style.display='flex';
 }
 function startUrgeSurf(minutes){
+  clearInterval(urgeSurfTimer);clearInterval(urgeSurfEncourageTimer); // guard re-entry
   logActivity('grounding',{tool:'urge_surf',minutes});
   urgeSurfSecondsLeft=minutes*60;
   document.getElementById('us-setup').style.display='none';
@@ -4605,6 +4611,7 @@ function closeUrgeSurf(){
 // ─── PANIC MODE + ADVANCED BREATHING COACH (Pro) ──────────────────────────────
 let panicTimer=null;
 function openPanicMode(){
+  clearInterval(panicTimer); // guard against re-opening while a cycle is already running
   logActivity('grounding',{tool:'panic'});
   document.getElementById('panic-overlay').style.display='flex';
   let phase=0,count=4;

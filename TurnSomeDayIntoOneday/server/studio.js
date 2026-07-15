@@ -745,7 +745,7 @@ function eqFilter(eq) {
 }
 
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win, loop, name } = req.body || {};
+  const { clips, transitions, music, overlays, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -846,10 +846,13 @@ router.post('/render', async (req, res) => {
 
   // --- filter graph
   const filters = [];
+  // "Auto enhance": gentle color pop + sharpen per clip, plus a cinematic
+  // vignette and a whisper of film grain on the finished picture.
+  const enhanceClip = enhance ? ',eq=contrast=1.06:saturation=1.14,unsharp=5:5:0.5:5:5:0.0' : '';
   resolved.forEach((c, i) => {
     filters.push(
       `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)},` +
+      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
     );
   });
@@ -893,6 +896,7 @@ router.post('/render', async (req, res) => {
     vcur = '[vloop]';
   }
   const postFades = [];
+  if (enhance) postFades.push(`vignette=angle=PI/5`, `noise=alls=5:allf=t+u`);
   if (fadeFromBlack) postFades.push(`fade=t=in:st=0:d=0.8`);
   if (fadeToBlack) postFades.push(`fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`);
   filters.push(`${vcur}${postFades.length ? postFades.join(',') : 'null'}[vout]`);
@@ -913,6 +917,16 @@ router.post('/render', async (req, res) => {
     }
     let achain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
       `,volume=${musicIn.volume.toFixed(2)}`;
+    // duck the music a touch while text is on screen so titles read clearly
+    const duckWindows = ovs
+      .map((o) => ({ s: Math.max(0, o.start - winStart), e: Math.min(outDur, o.end - winStart) }))
+      .filter((w) => w.e > 0 && w.s < outDur);
+    if (duckWindows.length) {
+      const terms = duckWindows.map((w) => `between(t\\,${w.s.toFixed(2)}\\,${w.e.toFixed(2)})`).join('+');
+      achain += `,volume='1-0.3*min(1\\,${terms})':eval=frame`;
+    }
+    // gentle mastering: keep levels steady and never clip
+    achain += `,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,alimiter=limit=0.95`;
     if (musicIn.fadeIn) achain += `,afade=t=in:st=0:d=1`;
     if (musicIn.fadeOut) achain += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
     filters.push(`${achain}[aout]`);
@@ -949,6 +963,29 @@ router.post('/thumbnail', (req, res) => {
     }
     const id = db.createAsset(req.userId, 'image', `${video.label} thumb @${t.toFixed(0)}s`, outFile, null,
       { source: 'thumbnail', overlay: true }); // overlay flag keeps thumbs out of the pickers
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
+/* ---------------- 2x upscale (sharp resize - honest, not ESRGAN) ---------------- */
+router.post('/upscale', (req, res) => {
+  const { assetId } = req.body || {};
+  const img = db.getAsset(req.userId, Number(assetId));
+  if (!img || img.kind !== 'image') return res.status(404).json({ error: 'Pick an image to upscale.' });
+  const outFile = newFilename(req.userId, '.png');
+  const proc = spawn(ffmpegBin(), [
+    '-i', mediaPath(img.filename),
+    '-vf', 'scale=iw*2:ih*2:flags=lanczos,unsharp=5:5:0.8:3:3:0.4',
+    '-y', mediaPath(outFile),
+  ]);
+  proc.on('error', () => res.status(500).json({ error: 'Could not start ffmpeg.' }));
+  proc.on('close', (code) => {
+    if (res.headersSent) return;
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Upscale failed.' });
+    }
+    const id = db.createAsset(req.userId, 'image', `${img.label} 2x`, outFile, img.character_id,
+      { source: 'upscale', fromAssetId: img.id });
     res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
   });
 });

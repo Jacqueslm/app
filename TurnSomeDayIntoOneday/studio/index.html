@@ -343,6 +343,24 @@ textarea::placeholder{color:var(--tm)}
     </div>
 
     <div class="card">
+      <h3>🎤 Lyrics &amp; Captions</h3>
+      <textarea id="lyr-text" placeholder="Paste your lyrics — one line per caption" style="min-height:88px"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="lyr-tap">▶ Tap to sync</button>
+        <button class="btn2 quiet" id="lyr-spread">Auto-spread</button>
+        <button class="btn2 quiet" id="lyr-title">+ Song title intro</button>
+        <button class="btn2 quiet" id="lyr-clear">Clear</button>
+      </div>
+      <div id="lyr-tap-ui" style="display:none;flex-direction:column;gap:8px">
+        <p style="font-size:15px;color:var(--tp);text-align:center;font-weight:600" id="lyr-now">…</p>
+        <button class="gen-btn" id="lyr-stamp">TAP when this line starts</button>
+        <button class="btn2 quiet" id="lyr-stop">Stop syncing</button>
+      </div>
+      <div id="lyr-list" class="row"></div>
+      <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
+    </div>
+
+    <div class="card">
       <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
       <div class="row">
         <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
@@ -966,6 +984,7 @@ const st = {
   highlights: [],       // shorts generator markers [{label, time}]
   shorts: [],           // built short specs [{name, start, len, text, loop}]
   musicList: [],        // playlist [{assetId, start, len}] - songs play in order
+  captions: [],         // lyric captions [{text, start, end}] in timeline seconds
   seqFormat: '16:9',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
@@ -1452,6 +1471,8 @@ function collectSpec() {
     trans: st.trans,
     overlays: st.overlays,
     highlights: st.highlights,
+    captions: st.captions,
+    lyrics: $('#lyr-text').value,
     format: st.seqFormat, res: st.seqRes,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
@@ -1480,6 +1501,8 @@ function applySpec(spec) {
   st.trans = Array.isArray(spec.trans) ? spec.trans : [];
   st.overlays = Array.isArray(spec.overlays) ? spec.overlays : [];
   st.highlights = Array.isArray(spec.highlights) ? spec.highlights : [];
+  st.captions = Array.isArray(spec.captions) ? spec.captions : [];
+  if (typeof spec.lyrics === 'string') $('#lyr-text').value = spec.lyrics;
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
   st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
@@ -1496,7 +1519,7 @@ function applySpec(spec) {
     $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -1778,6 +1801,7 @@ $('#seq-upload-music').onclick = () => pickFile('audio/*', async (file) => {
 $('#music-volume').oninput = () => { $('#music-vol-label').textContent = $('#music-volume').value + '%'; };
 ['music-volume', 'music-fadein', 'music-fadeout', 'music-crossfade', 'fade-black-in', 'fade-black-out', 'enhance-auto']
   .forEach((id) => { document.getElementById(id).addEventListener('change', persistDraft); });
+$('#lyr-text').addEventListener('change', persistDraft);
 
 /* ---------------- beat detection (pure WebAudio, on-device) ---------------- */
 async function analyzeBeats(url) {
@@ -1996,6 +2020,7 @@ async function runRender(windowOpt, btnSel, opts) {
   $(ui.dl).classList.remove('show');
   try {
     const overlays = await uploadOverlayPngs();
+    const captions = await uploadCaptionPngs();
     const spec = collectSpec();
     const { job } = await jfetch('/api/studio/render', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2012,6 +2037,7 @@ async function runRender(windowOpt, btnSel, opts) {
         window: windowOpt || null,
         name: ui.name || null,
         enhance: spec.enhance,
+        captions,
       }),
     });
     const done = await pollJob(job.id, (j) => {
@@ -2043,6 +2069,109 @@ $('#seq-render-cut').onclick = () => {
   const len = Number($('#cut-len').value) || 15;
   runRender({ start, end: start + len }, '#seq-render-cut');
 };
+
+/* ---------------- lyrics & captions ---------------- */
+const lyr = { audio: null, lines: [], idx: 0 };
+
+function lyrLines() {
+  return $('#lyr-text').value.split('\n').map((l) => l.trim()).filter(Boolean);
+}
+function finishCaptionEnds() {
+  st.captions.forEach((c, i) => {
+    c.end = i < st.captions.length - 1
+      ? Math.max(c.start + 0.4, st.captions[i + 1].start - 0.05)
+      : c.start + 3;
+  });
+}
+function renderLyrList() {
+  const list = $('#lyr-list');
+  list.innerHTML = '';
+  if (!st.captions.length) return;
+  st.captions.forEach((c, i) => {
+    const row = document.createElement('div');
+    row.className = 'trim';
+    row.style.fontSize = '12px';
+    row.innerHTML = `
+      <input type="number" class="ly-start" min="0" step="0.1" value="${c.start}" style="width:64px">
+      <span style="color:var(--tp);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(c.text)}</span>
+      <button class="ly-rm" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;width:24px;height:24px;cursor:pointer">✕</button>`;
+    row.querySelector('.ly-start').onchange = (e) => {
+      c.start = Math.max(0, Number(e.target.value) || 0);
+      st.captions.sort((a, b) => a.start - b.start);
+      finishCaptionEnds(); renderLyrList(); persistDraft();
+    };
+    row.querySelector('.ly-rm').onclick = () => { st.captions.splice(i, 1); finishCaptionEnds(); renderLyrList(); persistDraft(); };
+    list.appendChild(row);
+  });
+}
+
+$('#lyr-spread').onclick = () => {
+  setErr('#seq-err', null);
+  const lines = lyrLines();
+  if (!lines.length) return setErr('#seq-err', 'Paste your lyrics first.');
+  const total = timelineTotal() || (firstMusicAsset()?.meta?.duration || 60);
+  const span = Math.max(4, total - 1.5);
+  st.captions = lines.map((text, i) => ({ text, start: Math.round((0.5 + (span / lines.length) * i) * 10) / 10, end: 0 }));
+  finishCaptionEnds(); renderLyrList(); persistDraft();
+};
+
+$('#lyr-tap').onclick = () => {
+  setErr('#seq-err', null);
+  const lines = lyrLines();
+  if (!lines.length) return setErr('#seq-err', 'Paste your lyrics first.');
+  const song = firstMusicAsset();
+  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card).');
+  lyr.lines = lines; lyr.idx = 0;
+  st.captions = [];
+  lyr.audio = new Audio(song.url);
+  const trackStart = st.musicList[0]?.start || 0;
+  if (trackStart) lyr.audio.currentTime = trackStart;
+  lyr.audio.play().catch(() => setErr('#seq-err', 'Could not play the song in this browser.'));
+  $('#lyr-tap-ui').style.display = 'flex';
+  $('#lyr-now').textContent = `Next: "${lines[0]}"`;
+  $('#lyr-stamp').onclick = () => {
+    const t = Math.max(0, (lyr.audio.currentTime || 0) - trackStart);
+    st.captions.push({ text: lyr.lines[lyr.idx], start: Math.round(t * 10) / 10, end: 0 });
+    lyr.idx++;
+    if (lyr.idx >= lyr.lines.length) return stopLyrSync(true);
+    $('#lyr-now').textContent = `Next: "${lyr.lines[lyr.idx]}"`;
+  };
+};
+function stopLyrSync(done) {
+  if (lyr.audio) { lyr.audio.pause(); lyr.audio = null; }
+  $('#lyr-tap-ui').style.display = 'none';
+  finishCaptionEnds(); renderLyrList(); persistDraft();
+  if (done) $('#lyr-now').textContent = '';
+}
+$('#lyr-stop').onclick = () => stopLyrSync(false);
+$('#lyr-clear').onclick = () => { st.captions = []; renderLyrList(); persistDraft(); };
+
+$('#lyr-title').onclick = () => {
+  const title = $('#cp-title').value.trim() || 'My track';
+  const artist = $('#cp-artist').value.trim();
+  st.overlays.push({
+    text: artist ? `${title}\\n${artist}` : title,
+    font: 'system-ui', size: 96, color: '#ffffff', bold: true, pos: 5,
+    start: 0.4, end: 3.6, fade: 0.5,
+  });
+  renderOverlays(); persistDraft();
+  $('#lyr-now').textContent = '';
+  setErr('#seq-err', null);
+};
+
+// captions render smaller, lower, quicker fades than title overlays
+async function uploadCaptionPngs() {
+  const [W, H] = currentSize().split('x').map(Number);
+  const out = [];
+  for (const c of st.captions) {
+    if (!String(c.text || '').trim()) continue;
+    const canvas = drawOverlay({ text: c.text, font: 'system-ui', size: 52, color: '#ffffff', bold: true, pos: 8 }, W, H);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+    const asset = await uploadFile(new File([blob], `caption-${Date.now()}.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
+    out.push({ assetId: asset.id, start: c.start, end: c.end, fade: 0.2 });
+  }
+  return out;
+}
 
 /* ---------------- shorts generator ---------------- */
 function slugName(s) {
@@ -2179,6 +2308,7 @@ function renderShortsList() {
 
 async function renderOneShort(s, statusEl) {
   const overlays = [];
+  const captions = await uploadCaptionPngs(); // lyric captions ride along into shorts
   if (s.text.trim()) {
     const canvas = drawOverlay(
       { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 2, },
@@ -2203,6 +2333,7 @@ async function renderOneShort(s, statusEl) {
       loop: s.loop,
       name: s.name,
       enhance: spec.enhance,
+      captions,
     }),
   });
   const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });
@@ -2516,6 +2647,33 @@ function renderCampaignShorts() {
   });
 }
 
+// A YouTube-style thumbnail: the frame + a dark scrim + your title (or a lyric
+// line) in big bold text - all composited in the browser, free.
+async function textedThumb(frameAsset, text) {
+  const img = await new Promise((ok, err) => {
+    const i = new Image(); i.onload = () => ok(i); i.onerror = err; i.src = frameAsset.url;
+  });
+  const c = document.createElement('canvas');
+  c.width = img.width; c.height = img.height;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const g = ctx.createLinearGradient(0, c.height * 0.5, 0, c.height);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.78)');
+  ctx.fillStyle = g; ctx.fillRect(0, c.height * 0.5, c.width, c.height * 0.5);
+  let size = c.height * 0.12;
+  ctx.font = `800 ${size}px system-ui`;
+  const widest = Math.max(...text.split('\n').map((l) => ctx.measureText(l).width));
+  if (widest > c.width * 0.9) { size *= (c.width * 0.9) / widest; ctx.font = `800 ${size}px system-ui`; }
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = size / 6; ctx.shadowOffsetY = size / 20;
+  const lines = text.split('\n');
+  let y = c.height * 0.94 - (lines.length - 1) * size * 1.15;
+  for (const line of lines) { ctx.fillText(line, c.width / 2, y); y += size * 1.15; }
+  const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+  return uploadFile(new File([blob], 'thumb-text.png', { type: 'image/png' }), 'image', null, { overlay: '1' });
+}
+
 $('#cp-thumbs').onclick = async () => {
   setErr('#seq-err', null);
   const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
@@ -2525,12 +2683,18 @@ $('#cp-thumbs').onclick = async () => {
   $('#cp-status').textContent = 'Grabbing your best frames…';
   try {
     cp.thumbs = [];
+    const title = $('#cp-title').value.trim();
+    // best lyric hook = the first caption line, if lyrics are loaded
+    const hook = st.captions.length ? st.captions[0].text : '';
+    const texts = [title, hook && title ? `${hook}\n— ${title} —` : hook || title, title];
+    let k = 0;
     for (const frac of [0.2, 0.5, 0.8]) {
       const { asset } = await jfetch('/api/studio/thumbnail', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ assetId: main.id, time: Math.round(dur * frac * 10) / 10 }),
       });
-      cp.thumbs.push(asset);
+      cp.thumbs.push(texts[k] ? await textedThumb(asset, texts[k]) : asset);
+      k++;
     }
     $('#cp-thumb-row').innerHTML = cp.thumbs.map((t) => `<img src="${t.url}" alt="">`).join('');
     $('#cp-status').textContent = `${cp.thumbs.length} thumbnails ready — they'll be in the ZIP.`;
@@ -2653,6 +2817,7 @@ renderOverlays();
 renderHighlights();
 renderQkFormat();
 renderMusicList();
+renderLyrList();
 applySimpleMode();
 bootStudio().then(() => {
   updateScenesUsage();

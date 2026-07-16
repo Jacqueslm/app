@@ -323,6 +323,20 @@ router.get('/diagnostics', (req, res) => {
   res.json({ errors: db.getRecentErrors(50) });
 });
 
+/* ---------------- owned-audience email list ---------------- */
+router.get('/fans', (req, res) => {
+  res.json({ count: db.getFanSignupCount(), signups: db.getFanSignups() });
+});
+router.get('/fans.csv', (req, res) => {
+  const rows = db.getFanSignups();
+  const csv = ['email,source,signed_up_at']
+    .concat(rows.map((r) => [r.email, r.source || '', r.created_at].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')))
+    .join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename="fan-list-${todayUTC()}.csv"`);
+  res.send(csv);
+});
+
 /* ---------------- settings: AI key from the app ---------------- */
 router.post('/settings/falkey', (req, res) => {
   const { key } = req.body || {};

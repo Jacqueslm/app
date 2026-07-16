@@ -438,6 +438,16 @@ textarea::placeholder{color:var(--tm)}
     </div>
 
     <div class="card adv-card">
+      <h3>🎵 Your Audience <span class="usage" id="fans-count"></span></h3>
+      <p class="usage">An email signup page (<code>join.html</code>) is built in — a fan list you own, not one an algorithm controls. Right now it only works on this computer; to actually catch signups, this server needs to live at a real public address (see below).</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="fans-refresh">Refresh</button>
+        <button class="btn2" id="fans-download">⬇ Download email list (CSV)</button>
+      </div>
+      <p class="usage" id="fans-hosting-note" style="margin-top:8px"></p>
+    </div>
+
+    <div class="card adv-card">
       <h3>Storage &amp; Backup</h3>
       <p class="usage" id="stor-total">…</p>
       <div id="stor-list" class="row"></div>
@@ -1214,6 +1224,7 @@ async function bootStudio() {
   }
   loadStorage();
   loadDiagnostics();
+  loadFans();
   $('#chars-form').style.display = 'flex';
   await Promise.all([loadAssets(), loadCharacters()]);
 }
@@ -1366,6 +1377,18 @@ async function loadDiagnostics() {
   } catch (e) { $('#diag-count').textContent = ''; }
 }
 $('#diag-refresh').onclick = loadDiagnostics;
+
+async function loadFans() {
+  try {
+    const { count } = await jfetch('/api/studio/fans');
+    $('#fans-count').textContent = `(${count} signed up)`;
+    $('#fans-hosting-note').innerHTML = count
+      ? `Signups so far came in through <code>join.html</code> on whatever address reached this server. To grow this for real: put this computer (or a small always-on server) online with a real domain and HTTPS, then share <code>yourdomain.com/join.html</code> — on social bios, after shows, anywhere fans find you.`
+      : `Nobody's signed up yet — expected on localhost. To go live: host this server somewhere with a public address (a cheap VPS, or a small hosting provider that runs Node), point a domain at it, then share <code>yourdomain.com/join.html</code>.`;
+  } catch (e) { $('#fans-count').textContent = ''; }
+}
+$('#fans-refresh').onclick = loadFans;
+$('#fans-download').onclick = () => { location.href = '/api/studio/fans.csv'; };
 
 $('#upd-check').onclick = async () => {
   $('#upd-status').textContent = 'Checking GitHub…';

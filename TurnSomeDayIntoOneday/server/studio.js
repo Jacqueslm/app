@@ -37,7 +37,9 @@ function persistFalKey(key) {
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
 const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-pro/kontext';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
-const MODEL_IMAGE_TO_VIDEO = process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video';
+// Kling 3.0 Standard: $0.084/s (audio off) as of Jul 2026 - best value tier.
+// Swap to .../v3/pro/image-to-video ($0.112/s) via env for hero shots.
+const MODEL_IMAGE_TO_VIDEO = process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v3/standard/image-to-video';
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';

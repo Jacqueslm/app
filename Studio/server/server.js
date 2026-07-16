@@ -81,6 +81,27 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   res.json({ email: user.email });
 });
 
+// Public email-list signup (join.html) - deliberately outside auth, since
+// fans signing up have no Studio account. Only turns into a real, reachable
+// mailing list once this server is hosted somewhere public (see join.html);
+// on localhost it just proves the mechanism works end to end.
+const joinLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many signups from here recently. Try again in a few minutes.' },
+});
+app.post('/api/join', joinLimiter, (req, res) => {
+  const { email, hp, source } = req.body || {};
+  if (hp) return res.status(201).json({ ok: true }); // honeypot tripped - pretend success, drop it silently
+  if (!email || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  db.addFanSignup(email.trim().toLowerCase(), typeof source === 'string' ? source.slice(0, 60) : null);
+  res.status(201).json({ ok: true }); // same response whether new or already on the list
+});
+
 app.use('/api/studio', studio.router);
 
 // Anything that reaches here escaped every route's own try/catch - log it so

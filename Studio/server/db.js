@@ -68,6 +68,12 @@ db.exec(`
     updated_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_studio_queue_user_status ON studio_queue(user_id, status, id);
+  CREATE TABLE IF NOT EXISTS fan_signups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    source TEXT,
+    created_at TEXT NOT NULL
+  );
   CREATE TABLE IF NOT EXISTS error_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     scope TEXT NOT NULL,
@@ -273,6 +279,29 @@ function clearFinishedQueue(userId) {
   db.prepare("DELETE FROM studio_queue WHERE user_id = ? AND status IN ('done','error')").run(userId);
 }
 
+/* ---------------- owned-audience email list ---------------- */
+// Returns true if this was a new signup, false if the email was already on
+// the list (so the public endpoint can still say "you're on the list!"
+// either way without leaking whether someone already signed up).
+function addFanSignup(email, source) {
+  try {
+    db.prepare('INSERT INTO fan_signups (email, source, created_at) VALUES (?, ?, ?)')
+      .run(email, source || null, new Date().toISOString());
+    return true;
+  } catch (err) {
+    if (/UNIQUE/.test(err.message)) return false;
+    throw err;
+  }
+}
+
+function getFanSignups() {
+  return db.prepare('SELECT * FROM fan_signups ORDER BY id DESC').all();
+}
+
+function getFanSignupCount() {
+  return db.prepare('SELECT COUNT(*) AS n FROM fan_signups').get().n;
+}
+
 /* ---------------- error log (for in-app diagnostics) ---------------- */
 function logError(scope, message, detail) {
   db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
@@ -360,4 +389,7 @@ module.exports = {
   clearFinishedQueue,
   logError,
   getRecentErrors,
+  addFanSignup,
+  getFanSignups,
+  getFanSignupCount,
 };

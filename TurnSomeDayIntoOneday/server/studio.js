@@ -37,9 +37,28 @@ function persistFalKey(key) {
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
 const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-pro/kontext';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
-// Kling 3.0 Standard: $0.084/s (audio off) as of Jul 2026 - best value tier.
-// Swap to .../v3/pro/image-to-video ($0.112/s) via env for hero shots.
-const MODEL_IMAGE_TO_VIDEO = process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v3/standard/image-to-video';
+// Image-to-video quality tiers with price estimates (USD/second, audio off).
+// Rates are a snapshot - fal has no public pricing API - so they're shown in
+// the app as estimates with an as-of date, and every id/rate is env-overridable.
+const PRICES_AS_OF = 'July 2026';
+const VIDEO_TIERS = {
+  draft: {
+    label: 'Draft', desc: 'Seedance - cheap takes',
+    model: process.env.FAL_MODEL_I2V_DRAFT || 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.042),
+  },
+  standard: {
+    label: 'Standard', desc: 'Kling 3.0 Standard',
+    model: process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v3/standard/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_STANDARD || 0.084),
+  },
+  best: {
+    label: 'Best', desc: 'Kling 3.0 Pro - hero shots',
+    model: process.env.FAL_MODEL_I2V_BEST || 'fal-ai/kling-video/v3/pro/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_BEST || 0.112),
+  },
+};
+const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux/Kontext ballpark per image
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
@@ -247,10 +266,15 @@ router.get('/config', (req, res) => {
       textToImage: MODEL_TEXT_TO_IMAGE,
       characterImage: MODEL_CHARACTER_IMAGE,
       loraImage: MODEL_LORA_IMAGE,
-      imageToVideo: MODEL_IMAGE_TO_VIDEO,
       lipsyncImage: MODEL_LIPSYNC_IMAGE,
       lipsyncVideo: MODEL_LIPSYNC_VIDEO,
       motion: MODEL_MOTION,
+    },
+    pricing: {
+      asOf: PRICES_AS_OF,
+      imageRate: IMAGE_RATE,
+      tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
+        [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
   });
 });
@@ -474,11 +498,13 @@ router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { assetId, prompt, duration } = req.body || {};
+  const { assetId, prompt, duration, tier } = req.body || {};
   const still = db.getAsset(req.userId, Number(assetId));
   if (!still || still.kind !== 'image') {
     return res.status(404).json({ error: 'Pick an image from your library to animate.' });
   }
+  const chosenTier = VIDEO_TIERS[tier] ? tier : 'standard';
+  const model = VIDEO_TIERS[chosenTier].model;
   const seconds = [5, 10].includes(Number(duration)) ? Number(duration) : 5;
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
@@ -489,7 +515,7 @@ router.post('/animate', async (req, res) => {
     : 'subtle cinematic motion, natural movement, keep the subject consistent';
 
   try {
-    const submitted = await falSubmit(MODEL_IMAGE_TO_VIDEO, {
+    const submitted = await falSubmit(model, {
       prompt: motionPrompt,
       image_url: fileToDataUri(still.filename),
       duration: String(seconds),
@@ -501,7 +527,7 @@ router.post('/animate', async (req, res) => {
         expect: 'video',
         label: still.label,
         characterId: still.character_id,
-        meta: { source: 'fal', model: MODEL_IMAGE_TO_VIDEO, prompt: motionPrompt, fromAssetId: still.id, seconds },
+        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds },
       },
     });
     res.status(202).json({ job: jobJson(job) });

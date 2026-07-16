@@ -1343,7 +1343,7 @@ function fmtBytes(n) {
 async function loadStorage() {
   try {
     const s = await jfetch('/api/studio/storage');
-    $('#stor-total').textContent = `${fmtBytes(s.total)} used across ${s.count} files. Biggest first:`;
+    $('#stor-total').textContent = `${fmtBytes(s.total)} used across ${s.count} file${s.count === 1 ? '' : 's'}. Biggest first:`;
     const list = $('#stor-list');
     list.innerHTML = '';
     s.items.filter((it) => it.size > 0).slice(0, 15).forEach((it) => {

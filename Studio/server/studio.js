@@ -680,14 +680,14 @@ async function processQueueTick() {
           // Server restarted mid-job (in-memory jobs don't survive that) - the
           // fal job itself may still finish, but we've lost the handle to poll
           // it. Mark it failed rather than leaving it stuck forever.
-          db.updateQueueItem(running.id, { status: 'error', error: 'Lost track of this job after a server restart. Re-queue it.' });
+          failQueueItem(running, 'Lost track of this job after a server restart. Re-queue it.');
           continue;
         }
         await refreshFalJob(job);
         if (job.status === 'done') {
           db.updateQueueItem(running.id, { status: 'done', assetId: job.assetId });
         } else if (job.status === 'error') {
-          db.updateQueueItem(running.id, { status: 'error', error: job.error || 'Generation failed.' });
+          failQueueItem(running, job.error || 'Generation failed.');
         }
         continue; // one in flight per user - don't also start the next one this tick
       }
@@ -718,12 +718,19 @@ async function processQueueTick() {
         });
         db.updateQueueItem(next.id, { status: 'running', falJobId: job.id });
       } catch (err) {
-        db.updateQueueItem(next.id, { status: 'error', error: err.message });
+        failQueueItem(next, err.message);
       }
     } catch (err) {
       try { db.logError('studio-queue', err.message, err.stack); } catch (_) {}
     }
   }
+}
+
+// A queued scene failing while nobody's watching is exactly what Diagnostics
+// exists for - record it there as well as on the queue item itself.
+function failQueueItem(item, message) {
+  db.updateQueueItem(item.id, { status: 'error', error: message });
+  try { db.logError('overnight-queue', `Queued scene "${(item.label || item.prompt || '').slice(0, 60)}" failed: ${message}`); } catch (_) {}
 }
 const QUEUE_TICK_MS = Number(process.env.STUDIO_QUEUE_TICK_MS || 4000);
 setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);

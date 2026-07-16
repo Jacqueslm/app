@@ -34,7 +34,10 @@ function persistFalKey(key) {
 
 // Model ids move fast in this space - override any of these in .env without code changes.
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
-const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-pro/kontext';
+// Multi-reference editing model: sees up to 4 of the character's photos at
+// once, which holds the face far better than the old single-photo Kontext.
+// (If overridden to a kontext model, we fall back to single-image input.)
+const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-2-pro/edit';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // Image-to-video quality tiers with price estimates (USD/second, audio off).
 // Rates are a snapshot - fal has no public pricing API - so they're shown in
@@ -57,7 +60,10 @@ const VIDEO_TIERS = {
     rate: Number(process.env.STUDIO_RATE_BEST || 0.112),
   },
 };
-const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux/Kontext ballpark per image
+const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballpark per image
+// FLUX.2 pro edit bills $0.03 for the first output MP + $0.015 per extra MP of
+// input and output; ~2MP output + 3-4 downscaled reference photos lands here.
+const CHARACTER_IMAGE_RATE = Number(process.env.STUDIO_RATE_CHARACTER_IMAGE || 0.09);
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
@@ -215,6 +221,28 @@ function fileToDataUri(filename) {
   return `data:${type};base64,${buf.toString('base64')}`;
 }
 
+// Reference photos straight off a phone are 10+ megapixels; FLUX.2 edit bills
+// per input megapixel and big payloads slow every request. Cache a ≤1MP JPEG
+// copy of each reference (kept out of the library/backup — it's re-creatable).
+const REFCACHE_DIR = path.join(MEDIA_DIR, 'refcache');
+function scaledRefDataUri(filename) {
+  return new Promise((resolve) => {
+    const src = mediaPath(filename);
+    const asUri = (p) => {
+      try {
+        const ext = path.extname(p).toLowerCase();
+        resolve(`data:${CONTENT_TYPES[ext] || 'image/jpeg'};base64,${fs.readFileSync(p).toString('base64')}`);
+      } catch (_) { resolve(null); }
+    };
+    const cached = path.join(REFCACHE_DIR, path.basename(filename).replace(/\.[^.]+$/, '') + '.jpg');
+    if (fs.existsSync(cached)) return asUri(cached);
+    fs.mkdirSync(REFCACHE_DIR, { recursive: true });
+    const proc = spawn(ffmpegBin(), ['-y', '-i', src, '-vf', "scale='min(1152,iw)':-2", '-frames:v', '1', '-q:v', '3', cached]);
+    proc.on('error', () => asUri(src));
+    proc.on('close', (code) => asUri(code === 0 && fs.existsSync(cached) ? cached : src));
+  });
+}
+
 // Poll a running fal job once. Called from the client's polling loop rather
 // than a server timer, so an abandoned tab doesn't leave a hot loop running.
 async function refreshFalJob(job) {
@@ -283,6 +311,7 @@ router.get('/config', (req, res) => {
     pricing: {
       asOf: PRICES_AS_OF,
       imageRate: IMAGE_RATE,
+      characterImageRate: CHARACTER_IMAGE_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -370,6 +399,7 @@ router.delete('/assets/:id', (req, res) => {
   if (!row) return res.status(404).json({ error: 'Asset not found.' });
   db.deleteAsset(req.userId, row.id);
   try { fs.unlinkSync(mediaPath(row.filename)); } catch (_) {}
+  try { fs.unlinkSync(path.join(REFCACHE_DIR, path.basename(row.filename).replace(/\.[^.]+$/, '') + '.jpg')); } catch (_) {}
   res.json({ ok: true });
 });
 
@@ -449,20 +479,23 @@ router.post('/scene', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { prompt, characterId, imageSize } = req.body || {};
+  const { prompt, characterId, imageSize, count } = req.body || {};
   if (typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required.' });
   }
   if (imageSize && !IMAGE_SIZES.has(imageSize)) {
     return res.status(400).json({ error: 'imageSize must be square_hd, portrait_16_9, or landscape_16_9.' });
   }
-  if (db.getImageCount(req.userId, todayUTC()) >= DAILY_AI_IMAGE_LIMIT) {
+  const howMany = Math.max(1, Math.min(4, Number(count) || 1));
+  if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
   }
 
   const cleanPrompt = prompt.trim().slice(0, 2000);
   let model = MODEL_TEXT_TO_IMAGE;
-  const input = { prompt: cleanPrompt, image_size: imageSize || 'landscape_16_9', num_images: 1 };
+  // No num_images here: every model defaults to 1 and the FLUX.2 edit schema
+  // doesn't take it. Multiple takes are separate submits (one job each).
+  const input = { prompt: cleanPrompt, image_size: imageSize || 'landscape_16_9' };
   let character = null;
 
   if (characterId) {
@@ -476,29 +509,39 @@ router.post('/scene', async (req, res) => {
         input.prompt = `${character.trigger_word}, ${cleanPrompt}`;
       }
     } else {
-      // No LoRA yet: reference-conditioned edit from the primary reference image.
       const refs = db.getAssets(req.userId, 'image').filter((a) => a.character_id === character.id);
       if (!refs.length) {
         return res.status(400).json({ error: `Upload at least one reference photo for ${character.name} first (Characters tab), or paste a LoRA URL.` });
       }
       model = MODEL_CHARACTER_IMAGE;
-      input.image_url = fileToDataUri(refs[0].filename);
+      // The model only reproduces a face it can study — spell the identity
+      // instruction out and hand it several angles, not just the first photo.
+      input.prompt = 'The person in the reference photo(s) is the main character. '
+        + 'Keep their face, hairstyle, skin tone and build EXACTLY as shown — same person, instantly recognizable. '
+        + `Now show them in this scene: ${cleanPrompt}`;
+      const uris = (await Promise.all(refs.slice(0, 4).map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
+      if (!uris.length) return res.status(500).json({ error: 'Could not read the reference photos — try re-uploading them.' });
+      if (/kontext/.test(model)) input.image_url = uris[0]; // legacy override: single-image editor
+      else input.image_urls = uris;
     }
   }
 
   try {
-    const submitted = await falSubmit(model, input);
-    const job = createJob(req.userId, 'ai-image', {
-      fal: {
-        statusUrl: submitted.status_url,
-        responseUrl: submitted.response_url,
-        expect: 'image',
-        label: cleanPrompt.slice(0, 80),
-        characterId: character ? character.id : null,
-        meta: { source: 'fal', model, prompt: cleanPrompt },
-      },
-    });
-    res.status(202).json({ job: jobJson(job) });
+    const jobs = [];
+    for (let i = 0; i < howMany; i++) {
+      const submitted = await falSubmit(model, input);
+      jobs.push(createJob(req.userId, 'ai-image', {
+        fal: {
+          statusUrl: submitted.status_url,
+          responseUrl: submitted.response_url,
+          expect: 'image',
+          label: cleanPrompt.slice(0, 80) + (howMany > 1 ? ` (${i + 1}/${howMany})` : ''),
+          characterId: character ? character.id : null,
+          meta: { source: 'fal', model, prompt: cleanPrompt },
+        },
+      }));
+    }
+    res.status(202).json({ job: jobJson(jobs[0]), jobs: jobs.map(jobJson) });
   } catch (err) {
     res.status(502).json({ error: err.message });
   }

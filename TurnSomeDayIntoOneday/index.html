@@ -1393,6 +1393,13 @@ body{display:flex;justify-content:center}
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
+      <div class="sec">
+        <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
+        <div id="diag-list"></div>
+        <button class="ob-btn outline" style="margin-top:4px;color:var(--ts);border-color:var(--bdr)" onclick="loadDiagnostics()">Refresh</button>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
       <div class="setting-row" style="cursor:default">
         <i class="ti ti-info-circle"></i>
@@ -1923,7 +1930,11 @@ body{display:flex;justify-content:center}
 
 </div><!-- /app -->
 
-<script>// ─── STATE ───────────────────────────────────────────────────────────────────
+<script>
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
@@ -2036,6 +2047,8 @@ const ICON_PATHS={
 'ti-logout':'<path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3"/><path d="M21 12l-3 3"/>',
 'ti-refresh':'<path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>',
 'ti-download':'<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/>',
+'ti-shield':'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><polyline points="9 12 11 14 15 10"/>',
+'ti-file-text':'<path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>',
 'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
 'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
 'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
@@ -5809,6 +5822,7 @@ function switchTo(id){
   if(id==='community'){renderCommunityPosts();}
   if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
+  if(id==='profile'){loadDiagnostics();}
   if(id==='streaks'){renderAdvancedStreaks();}
   if(id==='analytics'){renderAnalytics();}
   if(id==='pack-list'){renderPackList();}
@@ -6655,6 +6669,23 @@ async function hardResetApp(){
   }
   localStorage.clear();
   location.reload();
+}
+
+async function loadDiagnostics(){
+  const countEl=document.getElementById('diag-count');
+  const listEl=document.getElementById('diag-list');
+  try{
+    const res=await fetch('/api/diagnostics');
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){countEl.textContent='';listEl.innerHTML='';return;}
+    const errors=data.errors||[];
+    countEl.textContent=errors.length?`(${errors.length} recent)`:'(none — all clear)';
+    listEl.innerHTML=errors.length?errors.map(e=>`
+      <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;font-size:11.5px;margin-top:6px">
+        <div style="color:var(--tm)">${new Date(e.created_at).toLocaleString()} · ${escapeHtml(e.scope)}</div>
+        <div style="color:var(--tp);margin-top:2px">${escapeHtml(e.message)}</div>
+      </div>`).join(''):'<p class="usage">No errors logged. If something ever looks wrong, check back here.</p>';
+  }catch(e){countEl.textContent='';listEl.innerHTML='';}
 }
 
 async function checkForAppUpdates(){

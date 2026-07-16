@@ -374,8 +374,12 @@ textarea::placeholder{color:var(--tm)}
       <button class="btn2" id="sb-build">Build storyboard from my lyrics</button>
       <p class="usage" id="sb-method"></p>
       <div id="sb-list" class="row"></div>
-      <button class="gen-btn" id="sb-gen-all" style="display:none">Generate all remaining scenes</button>
+      <div style="display:flex;gap:8px">
+        <button class="gen-btn" id="sb-gen-all" style="display:none;flex:1">Generate all remaining scenes</button>
+        <button class="btn2" id="sb-queue-all" style="display:none;flex:1">🌙 Queue overnight</button>
+      </div>
       <div class="progress-line" id="sb-prog"><div></div></div>
+      <p class="usage" id="sb-queue-status" style="display:none"></p>
     </div>
 
     <div class="card">
@@ -448,6 +452,15 @@ textarea::placeholder{color:var(--tm)}
       <p class="usage" id="upd-status"></p>
       <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
       <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
+    </div>
+
+    <div class="card adv-card">
+      <h3>Diagnostics <span class="usage" id="diag-count"></span></h3>
+      <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="diag-refresh">Refresh</button>
+      </div>
+      <div id="diag-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
     </div>
 
     <div class="card adv-card">
@@ -1200,6 +1213,7 @@ async function bootStudio() {
     $('#falkey-manage').style.display = 'none';
   }
   loadStorage();
+  loadDiagnostics();
   $('#chars-form').style.display = 'flex';
   await Promise.all([loadAssets(), loadCharacters()]);
 }
@@ -1339,6 +1353,19 @@ async function loadStorage() {
 }
 $('#stor-refresh').onclick = loadStorage;
 $('#stor-backup').onclick = () => { location.href = '/api/studio/backup'; };
+
+async function loadDiagnostics() {
+  try {
+    const { errors } = await jfetch('/api/studio/diagnostics');
+    $('#diag-count').textContent = errors.length ? `(${errors.length} recent)` : '(none — all clear)';
+    $('#diag-list').innerHTML = errors.length ? errors.map((e) => `
+      <div style="background:var(--s1);border-radius:8px;padding:8px 10px;font-size:11.5px">
+        <div style="color:var(--tm)">${new Date(e.created_at).toLocaleString()} · ${escapeHtml(e.scope)}</div>
+        <div style="color:var(--tp);margin-top:2px">${escapeHtml(e.message)}</div>
+      </div>`).join('') : '<p class="usage">No errors logged. If something ever looks wrong, check back here.</p>';
+  } catch (e) { $('#diag-count').textContent = ''; }
+}
+$('#diag-refresh').onclick = loadDiagnostics;
 
 $('#upd-check').onclick = async () => {
   $('#upd-status').textContent = 'Checking GitHub…';
@@ -2349,31 +2376,37 @@ async function uploadCaptionPngs() {
 function renderStoryboard() {
   const list = $('#sb-list');
   list.innerHTML = '';
-  if (!st.storyboard.length) { $('#sb-gen-all').style.display = 'none'; return; }
+  if (!st.storyboard.length) { $('#sb-gen-all').style.display = 'none'; $('#sb-queue-all').style.display = 'none'; return; }
   st.storyboard.forEach((sc, i) => {
     const asset = sc.assetId ? st.assets.find((a) => a.id === sc.assetId) : null;
     const card = document.createElement('div');
     card.className = 'seq-item';
     card.style.flexDirection = 'column';
     card.style.alignItems = 'stretch';
+    const queued = sc.queueId && !asset;
     card.innerHTML = `
       ${asset ? `<img src="${asset.url}" style="width:100%;border-radius:8px;background:#000;cursor:zoom-in" alt="">` : ''}
       <p style="font-size:11px;color:var(--tm);white-space:pre-line">Scene ${i + 1} · ${escapeHtml(sc.lines.slice(0, 90))}${sc.lines.length > 90 ? '…' : ''}</p>
-      <textarea class="sb-prompt" style="min-height:52px;padding:8px 10px;font-size:12px">${escapeHtml(sc.prompt)}</textarea>
+      <textarea class="sb-prompt" style="min-height:52px;padding:8px 10px;font-size:12px" ${queued ? 'disabled' : ''}>${escapeHtml(sc.prompt)}</textarea>
       <div style="display:flex;gap:8px">
-        <button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>
+        ${queued
+          ? `<span class="btn2 quiet" style="flex:1;text-align:center;cursor:default">🌙 Queued${sc.queueStatus === 'running' ? ' — generating…' : ' — waiting'}</span>`
+          : `<button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>`}
         ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
       </div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
     const sbImg = card.querySelector('img');
     if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, 'image');
     card.querySelector('.sb-prompt').oninput = (e) => { sc.prompt = e.target.value; persistDraft(); };
-    card.querySelector('.sb-gen').onclick = () => generateStoryboardScene(sc, card);
+    const genBtn = card.querySelector('.sb-gen');
+    if (genBtn) genBtn.onclick = () => generateStoryboardScene(sc, card);
     const addBtn = card.querySelector('.sb-add');
     if (addBtn) addBtn.onclick = () => addToSeq(asset);
     list.appendChild(card);
   });
-  $('#sb-gen-all').style.display = st.storyboard.some((s) => !s.assetId) ? 'block' : 'none';
+  const hasPending = st.storyboard.some((s) => !s.assetId && !s.queueId);
+  $('#sb-gen-all').style.display = hasPending ? 'block' : 'none';
+  $('#sb-queue-all').style.display = hasPending ? 'block' : 'none';
 }
 
 async function generateStoryboardScene(sc, card) {
@@ -2449,6 +2482,87 @@ $('#sb-gen-all').onclick = async () => {
   btn.disabled = false;
   btn.textContent = 'Generate all remaining scenes';
 };
+
+$('#sb-queue-all').onclick = async () => {
+  if (!st.cfg?.falAvailable) return setErr('#seq-err', 'Turn on AI first (AI Scenes tab) to generate storyboard images.');
+  setErr('#seq-err', null);
+  const btn = $('#sb-queue-all');
+  const pending = st.storyboard.filter((s) => !s.assetId && !s.queueId);
+  if (!pending.length) return;
+  btn.disabled = true;
+  const imageSize = { '16:9': 'landscape_16_9', '9:16': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9';
+  try {
+    const { ids } = await jfetch('/api/studio/queue/scenes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: pending.map((sc, i) => ({
+          prompt: sc.prompt,
+          characterId: $('#sb-char').value || null,
+          imageSize,
+          label: `Scene ${st.storyboard.indexOf(sc) + 1}: ${sc.prompt.slice(0, 60)}`,
+        })),
+      }),
+    });
+    pending.forEach((sc, i) => { sc.queueId = ids[i]; sc.queueStatus = 'pending'; });
+    persistDraft();
+    renderStoryboard();
+    startQueuePolling();
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+// Picks up progress on anything queued - runs regardless of which tab is open
+// so a queue started before bed keeps reflecting into the storyboard/library
+// the next time this page happens to be open, and shows live status while it is.
+let queuePollTimer = null;
+function startQueuePolling() {
+  if (queuePollTimer) return;
+  queuePollTimer = setInterval(pollQueueOnce, 6000);
+  pollQueueOnce();
+}
+async function pollQueueOnce() {
+  if (!st.signedIn) return;
+  let items;
+  try { ({ items } = await jfetch('/api/studio/queue')); } catch (e) { return; }
+  const live = items.filter((it) => it.status === 'pending' || it.status === 'running');
+  const statusEl = $('#sb-queue-status');
+  if (live.length) {
+    const running = items.filter((it) => it.status === 'running').length;
+    statusEl.style.display = 'block';
+    statusEl.textContent = `🌙 Overnight queue: ${running ? '1 generating, ' : ''}${live.length} waiting. Safe to close this tab — it keeps going.`;
+  } else if (queuePollTimer) {
+    clearInterval(queuePollTimer);
+    queuePollTimer = null;
+    statusEl.style.display = 'none';
+  }
+  let changed = false;
+  for (const sc of st.storyboard) {
+    if (!sc.queueId || sc.assetId) continue;
+    const match = items.find((it) => it.id === sc.queueId);
+    if (!match) continue;
+    if (match.status === 'done' && match.assetId) {
+      sc.assetId = match.assetId; sc.queueId = null; sc.queueStatus = null;
+      changed = true;
+    } else if (match.status === 'error') {
+      sc.queueId = null; sc.queueStatus = null; // fall back to a normal "Generate" button so they can retry
+      setErr('#seq-err', `A queued scene failed: ${match.error || 'unknown error'}`);
+      changed = true;
+    } else if (match.status !== sc.queueStatus) {
+      sc.queueStatus = match.status;
+      changed = true;
+    }
+  }
+  if (changed) {
+    st.cfg = await jfetch('/api/studio/config').catch(() => st.cfg);
+    updateScenesUsage();
+    await loadAssets();
+    renderStoryboard();
+    persistDraft();
+  }
+}
 
 /* ---------------- shorts generator ---------------- */
 function slugName(s) {
@@ -3108,6 +3222,9 @@ bootStudio().then(() => {
   }
   updateQkMusicLabel();
   draftReady = true;
+  // Pick up an overnight queue that's still running (or finished while this
+  // tab was closed) regardless of what's in the local draft.
+  pollQueueOnce();
 });
 </script>
 </body>

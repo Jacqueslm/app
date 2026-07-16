@@ -53,7 +53,24 @@ db.exec(`
     created_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_studio_assets_user ON studio_assets(user_id, kind);
+  CREATE TABLE IF NOT EXISTS error_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scope TEXT NOT NULL,
+    message TEXT NOT NULL,
+    detail TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
+
+function logError(scope, message, detail) {
+  db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
+    .run(scope, String(message).slice(0, 500), detail ? String(detail).slice(0, 2000) : null, new Date().toISOString());
+  db.prepare('DELETE FROM error_log WHERE id NOT IN (SELECT id FROM error_log ORDER BY id DESC LIMIT 200)').run();
+}
+
+function getRecentErrors(limit) {
+  return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
+}
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
 function addColumnIfMissing(name, ddl) {
@@ -259,4 +276,6 @@ module.exports = {
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,
+  logError,
+  getRecentErrors,
 };

@@ -83,6 +83,22 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
 
 app.use('/api/studio', studio.router);
 
+// Anything that reaches here escaped every route's own try/catch - log it so
+// it shows up in Storage & Backup diagnostics instead of vanishing silently.
+app.use((err, req, res, next) => {
+  try { db.logError('http', err.message, err.stack); } catch (_) {}
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Something went wrong on the server.' });
+});
+process.on('uncaughtException', (err) => {
+  try { db.logError('uncaughtException', err.message, err.stack); } catch (_) {}
+  console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (err) => {
+  try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
+  console.error('Unhandled rejection:', err);
+});
+
 app.listen(PORT, () => {
   console.log(`Studio running on http://localhost:${PORT}`);
 });

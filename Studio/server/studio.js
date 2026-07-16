@@ -318,6 +318,11 @@ router.get('/config', (req, res) => {
   });
 });
 
+/* ---------------- diagnostics (recent server errors) ---------------- */
+router.get('/diagnostics', (req, res) => {
+  res.json({ errors: db.getRecentErrors(50) });
+});
+
 /* ---------------- settings: AI key from the app ---------------- */
 router.post('/settings/falkey', (req, res) => {
   const { key } = req.body || {};
@@ -475,28 +480,21 @@ router.delete('/characters/:id', (req, res) => {
 /* ---------------- AI generation (fal.ai) ---------------- */
 const IMAGE_SIZES = new Set(['square_hd', 'portrait_16_9', 'landscape_16_9']);
 
-router.post('/scene', async (req, res) => {
-  if (!FAL_KEY) {
-    return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
-  }
-  const { prompt, characterId, characterIds, imageSize, count } = req.body || {};
+// Shared by the interactive /scene endpoint and the overnight queue worker:
+// resolves a prompt + character selection into a fal model/input pair.
+// Throws an Error with `.status` set to the right HTTP code on any problem.
+async function buildSceneModelInput(userId, { prompt, characterId, characterIds, imageSize }) {
   if (typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required.' });
+    throw Object.assign(new Error('prompt is required.'), { status: 400 });
   }
   if (imageSize && !IMAGE_SIZES.has(imageSize)) {
-    return res.status(400).json({ error: 'imageSize must be square_hd, portrait_16_9, or landscape_16_9.' });
+    throw Object.assign(new Error('imageSize must be square_hd, portrait_16_9, or landscape_16_9.'), { status: 400 });
   }
-  const howMany = Math.max(1, Math.min(4, Number(count) || 1));
-  if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
-    return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
-  }
-
   const cleanPrompt = prompt.trim().slice(0, 2000);
   let model = MODEL_TEXT_TO_IMAGE;
   // No num_images here: every model defaults to 1 and the FLUX.2 edit schema
   // doesn't take it. Multiple takes are separate submits (one job each).
   const input = { prompt: cleanPrompt, image_size: imageSize || 'landscape_16_9' };
-  let character = null;
 
   // One character, or two sharing the scene. Ids arrive as characterIds
   // (new client) or characterId (storyboard + older clients).
@@ -505,11 +503,11 @@ router.post('/scene', async (req, res) => {
   )].slice(0, 2);
   const cast = [];
   for (const id of requestedIds) {
-    const c = db.getCharacter(req.userId, id);
-    if (!c) return res.status(404).json({ error: 'Character not found.' });
+    const c = db.getCharacter(userId, id);
+    if (!c) throw Object.assign(new Error('Character not found.'), { status: 404 });
     cast.push(c);
   }
-  character = cast[0] || null;
+  const character = cast[0] || null;
 
   if (cast.length === 1 && cast[0].lora_url) {
     // Strongest consistency: the trained LoRA is baked into generation.
@@ -526,12 +524,12 @@ router.post('/scene', async (req, res) => {
     const allUris = [];
     const whose = []; // which reference photos belong to which character
     for (const c of cast) {
-      const refs = db.getAssets(req.userId, 'image').filter((a) => a.character_id === c.id).slice(0, perChar);
+      const refs = db.getAssets(userId, 'image').filter((a) => a.character_id === c.id).slice(0, perChar);
       if (!refs.length) {
-        return res.status(400).json({ error: `Upload at least one reference photo for ${c.name} first (Characters tab)${cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL'}.` });
+        throw Object.assign(new Error(`Upload at least one reference photo for ${c.name} first (Characters tab)${cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL'}.`), { status: 400 });
       }
       const uris = (await Promise.all(refs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
-      if (!uris.length) return res.status(500).json({ error: `Could not read ${c.name}'s reference photos — try re-uploading them.` });
+      if (!uris.length) throw Object.assign(new Error(`Could not read ${c.name}'s reference photos — try re-uploading them.`), { status: 500 });
       const from = allUris.length + 1, to = allUris.length + uris.length;
       whose.push(`${from === to ? `Reference photo ${from}` : `Reference photos ${from}-${to}`} show${from === to ? 's' : ''} ${c.name}.`);
       allUris.push(...uris);
@@ -548,6 +546,27 @@ router.post('/scene', async (req, res) => {
     if (/kontext/.test(model)) input.image_url = allUris[0]; // legacy override: single-image editor
     else input.image_urls = allUris;
   }
+
+  return { model, input, cleanPrompt, character, cast };
+}
+
+router.post('/scene', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
+  }
+  const { prompt, characterId, characterIds, imageSize, count } = req.body || {};
+  const howMany = Math.max(1, Math.min(4, Number(count) || 1));
+  if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
+    return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
+  }
+
+  let built;
+  try {
+    built = await buildSceneModelInput(req.userId, { prompt, characterId, characterIds, imageSize });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message });
+  }
+  const { model, input, cleanPrompt, character, cast } = built;
 
   try {
     const jobs = [];
@@ -569,6 +588,131 @@ router.post('/scene', async (req, res) => {
     res.status(502).json({ error: err.message });
   }
 });
+
+/* ---------------- overnight batch queue ---------------- */
+// Submit a whole storyboard's worth of scenes once; the server keeps
+// generating them one at a time even if the browser tab closes, so a full
+// batch can be queued before bed and finish generating overnight.
+router.post('/queue/scenes', (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
+  }
+  const { items } = req.body || {};
+  if (!Array.isArray(items) || !items.length) {
+    return res.status(400).json({ error: 'items must be a non-empty array of { prompt, characterId?, imageSize? }.' });
+  }
+  if (items.length > 60) {
+    return res.status(400).json({ error: 'Queue up to 60 scenes at a time.' });
+  }
+  const clean = [];
+  for (const it of items) {
+    if (typeof it.prompt !== 'string' || !it.prompt.trim()) {
+      return res.status(400).json({ error: 'Every queued scene needs a prompt.' });
+    }
+    if (it.imageSize && !IMAGE_SIZES.has(it.imageSize)) {
+      return res.status(400).json({ error: 'imageSize must be square_hd, portrait_16_9, or landscape_16_9.' });
+    }
+    clean.push({
+      prompt: it.prompt.trim().slice(0, 2000),
+      characterId: it.characterId ? Number(it.characterId) : null,
+      imageSize: it.imageSize || 'landscape_16_9',
+      label: typeof it.label === 'string' ? it.label.slice(0, 80) : null,
+    });
+  }
+  const remaining = DAILY_AI_IMAGE_LIMIT - db.getImageCount(req.userId, todayUTC());
+  if (clean.length > Math.max(0, remaining)) {
+    return res.status(429).json({ error: `Only ${Math.max(0, remaining)} images left in today's cap — that's fewer than the ${clean.length} scenes you're queuing. Queue fewer, or raise STUDIO_DAILY_IMAGE_LIMIT in .env.` });
+  }
+  const ids = db.enqueueScenes(req.userId, clean);
+  res.status(202).json({ queued: ids.length, ids });
+});
+
+router.get('/queue', (req, res) => {
+  res.json({ items: db.getQueue(req.userId).map(queueItemJson) });
+});
+
+router.delete('/queue/:id', (req, res) => {
+  db.deleteQueueItem(req.userId, Number(req.params.id));
+  res.json({ ok: true });
+});
+
+router.post('/queue/clear-finished', (req, res) => {
+  db.clearFinishedQueue(req.userId);
+  res.json({ ok: true });
+});
+
+function queueItemJson(row) {
+  return {
+    id: row.id, status: row.status, prompt: row.prompt, label: row.label,
+    characterId: row.character_id, assetId: row.asset_id, error: row.error,
+    createdAt: row.created_at, updatedAt: row.updated_at,
+  };
+}
+
+// Drives the queue forward on its own, independent of any browser being
+// open: for every user with pending/running items, keep exactly one fal job
+// in flight, poll it the same way the interactive job-polling endpoint does,
+// and move to the next item once it resolves.
+async function processQueueTick() {
+  if (!FAL_KEY) return;
+  let userIds;
+  try { userIds = db.getUsersWithPendingQueue(); } catch (err) { return; }
+  for (const userId of userIds) {
+    try {
+      const running = db.getRunningQueueItem(userId);
+      if (running) {
+        const job = jobs.get(running.fal_job_id);
+        if (!job) {
+          // Server restarted mid-job (in-memory jobs don't survive that) - the
+          // fal job itself may still finish, but we've lost the handle to poll
+          // it. Mark it failed rather than leaving it stuck forever.
+          db.updateQueueItem(running.id, { status: 'error', error: 'Lost track of this job after a server restart. Re-queue it.' });
+          continue;
+        }
+        await refreshFalJob(job);
+        if (job.status === 'done') {
+          db.updateQueueItem(running.id, { status: 'done', assetId: job.assetId });
+        } else if (job.status === 'error') {
+          db.updateQueueItem(running.id, { status: 'error', error: job.error || 'Generation failed.' });
+        }
+        continue; // one in flight per user - don't also start the next one this tick
+      }
+
+      const next = db.getNextPendingQueueItem(userId);
+      if (!next) continue;
+      if (db.getImageCount(userId, todayUTC()) >= DAILY_AI_IMAGE_LIMIT) continue; // resumes once the cap rolls over
+
+      // Anything that goes wrong turning this item into a fal submission -
+      // bad reference photos, a rejected key, a network blip - must mark the
+      // item 'error' and move on. Left uncaught here, the same item would be
+      // picked up as "next pending" again next tick and fail identically
+      // forever, since it never leaves 'pending'.
+      try {
+        const built = await buildSceneModelInput(userId, {
+          prompt: next.prompt, characterId: next.character_id, imageSize: next.image_size,
+        });
+        const submitted = await falSubmit(built.model, built.input);
+        const job = createJob(userId, 'ai-image', {
+          fal: {
+            statusUrl: submitted.status_url,
+            responseUrl: submitted.response_url,
+            expect: 'image',
+            label: next.label || built.cleanPrompt.slice(0, 80),
+            characterId: built.character ? built.character.id : null,
+            meta: { source: 'queue', model: built.model, prompt: built.cleanPrompt },
+          },
+        });
+        db.updateQueueItem(next.id, { status: 'running', falJobId: job.id });
+      } catch (err) {
+        db.updateQueueItem(next.id, { status: 'error', error: err.message });
+      }
+    } catch (err) {
+      try { db.logError('studio-queue', err.message, err.stack); } catch (_) {}
+    }
+  }
+}
+const QUEUE_TICK_MS = Number(process.env.STUDIO_QUEUE_TICK_MS || 4000);
+setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);
 
 router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {

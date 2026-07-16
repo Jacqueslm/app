@@ -11,7 +11,6 @@ const { spawn } = require('child_process');
 const express = require('express');
 
 const db = require('./db');
-const billing = require('./billing');
 const { requireAuth } = require('./auth');
 
 let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
@@ -1264,7 +1263,7 @@ router.post('/campaign', async (req, res) => {
 // code onto the install folder, refresh dependencies. Your data survives by
 // construction - .env, data.sqlite and media/ are gitignored so they are never
 // inside the ZIP being copied over.
-const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers + TurnSomeDayIntoOneday
+const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers, Studio and TurnSomeDayIntoOneday
 const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
@@ -1272,7 +1271,10 @@ const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // The running launcher scripts are skipped during the overlay copy: overwriting
 // a batch file mid-run corrupts its execution on Windows.
-const UPDATE_SKIP = new Set(['Start My App.bat', 'Start My App.command', 'start-app.sh', '.git']);
+const UPDATE_SKIP = new Set([
+  'Start My App.bat', 'Start My App.command', 'start-app.sh',
+  'Start Studio.bat', 'Start Studio.command', 'start-studio.sh', '.git',
+]);
 
 function runCmd(cmd, args, opts) {
   return new Promise((resolve, reject) => {

@@ -21,7 +21,7 @@ fi
 
 PORT=$(grep -E '^PORT=' .env | cut -d= -f2)
 PORT=${PORT:-4300}
-URL="http://localhost:${PORT}/studio/"
+URL="http://localhost:${PORT}/"
 
 # Already running? Just open the browser.
 if curl -s -o /dev/null --max-time 2 "$URL"; then

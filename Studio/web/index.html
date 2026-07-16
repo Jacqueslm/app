@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f0c29">
-<title>Studio — Turn Someday Into Day One</title>
+<title>Studio</title>
 <link rel="icon" href="/icons/icon-192.png">
 <style>
 :root{
@@ -115,8 +115,7 @@ textarea::placeholder{color:var(--tm)}
 <body>
 <div class="app">
   <div class="hdr">
-    <a href="/" aria-label="Back">&#8249;</a>
-    <h1>Studio</h1>
+    <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
   </div>
   <div class="mtabs" id="mtabs">
@@ -472,6 +471,16 @@ textarea::placeholder{color:var(--tm)}
   <button class="lb-close" aria-label="Close">✕</button>
   <img id="lb-img" style="display:none" alt="">
   <video id="lb-video" controls playsinline style="display:none"></video>
+</div>
+<div class="lightbox" id="auth-gate" style="cursor:default">
+  <div class="card" style="max-width:330px;width:92%">
+    <h3>🎬 Welcome to Studio</h3>
+    <p class="usage" style="font-size:13px">Sign in — or type a new email and password and an account is created for you. It lives only on this computer.</p>
+    <input class="input" id="au-email" placeholder="Email" autocomplete="username">
+    <input class="input" id="au-pass" type="password" placeholder="Password (8+ characters)" autocomplete="current-password">
+    <button class="gen-btn" id="au-go">Let's go</button>
+    <p class="usage" id="au-err" style="color:#d9534f"></p>
+  </div>
 </div>
 <input type="file" id="file-input" style="display:none">
 
@@ -1116,6 +1125,32 @@ function closeLightbox() {
 }
 $('#lightbox').onclick = (e) => { if (e.target.id !== 'lb-video') closeLightbox(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+/* ---------------- sign in / create account ---------------- */
+async function authGo() {
+  const email = $('#au-email').value.trim();
+  const password = $('#au-pass').value;
+  $('#au-err').textContent = '';
+  if (!email || !password) { $('#au-err').textContent = 'Type your email and a password.'; return; }
+  const post = (p) => fetch(`/api/auth/${p}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  $('#au-go').disabled = true;
+  try {
+    let res = await post('login');
+    if (res.status === 401) res = await post('signup'); // no such account yet -> make one
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) return location.reload();
+    $('#au-err').textContent = data.error || 'Could not sign in.';
+  } catch (_) {
+    $('#au-err').textContent = 'Could not reach the server. Is the black window open?';
+  } finally {
+    $('#au-go').disabled = false;
+  }
+}
+$('#au-go').onclick = authGo;
+$('#au-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') authGo(); });
 function setProg(sel, pct) {
   const el = $(sel);
   el.classList.toggle('show', pct != null);
@@ -1137,9 +1172,11 @@ async function bootStudio() {
     st.cfg = await jfetch('/api/studio/config');
     st.signedIn = true;
   } catch (e) {
-    const msg = e.status === 401
-      ? 'Sign in from the <a href="/">main app</a> first — your Studio library is tied to your account.'
-      : `Could not reach the server: ${e.message}`;
+    if (e.status === 401 || e.status === 403) {
+      $('#auth-gate').classList.add('show'); // sign in / create account right here
+      return;
+    }
+    const msg = `Could not reach the server: ${e.message}. Is the black window still open?`;
     for (const id of ['#scenes-banner', '#chars-banner', '#seq-banner']) { $(id).innerHTML = msg; $(id).style.display = 'block'; }
     return;
   }

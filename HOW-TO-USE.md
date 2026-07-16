@@ -39,7 +39,7 @@ That's it. No internet needed except for AI generations.
 | Tab | What it's for |
 |---|---|
 | **Art** | Free art from a text prompt (wallpapers, backgrounds). No AI key needed. |
-| **AI Scenes** | Make AI images, animate them into clips, make faces sing, dance transfer. Your **Library** lives here. |
+| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, make faces sing, dance transfer. Your **Library** lives here. |
 | **Characters** | Your AI artist — upload photos so every scene shows the same face. |
 | **Sequencer** | Where videos get made — Quick Video, lyrics, shorts, campaigns, everything. |
 
@@ -58,7 +58,7 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
 Leave "⚡ Cut on the beat" checked — your cuts will land on the music automatically.
 
 **The AI way (your character stars in it):**
-1. **Characters** tab → create your character, upload 1–6 clear photos
+1. **Characters** tab → create your character, upload **3–6 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). The AI studies up to 4 of them per scene, so variety is what makes it *look like you*.
 2. **Lyrics & Captions** card → paste your lyrics
 3. **Storyboard** card → **Build storyboard from my lyrics** → it writes a scene prompt for every verse → **Generate** each scene (~$0.04 each)
 4. On each scene in your Library → **Animate** → pick quality → tap the price button
@@ -113,6 +113,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | Thing | Rough cost |
 |---|---|
 | Scene image | ~4¢ |
+| Scene image starring your character | ~9¢ |
 | 5-second clip (Draft/Seedance) | ~21¢ |
 | 5-second clip (Standard/Kling) | ~42¢ |
 | 5-second clip (Best/Kling Pro) | ~56¢ |

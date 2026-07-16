@@ -190,6 +190,7 @@ textarea::placeholder{color:var(--tm)}
       <select class="input" id="scene-char2" style="display:none"><option value="">No second character (solo scene)</option></select>
       <textarea id="scene-prompt" placeholder="e.g. medium shot, gritty industrial warehouse, cyberpunk style, character turning around" style="min-height:64px"></textarea>
       <div class="chips" id="scene-sizes"></div>
+      <div class="chips" id="scene-quality"></div>
       <div class="chips" id="scene-counts"></div>
       <button class="gen-btn" id="scene-gen">Generate scene image</button>
       <div class="progress-line" id="scene-prog"><div></div></div>
@@ -1040,6 +1041,7 @@ const st = {
   characters: [],
   sceneSize: 'landscape_16_9',
   sceneCount: 1,        // images per press (same prompt, different takes)
+  sceneQuality: 'standard', // 'standard' = Flux, 'best' = Nano Banana Pro
   seq: [],              // timeline items (video: start/end trims, image: holdDur)
   trans: [],            // transitions between consecutive items
   overlays: [],         // text overlay specs (rendered to PNG at export time)
@@ -1241,9 +1243,17 @@ async function loadCharacters() {
 /* ---------------- AI Scenes ---------------- */
 function renderSceneChips() {
   chipRow($('#scene-sizes'), SCENE_SIZES, st.sceneSize, (k) => { st.sceneSize = k; renderSceneChips(); });
+  const p = st.cfg?.pricing;
+  const QUALITIES = [
+    { key: 'standard', label: `Flux${p ? ` · $${p.imageRate.toFixed(2)}` : ''}` },
+    { key: 'best', label: `✨ Banana Pro${p ? ` · $${p.imageBestRate.toFixed(2)}` : ''}` },
+  ];
+  chipRow($('#scene-quality'), QUALITIES, st.sceneQuality, (k) => { st.sceneQuality = k; renderSceneChips(); });
   chipRow($('#scene-counts'), SCENE_COUNTS, st.sceneCount, (k) => { st.sceneCount = Number(k); renderSceneChips(); });
   const n = st.sceneCount;
-  $('#scene-gen').textContent = n > 1 ? `Generate ${n} images (same prompt, ${n} takes)` : 'Generate scene image';
+  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : p.imageRate) : null;
+  const price = rate ? ` · ~$${(rate * n).toFixed(2)}` : '';
+  $('#scene-gen').textContent = (n > 1 ? `Generate ${n} images (${n} takes)` : 'Generate scene image') + price;
 }
 function renderSceneCharSelect() {
   const opts = '<option value="">No character (plain scene)</option>' +
@@ -1283,7 +1293,7 @@ $('#scene-gen').onclick = async () => {
       body: JSON.stringify({
         prompt,
         characterIds: [$('#scene-char').value, $('#scene-char2').value].filter(Boolean),
-        imageSize: st.sceneSize, count: st.sceneCount,
+        imageSize: st.sceneSize, count: st.sceneCount, quality: st.sceneQuality,
       }),
     });
     const jobs = resp.jobs || [resp.job];
@@ -3237,6 +3247,7 @@ renderStoryboard();
 applySimpleMode();
 bootStudio().then(() => {
   updateScenesUsage();
+  renderSceneChips(); // re-render with real prices now that config is loaded
   // restore the browser draft if the timeline is empty
   if (!st.seq.length) {
     try {

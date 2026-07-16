@@ -14,7 +14,7 @@ const db = require('./db');
 const { requireAuth } = require('./auth');
 
 let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
-const FAL_QUEUE_BASE = 'https://queue.fal.run';
+const FAL_QUEUE_BASE = process.env.FAL_QUEUE_BASE || 'https://queue.fal.run'; // overridable for tests
 const ENV_PATH = path.join(__dirname, '.env');
 
 // Optional: the same Anthropic key that powers Nova chat (server.js) sharpens
@@ -38,6 +38,11 @@ const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/
 // once, which holds the face far better than the old single-photo Kontext.
 // (If overridden to a kontext model, we fall back to single-image input.)
 const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/flux-2-pro/edit';
+// "Best" image quality: Google's Nano Banana Pro - stronger scene reasoning,
+// best-in-class text-inside-the-image, and multi-person consistency. Costs
+// ~4x Flux, so it's a per-generation choice, not the default.
+const MODEL_IMAGE_BEST = process.env.FAL_MODEL_IMAGE_BEST || 'fal-ai/nano-banana-pro';
+const MODEL_IMAGE_BEST_EDIT = process.env.FAL_MODEL_IMAGE_BEST_EDIT || 'fal-ai/nano-banana-pro/edit';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // Image-to-video quality tiers with price estimates (USD/second, audio off).
 // Rates are a snapshot - fal has no public pricing API - so they're shown in
@@ -64,6 +69,7 @@ const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballp
 // FLUX.2 pro edit bills $0.03 for the first output MP + $0.015 per extra MP of
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
 const CHARACTER_IMAGE_RATE = Number(process.env.STUDIO_RATE_CHARACTER_IMAGE || 0.09);
+const IMAGE_BEST_RATE = Number(process.env.STUDIO_RATE_IMAGE_BEST || 0.15); // Nano Banana Pro flat per image
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
@@ -312,6 +318,7 @@ router.get('/config', (req, res) => {
       asOf: PRICES_AS_OF,
       imageRate: IMAGE_RATE,
       characterImageRate: CHARACTER_IMAGE_RATE,
+      imageBestRate: IMAGE_BEST_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -497,18 +504,23 @@ const IMAGE_SIZES = new Set(['square_hd', 'portrait_16_9', 'landscape_16_9']);
 // Shared by the interactive /scene endpoint and the overnight queue worker:
 // resolves a prompt + character selection into a fal model/input pair.
 // Throws an Error with `.status` set to the right HTTP code on any problem.
-async function buildSceneModelInput(userId, { prompt, characterId, characterIds, imageSize }) {
+async function buildSceneModelInput(userId, { prompt, characterId, characterIds, imageSize, quality }) {
   if (typeof prompt !== 'string' || !prompt.trim()) {
     throw Object.assign(new Error('prompt is required.'), { status: 400 });
   }
   if (imageSize && !IMAGE_SIZES.has(imageSize)) {
     throw Object.assign(new Error('imageSize must be square_hd, portrait_16_9, or landscape_16_9.'), { status: 400 });
   }
+  const best = quality === 'best'; // Nano Banana Pro instead of Flux
   const cleanPrompt = prompt.trim().slice(0, 2000);
-  let model = MODEL_TEXT_TO_IMAGE;
+  let model = best ? MODEL_IMAGE_BEST : MODEL_TEXT_TO_IMAGE;
   // No num_images here: every model defaults to 1 and the FLUX.2 edit schema
   // doesn't take it. Multiple takes are separate submits (one job each).
-  const input = { prompt: cleanPrompt, image_size: imageSize || 'landscape_16_9' };
+  // Banana speaks aspect_ratio; Flux speaks image_size.
+  const size = imageSize || 'landscape_16_9';
+  const input = best
+    ? { prompt: cleanPrompt, aspect_ratio: { landscape_16_9: '16:9', portrait_16_9: '9:16', square_hd: '1:1' }[size] }
+    : { prompt: cleanPrompt, image_size: size };
 
   // One character, or two sharing the scene. Ids arrive as characterIds
   // (new client) or characterId (storyboard + older clients).
@@ -523,8 +535,10 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
   }
   const character = cast[0] || null;
 
-  if (cast.length === 1 && cast[0].lora_url) {
+  if (cast.length === 1 && cast[0].lora_url && !best) {
     // Strongest consistency: the trained LoRA is baked into generation.
+    // (LoRAs are Flux-only - on Best quality a LoRA character falls through
+    // to the photo path below, or errors if it has no photos.)
     model = MODEL_LORA_IMAGE;
     input.loras = [{ path: character.lora_url, scale: 1 }];
     if (character.trigger_word && !cleanPrompt.includes(character.trigger_word)) {
@@ -533,14 +547,16 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
   } else if (cast.length) {
     // Photo-reference path (solo or duo). A duo always works from photos: two
     // identity LoRAs in one generation bleed into each other.
-    model = MODEL_CHARACTER_IMAGE;
+    model = best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
     const perChar = cast.length > 1 ? 3 : 4;
     const allUris = [];
     const whose = []; // which reference photos belong to which character
     for (const c of cast) {
       const refs = db.getAssets(userId, 'image').filter((a) => a.character_id === c.id).slice(0, perChar);
       if (!refs.length) {
-        throw Object.assign(new Error(`Upload at least one reference photo for ${c.name} first (Characters tab)${cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL'}.`), { status: 400 });
+        const hint = best ? ' — Best quality works from photos (LoRAs are Flux-only)'
+          : cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL';
+        throw Object.assign(new Error(`Upload at least one reference photo for ${c.name} first (Characters tab)${hint}.`), { status: 400 });
       }
       const uris = (await Promise.all(refs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
       if (!uris.length) throw Object.assign(new Error(`Could not read ${c.name}'s reference photos — try re-uploading them.`), { status: 500 });
@@ -568,7 +584,7 @@ router.post('/scene', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { prompt, characterId, characterIds, imageSize, count } = req.body || {};
+  const { prompt, characterId, characterIds, imageSize, count, quality } = req.body || {};
   const howMany = Math.max(1, Math.min(4, Number(count) || 1));
   if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
@@ -576,7 +592,7 @@ router.post('/scene', async (req, res) => {
 
   let built;
   try {
-    built = await buildSceneModelInput(req.userId, { prompt, characterId, characterIds, imageSize });
+    built = await buildSceneModelInput(req.userId, { prompt, characterId, characterIds, imageSize, quality });
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message });
   }

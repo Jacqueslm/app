@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Turn Someday Into Day One - double-click launcher (Linux / anything with bash)
-# Starts the app and opens Studio in your browser. No terminal knowledge needed.
+# Studio - Mac launcher. Double-click me in Finder.
+# (If macOS complains the first time: right-click -> Open -> Open.)
 set -e
-cd "$(dirname "$0")/TurnSomeDayIntoOneday/server"
+cd "$(dirname "$0")/Studio/server"
 
 if ! command -v node >/dev/null 2>&1; then
   echo ""
@@ -12,21 +12,19 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-# First run: create .env with a stable session secret so you stay signed in.
 if [ ! -f .env ]; then
-  echo "PORT=4300" > .env
+  echo "PORT=4400" > .env
   echo "SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> .env
-  echo "Created server/.env with a fresh session secret."
+  echo "Created Studio/server/.env with a fresh session secret."
 fi
 
 PORT=$(grep -E '^PORT=' .env | cut -d= -f2)
-PORT=${PORT:-4300}
+PORT=${PORT:-4400}
 URL="http://localhost:${PORT}/"
 
-# Already running? Just open the browser.
 if curl -s -o /dev/null --max-time 2 "$URL"; then
-  echo "App is already running - opening $URL"
-  (xdg-open "$URL" >/dev/null 2>&1 || true) &
+  echo "Studio is already running - opening $URL"
+  open "$URL"
   exit 0
 fi
 
@@ -35,6 +33,7 @@ if [ ! -d node_modules ]; then
   npm install --no-audit --no-fund
 fi
 
-echo "Starting Turn Someday Into Day One..."
-(sleep 2 && (xdg-open "$URL" >/dev/null 2>&1 || echo "Open this in your browser: $URL")) &
+echo "Starting Studio..."
+echo "Keep this window open while you use the app. Close it to stop."
+(sleep 2 && open "$URL") &
 exec node server.js

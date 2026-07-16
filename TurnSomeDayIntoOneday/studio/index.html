@@ -1328,8 +1328,8 @@ function renderLibrary() {
     if (st.animTarget === a.id) {
       const pricing = st.cfg?.pricing;
       const tierKeys = pricing ? Object.keys(pricing.tiers) : ['standard'];
-      let curTier = localStorage.getItem('tsid-tier') || 'standard';
-      if (!tierKeys.includes(curTier)) curTier = 'standard';
+      let curTier = localStorage.getItem('tsid-tier') || 'draft'; // Seedance by default - cheapest good tier
+      if (!tierKeys.includes(curTier)) curTier = 'draft';
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
       const priceFor = (sec) => {
@@ -1413,7 +1413,7 @@ async function animateAsset(assetId, motion, seconds, panel, tier) {
   try {
     const { job } = await jfetch('/api/studio/animate', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ assetId, prompt: motion, duration: seconds, tier: tier || 'standard' }),
+      body: JSON.stringify({ assetId, prompt: motion, duration: seconds, tier: tier || localStorage.getItem('tsid-tier') || 'draft' }),
     });
     await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
     st.animTarget = null;

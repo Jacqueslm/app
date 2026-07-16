@@ -105,6 +105,11 @@ textarea::placeholder{color:var(--tm)}
 .progress-line.show{display:block}
 .progress-line div{height:100%;background:var(--green);width:0%;transition:width .3s}
 .usage{font-size:11px;color:var(--tm)}
+.lightbox{position:fixed;inset:0;background:rgba(5,4,18,0.94);display:none;align-items:center;justify-content:center;z-index:60;cursor:zoom-out}
+.lightbox.show{display:flex}
+.lightbox img,.lightbox video{max-width:96vw;max-height:92vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+.lightbox .lb-close{position:absolute;top:14px;right:18px;background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:20px;width:40px;height:40px;border-radius:50%;cursor:pointer}
+.lib-item img,.lib-item video{cursor:zoom-in}
 </style>
 </head>
 <body>
@@ -457,6 +462,11 @@ textarea::placeholder{color:var(--tm)}
     <button class="dl-btn" id="seq-dl">Download</button>
   </div>
   </div><!-- /body -->
+</div>
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" aria-label="Close">✕</button>
+  <img id="lb-img" style="display:none" alt="">
+  <video id="lb-video" controls playsinline style="display:none"></video>
 </div>
 <input type="file" id="file-input" style="display:none">
 
@@ -1083,6 +1093,24 @@ function probeDuration(url) {
 }
 
 function setErr(sel, msg) { const el = $(sel); el.textContent = msg || ''; el.classList.toggle('show', !!msg); }
+
+/* ---------------- tap-to-enlarge viewer ---------------- */
+function openLightbox(url, kind) {
+  const img = $('#lb-img'), vid = $('#lb-video');
+  img.style.display = kind === 'image' ? 'block' : 'none';
+  vid.style.display = kind === 'video' ? 'block' : 'none';
+  if (kind === 'image') { img.src = url; vid.removeAttribute('src'); }
+  else { vid.src = url; img.removeAttribute('src'); vid.play().catch(() => {}); }
+  $('#lightbox').classList.add('show');
+}
+function closeLightbox() {
+  const vid = $('#lb-video');
+  vid.pause();
+  vid.removeAttribute('src');
+  $('#lightbox').classList.remove('show');
+}
+$('#lightbox').onclick = (e) => { if (e.target.id !== 'lb-video') closeLightbox(); };
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 function setProg(sel, pct) {
   const el = $(sel);
   el.classList.toggle('show', pct != null);
@@ -1300,6 +1328,7 @@ function renderLibrary() {
       ? `<img src="${a.url}" loading="lazy" alt="">`
       : `<video src="${a.url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`)
       + `<div class="li-meta"><p>${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}</p><div class="li-actions"></div></div>`;
+    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
     const actions = el.querySelector('.li-actions');
     const btn = (label, cls, fn) => {
       const b = document.createElement('button');
@@ -2229,7 +2258,7 @@ function renderStoryboard() {
     card.style.flexDirection = 'column';
     card.style.alignItems = 'stretch';
     card.innerHTML = `
-      ${asset ? `<img src="${asset.url}" style="width:100%;border-radius:8px;background:#000" alt="">` : ''}
+      ${asset ? `<img src="${asset.url}" style="width:100%;border-radius:8px;background:#000;cursor:zoom-in" alt="">` : ''}
       <p style="font-size:11px;color:var(--tm);white-space:pre-line">Scene ${i + 1} · ${escapeHtml(sc.lines.slice(0, 90))}${sc.lines.length > 90 ? '…' : ''}</p>
       <textarea class="sb-prompt" style="min-height:52px;padding:8px 10px;font-size:12px">${escapeHtml(sc.prompt)}</textarea>
       <div style="display:flex;gap:8px">
@@ -2237,6 +2266,8 @@ function renderStoryboard() {
         ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
       </div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
+    const sbImg = card.querySelector('img');
+    if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, 'image');
     card.querySelector('.sb-prompt').oninput = (e) => { sc.prompt = e.target.value; persistDraft(); };
     card.querySelector('.sb-gen').onclick = () => generateStoryboardScene(sc, card);
     const addBtn = card.querySelector('.sb-add');

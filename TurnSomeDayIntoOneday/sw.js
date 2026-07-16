@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v1';
+const CACHE_NAME = 'tsid-shell-v2';
 const SHELL_FILES = [
   '/',
   '/index.html',
@@ -24,10 +24,15 @@ self.addEventListener('activate', (event) => {
 
 // Never cache API calls - auth, chat, and state must always hit the network so the app's
 // own online/offline handling (e.g. Nova's local fallback) stays in control of that behavior.
+//
+// Pages (HTML) are network-first so app updates show up on the very next load;
+// the cached copy is only a fallback for offline. Static assets stay
+// cache-first for speed.
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
 
+  const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)
@@ -36,7 +41,7 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => cached);
-      return cached || network;
+      return isPage ? network : (cached || network);
     })
   );
 });

@@ -1283,7 +1283,7 @@ $('#upd-check').onclick = async () => {
   } catch (e) { $('#upd-status').textContent = e.message; }
 };
 $('#upd-go').onclick = async () => {
-  if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Don\\'t update while a render is running.')) return;
+  if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Do not update while a render is running.')) return;
   const btn = $('#upd-go');
   btn.disabled = true;
   $('#upd-status').textContent = 'Downloading the new version… this can take a minute or two. Keep this page open.';

@@ -1149,8 +1149,12 @@ function renderSceneCharSelect() {
 }
 function updateScenesUsage() {
   if (!st.cfg) return;
+  const p = st.cfg.pricing;
+  const priceLine = p
+    ? ` — scene image ≈ $${p.imageRate.toFixed(2)}, video/5s: ${Object.values(p.tiers).map((t) => `${t.label} ~$${(t.rate * 5).toFixed(2)}`).join(' · ')} (as of ${p.asOf})`
+    : '';
   $('#scenes-usage').textContent =
-    `Today: ${st.cfg.imagesUsed}/${st.cfg.imageLimit} AI images · ${st.cfg.videosUsed}/${st.cfg.videoLimit} AI videos`;
+    `Today: ${st.cfg.imagesUsed}/${st.cfg.imageLimit} AI images · ${st.cfg.videosUsed}/${st.cfg.videoLimit} AI videos${priceLine}`;
 }
 $('#scene-gen').onclick = async () => {
   if (st.busyScene) return;
@@ -1322,17 +1326,35 @@ function renderLibrary() {
       catch (e) { setErr('#scenes-err', e.message); }
     });
     if (st.animTarget === a.id) {
+      const pricing = st.cfg?.pricing;
+      const tierKeys = pricing ? Object.keys(pricing.tiers) : ['standard'];
+      let curTier = localStorage.getItem('tsid-tier') || 'standard';
+      if (!tierKeys.includes(curTier)) curTier = 'standard';
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
-      panel.innerHTML = `<input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind">
-        <div style="display:flex;gap:6px">
-          <button class="btn2" style="flex:1" data-sec="5">5s clip</button>
-          <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip</button>
-        </div>
-        <div class="progress-line" id="anim-prog"><div></div></div>`;
-      panel.querySelectorAll('button[data-sec]').forEach((b) => {
-        b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel);
-      });
+      const priceFor = (sec) => {
+        const r = pricing?.tiers[curTier]?.rate;
+        return r ? ` · ~$${(r * sec).toFixed(2)}` : '';
+      };
+      const renderPanel = () => {
+        panel.innerHTML = `
+          ${pricing ? `<div class="chips anim-tiers">${tierKeys.map((k) =>
+            `<button class="chip${k === curTier ? ' on' : ''}" data-tier="${k}">${pricing.tiers[k].label} · $${pricing.tiers[k].rate.toFixed(3)}/s</button>`).join('')}</div>
+          <span class="usage">${escapeHtml(pricing.tiers[curTier].desc)} · prices as of ${escapeHtml(pricing.asOf)} — verify on fal.ai/pricing</span>` : ''}
+          <input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind">
+          <div style="display:flex;gap:6px">
+            <button class="btn2" style="flex:1" data-sec="5">5s clip${priceFor(5)}</button>
+            <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip${priceFor(10)}</button>
+          </div>
+          <div class="progress-line" id="anim-prog"><div></div></div>`;
+        panel.querySelectorAll('.anim-tiers .chip').forEach((c) => {
+          c.onclick = () => { curTier = c.dataset.tier; localStorage.setItem('tsid-tier', curTier); renderPanel(); };
+        });
+        panel.querySelectorAll('button[data-sec]').forEach((b) => {
+          b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel, curTier);
+        });
+      };
+      renderPanel();
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.singTarget === a.id) {
@@ -1383,7 +1405,7 @@ function renderLibrary() {
   }
 }
 
-async function animateAsset(assetId, motion, seconds, panel) {
+async function animateAsset(assetId, motion, seconds, panel, tier) {
   setErr('#scenes-err', null);
   panel.querySelectorAll('button').forEach((b) => (b.disabled = true));
   const prog = panel.querySelector('.progress-line');
@@ -1391,7 +1413,7 @@ async function animateAsset(assetId, motion, seconds, panel) {
   try {
     const { job } = await jfetch('/api/studio/animate', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ assetId, prompt: motion, duration: seconds }),
+      body: JSON.stringify({ assetId, prompt: motion, duration: seconds, tier: tier || 'standard' }),
     });
     await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
     st.animTarget = null;

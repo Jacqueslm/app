@@ -253,6 +253,17 @@ async function refreshFalJob(job) {
 const router = express.Router();
 router.use(requireAuth);
 
+// When the recovery app goes public, Studio must stay yours alone - it spends
+// your fal balance and renders on your CPU. Set STUDIO_OWNER_EMAIL in .env and
+// every Studio endpoint locks to that account; unset = open to any local user.
+const STUDIO_OWNER_EMAIL = (process.env.STUDIO_OWNER_EMAIL || '').trim().toLowerCase();
+router.use((req, res, next) => {
+  if (!STUDIO_OWNER_EMAIL) return next();
+  const user = db.getUserById(req.userId);
+  if (user && user.email === STUDIO_OWNER_EMAIL) return next();
+  res.status(403).json({ error: 'Studio is private on this server.' });
+});
+
 router.get('/config', (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });

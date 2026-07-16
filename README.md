@@ -74,3 +74,4 @@ Open `http://localhost:4300` in a browser and sign up.
     - *Storage & Backup* (studio tools): disk usage with the biggest files first and one-tap delete, plus a full-library backup ZIP (every media file + a manifest of characters/projects) — your media lives only on this machine, so keep a copy somewhere safe.
     - `npm install` fetches an ffmpeg binary automatically (`ffmpeg-static`); if that download is blocked, install ffmpeg yourself (`brew`/`apt`/`winget install ffmpeg`) or set `FFMPEG_PATH`.
   - Generated media is stored in `server/media/` and tied to your signed-in account.
+  - **Going public?** Before opening signups to strangers, add `STUDIO_OWNER_EMAIL=<your account email>` to `server/.env`. Studio then locks to your account only — public users get the recovery app but can never touch your fal key, uploads, renders, or library. (Also review Stripe keys and consider rotating your fal key.)

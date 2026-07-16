@@ -1259,6 +1259,91 @@ router.post('/campaign', async (req, res) => {
   }
 });
 
+/* ---------------- one-click app update ---------------- */
+// The app updates itself from GitHub: download the branch ZIP, overlay the new
+// code onto the install folder, refresh dependencies. Your data survives by
+// construction - .env, data.sqlite and media/ are gitignored so they are never
+// inside the ZIP being copied over.
+const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers + TurnSomeDayIntoOneday
+const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
+const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
+const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
+  || `https://codeload.github.com/${UPDATE_REPO}/zip/refs/heads/${UPDATE_BRANCH}`;
+const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
+// The running launcher scripts are skipped during the overlay copy: overwriting
+// a batch file mid-run corrupts its execution on Windows.
+const UPDATE_SKIP = new Set(['Start My App.bat', 'Start My App.command', 'start-app.sh', '.git']);
+
+function runCmd(cmd, args, opts) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(cmd, args, { ...opts, shell: process.platform === 'win32' });
+    let err = '';
+    proc.stderr?.on('data', (c) => { err = (err + c.toString()).slice(-800); });
+    proc.on('error', reject);
+    proc.on('close', (code) => (code === 0 ? resolve() : reject(new Error(err || `${cmd} exited ${code}`))));
+  });
+}
+
+async function fetchLatestCommit() {
+  const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${encodeURIComponent(UPDATE_BRANCH)}`, {
+    headers: { 'User-Agent': 'tsid-studio-updater', Accept: 'application/vnd.github+json' },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'GitHub did not answer.');
+  return { sha: data.sha, date: data.commit?.committer?.date || null };
+}
+
+router.get('/update/check', async (req, res) => {
+  let current = null;
+  try { current = JSON.parse(fs.readFileSync(UPDATE_STATE_FILE, 'utf8')); } catch (_) {}
+  try {
+    const latest = await fetchLatestCommit();
+    res.json({ latest, current, upToDate: Boolean(current && current.sha === latest.sha) });
+  } catch (err) {
+    res.status(502).json({ error: `Could not check GitHub: ${err.message}`, current });
+  }
+});
+
+router.post('/update', async (req, res) => {
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
+  try {
+    // 1. download the latest code
+    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: { 'User-Agent': 'tsid-studio-updater' } });
+    if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
+    const zipPath = path.join(tmp, 'update.zip');
+    fs.writeFileSync(zipPath, Buffer.from(await zipRes.arrayBuffer()));
+
+    // 2. extract (tar reads zips on Windows 10+/mac; unzip covers most Linux)
+    try { await runCmd('tar', ['-xf', zipPath, '-C', tmp]); }
+    catch (_) { await runCmd('unzip', ['-q', zipPath, '-d', tmp]); }
+    const rootName = fs.readdirSync(tmp).find((n) => n !== 'update.zip' && fs.statSync(path.join(tmp, n)).isDirectory());
+    if (!rootName) throw new Error('The downloaded ZIP looked empty.');
+    const src = path.join(tmp, rootName);
+
+    // 3. overlay the new code onto the install (data files aren't in the ZIP)
+    for (const entry of fs.readdirSync(src)) {
+      if (UPDATE_SKIP.has(entry)) continue;
+      fs.cpSync(path.join(src, entry), path.join(APP_ROOT, entry), { recursive: true, force: true });
+    }
+
+    // 4. refresh dependencies (fast no-op when nothing changed)
+    await runCmd(process.platform === 'win32' ? 'npm.cmd' : 'npm',
+      ['install', '--no-audit', '--no-fund'], { cwd: __dirname });
+
+    // 5. remember what we're on now
+    let state = { sha: 'unknown', date: new Date().toISOString() };
+    try { state = await fetchLatestCommit(); } catch (_) {}
+    fs.writeFileSync(UPDATE_STATE_FILE, JSON.stringify({ ...state, updatedAt: new Date().toISOString() }));
+
+    res.json({ ok: true, message: 'Update installed! Close the black window, then double-click Start My App again.' });
+  } catch (err) {
+    res.status(500).json({ error: `Update failed: ${err.message}. Your app is untouched - you can also update by re-downloading the ZIP.` });
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
 /* ---------------- job polling ---------------- */
 router.get('/jobs/:id', async (req, res) => {
   const job = jobs.get(req.params.id);

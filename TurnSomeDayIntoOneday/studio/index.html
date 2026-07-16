@@ -440,6 +440,11 @@ textarea::placeholder{color:var(--tm)}
         <button class="btn2 quiet" id="stor-refresh">Refresh</button>
         <button class="btn2" id="stor-backup">⬇ Download full backup (ZIP)</button>
       </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="upd-check">Check for updates</button>
+        <button class="btn2" id="upd-go">⬆ Update my app</button>
+      </div>
+      <p class="usage" id="upd-status"></p>
       <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
       <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
     </div>
@@ -1268,6 +1273,29 @@ async function loadStorage() {
 }
 $('#stor-refresh').onclick = loadStorage;
 $('#stor-backup').onclick = () => { location.href = '/api/studio/backup'; };
+
+$('#upd-check').onclick = async () => {
+  $('#upd-status').textContent = 'Checking GitHub…';
+  try {
+    const d = await jfetch('/api/studio/update/check');
+    if (d.upToDate) $('#upd-status').textContent = "✅ You're on the latest version.";
+    else $('#upd-status').textContent = `⬆ Update available (latest change: ${d.latest.date ? new Date(d.latest.date).toLocaleString() : 'unknown'}). Press "Update my app".`;
+  } catch (e) { $('#upd-status').textContent = e.message; }
+};
+$('#upd-go').onclick = async () => {
+  if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Don\\'t update while a render is running.')) return;
+  const btn = $('#upd-go');
+  btn.disabled = true;
+  $('#upd-status').textContent = 'Downloading the new version… this can take a minute or two. Keep this page open.';
+  try {
+    const d = await jfetch('/api/studio/update', { method: 'POST' });
+    $('#upd-status').textContent = `✅ ${d.message}`;
+  } catch (e) {
+    $('#upd-status').textContent = `❌ ${e.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+};
 
 /* ---------------- dance transfer ---------------- */
 $('#dn-upload').onclick = () => pickFile('video/*', async (file) => {

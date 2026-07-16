@@ -65,6 +65,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 5. Clips land on your timeline → add your song → **Render full video**
 
 **Extras, any time:**
+- **Two characters in one scene** — in AI Scenes, a second dropdown appears once you have two characters: pick "+ (name)" and describe them together ("Nova and Ray back to back under a streetlight"). Both need reference photos.
 - **Sing** button on any image/video = lip-sync to a part of your song
 - **Dance Transfer** (AI Scenes tab) = film yourself dancing, your character copies it
 - **Motion** button = free camera movement on any still (zoom, pan, drift, shake)

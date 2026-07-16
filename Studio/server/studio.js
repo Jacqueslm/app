@@ -479,7 +479,7 @@ router.post('/scene', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { prompt, characterId, imageSize, count } = req.body || {};
+  const { prompt, characterId, characterIds, imageSize, count } = req.body || {};
   if (typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required.' });
   }
@@ -498,32 +498,55 @@ router.post('/scene', async (req, res) => {
   const input = { prompt: cleanPrompt, image_size: imageSize || 'landscape_16_9' };
   let character = null;
 
-  if (characterId) {
-    character = db.getCharacter(req.userId, Number(characterId));
-    if (!character) return res.status(404).json({ error: 'Character not found.' });
-    if (character.lora_url) {
-      // Strongest consistency: the trained LoRA is baked into generation.
-      model = MODEL_LORA_IMAGE;
-      input.loras = [{ path: character.lora_url, scale: 1 }];
-      if (character.trigger_word && !cleanPrompt.includes(character.trigger_word)) {
-        input.prompt = `${character.trigger_word}, ${cleanPrompt}`;
-      }
-    } else {
-      const refs = db.getAssets(req.userId, 'image').filter((a) => a.character_id === character.id);
-      if (!refs.length) {
-        return res.status(400).json({ error: `Upload at least one reference photo for ${character.name} first (Characters tab), or paste a LoRA URL.` });
-      }
-      model = MODEL_CHARACTER_IMAGE;
-      // The model only reproduces a face it can study — spell the identity
-      // instruction out and hand it several angles, not just the first photo.
-      input.prompt = 'The person in the reference photo(s) is the main character. '
-        + 'Keep their face, hairstyle, skin tone and build EXACTLY as shown — same person, instantly recognizable. '
-        + `Now show them in this scene: ${cleanPrompt}`;
-      const uris = (await Promise.all(refs.slice(0, 4).map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
-      if (!uris.length) return res.status(500).json({ error: 'Could not read the reference photos — try re-uploading them.' });
-      if (/kontext/.test(model)) input.image_url = uris[0]; // legacy override: single-image editor
-      else input.image_urls = uris;
+  // One character, or two sharing the scene. Ids arrive as characterIds
+  // (new client) or characterId (storyboard + older clients).
+  const requestedIds = [...new Set(
+    (Array.isArray(characterIds) ? characterIds : [characterId]).filter(Boolean).map(Number)
+  )].slice(0, 2);
+  const cast = [];
+  for (const id of requestedIds) {
+    const c = db.getCharacter(req.userId, id);
+    if (!c) return res.status(404).json({ error: 'Character not found.' });
+    cast.push(c);
+  }
+  character = cast[0] || null;
+
+  if (cast.length === 1 && cast[0].lora_url) {
+    // Strongest consistency: the trained LoRA is baked into generation.
+    model = MODEL_LORA_IMAGE;
+    input.loras = [{ path: character.lora_url, scale: 1 }];
+    if (character.trigger_word && !cleanPrompt.includes(character.trigger_word)) {
+      input.prompt = `${character.trigger_word}, ${cleanPrompt}`;
     }
+  } else if (cast.length) {
+    // Photo-reference path (solo or duo). A duo always works from photos: two
+    // identity LoRAs in one generation bleed into each other.
+    model = MODEL_CHARACTER_IMAGE;
+    const perChar = cast.length > 1 ? 3 : 4;
+    const allUris = [];
+    const whose = []; // which reference photos belong to which character
+    for (const c of cast) {
+      const refs = db.getAssets(req.userId, 'image').filter((a) => a.character_id === c.id).slice(0, perChar);
+      if (!refs.length) {
+        return res.status(400).json({ error: `Upload at least one reference photo for ${c.name} first (Characters tab)${cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL'}.` });
+      }
+      const uris = (await Promise.all(refs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
+      if (!uris.length) return res.status(500).json({ error: `Could not read ${c.name}'s reference photos — try re-uploading them.` });
+      const from = allUris.length + 1, to = allUris.length + uris.length;
+      whose.push(`${from === to ? `Reference photo ${from}` : `Reference photos ${from}-${to}`} show${from === to ? 's' : ''} ${c.name}.`);
+      allUris.push(...uris);
+    }
+    // The model only reproduces a face it can study — spell the identity
+    // instruction out and hand it several angles, not just the first photo.
+    input.prompt = cast.length === 1
+      ? ('The person in the reference photo(s) is the main character. '
+        + 'Keep their face, hairstyle, skin tone and build EXACTLY as shown — same person, instantly recognizable. '
+        + `Now show them in this scene: ${cleanPrompt}`)
+      : (whose.join(' ')
+        + ' These are two different people appearing together. Keep each person\'s face, hairstyle, skin tone and build EXACTLY as in their own photos — both instantly recognizable. Never blend, swap or average their faces. '
+        + `Now show ${cast[0].name} and ${cast[1].name} together in this scene: ${cleanPrompt}`);
+    if (/kontext/.test(model)) input.image_url = allUris[0]; // legacy override: single-image editor
+    else input.image_urls = allUris;
   }
 
   try {
@@ -537,7 +560,7 @@ router.post('/scene', async (req, res) => {
           expect: 'image',
           label: cleanPrompt.slice(0, 80) + (howMany > 1 ? ` (${i + 1}/${howMany})` : ''),
           characterId: character ? character.id : null,
-          meta: { source: 'fal', model, prompt: cleanPrompt },
+          meta: { source: 'fal', model, prompt: cleanPrompt, ...(cast.length > 1 ? { castIds: cast.map((c) => c.id) } : {}) },
         },
       }));
     }

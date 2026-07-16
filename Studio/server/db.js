@@ -53,6 +53,28 @@ db.exec(`
     created_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_studio_assets_user ON studio_assets(user_id, kind);
+  CREATE TABLE IF NOT EXISTS studio_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    character_id INTEGER REFERENCES studio_characters(id),
+    prompt TEXT NOT NULL,
+    image_size TEXT NOT NULL,
+    label TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    fal_job_id TEXT,
+    asset_id INTEGER,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_studio_queue_user_status ON studio_queue(user_id, status, id);
+  CREATE TABLE IF NOT EXISTS error_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scope TEXT NOT NULL,
+    message TEXT NOT NULL,
+    detail TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -194,6 +216,75 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+/* ---------------- overnight batch queue ---------------- */
+// A persisted queue so a whole storyboard can be submitted once and keep
+// generating on the server even if the browser tab closes - the worker in
+// studio.js drives these rows forward independent of any HTTP request.
+function enqueueScenes(userId, items) {
+  const now = new Date().toISOString();
+  const stmt = db.prepare(
+    `INSERT INTO studio_queue (user_id, character_id, prompt, image_size, label, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
+  );
+  return items.map((it) => Number(stmt.run(userId, it.characterId || null, it.prompt, it.imageSize, it.label || null, now, now).lastInsertRowid));
+}
+
+function getQueue(userId) {
+  return db.prepare('SELECT * FROM studio_queue WHERE user_id = ? ORDER BY id ASC').all(userId);
+}
+
+function getQueueItem(id) {
+  return db.prepare('SELECT * FROM studio_queue WHERE id = ?').get(id);
+}
+
+// One in-flight item per user at a time (keeps behavior identical to the
+// interactive /scene endpoint, which also submits one fal job at a time).
+function getRunningQueueItem(userId) {
+  return db.prepare("SELECT * FROM studio_queue WHERE user_id = ? AND status = 'running' LIMIT 1").get(userId);
+}
+
+function getNextPendingQueueItem(userId) {
+  return db.prepare("SELECT * FROM studio_queue WHERE user_id = ? AND status = 'pending' ORDER BY id ASC LIMIT 1").get(userId);
+}
+
+function getUsersWithPendingQueue() {
+  return db.prepare("SELECT DISTINCT user_id FROM studio_queue WHERE status IN ('pending','running')").all().map((r) => r.user_id);
+}
+
+function updateQueueItem(id, fields) {
+  const sets = [];
+  const vals = [];
+  for (const [k, v] of Object.entries(fields)) {
+    const col = { status: 'status', falJobId: 'fal_job_id', assetId: 'asset_id', error: 'error' }[k];
+    if (!col) continue;
+    sets.push(`${col} = ?`);
+    vals.push(v);
+  }
+  sets.push('updated_at = ?');
+  vals.push(new Date().toISOString(), id);
+  db.prepare(`UPDATE studio_queue SET ${sets.join(', ')} WHERE id = ?`).run(...vals);
+}
+
+function deleteQueueItem(userId, id) {
+  db.prepare("DELETE FROM studio_queue WHERE user_id = ? AND id = ? AND status = 'pending'").run(userId, id);
+}
+
+function clearFinishedQueue(userId) {
+  db.prepare("DELETE FROM studio_queue WHERE user_id = ? AND status IN ('done','error')").run(userId);
+}
+
+/* ---------------- error log (for in-app diagnostics) ---------------- */
+function logError(scope, message, detail) {
+  db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
+    .run(scope, String(message).slice(0, 500), detail ? String(detail).slice(0, 2000) : null, new Date().toISOString());
+  // Keep the table small - this is a rolling diagnostics view, not an audit log.
+  db.prepare('DELETE FROM error_log WHERE id NOT IN (SELECT id FROM error_log ORDER BY id DESC LIMIT 200)').run();
+}
+
+function getRecentErrors(limit) {
+  return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
+}
+
 function updatePassword(userId, passwordHash) {
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
 }
@@ -258,4 +349,15 @@ module.exports = {
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,
+  enqueueScenes,
+  getQueue,
+  getQueueItem,
+  getRunningQueueItem,
+  getNextPendingQueueItem,
+  getUsersWithPendingQueue,
+  updateQueueItem,
+  deleteQueueItem,
+  clearFinishedQueue,
+  logError,
+  getRecentErrors,
 };

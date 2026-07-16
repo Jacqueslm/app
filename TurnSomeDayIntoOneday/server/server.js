@@ -144,6 +144,10 @@ app.put('/api/state', requireAuth, (req, res) => {
 
 app.use('/api/update', requireAuth, update.router);
 
+app.get('/api/diagnostics', requireAuth, (req, res) => {
+  res.json({ errors: db.getRecentErrors(50) });
+});
+
 app.get('/api/account/export', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
@@ -258,6 +262,22 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: 'Failed to reach Anthropic API.' });
   }
+});
+
+// Anything that reaches here escaped every route's own try/catch - log it so
+// it shows up in Profile diagnostics instead of vanishing silently.
+app.use((err, req, res, next) => {
+  try { db.logError('http', err.message, err.stack); } catch (_) {}
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Something went wrong on the server.' });
+});
+process.on('uncaughtException', (err) => {
+  try { db.logError('uncaughtException', err.message, err.stack); } catch (_) {}
+  console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (err) => {
+  try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
+  console.error('Unhandled rejection:', err);
 });
 
 app.listen(PORT, () => {

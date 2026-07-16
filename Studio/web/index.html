@@ -1395,6 +1395,7 @@ $('#upd-check').onclick = async () => {
   try {
     const d = await jfetch('/api/studio/update/check');
     if (d.upToDate) $('#upd-status').textContent = "✅ You're on the latest version.";
+    else if (!d.current) $('#upd-status').textContent = 'This install hasn\'t recorded a version yet — press "Update my app" once and it syncs to the latest.';
     else $('#upd-status').textContent = `⬆ Update available (latest change: ${d.latest.date ? new Date(d.latest.date).toLocaleString() : 'unknown'}). Press "Update my app".`;
   } catch (e) { $('#upd-status').textContent = e.message; }
 };

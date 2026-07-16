@@ -98,7 +98,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   const normalizedEmail = (email || '').trim().toLowerCase();
   const user = db.getUserByEmail(normalizedEmail);
   if (!user || !verifyPassword(password || '', user.password_hash)) {
-    return res.status(401).json({ error: 'Incorrect email or password.' });
+    return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
   setSessionCookie(res, user.id);
   res.json({ email: user.email });

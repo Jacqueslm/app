@@ -187,6 +187,7 @@ textarea::placeholder{color:var(--tm)}
     <div class="card" id="scenes-form" style="display:none">
       <h3>Generate a scene</h3>
       <select class="input" id="scene-char"><option value="">No character (plain scene)</option></select>
+      <select class="input" id="scene-char2" style="display:none"><option value="">No second character (solo scene)</option></select>
       <textarea id="scene-prompt" placeholder="e.g. medium shot, gritty industrial warehouse, cyberpunk style, character turning around" style="min-height:64px"></textarea>
       <div class="chips" id="scene-sizes"></div>
       <div class="chips" id="scene-counts"></div>
@@ -1222,10 +1223,15 @@ function renderSceneChips() {
 function renderSceneCharSelect() {
   const opts = '<option value="">No character (plain scene)</option>' +
     st.characters.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}${c.loraUrl ? ' (LoRA)' : ''}</option>`).join('');
-  const sceneCur = $('#scene-char').value, sbCur = $('#sb-char')?.value;
+  const sceneCur = $('#scene-char').value, scene2Cur = $('#scene-char2').value, sbCur = $('#sb-char')?.value;
   $('#scene-char').innerHTML = opts;
+  $('#scene-char2').innerHTML = '<option value="">No second character (solo scene)</option>' +
+    st.characters.map((c) => `<option value="${c.id}">+ ${escapeHtml(c.name)} (two-person scene)</option>`).join('');
+  // A duo only makes sense once there are two characters to pick from.
+  $('#scene-char2').style.display = st.characters.length >= 2 ? '' : 'none';
   if ($('#sb-char')) $('#sb-char').innerHTML = opts;
   if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
+  if ([...$('#scene-char2').options].some((o) => o.value === scene2Cur)) $('#scene-char2').value = scene2Cur;
   if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
 }
 function updateScenesUsage() {
@@ -1249,7 +1255,11 @@ $('#scene-gen').onclick = async () => {
   try {
     const resp = await jfetch('/api/studio/scene', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, characterId: $('#scene-char').value || null, imageSize: st.sceneSize, count: st.sceneCount }),
+      body: JSON.stringify({
+        prompt,
+        characterIds: [$('#scene-char').value, $('#scene-char2').value].filter(Boolean),
+        imageSize: st.sceneSize, count: st.sceneCount,
+      }),
     });
     const jobs = resp.jobs || [resp.job];
     // Poll every take in parallel; the bar shows combined progress and the

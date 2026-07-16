@@ -347,6 +347,7 @@ body{display:flex;justify-content:center}
   <div class="ob-label" style="text-align:left" id="gate-pass-label">Password</div>
   <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
+  <p class="small-text" id="gate-legal-consent" style="display:none;color:#8892c0;font-size:11px;text-align:left;margin-bottom:10px">By creating an account you agree to the <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('terms')">Terms of Service</span> and <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('privacy')">Privacy Policy</span>.</p>
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
 </div>
 
@@ -448,6 +449,96 @@ body{display:flex;justify-content:center}
     <button class="pin-key" id="pin-cancel-btn" onclick="cancelPinFlow()" style="visibility:hidden">Cancel</button>
     <button class="pin-key" onclick="pinPress('0')">0</button>
     <button class="pin-key" onclick="pinBackspace()"><i class="ti ti-backspace"></i></button>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY / TERMS OF SERVICE (top-level: reachable from the auth
+     gate, before #main-app exists, as well as from Profile) -->
+<div id="legal-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:1000;overflow-y:auto;padding:24px 20px 40px;color:var(--tp)">
+  <div style="max-width:440px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="nova-modes" style="margin:0">
+        <button class="nova-mode" id="legal-tab-privacy" onclick="setLegalTab('privacy')">Privacy Policy</button>
+        <button class="nova-mode" id="legal-tab-terms" onclick="setLegalTab('terms')">Terms of Service</button>
+      </div>
+      <button class="sos-close" style="width:auto;padding:8px 14px;margin:0" onclick="closeLegalOverlay()">Close</button>
+    </div>
+    <div style="background:var(--warn);color:var(--warn-t);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;margin-bottom:18px">
+      <b>Template, not legal advice.</b> This was drafted to plainly describe how this app actually works. Before opening signups to the public, have an attorney review both documents for your situation and jurisdiction — this is a starting point, not a substitute for real legal review.
+    </div>
+
+    <div id="legal-privacy" style="font-size:13px;line-height:1.75;color:var(--ts)">
+      <h1 style="font-size:18px;color:var(--tp);margin-bottom:4px">Privacy Policy</h1>
+      <p style="font-size:11.5px;color:var(--tm);margin-bottom:16px">Last updated: <span class="legal-date"></span></p>
+
+      <p style="margin-bottom:12px">Turn Someday Into Day One ("the app") is a recovery companion. This page explains, in plain language, what information the app collects, where it lives, and who else ever sees it.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">What we collect</h3>
+      <p style="margin-bottom:8px">When you create an account: your email address, a phone number if you choose to add one, and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
+      <p style="margin-bottom:8px">As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Nova (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Nova respond with real context.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Where it lives</h3>
+      <p style="margin-bottom:8px">This app is self-hosted: your data is stored in a local database on the server you (or whoever runs this instance) is running — not in a shared cloud service we control. If you're using an instance someone else operates, they are the ones storing your data, on their own server.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Who else sees it</h3>
+      <p style="margin-bottom:8px">Two outside services are used, and only for the specific job each does:</p>
+      <p style="margin-bottom:8px">• <b>Anthropic</b> processes the messages you send to Nova, in order to generate Nova's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Nova is only available when the app operator has configured this connection.</p>
+      <p style="margin-bottom:8px">• <b>Stripe</b> processes payment if you subscribe to a paid plan. Your card details go directly to Stripe — this app never sees or stores your full card number.</p>
+      <p style="margin-bottom:8px">Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Nova yourself.</p>
+      <p style="margin-bottom:8px">We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Your controls</h3>
+      <p style="margin-bottom:8px">From Profile, at any time: <b>Export my data</b> downloads everything as a file. <b>Delete my account</b> or <b>Erase everything &amp; start over</b> permanently removes your account and all associated data from the server — this cannot be undone once confirmed.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Not a substitute for professional care</h3>
+      <p style="margin-bottom:8px">Nova is a supportive tool, not a licensed therapist, doctor, or crisis service. In an emergency, or if you're in crisis, contact the <b>988 Suicide &amp; Crisis Lifeline</b> (call or text 988) or your local emergency number — not this app.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Who this app is for</h3>
+      <p style="margin-bottom:8px">This app discusses addiction, recovery, and related sensitive topics and is intended for adults. It is not directed at children under 18.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Changes</h3>
+      <p style="margin-bottom:8px">If this policy changes in a way that matters, we'll update the date above. Continuing to use the app after a change means you've seen and accepted the update.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Questions</h3>
+      <p style="margin-bottom:8px">Contact: <span style="color:var(--accent)">[add your contact email here]</span></p>
+    </div>
+
+    <div id="legal-terms" style="display:none;font-size:13px;line-height:1.75;color:var(--ts)">
+      <h1 style="font-size:18px;color:var(--tp);margin-bottom:4px">Terms of Service</h1>
+      <p style="font-size:11.5px;color:var(--tm);margin-bottom:16px">Last updated: <span class="legal-date"></span></p>
+
+      <p style="margin-bottom:12px">By creating an account and using Turn Someday Into Day One, you agree to the terms below.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">What this app is</h3>
+      <p style="margin-bottom:8px">A recovery companion offering daily lessons, journaling, streak tracking, an AI chat companion (Nova), and related tools. Free features remain free; some features require a paid Pro subscription.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Not medical or professional advice</h3>
+      <p style="margin-bottom:8px">Nothing in this app — including anything Nova says — is medical, psychiatric, legal, or professional advice, and it does not create a therapist-patient or doctor-patient relationship. It is a self-help and support tool. If you are in crisis or danger, contact the 988 Suicide &amp; Crisis Lifeline or emergency services immediately, not this app.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Your account</h3>
+      <p style="margin-bottom:8px">You're responsible for keeping your password or PIN confidential and for anything that happens under your account. You must be at least 18 years old to use this app.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Subscriptions &amp; billing</h3>
+      <p style="margin-bottom:8px">Paid plans are billed through Stripe on a recurring basis until cancelled. You can manage or cancel your subscription from Profile. Refunds, if any, are handled case by case.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Acceptable use</h3>
+      <p style="margin-bottom:8px">Don't use this app to harm others, attempt to break or abuse the service, or use Nova's responses as a substitute for emergency care.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Your content</h3>
+      <p style="margin-bottom:8px">Your journal entries, messages, and other content you create belong to you. We don't claim ownership of it, and (per the Privacy Policy) don't sell it or use it to train anything beyond what's needed to run the app itself.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">No guarantees</h3>
+      <p style="margin-bottom:8px">This app is provided "as is." Recovery outcomes are personal and cannot be guaranteed by any app. We aren't liable for decisions made based on the app's content, including Nova's responses.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Ending your account</h3>
+      <p style="margin-bottom:8px">You may delete your account at any time from Profile. We may suspend or terminate accounts that violate these terms.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Changes</h3>
+      <p style="margin-bottom:8px">These terms may be updated; the date above reflects the latest revision. Continued use after a change means you accept the update.</p>
+
+      <h3 style="color:var(--tp);margin:16px 0 6px">Contact</h3>
+      <p style="margin-bottom:8px">Questions about these terms: <span style="color:var(--accent)">[add your contact email here]</span></p>
+    </div>
   </div>
 </div>
 
@@ -1401,6 +1492,16 @@ body{display:flex;justify-content:center}
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
+      <div class="setting-row" onclick="openLegalOverlay('privacy')">
+        <i class="ti ti-shield"></i>
+        <div class="setting-row-txt"><p>Privacy Policy</p><span>What's collected and how it's used</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openLegalOverlay('terms')">
+        <i class="ti ti-file-text"></i>
+        <div class="setting-row-txt"><p>Terms of Service</p><span>The agreement for using this app</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" style="cursor:default">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Turn Someday Into Day One</p><span>Version <span id="app-version-txt"></span></span></div>
@@ -2324,6 +2425,25 @@ function openDay30Overlay(){
 function closeDay30Overlay(){
   document.getElementById('day30-overlay').style.display='none';
   renderTodayLesson();
+}
+
+function openLegalOverlay(which){
+  document.querySelectorAll('.legal-date').forEach(el=>{
+    el.textContent=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  });
+  setLegalTab(which||'privacy');
+  document.getElementById('legal-overlay').style.display='block';
+  document.getElementById('legal-overlay').scrollTop=0;
+}
+function closeLegalOverlay(){
+  document.getElementById('legal-overlay').style.display='none';
+}
+function setLegalTab(which){
+  document.getElementById('legal-tab-privacy').classList.toggle('active',which==='privacy');
+  document.getElementById('legal-tab-terms').classList.toggle('active',which==='terms');
+  document.getElementById('legal-privacy').style.display=which==='privacy'?'block':'none';
+  document.getElementById('legal-terms').style.display=which==='terms'?'block':'none';
+  document.getElementById('legal-overlay').scrollTop=0;
 }
 
 // ─── CUSTOM LESSON PACKS (Pro) ─────────────────────────────────────────────────
@@ -6555,6 +6675,7 @@ function setGateMode(mode){
   document.getElementById('gate-tab-signup').classList.toggle('active',mode==='signup');
   document.getElementById('gate-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
   document.getElementById('gate-signup-extras').style.display=mode==='signup'?'block':'none';
+  document.getElementById('gate-legal-consent').style.display=mode==='signup'?'block':'none';
   if(mode==='login'){
     // Logging in accepts whichever credential the account was created with.
     document.getElementById('gate-pass-label').textContent='Password or PIN';

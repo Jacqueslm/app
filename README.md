@@ -59,6 +59,7 @@ Open `http://localhost:4300` in a browser and sign up.
 
 - Data is stored locally in `server/data.sqlite` (SQLite).
 - Signup accepts a password (8+ characters) **or a 4–6 digit PIN**, plus an optional phone number. Pro accounts get 50 Nova chats/day (free: 3).
+- A Privacy Policy and Terms of Service live in Profile → About (and are linked from signup). They're a plain-language template describing how the app actually works — **have an attorney review both before opening signups to the public**, and fill in the placeholder contact email in `index.html`.
 - Profile page extras: one-click **app updates** (`APP_UPDATE_REPO`/`APP_UPDATE_BRANCH`/`APP_UPDATE_TOKEN` env overrides; set `APP_OWNER_EMAIL` before going public so only you can trigger a server update), **Log out**, and **Erase everything & start over** (deletes the account and all data after password confirmation).
 - The free tier (Days 1–15, basic Nova, journal, streaks, SOS tools) works fully with no optional keys configured. Pro screens show an upgrade preview until Stripe is configured and a real subscription/purchase completes.
 - **Studio** is its own standalone app in `/Studio` (own server on port 4400, own accounts, own library — start it with `Start Studio`; paste a fal.ai key into its "Turn on AI" box for the AI features). Four tabs:

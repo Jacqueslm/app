@@ -211,6 +211,11 @@ body{display:flex;justify-content:center}
 .nova-modes{display:flex;gap:8px}
 .nova-mode{flex:1;border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:10px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:14px;color:#8892c0;font-family:var(--f)}
 .nova-mode.active{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
+/* The base .nova-mode styles assume the dark-navy gate; the legal overlay sits
+   on var(--s0), which is near-white in light mode - restyle them theme-aware
+   there (green-on-white was 1.37:1 contrast, effectively invisible). */
+#legal-overlay .nova-mode{background:var(--s1);border:1px solid var(--bdr2);color:var(--ts)}
+#legal-overlay .nova-mode.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
 .clog{display:flex;flex-direction:column;gap:6px}
 .ci{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:10px}
 .cdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
@@ -463,13 +468,9 @@ body{display:flex;justify-content:center}
       </div>
       <button class="sos-close" style="width:auto;padding:8px 14px;margin:0" onclick="closeLegalOverlay()">Close</button>
     </div>
-    <div style="background:var(--warn);color:var(--warn-t);border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;margin-bottom:18px">
-      <b>Template, not legal advice.</b> This was drafted to plainly describe how this app actually works. Before opening signups to the public, have an attorney review both documents for your situation and jurisdiction — this is a starting point, not a substitute for real legal review.
-    </div>
-
     <div id="legal-privacy" style="font-size:13px;line-height:1.75;color:var(--ts)">
       <h1 style="font-size:18px;color:var(--tp);margin-bottom:4px">Privacy Policy</h1>
-      <p style="font-size:11.5px;color:var(--tm);margin-bottom:16px">Last updated: <span class="legal-date"></span></p>
+      <p style="font-size:12px;color:var(--ts);margin-bottom:16px">Last updated: July 16, 2026</p>
 
       <p style="margin-bottom:12px">Turn Someday Into Day One ("the app") is a recovery companion. This page explains, in plain language, what information the app collects, where it lives, and who else ever sees it.</p>
 
@@ -505,7 +506,7 @@ body{display:flex;justify-content:center}
 
     <div id="legal-terms" style="display:none;font-size:13px;line-height:1.75;color:var(--ts)">
       <h1 style="font-size:18px;color:var(--tp);margin-bottom:4px">Terms of Service</h1>
-      <p style="font-size:11.5px;color:var(--tm);margin-bottom:16px">Last updated: <span class="legal-date"></span></p>
+      <p style="font-size:12px;color:var(--ts);margin-bottom:16px">Last updated: July 16, 2026</p>
 
       <p style="margin-bottom:12px">By creating an account and using Turn Someday Into Day One, you agree to the terms below.</p>
 
@@ -2428,9 +2429,6 @@ function closeDay30Overlay(){
 }
 
 function openLegalOverlay(which){
-  document.querySelectorAll('.legal-date').forEach(el=>{
-    el.textContent=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  });
   setLegalTab(which||'privacy');
   document.getElementById('legal-overlay').style.display='block';
   document.getElementById('legal-overlay').scrollTop=0;
@@ -6818,7 +6816,9 @@ async function checkForAppUpdates(){
     if(!res.ok){sub.textContent=data.error||'Could not check right now.';return;}
     sub.textContent=data.upToDate
       ?"You're on the latest version. ✓"
-      :`Update available (${(data.latest?.date||'').slice(0,10)}) — tap "Update the app" below.`;
+      :!data.current
+        ?'This install hasn\'t recorded a version yet — press "Update the app" once and it syncs to the latest.'
+        :`Update available (${(data.latest?.date||'').slice(0,10)}) — tap "Update the app" below.`;
   }catch(e){
     sub.textContent='Could not reach the server.';
   }

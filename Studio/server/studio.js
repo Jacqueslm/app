@@ -1309,8 +1309,17 @@ router.post('/campaign', async (req, res) => {
 const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers, Studio and TurnSomeDayIntoOneday
 const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
+// A private repo needs a token (GitHub → Settings → Developer settings →
+// fine-grained PAT with Contents: read on this repo). Public repos need none.
+const UPDATE_TOKEN = (process.env.APP_UPDATE_TOKEN || '').trim();
+const GH_HEADERS = {
+  'User-Agent': 'tsid-studio-updater',
+  ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
+};
+// The API zipball endpoint (unlike codeload) honors the Authorization header,
+// so the same URL serves both public and token-carrying private installs.
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
-  || `https://codeload.github.com/${UPDATE_REPO}/zip/refs/heads/${UPDATE_BRANCH}`;
+  || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${encodeURIComponent(UPDATE_BRANCH)}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // The running launcher scripts are skipped during the overlay copy: overwriting
 // a batch file mid-run corrupts its execution on Windows.
@@ -1321,7 +1330,10 @@ const UPDATE_SKIP = new Set([
 
 function runCmd(cmd, args, opts) {
   return new Promise((resolve, reject) => {
-    const proc = spawn(cmd, args, { ...opts, shell: process.platform === 'win32' });
+    // No shell: cmd.exe re-splits arguments on spaces, which breaks temp paths
+    // like C:\Users\First Last\AppData\... . Windows-only .cmd shims (npm) are
+    // wrapped in `cmd /c` by the caller instead.
+    const proc = spawn(cmd, args, opts);
     let err = '';
     proc.stderr?.on('data', (c) => { err = (err + c.toString()).slice(-800); });
     proc.on('error', reject);
@@ -1331,10 +1343,14 @@ function runCmd(cmd, args, opts) {
 
 async function fetchLatestCommit() {
   const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${encodeURIComponent(UPDATE_BRANCH)}`, {
-    headers: { 'User-Agent': 'tsid-studio-updater', Accept: 'application/vnd.github+json' },
+    headers: { ...GH_HEADERS, Accept: 'application/vnd.github+json' },
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'GitHub did not answer.');
+  if (!res.ok) {
+    // GitHub answers 404 for private repos when no (valid) token is sent.
+    if (res.status === 404 && !UPDATE_TOKEN) throw new Error('GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to Studio/server/.env (or make the repo public).');
+    throw new Error(data.message || 'GitHub did not answer.');
+  }
   return { sha: data.sha, date: data.commit?.committer?.date || null };
 }
 
@@ -1354,7 +1370,8 @@ router.post('/update', async (req, res) => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
   try {
     // 1. download the latest code
-    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: { 'User-Agent': 'tsid-studio-updater' } });
+    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
+    if (zipRes.status === 404 && !UPDATE_TOKEN) throw new Error('download blocked - GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to Studio/server/.env (or make the repo public)');
     if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
     const zipPath = path.join(tmp, 'update.zip');
     fs.writeFileSync(zipPath, Buffer.from(await zipRes.arrayBuffer()));
@@ -1373,8 +1390,9 @@ router.post('/update', async (req, res) => {
     }
 
     // 4. refresh dependencies (fast no-op when nothing changed)
-    await runCmd(process.platform === 'win32' ? 'npm.cmd' : 'npm',
-      ['install', '--no-audit', '--no-fund'], { cwd: __dirname });
+    await (process.platform === 'win32'
+      ? runCmd('cmd', ['/c', 'npm', 'install', '--no-audit', '--no-fund'], { cwd: __dirname })
+      : runCmd('npm', ['install', '--no-audit', '--no-fund'], { cwd: __dirname }));
 
     // 5. remember what we're on now
     let state = { sha: 'unknown', date: new Date().toISOString() };

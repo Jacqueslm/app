@@ -61,6 +61,7 @@ function addColumnIfMissing(name, ddl) {
     db.exec(`ALTER TABLE users ADD COLUMN ${ddl}`);
   }
 }
+addColumnIfMissing('phone', 'phone TEXT');
 addColumnIfMissing('stripe_customer_id', 'stripe_customer_id TEXT');
 addColumnIfMissing('stripe_subscription_id', 'stripe_subscription_id TEXT');
 addColumnIfMissing('plan', "plan TEXT NOT NULL DEFAULT 'free'");
@@ -69,10 +70,10 @@ addColumnIfMissing('current_period_end', 'current_period_end TEXT');
 addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NULL DEFAULT 0');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
-function createUser(email, passwordHash) {
+function createUser(email, passwordHash, phone) {
   const info = db
-    .prepare('INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)')
-    .run(email, passwordHash, new Date().toISOString());
+    .prepare('INSERT INTO users (email, password_hash, phone, created_at) VALUES (?, ?, ?, ?)')
+    .run(email, passwordHash, phone || null, new Date().toISOString());
   return Number(info.lastInsertRowid);
 }
 

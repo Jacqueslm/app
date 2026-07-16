@@ -92,8 +92,10 @@ body{display:flex;justify-content:center}
 .preview-feat{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:14px;color:#c0caff;text-align:left}
 .preview-feat i{color:var(--green);font-size:16px;flex-shrink:0}
 .addiction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;width:100%}
-.add-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
-.add-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
+/* Theme-aware: these chips render inside white sheets in light mode, so the
+   old hardcoded dark-theme colors (#c0caff on white) were unreadable there. */
+.add-chip{border:1px solid var(--bdr2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:var(--s1);font-size:13px;color:var(--tp);font-weight:500}
+.add-chip.sel{border-color:var(--accent);background:var(--acc);color:var(--acc-t);font-weight:600}
 .behavior-chip-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
 .behavior-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:left;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
 .behavior-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
@@ -333,7 +335,16 @@ body{display:flex;justify-content:center}
   </div>
   <div class="ob-label" style="text-align:left">Email</div>
   <input class="ob-input" id="gate-email" placeholder="you@example.com" type="text" autocomplete="email">
-  <div class="ob-label" style="text-align:left">Password</div>
+  <div id="gate-signup-extras" style="display:none">
+    <div class="ob-label" style="text-align:left">Phone number <span style="opacity:0.7">(optional)</span></div>
+    <input class="ob-input" id="gate-phone" placeholder="Helps you recover your account later" type="tel" autocomplete="tel">
+    <div class="ob-label" style="text-align:left">Protect your account with</div>
+    <div class="nova-modes" style="margin-bottom:12px">
+      <button class="nova-mode active" id="gate-cred-pass" onclick="setGateCred('password')">Password</button>
+      <button class="nova-mode" id="gate-cred-pin" onclick="setGateCred('pin')">4–6 digit PIN</button>
+    </div>
+  </div>
+  <div class="ob-label" style="text-align:left" id="gate-pass-label">Password</div>
   <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
@@ -695,25 +706,29 @@ body{display:flex;justify-content:center}
     <!-- LESSON -->
     <div id="s-lesson" class="scr">
       <div class="sec">
-        <div id="lesson-track-switch-row" style="display:none;justify-content:space-between;align-items:center;padding:10px 2px;cursor:pointer" onclick="openLessonTrackSwitcher()">
-          <span style="font-size:12px;color:var(--tm)">Focus: <span id="lesson-track-switch-lbl" style="color:var(--tp);font-weight:600"></span></span>
-          <span style="font-size:12px;color:var(--accent)">Switch track</span>
+        <div id="lesson-track-switch-row" style="display:none;justify-content:space-between;align-items:center;background:var(--s2);border:1px solid var(--bdr);border-radius:12px;padding:11px 14px;margin-bottom:12px;cursor:pointer" onclick="openLessonTrackSwitcher()">
+          <span style="font-size:12.5px;color:var(--tm)">Focus: <span id="lesson-track-switch-lbl" style="color:var(--tp);font-weight:600"></span></span>
+          <span style="font-size:12.5px;color:var(--accent);font-weight:600">Switch lesson</span>
         </div>
         <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLessonList()">
           <span>Today's lesson</span>
           <span id="lesson-list-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">View all lessons</span>
         </div>
         <div id="lesson-list-wrap" style="display:none;margin-bottom:12px"></div>
-        <div class="card" id="lesson-card">
+        <div class="card" id="lesson-card" style="padding:20px 18px 18px">
           <div id="lesson-normal">
-            <div style="font-size:15px;font-weight:600;color:var(--tp)" id="lessonTitle">Loading…</div>
-            <div style="font-size:12px;color:var(--tm);margin-top:2px" id="lessonMeta"></div>
-            <div id="lessonBody" style="font-size:13px;color:var(--ts);line-height:1.6;margin-top:10px;white-space:pre-wrap"></div>
-            <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Today's action</div>
-            <div id="lessonAction" style="font-size:13px;color:var(--ts);line-height:1.6"></div>
-            <div class="sec-hd" style="margin-top:16px;margin-bottom:6px">Reflect</div>
-            <div id="lessonReflection" style="font-size:13px;color:var(--ts);line-height:1.6;font-style:italic"></div>
-            <button class="log-btn" id="lessonCompleteBtn" style="margin-top:16px" onclick="completeLessonForToday()">Mark as done</button>
+            <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700" id="lessonMeta"></div>
+            <div style="font-size:19px;font-weight:650;color:var(--tp);margin-top:6px;line-height:1.35" id="lessonTitle">Loading…</div>
+            <div id="lessonBody" style="font-size:14px;color:var(--ts);line-height:1.75;margin-top:14px;white-space:pre-wrap"></div>
+            <div id="lesson-action-box" style="background:var(--acc);border-radius:12px;padding:14px 16px;margin-top:18px">
+              <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-t);font-weight:700;margin-bottom:6px">✦ Today's action</div>
+              <div id="lessonAction" style="font-size:13.5px;color:var(--acc-t);line-height:1.65"></div>
+            </div>
+            <div id="lesson-reflect-box" style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-top:10px">
+              <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:6px">Reflect</div>
+              <div id="lessonReflection" style="font-size:13.5px;color:var(--ts);line-height:1.65;font-style:italic"></div>
+            </div>
+            <button class="log-btn" id="lessonCompleteBtn" style="margin-top:18px" onclick="completeLessonForToday()">Mark as done</button>
             <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
           </div>
           <div id="lesson-locked" style="display:none">
@@ -749,7 +764,7 @@ body{display:flex;justify-content:center}
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
             <div>✓ Days 16–30, the rest of your program</div>
-            <div>✓ 100 Nova AI chats/day</div>
+            <div>✓ 50 Nova AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
         </div>
@@ -1196,7 +1211,7 @@ body{display:flex;justify-content:center}
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>100 Nova AI chats/day</div>
+            <div class="feat y"><i class="ti ti-check"></i>50 Nova AI chats/day</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced recovery tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
@@ -1216,7 +1231,7 @@ body{display:flex;justify-content:center}
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 100 chats a day with Nova.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 50 chats a day with Nova.</div>
     </div>
 
     <!-- PROFILE -->
@@ -1280,7 +1295,7 @@ body{display:flex;justify-content:center}
       </div>
       <div class="setting-row" id="lesson-track-row" style="display:none" onclick="openLessonTrackSwitcher()">
         <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Lesson track</p><span id="lesson-track-row-sub">Not set</span></div>
+        <div class="setting-row-txt"><p>Current lesson</p><span id="lesson-track-row-sub">Not set</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1295,6 +1310,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="logOutFromProfile()">
+        <i class="ti ti-logout"></i>
+        <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleNotif()">
@@ -1357,6 +1377,20 @@ body{display:flex;justify-content:center}
         <div class="sec-hd" style="color:#E24B4A">Danger zone</div>
         <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
+        <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Erase everything &amp; start over</button>
+        <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates</div></div>
+      <div class="setting-row" onclick="checkForAppUpdates()">
+        <i class="ti ti-refresh"></i>
+        <div class="setting-row-txt"><p>Check for updates</p><span id="upd-check-sub">See if a newer version is available</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="runAppUpdate()">
+        <i class="ti ti-download"></i>
+        <div class="setting-row-txt"><p>Update the app</p><span id="upd-run-sub">Installs the latest version — your data is kept</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
@@ -1815,8 +1849,8 @@ body{display:flex;justify-content:center}
 <!-- LESSON TRACK SWITCHER MODAL -->
 <div class="sos-modal" id="lesson-track-modal" onclick="if(event.target===this)closeLessonTrackSwitcher()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">Switch lesson track</div>
-    <div class="sos-sub">Pick which focus area's daily lessons you want to see and complete. Progress in each track is saved separately.</div>
+    <div class="sos-title" style="color:var(--accent)">Switch lesson</div>
+    <div class="sos-sub">Pick which focus area's daily lessons you want to see and complete. Each focus area keeps its own progress.</div>
     <div class="addiction-grid" id="lessonTrackGrid" style="margin-top:12px"></div>
     <button class="sos-close" style="margin-top:4px" onclick="closeLessonTrackSwitcher()">Cancel</button>
   </div>
@@ -1999,6 +2033,9 @@ const ICON_PATHS={
 'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
 'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-lock':'<rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+'ti-logout':'<path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3"/><path d="M21 12l-3 3"/>',
+'ti-refresh':'<path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>',
+'ti-download':'<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/>',
 'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
 'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
 'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
@@ -2095,7 +2132,7 @@ function updateLessonPromo(){
     sub.textContent=isLessonLocked(lesson.day)?'Part of the Pro program':`Your ${S.currentAddiction||'recovery'} program`;
   }else{
     title.textContent="Today's lesson";
-    sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this track';
+    sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this focus area';
   }
 }
 
@@ -2116,6 +2153,8 @@ function renderTodayLesson(){
   const reflectionEl=document.getElementById('lessonReflection');
   const btn=document.getElementById('lessonCompleteBtn');
   const backBtn=document.getElementById('lessonBackBtn');
+  const actionBox=document.getElementById('lesson-action-box');
+  const reflectBox=document.getElementById('lesson-reflect-box');
 
   if(isLessonLocked(day)){
     normalEl.style.display='none';
@@ -2138,21 +2177,25 @@ function renderTodayLesson(){
     bodyEl.textContent=programDone
       ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Long-Term Stability Pack (in Lesson Packs) are built for exactly this stage."
       :hasTrack
-        ?"You've completed every lesson available in this track so far. Check back soon for more."
-        :`We're still building out the daily lesson program for ${S.currentAddiction||'this track'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
+        ?"You've completed every lesson available for this focus area so far. Check back soon for more."
+        :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
     actionEl.textContent='';
     reflectionEl.textContent='';
+    actionBox.style.display='none';
+    reflectBox.style.display='none';
     btn.style.display='none';
     backBtn.style.display=viewingDay?'block':'none';
     renderLessonList();
     return;
   }
 
-  titleEl.textContent=`Day ${lesson.day}: ${lesson.title}`;
-  metaEl.textContent=S.currentAddiction;
+  titleEl.textContent=lesson.title;
+  metaEl.textContent=`${S.currentAddiction||'Lesson'} · Day ${lesson.day}`;
   bodyEl.textContent=lesson.content;
   actionEl.textContent=lesson.action||'';
   reflectionEl.textContent=lesson.reflection||'';
+  actionBox.style.display=lesson.action?'block':'none';
+  reflectBox.style.display=lesson.reflection?'block':'none';
 
   const isPastDay=day<getLessonDayFor(S.currentAddiction);
   if(isPastDay){
@@ -2876,6 +2919,9 @@ function finishOnboard(){
   disarmOnboardingBackTrap();
   document.getElementById('onboarding').style.display='none';
   document.getElementById('main-app').style.display='flex';
+  // Always land on Today - browsing in preview mode before signing up can
+  // leave a different screen (e.g. Profile) still marked active.
+  switchTo('home');actBn('bn-home');
   initApp();
 }
 
@@ -5691,8 +5737,8 @@ Address the interactions of their unique blueprint and assign structured daily r
     });
     if(res.status===429){
       const reply=S.isPro
-        ?"Looks like you've reached today's 100-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 100 chats a day. 💜";
+        ?"Looks like you've reached today's 50-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
+        :"Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 50 chats a day. 💜";
       S.chatHistory.push({role:'assistant',content:reply});
       if(!S.isPro){
         S.chatsLeft=0;
@@ -6488,12 +6534,40 @@ function updateAccountUI(){
   sub.textContent=S.accountEmail?('Signed in as '+S.accountEmail):'';
 }
 
+let gateCred='password';
 function setGateMode(mode){
   gateMode=mode;
   document.getElementById('gate-tab-login').classList.toggle('active',mode==='login');
   document.getElementById('gate-tab-signup').classList.toggle('active',mode==='signup');
   document.getElementById('gate-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
+  document.getElementById('gate-signup-extras').style.display=mode==='signup'?'block':'none';
+  if(mode==='login'){
+    // Logging in accepts whichever credential the account was created with.
+    document.getElementById('gate-pass-label').textContent='Password or PIN';
+    document.getElementById('gate-password').placeholder='Your password or PIN';
+  }else{
+    setGateCred(gateCred);
+  }
   document.getElementById('gate-error').textContent='';
+}
+function setGateCred(kind){
+  gateCred=kind;
+  document.getElementById('gate-cred-pass').classList.toggle('active',kind==='password');
+  document.getElementById('gate-cred-pin').classList.toggle('active',kind==='pin');
+  const input=document.getElementById('gate-password');
+  const label=document.getElementById('gate-pass-label');
+  if(kind==='pin'){
+    label.textContent='Your PIN';
+    input.placeholder='4–6 digits';
+    input.inputMode='numeric';
+    input.maxLength=6;
+  }else{
+    label.textContent='Password';
+    input.placeholder='At least 8 characters';
+    input.inputMode='text';
+    input.maxLength=100;
+  }
+  input.value='';
 }
 
 function openAuthModal(){
@@ -6552,6 +6626,69 @@ async function signOutAccount(){
   document.getElementById('main-app').style.display='none';
   document.getElementById('onboarding').style.display='none';
   showAuthGate();
+}
+
+function logOutFromProfile(){
+  if(!confirm('Log out? Your data stays saved on this account — log back in any time.'))return;
+  signOutAccount();
+}
+
+// Erase absolutely everything: account + synced data on the server, plus every
+// trace in this browser. The person lands on a fresh signup, like day zero.
+async function hardResetApp(){
+  if(!confirm('Erase EVERYTHING and start over?\n\nThis deletes your account and all of its data — journal, streaks, chats, lessons, settings. There is no undo and no recovery.'))return;
+  const password=prompt('This is permanent. Enter your password (or PIN) to confirm:');
+  if(!password)return;
+  try{
+    const res=await fetch('/api/account',{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password})
+    });
+    if(!res.ok){
+      const data=await res.json().catch(()=>({}));
+      alert(data.error||'Could not erase your account.');
+      return;
+    }
+  }catch(e){
+    alert('Could not reach the server. Check that the app window is running and try again.');
+    return;
+  }
+  localStorage.clear();
+  location.reload();
+}
+
+async function checkForAppUpdates(){
+  const sub=document.getElementById('upd-check-sub');
+  sub.textContent='Checking…';
+  try{
+    const res=await fetch('/api/update/check');
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){sub.textContent=data.error||'Could not check right now.';return;}
+    sub.textContent=data.upToDate
+      ?"You're on the latest version. ✓"
+      :`Update available (${(data.latest?.date||'').slice(0,10)}) — tap "Update the app" below.`;
+  }catch(e){
+    sub.textContent='Could not reach the server.';
+  }
+}
+
+let appUpdateRunning=false;
+async function runAppUpdate(){
+  if(appUpdateRunning)return;
+  if(!confirm('Update the app now? Takes a minute or two. Your account, journal, and data are kept.'))return;
+  appUpdateRunning=true;
+  const sub=document.getElementById('upd-run-sub');
+  sub.textContent='Updating… keep this page open.';
+  try{
+    const res=await fetch('/api/update',{method:'POST'});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){sub.textContent=data.error||'Update failed.';appUpdateRunning=false;return;}
+    sub.textContent='Update installed! Close the black window, then start the app again.';
+    alert(data.message||'Update installed! Close the black window, then double-click Start My App again.');
+  }catch(e){
+    sub.textContent='Could not reach the server.';
+    appUpdateRunning=false;
+  }
 }
 
 async function exportAccountData(){
@@ -6644,10 +6781,15 @@ async function submitGateAuth(){
   const errEl=document.getElementById('gate-error');
   errEl.textContent='';
   if(!email||!password){errEl.textContent='Enter an email and password.';return;}
+  if(gateMode==='signup'){
+    if(gateCred==='pin'&&!/^\d{4,6}$/.test(password)){errEl.textContent='Your PIN must be 4 to 6 digits.';return;}
+    if(gateCred==='password'&&password.length<8){errEl.textContent='Password must be at least 8 characters.';return;}
+  }
+  const phone=gateMode==='signup'?document.getElementById('gate-phone').value.trim():undefined;
   try{
     const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,password})
+      body:JSON.stringify({email,password,phone})
     });
     const data=await res.json();
     if(!res.ok){errEl.textContent=data.error||'Something went wrong.';return;}

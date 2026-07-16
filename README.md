@@ -58,6 +58,8 @@ Open `http://localhost:4300` in a browser and sign up.
 ## Notes
 
 - Data is stored locally in `server/data.sqlite` (SQLite).
+- Signup accepts a password (8+ characters) **or a 4–6 digit PIN**, plus an optional phone number. Pro accounts get 50 Nova chats/day (free: 3).
+- Profile page extras: one-click **app updates** (`APP_UPDATE_REPO`/`APP_UPDATE_BRANCH`/`APP_UPDATE_TOKEN` env overrides; set `APP_OWNER_EMAIL` before going public so only you can trigger a server update), **Log out**, and **Erase everything & start over** (deletes the account and all data after password confirmation).
 - The free tier (Days 1–15, basic Nova, journal, streaks, SOS tools) works fully with no optional keys configured. Pro screens show an upgrade preview until Stripe is configured and a real subscription/purchase completes.
 - **Studio** is its own standalone app in `/Studio` (own server on port 4400, own accounts, own library — start it with `Start Studio`; paste a fal.ai key into its "Turn on AI" box for the AI features). Four tabs:
   - **Art** — local generative art: prompt-seeded styles (Aurora, Nebula, Waves, Flow, Mosaic), PNG wallpapers and looping WebM videos, all rendered in the browser with no keys. With `OPENAI_API_KEY` set, adds an "AI Photo" mode (3/day free, 20/day Pro).

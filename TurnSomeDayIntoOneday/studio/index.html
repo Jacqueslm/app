@@ -361,6 +361,18 @@ textarea::placeholder{color:var(--tm)}
     </div>
 
     <div class="card">
+      <h3>🎬 Storyboard <span class="usage">— your lyrics become a shot list</span></h3>
+      <p class="usage">Uses the lyrics pasted above. Splits your song into scenes and writes an image prompt for each — press Generate on any scene to make it.</p>
+      <input class="input" id="sb-style" placeholder="Visual style (optional): black-and-white film, cyberpunk night, dreamy pastel…">
+      <select class="input" id="sb-char"><option value="">No character (plain scenes)</option></select>
+      <button class="btn2" id="sb-build">Build storyboard from my lyrics</button>
+      <p class="usage" id="sb-method"></p>
+      <div id="sb-list" class="row"></div>
+      <button class="gen-btn" id="sb-gen-all" style="display:none">Generate all remaining scenes</button>
+      <div class="progress-line" id="sb-prog"><div></div></div>
+    </div>
+
+    <div class="card">
       <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
       <div class="row">
         <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
@@ -985,6 +997,7 @@ const st = {
   shorts: [],           // built short specs [{name, start, len, text, loop}]
   musicList: [],        // playlist [{assetId, start, len}] - songs play in order
   captions: [],         // lyric captions [{text, start, end}] in timeline seconds
+  storyboard: [],        // scene list [{index, lines, prompt, assetId}]
   seqFormat: '16:9',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
@@ -1126,9 +1139,13 @@ function renderSceneChips() {
   chipRow($('#scene-sizes'), SCENE_SIZES, st.sceneSize, (k) => { st.sceneSize = k; renderSceneChips(); });
 }
 function renderSceneCharSelect() {
-  const sel = $('#scene-char');
-  sel.innerHTML = '<option value="">No character (plain scene)</option>' +
+  const opts = '<option value="">No character (plain scene)</option>' +
     st.characters.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}${c.loraUrl ? ' (LoRA)' : ''}</option>`).join('');
+  const sceneCur = $('#scene-char').value, sbCur = $('#sb-char')?.value;
+  $('#scene-char').innerHTML = opts;
+  if ($('#sb-char')) $('#sb-char').innerHTML = opts;
+  if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
+  if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
 }
 function updateScenesUsage() {
   if (!st.cfg) return;
@@ -1473,6 +1490,8 @@ function collectSpec() {
     highlights: st.highlights,
     captions: st.captions,
     lyrics: $('#lyr-text').value,
+    storyboard: st.storyboard,
+    storyboardStyle: $('#sb-style').value,
     format: st.seqFormat, res: st.seqRes,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
@@ -1503,6 +1522,8 @@ function applySpec(spec) {
   st.highlights = Array.isArray(spec.highlights) ? spec.highlights : [];
   st.captions = Array.isArray(spec.captions) ? spec.captions : [];
   if (typeof spec.lyrics === 'string') $('#lyr-text').value = spec.lyrics;
+  st.storyboard = Array.isArray(spec.storyboard) ? spec.storyboard : [];
+  if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
   st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
@@ -1519,7 +1540,7 @@ function applySpec(spec) {
     $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -1802,6 +1823,7 @@ $('#music-volume').oninput = () => { $('#music-vol-label').textContent = $('#mus
 ['music-volume', 'music-fadein', 'music-fadeout', 'music-crossfade', 'fade-black-in', 'fade-black-out', 'enhance-auto']
   .forEach((id) => { document.getElementById(id).addEventListener('change', persistDraft); });
 $('#lyr-text').addEventListener('change', persistDraft);
+$('#sb-style').addEventListener('change', persistDraft);
 
 /* ---------------- beat detection (pure WebAudio, on-device) ---------------- */
 async function analyzeBeats(url) {
@@ -2172,6 +2194,109 @@ async function uploadCaptionPngs() {
   }
   return out;
 }
+
+/* ---------------- storyboard: lyric sheet -> scene shot list ---------------- */
+function renderStoryboard() {
+  const list = $('#sb-list');
+  list.innerHTML = '';
+  if (!st.storyboard.length) { $('#sb-gen-all').style.display = 'none'; return; }
+  st.storyboard.forEach((sc, i) => {
+    const asset = sc.assetId ? st.assets.find((a) => a.id === sc.assetId) : null;
+    const card = document.createElement('div');
+    card.className = 'seq-item';
+    card.style.flexDirection = 'column';
+    card.style.alignItems = 'stretch';
+    card.innerHTML = `
+      ${asset ? `<img src="${asset.url}" style="width:100%;border-radius:8px;background:#000" alt="">` : ''}
+      <p style="font-size:11px;color:var(--tm);white-space:pre-line">Scene ${i + 1} · ${escapeHtml(sc.lines.slice(0, 90))}${sc.lines.length > 90 ? '…' : ''}</p>
+      <textarea class="sb-prompt" style="min-height:52px;padding:8px 10px;font-size:12px">${escapeHtml(sc.prompt)}</textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>
+        ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
+      </div>
+      <div class="progress-line sb-item-prog"><div></div></div>`;
+    card.querySelector('.sb-prompt').oninput = (e) => { sc.prompt = e.target.value; persistDraft(); };
+    card.querySelector('.sb-gen').onclick = () => generateStoryboardScene(sc, card);
+    const addBtn = card.querySelector('.sb-add');
+    if (addBtn) addBtn.onclick = () => addToSeq(asset);
+    list.appendChild(card);
+  });
+  $('#sb-gen-all').style.display = st.storyboard.some((s) => !s.assetId) ? 'block' : 'none';
+}
+
+async function generateStoryboardScene(sc, card) {
+  if (!st.cfg?.falAvailable) return setErr('#seq-err', 'Turn on AI first (AI Scenes tab) to generate storyboard images.');
+  const btn = card.querySelector('.sb-gen');
+  const prog = card.querySelector('.sb-item-prog');
+  btn.disabled = true;
+  prog.classList.add('show');
+  try {
+    const { job } = await jfetch('/api/studio/scene', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: sc.prompt,
+        characterId: $('#sb-char').value || null,
+        imageSize: { '16:9': 'landscape_16_9', '9:16': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9',
+      }),
+    });
+    const done = await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+    sc.assetId = done.assetId;
+    st.cfg.imagesUsed += 1; updateScenesUsage();
+    await loadAssets();
+    renderStoryboard();
+    persistDraft();
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  } finally {
+    btn.disabled = false;
+    prog.classList.remove('show');
+  }
+}
+
+$('#sb-build').onclick = async () => {
+  setErr('#seq-err', null);
+  const lyrics = $('#lyr-text').value.trim();
+  if (!lyrics) return setErr('#seq-err', 'Paste your lyric sheet in the Lyrics & Captions card above first.');
+  $('#sb-build').disabled = true;
+  $('#sb-build').innerHTML = '<span class="spinner"></span>Reading your lyrics…';
+  $('#sb-method').textContent = '';
+  try {
+    const { scenes, method } = await jfetch('/api/studio/storyboard', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lyrics, title: $('#cp-title').value, artist: $('#cp-artist').value, style: $('#sb-style').value,
+      }),
+    });
+    st.storyboard = scenes;
+    $('#sb-method').textContent = method === 'ai'
+      ? `${scenes.length} scenes written by AI.`
+      : `${scenes.length} scenes built locally (free, no key needed). Add an ANTHROPIC_API_KEY for sharper AI-written prompts — same key that powers Nova chat.`;
+    renderStoryboard();
+    persistDraft();
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  } finally {
+    $('#sb-build').disabled = false;
+    $('#sb-build').textContent = 'Build storyboard from my lyrics';
+  }
+};
+
+$('#sb-gen-all').onclick = async () => {
+  setErr('#seq-err', null);
+  const btn = $('#sb-gen-all');
+  btn.disabled = true;
+  const pending = st.storyboard.filter((s) => !s.assetId);
+  for (let i = 0; i < pending.length; i++) {
+    btn.innerHTML = `<span class="spinner"></span>Scene ${i + 1} of ${pending.length}…`;
+    setProg('#sb-prog', (i / pending.length) * 100);
+    const idx = st.storyboard.indexOf(pending[i]);
+    const card = $('#sb-list').children[idx];
+    await generateStoryboardScene(pending[i], card);
+  }
+  setProg('#sb-prog', null);
+  btn.disabled = false;
+  btn.textContent = 'Generate all remaining scenes';
+};
 
 /* ---------------- shorts generator ---------------- */
 function slugName(s) {
@@ -2818,6 +2943,7 @@ renderHighlights();
 renderQkFormat();
 renderMusicList();
 renderLyrList();
+renderStoryboard();
 applySimpleMode();
 bootStudio().then(() => {
   updateScenesUsage();

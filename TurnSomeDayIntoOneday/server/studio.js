@@ -18,6 +18,11 @@ let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Setting
 const FAL_QUEUE_BASE = 'https://queue.fal.run';
 const ENV_PATH = path.join(__dirname, '.env');
 
+// Optional: the same Anthropic key that powers Nova chat (server.js) sharpens
+// storyboard prompts. Neither this feature nor Nova requires the other.
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_MODEL = 'claude-sonnet-5';
+
 // Persist (or remove) FAL_KEY in server/.env so it survives restarts, keeping
 // every other line (PORT, SESSION_SECRET, ...) untouched.
 function persistFalKey(key) {
@@ -952,6 +957,117 @@ router.post('/render', async (req, res) => {
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
     { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
   res.status(202).json({ job: jobJson(job) });
+});
+
+/* ---------------- storyboard: lyric sheet -> scene-by-scene prompts ---------------- */
+const STOPWORDS = new Set(('the a an and or but so to of in on at for with from by is are was were ' +
+  'be been being i you he she it we they my your his her its our their me him them this that these those ' +
+  'do does did not no yes as if then than up down out off over under again just now here there when will ' +
+  'would can could should shall may might must ooh oh yeah la na').split(' '));
+const SHOT_TYPES = ['wide establishing shot', 'close-up shot', 'medium shot', 'over-the-shoulder shot',
+  'silhouette shot', 'slow aerial shot', 'tracking shot', 'intimate detail shot'];
+const SHOT_MOODS = ['golden hour light', 'moody blue night', 'soft misty morning', 'neon-lit dusk',
+  'warm candlelight', 'stormy overcast sky', 'sunlit haze', 'cool moonlight'];
+const MAX_SCENES = 24;
+
+function splitStanzas(lyrics) {
+  let stanzas = lyrics.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean);
+  if (stanzas.length < 2) {
+    // no blank lines in the pasted sheet - fall back to fixed-size chunks
+    const lines = lyrics.split('\n').map((l) => l.trim()).filter(Boolean);
+    stanzas = [];
+    for (let i = 0; i < lines.length; i += 4) stanzas.push(lines.slice(i, i + 4).join('\n'));
+  }
+  return stanzas.slice(0, MAX_SCENES);
+}
+
+function keywordsFrom(text) {
+  const seen = new Set();
+  const words = text.toLowerCase().replace(/[^a-z0-9'\s]/g, ' ').split(/\s+/).filter(Boolean);
+  for (const w of words) {
+    if (w.length > 3 && !STOPWORDS.has(w) && !seen.has(w)) seen.add(w);
+    if (seen.size >= 6) break;
+  }
+  return [...seen];
+}
+
+function storyboardHeuristic(lyrics, title, artist, style) {
+  const stanzas = splitStanzas(lyrics);
+  return stanzas.map((lines, i) => {
+    const kws = keywordsFrom(lines);
+    const shot = SHOT_TYPES[i % SHOT_TYPES.length];
+    const mood = SHOT_MOODS[i % SHOT_MOODS.length];
+    const subject = kws.length ? kws.slice(0, 3).join(' and ') : (title || 'a quiet moment');
+    const prompt = `A ${shot} of ${subject}, ${mood}${style ? `, ${style}` : ''}, cinematic film still, consistent character and setting`;
+    return { index: i, lines, prompt };
+  });
+}
+
+async function storyboardWithClaude(lyrics, title, artist, style) {
+  const system = `You are a music video director. Given song lyrics, split them into filmable scenes ` +
+    `(usually one scene per verse/chorus/bridge stanza) and write one vivid, concrete, filmable image-generation ` +
+    `prompt per scene (15-30 words, visual only - camera shot type, subject, setting, lighting, mood; no song ` +
+    `metadata, no quotes around lyrics). Keep a consistent visual world across scenes unless the lyrics clearly ` +
+    `change setting. Reply with ONLY a JSON array, no other text, shaped exactly like: ` +
+    `[{"lines":"<the lyric lines for this scene, verbatim>","prompt":"<image prompt>"}, ...]. Make at most ${MAX_SCENES} scenes.`;
+  const userMsg = [
+    title ? `Song title: ${title}` : null,
+    artist ? `Artist: ${artist}` : null,
+    style ? `Visual style to apply throughout: ${style}` : null,
+    `Lyrics:\n${lyrics}`,
+  ].filter(Boolean).join('\n');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: ANTHROPIC_MODEL, max_tokens: 3000, system,
+      messages: [{ role: 'user', content: userMsg }],
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error((data && data.error && data.error.message) || 'Claude request failed.');
+  const text = (data.content || []).map((b) => b.text || '').join('');
+  const jsonStart = text.indexOf('[');
+  const jsonEnd = text.lastIndexOf(']');
+  if (jsonStart === -1 || jsonEnd === -1) throw new Error('Could not parse a scene list from the response.');
+  const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
+  if (!Array.isArray(parsed) || !parsed.length) throw new Error('Empty scene list.');
+  return parsed.slice(0, MAX_SCENES).map((s, i) => ({
+    index: i,
+    lines: String(s.lines || '').slice(0, 500),
+    prompt: String(s.prompt || '').slice(0, 400) || `cinematic film still${style ? `, ${style}` : ''}`,
+  }));
+}
+
+router.post('/storyboard', async (req, res) => {
+  const { lyrics, title, artist, style } = req.body || {};
+  if (typeof lyrics !== 'string' || !lyrics.trim()) {
+    return res.status(400).json({ error: 'Paste your lyric sheet first.' });
+  }
+  const cleanLyrics = lyrics.trim().slice(0, 8000);
+  const cleanStyle = typeof style === 'string' ? style.trim().slice(0, 200) : '';
+  const cleanTitle = typeof title === 'string' ? title.trim().slice(0, 100) : '';
+  const cleanArtist = typeof artist === 'string' ? artist.trim().slice(0, 100) : '';
+
+  if (ANTHROPIC_API_KEY) {
+    try {
+      const scenes = await storyboardWithClaude(cleanLyrics, cleanTitle, cleanArtist, cleanStyle);
+      return res.json({ scenes, method: 'ai' });
+    } catch (err) {
+      // Fall through to the free local splitter rather than failing the request.
+    }
+  }
+  try {
+    const scenes = storyboardHeuristic(cleanLyrics, cleanTitle, cleanArtist, cleanStyle);
+    res.json({ scenes, method: 'local' });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not build a storyboard from those lyrics.' });
+  }
 });
 
 /* ---------------- thumbnails ---------------- */

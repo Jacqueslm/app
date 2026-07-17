@@ -206,9 +206,17 @@ function getCharacter(userId, id) {
   return db.prepare('SELECT * FROM studio_characters WHERE user_id = ? AND id = ?').get(userId, id);
 }
 
+// cast-sheet description arrived later than the table
+const charColumns = db.prepare('PRAGMA table_info(studio_characters)').all().map((c) => c.name);
+if (!charColumns.includes('description')) db.exec('ALTER TABLE studio_characters ADD COLUMN description TEXT');
+
 function updateCharacter(userId, id, fields) {
-  db.prepare('UPDATE studio_characters SET name = ?, lora_url = ?, trigger_word = ? WHERE user_id = ? AND id = ?')
-    .run(fields.name, fields.loraUrl || null, fields.triggerWord || null, userId, id);
+  db.prepare('UPDATE studio_characters SET name = ?, lora_url = ?, trigger_word = ?, description = COALESCE(?, description) WHERE user_id = ? AND id = ?')
+    .run(fields.name, fields.loraUrl || null, fields.triggerWord || null, fields.description !== undefined ? (fields.description || '') : null, userId, id);
+}
+
+function updateAssetMeta(userId, id, meta) {
+  db.prepare('UPDATE studio_assets SET meta = ? WHERE user_id = ? AND id = ?').run(JSON.stringify(meta), userId, id);
 }
 
 function deleteCharacter(userId, id) {
@@ -434,6 +442,7 @@ module.exports = {
   getCharacters,
   getCharacter,
   updateCharacter,
+  updateAssetMeta,
   deleteCharacter,
   createAsset,
   getAssets,

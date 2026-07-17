@@ -102,6 +102,20 @@ Tap any picture or video in the Library to see it **full-screen**.
 
 ---
 
+## 4a. 🎬 Director & 💼 Producer (drop images, they do the rest)
+
+The laziest good way to make a video, at the top of the Sequencer:
+
+1. Have a **song** loaded (upload or Suno link) and **words** (paste lyrics or press 🪄 Auto-captions)
+2. **🎞 Drop your images** — as many or few as you have
+3. Set the **Producer's budget** (max AI spend for filling gaps)
+4. **🎬 Director: plan my video** — the Director reads your song's structure and shows you the full plan: which of your images plays which scene, what gets generated to fill gaps (choruses first, inside budget), and the camera move + pacing for every section
+5. Like the plan? **💼 Producer: make it** — generates the gap scenes (using your selected character/location dropdowns from AI Scenes), gives every shot its camera move, and assembles the whole video on the beat with your captions
+
+Nothing generates or spends until you press the Producer button — the plan is always yours to reject, tweak (budget, lyrics, images), and re-plan for free.
+
+---
+
 ## 4b. The 🚀 One-Click Pipeline (the whole flow, guided)
 
 At the top of the Sequencer there's a pipeline card with the full journey: **Song → Captions → Storyboard → Scenes → Timeline → Render → Shorts & campaign.** Each step lights up when the one before it is done, and each has its own button — nothing generates without you pressing it, so every checkpoint is yours. If you ever wonder "what do I do next?", the pipeline card is the answer.

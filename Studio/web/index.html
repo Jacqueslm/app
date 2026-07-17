@@ -274,6 +274,21 @@ textarea::placeholder{color:var(--tm)}
   <div class="view" id="view-seq">
     <div class="banner" id="seq-banner" style="display:none"></div>
 
+    <div class="card" id="crew-card">
+      <h3>🎬 Director &amp; 💼 Producer <span class="usage">— drop images, they do the rest from your song</span></h3>
+      <button class="btn2" id="crew-drop">🎞 Drop your images (pick several)</button>
+      <p class="usage" id="crew-imgs">No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.</p>
+      <div class="trim" style="font-size:12px">
+        <span>Producer's budget: $</span><input type="number" id="crew-budget" min="0" step="0.5" value="2" style="width:64px">
+        <span class="usage">max AI spend for gap scenes</span>
+      </div>
+      <button class="btn2" id="crew-direct">🎬 Director: plan my video</button>
+      <div id="crew-plan" class="row" style="display:none"></div>
+      <button class="gen-btn" id="crew-produce" style="display:none">💼 Producer: make it</button>
+      <div class="progress-line" id="crew-prog"><div></div></div>
+      <p class="usage" id="crew-status"></p>
+      <p class="usage">Needs a song (and lyrics or 🪄 auto-captions). The Director reads your song's structure, casts your images into scenes, picks camera moves and pacing per section, and hands you the plan. Nothing generates or renders until you press the Producer button.</p>
+    </div>
     <div class="card" id="pipe-card">
       <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
@@ -2848,6 +2863,123 @@ async function runRender(windowOpt, btnSel, opts) {
     setProg(ui.prog, null);
   }
 }
+/* ---------------- Director & Producer ---------------- */
+// The Director turns song structure + your dropped images into a shot plan
+// (who plays which scene, camera move + hold + transition per section, what
+// needs generating). The Producer executes the approved plan inside the
+// budget by driving the existing tested machinery (scene gen + Quick Video).
+const crew = { images: [], plan: null };
+const CREW_STYLE = {
+  intro: { move: 'pull', dur: 5, trans: 'fade' },
+  verse: { move: 'drift', dur: 4, trans: 'fade' },
+  chorus: { move: 'push', dur: 2, trans: 'cut' },
+  bridge: { move: 'pan_right', dur: 4, trans: 'fade' },
+  outro: { move: 'pull', dur: 5, trans: 'fade' },
+};
+
+$('#crew-drop').onclick = () => pickFiles('image/*', async (files) => {
+  setErr('#seq-err', null);
+  try {
+    for (const f of files) crew.images.push(await uploadFile(f, 'image'));
+    await loadAssets();
+    $('#crew-imgs').textContent = `${crew.images.length} image${crew.images.length === 1 ? '' : 's'} in the Director's hands.`;
+  } catch (e) { setErr('#seq-err', e.message); }
+});
+
+$('#crew-direct').onclick = async () => {
+  setErr('#seq-err', null);
+  if (!st.musicList.length) return setErr('#seq-err', 'Add your song first (upload or Suno link in Quick Video).');
+  const lyrics = $('#lyr-text').value.trim() || st.captions.map((c) => c.text).join('\n');
+  if (!lyrics) return setErr('#seq-err', 'The Director needs the words: paste lyrics in Lyrics & Captions, or press 🪄 Auto-captions first.');
+  const b = $('#crew-direct');
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Director is reading your song…';
+  try {
+    const { scenes } = await jfetch('/api/studio/storyboard', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lyrics, title: $('#cp-title')?.value || '', style: $('#sb-style')?.value || '' }),
+    });
+    const p = st.cfg?.pricing;
+    const genRate = p ? ($('#scene-char').value ? p.characterImageRate : p.imageRate) : 0.09;
+    const budget = Math.max(0, Number($('#crew-budget').value) || 0);
+    // cast dropped images first (in order), then budget-limited generation
+    // for the gaps - choruses get generation priority over verses
+    let spent = 0;
+    const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null }));
+    crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label }; });
+    const gaps = shots.filter((s) => !s.source);
+    const genOrder = [...gaps].sort((a, b) => (a.scene.section === 'chorus' ? -1 : 0) - (b.scene.section === 'chorus' ? -1 : 0));
+    for (const g of genOrder) {
+      if (spent + genRate <= budget) { g.generate = true; spent += genRate; }
+    }
+    // gaps past the budget reuse dropped images round-robin (never blank)
+    let rr = 0;
+    for (const g of gaps) {
+      if (!g.generate && crew.images.length) g.source = { assetId: crew.images[rr++ % crew.images.length].id, label: 'reused' };
+    }
+    if (gaps.some((g) => !g.generate && !g.source)) {
+      throw new Error('No images and no budget to generate any — drop some images or raise the budget.');
+    }
+    crew.plan = { shots, spent, genRate };
+    const box = $('#crew-plan');
+    box.style.display = 'flex';
+    const secIcon = { intro: '🎬', verse: '🎤', chorus: '🔥', bridge: '🌉', outro: '🌅' };
+    box.innerHTML = shots.map((s) => {
+      const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b> — ${
+        s.generate ? `<span style="color:var(--accent)">generate new (~$${crew.plan.genRate.toFixed(2)})</span>` : escapeHtml(s.source.label)
+      } · ${style.move} move · ${style.dur}s hold${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
+    }).join('') + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
+      shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. Chorus cut fast, verses breathe.</p>`;
+    $('#crew-produce').style.display = 'block';
+    $('#crew-status').textContent = 'Review the plan (tweak lyrics/budget and re-plan any time), then hand it to the Producer.';
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🎬 Director: plan my video';
+};
+
+$('#crew-produce').onclick = async () => {
+  if (!crew.plan) return;
+  setErr('#seq-err', null);
+  const b = $('#crew-produce');
+  b.disabled = true;
+  const prog = $('#crew-prog');
+  prog.classList.add('show');
+  try {
+    // 1. generate the gap scenes (sequentially, pinned character + location)
+    const toGen = crew.plan.shots.filter((s) => s.generate);
+    for (let i = 0; i < toGen.length; i++) {
+      $('#crew-status').textContent = `Producer: generating scene ${i + 1} of ${toGen.length}…`;
+      b.innerHTML = `<span class="spinner"></span>Scene ${i + 1}/${toGen.length}…`;
+      const { job } = await jfetch('/api/studio/scene', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: toGen[i].scene.prompt,
+          characterIds: [$('#scene-char').value].filter(Boolean),
+          locationId: $('#scene-location').value || undefined,
+          imageSize: st.seqFormat === '16:9' ? 'landscape_16_9' : 'portrait_16_9',
+        }),
+      });
+      const done = await pollJob(job.id, (j) => setProg('#crew-prog', ((i + j.progress / 100) / (toGen.length + 1)) * 50));
+      toGen[i].source = { assetId: done.assetId, label: 'generated' };
+      st.cfg.imagesUsed += 1;
+    }
+    await loadAssets();
+    // 2. hand the whole cast to Quick Video: moves/holds/transitions by section
+    qk.shots = crew.plan.shots.map((s) => {
+      const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      const asset = st.assets.find((a) => a.id === s.source.assetId);
+      return { assetId: s.source.assetId, url: asset?.url || '', label: asset?.label || '', move: style.move, dur: style.dur, text: '', transAfter: style.trans };
+    });
+    renderQkShots();
+    updateScenesUsage();
+    $('#crew-status').textContent = 'Producer: assembling on the beat (motion, cuts, music, captions)…';
+    b.innerHTML = '<span class="spinner"></span>Assembling…';
+    await $('#qk-assemble').onclick();
+    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '💼 Producer: make it';
+  prog.classList.remove('show');
+};
+
 /* ---------------- one-click pipeline (guided chain with checkpoints) ---------------- */
 function pipelineAddAllScenes() {
   const ready = st.storyboard.filter((s) => s.assetId);

@@ -90,6 +90,13 @@ const SING_HERO_RATE = Number(process.env.STUDIO_RATE_SING_HERO || 0.20);
 const MODEL_LIVEPORTRAIT = process.env.FAL_MODEL_LIVEPORTRAIT || 'fal-ai/live-portrait';
 const LIVEPORTRAIT_RATE = Number(process.env.STUDIO_RATE_LIVEPORTRAIT || 0.10);
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
+// Dance Transfer tiers (Viggle isn't on fal - the draft tier is Wan).
+// Kling motion-control takes image_url + video_url + character_orientation.
+const MODEL_MOTION_STD = process.env.FAL_MODEL_MOTION_STD || 'fal-ai/kling-video/v2.6/standard/motion-control';
+const MODEL_MOTION_HERO = process.env.FAL_MODEL_MOTION_HERO || 'fal-ai/kling-video/v3/pro/motion-control';
+const DANCE_DRAFT_RATE = Number(process.env.STUDIO_RATE_DANCE_DRAFT || 0.05);  // per second, estimates
+const DANCE_STD_RATE = Number(process.env.STUDIO_RATE_DANCE_STD || 0.07);
+const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.12);
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.
@@ -452,6 +459,7 @@ router.get('/config', (req, res) => {
       sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
       livePortrait: LIVEPORTRAIT_RATE,
       transcribe: TRANSCRIBE_RATE,
+      dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -1537,7 +1545,7 @@ router.post('/dance', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { imageAssetId, videoAssetId, start, len } = req.body || {};
+  const { imageAssetId, videoAssetId, start, len, tier } = req.body || {};
   const character = db.getAsset(req.userId, Number(imageAssetId));
   if (!character || character.kind !== 'image') {
     return res.status(404).json({ error: 'Pick a character image from your library first.' });
@@ -1554,9 +1562,11 @@ router.post('/dance', async (req, res) => {
 
   try {
     const drivingUri = await extractVideoSegment(mediaPath(dance.filename), segStart, segLen);
-    const submitted = await falSubmit(MODEL_MOTION, {
+    const model = tier === 'hero' ? MODEL_MOTION_HERO : tier === 'standard' ? MODEL_MOTION_STD : MODEL_MOTION;
+    const submitted = await falSubmit(model, {
       image_url: fileToDataUri(character.filename),
       video_url: drivingUri,
+      ...(/motion-control/.test(model) ? { character_orientation: 'video' } : {}),
     });
     const job = createJob(req.userId, 'ai-video', {
       fal: {
@@ -1565,7 +1575,7 @@ router.post('/dance', async (req, res) => {
         expect: 'video',
         label: `${character.label} · dance`,
         characterId: character.character_id,
-        meta: { source: 'motion', model: MODEL_MOTION, fromAssetId: character.id, drivingAssetId: dance.id, segStart, segLen },
+        meta: { source: 'motion', model, fromAssetId: character.id, drivingAssetId: dance.id, segStart, segLen },
       },
     });
     res.status(202).json({ job: jobJson(job) });

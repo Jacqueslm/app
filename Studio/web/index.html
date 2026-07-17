@@ -209,6 +209,7 @@ textarea::placeholder{color:var(--tm)}
         <span>use moves from</span><input type="number" id="dn-start" min="0" step="0.5" value="0">
         <span>s, for</span><input type="number" id="dn-len" min="2" max="30" step="0.5" value="10"><span>s</span>
       </div>
+      <div class="chips" id="dn-tiers"></div>
       <button class="btn2" id="dn-go">🕺 Make my character do it</button>
       <div class="progress-line" id="dn-prog"><div></div></div>
       <p class="usage">Film yourself phone-upright, full body in frame, good light, one person only. Short clips (5–15s) look best and cost least. The result lands in your library below.</p>
@@ -273,6 +274,11 @@ textarea::placeholder{color:var(--tm)}
   <div class="view" id="view-seq">
     <div class="banner" id="seq-banner" style="display:none"></div>
 
+    <div class="card" id="pipe-card">
+      <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
+      <div id="pipe-steps" class="row" style="gap:6px"></div>
+      <p class="usage">Each step lights up when the one before it is done. Nothing is generated without you pressing its button — every checkpoint is yours.</p>
+    </div>
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
       <button class="btn2" id="qk-add-imgs">1️⃣ &nbsp;Add your pictures</button>
@@ -1272,6 +1278,7 @@ async function bootStudio() {
     $('#scenes-form').style.display = 'flex';
     $('#dance-card').style.display = 'flex';
     $('#lp-card').style.display = 'flex';
+    renderDanceTiers();
     $('#falkey-card').style.display = 'none';
     $('#falkey-manage').style.display = 'block';
   } else {
@@ -1595,6 +1602,19 @@ $('#dn-upload').onclick = () => pickFile('video/*', async (file) => {
     $('#dn-video').value = String(asset.id);
   } catch (e) { setErr('#scenes-err', e.message); }
 });
+let dnTier = localStorage.getItem('tsid-dance-tier') || 'draft';
+function renderDanceTiers() {
+  const d = st.cfg?.pricing?.dance;
+  if (!d) return;
+  const len = Number($('#dn-len').value) || 10;
+  chipRow($('#dn-tiers'), [
+    { key: 'draft', label: `Draft (Wan) · ~$${(d.draft * len).toFixed(2)}` },
+    { key: 'standard', label: `Standard (Kling) · ~$${(d.standard * len).toFixed(2)}` },
+    { key: 'hero', label: `✨ Hero (Kling 3 Pro) · ~$${(d.hero * len).toFixed(2)}` },
+  ], dnTier, (k) => { dnTier = k; localStorage.setItem('tsid-dance-tier', k); renderDanceTiers(); });
+}
+$('#dn-len').addEventListener('input', renderDanceTiers);
+
 $('#dn-go').onclick = async () => {
   setErr('#scenes-err', null);
   const imageAssetId = Number($('#dn-image').value);
@@ -1612,6 +1632,7 @@ $('#dn-go').onclick = async () => {
         imageAssetId, videoAssetId,
         start: Number($('#dn-start').value) || 0,
         len: Number($('#dn-len').value) || 10,
+        tier: dnTier,
       }),
     });
     await pollJob(job.id, (j) => setProg('#dn-prog', j.progress));
@@ -2827,6 +2848,81 @@ async function runRender(windowOpt, btnSel, opts) {
     setProg(ui.prog, null);
   }
 }
+/* ---------------- one-click pipeline (guided chain with checkpoints) ---------------- */
+function pipelineAddAllScenes() {
+  const ready = st.storyboard.filter((s) => s.assetId);
+  if (!ready.length) return;
+  st.seq = [];
+  for (const sc of ready) {
+    const asset = st.assets.find((a) => a.id === sc.assetId);
+    if (!asset) continue;
+    st.seq.push({
+      assetId: asset.id, kind: 'image', label: asset.label, url: asset.url,
+      holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4, start: 0, eq: null,
+    });
+  }
+  syncTrans(); renderSeq(); persistDraft();
+}
+
+function flashCard(sel) {
+  const el = document.querySelector(sel);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.style.transition = 'box-shadow .3s';
+  el.style.boxShadow = '0 0 0 3px var(--accent)';
+  setTimeout(() => { el.style.boxShadow = ''; }, 1600);
+}
+
+function renderPipeline() {
+  const box = $('#pipe-steps');
+  if (!box) return;
+  const scenesReady = st.storyboard.length && st.storyboard.every((s) => s.assetId);
+  const steps = [
+    {
+      icon: '🎵', name: 'Song', done: !!st.musicList.length,
+      hint: 'Upload it or paste a Suno link', action: 'Add song', run: () => flashCard('#qk-add-music'),
+    },
+    {
+      icon: '🪄', name: 'Captions', done: !!st.captions.length, needs: !!st.musicList.length,
+      hint: 'AI listens and syncs every line (~2¢)', action: 'Auto-caption', run: () => $('#lyr-auto').onclick(),
+    },
+    {
+      icon: '🎬', name: 'Storyboard', done: !!st.storyboard.length, needs: !!$('#lyr-text').value.trim(),
+      hint: 'Lyrics → a shot list with sections', action: 'Build it', run: () => $('#sb-build').onclick(),
+    },
+    {
+      icon: '🖼', name: 'Scenes', done: !!scenesReady, needs: !!st.storyboard.length,
+      hint: 'Generate every storyboard image', action: 'Generate all', run: () => { flashCard('#sb-gen-all'); $('#sb-gen-all').onclick(); },
+    },
+    {
+      icon: '🎞', name: 'Timeline', done: st.seq.length > 0 && !!scenesReady, needs: st.storyboard.some((s) => s.assetId),
+      hint: 'Scenes → timeline, chorus cut faster', action: 'Build timeline', run: () => { pipelineAddAllScenes(); flashCard('#seq-render'); },
+    },
+    {
+      icon: '🎥', name: 'Render', done: false, needs: st.seq.length > 0,
+      hint: 'Full video with captions burned in', action: 'Render', run: () => $('#seq-render').onclick(),
+    },
+    {
+      icon: '📱', name: 'Shorts & campaign', done: false, needs: st.seq.length > 0,
+      hint: 'Hook-aware shorts, then the posting ZIP', action: 'Open', run: () => flashCard('#hl-auto'),
+    },
+  ];
+  box.innerHTML = '';
+  steps.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px';
+    const ready = s.needs === undefined ? true : s.needs;
+    row.innerHTML = `
+      <span style="width:18px;text-align:center">${s.done ? '✅' : s.icon}</span>
+      <span style="flex:1;color:${s.done ? 'var(--ts)' : 'var(--tp)'}">${i + 1}. ${s.name} <span class="usage">— ${s.hint}</span></span>
+      ${s.done ? '' : `<button class="btn2 quiet" style="padding:6px 10px;font-size:12px" ${ready ? '' : 'disabled'}>${s.action}</button>`}`;
+    const b = row.querySelector('button');
+    if (b) b.onclick = () => { s.run(); setTimeout(renderPipeline, 400); };
+    box.appendChild(row);
+  });
+}
+setInterval(() => { if (document.getElementById('view-seq')?.classList.contains('on')) renderPipeline(); }, 2500);
+
 $('#seq-render').onclick = () => runRender(null, '#seq-render');
 $('#seq-render-cut').onclick = () => {
   const start = Math.max(0, Number($('#cut-start').value) || 0);
@@ -3211,18 +3307,36 @@ $('#hl-auto').onclick = async () => {
     }
     ac.close();
     const musicStart = st.musicList[0]?.start || 0;
-    // candidates in timeline coords, loudest first, at least 15s apart
-    const picked = [];
+    // Semantic pass first: if captions exist, repeated lines = the chorus.
+    // A short that OPENS on the hook beats one that opens on a loud drum
+    // fill, so chorus starts outrank raw loudness.
+    const picked = [];   // { t, label }
+    if (st.captions.length >= 4) {
+      const norm = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      const counts = {};
+      for (const c of st.captions) { const k = norm(c.text); if (k) counts[k] = (counts[k] || 0) + 1; }
+      const repeated = new Set(Object.keys(counts).filter((k) => counts[k] >= 2));
+      st.captions.forEach((c, i) => {
+        if (!repeated.has(norm(c.text))) return;
+        const prev = st.captions[i - 1];
+        if (prev && repeated.has(norm(prev.text)) && c.start - prev.start < 12) return; // inside the same chorus block
+        const t = c.start;
+        if (t < 0 || t > total - 5) return;
+        if (picked.some((p) => Math.abs(p.t - t) < 15)) return;
+        if (picked.length < 2) picked.push({ t, label: picked.length ? 'chorus2' : 'hook' });
+      });
+    }
+    // fill remaining slots with the loudest distinct sections
     for (const c of [...rms].sort((a, b) => b.v - a.v)) {
+      if (picked.length >= 3) break;
       const tl = c.t - musicStart;
       if (tl < 0 || tl > total - 5) continue;
-      if (picked.some((p) => Math.abs(p - tl) < 15)) continue;
-      picked.push(tl);
-      if (picked.length >= 3) break;
+      if (picked.some((p) => Math.abs(p.t - tl) < 15)) continue;
+      picked.push({ t: tl, label: 'drop' });
     }
     if (!picked.length) return setErr('#seq-err', 'Could not find distinct loud sections inside the timeline.');
-    picked.sort((a, b) => a - b).forEach((t, i) => {
-      st.highlights.push({ label: ['drop', 'peak2', 'peak3'][i] || `peak${i + 1}`, time: Math.round(t * 10) / 10 });
+    picked.sort((a, b) => a.t - b.t).forEach((p, i) => {
+      st.highlights.push({ label: picked.filter((x) => x.label === p.label).length > 1 ? `${p.label}${i + 1}` : p.label, time: Math.round(p.t * 10) / 10 });
     });
     renderHighlights(); persistDraft();
   } catch (e) {

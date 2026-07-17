@@ -1897,7 +1897,10 @@ router.post('/render', async (req, res) => {
 
   args.push('-filter_complex', filters.join(';'), '-map', '[vout]');
   if (musicIn) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
-  args.push('-t', outDur.toFixed(3), '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart');
+  // -pix_fmt yuv420p is REQUIRED for the file to play outside a browser
+  // (Windows Media Player, QuickTime, phones reject other pixel formats).
+  // Without it a downloaded short/video shows a black screen or won't open.
+  args.push('-t', outDur.toFixed(3), '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart');
 
   const isCutdown = outDur < totalDur - 0.01;
   const label = (typeof name === 'string' && name.trim())
@@ -2111,11 +2114,16 @@ function storyboardHeuristic(lyrics, title, artist, style) {
     const section = sections[i];
     const spec = SECTION_STYLE[section] || SECTION_STYLE.verse;
     const nth = perSectionCount[section] = (perSectionCount[section] || 0) + 1;
-    const kws = keywordsFrom(lines);
     const shot = spec.shots[(nth - 1) % spec.shots.length];
     const mood = SHOT_MOODS[i % SHOT_MOODS.length];
-    const subject = kws.length ? kws.slice(0, 3).join(' and ') : (title || 'a quiet moment');
-    const prompt = `A ${shot} of ${subject}, ${mood}, ${spec.energy}${style ? `, ${style}` : ''}, cinematic film still, consistent character and setting`;
+    // Anchor on the most evocative lyric line so the image is ABOUT the song,
+    // not a bag of disconnected keywords ("rain and pain and window"). The
+    // pinned character becomes the person in the frame via reference photos.
+    const firstLine = lines.split('\n').map((l) => l.trim()).filter(Boolean)
+      .sort((a, b) => b.length - a.length)[0] || title || 'a quiet moment';
+    const prompt = `${shot}, a cinematic music-video moment that captures the feeling of the lyric "${firstLine}", `
+      + `the main character in a real environment that fits those words, ${mood}, ${spec.energy}${style ? `, ${style}` : ''}, `
+      + `photorealistic film still`;
     return { index: i, lines, prompt, section };
   });
 }

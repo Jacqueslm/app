@@ -117,6 +117,11 @@ textarea::placeholder{color:var(--tm)}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
+    <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
+      <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;color:#8892c0;font-size:16px;cursor:pointer">A−</button>
+      <span id="zoom-val" style="font-size:11px;color:#8892c0;min-width:34px;text-align:center">100%</span>
+      <button id="zoom-in" title="Make everything bigger (stretch the app out)" style="width:30px;height:30px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;color:#8892c0;font-size:16px;cursor:pointer">A+</button>
+    </span>
   </div>
   <div class="mtabs" id="mtabs">
     <button data-view="art" class="on">Art</button>
@@ -1186,6 +1191,24 @@ function pickFiles(accept, cb) {
   input.click();
 }
 
+// Whole-app zoom so the UI can be stretched out (Chrome supports CSS zoom).
+(function initZoom() {
+  let z = Number(localStorage.getItem('tsid-zoom')) || 100;
+  const apply = () => {
+    document.body.style.zoom = (z / 100).toString();
+    const v = document.getElementById('zoom-val'); if (v) v.textContent = z + '%';
+    localStorage.setItem('tsid-zoom', String(z));
+  };
+  const wire = () => {
+    const zi = document.getElementById('zoom-in'), zo = document.getElementById('zoom-out');
+    if (!zi || !zo) { setTimeout(wire, 50); return; }
+    zi.onclick = () => { z = Math.min(200, z + 10); apply(); };
+    zo.onclick = () => { z = Math.max(60, z - 10); apply(); };
+    apply();
+  };
+  wire();
+})();
+
 async function uploadFile(file, kind, characterId, extra) {
   const q = new URLSearchParams({ kind, name: file.name, ...(extra || {}) });
   if (characterId) q.set('characterId', characterId);
@@ -1426,6 +1449,10 @@ function renderSceneCharSelect() {
   if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
   if ([...$('#scene-char2').options].some((o) => o.value === scene2Cur)) $('#scene-char2').value = scene2Cur;
   if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
+  // Auto-pin: if a storyboard character hasn't been chosen yet and exactly one
+  // star exists, select them so generated scenes actually feature that person
+  // instead of a random stranger.
+  if ($('#sb-char') && !sbCur && st.characters.length === 1) $('#sb-char').value = String(st.characters[0].id);
 
   const locSel = $('#scene-location');
   const locCur = locSel.value;
@@ -2944,13 +2971,20 @@ function designerLook(lyrics) {
   return best;
 }
 
-$('#crew-drop').onclick = () => pickFiles('image/*', async (files) => {
+$('#crew-drop').onclick = () => pickFiles('image/*,video/*', async (files) => {
   setErr('#seq-err', null);
+  const b = $('#crew-drop'); const old = b.textContent;
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Uploading…';
   try {
-    for (const f of files) crew.images.push(await uploadFile(f, 'image'));
+    for (const f of files) {
+      const kind = (f.type || '').startsWith('video') ? 'video' : 'image';
+      const asset = await uploadFile(f, kind);
+      if (kind === 'image') crew.images.push(asset); // videos join the Library for the Director to place
+    }
     await loadAssets();
-    $('#crew-imgs').textContent = `${crew.images.length} image${crew.images.length === 1 ? '' : 's'} in the Director's hands.`;
+    $('#crew-imgs').textContent = `${crew.images.length} image${crew.images.length === 1 ? '' : 's'} in the Director's hands${files.some((f) => (f.type || '').startsWith('video')) ? ' (+ videos in your Library)' : ''}.`;
   } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = old;
 });
 
 $('#crew-direct').onclick = async () => {
@@ -3344,6 +3378,7 @@ function renderStoryboard() {
           ? `<span class="btn2 quiet" style="flex:1;text-align:center;cursor:default">🌙 Queued${sc.queueStatus === 'running' ? ' — generating…' : ' — waiting'}</span>`
           : `<button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>`}
         ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
+        <button class="btn2 quiet sb-del" title="Delete this scene" style="padding:7px 10px">✕</button>
       </div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
     const sbImg = card.querySelector('img');
@@ -3355,11 +3390,38 @@ function renderStoryboard() {
     // section-aware pacing: chorus stills hit the timeline with short punchy
     // holds, intro/outro breathe longer, verses sit in between
     if (addBtn) addBtn.onclick = () => addToSeq(asset, { holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4 });
+    card.querySelector('.sb-del').onclick = () => {
+      if (!confirm(`Delete scene ${i + 1}? (Any generated image stays in your Library.)`)) return;
+      st.storyboard.splice(i, 1); renderStoryboard(); persistDraft();
+    };
     list.appendChild(card);
   });
   const hasPending = st.storyboard.some((s) => !s.assetId && !s.queueId);
   $('#sb-gen-all').style.display = hasPending ? 'block' : 'none';
   $('#sb-queue-all').style.display = hasPending ? 'block' : 'none';
+  // one button to drop every generated scene onto the timeline, in order,
+  // with section-aware holds - so you don't add them one at a time
+  const anyGenerated = st.storyboard.some((s) => s.assetId);
+  let addAll = $('#sb-add-all');
+  if (!addAll) {
+    addAll = document.createElement('button');
+    addAll.id = 'sb-add-all'; addAll.className = 'btn2';
+    addAll.style.cssText = 'width:100%;margin-top:8px';
+    $('#sb-gen-all').parentNode.insertBefore(addAll, $('#sb-gen-all'));
+  }
+  addAll.textContent = '🎞 Add all generated scenes to the timeline';
+  addAll.style.display = anyGenerated ? 'block' : 'none';
+  addAll.onclick = () => {
+    st.seq = [];
+    for (const sc of st.storyboard) {
+      if (!sc.assetId) continue;
+      const a = st.assets.find((x) => x.id === sc.assetId);
+      if (a) st.seq.push({ assetId: a.id, kind: 'image', label: a.label, url: a.url, holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4, start: 0, eq: null });
+    }
+    syncTrans(); renderSeq(); persistDraft();
+    document.querySelector('#mtabs button[data-view="seq"]').click();
+    $('#seq-render').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 }
 
 async function generateStoryboardScene(sc, card) {

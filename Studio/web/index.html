@@ -151,11 +151,16 @@ body.simple-only #view-simple{display:flex !important}
       <h3>🎬 Make my video</h3>
       <p class="usage" style="margin:0">Three steps. All free — nothing here spends money.</p>
 
-      <button class="big-btn" id="s-add-media">①  📷  Add my pictures &amp; videos</button>
-      <div id="s-thumbs" class="char-refs" style="margin:6px 0"></div>
-      <p class="usage" id="s-media-note">Nothing added yet — they play in the order you add them.</p>
+      <p class="usage" style="margin:12px 0 0"><b>①  📷  Pick your pictures &amp; videos</b> — tap the ones you want in the video</p>
+      <div id="s-thumbs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0"></div>
+      <p class="usage" id="s-media-note">Nothing in your gallery yet — add some below.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="s-add-media" style="flex:1">⬆ Add from my computer</button>
+        <button class="btn2 quiet" id="s-select-all" style="flex:1">Select all</button>
+        <button class="btn2 quiet" id="s-select-none" style="flex:1">Clear</button>
+      </div>
 
-      <button class="big-btn" id="s-add-song">②  🎵  Add my song</button>
+      <button class="big-btn" id="s-add-song" style="margin-top:12px">②  🎵  Add my song</button>
       <p class="usage" id="s-song-note">No song yet.</p>
 
       <button class="big-btn go" id="s-make">③  🎬  Make my video</button>
@@ -1648,26 +1653,49 @@ $('#media-add-all-videos').onclick = () => mediaAddAll('video');
 
 /* ---------------- SIMPLE MODE: one screen, three steps, all free ---------------- */
 function simpleMedia() { return st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay); }
+st.simpleSel = st.simpleSel || null; // Set of picked asset ids (null = not initialised yet)
 function renderSimpleScreen() {
   if (!document.getElementById('view-simple')) return;
   const media = simpleMedia();
+  // first time we see the gallery, pick everything so it "just works"; after
+  // that, respect the user's taps and auto-keep only ids that still exist
+  if (st.simpleSel === null) st.simpleSel = new Set(media.map((a) => a.id));
+  else st.simpleSel = new Set([...st.simpleSel].filter((id) => media.some((a) => a.id === id)));
   const box = $('#s-thumbs');
-  box.innerHTML = media.map((a) => a.kind === 'video'
-    ? `<video src="${a.url}" muted playsinline style="width:70px;height:70px;object-fit:cover;border-radius:8px"></video>`
-    : `<img src="${a.url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px">`).join('');
+  box.innerHTML = '';
+  media.forEach((a) => {
+    const on = st.simpleSel.has(a.id);
+    const cell = document.createElement('div');
+    cell.style.cssText = `position:relative;cursor:pointer;border-radius:10px;overflow:hidden;outline:${on ? '3px solid var(--accent)' : '3px solid transparent'};opacity:${on ? '1' : '.5'}`;
+    cell.innerHTML = (a.kind === 'video'
+      ? `<video src="${a.url}" muted playsinline style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block"></video>`
+      : `<img src="${a.url}" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;display:block">`)
+      + `<span style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:${on ? 'var(--accent)' : 'rgba(0,0,0,.5)'};color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center">${on ? '✓' : ''}</span>`;
+    cell.onclick = () => { if (st.simpleSel.has(a.id)) st.simpleSel.delete(a.id); else st.simpleSel.add(a.id); renderSimpleScreen(); };
+    box.appendChild(cell);
+  });
+  const picked = media.filter((a) => st.simpleSel.has(a.id)).length;
   $('#s-media-note').textContent = media.length
-    ? `${media.length} picture/clip${media.length === 1 ? '' : 's'} — they play in the order you added them.`
-    : 'Nothing added yet — they play in the order you add them.';
+    ? `Using ${picked} of ${media.length} — tap to pick which ones go in the video (they play top-to-bottom).`
+    : 'Nothing in your gallery yet — add some below.';
   const song = firstMusicAsset();
   $('#s-song-note').textContent = song ? `♪ ${song.label}` : 'No song yet.';
 }
 $('#s-add-media').onclick = () => pickFiles('image/*,video/*', async (files) => {
   setErr('#s-err', null);
   const b = $('#s-add-media'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
-  try { for (const f of files) await uploadFile(f, (f.type || '').startsWith('video') ? 'video' : 'image'); await loadAssets(); renderSimpleScreen(); }
-  catch (e) { setErr('#s-err', e.message); }
+  try {
+    const added = [];
+    for (const f of files) added.push(await uploadFile(f, (f.type || '').startsWith('video') ? 'video' : 'image'));
+    await loadAssets();
+    // auto-select whatever you just added
+    if (st.simpleSel) added.forEach((a) => a && st.simpleSel.add(a.id));
+    renderSimpleScreen();
+  } catch (e) { setErr('#s-err', e.message); }
   b.disabled = false; b.textContent = old;
 });
+$('#s-select-all').onclick = () => { st.simpleSel = new Set(simpleMedia().map((a) => a.id)); renderSimpleScreen(); };
+$('#s-select-none').onclick = () => { st.simpleSel = new Set(); renderSimpleScreen(); };
 $('#s-add-song').onclick = () => pickFile('audio/*', async (file) => {
   setErr('#s-err', null);
   const b = $('#s-add-song'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
@@ -1677,8 +1705,8 @@ $('#s-add-song').onclick = () => pickFile('audio/*', async (file) => {
 });
 $('#s-make').onclick = async () => {
   setErr('#s-err', null);
-  const media = simpleMedia();
-  if (!media.length) return setErr('#s-err', 'Add at least one picture or video first (button ①).');
+  const media = simpleMedia().filter((a) => st.simpleSel && st.simpleSel.has(a.id));
+  if (!media.length) return setErr('#s-err', simpleMedia().length ? 'Tap the pictures/videos you want in the video first (they turn blue with a ✓).' : 'Add at least one picture or video first (button ①).');
   const b = $('#s-make'); b.disabled = true; const old = b.innerHTML; b.innerHTML = '<span class="spinner"></span>Making your video…';
   $('#s-status').textContent = 'Putting your pictures and song together…';
   try {

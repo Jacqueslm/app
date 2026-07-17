@@ -195,8 +195,14 @@ async function falSubmit(model, input) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const detail = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail || data);
-    throw new Error(`fal.ai rejected the job (${res.status}): ${detail}`);
+    const raw = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail || data);
+    // fal's content checker false-alarms fairly often when editing photos of
+    // real people. The raw 422 body echoes the whole request (including huge
+    // base64 reference images) - never show that wall of JSON to a human.
+    if (res.status === 422 && /content_policy/i.test(raw)) {
+      throw new Error("fal's safety checker flagged this one - with photos of real people that's usually a false alarm. You weren't charged. Reword the prompt a little (drop words that could read the wrong way out of context) and try again.");
+    }
+    throw new Error(`fal.ai rejected the job (${res.status}): ${raw.slice(0, 300)}`);
   }
   return data; // { request_id, status_url, response_url, ... }
 }

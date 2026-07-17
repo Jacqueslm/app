@@ -1080,6 +1080,41 @@ router.post('/loop', async (req, res) => {
   res.status(202).json({ job: jobJson(job) });
 });
 
+/* ---------------- free local crop ---------------- */
+// Crop an image to a target aspect, keeping the start/center/end of whichever
+// axis gets trimmed. Pure ffmpeg - free, instant, no AI. The crop inherits
+// the original's character link and source, so a face cropped out of an
+// UPLOADED photo still counts as a reference photo (AI output stays excluded).
+const CROP_ASPECTS = { '9:16': 9 / 16, '1:1': 1, '4:5': 4 / 5, '16:9': 16 / 9 };
+
+router.post('/crop', (req, res) => {
+  const { assetId, aspect, keep } = req.body || {};
+  const src = db.getAsset(req.userId, Number(assetId));
+  if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to crop.' });
+  const R = CROP_ASPECTS[aspect];
+  if (!R) return res.status(400).json({ error: `aspect must be one of ${Object.keys(CROP_ASPECTS).join(', ')}` });
+  const f = keep === 'start' ? 0 : keep === 'end' ? 1 : 0.5;
+  const ext = path.extname(src.filename).toLowerCase() || '.png';
+  const outFile = newFilename(req.userId, ext);
+  const filter = `crop=min(iw\\,ih*${R}):min(ih\\,iw/${R}):(iw-ow)*${f}:(ih-oh)*${f}`;
+  const proc = spawn(ffmpegBin(), ['-y', '-i', mediaPath(src.filename), '-vf', filter, '-frames:v', '1', mediaPath(outFile)]);
+  proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
+  proc.on('close', (code) => {
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Cropping failed — is that file really an image?' });
+    }
+    let srcMeta = {};
+    try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
+    const id = db.createAsset(req.userId, 'image', `${src.label} · ${aspect} crop`, outFile, src.character_id || null, {
+      ...(srcMeta.source ? { source: srcMeta.source } : {}),
+      ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
+      crop: aspect,
+      fromAssetId: src.id,
+    });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
 /* ---------------- output sizes ---------------- */
 const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
 const FPS = 30;

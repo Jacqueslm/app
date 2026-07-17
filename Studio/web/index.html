@@ -1072,6 +1072,7 @@ const st = {
   animTarget: null,     // assetId with the animate panel open
   singTarget: null,     // assetId with the lip-sync panel open
   loopTarget: null,     // assetId with the free-loop panel open
+  cropTarget: null,     // assetId with the crop panel open
   busyScene: false,
   busyRender: false,
 };
@@ -1579,6 +1580,7 @@ function renderLibrary() {
       catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '2×'; }
     });
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
+    if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,
@@ -1621,6 +1623,44 @@ function renderLibrary() {
         });
       };
       renderPanel();
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.cropTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      let aspect = '9:16', keep = 'center';
+      panel.innerHTML = `
+        <div class="chips crop-aspects">
+          ${['9:16', '1:1', '4:5', '16:9'].map((r) => `<button class="chip${r === aspect ? ' on' : ''}" data-aspect="${r}">${r}</button>`).join('')}
+        </div>
+        <div class="chips crop-keeps">
+          <button class="chip" data-keep="start">Keep left/top</button>
+          <button class="chip on" data-keep="center">Keep center</button>
+          <button class="chip" data-keep="end">Keep right/bottom</button>
+        </div>
+        <button class="btn2 crop-go">✂️ Crop · free</button>
+        <span class="usage">Cuts a new copy at that shape — the original stays. Free and instant. Cropping a face out of an uploaded photo makes a great extra reference photo.</span>`;
+      panel.querySelectorAll('.crop-aspects .chip').forEach((c) => {
+        c.onclick = () => { aspect = c.dataset.aspect; panel.querySelectorAll('.crop-aspects .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
+      panel.querySelectorAll('.crop-keeps .chip').forEach((c) => {
+        c.onclick = () => { keep = c.dataset.keep; panel.querySelectorAll('.crop-keeps .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
+      panel.querySelector('.crop-go').onclick = async (e) => {
+        setErr('#scenes-err', null);
+        e.target.disabled = true; e.target.textContent = 'Cropping…';
+        try {
+          await jfetch('/api/studio/crop', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetId: a.id, aspect, keep }),
+          });
+          st.cropTarget = null;
+          await Promise.all([loadAssets(), loadCharacters()]);
+        } catch (err) {
+          setErr('#scenes-err', err.message);
+          e.target.disabled = false; e.target.textContent = '✂️ Crop · free';
+        }
+      };
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.loopTarget === a.id) {

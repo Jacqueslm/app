@@ -69,6 +69,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 - **Two characters in one scene** — in AI Scenes, a second dropdown appears once you have two characters: pick "+ (name)" and describe them together ("Nova and Ray back to back under a streetlight"). Both need reference photos.
 - **Sing** button on any image/video = lip-sync to a part of your song. On videos you pick a tier: **Draft (~4¢)** to check the timing, **✨ Hero (20¢)** for the polished final pass.
 - **🎭 Live Portrait** (AI Scenes tab) = an approved still performs — film your own face doing the expressions (talking, vibing, head nods) and the still copies it exactly, without regenerating the image. Cheap (~10¢).
+- **Loop** button on any video = stretch it 2×/4×/6× longer for **free** — it plays forward, then smoothly backward, and repeats (no jump cut, no AI cost). Perfect for making a 5s AI clip carry a whole verse.
 - **Dance Transfer** (AI Scenes tab) = film yourself dancing, your character copies it
 - **Motion** button = free camera movement on any still (zoom, pan, drift, shake)
 - Tap any picture or video in the Library to see it **full-screen**

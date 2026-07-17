@@ -1047,6 +1047,39 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
   return job;
 }
 
+/* ---------------- free ping-pong loop ---------------- */
+// Stretch a short clip with zero AI spend: forward, reversed, forward... -
+// motion flows back on itself, so there's no jump cut at the seams.
+router.post('/loop', async (req, res) => {
+  const { assetId, times } = req.body || {};
+  const clip = db.getAsset(req.userId, Number(assetId));
+  if (!clip || clip.kind !== 'video') return res.status(404).json({ error: 'Pick a video from your library to loop.' });
+  const reps = [2, 4, 6].includes(Number(times)) ? Number(times) : 2;
+  let dur = null;
+  try { dur = JSON.parse(clip.meta || 'null')?.duration || null; } catch (_) {}
+  if (!dur) dur = await probeMediaDuration(mediaPath(clip.filename));
+  if (!dur) return res.status(400).json({ error: 'Could not read that clip.' });
+  if (dur > 16) return res.status(400).json({ error: 'Looping works best on short clips — pick one under 15 seconds (reversing long video eats memory).' });
+
+  // split into `reps` copies, reverse every other one, join them end to end
+  const splitLabels = Array.from({ length: reps }, (_, i) => `[s${i}]`);
+  let filter = `[0:v]split=${reps}${splitLabels.join('')};`;
+  const seq = [];
+  for (let i = 0; i < reps; i++) {
+    if (i % 2 === 1) { filter += `[s${i}]reverse[r${i}];`; seq.push(`[r${i}]`); }
+    else seq.push(`[s${i}]`);
+  }
+  filter += `${seq.join('')}concat=n=${reps}:v=1:a=0[out]`;
+  const outFile = newFilename(req.userId, '.mp4');
+  const args = [
+    '-i', mediaPath(clip.filename),
+    '-filter_complex', filter, '-map', '[out]', '-an',
+    '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
+  ];
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur * reps, `${clip.label} · ${reps}× loop`, { source: 'loop', fromAssetId: clip.id });
+  res.status(202).json({ job: jobJson(job) });
+});
+
 /* ---------------- output sizes ---------------- */
 const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
 const FPS = 30;

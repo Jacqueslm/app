@@ -1071,6 +1071,7 @@ const st = {
   kb: { fx: 0.5, fy: 0.5 },
   animTarget: null,     // assetId with the animate panel open
   singTarget: null,     // assetId with the lip-sync panel open
+  loopTarget: null,     // assetId with the free-loop panel open
   busyScene: false,
   busyRender: false,
 };
@@ -1577,6 +1578,7 @@ function renderLibrary() {
       try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
       catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '2×'; }
     });
+    if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,
@@ -1619,6 +1621,40 @@ function renderLibrary() {
         });
       };
       renderPanel();
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.loopTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      panel.innerHTML = `
+        <div style="display:flex;gap:6px">
+          <button class="btn2 quiet" data-times="2" style="flex:1">2× longer · free</button>
+          <button class="btn2 quiet" data-times="4" style="flex:1">4× longer · free</button>
+          <button class="btn2 quiet" data-times="6" style="flex:1">6× longer · free</button>
+        </div>
+        <div class="progress-line loop-prog"><div></div></div>
+        <span class="usage">Ping-pong loop: plays forward, then smoothly backward, and repeats — no jump cut, no AI cost. Stretches a 5s clip across a whole verse.</span>`;
+      panel.querySelectorAll('button[data-times]').forEach((b) => {
+        b.onclick = async () => {
+          setErr('#scenes-err', null);
+          panel.querySelectorAll('button').forEach((x) => { x.disabled = true; });
+          const prog = panel.querySelector('.loop-prog');
+          prog.classList.add('show');
+          try {
+            const { job } = await jfetch('/api/studio/loop', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ assetId: a.id, times: Number(b.dataset.times) }),
+            });
+            await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+            st.loopTarget = null;
+            await loadAssets();
+          } catch (e) {
+            setErr('#scenes-err', e.message);
+            panel.querySelectorAll('button').forEach((x) => { x.disabled = false; });
+            prog.classList.remove('show');
+          }
+        };
+      });
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.singTarget === a.id) {

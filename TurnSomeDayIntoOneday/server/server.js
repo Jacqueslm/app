@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 
 const db = require('./db');
 const billing = require('./billing');
+const update = require('./update');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -22,7 +23,7 @@ const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
-const PRO_CHAT_LIMIT = 100;
+const PRO_CHAT_LIMIT = 50;
 
 // Stripe webhook signature verification needs the raw request body, so this route is
 // registered with express.raw() before the global express.json() middleware below.
@@ -69,19 +70,25 @@ function todayUTC() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// A credential is either a real password (8+ chars) or a 4-6 digit PIN.
+function validCredential(cred) {
+  return typeof cred === 'string' && (cred.length >= 8 || /^\d{4,6}$/.test(cred));
+}
+
 app.post('/api/auth/signup', signupLimiter, (req, res) => {
-  const { email, password } = req.body || {};
+  const { email, password, phone } = req.body || {};
   if (!email || !EMAIL_RE.test(email)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
-  if (!password || password.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  if (!validCredential(password)) {
+    return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
   }
   const normalizedEmail = email.trim().toLowerCase();
   if (db.getUserByEmail(normalizedEmail)) {
     return res.status(409).json({ error: 'An account with that email already exists.' });
   }
-  const userId = db.createUser(normalizedEmail, hashPassword(password));
+  const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : '';
+  const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
 });
@@ -91,7 +98,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   const normalizedEmail = (email || '').trim().toLowerCase();
   const user = db.getUserByEmail(normalizedEmail);
   if (!user || !verifyPassword(password || '', user.password_hash)) {
-    return res.status(401).json({ error: 'Incorrect email or password.' });
+    return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
   setSessionCookie(res, user.id);
   res.json({ email: user.email });
@@ -108,8 +115,8 @@ app.post('/api/auth/change-password', loginLimiter, requireAuth, (req, res) => {
   if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
     return res.status(401).json({ error: 'Current password is incorrect.' });
   }
-  if (!newPassword || newPassword.length < 8) {
-    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  if (!validCredential(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
   }
   db.updatePassword(req.userId, hashPassword(newPassword));
   res.json({ ok: true });
@@ -133,6 +140,12 @@ app.put('/api/state', requireAuth, (req, res) => {
   }
   db.saveState(req.userId, state);
   res.json({ ok: true });
+});
+
+app.use('/api/update', requireAuth, update.router);
+
+app.get('/api/diagnostics', requireAuth, (req, res) => {
+  res.json({ errors: db.getRecentErrors(50) });
 });
 
 app.get('/api/account/export', requireAuth, (req, res) => {
@@ -249,6 +262,22 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: 'Failed to reach Anthropic API.' });
   }
+});
+
+// Anything that reaches here escaped every route's own try/catch - log it so
+// it shows up in Profile diagnostics instead of vanishing silently.
+app.use((err, req, res, next) => {
+  try { db.logError('http', err.message, err.stack); } catch (_) {}
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Something went wrong on the server.' });
+});
+process.on('uncaughtException', (err) => {
+  try { db.logError('uncaughtException', err.message, err.stack); } catch (_) {}
+  console.error('Uncaught exception:', err);
+});
+process.on('unhandledRejection', (err) => {
+  try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
+  console.error('Unhandled rejection:', err);
 });
 
 app.listen(PORT, () => {

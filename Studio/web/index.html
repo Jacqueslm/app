@@ -335,11 +335,11 @@ textarea::placeholder{color:var(--tm)}
       <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
       <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~2¢)</button>
 
-      <p class="usage" style="margin:8px 0 0"><b>3. Your pictures</b> <span class="usage">(optional — the crew generates the rest)</span></p>
-      <button class="btn2" id="crew-drop">🎞 Drop your images (pick several)</button>
+      <p class="usage" style="margin:8px 0 0"><b>3. Your pictures &amp; video clips</b> <span class="usage">(optional — the crew generates the rest)</span></p>
+      <button class="btn2" id="crew-drop">🎞 Drop your images or video clips (pick several)</button>
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
-      <p class="usage" id="crew-imgs">No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.</p>
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout" checked> 🔎 Director may also scout my Library for images that fit scenes</label>
+      <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
       <div class="trim" style="font-size:12px">
         <span>Producer's budget: $</span><input type="number" id="crew-budget" min="0" step="0.5" value="2" style="width:64px">
         <span class="usage">max AI spend for gap scenes</span>
@@ -3132,21 +3132,30 @@ $('#crew-drop').onclick = () => pickFiles('image/*,video/*', async (files) => {
     for (const f of files) {
       const kind = (f.type || '').startsWith('video') ? 'video' : 'image';
       const asset = await uploadFile(f, kind);
-      if (kind === 'image') crew.images.push(asset); // videos join the Library for the Director to place
+      // both images AND your own video clips go into the plan, in the order
+      // you dropped them (kind kept so the Producer plays clips as-is)
+      crew.images.push({ ...asset, kind });
     }
     await loadAssets();
     renderCrewThumbs();
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = old;
 });
-// Show the actual dropped pictures (thumbnails), not just a count. Tap one to remove it.
+// Show the actual dropped pictures/clips (thumbnails), not just a count. Tap one to remove it.
 function renderCrewThumbs() {
   const box = $('#crew-thumbs');
-  box.innerHTML = crew.images.map((im, i) => `<img src="${im.url}" title="Tap to remove" style="cursor:pointer" data-i="${i}">`).join('');
-  box.querySelectorAll('img').forEach((el) => { el.onclick = () => { crew.images.splice(Number(el.dataset.i), 1); renderCrewThumbs(); }; });
+  box.innerHTML = crew.images.map((im, i) => im.kind === 'video'
+    ? `<video src="${im.url}" title="Video clip — tap to remove" muted playsinline style="cursor:pointer;object-fit:cover" data-i="${i}"></video>`
+    : `<img src="${im.url}" title="Tap to remove" style="cursor:pointer" data-i="${i}">`).join('');
+  box.querySelectorAll('img,video').forEach((el) => { el.onclick = () => { crew.images.splice(Number(el.dataset.i), 1); renderCrewThumbs(); }; });
+  const nVid = crew.images.filter((im) => im.kind === 'video').length;
+  const nImg = crew.images.length - nVid;
+  const parts = [];
+  if (nImg) parts.push(`${nImg} picture${nImg === 1 ? '' : 's'}`);
+  if (nVid) parts.push(`${nVid} video clip${nVid === 1 ? '' : 's'}`);
   $('#crew-imgs').textContent = crew.images.length
-    ? `${crew.images.length} picture${crew.images.length === 1 ? '' : 's'} ready — tap one to remove it.`
-    : 'No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.';
+    ? `${parts.join(' + ')} ready, in this order — tap one to remove it.`
+    : 'Nothing dropped yet — the Director uses your images and clips in the order you drop them, and only generates scenes to fill gaps.';
 }
 
 // --- self-contained crew inputs (song + lyrics live right in the crew card) ---
@@ -3207,7 +3216,7 @@ $('#crew-direct').onclick = async () => {
     // for the gaps - choruses get generation priority over verses
     let spent = 0;
     const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null, cast: castForScene(sc) }));
-    crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label }; });
+    crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label, kind: img.kind || 'image' }; });
     // Location scout: the Director combs the whole Library for images whose
     // words (label + the prompt they were generated from) fit a scene's
     // lyrics — dropped images always take precedence over scouting.
@@ -3233,8 +3242,8 @@ $('#crew-direct').onclick = async () => {
       if (spent + genRate <= budget) { g.generate = true; spent += genRate; }
     }
     // gaps past the budget reuse what we have round-robin (never blank)
-    const pool = crew.images.map((im) => ({ assetId: im.id, label: 'reused' }));
-    if (!pool.length) pool.push(...shots.filter((s) => s.source && !s.generate).map((s) => ({ assetId: s.source.assetId, label: 'reused' })));
+    const pool = crew.images.map((im) => ({ assetId: im.id, label: 'reused', kind: im.kind || 'image' }));
+    if (!pool.length) pool.push(...shots.filter((s) => s.source && !s.generate).map((s) => ({ assetId: s.source.assetId, label: 'reused', kind: s.source.kind || 'image' })));
     let rr = 0;
     for (const g of gaps) {
       if (!g.generate && pool.length) g.source = pool[rr++ % pool.length];
@@ -3250,11 +3259,12 @@ $('#crew-direct').onclick = async () => {
     box.innerHTML = shots.map((s) => {
       const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
       const nth = secCount[s.scene.section] = (secCount[s.scene.section] || 0) + 1;
+      const isVid = s.source && s.source.kind === 'video';
       return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b>${
         s.cast.length ? ` · <b>starring ${escapeHtml(s.cast.map((c) => c.name).join(' + '))}</b>` : ''
       } — ${
-        s.generate ? `<span style="color:var(--accent)">generate new (~$${crew.plan.genRate.toFixed(2)})</span>` : escapeHtml(s.source.label)
-      } · ${crewMove(s.scene.section, nth - 1)} move · ${style.dur}s hold${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
+        s.generate ? `<span style="color:var(--accent)">generate new (~$${crew.plan.genRate.toFixed(2)})</span>` : (isVid ? `🎬 ${escapeHtml(s.source.label)} (your clip)` : escapeHtml(s.source.label))
+      } · ${isVid ? 'plays as-is' : `${crewMove(s.scene.section, nth - 1)} move · ${style.dur}s hold`}${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
     }).join('')
       + `<p style="font-size:12px;margin:0">🎨 <b>Designer's look:</b> ${escapeHtml(crew.plan.look.name)} — <i>${escapeHtml(crew.plan.look.style)}</i> (applied to every generated scene; put your own words in the Storyboard style box to override)</p>`
       + `<p style="font-size:12px;margin:0">🎥 <b>Cinematographer:</b> anamorphic energy on choruses (graded punchier), 35mm intimacy on verses, silhouettes on the bridge — lenses in the prompts, color grade on the timeline.</p>`
@@ -3320,7 +3330,8 @@ $('#crew-produce').onclick = async () => {
       const nth = secN[s.scene.section] = (secN[s.scene.section] || 0) + 1;
       if (style.eq) crew.eqByIndex[i] = { ...style.eq };
       const asset = st.assets.find((a) => a.id === s.source.assetId);
-      return { assetId: s.source.assetId, url: asset?.url || '', label: asset?.label || '', move: crewMove(s.scene.section, nth - 1), dur: style.dur, text: '', transAfter: style.trans };
+      const kind = (s.source.kind === 'video' || asset?.kind === 'video') ? 'video' : 'image';
+      return { assetId: s.source.assetId, kind, url: asset?.url || '', label: asset?.label || '', move: crewMove(s.scene.section, nth - 1), dur: style.dur, text: '', transAfter: style.trans };
     });
     $('#enhance-auto').checked = true;   // Mixer: mastered audio + film finish
     $('#music-fadein').checked = true;
@@ -3519,7 +3530,9 @@ $('#lyr-auto').onclick = async () => {
     st.captions = lines.map((l) => ({ text: l.text, start: Math.round(l.start * 10) / 10, end: 0 }));
     finishCaptionEnds();
     $('#lyr-text').value = lines.map((l) => l.text).join('\n');
+    if ($('#crew-lyrics')) $('#crew-lyrics').value = $('#lyr-text').value; // show it in the crew card too
     renderLyrList(); persistDraft();
+    if (window.__studioShowError) {} // (no-op) success is visible via the filled box
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '🪄 Auto-captions (AI)';
 };
@@ -4172,6 +4185,15 @@ $('#qk-assemble').onclick = async () => {
     const clipAssets = [];
     for (let i = 0; i < qk.shots.length; i++) {
       const s = qk.shots[i];
+      // your own video clips play as-is — no Ken Burns, just drop them on the timeline
+      const asset = st.assets.find((a) => a.id === s.assetId);
+      if (s.kind === 'video' || asset?.kind === 'video') {
+        $('#qk-status').textContent = `Adding your clip ${i + 1} of ${qk.shots.length}…`;
+        btn.innerHTML = `<span class="spinner"></span>Clip ${i + 1} of ${qk.shots.length}…`;
+        setProg('#qk-prog', ((i + 1) / qk.shots.length) * 100);
+        clipAssets.push(s.assetId);
+        continue;
+      }
       $('#qk-status').textContent = `Making picture ${i + 1} of ${qk.shots.length} move…`;
       btn.innerHTML = `<span class="spinner"></span>Picture ${i + 1} of ${qk.shots.length}…`;
       const { job } = await jfetch('/api/studio/kenburns', {

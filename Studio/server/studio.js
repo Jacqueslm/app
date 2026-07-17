@@ -179,6 +179,19 @@ function probeMediaDuration(file) {
   });
 }
 
+// Same stderr-parsing trick as probeMediaDuration: uploaded videos may or
+// may not carry sound, and concat filters hard-fail if you map a missing
+// audio stream.
+function probeHasAudio(file) {
+  return new Promise((resolve) => {
+    let out = '';
+    const proc = spawn(ffmpegBin(), ['-i', file]);
+    proc.stderr.on('data', (c) => { out += c.toString(); });
+    proc.on('close', () => resolve(/Stream #\d+:\d+.*Audio:/.test(out)));
+    proc.on('error', () => resolve(false));
+  });
+}
+
 function ffmpegBin() {
   if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
   try {
@@ -1077,6 +1090,44 @@ router.post('/loop', async (req, res) => {
     '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
   ];
   const job = spawnFfmpegJob(req.userId, args, outFile, dur * reps, `${clip.label} · ${reps}× loop`, { source: 'loop', fromAssetId: clip.id });
+  res.status(202).json({ job: jobJson(job) });
+});
+
+/* ---------------- free local cut ---------------- */
+// Trim a video into a new clip: keep only a segment, or remove a middle
+// chunk and join the sides. Pure ffmpeg, keeps the original untouched.
+router.post('/cut', async (req, res) => {
+  const { assetId, mode, from, to } = req.body || {};
+  const clip = db.getAsset(req.userId, Number(assetId));
+  if (!clip || clip.kind !== 'video') return res.status(404).json({ error: 'Pick a video from your library to cut.' });
+  let dur = null;
+  try { dur = JSON.parse(clip.meta || 'null')?.duration || null; } catch (_) {}
+  if (!dur) dur = await probeMediaDuration(mediaPath(clip.filename));
+  if (!dur) return res.status(400).json({ error: 'Could not read that video.' });
+  const F = Math.max(0, Number(from) || 0);
+  const T = Math.min(dur, Number(to) || 0);
+  if (T <= F) return res.status(400).json({ error: '"to" must be after "from".' });
+  if (mode === 'remove' && F === 0 && T >= dur) return res.status(400).json({ error: 'That would remove the whole video.' });
+
+  const src = mediaPath(clip.filename);
+  const hasAudio = await probeHasAudio(src);
+  const outFile = newFilename(req.userId, '.mp4');
+  const enc = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+  let args, expectedDur;
+  if (mode === 'remove') {
+    expectedDur = dur - (T - F);
+    let filter = `[0:v]trim=start=0:end=${F},setpts=PTS-STARTPTS[v0];[0:v]trim=start=${T},setpts=PTS-STARTPTS[v1];[v0][v1]concat=n=2:v=1:a=0[v]`;
+    const maps = ['-map', '[v]'];
+    if (hasAudio) {
+      filter += `;[0:a]atrim=start=0:end=${F},asetpts=PTS-STARTPTS[a0];[0:a]atrim=start=${T},asetpts=PTS-STARTPTS[a1];[a0][a1]concat=n=2:v=0:a=1[a]`;
+      maps.push('-map', '[a]');
+    }
+    args = ['-i', src, '-filter_complex', filter, ...maps, ...(hasAudio ? ['-c:a', 'aac'] : []), ...enc];
+  } else {
+    expectedDur = T - F;
+    args = ['-ss', F.toFixed(2), '-t', (T - F).toFixed(2), '-i', src, ...(hasAudio ? ['-c:a', 'aac'] : ['-an']), ...enc];
+  }
+  const job = spawnFfmpegJob(req.userId, args, outFile, expectedDur, `${clip.label} · cut`, { source: 'cut', fromAssetId: clip.id });
   res.status(202).json({ job: jobJson(job) });
 });
 

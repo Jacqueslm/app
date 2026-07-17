@@ -75,7 +75,7 @@ textarea::placeholder{color:var(--tm)}
 .err.show{display:block}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.mtabs{background:var(--brand);display:flex;gap:8px;padding:2px 14px 12px;overflow-x:auto;scrollbar-width:none}
+.mtabs{background:var(--brand);display:flex;flex-wrap:wrap;gap:8px;padding:2px 14px 12px;justify-content:center}
 .mtabs::-webkit-scrollbar{display:none}
 .mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#8892c0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
 .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}

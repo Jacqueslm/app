@@ -81,6 +81,21 @@ db.exec(`
     detail TEXT,
     created_at TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS studio_locations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS studio_relationships (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    char_a INTEGER NOT NULL,
+    char_b INTEGER NOT NULL,
+    descriptor TEXT NOT NULL,
+    UNIQUE(user_id, char_a, char_b)
+  );
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -224,6 +239,52 @@ function deleteAsset(userId, id) {
 
 function unlinkAssetFromCharacter(userId, id) {
   db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
+/* ---- locations (saved places, reused across scenes) ---- */
+function createLocation(userId, name, description) {
+  const info = db
+    .prepare('INSERT INTO studio_locations (user_id, name, description, created_at) VALUES (?, ?, ?, ?)')
+    .run(userId, name, description || null, new Date().toISOString());
+  return Number(info.lastInsertRowid);
+}
+
+function getLocations(userId) {
+  return db.prepare('SELECT * FROM studio_locations WHERE user_id = ? ORDER BY id DESC').all(userId);
+}
+
+function getLocation(userId, id) {
+  return db.prepare('SELECT * FROM studio_locations WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateLocation(userId, id, { name, description }) {
+  db.prepare('UPDATE studio_locations SET name = ?, description = ? WHERE user_id = ? AND id = ?')
+    .run(name, description || null, userId, id);
+}
+
+function deleteLocation(userId, id) {
+  db.prepare('DELETE FROM studio_locations WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
+/* ---- relationships (saved chemistry between two characters) ---- */
+function setRelationship(userId, charA, charB, descriptor) {
+  const [a, b] = [Math.min(charA, charB), Math.max(charA, charB)];
+  if (descriptor && descriptor.trim()) {
+    db.prepare(`INSERT INTO studio_relationships (user_id, char_a, char_b, descriptor) VALUES (?, ?, ?, ?)
+      ON CONFLICT(user_id, char_a, char_b) DO UPDATE SET descriptor = excluded.descriptor`)
+      .run(userId, a, b, descriptor.trim());
+  } else {
+    db.prepare('DELETE FROM studio_relationships WHERE user_id = ? AND char_a = ? AND char_b = ?').run(userId, a, b);
+  }
+}
+
+function getRelationship(userId, charA, charB) {
+  const [a, b] = [Math.min(charA, charB), Math.max(charA, charB)];
+  return db.prepare('SELECT * FROM studio_relationships WHERE user_id = ? AND char_a = ? AND char_b = ?').get(userId, a, b);
+}
+
+function getRelationships(userId) {
+  return db.prepare('SELECT * FROM studio_relationships WHERE user_id = ?').all(userId);
 }
 
 /* ---------------- overnight batch queue ---------------- */
@@ -379,6 +440,14 @@ module.exports = {
   getAsset,
   deleteAsset,
   unlinkAssetFromCharacter,
+  createLocation,
+  getLocations,
+  getLocation,
+  updateLocation,
+  deleteLocation,
+  setRelationship,
+  getRelationship,
+  getRelationships,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

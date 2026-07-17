@@ -188,6 +188,7 @@ textarea::placeholder{color:var(--tm)}
       <h3>Generate a scene</h3>
       <select class="input" id="scene-char"><option value="">No character (plain scene)</option></select>
       <select class="input" id="scene-char2" style="display:none"><option value="">No second character (solo scene)</option></select>
+      <select class="input" id="scene-location" style="display:none"><option value="">No saved location</option></select>
       <textarea id="scene-prompt" placeholder="e.g. medium shot, gritty industrial warehouse, cyberpunk style, character turning around" style="min-height:64px"></textarea>
       <div class="chips" id="scene-sizes"></div>
       <div class="chips" id="scene-quality"></div>
@@ -255,6 +256,18 @@ textarea::placeholder{color:var(--tm)}
     </div>
     <div class="err" id="chars-err"></div>
     <div id="chars-list" class="row"></div>
+    <div class="card" id="locs-card" style="display:none">
+      <h3>📍 Locations <span class="usage">— save a place once, reuse it in any scene</span></h3>
+      <input class="input" id="loc-name" placeholder="Location name (e.g. Club Krown)">
+      <input class="input" id="loc-desc" placeholder="Details (optional): purple neon, gold booths, packed dance floor">
+      <button class="btn2" id="loc-create">Save location</button>
+      <p class="note" style="text-align:left">Then add 1–2 photos of the place (real photos or a generated scene you saved). Every scene with this location picked will match those photos.</p>
+      <div id="locs-list" class="row"></div>
+    </div>
+    <div class="card" id="rels-card" style="display:none">
+      <h3>🤝 Relationships <span class="usage">— saved chemistry, auto-applied to two-person scenes</span></h3>
+      <div id="rels-list" class="row"></div>
+    </div>
   </div>
 
   <div class="view" id="view-seq">
@@ -1092,6 +1105,9 @@ const st = {
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
   cutTarget: null,      // assetId with the cut panel open
+  coverageTarget: null, // assetId with the coverage panel open
+  locations: [],        // saved places [{id, name, description, refs}]
+  relationships: [],    // saved chemistry [{charA, charB, descriptor}]
   soundTarget: null,    // assetId with the sound-swap panel open
   busyScene: false,
   busyRender: false,
@@ -1266,7 +1282,7 @@ async function bootStudio() {
   loadDiagnostics();
   loadFans();
   $('#chars-form').style.display = 'flex';
-  await Promise.all([loadAssets(), loadCharacters()]);
+  await Promise.all([loadAssets(), loadCharacters(), loadLocations(), loadRelationships()]);
 }
 
 async function loadAssets() {
@@ -1275,7 +1291,88 @@ async function loadAssets() {
 }
 async function loadCharacters() {
   st.characters = (await jfetch('/api/studio/characters')).characters;
-  renderCharacters(); renderSceneCharSelect();
+  renderCharacters(); renderSceneCharSelect(); renderRelationships();
+}
+async function loadLocations() {
+  st.locations = (await jfetch('/api/studio/locations')).locations;
+  renderLocations(); renderSceneCharSelect();
+}
+async function loadRelationships() {
+  st.relationships = (await jfetch('/api/studio/relationships')).relationships;
+  renderRelationships();
+}
+
+function renderLocations() {
+  const card = $('#locs-card');
+  if (card.style.display === 'none' && st.cfg) card.style.display = 'flex';
+  const list = $('#locs-list');
+  list.innerHTML = '';
+  for (const l of st.locations || []) {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+      <h3>📍 ${escapeHtml(l.name)}</h3>
+      <div class="char-refs">${l.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="">`).join('') || '<span class="usage">No photos yet — add 1–2 so scenes can match this place</span>'}</div>
+      <input class="input lc-desc" placeholder="Details (optional)" value="${escapeHtml(l.description || '')}">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 lc-photos" style="flex:1">Add photos</button>
+        <button class="btn2 lc-save" style="flex:1">Save</button>
+        <button class="btn2 quiet lc-del">Delete</button>
+      </div>`;
+    el.querySelector('.lc-photos').onclick = () => pickFile('image/*', async (file) => {
+      try {
+        await uploadFile(file, 'image', null, { locationId: l.id });
+        await Promise.all([loadLocations(), loadAssets()]);
+      } catch (e) { setErr('#chars-err', e.message); }
+    });
+    el.querySelector('.lc-save').onclick = async () => {
+      try {
+        await jfetch(`/api/studio/locations/${l.id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: l.name, description: el.querySelector('.lc-desc').value }),
+        });
+        await loadLocations();
+      } catch (e) { setErr('#chars-err', e.message); }
+    };
+    el.querySelector('.lc-del').onclick = async () => {
+      if (!confirm(`Delete location ${l.name}? Its photos stay in your library.`)) return;
+      try { await jfetch(`/api/studio/locations/${l.id}`, { method: 'DELETE' }); await loadLocations(); }
+      catch (e) { setErr('#chars-err', e.message); }
+    };
+    list.appendChild(el);
+  }
+}
+
+function renderRelationships() {
+  const card = $('#rels-card');
+  const pairs = [];
+  for (let i = 0; i < st.characters.length; i++) {
+    for (let j = i + 1; j < st.characters.length; j++) pairs.push([st.characters[i], st.characters[j]]);
+  }
+  card.style.display = pairs.length ? 'flex' : 'none';
+  const list = $('#rels-list');
+  list.innerHTML = '';
+  for (const [a, b] of pairs) {
+    const saved = (st.relationships || []).find((r) =>
+      (r.charA === a.id && r.charB === b.id) || (r.charA === b.id && r.charB === a.id));
+    const row = document.createElement('div');
+    row.className = 'card';
+    row.innerHTML = `
+      <h3 style="font-size:14px">${escapeHtml(a.name)} + ${escapeHtml(b.name)}</h3>
+      <input class="input rel-desc" placeholder="Their chemistry (e.g. tender but strained — deep history, longing looks, careful distance)" value="${escapeHtml(saved?.descriptor || '')}">
+      <button class="btn2 rel-save">Save</button>
+      <p class="usage" style="margin:0">${saved ? '✅ Applies automatically whenever these two share a scene.' : 'Once saved, this rides along on every two-person scene with them — no retyping.'}</p>`;
+    row.querySelector('.rel-save').onclick = async () => {
+      try {
+        await jfetch('/api/studio/relationships', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ charA: a.id, charB: b.id, descriptor: row.querySelector('.rel-desc').value }),
+        });
+        await loadRelationships();
+      } catch (e) { setErr('#chars-err', e.message); }
+    };
+    list.appendChild(row);
+  }
 }
 
 /* ---------------- AI Scenes ---------------- */
@@ -1306,6 +1403,13 @@ function renderSceneCharSelect() {
   if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
   if ([...$('#scene-char2').options].some((o) => o.value === scene2Cur)) $('#scene-char2').value = scene2Cur;
   if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
+
+  const locSel = $('#scene-location');
+  const locCur = locSel.value;
+  locSel.innerHTML = '<option value="">No saved location</option>' +
+    (st.locations || []).map((l) => `<option value="${l.id}">📍 ${escapeHtml(l.name)}</option>`).join('');
+  locSel.style.display = (st.locations || []).length ? '' : 'none';
+  if ([...locSel.options].some((o) => o.value === locCur)) locSel.value = locCur;
 }
 function updateScenesUsage() {
   if (!st.cfg) return;
@@ -1350,6 +1454,7 @@ $('#scene-gen').onclick = async () => {
       body: JSON.stringify({
         prompt,
         characterIds: [$('#scene-char').value, $('#scene-char2').value].filter(Boolean),
+        locationId: $('#scene-location').value || undefined,
         imageSize: st.sceneSize, count: st.sceneCount, quality: st.sceneQuality,
       }),
     });
@@ -1629,6 +1734,7 @@ function renderLibrary() {
     });
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
+    if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🎥 Shots', '', () => { st.coverageTarget = st.coverageTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.cropTarget = null; renderLibrary(); });
     if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
     if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
@@ -1673,6 +1779,54 @@ function renderLibrary() {
         });
       };
       renderPanel();
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.coverageTarget === a.id) {
+      const SHOTS = [['wide', 'Wide'], ['medium', 'Medium'], ['closeup', 'Close-up'], ['ots', 'Over-shoulder'], ['detail', 'Detail']];
+      const picked = new Set(SHOTS.map(([k]) => k));
+      const p = st.cfg?.pricing;
+      const perShot = p ? (a.meta?.quality === 'best' ? p.imageBestRate : (a.characterId || a.meta?.castIds ? p.characterImageRate : p.imageRate)) : null;
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const goLabel = () => `🎥 Shoot coverage (${picked.size} shot${picked.size === 1 ? '' : 's'}${perShot ? ` · ~$${(perShot * picked.size).toFixed(2)}` : ''})`;
+      panel.innerHTML = `
+        <div class="chips cov-shots">${SHOTS.map(([k, l]) => `<button class="chip on" data-shot="${k}">${l}</button>`).join('')}</div>
+        <button class="btn2 cov-go">${goLabel()}</button>
+        <div class="progress-line cov-prog"><div></div></div>
+        <span class="usage">Re-shoots this exact scene from other camera angles — same people, wardrobe, place and moment. Real videos cut between coverage like this; pick the takes you like from the Library.</span>`;
+      const goBtn = panel.querySelector('.cov-go');
+      panel.querySelectorAll('.cov-shots .chip').forEach((c) => {
+        c.onclick = () => {
+          if (picked.has(c.dataset.shot)) picked.delete(c.dataset.shot); else picked.add(c.dataset.shot);
+          c.classList.toggle('on', picked.has(c.dataset.shot));
+          goBtn.textContent = goLabel();
+        };
+      });
+      goBtn.onclick = async () => {
+        if (!picked.size) return setErr('#scenes-err', 'Pick at least one shot type.');
+        setErr('#scenes-err', null);
+        goBtn.disabled = true;
+        const prog = panel.querySelector('.cov-prog');
+        prog.classList.add('show');
+        try {
+          const { jobs } = await jfetch('/api/studio/coverage', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetId: a.id, shots: [...picked] }),
+          });
+          let doneCount = 0;
+          await Promise.all(jobs.map((j) => pollJob(j.id, () => {}).then(() => {
+            doneCount++;
+            prog.firstElementChild.style.width = Math.round((doneCount / jobs.length) * 100) + '%';
+          }).catch(() => { doneCount++; })));
+          st.coverageTarget = null;
+          st.cfg.imagesUsed += jobs.length; updateScenesUsage();
+          await loadAssets();
+        } catch (e) {
+          setErr('#scenes-err', e.message);
+          goBtn.disabled = false;
+          prog.classList.remove('show');
+        }
+      };
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.soundTarget === a.id) {
@@ -1932,6 +2086,20 @@ $('#char-create').onclick = async () => {
     });
     $('#char-name').value = '';
     await loadCharacters();
+  } catch (e) { setErr('#chars-err', e.message); }
+};
+
+$('#loc-create').onclick = async () => {
+  setErr('#chars-err', null);
+  const name = $('#loc-name').value.trim();
+  if (!name) return setErr('#chars-err', 'Give the location a name.');
+  try {
+    await jfetch('/api/studio/locations', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description: $('#loc-desc').value }),
+    });
+    $('#loc-name').value = ''; $('#loc-desc').value = '';
+    await loadLocations();
   } catch (e) { setErr('#chars-err', e.message); }
 };
 

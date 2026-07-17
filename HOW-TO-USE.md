@@ -76,6 +76,11 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 
 If you try to generate a scene nearly identical to one you already have, Studio warns you first so you don't pay twice by accident.
 
+**Your world, remembered (Characters tab):**
+- **📍 Locations** — save a place once (name + a detail line + 1–2 photos) and it appears as a dropdown in AI Scenes. Every scene with it picked matches those photos — same club, same colors, every time. A generated scene you love can become a location photo too: **Save** it, re-upload it to the location.
+- **🤝 Relationships** — once you have two characters, a Relationships card appears. Write their chemistry once ("tender but strained — deep history, longing looks") and it automatically rides along on **every** two-person scene with them. No retyping, no drift.
+- **🎥 Shots** button on any generated scene = camera coverage, like a real shoot: re-renders the *same moment* as Wide / Medium / Close-up / Over-shoulder / Detail (pick which, price on the button). Cutting between coverage of one moment is what makes edits feel professionally shot.
+
 **AI extras, any time:**
 - **Two characters in one scene** — a second dropdown appears once you have two characters: pick "+ (name)" and describe them together. Both need reference photos (duo scenes use photos even when face locks exist — two locks in one image would blend).
 - **Sing** button on any image/video = lip-sync to a part of your song. On videos you pick a tier: **Draft (~4¢)** to check the timing, **✨ Hero (20¢)** for the polished final pass.

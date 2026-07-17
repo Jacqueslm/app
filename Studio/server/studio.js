@@ -577,6 +577,7 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   const { kind } = req.query;
   const name = String(req.query.name || 'upload');
   const characterId = req.query.characterId ? Number(req.query.characterId) : null;
+  const locationId = req.query.locationId ? Number(req.query.locationId) : null;
   if (!EXT_BY_KIND[kind]) return res.status(400).json({ error: 'kind must be image, video, or audio.' });
   const ext = path.extname(name).toLowerCase();
   if (!EXT_BY_KIND[kind].has(ext)) {
@@ -595,6 +596,10 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   const label = path.basename(name, ext).slice(0, 80) || 'Upload';
   const meta = { source: 'upload' };
   if (req.query.overlay === '1') meta.overlay = true; // text-card PNGs stay out of the pickers
+  if (locationId) {
+    if (!db.getLocation(req.userId, locationId)) return res.status(404).json({ error: 'Location not found.' });
+    meta.locationRef = locationId;
+  }
   if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(mediaPath(filename));
   const id = db.createAsset(req.userId, kind, label, filename, characterId, meta);
   res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
@@ -637,6 +642,57 @@ router.delete('/characters/:id', (req, res) => {
   const character = db.getCharacter(req.userId, Number(req.params.id));
   if (!character) return res.status(404).json({ error: 'Character not found.' });
   db.deleteCharacter(req.userId, character.id); // reference images stay in the library
+  res.json({ ok: true });
+});
+
+/* ---------------- locations (scene memory) ---------------- */
+function locationJson(userId, l) {
+  return {
+    id: l.id, name: l.name, description: l.description, createdAt: l.created_at,
+    refs: db.getAssets(userId, 'image')
+      .filter((a) => { try { return JSON.parse(a.meta || 'null')?.locationRef === l.id; } catch (_) { return false; } })
+      .map(assetJson),
+  };
+}
+
+router.get('/locations', (req, res) => {
+  res.json({ locations: db.getLocations(req.userId).map((l) => locationJson(req.userId, l)) });
+});
+
+router.post('/locations', (req, res) => {
+  const name = String(req.body?.name || '').trim().slice(0, 80);
+  if (!name) return res.status(400).json({ error: 'Give the location a name (e.g. Club Krown).' });
+  const id = db.createLocation(req.userId, name, String(req.body?.description || '').trim().slice(0, 500));
+  res.status(201).json({ location: locationJson(req.userId, db.getLocation(req.userId, id)) });
+});
+
+router.put('/locations/:id', (req, res) => {
+  const loc = db.getLocation(req.userId, Number(req.params.id));
+  if (!loc) return res.status(404).json({ error: 'Location not found.' });
+  const name = String(req.body?.name ?? loc.name).trim().slice(0, 80) || loc.name;
+  db.updateLocation(req.userId, loc.id, { name, description: String(req.body?.description || '').trim().slice(0, 500) });
+  res.json({ location: locationJson(req.userId, db.getLocation(req.userId, loc.id)) });
+});
+
+router.delete('/locations/:id', (req, res) => {
+  const loc = db.getLocation(req.userId, Number(req.params.id));
+  if (!loc) return res.status(404).json({ error: 'Location not found.' });
+  db.deleteLocation(req.userId, loc.id); // its photos stay in the library
+  res.json({ ok: true });
+});
+
+/* ---------------- relationships (chemistry memory) ---------------- */
+router.get('/relationships', (req, res) => {
+  res.json({ relationships: db.getRelationships(req.userId).map((r) => ({ charA: r.char_a, charB: r.char_b, descriptor: r.descriptor })) });
+});
+
+router.put('/relationships', (req, res) => {
+  const a = Number(req.body?.charA), b = Number(req.body?.charB);
+  if (!a || !b || a === b) return res.status(400).json({ error: 'Pick two different characters.' });
+  if (!db.getCharacter(req.userId, a) || !db.getCharacter(req.userId, b)) {
+    return res.status(404).json({ error: 'Character not found.' });
+  }
+  db.setRelationship(req.userId, a, b, String(req.body?.descriptor || '').slice(0, 300));
   res.json({ ok: true });
 });
 
@@ -738,7 +794,7 @@ const IMAGE_SIZES = new Set(['square_hd', 'portrait_16_9', 'landscape_16_9']);
 // Shared by the interactive /scene endpoint and the overnight queue worker:
 // resolves a prompt + character selection into a fal model/input pair.
 // Throws an Error with `.status` set to the right HTTP code on any problem.
-async function buildSceneModelInput(userId, { prompt, characterId, characterIds, imageSize, quality }) {
+async function buildSceneModelInput(userId, { prompt, characterId, characterIds, imageSize, quality, locationId }) {
   if (typeof prompt !== 'string' || !prompt.trim()) {
     throw Object.assign(new Error('prompt is required.'), { status: 400 });
   }
@@ -815,8 +871,42 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
       : (whose.join(' ')
         + ' These are two different people appearing together. Keep each person\'s face, hairstyle, skin tone and build EXACTLY as in their own photos — both instantly recognizable. Never blend, swap or average their faces. '
         + `Now show ${cast[0].name} and ${cast[1].name} together in this scene: ${cleanPrompt}`);
+    // Saved chemistry: a stored relationship descriptor rides along on every
+    // duo scene so their dynamic stays consistent without retyping it.
+    if (cast.length === 2) {
+      const rel = db.getRelationship(userId, cast[0].id, cast[1].id);
+      if (rel) input.prompt += ` Their dynamic together: ${rel.descriptor}`;
+    }
     if (/kontext/.test(model)) input.image_url = allUris[0]; // legacy override: single-image editor
     else input.image_urls = allUris;
+  }
+
+  // Saved location: its reference photos pin the setting the same way
+  // character photos pin a face. On the LoRA path (text-only model) the
+  // location contributes its description as words instead.
+  if (locationId) {
+    const loc = db.getLocation(userId, Number(locationId));
+    if (!loc) throw Object.assign(new Error('Location not found.'), { status: 404 });
+    const locRefs = db.getAssets(userId, 'image')
+      .filter((a) => { try { return JSON.parse(a.meta || 'null')?.locationRef === loc.id; } catch (_) { return false; } })
+      .slice(0, 2);
+    const locUris = (await Promise.all(locRefs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
+    const canTakeImages = locUris.length && model !== MODEL_LORA_IMAGE;
+    if (canTakeImages) {
+      if (!input.image_urls) {
+        // no characters in this scene: switch to the photo-conditioned editor
+        model = best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
+        input.image_urls = [];
+        input.prompt = cleanPrompt;
+      }
+      const from = input.image_urls.length + 1;
+      input.image_urls.push(...locUris);
+      const to = input.image_urls.length;
+      input.prompt = `${from === to ? `Reference photo ${from} shows` : `Reference photos ${from}-${to} show`} the location: ${loc.name}. `
+        + 'Set the scene in EXACTLY this place - same architecture, furnishings, colors and atmosphere as those photos. '
+        + input.prompt;
+    }
+    if (loc.description) input.prompt += ` Location details: ${loc.description}`;
   }
 
   // Image models resolve prompts that mention several moments/places (or two
@@ -835,7 +925,7 @@ router.post('/scene', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { prompt, characterId, characterIds, imageSize, count, quality } = req.body || {};
+  const { prompt, characterId, characterIds, imageSize, count, quality, locationId } = req.body || {};
   const howMany = Math.max(1, Math.min(4, Number(count) || 1));
   if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
@@ -843,7 +933,7 @@ router.post('/scene', async (req, res) => {
 
   let built;
   try {
-    built = await buildSceneModelInput(req.userId, { prompt, characterId, characterIds, imageSize, quality });
+    built = await buildSceneModelInput(req.userId, { prompt, characterId, characterIds, imageSize, quality, locationId });
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message });
   }
@@ -860,13 +950,75 @@ router.post('/scene', async (req, res) => {
           expect: 'image',
           label: cleanPrompt.slice(0, 80) + (howMany > 1 ? ` (${i + 1}/${howMany})` : ''),
           characterId: character ? character.id : null,
-          meta: { source: 'fal', model, prompt: cleanPrompt, ...(cast.length > 1 ? { castIds: cast.map((c) => c.id) } : {}) },
+          meta: {
+            source: 'fal', model, prompt: cleanPrompt,
+            ...(cast.length > 1 ? { castIds: cast.map((c) => c.id) } : {}),
+            ...(locationId ? { locationId: Number(locationId) } : {}),
+            ...(imageSize ? { imageSize } : {}),
+            ...(quality === 'best' ? { quality: 'best' } : {}),
+          },
         },
       }));
     }
     res.status(202).json({ job: jobJson(jobs[0]), jobs: jobs.map(jobJson) });
   } catch (err) {
     res.status(502).json({ error: err.message });
+  }
+});
+
+/* ---------------- camera coverage: one approved scene -> a shot list ---------------- */
+// Real music videos shoot coverage: the same moment from several framings.
+// Given an approved generated scene, re-render it as other shot types with
+// the characters/location/quality it was made with.
+const COVERAGE_SHOTS = {
+  wide: 'A wide establishing shot',
+  medium: 'A medium shot',
+  closeup: 'A close-up shot',
+  ots: 'An over-the-shoulder shot',
+  detail: 'An extreme close-up detail shot of the most striking object or gesture',
+};
+
+router.post('/coverage', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const scene = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!scene || scene.kind !== 'image') return res.status(404).json({ error: 'Pick a generated scene from your library.' });
+  let meta = {};
+  try { meta = JSON.parse(scene.meta || 'null') || {}; } catch (_) {}
+  if (!meta.prompt) return res.status(400).json({ error: 'Coverage works on generated scenes (it reuses the scene\'s prompt). This image has none.' });
+  const shots = [...new Set((Array.isArray(req.body?.shots) ? req.body.shots : Object.keys(COVERAGE_SHOTS)).filter((s) => COVERAGE_SHOTS[s]))];
+  if (!shots.length) return res.status(400).json({ error: 'Pick at least one shot type.' });
+  if (db.getImageCount(req.userId, todayUTC()) + shots.length > DAILY_AI_IMAGE_LIMIT) {
+    return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached.` });
+  }
+
+  // drop any leading shot-type phrase so framings don't fight each other
+  const base = meta.prompt.replace(/^an?\s+[\w -]*shot\s+(?:of\s+)?/i, '').trim();
+  const characterIds = meta.castIds || (scene.character_id ? [scene.character_id] : []);
+  try {
+    const jobs = [];
+    for (const shot of shots) {
+      const prompt = `${COVERAGE_SHOTS[shot]} of this scene: ${base} Same setting, same people, same wardrobe, same lighting, the same moment in time - ONLY the camera framing changes.`;
+      const built = await buildSceneModelInput(req.userId, {
+        prompt, characterIds,
+        imageSize: meta.imageSize, quality: meta.quality, locationId: meta.locationId,
+      });
+      const submitted = await falSubmit(built.model, built.input);
+      jobs.push(createJob(req.userId, 'ai-image', {
+        fal: {
+          statusUrl: submitted.status_url,
+          responseUrl: submitted.response_url,
+          expect: 'image',
+          label: `${scene.label.slice(0, 60)} · ${shot}`,
+          characterId: built.character ? built.character.id : null,
+          meta: { ...meta, source: 'fal', prompt: built.cleanPrompt, coverageOf: scene.id, shot },
+        },
+      }));
+    }
+    res.status(202).json({ jobs: jobs.map(jobJson) });
+  } catch (err) {
+    res.status(err.status || 502).json({ error: err.message });
   }
 });
 

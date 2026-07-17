@@ -39,8 +39,8 @@ That's it. No internet needed except for AI generations.
 | Tab | What it's for |
 |---|---|
 | **Art** | Free art from a text prompt (wallpapers, backgrounds). No AI key needed. |
-| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, make faces sing, dance transfer. Your **Library** lives here. |
-| **Characters** | Your AI artist — upload photos so every scene shows the same face. |
+| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, sing, dance, Live Portrait, simple screens. Your **Library** (with its free editing tools) lives here. |
+| **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. |
 | **Sequencer** | Where videos get made — Quick Video, lyrics, shorts, campaigns, everything. |
 
 The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the full editor.
@@ -57,26 +57,43 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
 
 Leave "⚡ Cut on the beat" checked — your cuts will land on the music automatically.
 
-**The AI way (your character stars in it):**
-1. **Characters** tab → create your character, upload **3–6 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). The AI studies up to 4 of them per scene, so variety is what makes it *look like you*.
-1b. **Want the strongest likeness there is?** Upload 10–20 photos, then press **🔒 Train face lock** on the character (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; when it finishes, every solo scene with that character uses it automatically. Nothing to copy or paste.
-2. **Lyrics & Captions** card → paste your lyrics
-3. **Storyboard** card → **Build storyboard from my lyrics** → it writes a scene prompt for every verse → **Generate** each scene (~$0.04 each)
-4. On each scene in your Library → **Animate** → pick quality → tap the price button
-5. Clips land on your timeline → add your song → **Render full video**
+**The AI way (your characters star in it):**
+1. **Characters** tab → create your character, upload **6–20 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). Variety is what makes it *look like them*.
+   - Only photos **you upload** count as reference photos — AI-generated scenes never do, even when the character appears in them.
+   - Tap any thumbnail in their gallery to **remove it** from the reference set (it stays in your library).
+   - Short on photos? **Crop** a face out of a bigger picture — crops of your uploads count as reference photos too.
+2. Press **🔒 Train face lock** (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; every solo scene with that character then uses it automatically. Changed their photos later? Press **↻ Retrain face lock** — the new lock replaces the old one.
+3. **Lyrics & Captions** card → paste your lyrics
+4. **Storyboard** card → **Build storyboard from my lyrics** → it writes a scene prompt for every verse → **Generate** each scene (~$0.04–9¢ each)
+5. On each scene in your Library → **Animate** → pick quality → tap the price button
+6. Clips land on your timeline → add your song → **Render full video**
 
-**Extras, any time:**
-- **Two characters in one scene** — in AI Scenes, a second dropdown appears once you have two characters: pick "+ (name)" and describe them together ("Nova and Ray back to back under a streetlight"). Both need reference photos.
+**Writing prompts that work (the 4 rules):**
+1. **One subject per image.** Five ideas = five separate scenes cut together on the timeline, not one crowded picture. (The app automatically stops the AI from drawing split-screen collages.)
+2. **Pick characters in the dropdowns, keep names out of the prompt.** Writing a name does nothing — only the dropdown attaches their face. Say "he leans on the car," not "DBC leans on the car."
+3. **Describe what the camera sees** — who, where, light, mood. Story logic ("unaware they miss each other") isn't visible and just confuses it.
+4. **Words inside the picture** (phone screens, signs, jewelry text)? Use **✨ Best (Banana Pro)** — it's the only tier that spells reliably.
+
+If you try to generate a scene nearly identical to one you already have, Studio warns you first so you don't pay twice by accident.
+
+**AI extras, any time:**
+- **Two characters in one scene** — a second dropdown appears once you have two characters: pick "+ (name)" and describe them together. Both need reference photos (duo scenes use photos even when face locks exist — two locks in one image would blend).
 - **Sing** button on any image/video = lip-sync to a part of your song. On videos you pick a tier: **Draft (~4¢)** to check the timing, **✨ Hero (20¢)** for the polished final pass.
-- **🎭 Live Portrait** (AI Scenes tab) = an approved still performs — film your own face doing the expressions (talking, vibing, head nods) and the still copies it exactly, without regenerating the image. Cheap (~10¢).
-- **Loop** button on any video = stretch it 2×/4×/6× longer for **free** — it plays forward, then smoothly backward, and repeats (no jump cut, no AI cost). Perfect for making a 5s AI clip carry a whole verse.
-- **Crop** button on any photo = cut a free copy at 9:16 / 1:1 / 4:5 / 16:9, choosing which part to keep. The original stays. Cropping a face out of an uploaded photo counts as a new reference photo — great for beefing up a training set. Pair with **2×** (AI upscale, pennies) if the crop needs more resolution.
-- **🎨 Simple screens** (AI Scenes tab) = free black/white/gradient/custom-color screens, made instantly on your computer. Drop one on the timeline as a breather between scenes, a backdrop for lyrics, or a one-beat flash frame.
-- **Cut** button on any video = free trim tool. **Keep only this part** (from X to Y seconds becomes its own clip) or **Remove this part** (that middle piece disappears and the sides join up, sound intact). The original always stays.
-- **Sound** button on any video = free sound control. **🔇 Remove the sound** strips the audio, or **🎵 Swap in this song** replaces it with any song from your library, starting from the second you choose. New copy, original untouched.
-- **Dance Transfer** (AI Scenes tab) = film yourself dancing, your character copies it
-- **Motion** button = free camera movement on any still (zoom, pan, drift, shake)
-- Tap any picture or video in the Library to see it **full-screen**
+- **🎭 Live Portrait** = an approved still performs — film your own face doing the expressions (talking, vibing, head nods) and the still copies it exactly, without regenerating the image. Cheap (~10¢).
+- **Dance Transfer** = film yourself dancing full-body, your character copies the moves.
+
+**🆓 The free editing toolbox (no AI, no cost, originals always kept):**
+| Button | On | What it does |
+|---|---|---|
+| **Motion** | photos | Camera movement — zoom, pan, drift, shake — turns a still into a clip |
+| **Crop** | photos | Cut a copy at 9:16 / 1:1 / 4:5 / 16:9, keeping the part you choose |
+| **2×** | photos | Double the resolution (sharp resize — free, instant) |
+| **Cut** | videos | **Keep only** a section, or **remove** a middle piece and join the sides (sound intact) |
+| **Loop** | videos | 2×/4×/6× longer — plays forward, then smoothly backward (no jump cut) |
+| **Sound** | videos | **🔇 Remove the sound**, or **🎵 swap in a song** from the second you choose |
+| **🎨 Simple screens** | (card) | Black / white / gradient / any-color screens for pauses, flash frames, lyric backdrops |
+
+Tap any picture or video in the Library to see it **full-screen**.
 
 ---
 
@@ -115,7 +132,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens. Everything except AI generation.
 
 **AI (from your fal.ai balance):**
 | Thing | Rough cost |
@@ -127,7 +144,9 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | 5-second clip (Draft/Seedance) | ~21¢ |
 | 5-second clip (Standard/Kling) | ~42¢ |
 | 5-second clip (Best/Kling Pro) | ~56¢ |
-| Sing or Dance clip | ~50¢–$1.50 |
+| Sing on a video — Draft / ✨ Hero | ~4¢ / 20¢ |
+| Sing on a still, Dance Transfer | ~50¢–$1.50 |
+| 🎭 Live Portrait clip | ~10¢ |
 
 The exact price shows **on the button** before you tap. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 
@@ -162,6 +181,10 @@ Also on that card: see what's using disk space and delete big old files.
 | Welcome screen keeps showing | Type email + password and press Let's go — a wrong password on an existing account shows the reason underneath. |
 | AI button says "not set up yet" | Paste your fal key in AI Scenes → 🔑 Turn on AI. |
 | AI fails with a balance error | Add credits at fal.ai → Billing → Credits. |
+| "Safety checker flagged this" | Usually a false alarm with real-people photos. You weren't charged — reword the prompt slightly and go again. |
+| Generated image is a split-screen collage | Your prompt describes several places/moments at once. One subject per scene — the app blocks most of these automatically now. |
+| Upload/generation dies mid-send | Studio retries by itself; if it still fails, check your internet. With two characters on ✨ Best, removing a couple of reference photos also helps. |
+| "You already have an almost identical scene" | The duplicate guard saving you money. Check the existing shot in your Library before paying to regenerate. |
 | Windows blocks Start My App | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
 | Daily cap reached | You generated a LOT today. It resets at midnight UTC (or raise it in server/.env). |
 | Something weird I can't figure out | Open a Claude Code session on the repo and describe it. Screenshots help. |

@@ -71,6 +71,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 - **🎭 Live Portrait** (AI Scenes tab) = an approved still performs — film your own face doing the expressions (talking, vibing, head nods) and the still copies it exactly, without regenerating the image. Cheap (~10¢).
 - **Loop** button on any video = stretch it 2×/4×/6× longer for **free** — it plays forward, then smoothly backward, and repeats (no jump cut, no AI cost). Perfect for making a 5s AI clip carry a whole verse.
 - **Crop** button on any photo = cut a free copy at 9:16 / 1:1 / 4:5 / 16:9, choosing which part to keep. The original stays. Cropping a face out of an uploaded photo counts as a new reference photo — great for beefing up a training set. Pair with **2×** (AI upscale, pennies) if the crop needs more resolution.
+- **🎨 Simple screens** (AI Scenes tab) = free black/white/gradient/custom-color screens, made instantly on your computer. Drop one on the timeline as a breather between scenes, a backdrop for lyrics, or a one-beat flash frame.
 - **Dance Transfer** (AI Scenes tab) = film yourself dancing, your character copies it
 - **Motion** button = free camera movement on any still (zoom, pan, drift, shake)
 - Tap any picture or video in the Library to see it **full-screen**

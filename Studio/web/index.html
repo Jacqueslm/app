@@ -132,13 +132,40 @@ textarea::placeholder{color:var(--tm)}
     </span>
   </div>
   <div class="mtabs" id="mtabs">
-    <button data-view="art" class="on">Art</button>
+    <button data-view="art" class="on">⚙ Settings</button>
     <button data-view="scenes">AI Scenes</button>
     <button data-view="chars">Characters</button>
     <button data-view="seq">Sequencer</button>
   </div>
   <div class="body">
   <div class="view on" id="view-art">
+    <div class="card" id="settings-card">
+      <h3>⚙ Settings</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <span>Appearance</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn2 quiet" id="set-theme-light">☀️ Light</button>
+          <button class="btn2 quiet" id="set-theme-dark">🌙 Dark</button>
+          <button class="btn2 quiet" id="set-theme-auto">Auto</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <span>Text size</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn2 quiet" id="set-zoom-out">A−</button>
+          <span id="set-zoom-val" class="usage">100%</span>
+          <button class="btn2 quiet" id="set-zoom-in">A+</button>
+        </div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
+      <button class="btn2" id="set-key">🔑 AI key (fal.ai) — set or change</button>
+      <button class="btn2" id="set-update">⬆ Update my app</button>
+      <button class="btn2" id="set-backup">⬇ Back up everything (ZIP)</button>
+      <p class="usage" id="set-update-status" style="margin:0"></p>
+      <p class="usage">Your files live in <b>Studio\\server\\media</b>. Your account, characters and settings are in <b>Studio\\server\\data.sqlite</b> — copy those to move or restore your work.</p>
+    </div>
+    <details id="art-fold" style="margin-top:4px">
+    <summary style="cursor:pointer;color:var(--ts);font-size:13px;padding:6px 0">🎨 Free art generator (optional wallpapers) — click to open</summary>
     <div class="tabs">
       <button id="tab-image" class="on">Image</button>
       <button id="tab-video">Video</button>
@@ -185,6 +212,7 @@ textarea::placeholder{color:var(--tm)}
     <button class="dl-btn" id="dl">Download</button>
 
     <p class="note" id="foot-note">Everything is generated on your device — nothing you type here is uploaded.</p>
+    </details>
   </div><!-- /view-art -->
 
   <div class="view" id="view-scenes">
@@ -1249,6 +1277,28 @@ function pickFiles(accept, cb) {
       localStorage.setItem('tsid-theme', theme);
       applyTheme(theme);
     };
+    // Settings page mirrors of the same controls (safe: only wire if present)
+    const setTheme = (t) => { theme = t; if (t) localStorage.setItem('tsid-theme', t); else localStorage.removeItem('tsid-theme'); applyTheme(t); };
+    document.getElementById('set-theme-light') && (document.getElementById('set-theme-light').onclick = () => setTheme('light'));
+    document.getElementById('set-theme-dark') && (document.getElementById('set-theme-dark').onclick = () => setTheme('dark'));
+    document.getElementById('set-theme-auto') && (document.getElementById('set-theme-auto').onclick = () => setTheme(''));
+    const szv = document.getElementById('set-zoom-val');
+    const syncZ = () => { if (szv) szv.textContent = z + '%'; };
+    document.getElementById('set-zoom-in') && (document.getElementById('set-zoom-in').onclick = () => { z = Math.min(200, z + 10); apply(); syncZ(); });
+    document.getElementById('set-zoom-out') && (document.getElementById('set-zoom-out').onclick = () => { z = Math.max(60, z - 10); apply(); syncZ(); });
+    syncZ();
+    // Delegate to the existing buttons (bound later in the script; fine because
+    // these fire on click, not now). Guarded so a missing target never throws.
+    const go = (id) => { const el = document.getElementById(id); if (el && el.onclick) el.onclick(); };
+    document.getElementById('set-update') && (document.getElementById('set-update').onclick = () => {
+      const s = document.getElementById('set-update-status'); if (s) s.textContent = 'Checking for updates…';
+      go('upd-go');
+    });
+    document.getElementById('set-backup') && (document.getElementById('set-backup').onclick = () => go('stor-backup'));
+    document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => {
+      document.querySelector('#mtabs button[data-view="scenes"]')?.click();
+      setTimeout(() => document.getElementById('falkey-input')?.focus(), 200);
+    });
   };
   wire();
 })();

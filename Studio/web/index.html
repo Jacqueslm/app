@@ -266,8 +266,11 @@ textarea::placeholder{color:var(--tm)}
       <h3>📍 Locations <span class="usage">— save a place once, reuse it in any scene</span></h3>
       <input class="input" id="loc-name" placeholder="Location name (e.g. Club Krown)">
       <input class="input" id="loc-desc" placeholder="Details (optional): purple neon, gold booths, packed dance floor">
-      <button class="btn2" id="loc-create">Save location</button>
-      <p class="note" style="text-align:left">Then add 1–2 photos of the place (real photos or a generated scene you saved). Every scene with this location picked will match those photos.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="loc-create-photos" style="flex:2">📷 Add location + upload photos</button>
+        <button class="btn2 quiet" id="loc-create" style="flex:1">Save name only</button>
+      </div>
+      <p class="note" style="text-align:left">Type a name, then <b>📷 Add location + upload photos</b> — pick 1–2 photos of the place (real photos or a generated scene). Every scene with this location picked will match those photos.</p>
       <div id="locs-list" class="row"></div>
     </div>
     <div class="card" id="rels-card" style="display:none">
@@ -1365,11 +1368,13 @@ function renderLocations() {
         <button class="btn2 lc-save" style="flex:1">Save</button>
         <button class="btn2 quiet lc-del">Delete</button>
       </div>`;
-    el.querySelector('.lc-photos').onclick = () => pickFile('image/*', async (file) => {
+    el.querySelector('.lc-photos').onclick = () => pickFiles('image/*', async (files) => {
+      const b = el.querySelector('.lc-photos'); const old = b.textContent;
+      b.disabled = true; b.innerHTML = '<span class="spinner"></span>…';
       try {
-        await uploadFile(file, 'image', null, { locationId: l.id });
+        for (const file of files) await uploadFile(file, 'image', null, { locationId: l.id });
         await Promise.all([loadLocations(), loadAssets()]);
-      } catch (e) { setErr('#chars-err', e.message); }
+      } catch (e) { setErr('#chars-err', e.message); b.disabled = false; b.textContent = old; }
     });
     el.querySelector('.lc-save').onclick = async () => {
       try {
@@ -2165,18 +2170,36 @@ $('#char-create').onclick = async () => {
   } catch (e) { setErr('#chars-err', e.message); }
 };
 
+async function createLocation() {
+  const name = $('#loc-name').value.trim();
+  if (!name) { setErr('#chars-err', 'Give the location a name first.'); return null; }
+  const { location } = await jfetch('/api/studio/locations', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, description: $('#loc-desc').value }),
+  });
+  $('#loc-name').value = ''; $('#loc-desc').value = '';
+  return location;
+}
 $('#loc-create').onclick = async () => {
   setErr('#chars-err', null);
+  try { if (await createLocation()) await loadLocations(); }
+  catch (e) { setErr('#chars-err', e.message); }
+};
+// Create the location AND upload its photos in one step (the intuitive flow).
+$('#loc-create-photos').onclick = () => {
   const name = $('#loc-name').value.trim();
-  if (!name) return setErr('#chars-err', 'Give the location a name.');
-  try {
-    await jfetch('/api/studio/locations', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, description: $('#loc-desc').value }),
-    });
-    $('#loc-name').value = ''; $('#loc-desc').value = '';
-    await loadLocations();
-  } catch (e) { setErr('#chars-err', e.message); }
+  if (!name) return setErr('#chars-err', 'Type the location name first, then pick its photos.');
+  pickFiles('image/*', async (files) => {
+    setErr('#chars-err', null);
+    const b = $('#loc-create-photos'); const old = b.textContent;
+    b.disabled = true; b.innerHTML = '<span class="spinner"></span>Uploading…';
+    try {
+      const loc = await createLocation();
+      for (const f of files) await uploadFile(f, 'image', null, { locationId: loc.id });
+      await Promise.all([loadLocations(), loadAssets()]);
+    } catch (e) { setErr('#chars-err', e.message); }
+    b.disabled = false; b.textContent = old;
+  });
 };
 
 function renderCharacters() {

@@ -146,7 +146,7 @@ body.simple-only #view-simple{display:flex !important}
     <button data-view="art">⚙ Settings</button>
   </div>
   <div class="body">
-  <div class="view on" id="view-simple">
+  <div class="view" id="view-simple">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Make my video</h3>
       <p class="usage" style="margin:0">Three steps. All free — nothing here spends money.</p>
@@ -174,7 +174,7 @@ body.simple-only #view-simple{display:flex !important}
     </div>
   </div><!-- /view-simple -->
 
-  <div class="view" id="view-media">
+  <div class="view on" id="view-media">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🖼 My Media <span class="usage">— everything you've uploaded or made, as pictures</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1733,11 +1733,12 @@ $('#s-show-all').onclick = (e) => {
   try { localStorage.setItem('studioSimple', 'off'); } catch (_) {}
   document.querySelector('#mtabs button[data-view="media"]').click();
 };
-// default to the one simple screen unless the user chose "show all tools" before
-(function initSimpleMode() {
-  let off = false;
-  try { off = localStorage.getItem('studioSimple') === 'off'; } catch (_) {}
-  if (!off) document.body.classList.add('simple-only');
+// NOTE: the app opens as the normal, full multi-tab app. The one-screen
+// "simple" layout is no longer forced on anyone (it was confusing as a
+// default). It stays in the code, dormant, in case it's wanted later.
+(function clearForcedSimpleMode() {
+  try { localStorage.removeItem('studioSimple'); } catch (_) {}
+  document.body.classList.remove('simple-only');
 })();
 async function loadCharacters() {
   st.characters = (await jfetch('/api/studio/characters')).characters;

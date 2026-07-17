@@ -2977,6 +2977,17 @@ $('#crew-direct').onclick = async () => {
       + `<p style="font-size:12px;margin:0">🎨 <b>Designer's look:</b> ${escapeHtml(crew.plan.look.name)} — <i>${escapeHtml(crew.plan.look.style)}</i> (applied to every generated scene; put your own words in the Storyboard style box to override)</p>`
       + `<p style="font-size:12px;margin:0">🎥 <b>Cinematographer:</b> anamorphic energy on choruses (graded punchier), 35mm intimacy on verses, silhouettes on the bridge — lenses in the prompts, color grade on the timeline.</p>`
       + `<p style="font-size:12px;margin:0">🎚 <b>Sound Mixer:</b> mastered audio, fade-in/fade-out, music ducked under any clip sound — set automatically at render.</p>`
+      + (() => {
+        // Crew suggestions: upgrade ideas the plan itself won't spend on
+        const tips = [];
+        const selChar = st.characters.find((c) => String(c.id) === $('#scene-char').value);
+        if (shots.some((s) => s.scene.section === 'chorus')) tips.push('🎞 Animate the chorus hero shot after the render (Draft ~21¢/5s), then <b>Loop</b> it free — real motion where the song peaks.');
+        if (selChar && st.captions.length) tips.push(`🎤 <b>Sing</b> the hook line on ${escapeHtml(selChar.name)}'s best chorus shot (Draft 4¢ to test the timing, ✨ Hero 20¢ for the final).`);
+        if (selChar && !selChar.loraUrl) tips.push(`🔒 ${escapeHtml(selChar.name)} has no face lock yet — training one (~$3.60 one-time) makes every generated scene unmistakably them.`);
+        if (!$('#scene-location').value && (st.locations || []).length) tips.push('📍 Pick a saved Location so every generated scene shares one world.');
+        if (shots.some((s) => s.scene.section === 'bridge')) tips.push('🎭 The bridge is a great <b>Live Portrait</b> moment (~10¢): film your face performing the emotion, your still delivers it.');
+        return tips.length ? `<p style="font-size:12px;margin:0">💡 <b>Crew suggestions (optional, not in the budget):</b></p>` + tips.slice(0, 4).map((t) => `<p style="font-size:12px;color:var(--ts);margin:0">&nbsp;&nbsp;${t}</p>`).join('') : '';
+      })()
       + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> shorts &amp; reels cut to open right on the hook (the Shorts card's auto-detect reads your captions for the chorus), then Campaign Export packs everything with captions and a posting schedule.</p>`
       + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
         shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. This plan is free — nothing is charged until you press the Producer.</p>`;

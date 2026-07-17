@@ -228,6 +228,19 @@ textarea::placeholder{color:var(--tm)}
       <p class="usage" id="lp-note">The picked image stays exactly as approved — only the face, eyes and head move, copying your clip's performance. Film your own face doing the expressions you want (talking, vibing, head nods). Cheap — typically ~10¢ a clip.</p>
     </div>
 
+    <div class="card" id="basics-card">
+      <h3>🎨 Simple screens <span class="usage">— free, made on your computer</span></h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" data-basic="black" style="flex:1">⬛ Black screen</button>
+        <button class="btn2 quiet" data-basic="white" style="flex:1">⬜ White screen</button>
+        <button class="btn2 quiet" data-basic="gradient" style="flex:1">🌑 Dark gradient</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="color" id="basic-color" value="#1a1a2e" style="height:38px;width:56px;border:none;border-radius:8px;background:none;cursor:pointer">
+        <button class="btn2 quiet" data-basic="custom" style="flex:1">Add this color</button>
+      </div>
+      <p class="usage">Lands in your library like any image — drop it on the timeline as a pause between scenes, a backdrop for lyrics, or a flash frame on a beat.</p>
+    </div>
     <div class="err" id="scenes-err"></div>
     <div class="row"><label class="lbl">Library</label><div class="lib-grid" id="lib-grid"></div></div>
   </div>
@@ -1500,6 +1513,34 @@ $('#dn-go').onclick = async () => {
     setProg('#dn-prog', null);
   }
 };
+
+/* ---------------- simple screens (free, local canvas) ---------------- */
+document.querySelectorAll('#basics-card button[data-basic]').forEach((b) => {
+  b.onclick = async () => {
+    setErr('#scenes-err', null);
+    const kindKey = b.dataset.basic;
+    const c = document.createElement('canvas'); c.width = 1920; c.height = 1080;
+    const g = c.getContext('2d');
+    let label;
+    if (kindKey === 'gradient') {
+      const gr = g.createLinearGradient(0, 0, 0, 1080);
+      gr.addColorStop(0, '#000000'); gr.addColorStop(1, '#2b2b3a');
+      g.fillStyle = gr; label = 'Dark gradient';
+    } else {
+      const color = kindKey === 'black' ? '#000000' : kindKey === 'white' ? '#ffffff' : $('#basic-color').value;
+      g.fillStyle = color;
+      label = kindKey === 'black' ? 'Black screen' : kindKey === 'white' ? 'White screen' : `Color ${color}`;
+    }
+    g.fillRect(0, 0, 1920, 1080);
+    const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+    const old = b.textContent; b.disabled = true; b.textContent = 'Adding…';
+    try {
+      await uploadFile(new File([blob], `${label}.png`, { type: 'image/png' }), 'image');
+      await loadAssets();
+    } catch (e) { setErr('#scenes-err', e.message); }
+    b.disabled = false; b.textContent = old;
+  };
+});
 
 /* ---------------- Live Portrait ---------------- */
 $('#lp-upload').onclick = () => pickFile('video/*', async (file) => {

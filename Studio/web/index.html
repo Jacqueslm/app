@@ -1639,9 +1639,16 @@ function renderCharacters() {
   for (const c of st.characters) {
     const card = document.createElement('div');
     card.className = 'card';
+    const lt = st.cfg?.pricing?.loraTrain;
+    const trainLabel = `🔒 Train face lock${lt ? ` · ~$${lt.estCost.toFixed(2)} one-time` : ''}`;
     card.innerHTML = `
-      <h3>${escapeHtml(c.name)}</h3>
+      <h3>${escapeHtml(c.name)} ${c.loraUrl ? '<span class="usage" style="color:var(--green)">🔒 face lock active</span>' : ''}</h3>
       <div class="char-refs">${c.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="">`).join('') || '<span class="usage">No reference photos yet</span>'}</div>
+      ${c.loraUrl ? '' : `<button class="btn2 ch-train" ${c.refs.length >= 6 ? '' : 'disabled'}>${trainLabel}</button>
+      <p class="usage" style="margin-top:2px">${c.refs.length >= 6
+        ? 'Teaches the AI this face permanently — the strongest likeness there is. Takes ~10 minutes; keep this tab open.'
+        : `Needs at least 6 photos to train (has ${c.refs.length}). 10–20 varied photos = the best lock.`}</p>
+      <div class="progress-line ch-train-prog"><div></div></div>`}
       <input class="input ch-lora" placeholder="LoRA URL from fal.ai (optional, strongest consistency)" value="${escapeHtml(c.loraUrl || '')}">
       <input class="input ch-trig" placeholder="LoRA trigger word (optional, e.g. NOVA01)" value="${escapeHtml(c.triggerWord || '')}">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1649,6 +1656,27 @@ function renderCharacters() {
         <button class="btn2 ch-save" style="flex:1">Save</button>
         <button class="btn2 quiet ch-del">Delete</button>
       </div>`;
+    const trainBtn = card.querySelector('.ch-train');
+    if (trainBtn) trainBtn.onclick = async () => {
+      const est = lt ? `about $${lt.estCost.toFixed(2)}` : 'a few dollars';
+      if (!confirm(`Train a permanent face lock for ${c.name}?\n\nUses their ${Math.min(c.refs.length, 20)} reference photos, costs ${est} one-time from your fal balance, and takes around 10 minutes. Keep this tab open until it finishes.`)) return;
+      setErr('#chars-err', null);
+      trainBtn.disabled = true;
+      trainBtn.innerHTML = '<span class="spinner"></span>Training… (~10 min, keep tab open)';
+      const prog = card.querySelector('.ch-train-prog');
+      prog.classList.add('show');
+      try {
+        const { job } = await jfetch(`/api/studio/characters/${c.id}/train-lora`, { method: 'POST' });
+        await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+        await loadCharacters();
+        alert(`${c.name}'s face lock is trained and active! Every scene with them selected now uses it automatically.`);
+      } catch (e) {
+        setErr('#chars-err', e.message);
+        trainBtn.disabled = false;
+        trainBtn.textContent = trainLabel;
+        prog.classList.remove('show');
+      }
+    };
     card.querySelector('.ch-upload').onclick = () => pickFile('image/*', async (file) => {
       try { await uploadFile(file, 'image', c.id); await Promise.all([loadCharacters(), loadAssets()]); }
       catch (e) { setErr('#chars-err', e.message); }

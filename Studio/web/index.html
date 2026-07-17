@@ -81,6 +81,13 @@ textarea::placeholder{color:var(--tm)}
 .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .view{display:none;flex-direction:column;gap:14px}
 .view.on{display:flex}
+/* SIMPLE MODE: one screen only — hide the tab bar and every other view */
+body.simple-only #mtabs{display:none}
+body.simple-only .view{display:none !important}
+body.simple-only #view-simple{display:flex !important}
+#view-simple .big-btn{width:100%;padding:16px;font-size:16px;font-weight:700;border-radius:14px;border:none;cursor:pointer;font-family:var(--f);background:var(--s1);color:var(--tp);margin-top:8px}
+#view-simple .big-btn.go{background:var(--accent);color:#fff}
+#view-simple .big-btn:disabled{opacity:.6;cursor:default}
 .card{background:var(--s2);border:0.5px solid var(--bdr);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .card h3{font-size:14px;color:var(--tp)}
 .input{width:100%;background:var(--s0);border:0.5px solid var(--bdr2);border-radius:10px;padding:11px 12px;font-size:14px;color:var(--tp);font-family:var(--f);outline:none}
@@ -139,7 +146,30 @@ textarea::placeholder{color:var(--tm)}
     <button data-view="art">⚙ Settings</button>
   </div>
   <div class="body">
-  <div class="view on" id="view-media">
+  <div class="view on" id="view-simple">
+    <div class="card" style="border-color:var(--accent);border-width:1.5px">
+      <h3>🎬 Make my video</h3>
+      <p class="usage" style="margin:0">Three steps. All free — nothing here spends money.</p>
+
+      <button class="big-btn" id="s-add-media">①  📷  Add my pictures &amp; videos</button>
+      <div id="s-thumbs" class="char-refs" style="margin:6px 0"></div>
+      <p class="usage" id="s-media-note">Nothing added yet — they play in the order you add them.</p>
+
+      <button class="big-btn" id="s-add-song">②  🎵  Add my song</button>
+      <p class="usage" id="s-song-note">No song yet.</p>
+
+      <button class="big-btn go" id="s-make">③  🎬  Make my video</button>
+      <div class="progress-line" id="s-prog"><div></div></div>
+      <p class="usage" id="s-status"></p>
+      <div class="err" id="s-err"></div>
+      <div class="stage" id="s-stage"><video id="s-video" controls playsinline></video></div>
+      <a class="dl-btn" id="s-dl">⬇ Download my video</a>
+
+      <p style="text-align:center;margin-top:10px"><a href="#" id="s-show-all" style="color:var(--tm);font-size:13px">Show all tools →</a></p>
+    </div>
+  </div><!-- /view-simple -->
+
+  <div class="view" id="view-media">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🖼 My Media <span class="usage">— everything you've uploaded or made, as pictures</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1527,7 +1557,7 @@ async function bootStudio() {
 
 async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
-  renderLibrary(); renderSeqPickers(); renderMediaPage();
+  renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen();
 }
 
 /* ---------------- My Media: the visual first page (pictures / clips / songs) ---------------- */
@@ -1615,6 +1645,69 @@ async function mediaAddAll(kind) {
 }
 $('#media-add-all-images').onclick = () => mediaAddAll('image');
 $('#media-add-all-videos').onclick = () => mediaAddAll('video');
+
+/* ---------------- SIMPLE MODE: one screen, three steps, all free ---------------- */
+function simpleMedia() { return st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay); }
+function renderSimpleScreen() {
+  if (!document.getElementById('view-simple')) return;
+  const media = simpleMedia();
+  const box = $('#s-thumbs');
+  box.innerHTML = media.map((a) => a.kind === 'video'
+    ? `<video src="${a.url}" muted playsinline style="width:70px;height:70px;object-fit:cover;border-radius:8px"></video>`
+    : `<img src="${a.url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px">`).join('');
+  $('#s-media-note').textContent = media.length
+    ? `${media.length} picture/clip${media.length === 1 ? '' : 's'} — they play in the order you added them.`
+    : 'Nothing added yet — they play in the order you add them.';
+  const song = firstMusicAsset();
+  $('#s-song-note').textContent = song ? `♪ ${song.label}` : 'No song yet.';
+}
+$('#s-add-media').onclick = () => pickFiles('image/*,video/*', async (files) => {
+  setErr('#s-err', null);
+  const b = $('#s-add-media'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
+  try { for (const f of files) await uploadFile(f, (f.type || '').startsWith('video') ? 'video' : 'image'); await loadAssets(); renderSimpleScreen(); }
+  catch (e) { setErr('#s-err', e.message); }
+  b.disabled = false; b.textContent = old;
+});
+$('#s-add-song').onclick = () => pickFile('audio/*', async (file) => {
+  setErr('#s-err', null);
+  const b = $('#s-add-song'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Adding…';
+  try { const a = await uploadFile(file, 'audio'); await loadAssets(); addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); renderSimpleScreen(); }
+  catch (e) { setErr('#s-err', e.message); }
+  b.disabled = false; b.textContent = old;
+});
+$('#s-make').onclick = async () => {
+  setErr('#s-err', null);
+  const media = simpleMedia();
+  if (!media.length) return setErr('#s-err', 'Add at least one picture or video first (button ①).');
+  const b = $('#s-make'); b.disabled = true; const old = b.innerHTML; b.innerHTML = '<span class="spinner"></span>Making your video…';
+  $('#s-status').textContent = 'Putting your pictures and song together…';
+  try {
+    // build the timeline from ALL your media, in order — pictures hold 4s,
+    // your video clips play as-is. No AI, no spend.
+    st.seq = media.map((a) => a.kind === 'image'
+      ? { assetId: a.id, kind: 'image', label: a.label, url: a.url, holdDur: 4, start: 0, eq: null }
+      : { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: null });
+    st.trans = st.seq.slice(0, -1).map(() => ({ type: 'fade', duration: 0.5 }));
+    st.seqFormat = '16:9'; st.seqRes = '1080';
+    $('#enhance-auto').checked = true; $('#music-fadeout').checked = true;
+    renderSeq(); persistDraft();
+    const asset = await runRender(null, '#s-make', { prog: '#s-prog', stage: '#s-stage', video: '#s-video', dl: '#s-dl' });
+    $('#s-status').textContent = asset ? '🎉 Done! Press play above, or Download my video.' : '';
+  } catch (e) { setErr('#s-err', e.message); $('#s-status').textContent = ''; }
+  b.disabled = false; b.innerHTML = old;
+};
+$('#s-show-all').onclick = (e) => {
+  e.preventDefault();
+  document.body.classList.remove('simple-only');
+  try { localStorage.setItem('studioSimple', 'off'); } catch (_) {}
+  document.querySelector('#mtabs button[data-view="media"]').click();
+};
+// default to the one simple screen unless the user chose "show all tools" before
+(function initSimpleMode() {
+  let off = false;
+  try { off = localStorage.getItem('studioSimple') === 'off'; } catch (_) {}
+  if (!off) document.body.classList.add('simple-only');
+})();
 async function loadCharacters() {
   st.characters = (await jfetch('/api/studio/characters')).characters;
   renderCharacters(); renderSceneCharSelect(); renderRelationships();

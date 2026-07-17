@@ -278,6 +278,7 @@ textarea::placeholder{color:var(--tm)}
       <h3>🎬 Director &amp; 💼 Producer <span class="usage">— drop images, they do the rest from your song</span></h3>
       <button class="btn2" id="crew-drop">🎞 Drop your images (pick several)</button>
       <p class="usage" id="crew-imgs">No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.</p>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout" checked> 🔎 Director may also scout my Library for images that fit scenes</label>
       <div class="trim" style="font-size:12px">
         <span>Producer's budget: $</span><input type="number" id="crew-budget" min="0" step="0.5" value="2" style="width:64px">
         <span class="usage">max AI spend for gap scenes</span>
@@ -2927,18 +2928,39 @@ $('#crew-direct').onclick = async () => {
     let spent = 0;
     const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null }));
     crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label }; });
+    // Location scout: the Director combs the whole Library for images whose
+    // words (label + the prompt they were generated from) fit a scene's
+    // lyrics — dropped images always take precedence over scouting.
+    if ($('#crew-scout').checked) {
+      const used = new Set(shots.filter((s) => s.source).map((s) => s.source.assetId));
+      const tok = (t) => new Set(String(t).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 3));
+      for (const s of shots) {
+        if (s.source) continue;
+        const want = tok(s.scene.lines + ' ' + s.scene.prompt);
+        let best = null, bestN = 1; // needs at least 2 matching words
+        for (const a of st.assets) {
+          if (a.kind !== 'image' || used.has(a.id) || a.meta?.overlay) continue;
+          const have = tok(a.label + ' ' + (a.meta?.prompt || ''));
+          let n = 0; for (const w of want) if (have.has(w)) n++;
+          if (n > bestN) { bestN = n; best = a; }
+        }
+        if (best) { s.source = { assetId: best.id, label: `${best.label} (scouted)` }; used.add(best.id); }
+      }
+    }
     const gaps = shots.filter((s) => !s.source);
     const genOrder = [...gaps].sort((a, b) => (a.scene.section === 'chorus' ? -1 : 0) - (b.scene.section === 'chorus' ? -1 : 0));
     for (const g of genOrder) {
       if (spent + genRate <= budget) { g.generate = true; spent += genRate; }
     }
-    // gaps past the budget reuse dropped images round-robin (never blank)
+    // gaps past the budget reuse what we have round-robin (never blank)
+    const pool = crew.images.map((im) => ({ assetId: im.id, label: 'reused' }));
+    if (!pool.length) pool.push(...shots.filter((s) => s.source && !s.generate).map((s) => ({ assetId: s.source.assetId, label: 'reused' })));
     let rr = 0;
     for (const g of gaps) {
-      if (!g.generate && crew.images.length) g.source = { assetId: crew.images[rr++ % crew.images.length].id, label: 'reused' };
+      if (!g.generate && pool.length) g.source = pool[rr++ % pool.length];
     }
     if (gaps.some((g) => !g.generate && !g.source)) {
-      throw new Error('No images and no budget to generate any — drop some images or raise the budget.');
+      throw new Error('No images and no budget to generate any — drop some images, let the Director scout, or raise the budget.');
     }
     crew.plan = { shots, spent, genRate, look: designerLook(lyrics) };
     const box = $('#crew-plan');
@@ -2955,8 +2977,9 @@ $('#crew-direct').onclick = async () => {
       + `<p style="font-size:12px;margin:0">🎨 <b>Designer's look:</b> ${escapeHtml(crew.plan.look.name)} — <i>${escapeHtml(crew.plan.look.style)}</i> (applied to every generated scene; put your own words in the Storyboard style box to override)</p>`
       + `<p style="font-size:12px;margin:0">🎥 <b>Cinematographer:</b> anamorphic energy on choruses (graded punchier), 35mm intimacy on verses, silhouettes on the bridge — lenses in the prompts, color grade on the timeline.</p>`
       + `<p style="font-size:12px;margin:0">🎚 <b>Sound Mixer:</b> mastered audio, fade-in/fade-out, music ducked under any clip sound — set automatically at render.</p>`
+      + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> shorts &amp; reels cut to open right on the hook (the Shorts card's auto-detect reads your captions for the chorus), then Campaign Export packs everything with captions and a posting schedule.</p>`
       + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
-        shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. Chorus cut fast, verses breathe.</p>`;
+        shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. This plan is free — nothing is charged until you press the Producer.</p>`;
     $('#crew-produce').style.display = 'block';
     $('#crew-status').textContent = 'Review the plan (tweak lyrics/budget and re-plan any time), then hand it to the Producer.';
   } catch (e) { setErr('#seq-err', e.message); }

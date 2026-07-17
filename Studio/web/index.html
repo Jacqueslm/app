@@ -3127,16 +3127,8 @@ $('#crew-produce').onclick = async () => {
       const done = await pollJob(job.id, (j) => setProg('#crew-prog', ((i + j.progress / 100) / (toGen.length + 1)) * 50));
       toGen[i].source = { assetId: done.assetId, label: 'generated' };
       st.cfg.imagesUsed += 1;
-      // QC inspector: every fresh scene gets checked for face/hand/structure
-      // defects (~half a cent) before it reaches the timeline
-      try {
-        const { job: qcJob } = await jfetch('/api/studio/qc', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ assetId: done.assetId }),
-        });
-        const qcDone = await pollJob(qcJob.id, () => {});
-        if (qcDone.transcript?.qc === 'flag') crew.qcFlags = (crew.qcFlags || 0) + 1;
-      } catch (_) { /* QC is best-effort - a failed check never blocks the video */ }
+      // (QC is NOT run automatically - it would spend money you didn't ask
+      // for. Use the manual 🔍 QC button on any scene you want inspected.)
     }
     await loadAssets();
     // 2. hand the whole cast to Quick Video: moves/holds/transitions by
@@ -3159,8 +3151,7 @@ $('#crew-produce').onclick = async () => {
     b.innerHTML = '<span class="spinner"></span>Assembling…';
     await $('#qk-assemble').onclick();
     crew.eqByIndex = null; // grade is on the timeline now; manual assembles stay clean
-    $('#crew-status').textContent = `🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.${
-      crew.qcFlags ? ` ⚠ QC flagged ${crew.qcFlags} generated scene(s) — look for the ⚠ badge in the Library (hover it for the reason) and regenerate if it bothers you.` : ''}`;
+    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
     crew.qcFlags = 0;
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '💼 Producer: make it';

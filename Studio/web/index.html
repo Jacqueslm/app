@@ -1733,7 +1733,8 @@ function renderCharacters() {
     const trainLabel = `🔒 Train face lock${lt ? ` · ~$${lt.estCost.toFixed(2)} one-time` : ''}`;
     card.innerHTML = `
       <h3>${escapeHtml(c.name)} ${c.loraUrl ? '<span class="usage" style="color:var(--green)">🔒 face lock active</span>' : ''}</h3>
-      <div class="char-refs">${c.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="">`).join('') || '<span class="usage">No reference photos yet</span>'}</div>
+      <div class="char-refs">${c.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="" title="Tap to remove from ${escapeHtml(c.name)}'s reference photos" style="cursor:pointer">`).join('') || '<span class="usage">No reference photos yet</span>'}</div>
+      ${c.refs.length ? `<p class="usage" style="margin-top:2px">These are the photos the AI studies for ${escapeHtml(c.name)}'s face — tap one to remove it (it stays in your library). Only your uploads count; generated scenes never do.</p>` : ''}
       ${c.loraUrl ? '' : `<button class="btn2 ch-train" ${c.refs.length >= 6 ? '' : 'disabled'}>${trainLabel}</button>
       <p class="usage" style="margin-top:2px">${c.refs.length >= 6
         ? 'Teaches the AI this face permanently — the strongest likeness there is. Takes ~10 minutes; keep this tab open.'
@@ -1767,6 +1768,17 @@ function renderCharacters() {
         prog.classList.remove('show');
       }
     };
+    card.querySelectorAll('.char-refs img').forEach((imgEl, i) => {
+      const ref = c.refs[i];
+      if (!ref) return;
+      imgEl.onclick = async () => {
+        if (!confirm(`Remove this photo from ${c.name}'s reference set?\n\nIt stays in your library — it just stops being used to copy ${c.name}'s face.`)) return;
+        try {
+          await jfetch(`/api/studio/assets/${ref.id}/unlink-character`, { method: 'POST' });
+          await Promise.all([loadCharacters(), loadAssets()]);
+        } catch (e) { setErr('#chars-err', e.message); }
+      };
+    });
     card.querySelector('.ch-upload').onclick = () => pickFile('image/*', async (file) => {
       try { await uploadFile(file, 'image', c.id); await Promise.all([loadCharacters(), loadAssets()]); }
       catch (e) { setErr('#chars-err', e.message); }

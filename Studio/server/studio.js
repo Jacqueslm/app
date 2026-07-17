@@ -140,6 +140,21 @@ function assetJson(row) {
   };
 }
 
+// A character's REFERENCE photos are only the images the user uploaded for
+// them. Generated scenes also carry the character's id (useful for grouping),
+// but they must never feed back into references - AI output training/
+// conditioning on AI output drifts the face, and duo scenes would pollute
+// each member's set with the other person.
+function isUploadedRef(row, characterId) {
+  if (row.character_id !== characterId) return false;
+  try {
+    const m = JSON.parse(row.meta || 'null');
+    if (!m) return true; // very old rows predate meta entirely
+    if (m.overlay) return false;
+    return !m.source || m.source === 'upload';
+  } catch (_) { return true; }
+}
+
 function deleteUserAssets(userId) {
   for (const row of db.getAssets(userId)) {
     try { fs.unlinkSync(mediaPath(row.filename)); } catch (_) {}
@@ -505,6 +520,15 @@ router.get('/assets/:id/file', (req, res) => {
   });
 });
 
+// Remove an image from a character's reference set without deleting it from
+// the library (clears the character link only).
+router.post('/assets/:id/unlink-character', (req, res) => {
+  const row = db.getAsset(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Asset not found.' });
+  db.unlinkAssetFromCharacter(req.userId, row.id);
+  res.json({ ok: true });
+});
+
 router.delete('/assets/:id', (req, res) => {
   const row = db.getAsset(req.userId, Number(req.params.id));
   if (!row) return res.status(404).json({ error: 'Asset not found.' });
@@ -547,7 +571,7 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
 router.get('/characters', (req, res) => {
   const characters = db.getCharacters(req.userId).map((c) => ({
     id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word, createdAt: c.created_at,
-    refs: db.getAssets(req.userId, 'image').filter((a) => a.character_id === c.id).map(assetJson),
+    refs: db.getAssets(req.userId, 'image').filter((a) => isUploadedRef(a, c.id)).map(assetJson),
   }));
   res.json({ characters });
 });
@@ -601,7 +625,7 @@ router.post('/characters/:id/train-lora', async (req, res) => {
   const character = db.getCharacter(req.userId, Number(req.params.id));
   if (!character) return res.status(404).json({ error: 'Character not found.' });
   const refs = db.getAssets(req.userId, 'image')
-    .filter((a) => a.character_id === character.id && !(a.meta && JSON.parse(a.meta || '{}').overlay))
+    .filter((a) => isUploadedRef(a, character.id))
     .slice(0, 20);
   if (refs.length < 6) {
     return res.status(400).json({ error: `Training needs at least 6 photos of ${character.name} (10-20 varied ones is ideal) - they have ${refs.length}. Add more on this tab first.` });
@@ -731,7 +755,7 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
     const allUris = [];
     const whose = []; // which reference photos belong to which character
     for (const c of cast) {
-      const refs = db.getAssets(userId, 'image').filter((a) => a.character_id === c.id).slice(0, perChar);
+      const refs = db.getAssets(userId, 'image').filter((a) => isUploadedRef(a, c.id)).slice(0, perChar);
       if (!refs.length) {
         const hint = best ? ' — Best quality works from photos (LoRAs are Flux-only)'
           : cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL';

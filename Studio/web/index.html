@@ -340,6 +340,36 @@ textarea::placeholder{color:var(--tm)}
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
+
+      <p class="usage" style="margin:8px 0 0"><b>4. Director's brief</b> <span class="usage">(answer a few — the Director plans around your answers instead of guessing)</span></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:13px">
+        <label style="display:flex;flex-direction:column;gap:2px">🎨 Vibe
+          <select class="input" id="crew-vibe">
+            <option value="">Let the song decide</option>
+            <option value="moody">Moody / emotional</option>
+            <option value="hype">Hype / party</option>
+            <option value="romantic">Romantic / warm</option>
+            <option value="street">Street / gritty</option>
+            <option value="dreamy">Dreamy / soft</option>
+            <option value="dark">Dark / cinematic</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:2px">⚡ Energy
+          <select class="input" id="crew-energy">
+            <option value="chill">Chill — long holds, soft fades</option>
+            <option value="medium" selected>Medium — balanced</option>
+            <option value="hype">High — short holds, hard cuts</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:2px">⭐ Who's the star?
+          <select class="input" id="crew-star"><option value="">Whoever the lyrics name</option></select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:2px">📍 Where?
+          <select class="input" id="crew-world"><option value="">No fixed location</option></select>
+        </label>
+      </div>
+      <p class="usage" id="crew-brief-tip" style="margin:2px 0 0"></p>
+
       <div class="trim" style="font-size:12px">
         <span>Producer's budget: $</span><input type="number" id="crew-budget" min="0" step="0.5" value="2" style="width:64px">
         <span class="usage">max AI spend for gap scenes</span>
@@ -1595,6 +1625,20 @@ function renderSceneCharSelect() {
     (st.locations || []).map((l) => `<option value="${l.id}">📍 ${escapeHtml(l.name)}</option>`).join('');
   locSel.style.display = (st.locations || []).length ? '' : 'none';
   if ([...locSel.options].some((o) => o.value === locCur)) locSel.value = locCur;
+
+  // keep the Director's-brief star/where dropdowns in sync with the same data
+  const starSel = $('#crew-star');
+  if (starSel) {
+    starSel.innerHTML = '<option value="">Whoever the lyrics name</option>' +
+      st.characters.map((c) => `<option value="${c.id}">⭐ ${escapeHtml(c.name)}${c.loraUrl ? ' (face lock)' : ''}</option>`).join('');
+    if ([...starSel.options].some((o) => o.value === crew.brief.star)) starSel.value = crew.brief.star; else crew.brief.star = '';
+  }
+  const worldSel = $('#crew-world');
+  if (worldSel) {
+    worldSel.innerHTML = '<option value="">No fixed location</option>' +
+      (st.locations || []).map((l) => `<option value="${l.id}">📍 ${escapeHtml(l.name)}</option>`).join('');
+    if ([...worldSel.options].some((o) => o.value === crew.brief.world)) worldSel.value = crew.brief.world; else crew.brief.world = '';
+  }
 }
 function updateScenesUsage() {
   if (!st.cfg) return;
@@ -3082,7 +3126,25 @@ Object.entries({
 // (who plays which scene, camera move + hold + transition per section, what
 // needs generating). The Producer executes the approved plan inside the
 // budget by driving the existing tested machinery (scene gen + Quick Video).
-const crew = { images: [], plan: null, eqByIndex: null };
+const crew = { images: [], plan: null, eqByIndex: null, brief: { vibe: '', energy: 'medium', star: '', world: '' } };
+// Director's brief: the vibe you pick becomes the Production Designer's look
+// (grade + prompt words), so the plan matches what you asked for.
+const CREW_VIBES = {
+  moody: { look: 'Moody blue', style: 'moody teal-and-amber grade, rain-slick reflections, deep shadows, heavy cinematic contrast' },
+  hype: { look: 'Neon nightlife', style: 'saturated neon palette with purple and gold accents, atmospheric haze, glossy reflective surfaces' },
+  romantic: { look: 'Golden hour', style: 'warm golden-hour palette, soft haze, gentle rim light, romantic glow' },
+  street: { look: 'Street documentary', style: 'gritty lightly-desaturated palette, practical streetlight sources, handheld realism' },
+  dreamy: { look: 'Dreamy haze', style: 'soft pastel dreamlike haze, bloom highlights, gentle diffusion, ethereal light' },
+  dark: { look: 'Dark cinematic', style: 'high-contrast chiaroscuro, deep blacks, single dramatic light source, tense mood' },
+};
+// Energy from the brief scales every section's hold time and cut style so the
+// pacing you chose is real, not decorative.
+const CREW_ENERGY = { chill: { mult: 1.5, trans: 'fade' }, medium: { mult: 1, trans: null }, hype: { mult: 0.6, trans: 'cut' } };
+function crewStyleFor(section) {
+  const base = CREW_STYLE[section] || CREW_STYLE.verse;
+  const e = CREW_ENERGY[crew.brief.energy] || CREW_ENERGY.medium;
+  return { ...base, dur: Math.round(Math.max(1.2, base.dur * e.mult) * 10) / 10, trans: e.trans || base.trans };
+}
 // Cinematographer: per-section camera moves (varied within a section), lens
 // language for generated prompts, and a color grade applied on the timeline.
 const CREW_STYLE = {
@@ -3116,6 +3178,9 @@ const DESIGNER_LOOKS = [
 function designerLook(lyrics) {
   const custom = $('#sb-style').value.trim();
   if (custom) return { name: 'your custom look', style: custom };
+  // the brief's vibe wins over auto-detection (you told the Director what you want)
+  const v = crew.brief.vibe && CREW_VIBES[crew.brief.vibe];
+  if (v) return { name: v.look, style: v.style };
   let best = { name: 'Clean cinematic', style: 'balanced cinematic color grade, rich blacks, filmic contrast' }, bestN = 0;
   for (const l of DESIGNER_LOOKS) {
     const n = (lyrics.match(l.re) || []).length;
@@ -3196,18 +3261,45 @@ $('#crew-song-import').onclick = async () => {
 $('#crew-lyrics').oninput = () => { $('#lyr-text').value = $('#crew-lyrics').value; persistDraft(); };
 $('#crew-autocap').onclick = () => $('#lyr-auto').onclick();
 
+// --- Director's brief: the answers steer the plan, and each choice earns a
+// specific, targeted tip (real advice, not boilerplate) ---
+function updateBriefTip() {
+  const tips = [];
+  const e = crew.brief.energy;
+  if (e === 'hype') tips.push('⚡ High energy — shorter holds and hard cuts on the chorus. Great for dance/party tracks.');
+  else if (e === 'chill') tips.push('🌙 Chill — longer holds and soft fades let each shot breathe. Great for ballads.');
+  if (crew.brief.vibe) tips.push(`🎨 ${CREW_VIBES[crew.brief.vibe].look} grade will be baked into every generated scene and the timeline.`);
+  const star = st.characters.find((c) => String(c.id) === crew.brief.star);
+  if (star) tips.push(star.loraUrl
+    ? `⭐ ${escapeHtml(star.name)} stars in every generated scene, locked to their face.`
+    : `⭐ ${escapeHtml(star.name)} stars in every generated scene — train their face lock (~$3.60 once) to make them unmistakable.`);
+  const world = (st.locations || []).find((l) => String(l.id) === crew.brief.world);
+  if (world) tips.push(`📍 Every generated scene is set in ${escapeHtml(world.name)}, so the video shares one world.`);
+  $('#crew-brief-tip').innerHTML = tips.length ? tips.map((t) => `<span style="display:block">${t}</span>`).join('') : '';
+}
+$('#crew-vibe').onchange = () => { crew.brief.vibe = $('#crew-vibe').value; updateBriefTip(); };
+$('#crew-energy').onchange = () => { crew.brief.energy = $('#crew-energy').value; updateBriefTip(); };
+$('#crew-star').onchange = () => { crew.brief.star = $('#crew-star').value; updateBriefTip(); };
+$('#crew-world').onchange = () => { crew.brief.world = $('#crew-world').value; updateBriefTip(); };
+
 $('#crew-direct').onclick = async () => {
   setErr('#seq-err', null);
   if ($('#crew-lyrics').value.trim() && !$('#lyr-text').value.trim()) $('#lyr-text').value = $('#crew-lyrics').value;
   if (!st.musicList.length) return setErr('#seq-err', 'Add your song first (button 1 above — a file or a Suno link).');
   const lyrics = $('#lyr-text').value.trim() || $('#crew-lyrics').value.trim() || st.captions.map((c) => c.text).join('\n');
   if (!lyrics) return setErr('#seq-err', 'The Director needs the words: paste lyrics in Lyrics & Captions, or press 🪄 Auto-captions first.');
+  // apply the Director's brief: pin the chosen star + world so casting,
+  // pricing and generation all honor your answers
+  if (crew.brief.star && [...$('#scene-char').options].some((o) => o.value === crew.brief.star)) $('#scene-char').value = crew.brief.star;
+  if (crew.brief.world && [...$('#scene-location').options].some((o) => o.value === crew.brief.world)) $('#scene-location').value = crew.brief.world;
+  // the vibe's look words go into the prompts (your own style box still wins)
+  const briefStyle = ($('#sb-style')?.value || '').trim() || (crew.brief.vibe ? CREW_VIBES[crew.brief.vibe].style : '');
   const b = $('#crew-direct');
   b.disabled = true; b.innerHTML = '<span class="spinner"></span>Director is reading your song…';
   try {
     const { scenes } = await jfetch('/api/studio/storyboard', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lyrics, title: $('#cp-title')?.value || '', style: $('#sb-style')?.value || '' }),
+      body: JSON.stringify({ lyrics, title: $('#cp-title')?.value || '', style: briefStyle }),
     });
     const p = st.cfg?.pricing;
     const genRate = p ? ($('#scene-char').value ? p.characterImageRate : p.imageRate) : 0.09;
@@ -3215,7 +3307,13 @@ $('#crew-direct').onclick = async () => {
     // cast dropped images first (in order), then budget-limited generation
     // for the gaps - choruses get generation priority over verses
     let spent = 0;
-    const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null, cast: castForScene(sc) }));
+    const star = crew.brief.star && st.characters.find((c) => String(c.id) === crew.brief.star);
+    const shots = scenes.map((sc, i) => {
+      let cast = castForScene(sc);
+      // the brief's star headlines any scene the lyrics didn't already cast
+      if (star && !cast.some((c) => String(c.id) === crew.brief.star)) cast = [star, ...cast].slice(0, 2);
+      return { scene: sc, idx: i, source: null, cast };
+    });
     crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label, kind: img.kind || 'image' }; });
     // Location scout: the Director combs the whole Library for images whose
     // words (label + the prompt they were generated from) fit a scene's
@@ -3257,7 +3355,7 @@ $('#crew-direct').onclick = async () => {
     const secIcon = { intro: '🎬', verse: '🎤', chorus: '🔥', bridge: '🌉', outro: '🌅' };
     const secCount = {};
     box.innerHTML = shots.map((s) => {
-      const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      const style = crewStyleFor(s.scene.section);
       const nth = secCount[s.scene.section] = (secCount[s.scene.section] || 0) + 1;
       const isVid = s.source && s.source.kind === 'video';
       return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b>${
@@ -3326,7 +3424,7 @@ $('#crew-produce').onclick = async () => {
     const secN = {};
     crew.eqByIndex = {};
     qk.shots = crew.plan.shots.map((s, i) => {
-      const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      const style = crewStyleFor(s.scene.section);
       const nth = secN[s.scene.section] = (secN[s.scene.section] || 0) + 1;
       if (style.eq) crew.eqByIndex[i] = { ...style.eq };
       const asset = st.assets.find((a) => a.id === s.source.assetId);

@@ -566,6 +566,22 @@ router.get('/backup', (req, res) => {
   }
 });
 
+// Reveal the folder where every uploaded/generated picture, video and song is
+// stored, in the OS file manager. Studio runs on your own machine, so this
+// opens Explorer/Finder right on your media. Always returns the path too.
+router.post('/reveal-media', (req, res) => {
+  let opened = false;
+  try {
+    const plat = process.platform;
+    const cmd = plat === 'win32' ? 'explorer' : plat === 'darwin' ? 'open' : 'xdg-open';
+    const child = spawn(cmd, [MEDIA_DIR], { detached: true, stdio: 'ignore' });
+    child.on('error', () => {});
+    child.unref();
+    opened = true;
+  } catch (_) { opened = false; }
+  res.json({ opened, path: MEDIA_DIR });
+});
+
 /* ---------------- assets ---------------- */
 router.get('/assets', (req, res) => {
   const kind = ['image', 'video', 'audio', 'project', 'archive'].includes(req.query.kind) ? req.query.kind : null;

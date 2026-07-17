@@ -455,6 +455,7 @@ textarea::placeholder{color:var(--tm)}
         <button class="btn2" id="seq-add">Add</button>
         <button class="btn2 quiet" id="seq-upload-clip">Upload video</button>
       </div>
+      <button class="btn2" id="seq-add-all-media" style="width:100%;margin-top:6px">➕ Add ALL my pictures &amp; clips to the timeline</button>
       <p class="usage">Drag items to reorder (or use the arrows). Stills sit on the timeline with a hold time — or give them a camera move above first.</p>
     </div>
 
@@ -614,7 +615,9 @@ textarea::placeholder{color:var(--tm)}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2 quiet" id="stor-refresh">Refresh</button>
         <button class="btn2" id="stor-backup">⬇ Download full backup (ZIP)</button>
+        <button class="btn2 quiet" id="stor-open-folder">📁 Open my media folder</button>
       </div>
+      <p class="usage" id="stor-folder-path" style="word-break:break-all"></p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2 quiet" id="upd-check">Check for updates</button>
         <button class="btn2" id="upd-go">⬆ Update my app</button>
@@ -1765,6 +1768,18 @@ async function loadStorage() {
 }
 $('#stor-refresh').onclick = loadStorage;
 $('#stor-backup').onclick = () => { location.href = '/api/studio/backup'; };
+$('#stor-open-folder').onclick = async () => {
+  const b = $('#stor-open-folder'); b.disabled = true;
+  try {
+    const r = await jfetch('/api/studio/reveal-media', { method: 'POST' });
+    $('#stor-folder-path').textContent = r.opened
+      ? `Opened: ${r.path}`
+      : `Your pictures, videos and songs live here:  ${r.path}`;
+  } catch (e) {
+    $('#stor-folder-path').textContent = e.message;
+  }
+  b.disabled = false;
+};
 
 async function loadDiagnostics() {
   try {
@@ -2791,7 +2806,33 @@ $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }
   catch (e) { setErr('#seq-err', e.message); }
 });
+// Add EVERY uploaded picture and clip to the timeline in one click, in order —
+// so you never have to add them one at a time (and never lose any).
+$('#seq-add-all-media').onclick = async () => {
+  setErr('#seq-err', null);
+  const media = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
+  if (!media.length) return setErr('#seq-err', 'No pictures or clips uploaded yet — upload some first.');
+  const b = $('#seq-add-all-media'); b.disabled = true; const old = b.textContent;
+  b.innerHTML = '<span class="spinner"></span>Adding…';
+  try { for (const a of media) await addToSeq(a); }
+  finally { b.disabled = false; b.textContent = old; }
+};
+// One song, once: adding the same track twice (the mix-up that made the song
+// play twice and piled up duplicate uploads) now replaces instead of stacking.
+function songLabelOf(id) { return (st.assets.find((x) => x.id === id) || {}).label || ''; }
+function addMusicUnique(assetId) {
+  const lbl = songLabelOf(assetId);
+  if (lbl) st.musicList = st.musicList.filter((t) => songLabelOf(t.assetId) !== lbl);
+  st.musicList.push({ assetId, start: 0, len: null });
+}
 function renderMusicList() {
+  // self-heal: collapse accidental duplicate songs (same track added twice)
+  const seen = new Set();
+  st.musicList = st.musicList.filter((t) => {
+    const l = songLabelOf(t.assetId);
+    if (!l) return true; // asset not loaded yet — never drop it
+    if (seen.has(l)) return false; seen.add(l); return true;
+  });
   const list = $('#mus-list');
   list.innerHTML = st.musicList.length ? '' : '<p class="note" style="text-align:left">No songs yet. Songs play in order — add two or three for longer videos.</p>';
   st.musicList.forEach((t, i) => {
@@ -2823,7 +2864,7 @@ function updateQkMusicLabel() {
 $('#mus-add').onclick = () => {
   const id = Number($('#mus-add-select').value);
   if (!id) return;
-  st.musicList.push({ assetId: id, start: 0, len: null });
+  addMusicUnique(id);
   renderMusicList(); updateQkMusicLabel(); persistDraft();
 };
 $('#seq-upload-music').onclick = () => pickFile('audio/*', async (file) => {
@@ -2831,7 +2872,7 @@ $('#seq-upload-music').onclick = () => pickFile('audio/*', async (file) => {
   try {
     const asset = await uploadFile(file, 'audio');
     await loadAssets();
-    st.musicList.push({ assetId: asset.id, start: 0, len: null });
+    addMusicUnique(asset.id);
     renderMusicList(); updateQkMusicLabel(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
 });
@@ -4256,7 +4297,7 @@ $('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
   try {
     const asset = await uploadFile(file, 'audio');
     await loadAssets();
-    st.musicList.push({ assetId: asset.id, start: 0, len: null }); // press again to add a 2nd song
+    addMusicUnique(asset.id); // same song won't stack (that made it play twice)
     renderMusicList(); updateQkMusicLabel(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
 });
@@ -4273,7 +4314,7 @@ $('#qk-import-song').onclick = async () => {
       body: JSON.stringify({ url }),
     });
     await loadAssets();
-    st.musicList.push({ assetId: asset.id, start: 0, len: null });
+    addMusicUnique(asset.id);
     renderMusicList(); updateQkMusicLabel(); persistDraft();
     $('#qk-song-link').value = '';
   } catch (e) { setErr('#seq-err', e.message); }

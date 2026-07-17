@@ -2864,6 +2864,26 @@ async function runRender(windowOpt, btnSel, opts) {
     setProg(ui.prog, null);
   }
 }
+/* ---------------- hover help on every major button ---------------- */
+Object.entries({
+  'crew-drop': 'Pick images from your computer for the Director to cast into scenes. You can also let them scout your Library instead.',
+  'crew-direct': 'FREE. The Director reads your song + lyrics and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-produce': 'This is the spend button: generates the planned gap scenes, applies motion and grade, and renders the full video with captions.',
+  'qk-add-imgs': 'Pick pictures from your computer for a quick beat-matched video.',
+  'qk-add-music': 'Upload your song file (mp3/wav) from your computer.',
+  'qk-import-song': 'Paste a Suno share link (or any direct song link) and the song downloads straight into Studio.',
+  'qk-assemble': 'FREE. Builds the whole video: camera moves on every picture, cuts on the beat, music, captions.',
+  'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~2¢). Check the words after.',
+  'lyr-tap': 'FREE perfect sync: the song plays and you tap once when each line starts.',
+  'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
+  'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
+  'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene.',
+  'seq-render': 'FREE. Renders the timeline into the final MP4 with music, captions, and mastered audio.',
+  'hl-auto': 'FREE. Finds your best short-video moments: the chorus/hook if captions exist, loudest sections otherwise.',
+  'loc-create': 'Save a place once (add photos after) and reuse it in any scene from the location dropdown.',
+  'char-create': 'Create a star. Then upload 6–20 clear solo photos and train their face lock.',
+}).forEach(([id, tip]) => { const el = document.getElementById(id); if (el) el.title = tip; });
+
 /* ---------------- Director & Producer ---------------- */
 // The Director turns song structure + your dropped images into a shot plan
 // (who plays which scene, camera move + hold + transition per section, what

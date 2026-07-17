@@ -285,6 +285,7 @@ textarea::placeholder{color:var(--tm)}
     <div class="card" id="crew-card">
       <h3>🎬 Director &amp; 💼 Producer <span class="usage">— drop images, they do the rest from your song</span></h3>
       <button class="btn2" id="crew-drop">🎞 Drop your images (pick several)</button>
+      <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout" checked> 🔎 Director may also scout my Library for images that fit scenes</label>
       <div class="trim" style="font-size:12px">
@@ -3005,10 +3006,19 @@ $('#crew-drop').onclick = () => pickFiles('image/*,video/*', async (files) => {
       if (kind === 'image') crew.images.push(asset); // videos join the Library for the Director to place
     }
     await loadAssets();
-    $('#crew-imgs').textContent = `${crew.images.length} image${crew.images.length === 1 ? '' : 's'} in the Director's hands${files.some((f) => (f.type || '').startsWith('video')) ? ' (+ videos in your Library)' : ''}.`;
+    renderCrewThumbs();
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = old;
 });
+// Show the actual dropped pictures (thumbnails), not just a count. Tap one to remove it.
+function renderCrewThumbs() {
+  const box = $('#crew-thumbs');
+  box.innerHTML = crew.images.map((im, i) => `<img src="${im.url}" title="Tap to remove" style="cursor:pointer" data-i="${i}">`).join('');
+  box.querySelectorAll('img').forEach((el) => { el.onclick = () => { crew.images.splice(Number(el.dataset.i), 1); renderCrewThumbs(); }; });
+  $('#crew-imgs').textContent = crew.images.length
+    ? `${crew.images.length} picture${crew.images.length === 1 ? '' : 's'} ready — tap one to remove it.`
+    : 'No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.';
+}
 
 $('#crew-direct').onclick = async () => {
   setErr('#seq-err', null);
@@ -3096,7 +3106,9 @@ $('#crew-direct').onclick = async () => {
       + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
         shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. This plan is free — nothing is charged until you press the Producer.</p>`;
     $('#crew-produce').style.display = 'block';
-    $('#crew-status').textContent = 'Review the plan (tweak lyrics/budget and re-plan any time), then hand it to the Producer.';
+    $('#crew-status').textContent = 'Review the plan below (tweak lyrics/budget and re-plan any time), then hand it to the Producer.';
+    // Jump the plan into view so it never looks like "nothing happened".
+    $('#crew-plan').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '🎬 Director: plan my video';
 };
@@ -3487,6 +3499,7 @@ $('#sb-build').onclick = async () => {
       : `${scenes.length} scenes built locally (free, no key needed). Add an ANTHROPIC_API_KEY for sharper AI-written prompts — same key that powers Nova chat.`;
     renderStoryboard();
     persistDraft();
+    $('#sb-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
     setErr('#seq-err', e.message);
   } finally {

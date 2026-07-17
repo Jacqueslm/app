@@ -2868,14 +2868,35 @@ async function runRender(windowOpt, btnSel, opts) {
 // (who plays which scene, camera move + hold + transition per section, what
 // needs generating). The Producer executes the approved plan inside the
 // budget by driving the existing tested machinery (scene gen + Quick Video).
-const crew = { images: [], plan: null };
+const crew = { images: [], plan: null, eqByIndex: null };
+// Cinematographer: per-section camera moves (varied within a section), lens
+// language for generated prompts, and a color grade applied on the timeline.
 const CREW_STYLE = {
-  intro: { move: 'pull', dur: 5, trans: 'fade' },
-  verse: { move: 'drift', dur: 4, trans: 'fade' },
-  chorus: { move: 'push', dur: 2, trans: 'cut' },
-  bridge: { move: 'pan_right', dur: 4, trans: 'fade' },
-  outro: { move: 'pull', dur: 5, trans: 'fade' },
+  intro: { moves: ['pull'], dur: 5, trans: 'fade', lens: 'wide anamorphic establishing frame, deep focus', eq: null },
+  verse: { moves: ['drift', 'pan_right', 'pan_left'], dur: 4, trans: 'fade', lens: '35mm lens, shallow depth of field, natural framing', eq: null },
+  chorus: { moves: ['push', 'push_pan'], dur: 2, trans: 'cut', lens: 'dynamic low-angle, anamorphic flare, motion energy', eq: { brightness: 0.02, contrast: 1.12, saturation: 1.15 } },
+  bridge: { moves: ['pan_left'], dur: 4, trans: 'fade', lens: 'backlit silhouette, negative space composition', eq: { brightness: -0.03, contrast: 1.08, saturation: 0.8 } },
+  outro: { moves: ['pull'], dur: 5, trans: 'fade', lens: 'slow retreating frame, fading light', eq: null },
 };
+const crewMove = (section, nth) => { const m = (CREW_STYLE[section] || CREW_STYLE.verse).moves; return m[nth % m.length]; };
+// Production Designer: one consistent look for the whole video, derived from
+// the lyrics' world (the user's own style text always wins).
+const DESIGNER_LOOKS = [
+  { re: /club|party|dance|floor|neon|vip|bottle|dj/gi, name: 'Neon nightlife', style: 'saturated neon palette with purple and gold accents, atmospheric haze, glossy reflective surfaces' },
+  { re: /rain|pain|alone|tears|miss|gone|cold|hurt/gi, name: 'Moody blue', style: 'moody teal-and-amber grade, rain-slick reflections, deep shadows, heavy cinematic contrast' },
+  { re: /love|heart|hold|kiss|warm|home|light/gi, name: 'Golden hour', style: 'warm golden-hour palette, soft haze, gentle rim light, romantic glow' },
+  { re: /street|block|hustle|grind|city|concrete|corner/gi, name: 'Street documentary', style: 'gritty lightly-desaturated palette, practical streetlight sources, handheld realism' },
+];
+function designerLook(lyrics) {
+  const custom = $('#sb-style').value.trim();
+  if (custom) return { name: 'your custom look', style: custom };
+  let best = { name: 'Clean cinematic', style: 'balanced cinematic color grade, rich blacks, filmic contrast' }, bestN = 0;
+  for (const l of DESIGNER_LOOKS) {
+    const n = (lyrics.match(l.re) || []).length;
+    if (n > bestN) { best = l; bestN = n; }
+  }
+  return best;
+}
 
 $('#crew-drop').onclick = () => pickFiles('image/*', async (files) => {
   setErr('#seq-err', null);
@@ -2919,17 +2940,23 @@ $('#crew-direct').onclick = async () => {
     if (gaps.some((g) => !g.generate && !g.source)) {
       throw new Error('No images and no budget to generate any — drop some images or raise the budget.');
     }
-    crew.plan = { shots, spent, genRate };
+    crew.plan = { shots, spent, genRate, look: designerLook(lyrics) };
     const box = $('#crew-plan');
     box.style.display = 'flex';
     const secIcon = { intro: '🎬', verse: '🎤', chorus: '🔥', bridge: '🌉', outro: '🌅' };
+    const secCount = {};
     box.innerHTML = shots.map((s) => {
       const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      const nth = secCount[s.scene.section] = (secCount[s.scene.section] || 0) + 1;
       return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b> — ${
         s.generate ? `<span style="color:var(--accent)">generate new (~$${crew.plan.genRate.toFixed(2)})</span>` : escapeHtml(s.source.label)
-      } · ${style.move} move · ${style.dur}s hold${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
-    }).join('') + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
-      shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. Chorus cut fast, verses breathe.</p>`;
+      } · ${crewMove(s.scene.section, nth - 1)} move · ${style.dur}s hold${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
+    }).join('')
+      + `<p style="font-size:12px;margin:0">🎨 <b>Designer's look:</b> ${escapeHtml(crew.plan.look.name)} — <i>${escapeHtml(crew.plan.look.style)}</i> (applied to every generated scene; put your own words in the Storyboard style box to override)</p>`
+      + `<p style="font-size:12px;margin:0">🎥 <b>Cinematographer:</b> anamorphic energy on choruses (graded punchier), 35mm intimacy on verses, silhouettes on the bridge — lenses in the prompts, color grade on the timeline.</p>`
+      + `<p style="font-size:12px;margin:0">🎚 <b>Sound Mixer:</b> mastered audio, fade-in/fade-out, music ducked under any clip sound — set automatically at render.</p>`
+      + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
+        shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. Chorus cut fast, verses breathe.</p>`;
     $('#crew-produce').style.display = 'block';
     $('#crew-status').textContent = 'Review the plan (tweak lyrics/budget and re-plan any time), then hand it to the Producer.';
   } catch (e) { setErr('#seq-err', e.message); }
@@ -2949,10 +2976,11 @@ $('#crew-produce').onclick = async () => {
     for (let i = 0; i < toGen.length; i++) {
       $('#crew-status').textContent = `Producer: generating scene ${i + 1} of ${toGen.length}…`;
       b.innerHTML = `<span class="spinner"></span>Scene ${i + 1}/${toGen.length}…`;
+      const cine = CREW_STYLE[toGen[i].scene.section] || CREW_STYLE.verse;
       const { job } = await jfetch('/api/studio/scene', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: toGen[i].scene.prompt,
+          prompt: `${toGen[i].scene.prompt}, ${crew.plan.look.style}, ${cine.lens}`,
           characterIds: [$('#scene-char').value].filter(Boolean),
           locationId: $('#scene-location').value || undefined,
           imageSize: st.seqFormat === '16:9' ? 'landscape_16_9' : 'portrait_16_9',
@@ -2963,17 +2991,26 @@ $('#crew-produce').onclick = async () => {
       st.cfg.imagesUsed += 1;
     }
     await loadAssets();
-    // 2. hand the whole cast to Quick Video: moves/holds/transitions by section
-    qk.shots = crew.plan.shots.map((s) => {
+    // 2. hand the whole cast to Quick Video: moves/holds/transitions by
+    // section, plus the Cinematographer's grade and the Mixer's audio pass
+    const secN = {};
+    crew.eqByIndex = {};
+    qk.shots = crew.plan.shots.map((s, i) => {
       const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
+      const nth = secN[s.scene.section] = (secN[s.scene.section] || 0) + 1;
+      if (style.eq) crew.eqByIndex[i] = { ...style.eq };
       const asset = st.assets.find((a) => a.id === s.source.assetId);
-      return { assetId: s.source.assetId, url: asset?.url || '', label: asset?.label || '', move: style.move, dur: style.dur, text: '', transAfter: style.trans };
+      return { assetId: s.source.assetId, url: asset?.url || '', label: asset?.label || '', move: crewMove(s.scene.section, nth - 1), dur: style.dur, text: '', transAfter: style.trans };
     });
+    $('#enhance-auto').checked = true;   // Mixer: mastered audio + film finish
+    $('#music-fadein').checked = true;
+    $('#music-fadeout').checked = true;
     renderQkShots();
     updateScenesUsage();
     $('#crew-status').textContent = 'Producer: assembling on the beat (motion, cuts, music, captions)…';
     b.innerHTML = '<span class="spinner"></span>Assembling…';
     await $('#qk-assemble').onclick();
+    crew.eqByIndex = null; // grade is on the timeline now; manual assembles stay clean
     $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '💼 Producer: make it';
@@ -3790,9 +3827,11 @@ $('#qk-assemble').onclick = async () => {
     await loadAssets();
 
     // step 2: build the timeline (also fills the editor below, so you can tweak)
-    st.seq = clipAssets.map((id) => {
+    st.seq = clipAssets.map((id, ci) => {
       const a = st.assets.find((x) => x.id === id);
-      return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: null };
+      // crew.eqByIndex: the Cinematographer's per-section color grade, set
+      // when the Producer drives this assembler; empty for manual Quick Video
+      return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: (crew.eqByIndex && crew.eqByIndex[ci]) || null };
     });
     st.trans = qk.shots.slice(0, -1).map((s) => ({ type: s.transAfter, duration: 0.5 }));
     // words on screen, timed to each picture

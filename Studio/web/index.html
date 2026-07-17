@@ -3315,6 +3315,18 @@ $('#crew-direct').onclick = async () => {
       return { scene: sc, idx: i, source: null, cast };
     });
     crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label, kind: img.kind || 'image' }; });
+    // If you dropped MORE clips than the song split into scenes, every extra
+    // clip still gets its own shot — so all your footage lands in the video,
+    // in the order you dropped it (nothing thrown away).
+    for (let i = shots.length; i < crew.images.length; i++) {
+      const img = crew.images[i];
+      const sect = (scenes[i % Math.max(1, scenes.length)] || {}).section || 'verse';
+      shots.push({
+        scene: { section: sect, lines: '', prompt: '' }, idx: i,
+        source: { assetId: img.id, label: img.label, kind: img.kind || 'image' },
+        cast: star ? [star] : [],
+      });
+    }
     // Location scout: the Director combs the whole Library for images whose
     // words (label + the prompt they were generated from) fit a scene's
     // lyrics — dropped images always take precedence over scouting.
@@ -3431,6 +3443,26 @@ $('#crew-produce').onclick = async () => {
       const kind = (s.source.kind === 'video' || asset?.kind === 'video') ? 'video' : 'image';
       return { assetId: s.source.assetId, kind, url: asset?.url || '', label: asset?.label || '', move: crewMove(s.scene.section, nth - 1), dur: style.dur, text: '', transAfter: style.trans };
     });
+    // Caption alignment: when you have a song AND captions, fit the whole cut
+    // to the song's exact length so the on-screen captions (which are timed to
+    // the song) land in the right spot instead of drifting to "a different
+    // part". Your video clips keep their real length; the picture-shots split
+    // whatever time is left. No song/captions → keep beat-matched cutting.
+    const songDur = firstMusicAsset()?.meta?.duration || 0;
+    if (songDur && st.captions.length) {
+      let vidTime = 0, imgCount = 0;
+      qk.shots.forEach((s) => {
+        if (s.kind === 'video') { const a = st.assets.find((x) => x.id === s.assetId); vidTime += (a?.meta?.duration || s.dur); }
+        else imgCount++;
+      });
+      if (imgCount) {
+        const per = Math.max(1, (songDur - vidTime) / imgCount);
+        qk.shots.forEach((s) => { if (s.kind !== 'video') s.dur = Math.round(per * 10) / 10; });
+      }
+      $('#qk-beat').checked = false; // exact song-length fit keeps captions on time
+    } else {
+      $('#qk-beat').checked = true;
+    }
     $('#enhance-auto').checked = true;   // Mixer: mastered audio + film finish
     $('#music-fadein').checked = true;
     $('#music-fadeout').checked = true;

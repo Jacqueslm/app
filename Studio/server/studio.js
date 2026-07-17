@@ -188,11 +188,25 @@ function jobJson(job) {
 /* fal.ai queue helpers                                                */
 /* ------------------------------------------------------------------ */
 async function falSubmit(model, input) {
-  const res = await fetch(`${FAL_QUEUE_BASE}/${model}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Key ${FAL_KEY}` },
-    body: JSON.stringify(input),
-  });
+  // Network-level failures ("fetch failed": a dropped socket, a blip mid-
+  // upload) get two quiet retries before anything reaches the user.
+  let res;
+  const body = JSON.stringify(input);
+  for (let attempt = 1; ; attempt++) {
+    try {
+      res = await fetch(`${FAL_QUEUE_BASE}/${model}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Key ${FAL_KEY}` },
+        body,
+      });
+      break;
+    } catch (err) {
+      if (attempt >= 3) {
+        throw new Error('The upload to fal.ai kept failing mid-send (network hiccup, or a very large request). Check your connection and try again — if it only happens with two characters on Best quality, remove a couple of reference photos.');
+      }
+      await new Promise((r) => setTimeout(r, attempt * 1500));
+    }
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const raw = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail || data);
@@ -246,10 +260,13 @@ function scaledRefDataUri(filename) {
         resolve(`data:${CONTENT_TYPES[ext] || 'image/jpeg'};base64,${fs.readFileSync(p).toString('base64')}`);
       } catch (_) { resolve(null); }
     };
-    const cached = path.join(REFCACHE_DIR, path.basename(filename).replace(/\.[^.]+$/, '') + '.jpg');
+    // _v2: tighter geometry/quality than the first cut - a duo on Best sends
+    // up to 10 of these in one request body, and oversized refs were pushing
+    // submissions past what the connection would carry ("fetch failed").
+    const cached = path.join(REFCACHE_DIR, path.basename(filename).replace(/\.[^.]+$/, '') + '_v2.jpg');
     if (fs.existsSync(cached)) return asUri(cached);
     fs.mkdirSync(REFCACHE_DIR, { recursive: true });
-    const proc = spawn(ffmpegBin(), ['-y', '-i', src, '-vf', "scale='min(1152,iw)':-2", '-frames:v', '1', '-q:v', '3', cached]);
+    const proc = spawn(ffmpegBin(), ['-y', '-i', src, '-vf', "scale='min(1024,iw)':-2", '-frames:v', '1', '-q:v', '4', cached]);
     proc.on('error', () => asUri(src));
     proc.on('close', (code) => asUri(code === 0 && fs.existsSync(cached) ? cached : src));
   });
@@ -566,8 +583,14 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
           : cast.length > 1 ? ' — two-character scenes work from photos' : ', or paste a LoRA URL';
         throw Object.assign(new Error(`Upload at least one reference photo for ${c.name} first (Characters tab)${hint}.`), { status: 400 });
       }
-      const uris = (await Promise.all(refs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
+      let uris = (await Promise.all(refs.map((r) => scaledRefDataUri(r.filename)))).filter(Boolean);
       if (!uris.length) throw Object.assign(new Error(`Could not read ${c.name}'s reference photos — try re-uploading them.`), { status: 500 });
+      // Keep the whole submission under a payload budget: oversized bodies
+      // die in transit as a bare "fetch failed". Every character always keeps
+      // at least one photo; extras are dropped past ~6MB of total refs.
+      const budget = 6_000_000;
+      let used = allUris.reduce((n, u) => n + u.length, 0);
+      uris = uris.filter((u, i) => { if (i === 0 || used + u.length <= budget) { used += u.length; return true; } return false; });
       const from = allUris.length + 1, to = allUris.length + uris.length;
       whose.push(`${from === to ? `Reference photo ${from}` : `Reference photos ${from}-${to}`} show${from === to ? 's' : ''} ${c.name}.`);
       allUris.push(...uris);

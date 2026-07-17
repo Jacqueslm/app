@@ -1749,7 +1749,7 @@ function renderLibrary() {
     el.innerHTML = (a.kind === 'image'
       ? `<img src="${a.url}" loading="lazy" alt="">`
       : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
-      + `<div class="li-meta"><p>${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}</p><div class="li-actions"></div></div>`;
+      + `<div class="li-meta"><p title="${a.meta?.qc ? escapeHtml(a.meta.qc.note || '') : ''}">${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}${a.meta?.qc ? (a.meta.qc.verdict === 'flag' ? ' <span style="color:#e6a23c">⚠ QC</span>' : ' <span style="color:var(--green)">✅ QC</span>') : ''}</p><div class="li-actions"></div></div>`;
     el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
     const actions = el.querySelector('.li-actions');
     const btn = (label, cls, fn) => {
@@ -1772,6 +1772,18 @@ function renderLibrary() {
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🎥 Shots', '', () => { st.coverageTarget = st.coverageTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.cropTarget = null; renderLibrary(); });
+    if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🔍 QC', '', async (e) => {
+      // AI inspector: faces, fingers, limbs, structure (~half a cent)
+      const b = e.target; b.disabled = true; b.textContent = '…';
+      try {
+        const { job } = await jfetch('/api/studio/qc', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assetId: a.id }),
+        });
+        await pollJob(job.id, () => {});
+        await loadAssets();
+      } catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '🔍 QC'; }
+    });
     if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
     if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
@@ -2167,6 +2179,7 @@ function renderCharacters() {
         ? 'Teaches the AI this face permanently — the strongest likeness there is. Takes ~10 minutes; keep this tab open.'
         : `Needs at least 6 photos to train (has ${c.refs.length}). 10–20 varied photos = the best lock.`}</p>
       <div class="progress-line ch-train-prog"><div></div></div>`}
+      <input class="input ch-desc" placeholder="Cast sheet: who they are ('male lead — gold chains, tattoos, waves cut')" value="${escapeHtml(c.description || '')}">
       <input class="input ch-lora" placeholder="LoRA URL from fal.ai (optional, strongest consistency)" value="${escapeHtml(c.loraUrl || '')}">
       <input class="input ch-trig" placeholder="LoRA trigger word (optional, e.g. NOVA01)" value="${escapeHtml(c.triggerWord || '')}">
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -2216,7 +2229,7 @@ function renderCharacters() {
       try {
         await jfetch(`/api/studio/characters/${c.id}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: c.name, loraUrl: card.querySelector('.ch-lora').value, triggerWord: card.querySelector('.ch-trig').value }),
+          body: JSON.stringify({ name: c.name, loraUrl: card.querySelector('.ch-lora').value, triggerWord: card.querySelector('.ch-trig').value, description: card.querySelector('.ch-desc').value }),
         });
         await loadCharacters();
       } catch (e) { setErr('#chars-err', e.message); }
@@ -2900,6 +2913,18 @@ const CREW_STYLE = {
   outro: { moves: ['pull'], dur: 5, trans: 'fade', lens: 'slow retreating frame, fading light', eq: null },
 };
 const crewMove = (section, nth) => { const m = (CREW_STYLE[section] || CREW_STYLE.verse).moves; return m[nth % m.length]; };
+// Casting Director: match a scene's lyrics/prompt against each star's name
+// and cast-sheet description; hits star in that scene (max two). Falls back
+// to the AI Scenes character dropdown when no star is recognized.
+function castForScene(sc) {
+  const text = ` ${(sc.lines + ' ' + sc.prompt).toLowerCase().replace(/[^a-z0-9\s]/g, ' ')} `;
+  const hits = [];
+  for (const c of st.characters) {
+    const words = (c.name + ' ' + (c.description || '')).toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 3);
+    if (text.includes(` ${c.name.toLowerCase()} `) || words.some((w) => text.includes(` ${w} `))) hits.push(c);
+  }
+  return hits.slice(0, 2);
+}
 // Production Designer: one consistent look for the whole video, derived from
 // the lyrics' world (the user's own style text always wins).
 const DESIGNER_LOOKS = [
@@ -2946,7 +2971,7 @@ $('#crew-direct').onclick = async () => {
     // cast dropped images first (in order), then budget-limited generation
     // for the gaps - choruses get generation priority over verses
     let spent = 0;
-    const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null }));
+    const shots = scenes.map((sc, i) => ({ scene: sc, idx: i, source: null, cast: castForScene(sc) }));
     crew.images.forEach((img, i) => { if (shots[i]) shots[i].source = { assetId: img.id, label: img.label }; });
     // Location scout: the Director combs the whole Library for images whose
     // words (label + the prompt they were generated from) fit a scene's
@@ -2990,7 +3015,9 @@ $('#crew-direct').onclick = async () => {
     box.innerHTML = shots.map((s) => {
       const style = CREW_STYLE[s.scene.section] || CREW_STYLE.verse;
       const nth = secCount[s.scene.section] = (secCount[s.scene.section] || 0) + 1;
-      return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b> — ${
+      return `<p style="font-size:12px;color:var(--ts);margin:0">${secIcon[s.scene.section] || '🎞'} <b>${s.scene.section || 'scene'} ${s.idx + 1}</b>${
+        s.cast.length ? ` · <b>starring ${escapeHtml(s.cast.map((c) => c.name).join(' + '))}</b>` : ''
+      } — ${
         s.generate ? `<span style="color:var(--accent)">generate new (~$${crew.plan.genRate.toFixed(2)})</span>` : escapeHtml(s.source.label)
       } · ${crewMove(s.scene.section, nth - 1)} move · ${style.dur}s hold${style.trans === 'cut' ? ' · hard cuts' : ''}</p>`;
     }).join('')
@@ -3035,7 +3062,7 @@ $('#crew-produce').onclick = async () => {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: `${toGen[i].scene.prompt}, ${crew.plan.look.style}, ${cine.lens}`,
-          characterIds: [$('#scene-char').value].filter(Boolean),
+          characterIds: toGen[i].cast.length ? toGen[i].cast.map((c) => c.id) : [$('#scene-char').value].filter(Boolean),
           locationId: $('#scene-location').value || undefined,
           imageSize: st.seqFormat === '16:9' ? 'landscape_16_9' : 'portrait_16_9',
         }),
@@ -3043,6 +3070,16 @@ $('#crew-produce').onclick = async () => {
       const done = await pollJob(job.id, (j) => setProg('#crew-prog', ((i + j.progress / 100) / (toGen.length + 1)) * 50));
       toGen[i].source = { assetId: done.assetId, label: 'generated' };
       st.cfg.imagesUsed += 1;
+      // QC inspector: every fresh scene gets checked for face/hand/structure
+      // defects (~half a cent) before it reaches the timeline
+      try {
+        const { job: qcJob } = await jfetch('/api/studio/qc', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assetId: done.assetId }),
+        });
+        const qcDone = await pollJob(qcJob.id, () => {});
+        if (qcDone.transcript?.qc === 'flag') crew.qcFlags = (crew.qcFlags || 0) + 1;
+      } catch (_) { /* QC is best-effort - a failed check never blocks the video */ }
     }
     await loadAssets();
     // 2. hand the whole cast to Quick Video: moves/holds/transitions by
@@ -3065,7 +3102,9 @@ $('#crew-produce').onclick = async () => {
     b.innerHTML = '<span class="spinner"></span>Assembling…';
     await $('#qk-assemble').onclick();
     crew.eqByIndex = null; // grade is on the timeline now; manual assembles stay clean
-    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
+    $('#crew-status').textContent = `🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.${
+      crew.qcFlags ? ` ⚠ QC flagged ${crew.qcFlags} generated scene(s) — look for the ⚠ badge in the Library (hover it for the reason) and regenerate if it bothers you.` : ''}`;
+    crew.qcFlags = 0;
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '💼 Producer: make it';
   prog.classList.remove('show');

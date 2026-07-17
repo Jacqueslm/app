@@ -115,6 +115,8 @@ The laziest good way to make a video, at the top of the Sequencer:
 Nothing generates or spends until you press the Producer button — the plan is always yours to reject, tweak (budget, lyrics, images), and re-plan for free.
 
 **The rest of the crew works inside the plan automatically:**
+- **🎭 Casting Director** — fill each star's **cast sheet** line on the Characters tab ("male lead — gold chains, tattoos"). When your lyrics mention a star by name or their signature look, the Director casts them in that exact scene — the plan shows "starring Da Brown Chris" per scene, and generated scenes use their photos/face lock plus the cast-sheet notes.
+- **🔍 QC Inspector** — every scene the Producer generates gets inspected by a vision AI (~½¢): faces, fingers, limbs, structure. Flagged shots get a **⚠ QC badge** in the Library (hover it for the reason) so you can regenerate before a defect reaches your video. There's also a manual **🔍 QC** button on any generated image.
 - **🎨 Production Designer** — reads your lyrics and picks one consistent look for the whole video (Neon nightlife / Moody blue / Golden hour / Street documentary / Clean cinematic) and bakes it into every generated scene. Type your own style in the Storyboard style box to overrule them.
 - **🎥 Cinematographer** — chooses lenses per section (anamorphic energy on choruses, 35mm intimacy on verses, silhouettes on the bridge), varies the camera moves so no two shots feel identical, and grades the timeline (choruses punchier, bridge desaturated).
 - **🎚 Sound Mixer** — masters the audio, sets the fade-in/fade-out, and keeps music ducked under any clip sound. Runs at render, every time.

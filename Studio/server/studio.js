@@ -366,6 +366,25 @@ async function refreshFalJob(job) {
 
     const result = await falGet(job.fal.responseUrl);
 
+    if (job.fal.expect === 'qc') {
+      // Moondream answers as text; verdict lands on the asset so the library
+      // can badge it (and a flagged shot can be regenerated before it costs
+      // you a bad video).
+      const answer = String(result.output || result.answer || result.text || '').trim();
+      const verdict = /^\s*flag/i.test(answer) || (!/^\s*pass/i.test(answer) && /flag/i.test(answer)) ? 'flag' : 'pass';
+      const row = db.getAsset(job.userId, job.fal.assetId);
+      if (row) {
+        let meta = {};
+        try { meta = JSON.parse(row.meta || 'null') || {}; } catch (_) {}
+        meta.qc = { verdict, note: answer.replace(/^\s*(pass|flag)\s*[-–—:]?\s*/i, '').slice(0, 200) };
+        db.updateAssetMeta(job.userId, row.id, meta);
+      }
+      job.transcript = { qc: verdict }; // rides jobJson so the client can react without refetching
+      job.progress = 100;
+      job.status = 'done';
+      return;
+    }
+
     if (job.fal.expect === 'transcript') {
       // Whisper returns segments with [start, end] timestamps - exactly the
       // shape the lyrics card needs for synced captions.
@@ -460,6 +479,7 @@ router.get('/config', (req, res) => {
       livePortrait: LIVEPORTRAIT_RATE,
       transcribe: TRANSCRIBE_RATE,
       dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
+      qc: QC_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -616,7 +636,7 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
 /* ---------------- characters ---------------- */
 router.get('/characters', (req, res) => {
   const characters = db.getCharacters(req.userId).map((c) => ({
-    id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word, createdAt: c.created_at,
+    id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word, description: c.description || '', createdAt: c.created_at,
     refs: db.getAssets(req.userId, 'image').filter((a) => isUploadedRef(a, c.id)).map(assetJson),
   }));
   res.json({ characters });
@@ -642,6 +662,7 @@ router.put('/characters/:id', (req, res) => {
     name: name.trim().slice(0, 60),
     loraUrl: typeof loraUrl === 'string' ? loraUrl.trim() : null,
     triggerWord: typeof triggerWord === 'string' ? triggerWord.trim() : null,
+    description: typeof req.body?.description === 'string' ? req.body.description.trim().slice(0, 300) : undefined,
   });
   res.json({ ok: true });
 });
@@ -879,6 +900,11 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
       : (whose.join(' ')
         + ' These are two different people appearing together. Keep each person\'s face, hairstyle, skin tone and build EXACTLY as in their own photos — both instantly recognizable. Never blend, swap or average their faces. '
         + `Now show ${cast[0].name} and ${cast[1].name} together in this scene: ${cleanPrompt}`);
+    // Cast-sheet notes: signature details (chains, braids, style) the photos
+    // alone might not lock in.
+    for (const c of cast) {
+      if (c.description) input.prompt += ` ${c.name}'s appearance notes: ${c.description}.`;
+    }
     // Saved chemistry: a stored relationship descriptor rides along on every
     // duo scene so their dynamic stays consistent without retyping it.
     if (cast.length === 2) {
@@ -969,6 +995,39 @@ router.post('/scene', async (req, res) => {
       }));
     }
     res.status(202).json({ job: jobJson(jobs[0]), jobs: jobs.map(jobJson) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/* ---------------- QC: AI defect inspection on generated images ---------------- */
+const MODEL_QC = process.env.FAL_MODEL_QC || 'fal-ai/moondream3-preview/query';
+const QC_RATE = Number(process.env.STUDIO_RATE_QC || 0.005); // displayed estimate
+const QC_PROMPT = 'You are a strict photo QC inspector for AI-generated images. Examine faces (eyes, teeth, symmetry), '
+  + 'hands and fingers (count them), limbs and body proportions, and object/structure coherence. '
+  + 'Reply with exactly one line starting with PASS or FLAG, followed by a dash and a short reason. '
+  + 'FLAG anything with extra/missing fingers or limbs, warped faces, merged bodies, or impossible structure.';
+
+router.post('/qc', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const img = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!img || img.kind !== 'image') return res.status(404).json({ error: 'Pick an image to inspect.' });
+  try {
+    const uri = await scaledRefDataUri(img.filename);
+    if (!uri) throw new Error('could not read that image');
+    const submitted = await falSubmit(MODEL_QC, { image_url: uri, prompt: QC_PROMPT });
+    const job = createJob(req.userId, 'qc', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'qc',
+        label: `QC: ${img.label.slice(0, 60)}`,
+        assetId: img.id,
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
   } catch (err) {
     res.status(502).json({ error: err.message });
   }

@@ -222,6 +222,10 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+function unlinkAssetFromCharacter(userId, id) {
+  db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
 /* ---------------- overnight batch queue ---------------- */
 // A persisted queue so a whole storyboard can be submitted once and keep
 // generating on the server even if the browser tab closes - the worker in
@@ -374,6 +378,7 @@ module.exports = {
   getAssets,
   getAsset,
   deleteAsset,
+  unlinkAssetFromCharacter,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

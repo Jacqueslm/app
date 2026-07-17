@@ -2367,8 +2367,12 @@ const GH_HEADERS = {
 };
 // The API zipball endpoint (unlike codeload) honors the Authorization header,
 // so the same URL serves both public and token-carrying private installs.
+// NOTE: do NOT encodeURIComponent the branch - GitHub's ref endpoints want
+// raw slashes ("claude/vibe-code-uwxxlk"), and %2F makes them 404, which
+// silently broke every in-app update. Encode only individual path segments.
+const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
-  || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${encodeURIComponent(UPDATE_BRANCH)}`;
+  || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // The running launcher scripts are skipped during the overlay copy: overwriting
 // a batch file mid-run corrupts its execution on Windows.
@@ -2391,7 +2395,7 @@ function runCmd(cmd, args, opts) {
 }
 
 async function fetchLatestCommit() {
-  const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${encodeURIComponent(UPDATE_BRANCH)}`, {
+  const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${UPDATE_REF}`, {
     headers: { ...GH_HEADERS, Accept: 'application/vnd.github+json' },
   });
   const data = await res.json();

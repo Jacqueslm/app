@@ -59,6 +59,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 
 **The AI way (your character stars in it):**
 1. **Characters** tab → create your character, upload **3–6 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). The AI studies up to 4 of them per scene, so variety is what makes it *look like you*.
+1b. **Want the strongest likeness there is?** Upload 10–20 photos, then press **🔒 Train face lock** on the character (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; when it finishes, every solo scene with that character uses it automatically. Nothing to copy or paste.
 2. **Lyrics & Captions** card → paste your lyrics
 3. **Storyboard** card → **Build storyboard from my lyrics** → it writes a scene prompt for every verse → **Generate** each scene (~$0.04 each)
 4. On each scene in your Library → **Animate** → pick quality → tap the price button
@@ -115,6 +116,8 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 |---|---|
 | Scene image | ~4¢ |
 | Scene image starring your character | ~9¢ |
+| Scene image on ✨ Best (Banana Pro) | ~15¢ |
+| 🔒 Face lock training (per character, one-time) | ~$3.60 |
 | 5-second clip (Draft/Seedance) | ~21¢ |
 | 5-second clip (Standard/Kling) | ~42¢ |
 | 5-second clip (Best/Kling Pro) | ~56¢ |

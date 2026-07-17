@@ -70,6 +70,12 @@ const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballp
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
 const CHARACTER_IMAGE_RATE = Number(process.env.STUDIO_RATE_CHARACTER_IMAGE || 0.09);
 const IMAGE_BEST_RATE = Number(process.env.STUDIO_RATE_IMAGE_BEST || 0.15); // Nano Banana Pro flat per image
+// One-time LoRA face training, driven from the Characters tab. Billed per
+// step by fal (~$0.0024/step); 1500 steps is a solid portrait lock (~$3.60).
+const MODEL_LORA_TRAINER = process.env.FAL_MODEL_LORA_TRAINER || 'fal-ai/flux-lora-portrait-trainer';
+const LORA_TRAIN_STEPS = Math.max(1000, Number(process.env.STUDIO_LORA_STEPS || 1500));
+const LORA_STEP_RATE = Number(process.env.STUDIO_RATE_LORA_STEP || 0.0024);
+const FAL_STORAGE_AUTH_URL = process.env.FAL_STORAGE_AUTH_URL || 'https://rest.alpha.fal.ai/storage/auth/token?storage_type=fal-cdn-v3';
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
@@ -274,6 +280,35 @@ function scaledRefDataUri(filename) {
 
 // Poll a running fal job once. Called from the client's polling loop rather
 // than a server timer, so an abandoned tab doesn't leave a hot loop running.
+// Upload a buffer to fal's file storage; returns a URL fal models can read.
+// Two-step flow: short-lived token from the auth endpoint, then the bytes to
+// the returned base_url. (Data-URI inlining is the fallback - training zips
+// are too big for that to be the primary path.)
+async function falUploadFile(buf, filename, contentType) {
+  const tokRes = await fetch(FAL_STORAGE_AUTH_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Key ${FAL_KEY}` },
+    body: '{}',
+  });
+  const tok = await tokRes.json().catch(() => ({}));
+  if (!tokRes.ok || !tok.token || !tok.base_url) {
+    throw new Error(`fal storage auth failed (${tokRes.status})`);
+  }
+  const upRes = await fetch(`${tok.base_url}/files/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `${tok.token_type || 'Bearer'} ${tok.token}`,
+      'Content-Type': contentType,
+      'X-Fal-File-Name': filename,
+    },
+    body: buf,
+  });
+  const up = await upRes.json().catch(() => ({}));
+  const url = up.access_url || up.url;
+  if (!upRes.ok || !url) throw new Error(`fal storage upload failed (${upRes.status})`);
+  return url;
+}
+
 async function refreshFalJob(job) {
   if (job.status !== 'running') return;
   try {
@@ -283,6 +318,19 @@ async function refreshFalJob(job) {
     if (status.status !== 'COMPLETED') return;
 
     const result = await falGet(job.fal.responseUrl);
+
+    if (job.fal.expect === 'lora') {
+      // Training finished: wire the LoRA straight into the character so the
+      // very next generation with them uses it - nothing to copy or paste.
+      const loraUrl = result.diffusers_lora_file?.url || result.lora_file?.url;
+      if (!loraUrl) throw new Error('Training finished but returned no LoRA file.');
+      const ch = db.getCharacter(job.userId, job.fal.characterId);
+      if (ch) db.updateCharacter(job.userId, ch.id, { name: ch.name, loraUrl, triggerWord: job.fal.meta?.trigger || null });
+      job.progress = 100;
+      job.status = 'done';
+      return;
+    }
+
     const media = job.fal.expect === 'video'
       ? (result.video && result.video.url)
       : (result.images && result.images[0] && result.images[0].url);
@@ -342,6 +390,7 @@ router.get('/config', (req, res) => {
       imageRate: IMAGE_RATE,
       characterImageRate: CHARACTER_IMAGE_RATE,
       imageBestRate: IMAGE_BEST_RATE,
+      loraTrain: { steps: LORA_TRAIN_STEPS, estCost: LORA_TRAIN_STEPS * LORA_STEP_RATE },
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -519,6 +568,98 @@ router.delete('/characters/:id', (req, res) => {
   if (!character) return res.status(404).json({ error: 'Character not found.' });
   db.deleteCharacter(req.userId, character.id); // reference images stay in the library
   res.json({ ok: true });
+});
+
+/* ---------------- one-time LoRA face training ---------------- */
+// Scale a training photo to a bounded JPEG copy; resolves false on failure
+// so one unreadable photo doesn't sink the whole training set.
+function scaleForTraining(srcFile, outFile) {
+  return new Promise((resolve) => {
+    const proc = spawn(ffmpegBin(), ['-y', '-i', srcFile, '-vf', "scale='min(1536,iw)':-2", '-frames:v', '1', '-q:v', '2', outFile]);
+    proc.on('error', () => resolve(false));
+    proc.on('close', (code) => resolve(code === 0 && fs.existsSync(outFile)));
+  });
+}
+
+router.post('/characters/:id/train-lora', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const character = db.getCharacter(req.userId, Number(req.params.id));
+  if (!character) return res.status(404).json({ error: 'Character not found.' });
+  const refs = db.getAssets(req.userId, 'image')
+    .filter((a) => a.character_id === character.id && !(a.meta && JSON.parse(a.meta || '{}').overlay))
+    .slice(0, 20);
+  if (refs.length < 6) {
+    return res.status(400).json({ error: `Training needs at least 6 photos of ${character.name} (10-20 varied ones is ideal) - they have ${refs.length}. Add more on this tab first.` });
+  }
+
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-lora-'));
+  try {
+    // 1. bounded JPEG copies of every reference photo
+    const files = [];
+    for (let i = 0; i < refs.length; i++) {
+      const out = path.join(tmp, `photo_${String(i + 1).padStart(2, '0')}.jpg`);
+      if (await scaleForTraining(mediaPath(refs[i].filename), out)) files.push(out);
+    }
+    if (files.length < 6) throw new Error('Could not prepare enough of the photos for training - try re-uploading them.');
+
+    // 2. zip them
+    const zipPath = path.join(tmp, 'training.zip');
+    await new Promise((resolve, reject) => {
+      const archiverMod = require('archiver');
+      const archive = typeof archiverMod === 'function'
+        ? archiverMod('zip', { zlib: { level: 0 } })
+        : new archiverMod.ZipArchive({ zlib: { level: 0 } });
+      const outStream = fs.createWriteStream(zipPath);
+      outStream.on('close', resolve);
+      archive.on('error', reject);
+      archive.pipe(outStream);
+      for (const f of files) archive.file(f, { name: path.basename(f) });
+      archive.finalize();
+    });
+    const zipBuf = fs.readFileSync(zipPath);
+
+    // 3. get the zip somewhere fal can read it - storage upload first, inline
+    // data URI as a fallback for smaller sets
+    let imagesUrl;
+    try {
+      imagesUrl = await falUploadFile(zipBuf, `${character.name.replace(/[^a-zA-Z0-9]/g, '_')}_training.zip`, 'application/zip');
+    } catch (err) {
+      if (zipBuf.length > 9_000_000) {
+        throw new Error(`Could not upload the training photos to fal.ai (${err.message}) and the set is too large to send inline. Try again in a minute.`);
+      }
+      imagesUrl = `data:application/zip;base64,${zipBuf.toString('base64')}`;
+    }
+
+    // 4. train. Trigger word: keep the character's existing one if it's clean,
+    // else derive one from their name (a made-up single token works best).
+    const trigger = (character.trigger_word && /^[a-z0-9]{3,24}$/.test(character.trigger_word))
+      ? character.trigger_word
+      : (character.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16) || `char${character.id}`);
+    const submitted = await falSubmit(MODEL_LORA_TRAINER, {
+      images_data_url: imagesUrl,
+      trigger_phrase: trigger,
+      steps: LORA_TRAIN_STEPS,
+      subject_crop: true,
+    });
+    const job = createJob(req.userId, 'lora-train', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'lora',
+        label: `Face lock: ${character.name}`,
+        characterId: character.id,
+        meta: { trigger, photos: files.length },
+      },
+    });
+    res.status(202).json({ job: jobJson(job), trigger, photos: files.length });
+  } catch (err) {
+    res.status(err.status || 502).json({ error: err.message });
+  } finally {
+    try { fs.rmSync(tmp, { recursive: true, force: true }); } catch (_) {}
+  }
 });
 
 /* ---------------- AI generation (fal.ai) ---------------- */

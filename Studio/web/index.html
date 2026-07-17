@@ -643,6 +643,37 @@ textarea::placeholder{color:var(--tm)}
 'use strict';
 const $ = (s) => document.querySelector(s);
 
+// ---- Visible error reporter: silent failures are the enemy. Any JS error or
+// unhandled promise shows a red banner the user can read and screenshot. ----
+(function () {
+  let bar;
+  function show(msg) {
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#7a1520;color:#fff;'
+        + 'font:13px/1.4 system-ui,sans-serif;padding:10px 14px;box-shadow:0 -2px 12px rgba(0,0,0,.4);'
+        + 'max-height:40vh;overflow:auto;white-space:pre-wrap';
+      const close = document.createElement('button');
+      close.textContent = '✕';
+      close.style.cssText = 'float:right;background:transparent;border:0;color:#fff;font-size:16px;cursor:pointer';
+      close.onclick = () => { bar.remove(); bar = null; };
+      bar.appendChild(close);
+      (document.body || document.documentElement).appendChild(bar);
+    }
+    const line = document.createElement('div');
+    line.textContent = '⚠ ' + msg;
+    bar.appendChild(line);
+  }
+  window.addEventListener('error', (e) => {
+    show((e.message || 'Script error') + (e.filename ? ` (line ${e.lineno})` : ''));
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    const r = e.reason;
+    show('Action failed: ' + (r && (r.message || r) || 'unknown error'));
+  });
+  window.__studioShowError = show;
+})();
+
 /* ---------- seeded randomness ---------- */
 function xmur3(str){
   let h = 1779033703 ^ str.length;
@@ -1332,7 +1363,15 @@ function probeDuration(url) {
   });
 }
 
-function setErr(sel, msg) { const el = $(sel); el.textContent = msg || ''; el.classList.toggle('show', !!msg); }
+function setErr(sel, msg) {
+  const el = $(sel); el.textContent = msg || ''; el.classList.toggle('show', !!msg);
+  // Also surface it in the loud, always-visible banner and scroll the inline
+  // message into view — so an error can never be missed below the fold again.
+  if (msg) {
+    if (window.__studioShowError) window.__studioShowError(msg);
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+  }
+}
 
 /* ---------------- tap-to-enlarge viewer ---------------- */
 function openLightbox(url, kind) {

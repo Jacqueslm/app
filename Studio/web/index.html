@@ -268,6 +268,10 @@ textarea::placeholder{color:var(--tm)}
         <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
         <span class="usage" id="qk-music-label">no song yet (that's ok too)</span>
       </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input class="input" id="qk-song-link" placeholder="…or paste a Suno link (or any song link)" style="flex:1;min-width:140px">
+        <button class="btn2 quiet" id="qk-import-song">🔗 Import</button>
+      </div>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="qk-beat" checked> ⚡ Cut on the beat of the song</label>
       <div class="chips" id="qk-format"></div>
       <button class="gen-btn" id="qk-assemble">3️⃣ &nbsp;Assemble my video</button>
@@ -382,6 +386,7 @@ textarea::placeholder{color:var(--tm)}
       <textarea id="lyr-text" placeholder="Paste your lyrics — one line per caption" style="min-height:88px"></textarea>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="lyr-tap">▶ Tap to sync</button>
+        <button class="btn2 quiet" id="lyr-auto">🪄 Auto-captions (AI)</button>
         <button class="btn2 quiet" id="lyr-spread">Auto-spread</button>
         <button class="btn2 quiet" id="lyr-title">+ Song title intro</button>
         <button class="btn2 quiet" id="lyr-clear">Clear</button>
@@ -2217,9 +2222,9 @@ $('#kb-create').onclick = async () => {
 };
 
 /* ---------------- timeline ---------------- */
-async function addToSeq(asset) {
+async function addToSeq(asset, opts) {
   if (asset.kind === 'image') {
-    st.seq.push({ assetId: asset.id, kind: 'image', label: asset.label, url: asset.url, holdDur: 4, start: 0, eq: null });
+    st.seq.push({ assetId: asset.id, kind: 'image', label: asset.label, url: asset.url, holdDur: opts?.holdDur || 4, start: 0, eq: null });
   } else {
     const duration = (await probeDuration(asset.url)) || asset.meta?.duration || null;
     st.seq.push({
@@ -2737,6 +2742,34 @@ function stopLyrSync(done) {
 $('#lyr-stop').onclick = () => stopLyrSync(false);
 $('#lyr-clear').onclick = () => { st.captions = []; renderLyrList(); persistDraft(); };
 
+// AI auto-captions: transcribe the first song in the music list with Whisper
+// and land every line with its real start time - tap-sync quality, no tapping.
+$('#lyr-auto').onclick = async () => {
+  setErr('#seq-err', null);
+  if (!st.cfg?.falAvailable) return setErr('#seq-err', 'Turn on AI first (AI Scenes tab).');
+  const entry = st.musicList[0];
+  const song = entry && st.assets.find((a) => a.id === entry.assetId);
+  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card) — captions come from listening to it.');
+  const est = st.cfg?.pricing?.transcribe;
+  if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.02).toFixed(2)}). Your current caption list will be replaced.`)) return;
+  const b = $('#lyr-auto');
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Listening…';
+  try {
+    const { job } = await jfetch('/api/studio/transcribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audioAssetId: song.id }),
+    });
+    const done = await pollJob(job.id, () => {});
+    const lines = done.transcript?.lines || [];
+    if (!lines.length) throw new Error('The AI heard no words in that song — instrumental? Use Auto-spread or Tap to sync instead.');
+    st.captions = lines.map((l) => ({ text: l.text, start: Math.round(l.start * 10) / 10, end: 0 }));
+    finishCaptionEnds();
+    $('#lyr-text').value = lines.map((l) => l.text).join('\n');
+    renderLyrList(); persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🪄 Auto-captions (AI)';
+};
+
 $('#lyr-title').onclick = () => {
   const title = $('#cp-title').value.trim() || 'My track';
   const artist = $('#cp-artist').value.trim();
@@ -2778,7 +2811,7 @@ function renderStoryboard() {
     const queued = sc.queueId && !asset;
     card.innerHTML = `
       ${asset ? `<img src="${asset.url}" style="width:100%;border-radius:8px;background:#000;cursor:zoom-in" alt="">` : ''}
-      <p style="font-size:11px;color:var(--tm);white-space:pre-line">Scene ${i + 1} · ${escapeHtml(sc.lines.slice(0, 90))}${sc.lines.length > 90 ? '…' : ''}</p>
+      <p style="font-size:11px;color:var(--tm);white-space:pre-line">Scene ${i + 1}${sc.section ? ` · <b style="color:${sc.section === 'chorus' ? 'var(--accent)' : 'var(--ts)'}">${{ intro: '🎬 Intro', verse: '🎤 Verse', chorus: '🔥 Chorus', bridge: '🌉 Bridge', outro: '🌅 Outro' }[sc.section] || sc.section}</b>` : ''} · ${escapeHtml(sc.lines.slice(0, 90))}${sc.lines.length > 90 ? '…' : ''}</p>
       <textarea class="sb-prompt" style="min-height:52px;padding:8px 10px;font-size:12px" ${queued ? 'disabled' : ''}>${escapeHtml(sc.prompt)}</textarea>
       <div style="display:flex;gap:8px">
         ${queued
@@ -2793,7 +2826,9 @@ function renderStoryboard() {
     const genBtn = card.querySelector('.sb-gen');
     if (genBtn) genBtn.onclick = () => generateStoryboardScene(sc, card);
     const addBtn = card.querySelector('.sb-add');
-    if (addBtn) addBtn.onclick = () => addToSeq(asset);
+    // section-aware pacing: chorus stills hit the timeline with short punchy
+    // holds, intro/outro breathe longer, verses sit in between
+    if (addBtn) addBtn.onclick = () => addToSeq(asset, { holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4 });
     list.appendChild(card);
   });
   const hasPending = st.storyboard.some((s) => !s.assetId && !s.queueId);
@@ -3274,6 +3309,25 @@ $('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
     renderMusicList(); updateQkMusicLabel(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
 });
+
+$('#qk-import-song').onclick = async () => {
+  setErr('#seq-err', null);
+  const url = $('#qk-song-link').value.trim();
+  if (!url) return setErr('#seq-err', 'Paste the song link first (from Suno: Share → Copy link).');
+  const b = $('#qk-import-song');
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Importing…';
+  try {
+    const { asset } = await jfetch('/api/studio/import-song', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    await loadAssets();
+    st.musicList.push({ assetId: asset.id, start: 0, len: null });
+    renderMusicList(); updateQkMusicLabel(); persistDraft();
+    $('#qk-song-link').value = '';
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🔗 Import';
+};
 
 $('#qk-assemble').onclick = async () => {
   if (qk.busy || st.busyRender) return;

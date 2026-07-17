@@ -226,6 +226,7 @@ function jobJson(job) {
   return {
     id: job.id, type: job.type, status: job.status, progress: job.progress,
     error: job.error, assetId: job.assetId,
+    ...(job.transcript ? { transcript: job.transcript } : {}),
   };
 }
 
@@ -358,6 +359,24 @@ async function refreshFalJob(job) {
 
     const result = await falGet(job.fal.responseUrl);
 
+    if (job.fal.expect === 'transcript') {
+      // Whisper returns segments with [start, end] timestamps - exactly the
+      // shape the lyrics card needs for synced captions.
+      const chunks = Array.isArray(result.chunks) ? result.chunks : [];
+      job.transcript = {
+        text: String(result.text || ''),
+        lines: chunks
+          .map((c) => ({
+            text: String(c.text || '').trim(),
+            start: Array.isArray(c.timestamp) ? Number(c.timestamp[0]) || 0 : 0,
+          }))
+          .filter((l) => l.text),
+      };
+      job.progress = 100;
+      job.status = 'done';
+      return;
+    }
+
     if (job.fal.expect === 'lora') {
       // Training finished: wire the LoRA straight into the character so the
       // very next generation with them uses it - nothing to copy or paste.
@@ -432,6 +451,7 @@ router.get('/config', (req, res) => {
       loraTrain: { steps: LORA_TRAIN_STEPS, estCost: LORA_TRAIN_STEPS * LORA_STEP_RATE },
       sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
       livePortrait: LIVEPORTRAIT_RATE,
+      transcribe: TRANSCRIBE_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -1667,6 +1687,94 @@ router.post('/render', async (req, res) => {
   res.status(202).json({ job: jobJson(job) });
 });
 
+/* ---------------- import a song from a link ---------------- */
+// Paste a Suno share link (or any direct .mp3/.wav/.m4a link) and the song
+// lands in the library - no manual download/re-upload. For page links we
+// scan the HTML for the audio file URL (Suno pages embed a cdn .mp3).
+const AUDIO_EXT_RE = /\.(mp3|wav|m4a|aac|ogg)(\?|$)/i;
+
+router.post('/import-song', async (req, res) => {
+  const { url } = req.body || {};
+  let target;
+  try { target = new URL(String(url || '').trim()); } catch (_) {
+    return res.status(400).json({ error: 'Paste a full link (starting with https://).' });
+  }
+  if (!/^https?:$/.test(target.protocol)) return res.status(400).json({ error: 'Only http(s) links work here.' });
+
+  try {
+    let audioUrl = null;
+    let label = 'Imported song';
+    if (AUDIO_EXT_RE.test(target.pathname)) {
+      audioUrl = target.href;
+      label = decodeURIComponent(path.basename(target.pathname)).replace(/\.[^.]+$/, '') || label;
+    } else {
+      const pageRes = await fetch(target.href, { headers: { 'User-Agent': 'Mozilla/5.0 (Studio importer)' }, redirect: 'follow' });
+      if (!pageRes.ok) throw new Error(`the page answered ${pageRes.status}`);
+      const html = (await pageRes.text()).slice(0, 2_000_000);
+      // Suno's CDN link first, then any audio-file URL on the page
+      const suno = html.match(/https?:\/\/cdn[\w.-]*\.suno\.ai\/[\w.-]+\.mp3/i);
+      const any = html.match(/https?:\/\/[^"'\s\\<>]+\.(?:mp3|wav|m4a)(?:\?[^"'\s\\<>]*)?/i);
+      audioUrl = (suno && suno[0]) || (any && any[0]);
+      const t = html.match(/<title[^>]*>([^<]{1,120})</i);
+      if (t) label = t[1].replace(/\s*[|\-–]\s*Suno.*$/i, '').trim() || label;
+      if (!audioUrl) throw new Error('no audio file found on that page');
+    }
+
+    const audioRes = await fetch(audioUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Studio importer)' }, redirect: 'follow' });
+    if (!audioRes.ok) throw new Error(`the audio link answered ${audioRes.status}`);
+    const buf = Buffer.from(await audioRes.arrayBuffer());
+    if (!buf.length) throw new Error('the audio file was empty');
+    if (buf.length > 60_000_000) throw new Error('that file is over 60MB');
+    const ext = (audioUrl.match(AUDIO_EXT_RE) || [null, 'mp3'])[1].toLowerCase();
+    const filename = newFilename(req.userId, `.${ext === 'aac' || ext === 'ogg' ? 'mp3' : ext}`);
+    fs.writeFileSync(mediaPath(filename), buf);
+    const duration = await probeMediaDuration(mediaPath(filename));
+    if (!duration) { try { fs.unlinkSync(mediaPath(filename)); } catch (_) {} throw new Error('that file did not play as audio'); }
+    const id = db.createAsset(req.userId, 'audio', label.slice(0, 80), filename, null, { source: 'import', importedFrom: target.hostname, duration });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(502).json({ error: `Could not import from that link (${err.message}). If it keeps failing, download the song in your browser and use the normal upload button.` });
+  }
+});
+
+/* ---------------- auto-captions: transcribe a song with word timings ---------------- */
+const MODEL_TRANSCRIBE = process.env.FAL_MODEL_TRANSCRIBE || 'fal-ai/wizper';
+const TRANSCRIBE_RATE = Number(process.env.STUDIO_RATE_TRANSCRIBE || 0.02); // ~per song, displayed estimate
+
+router.post('/transcribe', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const song = db.getAsset(req.userId, Number(req.body?.audioAssetId));
+  if (!song || song.kind !== 'audio') return res.status(404).json({ error: 'Pick a song from your library first.' });
+  try {
+    const buf = fs.readFileSync(mediaPath(song.filename));
+    let audioUrl;
+    try {
+      audioUrl = await falUploadFile(buf, path.basename(song.filename), 'audio/mpeg');
+    } catch (_) {
+      if (buf.length > 9_000_000) throw new Error('could not upload the song to fal and it is too large to send inline');
+      audioUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
+    }
+    const submitted = await falSubmit(MODEL_TRANSCRIBE, {
+      audio_url: audioUrl,
+      task: 'transcribe',
+      chunk_level: 'segment',
+    });
+    const job = createJob(req.userId, 'transcribe', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'transcript',
+        label: `Transcribe: ${song.label}`,
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
 /* ---------------- storyboard: lyric sheet -> scene-by-scene prompts ---------------- */
 const STOPWORDS = new Set(('the a an and or but so to of in on at for with from by is are was were ' +
   'be been being i you he she it we they my your his her its our their me him them this that these those ' +
@@ -1699,15 +1807,83 @@ function keywordsFrom(text) {
   return [...seen];
 }
 
+// Structure detection: explicit [Chorus]/[Verse]/... tags win; otherwise a
+// stanza that repeats (near-)verbatim is the chorus, short first/last stanzas
+// read as intro/outro, and a unique late stanza after 2+ chorus hits is the
+// bridge. Free, local, no AI.
+function normalizeStanza(s) {
+  return s.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function detectSections(stanzas) {
+  const tagRe = /^\s*[\[(]?\s*(intro|verse|chorus|hook|bridge|outro|pre[- ]?chorus|refrain)\s*\d*\s*[\])]?\s*:?\s*$/i;
+  const cleaned = [];
+  const tagged = [];
+  for (const s of stanzas) {
+    const lines = s.split('\n');
+    const m = lines[0].match(tagRe);
+    if (m) {
+      const tag = m[1].toLowerCase().replace(/[- ]/g, '');
+      tagged.push(tag === 'hook' || tag === 'refrain' ? 'chorus' : tag === 'prechorus' ? 'verse' : tag);
+      cleaned.push(lines.slice(1).join('\n').trim() || s);
+    } else {
+      tagged.push(null);
+      cleaned.push(s);
+    }
+  }
+  // repetition -> chorus
+  const counts = {};
+  for (const s of cleaned) { const n = normalizeStanza(s); counts[n] = (counts[n] || 0) + 1; }
+  const sections = cleaned.map((s, i) => {
+    if (tagged[i]) return tagged[i];
+    if (counts[normalizeStanza(s)] >= 2) return 'chorus';
+    return null;
+  });
+  let chorusSeen = 0;
+  for (let i = 0; i < sections.length; i++) {
+    if (sections[i] === 'chorus') { chorusSeen++; continue; }
+    if (sections[i]) continue;
+    const lineCount = cleaned[i].split('\n').filter(Boolean).length;
+    if (i === 0 && lineCount <= 2) sections[i] = 'intro';
+    else if (i === sections.length - 1 && lineCount <= 2) sections[i] = 'outro';
+    else if (chorusSeen >= 2 && i >= sections.length - 3 && sections.lastIndexOf('chorus') > -1 && i > sections.lastIndexOf('bridge')) sections[i] = 'bridge';
+    else sections[i] = 'verse';
+  }
+  // only one stanza can be the bridge - later unresolved ones become verses
+  let bridgeUsed = false;
+  for (let i = 0; i < sections.length; i++) {
+    if (sections[i] === 'bridge') {
+      if (bridgeUsed) sections[i] = 'verse';
+      bridgeUsed = true;
+    }
+  }
+  return { cleaned, sections };
+}
+
+// Per-section energy: choruses get big dynamic coverage, verses stay
+// grounded and intimate, the bridge goes moody/abstract, intro/outro bookend.
+const SECTION_STYLE = {
+  intro: { shots: ['wide establishing shot'], energy: 'calm, atmospheric, scene-setting' },
+  verse: { shots: ['medium shot', 'close-up shot', 'over-the-shoulder shot', 'intimate detail shot'], energy: 'grounded, personal, natural movement' },
+  chorus: { shots: ['dynamic wide shot', 'sweeping crane shot', 'low-angle hero shot', 'fast tracking shot'], energy: 'high energy, dramatic motion, bold and cinematic' },
+  bridge: { shots: ['silhouette shot', 'slow aerial shot', 'abstract reflection shot'], energy: 'moody, dreamlike, tension building' },
+  outro: { shots: ['slow pull-back closing shot'], energy: 'quiet resolution, fading light' },
+};
+
 function storyboardHeuristic(lyrics, title, artist, style) {
   const stanzas = splitStanzas(lyrics);
-  return stanzas.map((lines, i) => {
+  const { cleaned, sections } = detectSections(stanzas);
+  const perSectionCount = {};
+  return cleaned.map((lines, i) => {
+    const section = sections[i];
+    const spec = SECTION_STYLE[section] || SECTION_STYLE.verse;
+    const nth = perSectionCount[section] = (perSectionCount[section] || 0) + 1;
     const kws = keywordsFrom(lines);
-    const shot = SHOT_TYPES[i % SHOT_TYPES.length];
+    const shot = spec.shots[(nth - 1) % spec.shots.length];
     const mood = SHOT_MOODS[i % SHOT_MOODS.length];
     const subject = kws.length ? kws.slice(0, 3).join(' and ') : (title || 'a quiet moment');
-    const prompt = `A ${shot} of ${subject}, ${mood}${style ? `, ${style}` : ''}, cinematic film still, consistent character and setting`;
-    return { index: i, lines, prompt };
+    const prompt = `A ${shot} of ${subject}, ${mood}, ${spec.energy}${style ? `, ${style}` : ''}, cinematic film still, consistent character and setting`;
+    return { index: i, lines, prompt, section };
   });
 }
 
@@ -1715,9 +1891,12 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
   const system = `You are a music video director. Given song lyrics, split them into filmable scenes ` +
     `(usually one scene per verse/chorus/bridge stanza) and write one vivid, concrete, filmable image-generation ` +
     `prompt per scene (15-30 words, visual only - camera shot type, subject, setting, lighting, mood; no song ` +
-    `metadata, no quotes around lyrics). Keep a consistent visual world across scenes unless the lyrics clearly ` +
-    `change setting. Reply with ONLY a JSON array, no other text, shaped exactly like: ` +
-    `[{"lines":"<the lyric lines for this scene, verbatim>","prompt":"<image prompt>"}, ...]. Make at most ${MAX_SCENES} scenes.`;
+    `metadata, no quotes around lyrics). Label each scene's song section and match the visual energy to it: ` +
+    `choruses get big dynamic high-energy coverage (wide/crane/low-angle, motion), verses stay grounded and ` +
+    `intimate (medium/close-up), the bridge goes moody or abstract, intro/outro are calm bookends. Keep a ` +
+    `consistent visual world across scenes unless the lyrics clearly change setting. Reply with ONLY a JSON ` +
+    `array, no other text, shaped exactly like: ` +
+    `[{"lines":"<the lyric lines for this scene, verbatim>","section":"<intro|verse|chorus|bridge|outro>","prompt":"<image prompt>"}, ...]. Make at most ${MAX_SCENES} scenes.`;
   const userMsg = [
     title ? `Song title: ${title}` : null,
     artist ? `Artist: ${artist}` : null,
@@ -1748,6 +1927,8 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
   return parsed.slice(0, MAX_SCENES).map((s, i) => ({
     index: i,
     lines: String(s.lines || '').slice(0, 500),
+    section: ['intro', 'verse', 'chorus', 'bridge', 'outro'].includes(String(s.section || '').toLowerCase())
+      ? String(s.section).toLowerCase() : 'verse',
     prompt: String(s.prompt || '').slice(0, 400) || `cinematic film still${style ? `, ${style}` : ''}`,
   }));
 }

@@ -1735,7 +1735,13 @@ function renderCharacters() {
       <h3>${escapeHtml(c.name)} ${c.loraUrl ? '<span class="usage" style="color:var(--green)">🔒 face lock active</span>' : ''}</h3>
       <div class="char-refs">${c.refs.map((r) => `<img src="${r.url}" loading="lazy" alt="" title="Tap to remove from ${escapeHtml(c.name)}'s reference photos" style="cursor:pointer">`).join('') || '<span class="usage">No reference photos yet</span>'}</div>
       ${c.refs.length ? `<p class="usage" style="margin-top:2px">These are the photos the AI studies for ${escapeHtml(c.name)}'s face — tap one to remove it (it stays in your library). Only your uploads count; generated scenes never do.</p>` : ''}
-      ${c.loraUrl ? '' : `<button class="btn2 ch-train" ${c.refs.length >= 6 ? '' : 'disabled'}>${trainLabel}</button>
+      ${c.loraUrl
+        ? `<button class="btn2 quiet ch-train" ${c.refs.length >= 6 ? '' : 'disabled'}>↻ Retrain face lock${lt ? ` · ~$${lt.estCost.toFixed(2)}` : ''}</button>
+      <p class="usage" style="margin-top:2px">${c.refs.length >= 6
+        ? 'Retrain after changing the reference photos — the new lock replaces the old one automatically when it finishes.'
+        : `Retraining needs at least 6 reference photos (has ${c.refs.length}).`}</p>
+      <div class="progress-line ch-train-prog"><div></div></div>`
+        : `<button class="btn2 ch-train" ${c.refs.length >= 6 ? '' : 'disabled'}>${trainLabel}</button>
       <p class="usage" style="margin-top:2px">${c.refs.length >= 6
         ? 'Teaches the AI this face permanently — the strongest likeness there is. Takes ~10 minutes; keep this tab open.'
         : `Needs at least 6 photos to train (has ${c.refs.length}). 10–20 varied photos = the best lock.`}</p>
@@ -1750,7 +1756,9 @@ function renderCharacters() {
     const trainBtn = card.querySelector('.ch-train');
     if (trainBtn) trainBtn.onclick = async () => {
       const est = lt ? `about $${lt.estCost.toFixed(2)}` : 'a few dollars';
-      if (!confirm(`Train a permanent face lock for ${c.name}?\n\nUses their ${Math.min(c.refs.length, 20)} reference photos, costs ${est} one-time from your fal balance, and takes around 10 minutes. Keep this tab open until it finishes.`)) return;
+      const verb = c.loraUrl ? 'Retrain' : 'Train';
+      const idleLabel = trainBtn.textContent;
+      if (!confirm(`${verb} ${c.name}'s face lock?\n\nUses their ${Math.min(c.refs.length, 20)} current reference photos, costs ${est} from your fal balance, and takes around 10 minutes. Keep this tab open until it finishes.${c.loraUrl ? '\n\nThe new lock replaces the old one automatically.' : ''}`)) return;
       setErr('#chars-err', null);
       trainBtn.disabled = true;
       trainBtn.innerHTML = '<span class="spinner"></span>Training… (~10 min, keep tab open)';
@@ -1760,11 +1768,11 @@ function renderCharacters() {
         const { job } = await jfetch(`/api/studio/characters/${c.id}/train-lora`, { method: 'POST' });
         await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
         await loadCharacters();
-        alert(`${c.name}'s face lock is trained and active! Every scene with them selected now uses it automatically.`);
+        alert(`${c.name}'s face lock is ${c.loraUrl ? 'retrained' : 'trained'} and active! Every scene with them selected now uses it automatically.`);
       } catch (e) {
         setErr('#chars-err', e.message);
         trainBtn.disabled = false;
-        trainBtn.textContent = trainLabel;
+        trainBtn.textContent = idleLabel;
         prog.classList.remove('show');
       }
     };

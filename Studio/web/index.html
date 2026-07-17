@@ -27,6 +27,13 @@
   --bdr:rgba(255,255,255,0.09);--bdr2:rgba(255,255,255,0.18);
   --acc:#26215C;--acc-t:#AFA9EC;
 }
+/* Force light even when the OS is in dark mode (manual toggle). */
+:root[data-theme="light"]{
+  --s0:#f5f4f0;--s1:#ededea;--s2:#fff;
+  --tp:#1a1a18;--ts:#4a4a46;--tm:#888780;
+  --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
+  --acc:#EEEDFE;--acc-t:#3C3489;
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{min-height:100%;background:var(--brand);font-family:var(--f)}
 body{display:flex;justify-content:center}
@@ -118,9 +125,10 @@ textarea::placeholder{color:var(--tm)}
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
-      <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;color:#8892c0;font-size:16px;cursor:pointer">A−</button>
-      <span id="zoom-val" style="font-size:11px;color:#8892c0;min-width:34px;text-align:center">100%</span>
-      <button id="zoom-in" title="Make everything bigger (stretch the app out)" style="width:30px;height:30px;border-radius:8px;border:0.5px solid rgba(255,255,255,0.2);background:transparent;color:#8892c0;font-size:16px;cursor:pointer">A+</button>
+      <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
+      <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
+      <span id="zoom-val" style="font-size:11px;color:var(--ts);min-width:34px;text-align:center">100%</span>
+      <button id="zoom-in" title="Make everything bigger (stretch the app out)" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A+</button>
     </span>
   </div>
   <div class="mtabs" id="mtabs">
@@ -282,8 +290,24 @@ textarea::placeholder{color:var(--tm)}
   <div class="view" id="view-seq">
     <div class="banner" id="seq-banner" style="display:none"></div>
 
-    <div class="card" id="crew-card">
-      <h3>🎬 Director &amp; 💼 Producer <span class="usage">— drop images, they do the rest from your song</span></h3>
+    <div class="card" id="crew-card" style="border-color:var(--accent);border-width:1.5px">
+      <h3>🎬 Make my video <span class="usage">— song + lyrics + pictures → the crew does the rest</span></h3>
+
+      <p class="usage" style="margin:0"><b>1. Your song</b></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn2 quiet" id="crew-song-add" style="flex:1;min-width:120px">🎵 Add song file</button>
+        <span class="usage" id="crew-song-label">no song yet</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input class="input" id="crew-song-link" placeholder="…or paste a Suno link" style="flex:1;min-width:120px">
+        <button class="btn2 quiet" id="crew-song-import">🔗 Import</button>
+      </div>
+
+      <p class="usage" style="margin:8px 0 0"><b>2. Your lyrics</b></p>
+      <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
+      <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~2¢)</button>
+
+      <p class="usage" style="margin:8px 0 0"><b>3. Your pictures</b> <span class="usage">(optional — the crew generates the rest)</span></p>
       <button class="btn2" id="crew-drop">🎞 Drop your images (pick several)</button>
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.</p>
@@ -1209,6 +1233,22 @@ function pickFiles(accept, cb) {
     zi.onclick = () => { z = Math.min(200, z + 10); apply(); };
     zo.onclick = () => { z = Math.max(60, z - 10); apply(); };
     apply();
+    // theme: default follows the OS; the toggle forces light/dark and persists
+    const tb = document.getElementById('theme-toggle');
+    const applyTheme = (t) => {
+      if (t) document.documentElement.setAttribute('data-theme', t);
+      else document.documentElement.removeAttribute('data-theme');
+      if (tb) tb.textContent = t === 'light' ? '☀️' : '🌙';
+    };
+    let theme = localStorage.getItem('tsid-theme') || '';
+    applyTheme(theme);
+    if (tb) tb.onclick = () => {
+      // cycle: (OS default) → light → dark → light …
+      const cur = document.documentElement.getAttribute('data-theme');
+      theme = cur === 'light' ? 'dark' : 'light';
+      localStorage.setItem('tsid-theme', theme);
+      applyTheme(theme);
+    };
   };
   wire();
 })();
@@ -3020,10 +3060,49 @@ function renderCrewThumbs() {
     : 'No images dropped yet — the Director will use what you give them, and only generates scenes to fill gaps.';
 }
 
+// --- self-contained crew inputs (song + lyrics live right in the crew card) ---
+function crewSongLabel() {
+  const entry = st.musicList[0];
+  const song = entry && st.assets.find((a) => a.id === entry.assetId);
+  $('#crew-song-label').textContent = song ? `♪ ${song.label}` : 'no song yet';
+}
+$('#crew-song-add').onclick = () => pickFile('audio/*', async (file) => {
+  setErr('#seq-err', null);
+  const b = $('#crew-song-add'); b.disabled = true; b.innerHTML = '<span class="spinner"></span>…';
+  try {
+    const asset = await uploadFile(file, 'audio');
+    await loadAssets();
+    st.musicList = [{ assetId: asset.id, start: 0, len: null }];
+    crewSongLabel(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🎵 Add song file';
+});
+$('#crew-song-import').onclick = async () => {
+  setErr('#seq-err', null);
+  const url = $('#crew-song-link').value.trim();
+  if (!url) return setErr('#seq-err', 'Paste the song link first (Suno: Share → Copy link).');
+  const b = $('#crew-song-import'); b.disabled = true; b.innerHTML = '<span class="spinner"></span>Importing…';
+  try {
+    const { asset } = await jfetch('/api/studio/import-song', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }),
+    });
+    await loadAssets();
+    st.musicList = [{ assetId: asset.id, start: 0, len: null }];
+    crewSongLabel(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft();
+    $('#crew-song-link').value = '';
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🔗 Import';
+};
+// keep the crew lyrics box and the (hidden) main lyrics box in sync so the
+// Director/storyboard read the same words
+$('#crew-lyrics').oninput = () => { $('#lyr-text').value = $('#crew-lyrics').value; persistDraft(); };
+$('#crew-autocap').onclick = () => $('#lyr-auto').onclick();
+
 $('#crew-direct').onclick = async () => {
   setErr('#seq-err', null);
-  if (!st.musicList.length) return setErr('#seq-err', 'Add your song first (upload or Suno link in Quick Video).');
-  const lyrics = $('#lyr-text').value.trim() || st.captions.map((c) => c.text).join('\n');
+  if ($('#crew-lyrics').value.trim() && !$('#lyr-text').value.trim()) $('#lyr-text').value = $('#crew-lyrics').value;
+  if (!st.musicList.length) return setErr('#seq-err', 'Add your song first (button 1 above — a file or a Suno link).');
+  const lyrics = $('#lyr-text').value.trim() || $('#crew-lyrics').value.trim() || st.captions.map((c) => c.text).join('\n');
   if (!lyrics) return setErr('#seq-err', 'The Director needs the words: paste lyrics in Lyrics & Captions, or press 🪄 Auto-captions first.');
   const b = $('#crew-direct');
   b.disabled = true; b.innerHTML = '<span class="spinner"></span>Director is reading your song…';
@@ -3854,11 +3933,18 @@ const QK_MOVES = [
 const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
 const qk = { shots: [], format: '9:16', busy: false };
 
-// Simple mode (default): only Quick Video + Shorts show; studio tools are one tap away.
+// Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
+// else — Quick Video, pipeline, storyboard, shorts, campaign — is one tap away.
 function applySimpleMode() {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';
-  document.querySelectorAll('#view-seq .adv-card').forEach((c) => { c.style.display = simple ? 'none' : ''; });
-  $('#mode-toggle').textContent = simple ? '🛠 Show studio tools' : '✨ Back to simple mode';
+  document.querySelectorAll('#view-seq > .card').forEach((c) => {
+    if (c.id === 'crew-card') { c.style.display = ''; return; } // the crew is the whole front page
+    c.style.display = simple ? 'none' : '';
+  });
+  $('#mode-toggle').textContent = simple ? '🛠 Show all studio tools' : '✨ Back to simple mode';
+  // keep the crew card's own song label + lyrics box current
+  if (typeof crewSongLabel === 'function') crewSongLabel();
+  if ($('#crew-lyrics') && $('#lyr-text') && !$('#crew-lyrics').value && $('#lyr-text').value) $('#crew-lyrics').value = $('#lyr-text').value;
 }
 $('#mode-toggle').onclick = () => {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';

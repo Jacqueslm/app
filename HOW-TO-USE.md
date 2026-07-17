@@ -6,12 +6,13 @@
 
 ---
 
-## The 4 Golden Rules
+## The 5 Golden Rules
 
 1. **Always start Studio with `Start Studio`** (the file with gears). Never by opening index.html.
 2. **The black window IS the app.** Keep it open while you work. Close it when you're done.
 3. **The address bar must say `localhost:4400`.** If it says "File C:/..." you opened the wrong thing.
 4. **Free stuff is unlimited. AI stuff costs cents.** Every AI button shows its price before you tap it.
+5. **Not sure what a button does? Hover your mouse over it.** A little note appears explaining what it does and whether it's free or a spend button.
 
 ---
 
@@ -62,6 +63,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
    - Only photos **you upload** count as reference photos — AI-generated scenes never do, even when the character appears in them.
    - Tap any thumbnail in their gallery to **remove it** from the reference set (it stays in your library).
    - Short on photos? **Crop** a face out of a bigger picture — crops of your uploads count as reference photos too.
+   - Fill in their **cast sheet** line ("male lead — gold chains, tattoos"): the Director uses it to recognize them in your lyrics, and it keeps their signature details consistent in every generated scene.
 2. Press **🔒 Train face lock** (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; every solo scene with that character then uses it automatically. Changed their photos later? Press **↻ Retrain face lock** — the new lock replaces the old one.
 3. **Lyrics & Captions** card → paste your lyrics
 4. **Storyboard** card → **Build storyboard from my lyrics** → it detects your song's structure (🎬 Intro · 🎤 Verse · 🔥 Chorus · 🌉 Bridge · 🌅 Outro — it spots repeated stanzas as the chorus, and `[Chorus]`-style tags in your sheet work too) and matches each scene's energy: big dynamic shots on choruses, intimate shots on verses, moody on the bridge. **Generate** each scene (~4–9¢). Chorus stills even land on the timeline with shorter, punchier holds.
@@ -177,9 +179,11 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | 5-second clip (Standard/Kling) | ~42¢ |
 | 5-second clip (Best/Kling Pro) | ~56¢ |
 | Sing on a video — Draft / ✨ Hero | ~4¢ / 20¢ |
-| Sing on a still, Dance Transfer | ~50¢–$1.50 |
+| Sing on a still | ~50¢–$1.50 |
+| Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~50¢ / 70¢ / $1.20 |
 | 🎭 Live Portrait clip | ~10¢ |
 | 🪄 Auto-captions (whole song) | ~2¢ |
+| 🔍 QC inspection (per image) | ~½¢ |
 
 The exact price shows **on the button** before you tap. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 
@@ -218,6 +222,8 @@ Also on that card: see what's using disk space and delete big old files.
 | Generated image is a split-screen collage | Your prompt describes several places/moments at once. One subject per scene — the app blocks most of these automatically now. |
 | Upload/generation dies mid-send | Studio retries by itself; if it still fails, check your internet. With two characters on ✨ Best, removing a couple of reference photos also helps. |
 | "You already have an almost identical scene" | The duplicate guard saving you money. Check the existing shot in your Library before paying to regenerate. |
+| ⚠ QC badge on an image | The AI inspector spotted a likely defect (hover the badge for the reason — e.g. wrong finger count). Regenerate the scene if it bothers you; ✅ QC means it passed. |
+| Suno import fails | Make sure you paste the **Share → Copy link** URL from Suno. If it still fails, download the song in your browser and use the normal upload button — same result. |
 | Windows blocks Start My App | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
 | Daily cap reached | You generated a LOT today. It resets at midnight UTC (or raise it in server/.env). |
 | Something weird I can't figure out | Open a Claude Code session on the repo and describe it. Screenshots help. |

@@ -548,7 +548,9 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
     // Photo-reference path (solo or duo). A duo always works from photos: two
     // identity LoRAs in one generation bleed into each other.
     model = best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
-    const perChar = cast.length > 1 ? 3 : 4;
+    // Banana Pro edit accepts up to 14 reference images (Flux bills per input
+    // megapixel, so it stays leaner) - more angles = a stronger likeness lock.
+    const perChar = best ? (cast.length > 1 ? 5 : 6) : (cast.length > 1 ? 3 : 4);
     const allUris = [];
     const whose = []; // which reference photos belong to which character
     for (const c of cast) {
@@ -575,6 +577,15 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
         + `Now show ${cast[0].name} and ${cast[1].name} together in this scene: ${cleanPrompt}`);
     if (/kontext/.test(model)) input.image_url = allUris[0]; // legacy override: single-image editor
     else input.image_urls = allUris;
+  }
+
+  // Image models resolve prompts that mention several moments/places (or two
+  // people who are apart) by drawing a literal split-screen collage with a
+  // seam down the middle - almost never what a music-video still wants.
+  // Pin every generation to one continuous frame unless the user explicitly
+  // asks for a collage-style layout.
+  if (!/collage|split.?screen|diptych|triptych|grid of|multi.?panel/i.test(cleanPrompt)) {
+    input.prompt += ' IMPORTANT: render ONE single continuous photograph of one unified scene - never a split screen, collage, diptych, or side-by-side panel layout.';
   }
 
   return { model, input, cleanPrompt, character, cast };

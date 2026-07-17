@@ -1086,6 +1086,7 @@ const st = {
   singTarget: null,     // assetId with the lip-sync panel open
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
+  cutTarget: null,      // assetId with the cut panel open
   busyScene: false,
   busyRender: false,
 };
@@ -1622,6 +1623,7 @@ function renderLibrary() {
     });
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
+    if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,
@@ -1664,6 +1666,57 @@ function renderLibrary() {
         });
       };
       renderPanel();
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.cutTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      let cutMode = 'keep';
+      panel.innerHTML = `
+        <div class="chips cut-modes">
+          <button class="chip on" data-mode="keep">Keep only this part</button>
+          <button class="chip" data-mode="remove">Remove this part</button>
+        </div>
+        <div class="trim" style="font-size:11px">
+          <span>from</span><input type="number" class="cut-from" min="0" step="0.1" value="0">
+          <span>s to</span><input type="number" class="cut-to" min="0" step="0.1" value="${Math.max(1, Math.round((a.meta?.duration || 10) / 2))}"><span>s</span>
+        </div>
+        <button class="btn2 cut-go">✂️ Cut · free</button>
+        <div class="progress-line cut-prog"><div></div></div>
+        <span class="usage cut-note">Makes a new clip with just that part — the original stays untouched.</span>`;
+      panel.querySelectorAll('.cut-modes .chip').forEach((c) => {
+        c.onclick = () => {
+          cutMode = c.dataset.mode;
+          panel.querySelectorAll('.cut-modes .chip').forEach((x) => x.classList.toggle('on', x === c));
+          panel.querySelector('.cut-note').textContent = cutMode === 'keep'
+            ? 'Makes a new clip with just that part — the original stays untouched.'
+            : 'Deletes that middle piece and joins the two sides — the original stays untouched.';
+        };
+      });
+      panel.querySelector('.cut-go').onclick = async (e) => {
+        setErr('#scenes-err', null);
+        const btn2 = e.target;
+        btn2.disabled = true;
+        const prog = panel.querySelector('.cut-prog');
+        prog.classList.add('show');
+        try {
+          const { job } = await jfetch('/api/studio/cut', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              assetId: a.id, mode: cutMode,
+              from: Number(panel.querySelector('.cut-from').value) || 0,
+              to: Number(panel.querySelector('.cut-to').value) || 0,
+            }),
+          });
+          await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+          st.cutTarget = null;
+          await loadAssets();
+        } catch (err) {
+          setErr('#scenes-err', err.message);
+          btn2.disabled = false;
+          prog.classList.remove('show');
+        }
+      };
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.cropTarget === a.id) {

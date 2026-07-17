@@ -132,13 +132,39 @@ textarea::placeholder{color:var(--tm)}
     </span>
   </div>
   <div class="mtabs" id="mtabs">
-    <button data-view="art" class="on">⚙ Settings</button>
+    <button data-view="media" class="on">🖼 My Media</button>
     <button data-view="scenes">AI Scenes</button>
     <button data-view="chars">Characters</button>
     <button data-view="seq">Sequencer</button>
+    <button data-view="art">⚙ Settings</button>
   </div>
   <div class="body">
-  <div class="view on" id="view-art">
+  <div class="view on" id="view-media">
+    <div class="card" style="border-color:var(--accent);border-width:1.5px">
+      <h3>🖼 My Media <span class="usage">— everything you've uploaded or made, as pictures</span></h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="media-upload">⬆ Upload pictures &amp; videos</button>
+        <button class="btn2 quiet" id="media-upload-song">🎵 Upload a song</button>
+        <button class="btn2 quiet" id="media-open-folder">📁 Open my media folder</button>
+      </div>
+      <p class="usage" id="media-folder-note" style="word-break:break-all"></p>
+
+      <h3 style="margin-top:8px">📷 Pictures <span class="usage" id="media-img-count"></span></h3>
+      <div class="lib-grid" id="media-images"></div>
+      <button class="btn2 quiet" id="media-add-all-images" style="width:100%;display:none">➕ Add all pictures to a video</button>
+
+      <h3 style="margin-top:12px">🎞 Video clips <span class="usage" id="media-vid-count"></span></h3>
+      <div class="lib-grid" id="media-videos"></div>
+      <button class="btn2 quiet" id="media-add-all-videos" style="width:100%;display:none">➕ Add all clips to a video</button>
+
+      <h3 style="margin-top:12px">🎵 Songs <span class="usage" id="media-song-count"></span></h3>
+      <div id="media-songs" class="row"></div>
+
+      <p class="usage" style="margin-top:10px">Tap any picture or clip to enlarge it. Use <b>➕ Add to video</b> to drop it on the timeline in the Sequencer.</p>
+    </div>
+  </div><!-- /view-media -->
+
+  <div class="view" id="view-art">
     <div class="card" id="settings-card">
       <h3>⚙ Settings</h3>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
@@ -1499,8 +1525,94 @@ async function bootStudio() {
 
 async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
-  renderLibrary(); renderSeqPickers();
+  renderLibrary(); renderSeqPickers(); renderMediaPage();
 }
+
+/* ---------------- My Media: the visual first page (pictures / clips / songs) ---------------- */
+function renderMediaPage() {
+  if (!document.getElementById('view-media')) return;
+  const imgs = st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay);
+  const vids = st.assets.filter((a) => a.kind === 'video');
+  const songs = st.assets.filter((a) => a.kind === 'audio');
+
+  const thumb = (a) => {
+    const el = document.createElement('div');
+    el.className = 'lib-item';
+    el.innerHTML = (a.kind === 'image'
+      ? `<img src="${a.url}" loading="lazy" alt="">`
+      : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
+      + `<div class="li-meta"><p>${escapeHtml(a.label)}</p><div class="li-actions"></div></div>`;
+    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
+    const actions = el.querySelector('.li-actions');
+    const add = document.createElement('button'); add.textContent = '➕ Add to video'; add.className = 'primary';
+    add.onclick = async () => { await addToSeq(a); };
+    const del = document.createElement('button'); del.textContent = '🗑';
+    del.onclick = async () => {
+      if (!confirm(`Delete "${a.label}" from your media? This can't be undone.`)) return;
+      try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); if (typeof loadStorage === 'function') loadStorage(); }
+      catch (e) { setErr('#seq-err', e.message); }
+    };
+    actions.appendChild(add); actions.appendChild(del);
+    return el;
+  };
+
+  const fill = (boxSel, list, emptyMsg) => {
+    const box = $(boxSel); box.innerHTML = '';
+    if (!list.length) { box.innerHTML = `<p class="note" style="grid-column:1/-1;text-align:left">${emptyMsg}</p>`; return; }
+    list.forEach((a) => box.appendChild(thumb(a)));
+  };
+  fill('#media-images', imgs, 'No pictures yet — upload some above, or generate scenes in AI Scenes.');
+  fill('#media-videos', vids, 'No video clips yet — upload some above.');
+  $('#media-img-count').textContent = imgs.length ? `(${imgs.length})` : '';
+  $('#media-vid-count').textContent = vids.length ? `(${vids.length})` : '';
+  $('#media-add-all-images').style.display = imgs.length ? 'block' : 'none';
+  $('#media-add-all-videos').style.display = vids.length ? 'block' : 'none';
+
+  const songBox = $('#media-songs'); songBox.innerHTML = '';
+  if (!songs.length) songBox.innerHTML = '<p class="note" style="text-align:left">No songs yet — upload one above.</p>';
+  songs.forEach((a) => {
+    const row = document.createElement('div'); row.className = 'trim'; row.style.fontSize = '13px';
+    const name = document.createElement('span'); name.style.flex = '1'; name.textContent = `♪ ${a.label}`;
+    const play = document.createElement('button'); play.textContent = '▶ Play'; play.className = 'btn2 quiet'; play.style.cssText = 'padding:5px 10px;font-size:12px';
+    const audio = new Audio(a.url);
+    play.onclick = () => { if (audio.paused) { audio.play().catch(() => {}); play.textContent = '⏸ Pause'; } else { audio.pause(); play.textContent = '▶ Play'; } };
+    audio.onended = () => { play.textContent = '▶ Play'; };
+    const use = document.createElement('button'); use.textContent = '🎬 Use in video'; use.className = 'btn2'; use.style.cssText = 'padding:5px 10px;font-size:12px';
+    use.onclick = () => { addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); document.querySelector('#mtabs button[data-view="seq"]').click(); };
+    const del = document.createElement('button'); del.textContent = '🗑'; del.className = 'btn2 quiet'; del.style.cssText = 'padding:5px 10px;font-size:12px';
+    del.onclick = async () => { if (!confirm(`Delete "${a.label}"?`)) return; try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); } catch (e) { setErr('#seq-err', e.message); } };
+    row.appendChild(name); row.appendChild(play); row.appendChild(use); row.appendChild(del);
+    songBox.appendChild(row);
+  });
+  $('#media-song-count').textContent = songs.length ? `(${songs.length})` : '';
+}
+$('#media-upload').onclick = () => pickFiles('image/*,video/*', async (files) => {
+  setErr('#seq-err', null);
+  const b = $('#media-upload'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Uploading…';
+  try { for (const f of files) await uploadFile(f, (f.type || '').startsWith('video') ? 'video' : 'image'); await loadAssets(); }
+  catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = old;
+});
+$('#media-upload-song').onclick = () => pickFile('audio/*', async (file) => {
+  setErr('#seq-err', null);
+  const b = $('#media-upload-song'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Uploading…';
+  try { await uploadFile(file, 'audio'); await loadAssets(); }
+  catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = old;
+});
+$('#media-open-folder').onclick = async () => {
+  const b = $('#media-open-folder'); b.disabled = true;
+  try { const r = await jfetch('/api/studio/reveal-media', { method: 'POST' }); $('#media-folder-note').textContent = r.opened ? `Opened: ${r.path}` : `Your files live here:  ${r.path}`; }
+  catch (e) { $('#media-folder-note').textContent = e.message; }
+  b.disabled = false;
+};
+async function mediaAddAll(kind) {
+  const list = st.assets.filter((a) => a.kind === kind && !a.meta?.overlay);
+  if (!list.length) return;
+  for (const a of list) await addToSeq(a);
+}
+$('#media-add-all-images').onclick = () => mediaAddAll('image');
+$('#media-add-all-videos').onclick = () => mediaAddAll('video');
 async function loadCharacters() {
   st.characters = (await jfetch('/api/studio/characters')).characters;
   renderCharacters(); renderSceneCharSelect(); renderRelationships();

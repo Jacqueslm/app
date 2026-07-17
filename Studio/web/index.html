@@ -224,6 +224,9 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2" id="set-key">🔑 AI key (fal.ai) — set or change</button>
       <button class="btn2" id="set-update">⬆ Update my app</button>
       <button class="btn2" id="set-backup">⬇ Back up everything (ZIP)</button>
+      <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
+      <button class="btn2" id="set-reset" style="border:1px solid #c0392b;color:#e74c3c">🗑 Start fresh — delete everything</button>
+      <p class="usage" id="set-reset-status" style="margin:0">Wipes every picture, video, song, character and project so the app is empty. Your login stays. Back up first if unsure — this can't be undone.</p>
       <p class="usage" id="set-update-status" style="margin:0"></p>
       <p class="usage">Your files live in <b>Studio\\server\\media</b>. Your account, characters and settings are in <b>Studio\\server\\data.sqlite</b> — copy those to move or restore your work.</p>
     </div>
@@ -2066,6 +2069,26 @@ async function runUpdate(statusSel, btnSel) {
 }
 $('#upd-go').onclick = () => runUpdate('#upd-status', '#upd-go');
 $('#media-update').onclick = () => runUpdate('#media-upd-status', '#media-update');
+
+$('#set-reset').onclick = async () => {
+  if (!confirm('Delete EVERYTHING — all your pictures, videos, songs, characters and projects? Your login stays, but the content is gone for good.')) return;
+  if (!confirm('Last check: this cannot be undone. Really wipe it all and start fresh?')) return;
+  const b = $('#set-reset'); b.disabled = true; b.innerHTML = '<span class="spinner"></span>Clearing…';
+  $('#set-reset-status').textContent = 'Clearing everything…';
+  try {
+    const d = await jfetch('/api/studio/reset-everything', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: 'DELETE' }),
+    });
+    // clear the client's working state too, then reload into a clean app
+    st.seq = []; st.trans = []; st.musicList = []; st.captions = []; st.overlays = []; st.simpleSel = new Set();
+    try { localStorage.removeItem('tsid-studio-draft'); } catch (_) {}
+    $('#set-reset-status').textContent = `✅ ${d.message} Reloading…`;
+    setTimeout(() => location.reload(), 900);
+  } catch (e) {
+    $('#set-reset-status').textContent = `❌ ${e.message}`;
+    b.disabled = false; b.textContent = '🗑 Start fresh — delete everything';
+  }
+};
 
 /* ---------------- dance transfer ---------------- */
 $('#dn-upload').onclick = () => pickFile('video/*', async (file) => {

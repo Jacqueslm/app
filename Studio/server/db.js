@@ -245,6 +245,17 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+// Wipe ALL of a user's content (pictures, videos, songs, characters, locations,
+// relationships, queue and the saved project) but KEEP their account/login.
+// Returns the media filenames so the caller can delete the files on disk.
+function resetUserContent(userId) {
+  const files = db.prepare('SELECT filename FROM studio_assets WHERE user_id = ?').all(userId).map((r) => r.filename);
+  for (const t of ['studio_assets', 'studio_characters', 'studio_locations', 'studio_relationships', 'studio_queue', 'user_state']) {
+    try { db.prepare(`DELETE FROM ${t} WHERE user_id = ?`).run(userId); } catch (_) {}
+  }
+  return files;
+}
+
 function unlinkAssetFromCharacter(userId, id) {
   db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND id = ?').run(userId, id);
 }
@@ -448,6 +459,7 @@ module.exports = {
   getAssets,
   getAsset,
   deleteAsset,
+  resetUserContent,
   unlinkAssetFromCharacter,
   createLocation,
   getLocations,

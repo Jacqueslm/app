@@ -1131,6 +1131,42 @@ router.post('/cut', async (req, res) => {
   res.status(202).json({ job: jobJson(job) });
 });
 
+/* ---------------- free local sound swap ---------------- */
+// Mute a clip, or replace its audio with a stretch of a song from the
+// library. -c:v copy leaves the video frames untouched, so both are instant.
+router.post('/resound', async (req, res) => {
+  const { assetId, mode, audioAssetId, start } = req.body || {};
+  const clip = db.getAsset(req.userId, Number(assetId));
+  if (!clip || clip.kind !== 'video') return res.status(404).json({ error: 'Pick a video from your library first.' });
+  const src = mediaPath(clip.filename);
+  let dur = null;
+  try { dur = JSON.parse(clip.meta || 'null')?.duration || null; } catch (_) {}
+  if (!dur) dur = await probeMediaDuration(src);
+
+  const outFile = newFilename(req.userId, '.mp4');
+  let args, label;
+  if (mode === 'replace') {
+    const song = db.getAsset(req.userId, Number(audioAssetId));
+    if (!song || song.kind !== 'audio') return res.status(404).json({ error: 'Pick a song for the new sound.' });
+    const S = Math.max(0, Number(start) || 0);
+    args = ['-i', src, '-ss', S.toFixed(2), '-i', mediaPath(song.filename),
+      '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart'];
+    label = `${clip.label} · new sound`;
+  } else {
+    args = ['-i', src, '-c:v', 'copy', '-an', '-movflags', '+faststart'];
+    label = `${clip.label} · muted`;
+  }
+  const proc = spawn(ffmpegBin(), args.concat(['-y', mediaPath(outFile)]));
+  proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
+  proc.on('close', (code) => {
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Could not change that video\'s sound.' });
+    }
+    const id = db.createAsset(req.userId, 'video', label, outFile, null, { source: 'resound', fromAssetId: clip.id, ...(dur ? { duration: dur } : {}) });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
 /* ---------------- free local crop ---------------- */
 // Crop an image to a target aspect, keeping the start/center/end of whichever
 // axis gets trimmed. Pure ffmpeg - free, instant, no AI. The crop inherits

@@ -1087,6 +1087,7 @@ const st = {
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
   cutTarget: null,      // assetId with the cut panel open
+  soundTarget: null,    // assetId with the sound-swap panel open
   busyScene: false,
   busyRender: false,
 };
@@ -1600,7 +1601,7 @@ function renderLibrary() {
     const charName = a.characterId && st.characters.find((c) => c.id === a.characterId)?.name;
     el.innerHTML = (a.kind === 'image'
       ? `<img src="${a.url}" loading="lazy" alt="">`
-      : `<video src="${a.url}" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`)
+      : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
       + `<div class="li-meta"><p>${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}</p><div class="li-actions"></div></div>`;
     el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
     const actions = el.querySelector('.li-actions');
@@ -1624,6 +1625,7 @@ function renderLibrary() {
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
+    if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; renderLibrary(); });
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,
@@ -1666,6 +1668,45 @@ function renderLibrary() {
         });
       };
       renderPanel();
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.soundTarget === a.id) {
+      const songs = st.assets.filter((x) => x.kind === 'audio');
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      panel.innerHTML = `
+        <button class="btn2 quiet snd-mute">🔇 Remove the sound · free</button>
+        ${songs.length ? `
+        <select class="input snd-song" style="padding:8px 10px;font-size:12px">
+          ${songs.map((s) => `<option value="${s.id}">♪ ${escapeHtml(s.label)}</option>`).join('')}
+        </select>
+        <div class="trim" style="font-size:11px">
+          <span>song from</span><input type="number" class="snd-start" min="0" step="0.5" value="0"><span>s</span>
+        </div>
+        <button class="btn2 quiet snd-swap">🎵 Swap in this song · free</button>` : '<span class="usage">Upload a song (Music card) to swap sound in.</span>'}
+        <span class="usage">Makes a new copy — the original keeps its sound. The song plays from your chosen second for the length of the clip.</span>`;
+      const run = async (body, btnEl) => {
+        setErr('#scenes-err', null);
+        btnEl.disabled = true; const old = btnEl.textContent; btnEl.textContent = 'Working…';
+        try {
+          await jfetch('/api/studio/resound', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetId: a.id, ...body }),
+          });
+          st.soundTarget = null;
+          await loadAssets();
+        } catch (err) {
+          setErr('#scenes-err', err.message);
+          btnEl.disabled = false; btnEl.textContent = old;
+        }
+      };
+      panel.querySelector('.snd-mute').onclick = (e) => run({ mode: 'mute' }, e.target);
+      const swap = panel.querySelector('.snd-swap');
+      if (swap) swap.onclick = (e) => run({
+        mode: 'replace',
+        audioAssetId: Number(panel.querySelector('.snd-song').value),
+        start: Number(panel.querySelector('.snd-start').value) || 0,
+      }, e.target);
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.cutTarget === a.id) {

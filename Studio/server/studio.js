@@ -582,6 +582,24 @@ router.post('/reveal-media', (req, res) => {
   res.json({ opened, path: MEDIA_DIR });
 });
 
+// Start fresh: wipe ALL of this user's content and the media files on disk, so
+// the app is empty. The account/login stays. Requires an explicit confirm flag.
+router.post('/reset-everything', (req, res) => {
+  if (!req.body || req.body.confirm !== 'DELETE') {
+    return res.status(400).json({ error: 'Reset not confirmed.' });
+  }
+  try {
+    const files = db.resetUserContent(req.userId);
+    let removed = 0;
+    for (const f of files) {
+      try { fs.unlinkSync(mediaPath(f)); removed++; } catch (_) {}
+    }
+    res.json({ ok: true, removed, message: `Cleared everything — ${removed} file(s) deleted. The app is empty and ready for a fresh start.` });
+  } catch (err) {
+    res.status(500).json({ error: `Reset failed: ${err.message}` });
+  }
+});
+
 /* ---------------- assets ---------------- */
 router.get('/assets', (req, res) => {
   const kind = ['image', 'video', 'audio', 'project', 'archive'].includes(req.query.kind) ? req.query.kind : null;

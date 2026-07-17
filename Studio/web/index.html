@@ -212,6 +212,21 @@ textarea::placeholder{color:var(--tm)}
       <div class="progress-line" id="dn-prog"><div></div></div>
       <p class="usage">Film yourself phone-upright, full body in frame, good light, one person only. Short clips (5–15s) look best and cost least. The result lands in your library below.</p>
     </div>
+    <div class="card" id="lp-card" style="display:none">
+      <h3>🎭 Live Portrait <span class="usage">— an approved still performs, without regenerating it</span></h3>
+      <select class="input" id="lp-image"></select>
+      <select class="input" id="lp-video"></select>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="lp-upload" style="flex:1">Upload a driving clip (film your face performing)</button>
+      </div>
+      <div class="trim" style="font-size:12px">
+        <span>use motion from</span><input type="number" id="lp-start" min="0" step="0.5" value="0">
+        <span>s, for</span><input type="number" id="lp-len" min="1" max="30" step="0.5" value="8"><span>s</span>
+      </div>
+      <button class="btn2" id="lp-go">🎭 Bring this still to life</button>
+      <div class="progress-line" id="lp-prog"><div></div></div>
+      <p class="usage" id="lp-note">The picked image stays exactly as approved — only the face, eyes and head move, copying your clip's performance. Film your own face doing the expressions you want (talking, vibing, head nods). Cheap — typically ~10¢ a clip.</p>
+    </div>
 
     <div class="err" id="scenes-err"></div>
     <div class="row"><label class="lbl">Library</label><div class="lib-grid" id="lib-grid"></div></div>
@@ -1218,6 +1233,7 @@ async function bootStudio() {
     $('#ai-badge').style.display = 'inline-block';
     $('#scenes-form').style.display = 'flex';
     $('#dance-card').style.display = 'flex';
+    $('#lp-card').style.display = 'flex';
     $('#falkey-card').style.display = 'none';
     $('#falkey-manage').style.display = 'block';
   } else {
@@ -1278,11 +1294,30 @@ function updateScenesUsage() {
   $('#scenes-usage').textContent =
     `Today: ${st.cfg.imagesUsed}/${st.cfg.imageLimit} AI images · ${st.cfg.videosUsed}/${st.cfg.videoLimit} AI videos${priceLine}`;
 }
+// Cost guard: warn before paying to regenerate a scene that's nearly identical
+// to something already in the library (compares prompt word-overlap).
+function findNearDuplicateScene(prompt) {
+  const tokens = (s) => new Set(String(s).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter((w) => w.length > 2));
+  const mine = tokens(prompt);
+  if (mine.size < 4) return null;
+  for (const a of st.assets) {
+    if (a.kind !== 'image' || !a.meta?.prompt) continue;
+    const theirs = tokens(a.meta.prompt);
+    let overlap = 0;
+    for (const w of mine) if (theirs.has(w)) overlap++;
+    const sim = overlap / new Set([...mine, ...theirs]).size;
+    if (sim >= 0.75) return a;
+  }
+  return null;
+}
+
 $('#scene-gen').onclick = async () => {
   if (st.busyScene) return;
   setErr('#scenes-err', null);
   const prompt = $('#scene-prompt').value.trim();
   if (!prompt) return setErr('#scenes-err', 'Describe the shot first.');
+  const dup = findNearDuplicateScene(prompt);
+  if (dup && !confirm(`Heads up — your library already has an almost identical scene:\n\n"${dup.label}"\n\nGenerate again anyway? (Tapping it in the Library lets you check it first.)`)) return;
   st.busyScene = true;
   $('#scene-gen').disabled = true;
   $('#scene-gen').innerHTML = '<span class="spinner"></span>Generating…';
@@ -1464,6 +1499,46 @@ $('#dn-go').onclick = async () => {
   }
 };
 
+/* ---------------- Live Portrait ---------------- */
+$('#lp-upload').onclick = () => pickFile('video/*', async (file) => {
+  setErr('#scenes-err', null);
+  try {
+    const asset = await uploadFile(file, 'video');
+    await loadAssets();
+    $('#lp-video').value = String(asset.id);
+  } catch (e) { setErr('#scenes-err', e.message); }
+});
+$('#lp-go').onclick = async () => {
+  setErr('#scenes-err', null);
+  const imageAssetId = Number($('#lp-image').value);
+  const videoAssetId = Number($('#lp-video').value);
+  if (!imageAssetId) return setErr('#scenes-err', 'Pick the still image to bring to life.');
+  if (!videoAssetId) return setErr('#scenes-err', 'Pick (or upload) a driving clip of your face performing.');
+  const btn = $('#lp-go');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Teaching the still your performance…';
+  setProg('#lp-prog', 3);
+  try {
+    const { job } = await jfetch('/api/studio/liveportrait', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageAssetId, videoAssetId,
+        start: Number($('#lp-start').value) || 0,
+        len: Number($('#lp-len').value) || 8,
+      }),
+    });
+    await pollJob(job.id, (j) => setProg('#lp-prog', j.progress));
+    st.cfg.videosUsed += 1; updateScenesUsage();
+    await loadAssets();
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🎭 Bring this still to life';
+    setProg('#lp-prog', null);
+  }
+};
+
 /* ---------------- library ---------------- */
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
@@ -1548,20 +1623,34 @@ function renderLibrary() {
     }
     if (st.singTarget === a.id) {
       const songs = st.assets.filter((x) => x.kind === 'audio');
+      const singRates = st.cfg?.pricing?.sing;
+      const isVid = a.kind === 'video';
+      let singTier = localStorage.getItem('tsid-sing-tier') || 'draft';
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
       panel.innerHTML = songs.length ? `
         <select class="input sg-song" style="padding:8px 10px;font-size:12px">
           ${songs.map((s) => `<option value="${s.id}">♪ ${escapeHtml(s.label)}</option>`).join('')}
         </select>
+        ${isVid && singRates ? `<div class="chips sg-tiers">
+          <button class="chip${singTier === 'draft' ? ' on' : ''}" data-tier="draft">Draft · ~$${singRates.draft.toFixed(2)}</button>
+          <button class="chip${singTier === 'hero' ? ' on' : ''}" data-tier="hero">✨ Hero · $${singRates.hero.toFixed(2)}</button>
+        </div>` : ''}
         <div class="trim" style="font-size:11px">
           <span>vocal from</span><input type="number" class="sg-start" min="0" step="0.5" value="0">
           <span>s, for</span><input type="number" class="sg-len" min="1" max="30" step="0.5" value="10"><span>s</span>
         </div>
         <button class="btn2 sg-go">🎤 Make it sing</button>
         <div class="progress-line sg-prog"><div></div></div>
-        <span class="usage">Lip-syncs the face to that part of the song (AI, uses your fal balance). Keep it short.</span>`
+        <span class="usage">${isVid ? 'Draft = quick check the timing works. Hero = the polished pass for the final cut.' : 'Lip-syncs the face to that part of the song (AI, uses your fal balance). Keep it short.'}</span>`
         : '<span class="usage">Upload a song first (Music card or Quick Video).</span>';
+      panel.querySelectorAll('.sg-tiers .chip').forEach((chip) => {
+        chip.onclick = () => {
+          singTier = chip.dataset.tier;
+          localStorage.setItem('tsid-sing-tier', singTier);
+          panel.querySelectorAll('.sg-tiers .chip').forEach((x) => x.classList.toggle('on', x === chip));
+        };
+      });
       const go = panel.querySelector('.sg-go');
       if (go) go.onclick = async () => {
         setErr('#scenes-err', null);
@@ -1576,6 +1665,7 @@ function renderLibrary() {
               audioAssetId: Number(panel.querySelector('.sg-song').value),
               start: Number(panel.querySelector('.sg-start').value) || 0,
               len: Number(panel.querySelector('.sg-len').value) || 10,
+              ...(isVid ? { tier: singTier } : {}),
             }),
           });
           await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
@@ -1820,6 +1910,15 @@ function renderSeqPickers() {
     vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
   if ([...dnImg.options].some((o) => o.value === dnImgCur)) dnImg.value = dnImgCur;
   if ([...dnVid.options].some((o) => o.value === dnVidCur)) dnVid.value = dnVidCur;
+
+  const lpImg = $('#lp-image'), lpVid = $('#lp-video');
+  const lpImgCur = lpImg.value, lpVidCur = lpVid.value;
+  lpImg.innerHTML = '<option value="">The approved still (pick an image)…</option>' +
+    imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
+  lpVid.innerHTML = '<option value="">Your driving clip (pick a video)…</option>' +
+    vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
+  if ([...lpImg.options].some((o) => o.value === lpImgCur)) lpImg.value = lpImgCur;
+  if ([...lpVid.options].some((o) => o.value === lpVidCur)) lpVid.value = lpVidCur;
 
   const projects = st.assets.filter((a) => a.kind === 'project' && !a.label.endsWith('[template]'));
   $('#proj-select').innerHTML = projects.length

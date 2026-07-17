@@ -78,6 +78,17 @@ const LORA_STEP_RATE = Number(process.env.STUDIO_RATE_LORA_STEP || 0.0024);
 const FAL_STORAGE_AUTH_URL = process.env.FAL_STORAGE_AUTH_URL || 'https://rest.alpha.fal.ai/storage/auth/token?storage_type=fal-cdn-v3';
 const MODEL_LIPSYNC_IMAGE = process.env.FAL_MODEL_LIPSYNC_IMAGE || 'fal-ai/sadtalker';
 const MODEL_LIPSYNC_VIDEO = process.env.FAL_MODEL_LIPSYNC_VIDEO || 'fal-ai/sync-lipsync';
+// Sing quality tiers for video subjects: MuseTalk is the cheap fast draft,
+// LatentSync the hero pass ($0.20 flat for clips under 40s - Sing caps at 30).
+const MODEL_LIPSYNC_DRAFT = process.env.FAL_MODEL_LIPSYNC_DRAFT || 'fal-ai/musetalk';
+const MODEL_LIPSYNC_HERO = process.env.FAL_MODEL_LIPSYNC_HERO || 'fal-ai/latentsync';
+const SING_DRAFT_RATE = Number(process.env.STUDIO_RATE_SING_DRAFT || 0.04);
+const SING_HERO_RATE = Number(process.env.STUDIO_RATE_SING_HERO || 0.20);
+// LivePortrait: animates an approved still's face/eyes/head from a driving
+// clip without regenerating the image - canon-safe motion. Compute-billed;
+// the rate here is a displayed estimate, not a fal list price.
+const MODEL_LIVEPORTRAIT = process.env.FAL_MODEL_LIVEPORTRAIT || 'fal-ai/live-portrait';
+const LIVEPORTRAIT_RATE = Number(process.env.STUDIO_RATE_LIVEPORTRAIT || 0.10);
 const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
@@ -391,6 +402,8 @@ router.get('/config', (req, res) => {
       characterImageRate: CHARACTER_IMAGE_RATE,
       imageBestRate: IMAGE_BEST_RATE,
       loraTrain: { steps: LORA_TRAIN_STEPS, estCost: LORA_TRAIN_STEPS * LORA_STEP_RATE },
+      sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
+      livePortrait: LIVEPORTRAIT_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -1105,7 +1118,7 @@ router.post('/lipsync', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { assetId, audioAssetId, start, len } = req.body || {};
+  const { assetId, audioAssetId, start, len, tier } = req.body || {};
   const subject = db.getAsset(req.userId, Number(assetId));
   if (!subject || (subject.kind !== 'image' && subject.kind !== 'video')) {
     return res.status(404).json({ error: 'Pick an image or video from your library first.' });
@@ -1121,10 +1134,17 @@ router.post('/lipsync', async (req, res) => {
   try {
     const audioUri = await extractAudioSegment(mediaPath(song.filename), segStart, segLen);
     const isImage = subject.kind === 'image';
-    const model = isImage ? MODEL_LIPSYNC_IMAGE : MODEL_LIPSYNC_VIDEO;
+    // Video subjects choose a tier: draft (MuseTalk) or hero (LatentSync).
+    // No tier sent = legacy default model. Images always use SadTalker.
+    const model = isImage ? MODEL_LIPSYNC_IMAGE
+      : tier === 'hero' ? MODEL_LIPSYNC_HERO
+      : tier === 'draft' ? MODEL_LIPSYNC_DRAFT
+      : MODEL_LIPSYNC_VIDEO;
     const input = isImage
       ? { source_image_url: fileToDataUri(subject.filename), driven_audio_url: audioUri }
-      : { video_url: fileToDataUri(subject.filename), audio_url: audioUri };
+      : /musetalk/.test(model)
+        ? { source_video_url: fileToDataUri(subject.filename), audio_url: audioUri }
+        : { video_url: fileToDataUri(subject.filename), audio_url: audioUri }; // latentsync + sync-lipsync
     const submitted = await falSubmit(model, input);
     const job = createJob(req.userId, 'ai-video', {
       fal: {
@@ -1195,6 +1215,49 @@ router.post('/dance', async (req, res) => {
         label: `${character.label} · dance`,
         characterId: character.character_id,
         meta: { source: 'motion', model: MODEL_MOTION, fromAssetId: character.id, drivingAssetId: dance.id, segStart, segLen },
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// LivePortrait: an approved still performs the face/eye/head motion from a
+// driving clip - the image itself is never regenerated, so the look you
+// approved is exactly the look that moves (canon-safe).
+router.post('/liveportrait', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const { imageAssetId, videoAssetId, start, len } = req.body || {};
+  const still = db.getAsset(req.userId, Number(imageAssetId));
+  if (!still || still.kind !== 'image') {
+    return res.status(404).json({ error: 'Pick a still image from your library first.' });
+  }
+  const driver = db.getAsset(req.userId, Number(videoAssetId));
+  if (!driver || driver.kind !== 'video') {
+    return res.status(404).json({ error: 'Pick a driving video (film your own face doing the performance).' });
+  }
+  const segStart = Math.max(0, Number(start) || 0);
+  const segLen = Math.min(30, Math.max(1, Number(len) || 8));
+  if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
+    return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
+  }
+  try {
+    const drivingUri = await extractVideoSegment(mediaPath(driver.filename), segStart, segLen);
+    const submitted = await falSubmit(MODEL_LIVEPORTRAIT, {
+      image_url: fileToDataUri(still.filename),
+      video_url: drivingUri,
+    });
+    const job = createJob(req.userId, 'ai-video', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'video',
+        label: `${still.label} · live portrait`,
+        characterId: still.character_id,
+        meta: { source: 'liveportrait', model: MODEL_LIVEPORTRAIT, fromAssetId: still.id, drivingAssetId: driver.id, segStart, segLen },
       },
     });
     res.status(202).json({ job: jobJson(job) });

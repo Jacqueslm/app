@@ -1866,11 +1866,23 @@ router.post('/import-song', async (req, res) => {
   try {
     let audioUrl = null;
     let label = 'Imported song';
-    if (AUDIO_EXT_RE.test(target.pathname)) {
+    // Suno pages are app-rendered (no audio URL in the HTML), but the song id
+    // in the link maps straight to their CDN - try that first.
+    const sunoId = /suno\.(com|ai)/i.test(target.hostname)
+      && target.pathname.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+    if (sunoId) {
+      for (const cdn of [`https://cdn1.suno.ai/${sunoId[1]}.mp3`, `https://cdn2.suno.ai/${sunoId[1]}.mp3`]) {
+        const head = await fetch(cdn, { method: 'HEAD', headers: { 'User-Agent': 'Mozilla/5.0' } }).catch(() => null);
+        if (head && head.ok) { audioUrl = cdn; label = 'Suno song'; break; }
+      }
+    }
+    if (audioUrl) {
+      // direct CDN hit - skip the page scrape entirely
+    } else if (AUDIO_EXT_RE.test(target.pathname)) {
       audioUrl = target.href;
       label = decodeURIComponent(path.basename(target.pathname)).replace(/\.[^.]+$/, '') || label;
     } else {
-      const pageRes = await fetch(target.href, { headers: { 'User-Agent': 'Mozilla/5.0 (Studio importer)' }, redirect: 'follow' });
+      const pageRes = await fetch(target.href, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36' }, redirect: 'follow' });
       if (!pageRes.ok) throw new Error(`the page answered ${pageRes.status}`);
       const html = (await pageRes.text()).slice(0, 2_000_000);
       // Suno's CDN link first, then any audio-file URL on the page

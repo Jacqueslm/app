@@ -2402,11 +2402,14 @@ function runCmd(cmd, args, opts) {
     // No shell: cmd.exe re-splits arguments on spaces, which breaks temp paths
     // like C:\Users\First Last\AppData\... . Windows-only .cmd shims (npm) are
     // wrapped in `cmd /c` by the caller instead.
-    const proc = spawn(cmd, args, opts);
+    const { timeoutMs, ...spawnOpts } = opts || {};
+    const proc = spawn(cmd, args, spawnOpts);
     let err = '';
+    let timer = null;
+    if (timeoutMs) timer = setTimeout(() => { try { proc.kill(); } catch (_) {} reject(new Error(`${cmd} timed out`)); }, timeoutMs);
     proc.stderr?.on('data', (c) => { err = (err + c.toString()).slice(-800); });
-    proc.on('error', reject);
-    proc.on('close', (code) => (code === 0 ? resolve() : reject(new Error(err || `${cmd} exited ${code}`))));
+    proc.on('error', (e) => { if (timer) clearTimeout(timer); reject(e); });
+    proc.on('close', (code) => { if (timer) clearTimeout(timer); code === 0 ? resolve() : reject(new Error(err || `${cmd} exited ${code}`)); });
   });
 }
 
@@ -2437,6 +2440,10 @@ router.get('/update/check', async (req, res) => {
 router.post('/update', async (req, res) => {
   const os = require('os');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
+  // remember the current dependencies so we only run the slow npm install when
+  // they actually changed (a code-only update should never touch npm)
+  let pkgBefore = '';
+  try { pkgBefore = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'); } catch (_) {}
   try {
     // 1. download the latest code
     const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
@@ -2458,17 +2465,30 @@ router.post('/update', async (req, res) => {
       fs.cpSync(path.join(src, entry), path.join(APP_ROOT, entry), { recursive: true, force: true });
     }
 
-    // 4. refresh dependencies (fast no-op when nothing changed)
-    await (process.platform === 'win32'
-      ? runCmd('cmd', ['/c', 'npm', 'install', '--no-audit', '--no-fund'], { cwd: __dirname })
-      : runCmd('npm', ['install', '--no-audit', '--no-fund'], { cwd: __dirname }));
+    // 4. refresh dependencies ONLY when package.json actually changed. npm
+    // install is the slow, hang-prone step; skipping it for the usual
+    // code-only update is what makes the updater finish instead of appearing
+    // stuck forever. The new files are already in place from step 3.
+    let depsNote = '';
+    let pkgAfter = '';
+    try { pkgAfter = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'); } catch (_) {}
+    if (pkgAfter && pkgAfter !== pkgBefore) {
+      try {
+        await (process.platform === 'win32'
+          ? runCmd('cmd', ['/c', 'npm', 'install', '--no-audit', '--no-fund'], { cwd: __dirname, timeoutMs: 240000 })
+          : runCmd('npm', ['install', '--no-audit', '--no-fund'], { cwd: __dirname, timeoutMs: 240000 }));
+        depsNote = ' New add-ons were installed too.';
+      } catch (e) {
+        depsNote = ' (Heads up: a dependency refresh timed out — the app still updated. If anything misbehaves, run "npm install" in Studio/server once.)';
+      }
+    }
 
     // 5. remember what we're on now
     let state = { sha: 'unknown', date: new Date().toISOString() };
     try { state = await fetchLatestCommit(); } catch (_) {}
     fs.writeFileSync(UPDATE_STATE_FILE, JSON.stringify({ ...state, updatedAt: new Date().toISOString() }));
 
-    res.json({ ok: true, message: 'Update installed! Close the black window, then double-click Start My App again.' });
+    res.json({ ok: true, message: `Update installed! Close the black window, double-click Start My App again, then press Ctrl+Shift+R in your browser.${depsNote}` });
   } catch (err) {
     res.status(500).json({ error: `Update failed: ${err.message}. Your app is untouched - you can also update by re-downloading the ZIP.` });
   } finally {

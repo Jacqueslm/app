@@ -146,8 +146,10 @@ textarea::placeholder{color:var(--tm)}
         <button class="btn2" id="media-upload">⬆ Upload pictures &amp; videos</button>
         <button class="btn2 quiet" id="media-upload-song">🎵 Upload a song</button>
         <button class="btn2 quiet" id="media-open-folder">📁 Open my media folder</button>
+        <button class="btn2 quiet" id="media-update">⬆ Update my app</button>
       </div>
       <p class="usage" id="media-folder-note" style="word-break:break-all"></p>
+      <p class="usage" id="media-upd-status" style="word-break:break-all"></p>
 
       <h3 style="margin-top:8px">📷 Pictures <span class="usage" id="media-img-count"></span></h3>
       <div class="lib-grid" id="media-images"></div>
@@ -1927,20 +1929,22 @@ $('#upd-check').onclick = async () => {
     else $('#upd-status').textContent = `⬆ Update available (latest change: ${d.latest.date ? new Date(d.latest.date).toLocaleString() : 'unknown'}). Press "Update my app".`;
   } catch (e) { $('#upd-status').textContent = e.message; }
 };
-$('#upd-go').onclick = async () => {
+async function runUpdate(statusSel, btnSel) {
   if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Do not update while a render is running.')) return;
-  const btn = $('#upd-go');
-  btn.disabled = true;
-  $('#upd-status').textContent = 'Downloading the new version… this can take a minute or two. Keep this page open.';
+  const btn = $(btnSel);
+  if (btn) btn.disabled = true;
+  $(statusSel).textContent = 'Downloading the new version… this can take a minute. Keep this page open.';
   try {
     const d = await jfetch('/api/studio/update', { method: 'POST' });
-    $('#upd-status').textContent = `✅ ${d.message}`;
+    $(statusSel).textContent = `✅ ${d.message}`;
   } catch (e) {
-    $('#upd-status').textContent = `❌ ${e.message}`;
+    $(statusSel).textContent = `❌ ${e.message}`;
   } finally {
-    btn.disabled = false;
+    if (btn) btn.disabled = false;
   }
-};
+}
+$('#upd-go').onclick = () => runUpdate('#upd-status', '#upd-go');
+$('#media-update').onclick = () => runUpdate('#media-upd-status', '#media-update');
 
 /* ---------------- dance transfer ---------------- */
 $('#dn-upload').onclick = () => pickFile('video/*', async (file) => {

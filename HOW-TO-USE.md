@@ -51,7 +51,7 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
 
 **The 5-minute way (Quick Video):**
 1. Sequencer tab → **1️⃣ Add your pictures** (pick several at once)
-2. **2️⃣ Add your song**
+2. **2️⃣ Add your song** — or paste a **Suno link** (Share → Copy link) in the box underneath and press **🔗 Import**; the song downloads straight into Studio
 3. Pick a shape: Phone 9:16 · YouTube 16:9 · Square 1:1
 4. **3️⃣ Assemble my video** → wait for the bar → **Download my video**
 
@@ -64,7 +64,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
    - Short on photos? **Crop** a face out of a bigger picture — crops of your uploads count as reference photos too.
 2. Press **🔒 Train face lock** (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; every solo scene with that character then uses it automatically. Changed their photos later? Press **↻ Retrain face lock** — the new lock replaces the old one.
 3. **Lyrics & Captions** card → paste your lyrics
-4. **Storyboard** card → **Build storyboard from my lyrics** → it writes a scene prompt for every verse → **Generate** each scene (~$0.04–9¢ each)
+4. **Storyboard** card → **Build storyboard from my lyrics** → it detects your song's structure (🎬 Intro · 🎤 Verse · 🔥 Chorus · 🌉 Bridge · 🌅 Outro — it spots repeated stanzas as the chorus, and `[Chorus]`-style tags in your sheet work too) and matches each scene's energy: big dynamic shots on choruses, intimate shots on verses, moody on the bridge. **Generate** each scene (~4–9¢). Chorus stills even land on the timeline with shorter, punchier holds.
 5. On each scene in your Library → **Animate** → pick quality → tap the price button
 6. Clips land on your timeline → add your song → **Render full video**
 
@@ -124,7 +124,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 ## 7. Lyrics & Captions (words on screen)
 
 1. **Lyrics & Captions** card → paste lyrics, one line per caption
-2. **Auto-spread** = instant. **▶ Tap to sync** = perfect: the song plays, you tap once when each line starts
+2. Three ways to time them: **Auto-spread** = instant guess. **▶ Tap to sync** = perfect and free: the song plays, you tap once per line. **🪄 Auto-captions (AI, ~2¢)** = the app *listens to your song* and writes every line with its real timing — no pasting, no tapping. (Check the words after — AI hearing isn't perfect on fast verses.)
 3. Captions burn into your video AND your shorts automatically
 4. **+ Song title intro** puts your title card at the start
 
@@ -147,6 +147,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | Sing on a video — Draft / ✨ Hero | ~4¢ / 20¢ |
 | Sing on a still, Dance Transfer | ~50¢–$1.50 |
 | 🎭 Live Portrait clip | ~10¢ |
+| 🪄 Auto-captions (whole song) | ~2¢ |
 
 The exact price shows **on the button** before you tap. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 

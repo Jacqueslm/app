@@ -1275,17 +1275,10 @@ try {
   if (saved && saved.darkMode === true) document.documentElement.dataset.theme = 'dark';
 } catch (_) {}
 
-// AI mode lights up only when signed in AND the server has an image key configured.
-fetch('/api/studio/status')
-  .then((r) => (r.ok ? r.json() : null))
-  .then((s) => {
-    if (s && s.aiAvailable){
-      state.ai = { available: true, used: s.used, limit: s.limit };
-      $('#ai-badge').style.display = 'inline-block';
-      renderControls();
-    }
-  })
-  .catch(() => {});
+// (The AI-ready badge and AI features are driven by the Studio config in
+// bootStudio() via st.cfg.falAvailable — see where #ai-badge is shown on load.
+// The old /api/studio/status probe was a recovery-app leftover with no route
+// here, so it only logged a harmless 404 on every load; removed.)
 
 renderControls();
 

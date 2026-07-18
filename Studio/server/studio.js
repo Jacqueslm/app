@@ -2389,7 +2389,7 @@ router.post('/campaign', async (req, res) => {
 // code onto the install folder, refresh dependencies. Your data survives by
 // construction - .env, data.sqlite and media/ are gitignored so they are never
 // inside the ZIP being copied over.
-const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers, Studio and TurnSomeDayIntoOneday
+const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the Start Studio launcher and the Studio app
 const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
 // A private repo needs a token (GitHub → Settings → Developer settings →
@@ -2506,7 +2506,7 @@ router.post('/update', async (req, res) => {
     try { state = await fetchLatestCommit(); } catch (_) {}
     fs.writeFileSync(UPDATE_STATE_FILE, JSON.stringify({ ...state, updatedAt: new Date().toISOString() }));
 
-    res.json({ ok: true, message: `Update installed! Close the black window, double-click Start My App again, then press Ctrl+Shift+R in your browser.${depsNote}` });
+    res.json({ ok: true, message: `Update installed! Close the black window, double-click Start Studio again, then press Ctrl+Shift+R in your browser.${depsNote}` });
   } catch (err) {
     res.status(500).json({ error: `Update failed: ${err.message}. Your app is untouched - you can also update by re-downloading the ZIP.` });
   } finally {

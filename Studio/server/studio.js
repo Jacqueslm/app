@@ -49,20 +49,24 @@ const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // the app as estimates with an as-of date, and every id/rate is env-overridable.
 const PRICES_AS_OF = 'July 2026';
 const VIDEO_TIERS = {
+  // Rates updated to match real fal billing (Jul 2026 invoice): Seedance and
+  // Kling both cost far more than the old placeholder rates, which under-quoted
+  // by 2-3x and led to surprise overspend. These are conservative (round-up)
+  // per-second estimates; always confirm against your live fal balance.
   draft: {
-    label: 'Draft', desc: 'Seedance - cheap takes',
+    label: 'Draft', desc: 'Seedance - quick motion',
     model: process.env.FAL_MODEL_I2V_DRAFT || 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.042),
+    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.12),
   },
   standard: {
-    label: 'Standard', desc: 'Kling 3.0 Standard',
+    label: 'Standard', desc: 'Kling 3.0 Standard - best value',
     model: process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v3/standard/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_STANDARD || 0.084),
+    rate: Number(process.env.STUDIO_RATE_STANDARD || 0.14),
   },
   best: {
     label: 'Best', desc: 'Kling 3.0 Pro - hero shots',
     model: process.env.FAL_MODEL_I2V_BEST || 'fal-ai/kling-video/v3/pro/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_BEST || 0.112),
+    rate: Number(process.env.STUDIO_RATE_BEST || 0.20),
   },
 };
 const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballpark per image

@@ -2,7 +2,7 @@
 
 *Everything you need to run Studio. No tech knowledge required.*
 
-> This folder holds TWO separate apps: **Start Studio** = your music-video maker (this manual). **Start My App** = the Turn Someday Into Day One recovery app. They don't share anything — different windows, different accounts.
+> This is **Studio**, your music-video maker. Start it with **Start Studio** — it opens at **localhost:4400**. (Studio is now its own standalone download; nothing else comes bundled with it.)
 
 ---
 
@@ -29,20 +29,21 @@ That's it. No internet needed except for AI generations.
 ## 2. First-Time Setup (only once)
 
 1. **Sign up** — Studio greets you with a welcome screen: type any email + a password and your account is created right there. It lives only on your computer.
-2. **Turn on AI** — Studio → **AI Scenes** tab → paste your fal.ai key in the 🔑 box → Save.
-   The badge at the top says **AI READY** when it worked.
+2. **Turn on AI** — Studio → **⚙ Settings** tab → **🔑 AI key (fal.ai)** → paste your key → Save.
+   The badge at the top says **AI READY** when it worked. (AI buttons like Sing/Animate stay hidden until the key is set.)
 3. **Credits** — your fal.ai account needs money on it ($10 lasts a while). No credits = every AI button fails.
 
 ---
 
-## 3. The Four Tabs
+## 3. The Five Tabs
 
 | Tab | What it's for |
 |---|---|
-| **Art** | Free art from a text prompt (wallpapers, backgrounds). No AI key needed. |
-| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, sing, dance, Live Portrait, simple screens. Your **Library** (with its free editing tools) lives here. |
-| **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. |
-| **Sequencer** | Where videos get made — Quick Video, lyrics, shorts, campaigns, everything. |
+| **🖼 My Media** | Your home base — every picture, video clip and song you've uploaded or made, shown as thumbnails, split into Pictures / Video clips / Songs. Upload here, and "Open my media folder". |
+| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, **Sing** (lip-sync), dance, Live Portrait, simple screens. Your **Library** (with its free editing tools, incl. the **Sing** button on each picture) lives here. |
+| **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. Paste a LoRA URL + trigger word here to restore a face lock. |
+| **Sequencer** | Where videos get made — Quick Video, timeline, lyrics, shorts, campaigns, everything. |
+| **⚙ Settings** | AI key, update the app, back up everything, and **🗑 Start fresh** (wipe everything). |
 
 The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the full editor.
 
@@ -224,7 +225,10 @@ Also on that card: see what's using disk space and delete big old files.
 | "You already have an almost identical scene" | The duplicate guard saving you money. Check the existing shot in your Library before paying to regenerate. |
 | ⚠ QC badge on an image | The AI inspector spotted a likely defect (hover the badge for the reason — e.g. wrong finger count). Regenerate the scene if it bothers you; ✅ QC means it passed. |
 | Suno import fails | Make sure you paste the **Share → Copy link** URL from Suno. If it still fails, download the song in your browser and use the normal upload button — same result. |
-| Windows blocks Start My App | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
+| Windows blocks Start Studio | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
+| I see "Turn Someday Into Day One" / localhost:4300 | That's a different app from an OLD download. Close it and use **Start Studio** (localhost:4400). A fresh Studio download has only one launcher. |
+| A feature (Sing, Animate) is missing | Those show only when AI is on. Check the badge says **AI READY**; if not, set your key in ⚙ Settings. **Sing** appears **on each picture in the AI Scenes → Library**, so you need at least one picture there. |
+| My face lock / character disappeared | If you have your old `data.sqlite`, copy it back into `Studio\server\`. Otherwise the LoRA link may still be on **fal.ai/dashboard** under the `flux-lora-portrait-trainer` training request — "Show files" → copy the `.safetensors` link → paste it into the character's **LoRA URL** box (+ its trigger word) → Save. If the file expired, retrain (~$3.60). |
 | Daily cap reached | You generated a LOT today. It resets at midnight UTC (or raise it in server/.env). |
 | Something weird I can't figure out | Open a Claude Code session on the repo and describe it. Screenshots help. |
 
@@ -238,6 +242,10 @@ Also on that card: see what's using disk space and delete big old files.
 - **Your account**: `Studio\server\data.sqlite`
 
 Those three files/folders = your stuff. Everything else is replaceable code.
+
+**⭐ BACK UP `data.sqlite` — this is the one that hurts to lose.** It holds your account, your characters, and your **face locks**. After you train or restore a face lock, copy `Studio\server\data.sqlite` to your Desktop (and a cloud folder / USB). Do it again whenever you add characters. The in-app **⚙ Settings → ⬇ Back up everything (ZIP)** button saves media + a manifest too. If you ever lose your setup, copying an old `data.sqlite` back into `Studio\server\` restores everything at once.
+
+**Updating:** ⚙ Settings → **⬆ Update my app** (wait ~2 min even if it looks stuck, then close the black window, run **Start Studio** again, and press Ctrl+Shift+R). Or grab a fresh copy — extract it to a **new empty folder** to avoid leftover files, then copy your saved `.env` and `data.sqlite` into its `Studio\server\`.
 
 ---
 

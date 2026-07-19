@@ -2073,6 +2073,24 @@ router.post('/transform', async (req, res) => {
       return res.status(400).json({ error: 'Remaster works on songs or clips with sound.' });
     }
 
+    // POLISH — one-tap "make it look finished" pass for a rendered video: a
+    // gentle cinematic colour grade (lift contrast + saturation a touch, tiny
+    // brightness lift), a light sharpen for crispness, and — if it has sound —
+    // a loudness master so it plays as loud and balanced as commercial music
+    // video. Free, no AI. Makes a new copy; the original stays.
+    if (op === 'polish') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Polish is for a finished video (render your timeline first, then polish the result).' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const grade = 'eq=contrast=1.06:saturation=1.12:brightness=0.02,unsharp=5:5:0.5:5:5:0.0';
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', grade,
+        ...(hasAudio ? ['-af', 'loudnorm=I=-14:TP=-1.0:LRA=11', '-c:a', 'aac', '-b:a', '192k'] : ['-an']),
+        ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · polished`, { ...carry, transform: 'polish' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
     // REFRAME — turn any clip/photo into a vertical Short (9:16), Square (1:1),
     // or Wide (16:9). 'fill' crops to fill the frame (subject-centered); 'blur'
     // fits the whole shot with a blurred zoom behind it (nothing cropped). Free.

@@ -121,6 +121,54 @@ const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.17);
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.
 const DAILY_AI_IMAGE_LIMIT = Number(process.env.STUDIO_DAILY_IMAGE_LIMIT || 300);
 const DAILY_AI_VIDEO_LIMIT = Number(process.env.STUDIO_DAILY_VIDEO_LIMIT || 60);
+// Hard DOLLAR cap: once today's estimated AI spend hits this, Studio refuses to
+// start any new paid generation until tomorrow (UTC). 0 = off. Set from the app;
+// this is the "runaway spend is impossible" guarantee.
+let DAILY_USD_CAP = Number(process.env.STUDIO_DAILY_USD_CAP || 0);
+
+// Estimated cost of a single paid action, from the same verified rates shown on
+// the buttons. Used by both the spend ledger and the dollar cap. Round-up bias.
+function estActionCost(kind, opts = {}) {
+  const s = Number(opts.seconds) || 5;
+  switch (kind) {
+    case 'video': return (VIDEO_TIERS[opts.tier] || VIDEO_TIERS.standard).rate * s;
+    case 'image': return (opts.characterId ? CHARACTER_IMAGE_RATE : IMAGE_RATE) * (Number(opts.count) || 1);
+    case 'imageBest': return IMAGE_BEST_RATE * (Number(opts.count) || 1);
+    case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
+    case 'dance': return ({ draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE }[opts.tier] || DANCE_STD_RATE) * s;
+    case 'sing': return opts.tier === 'hero' ? SING_HERO_RATE : SING_DRAFT_RATE;
+    case 'liveportrait': return LIVEPORTRAIT_RATE;
+    case 'voice': return (opts.emotion ? VOICE_EMO_RATE : VOICE_RATE) * Math.max(1, (Number(opts.chars) || 0) / 1000);
+    case 'transcript': return TRANSCRIBE_RATE;
+    case 'qc': return QC_RATE;
+    default: return 0;
+  }
+}
+
+// Sum of today's (UTC) estimated spend from the durable receipts. Failed
+// generations aren't billed, so they don't count.
+function todaySpendUSD(userId) {
+  const day = todayUTC();
+  let total = 0;
+  for (const r of db.getFalReceipts(userId, 500)) {
+    if (r.status === 'error') continue;
+    if (String(r.created_at || '').slice(0, 10) !== day) continue;
+    let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+    total += estActionCost(r.expect, { tier: r.tier, seconds: meta.seconds, characterId: r.character_id });
+  }
+  return total;
+}
+
+// Returns an error string if starting an action costing `addUSD` would push
+// today's spend over the cap, else null. No cap set → always allowed.
+function overDailyCap(userId, addUSD) {
+  if (!(DAILY_USD_CAP > 0)) return null;
+  const spent = todaySpendUSD(userId);
+  if (spent + addUSD > DAILY_USD_CAP + 1e-9) {
+    return `Daily spend cap reached — you set $${DAILY_USD_CAP.toFixed(2)}/day and today is at ~$${spent.toFixed(2)}. This action (~$${addUSD.toFixed(2)}) would go over. Raise or clear the cap in Recover paid clips → Daily spend cap, or try again tomorrow.`;
+  }
+  return null;
+}
 
 const MEDIA_DIR = path.join(__dirname, 'media');
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
@@ -667,6 +715,23 @@ router.post('/settings/falkey', (req, res) => {
   }
 });
 
+/* ---------------- settings: daily spend cap ---------------- */
+// The hard dollar ceiling. Persisted to .env so it survives restarts. Send 0
+// (or blank) to turn it off. Once today's estimated spend + a new action would
+// exceed it, that action is refused until tomorrow (UTC).
+router.post('/settings/spendcap', (req, res) => {
+  let cap = Number(req.body?.cap);
+  if (!Number.isFinite(cap) || cap < 0) cap = 0;
+  cap = Math.min(1000, Math.round(cap * 100) / 100); // sane ceiling + cents precision
+  try {
+    persistEnvKey('STUDIO_DAILY_USD_CAP', cap > 0 ? String(cap) : null);
+    DAILY_USD_CAP = cap;
+    res.json({ cap: DAILY_USD_CAP, spentToday: Number(todaySpendUSD(req.userId).toFixed(2)) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the cap: ${err.message}` });
+  }
+});
+
 /* ---------------- free stock b-roll (Pexels) ---------------- */
 // A free Pexels key (pexels.com/api) unlocks free, no-attribution-required
 // stock photos and video for establishing shots, textures, and transitions -
@@ -1082,6 +1147,10 @@ router.post('/characters/:id/train-lora', async (req, res) => {
   if (refs.length < 6) {
     return res.status(400).json({ error: `Training needs at least 6 photos of ${character.name} (10-20 varied ones is ideal) - they have ${refs.length}. Add more on this tab first.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('lora'));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   const os = require('os');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-lora-'));
@@ -1298,6 +1367,12 @@ router.post('/scene', async (req, res) => {
   if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
   }
+  {
+    const hasChar = !!characterId || (Array.isArray(characterIds) && characterIds.length > 0);
+    const imgCost = quality === 'best' ? estActionCost('imageBest', { count: howMany }) : estActionCost('image', { characterId: hasChar, count: howMany });
+    const capMsg = overDailyCap(req.userId, imgCost);
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   let built;
   try {
@@ -1392,6 +1467,11 @@ router.post('/coverage', async (req, res) => {
   if (!shots.length) return res.status(400).json({ error: 'Pick at least one shot type.' });
   if (db.getImageCount(req.userId, todayUTC()) + shots.length > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached.` });
+  }
+  {
+    const hasChar = !!(meta.castIds?.length || scene.character_id);
+    const capMsg = overDailyCap(req.userId, estActionCost('image', { characterId: hasChar, count: shots.length }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
   }
 
   // drop any leading shot-type phrase so framings don't fight each other
@@ -1570,6 +1650,8 @@ router.post('/animate', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  const capMsg = overDailyCap(req.userId, estActionCost('video', { tier: chosenTier, seconds }));
+  if (capMsg) return res.status(429).json({ error: capMsg });
 
   const motionPrompt = (typeof prompt === 'string' && prompt.trim())
     ? prompt.trim().slice(0, 1000)
@@ -2170,6 +2252,10 @@ router.post('/lipsync', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('sing', { tier }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   try {
     const audioUri = await extractAudioSegment(mediaPath(song.filename), segStart, segLen);
@@ -2240,6 +2326,10 @@ router.post('/dance', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('dance', { tier, seconds: segLen }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   try {
     const drivingUri = await extractVideoSegment(mediaPath(dance.filename), segStart, segLen);
@@ -2285,6 +2375,10 @@ router.post('/liveportrait', async (req, res) => {
   const segLen = Math.min(30, Math.max(1, Number(len) || 8));
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
+  }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('liveportrait'));
+    if (capMsg) return res.status(429).json({ error: capMsg });
   }
   try {
     const drivingUri = await extractVideoSegment(mediaPath(driver.filename), segStart, segLen);
@@ -2712,6 +2806,11 @@ router.post('/voice-clone', async (req, res) => {
   const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
   if (!text) return res.status(400).json({ error: 'Type the words you want spoken.' });
   if (text.length > VOICE_MAX_CHARS) return res.status(400).json({ error: `Keep it under ${VOICE_MAX_CHARS} characters per take (about ${Math.round(VOICE_MAX_CHARS / 1000)} minutes). Split longer narration into a few takes.` });
+  {
+    const emo = typeof req.body?.mood === 'string' && req.body.mood !== 'neutral' && VOICE_MOODS[req.body.mood];
+    const capMsg = overDailyCap(req.userId, estActionCost('voice', { emotion: !!emo, chars: text.length }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
   try {
     const buf = fs.readFileSync(mediaPath(ref.filename));
     let refUrl;
@@ -3230,19 +3329,10 @@ router.get('/jobs/:id', async (req, res) => {
 // the final word — but it's built from the same verified rates shown on the
 // buttons, so the running total is honest about where money actually went.
 function estReceiptCost(r) {
+  if (r.expect === 'audio') return null; // voice length isn't stored — don't guess
   let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
-  switch (r.expect) {
-    case 'video': {
-      const rate = (VIDEO_TIERS[r.tier] || VIDEO_TIERS.standard).rate;
-      const secs = Number(meta.seconds) || 5;
-      return rate * secs;
-    }
-    case 'image': return r.character_id ? CHARACTER_IMAGE_RATE : IMAGE_RATE;
-    case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
-    case 'qc': return QC_RATE;
-    case 'transcript': return TRANSCRIBE_RATE;
-    default: return null; // voice/other: length not stored, don't guess
-  }
+  const c = estActionCost(r.expect, { tier: r.tier, seconds: meta.seconds, characterId: r.character_id });
+  return c || (r.expect === 'video' || r.expect === 'image' ? c : null);
 }
 
 // List recent fal receipts + a running spend estimate so the artist can see
@@ -3261,7 +3351,10 @@ router.get('/fal/receipts', (req, res) => {
     };
   });
   const open = receipts.filter((r) => r.status === 'running').length;
-  res.json({ receipts: receipts.slice(0, 60), open, totalSpent: Number(total.toFixed(2)), counted });
+  res.json({
+    receipts: receipts.slice(0, 60), open, totalSpent: Number(total.toFixed(2)), counted,
+    cap: DAILY_USD_CAP, spentToday: Number(todaySpendUSD(req.userId).toFixed(2)),
+  });
 });
 
 // One button: re-check every still-open receipt against fal. Any that finished

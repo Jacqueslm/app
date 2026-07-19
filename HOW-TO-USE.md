@@ -167,7 +167,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
 
 > 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
 
@@ -194,6 +194,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 The exact price shows **on the button** before you tap, and every number above rounds **up** so a real bill is never a surprise. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 
 ### The free toolbox (no AI, on every clip/photo in My Media)
+- **🧽 Remove corner mark** (Crop → *Remove corner mark ✦*) — cleans a decorative sparkle / corner watermark off **your own** generated image. *Patch it out* blends it into the pixels around it and keeps the whole frame (best when the subject is near the corner); *Zoom past it* crops the corner off. Free & instant. It's for tidying a provider's sparkle on your own art — it can't touch invisible watermarks and isn't for anyone else's work.
 - **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
 - **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
 - **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.

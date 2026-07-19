@@ -2911,37 +2911,107 @@ function renderLibrary() {
     if (st.cropTarget === a.id) {
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
-      let aspect = '9:16', keep = 'center';
+      let aspect = '9:16', keep = 'center', mode = 'shape', corner = 'br', zoom = 0.12, method = 'patch', markSize = 'medium';
       panel.innerHTML = `
-        <div class="chips crop-aspects">
-          ${['9:16', '1:1', '4:5', '16:9'].map((r) => `<button class="chip${r === aspect ? ' on' : ''}" data-aspect="${r}">${r}</button>`).join('')}
+        <div class="chips crop-modes">
+          <button class="chip on" data-mode="shape">Change shape</button>
+          <button class="chip" data-mode="mark">Remove corner mark ✦</button>
         </div>
-        <div class="chips crop-keeps">
-          <button class="chip" data-keep="start">Keep left/top</button>
-          <button class="chip on" data-keep="center">Keep center</button>
-          <button class="chip" data-keep="end">Keep right/bottom</button>
+        <div class="crop-shape">
+          <div class="chips crop-aspects">
+            ${['9:16', '1:1', '4:5', '16:9'].map((r) => `<button class="chip${r === aspect ? ' on' : ''}" data-aspect="${r}">${r}</button>`).join('')}
+          </div>
+          <div class="chips crop-keeps">
+            <button class="chip" data-keep="start">Keep left/top</button>
+            <button class="chip on" data-keep="center">Keep center</button>
+            <button class="chip" data-keep="end">Keep right/bottom</button>
+          </div>
+        </div>
+        <div class="crop-mark" style="display:none">
+          <span class="usage" style="margin:0 0 3px">Which corner is the sparkle / watermark in?</span>
+          <div class="chips crop-corners">
+            <button class="chip" data-corner="tl">↖ top-left</button>
+            <button class="chip" data-corner="tr">↗ top-right</button>
+            <button class="chip" data-corner="bl">↙ bottom-left</button>
+            <button class="chip on" data-corner="br">↘ bottom-right</button>
+          </div>
+          <span class="usage" style="margin:6px 0 3px">How should I get rid of it?</span>
+          <div class="chips crop-methods">
+            <button class="chip on" data-method="patch">Patch it out (keep full frame)</button>
+            <button class="chip" data-method="zoom">Zoom past it (crops the edge)</button>
+          </div>
+          <div class="chips crop-sizes">
+            <button class="chip" data-size="small">Small mark</button>
+            <button class="chip on" data-size="medium">Medium</button>
+            <button class="chip" data-size="large">Large mark</button>
+          </div>
+          <div class="chips crop-zooms" style="display:none">
+            <button class="chip" data-zoom="0.08">Trim a little (8%)</button>
+            <button class="chip on" data-zoom="0.12">Trim (12%)</button>
+            <button class="chip" data-zoom="0.18">Trim more (18%)</button>
+          </div>
         </div>
         <button class="btn2 crop-go">✂️ Crop · free</button>
-        <span class="usage">Cuts a new copy at that shape — the original stays. Free and instant. Cropping a face out of an uploaded photo makes a great extra reference photo.</span>`;
+        <span class="usage crop-hint">Cuts a new copy at that shape — the original stays. Free and instant. Cropping a face out of an uploaded photo makes a great extra reference photo.</span>`;
+      const shapeBox = panel.querySelector('.crop-shape');
+      const markBox = panel.querySelector('.crop-mark');
+      const hint = panel.querySelector('.crop-hint');
+      const goBtn = panel.querySelector('.crop-go');
+      const goLabel = () => (mode === 'mark' ? '🧽 Remove mark · free' : '✂️ Crop · free');
+      panel.querySelectorAll('.crop-modes .chip').forEach((c) => {
+        c.onclick = () => {
+          mode = c.dataset.mode;
+          panel.querySelectorAll('.crop-modes .chip').forEach((x) => x.classList.toggle('on', x === c));
+          shapeBox.style.display = mode === 'shape' ? '' : 'none';
+          markBox.style.display = mode === 'mark' ? '' : 'none';
+          goBtn.textContent = goLabel();
+          hint.textContent = mode === 'mark'
+            ? 'For cleaning a decorative sparkle / corner watermark off your OWN generated image. "Patch it out" blends it into the pixels around it and keeps the full frame; "Zoom past it" crops the corner off. Free and instant; the original stays.'
+            : 'Cuts a new copy at that shape — the original stays. Free and instant. Cropping a face out of an uploaded photo makes a great extra reference photo.';
+        };
+      });
       panel.querySelectorAll('.crop-aspects .chip').forEach((c) => {
         c.onclick = () => { aspect = c.dataset.aspect; panel.querySelectorAll('.crop-aspects .chip').forEach((x) => x.classList.toggle('on', x === c)); };
       });
       panel.querySelectorAll('.crop-keeps .chip').forEach((c) => {
         c.onclick = () => { keep = c.dataset.keep; panel.querySelectorAll('.crop-keeps .chip').forEach((x) => x.classList.toggle('on', x === c)); };
       });
+      const zoomsBox = panel.querySelector('.crop-zooms');
+      const sizesBox = panel.querySelector('.crop-sizes');
+      panel.querySelectorAll('.crop-corners .chip').forEach((c) => {
+        c.onclick = () => { corner = c.dataset.corner; panel.querySelectorAll('.crop-corners .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
+      panel.querySelectorAll('.crop-methods .chip').forEach((c) => {
+        c.onclick = () => {
+          method = c.dataset.method;
+          panel.querySelectorAll('.crop-methods .chip').forEach((x) => x.classList.toggle('on', x === c));
+          zoomsBox.style.display = method === 'zoom' ? '' : 'none';
+          sizesBox.style.display = method === 'patch' ? '' : 'none';
+        };
+      });
+      panel.querySelectorAll('.crop-sizes .chip').forEach((c) => {
+        c.onclick = () => { markSize = c.dataset.size; panel.querySelectorAll('.crop-sizes .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
+      panel.querySelectorAll('.crop-zooms .chip').forEach((c) => {
+        c.onclick = () => { zoom = Number(c.dataset.zoom); panel.querySelectorAll('.crop-zooms .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
       panel.querySelector('.crop-go').onclick = async (e) => {
         setErr('#scenes-err', null);
-        e.target.disabled = true; e.target.textContent = 'Cropping…';
+        e.target.disabled = true; e.target.textContent = mode === 'mark' ? 'Cleaning…' : 'Cropping…';
         try {
-          await jfetch('/api/studio/crop', {
+          const url = mode === 'mark' && method === 'patch' ? '/api/studio/cleanmark' : '/api/studio/crop';
+          const body = mode !== 'mark' ? { assetId: a.id, aspect, keep }
+            : method === 'patch' ? { assetId: a.id, corner, size: markSize }
+            : { assetId: a.id, zoom, corner };
+          await jfetch(url, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ assetId: a.id, aspect, keep }),
+            body: JSON.stringify(body),
           });
           st.cropTarget = null;
           await Promise.all([loadAssets(), loadCharacters()]);
         } catch (err) {
           setErr('#scenes-err', err.message);
-          e.target.disabled = false; e.target.textContent = '✂️ Crop · free';
+          e.target.disabled = false; e.target.textContent = goLabel();
         }
       };
       el.querySelector('.li-meta').appendChild(panel);

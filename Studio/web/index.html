@@ -2770,6 +2770,31 @@ function timelineTotal() {
   const transSum = st.trans.reduce((s, t) => s + (t.type === 'cut' ? 0 : t.duration), 0);
   return Math.max(0, clipSum - transSum);
 }
+/* Pre-render QC: cheap client-side checks so you never waste a render on a fixable mistake. */
+function preRenderWarnings() {
+  const w = [];
+  if (!st.seq.length) return w; // hard-blocked elsewhere
+  if (!st.musicList.length) w.push('No song added — your video will be silent. Add your song in the "Song" section above.');
+  if (st.seq.length === 1) w.push('Only one clip on the timeline. Add more scenes for a full video.');
+  // repeated clips (same source used more than once)
+  const counts = {};
+  st.seq.forEach((c) => { counts[c.assetId] = (counts[c.assetId] || 0) + 1; });
+  const repeats = st.seq.filter((c, i) => st.seq.findIndex((x) => x.assetId === c.assetId) !== i)
+    .map((c) => c.label).filter(Boolean);
+  const uniqRepeats = [...new Set(repeats)];
+  if (uniqRepeats.length) w.push(`Some clips are used more than once: ${uniqRepeats.slice(0, 4).join(', ')}${uniqRepeats.length > 4 ? '…' : ''}.`);
+  // very short clips
+  const tiny = st.seq.filter((c) => effDur(c) < 0.5).map((c) => c.label).filter(Boolean);
+  if (tiny.length) w.push(`Very short clip${tiny.length > 1 ? 's' : ''} (under half a second): ${[...new Set(tiny)].slice(0, 4).join(', ')}. They may flash by too fast.`);
+  // song vs. video length mismatch
+  const song = firstMusicAsset();
+  const total = timelineTotal();
+  if (song && song.duration && total) {
+    if (total < song.duration - 8) w.push(`Your video (${Math.round(total)}s) is much shorter than your song (${Math.round(song.duration)}s) — the song will cut off. Add more scenes or hold shots longer.`);
+    else if (total > song.duration + 8) w.push(`Your video (${Math.round(total)}s) runs well past your song (${Math.round(song.duration)}s) — the end will be silent.`);
+  }
+  return w;
+}
 function syncTrans() {
   const need = Math.max(0, st.seq.length - 1);
   while (st.trans.length < need) st.trans.push({ type: 'cut', duration: 0.5 });
@@ -3869,7 +3894,11 @@ function renderPipeline() {
 }
 setInterval(() => { if (document.getElementById('view-seq')?.classList.contains('on')) renderPipeline(); }, 2500);
 
-$('#seq-render').onclick = () => runRender(null, '#seq-render');
+$('#seq-render').onclick = () => {
+  const warns = preRenderWarnings();
+  if (warns.length && !confirm(`Before you render, ${warns.length} thing${warns.length > 1 ? 's' : ''} to check:\n\n• ${warns.join('\n• ')}\n\nRender anyway?`)) return;
+  runRender(null, '#seq-render');
+};
 $('#seq-render-cut').onclick = () => {
   const start = Math.max(0, Number($('#cut-start').value) || 0);
   const len = Number($('#cut-len').value) || 15;

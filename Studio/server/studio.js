@@ -235,7 +235,7 @@ let jobCounter = 0;
 
 function createJob(userId, type, extra) {
   const id = `job-${++jobCounter}-${crypto.randomBytes(4).toString('hex')}`;
-  const job = { id, userId, type, status: 'running', progress: 0, error: null, assetId: null, ...extra };
+  const job = { id, userId, type, status: 'running', progress: 0, error: null, assetId: null, startedAt: Date.now(), ...extra };
   jobs.set(id, job);
   // Don't let the map grow forever on a long-lived server.
   if (jobs.size > 500) {
@@ -374,13 +374,32 @@ async function falUploadFile(buf, filename, contentType) {
   return url;
 }
 
+// How long a fal job may run before we stop waiting and surface an error, so a
+// stuck request never spins forever. Training is legitimately slow (~10 min).
+const FAL_MAX_MS = { lora: 25 * 60e3, video: 12 * 60e3 };
+function falMaxMs(expect) { return FAL_MAX_MS[expect] || 6 * 60e3; }
+
 async function refreshFalJob(job) {
   if (job.status !== 'running') return;
   try {
     const status = await falGet(job.fal.statusUrl);
-    if (status.status === 'IN_QUEUE') { job.progress = 5; return; }
-    if (status.status === 'IN_PROGRESS') { job.progress = Math.min(90, (job.progress || 5) + 5); return; }
-    if (status.status !== 'COMPLETED') return;
+    if (status.status === 'IN_QUEUE' || status.status === 'IN_PROGRESS') {
+      // Give up on a job that's been running far too long rather than spin
+      // forever. Nothing new was produced, so it never counts against your cap.
+      if (Date.now() - (job.startedAt || 0) > falMaxMs(job.fal.expect)) {
+        throw new Error('This one took far too long and was given up on — nothing was produced, and it doesn\'t count against your daily limit. Try again.');
+      }
+      job.progress = status.status === 'IN_QUEUE' ? 5 : Math.min(90, (job.progress || 5) + 5);
+      return;
+    }
+    // Any terminal state that isn't a clean completion is a failure — surface it
+    // instead of silently returning (which left the job spinning forever).
+    if (status.status !== 'COMPLETED') {
+      if (/FAIL|ERROR|CANCEL/i.test(String(status.status || ''))) {
+        throw new Error('The model reported an error and produced nothing — it doesn\'t count against your daily limit. Try again, or tweak the prompt a little.');
+      }
+      return; // unknown non-terminal status: keep polling (timeout above still applies)
+    }
 
     const result = await falGet(job.fal.responseUrl);
 

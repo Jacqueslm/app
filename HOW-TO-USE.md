@@ -167,7 +167,9 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Green screen, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+
+> 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
 
 **AI (from your fal.ai balance) — verified July 2026, and every price shows on the button before you tap:**
 | Thing | Rough cost |
@@ -183,9 +185,11 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | Sing on a still | ~50¢–$1.50 |
 | Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~$1.50 / $1.30 / $1.70 |
 | 🎭 Live Portrait clip | ~10¢ |
-| 🎙 Voice (narrate in a character's voice) | ~5¢ per minute (½¢ a line) |
+| 🎙 Voice — Neutral | $0.05 / 1,000 chars (~½¢ a line, ~5¢/min) |
+| 🎙 Voice — with a mood (emotion) | ~$0.12 / 1,000 chars |
 | 🪄 Auto-captions (whole song) | ~35¢ *(free if you paste your own lyrics)* |
 | 🔍 QC inspection (per image) | ~½¢ |
+| 🎧 Crew Room chat (Creative Director, etc.) | fraction of a cent per message |
 
 The exact price shows **on the button** before you tap, and every number above rounds **up** so a real bill is never a surprise. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 

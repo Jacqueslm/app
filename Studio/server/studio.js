@@ -2018,7 +2018,10 @@ router.post('/import-song', async (req, res) => {
 
 /* ---------------- auto-captions: transcribe a song with word timings ---------------- */
 const MODEL_TRANSCRIBE = process.env.FAL_MODEL_TRANSCRIBE || 'fal-ai/wizper';
-const TRANSCRIBE_RATE = Number(process.env.STUDIO_RATE_TRANSCRIBE || 0.02); // ~per song, displayed estimate
+// Whisper (wizper) bills ~$0.10 per minute of audio, so a full 3-4 min song is
+// ~$0.30-0.40, NOT 2c. Flat estimate raised to a realistic per-song figure so
+// the confirm dialog stops under-quoting. Override via STUDIO_RATE_TRANSCRIBE.
+const TRANSCRIBE_RATE = Number(process.env.STUDIO_RATE_TRANSCRIBE || 0.35);
 
 router.post('/transcribe', async (req, res) => {
   if (!FAL_KEY) {

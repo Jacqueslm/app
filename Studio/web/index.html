@@ -736,6 +736,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <div class="trim" style="font-size:12px">
         <span>Lengths</span>
+        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="7">7s</label>
         <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
         <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="30" checked>30s</label>
         <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="60">60s</label>
@@ -1454,6 +1455,7 @@ const st = {
   animPrefill: '',      // motion text to pre-fill when a panel is opened via "Continue"
   animPrefillFor: null, // which assetId that prefill belongs to
   singTarget: null,     // assetId with the lip-sync panel open
+  lookTarget: null,     // assetId with the look-theme panel open
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
   cutTarget: null,      // assetId with the cut panel open
@@ -2802,6 +2804,7 @@ function renderLibrary() {
     if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion'); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
     // Finish (polish / quality / audio, free)
     if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
+    if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap colour themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
     if (a.kind === 'image') btn('2× sharper', '', async (e) => {
       const b = e.target; b.disabled = true; b.textContent = '…';
       try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
@@ -3212,6 +3215,39 @@ function renderLibrary() {
           } catch (e) {
             setErr('#scenes-err', e.message);
             panel.querySelectorAll('button').forEach((x) => { x.disabled = false; });
+            prog.classList.remove('show');
+          }
+        };
+      });
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.lookTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const LOOKS = [
+        ['luxury', '🖤 Dark Luxury'], ['neon', '💜 Neon Night'], ['cinematic', '🎬 Cinematic'],
+        ['warm', '🌅 Warm Film'], ['vibrant', '🌈 Vibrant'], ['bw', '⚫ Black & White'],
+      ];
+      panel.innerHTML = `
+        <div class="chips look-chips">${LOOKS.map(([k, l]) => `<button class="chip" data-look="${k}">${l}</button>`).join('')}</div>
+        <div class="progress-line look-prog"><div></div></div>
+        <span class="usage">One-tap colour theme for the whole clip (free, no AI). Makes a new copy — the original stays. Best on your finished render.</span>`;
+      panel.querySelectorAll('.look-chips .chip').forEach((chip) => {
+        chip.onclick = async () => {
+          setErr('#scenes-err', null);
+          panel.querySelectorAll('.chip').forEach((x) => { x.disabled = true; });
+          const prog = panel.querySelector('.look-prog'); prog.classList.add('show');
+          try {
+            const { job } = await jfetch('/api/studio/transform', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ assetId: a.id, op: 'grade', theme: chip.dataset.look }),
+            });
+            await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+            st.lookTarget = null;
+            await loadAssets();
+          } catch (e) {
+            setErr('#scenes-err', e.message);
+            panel.querySelectorAll('.chip').forEach((x) => { x.disabled = false; });
             prog.classList.remove('show');
           }
         };
@@ -5431,6 +5467,9 @@ const SHORT_TEMPLATES = {
   chorus:    { label: '🔁 Full Chorus',  lens: [30], caption: 'outline', loop: true,  note: '30s on the chorus, loops clean for replays' },
   cinematic: { label: '🎬 Cinematic',    lens: [60], caption: 'classic', loop: false, note: '60s cinematic cut, clean classic captions' },
   triple:    { label: '📦 All 3 sizes',  lens: [15, 30, 60], caption: 'outline', loop: true, note: 'Builds 15s + 30s + 60s at once from every highlight' },
+  beatsync:  { label: '⚡ Beat-sync',    lens: [15], caption: 'pop',     loop: true,  note: '15s fast cuts, yellow-pop captions — highest energy' },
+  slideshow: { label: '🖼 Slideshow',    lens: [30], caption: 'classic', loop: false, note: '30s clean slideshow feel, classic captions' },
+  snippet:   { label: '✂️ Snippet',      lens: [7],  caption: 'boxed',   loop: true,  note: '7s quick snippet for a story/status post' },
 };
 function renderShortTemplates() {
   const box = document.getElementById('sh-templates');

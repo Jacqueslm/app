@@ -167,26 +167,35 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Green screen, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
 
-**AI (from your fal.ai balance):**
+**AI (from your fal.ai balance) — verified July 2026, and every price shows on the button before you tap:**
 | Thing | Rough cost |
 |---|---|
 | Scene image | ~4¢ |
 | Scene image starring your character | ~9¢ |
 | Scene image on ✨ Best (Banana Pro) | ~15¢ |
 | 🔒 Face lock training (per character, one-time) | ~$3.60 |
-| 5-second clip (Draft/Seedance) | ~21¢ |
-| 5-second clip (Standard/Kling) | ~42¢ |
-| 5-second clip (Best/Kling Pro) | ~56¢ |
+| 5-second clip — Draft (Wan) | ~25¢ |
+| 5-second clip — Standard (Kling Turbo) | ~35¢ |
+| 5-second clip — ✨ Best (Seedance) | ~$1.20 |
 | Sing on a video — Draft / ✨ Hero | ~4¢ / 20¢ |
 | Sing on a still | ~50¢–$1.50 |
-| Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~50¢ / 70¢ / $1.20 |
+| Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~$1.50 / $1.30 / $1.70 |
 | 🎭 Live Portrait clip | ~10¢ |
-| 🪄 Auto-captions (whole song) | ~2¢ |
+| 🪄 Auto-captions (whole song) | ~35¢ *(free if you paste your own lyrics)* |
 | 🔍 QC inspection (per image) | ~½¢ |
 
-The exact price shows **on the button** before you tap. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
+The exact price shows **on the button** before you tap, and every number above rounds **up** so a real bill is never a surprise. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
+
+### The free toolbox (no AI, on every clip/photo in My Media)
+- **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
+- **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
+- **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.
+- **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
+- **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
+- **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).
+- **One-click setups** (AI Scenes → Director's brief) — tap a face-locked character to make them the star; save your vibe/energy/star/place as a reusable setup; your last brief is remembered.
 
 ---
 

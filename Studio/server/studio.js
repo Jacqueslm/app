@@ -456,7 +456,8 @@ async function refreshFalJob(job) {
     if (job.fal.expect === 'audio') {
       // Voice clone (F5-TTS) returns a generated speech clip. File it as audio;
       // it's cheap and not gated by the image/video caps.
-      const url = (result.audio_url && result.audio_url.url) || (result.audio && result.audio.url);
+      const outAudio = result.audio_url || result.audio || result.output;
+      const url = typeof outAudio === 'string' ? outAudio : (outAudio && outAudio.url);
       if (!url) throw new Error('The voice model finished but returned no audio.');
       const filename = await downloadToMedia(job.userId, url, '.wav');
       const meta = { ...(job.fal.meta || {}), source: 'voice', duration: await probeMediaDuration(mediaPath(filename)) };
@@ -534,6 +535,7 @@ router.get('/config', (req, res) => {
       dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
       qc: QC_RATE,
       voicePer1k: VOICE_RATE,
+      voiceEmoPer1k: VOICE_EMO_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -2403,6 +2405,19 @@ const MODEL_TRANSCRIBE = process.env.FAL_MODEL_TRANSCRIBE || 'fal-ai/wizper';
 const MODEL_VOICE = process.env.FAL_MODEL_VOICE || 'fal-ai/f5-tts';
 const VOICE_RATE = Number(process.env.STUDIO_RATE_VOICE || 0.05); // per 1,000 characters
 const VOICE_MAX_CHARS = 2000;
+// Emotional delivery: index-tts-2 clones from the same reference clip AND takes
+// an emotion prompt, all in one call. Billed per second (~$0.002/s); ~1,000
+// chars ≈ 1 min of speech, so the per-1k estimate is ~$0.12.
+const MODEL_VOICE_EMO = process.env.FAL_MODEL_VOICE_EMO || 'fal-ai/index-tts-2/text-to-speech';
+const VOICE_EMO_RATE = Number(process.env.STUDIO_RATE_VOICE_EMO || 0.12); // per ~1,000 characters (estimate)
+const VOICE_MOODS = {
+  neutral: '',
+  happy: 'happy, warm and upbeat',
+  hyped: 'excited, energetic and hyped up',
+  sad: 'sad, soft and reflective',
+  angry: 'angry, intense and forceful',
+  calm: 'calm, smooth and reassuring',
+};
 // Whisper (wizper) bills ~$0.10 per minute of audio, so a full 3-4 min song is
 // ~$0.30-0.40, NOT 2c. Flat estimate raised to a realistic per-song figure so
 // the confirm dialog stops under-quoting. Override via STUDIO_RATE_TRANSCRIBE.
@@ -2461,18 +2476,24 @@ router.post('/voice-clone', async (req, res) => {
       if (buf.length > 9_000_000) throw new Error('could not upload the reference clip to fal and it is too large to send inline — trim it to ~20 seconds first');
       refUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
     }
-    const submitted = await falSubmit(MODEL_VOICE, {
-      gen_text: text,
-      ref_audio_url: refUrl,
-      model_type: 'F5-TTS',
-      remove_silence: true,
-    });
+    const mood = typeof req.body?.mood === 'string' && VOICE_MOODS[req.body.mood] !== undefined ? req.body.mood : 'neutral';
+    const emoPrompt = VOICE_MOODS[mood];
+    let model, input;
+    if (mood !== 'neutral' && emoPrompt) {
+      // index-tts-2: zero-shot clone + emotion prompt, one call
+      model = MODEL_VOICE_EMO;
+      input = { audio_url: refUrl, prompt: text, should_use_prompt_for_emotion: true, emotion_prompt: emoPrompt };
+    } else {
+      model = MODEL_VOICE;
+      input = { gen_text: text, ref_audio_url: refUrl, model_type: 'F5-TTS', remove_silence: true };
+    }
+    const submitted = await falSubmit(model, input);
     const job = createJob(req.userId, 'voice', {
       fal: {
         statusUrl: submitted.status_url,
         responseUrl: submitted.response_url,
         expect: 'audio',
-        label: `${ref.label} says: ${text.slice(0, 40)}${text.length > 40 ? '…' : ''}`,
+        label: `${ref.label}${mood !== 'neutral' ? ` (${mood})` : ''} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`,
       },
     });
     res.status(202).json({ job: jobJson(job) });

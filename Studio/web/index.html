@@ -3712,6 +3712,14 @@ function renderSeq() {
         <button class="adj-t" title="Color adjust">◑</button>
         <button class="rm" title="Remove">✕</button>
       </div>`;
+    // Tap the thumbnail to watch this exact clip full-size (with scrub controls)
+    // so you can check each one is right before rendering.
+    const thumb = row.querySelector(item.kind === 'image' ? 'img' : 'video');
+    if (thumb) {
+      thumb.style.cursor = 'zoom-in';
+      thumb.title = 'Tap to watch';
+      thumb.onclick = (e) => { e.stopPropagation(); openLightbox(item.url, item.kind); };
+    }
     const upd = () => { renderSeq(); };
     if (item.kind === 'image') {
       row.querySelector('.t-hold').onchange = (e) => { item.holdDur = Math.min(60, Math.max(0.4, Number(e.target.value) || 4)); upd(); };

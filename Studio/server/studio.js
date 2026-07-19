@@ -2152,7 +2152,10 @@ router.post('/render', async (req, res) => {
       if (!end || end <= start) {
         return res.status(400).json({ error: `Clip "${row.label}" has an invalid trim range.` });
       }
-      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label });
+      // keepAudio: preserve this clip's own sound (e.g. dialogue) in the mix.
+      // Only honour it if the clip actually has an audio stream.
+      const keepAudio = !!c.keepAudio && await probeHasAudio(file);
+      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label, keepAudio });
     }
   }
 
@@ -2167,6 +2170,10 @@ router.post('/render', async (req, res) => {
     trans.push({ type, td: type === 'cut' ? 0 : td });
   }
   const totalDur = resolved.reduce((s, c) => s + c.dur, 0) - trans.reduce((s, t) => s + t.td, 0);
+  // each clip's start position on the assembled timeline (accounts for xfade overlap)
+  const clipStart = resolved.length ? [0] : [];
+  { let end = resolved.length ? resolved[0].dur : 0;
+    for (let i = 0; i < trans.length; i++) { clipStart[i + 1] = end - trans[i].td; end = clipStart[i + 1] + resolved[i + 1].dur; } }
 
   // --- optional cutdown window (timeline seconds)
   let winStart = 0, winEnd = totalDur;
@@ -2289,6 +2296,32 @@ router.post('/render', async (req, res) => {
   if (fadeToBlack) postFades.push(`fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`);
   filters.push(`${vcur}${postFades.length ? postFades.join(',') : 'null'}[vout]`);
 
+  // --- kept clip audio (dialogue): trim to the clip, level up, delay to its
+  // spot on the output timeline. The song ducks under these windows.
+  const voiceLabels = [];
+  const voiceWindows = [];
+  resolved.forEach((c, i) => {
+    if (!(c.kind === 'video' && c.keepAudio)) return;
+    const s = clipStart[i] - winStart; // clip start in output coordinates
+    if (s + c.dur <= 0 || s >= outDur) return; // outside the window
+    const skip = s < 0 ? -s : 0;
+    const audible = Math.min(c.dur - skip, outDur - Math.max(0, s));
+    if (audible <= 0.05) return;
+    const delayMs = Math.max(0, Math.round(s * 1000));
+    filters.push(`[${i}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,` +
+      `atrim=${skip.toFixed(3)}:${(skip + audible).toFixed(3)},asetpts=PTS-STARTPTS,volume=1.5` +
+      `${delayMs > 0 ? `,adelay=${delayMs}|${delayMs}` : ''}[cv${i}]`);
+    voiceLabels.push(`[cv${i}]`);
+    voiceWindows.push({ s: Math.max(0, s), e: Math.min(outDur, s + c.dur) });
+  });
+
+  let hasAudioOut = false;
+  const master = (fadeIn, fadeOut) => {
+    let m = `,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,alimiter=limit=0.95`;
+    if (fadeIn) m += `,afade=t=in:st=0:d=1`;
+    if (fadeOut) m += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
+    return m;
+  };
   if (musicIn) {
     // Normalize every track so they can be joined regardless of source format.
     musicIn.tracks.forEach((t, i) => {
@@ -2303,25 +2336,40 @@ router.post('/render', async (req, res) => {
       else filters.push(`${mcur}[mt${i}]concat=n=2:v=0:a=1${out}`);
       mcur = out;
     }
-    let achain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
+    let mchain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
       `,volume=${musicIn.volume.toFixed(2)}`;
-    // duck the music a touch while text is on screen so titles read clearly
+    // duck lightly under titles so text reads
     const duckWindows = ovs
       .map((o) => ({ s: Math.max(0, o.start - winStart), e: Math.min(outDur, o.end - winStart) }))
       .filter((w) => w.e > 0 && w.s < outDur);
     if (duckWindows.length) {
       const terms = duckWindows.map((w) => `between(t\\,${w.s.toFixed(2)}\\,${w.e.toFixed(2)})`).join('+');
-      achain += `,volume='1-0.3*min(1\\,${terms})':eval=frame`;
+      mchain += `,volume='1-0.3*min(1\\,${terms})':eval=frame`;
     }
-    // gentle mastering: keep levels steady and never clip
-    achain += `,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,alimiter=limit=0.95`;
-    if (musicIn.fadeIn) achain += `,afade=t=in:st=0:d=1`;
-    if (musicIn.fadeOut) achain += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
-    filters.push(`${achain}[aout]`);
+    // duck harder under kept dialogue so the voice is clear
+    if (voiceWindows.length) {
+      const terms = voiceWindows.map((w) => `between(t\\,${w.s.toFixed(2)}\\,${w.e.toFixed(2)})`).join('+');
+      mchain += `,volume='1-0.65*min(1\\,${terms})':eval=frame`;
+    }
+    if (voiceLabels.length) {
+      filters.push(`${mchain}[musd]`);
+      filters.push(`[musd]${voiceLabels.join('')}amix=inputs=${1 + voiceLabels.length}:normalize=0:dropout_transition=0` +
+        `${master(musicIn.fadeIn, musicIn.fadeOut)}[aout]`);
+    } else {
+      filters.push(`${mchain}${master(musicIn.fadeIn, musicIn.fadeOut)}[aout]`);
+    }
+    hasAudioOut = true;
+  } else if (voiceLabels.length) {
+    // no song, but kept dialogue — that becomes the audio
+    const mixed = voiceLabels.length > 1
+      ? (filters.push(`${voiceLabels.join('')}amix=inputs=${voiceLabels.length}:normalize=0:dropout_transition=0[vmix]`), '[vmix]')
+      : voiceLabels[0];
+    filters.push(`${mixed}anull${master(false, false)}[aout]`);
+    hasAudioOut = true;
   }
 
   args.push('-filter_complex', filters.join(';'), '-map', '[vout]');
-  if (musicIn) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
+  if (hasAudioOut) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
   // -pix_fmt yuv420p is REQUIRED for the file to play outside a browser
   // (Windows Media Player, QuickTime, phones reject other pixel formats).
   // Without it a downloaded short/video shows a black screen or won't open.

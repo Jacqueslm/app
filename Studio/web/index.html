@@ -502,6 +502,14 @@ body.simple-only #view-simple{display:flex !important}
         <p class="usage" style="margin:0 0 4px">1. Pick a <b>reference voice</b> — an audio clip of the character (e.g. a vocal stem you pulled from Suno). 2. Type the line. 3. Generate. The price shows before you spend.</p>
         <select class="input" id="voice-ref" style="margin-bottom:6px"></select>
         <textarea id="voice-text" placeholder="Type what they should say… e.g. This is the story of Saving Queens." style="min-height:70px"></textarea>
+        <div class="chips" id="voice-moods" style="margin-top:6px">
+          <button class="chip on" data-mood="neutral">😐 Neutral</button>
+          <button class="chip" data-mood="happy">😊 Happy</button>
+          <button class="chip" data-mood="hyped">🔥 Hyped</button>
+          <button class="chip" data-mood="sad">😢 Sad</button>
+          <button class="chip" data-mood="angry">😤 Angry</button>
+          <button class="chip" data-mood="calm">😌 Calm</button>
+        </div>
         <button class="gen-btn" id="voice-go" style="margin-top:6px">🎙 Speak in their voice</button>
         <div class="progress-line" id="voice-prog"><div></div></div>
         <p class="usage" id="voice-note" style="margin:4px 0 0"></p>
@@ -2250,9 +2258,11 @@ if (document.getElementById('crewchat-key-save')) $('#crewchat-key-save').onclic
   b.disabled = false;
 };
 
-/* ---------------- Voice: narrate in a character's voice (F5-TTS on fal) ---------------- */
+/* ---------------- Voice: narrate in a character's voice (F5-TTS + emotion) ---------------- */
+let voiceMood = 'neutral';
 function voicePrice() {
-  const rate = st.cfg?.pricing?.voicePer1k;
+  const pr = st.cfg?.pricing;
+  const rate = voiceMood === 'neutral' ? pr?.voicePer1k : (pr?.voiceEmoPer1k || pr?.voicePer1k);
   const n = ($('#voice-text')?.value || '').length;
   if (!rate || !n) return null;
   return Math.max(0.001, (n / 1000) * rate);
@@ -2277,6 +2287,10 @@ function renderVoiceCard() {
   if (songs.some((a) => String(a.id) === cur)) sel.value = cur;
   updateVoicePrice();
 }
+if (document.getElementById('voice-moods')) $('#voice-moods').querySelectorAll('.chip').forEach((c) => c.onclick = () => {
+  $('#voice-moods').querySelectorAll('.chip').forEach((x) => x.classList.remove('on'));
+  c.classList.add('on'); voiceMood = c.dataset.mood; updateVoicePrice();
+});
 if (document.getElementById('voice-text')) $('#voice-text').addEventListener('input', updateVoicePrice);
 if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   const refId = Number($('#voice-ref').value);
@@ -2291,7 +2305,7 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   try {
     const { job } = await jfetch('/api/studio/voice-clone', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refAssetId: refId, text }),
+      body: JSON.stringify({ refAssetId: refId, text, mood: voiceMood }),
     });
     const done = await pollJob(job.id, (j) => setProg('#voice-prog', j.progress || 20));
     await loadAssets();

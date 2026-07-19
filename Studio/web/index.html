@@ -1381,6 +1381,7 @@ const st = {
   sceneCount: 1,        // images per press (same prompt, different takes)
   sceneQuality: 'standard', // 'standard' = Flux, 'best' = Nano Banana Pro
   seq: [],              // timeline items (video: start/end trims, image: holdDur)
+  keepAudioAssets: new Set(), // assetIds whose own sound (dialogue) rides in the mix
   trans: [],            // transitions between consecutive items
   overlays: [],         // text overlay specs (rendered to PNG at export time)
   highlights: [],       // shorts generator markers [{label, time}]
@@ -2745,7 +2746,9 @@ function renderLibrary() {
       const songs = st.assets.filter((x) => x.kind === 'audio');
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const keeping = st.keepAudioAssets.has(a.id);
       panel.innerHTML = `
+        <button class="btn2 ${keeping ? '' : 'quiet'} snd-keep">${keeping ? '✅ Keeping this clip\'s talking (song ducks under it)' : '🎙 Keep this clip\'s talking (song ducks under it) · free'}</button>
         <button class="btn2 quiet snd-mute">🔇 Remove the sound · free</button>
         ${songs.length ? `
         <select class="input snd-song" style="padding:8px 10px;font-size:12px">
@@ -2770,6 +2773,11 @@ function renderLibrary() {
           setErr('#scenes-err', err.message);
           btnEl.disabled = false; btnEl.textContent = old;
         }
+      };
+      // keep-audio is a timeline/render setting (no new file) — toggle it for this clip
+      panel.querySelector('.snd-keep').onclick = () => {
+        if (st.keepAudioAssets.has(a.id)) st.keepAudioAssets.delete(a.id); else st.keepAudioAssets.add(a.id);
+        persistDraft(); renderLibrary();
       };
       panel.querySelector('.snd-mute').onclick = (e) => run({ mode: 'mute' }, e.target);
       const swap = panel.querySelector('.snd-swap');
@@ -3243,6 +3251,7 @@ function collectSpec() {
   return {
     v: 2,
     seq: st.seq.map((c) => ({ assetId: c.assetId, kind: c.kind, start: c.start, end: c.end, holdDur: c.holdDur, eq: c.eq })),
+    keepAudio: [...st.keepAudioAssets],
     trans: st.trans,
     overlays: st.overlays,
     highlights: st.highlights,
@@ -3279,6 +3288,7 @@ function applySpec(spec) {
   st.overlays = Array.isArray(spec.overlays) ? spec.overlays : [];
   st.highlights = Array.isArray(spec.highlights) ? spec.highlights : [];
   st.captions = Array.isArray(spec.captions) ? spec.captions : [];
+  st.keepAudioAssets = new Set(Array.isArray(spec.keepAudio) ? spec.keepAudio : []);
   if (typeof spec.lyrics === 'string') $('#lyr-text').value = spec.lyrics;
   st.storyboard = Array.isArray(spec.storyboard) ? spec.storyboard : [];
   if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
@@ -3941,7 +3951,7 @@ async function runRender(windowOpt, btnSel, opts) {
       body: JSON.stringify({
         clips: st.seq.map((c) => c.kind === 'image'
           ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
-          : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq }),
+          : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, keepAudio: st.keepAudioAssets.has(c.assetId) }),
         transitions: st.trans,
         music: spec.music.tracks.length ? spec.music : null,
         overlays,

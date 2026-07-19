@@ -1678,6 +1678,23 @@ router.post('/transform', async (req, res) => {
       return res.status(400).json({ error: 'Clean-up audio works on songs, narration, or video clips with sound.' });
     }
 
+    // REMASTER — export a clean, streaming-standard 48 kHz / 24-bit WAV with
+    // gentle mastering (de-rumble + loudness normalize to -14 LUFS, the level
+    // Spotify/YouTube target). Free, local. Works on a song or a clip's audio.
+    if (op === 'remaster') {
+      const MASTER_CHAIN = 'highpass=f=35,loudnorm=I=-14:TP=-1.0:LRA=11';
+      if (src.kind === 'audio' || src.kind === 'video') {
+        if (src.kind === 'video' && !(await probeHasAudio(srcPath))) return res.status(400).json({ error: 'That clip has no sound to remaster.' });
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.wav');
+        // -vn drops any video; 24-bit PCM at 48 kHz
+        const args = ['-i', srcPath, '-vn', '-af', MASTER_CHAIN, '-ar', '48000', '-c:a', 'pcm_s24le'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · 48k master`, { ...carry, transform: 'remaster' }, 'audio');
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Remaster works on songs or clips with sound.' });
+    }
+
     // REFRAME — turn any clip/photo into a vertical Short (9:16), Square (1:1),
     // or Wide (16:9). 'fill' crops to fill the frame (subject-centered); 'blur'
     // fits the whole shot with a blurred zoom behind it (nothing cropped). Free.

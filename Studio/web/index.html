@@ -666,6 +666,17 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
     </div>
 
+    <div class="card" id="wm-card">
+      <h3>🏷 Brand watermark <span class="usage">— your @handle on every video (free)</span></h3>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" id="wm-on"> Add my handle to renders &amp; shorts</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
+        <input class="input" id="wm-text" placeholder="@yourhandle" style="flex:1;min-width:140px" maxlength="40">
+        <div class="chips" id="wm-pos"></div>
+      </div>
+      <canvas id="wm-preview" style="width:100%;max-width:280px;border-radius:8px;margin-top:6px;background:linear-gradient(135deg,#3a3a5a,#14121f);display:none"></canvas>
+      <p class="usage">A small, subtle tag stays on screen the whole video — so when your clips get reshared, they're always tied to you.</p>
+    </div>
+
     <div class="card">
       <h3>🎬 Storyboard <span class="usage">— your lyrics become a shot list</span></h3>
       <p class="usage">Uses the lyrics pasted above. Splits your song into scenes and writes an image prompt for each — press Generate on any scene to make it.</p>
@@ -1628,6 +1639,7 @@ async function bootStudio() {
   renderCrewRoom();
   renderVoiceCard();
   renderCaptionStyles();
+  renderWatermark();
   loadStorage();
   loadDiagnostics();
   loadFans();
@@ -3812,6 +3824,13 @@ function renderOutputChips() {
   ], st.seqRes, (k) => { st.seqRes = k; renderOutputChips(); persistDraft(); });
 }
 
+function wmSpec() {
+  return {
+    on: localStorage.getItem('tsid-wm-on') === '1',
+    text: (localStorage.getItem('tsid-wm-text') || '').trim(),
+    pos: Number(localStorage.getItem('tsid-wm-pos')) || 9,
+  };
+}
 async function uploadOverlayPngs() {
   const [W, H] = currentSize().split('x').map(Number);
   const out = [];
@@ -3823,7 +3842,39 @@ async function uploadOverlayPngs() {
     const asset = await uploadFile(file, 'image', null, { overlay: '1' });
     out.push({ assetId: asset.id, start: o.start, end: o.end, fade: o.fade });
   }
+  // brand watermark: a subtle handle pinned to a corner for the whole video
+  const wm = wmSpec();
+  if (wm.on && wm.text) {
+    const canvas = drawOverlay({ text: wm.text, font: 'system-ui', size: 30, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.82)', stroke: { color: 'rgba(0,0,0,0.5)', width: 0.12 } }, W, H);
+    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+    const asset = await uploadFile(new File([blob], `wm-${Date.now()}.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
+    out.push({ assetId: asset.id, start: 0, end: Math.max(1, timelineTotal() || 3600), fade: 0.3 });
+  }
   return out;
+}
+function renderWatermark() {
+  if (!document.getElementById('wm-card')) return;
+  const wm = wmSpec();
+  const on = $('#wm-on'), txt = $('#wm-text');
+  on.checked = wm.on; if (document.activeElement !== txt) txt.value = wm.text;
+  // position chips (corners + top/bottom center)
+  const posBox = $('#wm-pos');
+  const POS = [[7, '↖'], [8, '↑'], [9, '↗'], [1, '↙'], [2, '↓'], [3, '↘']];
+  posBox.innerHTML = '';
+  POS.forEach(([p, label]) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (p === wm.pos ? ' on' : '');
+    b.textContent = label; b.title = 'watermark position';
+    b.onclick = () => { localStorage.setItem('tsid-wm-pos', String(p)); renderWatermark(); };
+    posBox.appendChild(b);
+  });
+  const pv = $('#wm-preview');
+  if (wm.on && wm.text) { pv.style.display = 'block'; drawOverlay({ text: wm.text, font: 'system-ui', size: 46, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.82)', stroke: { color: 'rgba(0,0,0,0.5)', width: 0.12 } }, 560, 315, pv); }
+  else pv.style.display = 'none';
+}
+if (document.getElementById('wm-on')) {
+  $('#wm-on').onchange = () => { localStorage.setItem('tsid-wm-on', $('#wm-on').checked ? '1' : '0'); renderWatermark(); };
+  $('#wm-text').addEventListener('input', () => { localStorage.setItem('tsid-wm-text', $('#wm-text').value.trim()); renderWatermark(); });
 }
 
 async function runRender(windowOpt, btnSel, opts) {

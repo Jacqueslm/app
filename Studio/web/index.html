@@ -399,7 +399,7 @@ body.simple-only #view-simple{display:flex !important}
 
       <p class="usage" style="margin:8px 0 0"><b>2. Your lyrics</b></p>
       <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
-      <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~2¢)</button>
+      <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~35¢ — or paste lyrics above for free)</button>
 
       <p class="usage" style="margin:8px 0 0"><b>3. Your pictures &amp; video clips</b> <span class="usage">(optional — the crew generates the rest)</span></p>
       <button class="btn2" id="crew-drop">🎞 Drop your images or video clips (pick several)</button>
@@ -3450,7 +3450,7 @@ Object.entries({
   'qk-add-music': 'Upload your song file (mp3/wav) from your computer.',
   'qk-import-song': 'Paste a Suno share link (or any direct song link) and the song downloads straight into Studio.',
   'qk-assemble': 'FREE. Builds the whole video: camera moves on every picture, cuts on the beat, music, captions.',
-  'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~2¢). Check the words after.',
+  'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~35¢). Free instead: paste your lyrics, then Auto-spread or Tap-to-sync. Check the words after.',
   'lyr-tap': 'FREE perfect sync: the song plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
@@ -3855,7 +3855,7 @@ function renderPipeline() {
     },
     {
       icon: '🪄', name: 'Captions', done: !!st.captions.length, needs: !!st.musicList.length,
-      hint: 'AI listens and syncs every line (~2¢)', action: 'Auto-caption', run: () => $('#lyr-auto').onclick(),
+      hint: 'AI listens and syncs every line (~35¢, or paste lyrics free)', action: 'Auto-caption', run: () => $('#lyr-auto').onclick(),
     },
     {
       icon: '🎬', name: 'Storyboard', done: !!st.storyboard.length, needs: !!$('#lyr-text').value.trim(),
@@ -3990,7 +3990,7 @@ $('#lyr-auto').onclick = async () => {
   const song = entry && st.assets.find((a) => a.id === entry.assetId);
   if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card) — captions come from listening to it.');
   const est = st.cfg?.pricing?.transcribe;
-  if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.02).toFixed(2)}). Your current caption list will be replaced.`)) return;
+  if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.35).toFixed(2)}). Free instead: paste your lyrics and use Auto-spread or Tap-to-sync.\n\nYour current caption list will be replaced.`)) return;
   const b = $('#lyr-auto');
   b.disabled = true; b.innerHTML = '<span class="spinner"></span>Listening…';
   try {

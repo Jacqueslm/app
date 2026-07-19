@@ -3224,16 +3224,44 @@ router.get('/jobs/:id', async (req, res) => {
   res.json({ job: jobJson(job) });
 });
 
-/* ---------------- paid-generation recovery ---------------- */
-// List recent fal receipts so the artist can see what they've paid for and
-// which ones did / didn't land in the library.
+/* ---------------- paid-generation recovery + spend ledger ---------------- */
+// Best-effort estimate of what a single generation cost, from its type/tier and
+// stored details. Marked as an estimate everywhere — your real fal balance is
+// the final word — but it's built from the same verified rates shown on the
+// buttons, so the running total is honest about where money actually went.
+function estReceiptCost(r) {
+  let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+  switch (r.expect) {
+    case 'video': {
+      const rate = (VIDEO_TIERS[r.tier] || VIDEO_TIERS.standard).rate;
+      const secs = Number(meta.seconds) || 5;
+      return rate * secs;
+    }
+    case 'image': return r.character_id ? CHARACTER_IMAGE_RATE : IMAGE_RATE;
+    case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
+    case 'qc': return QC_RATE;
+    case 'transcript': return TRANSCRIBE_RATE;
+    default: return null; // voice/other: length not stored, don't guess
+  }
+}
+
+// List recent fal receipts + a running spend estimate so the artist can see
+// exactly what they've paid for and which ones did / didn't land.
 router.get('/fal/receipts', (req, res) => {
-  const rows = db.getFalReceipts(req.userId, 60).map((r) => ({
-    id: r.id, requestId: r.request_id, expect: r.expect, label: r.label,
-    tier: r.tier, status: r.status, assetId: r.asset_id, createdAt: r.created_at,
-  }));
-  const open = rows.filter((r) => r.status === 'running').length;
-  res.json({ receipts: rows, open });
+  const rows = db.getFalReceipts(req.userId, 200);
+  let total = 0, counted = 0;
+  const receipts = rows.map((r) => {
+    // Failed generations that never completed weren't billed — don't count them.
+    const cost = r.status === 'error' ? null : estReceiptCost(r);
+    if (cost != null) { total += cost; counted += 1; }
+    return {
+      id: r.id, requestId: r.request_id, expect: r.expect, label: r.label,
+      tier: r.tier, status: r.status, assetId: r.asset_id, createdAt: r.created_at,
+      cost: cost == null ? null : Number(cost.toFixed(3)),
+    };
+  });
+  const open = receipts.filter((r) => r.status === 'running').length;
+  res.json({ receipts: receipts.slice(0, 60), open, totalSpent: Number(total.toFixed(2)), counted });
 });
 
 // One button: re-check every still-open receipt against fal. Any that finished

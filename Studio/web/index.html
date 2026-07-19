@@ -2911,7 +2911,7 @@ function renderLibrary() {
     if (st.cropTarget === a.id) {
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
-      let aspect = '9:16', keep = 'center', mode = 'shape', corner = 'br', zoom = 0.12, method = 'patch', markSize = 'medium';
+      let aspect = '9:16', keep = 'center', mode = 'shape', corner = 'br', zoom = 0.12, method = 'patch', markSize = 'medium', blend = 1;
       panel.innerHTML = `
         <div class="chips crop-modes">
           <button class="chip on" data-mode="shape">Change shape</button>
@@ -2945,6 +2945,10 @@ function renderLibrary() {
             <button class="chip on" data-size="medium">Medium</button>
             <button class="chip" data-size="large">Large mark</button>
           </div>
+          <div class="chips crop-blend">
+            <button class="chip on" data-blend="1">Texture blend (hides the spot)</button>
+            <button class="chip" data-blend="0">Plain (smooth)</button>
+          </div>
           <div class="chips crop-zooms" style="display:none">
             <button class="chip" data-zoom="0.08">Trim a little (8%)</button>
             <button class="chip on" data-zoom="0.12">Trim (12%)</button>
@@ -2966,7 +2970,7 @@ function renderLibrary() {
           markBox.style.display = mode === 'mark' ? '' : 'none';
           goBtn.textContent = goLabel();
           hint.textContent = mode === 'mark'
-            ? 'For cleaning a decorative sparkle / corner watermark off your OWN generated image. "Patch it out" blends it into the pixels around it and keeps the full frame; "Zoom past it" crops the corner off. Free and instant; the original stays.'
+            ? 'Cleans a decorative sparkle / corner watermark off your OWN generated image. "Patch it out" keeps the full frame — use the smallest mark size that still covers the sparkle for the cleanest result. If a busy background still shows a faint spot, switch to "Zoom past it" (crops the corner off — always clean). Free & instant; the original stays.'
             : 'Cuts a new copy at that shape — the original stays. Free and instant. Cropping a face out of an uploaded photo makes a great extra reference photo.';
         };
       });
@@ -2978,6 +2982,7 @@ function renderLibrary() {
       });
       const zoomsBox = panel.querySelector('.crop-zooms');
       const sizesBox = panel.querySelector('.crop-sizes');
+      const blendBox = panel.querySelector('.crop-blend');
       panel.querySelectorAll('.crop-corners .chip').forEach((c) => {
         c.onclick = () => { corner = c.dataset.corner; panel.querySelectorAll('.crop-corners .chip').forEach((x) => x.classList.toggle('on', x === c)); };
       });
@@ -2987,10 +2992,14 @@ function renderLibrary() {
           panel.querySelectorAll('.crop-methods .chip').forEach((x) => x.classList.toggle('on', x === c));
           zoomsBox.style.display = method === 'zoom' ? '' : 'none';
           sizesBox.style.display = method === 'patch' ? '' : 'none';
+          blendBox.style.display = method === 'patch' ? '' : 'none';
         };
       });
       panel.querySelectorAll('.crop-sizes .chip').forEach((c) => {
         c.onclick = () => { markSize = c.dataset.size; panel.querySelectorAll('.crop-sizes .chip').forEach((x) => x.classList.toggle('on', x === c)); };
+      });
+      panel.querySelectorAll('.crop-blend .chip').forEach((c) => {
+        c.onclick = () => { blend = Number(c.dataset.blend); panel.querySelectorAll('.crop-blend .chip').forEach((x) => x.classList.toggle('on', x === c)); };
       });
       panel.querySelectorAll('.crop-zooms .chip').forEach((c) => {
         c.onclick = () => { zoom = Number(c.dataset.zoom); panel.querySelectorAll('.crop-zooms .chip').forEach((x) => x.classList.toggle('on', x === c)); };
@@ -3001,7 +3010,7 @@ function renderLibrary() {
         try {
           const url = mode === 'mark' && method === 'patch' ? '/api/studio/cleanmark' : '/api/studio/crop';
           const body = mode !== 'mark' ? { assetId: a.id, aspect, keep }
-            : method === 'patch' ? { assetId: a.id, corner, size: markSize }
+            : method === 'patch' ? { assetId: a.id, corner, size: markSize, blend }
             : { assetId: a.id, zoom, corner };
           await jfetch(url, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },

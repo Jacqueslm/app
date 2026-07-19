@@ -1737,16 +1737,17 @@ router.post('/crop', (req, res) => {
 // for cleaning a provider's decorative sparkle off your own generated art; it
 // cannot touch invisible watermarks (SynthID) and isn't for other people's work.
 const MARK_BOXES = {
-  // fractional x, y, w, h of the patch box, per corner. Insets from the edge so
-  // delogo always has a border of real pixels to sample from.
-  br: { x: 0.70, y: 0.78, w: 0.27, h: 0.19 },
-  bl: { x: 0.03, y: 0.78, w: 0.27, h: 0.19 },
-  tr: { x: 0.70, y: 0.03, w: 0.27, h: 0.19 },
-  tl: { x: 0.03, y: 0.03, w: 0.27, h: 0.19 },
+  // fractional x, y, w, h of the patch box, per corner. Tightened to hug a small
+  // corner sparkle (a big box makes delogo smear a big smooth blob). Insets from
+  // the edge so delogo always has a border of real pixels to sample from.
+  br: { x: 0.76, y: 0.83, w: 0.20, h: 0.14 },
+  bl: { x: 0.04, y: 0.83, w: 0.20, h: 0.14 },
+  tr: { x: 0.76, y: 0.03, w: 0.20, h: 0.14 },
+  tl: { x: 0.04, y: 0.03, w: 0.20, h: 0.14 },
 };
-const MARK_SIZES = { small: 0.7, medium: 1.0, large: 1.35 };
+const MARK_SIZES = { small: 0.65, medium: 1.0, large: 1.5 };
 router.post('/cleanmark', async (req, res) => {
-  const { assetId, corner, size } = req.body || {};
+  const { assetId, corner, size, blend } = req.body || {};
   const src = db.getAsset(req.userId, Number(assetId));
   if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to clean.' });
   const c = MARK_BOXES[corner] ? corner : 'br';
@@ -1770,10 +1771,26 @@ router.post('/cleanmark', async (req, res) => {
   let W = Math.min(iw - 2 - X, Math.floor(iw * bw));
   let H = Math.min(ih - 2 - Y, Math.floor(ih * bh));
   W = Math.max(8, W); H = Math.max(8, H);
-  const filter = `delogo=x=${X}:y=${Y}:w=${W}:h=${H}`;
+
+  // Two-stage clean-up so it doesn't leave a tell-tale smooth blob:
+  //   1) delogo interpolates the sparkle away (leaves a smooth patch).
+  //   2) unless disabled, sprinkle fine grain back over JUST that patch so it
+  //      matches the surrounding photo texture instead of reading as a blur.
+  const useBlend = blend === undefined ? true : !!blend;
   const ext = path.extname(src.filename).toLowerCase() || '.png';
   const outFile = newFilename(req.userId, ext);
-  const proc = spawn(ffmpegBin(), ['-y', '-i', mediaPath(src.filename), '-vf', filter, '-frames:v', '1', mediaPath(outFile)]);
+  const args = ['-y', '-i', mediaPath(src.filename)];
+  if (useBlend) {
+    const fc =
+      `[0:v]delogo=x=${X}:y=${Y}:w=${W}:h=${H},split=2[base][src];` +
+      `[src]crop=${W}:${H}:${X}:${Y},noise=alls=7:allf=u[gp];` +
+      `[base][gp]overlay=${X}:${Y}`;
+    args.push('-filter_complex', fc);
+  } else {
+    args.push('-vf', `delogo=x=${X}:y=${Y}:w=${W}:h=${H}`);
+  }
+  args.push('-frames:v', '1', mediaPath(outFile));
+  const proc = spawn(ffmpegBin(), args);
   proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
   proc.on('close', (code) => {
     if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {

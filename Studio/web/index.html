@@ -4139,6 +4139,29 @@ function restoreBrief() {
 }
 function getCrewSetups() { try { return JSON.parse(localStorage.getItem('tsid-crew-setups') || '[]'); } catch (e) { return []; } }
 function setCrewSetups(list) { try { localStorage.setItem('tsid-crew-setups', JSON.stringify(list)); } catch (e) {} }
+// Free, instant: pick the star from the lyrics. Counts each character's name and
+// trigger word; the most-mentioned wins, else the first face-locked character.
+function autoCastStar() {
+  const lyrics = (($('#crew-lyrics')?.value || '') + '\n' + ($('#lyr-text')?.value || '') + '\n' + (st.captions || []).map((c) => c.text).join('\n')).toLowerCase();
+  const chars = st.characters || [];
+  if (!chars.length) return;
+  let best = null, bestN = 0, why = '';
+  chars.forEach((c) => {
+    let n = 0;
+    const terms = [c.name, c.triggerWord].filter(Boolean);
+    terms.forEach((t) => {
+      const words = String(t).toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      words.forEach((w) => { const m = lyrics.match(new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g')); n += m ? m.length : 0; });
+    });
+    if (n > bestN) { bestN = n; best = c; }
+  });
+  if (!best) { best = chars.find((c) => c.loraUrl) || chars[0]; why = best ? `no character named in the lyrics — defaulting to ${best.name}.` : ''; }
+  else why = `${best.name} is named ${bestN}× in the lyrics.`;
+  if (!best) return;
+  applyBrief({ ...crew.brief, star: String(best.id) });
+  const tip = $('#crew-brief-tip');
+  if (tip) tip.innerHTML = `<span style="display:block">✨ Auto-cast: ${escapeHtml(why)}</span>` + tip.innerHTML;
+}
 function renderCrewPresets() {
   const box = $('#crew-presets'); if (!box) return;
   box.innerHTML = '';
@@ -4149,6 +4172,10 @@ function renderCrewPresets() {
     if (onX) { const x = document.createElement('span'); x.textContent = ' ✕'; x.style.cssText = 'opacity:.6;margin-left:2px'; x.onclick = (e) => { e.stopPropagation(); onX(); }; b.appendChild(x); }
     box.appendChild(b);
   };
+  // auto-cast: read the lyrics and pick who should star
+  if ((st.characters || []).length) {
+    chip('✨ Auto-cast from lyrics', 'Read the lyrics and pick the star automatically', autoCastStar);
+  }
   // one-click: make each face-locked character the star (their look/pacing stay as set)
   (st.characters || []).filter((c) => c.loraUrl).forEach((c) => {
     const isStar = String(c.id) === String(crew.brief.star);

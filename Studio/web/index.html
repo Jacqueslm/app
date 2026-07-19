@@ -3842,17 +3842,17 @@ async function drawWatermarkCanvas(W, H, canvas) {
     const c = canvas || document.createElement('canvas'); c.width = W; c.height = H;
     const ctx = c.getContext('2d'); ctx.clearRect(0, 0, W, H);
     const img = await loadImg(wm.logo);
-    const lw = W * 0.18, lh = lw * (img.height / img.width || 0.3);
+    const lw = W * 0.26, lh = lw * (img.height / img.width || 0.3);
     const col = (wm.pos - 1) % 3, row = Math.floor((wm.pos - 1) / 3), m = 0.045;
     const x = col === 0 ? W * m : col === 1 ? (W - lw) / 2 : W - lw - W * m;
     const y = row === 0 ? H * m : row === 1 ? (H - lh) / 2 : H - lh - H * m;
-    ctx.globalAlpha = 0.85;
-    ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = lw / 16; ctx.shadowOffsetY = lw / 45;
+    ctx.globalAlpha = 0.96;
+    ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = lw / 12; ctx.shadowOffsetY = lw / 55;
     ctx.drawImage(img, x, y, lw, lh);
     ctx.globalAlpha = 1;
     return c;
   }
-  return drawOverlay({ text: wm.text, font: 'system-ui', size: 30, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.82)', stroke: { color: 'rgba(0,0,0,0.5)', width: 0.12 } }, W, H, canvas);
+  return drawOverlay({ text: wm.text, font: 'system-ui', size: 40, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.95)', stroke: { color: 'rgba(0,0,0,0.6)', width: 0.13 } }, W, H, canvas);
 }
 async function uploadOverlayPngs() {
   const [W, H] = currentSize().split('x').map(Number);

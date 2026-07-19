@@ -180,9 +180,11 @@ body.simple-only #view-simple{display:flex !important}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="media-upload">⬆ Upload pictures &amp; videos</button>
         <button class="btn2 quiet" id="media-upload-song">🎵 Upload a song</button>
+        <button class="btn2 quiet" id="media-record">🎥 Record my screen</button>
         <button class="btn2 quiet" id="media-open-folder">📁 Open my media folder</button>
         <button class="btn2 quiet" id="media-update">⬆ Update my app</button>
       </div>
+      <p class="usage" id="media-rec-note" style="margin:2px 0 0">Grab any clip you can play on screen — a Manus render, a reference video — straight into your library. Pick the tab/window, and it stops when you press again.</p>
       <p class="usage" id="media-folder-note" style="word-break:break-all"></p>
       <p class="usage" id="media-upd-status" style="word-break:break-all"></p>
 
@@ -1642,6 +1644,59 @@ $('#media-open-folder').onclick = async () => {
   try { const r = await jfetch('/api/studio/reveal-media', { method: 'POST' }); $('#media-folder-note').textContent = r.opened ? `Opened: ${r.path}` : `Your files live here:  ${r.path}`; }
   catch (e) { $('#media-folder-note').textContent = e.message; }
   b.disabled = false;
+};
+// --- Screen recorder: capture any on-screen clip (e.g. a Manus render) straight
+// into the library. Pure browser MediaRecorder, no AI, no upload to anywhere but
+// your own Studio. Records to webm and files it as a video asset. ---
+const screenRec = { mr: null, chunks: [], stream: null, t0: 0, timer: null };
+function stopScreenRec() {
+  if (screenRec.mr && screenRec.mr.state !== 'inactive') screenRec.mr.stop();
+}
+$('#media-record').onclick = async () => {
+  const b = $('#media-record');
+  const note = $('#media-rec-note');
+  if (screenRec.mr && screenRec.mr.state === 'recording') { stopScreenRec(); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined') {
+    note.textContent = 'Screen recording needs a desktop browser (Chrome, Edge, or Firefox). Open Studio there and try again.';
+    return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
+  } catch (e) {
+    note.textContent = e.name === 'NotAllowedError' ? 'Recording cancelled — nothing captured.' : `Could not start recording: ${e.message}`;
+    return;
+  }
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  screenRec.stream = stream; screenRec.chunks = [];
+  const mr = new MediaRecorder(stream, { mimeType: mime });
+  screenRec.mr = mr;
+  mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) screenRec.chunks.push(ev.data); };
+  // if the user clicks the browser's native "Stop sharing", end cleanly too
+  stream.getVideoTracks()[0].addEventListener('ended', stopScreenRec);
+  mr.onstop = async () => {
+    clearInterval(screenRec.timer);
+    stream.getTracks().forEach((t) => t.stop());
+    b.classList.remove('primary'); b.disabled = true; b.textContent = '⏳ Saving…';
+    try {
+      const blob = new Blob(screenRec.chunks, { type: mime });
+      if (blob.size < 1000) throw new Error('That recording was empty.');
+      const file = new File([blob], `screen-recording-${Date.now()}.webm`, { type: 'video/webm' });
+      await uploadFile(file, 'video');
+      await loadAssets();
+      note.textContent = `Saved a ${Math.round(blob.size / 1e5) / 10} MB clip to your Video clips below.`;
+    } catch (e) { setErr('#seq-err', e.message); note.textContent = e.message; }
+    b.disabled = false; b.textContent = '🎥 Record my screen';
+    screenRec.mr = null;
+  };
+  mr.start(1000);
+  screenRec.t0 = 0;
+  b.classList.add('primary'); b.textContent = '⏺ Stop recording (0:00)';
+  screenRec.timer = setInterval(() => {
+    screenRec.t0 += 1;
+    const m = Math.floor(screenRec.t0 / 60), s = String(screenRec.t0 % 60).padStart(2, '0');
+    b.textContent = `⏺ Stop recording (${m}:${s})`;
+  }, 1000);
 };
 async function mediaAddAll(kind) {
   const list = st.assets.filter((a) => a.kind === kind && !a.meta?.overlay);

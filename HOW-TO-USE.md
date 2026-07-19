@@ -200,7 +200,7 @@ The exact price shows **on the button** before you tap, and every number above r
 
 ### Make a character TALK (with a moving, expressive face)
 It's three steps, and each one is its own button:
-1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. (~½¢ a line.)
+1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. Pick a **mood** (Happy / Hyped / Sad / Angry / Calm) to change the delivery — no filming needed. Neutral is cheapest (~½¢ a line); a mood is a touch more (~pennies), and the price shows before you spend.
 2. **🎤 Sing** — on DBC's photo or clip, tap **Sing**, and in the song list pick the **voice line you just made**. It lip-syncs his mouth to the words. (Draft ~4¢ / Hero 20¢.)
 3. **🎭 Live Portrait** — for full expressions (eyes, head, mood), film your own face doing the performance and it maps that onto his still. (~10¢.)
 

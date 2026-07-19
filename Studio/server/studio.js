@@ -1315,7 +1315,7 @@ router.post('/animate', async (req, res) => {
 /* ---------------- ffmpeg job runner ---------------- */
 // Spawn ffmpeg with the given args, track progress against expectedDur, and
 // register the output as a video asset when it succeeds.
-function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
+function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 'video') {
   const job = createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
   const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]));
@@ -1336,7 +1336,7 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
   proc.on('close', (code) => {
     if (job.status === 'error') return;
     if (code === 0) {
-      job.assetId = db.createAsset(userId, 'video', label, outFile, null, { ...meta, duration: expectedDur });
+      job.assetId = db.createAsset(userId, kind, label, outFile, null, { ...meta, duration: expectedDur });
       job.progress = 100;
       job.status = 'done';
     } else {
@@ -1555,6 +1555,28 @@ router.post('/transform', async (req, res) => {
         res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
       });
       return;
+    }
+
+    // CLEAN UP AUDIO — free narration/voice cleanup: de-rumble, denoise, normalize
+    // loudness. Great for phone-recorded narration (DBC) before it goes in a video.
+    if (op === 'cleanaudio') {
+      const AUDIO_CHAIN = 'highpass=f=90,afftdn=nf=-25,loudnorm=I=-16:TP=-1.5:LRA=11';
+      if (src.kind === 'audio') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.m4a');
+        const args = ['-i', srcPath, '-af', AUDIO_CHAIN, '-c:a', 'aac', '-b:a', '192k'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · cleaned`, { ...carry, transform: 'cleanaudio' }, 'audio');
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      if (src.kind === 'video') {
+        if (!(await probeHasAudio(srcPath))) return res.status(400).json({ error: 'That clip has no sound to clean up.' });
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, '-c:v', 'copy', '-af', AUDIO_CHAIN, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · cleaned`, { ...carry, transform: 'cleanaudio' });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Clean-up audio works on songs, narration, or video clips with sound.' });
     }
 
     return res.status(400).json({ error: 'Unknown transform.' });

@@ -218,6 +218,22 @@ function probeHasAudio(file) {
   });
 }
 
+// Read pixel dimensions the same stderr-parsing way (no ffprobe dependency).
+// Returns {w,h} or null. Grabs the first "<W>x<H>" that appears on a Video line.
+function probeDimensions(file) {
+  return new Promise((resolve) => {
+    let out = '';
+    const proc = spawn(ffmpegBin(), ['-i', file]);
+    proc.stderr.on('data', (c) => { out += c.toString(); });
+    proc.on('close', () => {
+      const line = (out.match(/Stream #\d+:\d+.*Video:.*/) || [null])[0];
+      const m = line && line.match(/(\d{2,5})x(\d{2,5})/);
+      resolve(m ? { w: Number(m[1]), h: Number(m[2]) } : null);
+    });
+    proc.on('error', () => resolve(null));
+  });
+}
+
 function ffmpegBin() {
   if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
   try {
@@ -1658,15 +1674,44 @@ router.post('/resound', async (req, res) => {
 const CROP_ASPECTS = { '9:16': 9 / 16, '1:1': 1, '4:5': 4 / 5, '16:9': 16 / 9 };
 
 router.post('/crop', (req, res) => {
-  const { assetId, aspect, keep } = req.body || {};
+  const { assetId, aspect, keep, zoom, corner } = req.body || {};
   const src = db.getAsset(req.userId, Number(assetId));
   if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to crop.' });
-  const R = CROP_ASPECTS[aspect];
-  if (!R) return res.status(400).json({ error: `aspect must be one of ${Object.keys(CROP_ASPECTS).join(', ')}` });
-  const f = keep === 'start' ? 0 : keep === 'end' ? 1 : 0.5;
+
+  // Two modes:
+  //  (a) aspect crop  — cut to a target shape (9:16, 1:1, ...), keeping start/center/end.
+  //  (b) zoom crop    — keep the SAME shape, zoom in by a % and push toward a corner so
+  //                     whatever sits in the opposite corner (e.g. a corner watermark /
+  //                     sparkle) falls outside the frame. This is what removes a corner
+  //                     mark from an already-9:16 still without changing its shape.
+  const isZoom = zoom !== undefined && zoom !== null && zoom !== '';
+  let filter, tag, cropMeta;
+  if (isZoom) {
+    let z = Number(zoom);
+    if (!Number.isFinite(z)) return res.status(400).json({ error: 'zoom must be a number' });
+    z = Math.min(0.4, Math.max(0.04, z)); // clamp 4%–40%
+    const keepFrac = 1 - z;
+    // Which corner do we KEEP? To erase a mark in the bottom-right, keep the top-left,
+    // so the crop window hugs the opposite corner. corner = where the MARK is.
+    const c = ['tl', 'tr', 'bl', 'br'].includes(corner) ? corner : 'br';
+    const keepLeft = c === 'tr' || c === 'br';   // mark on the right → keep the left
+    const keepTop = c === 'bl' || c === 'br';    // mark on the bottom → keep the top
+    const fx = keepLeft ? 0 : 1;
+    const fy = keepTop ? 0 : 1;
+    filter = `crop=iw*${keepFrac}:ih*${keepFrac}:(iw-ow)*${fx}:(ih-oh)*${fy}`;
+    tag = `${src.label} · mark-free`;
+    cropMeta = { cornerCrop: c, zoom: z };
+  } else {
+    const R = CROP_ASPECTS[aspect];
+    if (!R) return res.status(400).json({ error: `aspect must be one of ${Object.keys(CROP_ASPECTS).join(', ')}` });
+    const f = keep === 'start' ? 0 : keep === 'end' ? 1 : 0.5;
+    filter = `crop=min(iw\\,ih*${R}):min(ih\\,iw/${R}):(iw-ow)*${f}:(ih-oh)*${f}`;
+    tag = `${src.label} · ${aspect} crop`;
+    cropMeta = { crop: aspect };
+  }
+
   const ext = path.extname(src.filename).toLowerCase() || '.png';
   const outFile = newFilename(req.userId, ext);
-  const filter = `crop=min(iw\\,ih*${R}):min(ih\\,iw/${R}):(iw-ow)*${f}:(ih-oh)*${f}`;
   const proc = spawn(ffmpegBin(), ['-y', '-i', mediaPath(src.filename), '-vf', filter, '-frames:v', '1', mediaPath(outFile)]);
   proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
   proc.on('close', (code) => {
@@ -1675,10 +1720,71 @@ router.post('/crop', (req, res) => {
     }
     let srcMeta = {};
     try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
-    const id = db.createAsset(req.userId, 'image', `${src.label} · ${aspect} crop`, outFile, src.character_id || null, {
+    const id = db.createAsset(req.userId, 'image', tag, outFile, src.character_id || null, {
       ...(srcMeta.source ? { source: srcMeta.source } : {}),
       ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
-      crop: aspect,
+      ...cropMeta,
+      fromAssetId: src.id,
+    });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
+/* ---------------- free local watermark remover (patch it out) ---------------- */
+// Removes a small corner mark (e.g. the Gemini sparkle) from the artist's OWN
+// image by interpolating the surrounding pixels over it — ffmpeg's `delogo`.
+// Pure ffmpeg, free, instant, keeps the FULL frame (nothing cropped). Intended
+// for cleaning a provider's decorative sparkle off your own generated art; it
+// cannot touch invisible watermarks (SynthID) and isn't for other people's work.
+const MARK_BOXES = {
+  // fractional x, y, w, h of the patch box, per corner. Insets from the edge so
+  // delogo always has a border of real pixels to sample from.
+  br: { x: 0.70, y: 0.78, w: 0.27, h: 0.19 },
+  bl: { x: 0.03, y: 0.78, w: 0.27, h: 0.19 },
+  tr: { x: 0.70, y: 0.03, w: 0.27, h: 0.19 },
+  tl: { x: 0.03, y: 0.03, w: 0.27, h: 0.19 },
+};
+const MARK_SIZES = { small: 0.7, medium: 1.0, large: 1.35 };
+router.post('/cleanmark', async (req, res) => {
+  const { assetId, corner, size } = req.body || {};
+  const src = db.getAsset(req.userId, Number(assetId));
+  if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to clean.' });
+  const c = MARK_BOXES[corner] ? corner : 'br';
+  const box = MARK_BOXES[c];
+  const k = MARK_SIZES[size] || 1.0;
+  // Scale the box around its own centre by k, then re-clamp inside a safe border.
+  const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+  let bw = box.w * k, bh = box.h * k;
+  let bx = cx - bw / 2, by = cy - bh / 2;
+  bx = Math.max(0.006, bx); by = Math.max(0.006, by);
+  bw = Math.min(bw, 0.988 - bx); bh = Math.min(bh, 0.988 - by);
+
+  // delogo needs constant integer pixels (it does NOT accept iw/ih expressions),
+  // so read the real dimensions first and compute an even, in-bounds box that
+  // always leaves a >=1px border of real pixels for delogo to interpolate from.
+  const dim = await probeDimensions(mediaPath(src.filename));
+  if (!dim) return res.status(500).json({ error: "Couldn't read that image's size — try a PNG or JPG." });
+  const { w: iw, h: ih } = dim;
+  let X = Math.max(1, Math.floor(iw * bx));
+  let Y = Math.max(1, Math.floor(ih * by));
+  let W = Math.min(iw - 2 - X, Math.floor(iw * bw));
+  let H = Math.min(ih - 2 - Y, Math.floor(ih * bh));
+  W = Math.max(8, W); H = Math.max(8, H);
+  const filter = `delogo=x=${X}:y=${Y}:w=${W}:h=${H}`;
+  const ext = path.extname(src.filename).toLowerCase() || '.png';
+  const outFile = newFilename(req.userId, ext);
+  const proc = spawn(ffmpegBin(), ['-y', '-i', mediaPath(src.filename), '-vf', filter, '-frames:v', '1', mediaPath(outFile)]);
+  proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
+  proc.on('close', (code) => {
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Clean-up failed — is that file really an image?' });
+    }
+    let srcMeta = {};
+    try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
+    const id = db.createAsset(req.userId, 'image', `${src.label} · mark-free`, outFile, src.character_id || null, {
+      ...(srcMeta.source ? { source: srcMeta.source } : {}),
+      ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
+      cleanMark: c,
       fromAssetId: src.id,
     });
     res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });

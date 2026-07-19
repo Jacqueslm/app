@@ -783,6 +783,16 @@ body.simple-only #view-simple{display:flex !important}
       <h3>💸 Recover paid clips <span class="usage" id="recover-open"></span></h3>
       <p class="usage">Every AI generation is now saved here the moment it's sent — so if a clip you paid for didn't land in your library (tab closed, page refreshed, long render), tap below and Studio pulls in anything fal already finished. This never costs anything.</p>
       <p class="usage" id="recover-total" style="margin:6px 0"></p>
+      <div style="background:var(--s1);border-radius:8px;padding:9px 11px;margin:6px 0">
+        <div style="font-weight:600;color:var(--tp);font-size:12.5px">🛑 Daily spend cap</div>
+        <p class="usage" id="cap-status" style="margin:3px 0 6px">Set a hard limit — Studio flat refuses to start any AI generation past it, so runaway spend is impossible.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:13px;color:var(--tm)">$</span>
+          <input class="input" id="cap-input" type="number" min="0" step="0.5" placeholder="0 = off" style="width:90px;padding:6px 8px;font-size:12px" autocomplete="off">
+          <span style="font-size:12px;color:var(--tm)">/ day</span>
+          <button class="btn2 quiet" id="cap-save" style="padding:6px 12px">Save cap</button>
+        </div>
+      </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="recover-go">🔁 Find my finished clips</button>
         <button class="btn2 quiet" id="recover-refresh">Refresh list</button>
@@ -2405,8 +2415,14 @@ $('#stor-open-folder').onclick = async () => {
 async function loadReceipts() {
   if (!document.getElementById('recover-card')) return;
   try {
-    const { receipts, open, totalSpent } = await jfetch('/api/studio/fal/receipts');
+    const { receipts, open, totalSpent, cap, spentToday } = await jfetch('/api/studio/fal/receipts');
     $('#recover-open').textContent = open ? `— ${open} may still be finishing` : '';
+    const capIn = document.getElementById('cap-input');
+    const capStat = document.getElementById('cap-status');
+    if (capIn && document.activeElement !== capIn) capIn.value = cap ? cap : '';
+    if (capStat) capStat.innerHTML = cap
+      ? `Cap: <b>$${Number(cap).toFixed(2)}/day</b> · spent today ~<b>$${Number(spentToday || 0).toFixed(2)}</b>. Studio refuses any generation that would go over. Set 0 to turn off.`
+      : 'Set a hard limit — Studio flat refuses to start any AI generation past it, so runaway spend is impossible.';
     const totEl = document.getElementById('recover-total');
     if (totEl) totEl.innerHTML = receipts.length
       ? `Estimated spent so far on AI: <b>~$${(totalSpent || 0).toFixed(2)}</b> across ${receipts.length} generation${receipts.length === 1 ? '' : 's'}. <span style="color:var(--tm)">Estimate from the verified button rates — your real fal.ai balance is the final word.</span>`
@@ -2423,6 +2439,16 @@ async function loadReceipts() {
       </div>`).join('');
   } catch (_) { /* not signed in */ }
 }
+$('#cap-save') && ($('#cap-save').onclick = async () => {
+  const b = $('#cap-save'); b.disabled = true;
+  try {
+    const cap = Math.max(0, Number($('#cap-input').value) || 0);
+    const r = await jfetch('/api/studio/settings/spendcap', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cap }) });
+    $('#recover-status').textContent = r.cap ? `✓ Daily cap set to $${Number(r.cap).toFixed(2)}. Studio will refuse any generation that goes over.` : '✓ Daily cap turned off.';
+    await loadReceipts();
+  } catch (e) { $('#recover-status').textContent = e.message; }
+  b.disabled = false;
+});
 $('#recover-refresh') && ($('#recover-refresh').onclick = loadReceipts);
 $('#recover-go') && ($('#recover-go').onclick = async () => {
   const b = $('#recover-go'); b.disabled = true; $('#recover-status').textContent = 'Checking fal for finished clips…';

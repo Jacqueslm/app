@@ -1345,6 +1345,7 @@ const st = {
   relationships: [],    // saved chemistry [{charA, charB, descriptor}]
   soundTarget: null,    // assetId with the sound-swap panel open
   chromaTarget: null,   // assetId (green-screen clip) with the background picker open
+  reframeTarget: null,  // assetId with the reframe (aspect) panel open
   busyScene: false,
   busyRender: false,
 };
@@ -2436,6 +2437,7 @@ function renderLibrary() {
     if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
     if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'));
     if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio')); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
+    if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,
@@ -2600,6 +2602,37 @@ function renderLibrary() {
           });
           if (job) await pollJob(job.id, () => {});
           st.chromaTarget = null;
+          await loadAssets();
+        } catch (err) { setErr('#scenes-err', err.message); btnEl.disabled = false; btnEl.textContent = old; }
+      };
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.reframeTarget === a.id) {
+      // Free reframe to a Short / Square / Wide, subject-fill or blurred-bars.
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      let rfTarget = '9:16', rfMode = 'fill';
+      panel.innerHTML = `
+        <div class="chips rf-target">
+          <button class="chip on" data-t="9:16">📱 Short 9:16</button>
+          <button class="chip" data-t="1:1">⬛ Square 1:1</button>
+          <button class="chip" data-t="16:9">🖥 Wide 16:9</button>
+        </div>
+        <div class="chips rf-mode">
+          <button class="chip on" data-m="fill">Fill (crop to subject)</button>
+          <button class="chip" data-m="blur">Blurred bars (keep all)</button>
+        </div>
+        <button class="btn2 quiet rf-go">📱 Reframe · free</button>
+        <span class="usage">Makes a new copy sized for the platform. <b>Fill</b> crops in on the centre; <b>Blurred bars</b> keeps the whole shot with a soft zoom behind it.</span>`;
+      panel.querySelectorAll('.rf-target .chip').forEach((c) => c.onclick = () => { panel.querySelectorAll('.rf-target .chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); rfTarget = c.dataset.t; });
+      panel.querySelectorAll('.rf-mode .chip').forEach((c) => c.onclick = () => { panel.querySelectorAll('.rf-mode .chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); rfMode = c.dataset.m; });
+      panel.querySelector('.rf-go').onclick = async (e) => {
+        setErr('#scenes-err', null);
+        const btnEl = e.target; btnEl.disabled = true; const old = btnEl.textContent; btnEl.textContent = 'Working…';
+        try {
+          const r = await jfetch('/api/studio/transform', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id, op: 'reframe', target: rfTarget, mode: rfMode }) });
+          if (r.job) await pollJob(r.job.id, () => {});
+          st.reframeTarget = null;
           await loadAssets();
         } catch (err) { setErr('#scenes-err', err.message); btnEl.disabled = false; btnEl.textContent = old; }
       };

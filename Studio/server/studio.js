@@ -1678,6 +1678,40 @@ router.post('/transform', async (req, res) => {
       return res.status(400).json({ error: 'Clean-up audio works on songs, narration, or video clips with sound.' });
     }
 
+    // REFRAME — turn any clip/photo into a vertical Short (9:16), Square (1:1),
+    // or Wide (16:9). 'fill' crops to fill the frame (subject-centered); 'blur'
+    // fits the whole shot with a blurred zoom behind it (nothing cropped). Free.
+    if (op === 'reframe') {
+      const DIMS = { '9:16': [1080, 1920], '1:1': [1080, 1080], '16:9': [1920, 1080] };
+      const target = DIMS[req.body.target] ? req.body.target : '9:16';
+      const [W, H] = DIMS[target];
+      const mode = req.body.mode === 'blur' ? 'blur' : 'fill';
+      const fill = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1`;
+      const blur = `[0:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},gblur=sigma=20,setsar=1[bg];[0:v]scale=${W}:${H}:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1`;
+      const vArgs = mode === 'blur' ? ['-filter_complex', blur] : ['-vf', fill];
+      const tag = `${src.label} · ${target}`;
+      if (src.kind === 'image') {
+        const outFile = newFilename(req.userId, '.jpg');
+        const proc = spawn(ffmpegBin(), ['-y', '-i', srcPath, ...vArgs, '-frames:v', '1', '-q:v', '3', mediaPath(outFile)]);
+        proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+        proc.on('close', (code) => {
+          if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Reframe failed.' });
+          const id = db.createAsset(req.userId, 'image', tag, outFile, src.character_id || null, { ...carry, transform: 'reframe', reframe: target });
+          res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+        });
+        return;
+      }
+      if (src.kind === 'video') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const hasAudio = await probeHasAudio(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, ...vArgs, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, tag, { ...carry, transform: 'reframe', reframe: target });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Reframe works on photos and clips.' });
+    }
+
     return res.status(400).json({ error: 'Unknown transform.' });
   } catch (err) {
     if (!res.headersSent) res.status(500).json({ error: `Transform failed: ${err.message}` });

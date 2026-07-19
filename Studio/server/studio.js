@@ -21,8 +21,9 @@ const ENV_PATH = path.join(__dirname, '.env');
 
 // Optional: the same Anthropic key that powers Nova chat (server.js) sharpens
 // storyboard prompts. Neither this feature nor Nova requires the other.
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+let ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY; // mutable: settable from the app
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
+const ANTHROPIC_BASE = process.env.ANTHROPIC_BASE || 'https://api.anthropic.com'; // overridable for tests
 
 // Persist (or remove) a key in server/.env so it survives restarts, keeping
 // every other line (PORT, SESSION_SECRET, ...) untouched.
@@ -495,6 +496,7 @@ router.get('/config', (req, res) => {
   res.json({
     falAvailable: Boolean(FAL_KEY),
     stockAvailable: Boolean(PEXELS_KEY),
+    chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
     videosUsed: db.getVideoCount(req.userId, todayUTC()),
@@ -575,6 +577,84 @@ router.post('/settings/pexelskey', (req, res) => {
     res.json({ stockAvailable: Boolean(PEXELS_KEY) });
   } catch (err) {
     res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+router.post('/settings/anthropickey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 15 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like an Anthropic key. It starts with sk-ant-." });
+  }
+  try {
+    persistEnvKey('ANTHROPIC_API_KEY', clean || null);
+    ANTHROPIC_API_KEY = clean || undefined;
+    res.json({ chatAvailable: Boolean(ANTHROPIC_API_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+/* ---------------- talk to your crew (per-role AI advisors) ---------------- */
+// Each crew member is a focused persona. They give short, concrete, encouraging
+// advice grounded in Studio's actual tools and the artist's own characters.
+const CREW = {
+  creative: { name: 'Creative Director', emoji: '🎨', role:
+    'the CREATIVE DIRECTOR. You own the big vision: the concept, mood, emotional arc, and what makes a video unforgettable and unmistakably THIS artist. You think in story and feeling, not shot lists. You protect the artist\'s brand and their recurring characters\' identity across every video. You push for one strong idea over ten scattered ones.' },
+  director: { name: 'Director', emoji: '🎬', role:
+    'the DIRECTOR. You turn the vision into shots: camera moves, framing, pacing, coverage, how scenes cut to the beat. You give specific, practical shot direction and keep the video flowing.' },
+  casting: { name: 'Casting Director', emoji: '🎭', role:
+    'the CASTING DIRECTOR. You decide which character appears in which scene, protect their likeness and face-lock consistency, and think about wardrobe and who carries each moment.' },
+  designer: { name: 'Production Designer', emoji: '🖌', role:
+    'the PRODUCTION DESIGNER. You own the look: color grade, lighting mood, locations, and keeping one consistent world across the whole video.' },
+  qc: { name: 'QC Supervisor', emoji: '🔍', role:
+    'the QC SUPERVISOR. You catch problems before they cost a render: off-model faces, wrong hands/fingers, wrong tattoos, continuity slips, and technical issues. You are picky but constructive.' },
+  producer: { name: 'Producer', emoji: '💼', role:
+    'the PRODUCER. You watch the money and the clock: what is worth spending AI credits on vs doing free, how to hit a deadline, and how to get the most video for the least spend. You always suggest the free/cheap path first.' },
+};
+
+router.post('/crew-chat', async (req, res) => {
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'Add an Anthropic key in Settings to chat with your crew.' });
+  const { member, message, history, context } = req.body || {};
+  const who = CREW[member];
+  if (!who) return res.status(400).json({ error: 'Pick a crew member to talk to.' });
+  const msg = typeof message === 'string' ? message.trim().slice(0, 2000) : '';
+  if (!msg) return res.status(400).json({ error: 'Type a message first.' });
+
+  const ctx = context && typeof context === 'object' ? context : {};
+  const projectBits = [
+    ctx.characters ? `The artist's recurring characters: ${String(ctx.characters).slice(0, 300)}.` : null,
+    ctx.song ? `Current song: ${String(ctx.song).slice(0, 120)}.` : null,
+    ctx.brief ? `Current creative brief: ${String(ctx.brief).slice(0, 300)}.` : null,
+  ].filter(Boolean).join(' ');
+
+  const system = `You are ${who.role}
+You work inside "Studio", a personal music-video app the artist runs on their own computer. It can: generate AI scene images, animate stills, lip-sync (Sing), dance/motion transfer, train face-locks (LoRA) for recurring characters, reframe to 9:16/1:1, master audio, add captions, and assemble beat-matched videos — most editing is free, only AI generation costs money (shown before each action).
+${projectBits ? 'Project context: ' + projectBits : ''}
+Style: talk like a real, warm creative collaborator on this artist's team. Be specific and practical, reference Studio's tools when relevant, and keep replies short — 2 to 5 sentences or a tight list. No preamble, no restating the question. Never invent prices; if asked about cost, say the button shows it. Stay in your role.`;
+
+  const msgs = [];
+  if (Array.isArray(history)) {
+    for (const h of history.slice(-8)) {
+      if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string') {
+        msgs.push({ role: h.role, content: h.content.slice(0, 2000) });
+      }
+    }
+  }
+  msgs.push({ role: 'user', content: msg });
+
+  try {
+    const r = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 700, system, messages: msgs }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error((data && data.error && data.error.message) || 'Chat request failed.');
+    const reply = (data.content || []).map((b) => b.text || '').join('').trim();
+    res.json({ reply: reply || '(no reply)', member });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach your ${who.name}: ${err.message}` });
   }
 });
 
@@ -2477,7 +2557,7 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
     `Lyrics:\n${lyrics}`,
   ].filter(Boolean).join('\n');
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

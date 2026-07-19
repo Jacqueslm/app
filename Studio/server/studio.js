@@ -453,6 +453,19 @@ async function refreshFalJob(job) {
       return;
     }
 
+    if (job.fal.expect === 'audio') {
+      // Voice clone (F5-TTS) returns a generated speech clip. File it as audio;
+      // it's cheap and not gated by the image/video caps.
+      const url = (result.audio_url && result.audio_url.url) || (result.audio && result.audio.url);
+      if (!url) throw new Error('The voice model finished but returned no audio.');
+      const filename = await downloadToMedia(job.userId, url, '.wav');
+      const meta = { ...(job.fal.meta || {}), source: 'voice', duration: await probeMediaDuration(mediaPath(filename)) };
+      job.assetId = db.createAsset(job.userId, 'audio', job.fal.label, filename, null, meta);
+      job.progress = 100;
+      job.status = 'done';
+      return;
+    }
+
     const media = job.fal.expect === 'video'
       ? (result.video && result.video.url)
       : (result.images && result.images[0] && result.images[0].url);
@@ -520,6 +533,7 @@ router.get('/config', (req, res) => {
       transcribe: TRANSCRIBE_RATE,
       dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
       qc: QC_RATE,
+      voicePer1k: VOICE_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -2384,6 +2398,11 @@ router.post('/import-song', async (req, res) => {
 
 /* ---------------- auto-captions: transcribe a song with word timings ---------------- */
 const MODEL_TRANSCRIBE = process.env.FAL_MODEL_TRANSCRIBE || 'fal-ai/wizper';
+// Voice clone: F5-TTS is zero-shot (no training) — pass a reference clip + text.
+// fal charges ~$0.05 / 1,000 characters (~1 minute of speech).
+const MODEL_VOICE = process.env.FAL_MODEL_VOICE || 'fal-ai/f5-tts';
+const VOICE_RATE = Number(process.env.STUDIO_RATE_VOICE || 0.05); // per 1,000 characters
+const VOICE_MAX_CHARS = 2000;
 // Whisper (wizper) bills ~$0.10 per minute of audio, so a full 3-4 min song is
 // ~$0.30-0.40, NOT 2c. Flat estimate raised to a realistic per-song figure so
 // the confirm dialog stops under-quoting. Override via STUDIO_RATE_TRANSCRIBE.
@@ -2415,6 +2434,45 @@ router.post('/transcribe', async (req, res) => {
         responseUrl: submitted.response_url,
         expect: 'transcript',
         label: `Transcribe: ${song.label}`,
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/* ---------------- voice clone: narrate in a character's voice (F5-TTS) ---------------- */
+router.post('/voice-clone', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const ref = db.getAsset(req.userId, Number(req.body?.refAssetId));
+  if (!ref || ref.kind !== 'audio') return res.status(404).json({ error: 'Pick a reference voice clip (an audio file — e.g. a vocal stem) first.' });
+  const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
+  if (!text) return res.status(400).json({ error: 'Type the words you want spoken.' });
+  if (text.length > VOICE_MAX_CHARS) return res.status(400).json({ error: `Keep it under ${VOICE_MAX_CHARS} characters per take (about ${Math.round(VOICE_MAX_CHARS / 1000)} minutes). Split longer narration into a few takes.` });
+  try {
+    const buf = fs.readFileSync(mediaPath(ref.filename));
+    let refUrl;
+    try {
+      refUrl = await falUploadFile(buf, path.basename(ref.filename), 'audio/mpeg');
+    } catch (_) {
+      if (buf.length > 9_000_000) throw new Error('could not upload the reference clip to fal and it is too large to send inline — trim it to ~20 seconds first');
+      refUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
+    }
+    const submitted = await falSubmit(MODEL_VOICE, {
+      gen_text: text,
+      ref_audio_url: refUrl,
+      model_type: 'F5-TTS',
+      remove_silence: true,
+    });
+    const job = createJob(req.userId, 'voice', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'audio',
+        label: `${ref.label} says: ${text.slice(0, 40)}${text.length > 40 ? '…' : ''}`,
       },
     });
     res.status(202).json({ job: jobJson(job) });

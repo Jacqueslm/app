@@ -2747,27 +2747,31 @@ function renderLibrary() {
       + `<div class="li-meta"><p title="${a.meta?.qc ? escapeHtml(a.meta.qc.note || '') : ''}">${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}${a.meta?.qc ? (a.meta.qc.verdict === 'flag' ? ' <span style="color:#e6a23c">⚠ QC</span>' : ' <span style="color:var(--green)">✅ QC</span>') : ''}</p><div class="li-actions"></div></div>`;
     el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
     const actions = el.querySelector('.li-actions');
-    const btn = (label, cls, fn) => {
+    actions.style.cssText = 'display:flex;flex-direction:column;gap:6px;align-items:stretch';
+    // Bundle the tools into labeled groups so it's not a scattered wall of buttons.
+    const groupEls = {};
+    [['make', '✨ Create'], ['motion', '🎬 Motion & edit'], ['finish', '✨ Finish'], ['use', '📥 Use']].forEach(([key, label]) => {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:none;flex-direction:column;gap:3px';
+      const lbl = document.createElement('div');
+      lbl.textContent = label;
+      lbl.style.cssText = 'font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--tm);font-weight:800';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px';
+      wrap.appendChild(lbl); wrap.appendChild(row); actions.appendChild(wrap);
+      groupEls[key] = { wrap, row };
+    });
+    const btn = (label, cls, fn, group) => {
       const b = document.createElement('button');
       b.textContent = label; if (cls) b.className = cls; b.onclick = fn;
-      actions.appendChild(b); return b;
+      const g = groupEls[group] || groupEls.use;
+      g.row.appendChild(b); g.wrap.style.display = 'flex';
+      return b;
     };
-    if (a.kind === 'image' && st.cfg?.falAvailable) btn('Animate', 'primary', () => { st.animTarget = st.animTarget === a.id ? null : a.id; st.singTarget = null; renderLibrary(); });
-    if (st.cfg?.falAvailable) btn('Sing', '', () => { st.singTarget = st.singTarget === a.id ? null : a.id; st.animTarget = null; renderLibrary(); });
-    if (a.kind === 'image') btn('Motion', 'primary', () => {
-      $('#kb-image').value = String(a.id);
-      kbSelectImage();
-      document.querySelector('#mtabs button[data-view="seq"]').click();
-    });
-    if (a.kind === 'image') btn('2×', '', async (e) => {
-      const b = e.target; b.disabled = true; b.textContent = '…';
-      try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
-      catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '2×'; }
-    });
-    if (a.kind === 'video' && st.cfg?.falAvailable) { const cb = btn('▶ Continue', 'primary', () => continueClip(a.id)); cb.title = 'Extend this shot — animates forward from its last frame so the motion keeps going (not a loop).'; }
-    if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
-    if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
-    if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🎥 Shots', '', () => { st.coverageTarget = st.coverageTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.cropTarget = null; renderLibrary(); });
+    if (a.kind === 'image' && st.cfg?.falAvailable) btn('Animate', 'primary', () => { st.animTarget = st.animTarget === a.id ? null : a.id; st.singTarget = null; renderLibrary(); }, 'make');
+    if (st.cfg?.falAvailable) btn('Sing', '', () => { st.singTarget = st.singTarget === a.id ? null : a.id; st.animTarget = null; renderLibrary(); }, 'make');
+    if (a.kind === 'video' && st.cfg?.falAvailable) { const cb = btn('▶ Continue', 'primary', () => continueClip(a.id), 'make'); cb.title = 'Extend this shot — animates forward from its last frame so the motion keeps going (not a loop).'; }
+    if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🎥 Shots', '', () => { st.coverageTarget = st.coverageTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.cropTarget = null; renderLibrary(); }, 'make');
     if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🔍 QC', '', async (e) => {
       // AI inspector: faces, fingers, limbs, structure (~half a cent)
       const b = e.target; b.disabled = true; b.textContent = '…';
@@ -2779,31 +2783,43 @@ function renderLibrary() {
         await pollJob(job.id, () => {});
         await loadAssets();
       } catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '🔍 QC'; }
-    });
-    if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
-    if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.chromaTarget = null; renderLibrary(); });
-    if (a.kind === 'video') btn('🟢 Green screen', '', () => { st.chromaTarget = st.chromaTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); });
-    // free ffmpeg transforms (no AI cost) — reuse what you already have
-    if (a.kind !== 'audio') btn('Mirror', '', (e) => freeTransform(a.id, 'mirror', e.target, 'Mirror'));
-    if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
-    if (a.kind === 'video') { const mbb = btn('💫 Motion blur', '', (e) => freeTransform(a.id, 'motionblur', e.target, '💫 Motion blur')); mbb.title = 'FREE — silky motion blur on fast movement (blends frames); softens jumpy cuts too.'; }
-    if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'));
-    if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio')); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
-    if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release')); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
-    if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video')); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
-    if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
-    btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
+    }, 'make');
+    // Motion & edit (free)
+    if (a.kind === 'image') btn('Motion', 'primary', () => {
+      $('#kb-image').value = String(a.id);
+      kbSelectImage();
+      document.querySelector('#mtabs button[data-view="seq"]').click();
+    }, 'motion');
+    if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); }, 'motion');
+    if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'), 'motion');
+    if (a.kind === 'video') { const mbb = btn('💫 Motion blur', '', (e) => freeTransform(a.id, 'motionblur', e.target, '💫 Motion blur'), 'motion'); mbb.title = 'FREE — silky motion blur on fast movement (blends frames); softens jumpy cuts too.'; }
+    if (a.kind !== 'audio') btn('Mirror', '', (e) => freeTransform(a.id, 'mirror', e.target, 'Mirror'), 'motion');
+    if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'), 'motion');
+    if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); }, 'motion');
+    if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); }, 'motion');
+    if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.chromaTarget = null; renderLibrary(); }, 'motion');
+    if (a.kind === 'video') btn('🟢 Green screen', '', () => { st.chromaTarget = st.chromaTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion');
+    if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion'); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
+    // Finish (polish / quality / audio, free)
+    if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
+    if (a.kind === 'image') btn('2× sharper', '', async (e) => {
+      const b = e.target; b.disabled = true; b.textContent = '…';
+      try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
+      catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '2× sharper'; }
+    }, 'finish');
+    if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio'), 'finish'); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
+    if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release'), 'finish'); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
+    // Use
+    btn('+ Add to video', a.kind === 'video' ? 'primary' : '', () => addToSeq(a), 'use');
     btn('Save', '', () => {
-      // The label is prompt text — sanitize it and keep the real file extension,
-      // otherwise Windows saves an extensionless file it can't open.
       const ext = (a.url.match(/\.[a-z0-9]{2,4}$/i) || [a.kind === 'video' ? '.mp4' : '.png'])[0];
       const l = document.createElement('a'); l.href = a.url; l.download = slug(a.label) + ext; l.click();
-    });
+    }, 'use');
     btn('✕', '', async () => {
       if (!confirm(`Delete "${a.label}" from your library?`)) return;
       try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); }
       catch (e) { setErr('#scenes-err', e.message); }
-    });
+    }, 'use');
     if (st.animTarget === a.id) {
       const pricing = st.cfg?.pricing;
       const tierKeys = pricing ? Object.keys(pricing.tiers) : ['standard'];

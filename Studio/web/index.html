@@ -436,6 +436,9 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <p class="usage" id="crew-brief-tip" style="margin:2px 0 0"></p>
 
+      <div id="crew-presets" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 2px"></div>
+      <p class="usage" style="margin:0">One-click setups: tap a face-locked character to make them the star, or save this brief as a reusable setup. Your last brief is remembered automatically.</p>
+
       <div class="trim" style="font-size:12px">
         <span>Producer's budget: $</span><input type="number" id="crew-budget" min="0" step="0.5" value="2" style="width:64px">
         <span class="usage">max AI spend for gap scenes</span>
@@ -1866,7 +1869,9 @@ function renderSceneCharSelect() {
   if (starSel) {
     starSel.innerHTML = '<option value="">Whoever the lyrics name</option>' +
       st.characters.map((c) => `<option value="${c.id}">⭐ ${escapeHtml(c.name)}${c.loraUrl ? ' (face lock)' : ''}</option>`).join('');
-    if ([...starSel.options].some((o) => o.value === crew.brief.star)) starSel.value = crew.brief.star; else crew.brief.star = '';
+    // keep the remembered star even if their character hasn't loaded yet — it
+    // re-binds once they do; only the visible select stays blank meanwhile
+    if ([...starSel.options].some((o) => o.value === crew.brief.star)) starSel.value = crew.brief.star;
   }
   const worldSel = $('#crew-world');
   if (worldSel) {
@@ -1874,6 +1879,10 @@ function renderSceneCharSelect() {
       (st.locations || []).map((l) => `<option value="${l.id}">📍 ${escapeHtml(l.name)}</option>`).join('');
     if ([...worldSel.options].some((o) => o.value === crew.brief.world)) worldSel.value = crew.brief.world; else crew.brief.world = '';
   }
+  // restore the remembered brief once (after the star/where options exist), then
+  // refresh the one-click character/setup chips
+  if (!crew._restored && typeof restoreBrief === 'function') { crew._restored = true; restoreBrief(); }
+  if (typeof renderCrewPresets === 'function') renderCrewPresets();
 }
 function updateScenesUsage() {
   if (!st.cfg) return;
@@ -3617,10 +3626,65 @@ function updateBriefTip() {
   if (world) tips.push(`📍 Every generated scene is set in ${escapeHtml(world.name)}, so the video shares one world.`);
   $('#crew-brief-tip').innerHTML = tips.length ? tips.map((t) => `<span style="display:block">${t}</span>`).join('') : '';
 }
-$('#crew-vibe').onchange = () => { crew.brief.vibe = $('#crew-vibe').value; updateBriefTip(); };
-$('#crew-energy').onchange = () => { crew.brief.energy = $('#crew-energy').value; updateBriefTip(); };
-$('#crew-star').onchange = () => { crew.brief.star = $('#crew-star').value; updateBriefTip(); };
-$('#crew-world').onchange = () => { crew.brief.world = $('#crew-world').value; updateBriefTip(); };
+$('#crew-vibe').onchange = () => { crew.brief.vibe = $('#crew-vibe').value; updateBriefTip(); rememberBrief(); renderCrewPresets(); };
+$('#crew-energy').onchange = () => { crew.brief.energy = $('#crew-energy').value; updateBriefTip(); rememberBrief(); };
+$('#crew-star').onchange = () => { crew.brief.star = $('#crew-star').value; updateBriefTip(); rememberBrief(); renderCrewPresets(); };
+$('#crew-world').onchange = () => { crew.brief.world = $('#crew-world').value; updateBriefTip(); rememberBrief(); };
+
+// --- Habit memory + one-click setups ---
+// The whole brief is remembered between sessions, saved setups are reusable in
+// one tap, and every face-locked character gets a "make them the star" shortcut.
+function rememberBrief() { try { localStorage.setItem('tsid-crew-brief', JSON.stringify(crew.brief)); } catch (e) {} }
+function syncBriefSelects() {
+  const map = { vibe: '#crew-vibe', energy: '#crew-energy', star: '#crew-star', world: '#crew-world' };
+  for (const k in map) { const el = $(map[k]); if (el && [...el.options].some((o) => o.value === (crew.brief[k] || ''))) el.value = crew.brief[k] || ''; }
+}
+function applyBrief(b) {
+  crew.brief = { vibe: b.vibe || '', energy: b.energy || 'medium', star: b.star || '', world: b.world || '' };
+  syncBriefSelects(); updateBriefTip(); rememberBrief(); renderCrewPresets();
+}
+function restoreBrief() {
+  try { const saved = JSON.parse(localStorage.getItem('tsid-crew-brief') || 'null'); if (saved && typeof saved === 'object') crew.brief = { vibe: '', energy: 'medium', star: '', world: '', ...saved }; } catch (e) {}
+  syncBriefSelects(); updateBriefTip();
+}
+function getCrewSetups() { try { return JSON.parse(localStorage.getItem('tsid-crew-setups') || '[]'); } catch (e) { return []; } }
+function setCrewSetups(list) { try { localStorage.setItem('tsid-crew-setups', JSON.stringify(list)); } catch (e) {} }
+function renderCrewPresets() {
+  const box = $('#crew-presets'); if (!box) return;
+  box.innerHTML = '';
+  const chip = (label, title, onClick, onX) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.textContent = label; if (title) b.title = title;
+    b.onclick = onClick;
+    if (onX) { const x = document.createElement('span'); x.textContent = ' ✕'; x.style.cssText = 'opacity:.6;margin-left:2px'; x.onclick = (e) => { e.stopPropagation(); onX(); }; b.appendChild(x); }
+    box.appendChild(b);
+  };
+  // one-click: make each face-locked character the star (their look/pacing stay as set)
+  (st.characters || []).filter((c) => c.loraUrl).forEach((c) => {
+    const isStar = String(c.id) === String(crew.brief.star);
+    chip(`${isStar ? '⭐ ' : '🎬 '}${c.name}`, `Make ${c.name} the star of every generated scene`, () => applyBrief({ ...crew.brief, star: isStar ? '' : String(c.id) }));
+  });
+  // saved setups
+  getCrewSetups().forEach((p, i) => {
+    chip(`💾 ${p.name}`, 'Apply this saved setup', () => applyBrief(p.brief), () => {
+      if (!confirm(`Delete saved setup "${p.name}"?`)) return;
+      const list = getCrewSetups(); list.splice(i, 1); setCrewSetups(list); renderCrewPresets();
+    });
+  });
+  // save current
+  const save = document.createElement('button');
+  save.className = 'chip'; save.type = 'button'; save.textContent = '＋ Save setup';
+  save.title = 'Save the current vibe / energy / star / place as a reusable setup';
+  save.style.cssText = 'border-style:dashed';
+  save.onclick = () => {
+    const name = (prompt('Name this setup (e.g. "DBC hype", "SBGQ dreamy"):') || '').trim();
+    if (!name) return;
+    const list = getCrewSetups().filter((p) => p.name.toLowerCase() !== name.toLowerCase());
+    list.push({ name, brief: { ...crew.brief } });
+    setCrewSetups(list); renderCrewPresets();
+  };
+  box.appendChild(save);
+}
 
 $('#crew-direct').onclick = async () => {
   setErr('#seq-err', null);

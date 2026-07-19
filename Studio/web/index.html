@@ -720,6 +720,10 @@ body.simple-only #view-simple{display:flex !important}
     <div class="card">
       <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
       <div class="row">
+        <label class="lbl">📱 Quick templates <span style="text-transform:none;font-weight:400">— one tap sets the length, captions &amp; loop, then builds</span></label>
+        <div class="chips" id="sh-templates"></div>
+      </div>
+      <div class="row">
         <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
         <div class="chips" id="hl-chips"></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -5365,6 +5369,42 @@ $('#hl-auto').onclick = async () => {
     $('#hl-auto').textContent = 'Auto-detect from music';
   }
 };
+
+// One-tap Short/Reel templates: each sets the length, caption style and loop,
+// then builds the shorts list — so making a platform-ready cut is a single tap.
+const SHORT_TEMPLATES = {
+  tiktok:    { label: '🎯 TikTok Hook',  lens: [15], caption: 'pop',     loop: true,  note: '15s, yellow-pop captions, opens on the hook, seamless loop' },
+  reel:      { label: '📸 IG Reel',      lens: [30], caption: 'outline', loop: false, note: '30s, bold-outline captions — the Instagram sweet spot' },
+  teaser:    { label: '⚡ Teaser',        lens: [15], caption: 'boxed',   loop: true,  note: '15s punchy teaser, boxed captions, loops' },
+  lyric:     { label: '🎤 Lyric Drop',   lens: [15], caption: 'pop',     loop: true,  note: '15s built around a lyric line, big yellow captions' },
+  chorus:    { label: '🔁 Full Chorus',  lens: [30], caption: 'outline', loop: true,  note: '30s on the chorus, loops clean for replays' },
+  cinematic: { label: '🎬 Cinematic',    lens: [60], caption: 'classic', loop: false, note: '60s cinematic cut, clean classic captions' },
+  triple:    { label: '📦 All 3 sizes',  lens: [15, 30, 60], caption: 'outline', loop: true, note: 'Builds 15s + 30s + 60s at once from every highlight' },
+};
+function renderShortTemplates() {
+  const box = document.getElementById('sh-templates');
+  if (!box) return;
+  box.innerHTML = '';
+  Object.entries(SHORT_TEMPLATES).forEach(([key, t]) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = t.label; b.title = t.note;
+    b.onclick = () => applyShortTemplate(key);
+    box.appendChild(b);
+  });
+}
+function applyShortTemplate(key) {
+  const t = SHORT_TEMPLATES[key];
+  if (!t) return;
+  if (!timelineTotal()) { setErr('#seq-err', 'Build your timeline (and render) first — shorts are cut from your finished video.'); return; }
+  document.querySelectorAll('.sh-len').forEach((el) => { el.checked = t.lens.includes(Number(el.value)); });
+  localStorage.setItem('tsid-caption-style', t.caption);
+  if (typeof renderCaptionStyles === 'function') renderCaptionStyles();
+  if (typeof renderCaptionPreview === 'function') renderCaptionPreview();
+  const loopBox = document.getElementById('sh-loop-default'); if (loopBox) loopBox.checked = t.loop;
+  document.querySelectorAll('#sh-templates .chip').forEach((c) => c.classList.toggle('on', c.textContent === t.label));
+  $('#sh-build').onclick(); // build the shorts list with these settings
+}
+renderShortTemplates();
 
 $('#sh-build').onclick = () => {
   setErr('#seq-err', null);

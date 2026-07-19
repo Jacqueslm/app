@@ -495,6 +495,19 @@ body.simple-only #view-simple{display:flex !important}
         <p class="usage" id="crew-chat-note" style="margin:4px 0 0"></p>
       </div>
     </div>
+    <div class="card" id="voice-card">
+      <h3>🎙 Voice — narrate in your character's voice <span class="usage">— clone from a vocal clip</span></h3>
+      <div id="voice-off" style="display:none"><p class="usage">Turn on AI (paste your fal.ai key above) to use voice.</p></div>
+      <div id="voice-on" style="display:none">
+        <p class="usage" style="margin:0 0 4px">1. Pick a <b>reference voice</b> — an audio clip of the character (e.g. a vocal stem you pulled from Suno). 2. Type the line. 3. Generate. The price shows before you spend.</p>
+        <select class="input" id="voice-ref" style="margin-bottom:6px"></select>
+        <textarea id="voice-text" placeholder="Type what they should say… e.g. This is the story of Saving Queens." style="min-height:70px"></textarea>
+        <button class="gen-btn" id="voice-go" style="margin-top:6px">🎙 Speak in their voice</button>
+        <div class="progress-line" id="voice-prog"><div></div></div>
+        <p class="usage" id="voice-note" style="margin:4px 0 0"></p>
+        <audio id="voice-audio" controls style="width:100%;margin-top:6px;display:none"></audio>
+      </div>
+    </div>
     <div class="card" id="pipe-card">
       <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
@@ -1601,6 +1614,7 @@ async function bootStudio() {
   }
   renderStockCard();
   renderCrewRoom();
+  renderVoiceCard();
   loadStorage();
   loadDiagnostics();
   loadFans();
@@ -1610,7 +1624,7 @@ async function bootStudio() {
 
 async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
-  renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen();
+  renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
 }
 
 /* ---------------- My Media: the visual first page (pictures / clips / songs) ---------------- */
@@ -2234,6 +2248,58 @@ if (document.getElementById('crewchat-key-save')) $('#crewchat-key-save').onclic
     renderCrewRoom();
   } catch (e) { $('#crew-chat-setup').querySelector('.usage').textContent = e.message; }
   b.disabled = false;
+};
+
+/* ---------------- Voice: narrate in a character's voice (F5-TTS on fal) ---------------- */
+function voicePrice() {
+  const rate = st.cfg?.pricing?.voicePer1k;
+  const n = ($('#voice-text')?.value || '').length;
+  if (!rate || !n) return null;
+  return Math.max(0.001, (n / 1000) * rate);
+}
+function updateVoicePrice() {
+  const b = $('#voice-go'); if (!b) return;
+  const p = voicePrice();
+  b.textContent = p ? `🎙 Speak in their voice · ~$${p.toFixed(p < 0.1 ? 3 : 2)}` : '🎙 Speak in their voice';
+}
+function renderVoiceCard() {
+  if (!document.getElementById('voice-card')) return;
+  const on = !!st.cfg?.falAvailable;
+  $('#voice-off').style.display = on ? 'none' : 'block';
+  $('#voice-on').style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const sel = $('#voice-ref');
+  const cur = sel.value;
+  const songs = st.assets.filter((a) => a.kind === 'audio');
+  sel.innerHTML = songs.length
+    ? songs.map((a) => `<option value="${a.id}">🎤 ${escapeHtml(a.label)}</option>`).join('')
+    : '<option value="">Upload a voice clip first (My Media → Upload a song)</option>';
+  if (songs.some((a) => String(a.id) === cur)) sel.value = cur;
+  updateVoicePrice();
+}
+if (document.getElementById('voice-text')) $('#voice-text').addEventListener('input', updateVoicePrice);
+if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
+  const refId = Number($('#voice-ref').value);
+  const text = $('#voice-text').value.trim();
+  const note = $('#voice-note');
+  if (!refId) { note.textContent = 'Pick a reference voice clip first.'; return; }
+  if (!text) { note.textContent = 'Type the words you want spoken.'; return; }
+  const p = voicePrice();
+  if (!confirm(`Generate this line in that voice?\n\nUses AI on your fal key (~$${(p || 0.01).toFixed(3)}).`)) return;
+  const b = $('#voice-go'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Speaking…';
+  note.textContent = ''; $('#voice-audio').style.display = 'none'; setProg('#voice-prog', 3);
+  try {
+    const { job } = await jfetch('/api/studio/voice-clone', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refAssetId: refId, text }),
+    });
+    const done = await pollJob(job.id, (j) => setProg('#voice-prog', j.progress || 20));
+    await loadAssets();
+    setProg('#voice-prog', 100);
+    const made = done && done.assetId && st.assets.find((a) => a.id === done.assetId);
+    if (made) { const au = $('#voice-audio'); au.src = made.url; au.style.display = 'block'; au.play().catch(() => {}); note.textContent = 'Saved to your Songs in My Media. Add it to a video, or use it as narration.'; }
+  } catch (e) { note.textContent = e.message; }
+  b.disabled = false; b.innerHTML = old; updateVoicePrice();
 };
 
 function fmtBytes(n) {
@@ -4907,8 +4973,8 @@ const qk = { shots: [], format: '9:16', busy: false };
 function applySimpleMode() {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';
   document.querySelectorAll('#view-seq > .card').forEach((c) => {
-    // the crew IS the front page — the planning card and the Crew Room stay up
-    if (c.id === 'crew-card' || c.id === 'crew-room-card') { c.style.display = ''; return; }
+    // the crew IS the front page — planning, Crew Room, and Voice stay up
+    if (c.id === 'crew-card' || c.id === 'crew-room-card' || c.id === 'voice-card') { c.style.display = ''; return; }
     c.style.display = simple ? 'none' : '';
   });
   $('#mode-toggle').textContent = simple ? '🛠 Show all studio tools' : '✨ Back to simple mode';

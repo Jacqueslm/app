@@ -201,6 +201,30 @@ body.simple-only #view-simple{display:flex !important}
 
       <p class="usage" style="margin-top:10px">Tap any picture or clip to enlarge it. Use <b>➕ Add to video</b> to drop it on the timeline in the Sequencer.</p>
     </div>
+
+    <div class="card" id="stock-card">
+      <h3>🎬 Free stock b-roll <span class="usage">— establishing shots, textures, transitions (Pexels, free)</span></h3>
+      <div id="stock-setup" style="display:none">
+        <p class="usage">One-time: get a free key at <b>pexels.com/api</b> (no card needed), paste it here, and search millions of free clips &amp; photos — no AI spend, no attribution required.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <input class="input" id="stock-key" placeholder="Paste your free Pexels key" style="flex:1;min-width:140px" autocomplete="off">
+          <button class="btn2" id="stock-key-save">Save</button>
+        </div>
+      </div>
+      <div id="stock-search-wrap" style="display:none">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <input class="input" id="stock-q" placeholder="Search: city night, rain window, smoke, crowd…" style="flex:1;min-width:160px">
+          <div class="chips stock-type">
+            <button class="chip on" data-type="videos">🎬 Clips</button>
+            <button class="chip" data-type="photos">🖼 Photos</button>
+          </div>
+          <button class="btn2" id="stock-go">Search</button>
+        </div>
+        <p class="usage" id="stock-status" style="margin:4px 0 0"></p>
+        <div class="lib-grid" id="stock-results" style="margin-top:6px"></div>
+        <p class="usage" id="stock-manage" style="margin-top:4px"></p>
+      </div>
+    </div>
   </div><!-- /view-media -->
 
   <div class="view" id="view-art">
@@ -1555,6 +1579,7 @@ async function bootStudio() {
     $('#falkey-card').style.display = 'flex';
     $('#falkey-manage').style.display = 'none';
   }
+  renderStockCard();
   loadStorage();
   loadDiagnostics();
   loadFans();
@@ -2035,6 +2060,69 @@ $('#falkey-remove').onclick = async (e) => {
     location.reload();
   } catch (err) { setErr('#seq-err', err.message); }
 };
+
+/* ---------------- free stock b-roll (Pexels) ---------------- */
+let stockType = 'videos';
+function renderStockCard() {
+  if (!document.getElementById('stock-card')) return;
+  const on = !!st.cfg?.stockAvailable;
+  $('#stock-setup').style.display = on ? 'none' : 'block';
+  $('#stock-search-wrap').style.display = on ? 'block' : 'none';
+  if (on) $('#stock-manage').innerHTML = 'Free stock from <b>Pexels</b>. <a href="#" id="stock-remove">Remove key</a>.';
+  const rm = document.getElementById('stock-remove');
+  if (rm) rm.onclick = async (e) => {
+    e.preventDefault();
+    if (!confirm('Remove the Pexels key? Stock search turns off (nothing you already imported is affected).')) return;
+    try { await jfetch('/api/studio/settings/pexelskey', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: '' }) }); st.cfg = await jfetch('/api/studio/config'); renderStockCard(); } catch (err) { $('#stock-status').textContent = err.message; }
+  };
+}
+if (document.getElementById('stock-key-save')) $('#stock-key-save').onclick = async () => {
+  const key = $('#stock-key').value.trim();
+  if (!key) { $('#stock-status').textContent = 'Paste your Pexels key first.'; return; }
+  const b = $('#stock-key-save'); b.disabled = true;
+  try {
+    await jfetch('/api/studio/settings/pexelskey', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+    $('#stock-key').value = '';
+    st.cfg = await jfetch('/api/studio/config');
+    renderStockCard();
+  } catch (e) { $('#stock-status').textContent = e.message; }
+  b.disabled = false;
+};
+document.querySelectorAll('#stock-card .stock-type .chip').forEach((c) => c.onclick = () => {
+  document.querySelectorAll('#stock-card .stock-type .chip').forEach((x) => x.classList.remove('on'));
+  c.classList.add('on'); stockType = c.dataset.type;
+});
+async function runStockSearch() {
+  const q = $('#stock-q').value.trim();
+  const results = $('#stock-results');
+  if (!q) { $('#stock-status').textContent = 'Type what you need — "city night", "rain", "smoke".'; return; }
+  $('#stock-status').textContent = 'Searching…'; results.innerHTML = '';
+  try {
+    const r = await jfetch(`/api/studio/stock/search?q=${encodeURIComponent(q)}&type=${stockType}`);
+    if (!r.results.length) { $('#stock-status').textContent = 'Nothing found — try different words.'; return; }
+    $('#stock-status').textContent = `${r.results.length} free results — tap ➕ to add one to your library.`;
+    r.results.forEach((item) => {
+      const cell = document.createElement('div');
+      cell.className = 'lib-item';
+      cell.style.cssText = 'position:relative';
+      cell.innerHTML = `
+        <img src="${item.thumb}" loading="lazy" style="width:100%;border-radius:8px;display:block">
+        <button class="btn2 primary stk-add" style="width:100%;margin-top:4px;padding:6px;font-size:12px">➕ Add${item.kind === 'video' ? ' clip' : ''}</button>
+        ${item.credit ? `<span class="usage" style="font-size:10px">by ${escapeHtml(item.credit)}</span>` : ''}`;
+      cell.querySelector('.stk-add').onclick = async (e) => {
+        const bt = e.target; bt.disabled = true; bt.textContent = 'Adding…';
+        try {
+          await jfetch('/api/studio/stock/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: item.url, kind: item.kind, label: item.label }) });
+          await loadAssets();
+          bt.textContent = '✓ Added';
+        } catch (err) { $('#stock-status').textContent = err.message; bt.disabled = false; bt.textContent = '➕ Add'; }
+      };
+      results.appendChild(cell);
+    });
+  } catch (e) { $('#stock-status').textContent = e.message; }
+}
+if (document.getElementById('stock-go')) $('#stock-go').onclick = runStockSearch;
+if (document.getElementById('stock-q')) $('#stock-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') runStockSearch(); });
 
 function fmtBytes(n) {
   if (n > 1e9) return (n / 1e9).toFixed(2) + ' GB';

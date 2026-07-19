@@ -14,7 +14,9 @@ const db = require('./db');
 const { requireAuth } = require('./auth');
 
 let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
+let PEXELS_KEY = process.env.PEXELS_KEY; // free stock b-roll key, also settable from the app
 const FAL_QUEUE_BASE = process.env.FAL_QUEUE_BASE || 'https://queue.fal.run'; // overridable for tests
+const PEXELS_BASE = process.env.PEXELS_BASE || 'https://api.pexels.com'; // overridable for tests
 const ENV_PATH = path.join(__dirname, '.env');
 
 // Optional: the same Anthropic key that powers Nova chat (server.js) sharpens
@@ -22,15 +24,16 @@ const ENV_PATH = path.join(__dirname, '.env');
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
 
-// Persist (or remove) FAL_KEY in server/.env so it survives restarts, keeping
+// Persist (or remove) a key in server/.env so it survives restarts, keeping
 // every other line (PORT, SESSION_SECRET, ...) untouched.
-function persistFalKey(key) {
+function persistEnvKey(name, value) {
   let lines = [];
   try { lines = fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/); } catch (_) {}
-  lines = lines.filter((l) => !l.startsWith('FAL_KEY=') && l.trim() !== '');
-  if (key) lines.push(`FAL_KEY=${key}`);
+  lines = lines.filter((l) => !l.startsWith(`${name}=`) && l.trim() !== '');
+  if (value) lines.push(`${name}=${value}`);
   fs.writeFileSync(ENV_PATH, lines.join('\n') + '\n');
 }
+function persistFalKey(key) { persistEnvKey('FAL_KEY', key); }
 
 // Model ids move fast in this space - override any of these in .env without code changes.
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
@@ -472,6 +475,7 @@ router.get('/config', (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   res.json({
     falAvailable: Boolean(FAL_KEY),
+    stockAvailable: Boolean(PEXELS_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
     videosUsed: db.getVideoCount(req.userId, todayUTC()),
@@ -533,6 +537,82 @@ router.post('/settings/falkey', (req, res) => {
     res.json({ falAvailable: Boolean(FAL_KEY) });
   } catch (err) {
     res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+/* ---------------- free stock b-roll (Pexels) ---------------- */
+// A free Pexels key (pexels.com/api) unlocks free, no-attribution-required
+// stock photos and video for establishing shots, textures, and transitions -
+// so you don't spend on AI to generate filler.
+router.post('/settings/pexelskey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 10 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a Pexels key. Copy it from pexels.com/api." });
+  }
+  try {
+    persistEnvKey('PEXELS_KEY', clean || null);
+    PEXELS_KEY = clean || undefined;
+    res.json({ stockAvailable: Boolean(PEXELS_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+router.get('/stock/search', async (req, res) => {
+  if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings to search stock b-roll.' });
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.status(400).json({ error: 'What should I search for? Try "city night", "rain window", "smoke".' });
+  const type = req.query.type === 'photos' ? 'photos' : 'videos';
+  const url = type === 'videos'
+    ? `${PEXELS_BASE}/videos/search?query=${encodeURIComponent(q)}&per_page=16&size=medium`
+    : `${PEXELS_BASE}/v1/search?query=${encodeURIComponent(q)}&per_page=16`;
+  try {
+    const r = await fetch(url, { headers: { Authorization: PEXELS_KEY } });
+    if (!r.ok) return res.status(502).json({ error: `Pexels error ${r.status}. Check your key in Settings.` });
+    const data = await r.json();
+    let results;
+    if (type === 'videos') {
+      results = (data.videos || []).map((v) => {
+        // pick a reasonably sized mp4 (<=1280 wide), else the smallest
+        const files = (v.video_files || []).filter((f) => f.file_type === 'video/mp4');
+        const pick = files.filter((f) => (f.width || 0) <= 1280).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || files.sort((a, b) => (a.width || 0) - (b.width || 0))[0];
+        return pick ? { id: v.id, kind: 'video', thumb: v.image, url: pick.link, label: (v.user && v.user.name) ? `stock · ${q}` : `stock · ${q}`, credit: v.user && v.user.name } : null;
+      }).filter(Boolean);
+    } else {
+      results = (data.photos || []).map((p) => ({ id: p.id, kind: 'image', thumb: p.src.medium, url: p.src.large2x || p.src.large || p.src.original, label: `stock · ${q}`, credit: p.photographer }));
+    }
+    res.json({ results });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach Pexels: ${err.message}` });
+  }
+});
+
+router.post('/stock/import', async (req, res) => {
+  if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings first.' });
+  const { url, kind, label } = req.body || {};
+  const trustedBase = (PEXELS_BASE || '').replace(/\/$/, '');
+  const okUrl = typeof url === 'string' && !/\s/.test(url) && (
+    /^https:\/\/([^/\s]*\.)?(pexels\.com|pexels\.io|pexelsusercontent\.com)\//.test(url) ||
+    (trustedBase && url.startsWith(trustedBase + '/'))
+  );
+  if (!okUrl) return res.status(400).json({ error: 'That is not a valid Pexels media link.' });
+  const isVideo = kind === 'video';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return res.status(502).json({ error: `Download failed (${r.status}).` });
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (!buf.length) return res.status(502).json({ error: 'Downloaded an empty file.' });
+    const ext = isVideo ? '.mp4' : '.jpg';
+    const filename = newFilename(req.userId, ext);
+    fs.writeFileSync(mediaPath(filename), buf);
+    const meta = { source: 'stock', stock: 'pexels' };
+    if (isVideo) meta.duration = await probeMediaDuration(mediaPath(filename));
+    const cleanLabel = String(label || 'stock clip').slice(0, 80);
+    const id = db.createAsset(req.userId, isVideo ? 'video' : 'image', cleanLabel, filename, null, meta);
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(502).json({ error: `Could not import: ${err.message}` });
   }
 });
 

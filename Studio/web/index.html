@@ -1413,6 +1413,8 @@ const st = {
   beats: null,          // {bpm, beats[]} from the analyzer
   kb: { fx: 0.5, fy: 0.5 },
   animTarget: null,     // assetId with the animate panel open
+  animPrefill: '',      // motion text to pre-fill when a panel is opened via "Continue"
+  animPrefillFor: null, // which assetId that prefill belongs to
   singTarget: null,     // assetId with the lip-sync panel open
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
@@ -2663,6 +2665,7 @@ function renderLibrary() {
   for (const a of items) {
     const el = document.createElement('div');
     el.className = 'lib-item';
+    el.dataset.id = a.id;
     const charName = a.characterId && st.characters.find((c) => c.id === a.characterId)?.name;
     el.innerHTML = (a.kind === 'image'
       ? `<img src="${a.url}" loading="lazy" alt="">`
@@ -2687,6 +2690,7 @@ function renderLibrary() {
       try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
       catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '2×'; }
     });
+    if (a.kind === 'video' && st.cfg?.falAvailable) { const cb = btn('▶ Continue', 'primary', () => continueClip(a.id)); cb.title = 'Extend this shot — animates forward from its last frame so the motion keeps going (not a loop).'; }
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image') btn('Crop', '', () => { st.cropTarget = st.cropTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); });
     if (a.kind === 'image' && a.meta?.prompt && st.cfg?.falAvailable) btn('🎥 Shots', '', () => { st.coverageTarget = st.coverageTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.cropTarget = null; renderLibrary(); });
@@ -2740,7 +2744,8 @@ function renderLibrary() {
           ${pricing ? `<div class="chips anim-tiers">${tierKeys.map((k) =>
             `<button class="chip${k === curTier ? ' on' : ''}" data-tier="${k}">${pricing.tiers[k].label} · $${pricing.tiers[k].rate.toFixed(3)}/s</button>`).join('')}</div>
           <span class="usage">${escapeHtml(pricing.tiers[curTier].desc)} · prices as of ${escapeHtml(pricing.asOf)} — verify on fal.ai/pricing</span>` : ''}
-          <input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind">
+          <input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind" value="${st.animPrefillFor === a.id ? escapeHtml(st.animPrefill) : ''}">
+          ${st.animPrefillFor === a.id ? '<span class="usage">▶ Continuing your clip — this is its last frame. Tweak the motion if you like, then pick a length. Place the new clip right after the first for one seamless shot.</span>' : ''}
           <div style="display:flex;gap:6px">
             <button class="btn2" style="flex:1" data-sec="5">5s clip${priceFor(5)}</button>
             <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip${priceFor(10)}</button>
@@ -3196,6 +3201,7 @@ async function animateAsset(assetId, motion, seconds, panel, tier) {
     });
     await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
     st.animTarget = null;
+    if (st.animPrefillFor === assetId) { st.animPrefill = ''; st.animPrefillFor = null; }
     st.cfg.videosUsed += 1; updateScenesUsage();
     await loadAssets();
   } catch (e) {
@@ -3203,6 +3209,32 @@ async function animateAsset(assetId, motion, seconds, panel, tier) {
     panel.querySelectorAll('button').forEach((b) => (b.disabled = false));
     prog.classList.remove('show');
   }
+}
+
+// One-click extend: grab the clip's last frame, then open the Animate panel on
+// that still pre-loaded with a "keep the motion going" prompt. Freeze + Animate
+// in a single tap — the new clip continues forward from exactly where this one
+// ended (place them back-to-back in the Sequencer for one seamless shot).
+async function continueClip(videoId) {
+  setErr('#scenes-err', null);
+  try {
+    const r = await jfetch('/api/studio/transform', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId: videoId, op: 'freeze' }),
+    });
+    const still = r.asset;
+    if (!still || !still.id) throw new Error('Could not grab the last frame.');
+    await loadAssets();
+    st.animTarget = still.id;
+    st.animPrefill = 'continue the same motion smoothly, same direction and pace, natural movement';
+    st.animPrefillFor = still.id;
+    st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.cropTarget = null;
+    renderLibrary();
+    setTimeout(() => {
+      const el = document.querySelector(`.lib-item[data-id="${still.id}"]`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+  } catch (e) { setErr('#scenes-err', e.message); }
 }
 
 /* ---------------- characters ---------------- */

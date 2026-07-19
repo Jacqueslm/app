@@ -198,6 +198,7 @@ Every AI generation is now saved the moment it's sent. If a clip you paid for di
 
 ### The free toolbox (no AI, on every clip/photo in My Media)
 - **🧽 Remove corner mark** (Crop → *Remove corner mark ✦*) — cleans a decorative sparkle / corner watermark off **your own** generated image. *Patch it out* blends it into the pixels around it and keeps the whole frame (best when the subject is near the corner); *Zoom past it* crops the corner off. Free & instant. It's for tidying a provider's sparkle on your own art — it can't touch invisible watermarks and isn't for anyone else's work.
+- **▶ Continue (extend a clip)** — on any video, tap **▶ Continue**: Studio grabs its last frame and opens Animate pre-loaded with a "keep the motion going" prompt. The new clip carries on from exactly where the first ended — place them back-to-back in the Sequencer for one seamless longer shot (chain it as many times as you want). This is real *forward* motion, unlike Loop which repeats. Costs one Animate per extension.
 - **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
 - **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
 - **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.

@@ -2209,6 +2209,22 @@ $('#lp-go').onclick = async () => {
 /* ---------------- library ---------------- */
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+// Free (ffmpeg) transforms — mirror / slow-mo / freeze. No AI cost. Returns a
+// new asset (images) or a job to poll (videos); either way it lands in the library.
+async function freeTransform(assetId, op, btnEl, oldLabel) {
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = '…'; }
+  try {
+    const r = await jfetch('/api/studio/transform', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId, op }),
+    });
+    if (r.job) await pollJob(r.job.id, () => {});
+    await loadAssets();
+  } catch (e) {
+    setErr('#scenes-err', e.message);
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = oldLabel; }
+  }
+}
 function renderLibrary() {
   const grid = $('#lib-grid');
   const items = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
@@ -2261,6 +2277,10 @@ function renderLibrary() {
     });
     if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
     if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; renderLibrary(); });
+    // free ffmpeg transforms (no AI cost) — reuse what you already have
+    btn('Mirror', '', (e) => freeTransform(a.id, 'mirror', e.target, 'Mirror'));
+    if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
+    if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'));
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {
       // The label is prompt text — sanitize it and keep the real file extension,

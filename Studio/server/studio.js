@@ -1484,6 +1484,79 @@ router.post('/crop', (req, res) => {
   });
 });
 
+/* ---------------- free local transforms: mirror / slow-mo / freeze ---------------- */
+// All pure ffmpeg, zero AI cost. Reuse-focused: flip a shot for variety, slow it
+// for drama (also DOUBLES its length to help fill a song), or grab a still from a
+// clip. Originals are never touched — each makes a new library asset.
+router.post('/transform', async (req, res) => {
+  const { assetId, op } = req.body || {};
+  const src = db.getAsset(req.userId, Number(assetId));
+  if (!src) return res.status(404).json({ error: 'Pick an item from your library first.' });
+  const srcPath = mediaPath(src.filename);
+  let srcMeta = {}; try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
+  const carry = {
+    ...(srcMeta.source ? { source: srcMeta.source } : {}),
+    ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
+    fromAssetId: src.id,
+  };
+  const enc = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+
+  try {
+    // MIRROR — image or video, horizontal flip
+    if (op === 'mirror') {
+      if (src.kind === 'image') {
+        const ext = path.extname(src.filename).toLowerCase() || '.png';
+        const outFile = newFilename(req.userId, ext);
+        const proc = spawn(ffmpegBin(), ['-y', '-i', srcPath, '-vf', 'hflip', '-frames:v', '1', mediaPath(outFile)]);
+        proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+        proc.on('close', (code) => {
+          if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Mirror failed.' });
+          const id = db.createAsset(req.userId, 'image', `${src.label} · mirrored`, outFile, src.character_id || null, { ...carry, transform: 'mirror' });
+          res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+        });
+        return;
+      }
+      if (src.kind === 'video') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const hasAudio = await probeHasAudio(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, '-vf', 'hflip', ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · mirrored`, { ...carry, transform: 'mirror' });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Mirror works on pictures and clips.' });
+    }
+
+    // SLOW MOTION — video only, 0.5x (audio dropped; your song carries the sound)
+    if (op === 'slowmo') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Slow motion is for video clips.' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', 'setpts=2.0*PTS', '-an', ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur ? dur * 2 : null, `${src.label} · slow-mo`, { ...carry, transform: 'slowmo' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
+    // FREEZE FRAME — grab a still from a clip (reuse a video moment as a picture)
+    if (op === 'freeze') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Freeze-frame grabs a still from a video clip.' });
+      const outFile = newFilename(req.userId, '.png');
+      const proc = spawn(ffmpegBin(), ['-y', '-sseof', '-0.2', '-i', srcPath, '-frames:v', '1', mediaPath(outFile)]);
+      proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+      proc.on('close', (code) => {
+        if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Freeze-frame failed.' });
+        const id = db.createAsset(req.userId, 'image', `${src.label} · freeze`, outFile, src.character_id || null, { ...carry, transform: 'freeze' });
+        res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+      });
+      return;
+    }
+
+    return res.status(400).json({ error: 'Unknown transform.' });
+  } catch (err) {
+    if (!res.headersSent) res.status(500).json({ error: `Transform failed: ${err.message}` });
+  }
+});
+
 /* ---------------- output sizes ---------------- */
 const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
 const FPS = 30;

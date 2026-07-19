@@ -591,6 +591,12 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="seq-upload-clip">Upload video</button>
       </div>
       <button class="btn2" id="seq-add-all-media" style="width:100%;margin-top:6px">➕ Add ALL my pictures &amp; clips to the timeline</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+        <span class="usage" style="font-weight:600;color:var(--tp)">All transitions:</span>
+        <button class="btn2 quiet" id="seq-all-cuts" style="padding:6px 12px;font-size:12px">✂️ Hard cuts</button>
+        <button class="btn2 quiet" id="seq-all-fades" style="padding:6px 12px;font-size:12px">🎞 Crossfades</button>
+        <span class="usage" id="seq-trans-note">Hard cuts are punchier & fix Continue seams; crossfades are dreamy but blur fast cuts.</span>
+      </div>
       <div style="margin-top:10px">
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">
           <span class="usage" style="font-weight:600;color:var(--tp)">Your clips &amp; pictures</span>
@@ -3815,6 +3821,17 @@ document.querySelectorAll('.seq-thumb-filter .chip').forEach((c) => {
     renderSeqThumbs();
   };
 });
+// One-tap: set every transition on the timeline at once (fixes the crossfade-on-
+// Continue-seam mush — hard cuts make continued clips flow seamlessly).
+function setAllTransitions(type) {
+  if (!st.trans.length) { setErr('#seq-err', 'Add at least two clips first.'); return; }
+  st.trans.forEach((t) => { t.type = type; if (type === 'cut') t.duration = 0; else if (!t.duration) t.duration = 0.5; });
+  renderSeq(); persistDraft();
+  const note = document.getElementById('seq-trans-note');
+  if (note) note.textContent = type === 'cut' ? '✓ All set to hard cuts — Continue seams are seamless now.' : '✓ All set to crossfades (~0.5s). Tip: keep Continue seams as hard cuts.';
+}
+$('#seq-all-cuts') && ($('#seq-all-cuts').onclick = () => setAllTransitions('cut'));
+$('#seq-all-fades') && ($('#seq-all-fades').onclick = () => setAllTransitions('fade'));
 $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   setErr('#seq-err', null);
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }

@@ -254,6 +254,24 @@ function createJob(userId, type, extra) {
   const id = `job-${++jobCounter}-${crypto.randomBytes(4).toString('hex')}`;
   const job = { id, userId, type, status: 'running', progress: 0, error: null, assetId: null, startedAt: Date.now(), ...extra };
   jobs.set(id, job);
+  // Durable receipt for every fal (paid) submission, so a clip we're billed for
+  // can always be recovered later — even after a restart wipes this in-memory job.
+  if (job.fal && job.fal.statusUrl && job.fal.responseUrl) {
+    try {
+      const requestId = (String(job.fal.responseUrl).match(/requests\/([^/?]+)/) || [])[1] || null;
+      job._receiptId = db.logFalReceipt(userId, {
+        requestId,
+        statusUrl: job.fal.statusUrl,
+        responseUrl: job.fal.responseUrl,
+        expect: job.fal.expect,
+        label: job.fal.label,
+        characterId: job.fal.characterId,
+        model: job.fal.meta && job.fal.meta.model,
+        tier: job.fal.meta && job.fal.meta.tier,
+        meta: job.fal.meta,
+      });
+    } catch (_) { /* logging must never block a generation */ }
+  }
   // Don't let the map grow forever on a long-lived server.
   if (jobs.size > 500) {
     for (const [key, j] of jobs) {
@@ -531,6 +549,11 @@ async function refreshFalJob(job) {
     job.error = err.message;
   } finally {
     job._refreshing = false;
+    // Close out the durable receipt once the job reaches a terminal state, so
+    // the recovery view knows this one is collected (and won't re-offer it).
+    if (job._receiptId && (job.status === 'done' || job.status === 'error')) {
+      try { db.setFalReceiptStatus(job._receiptId, { status: job.status, assetId: job.assetId || null, error: job.error || null }); } catch (_) {}
+    }
   }
 }
 
@@ -3199,6 +3222,62 @@ router.get('/jobs/:id', async (req, res) => {
   if (!job || job.userId !== req.userId) return res.status(404).json({ error: 'Job not found.' });
   if (job.fal) await refreshFalJob(job);
   res.json({ job: jobJson(job) });
+});
+
+/* ---------------- paid-generation recovery ---------------- */
+// List recent fal receipts so the artist can see what they've paid for and
+// which ones did / didn't land in the library.
+router.get('/fal/receipts', (req, res) => {
+  const rows = db.getFalReceipts(req.userId, 60).map((r) => ({
+    id: r.id, requestId: r.request_id, expect: r.expect, label: r.label,
+    tier: r.tier, status: r.status, assetId: r.asset_id, createdAt: r.created_at,
+  }));
+  const open = rows.filter((r) => r.status === 'running').length;
+  res.json({ receipts: rows, open });
+});
+
+// One button: re-check every still-open receipt against fal. Any that finished
+// while the browser was gone get downloaded into the library now. Never charges
+// — reading a fal result is free — so it's safe to run any time.
+router.post('/fal/recover', async (req, res) => {
+  if (!FAL_KEY) return res.status(503).json({ error: 'AI generation is not set up yet.' });
+  const open = db.getOpenFalReceipts(req.userId);
+  let recovered = 0, stillWorking = 0, failed = 0;
+  for (const r of open) {
+    let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+    const job = {
+      id: `recover-${r.id}`, userId: req.userId, status: 'running', progress: 0, assetId: null,
+      startedAt: Date.parse(r.created_at) || Date.now(), _receiptId: r.id,
+      fal: { statusUrl: r.status_url, responseUrl: r.response_url, expect: r.expect, label: r.label || 'Recovered', characterId: r.character_id, meta },
+    };
+    try { await refreshFalJob(job); } catch (_) {}
+    if (job.status === 'done') recovered++;
+    else if (job.status === 'error') failed++;
+    else stillWorking++;
+  }
+  res.json({ recovered, stillWorking, failed, checked: open.length });
+});
+
+// Manual rescue for clips paid for BEFORE receipts existed: paste the output
+// file URL straight from your fal.ai dashboard (open the request → copy the
+// video/image URL) and Studio downloads it into your library. Free.
+router.post('/fal/import', async (req, res) => {
+  const { url, kind } = req.body || {};
+  const clean = typeof url === 'string' ? url.trim() : '';
+  if (!/^https?:\/\//i.test(clean)) return res.status(400).json({ error: 'Paste a direct file link (starts with http) from your fal.ai dashboard.' });
+  const isVideo = kind === 'video' || /\.(mp4|mov|webm|m4v)(\?|$)/i.test(clean) || (kind !== 'image' && kind !== 'audio' && /video/i.test(clean));
+  const isAudio = kind === 'audio' || /\.(wav|mp3|m4a|aac)(\?|$)/i.test(clean);
+  const assetKind = isVideo ? 'video' : isAudio ? 'audio' : 'image';
+  const ext = isVideo ? '.mp4' : isAudio ? '.wav' : /\.(jpe?g)(\?|$)/i.test(clean) ? '.jpg' : '.png';
+  try {
+    const filename = await downloadToMedia(req.userId, clean, ext);
+    const meta = { source: 'fal-import' };
+    if (assetKind !== 'image') meta.duration = await probeMediaDuration(mediaPath(filename));
+    const id = db.createAsset(req.userId, assetKind, 'Recovered from fal', filename, null, meta);
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(502).json({ error: `Couldn't import that link: ${err.message}` });
+  }
 });
 
 module.exports = { router, deleteUserAssets };

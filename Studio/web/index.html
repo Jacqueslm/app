@@ -779,6 +779,25 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
     </div>
 
+    <div class="card adv-card" id="recover-card">
+      <h3>💸 Recover paid clips <span class="usage" id="recover-open"></span></h3>
+      <p class="usage">Every AI generation is now saved here the moment it's sent — so if a clip you paid for didn't land in your library (tab closed, page refreshed, long render), tap below and Studio pulls in anything fal already finished. This never costs anything.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="recover-go">🔁 Find my finished clips</button>
+        <button class="btn2 quiet" id="recover-refresh">Refresh list</button>
+      </div>
+      <p class="usage" id="recover-status"></p>
+      <div id="recover-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
+      <details style="margin-top:10px">
+        <summary class="usage" style="cursor:pointer">Recover an older one from fal.ai directly</summary>
+        <p class="usage" style="margin-top:6px">For clips paid for before this feature existed: open the request on your <b>fal.ai dashboard</b>, copy the output video/image link, paste it here.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <input class="input" id="recover-url" placeholder="Paste fal output file link (https://…)" style="flex:1;min-width:160px" autocomplete="off">
+          <button class="btn2 quiet" id="recover-import">Import</button>
+        </div>
+      </details>
+    </div>
+
     <div class="card adv-card">
       <h3>Diagnostics <span class="usage" id="diag-count"></span></h3>
       <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
@@ -1646,6 +1665,7 @@ async function bootStudio() {
   loadStorage();
   loadDiagnostics();
   loadFans();
+  loadReceipts();
   $('#chars-form').style.display = 'flex';
   await Promise.all([loadAssets(), loadCharacters(), loadLocations(), loadRelationships()]);
 }
@@ -2377,6 +2397,48 @@ $('#stor-open-folder').onclick = async () => {
   }
   b.disabled = false;
 };
+
+/* ---------------- recover paid clips ---------------- */
+async function loadReceipts() {
+  if (!document.getElementById('recover-card')) return;
+  try {
+    const { receipts, open } = await jfetch('/api/studio/fal/receipts');
+    $('#recover-open').textContent = open ? `— ${open} may still be finishing` : '';
+    const list = $('#recover-list');
+    if (!receipts.length) { list.innerHTML = '<p class="usage">No AI generations recorded yet.</p>'; return; }
+    const label = { video: '🎬 clip', image: '🖼 image', audio: '🎵 audio', lora: '🧬 face-lock', qc: 'check', transcript: 'captions' };
+    const badge = { running: '<span style="color:#c9a227">⏳ working / unclaimed</span>', done: '<span style="color:#1f9d55">✓ in library</span>', error: '<span style="color:#c0392b">✕ failed (not charged if it never finished)</span>' };
+    list.innerHTML = receipts.slice(0, 20).map((r) => `
+      <div style="background:var(--s1);border-radius:8px;padding:7px 10px;font-size:11.5px;display:flex;justify-content:space-between;gap:8px">
+        <span style="color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label[r.expect] || r.expect} · ${escapeHtml(r.label || '—')}${r.tier ? ` · ${escapeHtml(r.tier)}` : ''}</span>
+        <span style="white-space:nowrap">${badge[r.status] || r.status}</span>
+      </div>`).join('');
+  } catch (_) { /* not signed in */ }
+}
+$('#recover-refresh') && ($('#recover-refresh').onclick = loadReceipts);
+$('#recover-go') && ($('#recover-go').onclick = async () => {
+  const b = $('#recover-go'); b.disabled = true; $('#recover-status').textContent = 'Checking fal for finished clips…';
+  try {
+    const r = await jfetch('/api/studio/fal/recover', { method: 'POST' });
+    $('#recover-status').textContent = r.recovered
+      ? `✓ Pulled in ${r.recovered} finished ${r.recovered === 1 ? 'item' : 'items'}! Check your library.${r.stillWorking ? ` (${r.stillWorking} still generating — try again in a minute.)` : ''}`
+      : (r.stillWorking ? `${r.stillWorking} still generating — nothing ready yet. Try again shortly.` : 'Nothing waiting — everything you paid for is already in your library. 👍');
+    await Promise.all([loadAssets(), loadReceipts()]);
+  } catch (e) { $('#recover-status').textContent = e.message; }
+  b.disabled = false;
+});
+$('#recover-import') && ($('#recover-import').onclick = async () => {
+  const url = $('#recover-url').value.trim();
+  if (!url) { $('#recover-status').textContent = 'Paste the file link from your fal dashboard first.'; return; }
+  const b = $('#recover-import'); b.disabled = true; $('#recover-status').textContent = 'Importing…';
+  try {
+    await jfetch('/api/studio/fal/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+    $('#recover-url').value = '';
+    $('#recover-status').textContent = '✓ Imported into your library.';
+    await loadAssets();
+  } catch (e) { $('#recover-status').textContent = e.message; }
+  b.disabled = false;
+});
 
 async function loadDiagnostics() {
   try {

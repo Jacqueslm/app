@@ -2091,6 +2091,27 @@ router.post('/transform', async (req, res) => {
       return res.status(202).json({ job: jobJson(job) });
     }
 
+    // LOOK THEMES — one-tap whole-video colour grades (like CapCut filters).
+    // Each is a themed grade + sharpen; audio is preserved. Free, no AI.
+    if (op === 'grade') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Look themes apply to a video (render first, then pick a look).' });
+      const GRADE_THEMES = {
+        luxury: 'eq=contrast=1.12:saturation=0.9:brightness=-0.02,colorbalance=rh=0.04:bh=-0.03,unsharp=5:5:0.4:5:5:0',
+        neon: 'eq=contrast=1.12:saturation=1.35,colorbalance=bs=0.12:rm=-0.04:bh=0.06,unsharp=5:5:0.5:5:5:0',
+        cinematic: 'eq=contrast=1.12:saturation=1.02,colorbalance=rm=0.06:bs=0.06:rh=0.03:bh=-0.03,unsharp=5:5:0.4:5:5:0',
+        warm: 'eq=contrast=1.05:saturation=1.1:brightness=0.02,colorbalance=rm=0.08:bm=-0.05',
+        bw: 'hue=s=0,eq=contrast=1.14:brightness=0.01,unsharp=5:5:0.5:5:5:0',
+        vibrant: 'eq=contrast=1.08:saturation=1.32,unsharp=5:5:0.5:5:5:0',
+      };
+      const theme = GRADE_THEMES[req.body.theme] ? req.body.theme : 'cinematic';
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', GRADE_THEMES[theme], ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · ${theme} look`, { ...carry, transform: 'grade', theme });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
     // MOTION BLUR — averages neighbouring frames (tmix) so fast motion smears
     // into a silky cinematic blur, and hard cuts/jumps read softer. Same length,
     // audio preserved. Free, no AI.

@@ -476,6 +476,25 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="crew-status"></p>
       <p class="usage">Needs a song (and lyrics or 🪄 auto-captions). The Director reads your song's structure, casts your images into scenes, picks camera moves and pacing per section, and hands you the plan. Nothing generates or renders until you press the Producer button.</p>
     </div>
+    <div class="card" id="crew-room-card">
+      <h3>🎧 Crew Room <span class="usage">— talk to any crew member one-on-one</span></h3>
+      <div id="crew-chat-setup" style="display:none">
+        <p class="usage">Your crew can give you real creative advice. This uses an Anthropic key (from <b>console.anthropic.com</b>) — a chat costs a fraction of a cent. Paste it once:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <input class="input" id="crewchat-key" placeholder="Paste your Anthropic key (sk-ant-…)" style="flex:1;min-width:160px" autocomplete="off">
+          <button class="btn2" id="crewchat-key-save">Save</button>
+        </div>
+      </div>
+      <div id="crew-chat-wrap" style="display:none">
+        <div id="crew-members" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="crew-thread" style="display:flex;flex-direction:column;gap:8px;margin:8px 0;max-height:340px;overflow-y:auto;padding:4px"></div>
+        <div style="display:flex;gap:8px">
+          <input class="input" id="crew-chat-input" placeholder="Ask them anything…" style="flex:1">
+          <button class="btn2" id="crew-chat-send">Send</button>
+        </div>
+        <p class="usage" id="crew-chat-note" style="margin:4px 0 0"></p>
+      </div>
+    </div>
     <div class="card" id="pipe-card">
       <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
@@ -1581,6 +1600,7 @@ async function bootStudio() {
     $('#falkey-manage').style.display = 'none';
   }
   renderStockCard();
+  renderCrewRoom();
   loadStorage();
   loadDiagnostics();
   loadFans();
@@ -2124,6 +2144,97 @@ async function runStockSearch() {
 }
 if (document.getElementById('stock-go')) $('#stock-go').onclick = runStockSearch;
 if (document.getElementById('stock-q')) $('#stock-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') runStockSearch(); });
+
+/* ---------------- Crew Room: talk to any crew member one-on-one ---------------- */
+const CREW_MEMBERS = [
+  { key: 'creative', emoji: '🎨', name: 'Creative Director' },
+  { key: 'director', emoji: '🎬', name: 'Director' },
+  { key: 'casting', emoji: '🎭', name: 'Casting Director' },
+  { key: 'designer', emoji: '🖌', name: 'Production Designer' },
+  { key: 'qc', emoji: '🔍', name: 'QC Supervisor' },
+  { key: 'producer', emoji: '💼', name: 'Producer' },
+];
+let crewMember = localStorage.getItem('tsid-crew-member') || 'creative';
+function crewHistKey(m) { return `tsid-crewchat-${m}`; }
+function crewHist(m) { try { return JSON.parse(localStorage.getItem(crewHistKey(m)) || '[]'); } catch (e) { return []; } }
+function setCrewHist(m, h) { try { localStorage.setItem(crewHistKey(m), JSON.stringify(h.slice(-20))); } catch (e) {} }
+function crewChatContext() {
+  const chars = (st.characters || []).map((c) => c.name + (c.loraUrl ? ' (face-locked)' : '')).join(', ');
+  const song = st.musicList && st.musicList[0] ? (songLabelOf(st.musicList[0].assetId) || '') : '';
+  const b = crew.brief || {};
+  const star = (st.characters || []).find((c) => String(c.id) === String(b.star));
+  const briefStr = [b.vibe && `vibe ${b.vibe}`, b.energy && `energy ${b.energy}`, star && `star ${star.name}`].filter(Boolean).join(', ');
+  return { characters: chars, song, brief: briefStr };
+}
+function renderCrewRoom() {
+  if (!document.getElementById('crew-room-card')) return;
+  const on = !!st.cfg?.chatAvailable;
+  $('#crew-chat-setup').style.display = on ? 'none' : 'block';
+  $('#crew-chat-wrap').style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const box = $('#crew-members');
+  box.innerHTML = '';
+  CREW_MEMBERS.forEach((m) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (m.key === crewMember ? ' on' : '');
+    b.textContent = `${m.emoji} ${m.name}`;
+    b.onclick = () => { crewMember = m.key; localStorage.setItem('tsid-crew-member', m.key); renderCrewRoom(); };
+    box.appendChild(b);
+  });
+  renderCrewThread();
+}
+function renderCrewThread() {
+  const t = $('#crew-thread'); if (!t) return;
+  const hist = crewHist(crewMember);
+  const me = CREW_MEMBERS.find((m) => m.key === crewMember);
+  t.innerHTML = '';
+  if (!hist.length) {
+    t.innerHTML = `<p class="usage" style="text-align:center">Say hi to your ${me.emoji} ${escapeHtml(me.name)} — ask for an idea, a fix, or a plan. This chat stays on your computer.</p>`;
+  }
+  hist.forEach((h) => {
+    const row = document.createElement('div');
+    const mine = h.role === 'user';
+    row.style.cssText = `align-self:${mine ? 'flex-end' : 'flex-start'};max-width:88%;padding:8px 11px;border-radius:12px;font-size:13px;white-space:pre-wrap;background:${mine ? 'var(--accent)' : 'var(--bg2, rgba(128,128,128,.15))'};color:${mine ? '#fff' : 'var(--tp)'}`;
+    row.textContent = h.content;
+    t.appendChild(row);
+  });
+  t.scrollTop = t.scrollHeight;
+}
+async function sendCrewChat() {
+  const input = $('#crew-chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const note = $('#crew-chat-note');
+  const hist = crewHist(crewMember);
+  hist.push({ role: 'user', content: text });
+  setCrewHist(crewMember, hist); input.value = ''; renderCrewThread();
+  note.textContent = 'Thinking…';
+  try {
+    const r = await jfetch('/api/studio/crew-chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member: crewMember, message: text, history: hist.slice(0, -1), context: crewChatContext() }),
+    });
+    const h2 = crewHist(crewMember);
+    h2.push({ role: 'assistant', content: r.reply });
+    setCrewHist(crewMember, h2); renderCrewThread(); note.textContent = '';
+  } catch (e) { note.textContent = e.message; }
+}
+if (document.getElementById('crew-chat-send')) {
+  $('#crew-chat-send').onclick = sendCrewChat;
+  $('#crew-chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendCrewChat(); });
+}
+if (document.getElementById('crewchat-key-save')) $('#crewchat-key-save').onclick = async () => {
+  const key = $('#crewchat-key').value.trim();
+  if (!key) { $('#crew-chat-note').textContent = 'Paste your Anthropic key first.'; return; }
+  const b = $('#crewchat-key-save'); b.disabled = true;
+  try {
+    await jfetch('/api/studio/settings/anthropickey', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }) });
+    $('#crewchat-key').value = '';
+    st.cfg = await jfetch('/api/studio/config');
+    renderCrewRoom();
+  } catch (e) { $('#crew-chat-setup').querySelector('.usage').textContent = e.message; }
+  b.disabled = false;
+};
 
 function fmtBytes(n) {
   if (n > 1e9) return (n / 1e9).toFixed(2) + ' GB';
@@ -4796,7 +4907,8 @@ const qk = { shots: [], format: '9:16', busy: false };
 function applySimpleMode() {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';
   document.querySelectorAll('#view-seq > .card').forEach((c) => {
-    if (c.id === 'crew-card') { c.style.display = ''; return; } // the crew is the whole front page
+    // the crew IS the front page — the planning card and the Crew Room stay up
+    if (c.id === 'crew-card' || c.id === 'crew-room-card') { c.style.display = ''; return; }
     c.style.display = simple ? 'none' : '';
   });
   $('#mode-toggle').textContent = simple ? '🛠 Show all studio tools' : '✨ Back to simple mode';

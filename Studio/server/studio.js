@@ -396,8 +396,34 @@ async function falUploadFile(buf, filename, contentType) {
 const FAL_MAX_MS = { lora: 25 * 60e3, video: 12 * 60e3 };
 function falMaxMs(expect) { return FAL_MAX_MS[expect] || 6 * 60e3; }
 
+// fal video/image models don't all return the output in the same place. Dig
+// through every shape they're known to use so a COMPLETED (already-billed)
+// job never gets thrown away as "no output" — that would mean paying for a
+// clip we failed to save. Returns the first URL found, or null.
+function extractMediaUrl(result, expect) {
+  if (!result || typeof result !== 'object') return null;
+  const asUrl = (v) => {
+    if (!v) return null;
+    if (typeof v === 'string' && /^https?:\/\//i.test(v)) return v;
+    if (typeof v === 'object' && typeof v.url === 'string') return v.url;
+    return null;
+  };
+  const first = (v) => (Array.isArray(v) ? v[0] : v);
+  const candidates = expect === 'video'
+    ? [result.video, first(result.videos), result.output, first(result.outputs),
+       result.video_url, result.url, result.data && result.data.video]
+    : [first(result.images), result.image, result.output, first(result.outputs),
+       result.image_url, result.url, result.data && first(result.data.images)];
+  for (const c of candidates) { const u = asUrl(c); if (u) return u; }
+  return null;
+}
+
 async function refreshFalJob(job) {
   if (job.status !== 'running') return;
+  // Guard against the background sweeper and a browser poll advancing the same
+  // job at once — that could download twice / create two assets for one charge.
+  if (job._refreshing) return;
+  job._refreshing = true;
   try {
     const status = await falGet(job.fal.statusUrl);
     if (status.status === 'IN_QUEUE' || status.status === 'IN_PROGRESS') {
@@ -483,10 +509,13 @@ async function refreshFalJob(job) {
       return;
     }
 
-    const media = job.fal.expect === 'video'
-      ? (result.video && result.video.url)
-      : (result.images && result.images[0] && result.images[0].url);
-    if (!media) throw new Error('The model finished but returned no output file.');
+    const media = extractMediaUrl(result, job.fal.expect);
+    if (!media) {
+      // Completed (so fal billed it) but we can't find the file. Log the raw
+      // payload so the URL is recoverable instead of silently lost.
+      try { console.error('[fal] COMPLETED but no media URL found. Raw result:', JSON.stringify(result).slice(0, 2000)); } catch (_) {}
+      throw new Error('The model finished but returned no output file. (Logged for recovery — tell support if this repeats.)');
+    }
 
     const ext = job.fal.expect === 'video' ? '.mp4' : '.png';
     const filename = await downloadToMedia(job.userId, media, ext);
@@ -500,8 +529,30 @@ async function refreshFalJob(job) {
   } catch (err) {
     job.status = 'error';
     job.error = err.message;
+  } finally {
+    job._refreshing = false;
   }
 }
+
+// Background sweeper. fal jobs otherwise ONLY advance when the browser polls
+// GET /jobs/:id — so if the tab closes, refreshes, sleeps, or a render outlives
+// the page, the job stalls while fal still finishes AND BILLS it, and the clip
+// you paid for never downloads. This finishes every running fal job server-side
+// on a timer, so completed work always lands in the library regardless of the
+// browser. Reading fal results never re-charges, so this can't cost extra.
+let falSweeperTimer = null;
+function startFalSweeper() {
+  if (falSweeperTimer) return;
+  falSweeperTimer = setInterval(async () => {
+    for (const job of jobs.values()) {
+      if (job.status === 'running' && job.fal && !job._refreshing) {
+        try { await refreshFalJob(job); } catch (_) {}
+      }
+    }
+  }, 6000);
+  if (falSweeperTimer.unref) falSweeperTimer.unref(); // don't hold the process open
+}
+startFalSweeper();
 
 /* ------------------------------------------------------------------ */
 /* Router                                                              */

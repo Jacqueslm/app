@@ -183,6 +183,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | Sing on a still | ~50¢–$1.50 |
 | Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~$1.50 / $1.30 / $1.70 |
 | 🎭 Live Portrait clip | ~10¢ |
+| 🎙 Voice (narrate in a character's voice) | ~5¢ per minute (½¢ a line) |
 | 🪄 Auto-captions (whole song) | ~35¢ *(free if you paste your own lyrics)* |
 | 🔍 QC inspection (per image) | ~½¢ |
 
@@ -196,6 +197,14 @@ The exact price shows **on the button** before you tap, and every number above r
 - **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
 - **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).
 - **One-click setups** (AI Scenes → Director's brief) — tap a face-locked character to make them the star; save your vibe/energy/star/place as a reusable setup; your last brief is remembered.
+
+### Make a character TALK (with a moving, expressive face)
+It's three steps, and each one is its own button:
+1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. (~½¢ a line.)
+2. **🎤 Sing** — on DBC's photo or clip, tap **Sing**, and in the song list pick the **voice line you just made**. It lip-syncs his mouth to the words. (Draft ~4¢ / Hero 20¢.)
+3. **🎭 Live Portrait** — for full expressions (eyes, head, mood), film your own face doing the performance and it maps that onto his still. (~10¢.)
+
+For expressions in **still scenes**, just say it in the prompt — "DBC looking intense," "SBGQ smiling softly." That's free (part of the image).
 
 ---
 

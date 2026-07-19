@@ -591,6 +591,18 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="seq-upload-clip">Upload video</button>
       </div>
       <button class="btn2" id="seq-add-all-media" style="width:100%;margin-top:6px">➕ Add ALL my pictures &amp; clips to the timeline</button>
+      <div style="margin-top:10px">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">
+          <span class="usage" style="font-weight:600;color:var(--tp)">Your clips &amp; pictures</span>
+          <span class="usage" id="seq-thumb-hint">— tap a thumbnail to add it · ▶ hover a clip to preview</span>
+          <div class="chips seq-thumb-filter" style="margin-left:auto">
+            <button class="chip on" data-f="all">All</button>
+            <button class="chip" data-f="video">🎬 Clips</button>
+            <button class="chip" data-f="image">🖼 Stills</button>
+          </div>
+        </div>
+        <div id="seq-thumb-picker" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:260px;overflow-y:auto;padding:2px"></div>
+      </div>
       <p class="usage">Drag items to reorder (or use the arrows). Stills sit on the timeline with a hold time — or give them a camera move above first.</p>
     </div>
 
@@ -3522,7 +3534,43 @@ function persistDraft() {
 }
 
 /* ---------------- pickers ---------------- */
+let seqThumbFilter = 'all';
+// Visual picker: a grid of every clip/still so you can SEE what you're loading
+// onto the timeline instead of guessing from a text dropdown. Tap = add;
+// hover a clip = autoplay preview; the little ⤢ opens it full-size to check.
+function renderSeqThumbs() {
+  const grid = document.getElementById('seq-thumb-picker');
+  if (!grid) return;
+  let media = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
+  if (seqThumbFilter !== 'all') media = media.filter((a) => a.kind === seqThumbFilter);
+  if (!media.length) { grid.innerHTML = '<p class="usage" style="grid-column:1/-1">Nothing to show — upload clips/pictures in My Media first.</p>'; return; }
+  grid.innerHTML = '';
+  media.forEach((a) => {
+    const cell = document.createElement('div');
+    cell.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid transparent';
+    cell.title = `Tap to add: ${a.label}`;
+    cell.innerHTML = (a.kind === 'image'
+      ? `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover" alt="">`
+      : `<video src="${a.url}" muted loop playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>`)
+      + `<span style="position:absolute;top:2px;left:3px;font-size:11px;filter:drop-shadow(0 1px 1px #000)">${a.kind === 'video' ? '🎬' : '🖼'}</span>`
+      + `<button class="stp-watch" title="Watch full-size" style="position:absolute;top:2px;right:2px;border:none;background:rgba(0,0,0,.55);color:#fff;border-radius:5px;font-size:10px;padding:1px 4px;cursor:zoom-in">⤢</button>`;
+    if (a.kind === 'video') {
+      const v = cell.querySelector('video');
+      cell.onmouseover = () => v.play().catch(() => {});
+      cell.onmouseout = () => { v.pause(); };
+    }
+    cell.onclick = async (e) => {
+      if (e.target.classList.contains('stp-watch')) { e.stopPropagation(); openLightbox(a.url, a.kind); return; }
+      cell.style.borderColor = 'var(--green)';
+      try { await addToSeq(a); } catch (_) {}
+      setTimeout(() => { cell.style.borderColor = 'transparent'; }, 500);
+    };
+    grid.appendChild(cell);
+  });
+}
+
 function renderSeqPickers() {
+  renderSeqThumbs();
   const vids = st.assets.filter((a) => a.kind === 'video');
   const imgs = st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay);
   $('#seq-add-select').innerHTML =
@@ -3760,6 +3808,13 @@ $('#seq-add').onclick = () => {
   const asset = st.assets.find((a) => a.id === Number($('#seq-add-select').value));
   if (asset) addToSeq(asset);
 };
+document.querySelectorAll('.seq-thumb-filter .chip').forEach((c) => {
+  c.onclick = () => {
+    seqThumbFilter = c.dataset.f;
+    document.querySelectorAll('.seq-thumb-filter .chip').forEach((x) => x.classList.toggle('on', x === c));
+    renderSeqThumbs();
+  };
+});
 $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   setErr('#seq-err', null);
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }

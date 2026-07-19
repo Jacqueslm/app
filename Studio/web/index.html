@@ -1724,6 +1724,21 @@ function renderMediaPage() {
     const actions = el.querySelector('.li-actions');
     const add = document.createElement('button'); add.textContent = '➕ Add to video'; add.className = 'primary';
     add.onclick = async () => { await addToSeq(a); };
+    if (a.kind === 'video') {
+      const pol = document.createElement('button');
+      pol.textContent = '✨ Polish';
+      pol.title = 'FREE — cinematic colour grade + sharpen + loudness master. Best on your finished render.';
+      pol.onclick = (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish');
+      actions.appendChild(add); actions.appendChild(pol);
+      const del2 = document.createElement('button'); del2.textContent = '🗑';
+      del2.onclick = async () => {
+        if (!confirm(`Delete "${a.label}" from your media? This can't be undone.`)) return;
+        try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); if (typeof loadStorage === 'function') loadStorage(); }
+        catch (e) { setErr('#seq-err', e.message); }
+      };
+      actions.appendChild(del2);
+      return el;
+    }
     const del = document.createElement('button'); del.textContent = '🗑';
     del.onclick = async () => {
       if (!confirm(`Delete "${a.label}" from your media? This can't be undone.`)) return;

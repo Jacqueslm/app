@@ -584,6 +584,10 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card adv-card">
       <h3>Timeline <span class="usage" id="seq-total"></span></h3>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button class="btn2 quiet" id="seq-undo" title="Undo last change (Ctrl+Z)" disabled>↩ Undo</button>
+        <button class="btn2 quiet" id="seq-redo" title="Redo (Ctrl+Y)" disabled>↪ Redo</button>
+      </div>
       <div id="seq-list" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <select class="input" id="seq-add-select" style="flex:1;min-width:140px"></select>
@@ -3555,6 +3559,46 @@ function persistDraft() {
   try { localStorage.setItem('tsid-studio-draft', JSON.stringify(collectSpec())); } catch (_) {}
 }
 
+/* ---------------- timeline undo / redo ---------------- */
+// Snapshot the timeline (clips + transitions) BEFORE every change, so any
+// mistake — a wrong delete, a bad reorder, an accidental transition — is one
+// tap to undo. Ctrl+Z / Ctrl+Y work too.
+let seqUndo = [], seqRedo = [];
+function snapSeq() {
+  seqUndo.push(JSON.stringify({ seq: st.seq, trans: st.trans }));
+  if (seqUndo.length > 80) seqUndo.shift();
+  seqRedo = [];
+  updateUndoUi();
+}
+function restoreSeqState(s) {
+  try { const o = JSON.parse(s); st.seq = o.seq || []; st.trans = o.trans || []; } catch (_) {}
+  renderSeq(); persistDraft(); updateUndoUi();
+}
+function undoSeq() {
+  if (!seqUndo.length) return;
+  seqRedo.push(JSON.stringify({ seq: st.seq, trans: st.trans }));
+  restoreSeqState(seqUndo.pop());
+}
+function redoSeq() {
+  if (!seqRedo.length) return;
+  seqUndo.push(JSON.stringify({ seq: st.seq, trans: st.trans }));
+  restoreSeqState(seqRedo.pop());
+}
+function updateUndoUi() {
+  const u = document.getElementById('seq-undo'); if (u) u.disabled = !seqUndo.length;
+  const r = document.getElementById('seq-redo'); if (r) r.disabled = !seqRedo.length;
+}
+document.addEventListener('keydown', (e) => {
+  const t = e.target;
+  if (t && /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName)) return; // don't hijack typing
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+    e.preventDefault();
+    if (e.shiftKey) redoSeq(); else undoSeq();
+  } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
+    e.preventDefault(); redoSeq();
+  }
+});
+
 /* ---------------- pickers ---------------- */
 let seqThumbFilter = 'all';
 // Visual picker: a grid of every clip/still so you can SEE what you're loading
@@ -3584,6 +3628,7 @@ function renderSeqThumbs() {
     cell.onclick = async (e) => {
       if (e.target.classList.contains('stp-watch')) { e.stopPropagation(); openLightbox(a.url, a.kind); return; }
       cell.style.borderColor = 'var(--green)';
+      snapSeq();
       try { await addToSeq(a); } catch (_) {}
       setTimeout(() => { cell.style.borderColor = 'transparent'; }, 500);
     };
@@ -3746,8 +3791,8 @@ function renderSeq() {
       tr.querySelector('.tr-type').value = t.type;
       tr.querySelector('.tr-dur').value = String(t.duration);
       tr.querySelector('.tr-dur').style.display = t.type === 'cut' ? 'none' : '';
-      tr.querySelector('.tr-type').onchange = (e) => { t.type = e.target.value; renderSeq(); };
-      tr.querySelector('.tr-dur').onchange = (e) => { t.duration = Number(e.target.value); renderSeq(); };
+      tr.querySelector('.tr-type').onchange = (e) => { snapSeq(); t.type = e.target.value; renderSeq(); };
+      tr.querySelector('.tr-dur').onchange = (e) => { snapSeq(); t.duration = Number(e.target.value); renderSeq(); };
       list.appendChild(tr);
     }
 
@@ -3792,10 +3837,10 @@ function renderSeq() {
     }
     const upd = () => { renderSeq(); };
     if (item.kind === 'image') {
-      row.querySelector('.t-hold').onchange = (e) => { item.holdDur = Math.min(60, Math.max(0.4, Number(e.target.value) || 4)); upd(); };
+      row.querySelector('.t-hold').onchange = (e) => { snapSeq(); item.holdDur = Math.min(60, Math.max(0.4, Number(e.target.value) || 4)); upd(); };
     } else {
-      row.querySelector('.t-start').onchange = (e) => { item.start = Math.max(0, Number(e.target.value) || 0); upd(); };
-      row.querySelector('.t-end').onchange = (e) => { item.end = Number(e.target.value) || item.end; upd(); };
+      row.querySelector('.t-start').onchange = (e) => { snapSeq(); item.start = Math.max(0, Number(e.target.value) || 0); upd(); };
+      row.querySelector('.t-end').onchange = (e) => { snapSeq(); item.end = Number(e.target.value) || item.end; upd(); };
     }
     const setEq = () => {
       item.eq = {
@@ -3806,17 +3851,18 @@ function renderSeq() {
       persistDraft();
     };
     row.querySelectorAll('.a-b,.a-c,.a-s').forEach((el) => (el.onchange = setEq));
-    row.querySelector('.a-reset').onclick = () => { item.eq = null; upd(); };
+    row.querySelector('.a-reset').onclick = () => { snapSeq(); item.eq = null; upd(); };
     row.querySelector('.adj-t').onclick = () => { item._adj = !item._adj; renderSeq(); };
-    row.querySelector('.mv-up').onclick = () => { if (i > 0) { [st.seq[i - 1], st.seq[i]] = [st.seq[i], st.seq[i - 1]]; renderSeq(); } };
-    row.querySelector('.mv-dn').onclick = () => { if (i < st.seq.length - 1) { [st.seq[i + 1], st.seq[i]] = [st.seq[i], st.seq[i + 1]]; renderSeq(); } };
-    row.querySelector('.rm').onclick = () => { st.seq.splice(i, 1); syncTrans(); renderSeq(); };
+    row.querySelector('.mv-up').onclick = () => { if (i > 0) { snapSeq(); [st.seq[i - 1], st.seq[i]] = [st.seq[i], st.seq[i - 1]]; renderSeq(); } };
+    row.querySelector('.mv-dn').onclick = () => { if (i < st.seq.length - 1) { snapSeq(); [st.seq[i + 1], st.seq[i]] = [st.seq[i], st.seq[i + 1]]; renderSeq(); } };
+    row.querySelector('.rm').onclick = () => { snapSeq(); st.seq.splice(i, 1); syncTrans(); renderSeq(); };
     row.ondragstart = (e) => { dragIdx = i; e.dataTransfer.effectAllowed = 'move'; };
     row.ondragover = (e) => { e.preventDefault(); row.style.borderColor = 'var(--accent)'; };
     row.ondragleave = () => { row.style.borderColor = ''; };
     row.ondrop = (e) => {
       e.preventDefault(); row.style.borderColor = '';
       if (dragIdx == null || dragIdx === i) return;
+      snapSeq();
       const [moved] = st.seq.splice(dragIdx, 1);
       st.seq.splice(i, 0, moved);
       dragIdx = null; renderSeq();
@@ -3828,7 +3874,7 @@ function renderSeq() {
 
 $('#seq-add').onclick = () => {
   const asset = st.assets.find((a) => a.id === Number($('#seq-add-select').value));
-  if (asset) addToSeq(asset);
+  if (asset) { snapSeq(); addToSeq(asset); }
 };
 document.querySelectorAll('.seq-thumb-filter .chip').forEach((c) => {
   c.onclick = () => {
@@ -3841,6 +3887,7 @@ document.querySelectorAll('.seq-thumb-filter .chip').forEach((c) => {
 // Continue-seam mush — hard cuts make continued clips flow seamlessly).
 function setAllTransitions(type) {
   if (!st.trans.length) { setErr('#seq-err', 'Add at least two clips first.'); return; }
+  snapSeq();
   st.trans.forEach((t) => { t.type = type; if (type === 'cut') t.duration = 0; else if (!t.duration) t.duration = 0.5; });
   renderSeq(); persistDraft();
   const note = document.getElementById('seq-trans-note');
@@ -3848,6 +3895,8 @@ function setAllTransitions(type) {
 }
 $('#seq-all-cuts') && ($('#seq-all-cuts').onclick = () => setAllTransitions('cut'));
 $('#seq-all-fades') && ($('#seq-all-fades').onclick = () => setAllTransitions('fade'));
+$('#seq-undo') && ($('#seq-undo').onclick = undoSeq);
+$('#seq-redo') && ($('#seq-redo').onclick = redoSeq);
 $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   setErr('#seq-err', null);
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }
@@ -3861,6 +3910,7 @@ $('#seq-add-all-media').onclick = async () => {
   if (!media.length) return setErr('#seq-err', 'No pictures or clips uploaded yet — upload some first.');
   const b = $('#seq-add-all-media'); b.disabled = true; const old = b.textContent;
   b.innerHTML = '<span class="spinner"></span>Adding…';
+  snapSeq();
   try { for (const a of media) await addToSeq(a); }
   finally { b.disabled = false; b.textContent = old; }
 };

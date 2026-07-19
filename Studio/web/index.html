@@ -2437,7 +2437,7 @@ function renderLibrary() {
     if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
     if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'));
     if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio')); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
-    if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('🎚 Remaster 48k WAV', '', (e) => freeTransform(a.id, 'remaster', e.target, '🎚 Remaster 48k WAV')); mb.title = 'FREE — export a streaming-standard 48kHz / 24-bit WAV, loudness-normalized to -14 LUFS'; }
+    if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release')); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
     if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
     btn('+ Seq', a.kind === 'video' ? 'primary' : '', () => addToSeq(a));
     btn('Save', '', () => {

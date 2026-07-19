@@ -1585,6 +1585,38 @@ router.post('/transform', async (req, res) => {
   }
 });
 
+/* ---------------- green screen / chroma key (free, local) ---------------- */
+// Drop a subject shot/generated on a solid colour onto any picture or clip.
+// scale2ref sizes the background to the foreground, chromakey removes the colour,
+// overlay composites. Foreground audio (if any) is kept; original never touched.
+router.post('/chroma', async (req, res) => {
+  const { fgAssetId, bgAssetId, color } = req.body || {};
+  const fg = db.getAsset(req.userId, Number(fgAssetId));
+  const bg = db.getAsset(req.userId, Number(bgAssetId));
+  if (!fg || fg.kind !== 'video') return res.status(404).json({ error: 'Pick the green-screen video clip first (the subject on a solid colour).' });
+  if (!bg || (bg.kind !== 'image' && bg.kind !== 'video')) return res.status(404).json({ error: 'Pick a picture or clip from your library as the new background.' });
+  const key = /^0x[0-9a-fA-F]{6}$/.test(color) ? color : '0x00d600';
+  const fgPath = mediaPath(fg.filename);
+  const bgPath = mediaPath(bg.filename);
+  let fgMeta = {}; try { fgMeta = JSON.parse(fg.meta || 'null') || {}; } catch (_) {}
+  const dur = fgMeta.duration || await probeMediaDuration(fgPath);
+  const hasAudio = await probeHasAudio(fgPath);
+  const outFile = newFilename(req.userId, '.mp4');
+  // background loops to cover the whole clip; image is held with -loop 1
+  const bgInput = bg.kind === 'image' ? ['-loop', '1', '-i', bgPath] : ['-stream_loop', '-1', '-i', bgPath];
+  const filter = `[0:v][1:v]scale2ref[bg][fg];[fg]chromakey=${key}:0.14:0.08[cf];[bg][cf]overlay=shortest=1,format=yuv420p[out]`;
+  const args = [
+    ...bgInput, '-i', fgPath,
+    '-filter_complex', filter,
+    '-map', '[out]', ...(hasAudio ? ['-map', '1:a?'] : []),
+    '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p',
+    ...(hasAudio ? ['-c:a', 'aac', '-b:a', '192k'] : ['-an']),
+    ...(dur ? ['-t', String(dur)] : []), '-movflags', '+faststart',
+  ];
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${fg.label} on ${bg.label}`, { source: 'chroma', fromAssetId: fg.id, bgAssetId: bg.id });
+  res.status(202).json({ job: jobJson(job) });
+});
+
 /* ---------------- output sizes ---------------- */
 const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
 const FPS = 30;

@@ -1318,6 +1318,7 @@ const st = {
   locations: [],        // saved places [{id, name, description, refs}]
   relationships: [],    // saved chemistry [{charA, charB, descriptor}]
   soundTarget: null,    // assetId with the sound-swap panel open
+  chromaTarget: null,   // assetId (green-screen clip) with the background picker open
   busyScene: false,
   busyRender: false,
 };
@@ -2285,7 +2286,8 @@ function renderLibrary() {
       } catch (err) { setErr('#scenes-err', err.message); b.disabled = false; b.textContent = '🔍 QC'; }
     });
     if (a.kind === 'video') btn('Cut', '', () => { st.cutTarget = st.cutTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; renderLibrary(); });
-    if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; renderLibrary(); });
+    if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.chromaTarget = null; renderLibrary(); });
+    if (a.kind === 'video') btn('🟢 Green screen', '', () => { st.chromaTarget = st.chromaTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); });
     // free ffmpeg transforms (no AI cost) — reuse what you already have
     if (a.kind !== 'audio') btn('Mirror', '', (e) => freeTransform(a.id, 'mirror', e.target, 'Mirror'));
     if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
@@ -2420,6 +2422,44 @@ function renderLibrary() {
         audioAssetId: Number(panel.querySelector('.snd-song').value),
         start: Number(panel.querySelector('.snd-start').value) || 0,
       }, e.target);
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.chromaTarget === a.id) {
+      // Green screen: drop this clip's subject (shot/generated on a solid colour)
+      // onto any picture or clip in your library. Free, local ffmpeg chroma key.
+      const bgs = st.assets.filter((x) => x.id !== a.id && (x.kind === 'image' || x.kind === 'video'));
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      let chromaKey = '0x00d600';
+      panel.innerHTML = bgs.length ? `
+        <div class="chips ck-colors">
+          <button class="chip on" data-key="0x00d600">🟢 Green screen</button>
+          <button class="chip" data-key="0x0047ff">🔵 Blue screen</button>
+        </div>
+        <select class="input ck-bg" style="padding:8px 10px;font-size:12px">
+          ${bgs.map((s) => `<option value="${s.id}">${s.kind === 'video' ? '🎬' : '🖼'} ${escapeHtml(s.label)}</option>`).join('')}
+        </select>
+        <button class="btn2 quiet ck-go">🟢 Put me on this background · free</button>
+        <span class="usage">Keys out the solid colour behind your subject and lays them over the picture/clip you pick. Makes a new copy — the original is untouched. Works best when the background colour is even and doesn't appear on your subject.</span>`
+        : '<span class="usage">Add a picture or another clip to your library first — that becomes the new background.</span>';
+      panel.querySelectorAll('.ck-colors .chip').forEach((c) => c.onclick = () => {
+        panel.querySelectorAll('.ck-colors .chip').forEach((x) => x.classList.remove('on'));
+        c.classList.add('on'); chromaKey = c.dataset.key;
+      });
+      const go = panel.querySelector('.ck-go');
+      if (go) go.onclick = async (e) => {
+        setErr('#scenes-err', null);
+        const btnEl = e.target; btnEl.disabled = true; const old = btnEl.textContent; btnEl.textContent = 'Working…';
+        try {
+          const { job } = await jfetch('/api/studio/chroma', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fgAssetId: a.id, bgAssetId: Number(panel.querySelector('.ck-bg').value), color: chromaKey }),
+          });
+          if (job) await pollJob(job.id, () => {});
+          st.chromaTarget = null;
+          await loadAssets();
+        } catch (err) { setErr('#scenes-err', err.message); btnEl.disabled = false; btnEl.textContent = old; }
+      };
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.cutTarget === a.id) {

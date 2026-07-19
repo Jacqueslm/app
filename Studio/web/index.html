@@ -599,7 +599,8 @@ body.simple-only #view-simple{display:flex !important}
         <span class="usage" style="font-weight:600;color:var(--tp)">All transitions:</span>
         <button class="btn2 quiet" id="seq-all-cuts" style="padding:6px 12px;font-size:12px">✂️ Hard cuts</button>
         <button class="btn2 quiet" id="seq-all-fades" style="padding:6px 12px;font-size:12px">🎞 Crossfades</button>
-        <span class="usage" id="seq-trans-note">Hard cuts are punchier & fix Continue seams; crossfades are dreamy but blur fast cuts.</span>
+        <button class="btn2 quiet" id="seq-smooth-continue" style="padding:6px 12px;font-size:12px">🩹 Smooth Continue seams</button>
+        <span class="usage" id="seq-trans-note">Hard cuts are punchy for normal scene changes. Use 🩹 to blend just the Continue seams (a 0.3s crossfade hides the AI's frame mismatch).</span>
       </div>
       <div style="margin-top:10px">
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">
@@ -2785,6 +2786,7 @@ function renderLibrary() {
     // free ffmpeg transforms (no AI cost) — reuse what you already have
     if (a.kind !== 'audio') btn('Mirror', '', (e) => freeTransform(a.id, 'mirror', e.target, 'Mirror'));
     if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'));
+    if (a.kind === 'video') { const mbb = btn('💫 Motion blur', '', (e) => freeTransform(a.id, 'motionblur', e.target, '💫 Motion blur')); mbb.title = 'FREE — silky motion blur on fast movement (blends frames); softens jumpy cuts too.'; }
     if (a.kind === 'video') btn('Freeze', '', (e) => freeTransform(a.id, 'freeze', e.target, 'Freeze'));
     if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio')); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
     if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release')); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
@@ -3901,6 +3903,39 @@ $('#seq-all-cuts') && ($('#seq-all-cuts').onclick = () => setAllTransitions('cut
 $('#seq-all-fades') && ($('#seq-all-fades').onclick = () => setAllTransitions('fade'));
 $('#seq-undo') && ($('#seq-undo').onclick = undoSeq);
 $('#seq-redo') && ($('#seq-redo').onclick = redoSeq);
+
+// Auto-detect Continue seams (a clip animated forward from the previous clip's
+// last frame) and blend just those with a 0.3s crossfade — hides the AI frame
+// mismatch that a hard cut exposes as a jump. Leaves all other cuts alone.
+function smoothContinueSeams() {
+  if (st.seq.length < 2) { setErr('#seq-err', 'Add at least two clips first.'); return; }
+  const byId = new Map(st.assets.map((a) => [a.id, a]));
+  const isContinuationOf = (curItem, prevItem) => {
+    const cur = byId.get(curItem.assetId);
+    let src = cur && cur.meta && cur.meta.fromAssetId;
+    let hops = 0;
+    while (src && hops < 5) {
+      const node = byId.get(src);
+      if (!node || !node.meta) break;
+      // a freeze grabbed from the previous clip = the Continue handoff point
+      if (node.meta.transform === 'freeze' && node.meta.fromAssetId === prevItem.assetId) return true;
+      src = node.meta.fromAssetId; hops++;
+    }
+    return false;
+  };
+  snapSeq();
+  let n = 0;
+  for (let i = 0; i < st.seq.length - 1; i++) {
+    if (isContinuationOf(st.seq[i + 1], st.seq[i])) { st.trans[i] = { type: 'fade', duration: 0.3 }; n++; }
+  }
+  renderSeq(); persistDraft();
+  setErr('#seq-err', null);
+  const note = document.getElementById('seq-trans-note');
+  if (note) note.textContent = n
+    ? `✓ Smoothed ${n} Continue seam${n > 1 ? 's' : ''} with a 0.3s blend — that jump should be gone.`
+    : 'No Continue seams found. A Continue clip has to sit right after the clip it continues from — place them back-to-back, then tap this again.';
+}
+$('#seq-smooth-continue') && ($('#seq-smooth-continue').onclick = smoothContinueSeams);
 $('#seq-upload-clip').onclick = () => pickFile('video/*', async (file) => {
   setErr('#seq-err', null);
   try { const asset = await uploadFile(file, 'video'); await loadAssets(); addToSeq(asset); }

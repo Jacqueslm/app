@@ -2091,6 +2091,20 @@ router.post('/transform', async (req, res) => {
       return res.status(202).json({ job: jobJson(job) });
     }
 
+    // MOTION BLUR — averages neighbouring frames (tmix) so fast motion smears
+    // into a silky cinematic blur, and hard cuts/jumps read softer. Same length,
+    // audio preserved. Free, no AI.
+    if (op === 'motionblur') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Motion blur is for video clips.' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const strength = [2, 3, 4, 5].includes(Number(req.body.strength)) ? Number(req.body.strength) : 3;
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', `tmix=frames=${strength}`, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · motion blur`, { ...carry, transform: 'motionblur' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
     // REFRAME — turn any clip/photo into a vertical Short (9:16), Square (1:1),
     // or Wide (16:9). 'fill' crops to fill the frame (subject-centered); 'blur'
     // fits the whole shot with a blurred zoom behind it (nothing cropped). Free.

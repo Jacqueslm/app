@@ -193,6 +193,9 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 The exact price shows **on the button** before you tap, and every number above rounds **up** so a real bill is never a surprise. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
 
+### 💸 Recover paid clips (Settings → Storage area)
+Every AI generation is now saved the moment it's sent. If a clip you paid for didn't land in your library (you closed the tab, refreshed, or the render ran long), open **Recover paid clips** and tap **Find my finished clips** — Studio pulls in anything fal already finished. This never costs anything (reading a result is free). For clips paid for *before* this existed, paste the output file link from your fal.ai dashboard into the "Recover an older one" box.
+
 ### The free toolbox (no AI, on every clip/photo in My Media)
 - **🧽 Remove corner mark** (Crop → *Remove corner mark ✦*) — cleans a decorative sparkle / corner watermark off **your own** generated image. *Patch it out* blends it into the pixels around it and keeps the whole frame (best when the subject is near the corner); *Zoom past it* crops the corner off. Free & instant. It's for tidying a provider's sparkle on your own art — it can't touch invisible watermarks and isn't for anyone else's work.
 - **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.

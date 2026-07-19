@@ -96,6 +96,25 @@ db.exec(`
     descriptor TEXT NOT NULL,
     UNIQUE(user_id, char_a, char_b)
   );
+  CREATE TABLE IF NOT EXISTS fal_receipts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    request_id TEXT,
+    status_url TEXT NOT NULL,
+    response_url TEXT NOT NULL,
+    expect TEXT NOT NULL,
+    label TEXT,
+    character_id INTEGER,
+    model TEXT,
+    tier TEXT,
+    meta TEXT,
+    status TEXT NOT NULL DEFAULT 'running',
+    asset_id INTEGER,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_fal_receipts_user ON fal_receipts(user_id, status, id);
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -363,6 +382,38 @@ function clearFinishedQueue(userId) {
   db.prepare("DELETE FROM studio_queue WHERE user_id = ? AND status IN ('done','error')").run(userId);
 }
 
+/* ---------------- fal receipts (paid-generation recovery) ---------------- */
+// Every fal submission is logged here the moment it's sent, BEFORE any result
+// comes back. Because fal bills whether or not the browser is around to collect
+// the output, this is the durable record that lets Studio recover a paid clip
+// later — even after a server restart wipes the in-memory job. request_id is
+// parsed out of the response URL for display.
+function logFalReceipt(userId, r) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO fal_receipts (user_id, request_id, status_url, response_url, expect, label, character_id, model, tier, meta, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?)`
+  ).run(userId, r.requestId || null, r.statusUrl, r.responseUrl, r.expect, r.label || null,
+        r.characterId || null, r.model || null, r.tier || null, r.meta ? JSON.stringify(r.meta) : null, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function setFalReceiptStatus(id, fields) {
+  db.prepare('UPDATE fal_receipts SET status = ?, asset_id = COALESCE(?, asset_id), error = ?, updated_at = ? WHERE id = ?')
+    .run(fields.status, fields.assetId || null, fields.error || null, new Date().toISOString(), id);
+}
+
+// Receipts still worth re-checking: anything not cleanly finished. (A 'running'
+// row whose fal request actually completed while the tab was gone is exactly
+// what recovery pulls in.)
+function getOpenFalReceipts(userId) {
+  return db.prepare("SELECT * FROM fal_receipts WHERE user_id = ? AND status = 'running' ORDER BY id ASC").all(userId);
+}
+
+function getFalReceipts(userId, limit) {
+  return db.prepare('SELECT * FROM fal_receipts WHERE user_id = ? ORDER BY id DESC LIMIT ?').all(userId, limit || 50);
+}
+
 /* ---------------- owned-audience email list ---------------- */
 // Returns true if this was a new signup, false if the email was already on
 // the list (so the public endpoint can still say "you're on the list!"
@@ -487,4 +538,8 @@ module.exports = {
   addFanSignup,
   getFanSignups,
   getFanSignupCount,
+  logFalReceipt,
+  setFalReceiptStatus,
+  getOpenFalReceipts,
+  getFalReceipts,
 };

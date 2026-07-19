@@ -103,9 +103,15 @@ const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
 // Kling motion-control takes image_url + video_url + character_orientation.
 const MODEL_MOTION_STD = process.env.FAL_MODEL_MOTION_STD || 'fal-ai/kling-video/v2.6/standard/motion-control';
 const MODEL_MOTION_HERO = process.env.FAL_MODEL_MOTION_HERO || 'fal-ai/kling-video/v3/pro/motion-control';
-const DANCE_DRAFT_RATE = Number(process.env.STUDIO_RATE_DANCE_DRAFT || 0.05);  // per second, estimates
-const DANCE_STD_RATE = Number(process.env.STUDIO_RATE_DANCE_STD || 0.07);
-const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.12);
+// Dance rates verified against fal Jul 2026, quoted per OUTPUT second and rounded
+// UP so the real bill is never a surprise (this is what caused the overspend before):
+//  - Draft = wan-animate. fal bills it per 16-frame "video second," so a 720p clip
+//    from ~30fps source lands near $0.15/output-sec, not the naive $0.05.
+//  - Standard = kling v2.6 standard motion-control (~$0.13/sec by credit math).
+//  - Hero = kling v3 pro motion-control, listed at $0.168/sec.
+const DANCE_DRAFT_RATE = Number(process.env.STUDIO_RATE_DANCE_DRAFT || 0.15);
+const DANCE_STD_RATE = Number(process.env.STUDIO_RATE_DANCE_STD || 0.13);
+const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.17);
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.

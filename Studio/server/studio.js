@@ -3376,6 +3376,18 @@ router.get('/jobs/:id', async (req, res) => {
   res.json({ job: jobJson(job) });
 });
 
+/* ---------------- built-in documents (guide + price list PDFs) ---------------- */
+// Served straight from the Studio folder so they're always one tap from Settings.
+function sendStudioDoc(res, filename, downloadName) {
+  const p = path.join(__dirname, '..', filename);
+  if (!fs.existsSync(p)) return res.status(404).json({ error: 'That document is not installed in this copy of Studio.' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${downloadName || filename}"`);
+  fs.createReadStream(p).pipe(res);
+}
+router.get('/docs/guide.pdf', (req, res) => sendStudioDoc(res, 'Studio-Guide.pdf', 'Studio-Guide.pdf'));
+router.get('/docs/pricelist.pdf', (req, res) => sendStudioDoc(res, 'Studio-Price-List.pdf', 'Studio-Price-List.pdf'));
+
 /* ---------------- paid-generation recovery + spend ledger ---------------- */
 // Best-effort estimate of what a single generation cost, from its type/tier and
 // stored details. Marked as an estimate everywhere — your real fal balance is

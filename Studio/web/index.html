@@ -789,6 +789,15 @@ body.simple-only #view-simple{display:flex !important}
     </div>
 
     <div class="card adv-card">
+      <h3>📖 Guide &amp; help</h3>
+      <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow. Open it any time.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="doc-guide">📖 Open the guide (PDF)</button>
+        <button class="btn2 quiet" id="doc-pricelist">📄 Price list (PDF)</button>
+      </div>
+    </div>
+
+    <div class="card adv-card">
       <h3>Storage &amp; Backup</h3>
       <p class="usage" id="stor-total">…</p>
       <div id="stor-list" class="row"></div>
@@ -2440,6 +2449,8 @@ async function loadStorage() {
     });
   } catch (_) { /* not signed in */ }
 }
+$('#doc-guide') && ($('#doc-guide').onclick = () => window.open('/api/studio/docs/guide.pdf', '_blank'));
+$('#doc-pricelist') && ($('#doc-pricelist').onclick = () => window.open('/api/studio/docs/pricelist.pdf', '_blank'));
 $('#stor-refresh').onclick = loadStorage;
 $('#stor-backup').onclick = () => { location.href = '/api/studio/backup'; };
 $('#stor-open-folder').onclick = async () => {

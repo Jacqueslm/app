@@ -170,6 +170,8 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 **Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
 
 > 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
+>
+> 📖 **The full guide is built in.** Open **⚙ Settings → 📖 Guide & help → Open the guide (PDF)** for the complete Studio manual (every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow). The price list is right beside it.
 
 **AI (from your fal.ai balance) — verified July 2026, and every price shows on the button before you tap:**
 | Thing | Rough cost |

@@ -78,6 +78,12 @@ const VIDEO_TIERS = {
     rate: Number(process.env.STUDIO_RATE_BEST || 0.24),
   },
 };
+// Reference-to-video: when you attach character reference photos to an Animate,
+// we switch to a model that keeps the character consistent using those refs
+// (Vidu Q1 supports up to 7 reference images via reference_image_urls). Priced
+// per clip (round-up estimate); shown on the button and guarded by the cap.
+const MODEL_I2V_REF = process.env.FAL_MODEL_I2V_REF || 'fal-ai/vidu/q1/reference-to-video';
+const ANIM_REF_RATE = Number(process.env.STUDIO_RATE_ANIM_REF || 0.40); // per clip, conservative
 const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballpark per image
 // FLUX.2 pro edit bills $0.03 for the first output MP + $0.015 per extra MP of
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
@@ -131,7 +137,9 @@ let DAILY_USD_CAP = Number(process.env.STUDIO_DAILY_USD_CAP || 0);
 function estActionCost(kind, opts = {}) {
   const s = Number(opts.seconds) || 5;
   switch (kind) {
-    case 'video': return (VIDEO_TIERS[opts.tier] || VIDEO_TIERS.standard).rate * s;
+    case 'video':
+      if (opts.tier === 'reference') return ANIM_REF_RATE; // flat per-clip for character-lock
+      return (VIDEO_TIERS[opts.tier] || VIDEO_TIERS.standard).rate * s;
     case 'image': return (opts.characterId ? CHARACTER_IMAGE_RATE : IMAGE_RATE) * (Number(opts.count) || 1);
     case 'imageBest': return IMAGE_BEST_RATE * (Number(opts.count) || 1);
     case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
@@ -674,6 +682,7 @@ router.get('/config', (req, res) => {
       qc: QC_RATE,
       voicePer1k: VOICE_RATE,
       voiceEmoPer1k: VOICE_EMO_RATE,
+      animRef: ANIM_REF_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -1639,13 +1648,16 @@ router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { assetId, prompt, duration, tier } = req.body || {};
+  const { assetId, prompt, duration, tier, refAssetIds } = req.body || {};
   const still = db.getAsset(req.userId, Number(assetId));
   if (!still || still.kind !== 'image') {
     return res.status(404).json({ error: 'Pick an image from your library to animate.' });
   }
-  const chosenTier = VIDEO_TIERS[tier] ? tier : 'standard';
-  const model = VIDEO_TIERS[chosenTier].model;
+  // Reference photos attached → character-lock mode (reference-to-video model).
+  const refIds = Array.isArray(refAssetIds) ? refAssetIds.map(Number).filter(Boolean).slice(0, 6) : [];
+  const useRefs = refIds.length > 0;
+  const chosenTier = useRefs ? 'reference' : (VIDEO_TIERS[tier] ? tier : 'standard');
+  const model = useRefs ? MODEL_I2V_REF : VIDEO_TIERS[chosenTier].model;
   const seconds = [5, 10].includes(Number(duration)) ? Number(duration) : 5;
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
@@ -1658,19 +1670,29 @@ router.post('/animate', async (req, res) => {
     : 'subtle cinematic motion, natural movement, keep the subject consistent';
 
   try {
-    const submitted = await falSubmit(model, {
-      prompt: motionPrompt,
-      image_url: fileToDataUri(still.filename),
-      duration: String(seconds),
-    });
+    let input;
+    if (useRefs) {
+      // Feed the still plus the character reference photos (scaled down to keep
+      // the payload light) so the model locks the character's look.
+      const refUris = [];
+      for (const id of refIds) {
+        const r = db.getAsset(req.userId, id);
+        if (r && r.kind === 'image') refUris.push(await scaledRefDataUri(r.filename));
+      }
+      const reference_image_urls = [fileToDataUri(still.filename), ...refUris.filter(Boolean)].slice(0, 7);
+      input = { prompt: motionPrompt, reference_image_urls };
+    } else {
+      input = { prompt: motionPrompt, image_url: fileToDataUri(still.filename), duration: String(seconds) };
+    }
+    const submitted = await falSubmit(model, input);
     const job = createJob(req.userId, 'ai-video', {
       fal: {
         statusUrl: submitted.status_url,
         responseUrl: submitted.response_url,
         expect: 'video',
-        label: still.label,
+        label: useRefs ? `${still.label} · locked` : still.label,
         characterId: still.character_id,
-        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds },
+        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds, refCount: refIds.length || undefined },
       },
     });
     res.status(202).json({ job: jobJson(job) });

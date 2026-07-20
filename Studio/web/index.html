@@ -1792,9 +1792,15 @@ function renderMediaPage() {
     audio.onended = () => { play.textContent = '▶ Play'; };
     const use = document.createElement('button'); use.textContent = '🎬 Use in video'; use.className = 'btn2'; use.style.cssText = 'padding:5px 10px;font-size:12px';
     use.onclick = () => { addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); document.querySelector('#mtabs button[data-view="seq"]').click(); };
+    const master = document.createElement('button'); master.textContent = '✨ Master'; master.className = 'btn2'; master.style.cssText = 'padding:5px 10px;font-size:12px';
+    master.title = 'FREE — repair, even out & loudness-master to a release-ready 48kHz/24-bit WAV';
+    master.onclick = (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master');
+    const clean = document.createElement('button'); clean.textContent = '🔊 Clean'; clean.className = 'btn2 quiet'; clean.style.cssText = 'padding:5px 10px;font-size:12px';
+    clean.title = 'FREE — de-noise, de-rumble & normalize loudness';
+    clean.onclick = (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean');
     const del = document.createElement('button'); del.textContent = '🗑'; del.className = 'btn2 quiet'; del.style.cssText = 'padding:5px 10px;font-size:12px';
     del.onclick = async () => { if (!confirm(`Delete "${a.label}"?`)) return; try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); } catch (e) { setErr('#seq-err', e.message); } };
-    row.appendChild(name); row.appendChild(play); row.appendChild(use); row.appendChild(del);
+    row.appendChild(name); row.appendChild(play); row.appendChild(use); row.appendChild(master); row.appendChild(clean); row.appendChild(del);
     songBox.appendChild(row);
   });
   $('#media-song-count').textContent = songs.length ? `(${songs.length})` : '';
@@ -2841,27 +2847,48 @@ function renderLibrary() {
       if (!tierKeys.includes(curTier)) curTier = 'standard';
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const animRefs = new Set();           // selected reference-photo asset ids
+      let refPickerOpen = false;
+      const refImgs = st.assets.filter((x) => x.kind === 'image' && !x.meta?.overlay && x.id !== a.id);
+      const animRefRate = pricing?.animRef || 0.40;
       const priceFor = (sec) => {
         const r = pricing?.tiers[curTier]?.rate;
         return r ? ` · ~$${(r * sec).toFixed(2)}` : '';
       };
       const renderPanel = () => {
+        const locked = animRefs.size > 0;
         panel.innerHTML = `
-          ${pricing ? `<div class="chips anim-tiers">${tierKeys.map((k) =>
+          ${pricing && !locked ? `<div class="chips anim-tiers">${tierKeys.map((k) =>
             `<button class="chip${k === curTier ? ' on' : ''}" data-tier="${k}">${pricing.tiers[k].label} · $${pricing.tiers[k].rate.toFixed(3)}/s</button>`).join('')}</div>
           <span class="usage">${escapeHtml(pricing.tiers[curTier].desc)} · prices as of ${escapeHtml(pricing.asOf)} — verify on fal.ai/pricing</span>` : ''}
           <input class="input" style="padding:8px 10px;font-size:12px" id="anim-prompt" placeholder="Motion (optional): slow push-in, hair moving in the wind" value="${st.animPrefillFor === a.id ? escapeHtml(st.animPrefill) : ''}">
-          ${st.animPrefillFor === a.id ? '<span class="usage">▶ Continuing your clip — this is its last frame. Tweak the motion if you like, then pick a length. Place the new clip right after the first for one seamless shot.</span>' : ''}
+          ${st.animPrefillFor === a.id ? '<span class="usage">▶ Continuing your clip — this is its last frame. Tweak the motion if you like, then pick a length.</span>' : ''}
+          <button class="btn2 quiet anim-reftoggle" style="text-align:left;font-size:12px">🎯 Character lock ${locked ? `(${animRefs.size} reference${animRefs.size === 1 ? '' : 's'} on)` : '— add reference photos for max consistency'}</button>
+          ${refPickerOpen ? `<div class="anim-refgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:5px;max-height:170px;overflow-y:auto">
+            ${refImgs.length ? refImgs.map((r) => `<div class="anim-refcell" data-rid="${r.id}" style="position:relative;aspect-ratio:1;border-radius:7px;overflow:hidden;cursor:pointer;border:2px solid ${animRefs.has(r.id) ? 'var(--green)' : 'transparent'}"><img src="${r.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover" alt="">${animRefs.has(r.id) ? '<span style="position:absolute;top:1px;right:2px;color:var(--green);font-weight:800">✓</span>' : ''}</div>`).join('') : '<span class="usage" style="grid-column:1/-1">No other photos to use as references. Upload a few clear shots of your character first.</span>'}
+          </div>
+          <span class="usage">Tap the clearest photos of this character (up to 6). Locking uses a reference model that keeps their face/look consistent — it generates a fresh clip guided by your photos + the motion prompt.</span>` : ''}
           <div style="display:flex;gap:6px">
-            <button class="btn2" style="flex:1" data-sec="5">5s clip${priceFor(5)}</button>
-            <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip${priceFor(10)}</button>
+            ${locked
+              ? `<button class="btn2" style="flex:1" data-sec="5">🎯 Locked clip · ~$${animRefRate.toFixed(2)}</button>`
+              : `<button class="btn2" style="flex:1" data-sec="5">5s clip${priceFor(5)}</button>
+                 <button class="btn2 quiet" style="flex:1" data-sec="10">10s clip${priceFor(10)}</button>`}
           </div>
           <div class="progress-line" id="anim-prog"><div></div></div>`;
         panel.querySelectorAll('.anim-tiers .chip').forEach((c) => {
           c.onclick = () => { curTier = c.dataset.tier; localStorage.setItem('tsid-tier', curTier); renderPanel(); };
         });
+        panel.querySelector('.anim-reftoggle').onclick = () => { refPickerOpen = !refPickerOpen; renderPanel(); };
+        panel.querySelectorAll('.anim-refcell').forEach((cell) => {
+          cell.onclick = () => {
+            const id = Number(cell.dataset.rid);
+            if (animRefs.has(id)) animRefs.delete(id);
+            else { if (animRefs.size >= 6) return; animRefs.add(id); }
+            renderPanel();
+          };
+        });
         panel.querySelectorAll('button[data-sec]').forEach((b) => {
-          b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel, curTier);
+          b.onclick = () => animateAsset(a.id, panel.querySelector('#anim-prompt').value, Number(b.dataset.sec), panel, curTier, [...animRefs]);
         });
       };
       renderPanel();
@@ -3328,15 +3355,17 @@ function renderLibrary() {
   }
 }
 
-async function animateAsset(assetId, motion, seconds, panel, tier) {
+async function animateAsset(assetId, motion, seconds, panel, tier, refIds) {
   setErr('#scenes-err', null);
   panel.querySelectorAll('button').forEach((b) => (b.disabled = true));
   const prog = panel.querySelector('.progress-line');
   prog.classList.add('show');
   try {
+    const body = { assetId, prompt: motion, duration: seconds, tier: tier || localStorage.getItem('tsid-tier') || 'standard' };
+    if (Array.isArray(refIds) && refIds.length) body.refAssetIds = refIds;
     const { job } = await jfetch('/api/studio/animate', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ assetId, prompt: motion, duration: seconds, tier: tier || localStorage.getItem('tsid-tier') || 'standard' }),
+      body: JSON.stringify(body),
     });
     await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
     st.animTarget = null;

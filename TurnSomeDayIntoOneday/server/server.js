@@ -50,11 +50,14 @@ const loginLimiter = rateLimit({
 });
 
 const signupLimiter = rateLimit({
+  // Recovery signups often share a network (a household, a rehab center, a
+  // campus or coffee-shop Wi-Fi, or several people who saw the same launch
+  // post from one office). Keep abuse protection but don't block real users.
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many accounts created from this network. Try again later.' },
+  message: { error: 'Too many accounts created from this network. Try again in a little while.' },
 });
 
 function setSessionCookie(res, userId) {

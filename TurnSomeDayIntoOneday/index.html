@@ -598,7 +598,7 @@ body{display:flex;justify-content:center}
         <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
         <span class="nova-mode-chip" id="nova-mode-chip">Guided mode</span>
       </div>
-      <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI therapist · Non-judgmental · Confidential</div>
+      <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI companion · Non-judgmental · Confidential</div>
     </div>
   </div>
   <div class="quick-chips" id="quickChips">
@@ -1268,7 +1268,7 @@ body{display:flex;justify-content:center}
           <div>✓ Custom lesson packs</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
-        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:var(--ts);border-color:var(--bdr)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
+        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:#d3d7ee;border-color:rgba(255,255,255,.35)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
         <div class="tier-toggle">
           <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
           <button id="abtn" onclick="setBill('a')">Yearly · save 40%</button>
@@ -1534,7 +1534,7 @@ body{display:flex;justify-content:center}
     </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
-      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
+      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI recovery companion, right now</span></div>
     </div>
     <div class="sos-opt" onclick="openTriggeredFlow()">
       <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
@@ -2062,16 +2062,8 @@ let S = {
     morningTime:'08:00',bedtimeTime:'21:00',tone:'gentle',frequency:'daily'
   },
   lastSmartReminderSent:{},
-  journals:[
-    {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
-    {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
-  ],
-  cravings:[
-    {ts:'2026-06-27T16:22:00',val:6,trigger:'Stress'},
-    {ts:'2026-06-25T21:10:00',val:3,trigger:'Boredom'},
-    {ts:'2026-06-23T19:45:00',val:8,trigger:'Social situation'},
-    {ts:'2026-06-21T08:00:00',val:2,trigger:'Habit / routine'}
-  ],
+  journals:[],
+  cravings:[],
   currentJourMood:'🙂',currentJourMoodLabel:'Good',
   soberDays:[]
 };
@@ -5728,21 +5720,25 @@ function addBubble(who,text){
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
-const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?|\bpacks?\b|habits?|consistency|routines?/i;
+// Only gate GENUINE Pro product features (reports/analytics/custom packs).
+// Emotional-support phrasing ("why do I keep relapsing", "journal", "habits",
+// "patterns", "streaks") must NEVER be walled — a hurting free user has to get
+// a real supportive reply, not an upsell. Those now flow straight to Nova.
+const PRO_FEATURE_TEST=/weekly (summary|check-?in|report)|\breports?\b|\banalytics\b|\bdashboard\b|deep dive|custom (lesson )?packs?|build (my )?own pack/i;
 function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
 function proFeaturePreviewText(text){
-  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Nova Pro to continue.";
-  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
+  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nThat deeper piece is part of Nova Pro whenever you want it — but I'm right here with you either way. 💜";
 }
 function addProPreviewBubble(teaserText){
   const area=document.getElementById('chatArea');
@@ -5820,7 +5816,7 @@ async function sendMsg(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
-    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 100 sessions a day with me. 💜");
+    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -5906,7 +5902,7 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools'
 };
-const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={home:'Today',nova:'Nova — AI companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';

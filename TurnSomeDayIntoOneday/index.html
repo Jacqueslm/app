@@ -2062,16 +2062,8 @@ let S = {
     morningTime:'08:00',bedtimeTime:'21:00',tone:'gentle',frequency:'daily'
   },
   lastSmartReminderSent:{},
-  journals:[
-    {date:'2026-06-27T20:12:00',mood:'🙂',moodLabel:'Good',body:'Had a tough moment at dinner when others were drinking. Remembered my reasons and got through it. Really proud of how far I\'ve come this month.'},
-    {date:'2026-06-26T09:05:00',mood:'🌟',moodLabel:'Amazing',body:'Woke up clear-headed for the second day in a row. Morning run felt incredible. Energy levels improving.'}
-  ],
-  cravings:[
-    {ts:'2026-06-27T16:22:00',val:6,trigger:'Stress'},
-    {ts:'2026-06-25T21:10:00',val:3,trigger:'Boredom'},
-    {ts:'2026-06-23T19:45:00',val:8,trigger:'Social situation'},
-    {ts:'2026-06-21T08:00:00',val:2,trigger:'Habit / routine'}
-  ],
+  journals:[],
+  cravings:[],
   currentJourMood:'🙂',currentJourMoodLabel:'Good',
   soberDays:[]
 };
@@ -2098,6 +2090,13 @@ function load(){
   (S.communityPosts||[]).forEach(p=>{
     if(!p.category)p.category=S.currentAddiction||'Other';
   });
+  // Strip the sample journal/craving entries that older builds seeded into every new
+  // account - they were mockup filler, not anything the user wrote, and they polluted
+  // streak/insight calculations with fake data.
+  const DEMO_JOURNAL_DATES=['2026-06-27T20:12:00','2026-06-26T09:05:00'];
+  const DEMO_CRAVING_TS=['2026-06-27T16:22:00','2026-06-25T21:10:00','2026-06-23T19:45:00','2026-06-21T08:00:00'];
+  if(Array.isArray(S.journals))S.journals=S.journals.filter(j=>!DEMO_JOURNAL_DATES.includes(j.date));
+  if(Array.isArray(S.cravings))S.cravings=S.cravings.filter(c=>!DEMO_CRAVING_TS.includes(c.ts));
 }
 function getLessonDayFor(addiction){
   if(!addiction)return 1;
@@ -3429,6 +3428,9 @@ function renderJournal(){
     div.innerHTML=`<div class="jmeta"><span class="jdate">${ds}</span><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="jtag" style="background:${colors[0]};color:${colors[1]}">${j.mood} ${j.moodLabel}</span>${proMoodHTML}${catHTML}<button onclick="editJournalEntry(${idx})" title="Edit entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:14px;line-height:1;padding:0"><i class="ti ti-pencil" style="font-size:14px"></i></button><button onclick="deleteJournalEntry(${idx})" title="Delete entry" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0">×</button></span></div>${titleHTML}${promptHTML}<div class="jbody">${j.body.replace(/</g,'&lt;')}</div>`;
     list.appendChild(div);
   });
+  if(!S.journals.length){
+    list.innerHTML='<div style="text-align:center;padding:28px 16px;color:var(--tm);font-size:13px">No entries yet. Your first one can be a single sentence about how today felt — that\'s enough to start.</div>';
+  }
   renderIcons(list);
   renderJournalInsights();
 }
@@ -6723,7 +6725,7 @@ async function submitChangePassword(){
   const confirmPassword=document.getElementById('cp-confirm').value;
   const errEl=document.getElementById('cp-error');
   if(!currentPassword||!newPassword){errEl.textContent='Enter your current and new password.';return;}
-  if(newPassword.length<8){errEl.textContent='New password must be at least 8 characters.';return;}
+  if(newPassword.length<8&&!/^\d{4,6}$/.test(newPassword)){errEl.textContent='New password must be at least 8 characters, or a 4-6 digit PIN.';return;}
   if(newPassword!==confirmPassword){errEl.textContent='New passwords do not match.';return;}
   try{
     const res=await fetch('/api/auth/change-password',{
@@ -6976,6 +6978,20 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
+      // Signed in but no local data (cleared browser storage, new browser profile): adopt the
+      // account's synced state. Without this the app would re-onboard and the first save()
+      // would overwrite the account's real data with a blank slate.
+      if(!S.startDate){
+        try{
+          const stateRes=await fetch('/api/state');
+          const stateData=stateRes.ok?await stateRes.json():{state:null};
+          if(stateData.state){
+            Object.assign(S,JSON.parse(stateData.state));
+            S.accountEmail=me.email;
+            save();
+          }
+        }catch(e){/* offline - continue with local defaults */}
+      }
       enterApp();
       return;
     }

@@ -123,6 +123,9 @@ body.simple-only #view-simple{display:flex !important}
 .lightbox.show{display:flex}
 .lightbox img,.lightbox video{max-width:96vw;max-height:92vh;border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
 .lightbox .lb-close{position:absolute;top:14px;right:18px;background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:20px;width:40px;height:40px;border-radius:50%;cursor:pointer}
+.lightbox .lb-dl{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:#6d5cff;border:none;color:#fff;font-size:15px;font-weight:700;padding:11px 20px;border-radius:26px;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.5);display:flex;align-items:center;gap:6px}
+.lightbox .lb-dl:hover{background:#7d6dff}
+.lightbox .lb-dl:disabled{opacity:.6;cursor:default}
 .lib-item img,.lib-item video{cursor:zoom-in}
 </style>
 </head>
@@ -876,6 +879,7 @@ body.simple-only #view-simple{display:flex !important}
 </div>
 <div class="lightbox" id="lightbox">
   <button class="lb-close" aria-label="Close">✕</button>
+  <button class="lb-dl" id="lb-dl" aria-label="Download">⬇ Download</button>
   <img id="lb-img" style="display:none" alt="">
   <video id="lb-video" controls playsinline style="display:none"></video>
 </div>
@@ -1624,13 +1628,49 @@ function setErr(sel, msg) {
   }
 }
 
+/* ---------------- download any picture / clip to your device ---------------- */
+// Fetches the file as a blob so the browser truly SAVES it (with a real filename)
+// instead of just opening it in a new tab. Falls back to a direct link if fetch
+// is blocked. Works for generated images (same-origin) and most stock media.
+async function downloadFile(url, name, btn) {
+  const hasExt = /\.[a-z0-9]{2,4}$/i.test(name);
+  const urlExt = (url.match(/\.[a-z0-9]{2,4}(?=$|\?)/i) || [''])[0];
+  const old = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch failed');
+    const blob = await res.blob();
+    let ext = hasExt ? '' : urlExt;
+    if (!ext) {
+      const t = blob.type;
+      ext = t.includes('png') ? '.png' : t.includes('jpeg') ? '.jpg'
+        : t.includes('webp') ? '.webp' : t.includes('mp4') ? '.mp4'
+        : t.includes('webm') ? '.webm' : t.includes('wav') ? '.wav'
+        : t.includes('mpeg') || t.includes('mp3') ? '.mp3' : '.png';
+    }
+    const obj = URL.createObjectURL(blob);
+    const l = document.createElement('a'); l.href = obj; l.download = name + ext; l.click();
+    setTimeout(() => URL.revokeObjectURL(obj), 5000);
+  } catch (e) {
+    // Fallback: works same-origin; opens in a tab if a remote host blocks it
+    const l = document.createElement('a');
+    l.href = url; l.download = name + (hasExt ? '' : (urlExt || '.png')); l.target = '_blank'; l.click();
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = old; }
+  }
+}
+
 /* ---------------- tap-to-enlarge viewer ---------------- */
-function openLightbox(url, kind) {
+function openLightbox(url, kind, label) {
   const img = $('#lb-img'), vid = $('#lb-video');
   img.style.display = kind === 'image' ? 'block' : 'none';
   vid.style.display = kind === 'video' ? 'block' : 'none';
   if (kind === 'image') { img.src = url; vid.removeAttribute('src'); }
   else { vid.src = url; img.removeAttribute('src'); vid.play().catch(() => {}); }
+  const dl = $('#lb-dl');
+  const base = slug(label || (kind === 'video' ? 'studio-clip' : 'studio-image')) || 'studio-file';
+  dl.onclick = (e) => { e.stopPropagation(); downloadFile(url, base, dl); };
   $('#lightbox').classList.add('show');
 }
 function closeLightbox() {
@@ -1639,7 +1679,7 @@ function closeLightbox() {
   vid.removeAttribute('src');
   $('#lightbox').classList.remove('show');
 }
-$('#lightbox').onclick = (e) => { if (e.target.id !== 'lb-video') closeLightbox(); };
+$('#lightbox').onclick = (e) => { if (e.target.id !== 'lb-video' && e.target.id !== 'lb-dl') closeLightbox(); };
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
 
 /* ---------------- sign in / create account ---------------- */
@@ -1740,7 +1780,7 @@ function renderMediaPage() {
       ? `<img src="${a.url}" loading="lazy" alt="">`
       : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
       + `<div class="li-meta"><p>${escapeHtml(a.label)}</p><div class="li-actions"></div></div>`;
-    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
+    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind, a.label);
     const actions = el.querySelector('.li-actions');
     const add = document.createElement('button'); add.textContent = '➕ Add to video'; add.className = 'primary';
     add.onclick = async () => { await addToSeq(a); };
@@ -2764,7 +2804,7 @@ function renderLibrary() {
       ? `<img src="${a.url}" loading="lazy" alt="">`
       : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
       + `<div class="li-meta"><p title="${a.meta?.qc ? escapeHtml(a.meta.qc.note || '') : ''}">${escapeHtml(a.label)}${charName ? ' · ' + escapeHtml(charName) : ''}${a.meta?.qc ? (a.meta.qc.verdict === 'flag' ? ' <span style="color:#e6a23c">⚠ QC</span>' : ' <span style="color:var(--green)">✅ QC</span>') : ''}</p><div class="li-actions"></div></div>`;
-    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind);
+    el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind, a.label);
     const actions = el.querySelector('.li-actions');
     actions.style.cssText = 'display:flex;flex-direction:column;gap:6px;align-items:stretch';
     // Bundle the tools into labeled groups so it's not a scattered wall of buttons.
@@ -2831,10 +2871,7 @@ function renderLibrary() {
     if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release'), 'finish'); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
     // Use
     btn('+ Add to video', a.kind === 'video' ? 'primary' : '', () => addToSeq(a), 'use');
-    btn('Save', '', () => {
-      const ext = (a.url.match(/\.[a-z0-9]{2,4}$/i) || [a.kind === 'video' ? '.mp4' : '.png'])[0];
-      const l = document.createElement('a'); l.href = a.url; l.download = slug(a.label) + ext; l.click();
-    }, 'use');
+    btn('⬇ Download', '', (e) => downloadFile(a.url, slug(a.label) || (a.kind === 'video' ? 'studio-clip' : 'studio-image'), e.target), 'use');
     btn('✕', '', async () => {
       if (!confirm(`Delete "${a.label}" from your library?`)) return;
       try { await jfetch(`/api/studio/assets/${a.id}`, { method: 'DELETE' }); await loadAssets(); }
@@ -3724,7 +3761,7 @@ function renderSeqThumbs() {
       cell.onmouseout = () => { v.pause(); };
     }
     cell.onclick = async (e) => {
-      if (e.target.classList.contains('stp-watch')) { e.stopPropagation(); openLightbox(a.url, a.kind); return; }
+      if (e.target.classList.contains('stp-watch')) { e.stopPropagation(); openLightbox(a.url, a.kind, a.label); return; }
       cell.style.borderColor = 'var(--green)';
       snapSeq();
       try { await addToSeq(a); } catch (_) {}
@@ -3931,7 +3968,7 @@ function renderSeq() {
     if (thumb) {
       thumb.style.cursor = 'zoom-in';
       thumb.title = 'Tap to watch';
-      thumb.onclick = (e) => { e.stopPropagation(); openLightbox(item.url, item.kind); };
+      thumb.onclick = (e) => { e.stopPropagation(); openLightbox(item.url, item.kind, item.label); };
     }
     const upd = () => { renderSeq(); };
     if (item.kind === 'image') {
@@ -5207,7 +5244,7 @@ function renderStoryboard() {
       </div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
     const sbImg = card.querySelector('img');
-    if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, 'image');
+    if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, "image", asset.label);
     card.querySelector('.sb-prompt').oninput = (e) => { sc.prompt = e.target.value; persistDraft(); };
     const genBtn = card.querySelector('.sb-gen');
     if (genBtn) genBtn.onclick = () => generateStoryboardScene(sc, card);

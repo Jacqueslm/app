@@ -57,6 +57,16 @@ const signupLimiter = rateLimit({
   message: { error: 'Too many accounts created from this network. Try again later.' },
 });
 
+// Separate bucket from login: sharing the 5-per-15-min login limiter meant a couple of
+// mistyped logins plus a password change could lock a legitimate user out for 15 minutes.
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password change attempts. Try again in a few minutes.' },
+});
+
 function setSessionCookie(res, userId) {
   res.cookie(COOKIE_NAME, signSession(userId), {
     httpOnly: true,
@@ -109,7 +119,7 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/auth/change-password', loginLimiter, requireAuth, (req, res) => {
+app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   const user = db.getUserById(req.userId);
   if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
@@ -267,6 +277,12 @@ app.post('/api/chat', requireAuth, async (req, res) => {
 // Anything that reaches here escaped every route's own try/catch - log it so
 // it shows up in Profile diagnostics instead of vanishing silently.
 app.use((err, req, res, next) => {
+  // Malformed JSON in a request body is a client mistake, not a server fault - answer 400
+  // and keep it out of the user-visible diagnostics log so real server errors stand out.
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    if (res.headersSent) return next(err);
+    return res.status(400).json({ error: 'Invalid JSON in request body.' });
+  }
   try { db.logError('http', err.message, err.stack); } catch (_) {}
   if (res.headersSent) return next(err);
   res.status(500).json({ error: 'Something went wrong on the server.' });

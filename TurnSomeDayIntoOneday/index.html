@@ -48,8 +48,7 @@ body{display:flex;justify-content:center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
 }
 /* TOPBAR / HEADER */
-.topbar{background:var(--brand);color:#c0caff;padding:10px 16px 6px;display:flex;justify-content:space-between;font-size:12px;flex-shrink:0}
-.hdr{background:var(--brand);padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hdr{background:var(--brand);padding:max(10px,env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .app-name{font-size:9px;color:var(--green);letter-spacing:1.2px;font-weight:700;text-transform:uppercase}
 .scr-title{font-size:17px;font-weight:500;color:#fff}
 
@@ -319,7 +318,8 @@ body{display:flex;justify-content:center}
 .toggle-sw.on{background:var(--accent)}
 .toggle-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s}
 .toggle-sw.on .toggle-knob{left:21px}
-.reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
+.reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
+.usage{font-size:12px;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
 <!-- PREVIEW (shown before the mandatory account gate) -->
 <div id="preview-gate" class="ob">
@@ -544,7 +544,7 @@ body{display:flex;justify-content:center}
 </div>
 
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
-<div class="topbar"> <span>9:41</span> <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span> </div> <div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0"></i> </div> </div> <div class="screens" id="screens">
+<div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
 
 <!-- HOME -->
 <div id="s-home" class="scr on">
@@ -557,7 +557,7 @@ body{display:flex;justify-content:center}
     <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
     <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
     <div class="mini-stats">
-      <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l">Hours</div></div>
+      <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l" id="h-hours-lbl">Hours sober</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
     </div>
     <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-tools')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
@@ -2311,15 +2311,18 @@ function renderTodayLesson(){
   actionBox.style.display=lesson.action?'block':'none';
   reflectBox.style.display=lesson.reflection?'block':'none';
 
-  const isPastDay=day<getLessonDayFor(S.currentAddiction);
-  if(isPastDay){
-    btn.style.display='none';
-    backBtn.style.display='block';
-  }else{
+  // "Mark as done" only applies to the track's current day - a past or future day
+  // opened from "View all lessons" is read-only, otherwise completing it would
+  // advance the track from the wrong spot (or let repeat taps burn through days).
+  const isCurrentDay=day===getLessonDayFor(S.currentAddiction);
+  if(isCurrentDay){
     btn.style.display='block';
     btn.textContent='Mark as done';
     btn.disabled=false;
     backBtn.style.display='none';
+  }else{
+    btn.style.display='none';
+    backBtn.style.display='block';
   }
   renderLessonList();
 }
@@ -3212,7 +3215,8 @@ function updateStats(){
   if(next){
     const pct=Math.min((days/next)*100,100);
     document.getElementById('streak-fill').style.width=pct+'%';
-    document.getElementById('next-milestone-lbl').textContent=(next-days)+' days until '+next+'-day milestone';
+    const toGo=next-days;
+    document.getElementById('next-milestone-lbl').textContent=toGo+(toGo===1?' day':' days')+' until '+next+'-day milestone';
   } else {
     document.getElementById('streak-fill').style.width='100%';
     document.getElementById('next-milestone-lbl').textContent='All major milestones achieved 🏆';
@@ -4192,20 +4196,23 @@ function maybeShowHabitCelebration(days){
   novaNudge(`${days} days of showing up for this habit — that consistency is the real work, and it's paying off.`);
 }
 
+// Feedback here must use appInfo, not addBubble - the user is on the Journal
+// screen, and addBubble writes to the Nova chat area they can't see, which made
+// this button look like it silently did nothing.
 function startVoiceJournal(){
   if(!S.isPro){
-    addBubble('nova',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
+    appInfo('Voice journaling',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
     return;
   }
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SpeechRecognition){
-    addBubble('nova',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
+    appInfo('Voice journaling',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
     return;
   }
   if(S.voiceJournalActive)return;
 
   S.voiceJournalActive=true;
-  addBubble('nova',"I'm listening. Speak your journal entry whenever you're ready.");
+  appInfo('Voice journaling',"I'm listening — close this and speak your journal entry whenever you're ready.");
 
   const rec=new SpeechRecognition();
   rec.lang='en-US';
@@ -4217,7 +4224,7 @@ function startVoiceJournal(){
   };
 
   rec.onerror=()=>{
-    addBubble('nova',"Something went wrong with the microphone. Try again when you're ready.");
+    appInfo('Voice journaling',"Something went wrong with the microphone. Try again when you're ready.");
     S.voiceJournalActive=false;
   };
 
@@ -4238,7 +4245,7 @@ function saveVoiceJournal(text){
   logActivity('journal',{moodLabel:'Voice Entry'});
   save();
   renderJournal();
-  addBubble('nova',"Your voice journal has been saved.");
+  appInfo('Voice journaling',"Your voice journal entry has been saved.");
 }
 
 // ─── CRAVINGS ─────────────────────────────────────────────────────────────────
@@ -4607,6 +4614,8 @@ function updateRecoveryTermLabels(){
   if(daysLbl)daysLbl.textContent=`Days ${term}`;
   const hoursLbl=document.getElementById('prog-hours-lbl');
   if(hoursLbl)hoursLbl.textContent=`Hours ${term}`;
+  const homeHoursLbl=document.getElementById('h-hours-lbl');
+  if(homeHoursLbl)homeHoursLbl.textContent=`Hours ${term}`;
   const totalLbl=document.getElementById('prog-total-days-lbl');
   if(totalLbl)totalLbl.textContent=`Total ${term} days`;
   if(!S.pledged){
@@ -5518,8 +5527,12 @@ function buildSystemPrompt(){
 
 // ─── LOCAL FALLBACK (used when /api/chat is unreachable or unconfigured) ─────
 const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
+// One shared pattern for crisis language so the fallback reply and the live-chat
+// crisis handling can never drift apart. Errs toward matching: a false positive
+// shows a supportive 988 message, a false negative misses someone in danger.
+const CRISIS_RE=/suicid|kill(ing)?\s+myself|self.?harm|harm(ing)?\s+myself|hurt(ing)?\s+myself|end(ing)?\s+my\s+life|end\s+it\s+all|want(ed)?\s+to\s+end\s+it|take\s+my\s+(own\s+)?life|don'?t\s+want\s+to\s+(be\s+here|live|exist|wake\s+up)|no\s+reason\s+to\s+(live|go\s+on)|better\s+off\s+without\s+me|not\s+worth\s+living/i;
 const FALLBACK_PATTERNS=[
-  {test:/suicid|kill myself|self.?harm|end my life|hurt myself/i,
+  {test:CRISIS_RE,
    reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
   {test:/relaps|slipped|used again|drank again|smoked again/i,
    reply:`A slip doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
@@ -5822,7 +5835,7 @@ async function sendMsg(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
-    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 100 sessions a day with me. 💜");
+    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -5832,7 +5845,7 @@ async function sendMsg(){
   save();
 
   // Crisis language always gets full support, regardless of tier - never gated.
-  const isCrisis=/suicid|kill myself|self.?harm|end my life|hurt myself/i.test(text);
+  const isCrisis=CRISIS_RE.test(text);
   if(!S.isPro&&!isCrisis&&isProFeatureRequest(text)){
     const teaser=proFeaturePreviewText(text);
     addProPreviewBubble(teaser);
@@ -5968,7 +5981,7 @@ function setBill(type){
   const priceEl=document.getElementById('pro-price');
   const subEl=document.getElementById('pro-price-sub');
   if(type==='a'){
-    priceEl.innerHTML='$5.99<span>/mo</span>';
+    priceEl.innerHTML=`$${(PRO_PRICE_YEARLY/12).toFixed(2)}<span>/mo</span>`;
     if(subEl)subEl.textContent=`Billed $${PRO_PRICE_YEARLY}/yr — save 40% vs monthly`;
   }else if(type==='l'){
     priceEl.innerHTML=`$${PRO_PRICE_LIFETIME}<span> one-time</span>`;

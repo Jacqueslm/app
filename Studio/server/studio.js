@@ -2570,6 +2570,10 @@ router.post('/render', async (req, res) => {
       fadeIn: music.fadeIn !== false,
       fadeOut: music.fadeOut !== false,
       crossfade: music.crossfade !== false && tracks.length > 1,
+      // Loop the song to fill a video that runs longer than the music, so the
+      // tail is never silent. On by default; harmless when the song is already
+      // long enough (nothing repeats). Send music.loop === false to disable.
+      loop: music.loop !== false,
     };
   }
 
@@ -2702,7 +2706,14 @@ router.post('/render', async (req, res) => {
       else filters.push(`${mcur}[mt${i}]concat=n=2:v=0:a=1${out}`);
       mcur = out;
     }
-    let mchain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
+    // If the song is shorter than the video, repeat it to fill the whole
+    // window (bounded to the window length so memory stays tied to the video,
+    // not the source). When the song is already long enough this loops nothing
+    // audible — atrim reads the straight-through portion before any repeat.
+    const loopFilter = musicIn.loop
+      ? `aloop=loop=-1:size=${Math.ceil((winEnd + 2) * 44100)},`
+      : '';
+    let mchain = `${mcur}${loopFilter}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
       `,volume=${musicIn.volume.toFixed(2)}`;
     // duck lightly under titles so text reads
     const duckWindows = ovs

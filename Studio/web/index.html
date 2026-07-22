@@ -185,11 +185,9 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="media-upload-song">🎵 Upload a song</button>
         <button class="btn2 quiet" id="media-record">🎥 Record my screen</button>
         <button class="btn2 quiet" id="media-open-folder">📁 Open my media folder</button>
-        <button class="btn2 quiet" id="media-update">⬆ Update my app</button>
       </div>
       <p class="usage" id="media-rec-note" style="margin:2px 0 0">Grab any clip you can play on screen — a Manus render, a reference video — straight into your library. Pick the tab/window, and it stops when you press again.</p>
       <p class="usage" id="media-folder-note" style="word-break:break-all"></p>
-      <p class="usage" id="media-upd-status" style="word-break:break-all"></p>
 
       <h3 style="margin-top:8px">📷 Pictures <span class="usage" id="media-img-count"></span></h3>
       <div class="lib-grid" id="media-images"></div>
@@ -822,11 +820,6 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="stor-open-folder">📁 Open my media folder</button>
       </div>
       <p class="usage" id="stor-folder-path" style="word-break:break-all"></p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2 quiet" id="upd-check">Check for updates</button>
-        <button class="btn2" id="upd-go">⬆ Update my app</button>
-      </div>
-      <p class="usage" id="upd-status"></p>
       <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
       <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
     </div>
@@ -1589,10 +1582,20 @@ function pickFiles(accept, cb) {
     // Delegate to the existing buttons (bound later in the script; fine because
     // these fire on click, not now). Guarded so a missing target never throws.
     const go = (id) => { const el = document.getElementById(id); if (el && el.onclick) el.onclick(); };
-    document.getElementById('set-update') && (document.getElementById('set-update').onclick = () => {
-      const s = document.getElementById('set-update-status'); if (s) s.textContent = 'Checking for updates…';
-      go('upd-go');
-    });
+    // The one update button. It runs the update itself and reports progress
+    // right below the button - the old version delegated to a button on another
+    // tab and printed its progress there, which looked like a dead button.
+    document.getElementById('set-update') && (document.getElementById('set-update').onclick = () => runUpdate('#set-update-status', '#set-update'));
+    (async () => {
+      const s = document.getElementById('set-update-status');
+      if (!s) return;
+      try {
+        const d = await jfetch('/api/studio/update/check');
+        s.textContent = d.upToDate ? "✅ You're on the latest version."
+          : !d.current ? 'Press "Update my app" once and it syncs to the latest version.'
+          : `⬆ Update available — press "Update my app".`;
+      } catch (_) { /* offline or GitHub unreachable - stay quiet */ }
+    })();
     document.getElementById('set-backup') && (document.getElementById('set-backup').onclick = () => go('stor-backup'));
     document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => {
       document.querySelector('#mtabs button[data-view="scenes"]')?.click();
@@ -2613,15 +2616,6 @@ async function loadFans() {
 $('#fans-refresh').onclick = loadFans;
 $('#fans-download').onclick = () => { location.href = '/api/studio/fans.csv'; };
 
-$('#upd-check').onclick = async () => {
-  $('#upd-status').textContent = 'Checking GitHub…';
-  try {
-    const d = await jfetch('/api/studio/update/check');
-    if (d.upToDate) $('#upd-status').textContent = "✅ You're on the latest version.";
-    else if (!d.current) $('#upd-status').textContent = 'This install hasn\'t recorded a version yet — press "Update my app" once and it syncs to the latest.';
-    else $('#upd-status').textContent = `⬆ Update available (latest change: ${d.latest.date ? new Date(d.latest.date).toLocaleString() : 'unknown'}). Press "Update my app".`;
-  } catch (e) { $('#upd-status').textContent = e.message; }
-};
 async function runUpdate(statusSel, btnSel) {
   if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Do not update while a render is running.')) return;
   const btn = $(btnSel);
@@ -2636,8 +2630,8 @@ async function runUpdate(statusSel, btnSel) {
     if (btn) btn.disabled = false;
   }
 }
-$('#upd-go').onclick = () => runUpdate('#upd-status', '#upd-go');
-$('#media-update').onclick = () => runUpdate('#media-upd-status', '#media-update');
+// The one and only update button lives in Settings (#set-update, wired in the
+// settings block) - it runs the update AND shows its progress right there.
 
 $('#set-reset').onclick = async () => {
   if (!confirm('Delete EVERYTHING — all your pictures, videos, songs, characters and projects? Your login stays, but the content is gone for good.')) return;

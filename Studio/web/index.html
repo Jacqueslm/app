@@ -461,6 +461,7 @@ textarea::placeholder{color:var(--tm)}
       <h3>Output</h3>
       <div class="chips" id="seq-formats"></div>
       <div class="chips" id="seq-res"></div>
+      <div class="chips" id="seq-fit"></div>
       <div style="display:flex;gap:16px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-in"> Fade in from black</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-out"> Fade out to black</label>
@@ -1211,6 +1212,7 @@ const st = {
   captions: [],         // lyric captions [{text, start, end}] in timeline seconds
   storyboard: [],        // scene list [{index, lines, prompt, assetId}]
   seqFormat: '16:9',
+  seqFit: 'crop',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
   kb: { fx: 0.5, fy: 0.5 },
@@ -2455,7 +2457,7 @@ function collectSpec() {
     lyrics: $('#lyr-text').value,
     storyboard: st.storyboard,
     storyboardStyle: $('#sb-style').value,
-    format: st.seqFormat, res: st.seqRes,
+    format: st.seqFormat, res: st.seqRes, fit: st.seqFit,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
     music: {
@@ -2489,6 +2491,7 @@ function applySpec(spec) {
   if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
   st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
+  st.seqFit = ['crop', 'pad'].includes(spec.fit) ? spec.fit : 'crop';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
   $('#fade-black-out').checked = !!spec.fadeToBlack;
   $('#enhance-auto').checked = spec.enhance !== false;
@@ -2978,6 +2981,11 @@ function renderOutputChips() {
   chipRow($('#seq-res'), [
     { key: '1080', label: '1080p' }, { key: '720', label: '720p' },
   ], st.seqRes, (k) => { st.seqRes = k; renderOutputChips(); persistDraft(); });
+  // Only matters when a clip's aspect differs from the output (e.g. 16:9 filming
+  // exported as a 9:16 Reel): fill crops to fill the frame, letterbox pads bars.
+  chipRow($('#seq-fit'), [
+    { key: 'crop', label: 'Fill frame' }, { key: 'pad', label: 'Letterbox' },
+  ], st.seqFit, (k) => { st.seqFit = k; renderOutputChips(); persistDraft(); });
 }
 
 async function uploadOverlayPngs() {
@@ -3026,6 +3034,7 @@ async function runRender(windowOpt, btnSel, opts) {
         music: spec.music.tracks.length ? spec.music : null,
         overlays,
         size: currentSize(),
+        fit: st.seqFit,
         fadeFromBlack: spec.fadeFromBlack,
         fadeToBlack: spec.fadeToBlack,
         window: windowOpt || null,
@@ -3948,6 +3957,7 @@ async function renderOneShort(s, statusEl) {
       music: spec.music.tracks.length ? spec.music : null,
       overlays,
       size: '1080x1920',
+      fit: st.seqFit,
       window: { start: s.start, end: s.start + s.len },
       loop: s.loop,
       name: s.name,

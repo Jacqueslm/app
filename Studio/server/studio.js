@@ -106,7 +106,6 @@ const DAILY_AI_VIDEO_LIMIT = Number(process.env.STUDIO_DAILY_VIDEO_LIMIT || 60);
 const MEDIA_DIR = path.join(__dirname, 'media');
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
-const UPLOAD_LIMIT = '400mb';
 const EXT_BY_KIND = {
   image: new Set(['.png', '.jpg', '.jpeg', '.webp']),
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
@@ -600,8 +599,11 @@ router.delete('/assets/:id', (req, res) => {
 });
 
 // Raw-body upload keeps us dependency-free (no multer). The client sends the
-// file bytes directly with metadata in the query string.
-router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), async (req, res) => {
+// file bytes directly with metadata in the query string. The body streams to
+// disk as it arrives - the old express.raw() approach buffered the whole file
+// in RAM with a 400MB ceiling, which rejected any long phone-camera video.
+const UPLOAD_LIMIT_BYTES = 4 * 1024 * 1024 * 1024; // 4GB - covers a 15+ min 4K filming
+router.put('/upload', async (req, res) => {
   const { kind } = req.query;
   const name = String(req.query.name || 'upload');
   const characterId = req.query.characterId ? Number(req.query.characterId) : null;
@@ -611,24 +613,51 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   if (!EXT_BY_KIND[kind].has(ext)) {
     return res.status(400).json({ error: `Unsupported ${kind} file type: ${ext || '(none)'}` });
   }
-  // If a JSON-typed body slipped through express.json() first, req.body is a
-  // parsed object rather than a Buffer - re-serialize it.
-  let body = req.body;
-  if (body && !Buffer.isBuffer(body) && typeof body === 'object') body = Buffer.from(JSON.stringify(body));
-  if (!body || !body.length) return res.status(400).json({ error: 'Empty upload.' });
   if (characterId && !db.getCharacter(req.userId, characterId)) {
     return res.status(404).json({ error: 'Character not found.' });
   }
+  if (locationId && !db.getLocation(req.userId, locationId)) {
+    return res.status(404).json({ error: 'Location not found.' });
+  }
   const filename = newFilename(req.userId, ext);
-  fs.writeFileSync(mediaPath(filename), body);
+  const dest = mediaPath(filename);
+  try {
+    if (Buffer.isBuffer(req.body) || (req.body && typeof req.body === 'object' && Object.keys(req.body).length)) {
+      // A JSON-typed body already consumed by express.json() upstream - re-serialize it.
+      const body = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
+      if (!body.length) return res.status(400).json({ error: 'Empty upload.' });
+      fs.writeFileSync(dest, body);
+    } else {
+      let bytes = 0;
+      await new Promise((resolve, reject) => {
+        const out = fs.createWriteStream(dest);
+        req.on('data', (chunk) => {
+          bytes += chunk.length;
+          if (bytes > UPLOAD_LIMIT_BYTES) {
+            reject(Object.assign(new Error('File is too large (4GB max).'), { status: 413 }));
+            req.destroy();
+            out.destroy();
+          }
+        });
+        req.pipe(out);
+        out.on('finish', resolve);
+        out.on('error', reject);
+        req.on('error', reject);
+      });
+      if (!bytes) {
+        try { fs.unlinkSync(dest); } catch (_) {}
+        return res.status(400).json({ error: 'Empty upload.' });
+      }
+    }
+  } catch (err) {
+    try { fs.unlinkSync(dest); } catch (_) {}
+    return res.status(err.status || 500).json({ error: err.message || 'Upload failed.' });
+  }
   const label = path.basename(name, ext).slice(0, 80) || 'Upload';
   const meta = { source: 'upload' };
   if (req.query.overlay === '1') meta.overlay = true; // text-card PNGs stay out of the pickers
-  if (locationId) {
-    if (!db.getLocation(req.userId, locationId)) return res.status(404).json({ error: 'Location not found.' });
-    meta.locationRef = locationId;
-  }
-  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(mediaPath(filename));
+  if (locationId) meta.locationRef = locationId;
+  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(dest);
   const id = db.createAsset(req.userId, kind, label, filename, characterId, meta);
   res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
 });
@@ -1699,7 +1728,7 @@ function eqFilter(eq) {
 }
 
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
+  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -1812,10 +1841,17 @@ router.post('/render', async (req, res) => {
   // "Auto enhance": gentle color pop + sharpen per clip, plus a cinematic
   // vignette and a whisper of film grain on the finished picture.
   const enhanceClip = enhance ? ',eq=contrast=1.06:saturation=1.14,unsharp=5:5:0.5:5:5:0.0' : '';
+  // fit:'crop' fills the frame by scaling up and cropping the overflow (with an
+  // optional 0..1 focusX picking which horizontal slice survives) instead of
+  // letterboxing - the difference between a real vertical Short and a 16:9
+  // video floating between black bars.
+  const fx = Math.min(1, Math.max(0, focusX == null ? 0.5 : Number(focusX)));
+  const fitFilter = fit === 'crop'
+    ? `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}:(iw-${W})*${fx.toFixed(3)}:(ih-${H})/2`
+    : `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2`;
   resolved.forEach((c, i) => {
     filters.push(
-      `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
+      `[${i}:v]${fitFilter},setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
     );
   });

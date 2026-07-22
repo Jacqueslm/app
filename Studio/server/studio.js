@@ -678,6 +678,7 @@ router.get('/config', (req, res) => {
       sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
       livePortrait: LIVEPORTRAIT_RATE,
       transcribe: TRANSCRIBE_RATE,
+      captionFix: CAPTION_FIX_RATE,
       dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
       qc: QC_RATE,
       voicePer1k: VOICE_RATE,
@@ -3059,6 +3060,7 @@ const localStt = require('./transcribe');
 const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
   ? [process.env.STUDIO_CAPTION_FIX_MODEL]
   : ['anthropic/claude-sonnet-4.5', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5']);
+const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
 async function aiCleanTranscriptLines(lines) {
   if (!FAL_KEY || !lines.length) return null;
   const numbered = lines.map((l, i) => `${i}|${l.text}`).join('\n');

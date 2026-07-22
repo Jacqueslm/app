@@ -1,5 +1,5 @@
 {
-  "name": "studio-server",
+  "name": "turn-someday-into-oneday-server",
   "version": "1.0.0",
   "private": true,
   "type": "commonjs",
@@ -7,17 +7,13 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
-    "archiver": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-rate-limit": "^8.5.2",
-    "jsonwebtoken": "^9.0.3"
-  },
-  "optionalDependencies": {
-    "ffmpeg-static": "^5.3.0"
+    "jsonwebtoken": "^9.0.3",
+    "stripe": "^22.3.0"
   },
   "engines": {
     "node": ">=22.5"

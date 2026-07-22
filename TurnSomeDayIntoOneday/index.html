@@ -328,6 +328,7 @@ body{display:flex;justify-content:center}
   <p>No Pressure. No Worries. Just Progress. One Day At A Time.</p>
   <button class="ob-btn" onclick="proceedFromPreview('signup')">Sign Up</button>
   <button class="ob-btn outline" onclick="proceedFromPreview('login')">I already have an account</button>
+  <p style="margin-top:14px;font-size:12.5px"><a href="/quiz.html" style="color:var(--ts);text-decoration:underline">Not sure yet? Take the private 2-minute check-in</a></p>
 </div>
 
 <!-- MANDATORY ACCOUNT GATE -->
@@ -7148,6 +7149,13 @@ async function boot(){
       return;
     }
   }catch(e){/* server unreachable - fall through to the gate */}
+  // Arriving from the check-in quiz (/?join=1): skip the welcome screen and land
+  // straight on signup while the motivation is still warm.
+  if(new URLSearchParams(window.location.search).get('join')){
+    history.replaceState(null,'',window.location.pathname);
+    showAuthGate('signup');
+    return;
+  }
   showPreviewGate();
 }
 

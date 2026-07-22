@@ -3024,7 +3024,6 @@ async function runRender(windowOpt, btnSel, opts) {
   $(ui.dl).classList.remove('show');
   try {
     const overlays = await uploadOverlayPngs();
-    const captions = await uploadCaptionPngs();
     const spec = collectSpec();
     const { job } = await jfetch('/api/studio/render', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3042,7 +3041,7 @@ async function runRender(windowOpt, btnSel, opts) {
         window: windowOpt || null,
         name: ui.name || null,
         enhance: spec.enhance,
-        captions,
+        captionLines: captionLinesPayload(),
       }),
     });
     const done = await pollJob(job.id, (j) => {
@@ -3600,18 +3599,13 @@ $('#lyr-title').onclick = () => {
   setErr('#seq-err', null);
 };
 
-// captions render smaller, lower, quicker fades than title overlays
-async function uploadCaptionPngs() {
-  const [W, H] = currentSize().split('x').map(Number);
-  const out = [];
-  for (const c of st.captions) {
-    if (!String(c.text || '').trim()) continue;
-    const canvas = drawOverlay({ text: c.text, font: 'system-ui', size: 52, color: '#ffffff', bold: true, pos: 8 }, W, H);
-    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
-    const asset = await uploadFile(new File([blob], `caption-${Date.now()}.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
-    out.push({ assetId: asset.id, start: c.start, end: c.end, fade: 0.2 });
-  }
-  return out;
+// Captions go to the server as plain text + timings; it burns them in via a
+// generated subtitle file. No per-line PNG uploads, no line cap - a 10-minute
+// talking video captions as cleanly as a 3-minute song.
+function captionLinesPayload() {
+  return st.captions
+    .filter((c) => String(c.text || '').trim())
+    .map((c) => ({ text: c.text, start: c.start, end: c.end || c.start + 3 }));
 }
 
 /* ---------------- storyboard: lyric sheet -> scene shot list ---------------- */
@@ -3990,7 +3984,6 @@ function renderShortsList() {
 
 async function renderOneShort(s, statusEl) {
   const overlays = [];
-  const captions = await uploadCaptionPngs(); // lyric captions ride along into shorts
   if (s.text.trim()) {
     const canvas = drawOverlay(
       { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 2, },
@@ -4016,7 +4009,7 @@ async function renderOneShort(s, statusEl) {
       loop: s.loop,
       name: s.name,
       enhance: spec.enhance,
-      captions,
+      captionLines: captionLinesPayload(),
     }),
   });
   const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });

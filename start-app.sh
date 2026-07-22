@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
-# Studio - Linux launcher.
+# Turn Someday Into Day One - double-click launcher (Linux / anything with bash)
+# Starts the app and opens Studio in your browser. No terminal knowledge needed.
 set -e
-cd "$(dirname "$0")/Studio/server"
+cd "$(dirname "$0")/TurnSomeDayIntoOneday/server"
 
 if ! command -v node >/dev/null 2>&1; then
   echo ""
   echo "Node.js isn't installed yet. Grab it from https://nodejs.org (LTS version),"
-  echo "install it, then run this again."
+  echo "install it, then double-click this file again."
   read -r -p "Press Enter to close..."
   exit 1
 fi
 
+# First run: create .env with a stable session secret so you stay signed in.
 if ! node -e "const[a,b]=process.versions.node.split('.').map(Number);process.exit(a>22||(a===22&&b>=5)?0:1)" >/dev/null 2>&1; then
   echo ""
   echo "Your Node.js ($(node -v)) is too old - this app needs Node 22.5 or newer."
@@ -20,17 +22,18 @@ if ! node -e "const[a,b]=process.versions.node.split('.').map(Number);process.ex
 fi
 
 if [ ! -f .env ]; then
-  echo "PORT=4400" > .env
+  echo "PORT=4300" > .env
   echo "SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> .env
-  echo "Created Studio/server/.env with a fresh session secret."
+  echo "Created server/.env with a fresh session secret."
 fi
 
 PORT=$(grep -E '^PORT=' .env | cut -d= -f2)
-PORT=${PORT:-4400}
+PORT=${PORT:-4300}
 URL="http://localhost:${PORT}/"
 
+# Already running? Just open the browser.
 if curl -s -o /dev/null --max-time 2 "$URL"; then
-  echo "Studio is already running - opening $URL"
+  echo "App is already running - opening $URL"
   (xdg-open "$URL" >/dev/null 2>&1 || true) &
   exit 0
 fi
@@ -40,6 +43,6 @@ if [ ! -d node_modules ]; then
   npm install --no-audit --no-fund
 fi
 
-echo "Starting Studio..."
+echo "Starting Turn Someday Into Day One..."
 (sleep 2 && (xdg-open "$URL" >/dev/null 2>&1 || echo "Open this in your browser: $URL")) &
 exec node server.js

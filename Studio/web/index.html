@@ -653,6 +653,7 @@ body.simple-only #view-simple{display:flex !important}
       <h3>Output</h3>
       <div class="chips" id="seq-formats"></div>
       <div class="chips" id="seq-res"></div>
+      <div class="chips" id="seq-fit"></div>
       <div style="display:flex;gap:16px;flex-wrap:wrap">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-in"> Fade in from black</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-out"> Fade out to black</label>
@@ -675,8 +676,10 @@ body.simple-only #view-simple{display:flex !important}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="lyr-tap">▶ Tap to sync</button>
         <button class="btn2 quiet" id="lyr-auto">🪄 Auto-captions (AI)</button>
+        <button class="btn2 quiet" id="lyr-speech">🎙️ Captions from my voice (free)</button>
         <button class="btn2 quiet" id="lyr-spread">Auto-spread</button>
         <button class="btn2 quiet" id="lyr-title">+ Song title intro</button>
+        <button class="btn2 quiet" id="lyr-srt">⬇ .srt</button>
         <button class="btn2 quiet" id="lyr-clear">Clear</button>
       </div>
       <div id="lyr-tap-ui" style="display:none;flex-direction:column;gap:8px">
@@ -735,6 +738,15 @@ body.simple-only #view-simple{display:flex !important}
           <input class="input" id="hl-time" type="number" min="0" step="0.5" placeholder="time (s)" style="width:90px">
           <button class="btn2" id="hl-add">Mark</button>
           <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
+        </div>
+      </div>
+      <div class="row" id="clip-picker-row">
+        <label class="lbl">Clip picker <span style="text-transform:none;font-weight:400">— pick the strongest sentences from your filmed video</span></label>
+        <div id="cp-transcript-list" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn2" id="cp-load-transcript">Load my transcript</button>
+          <button class="btn2" id="cp-add-clips" style="display:none">Add selected as clips</button>
+          <button class="btn2 quiet" id="cp-clear-sel" style="display:none">Clear selection</button>
         </div>
       </div>
       <div class="trim" style="font-size:12px">
@@ -1461,6 +1473,7 @@ const st = {
   captions: [],         // lyric captions [{text, start, end}] in timeline seconds
   storyboard: [],        // scene list [{index, lines, prompt, assetId}]
   seqFormat: '16:9',
+  seqFit: 'crop',
   seqRes: '1080',
   beats: null,          // {bpm, beats[]} from the analyzer
   kb: { fx: 0.5, fy: 0.5 },
@@ -3637,7 +3650,7 @@ function collectSpec() {
     lyrics: $('#lyr-text').value,
     storyboard: st.storyboard,
     storyboardStyle: $('#sb-style').value,
-    format: st.seqFormat, res: st.seqRes,
+    format: st.seqFormat, res: st.seqRes, fit: st.seqFit,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
     music: {
@@ -3672,6 +3685,7 @@ function applySpec(spec) {
   if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
   st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
+  st.seqFit = ['crop', 'pad'].includes(spec.fit) ? spec.fit : 'crop';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
   $('#fade-black-out').checked = !!spec.fadeToBlack;
   $('#enhance-auto').checked = spec.enhance !== false;
@@ -3686,7 +3700,7 @@ function applySpec(spec) {
     $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard(); renderClipPicker();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -4353,6 +4367,11 @@ function renderOutputChips() {
   chipRow($('#seq-res'), [
     { key: '1080', label: '1080p' }, { key: '720', label: '720p' },
   ], st.seqRes, (k) => { st.seqRes = k; renderOutputChips(); persistDraft(); });
+  // Only matters when a clip's aspect differs from the output (e.g. 16:9 filming
+  // exported as a 9:16 Reel): fill crops to fill the frame, letterbox pads bars.
+  chipRow($('#seq-fit'), [
+    { key: 'crop', label: 'Fill frame' }, { key: 'pad', label: 'Letterbox' },
+  ], st.seqFit, (k) => { st.seqFit = k; renderOutputChips(); persistDraft(); });
 }
 
 function wmSpec() {
@@ -4463,7 +4482,6 @@ async function runRender(windowOpt, btnSel, opts) {
   $(ui.dl).classList.remove('show');
   try {
     const overlays = await uploadOverlayPngs();
-    const captions = await uploadCaptionPngs();
     const spec = collectSpec();
     const { job } = await jfetch('/api/studio/render', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -4475,12 +4493,14 @@ async function runRender(windowOpt, btnSel, opts) {
         music: spec.music.tracks.length ? spec.music : null,
         overlays,
         size: currentSize(),
+        fit: st.seqFit,
         fadeFromBlack: spec.fadeFromBlack,
         fadeToBlack: spec.fadeToBlack,
         window: windowOpt || null,
         name: ui.name || null,
         enhance: spec.enhance,
-        captions,
+        captionLines: captionLinesPayload(),
+        captionStyle: captionStyleKey(),
       }),
     });
     const done = await pollJob(job.id, (j) => {
@@ -4516,6 +4536,8 @@ Object.entries({
   'qk-import-song': 'Paste a Suno share link (or any direct song link) and the song downloads straight into Studio.',
   'qk-assemble': 'FREE. Builds the whole video: camera moves on every picture, cuts on the beat, music, captions.',
   'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~35¢). Free instead: paste your lyrics, then Auto-spread or Tap-to-sync. Check the words after.',
+  'lyr-speech': 'FREE. Listens to your filmed video ON THIS COMPUTER and writes captions with real timings. First use downloads a small model (~80MB), then it works offline. Nothing is uploaded.',
+  'lyr-srt': 'FREE. Downloads your captions as a standard .srt subtitle file - upload it with your video on YouTube/Facebook instead of burning captions in.',
   'lyr-tap': 'FREE perfect sync: the song plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
@@ -5158,6 +5180,60 @@ $('#lyr-auto').onclick = async () => {
   b.disabled = false; b.textContent = '🪄 Auto-captions (AI)';
 };
 
+// Local speech-to-text: transcribes the first VIDEO on the timeline (a filmed
+// talking video) on this computer - free, private, works offline after the
+// first model download. Fills the caption list with real timings.
+$('#lyr-speech').onclick = async () => {
+  setErr('#seq-err', null);
+  const clip = st.seq.find((c) => c.kind === 'video');
+  if (!clip) return setErr('#seq-err', 'Add your filmed video to the timeline first — captions come from listening to it.');
+  if (st.captions.length && !confirm('Replace your current caption list with what the video says?')) return;
+  const b = $('#lyr-speech');
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Listening…';
+  try {
+    const { job } = await jfetch('/api/studio/transcribe-local', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId: clip.assetId }),
+    });
+    const done = await pollJob(job.id, (j) => {
+      b.innerHTML = `<span class="spinner"></span>${j.progress < 42 ? 'Getting the model (first time only)…' : 'Listening…'} ${j.progress}%`;
+    });
+    const lines = done.transcript?.lines || [];
+    if (!lines.length) throw new Error('No speech heard in that video — is the mic audio there?');
+    st.captions = lines.map((l) => ({
+      text: l.text,
+      start: Math.round(l.start * 10) / 10,
+      end: Math.round(l.end * 10) / 10,
+    }));
+    $('#lyr-text').value = lines.map((l) => l.text).join('\n');
+    st.lastSrt = done.transcript?.srt || '';
+    // The server saved the transcript onto the asset - mirror it locally so the
+    // clip picker can use it without a refetch.
+    const localAsset = st.assets.find((a) => a.id === clip.assetId);
+    if (localAsset) localAsset.meta = { ...(localAsset.meta || {}), transcript: { lines } };
+    renderLyrList(); renderClipPicker(); persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🎙️ Captions from my voice (free)';
+};
+
+// Standard subtitle file from whatever is in the caption list - YouTube and
+// Facebook accept .srt directly, which beats burned-in captions for long videos.
+$('#lyr-srt').onclick = () => {
+  const lines = st.captions.filter((c) => String(c.text || '').trim());
+  if (!lines.length) return setErr('#seq-err', 'No captions yet — transcribe or sync some lines first.');
+  const ts = (s) => {
+    const ms = Math.max(0, Math.round(s * 1000));
+    const p = (n, w) => String(n).padStart(w, '0');
+    return `${p(Math.floor(ms / 3600000), 2)}:${p(Math.floor(ms % 3600000 / 60000), 2)}:${p(Math.floor(ms % 60000 / 1000), 2)},${p(ms % 1000, 3)}`;
+  };
+  const srt = lines.map((c, i) => `${i + 1}\n${ts(c.start)} --> ${ts(c.end || c.start + 3)}\n${c.text}\n`).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([srt], { type: 'text/plain' }));
+  a.download = 'captions.srt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+
 $('#lyr-title').onclick = () => {
   const title = $('#cp-title').value.trim() || 'My track';
   const artist = $('#cp-artist').value.trim();
@@ -5204,19 +5280,13 @@ function renderCaptionPreview() {
   const style = CAPTION_STYLES[captionStyleKey()];
   drawOverlay({ text: 'your lyrics here', font: 'system-ui', size: 150, pos: 5, ...style }, 560, 200, pv);
 }
-// captions render smaller, lower, quicker fades than title overlays
-async function uploadCaptionPngs() {
-  const [W, H] = currentSize().split('x').map(Number);
-  const style = CAPTION_STYLES[captionStyleKey()];
-  const out = [];
-  for (const c of st.captions) {
-    if (!String(c.text || '').trim()) continue;
-    const canvas = drawOverlay({ text: c.text, font: 'system-ui', size: 52, pos: 8, ...style }, W, H);
-    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
-    const asset = await uploadFile(new File([blob], `caption-${Date.now()}.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
-    out.push({ assetId: asset.id, start: c.start, end: c.end, fade: 0.2 });
-  }
-  return out;
+// Captions go to the server as plain text + timings plus the chosen look; it
+// burns them in via a generated subtitle file. No per-line PNG uploads, no
+// line cap - a 10-minute talking video captions as cleanly as a 3-minute song.
+function captionLinesPayload() {
+  return st.captions
+    .filter((c) => String(c.text || '').trim())
+    .map((c) => ({ text: c.text, start: c.start, end: c.end || c.start + 3 }));
 }
 
 /* ---------------- storyboard: lyric sheet -> scene shot list ---------------- */
@@ -5442,6 +5512,103 @@ async function pollQueueOnce() {
   }
 }
 
+/* ---------------- clip picker: transcript sentences -> vertical clips ------- */
+// Reads the transcript saved on the filmed video (Captions card -> 🎙️), shows
+// every line as a clickable row, and turns each contiguous selection into an
+// entry in the shorts list - cut, cropped, and captioned by the existing
+// pipeline. "One long video -> a week of clips" in a few clicks.
+const cpSel = new Set();
+
+function firstTimelineVideo() {
+  const idx = st.seq.findIndex((c) => c.kind === 'video');
+  return idx === -1 ? null : { clip: st.seq[idx], idx };
+}
+function clipPlayDur(c) {
+  return c.kind === 'image' ? (c.holdDur || 4) : Math.max(0, (c.end ?? c.duration ?? 0) - (c.start || 0));
+}
+// Where a timeline item starts in output time (transitions overlap on xfades).
+function timelineOffsetOfClip(idx) {
+  let off = 0;
+  for (let i = 0; i < idx; i++) {
+    off += clipPlayDur(st.seq[i]);
+    const t = st.trans[i];
+    if (t && t.type && t.type !== 'cut') off -= Math.min(2, Math.max(0.2, Number(t.duration) || 0.5));
+  }
+  return Math.max(0, off);
+}
+function cpTranscriptLines() {
+  const found = firstTimelineVideo();
+  if (!found) return null;
+  const asset = st.assets.find((a) => a.id === found.clip.assetId);
+  return asset?.meta?.transcript?.lines || null;
+}
+
+function renderClipPicker() {
+  const list = $('#cp-transcript-list');
+  const lines = cpTranscriptLines();
+  const has = Array.isArray(lines) && lines.length;
+  $('#cp-add-clips').style.display = has ? '' : 'none';
+  $('#cp-clear-sel').style.display = has ? '' : 'none';
+  $('#cp-load-transcript').style.display = has ? 'none' : '';
+  if (!has) {
+    list.innerHTML = '<span class="usage">No transcript yet. Add your filmed video to the timeline, then use 🎙️ Captions from my voice (Captions card) — the transcript lands here automatically.</span>';
+    return;
+  }
+  list.innerHTML = '';
+  lines.forEach((l, i) => {
+    const row = document.createElement('div');
+    const on = cpSel.has(i);
+    row.style.cssText = `padding:6px 10px;border-radius:8px;font-size:13px;line-height:1.45;cursor:pointer;border:1px solid ${on ? 'var(--acc, #7c5cff)' : 'transparent'};background:${on ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)'}`;
+    row.innerHTML = `<span style="opacity:.5;font-size:11px;margin-right:8px">${l.start.toFixed(1)}s</span>${l.text.replace(/</g, '&lt;')}`;
+    row.onclick = () => { cpSel.has(i) ? cpSel.delete(i) : cpSel.add(i); renderClipPicker(); };
+    list.appendChild(row);
+  });
+}
+
+$('#cp-load-transcript').onclick = () => {
+  renderClipPicker();
+  if (!cpTranscriptLines()) setErr('#seq-err', 'Transcribe your video first: Captions card → 🎙️ Captions from my voice (free).');
+};
+$('#cp-clear-sel').onclick = () => { cpSel.clear(); renderClipPicker(); };
+
+$('#cp-add-clips').onclick = () => {
+  setErr('#seq-err', null);
+  const lines = cpTranscriptLines();
+  const found = firstTimelineVideo();
+  if (!lines || !found) return;
+  if (!cpSel.size) return setErr('#seq-err', 'Tap the sentences you want in the clip first.');
+  // Contiguous selected lines merge into one clip; gaps split into separate clips.
+  const idxs = [...cpSel].sort((a, b) => a - b);
+  const groups = [];
+  for (const i of idxs) {
+    const g = groups[groups.length - 1];
+    if (g && i === g[g.length - 1] + 1) g.push(i); else groups.push([i]);
+  }
+  const { clip, idx } = found;
+  const base = timelineOffsetOfClip(idx);
+  const timelineLen = clipPlayDur(clip);
+  let added = 0;
+  for (const g of groups) {
+    // transcript times are in the video file's own clock; shift into timeline time
+    const rawStart = lines[g[0]].start - (clip.start || 0) - 0.25;           // slight pre-roll
+    const rawEnd = lines[g[g.length - 1]].end - (clip.start || 0) + 0.4;    // slight post-roll
+    const start = base + Math.min(Math.max(0, rawStart), timelineLen);
+    const end = base + Math.min(Math.max(0, rawEnd), timelineLen);
+    const len = Math.round((end - start) * 10) / 10;
+    if (len < 1.5) continue;
+    const slug = slugName(lines[g[0]].text.split(/\s+/).slice(0, 4).join(' '));
+    let name = `clip_${slug}`, bump = 2;
+    while (st.shorts.some((x) => x.name === name)) name = `clip_${slug}${bump++}`;
+    st.shorts.push({ name, start: Math.round(start * 10) / 10, len: Math.min(180, len), text: '', loop: false });
+    added++;
+  }
+  cpSel.clear();
+  renderClipPicker();
+  if (!added) return setErr('#seq-err', 'Those selections were too short to make a clip (under 1.5s).');
+  renderShortsList();
+  $('#sh-list').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
 /* ---------------- shorts generator ---------------- */
 function slugName(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'short';
@@ -5634,7 +5801,6 @@ function renderShortsList() {
 
 async function renderOneShort(s, statusEl) {
   const overlays = [];
-  const captions = await uploadCaptionPngs(); // lyric captions ride along into shorts
   if (s.text.trim()) {
     const canvas = drawOverlay(
       { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 2, },
@@ -5655,11 +5821,13 @@ async function renderOneShort(s, statusEl) {
       music: spec.music.tracks.length ? spec.music : null,
       overlays,
       size: '1080x1920',
+      fit: st.seqFit,
       window: { start: s.start, end: s.start + s.len },
       loop: s.loop,
       name: s.name,
       enhance: spec.enhance,
-      captions,
+      captionLines: captionLinesPayload(),
+      captionStyle: captionStyleKey(),
     }),
   });
   const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });
@@ -6179,6 +6347,7 @@ renderOutputChips();
 renderSeq();
 renderOverlays();
 renderHighlights();
+renderClipPicker();
 renderQkFormat();
 renderMusicList();
 renderLyrList();

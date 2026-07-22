@@ -6,6 +6,7 @@
 // simply hides those features. Uploads and the Sequencer work with no keys.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const express = require('express');
@@ -181,7 +182,6 @@ function overDailyCap(userId, addUSD) {
 const MEDIA_DIR = path.join(__dirname, 'media');
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
-const UPLOAD_LIMIT = '400mb';
 const EXT_BY_KIND = {
   image: new Set(['.png', '.jpg', '.jpeg', '.webp']),
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
@@ -1008,8 +1008,11 @@ router.delete('/assets/:id', (req, res) => {
 });
 
 // Raw-body upload keeps us dependency-free (no multer). The client sends the
-// file bytes directly with metadata in the query string.
-router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), async (req, res) => {
+// file bytes directly with metadata in the query string. The body streams to
+// disk as it arrives - the old express.raw() approach buffered the whole file
+// in RAM with a 400MB ceiling, which rejected any long phone-camera video.
+const UPLOAD_LIMIT_BYTES = 4 * 1024 * 1024 * 1024; // 4GB - covers a 15+ min 4K filming
+router.put('/upload', async (req, res) => {
   const { kind } = req.query;
   const name = String(req.query.name || 'upload');
   const characterId = req.query.characterId ? Number(req.query.characterId) : null;
@@ -1019,24 +1022,51 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   if (!EXT_BY_KIND[kind].has(ext)) {
     return res.status(400).json({ error: `Unsupported ${kind} file type: ${ext || '(none)'}` });
   }
-  // If a JSON-typed body slipped through express.json() first, req.body is a
-  // parsed object rather than a Buffer - re-serialize it.
-  let body = req.body;
-  if (body && !Buffer.isBuffer(body) && typeof body === 'object') body = Buffer.from(JSON.stringify(body));
-  if (!body || !body.length) return res.status(400).json({ error: 'Empty upload.' });
   if (characterId && !db.getCharacter(req.userId, characterId)) {
     return res.status(404).json({ error: 'Character not found.' });
   }
+  if (locationId && !db.getLocation(req.userId, locationId)) {
+    return res.status(404).json({ error: 'Location not found.' });
+  }
   const filename = newFilename(req.userId, ext);
-  fs.writeFileSync(mediaPath(filename), body);
+  const dest = mediaPath(filename);
+  try {
+    if (Buffer.isBuffer(req.body) || (req.body && typeof req.body === 'object' && Object.keys(req.body).length)) {
+      // A JSON-typed body already consumed by express.json() upstream - re-serialize it.
+      const body = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
+      if (!body.length) return res.status(400).json({ error: 'Empty upload.' });
+      fs.writeFileSync(dest, body);
+    } else {
+      let bytes = 0;
+      await new Promise((resolve, reject) => {
+        const out = fs.createWriteStream(dest);
+        req.on('data', (chunk) => {
+          bytes += chunk.length;
+          if (bytes > UPLOAD_LIMIT_BYTES) {
+            reject(Object.assign(new Error('File is too large (4GB max).'), { status: 413 }));
+            req.destroy();
+            out.destroy();
+          }
+        });
+        req.pipe(out);
+        out.on('finish', resolve);
+        out.on('error', reject);
+        req.on('error', reject);
+      });
+      if (!bytes) {
+        try { fs.unlinkSync(dest); } catch (_) {}
+        return res.status(400).json({ error: 'Empty upload.' });
+      }
+    }
+  } catch (err) {
+    try { fs.unlinkSync(dest); } catch (_) {}
+    return res.status(err.status || 500).json({ error: err.message || 'Upload failed.' });
+  }
   const label = path.basename(name, ext).slice(0, 80) || 'Upload';
   const meta = { source: 'upload' };
   if (req.query.overlay === '1') meta.overlay = true; // text-card PNGs stay out of the pickers
-  if (locationId) {
-    if (!db.getLocation(req.userId, locationId)) return res.status(404).json({ error: 'Location not found.' });
-    meta.locationRef = locationId;
-  }
-  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(mediaPath(filename));
+  if (locationId) meta.locationRef = locationId;
+  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(dest);
   const id = db.createAsset(req.userId, kind, label, filename, characterId, meta);
   res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
 });
@@ -1704,10 +1734,15 @@ router.post('/animate', async (req, res) => {
 /* ---------------- ffmpeg job runner ---------------- */
 // Spawn ffmpeg with the given args, track progress against expectedDur, and
 // register the output as a video asset when it succeeds.
-function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 'video') {
+function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 'video', opts) {
   const job = createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
-  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]));
+  const cleanup = () => {
+    for (const f of (opts && opts.cleanupFiles) || []) { try { fs.unlinkSync(f); } catch (_) {} }
+  };
+  // opts.cwd lets a filter reference a side file (e.g. a generated .ass subtitle
+  // file) by bare relative name - no cross-platform path escaping in the graph.
+  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]), opts && opts.cwd ? { cwd: opts.cwd } : undefined);
   let stderrTail = '';
   proc.stderr.on('data', (chunk) => {
     const text = chunk.toString();
@@ -1719,10 +1754,12 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 
     }
   });
   proc.on('error', (err) => {
+    cleanup();
     job.status = 'error';
     job.error = `Could not start ffmpeg: ${err.message}. Run npm install in server/ (or install ffmpeg / set FFMPEG_PATH).`;
   });
   proc.on('close', (code) => {
+    cleanup();
     if (job.status === 'error') return;
     if (code === 0) {
       job.assetId = db.createAsset(userId, kind, label, outFile, null, { ...meta, duration: expectedDur });
@@ -2489,8 +2526,48 @@ function eqFilter(eq) {
   return `,eq=brightness=${b}:contrast=${c}:saturation=${s}`;
 }
 
+// Text captions burn in via a generated .ass subtitle file (libass). Unlike the
+// caption-PNG path there is no line cap and no per-line upload, so a 10-minute
+// talking video captions cleanly. Styled to match the old canvas look: bold
+// white, soft shadow, bottom-center.
+// styleKey mirrors the client's CAPTION_STYLES picker (outline/boxed/pop/classic).
+// ASS colors are &HAABBGGRR (alpha 00 = opaque); BorderStyle 3 = opaque box.
+const ASS_STYLES = {
+  outline: { color: '&H00FFFFFF', border: 1, outlineMul: 1.0, back: '&H7F000000' },
+  boxed: { color: '&H00FFFFFF', border: 3, outlineMul: 0.6, back: '&H66000000' },
+  pop: { color: '&H0000DDFF', border: 1, outlineMul: 1.1, back: '&H7F000000' },
+  classic: { color: '&H00FFFFFF', border: 1, outlineMul: 0.5, back: '&H7F000000' },
+};
+function buildAssFile(lines, W, H, styleKey) {
+  const st = ASS_STYLES[styleKey] || ASS_STYLES.outline;
+  const esc = (t) => String(t).replace(/\r?\n/g, '\\N').replace(/[{}]/g, '');
+  const ts = (s) => {
+    const cs = Math.max(0, Math.round(s * 100));
+    const h = Math.floor(cs / 360000);
+    const m = String(Math.floor((cs % 360000) / 6000)).padStart(2, '0');
+    const sec = String(Math.floor((cs % 6000) / 100)).padStart(2, '0');
+    return `${h}:${m}:${sec}.${String(cs % 100).padStart(2, '0')}`;
+  };
+  const fontSize = Math.round(H * 0.048);
+  const outline = Math.max(1, Math.round((fontSize / 16) * st.outlineMul));
+  const marginV = Math.round(H * 0.08);
+  return `[Script Info]
+ScriptType: v4.00+
+PlayResX: ${W}
+PlayResY: ${H}
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Arial,${fontSize},${st.color},${st.color},&H00000000,${st.back},-1,0,0,0,100,100,0,0,${st.border},${outline},1,2,40,40,${marginV},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+` + lines.map((l) => `Dialogue: 0,${ts(l.start)},${ts(l.end)},Cap,,0,0,0,,${esc(l.text)}`).join('\n') + '\n';
+}
+
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
+  const { clips, transitions, music, overlays, captions, captionLines, captionStyle, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -2614,10 +2691,17 @@ router.post('/render', async (req, res) => {
   // "Auto enhance": gentle color pop + sharpen per clip, plus a cinematic
   // vignette and a whisper of film grain on the finished picture.
   const enhanceClip = enhance ? ',eq=contrast=1.06:saturation=1.14,unsharp=5:5:0.5:5:5:0.0' : '';
+  // fit:'crop' fills the frame by scaling up and cropping the overflow (with an
+  // optional 0..1 focusX picking which horizontal slice survives) instead of
+  // letterboxing - the difference between a real vertical Short and a 16:9
+  // video floating between black bars.
+  const fx = Math.min(1, Math.max(0, focusX == null ? 0.5 : Number(focusX)));
+  const fitFilter = fit === 'crop'
+    ? `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}:(iw-${W})*${fx.toFixed(3)}:(ih-${H})/2`
+    : `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2`;
   resolved.forEach((c, i) => {
     filters.push(
-      `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
+      `[${i}:v]${fitFilter},setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
     );
   });
@@ -2646,6 +2730,21 @@ router.post('/render', async (req, res) => {
     filters.push(`${current}[ov${k}]overlay=0:0:eof_action=pass:enable='between(t\\,${o.start.toFixed(3)}\\,${o.end.toFixed(3)})'[vo${k}]`);
     current = `[vo${k}]`;
   });
+
+  // Burned-in text captions ride the assembled timeline (before windowing, in
+  // timeline coordinates - same convention as the overlay captions above).
+  let assFile = null;
+  const capLines = (Array.isArray(captionLines) ? captionLines : [])
+    .map((l) => ({ text: String(l.text || '').trim(), start: Math.max(0, Number(l.start) || 0), end: Math.max(0, Number(l.end) || 0) }))
+    .filter((l) => l.text && l.end > l.start && l.start < winEnd && l.end > winStart)
+    .slice(0, 5000)
+    .sort((a, b) => a.start - b.start);
+  if (capLines.length) {
+    assFile = `captions-${crypto.randomBytes(5).toString('hex')}.ass`;
+    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle));
+    filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
+    current = '[vcap]';
+  }
 
   // Cutdown window, then loop treatment, then the final fades so they always
   // sit at the output's edges.
@@ -2757,7 +2856,8 @@ router.post('/render', async (req, res) => {
     ? name.trim().slice(0, 80)
     : `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
-    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
+    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop }, 'video',
+    assFile ? { cwd: os.tmpdir(), cleanupFiles: [path.join(os.tmpdir(), assFile)] } : undefined);
   res.status(202).json({ job: jobJson(job) });
 });
 
@@ -2930,6 +3030,38 @@ router.post('/voice-clone', async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+});
+
+/* ---------------- local speech-to-text (free, runs on this computer) ---------------- */
+const localStt = require('./transcribe');
+
+router.post('/transcribe-local', (req, res) => {
+  const asset = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!asset || (asset.kind !== 'video' && asset.kind !== 'audio')) {
+    return res.status(404).json({ error: 'Pick a video or audio file from your library first.' });
+  }
+  const job = createJob(req.userId, 'transcribe', {});
+  res.status(202).json({ job: jobJson(job) });
+  (async () => {
+    try {
+      const result = await localStt.transcribeLocal(ffmpegBin(), mediaPath(asset.filename), (phase, pct) => {
+        if (phase === 'extract') job.progress = 3;
+        else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
+        else job.progress = Math.max(job.progress, 45); // listening
+      });
+      // Keep the transcript on the asset - the clip picker and future features
+      // read it from here instead of transcribing again.
+      const meta = asset.meta ? JSON.parse(asset.meta) : {};
+      meta.transcript = { lines: result.lines, text: result.text };
+      db.updateAssetMeta(req.userId, asset.id, meta);
+      job.transcript = { lines: result.lines, text: result.text, srt: localStt.toSrt(result.lines) };
+      job.progress = 100;
+      job.status = 'done';
+    } catch (err) {
+      job.error = err.message || 'Transcription failed.';
+      job.status = 'error';
+    }
+  })();
 });
 
 /* ---------------- storyboard: lyric sheet -> scene-by-scene prompts ---------------- */

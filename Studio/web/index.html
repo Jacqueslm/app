@@ -657,6 +657,7 @@ body.simple-only #view-simple{display:flex !important}
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-out"> Fade out to black</label>
       </div>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="enhance-auto" checked> ✨ Auto enhance (color pop · vignette · film grain · mastered audio)</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="brand-watermark" checked> 🏷 Day One watermark (small logo, top-left)</label>
       <button class="gen-btn" id="seq-render">Render full video</button>
       <div class="trim" style="font-size:12px;margin-top:2px">
         <span>Cutdown from</span><input type="number" id="cut-start" min="0" step="0.5" value="0"><span>s, length</span>
@@ -3647,6 +3648,7 @@ function collectSpec() {
     format: st.seqFormat, res: st.seqRes, fit: st.seqFit,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
+    watermark: $('#brand-watermark').checked,
     music: {
       tracks: st.musicList,
       volume: (Number($('#music-volume').value) || 100) / 100,
@@ -3687,6 +3689,7 @@ function applySpec(spec) {
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
   $('#fade-black-out').checked = !!spec.fadeToBlack;
   $('#enhance-auto').checked = spec.enhance !== false;
+  $('#brand-watermark').checked = spec.watermark !== false;
   if (spec.music) {
     // new playlist shape, with fallback for older single-track projects
     if (Array.isArray(spec.music.tracks)) st.musicList = spec.music.tracks.filter((t) => t && t.assetId);
@@ -4501,6 +4504,7 @@ async function runRender(windowOpt, btnSel, opts) {
         window: windowOpt || null,
         name: ui.name || null,
         enhance: spec.enhance,
+        watermark: spec.watermark,
         captionLines: captionLinesPayload(),
         captionStyle: captionStyleKey(),
       }),
@@ -5828,6 +5832,7 @@ async function renderOneShort(s, statusEl) {
       loop: s.loop,
       name: s.name,
       enhance: spec.enhance,
+      watermark: spec.watermark,
       captionLines: captionLinesPayload(),
       captionStyle: captionStyleKey(),
     }),

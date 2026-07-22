@@ -3051,6 +3051,43 @@ router.post('/voice-clone', async (req, res) => {
 /* ---------------- local speech-to-text (free, runs on this computer) ---------------- */
 const localStt = require('./transcribe');
 
+// Automatic caption cleanup: the raw local transcript goes through a large
+// language model (via the already-configured fal key - no extra setup) that
+// fixes mishears, garbled fragments, and chunk-overlap duplicates while
+// preserving the speaker's exact voice. Fails soft: any problem returns null
+// and the raw transcript is used unchanged.
+const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
+  ? [process.env.STUDIO_CAPTION_FIX_MODEL]
+  : ['anthropic/claude-sonnet-4.5', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5']);
+async function aiCleanTranscriptLines(lines) {
+  if (!FAL_KEY || !lines.length) return null;
+  const numbered = lines.map((l, i) => `${i}|${l.text}`).join('\n');
+  const system = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
+  const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":0,"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
+  for (const model of CAPTION_FIX_MODELS) {
+    try {
+      const res = await fetch('https://fal.run/fal-ai/any-llm', {
+        method: 'POST',
+        headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, system_prompt: system, prompt }),
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = String(data.output || data.response || '');
+      const m = text.match(/\[[\s\S]*\]/);
+      if (!m) continue;
+      const arr = JSON.parse(m[0]);
+      if (!Array.isArray(arr)) continue;
+      const byIdx = new Map(arr.map((e) => [Number(e.i), String(e.text ?? '')]));
+      const cleaned = lines
+        .map((l, i) => ({ ...l, text: (byIdx.has(i) ? byIdx.get(i) : l.text).trim() }))
+        .filter((l) => l.text);
+      if (cleaned.length >= Math.max(1, Math.floor(lines.length * 0.5))) return cleaned;
+    } catch (_) { /* try the next model */ }
+  }
+  return null;
+}
+
 router.post('/transcribe-local', (req, res) => {
   const asset = db.getAsset(req.userId, Number(req.body?.assetId));
   if (!asset || (asset.kind !== 'video' && asset.kind !== 'audio')) {
@@ -3065,12 +3102,18 @@ router.post('/transcribe-local', (req, res) => {
         else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
         else job.progress = Math.max(job.progress, 45); // listening
       });
+      // Automatic AI cleanup of mishears/garbles (falls back to the raw
+      // transcript if AI is off or the call fails).
+      job.progress = 92;
+      const cleaned = await aiCleanTranscriptLines(result.lines);
+      const lines = cleaned || result.lines;
+      const text = lines.map((l) => l.text).join(' ').trim();
       // Keep the transcript on the asset - the clip picker and future features
       // read it from here instead of transcribing again.
       const meta = asset.meta ? JSON.parse(asset.meta) : {};
-      meta.transcript = { lines: result.lines, text: result.text };
+      meta.transcript = { lines, text };
       db.updateAssetMeta(req.userId, asset.id, meta);
-      job.transcript = { lines: result.lines, text: result.text, srt: localStt.toSrt(result.lines) };
+      job.transcript = { lines, text, srt: localStt.toSrt(lines), aiCleaned: !!cleaned };
       job.progress = 100;
       job.status = 'done';
     } catch (err) {

@@ -1528,7 +1528,7 @@ body{display:flex;justify-content:center}
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
-      <div class="bn-rel"><i class="ti ti-handshake"></i></div><span>Nova</span>
+      <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Nova</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
@@ -3122,6 +3122,50 @@ function initApp(){
   maybeShowAccountabilityCheckin();
   maybeShowDailyLessonReminder();
   evaluateSmartReminders();
+  maybeProactiveCheckin();
+}
+
+// ─── PROACTIVE CHECK-INS ─────────────────────────────────────────────────────
+// Nova reaches out first when yesterday left something worth asking about - the
+// day after a slip, after a hard craving, a rough journal day, or after days
+// away. One per day, most important trigger wins, free for everyone: showing up
+// for people is the product, not a paywalled extra.
+function maybeProactiveCheckin(){
+  const today=new Date().toDateString();
+  const prevOpened=S.lastOpenedDate;
+  S.lastOpenedDate=today;
+  if(S.lastProactiveCheckinDate===today){save();return;}
+  const name=S.name||'';
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  const wasYesterday=ts=>new Date(ts).toDateString()===yesterday;
+  let msg=null;
+  const slipYesterday=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&wasYesterday(a.ts));
+  const hardCraving=(S.cravings||[]).find(c=>wasYesterday(c.ts)&&c.val>=7);
+  const roughJournal=(S.journals||[]).find(j=>wasYesterday(j.date)&&j.moodLabel==='Rough');
+  const gapDays=prevOpened?Math.round((new Date(today)-new Date(prevOpened))/86400000):0;
+  if(slipYesterday){
+    msg=`Hey${name?' '+name:''} — I've been thinking about yesterday. However it went, you came back today, and that's the part that decides everything. How are you feeling this morning?`;
+  }else if(hardCraving){
+    msg=`Yesterday you rode out a ${hardCraving.val}/10 craving${hardCraving.trigger&&hardCraving.trigger!=='General'?` (${hardCraving.trigger.toLowerCase()})`:''} — that's not a small thing. How did the rest of the day go?`;
+  }else if(roughJournal){
+    msg=`Yesterday's journal sounded heavy. No need to relive it — I just want you to know I read it, and I'm here today. How's this morning treating you?`;
+  }else if(gapDays>=3){
+    msg=`Good to see you${name?', '+name:''}. It's been a few days — no guilt, that's not how this works. You opened the app today, and that counts. Anything you want to pick back up?`;
+  }
+  if(!msg)return;
+  S.lastProactiveCheckinDate=today;
+  novaNudge(msg);
+  showNovaBadge();
+}
+function showNovaBadge(){
+  const activeEl=document.querySelector('.scr.on');
+  if(activeEl&&activeEl.id==='s-nova')return;
+  const b=document.getElementById('nova-badge');
+  if(b)b.style.display='';
+}
+function clearNovaBadge(){
+  const b=document.getElementById('nova-badge');
+  if(b)b.style.display='none';
 }
 
 function updateUserUI(){
@@ -5945,6 +5989,7 @@ function novaNudge(text){
   if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
   save();
   systemNotify('Nova',text);
+  showNovaBadge();
 }
 function maybeNovaProNudge(text){
   if(S.isPro)return;
@@ -6073,6 +6118,7 @@ function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
+  if(id==='nova')clearNovaBadge();
   document.getElementById('scr-title').textContent=TITLES[id]||id;
   const screensEl=document.getElementById('screens');
   screensEl.scrollTop=0;

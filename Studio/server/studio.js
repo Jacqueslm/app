@@ -6,6 +6,7 @@
 // simply hides those features. Uploads and the Sequencer work with no keys.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const express = require('express');
@@ -1295,10 +1296,15 @@ router.post('/animate', async (req, res) => {
 /* ---------------- ffmpeg job runner ---------------- */
 // Spawn ffmpeg with the given args, track progress against expectedDur, and
 // register the output as a video asset when it succeeds.
-function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
+function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, opts) {
   const job = createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
-  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]));
+  const cleanup = () => {
+    for (const f of (opts && opts.cleanupFiles) || []) { try { fs.unlinkSync(f); } catch (_) {} }
+  };
+  // opts.cwd lets a filter reference a side file (e.g. a generated .ass subtitle
+  // file) by bare relative name - no cross-platform path escaping in the graph.
+  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]), opts && opts.cwd ? { cwd: opts.cwd } : undefined);
   let stderrTail = '';
   proc.stderr.on('data', (chunk) => {
     const text = chunk.toString();
@@ -1310,10 +1316,12 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
     }
   });
   proc.on('error', (err) => {
+    cleanup();
     job.status = 'error';
     job.error = `Could not start ffmpeg: ${err.message}. Run npm install in server/ (or install ffmpeg / set FFMPEG_PATH).`;
   });
   proc.on('close', (code) => {
+    cleanup();
     if (job.status === 'error') return;
     if (code === 0) {
       job.assetId = db.createAsset(userId, 'video', label, outFile, null, { ...meta, duration: expectedDur });
@@ -1727,8 +1735,39 @@ function eqFilter(eq) {
   return `,eq=brightness=${b}:contrast=${c}:saturation=${s}`;
 }
 
+// Text captions burn in via a generated .ass subtitle file (libass). Unlike the
+// caption-PNG path there is no line cap and no per-line upload, so a 10-minute
+// talking video captions cleanly. Styled to match the old canvas look: bold
+// white, soft shadow, bottom-center.
+function buildAssFile(lines, W, H) {
+  const esc = (t) => String(t).replace(/\r?\n/g, '\\N').replace(/[{}]/g, '');
+  const ts = (s) => {
+    const cs = Math.max(0, Math.round(s * 100));
+    const h = Math.floor(cs / 360000);
+    const m = String(Math.floor((cs % 360000) / 6000)).padStart(2, '0');
+    const sec = String(Math.floor((cs % 6000) / 100)).padStart(2, '0');
+    return `${h}:${m}:${sec}.${String(cs % 100).padStart(2, '0')}`;
+  };
+  const fontSize = Math.round(H * 0.048);
+  const outline = Math.max(2, Math.round(fontSize / 16));
+  const marginV = Math.round(H * 0.08);
+  return `[Script Info]
+ScriptType: v4.00+
+PlayResX: ${W}
+PlayResY: ${H}
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Arial,${fontSize},&H00FFFFFF,&H00FFFFFF,&H00000000,&H7F000000,-1,0,0,0,100,100,0,0,1,${outline},1,2,40,40,${marginV},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+` + lines.map((l) => `Dialogue: 0,${ts(l.start)},${ts(l.end)},Cap,,0,0,0,,${esc(l.text)}`).join('\n') + '\n';
+}
+
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
+  const { clips, transitions, music, overlays, captions, captionLines, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -1881,6 +1920,21 @@ router.post('/render', async (req, res) => {
     current = `[vo${k}]`;
   });
 
+  // Burned-in text captions ride the assembled timeline (before windowing, in
+  // timeline coordinates - same convention as the overlay captions above).
+  let assFile = null;
+  const capLines = (Array.isArray(captionLines) ? captionLines : [])
+    .map((l) => ({ text: String(l.text || '').trim(), start: Math.max(0, Number(l.start) || 0), end: Math.max(0, Number(l.end) || 0) }))
+    .filter((l) => l.text && l.end > l.start && l.start < winEnd && l.end > winStart)
+    .slice(0, 5000)
+    .sort((a, b) => a.start - b.start);
+  if (capLines.length) {
+    assFile = `captions-${crypto.randomBytes(5).toString('hex')}.ass`;
+    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H));
+    filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
+    current = '[vcap]';
+  }
+
   // Cutdown window, then loop treatment, then the final fades so they always
   // sit at the output's edges.
   filters.push(`${current}trim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},setpts=PTS-STARTPTS,settb=AVTB[vwin]`);
@@ -1943,7 +1997,8 @@ router.post('/render', async (req, res) => {
     ? name.trim().slice(0, 80)
     : `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
-    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
+    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop },
+    assFile ? { cwd: os.tmpdir(), cleanupFiles: [path.join(os.tmpdir(), assFile)] } : undefined);
   res.status(202).json({ job: jobJson(job) });
 });
 

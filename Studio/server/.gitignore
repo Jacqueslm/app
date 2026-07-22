@@ -3,3 +3,4 @@ node_modules/
 data.sqlite
 media/
 update-state.json
+model-cache/

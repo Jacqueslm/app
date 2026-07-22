@@ -2047,6 +2047,38 @@ router.post('/transcribe', async (req, res) => {
   }
 });
 
+/* ---------------- local speech-to-text (free, runs on this computer) ---------------- */
+const localStt = require('./transcribe');
+
+router.post('/transcribe-local', (req, res) => {
+  const asset = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!asset || (asset.kind !== 'video' && asset.kind !== 'audio')) {
+    return res.status(404).json({ error: 'Pick a video or audio file from your library first.' });
+  }
+  const job = createJob(req.userId, 'transcribe', {});
+  res.status(202).json({ job: jobJson(job) });
+  (async () => {
+    try {
+      const result = await localStt.transcribeLocal(ffmpegBin(), mediaPath(asset.filename), (phase, pct) => {
+        if (phase === 'extract') job.progress = 3;
+        else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
+        else job.progress = Math.max(job.progress, 45); // listening
+      });
+      // Keep the transcript on the asset - the clip picker and future features
+      // read it from here instead of transcribing again.
+      const meta = asset.meta ? JSON.parse(asset.meta) : {};
+      meta.transcript = { lines: result.lines, text: result.text };
+      db.updateAssetMeta(req.userId, asset.id, meta);
+      job.transcript = { lines: result.lines, text: result.text, srt: localStt.toSrt(result.lines) };
+      job.progress = 100;
+      job.status = 'done';
+    } catch (err) {
+      job.error = err.message || 'Transcription failed.';
+      job.status = 'error';
+    }
+  })();
+});
+
 /* ---------------- storyboard: lyric sheet -> scene-by-scene prompts ---------------- */
 const STOPWORDS = new Set(('the a an and or but so to of in on at for with from by is are was were ' +
   'be been being i you he she it we they my your his her its our their me him them this that these those ' +

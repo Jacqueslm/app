@@ -7,7 +7,10 @@ const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 
-const MODEL_ID = process.env.STUDIO_WHISPER_MODEL || 'Xenova/whisper-base.en';
+// small.en hears far more accurately than base.en on real-world speech at the
+// cost of a bigger one-time download (~250MB) and a slower pass - the right
+// trade for captions someone will publish. Override via STUDIO_WHISPER_MODEL.
+const MODEL_ID = process.env.STUDIO_WHISPER_MODEL || 'Xenova/whisper-small.en';
 const CACHE_DIR = path.join(__dirname, 'model-cache');
 
 let asrPromise = null;
@@ -55,6 +58,18 @@ function extractPcm(ffmpeg, inputPath) {
   });
 }
 
+// Whisper sometimes gets stuck in a loop and emits the same phrase dozens of
+// times in a row ("I'm going to go. I'm going to go. ..."). Collapse any short
+// phrase repeated 3+ times consecutively down to a single instance.
+function collapseRepeats(text) {
+  let out = String(text);
+  for (let n = 8; n >= 1; n--) {
+    const re = new RegExp('((?:\\S+\\s+){' + (n - 1) + '}\\S+)(?:\\s+\\1){2,}', 'gi');
+    out = out.replace(re, '$1');
+  }
+  return out.replace(/\s+/g, ' ').trim();
+}
+
 // onPhase(phase, pct): 'extract' -> 'model' (pct = download %) -> 'listen'
 async function transcribeLocal(ffmpeg, inputPath, onPhase) {
   onPhase && onPhase('extract', 0);
@@ -75,7 +90,7 @@ async function transcribeLocal(ffmpeg, inputPath, onPhase) {
     .map((c) => ({
       start: Math.max(0, Number(c.timestamp && c.timestamp[0]) || 0),
       end: Number(c.timestamp && c.timestamp[1]) || 0,
-      text: String(c.text || '').trim(),
+      text: collapseRepeats(String(c.text || '').trim()),
     }))
     .filter((l) => l.text);
   // Whisper sometimes leaves the final chunk's end open - close every bad end

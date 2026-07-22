@@ -3674,6 +3674,10 @@ function applySpec(spec) {
   st.highlights = Array.isArray(spec.highlights) ? spec.highlights : [];
   st.captions = Array.isArray(spec.captions) ? spec.captions : [];
   st.keepAudioAssets = new Set(Array.isArray(spec.keepAudio) ? spec.keepAudio : []);
+  // Older drafts predate the talking-first default - if nothing was explicitly
+  // kept, keep every timeline video's own sound (a silent render of someone
+  // talking is never what anyone wanted).
+  if (!st.keepAudioAssets.size) st.seq.filter((c) => c.kind === 'video').forEach((c) => st.keepAudioAssets.add(c.assetId));
   if (typeof spec.lyrics === 'string') $('#lyr-text').value = spec.lyrics;
   st.storyboard = Array.isArray(spec.storyboard) ? spec.storyboard : [];
   if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
@@ -3897,6 +3901,10 @@ async function addToSeq(asset, opts) {
       assetId: asset.id, kind: 'video', label: asset.label, url: asset.url,
       duration, start: 0, end: duration ? Math.round(duration * 100) / 100 : null, eq: null,
     });
+    // Talking-first default: a video's own sound rides along unless the user
+    // turns it off. The server skips clips with no audio stream, so silent AI
+    // clips in music videos are unaffected.
+    st.keepAudioAssets.add(asset.id);
   }
   syncTrans(); renderSeq();
   document.querySelector('#mtabs button[data-view="seq"]').click();
@@ -5810,7 +5818,7 @@ async function renderOneShort(s, statusEl) {
     body: JSON.stringify({
       clips: st.seq.map((c) => c.kind === 'image'
         ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
-        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq }),
+        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, keepAudio: st.keepAudioAssets.has(c.assetId) }),
       transitions: st.trans,
       music: spec.music.tracks.length ? spec.music : null,
       overlays,

@@ -3427,12 +3427,12 @@ const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
   || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
-// The running launcher scripts are skipped during the overlay copy: overwriting
-// a batch file mid-run corrupts its execution on Windows.
-const UPDATE_SKIP = new Set([
-  'Start My App.bat', 'Start My App.command', 'start-app.sh',
-  'Start Studio.bat', 'Start Studio.command', 'start-studio.sh', '.git',
-]);
+// Strict whitelist: an update only ever copies Studio's own files. The repo also
+// contains the Turn Someday Into Day One app, and the two must stay fully
+// separate on disk - updating one never adds or touches the other's files.
+// (Launchers are excluded too: overwriting a batch file mid-run corrupts its
+// execution on Windows, and they almost never change.)
+const UPDATE_ONLY = new Set(['Studio', 'HOW-TO-USE.md']);
 
 function runCmd(cmd, args, opts) {
   return new Promise((resolve, reject) => {
@@ -3498,7 +3498,7 @@ router.post('/update', async (req, res) => {
 
     // 3. overlay the new code onto the install (data files aren't in the ZIP)
     for (const entry of fs.readdirSync(src)) {
-      if (UPDATE_SKIP.has(entry)) continue;
+      if (!UPDATE_ONLY.has(entry)) continue;
       fs.cpSync(path.join(src, entry), path.join(APP_ROOT, entry), { recursive: true, force: true });
     }
 

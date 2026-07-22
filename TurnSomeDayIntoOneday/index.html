@@ -560,7 +560,10 @@ body{display:flex;justify-content:center}
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l" id="h-hours-lbl">Hours sober</div></div>
       <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
     </div>
-    <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-tools')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></div>
+    <div style="display:flex;justify-content:center;gap:18px;margin-top:10px;font-size:12px">
+      <span style="color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-tools')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></span>
+      <span style="color:var(--accent);cursor:pointer" onclick="shareProgressCard()"><i class="ti ti-share" style="font-size:11px"></i> Share my progress</span>
+    </div>
   </div>
 
   <div class="row">
@@ -920,6 +923,7 @@ body{display:flex;justify-content:center}
         <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a setback</span></div>
         <div class="card" style="display:flex;justify-content:space-around;text-align:center">
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l" id="prog-total-days-lbl">Total sober days</div></div>
+          <div class="ps" style="align-items:center;display:none" id="prog-hours-back-wrap"><div class="ps-n" id="prog-hours-back">0</div><div class="ps-l">Hours won back</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
         </div>
@@ -1064,6 +1068,13 @@ body{display:flex;justify-content:center}
           <i class="ti ti-pencil" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Lesson integration reminders</p><span>Connects today's lesson to real life</span></div>
           <div class="toggle-sw" id="sr-toggle-lessonIntegration"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Delivery</div>
+        <div class="setting-row" onclick="requestNotificationPermission()">
+          <i class="ti ti-bell" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Browser notifications</p><span id="notif-perm-sub">Tap to allow reminder notifications</span></div>
         </div>
       </div>
       <div class="sec" style="padding-top:0">
@@ -1271,7 +1282,7 @@ body{display:flex;justify-content:center}
         <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:var(--ts);border-color:var(--bdr)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
         <div class="tier-toggle">
           <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
-          <button id="abtn" onclick="setBill('a')">Yearly · save 40%</button>
+          <button id="abtn" onclick="setBill('a')">Yearly · save 50%</button>
           <button id="lbtn" onclick="setBill('l')">Lifetime</button>
         </div>
       </div>
@@ -1802,6 +1813,7 @@ body{display:flex;justify-content:center}
     <div class="sos-sub" id="mc-message" style="margin-bottom:16px"></div>
     <textarea class="ob-input" id="mc-reflection-input" rows="3" placeholder="Optional: what's one thing that got you here? (saved to your journal)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f);text-align:left"></textarea>
     <button class="ob-btn" style="margin-top:4px" onclick="saveMilestoneReflection()">Save &amp; close</button>
+    <button class="ob-btn outline" style="margin-top:8px;color:var(--ts);border-color:var(--bdr)" onclick="shareProgressCard()"><i class="ti ti-share" style="font-size:13px"></i> Share this milestone</button>
     <button class="sos-close" onclick="closeMilestoneCelebration()">Close</button>
   </div>
 </div>
@@ -3231,6 +3243,15 @@ function updateStats(){
     // lifetime stats - sum the current streak on top of every streak already banked at reset time,
     // so this number only ever grows, unlike "Days sober" which restarts after a relapse.
     document.getElementById('prog-total-days').textContent=((S.totalSoberDaysEver||0)+days).toLocaleString();
+    // Hours won back = lifetime days x the hours/day this habit used to take. Only
+    // shown when the user gave an hours figure in onboarding - a permanent 0 is noise.
+    const hoursBackWrap=document.getElementById('prog-hours-back-wrap');
+    if(S.dailyHoursLost>0){
+      hoursBackWrap.style.display='';
+      document.getElementById('prog-hours-back').textContent=Math.round(((S.totalSoberDaysEver||0)+days)*S.dailyHoursLost).toLocaleString();
+    }else{
+      hoursBackWrap.style.display='none';
+    }
     document.getElementById('prog-lessons').textContent=(S.lessonsCompletedCount||0).toLocaleString();
     document.getElementById('prog-cravings-survived').textContent=(S.cravingsSurvivedCount||0).toLocaleString();
     const pct90=Math.min(days/90,1);
@@ -4248,6 +4269,77 @@ function saveVoiceJournal(text){
   appInfo('Voice journaling',"Your voice journal entry has been saved.");
 }
 
+// ─── SHAREABLE PROGRESS CARD ──────────────────────────────────────────────────
+// A milestone image people actually want to post is the cheapest organic growth
+// loop in this category. The card renders locally on a canvas - nothing about
+// the journey leaves the device unless the user chooses to share it.
+function buildShareCardCanvas(){
+  const days=getDays();
+  const term=recoveryTerm();
+  const saved=Math.round(days*(S.dailySpend||0));
+  const hoursBack=Math.round(days*(S.dailyHoursLost||0));
+  const totalDays=(S.totalSoberDaysEver||0)+days;
+  const c=document.createElement('canvas');
+  c.width=1080;c.height=1350;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,c.height);
+  g.addColorStop(0,'#0f0c29');g.addColorStop(0.55,'#24243e');g.addColorStop(1,'#302b63');
+  x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+  const glow=x.createRadialGradient(540,600,60,540,600,480);
+  glow.addColorStop(0,'rgba(240,177,90,0.32)');glow.addColorStop(1,'rgba(240,177,90,0)');
+  x.fillStyle=glow;x.fillRect(0,120,1080,960);
+  const F='-apple-system,"Segoe UI",Roboto,sans-serif';
+  x.textAlign='center';
+  x.fillStyle='#8f98c6';
+  x.font=`600 34px ${F}`;
+  x.fillText('T U R N   S O M E D A Y   I N T O   D A Y   O N E',540,200);
+  x.fillStyle='#ffffff';
+  x.font=`700 300px ${F}`;
+  x.fillText(String(days),540,700);
+  x.fillStyle='#f0b15a';
+  x.font=`600 52px ${F}`;
+  x.fillText(`DAY${days===1?'':'S'} ${term.toUpperCase()}`,540,790);
+  x.strokeStyle='rgba(255,255,255,0.18)';x.lineWidth=2;
+  x.beginPath();x.moveTo(240,880);x.lineTo(840,880);x.stroke();
+  const stats=[];
+  if(saved>0)stats.push(`$${saved.toLocaleString()} saved`);
+  if(hoursBack>0)stats.push(`${hoursBack.toLocaleString()} hours won back`);
+  if(totalDays>days)stats.push(`${totalDays.toLocaleString()} days across my journey`);
+  x.fillStyle='#c0caff';
+  x.font=`500 42px ${F}`;
+  if(stats.length){
+    stats.forEach((s,i)=>x.fillText(s,540,970+i*70));
+  }else{
+    x.fillText('Every day is a win.',540,970);
+  }
+  x.fillStyle='#8f98c6';
+  x.font=`500 38px ${F}`;
+  x.fillText('One day at a time.',540,1250);
+  return c;
+}
+function shareProgressCard(){
+  if(!S.startDate){
+    appInfo('Share my progress','Set your start date first — then your card will show your real numbers.');
+    return;
+  }
+  logActivity('share_card');
+  const canvas=buildShareCardCanvas();
+  canvas.toBlob(async blob=>{
+    if(!blob){appInfo('Share my progress','Could not create your card. Please try again.');return;}
+    const file=new File([blob],`day-${getDays()}-of-my-journey.png`,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'My progress'});return;}
+      catch(e){if(e&&e.name==='AbortError')return;/* fall through to download */}
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=file.name;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    appInfo('Share my progress','Your progress card was saved as an image — post it anywhere you like.');
+  },'image/png');
+}
+
 // ─── CRAVINGS ─────────────────────────────────────────────────────────────────
 function logCraving(){
   const v=parseInt(document.getElementById('cSlider').value);
@@ -4318,7 +4410,12 @@ function finishTriggeredFlow(){
 // ─── SLIPPED FLOW (Free) ──────────────────────────────────────────────────────
 function openSlippedFlow(){
   closeSOS();
-  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${categoryFallbackNote()} What matters now is the next choice, not this one.`;
+  // Lead with the numbers that never reset - the "back to zero" shame spiral is
+  // the single most-cited reason people abandon streak apps after a slip.
+  const totalEver=(S.totalSoberDaysEver||0)+getDays();
+  const longest=Math.max(S.longestStreak||0,getDays());
+  const lifetimeNote=totalEver>0?` Your lifetime total — ${totalEver} day${totalEver===1?'':'s'} — and your longest run of ${longest} never reset.`:'';
+  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} What matters now is the next choice, not this one.`;
   document.getElementById('slipped-modal').classList.add('open');
   logActivity('slip_reported');
   novaNudge("I saw you check in after a slip. I'm not here to judge you — a slip is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
@@ -5407,6 +5504,7 @@ function evaluateSmartReminders(){
     const [mh,mm]=(sr.morningTime||'08:00').split(':').map(Number);
     if(hour>mh||(hour===mh&&minute>=mm)){
       markSmartReminderSent('morningCheckin');
+      systemNotify('Morning check-in','A minute to set your intention for today.');
       openMorningCheckin();
       return;
     }
@@ -5415,6 +5513,7 @@ function evaluateSmartReminders(){
     const [bh,bm]=(sr.bedtimeTime||'21:00').split(':').map(Number);
     if(hour>bh||(hour===bh&&minute>=bm)){
       markSmartReminderSent('bedtimeReflection');
+      systemNotify('Bedtime reflection','How did today actually go? One honest minute.');
       openBedtimeReflection();
       return;
     }
@@ -5454,6 +5553,7 @@ function openSmartReminderSettings(){
   switchTo('reminder-settings');actBn('bn-plans');
 }
 function renderSmartReminderSettings(){
+  updateNotifPermissionRow();
   const sr=S.smartReminders||{};
   ['urgeWindow','relapseRisk','morningCheckin','bedtimeReflection','motivational','categorySpecific','emotionalTrend','lessonIntegration'].forEach(key=>{
     const el=document.getElementById('sr-toggle-'+key);
@@ -5803,11 +5903,47 @@ function updateNovaDisclaimerToggleUI(){
 
 // ─── NOVA PRO UPGRADE NUDGES ────────────────────────────────────────────────
 // Soft, in-character nudges at emotional moments - never blocking, at most once/day, never for Pro users.
+// Mirror a nudge to a system notification when the tab is hidden and the user
+// has granted permission - otherwise reminders written to the chat go unseen
+// until the next time the app happens to be opened.
+function systemNotify(title,body){
+  try{
+    if(!('Notification' in window))return;
+    if(Notification.permission!=='granted')return;
+    if(!document.hidden)return;
+    new Notification(title,{body:String(body).slice(0,180),icon:'icons/icon-192.png',badge:'icons/icon-192.png'});
+  }catch(e){/* notification support varies - never let a reminder throw */}
+}
+function requestNotificationPermission(){
+  if(!('Notification' in window)){
+    appInfo('Notifications',"This browser doesn't support notifications. On iPhone, add the app to your Home Screen first, then enable them here.");
+    return;
+  }
+  Notification.requestPermission().then(p=>{
+    updateNotifPermissionRow();
+    if(p==='granted'){
+      appInfo('Notifications','Reminders can now reach you even when the app is in the background.');
+    }else if(p==='denied'){
+      appInfo('Notifications','Notifications are blocked for this app in your browser settings. Enable them there, then come back.');
+    }
+  });
+}
+function updateNotifPermissionRow(){
+  const sub=document.getElementById('notif-perm-sub');
+  if(!sub)return;
+  if(!('Notification' in window)){sub.textContent='Not supported in this browser';return;}
+  sub.textContent=Notification.permission==='granted'
+    ?'On — reminders reach you in the background'
+    :Notification.permission==='denied'
+      ?'Blocked in browser settings'
+      :'Tap to allow reminder notifications';
+}
 function novaNudge(text){
   addBubble('nova',text);
   S.chatHistory.push({role:'assistant',content:text});
   if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
   save();
+  systemNotify('Nova',text);
 }
 function maybeNovaProNudge(text){
   if(S.isPro)return;
@@ -5970,8 +6106,11 @@ function actBn(id){
 }
 
 // ─── PLANS / PRICING (one Pro plan, three billing options) ───────────────────
-const PRO_PRICE_MONTHLY=9.99,PRO_PRICE_YEARLY=71.99,PRO_PRICE_LIFETIME=149.99;
-let currentBillSelection='m';
+const PRO_PRICE_MONTHLY=9.99,PRO_PRICE_YEARLY=59.99,PRO_PRICE_LIFETIME=149.99;
+const YEARLY_SAVE_PCT=Math.round((1-(PRO_PRICE_YEARLY/12)/PRO_PRICE_MONTHLY)*100);
+// Yearly is pre-selected: annual subscribers stick around roughly 3x longer than
+// monthly ones, so the default should be the plan that's best for both sides.
+let currentBillSelection='a';
 function billTypeToPlan(t){return t==='a'?'yearly':t==='l'?'lifetime':'monthly';}
 function setBill(type){
   currentBillSelection=type;
@@ -5982,17 +6121,17 @@ function setBill(type){
   const subEl=document.getElementById('pro-price-sub');
   if(type==='a'){
     priceEl.innerHTML=`$${(PRO_PRICE_YEARLY/12).toFixed(2)}<span>/mo</span>`;
-    if(subEl)subEl.textContent=`Billed $${PRO_PRICE_YEARLY}/yr — save 40% vs monthly`;
+    if(subEl)subEl.textContent=`7-day free trial, then $${PRO_PRICE_YEARLY}/yr — save ${YEARLY_SAVE_PCT}% vs monthly`;
   }else if(type==='l'){
     priceEl.innerHTML=`$${PRO_PRICE_LIFETIME}<span> one-time</span>`;
     if(subEl)subEl.textContent='One-time payment. Yours for good, no renewals.';
   }else{
     priceEl.innerHTML=`$${PRO_PRICE_MONTHLY}<span>/mo</span>`;
-    if(subEl)subEl.textContent='Billed monthly. Cancel anytime.';
+    if(subEl)subEl.textContent='7-day free trial, then billed monthly. Cancel anytime in two taps.';
   }
 }
 function renderMiniPricingRows(){
-  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save 40%) · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
+  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save ${YEARLY_SAVE_PCT}%) · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
   document.querySelectorAll('.mini-pricing-row').forEach(el=>{el.textContent=text;});
 }
 function scrollToPricingCards(){

@@ -9,9 +9,12 @@ const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY) : null;
 // pre-created Stripe Price IDs, so there's no separate one-time setup script required.
 const PLANS = {
   monthly: { amount: 999, currency: 'usd', interval: 'month', name: 'Pro Monthly' },
-  yearly: { amount: 7199, currency: 'usd', interval: 'year', name: 'Pro Yearly' },
+  yearly: { amount: 5999, currency: 'usd', interval: 'year', name: 'Pro Yearly' },
   lifetime: { amount: 14999, currency: 'usd', name: 'Pro Lifetime' },
 };
+// Both subscription plans start with a free trial - trials roughly double how many
+// people are willing to start, and the card is only charged after day 7.
+const TRIAL_DAYS = 7;
 
 function isConfigured() {
   return !!stripe;
@@ -50,7 +53,7 @@ async function createCheckoutSession(user, plan, origin) {
     cancel_url: `${origin}/?checkout=cancel`,
     metadata: { app_user_id: String(user.id), plan },
     ...(plan !== 'lifetime'
-      ? { subscription_data: { metadata: { app_user_id: String(user.id), plan } } }
+      ? { subscription_data: { trial_period_days: TRIAL_DAYS, metadata: { app_user_id: String(user.id), plan } } }
       : { payment_intent_data: { metadata: { app_user_id: String(user.id), plan } } }),
   });
 

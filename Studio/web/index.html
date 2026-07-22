@@ -527,6 +527,15 @@ textarea::placeholder{color:var(--tm)}
           <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
         </div>
       </div>
+      <div class="row" id="clip-picker-row">
+        <label class="lbl">Clip picker <span style="text-transform:none;font-weight:400">— pick the strongest sentences from your filmed video</span></label>
+        <div id="cp-transcript-list" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn2" id="cp-load-transcript">Load my transcript</button>
+          <button class="btn2" id="cp-add-clips" style="display:none">Add selected as clips</button>
+          <button class="btn2 quiet" id="cp-clear-sel" style="display:none">Clear selection</button>
+        </div>
+      </div>
       <div class="trim" style="font-size:12px">
         <span>Lengths</span>
         <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
@@ -2508,7 +2517,7 @@ function applySpec(spec) {
     $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard(); renderClipPicker();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -3563,7 +3572,11 @@ $('#lyr-speech').onclick = async () => {
     }));
     $('#lyr-text').value = lines.map((l) => l.text).join('\n');
     st.lastSrt = done.transcript?.srt || '';
-    renderLyrList(); persistDraft();
+    // The server saved the transcript onto the asset - mirror it locally so the
+    // clip picker can use it without a refetch.
+    const localAsset = st.assets.find((a) => a.id === clip.assetId);
+    if (localAsset) localAsset.meta = { ...(localAsset.meta || {}), transcript: { lines } };
+    renderLyrList(); renderClipPicker(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '🎙️ Captions from my voice (free)';
 };
@@ -3830,6 +3843,103 @@ async function pollQueueOnce() {
     persistDraft();
   }
 }
+
+/* ---------------- clip picker: transcript sentences -> vertical clips ------- */
+// Reads the transcript saved on the filmed video (Captions card -> 🎙️), shows
+// every line as a clickable row, and turns each contiguous selection into an
+// entry in the shorts list - cut, cropped, and captioned by the existing
+// pipeline. "One long video -> a week of clips" in a few clicks.
+const cpSel = new Set();
+
+function firstTimelineVideo() {
+  const idx = st.seq.findIndex((c) => c.kind === 'video');
+  return idx === -1 ? null : { clip: st.seq[idx], idx };
+}
+function clipPlayDur(c) {
+  return c.kind === 'image' ? (c.holdDur || 4) : Math.max(0, (c.end ?? c.duration ?? 0) - (c.start || 0));
+}
+// Where a timeline item starts in output time (transitions overlap on xfades).
+function timelineOffsetOfClip(idx) {
+  let off = 0;
+  for (let i = 0; i < idx; i++) {
+    off += clipPlayDur(st.seq[i]);
+    const t = st.trans[i];
+    if (t && t.type && t.type !== 'cut') off -= Math.min(2, Math.max(0.2, Number(t.duration) || 0.5));
+  }
+  return Math.max(0, off);
+}
+function cpTranscriptLines() {
+  const found = firstTimelineVideo();
+  if (!found) return null;
+  const asset = st.assets.find((a) => a.id === found.clip.assetId);
+  return asset?.meta?.transcript?.lines || null;
+}
+
+function renderClipPicker() {
+  const list = $('#cp-transcript-list');
+  const lines = cpTranscriptLines();
+  const has = Array.isArray(lines) && lines.length;
+  $('#cp-add-clips').style.display = has ? '' : 'none';
+  $('#cp-clear-sel').style.display = has ? '' : 'none';
+  $('#cp-load-transcript').style.display = has ? 'none' : '';
+  if (!has) {
+    list.innerHTML = '<span class="usage">No transcript yet. Add your filmed video to the timeline, then use 🎙️ Captions from my voice (Captions card) — the transcript lands here automatically.</span>';
+    return;
+  }
+  list.innerHTML = '';
+  lines.forEach((l, i) => {
+    const row = document.createElement('div');
+    const on = cpSel.has(i);
+    row.style.cssText = `padding:6px 10px;border-radius:8px;font-size:13px;line-height:1.45;cursor:pointer;border:1px solid ${on ? 'var(--acc, #7c5cff)' : 'transparent'};background:${on ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)'}`;
+    row.innerHTML = `<span style="opacity:.5;font-size:11px;margin-right:8px">${l.start.toFixed(1)}s</span>${l.text.replace(/</g, '&lt;')}`;
+    row.onclick = () => { cpSel.has(i) ? cpSel.delete(i) : cpSel.add(i); renderClipPicker(); };
+    list.appendChild(row);
+  });
+}
+
+$('#cp-load-transcript').onclick = () => {
+  renderClipPicker();
+  if (!cpTranscriptLines()) setErr('#seq-err', 'Transcribe your video first: Captions card → 🎙️ Captions from my voice (free).');
+};
+$('#cp-clear-sel').onclick = () => { cpSel.clear(); renderClipPicker(); };
+
+$('#cp-add-clips').onclick = () => {
+  setErr('#seq-err', null);
+  const lines = cpTranscriptLines();
+  const found = firstTimelineVideo();
+  if (!lines || !found) return;
+  if (!cpSel.size) return setErr('#seq-err', 'Tap the sentences you want in the clip first.');
+  // Contiguous selected lines merge into one clip; gaps split into separate clips.
+  const idxs = [...cpSel].sort((a, b) => a - b);
+  const groups = [];
+  for (const i of idxs) {
+    const g = groups[groups.length - 1];
+    if (g && i === g[g.length - 1] + 1) g.push(i); else groups.push([i]);
+  }
+  const { clip, idx } = found;
+  const base = timelineOffsetOfClip(idx);
+  const timelineLen = clipPlayDur(clip);
+  let added = 0;
+  for (const g of groups) {
+    // transcript times are in the video file's own clock; shift into timeline time
+    const rawStart = lines[g[0]].start - (clip.start || 0) - 0.25;           // slight pre-roll
+    const rawEnd = lines[g[g.length - 1]].end - (clip.start || 0) + 0.4;    // slight post-roll
+    const start = base + Math.min(Math.max(0, rawStart), timelineLen);
+    const end = base + Math.min(Math.max(0, rawEnd), timelineLen);
+    const len = Math.round((end - start) * 10) / 10;
+    if (len < 1.5) continue;
+    const slug = slugName(lines[g[0]].text.split(/\s+/).slice(0, 4).join(' '));
+    let name = `clip_${slug}`, bump = 2;
+    while (st.shorts.some((x) => x.name === name)) name = `clip_${slug}${bump++}`;
+    st.shorts.push({ name, start: Math.round(start * 10) / 10, len: Math.min(180, len), text: '', loop: false });
+    added++;
+  }
+  cpSel.clear();
+  renderClipPicker();
+  if (!added) return setErr('#seq-err', 'Those selections were too short to make a clip (under 1.5s).');
+  renderShortsList();
+  $('#sh-list').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
 
 /* ---------------- shorts generator ---------------- */
 function slugName(s) {
@@ -4519,6 +4629,7 @@ renderOutputChips();
 renderSeq();
 renderOverlays();
 renderHighlights();
+renderClipPicker();
 renderQkFormat();
 renderMusicList();
 renderLyrList();

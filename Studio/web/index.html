@@ -484,8 +484,10 @@ textarea::placeholder{color:var(--tm)}
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="lyr-tap">▶ Tap to sync</button>
         <button class="btn2 quiet" id="lyr-auto">🪄 Auto-captions (AI)</button>
+        <button class="btn2 quiet" id="lyr-speech">🎙️ Captions from my voice (free)</button>
         <button class="btn2 quiet" id="lyr-spread">Auto-spread</button>
         <button class="btn2 quiet" id="lyr-title">+ Song title intro</button>
+        <button class="btn2 quiet" id="lyr-srt">⬇ .srt</button>
         <button class="btn2 quiet" id="lyr-clear">Clear</button>
       </div>
       <div id="lyr-tap-ui" style="display:none;flex-direction:column;gap:8px">
@@ -3076,6 +3078,8 @@ Object.entries({
   'qk-import-song': 'Paste a Suno share link (or any direct song link) and the song downloads straight into Studio.',
   'qk-assemble': 'FREE. Builds the whole video: camera moves on every picture, cuts on the beat, music, captions.',
   'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~2¢). Check the words after.',
+  'lyr-speech': 'FREE. Listens to your filmed video ON THIS COMPUTER and writes captions with real timings. First use downloads a small model (~80MB), then it works offline. Nothing is uploaded.',
+  'lyr-srt': 'FREE. Downloads your captions as a standard .srt subtitle file - upload it with your video on YouTube/Facebook instead of burning captions in.',
   'lyr-tap': 'FREE perfect sync: the song plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
@@ -3531,6 +3535,56 @@ $('#lyr-auto').onclick = async () => {
     renderLyrList(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '🪄 Auto-captions (AI)';
+};
+
+// Local speech-to-text: transcribes the first VIDEO on the timeline (a filmed
+// talking video) on this computer - free, private, works offline after the
+// first model download. Fills the caption list with real timings.
+$('#lyr-speech').onclick = async () => {
+  setErr('#seq-err', null);
+  const clip = st.seq.find((c) => c.kind === 'video');
+  if (!clip) return setErr('#seq-err', 'Add your filmed video to the timeline first — captions come from listening to it.');
+  if (st.captions.length && !confirm('Replace your current caption list with what the video says?')) return;
+  const b = $('#lyr-speech');
+  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Listening…';
+  try {
+    const { job } = await jfetch('/api/studio/transcribe-local', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId: clip.assetId }),
+    });
+    const done = await pollJob(job.id, (j) => {
+      b.innerHTML = `<span class="spinner"></span>${j.progress < 42 ? 'Getting the model (first time only)…' : 'Listening…'} ${j.progress}%`;
+    });
+    const lines = done.transcript?.lines || [];
+    if (!lines.length) throw new Error('No speech heard in that video — is the mic audio there?');
+    st.captions = lines.map((l) => ({
+      text: l.text,
+      start: Math.round(l.start * 10) / 10,
+      end: Math.round(l.end * 10) / 10,
+    }));
+    $('#lyr-text').value = lines.map((l) => l.text).join('\n');
+    st.lastSrt = done.transcript?.srt || '';
+    renderLyrList(); persistDraft();
+  } catch (e) { setErr('#seq-err', e.message); }
+  b.disabled = false; b.textContent = '🎙️ Captions from my voice (free)';
+};
+
+// Standard subtitle file from whatever is in the caption list - YouTube and
+// Facebook accept .srt directly, which beats burned-in captions for long videos.
+$('#lyr-srt').onclick = () => {
+  const lines = st.captions.filter((c) => String(c.text || '').trim());
+  if (!lines.length) return setErr('#seq-err', 'No captions yet — transcribe or sync some lines first.');
+  const ts = (s) => {
+    const ms = Math.max(0, Math.round(s * 1000));
+    const p = (n, w) => String(n).padStart(w, '0');
+    return `${p(Math.floor(ms / 3600000), 2)}:${p(Math.floor(ms % 3600000 / 60000), 2)}:${p(Math.floor(ms % 60000 / 1000), 2)},${p(ms % 1000, 3)}`;
+  };
+  const srt = lines.map((c, i) => `${i + 1}\n${ts(c.start)} --> ${ts(c.end || c.start + 3)}\n${c.text}\n`).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([srt], { type: 'text/plain' }));
+  a.download = 'captions.srt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 
 $('#lyr-title').onclick = () => {

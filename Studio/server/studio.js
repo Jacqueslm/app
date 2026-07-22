@@ -2685,6 +2685,12 @@ router.post('/render', async (req, res) => {
   if (musicIn) for (const t of musicIn.tracks) args.push('-i', t.file);
   const ovBase = musicIdx + (musicIn ? musicIn.tracks.length : 0);
   for (const o of allOverlays) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
+  // Brand watermark: a small logo pinned top-left for the whole video. The
+  // image lives at server/watermark.png - replace that file to change the logo.
+  const WATERMARK_FILE = path.join(__dirname, 'watermark.png');
+  const useWatermark = !!req.body.watermark && fs.existsSync(WATERMARK_FILE);
+  const wmIdx = ovBase + allOverlays.length;
+  if (useWatermark) args.push('-i', WATERMARK_FILE);
 
   // --- filter graph
   const filters = [];
@@ -2744,6 +2750,16 @@ router.post('/render', async (req, res) => {
     fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle));
     filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
     current = '[vcap]';
+  }
+
+  // Watermark rides above everything, for the full duration (eof_action=repeat
+  // holds the single PNG frame). ~13% of the width, top-left, slightly sheer.
+  if (useWatermark) {
+    const wmW = Math.round(W * 0.13);
+    const wmM = Math.round(W * 0.035);
+    filters.push(`[${wmIdx}:v]scale=${wmW}:-1,format=rgba,colorchannelmixer=aa=0.85[wmk]`);
+    filters.push(`${current}[wmk]overlay=${wmM}:${wmM}:eof_action=repeat[vwm]`);
+    current = '[vwm]';
   }
 
   // Cutdown window, then loop treatment, then the final fades so they always

@@ -67,8 +67,8 @@ const changePasswordLimiter = rateLimit({
   message: { error: 'Too many password change attempts. Try again in a few minutes.' },
 });
 
-function setSessionCookie(res, userId) {
-  res.cookie(COOKIE_NAME, signSession(userId), {
+function setSessionCookie(res, userId, sessionVersion) {
+  res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -110,12 +110,20 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
-  setSessionCookie(res, user.id);
+  setSessionCookie(res, user.id, user.session_version || 1);
   res.json({ email: user.email });
 });
 
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie(COOKIE_NAME);
+  res.json({ ok: true });
+});
+
+// Signs the account out everywhere EXCEPT this device: the version bump kills every
+// existing token, then this device immediately gets a fresh cookie at the new version.
+app.post('/api/auth/logout-all', requireAuth, (req, res) => {
+  const newVersion = db.bumpSessionVersion(req.userId);
+  setSessionCookie(res, req.userId, newVersion);
   res.json({ ok: true });
 });
 

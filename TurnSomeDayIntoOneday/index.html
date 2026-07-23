@@ -7255,6 +7255,12 @@ async function submitGateAuth(){
     S.accountEmail=data.email;
 
     if(gateMode==='signup'){
+      // Signing up with a PIN means "protect this app with a PIN" to a real person -
+      // so the same PIN also becomes the App lock, and Profile shows it as on.
+      if(gateCred==='pin'){
+        S.pinHash=await hashPin(password);
+        S.pinEnabled=true;
+      }
       // Brand-new account - anything already cached in this browser becomes this account's data.
       save();
       enterApp();

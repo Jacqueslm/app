@@ -3065,13 +3065,31 @@ const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
 const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
 const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
 
-// One batch of lines through one model. Returns a Map(index -> fixed text, ''
-// meaning delete) or null. Every failure reason is logged to Diagnostics so a
-// silent no-op polish can't hide.
+// fal's model catalog changes over time; a retired id gets HTTP 400 whose
+// error text lists the ids fal currently accepts. Harvest those and retry -
+// the polish self-heals instead of dying on a stale name.
+function harvestModelIds(body) {
+  const ids = (String(body).match(/[a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,}/gi) || [])
+    .filter((s) => /claude|gemini|gpt/i.test(s) && !/vision|audio|image/i.test(s));
+  const rank = (s) => (/claude/i.test(s) ? 0 : /gemini/i.test(s) ? 1 : 2);
+  return [...new Set(ids.map((s) => s.toLowerCase()))].sort((a, b) => rank(a) - rank(b));
+}
+let discoveredModel = null; // a model that worked this run - goes first next batch
+
+// One batch of lines through the models. Returns a Map(index -> fixed text, ''
+// meaning delete) or null. Every failure reason is logged to Diagnostics with
+// fal's own words, so a silent no-op polish can't hide.
 async function aiFixBatch(chunk, offset) {
   const numbered = chunk.map((l, j) => `${offset + j}|${l.text}`).join('\n');
   const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":${offset},"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
-  for (const model of CAPTION_FIX_MODELS) {
+  const queue = [...new Set([...(discoveredModel ? [discoveredModel] : []), ...CAPTION_FIX_MODELS])];
+  const tried = new Set();
+  let attempts = 0;
+  while (queue.length && attempts < 6) {
+    const model = queue.shift();
+    if (tried.has(model)) continue;
+    tried.add(model);
+    attempts++;
     // Hard 60s cap per attempt - a slow provider must never hang the job.
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 60_000);
@@ -3079,14 +3097,15 @@ async function aiFixBatch(chunk, offset) {
       const res = await fetch('https://fal.run/fal-ai/any-llm', {
         method: 'POST',
         headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
-        // Only documented input fields (model, prompt, system_prompt) - an
-        // unrecognized field risks the request being rejected outright.
         body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt }),
         signal: ctl.signal,
       });
       if (!res.ok) {
-        const body = (await res.text().catch(() => '')).slice(0, 200);
-        try { db.logError('caption-fix', `${model} answered HTTP ${res.status}`, body); } catch (_) {}
+        const body = (await res.text().catch(() => '')).slice(0, 600);
+        // Put fal's own explanation in the visible message, and queue up any
+        // valid model ids it names.
+        try { db.logError('caption-fix', `${model} → HTTP ${res.status}: ${body.slice(0, 160)}`, body); } catch (_) {}
+        for (const id of harvestModelIds(body)) if (!tried.has(id)) queue.push(id);
         continue;
       }
       const data = await res.json();
@@ -3101,6 +3120,7 @@ async function aiFixBatch(chunk, offset) {
         try { db.logError('caption-fix', `${model} covered ${Array.isArray(arr) ? arr.length : 0}/${chunk.length} lines`); } catch (_) {}
         continue;
       }
+      discoveredModel = model;
       return new Map(arr.map((e) => [Number(e.i), String(e.text ?? '').trim()]));
     } catch (err) {
       const msg = err && err.name === 'AbortError' ? 'timed out after 60s' : (err && err.message);

@@ -3059,35 +3059,70 @@ const localStt = require('./transcribe');
 // and the raw transcript is used unchanged.
 const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
   ? [process.env.STUDIO_CAPTION_FIX_MODEL]
-  : ['anthropic/claude-sonnet-4.5', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5']);
+  : ['anthropic/claude-sonnet-4.5', 'anthropic/claude-3.7-sonnet', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5', 'openai/gpt-4o-mini']);
 const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
-async function aiCleanTranscriptLines(lines) {
-  if (!FAL_KEY || !lines.length) return null;
-  const numbered = lines.map((l, i) => `${i}|${l.text}`).join('\n');
-  const system = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
-  const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":0,"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
+const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
+
+// One batch of lines through one model. Returns a Map(index -> fixed text, ''
+// meaning delete) or null. Every failure reason is logged to Diagnostics so a
+// silent no-op polish can't hide.
+async function aiFixBatch(chunk, offset) {
+  const numbered = chunk.map((l, j) => `${offset + j}|${l.text}`).join('\n');
+  const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":${offset},"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
   for (const model of CAPTION_FIX_MODELS) {
     try {
       const res = await fetch('https://fal.run/fal-ai/any-llm', {
         method: 'POST',
         headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, system_prompt: system, prompt }),
+        body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt, max_tokens: 3000 }),
       });
-      if (!res.ok) continue;
+      if (!res.ok) {
+        const body = (await res.text().catch(() => '')).slice(0, 200);
+        try { db.logError('caption-fix', `${model} answered HTTP ${res.status}`, body); } catch (_) {}
+        continue;
+      }
       const data = await res.json();
       const text = String(data.output || data.response || '');
       const m = text.match(/\[[\s\S]*\]/);
-      if (!m) continue;
+      if (!m) {
+        try { db.logError('caption-fix', `${model} returned no JSON`, text.slice(0, 200)); } catch (_) {}
+        continue;
+      }
       const arr = JSON.parse(m[0]);
-      if (!Array.isArray(arr)) continue;
-      const byIdx = new Map(arr.map((e) => [Number(e.i), String(e.text ?? '')]));
-      const cleaned = lines
-        .map((l, i) => ({ ...l, text: (byIdx.has(i) ? byIdx.get(i) : l.text).trim() }))
-        .filter((l) => l.text);
-      if (cleaned.length >= Math.max(1, Math.floor(lines.length * 0.5))) return cleaned;
-    } catch (_) { /* try the next model */ }
+      if (!Array.isArray(arr) || arr.length < chunk.length * 0.8) {
+        try { db.logError('caption-fix', `${model} covered ${Array.isArray(arr) ? arr.length : 0}/${chunk.length} lines`); } catch (_) {}
+        continue;
+      }
+      return new Map(arr.map((e) => [Number(e.i), String(e.text ?? '').trim()]));
+    } catch (err) {
+      try { db.logError('caption-fix', `${model} failed: ${err.message}`); } catch (_) {}
+    }
   }
   return null;
+}
+
+// Batched (25 lines per request) so long videos can't overflow the model's
+// output and lose the whole cleanup. A failed batch keeps its raw lines.
+async function aiCleanTranscriptLines(lines) {
+  if (!FAL_KEY || !lines.length) return null;
+  const out = [...lines];
+  const deletions = new Set();
+  let anyFixed = false;
+  for (let base = 0; base < lines.length; base += 25) {
+    const chunk = lines.slice(base, base + 25);
+    const fixes = await aiFixBatch(chunk, base);
+    if (!fixes) continue;
+    anyFixed = true;
+    chunk.forEach((l, j) => {
+      const i = base + j;
+      if (!fixes.has(i)) return;
+      const t = fixes.get(i);
+      if (t === '') deletions.add(i);
+      else out[i] = { ...out[i], text: t };
+    });
+  }
+  if (!anyFixed) return null;
+  return out.filter((_, i) => !deletions.has(i));
 }
 
 router.post('/transcribe-local', (req, res) => {

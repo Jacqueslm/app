@@ -3153,6 +3153,9 @@ async function aiFixBatch(chunk, offset) {
         try { db.logError('caption-fix', `${model} covered ${Array.isArray(arr) ? arr.length : 0}/${chunk.length} lines`); } catch (_) {}
         continue;
       }
+      if (discoveredModel !== model) {
+        try { db.logError('caption-fix', `✓ Words polished by ${model}`); } catch (_) {}
+      }
       discoveredModel = model;
       return new Map(arr.map((e) => [Number(e.i), String(e.text ?? '').trim()]));
     } catch (err) {

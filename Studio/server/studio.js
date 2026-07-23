@@ -3175,10 +3175,10 @@ router.post('/transcribe-local', (req, res) => {
         },
         (note) => { try { db.logError('transcribe', note); } catch (_) {} }
       );
-      // Automatic AI cleanup of mishears/garbles (falls back to the raw
-      // transcript if AI is off or the call fails).
+      // AI cleanup of mishears/garbles - ONLY when the user said yes to the
+      // priced confirm (falls back to the raw transcript if it fails).
       job.progress = 92;
-      const cleaned = await aiCleanTranscriptLines(result.lines);
+      const cleaned = req.body?.polish ? await aiCleanTranscriptLines(result.lines) : null;
       const lines = cleaned || result.lines;
       const text = lines.map((l) => l.text).join(' ').trim();
       // Keep the transcript on the asset - the clip picker and future features

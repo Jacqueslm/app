@@ -3605,8 +3605,11 @@ function timelineTotal() {
 function preRenderWarnings() {
   const w = [];
   if (!st.seq.length) return w; // hard-blocked elsewhere
-  if (!st.musicList.length) w.push('No song added — your video will be silent. Add your song in the "Song" section above.');
-  if (st.seq.length === 1) w.push('Only one clip on the timeline. Add more scenes for a full video.');
+  // A talking video carries its own sound - only warn about silence when
+  // there's truly no audio source at all (no song AND no kept clip sound).
+  const hasKeptVoice = st.seq.some((c) => c.kind === 'video' && st.keepAudioAssets.has(c.assetId));
+  if (!st.musicList.length && !hasKeptVoice) w.push('No song added and no clip sound kept — your video will be silent. Add a song, or keep a clip\'s talking (speaker icon on the timeline clip).');
+  if (st.seq.length === 1 && !hasKeptVoice) w.push('Only one clip on the timeline. Add more scenes for a full video.');
   // repeated clips (same source used more than once)
   const counts = {};
   st.seq.forEach((c) => { counts[c.assetId] = (counts[c.assetId] || 0) + 1; });

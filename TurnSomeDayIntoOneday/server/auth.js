@@ -22,8 +22,8 @@ function verifyPassword(password, hash) {
   return bcrypt.compareSync(password, hash);
 }
 
-function signSession(userId) {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '30d' });
+function signSession(userId, sessionVersion) {
+  return jwt.sign({ userId, sv: sessionVersion || 1 }, JWT_SECRET, { expiresIn: '30d' });
 }
 
 function verifySession(token) {
@@ -41,7 +41,13 @@ function requireAuth(req, res, next) {
   // A JWT stays cryptographically valid for its full 30-day lifetime regardless of logout or
   // account deletion on another device, since sessions aren't tracked server-side - checking the
   // user still exists closes that gap instead of letting deleted accounts keep writing state/chat data.
-  if (!db.getUserById(payload.userId)) return res.status(401).json({ error: 'Not signed in.' });
+  const user = db.getUserById(payload.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // "Log out on all devices" bumps the account's session version; any token minted
+  // before the bump carries the old number and stops working right here.
+  if ((payload.sv || 1) !== (user.session_version || 1)) {
+    return res.status(401).json({ error: 'Not signed in.' });
+  }
   req.userId = payload.userId;
   next();
 }

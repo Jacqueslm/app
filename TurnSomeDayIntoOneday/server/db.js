@@ -85,6 +85,9 @@ addColumnIfMissing('plan', "plan TEXT NOT NULL DEFAULT 'free'");
 addColumnIfMissing('subscription_status', 'subscription_status TEXT');
 addColumnIfMissing('current_period_end', 'current_period_end TEXT');
 addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NULL DEFAULT 0');
+// Bumping this number invalidates every session token issued before the bump -
+// that's how "log out on all devices" works without tracking sessions server-side.
+addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 function createUser(email, passwordHash, phone) {
@@ -212,6 +215,12 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+function bumpSessionVersion(userId) {
+  db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(userId);
+  const row = db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId);
+  return row ? row.session_version : 1;
+}
+
 function updatePassword(userId, passwordHash) {
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
 }
@@ -272,6 +281,7 @@ module.exports = {
   getAssets,
   getAsset,
   deleteAsset,
+  bumpSessionVersion,
   updatePassword,
   getUserByStripeCustomerId,
   setStripeCustomerId,

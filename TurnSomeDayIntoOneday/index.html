@@ -1415,6 +1415,13 @@ body{display:flex;justify-content:center}
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Help</div></div>
+      <div class="setting-row" onclick="openHelpFinder()">
+        <i class="ti ti-lifebuoy" style="color:#1D9E75"></i>
+        <div class="setting-row-txt"><p>Find anything</p><span>Type what you're looking for — get taken straight there</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Settings</div></div>
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
@@ -1424,6 +1431,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="logOutFromProfile()">
         <i class="ti ti-logout"></i>
         <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="logOutEverywhere()">
+        <i class="ti ti-devices"></i>
+        <div class="setting-row-txt"><p>Log out on all devices</p><span>Signs out every other phone or computer — this one stays in</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleNotif()">
@@ -1491,6 +1503,11 @@ body{display:flex;justify-content:center}
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates</div></div>
+      <div class="setting-row" onclick="toggleAutoUpdate()">
+        <i class="ti ti-refresh-dot"></i>
+        <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
+        <div class="toggle-sw on" id="autoupd-toggle"><div class="toggle-knob"></div></div>
+      </div>
       <div class="setting-row" onclick="checkForAppUpdates()">
         <i class="ti ti-refresh"></i>
         <div class="setting-row-txt"><p>Check for updates</p><span id="upd-check-sub">See if a newer version is available</span></div>
@@ -2050,6 +2067,17 @@ body{display:flex;justify-content:center}
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
   <div style="font-size:36px;font-weight:700;color:var(--green);margin-bottom:32px" id="breathe-count">4</div>
   <button onclick="closeBreathe()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I feel calmer</button>
+</div>
+
+<!-- HELP FINDER: type what you're looking for, get taken straight there -->
+<div class="sos-modal" id="help-modal" onclick="if(event.target===this)closeHelpFinder()">
+  <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="sos-title" style="color:var(--accent)">What are you looking for?</div>
+    <div class="sos-sub">Type a word — like "cancel", "PIN", "share", or "reminder"</div>
+    <input class="ob-input" id="help-search" placeholder="Search the app…" oninput="renderHelpResults()" autocomplete="off">
+    <div id="help-results" style="overflow-y:auto;flex:1;min-height:120px"></div>
+    <button class="sos-close" onclick="closeHelpFinder()">Close</button>
+  </div>
 </div>
 
 <!-- VOICE GUIDE OVERLAY (hands-free "talk me through it") -->
@@ -3093,6 +3121,8 @@ function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
   handleCheckoutReturn();
   syncBillingStatus(true);
+  document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
+  maybeAutoUpdate();
   renderMiniPricingRows();
   applyDarkMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
@@ -7073,6 +7103,74 @@ function logOutFromProfile(){
   signOutAccount();
 }
 
+function logOutEverywhere(){
+  if(!S.accountEmail){appInfo('Log out on all devices','You\'re not signed in on this device yet.');return;}
+  appConfirm('Sign this account out on every other phone and computer? This device stays signed in.',async()=>{
+    try{
+      const res=await fetch('/api/auth/logout-all',{method:'POST'});
+      if(!res.ok)throw new Error();
+      appInfo('Done','Every other device has been signed out. This one stays signed in.');
+    }catch(e){
+      appInfo('Could not reach the server','Check your connection and try again.');
+    }
+  });
+}
+
+// ─── HELP FINDER ─────────────────────────────────────────────────────────────
+// People shouldn't have to hunt through menus. Type a word, tap the match, and
+// the app takes you straight there. Works offline - it's a plain keyword index.
+const HELP_INDEX=[
+  {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
+  {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
+  {name:'Breathing exercise',sub:'4-7-8 calm-down technique',k:'breathe breathing calm anxiety relax',go:()=>breathe()},
+  {name:'5-4-3-2-1 grounding',sub:'Step-by-step sensory grounding',k:'ground grounding senses panic anxiety',go:()=>open5to1()},
+  {name:'Log a craving',sub:'Track it and let it pass',k:'log craving track urge record',go:()=>{switchTo('craving');actBn('bn-tools');}},
+  {name:'Write in my journal',sub:'Your private journal',k:'journal write diary note feelings',go:()=>{switchTo('journal');actBn('bn-tools');}},
+  {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
+  {name:'Talk to Nova',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
+  {name:'My progress & stats',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
+  {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},
+  {name:'Upgrade to Pro / see pricing',sub:'Plans, prices, and the free trial',k:'pro upgrade price pricing plan subscribe trial pay',go:()=>{switchTo('plans');actBn('bn-plans');}},
+  {name:'Cancel or change my subscription',sub:'Opens secure billing management',k:'cancel subscription refund billing stop paying manage payment card',go:()=>openBillingPortal()},
+  {name:'Restore my purchases',sub:'Re-sync Pro from your account',k:'restore purchase pro missing bought',go:()=>restorePurchases()},
+  {name:'Account & sync',sub:'Your email, password, and synced data',k:'account email password sync sign in login',go:()=>openAuthModal()},
+  {name:'Log out',sub:'Sign out on this device',k:'logout log out sign out exit',go:()=>logOutFromProfile()},
+  {name:'Log out on all devices',sub:'Signs out every other phone or computer',k:'logout all devices everywhere security stolen',go:()=>logOutEverywhere()},
+  {name:'App lock (PIN)',sub:'Require a PIN to open the app',k:'pin lock privacy private protect passcode',go:()=>toggleAppLock()},
+  {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'Dark mode',sub:'Switch between light and dark',k:'dark mode light theme night',go:()=>toggleDark()},
+  {name:'Text size',sub:'Make the app text bigger or smaller',k:'text size font bigger smaller read',go:()=>openFontSizeModal()},
+  {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
+  {name:'Rooms',sub:'Recovery stories, grouped by focus area',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
+  {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
+  {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-profile');}},
+  {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
+];
+function openHelpFinder(){
+  document.getElementById('help-modal').classList.add('open');
+  const inp=document.getElementById('help-search');
+  inp.value='';
+  renderHelpResults();
+  setTimeout(()=>inp.focus(),200);
+}
+function closeHelpFinder(){document.getElementById('help-modal').classList.remove('open');}
+function helpGo(i){closeHelpFinder();HELP_INDEX[i].go();}
+function renderHelpResults(){
+  const q=document.getElementById('help-search').value.trim().toLowerCase();
+  const words=q.split(/\s+/).filter(Boolean);
+  const list=words.length
+    ?HELP_INDEX.filter(h=>{const hay=(h.name+' '+h.sub+' '+h.k).toLowerCase();return words.every(w=>hay.includes(w));})
+    :HELP_INDEX.slice(0,7);
+  document.getElementById('help-results').innerHTML=list.length
+    ?list.map(h=>{
+      const i=HELP_INDEX.indexOf(h);
+      return `<div class="sos-opt" onclick="helpGo(${i})"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><div class="sos-opt-info"><p>${escapeHtml(h.name)}</p><span>${escapeHtml(h.sub)}</span></div></div>`;
+    }).join('')
+    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word, or ask Nova on the Nova tab.</div>';
+}
+
 // Erase absolutely everything: account + synced data on the server, plus every
 // trace in this browser. The person lands on a fresh signup, like day zero.
 async function hardResetApp(){
@@ -7129,6 +7227,38 @@ async function checkForAppUpdates(){
   }catch(e){
     sub.textContent='Could not reach the server.';
   }
+}
+
+function toggleAutoUpdate(){
+  S.autoUpdate=S.autoUpdate===false;// undefined counts as on
+  save();
+  document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
+}
+
+// With automatic updates on (the default), the app quietly checks GitHub on
+// open and installs anything new by itself - no buttons to remember.
+let autoUpdateAttempted=false;
+async function maybeAutoUpdate(){
+  if(autoUpdateAttempted||S.autoUpdate===false||appUpdateRunning)return;
+  autoUpdateAttempted=true;
+  try{
+    const res=await fetch('/api/update/check');
+    if(!res.ok)return;
+    const data=await res.json();
+    if(data.upToDate)return;
+    appUpdateRunning=true;
+    const sub=document.getElementById('upd-run-sub');
+    if(sub)sub.textContent='New version found — installing it in the background…';
+    const up=await fetch('/api/update',{method:'POST'});
+    const result=await up.json().catch(()=>({}));
+    if(up.ok){
+      if(sub)sub.textContent='Update installed — restart the app to finish.';
+      appInfo('App updated itself','A new version was installed automatically. Close the black window, then double-click Start My App to finish. Your data is untouched.');
+    }else{
+      if(sub)sub.textContent=(result.error||'Automatic update failed')+' — tap here to try manually.';
+      appUpdateRunning=false;
+    }
+  }catch(e){appUpdateRunning=false;/* offline - try again next open */}
 }
 
 let appUpdateRunning=false;

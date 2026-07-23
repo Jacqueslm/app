@@ -5193,6 +5193,17 @@ $('#lyr-speech').onclick = async () => {
   setErr('#seq-err', null);
   const clip = st.seq.find((c) => c.kind === 'video');
   if (!clip) return setErr('#seq-err', 'Add your filmed video to the timeline first — captions come from listening to it.');
+  // A finished transcript is saved on the video itself - if one exists, offer
+  // it instantly (free) instead of listening all over again. This also rescues
+  // runs whose result never reached the page (refresh mid-job).
+  const savedLines = st.assets.find((a) => a.id === clip.assetId)?.meta?.transcript?.lines;
+  if (Array.isArray(savedLines) && savedLines.length
+      && confirm('This video already has a saved transcript from the last run.\n\nOK = use it instantly (free)\nCancel = listen to the video again')) {
+    st.captions = savedLines.map((l) => ({ text: l.text, start: Math.round(l.start * 10) / 10, end: Math.round(l.end * 10) / 10 }));
+    $('#lyr-text').value = savedLines.map((l) => l.text).join('\n');
+    renderLyrList(); renderClipPicker(); persistDraft();
+    return;
+  }
   if (st.captions.length && !confirm('Replace your current caption list with what the video says?')) return;
   // Listening is free. The AI word-polish costs money, so it never runs
   // without a yes - same rule as every other paid button in Studio.

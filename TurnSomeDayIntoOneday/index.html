@@ -7220,6 +7220,34 @@ function buildGuideIndex(){
     });
   });
 }
+// Built-in answers for the most common "how/why" questions - free and offline,
+// so none of them ever burn a Nova chat. Each can carry a take-me-there button.
+const GUIDE_FAQ=[
+  {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>50 Nova chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
+  {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
+  {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
+  {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
+  {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
+  {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
+  {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Nova and syncing need a connection.",go:null},
+  {q:'Is Nova a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Nova is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
+  {q:'How many Nova chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Nova chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Nova'},
+  {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
+  {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
+  {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},
+  {q:'How do I change my email or password?',k:'change email password credentials account update',a:"Everything account-related lives in <b>Account &amp; Sync</b> in Profile — password changes included.",go:'Account & sync'},
+  {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Focus areas'},
+  {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
+  {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
+  {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.",go:'Delete my account'},
+  {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
+  {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
+];
+function guideGoName(n){
+  const i=HELP_INDEX.findIndex(h=>h.name===n);
+  if(i>=0)guideGo(i);
+}
 let guideGreeted=false;
 function toggleGuideBot(){
   buildGuideIndex();
@@ -7264,6 +7292,17 @@ function guideSend(){
     +(h.name.toLowerCase().includes(w)?3:0)
     +((h.sub+' '+h.k).toLowerCase().includes(w)?1:0),0)}))
     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
+  // A question beats a location when it matches at least as well - "how do I
+  // cancel" deserves the explanation with a button, not just the button.
+  const faqScored=GUIDE_FAQ.map((f,i)=>({i,score:words.reduce((s,w)=>s
+    +(f.q.toLowerCase().includes(w)?3:0)
+    +(f.k.includes(w)?1:0),0)}))
+    .filter(x=>x.score>1).sort((a,b)=>b.score-a.score);
+  if(faqScored.length&&(!scored.length||faqScored[0].score>=scored[0].score)){
+    const f=GUIDE_FAQ[faqScored[0].i];
+    guideBotSay(f.a+(f.go?`<button class="gb-go" onclick="guideGoName('${f.go.replace(/'/g,"\\'")}')">→ ${escapeHtml(f.go)}</button>`:''));
+    return;
+  }
   if(scored.length){
     guideBotSay('Here you go — tap one and I\'ll take you there:'+
       scored.map(s=>`<button class="gb-go" onclick="guideGo(${s.i})">→ ${escapeHtml(HELP_INDEX[s.i].name)}</button>`).join(''));

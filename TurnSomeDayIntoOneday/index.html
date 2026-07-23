@@ -7152,6 +7152,9 @@ function logOutEverywhere(){
 // People shouldn't have to hunt through menus. Type a word, tap the match, and
 // the app takes you straight there. Works offline - it's a plain keyword index.
 const HELP_INDEX=[
+  {name:'Profile & settings',sub:'Your account, PIN, reminders, updates — all settings',k:'profile page settings preferences options menu account section',go:()=>{switchTo('profile');actBn('bn-plans');}},
+  {name:'Today screen',sub:'Your day counter, pledge, and daily lesson',k:'today home main screen front day counter start',go:()=>{switchTo('home');actBn('bn-home');}},
+  {name:'Tools',sub:'All the free recovery tools in one place',k:'tools toolbox exercises coping techniques',go:()=>{switchTo('tools');actBn('bn-tools');}},
   {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
   {name:'Breathing exercise',sub:'4-7-8 calm-down technique',k:'breathe breathing calm anxiety relax',go:()=>breathe()},
@@ -7169,16 +7172,16 @@ const HELP_INDEX=[
   {name:'Log out',sub:'Sign out on this device',k:'logout log out sign out exit',go:()=>logOutFromProfile()},
   {name:'Log out on all devices',sub:'Signs out every other phone or computer',k:'logout all devices everywhere security stolen',go:()=>logOutEverywhere()},
   {name:'App lock (PIN)',sub:'Require a PIN to open the app',k:'pin lock privacy private protect passcode',go:()=>toggleAppLock()},
-  {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Dark mode',sub:'Switch between light and dark',k:'dark mode light theme night',go:()=>toggleDark()},
   {name:'Text size',sub:'Make the app text bigger or smaller',k:'text size font bigger smaller read',go:()=>openFontSizeModal()},
-  {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
-  {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
+  {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
   {name:'Rooms',sub:'Recovery stories, grouped by focus area',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
-  {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-profile');}},
-  {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
+  {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-plans');}},
+  {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
 ];
 // ─── GUIDE BOT ───────────────────────────────────────────────────────────────
 // The floating "?" on every screen. Same free offline index as Find anything,
@@ -7221,7 +7224,11 @@ function guideSend(){
   if(/^(hi|hey|hello|yo|sup|good\s(morning|afternoon|evening))\b/.test(ql)){guideBotSay('Hey! What are you trying to find or do?');return;}
   if(/thank/.test(ql)){guideBotSay("Any time. I'm right here whenever you need me.");return;}
   const words=ql.replace(/[?!.,']/g,' ').split(/\s+/).filter(w=>w&&!GUIDE_STOP.has(w));
-  const scored=HELP_INDEX.map((h,i)=>({i,score:words.filter(w=>(h.name+' '+h.sub+' '+h.k).toLowerCase().includes(w)).length}))
+  // A hit in the entry's NAME counts triple - asking for "profile" should rank
+  // the Profile screen itself far above entries that merely mention it.
+  const scored=HELP_INDEX.map((h,i)=>({i,score:words.reduce((s,w)=>s
+    +(h.name.toLowerCase().includes(w)?3:0)
+    +((h.sub+' '+h.k).toLowerCase().includes(w)?1:0),0)}))
     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
   if(scored.length){
     guideBotSay('Here you go — tap one and I\'ll take you there:'+

@@ -91,6 +91,47 @@ async function cancelStripeSubscriptionForUser(user) {
   }
 }
 
+// Webhook-optional reconciliation: ask Stripe directly what this customer has
+// paid for. A home install has no public URL for Stripe to send webhooks to,
+// so after checkout the app pulls the truth on demand and updates the local
+// account to match - Pro activates without any webhook setup.
+async function refreshFromStripe(user) {
+  if (!stripe || !user.stripe_customer_id) return;
+  try {
+    // Lifetime is a one-time payment, not a subscription - it shows up as a
+    // completed payment-mode Checkout Session. A lifetime purchase never downgrades.
+    const sessions = await stripe.checkout.sessions.list({ customer: user.stripe_customer_id, limit: 10 });
+    const lifetimePaid = sessions.data.some(
+      (s) => s.mode === 'payment' && s.payment_status === 'paid' && s.metadata && s.metadata.plan === 'lifetime'
+    );
+    if (lifetimePaid || user.plan === 'lifetime') {
+      db.updateSubscriptionFromStripe(user.id, {
+        plan: 'lifetime',
+        subscriptionStatus: 'active',
+        stripeSubscriptionId: null,
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+      });
+      return;
+    }
+    const subs = await stripe.subscriptions.list({ customer: user.stripe_customer_id, status: 'all', limit: 10 });
+    const best = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') || subs.data[0];
+    if (!best) return;
+    const isActive = best.status === 'active' || best.status === 'trialing';
+    db.updateSubscriptionFromStripe(user.id, {
+      plan: isActive ? ((best.metadata && best.metadata.plan) || user.plan || 'monthly') : 'free',
+      subscriptionStatus: best.status,
+      stripeSubscriptionId: best.id,
+      currentPeriodEnd: best.current_period_end
+        ? new Date(best.current_period_end * 1000).toISOString()
+        : null,
+      cancelAtPeriodEnd: best.cancel_at_period_end,
+    });
+  } catch (e) {
+    // Stripe unreachable - keep the last known local state; the next refresh catches up.
+  }
+}
+
 async function handleWebhookEvent(rawBody, signature) {
   if (!WEBHOOK_SECRET) throw new Error('Webhook secret not configured.');
   const event = stripe.webhooks.constructEvent(rawBody, signature, WEBHOOK_SECRET);
@@ -150,6 +191,7 @@ module.exports = {
   createCheckoutSession,
   createPortalSession,
   getBillingStatus,
+  refreshFromStripe,
   cancelStripeSubscriptionForUser,
   handleWebhookEvent,
 };

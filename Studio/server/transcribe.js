@@ -1,37 +1,41 @@
 // Local speech-to-text: Whisper running on this computer via transformers.js.
-// First use downloads the model (~80MB) into server/model-cache, and after that
-// it works fully offline - no keys, no per-use cost, nothing leaves the machine.
+// First use downloads the model into server/model-cache, and after that it
+// works fully offline - no keys, no per-use cost, nothing leaves the machine.
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 
-// small.en hears far more accurately than base.en on real-world speech at the
-// cost of a bigger one-time download (~250MB) and a slower pass - the right
-// trade for captions someone will publish. Override via STUDIO_WHISPER_MODEL.
+// small.en hears more accurately; base.en is the proven fallback that already
+// worked on this install. If small.en can't load (download blocked, first run
+// offline), transcription automatically drops back to base.en instead of
+// failing - never worse than before. Override via STUDIO_WHISPER_MODEL.
 const MODEL_ID = process.env.STUDIO_WHISPER_MODEL || 'Xenova/whisper-small.en';
+const FALLBACK_MODEL_ID = 'Xenova/whisper-base.en';
 const CACHE_DIR = path.join(__dirname, 'model-cache');
+const SR = 16000;
 
-let asrPromise = null;
-async function getAsr(onDownloadPct) {
-  if (!asrPromise) {
-    asrPromise = (async () => {
+const asrCache = new Map(); // modelId -> Promise<pipeline>
+async function getAsr(modelId, onDownloadPct) {
+  if (!asrCache.has(modelId)) {
+    const p = (async () => {
       // transformers.js is ESM-only; dynamic import keeps this file CommonJS.
       const { pipeline, env } = await import('@huggingface/transformers');
       env.cacheDir = CACHE_DIR;
-      return pipeline('automatic-speech-recognition', MODEL_ID, {
-        progress_callback: (p) => {
-          if (p.status === 'progress' && p.total) {
-            onDownloadPct && onDownloadPct(Math.round((p.loaded / p.total) * 100));
+      return pipeline('automatic-speech-recognition', modelId, {
+        progress_callback: (pr) => {
+          if (pr.status === 'progress' && pr.total) {
+            onDownloadPct && onDownloadPct(Math.round((pr.loaded / pr.total) * 100));
           }
         },
       });
     })();
-    // A failed model download (offline first run) must not poison later retries.
-    asrPromise.catch(() => { asrPromise = null; });
+    // A failed model download must not poison later retries.
+    p.catch(() => { asrCache.delete(modelId); });
+    asrCache.set(modelId, p);
   }
-  return asrPromise;
+  return asrCache.get(modelId);
 }
 
 // 16kHz mono float32 raw PCM - exactly what Whisper expects, no WAV header to parse.
@@ -40,7 +44,7 @@ function extractPcm(ffmpeg, inputPath) {
     const out = path.join(os.tmpdir(), `stt-${crypto.randomBytes(6).toString('hex')}.pcm`);
     const proc = spawn(
       ffmpeg,
-      ['-y', '-i', inputPath, '-vn', '-ac', '1', '-ar', '16000', '-f', 'f32le', '-acodec', 'pcm_f32le', out],
+      ['-y', '-i', inputPath, '-vn', '-ac', '1', '-ar', String(SR), '-f', 'f32le', '-acodec', 'pcm_f32le', out],
       { stdio: ['ignore', 'ignore', 'pipe'] }
     );
     proc.on('error', (e) => reject(new Error(`Could not run ffmpeg: ${e.message}`)));
@@ -70,31 +74,68 @@ function collapseRepeats(text) {
   return out.replace(/\s+/g, ' ').trim();
 }
 
-// onPhase(phase, pct): 'extract' -> 'model' (pct = download %) -> 'listen'
-async function transcribeLocal(ffmpeg, inputPath, onPhase) {
+// The audio is processed in ~60s pieces (with a 2s overlap so words at a seam
+// aren't cut in half). This gives real progress on long videos - the old
+// single-pass approach sat at one percentage for many minutes on a slower
+// model, which looked frozen.
+const PIECE_S = 60;
+const OVERLAP_S = 2;
+function planPieces(totalSamples) {
+  const pieces = [];
+  for (let s = 0; s < totalSamples; s += PIECE_S * SR) {
+    pieces.push({
+      from: Math.max(0, s === 0 ? 0 : s - OVERLAP_S * SR),
+      to: Math.min(totalSamples, s + PIECE_S * SR),
+      offsetSec: Math.max(0, s === 0 ? 0 : s / SR - OVERLAP_S),
+    });
+  }
+  return pieces;
+}
+
+// onPhase(phase, pct): 'extract' -> 'model' (pct = download %) -> 'listen' (pct = % done)
+// onNote(msg): human-readable notes (e.g. model fallback) for the diagnostics log.
+async function transcribeLocal(ffmpeg, inputPath, onPhase, onNote) {
   onPhase && onPhase('extract', 0);
   const audio = await extractPcm(ffmpeg, inputPath);
   if (!audio.length) throw new Error('No audio track found in that file.');
   onPhase && onPhase('model', 0);
   let asr;
   try {
-    asr = await getAsr((pct) => onPhase && onPhase('model', pct));
+    asr = await getAsr(MODEL_ID, (pct) => onPhase && onPhase('model', pct));
   } catch (e) {
-    throw new Error('Could not download the speech model (first run needs internet). Check your connection and try again - after the first download it works offline.');
+    onNote && onNote(`Could not load ${MODEL_ID} (${e.message ? String(e.message).slice(0, 120) : 'unknown'}) - falling back to ${FALLBACK_MODEL_ID}`);
+    try {
+      asr = await getAsr(FALLBACK_MODEL_ID, (pct) => onPhase && onPhase('model', pct));
+    } catch (e2) {
+      throw new Error('Could not download the speech model (first run needs internet). Check your connection and try again - after the first download it works offline.');
+    }
   }
-  onPhase && onPhase('listen', 0);
-  const result = await asr(audio, { chunk_length_s: 30, stride_length_s: 5, return_timestamps: true });
-  const chunks = Array.isArray(result && result.chunks) ? result.chunks : [];
-  const totalDur = audio.length / 16000;
-  const lines = chunks
-    .map((c) => ({
-      start: Math.max(0, Number(c.timestamp && c.timestamp[0]) || 0),
-      end: Number(c.timestamp && c.timestamp[1]) || 0,
-      text: collapseRepeats(String(c.text || '').trim()),
-    }))
-    .filter((l) => l.text);
-  // Whisper sometimes leaves the final chunk's end open - close every bad end
-  // against the next line's start (or the end of the audio).
+
+  const totalDur = audio.length / SR;
+  const pieces = planPieces(audio.length);
+  const lines = [];
+  let lastEnd = 0; // absolute seconds already covered - dedupes the overlap
+  for (let i = 0; i < pieces.length; i++) {
+    onPhase && onPhase('listen', Math.round((i / pieces.length) * 100));
+    const { from, to, offsetSec } = pieces[i];
+    const result = await asr(audio.subarray(from, to), { chunk_length_s: 30, stride_length_s: 5, return_timestamps: true });
+    const chunks = Array.isArray(result && result.chunks) ? result.chunks : [];
+    for (const c of chunks) {
+      const start = offsetSec + Math.max(0, Number(c.timestamp && c.timestamp[0]) || 0);
+      const endRaw = Number(c.timestamp && c.timestamp[1]) || 0;
+      const end = endRaw > 0 ? offsetSec + endRaw : 0;
+      const text = collapseRepeats(String(c.text || '').trim());
+      if (!text) continue;
+      if (start < lastEnd - 0.75) continue; // overlap region already emitted
+      lines.push({ start, end, text });
+      if (end > lastEnd) lastEnd = end;
+      else if (start > lastEnd) lastEnd = start;
+    }
+  }
+  onPhase && onPhase('listen', 100);
+
+  // Whisper sometimes leaves a chunk's end open - close every bad end against
+  // the next line's start (or the end of the audio).
   lines.forEach((l, i) => {
     if (!l.end || l.end <= l.start) l.end = Math.min(totalDur, (lines[i + 1] && lines[i + 1].start) || totalDur);
   });
@@ -112,4 +153,4 @@ function toSrt(lines) {
   return lines.map((l, i) => `${i + 1}\n${ts(l.start)} --> ${ts(l.end)}\n${l.text}\n`).join('\n');
 }
 
-module.exports = { transcribeLocal, toSrt, MODEL_ID };
+module.exports = { transcribeLocal, toSrt, planPieces, MODEL_ID };

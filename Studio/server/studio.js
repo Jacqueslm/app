@@ -3072,6 +3072,9 @@ async function aiFixBatch(chunk, offset) {
   const numbered = chunk.map((l, j) => `${offset + j}|${l.text}`).join('\n');
   const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":${offset},"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
   for (const model of CAPTION_FIX_MODELS) {
+    // Hard 60s cap per attempt - a slow provider must never hang the job.
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 60_000);
     try {
       const res = await fetch('https://fal.run/fal-ai/any-llm', {
         method: 'POST',
@@ -3079,6 +3082,7 @@ async function aiFixBatch(chunk, offset) {
         // Only documented input fields (model, prompt, system_prompt) - an
         // unrecognized field risks the request being rejected outright.
         body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt }),
+        signal: ctl.signal,
       });
       if (!res.ok) {
         const body = (await res.text().catch(() => '')).slice(0, 200);
@@ -3099,7 +3103,10 @@ async function aiFixBatch(chunk, offset) {
       }
       return new Map(arr.map((e) => [Number(e.i), String(e.text ?? '').trim()]));
     } catch (err) {
-      try { db.logError('caption-fix', `${model} failed: ${err.message}`); } catch (_) {}
+      const msg = err && err.name === 'AbortError' ? 'timed out after 60s' : (err && err.message);
+      try { db.logError('caption-fix', `${model} failed: ${msg}`); } catch (_) {}
+    } finally {
+      clearTimeout(timer);
     }
   }
   return null;
@@ -3138,11 +3145,16 @@ router.post('/transcribe-local', (req, res) => {
   res.status(202).json({ job: jobJson(job) });
   (async () => {
     try {
-      const result = await localStt.transcribeLocal(ffmpegBin(), mediaPath(asset.filename), (phase, pct) => {
-        if (phase === 'extract') job.progress = 3;
-        else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
-        else job.progress = Math.max(job.progress, 45); // listening
-      });
+      const result = await localStt.transcribeLocal(
+        ffmpegBin(),
+        mediaPath(asset.filename),
+        (phase, pct) => {
+          if (phase === 'extract') job.progress = 3;
+          else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
+          else job.progress = 40 + Math.round((pct || 0) * 0.5); // 40-90%: listening, moves per audio piece
+        },
+        (note) => { try { db.logError('transcribe', note); } catch (_) {} }
+      );
       // Automatic AI cleanup of mishears/garbles (falls back to the raw
       // transcript if AI is off or the call fails).
       job.progress = 92;

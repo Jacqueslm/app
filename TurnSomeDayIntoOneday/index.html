@@ -950,6 +950,11 @@ body{display:flex;justify-content:center}
       </div>
       <div class="sec">
         <div class="sec-hd">Free tools — always available</div>
+        <div class="setting-row" onclick="startVoiceGuide()">
+          <i class="ti ti-headphones" style="color:#1D9E75"></i>
+          <div class="setting-row-txt"><p>Talk me through it</p><span>Hands-free voice guide — just listen and breathe</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="breathe()">
           <i class="ti ti-wind" style="color:#1D9E75"></i>
           <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
@@ -1544,6 +1549,10 @@ body{display:flex;justify-content:center}
       <i class="ti ti-phone" style="color:#E24B4A"></i>
       <div class="sos-opt-info"><p style="color:#E24B4A">Call or text 988</p><span>Suicide &amp; Crisis Lifeline — free, confidential, 24/7</span></div>
     </div>
+    <div class="sos-opt" onclick="startVoiceGuide()">
+      <i class="ti ti-headphones" style="color:#1D9E75"></i>
+      <div class="sos-opt-info"><p>Talk me through it</p><span>Hands-free — a calm voice guides you, nothing to read</span></div>
+    </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
@@ -2041,6 +2050,14 @@ body{display:flex;justify-content:center}
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
   <div style="font-size:36px;font-weight:700;color:var(--green);margin-bottom:32px" id="breathe-count">4</div>
   <button onclick="closeBreathe()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I feel calmer</button>
+</div>
+
+<!-- VOICE GUIDE OVERLAY (hands-free "talk me through it") -->
+<div id="voiceguide-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+  <div id="vg-circle" style="width:130px;height:130px;border-radius:50%;background:rgba(29,158,117,0.2);border:3px solid #1D9E75;margin:0 auto 28px;transition:transform 4s ease"></div>
+  <div id="vg-caption" style="font-size:18px;font-weight:500;line-height:1.5;max-width:320px;min-height:84px;margin:0 auto 28px;color:#fff">I'm here with you.</div>
+  <div style="font-size:12px;color:#8892c0;margin-bottom:20px">Close your eyes if you want — the voice will keep going.</div>
+  <button onclick="closeVoiceGuide()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I'm steadier — stop</button>
 </div>
 
 </div><!-- /app -->
@@ -4875,6 +4892,93 @@ function breathe(){
   runPhase();
 }
 function closeBreathe(){clearInterval(breatheTimer);document.getElementById('breathe-overlay').style.display='none';}
+
+// ─── VOICE GUIDE (hands-free craving support) ────────────────────────────────
+// Someone mid-craving won't read a screen or watch a video. One tap, and the
+// browser's built-in voice (free, no API, works offline) talks them through
+// the wave while the circle breathes with them. Muted phone still works: every
+// line is shown as an on-screen caption while it's spoken.
+const VG_STEPS=[
+  {t:"I'm here with you. You don't have to do anything right now except listen.",ph:'rest'},
+  {t:"This craving is a wave. It rises, it peaks, and it always comes back down. Your only job is to ride it out with me.",ph:'rest'},
+  {t:"Let's slow your body down. Breathe in through your nose... two... three... four.",ph:'in'},
+  {t:"Now hold it gently... just hold... three... four... five... six... seven.",ph:'hold'},
+  {t:"And breathe out slowly through your mouth... let your shoulders drop... all the way out... six... seven... eight.",ph:'out'},
+  {t:"Good. Again — breathe in... two... three... four.",ph:'in'},
+  {t:"Hold... you're doing this... four... five... six... seven.",ph:'hold'},
+  {t:"And slowly out... let everything go... six... seven... eight.",ph:'out'},
+  {t:"Notice where the urge sits in your body. Don't fight it. Just watch it, like weather passing through.",ph:'rest'},
+  {t:"You have outlasted every craving you have ever had. Every single one. That's why you're still here.",ph:'rest'},
+  {t:"One more. Breathe in... two... three... four.",ph:'in'},
+  {t:"Hold... almost there... five... six... seven.",ph:'hold'},
+  {t:"And out... nice and slow... six... seven... eight.",ph:'out'},
+  {t:"The wave is already losing power. You don't need to be perfect today. You just need this next minute — and you're already in it.",ph:'rest'},
+  {t:"Stay here breathing with the circle as long as you like. When you're ready, tap the button and go do the next small thing.",ph:'rest'},
+];
+let vgActive=false,vgTimer=null;
+function vgPickVoice(){
+  const vs=window.speechSynthesis?speechSynthesis.getVoices():[];
+  const en=vs.filter(v=>/^en/i.test(v.lang));
+  // Prefer the higher-quality system voices when present (Edge "Natural", Chrome "Google").
+  return en.find(v=>/natural/i.test(v.name))||en.find(v=>/google/i.test(v.name))||en[0]||null;
+}
+function vgSetPhase(ph){
+  const c=document.getElementById('vg-circle');
+  if(ph==='in'){c.style.transition='transform 4s ease';c.style.transform='scale(1.45)';}
+  else if(ph==='hold'){c.style.transition='transform 7s ease';c.style.transform='scale(1.45)';}
+  else if(ph==='out'){c.style.transition='transform 8s ease';c.style.transform='scale(1)';}
+  else{c.style.transition='transform 3s ease';c.style.transform='scale(1.1)';}
+}
+function startVoiceGuide(){
+  if(!('speechSynthesis' in window)){breathe();return;}// no voice engine - breathing still helps
+  closeSOS();
+  logActivity('grounding',{tool:'voice_guide'});
+  vgActive=true;
+  document.getElementById('voiceguide-overlay').style.display='flex';
+  speechSynthesis.cancel();
+  // Voice lists load lazily in Chrome - warm the list, then start.
+  const begin=()=>vgSpeakStep(0);
+  if(speechSynthesis.getVoices().length)begin();
+  else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;begin();};setTimeout(()=>{if(vgActive&&!speechSynthesis.speaking)begin();},700);}
+}
+function vgSpeakStep(i){
+  if(!vgActive)return;
+  if(i>=VG_STEPS.length){vgSilentLoop();return;}
+  const step=VG_STEPS[i];
+  document.getElementById('vg-caption').textContent=step.t;
+  vgSetPhase(step.ph);
+  const u=new SpeechSynthesisUtterance(step.t);
+  const voice=vgPickVoice();
+  if(voice)u.voice=voice;
+  u.rate=0.88;u.pitch=1;
+  let advanced=false;
+  const next=()=>{if(advanced||!vgActive)return;advanced=true;vgTimer=setTimeout(()=>vgSpeakStep(i+1),600);};
+  u.onend=next;u.onerror=next;
+  // Safety net: if the engine stalls silently, captions keep the guide moving.
+  vgTimer=setTimeout(next,Math.max(6000,step.t.length*120));
+  speechSynthesis.speak(u);
+}
+function vgSilentLoop(){
+  // Script finished - keep the circle breathing quietly until they stop it.
+  if(!vgActive)return;
+  const phases=[{ph:'in',s:4},{ph:'hold',s:7},{ph:'out',s:8}];
+  let idx=0;
+  const cap=document.getElementById('vg-caption');
+  const labels={in:'Breathe in...',hold:'Hold...',out:'And slowly out...'};
+  const run=()=>{
+    if(!vgActive)return;
+    const p=phases[idx%3];idx++;
+    vgSetPhase(p.ph);cap.textContent=labels[p.ph];
+    vgTimer=setTimeout(run,p.s*1000);
+  };
+  run();
+}
+function closeVoiceGuide(){
+  vgActive=false;
+  clearTimeout(vgTimer);
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  document.getElementById('voiceguide-overlay').style.display='none';
+}
 
 // ─── URGE SURFING TIMER (Pro) ─────────────────────────────────────────────────
 const URGE_SURF_ENCOURAGEMENT=[

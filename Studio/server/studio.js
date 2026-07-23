@@ -3096,10 +3096,15 @@ const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal 
 // error text lists the ids fal currently accepts. Harvest those and retry -
 // the polish self-heals instead of dying on a stale name.
 function harvestModelIds(body) {
-  const ids = (String(body).match(/[a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,}/gi) || [])
-    .filter((s) => /claude|gemini|gpt/i.test(s) && !/vision|audio|image/i.test(s));
-  const rank = (s) => (/claude/i.test(s) ? 0 : /gemini/i.test(s) ? 1 : 2);
-  return [...new Set(ids.map((s) => s.toLowerCase()))].sort((a, b) => rank(a) - rank(b));
+  // fal's validation error quotes its allowed ids ('x', 'y', ...) - prefer
+  // those complete quoted names; fall back to any id-shaped token. Any text
+  // model is acceptable as a last resort (deepseek etc.) - a working cheap
+  // model beats a dead perfect one.
+  const quoted = [...String(body).matchAll(/'([a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,})'/gi)].map((m) => m[1].toLowerCase());
+  const pool = quoted.length ? quoted : (String(body).match(/[a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,}/gi) || []).map((s) => s.toLowerCase());
+  const ids = pool.filter((s) => !/vision|audio|image|embed|whisper/i.test(s));
+  const rank = (s) => (/claude/i.test(s) ? 0 : /gemini/i.test(s) ? 1 : /gpt/i.test(s) ? 2 : 3);
+  return [...new Set(ids)].sort((a, b) => rank(a) - rank(b));
 }
 let discoveredModel = null; // a model that worked this run - goes first next batch
 
@@ -3129,10 +3134,10 @@ async function aiFixBatch(chunk, offset) {
         signal: ctl.signal,
       });
       if (!res.ok) {
-        const body = (await res.text().catch(() => '')).slice(0, 600);
-        // Put fal's own explanation in the visible message, and queue up any
-        // valid model ids it names.
-        try { db.logError('caption-fix', `${model} → HTTP ${res.status}: ${body.slice(0, 160)}`, body); } catch (_) {}
+        // Read the WHOLE error - fal's 422 lists its complete allowed-model
+        // enum, and truncating it once cost us the answer mid-name.
+        const body = await res.text().catch(() => '');
+        try { db.logError('caption-fix', `${model} → HTTP ${res.status}: ${body.slice(0, 160)}`, body.slice(0, 2000)); } catch (_) {}
         for (const id of harvestModelIds(body)) if (!tried.has(id)) queue.push(id);
         continue;
       }

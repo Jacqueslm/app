@@ -181,6 +181,18 @@ body{display:flex;justify-content:center}
 .sos-opt-info p{font-size:14px;font-weight:500;color:var(--tp)}
 .sos-opt-info span{font-size:12px;color:var(--tm)}
 .sos-close{width:100%;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:14px;color:var(--ts);cursor:pointer;font-family:var(--f);margin-top:4px}
+#guide-fab{position:fixed;bottom:80px;right:max(12px,calc(50% - 203px));width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:500;box-shadow:0 4px 14px rgba(0,0,0,0.35)}
+#guide-fab i{font-size:24px}
+#guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+#guide-panel.open{display:flex}
+#guide-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:140px}
+.gb-bot{background:var(--s1);border:0.5px solid var(--bdr);color:var(--tp);border-radius:12px 12px 12px 4px;padding:10px 12px;font-size:13.5px;max-width:88%;align-self:flex-start;line-height:1.45}
+.gb-user{background:var(--accent);color:#fff;border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:13.5px;max-width:88%;align-self:flex-end}
+.gb-go{display:block;margin-top:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);width:100%;text-align:left}
+#guide-input-row{display:flex;gap:8px;padding:10px;border-top:0.5px solid var(--bdr)}
+#guide-input{flex:1;background:var(--s1);border:0.5px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:13.5px;color:var(--tp);font-family:var(--f);outline:none}
+#guide-send{background:var(--accent);border:none;border-radius:10px;width:42px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#guide-send i{font-size:18px}
 
 /* JOURNAL */
 .jour-new{width:100%;border:0.5px dashed var(--bdr2);border-radius:12px;padding:16px;background:var(--s1);text-align:center;cursor:pointer;color:var(--ts);font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -1504,7 +1516,7 @@ body{display:flex;justify-content:center}
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates</div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
-        <i class="ti ti-refresh-dot"></i>
+        <i class="ti ti-refresh"></i>
         <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
         <div class="toggle-sw on" id="autoupd-toggle"><div class="toggle-knob"></div></div>
       </div>
@@ -1553,6 +1565,21 @@ body{display:flex;justify-content:center}
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Nova</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
+  </div>
+
+  <!-- GUIDE BOT: free navigation helper, floats on every screen -->
+  <div id="guide-fab" onclick="toggleGuideBot()"><i class="ti ti-help"></i></div>
+  <div id="guide-panel">
+    <div style="padding:12px 14px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;gap:10px">
+      <i class="ti ti-lifebuoy" style="color:#1D9E75;font-size:18px"></i>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--tp)">App guide</div><div style="font-size:11px;color:var(--tm)">Free — ask me where anything is</div></div>
+      <i class="ti ti-x" style="cursor:pointer;color:var(--tm);font-size:18px" onclick="toggleGuideBot()"></i>
+    </div>
+    <div id="guide-msgs"></div>
+    <div id="guide-input-row">
+      <input id="guide-input" placeholder="e.g. how do I cancel?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
+      <button id="guide-send" onclick="guideSend()"><i class="ti ti-send"></i></button>
+    </div>
   </div>
 
 </div><!-- /main-app -->
@@ -2226,6 +2253,11 @@ const ICON_PATHS={
 'ti-users':'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-4.5 3.3-6.5 6.5-6.5s5.7 2 6.5 6.5"/><circle cx="17" cy="9" r="3"/><path d="M15.5 13.2c2.6.3 4 2.2 4.6 5.8"/>',
 'ti-wifi':'<path d="M5 13a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/>',
 'ti-wind':'<path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.7 7.7A2.5 2.5 0 1 1 19.5 12H2"/>',
+'ti-headphones':'<path d="M4 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M15 15a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2z"/><path d="M4 15v-3a8 8 0 0 1 16 0v3"/>',
+'ti-lifebuoy':'<circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="9"/><path d="M15 15l3.35 3.35"/><path d="M9 15l-3.35 3.35"/><path d="M5.65 5.65L9 9"/><path d="M18.35 5.65L15 9"/>',
+'ti-devices':'<rect x="13" y="8" width="8" height="12" rx="1"/><path d="M18 8V5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9"/><path d="M16 11h2"/>',
+'ti-help':'<circle cx="12" cy="12" r="9"/><path d="M12 17v.01"/><path d="M12 13.5a1.5 1.5 0 0 1 1-1.5 2.6 2.6 0 1 0-3-4"/>',
+'ti-x':'<path d="M18 6L6 18"/><path d="M6 6l12 12"/>',
 };
 function renderIcons(root){
   (root||document).querySelectorAll('i.ti').forEach(el=>{
@@ -7148,6 +7180,59 @@ const HELP_INDEX=[
   {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-profile');}},
   {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-profile');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
 ];
+// ─── GUIDE BOT ───────────────────────────────────────────────────────────────
+// The floating "?" on every screen. Same free offline index as Find anything,
+// presented as a chat: ask in plain words, tap the answer, get taken there.
+const GUIDE_STOP=new Set(['how','do','does','i','the','a','an','my','me','to','where','is','are','can','you','get','of','in','it','on','for','what','want','need','go','open','please','and','app','with','turn']);
+let guideGreeted=false;
+function toggleGuideBot(){
+  const p=document.getElementById('guide-panel');
+  const open=p.classList.toggle('open');
+  if(open){
+    if(!guideGreeted){
+      guideGreeted=true;
+      guideBotSay(`Hi${S.name?' '+escapeHtml(S.name):''} — I'm your app guide. Ask me things like <b>"how do I cancel"</b>, <b>"where is my journal"</b>, or <b>"set a PIN"</b> and I'll take you straight there.`);
+    }
+    setTimeout(()=>document.getElementById('guide-input').focus(),150);
+  }
+}
+function guideBotSay(html){
+  const d=document.createElement('div');d.className='gb-bot';d.innerHTML=html;
+  document.getElementById('guide-msgs').appendChild(d);
+  d.scrollIntoView({block:'end'});
+  renderIcons(d);
+}
+function guideUserSay(text){
+  const d=document.createElement('div');d.className='gb-user';d.textContent=text;
+  document.getElementById('guide-msgs').appendChild(d);
+  d.scrollIntoView({block:'end'});
+}
+function guideGo(i){
+  document.getElementById('guide-panel').classList.remove('open');
+  HELP_INDEX[i].go();
+}
+function guideSend(){
+  const inp=document.getElementById('guide-input');
+  const q=inp.value.trim();
+  if(!q)return;
+  inp.value='';
+  guideUserSay(q);
+  const ql=q.toLowerCase();
+  if(/^(hi|hey|hello|yo|sup|good\s(morning|afternoon|evening))\b/.test(ql)){guideBotSay('Hey! What are you trying to find or do?');return;}
+  if(/thank/.test(ql)){guideBotSay("Any time. I'm right here whenever you need me.");return;}
+  const words=ql.replace(/[?!.,']/g,' ').split(/\s+/).filter(w=>w&&!GUIDE_STOP.has(w));
+  const scored=HELP_INDEX.map((h,i)=>({i,score:words.filter(w=>(h.name+' '+h.sub+' '+h.k).toLowerCase().includes(w)).length}))
+    .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
+  if(scored.length){
+    guideBotSay('Here you go — tap one and I\'ll take you there:'+
+      scored.map(s=>`<button class="gb-go" onclick="guideGo(${s.i})">→ ${escapeHtml(HELP_INDEX[s.i].name)}</button>`).join(''));
+  }else{
+    const novaIdx=HELP_INDEX.findIndex(h=>h.name.indexOf('Nova')>=0);
+    guideBotSay('I couldn\'t find that in the app — I only know my way around the menus. For anything deeper, Nova\'s the one to ask.'+
+      `<button class="gb-go" onclick="guideGo(${novaIdx})">→ Talk to Nova</button>`);
+  }
+}
+
 function openHelpFinder(){
   document.getElementById('help-modal').classList.add('open');
   const inp=document.getElementById('help-search');

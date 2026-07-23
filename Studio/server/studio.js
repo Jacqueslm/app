@@ -3057,11 +3057,38 @@ const localStt = require('./transcribe');
 // fixes mishears, garbled fragments, and chunk-overlap duplicates while
 // preserving the speaker's exact voice. Fails soft: any problem returns null
 // and the raw transcript is used unchanged.
-// Model ids verified against fal's documented any-llm enum - do not add
-// guessed names here; an invalid id fails the request for that model.
+// fal's any-llm routes through OpenRouter, whose catalog changes constantly -
+// hardcoded ids rot. Primary source of truth: OpenRouter's public model list,
+// fetched live (free, no key) to pick the newest Claude Sonnet automatically.
+// The static list below is only the last-resort fallback (ids confirmed
+// against openrouter.ai, Jul 2026).
 const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
   ? [process.env.STUDIO_CAPTION_FIX_MODEL]
-  : ['anthropic/claude-3.7-sonnet', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash-001', 'google/gemini-flash-1.5']);
+  : ['anthropic/claude-sonnet-4.6', 'anthropic/claude-sonnet-4.5', 'google/gemini-2.5-flash']);
+let liveModelCandidates = null; // cached for the server's lifetime
+async function fetchLiveModelCandidates() {
+  if (liveModelCandidates) return liveModelCandidates;
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15_000);
+    const res = await fetch('https://openrouter.ai/api/v1/models', { signal: ctl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const ids = (((await res.json()).data) || [])
+      .map((m) => m && m.id)
+      .filter((s) => typeof s === 'string' && !s.includes(':'));
+    // Lexicographic descending sorts 5 above 4.6 above 4.5 - good enough here.
+    const sonnets = ids.filter((s) => s.startsWith('anthropic/claude-sonnet')).sort().reverse();
+    const haikus = ids.filter((s) => s.startsWith('anthropic/claude-haiku')).sort().reverse();
+    const flash = ids.filter((s) => /^google\/gemini-[\d.]+-flash$/.test(s)).sort().reverse();
+    const picked = [...sonnets.slice(0, 2), ...haikus.slice(0, 1), ...flash.slice(0, 1)];
+    if (picked.length) {
+      liveModelCandidates = picked;
+      try { db.logError('caption-fix', `Using live model catalog: ${picked.join(', ')}`); } catch (_) {}
+    }
+    return liveModelCandidates;
+  } catch (_) { return null; }
+}
 const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
 const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
 
@@ -3082,7 +3109,8 @@ let discoveredModel = null; // a model that worked this run - goes first next ba
 async function aiFixBatch(chunk, offset) {
   const numbered = chunk.map((l, j) => `${offset + j}|${l.text}`).join('\n');
   const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":${offset},"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
-  const queue = [...new Set([...(discoveredModel ? [discoveredModel] : []), ...CAPTION_FIX_MODELS])];
+  const live = (await fetchLiveModelCandidates()) || [];
+  const queue = [...new Set([...(discoveredModel ? [discoveredModel] : []), ...live, ...CAPTION_FIX_MODELS])];
   const tried = new Set();
   let attempts = 0;
   while (queue.length && attempts < 6) {

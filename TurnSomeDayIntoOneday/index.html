@@ -6256,7 +6256,9 @@ async function syncBillingStatus(force){
   if(!force&&now-lastBillingSyncAt<120000)return;
   lastBillingSyncAt=now;
   try{
-    const res=await fetch('/api/billing/status');
+    // force=true also asks the server to double-check with Stripe itself, so a
+    // just-finished checkout activates Pro even with no webhooks configured.
+    const res=await fetch('/api/billing/status'+(force?'?refresh=1':''));
     if(!res.ok)return;
     const data=await res.json();
     S.isPro=!!data.isPro;

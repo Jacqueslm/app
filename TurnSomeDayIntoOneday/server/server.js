@@ -216,9 +216,15 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
 });
 
-app.get('/api/billing/status', requireAuth, (req, res) => {
-  const user = db.getUserById(req.userId);
+app.get('/api/billing/status', requireAuth, async (req, res) => {
+  let user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // ?refresh=1 asks Stripe directly instead of waiting for a webhook - a home
+  // install has no public URL Stripe can reach, so this is how Pro activates.
+  if (req.query.refresh === '1' && billing.isConfigured()) {
+    await billing.refreshFromStripe(user);
+    user = db.getUserById(req.userId) || user;
+  }
   res.json(billing.getBillingStatus(user));
 });
 

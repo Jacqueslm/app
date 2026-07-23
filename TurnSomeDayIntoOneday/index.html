@@ -7187,8 +7187,42 @@ const HELP_INDEX=[
 // The floating "?" on every screen. Same free offline index as Find anything,
 // presented as a chat: ask in plain words, tap the answer, get taken there.
 const GUIDE_STOP=new Set(['how','do','does','i','the','a','an','my','me','to','where','is','are','can','you','get','of','in','it','on','for','what','want','need','go','open','please','and','app','with','turn']);
+
+// Every visible row in the app indexes ITSELF - the bot scans the real screens,
+// so anything that exists in a menu is automatically findable. Curated entries
+// (which can act directly, e.g. start breathing) stay and win ties by name.
+let guideIndexed=false;
+function buildGuideIndex(){
+  if(guideIndexed)return;
+  guideIndexed=true;
+  const navFor={home:'bn-home',tools:'bn-tools',nova:'bn-nova',profile:'bn-plans'};
+  const seen=new Set(HELP_INDEX.map(h=>h.name.toLowerCase()));
+  document.querySelectorAll('.scr').forEach(scr=>{
+    const key=Object.keys(SCREEN_MAP).find(k=>SCREEN_MAP[k]===scr.id);
+    if(!key)return;
+    scr.querySelectorAll('.setting-row').forEach(row=>{
+      const p=row.querySelector('p');
+      const s=row.querySelector('span');
+      const name=p&&p.textContent.trim();
+      if(!name||seen.has(name.toLowerCase()))return;
+      if(/^back\b/i.test(name))return;// back-navigation rows aren't destinations
+      seen.add(name.toLowerCase());
+      HELP_INDEX.push({name,sub:s?s.textContent.trim().slice(0,90):('On the '+key+' screen'),k:key,go:()=>{
+        switchTo(key);actBn(navFor[key]||null);
+        setTimeout(()=>{
+          row.scrollIntoView({behavior:'smooth',block:'center'});
+          const bg=row.style.background;
+          row.style.transition='background 0.4s';
+          row.style.background='rgba(83,74,183,0.3)';
+          setTimeout(()=>{row.style.background=bg;},1800);
+        },250);
+      }});
+    });
+  });
+}
 let guideGreeted=false;
 function toggleGuideBot(){
+  buildGuideIndex();
   const p=document.getElementById('guide-panel');
   const open=p.classList.toggle('open');
   if(open){
@@ -7241,6 +7275,7 @@ function guideSend(){
 }
 
 function openHelpFinder(){
+  buildGuideIndex();
   document.getElementById('help-modal').classList.add('open');
   const inp=document.getElementById('help-search');
   inp.value='';

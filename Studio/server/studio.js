@@ -3057,9 +3057,11 @@ const localStt = require('./transcribe');
 // fixes mishears, garbled fragments, and chunk-overlap duplicates while
 // preserving the speaker's exact voice. Fails soft: any problem returns null
 // and the raw transcript is used unchanged.
+// Model ids verified against fal's documented any-llm enum - do not add
+// guessed names here; an invalid id fails the request for that model.
 const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
   ? [process.env.STUDIO_CAPTION_FIX_MODEL]
-  : ['anthropic/claude-sonnet-4.5', 'anthropic/claude-3.7-sonnet', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5', 'openai/gpt-4o-mini']);
+  : ['anthropic/claude-3.7-sonnet', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash-001', 'google/gemini-flash-1.5']);
 const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
 const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
 
@@ -3074,7 +3076,9 @@ async function aiFixBatch(chunk, offset) {
       const res = await fetch('https://fal.run/fal-ai/any-llm', {
         method: 'POST',
         headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt, max_tokens: 3000 }),
+        // Only documented input fields (model, prompt, system_prompt) - an
+        // unrecognized field risks the request being rejected outright.
+        body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt }),
       });
       if (!res.ok) {
         const body = (await res.text().catch(() => '')).slice(0, 200);

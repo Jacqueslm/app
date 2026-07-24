@@ -1,0 +1,13 @@
+{
+  "name": "turn-someday-into-day-one",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Recovery companion app - deployable root for hosting platforms",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "postinstall": "npm install --prefix server --no-audit --no-fund",
+    "start": "node server/server.js"
+  }
+}

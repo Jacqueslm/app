@@ -16,6 +16,9 @@ const {
 } = require('./auth');
 
 const app = express();
+// Hosted deployments sit behind the platform's HTTPS proxy - trust its
+// forwarded headers so secure cookies and per-IP rate limits work correctly.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_VERSION = '2023-06-01';

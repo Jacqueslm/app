@@ -1,7 +1,9 @@
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 
-const DB_PATH = path.join(__dirname, 'data.sqlite');
+// On a hosting platform the database must live on the persistent volume
+// (DB_PATH env var); on a home install it sits next to the code as before.
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.sqlite');
 const db = new DatabaseSync(DB_PATH);
 
 db.exec(`

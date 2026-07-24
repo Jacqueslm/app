@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v3';
+const CACHE_NAME = 'tsid-shell-v4'; // v4: handshake app icons
 const SHELL_FILES = [
   '/',
   '/index.html',

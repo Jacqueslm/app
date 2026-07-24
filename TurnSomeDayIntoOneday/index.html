@@ -3072,7 +3072,11 @@ function obNext(n){
   if(document.getElementById('od'+n))document.getElementById('od'+n).classList.add('on');
   if(n===4){
     const dt=document.getElementById('ob-date').value;
-    S.startDate=dt?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
+    // Starting TODAY means starting right now - counting "hours clean" from
+    // midnight hands people 17 free hours and reads as broken. Past dates
+    // anchor at midnight because that's all the precision a date can carry.
+    const todayStr=new Date().toISOString().split('T')[0];
+    S.startDate=dt&&dt!==todayStr?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
     const triggerSentence=blueprintVals.length?`Nova has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';

@@ -999,6 +999,11 @@ body{display:flex;justify-content:center}
           <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
+        <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
+          <i class="ti ti-heart" style="color:#E24B4A"></i>
+          <div class="setting-row-txt"><p>For the one who loves you</p><span>Help your partner understand — and fight this together</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
       </div>
       <div class="sec" style="padding-top:0">
         <div class="sec-hd">Advanced Pro tools</div>
@@ -1165,6 +1170,11 @@ body{display:flex;justify-content:center}
       <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
         <i class="ti ti-activity"></i>
         <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
+        <i class="ti ti-heart" style="color:#E24B4A"></i>
+        <div class="setting-row-txt"><p>For the one who loves you</p><span>Help your partner understand — and fight this together</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1559,6 +1569,50 @@ body{display:flex;justify-content:center}
       <div class="setting-row" style="cursor:default">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Turn Someday Into Day One</p><span>Version <span id="app-version-txt"></span></span></div>
+      </div>
+    </div>
+
+    <!-- TOGETHER: for the partner of someone in recovery -->
+    <div id="s-partner" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">For the one who loves you</div>
+        <div class="card" style="padding:18px">
+          <div style="font-size:14px;color:var(--tp);line-height:1.7">Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.</div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Free — start here</div>
+        <div class="setting-row" onclick="openPartnerLetter()">
+          <i class="ti ti-pencil" style="color:#1D9E75"></i>
+          <div class="setting-row-txt"><p>A letter to the person who loves me</p><span>Written from your journey — share it with one tap</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="card" style="padding:16px 18px;margin-top:10px">
+          <div style="font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px">5 things every partner should know</div>
+          <div style="font-size:13px;color:var(--ts);line-height:1.8">
+            <b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it's wiring in the brain's reward system that formed long before you.<br>
+            <b style="color:var(--tp)">2.</b> Shame is the fuel. Anger and silent disappointment feed it; understanding starves it.<br>
+            <b style="color:var(--tp)">3.</b> Policing doesn't work. Safety to be honest does — "I'm struggling today" should never start a fight.<br>
+            <b style="color:var(--tp)">4.</b> A slip is a lost battle, not a betrayal — and the days after a slip decide everything.<br>
+            <b style="color:var(--tp)">5.</b> You matter too. Supporters need support — and sometimes their own quiet struggle deserves the same compassion.
+          </div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <div class="sec-hd">Together — go deeper</div>
+        <div class="setting-row" onclick="openProTool('couples')">
+          <i class="ti ti-users" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Do this together</p><span>Weekly couple exercises — check-ins, slip plans, trigger walkthroughs <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openProTool('partnerCheck')">
+          <i class="ti ti-heart" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Partner self-check</p><span>Is something quietly running your life too? 10 gentle questions <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:0">
+        <button class="ob-btn outline" style="color:var(--ts);border-color:var(--bdr)" onclick="switchTo('tools');actBn('bn-tools')">Back to Tools</button>
       </div>
     </div>
 
@@ -2108,6 +2162,37 @@ body{display:flex;justify-content:center}
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
   <div style="font-size:36px;font-weight:700;color:var(--green);margin-bottom:32px" id="breathe-count">4</div>
   <button onclick="closeBreathe()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I feel calmer</button>
+</div>
+
+<!-- PARTNER LETTER -->
+<div class="sos-modal" id="partner-letter-modal" onclick="if(event.target===this)closePartnerLetter()">
+  <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="sos-title" style="color:var(--accent)">A letter to the person who loves me</div>
+    <div class="sos-sub">Read it first. Then share it with them — this is the conversation that's hard to start out loud.</div>
+    <div id="partner-letter-text" style="overflow-y:auto;flex:1;min-height:120px;font-size:13.5px;color:var(--ts);line-height:1.8;white-space:pre-wrap;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:12px"></div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="sharePartnerLetter()">Share this letter</button>
+    <button class="sos-close" onclick="closePartnerLetter()">Close</button>
+  </div>
+</div>
+
+<!-- COUPLES EXERCISES (Pro) -->
+<div class="sos-modal" id="couples-modal" onclick="if(event.target===this)closeCouplesExercises()">
+  <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="sos-title" style="color:var(--accent)">Do this together</div>
+    <div class="sos-sub">One a week is plenty. Ten minutes, phones down, no fixing — just the two of you.</div>
+    <div id="couples-list" style="overflow-y:auto;flex:1;min-height:120px"></div>
+    <button class="sos-close" onclick="closeCouplesExercises()">Close</button>
+  </div>
+</div>
+
+<!-- PARTNER SELF-CHECK (Pro) -->
+<div class="sos-modal" id="partner-check-modal" onclick="if(event.target===this)closePartnerCheck()">
+  <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="sos-title" style="color:var(--accent)">Partner self-check</div>
+    <div class="sos-sub" id="pc-sub">Hand the phone to your partner. Ten honest yes-or-no questions — nobody sees the answers but you.</div>
+    <div id="pc-body" style="overflow-y:auto;flex:1;min-height:120px"></div>
+    <button class="sos-close" onclick="closePartnerCheck()">Close</button>
+  </div>
 </div>
 
 <!-- HELP FINDER: type what you're looking for, get taken straight there -->
@@ -6058,6 +6143,18 @@ function categoryFallbackNote(){
 
 // ─── RELAPSE TOOLKIT: PRO TOOL GATING (generic teaser+blur+upgrade pattern) ───
 const PRO_TOOLS={
+  couples:{
+    title:'Do this together',
+    teaser:"Guided ten-minute exercises for you and your partner: the weekly check-in, the craving signal, the slip plan you agree on before you need it, and more. Recovery is a team sport — this is the playbook.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">1. The weekly check-in — 10 min<br>2. The craving signal<br>3. The slip plan<br>4. Trigger walkthrough...</div>',
+    open:'openCouplesExercises'
+  },
+  partnerCheck:{
+    title:'Partner self-check',
+    teaser:"Ten gentle yes-or-no questions your partner answers privately — because sometimes the person supporting you is quietly fighting something of their own, and naming it is where their recovery starts too.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Q1. Is there a habit you hide or minimize?<br>Q2. Do you feel restless when you can\'t...?<br>...</div>',
+    open:'openPartnerCheck'
+  },
   urgeSurf:{
     title:'Urge Surfing Timer',
     teaser:"A guided 1-10 minute countdown with rotating encouragement to help you ride out an urge instead of acting on it — most urges peak and pass within minutes.",
@@ -6390,7 +6487,7 @@ const SCREEN_MAP={
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
-  'habit-coach':'s-habit-coach',tools:'s-tools'
+  'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
 };
 const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
@@ -7302,11 +7399,120 @@ const HELP_INDEX=[
   {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
+  {name:'For the one who loves you',sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
   {name:'Rooms',sub:'Recovery stories, grouped by focus area',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
   {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
 ];
+// ─── TOGETHER (partner support) ──────────────────────────────────────────────
+// Most people fail because they don't have support - and most partners don't
+// fail to support, they were just never told what this actually feels like.
+function buildPartnerLetter(){
+  const days=getDays();
+  const what=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
+  const name=S.name||'';
+  return `To the person who loves me,
+
+I'm working on my recovery from ${what}. Today is day ${days} for me. There are things I've never known how to say out loud, so I'm saying them here.
+
+When a craving hits, it isn't a thought I'm choosing — it's a wave in my body. My chest tightens, my mind narrows, and for a few minutes the thing I'm fighting feels like the only thing that exists. In those minutes, it isn't about you. It was never about you.
+
+The heaviest part isn't the craving — it's the shame after. When you're angry with me, I understand. But even your silent disappointment makes the shame louder, and shame is the fuel this thing runs on. It wants me isolated. It wants this to stay a secret.
+
+So here is what actually helps: not watching me, not checking on me, not policing me. What helps is that I can say "I'm struggling today" and it doesn't start a fight. When I can hand you the weight for a minute, I don't have to carry it alone — and this thing loses its power the moment it stops being a secret.
+
+If I ever slip, it will not mean I chose it over you, and it will not erase the days I fought. It means I lost one battle in a war I am still fighting. The most dangerous moment isn't the slip — it's the days after, when shame tries to convince me the fight is over. That's when I'll need you most, and deserve it least.
+
+I'm doing this one day at a time. Today, I chose recovery. And if you've read this far, you're already giving me the thing I need most: you're trying to understand.
+
+${name?'— '+name:'— with love'}`;
+}
+function openPartnerLetter(){
+  logActivity('partner_letter',{});
+  document.getElementById('partner-letter-text').textContent=buildPartnerLetter();
+  document.getElementById('partner-letter-modal').classList.add('open');
+}
+function closePartnerLetter(){document.getElementById('partner-letter-modal').classList.remove('open');}
+function sharePartnerLetter(){
+  const text=buildPartnerLetter();
+  if(navigator.share){navigator.share({text}).catch(()=>{});return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>appInfo('Copied','The letter is on your clipboard — paste it into a text, email, or note to them.')).catch(()=>appInfo('Share','Could not copy automatically — select the letter text and copy it by hand.'));
+  }
+}
+
+const COUPLES_EXERCISES=[
+  {t:'The weekly check-in',w:'Ten minutes, once a week, phones down. One talks, one listens — then switch.',s:['Each of you answers: How was your week, really? What was the hardest moment? What do you need from me this week?','While one talks, the other only listens. No fixing, no defending — the listener\'s only job is "tell me more."','End with one appreciation each: something the other person did this week that mattered.']},
+  {t:'The craving signal',w:'A private word or gesture that means "I\'m struggling — I don\'t need questions, just stay close."',s:['Pick the signal together — a word, a hand squeeze, anything.','Agree on the response in advance: no interrogation, no alarm. Maybe just a walk, or sitting nearby.','The signal is a victory, not a warning sign — saying it out loud means recovery is winning.']},
+  {t:'The slip plan',w:'Agree BEFORE it ever happens how you\'ll both respond to a slip. The plan you make calm is the plan that saves you in the storm.',s:['The one in recovery says what they\'ll do within 24 hours of a slip (tell you, use the app\'s I-slipped tool, call someone).','The partner says how they\'ll respond: disappointment is allowed, contempt is not. The relationship is not on trial.','Write the plan in your phones. A slip triggers the plan — not a crisis.']},
+  {t:'The trigger walkthrough',w:'Your partner can\'t help you avoid what they can\'t see.',s:['Show them your top three triggers — times, moods, places, situations.','For each one: what they might notice from the outside, and what actually helps in that moment.','Let them ask questions. There are no wrong ones — confusion they voice is confusion that stops hurting you.']},
+  {t:'The gratitude swap',w:'Addiction narrows life to the next fix; gratitude widens it back. Do this one out loud.',s:['Each of you names three things you\'re grateful for today — at least one about the other person.','No repeats from last time.','Do it at the same time each week — after dinner, before bed — so it becomes yours.']},
+  {t:'Reclaim the hour',w:'The habit used to own a time slot. Take one hour of it back, together.',s:['Pick the hour the struggle usually claims (late night, Sunday afternoon — you know yours).','Fill it with something analog you both do: walk, cook, cards, drive, music.','Protect it like an appointment. This is the hour you\'re stealing back from the old life.']},
+];
+function openCouplesExercises(){
+  logActivity('couples_exercises',{});
+  document.getElementById('couples-list').innerHTML=COUPLES_EXERCISES.map(e=>
+    `<div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:14px;font-weight:600;color:var(--tp)">${escapeHtml(e.t)}</div>
+      <div style="font-size:12.5px;color:var(--tm);margin:4px 0 8px;line-height:1.5">${escapeHtml(e.w)}</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.7">${e.s.map((st,i)=>`<b style="color:var(--tp)">${i+1}.</b> ${escapeHtml(st)}`).join('<br>')}</div>
+    </div>`).join('');
+  document.getElementById('couples-modal').classList.add('open');
+}
+function closeCouplesExercises(){document.getElementById('couples-modal').classList.remove('open');}
+
+const PARTNER_CHECK_QS=[
+  'Is there a habit you hide, downplay, or feel the need to explain away?',
+  'Do you get restless or irritable when you can\'t do it?',
+  'Have you promised yourself you\'d cut back — and didn\'t?',
+  'Does it regularly eat time you meant to spend on something else?',
+  'Do you reach for it to escape stress, boredom, or hard feelings?',
+  'Has anyone ever expressed concern about it?',
+  'Do you feel guilt or emptiness afterward?',
+  'Is it quietly affecting your sleep, money, health, or work?',
+  'Do you defend it more than you question it?',
+  'Would giving it up for one week feel genuinely scary?',
+];
+let pcAnswers=[];
+function openPartnerCheck(){
+  logActivity('partner_check',{});
+  pcAnswers=[];
+  document.getElementById('pc-sub').textContent='Hand the phone to your partner. Ten honest yes-or-no questions — nobody sees the answers but you.';
+  renderPartnerCheckQ();
+  document.getElementById('partner-check-modal').classList.add('open');
+}
+function closePartnerCheck(){document.getElementById('partner-check-modal').classList.remove('open');}
+function renderPartnerCheckQ(){
+  const i=pcAnswers.length;
+  const body=document.getElementById('pc-body');
+  if(i<PARTNER_CHECK_QS.length){
+    body.innerHTML=`<div class="card" style="padding:18px;text-align:center">
+      <div style="font-size:11px;color:var(--tm);margin-bottom:10px">Question ${i+1} of ${PARTNER_CHECK_QS.length}</div>
+      <div style="font-size:15px;color:var(--tp);line-height:1.6;margin-bottom:16px">${escapeHtml(PARTNER_CHECK_QS[i])}</div>
+      <div style="display:flex;gap:10px">
+        <button class="ob-btn outline" style="flex:1;margin:0;color:var(--ts);border-color:var(--bdr)" onclick="pcAnswer(false)">No</button>
+        <button class="ob-btn" style="flex:1;margin:0" onclick="pcAnswer(true)">Yes</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const yes=pcAnswers.filter(Boolean).length;
+  const msg=yes<=2
+    ?"Your relationship with your habits looks steady. Your role here is the supporter — and the five partner truths on the previous screen are your best tools."
+    :yes<=5
+    ?"There's something here worth watching — not with alarm, with honesty. Pick the habit that came to mind most during these questions and just track it for a week. Awareness comes before everything else."
+    :"These answers deserve the same compassion you give your partner. This isn't a verdict — it's a starting line, and recognizing it is genuinely the hardest step. This app works for every struggle, not just theirs: you could start your own journey right here, and recover side by side.";
+  document.getElementById('pc-sub').textContent='Your result — only you can see this.';
+  document.getElementById('pc-body').innerHTML=`<div class="card" style="padding:18px;text-align:center">
+    <div style="font-size:26px;font-weight:700;color:var(--accent)">${yes} of ${PARTNER_CHECK_QS.length}</div>
+    <div style="font-size:11px;color:var(--tm);margin-bottom:12px">answered yes</div>
+    <div style="font-size:13.5px;color:var(--ts);line-height:1.7;text-align:left">${msg}</div>
+    ${yes>2?'<button class="ob-btn" style="margin-top:14px" onclick="closePartnerCheck();appInfo(\'Side by side\',\'To start their own journey, your partner creates their own free account from the sign-in screen — separate, private, and theirs.\')">How would I start?</button>':''}
+  </div>`;
+}
+function pcAnswer(v){pcAnswers.push(v);renderPartnerCheckQ();}
+
 // ─── GUIDE BOT ───────────────────────────────────────────────────────────────
 // The floating "?" on every screen. Same free offline index as Find anything,
 // presented as a chat: ask in plain words, tap the answer, get taken there.
@@ -7366,6 +7572,7 @@ const GUIDE_FAQ=[
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.",go:'Delete my account'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
+  {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){

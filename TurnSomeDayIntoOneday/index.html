@@ -827,6 +827,7 @@ body{display:flex;justify-content:center}
           <div id="lesson-normal">
             <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700" id="lessonMeta"></div>
             <div style="font-size:19px;font-weight:650;color:var(--tp);margin-top:6px;line-height:1.35" id="lessonTitle">Loading…</div>
+            <button class="ob-btn outline" id="lessonListenBtn" style="margin-top:12px;margin-bottom:0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleLessonAudio()"><i class="ti ti-headphones"></i> Listen to this lesson</button>
             <div id="lessonBody" style="font-size:14px;color:var(--ts);line-height:1.75;margin-top:14px;white-space:pre-wrap"></div>
             <div id="lesson-action-box" style="background:var(--acc);border-radius:12px;padding:14px 16px;margin-top:18px">
               <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-t);font-weight:700;margin-bottom:6px">✦ Today's action</div>
@@ -2866,14 +2867,18 @@ function renderPackLesson(){
   }
   wrap.innerHTML=`<div class="card">
     <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
+    <button class="ob-btn outline" id="pack-listen-btn" style="margin-top:0;margin-bottom:14px;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="togglePackLessonAudio()"><i class="ti ti-headphones"></i> Listen to this lesson</button>
+    <div id="pack-lesson-text">
     <div style="font-size:14px;color:var(--tp);line-height:1.6;margin-bottom:14px">${lesson.content}</div>
     <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Try this</div>
     <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:14px">${lesson.action}</div>
     <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Reflect</div>
     <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:16px">${lesson.reflection}</div>
+    </div>
     <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
     <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Nova to guide this reflection</button>
   </div>`;
+  renderIcons(wrap);
 }
 function completePackLessonToday(){
   const key=S.activeCustomPack;
@@ -5042,6 +5047,78 @@ function closeVoiceGuide(){
   document.getElementById('voiceguide-overlay').style.display='none';
 }
 
+// ─── LESSON AUDIO ────────────────────────────────────────────────────────────
+// Every lesson can be listened to instead of read - same free built-in voice
+// as the guide, so someone cooking, driving, or working can still do their day.
+let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null;
+function splitForSpeech(text){
+  // browsers cut long utterances off mid-sentence - feed the voice bite-sized pieces
+  const sentences=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)];
+  const parts=[];let cur='';
+  for(const s of sentences){
+    if((cur+s).length>220){if(cur.trim())parts.push(cur.trim());cur=s;}
+    else cur+=s;
+  }
+  if(cur.trim())parts.push(cur.trim());
+  return parts;
+}
+function updateListenBtn(){
+  const b=lessonAudioBtnId&&document.getElementById(lessonAudioBtnId);
+  if(!b)return;
+  b.innerHTML=lessonAudioState==='playing'
+    ?'<i class="ti ti-x"></i> Stop listening'
+    :'<i class="ti ti-headphones"></i> Listen to this lesson';
+  renderIcons(b);
+}
+function startLessonAudio(text,btnId){
+  if(!('speechSynthesis' in window)){appInfo('Listen',"This browser has no built-in voice, so audio isn't available here. Chrome and Edge both have one.");return;}
+  stopLessonAudio();
+  lessonAudioQueue=splitForSpeech(text);
+  lessonAudioIdx=0;lessonAudioState='playing';lessonAudioBtnId=btnId;
+  updateListenBtn();
+  logActivity('lesson_listen',{});
+  speechSynthesis.cancel();
+  const go=()=>lessonAudioNext();
+  if(speechSynthesis.getVoices().length)go();
+  else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;go();};setTimeout(()=>{if(lessonAudioState==='playing'&&!speechSynthesis.speaking)go();},700);}
+}
+function lessonAudioNext(){
+  if(lessonAudioState!=='playing')return;
+  if(lessonAudioIdx>=lessonAudioQueue.length){stopLessonAudio();return;}
+  const u=new SpeechSynthesisUtterance(lessonAudioQueue[lessonAudioIdx++]);
+  const v=vgPickVoice();
+  if(v)u.voice=v;
+  u.rate=0.95;u.pitch=1;
+  let advanced=false;
+  const next=()=>{if(advanced)return;advanced=true;lessonAudioNext();};
+  u.onend=next;u.onerror=next;
+  speechSynthesis.speak(u);
+}
+function stopLessonAudio(){
+  if(lessonAudioState!=='playing')return;
+  lessonAudioState='idle';
+  try{speechSynthesis.cancel();}catch(e){}
+  updateListenBtn();
+  lessonAudioBtnId=null;
+}
+function toggleLessonAudio(){
+  if(lessonAudioState==='playing'&&lessonAudioBtnId==='lessonListenBtn'){stopLessonAudio();return;}
+  const title=document.getElementById('lessonTitle').textContent;
+  const body=document.getElementById('lessonBody').textContent;
+  const action=document.getElementById('lessonAction').textContent.trim();
+  const reflect=document.getElementById('lessonReflection').textContent.trim();
+  let text=title+'. '+body;
+  if(action)text+=" Today's action: "+action;
+  if(reflect)text+=' Something to reflect on: '+reflect;
+  startLessonAudio(text,'lessonListenBtn');
+}
+function togglePackLessonAudio(){
+  if(lessonAudioState==='playing'&&lessonAudioBtnId==='pack-listen-btn'){stopLessonAudio();return;}
+  const textEl=document.getElementById('pack-lesson-text');
+  if(!textEl)return;
+  startLessonAudio(textEl.textContent.replace(/\s+/g,' ').trim(),'pack-listen-btn');
+}
+
 // ─── URGE SURFING TIMER (Pro) ─────────────────────────────────────────────────
 const URGE_SURF_ENCOURAGEMENT=[
   "You're already surfing it — urges are a wave, not a wall.",
@@ -6274,6 +6351,8 @@ const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-p
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
+  // Leaving a lesson stops its audio - a voice reading to an empty room is noise.
+  if(typeof stopLessonAudio==='function'&&id!=='lesson'&&id!=='pack-lesson')stopLessonAudio();
   if(id==='plans'){
     const activeEl=document.querySelector('.scr.on');
     if(activeEl){
@@ -7162,6 +7241,7 @@ const HELP_INDEX=[
   {name:'Log a craving',sub:'Track it and let it pass',k:'log craving track urge record',go:()=>{switchTo('craving');actBn('bn-tools');}},
   {name:'Write in my journal',sub:'Your private journal',k:'journal write diary note feelings',go:()=>{switchTo('journal');actBn('bn-tools');}},
   {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
+  {name:'Listen to today\'s lesson',sub:'The lesson read aloud — hands-free',k:'listen audio hear read aloud voice speak lesson multitask',go:()=>{switchTo('lesson');actBn('bn-home');setTimeout(()=>toggleLessonAudio(),400);}},
   {name:'Talk to Nova',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
   {name:'My progress & stats',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
   {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},

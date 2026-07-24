@@ -41,8 +41,12 @@
 html,body{height:100%;background:#0f0c29;font-family:var(--f)}
 body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
-.app.fs-smaller{zoom:0.88}
-.app.fs-bigger{zoom:1.18}
+/* zoom scales 100dvh past the real viewport - compensate so pinned layouts
+   (Nova's input, the bottom nav) stay on screen at every text size. */
+.app.fs-smaller{zoom:0.88;min-height:calc(100dvh/0.88)}
+.app.fs-bigger{zoom:1.18;min-height:calc(100dvh/1.18)}
+.app.fs-smaller .ob{min-height:calc(100dvh/0.88);max-height:calc(100dvh/0.88)}
+.app.fs-bigger .ob{min-height:calc(100dvh/1.18);max-height:calc(100dvh/1.18)}
 @supports not (zoom: 1){
   .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
@@ -191,6 +195,12 @@ body{display:flex;justify-content:center}
 .sos-close{width:100%;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:14px;color:var(--ts);cursor:pointer;font-family:var(--f);margin-top:4px}
 #guide-fab{position:fixed;bottom:80px;right:max(12px,calc(50% - 203px));width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:500;box-shadow:0 4px 14px rgba(0,0,0,0.35)}
 #guide-fab i{font-size:24px}
+/* Nova's typing bar lives exactly where the floating buttons sit - lift them
+   clear of it so a tap on "send" is never stolen by the guide. */
+body.nova-open #guide-fab{bottom:164px}
+body.nova-open #guide-fab-label{bottom:172px}
+body.nova-open #audio-pill{bottom:216px}
+body.nova-open #audio-pill-label{bottom:222px}
 #guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
 #guide-panel.open{display:flex}
 #guide-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:140px}
@@ -3305,7 +3315,7 @@ function initApp(){
   // init Nova welcome
   if(document.getElementById('chatArea').children.length===0){
     const days=getDays();
-    addBubble('nova',`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\nDay ${days} is not a small thing — it's ${days} choices to choose yourself, over and over. I see that.\n\nWhat's on your mind right now? You can be completely honest with me.`);
+    addBubble('nova',`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\n${days>0?`Day ${days} is not a small thing — it's ${days} choice${days===1?'':'s'} to choose yourself, over and over. I see that.`:`Day One starts right now — and you already made the hardest choice: you're here.`}\n\nWhat's on your mind right now? You can be completely honest with me.`);
     if(S.chatHistory.length>0){
       S.chatHistory.forEach(m=>{if(m.role!=='system')addBubble(m.role==='assistant'?'nova':'user',m.content);});
     }
@@ -6503,6 +6513,7 @@ const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-p
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
+  document.body.classList.toggle('nova-open',id==='nova');
   if(id==='plans'){
     const activeEl=document.querySelector('.scr.on');
     if(activeEl){
@@ -6778,9 +6789,17 @@ function setPinTitles(mode){
   }
 }
 
+// The keypad must accept exactly as many digits as the stored PIN has - a
+// 6-digit signup PIN against a 4-digit keypad was a silent, permanent lockout.
+function pinExpectedLen(){
+  if(pinFlow==='setup1')return 4;// the in-app setup flow advertises 4 digits
+  if(pinFlow==='setup2')return pinFirstEntry.length||4;
+  return S.pinLen||4;
+}
 function openPinFlow(mode){
   pinFlow=mode;pinBuffer='';pinFirstEntry='';
   setPinTitles(mode);
+  document.getElementById('pin-dots').innerHTML='<span class="pin-dot"></span>'.repeat(pinExpectedLen());
   document.getElementById('pin-error').textContent=' ';
   updatePinDots();
   document.getElementById('main-app').style.display='none';
@@ -6801,11 +6820,11 @@ function updatePinDots(err){
 }
 
 function pinPress(d){
-  if(pinBuffer.length>=4)return;
+  if(pinBuffer.length>=pinExpectedLen())return;
   pinBuffer+=d;
   document.getElementById('pin-error').textContent=' ';
   updatePinDots();
-  if(pinBuffer.length===4)submitPinEntry();
+  if(pinBuffer.length===pinExpectedLen())submitPinEntry();
 }
 
 function pinBackspace(){
@@ -6841,6 +6860,7 @@ async function submitPinEntry(){
     if(pinBuffer!==pinFirstEntry){pinMismatch("PINs didn't match — try again",'setup1');return;}
     S.pinHash=await hashPin(pinBuffer);
     S.pinEnabled=true;
+    S.pinLen=pinBuffer.length;
     save();
     document.getElementById('applock-toggle').classList.add('on');
     pinFlow=null;pinBuffer='';pinFirstEntry='';
@@ -7423,7 +7443,7 @@ function buildPartnerLetter(){
   const name=S.name||'';
   return `To the person who loves me,
 
-I'm working on my recovery from ${what}. Today is day ${days} for me. There are things I've never known how to say out loud, so I'm saying them here.
+I'm working on my recovery from ${what}. ${days>0?`Today is day ${days} for me.`:`Today is my Day One.`} There are things I've never known how to say out loud, so I'm saying them here.
 
 When a craving hits, it isn't a thought I'm choosing — it's a wave in my body. My chest tightens, my mind narrows, and for a few minutes the thing I'm fighting feels like the only thing that exists. In those minutes, it isn't about you. It was never about you.
 
@@ -7757,6 +7777,9 @@ async function maybeAutoUpdate(){
     if(!res.ok)return;
     const data=await res.json();
     if(data.upToDate)return;
+    // A brand-new install has no recorded version yet - that's not "out of
+    // date", so don't kick off a background reinstall on someone's first open.
+    if(!data.current)return;
     appUpdateRunning=true;
     const sub=document.getElementById('upd-run-sub');
     if(sub)sub.textContent='New version found — installing it in the background…';
@@ -7901,6 +7924,7 @@ async function submitGateAuth(){
       if(gateCred==='pin'){
         S.pinHash=await hashPin(password);
         S.pinEnabled=true;
+        S.pinLen=password.length;// the lock keypad must expect this many digits
       }
       // Brand-new account - anything already cached in this browser becomes this account's data.
       save();

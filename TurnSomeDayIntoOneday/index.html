@@ -1568,6 +1568,11 @@ body{display:flex;justify-content:center}
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
 
+  <!-- Discreet stop for lesson audio: the lesson keeps reading on ANY screen
+       (privacy - flip to a neutral screen, the earbuds keep going), and this
+       unlabeled button is how you stop it from anywhere. -->
+  <div id="audio-pill" onclick="stopLessonAudio()" style="display:none;position:fixed;bottom:132px;right:max(12px,calc(50% - 203px));width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);color:var(--tp);align-items:center;justify-content:center;cursor:pointer;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)"><i class="ti ti-player-stop" style="font-size:16px"></i></div>
+
   <!-- GUIDE BOT: free navigation helper, floats on every screen -->
   <div id="guide-fab" onclick="toggleGuideBot()"><i class="ti ti-help"></i></div>
   <div id="guide-panel">
@@ -2259,6 +2264,7 @@ const ICON_PATHS={
 'ti-devices':'<rect x="13" y="8" width="8" height="12" rx="1"/><path d="M18 8V5a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h9"/><path d="M16 11h2"/>',
 'ti-help':'<circle cx="12" cy="12" r="9"/><path d="M12 17v.01"/><path d="M12 13.5a1.5 1.5 0 0 1 1-1.5 2.6 2.6 0 1 0-3-4"/>',
 'ti-x':'<path d="M18 6L6 18"/><path d="M6 6l12 12"/>',
+'ti-player-stop':'<rect x="6" y="6" width="12" height="12" rx="2"/>',
 };
 function renderIcons(root){
   (root||document).querySelectorAll('i.ti').forEach(el=>{
@@ -5063,6 +5069,10 @@ function splitForSpeech(text){
   return parts;
 }
 function updateListenBtn(){
+  // The floating stop pill follows the audio, not the screen - the lesson keeps
+  // reading wherever you navigate, and this is always there to stop it quietly.
+  const pill=document.getElementById('audio-pill');
+  if(pill)pill.style.display=lessonAudioState==='playing'?'flex':'none';
   const b=lessonAudioBtnId&&document.getElementById(lessonAudioBtnId);
   if(!b)return;
   b.innerHTML=lessonAudioState==='playing'
@@ -6351,8 +6361,6 @@ const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-p
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
-  // Leaving a lesson stops its audio - a voice reading to an empty room is noise.
-  if(typeof stopLessonAudio==='function'&&id!=='lesson'&&id!=='pack-lesson')stopLessonAudio();
   if(id==='plans'){
     const activeEl=document.querySelector('.scr.on');
     if(activeEl){

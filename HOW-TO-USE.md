@@ -35,7 +35,7 @@ That's it. No internet needed except for AI generations.
 
 ---
 
-## 3. The Five Tabs
+## 3. The Six Tabs
 
 | Tab | What it's for |
 |---|---|
@@ -43,7 +43,8 @@ That's it. No internet needed except for AI generations.
 | **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, **Sing** (lip-sync), dance, Live Portrait, simple screens. Your **Library** (with its free editing tools, incl. the **Sing** button on each picture) lives here. |
 | **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. Paste a LoRA URL + trigger word here to restore a face lock. |
 | **Sequencer** | Where videos get made — Quick Video, timeline, lyrics, shorts, campaigns, everything. |
-| **⚙ Settings** | AI key, update the app, back up everything, and **🗑 Start fresh** (wipe everything). |
+| **📅 Post** | Your posting schedule — line up finished clips with captions and times, and Studio tells you the moment each one is due. |
+| **⚙ Settings** | AI key, open Studio on your phone, update the app, back up everything, and **🗑 Start fresh** (wipe everything). |
 
 The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the full editor.
 
@@ -144,6 +145,33 @@ One music video = a week of posts. Seamless loop makes them replay forever.
 
 ---
 
+## 5a. 📅 The Post tab (your posting schedule)
+
+Studio can't post for you — TikTok, Instagram and YouTube all make a brand-new app wait weeks for a manual review before it's allowed to publish, and even then a video posted through their back door gets less reach than one you upload yourself. So the Post tab does everything **except** the final tap:
+
+1. **📅 Post** tab → pick a clip, write the caption once, tick the platforms, set the date and time
+2. **Add to schedule** — repeat for the whole week (do this right after a Sunday batch)
+3. When a post comes due, a red banner appears and a red dot lights on the **Post** tab — even if Studio was closed when the moment passed
+4. On that due post: **Copy caption** · **⬇ Download clip** · **Open TikTok / YouTube / Instagram / Facebook** → post it natively → tap **Posted ✓**
+
+Posting to TikTok now and YouTube tonight? Tick them off one at a time — the post stays on the list until every platform is done.
+
+**Tip:** open Studio on your phone (⚙ Settings → 📱 Open Studio on your phone, same Wi-Fi) and you can download the clip straight to the phone you're posting from.
+
+---
+
+## 5b. 📱 Open Studio on your phone
+
+Studio runs on this computer, but your phone can open it over your home Wi-Fi — which is how finished clips get onto the phone you post from.
+
+1. **⚙ Settings** → **📱 Open Studio on your phone** → tap **Copy** (the address looks like `http://192.168.1.47:4400`). It's also printed in the black window when Studio starts.
+2. On your phone (same Wi-Fi), type that address into the browser → sign in
+3. Add it to your phone's home screen — then it's an icon, and you never type it again
+
+The first time, Windows may ask to allow Studio through the firewall — choose **Allow** on private networks. This computer has to be on with Studio running; the phone is a window into it, not a copy.
+
+---
+
 ## 6. Campaign Export (ready to post)
 
 1. **Campaign Export** card → fill in song title, artist, link, hashtags
@@ -159,7 +187,11 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 ## 7. Lyrics & Captions (words on screen)
 
 1. **Lyrics & Captions** card → paste lyrics, one line per caption
-2. Three ways to time them: **Auto-spread** = instant guess. **▶ Tap to sync** = perfect and free: the song plays, you tap once per line. **🪄 Auto-captions (AI, ~2¢)** = the app *listens to your song* and writes every line with its real timing — no pasting, no tapping. (Check the words after — AI hearing isn't perfect on fast verses.)
+2. Four ways to time them:
+   - **Auto-spread** — instant guess, free
+   - **▶ Tap to sync** — perfect and free: the song plays, you tap once per line
+   - **🎙️ Captions from my voice (free)** — Studio listens on **your own computer** and writes every line with its real timing. Nothing is uploaded, nothing is charged, and it works offline after the first use. **Best choice for talking videos.** The first run downloads the listening model once (a few minutes); after that it's instant. Optional afterwards: a paid AI tidy-up of the wording — the price is shown before you agree, and you can always say no.
+   - **🪄 Auto-captions (AI)** — the cloud version, for songs. Costs cents; price shows on the button.
 3. Captions burn into your video AND your shorts automatically
 4. **+ Song title intro** puts your title card at the start
 
@@ -167,7 +199,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, and 🎙️ Captions from my voice (listening happens on your own computer)** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
 
 > 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
 >

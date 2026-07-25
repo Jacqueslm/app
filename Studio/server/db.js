@@ -115,6 +115,19 @@ db.exec(`
     updated_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_fal_receipts_user ON fal_receipts(user_id, status, id);
+  CREATE TABLE IF NOT EXISTS social_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    asset_id INTEGER REFERENCES studio_assets(id),
+    platforms TEXT NOT NULL,
+    caption TEXT NOT NULL DEFAULT '',
+    scheduled_at TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    posted_platforms TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_social_posts_user ON social_posts(user_id, status, scheduled_at);
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -437,6 +450,63 @@ function getFanSignupCount() {
   return db.prepare('SELECT COUNT(*) AS n FROM fan_signups').get().n;
 }
 
+/* ---------------- social post scheduler ---------------- */
+// Platform APIs for TikTok/Instagram/YouTube all require weeks-long developer
+// audits before they'll let a new app post publicly (TikTok posts land as
+// private drafts, Meta/YouTube uploads stay locked, until Google/Meta/TikTok
+// manually review the app). Auto-publishing on day one isn't available at any
+// price, so this queue automates everything up to the final tap: it tracks
+// what's due, hands over the caption and the file, and the founder does the
+// one thing an API can't do better anyway - native uploads outperform
+// API-posted video on every platform's own feed ranking.
+function createSocialPost(userId, { assetId, platforms, caption, scheduledAt }) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO social_posts (user_id, asset_id, platforms, caption, scheduled_at, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
+  ).run(userId, assetId || null, JSON.stringify(platforms || []), caption || '', scheduledAt, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function getSocialPosts(userId) {
+  return db.prepare('SELECT * FROM social_posts WHERE user_id = ? ORDER BY scheduled_at ASC').all(userId);
+}
+
+function getSocialPost(userId, id) {
+  return db.prepare('SELECT * FROM social_posts WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateSocialPost(userId, id, fields) {
+  const sets = [];
+  const vals = [];
+  if (fields.caption !== undefined) { sets.push('caption = ?'); vals.push(fields.caption); }
+  if (fields.platforms !== undefined) { sets.push('platforms = ?'); vals.push(JSON.stringify(fields.platforms)); }
+  if (fields.scheduledAt !== undefined) { sets.push('scheduled_at = ?'); vals.push(fields.scheduledAt); }
+  if (fields.status !== undefined) { sets.push('status = ?'); vals.push(fields.status); }
+  if (fields.postedPlatforms !== undefined) { sets.push('posted_platforms = ?'); vals.push(JSON.stringify(fields.postedPlatforms)); }
+  if (!sets.length) return;
+  sets.push('updated_at = ?'); vals.push(new Date().toISOString());
+  vals.push(userId, id);
+  db.prepare(`UPDATE social_posts SET ${sets.join(', ')} WHERE user_id = ? AND id = ?`).run(...vals);
+}
+
+function deleteSocialPost(userId, id) {
+  db.prepare('DELETE FROM social_posts WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
+// Flips any 'pending' post whose time has come to 'due' - the tick worker in
+// studio.js calls this, then the client polls for 'due' posts to raise the
+// "time to post" banner even if the browser was closed when the time hit.
+function promoteDueSocialPosts() {
+  const nowIso = new Date().toISOString();
+  db.prepare("UPDATE social_posts SET status = 'due', updated_at = ? WHERE status = 'pending' AND scheduled_at <= ?")
+    .run(nowIso, nowIso);
+}
+
+function getDueSocialPosts(userId) {
+  return db.prepare("SELECT * FROM social_posts WHERE user_id = ? AND status = 'due' ORDER BY scheduled_at ASC").all(userId);
+}
+
 /* ---------------- error log (for in-app diagnostics) ---------------- */
 function logError(scope, message, detail) {
   db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
@@ -542,4 +612,11 @@ module.exports = {
   setFalReceiptStatus,
   getOpenFalReceipts,
   getFalReceipts,
+  createSocialPost,
+  getSocialPosts,
+  getSocialPost,
+  updateSocialPost,
+  deleteSocialPost,
+  promoteDueSocialPosts,
+  getDueSocialPosts,
 };

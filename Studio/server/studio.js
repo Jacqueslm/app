@@ -1595,6 +1595,109 @@ router.post('/queue/clear-finished', (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── SOCIAL SCHEDULER ──────────────────────────────────────────────────────
+// TikTok/Meta/YouTube all require a weeks-long developer app review before
+// they'll let a new app publish for real (TikTok posts land as private
+// drafts, Meta needs App Review, YouTube uploads stay locked) - and even once
+// approved, API-posted video is quietly ranked below native uploads on every
+// one of these platforms. So this queue automates everything up to the tap
+// that actually has to happen on the phone: it holds the caption + platform
+// list + time, surfaces a loud "time to post" banner the moment it's due
+// (even if the browser was closed when the time hit), and hands over the
+// video file and a one-tap copy of the caption. A real per-platform
+// publish() dispatcher can slot in later, once each platform's app review
+// clears, without changing this schema or the UI around it.
+const SOCIAL_PLATFORMS = new Set(['tiktok', 'youtube', 'instagram', 'facebook']);
+function socialPostJson(row) {
+  return {
+    id: row.id,
+    assetId: row.asset_id,
+    platforms: JSON.parse(row.platforms || '[]'),
+    caption: row.caption,
+    scheduledAt: row.scheduled_at,
+    status: row.status,
+    postedPlatforms: JSON.parse(row.posted_platforms || '[]'),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+router.post('/schedule', (req, res) => {
+  const { assetId, platforms, caption, scheduledAt } = req.body || {};
+  if (!Array.isArray(platforms) || !platforms.length || !platforms.every((p) => SOCIAL_PLATFORMS.has(p))) {
+    return res.status(400).json({ error: 'platforms must include at least one of tiktok, youtube, instagram, facebook.' });
+  }
+  if (!scheduledAt || Number.isNaN(new Date(scheduledAt).getTime())) {
+    return res.status(400).json({ error: 'scheduledAt must be a valid date/time.' });
+  }
+  let cleanAssetId = null;
+  if (assetId) {
+    const asset = db.getAsset(req.userId, Number(assetId));
+    if (!asset) return res.status(400).json({ error: 'That asset was not found in your library.' });
+    cleanAssetId = asset.id;
+  }
+  const id = db.createSocialPost(req.userId, {
+    assetId: cleanAssetId,
+    platforms,
+    caption: typeof caption === 'string' ? caption.slice(0, 2200) : '',
+    scheduledAt: new Date(scheduledAt).toISOString(),
+  });
+  res.status(201).json({ id });
+});
+router.get('/schedule', (req, res) => {
+  db.promoteDueSocialPosts();
+  res.json({ posts: db.getSocialPosts(req.userId).map(socialPostJson) });
+});
+router.get('/schedule/due', (req, res) => {
+  db.promoteDueSocialPosts();
+  res.json({ posts: db.getDueSocialPosts(req.userId).map(socialPostJson) });
+});
+router.put('/schedule/:id', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  const { platforms, caption, scheduledAt } = req.body || {};
+  const fields = {};
+  if (platforms !== undefined) {
+    if (!Array.isArray(platforms) || !platforms.length || !platforms.every((p) => SOCIAL_PLATFORMS.has(p))) {
+      return res.status(400).json({ error: 'platforms must include at least one valid platform.' });
+    }
+    fields.platforms = platforms;
+  }
+  if (caption !== undefined) fields.caption = String(caption).slice(0, 2200);
+  if (scheduledAt !== undefined) {
+    if (Number.isNaN(new Date(scheduledAt).getTime())) return res.status(400).json({ error: 'scheduledAt must be a valid date/time.' });
+    fields.scheduledAt = new Date(scheduledAt).toISOString();
+    // Editing the time on an already-due/posted item puts it back in the queue.
+    if (row.status !== 'pending') fields.status = 'pending';
+  }
+  db.updateSocialPost(req.userId, row.id, fields);
+  res.json({ ok: true });
+});
+router.delete('/schedule/:id', (req, res) => {
+  db.deleteSocialPost(req.userId, Number(req.params.id));
+  res.json({ ok: true });
+});
+// Marked posted after the founder does the native tap - platforms is which
+// ones got done (lets a partial post - e.g. TikTok now, YouTube later - stay
+// visible until every platform is checked off).
+router.post('/schedule/:id/complete', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  const { platforms } = req.body || {};
+  const already = JSON.parse(row.posted_platforms || '[]');
+  const target = JSON.parse(row.platforms || '[]');
+  const newlyDone = Array.isArray(platforms) && platforms.length ? platforms.filter((p) => target.includes(p)) : target;
+  const postedPlatforms = [...new Set([...already, ...newlyDone])];
+  const allDone = target.every((p) => postedPlatforms.includes(p));
+  db.updateSocialPost(req.userId, row.id, { postedPlatforms, status: allDone ? 'posted' : 'due' });
+  res.json({ ok: true, done: allDone });
+});
+router.post('/schedule/:id/skip', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  db.updateSocialPost(req.userId, row.id, { status: 'skipped' });
+  res.json({ ok: true });
+});
+
 function queueItemJson(row) {
   return {
     id: row.id, status: row.status, prompt: row.prompt, label: row.label,
@@ -1674,6 +1777,11 @@ function failQueueItem(item, message) {
 }
 const QUEUE_TICK_MS = Number(process.env.STUDIO_QUEUE_TICK_MS || 4000);
 setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);
+
+// Flips scheduled posts to 'due' the moment their time hits, independent of
+// any browser being open - the web client just polls /schedule/due to raise
+// the banner once it's back.
+setInterval(() => { try { db.promoteDueSocialPosts(); } catch (_) {} }, 30000);
 
 router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {

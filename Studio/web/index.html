@@ -79,6 +79,9 @@ textarea::placeholder{color:var(--tm)}
 .mtabs::-webkit-scrollbar{display:none}
 .mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#8892c0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
 .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.mtabs button{position:relative}
+.mtabs button .due-dot{display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#ff5f57}
+.mtabs button.has-due .due-dot{display:block}
 .view{display:none;flex-direction:column;gap:14px}
 .view.on{display:flex}
 /* SIMPLE MODE: one screen only — hide the tab bar and every other view */
@@ -146,6 +149,7 @@ body.simple-only #view-simple{display:flex !important}
     <button data-view="scenes">AI Scenes</button>
     <button data-view="chars">Characters</button>
     <button data-view="seq">Sequencer</button>
+    <button data-view="social">📅 Post<span class="due-dot"></span></button>
     <button data-view="art">⚙ Settings</button>
   </div>
   <div class="body">
@@ -880,6 +884,30 @@ body.simple-only #view-simple{display:flex !important}
     <div class="err" id="seq-err"></div>
     <div class="stage" id="seq-stage"><video id="seq-video" controls playsinline></video></div>
     <button class="dl-btn" id="seq-dl">Download</button>
+  </div>
+
+  <div class="view" id="view-social">
+    <div class="banner" id="social-due-banner" style="display:none"></div>
+    <div class="card">
+      <h3>📅 Schedule a post</h3>
+      <p class="usage" style="margin:0">No platform lets a brand-new app auto-post for real yet — TikTok/Instagram/YouTube all require a weeks-long review first. So this queue does everything up to the tap: pick the clip, write the caption once, and it tells you the second it's time to post — you do the one tap, which also gets more reach than any API post does anyway.</p>
+      <label class="lbl">Clip</label>
+      <select class="input" id="soc-asset"></select>
+      <label class="lbl">Caption (with hashtags)</label>
+      <textarea class="input" id="soc-caption" style="min-height:74px;resize:vertical" placeholder="One sentence. Cold open. #selfimprovement #discipline #addictionrecovery"></textarea>
+      <label class="lbl">Platforms</label>
+      <div class="chips" id="soc-platforms">
+        <div class="chip" data-p="tiktok">TikTok</div>
+        <div class="chip" data-p="youtube">YouTube Shorts</div>
+        <div class="chip" data-p="instagram">Instagram Reels</div>
+        <div class="chip" data-p="facebook">Facebook Reels</div>
+      </div>
+      <label class="lbl">When</label>
+      <input class="input" id="soc-when" type="datetime-local">
+      <button class="gen-btn" id="soc-add">Add to schedule</button>
+      <div class="err" id="soc-err"></div>
+    </div>
+    <div class="row"><label class="lbl">Queue</label><div id="soc-list" class="row" style="flex-direction:column;align-items:stretch;gap:10px"></div></div>
   </div>
   </div><!-- /body -->
 </div>
@@ -1775,13 +1803,167 @@ async function bootStudio() {
   loadFans();
   loadReceipts();
   $('#chars-form').style.display = 'flex';
-  await Promise.all([loadAssets(), loadCharacters(), loadLocations(), loadRelationships()]);
+  await Promise.all([loadAssets(), loadCharacters(), loadLocations(), loadRelationships(), loadSchedule()]);
 }
 
 async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
+  renderSocialAssetPicker();
 }
+
+/* ---------------- Post scheduler: no platform lets a new app auto-post yet
+   (TikTok/Meta/YouTube all require a weeks-long review), so this automates
+   everything up to the tap that has to happen on the phone anyway - native
+   uploads outrank API-posted video on every one of these platforms. ---------------- */
+const socPlatformSel = new Set();
+document.getElementById('soc-platforms')?.addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const p = chip.dataset.p;
+  if (socPlatformSel.has(p)) { socPlatformSel.delete(p); chip.classList.remove('on'); }
+  else { socPlatformSel.add(p); chip.classList.add('on'); }
+});
+
+function renderSocialAssetPicker() {
+  const sel = $('#soc-asset');
+  if (!sel) return;
+  const clips = (st.assets || []).filter((a) => a.kind === 'video' || a.kind === 'image');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">No clip — text/link post only</option>'
+    + clips.map((a) => `<option value="${a.id}">${escapeHtml(a.label)} (${a.kind})</option>`).join('');
+  if (prev && clips.some((a) => String(a.id) === prev)) sel.value = prev;
+}
+
+function defaultScheduleWhen() {
+  // Round up to the next quarter hour so the picker doesn't default to a time
+  // that's already passed by the time the tap lands.
+  const d = new Date(Date.now() + 15 * 60000);
+  d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function addSocialSchedule() {
+  setErr('#soc-err', '');
+  const platforms = [...socPlatformSel];
+  if (!platforms.length) return setErr('#soc-err', 'Pick at least one platform.');
+  const whenVal = $('#soc-when').value;
+  if (!whenVal) return setErr('#soc-err', 'Pick a date and time.');
+  const assetId = $('#soc-asset').value || null;
+  const caption = $('#soc-caption').value.trim();
+  const btn = $('#soc-add');
+  btn.disabled = true;
+  try {
+    await jfetch('/api/studio/schedule', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId, platforms, caption, scheduledAt: new Date(whenVal).toISOString() }),
+    });
+    $('#soc-caption').value = '';
+    socPlatformSel.clear();
+    document.querySelectorAll('#soc-platforms .chip').forEach((c) => c.classList.remove('on'));
+    $('#soc-when').value = defaultScheduleWhen();
+    await loadSchedule();
+  } catch (e) { setErr('#soc-err', e.message); }
+  finally { btn.disabled = false; }
+}
+$('#soc-add')?.addEventListener('click', addSocialSchedule);
+
+const PLATFORM_LABEL = { tiktok: 'TikTok', youtube: 'YouTube Shorts', instagram: 'Instagram Reels', facebook: 'Facebook Reels' };
+const PLATFORM_UPLOAD_URL = { tiktok: 'https://www.tiktok.com/upload', youtube: 'https://studio.youtube.com/channel/UC/videos/upload', instagram: 'https://www.instagram.com/', facebook: 'https://www.facebook.com/reels/create' };
+
+function fmtWhen(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const opts = { hour: 'numeric', minute: '2-digit' };
+  return sameDay ? `Today ${d.toLocaleTimeString(undefined, opts)}` : d.toLocaleString(undefined, { month: 'short', day: 'numeric', ...opts });
+}
+
+async function loadSchedule() {
+  let posts;
+  try { posts = (await jfetch('/api/studio/schedule')).posts; } catch (e) { return; }
+  st.socialPosts = posts;
+  renderScheduleList();
+  renderDueBanner();
+}
+
+function renderDueBanner() {
+  const banner = $('#social-due-banner');
+  const navBtn = document.querySelector('#mtabs button[data-view="social"]');
+  const due = (st.socialPosts || []).filter((p) => p.status === 'due');
+  navBtn?.classList.toggle('has-due', due.length > 0);
+  if (!banner) return;
+  if (!due.length) { banner.style.display = 'none'; return; }
+  banner.style.display = 'block';
+  banner.innerHTML = `🔴 <b>Time to post!</b> ${due.length} clip${due.length > 1 ? 's' : ''} ready — scroll down and tap through.`;
+}
+
+function renderScheduleList() {
+  const wrap = $('#soc-list');
+  if (!wrap) return;
+  const posts = st.socialPosts || [];
+  if (!posts.length) { wrap.innerHTML = '<p class="usage">Nothing scheduled yet — add a post above.</p>'; return; }
+  const order = { due: 0, pending: 1, posted: 2, skipped: 3 };
+  const sorted = [...posts].sort((a, b) => (order[a.status] - order[b.status]) || (a.scheduledAt < b.scheduledAt ? -1 : 1));
+  wrap.innerHTML = '';
+  for (const p of sorted) {
+    const asset = p.assetId ? (st.assets || []).find((a) => a.id === p.assetId) : null;
+    const card = document.createElement('div');
+    card.className = 'card';
+    if (p.status === 'due') card.style.borderColor = 'var(--accent)';
+    const statusLabel = { pending: `Scheduled — ${fmtWhen(p.scheduledAt)}`, due: '🔴 Time to post now', posted: '✅ Posted', skipped: 'Skipped' }[p.status];
+    const platformRows = p.platforms.map((plat) => {
+      const done = p.postedPlatforms.includes(plat);
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+        <span style="font-size:13px;color:${done ? 'var(--tm)' : 'var(--tp)'};${done ? 'text-decoration:line-through' : ''}">${PLATFORM_LABEL[plat] || plat}</span>
+        ${p.status === 'due' && !done ? `<div style="display:flex;gap:6px">
+          <a class="btn2 quiet" style="text-decoration:none;display:inline-block" href="${PLATFORM_UPLOAD_URL[plat]}" target="_blank" rel="noopener">Open ${PLATFORM_LABEL[plat]}</a>
+          <button class="btn2" data-mark="${plat}">Posted ✓</button>
+        </div>` : done ? '<span style="font-size:12px;color:var(--green)">✓ done</span>' : ''}
+      </div>`;
+    }).join('');
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <b style="font-size:13px">${statusLabel}</b>
+        ${p.status !== 'posted' ? `<button class="btn2 quiet" data-del="1" style="padding:6px 10px">🗑</button>` : ''}
+      </div>
+      ${asset ? (asset.kind === 'video'
+        ? `<video src="${asset.url}" controls playsinline style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;background:#000"></video>`
+        : `<img src="${asset.url}" style="width:100%;border-radius:10px;max-height:220px;object-fit:contain;background:#000">`) : ''}
+      ${p.caption ? `<div style="display:flex;gap:8px;align-items:flex-start">
+        <p style="font-size:13px;color:var(--ts);flex:1;white-space:pre-wrap">${escapeHtml(p.caption)}</p>
+        <button class="btn2 quiet" data-copy="1" style="flex-shrink:0">Copy caption</button>
+      </div>` : ''}
+      ${asset ? `<a class="btn2 quiet" style="text-align:center;text-decoration:none" href="${asset.url}" download>⬇ Download clip</a>` : ''}
+      <div style="display:flex;flex-direction:column;gap:6px">${platformRows}</div>
+      ${p.status === 'due' ? `<button class="btn2" data-skip="1" style="background:transparent;border:0.5px solid var(--bdr2);color:var(--tm)">Not posting this one</button>` : ''}
+    `;
+    card.querySelector('[data-del]')?.addEventListener('click', async () => {
+      if (!confirm('Remove this scheduled post?')) return;
+      await jfetch(`/api/studio/schedule/${p.id}`, { method: 'DELETE' });
+      await loadSchedule();
+    });
+    card.querySelector('[data-copy]')?.addEventListener('click', (e) => {
+      navigator.clipboard?.writeText(p.caption).then(() => { e.target.textContent = 'Copied ✓'; setTimeout(() => { e.target.textContent = 'Copy caption'; }, 1500); });
+    });
+    card.querySelector('[data-skip]')?.addEventListener('click', async () => {
+      await jfetch(`/api/studio/schedule/${p.id}/skip`, { method: 'POST' });
+      await loadSchedule();
+    });
+    card.querySelectorAll('[data-mark]').forEach((b) => b.addEventListener('click', async () => {
+      await jfetch(`/api/studio/schedule/${p.id}/complete`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platforms: [b.dataset.mark] }),
+      });
+      await loadSchedule();
+    }));
+    wrap.appendChild(card);
+  }
+}
+if ($('#soc-when')) $('#soc-when').value = defaultScheduleWhen();
+// Checks quietly in the background so the "time to post" banner appears even
+// if the founder is on a different tab when the moment hits.
+setInterval(() => { if (st.signedIn) loadSchedule().catch(() => {}); }, 30000);
 
 /* ---------------- My Media: the visual first page (pictures / clips / songs) ---------------- */
 function renderMediaPage() {

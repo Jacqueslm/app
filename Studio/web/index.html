@@ -252,6 +252,12 @@ body.simple-only #view-simple{display:flex !important}
         </div>
       </div>
       <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
+      <div id="lan-card">
+        <div style="font-size:13px;font-weight:600;color:var(--tp);margin-bottom:4px">📱 Open Studio on your phone</div>
+        <p class="usage" style="margin:0 0 8px">Same Wi-Fi as this computer. Type this in your phone's browser once, then add it to your home screen — that's how finished clips get onto your phone for posting.</p>
+        <div id="lan-list"></div>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--bdr);margin:4px 0">
       <button class="btn2" id="set-key">🔑 AI key (fal.ai) — set or change</button>
       <button class="btn2" id="set-update">⬆ Update my app</button>
       <button class="btn2" id="set-backup">⬇ Back up everything (ZIP)</button>
@@ -1793,6 +1799,7 @@ async function bootStudio() {
     $('#falkey-card').style.display = 'flex';
     $('#falkey-manage').style.display = 'none';
   }
+  renderLanAddresses();
   renderStockCard();
   renderCrewRoom();
   renderVoiceCard();
@@ -1810,6 +1817,41 @@ async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
   renderSocialAssetPicker();
+}
+
+/* ---------------- Open Studio on the phone (same Wi-Fi) ---------------- */
+async function renderLanAddresses() {
+  const wrap = $('#lan-list');
+  if (!wrap) return;
+  let addresses = [];
+  try { addresses = (await jfetch('/api/studio-lan')).addresses || []; } catch (e) { /* offline */ }
+  if (!addresses.length) {
+    wrap.innerHTML = '<p class="usage" style="margin:0">Could not find this computer\'s Wi-Fi address. Make sure you\'re on Wi-Fi (not just a cable) and reopen Studio.</p>';
+    return;
+  }
+  wrap.innerHTML = '';
+  for (const a of addresses) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:6px';
+    row.innerHTML = `<code style="flex:1;font-size:15px;font-weight:600;color:var(--accent);background:var(--s0);border:0.5px solid var(--bdr);border-radius:8px;padding:9px 10px;word-break:break-all">${a.url}</code>`;
+    const copy = document.createElement('button');
+    copy.className = 'btn2 quiet';
+    copy.textContent = 'Copy';
+    copy.style.flexShrink = '0';
+    copy.onclick = () => {
+      navigator.clipboard?.writeText(a.url).then(() => {
+        copy.textContent = 'Copied ✓';
+        setTimeout(() => { copy.textContent = 'Copy'; }, 1500);
+      });
+    };
+    row.appendChild(copy);
+    wrap.appendChild(row);
+  }
+  const note = document.createElement('p');
+  note.className = 'usage';
+  note.style.margin = '4px 0 0';
+  note.textContent = 'First time, Windows may ask to allow Studio through the firewall — choose Allow on private networks. This computer has to be on with Studio running.';
+  wrap.appendChild(note);
 }
 
 /* ---------------- Post scheduler: no platform lets a new app auto-post yet

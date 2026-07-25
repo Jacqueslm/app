@@ -487,6 +487,7 @@ body.nova-open #audio-pill-label{bottom:222px}
     <button class="pin-key" onclick="pinPress('0')">0</button>
     <button class="pin-key" onclick="pinBackspace()"><i class="ti ti-backspace"></i></button>
   </div>
+  <button class="ob-btn" id="pin-continue-btn" style="display:none;max-width:280px;margin-top:18px" onclick="submitPinEntry()">Continue</button>
 </div>
 
 <!-- PRIVACY POLICY / TERMS OF SERVICE (top-level: reachable from the auth
@@ -6855,7 +6856,7 @@ function toggleAppLock(){
     openPinFlow('disable');
     return;
   }
-  appConfirm('Require a PIN to open the app? You\'ll set a 4-digit PIN on the next screen. This is optional — you can turn it off again any time from here.',()=>{
+  appConfirm('Require a PIN to open the app? You\'ll pick a 4 to 6 digit PIN on the next screen. This is optional — you can turn it off again any time from here.',()=>{
     openPinFlow('setup1');
   });
 }
@@ -6866,7 +6867,7 @@ function setPinTitles(mode){
   const subEl=document.getElementById('pin-sub');
   if(mode==='setup1'){
     titleEl.textContent='Create a PIN';
-    subEl.textContent="You'll need this to open the app";
+    subEl.textContent='Pick 4 to 6 digits, then tap Continue';
     cancelBtn.style.visibility='visible';
   }else if(mode==='disable'){
     titleEl.textContent='Enter your PIN';
@@ -6881,15 +6882,29 @@ function setPinTitles(mode){
 
 // The keypad must accept exactly as many digits as the stored PIN has - a
 // 6-digit signup PIN against a 4-digit keypad was a silent, permanent lockout.
-function pinExpectedLen(){
-  if(pinFlow==='setup1')return 4;// the in-app setup flow advertises 4 digits
-  if(pinFlow==='setup2')return pinFirstEntry.length||4;
-  return S.pinLen||4;
+const PIN_MIN_LEN=4,PIN_MAX_LEN=6;
+// Creating a PIN in-app allows the same 4-6 digits signup does, so both places
+// behave identically. Choosing a length needs an explicit Continue (there's no
+// known length to auto-submit at); every other flow knows exactly how many
+// digits to expect, so those still submit themselves on the last keypress.
+function pinMaxLen(){
+  if(pinFlow==='setup1')return PIN_MAX_LEN;
+  if(pinFlow==='setup2')return pinFirstEntry.length||PIN_MIN_LEN;
+  return S.pinLen||PIN_MIN_LEN;
+}
+function pinAutoSubmitLen(){
+  if(pinFlow==='setup1')return 0;// the user decides the length here
+  return pinMaxLen();
+}
+function updatePinContinueBtn(){
+  const btn=document.getElementById('pin-continue-btn');
+  if(!btn)return;
+  btn.style.display=(pinFlow==='setup1'&&pinBuffer.length>=PIN_MIN_LEN)?'block':'none';
 }
 function openPinFlow(mode){
   pinFlow=mode;pinBuffer='';pinFirstEntry='';
   setPinTitles(mode);
-  document.getElementById('pin-dots').innerHTML='<span class="pin-dot"></span>'.repeat(pinExpectedLen());
+  document.getElementById('pin-dots').innerHTML='<span class="pin-dot"></span>'.repeat(pinMaxLen());
   document.getElementById('pin-error').textContent=' ';
   updatePinDots();
   document.getElementById('main-app').style.display='none';
@@ -6910,16 +6925,19 @@ function updatePinDots(err){
 }
 
 function pinPress(d){
-  if(pinBuffer.length>=pinExpectedLen())return;
+  if(pinBuffer.length>=pinMaxLen())return;
   pinBuffer+=d;
   document.getElementById('pin-error').textContent=' ';
   updatePinDots();
-  if(pinBuffer.length===pinExpectedLen())submitPinEntry();
+  updatePinContinueBtn();
+  const auto=pinAutoSubmitLen();
+  if(auto&&pinBuffer.length===auto)submitPinEntry();
 }
 
 function pinBackspace(){
   pinBuffer=pinBuffer.slice(0,-1);
   updatePinDots();
+  updatePinContinueBtn();
 }
 
 async function hashPin(pin){
@@ -6932,18 +6950,27 @@ function pinMismatch(msg,resetTo){
   updatePinDots(true);
   document.getElementById('pin-error').textContent=msg;
   pinBuffer='';
-  if(resetTo){pinFlow=resetTo;setPinTitles(resetTo);}
+  if(resetTo){
+    pinFlow=resetTo;setPinTitles(resetTo);
+    // Back to choosing a length: restore the full 6 slots.
+    document.getElementById('pin-dots').innerHTML='<span class="pin-dot"></span>'.repeat(pinMaxLen());
+  }
+  updatePinContinueBtn();
   setTimeout(()=>{updatePinDots();},900);
 }
 
 async function submitPinEntry(){
   if(pinFlow==='setup1'){
+    if(pinBuffer.length<PIN_MIN_LEN)return;
     pinFirstEntry=pinBuffer;
     pinBuffer='';
     pinFlow='setup2';
     document.getElementById('pin-title').textContent='Confirm your PIN';
-    document.getElementById('pin-sub').textContent='Enter it one more time';
+    document.getElementById('pin-sub').textContent=`Enter the same ${pinFirstEntry.length} digits again`;
+    // The confirm step shows exactly as many slots as the PIN they chose.
+    document.getElementById('pin-dots').innerHTML='<span class="pin-dot"></span>'.repeat(pinFirstEntry.length);
     updatePinDots();
+    updatePinContinueBtn();
     return;
   }
   if(pinFlow==='setup2'){

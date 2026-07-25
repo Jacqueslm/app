@@ -211,6 +211,7 @@ body.nova-open #audio-pill-label{bottom:222px}
 #guide-input{flex:1;background:var(--s1);border:0.5px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:13.5px;color:var(--tp);font-family:var(--f);outline:none}
 #guide-send{background:var(--accent);border:none;border-radius:10px;width:42px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
 #guide-send i{font-size:18px}
+.calm-toggle{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.25);border-radius:10px;padding:8px 14px;font-size:12.5px;color:#fff;cursor:pointer;font-family:var(--f);margin-top:14px}
 
 /* JOURNAL */
 .jour-new{width:100%;border:0.5px dashed var(--bdr2);border-radius:12px;padding:16px;background:var(--s1);text-align:center;cursor:pointer;color:var(--ts);font-size:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -856,7 +857,10 @@ body.nova-open #audio-pill-label{bottom:222px}
             </div>
             <div id="lesson-reflect-box" style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-top:10px">
               <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:6px">Reflect</div>
-              <div id="lessonReflection" style="font-size:13.5px;color:var(--ts);line-height:1.65;font-style:italic"></div>
+              <div id="lessonReflection" style="font-size:13.5px;color:var(--ts);line-height:1.65;font-style:italic;margin-bottom:12px"></div>
+              <textarea class="ob-input" id="lesson-reflect-input" rows="3" placeholder="Write it right here — it saves straight to your journal" style="color:var(--tp);background:var(--s0);border-color:var(--bdr);resize:vertical;font-family:var(--f);margin-bottom:8px"></textarea>
+              <button class="log-btn" style="margin:0" onclick="saveLessonReflection('lesson-reflect-input','lesson-reflect-saved')">Save to my journal</button>
+              <div id="lesson-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-top:8px">Saved to your journal ✓</div>
             </div>
             <button class="log-btn" id="lessonCompleteBtn" style="margin-top:18px" onclick="completeLessonForToday()">Mark as done</button>
             <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
@@ -1797,6 +1801,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div style="font-size:13px;color:#8892c0;margin-bottom:32px;max-width:280px">Say them out loud or in your head — really look for them.</div>
   <button class="ob-btn" style="max-width:280px" onclick="next54321()" id="g54-next-btn">Next</button>
   <button class="ob-btn outline" style="max-width:280px" onclick="close54321()">Stop here</button>
+  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
 <!-- URGE SURFING TIMER (Pro) -->
@@ -1822,6 +1827,7 @@ body.nova-open #audio-pill-label{bottom:222px}
     <div style="font-size:13px;color:#8892c0;margin-bottom:28px;max-width:280px">That urge had a lifespan, and you outlasted it — real proof you can do this again.</div>
     <button class="ob-btn" style="max-width:280px" onclick="finishUrgeSurf()">Done</button>
   </div>
+  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
 <!-- PANIC MODE (Pro) -->
@@ -1838,6 +1844,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div style="font-size:28px;font-weight:700;color:#FF8A80;margin-bottom:24px" id="panic-count">4</div>
   <button class="ob-btn outline" style="max-width:280px;color:#fff;margin-bottom:8px" onclick="window.location.href='tel:988'">Call or text 988</button>
   <button class="ob-btn" style="max-width:280px;background:#FF8A80;color:#2E0F0F" onclick="closePanicMode()">I'm more stable now</button>
+  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
 <!-- EMERGENCY PLAN (Pro) -->
@@ -2180,6 +2187,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
   <div style="font-size:36px;font-weight:700;color:var(--green);margin-bottom:32px" id="breathe-count">4</div>
   <button onclick="closeBreathe()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I feel calmer</button>
+  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
 <!-- PARTNER LETTER -->
@@ -2230,6 +2238,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div id="vg-caption" style="font-size:18px;font-weight:500;line-height:1.5;max-width:320px;min-height:84px;margin:0 auto 28px;color:#fff">I'm here with you.</div>
   <div style="font-size:12px;color:#8892c0;margin-bottom:20px">Close your eyes if you want — the voice will keep going.</div>
   <button onclick="closeVoiceGuide()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I'm steadier — stop</button>
+  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
 </div><!-- /app -->
@@ -2993,8 +3002,11 @@ function renderPackLesson(){
     <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Try this</div>
     <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:14px">${lesson.action}</div>
     <div style="font-size:12px;color:var(--tm);margin-bottom:4px">Reflect</div>
-    <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:16px">${lesson.reflection}</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:10px">${lesson.reflection}</div>
     </div>
+    <textarea class="ob-input" id="pack-reflect-input" rows="3" placeholder="Write it right here — it saves straight to your journal" style="color:var(--tp);background:var(--s0);border-color:var(--bdr);resize:vertical;font-family:var(--f);margin-bottom:8px"></textarea>
+    <button class="log-btn" style="margin-bottom:8px" onclick="saveLessonReflection('pack-reflect-input','pack-reflect-saved')">Save to my journal</button>
+    <div id="pack-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-bottom:8px">Saved to your journal ✓</div>
     <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
     <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Nova to guide this reflection</button>
   </div>`;
@@ -3985,6 +3997,21 @@ function buildMilestoneEncouragement(days){
 function closeMilestoneCelebration(){
   document.getElementById('milestone-celebration-modal').classList.remove('open');
 }
+// Reflection without leaving the lesson - nobody keeps a pen handy or wants to
+// bounce between screens mid-thought. Writes a real journal entry in place.
+function saveLessonReflection(inputId,savedId){
+  const el=document.getElementById(inputId);
+  const text=el?el.value.trim():'';
+  if(!text){appInfo('Journal','Write a line or two first — even one honest sentence counts.');return;}
+  S.journals.unshift({date:new Date().toISOString(),mood:'📖',moodLabel:'Lesson Reflection',body:text});
+  logActivity('journal',{moodLabel:'Lesson Reflection'});
+  save();
+  if(typeof renderJournal==='function')renderJournal();
+  el.value='';
+  const ok=document.getElementById(savedId);
+  if(ok){ok.style.display='block';setTimeout(()=>{ok.style.display='none';},3000);}
+}
+
 function saveMilestoneReflection(){
   const text=document.getElementById('mc-reflection-input').value.trim();
   if(text){
@@ -4696,6 +4723,7 @@ function open5to1(){
   logActivity('grounding',{tool:'5-4-3-2-1'});
   renderGrounding54321Step();
   document.getElementById('grounding54321-overlay').style.display='flex';
+  calmSoundOn();updateCalmToggles();
 }
 function renderGrounding54321Step(){
   const step=GROUNDING_54321_STEPS[groundingStepIdx];
@@ -4712,6 +4740,7 @@ function next54321(){
   }
 }
 function close54321(){
+  calmSoundOff();
   document.getElementById('grounding54321-overlay').style.display='none';
   closeTriggeredFlow();
 }
@@ -5074,6 +5103,7 @@ function breathe(){
   logActivity('grounding',{tool:'breathing'});
   const ov=document.getElementById('breathe-overlay');
   ov.style.display='flex';
+  calmSoundOn();updateCalmToggles();
   let phase=0,count=4;
   const phases=[{label:'Breathe in',dur:4,scale:'1.4'},{label:'Hold',dur:7,scale:'1.4'},{label:'Breathe out',dur:8,scale:'1'}];
   const circle=document.getElementById('breathe-circle');
@@ -5087,7 +5117,50 @@ function breathe(){
   }
   runPhase();
 }
-function closeBreathe(){clearInterval(breatheTimer);document.getElementById('breathe-overlay').style.display='none';}
+function closeBreathe(){clearInterval(breatheTimer);calmSoundOff();document.getElementById('breathe-overlay').style.display='none';}
+
+// ─── CALM SOUND ──────────────────────────────────────────────────────────────
+// Soft meditation tones generated by the browser itself - no music files, no
+// cost, works offline. A warm low chord that swells and settles like slow
+// breathing. Optional on every SOS tool; the choice is remembered.
+let calmCtx=null,calmNodes=null;
+function calmWanted(){return S.sosMusicOn!==false;}
+function calmSoundOn(){
+  if(calmNodes||!calmWanted())return;
+  try{
+    calmCtx=calmCtx||new (window.AudioContext||window.webkitAudioContext)();
+    if(calmCtx.state==='suspended')calmCtx.resume();
+    const master=calmCtx.createGain();master.gain.value=0.0001;
+    const lp=calmCtx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=700;
+    master.connect(lp);lp.connect(calmCtx.destination);
+    const oscs=[];
+    const mk=(f,v)=>{const o=calmCtx.createOscillator();o.type='sine';o.frequency.value=f;const g=calmCtx.createGain();g.gain.value=v;o.connect(g);g.connect(master);o.start();oscs.push(o);};
+    mk(87,0.25);mk(174,0.5);mk(176.4,0.35);mk(261.6,0.15);// low root + warm detuned pair + soft octave
+    const lfo=calmCtx.createOscillator();lfo.frequency.value=0.07;// ~14s swell, like slow breath
+    const lfoG=calmCtx.createGain();lfoG.gain.value=0.018;
+    lfo.connect(lfoG);lfoG.connect(master.gain);lfo.start();oscs.push(lfo);
+    master.gain.setTargetAtTime(0.045,calmCtx.currentTime,2.5);// gentle fade in
+    calmNodes={master,lp,oscs};
+  }catch(e){/* no audio on this device - the tools work fine in silence */}
+}
+function calmSoundOff(){
+  if(!calmNodes)return;
+  const n=calmNodes;calmNodes=null;
+  try{
+    n.master.gain.setTargetAtTime(0.0001,calmCtx.currentTime,0.5);
+    setTimeout(()=>{try{n.oscs.forEach(o=>o.stop());n.master.disconnect();n.lp.disconnect();}catch(e){}},1500);
+  }catch(e){}
+}
+function updateCalmToggles(){
+  const on=calmWanted();
+  document.querySelectorAll('.calm-toggle').forEach(b=>{b.textContent=on?'♪ Calm sound: on':'♪ Calm sound: off';});
+}
+function toggleSosMusic(){
+  S.sosMusicOn=!calmWanted();
+  save();
+  updateCalmToggles();
+  if(calmWanted())calmSoundOn();else calmSoundOff();
+}
 
 // ─── VOICE GUIDE (hands-free craving support) ────────────────────────────────
 // Someone mid-craving won't read a screen or watch a video. One tap, and the
@@ -5131,6 +5204,7 @@ function startVoiceGuide(){
   logActivity('grounding',{tool:'voice_guide'});
   vgActive=true;
   document.getElementById('voiceguide-overlay').style.display='flex';
+  calmSoundOn();updateCalmToggles();
   speechSynthesis.cancel();
   // Voice lists load lazily in Chrome - warm the list, then start.
   const begin=()=>vgSpeakStep(0);
@@ -5173,6 +5247,7 @@ function closeVoiceGuide(){
   vgActive=false;
   clearTimeout(vgTimer);
   if('speechSynthesis' in window)speechSynthesis.cancel();
+  calmSoundOff();
   document.getElementById('voiceguide-overlay').style.display='none';
 }
 
@@ -5287,6 +5362,7 @@ function openUrgeSurf(){
   document.getElementById('us-active').style.display='none';
   document.getElementById('us-done').style.display='none';
   document.getElementById('urgesurf-overlay').style.display='flex';
+  calmSoundOn();updateCalmToggles();
 }
 function startUrgeSurf(minutes){
   logActivity('grounding',{tool:'urge_surf',minutes});
@@ -5325,6 +5401,7 @@ function finishUrgeSurf(){
   closeUrgeSurf();
 }
 function closeUrgeSurf(){
+  calmSoundOff();
   document.getElementById('urgesurf-overlay').style.display='none';
 }
 
@@ -5333,6 +5410,7 @@ let panicTimer=null;
 function openPanicMode(){
   logActivity('grounding',{tool:'panic'});
   document.getElementById('panic-overlay').style.display='flex';
+  calmSoundOn();updateCalmToggles();
   let phase=0,count=4;
   const phases=[{label:'Breathe in',dur:4,scale:'1.3'},{label:'Hold',dur:4,scale:'1.3'},{label:'Breathe out',dur:4,scale:'1'},{label:'Hold',dur:4,scale:'1'}];
   const circle=document.getElementById('panic-circle');
@@ -5347,6 +5425,7 @@ function openPanicMode(){
 }
 function closePanicMode(){
   clearInterval(panicTimer);
+  calmSoundOff();
   document.getElementById('panic-overlay').style.display='none';
 }
 

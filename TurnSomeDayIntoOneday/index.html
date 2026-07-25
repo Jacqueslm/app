@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Turn Someday Into Day One</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f0c29">
+<title id="page-title">Turn Someday Into Day One</title>
+<link rel="manifest" href="manifest.json" id="manifest-link">
+<meta name="theme-color" content="#0f0c29" id="theme-color-meta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Day One">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Day One" id="apple-title-meta">
+<link rel="apple-touch-icon" href="icons/icon-192.png" id="apple-icon-link">
+<link rel="icon" href="icons/icon-192.png" id="favicon-link">
 <style>
 :root{
   --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;--green-dim:rgba(126,232,162,0.15);
@@ -1524,6 +1524,11 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
         <div class="toggle-sw" id="applock-toggle"><div class="toggle-knob"></div></div>
       </div>
+      <div class="setting-row" onclick="toggleDiscretionMode()">
+        <i class="ti ti-eye-off"></i>
+        <div class="setting-row-txt"><p>Discretion mode</p><span id="discretion-sub">Home screen shows a neutral name — nobody can tell what this app is by glancing at your phone</span></div>
+        <div class="toggle-sw" id="discretion-toggle"><div class="toggle-knob"></div></div>
+      </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-plans')">
         <i class="ti ti-users"></i>
         <div class="setting-row-txt"><p>Rooms</p><span>Recovery stories, grouped by focus area</span></div>
@@ -2261,7 +2266,7 @@ let S = {
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
-  pinHash:null,pinEnabled:false,
+  pinHash:null,pinEnabled:false,discretionMode:false,
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -2385,6 +2390,7 @@ const ICON_PATHS={
 'ti-help':'<circle cx="12" cy="12" r="9"/><path d="M12 17v.01"/><path d="M12 13.5a1.5 1.5 0 0 1 1-1.5 2.6 2.6 0 1 0-3-4"/>',
 'ti-x':'<path d="M18 6L6 18"/><path d="M6 6l12 12"/>',
 'ti-player-stop':'<rect x="6" y="6" width="12" height="12" rx="2"/>',
+'ti-eye-off':'<path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c5 0 9 4 10.5 7-.5 1-1.2 2.1-2.1 3.1M6.6 6.6C4.5 8 3 10 1.5 12c1.5 3 5.5 7 10.5 7 1.5 0 2.9-.4 4.1-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
 };
 function renderIcons(root){
   (root||document).querySelectorAll('i.ti').forEach(el=>{
@@ -3303,8 +3309,10 @@ function initApp(){
   if(fabLabel)fabLabel.style.display=S.guideFabExplained?'none':'block';
   renderMiniPricingRows();
   applyDarkMode();
+  applyDiscretionMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
+  document.getElementById('discretion-toggle').classList.toggle('on',!!S.discretionMode);
   updateNotificationPermissionUI();
   updateNovaDisclaimerToggleUI();
   applyFontSize();
@@ -7009,6 +7017,40 @@ function chooseFontSize(size){
 function applyDarkMode(){
   document.getElementById('app').classList.toggle('force-dark',!!S.darkMode);
 }
+
+// ─── DISCRETION MODE ─────────────────────────────────────────────────────────
+// A phone glanced at by someone else shouldn't announce "recovery app." This
+// swaps the tab title and the iOS/Android home-screen name+icon to something
+// neutral. The browser tab and title update instantly; the actual HOME SCREEN
+// icon is only ever set at the moment "Add to Home Screen" happens, so an
+// already-installed icon needs a reinstall to pick up the change - the
+// settings copy says this plainly rather than promising something silent
+// swapping can't actually do.
+function applyDiscretionMode(){
+  const on=!!S.discretionMode;
+  const title=on?'Daily Journal':'Turn Someday Into Day One';
+  const appleTitle=on?'Daily Journal':'Day One';
+  const manifestHref=on?'manifest-discrete.json':'manifest.json';
+  const iconHref=on?'icons/icon-discrete-192.png':'icons/icon-192.png';
+  const themeColor=on?'#1a1a18':'#0f0c29';
+  document.title=title;
+  const pageTitle=document.getElementById('page-title');if(pageTitle)pageTitle.textContent=title;
+  const appleTitleMeta=document.getElementById('apple-title-meta');if(appleTitleMeta)appleTitleMeta.setAttribute('content',appleTitle);
+  const manifestLink=document.getElementById('manifest-link');if(manifestLink)manifestLink.setAttribute('href',manifestHref);
+  const appleIcon=document.getElementById('apple-icon-link');if(appleIcon)appleIcon.setAttribute('href',iconHref);
+  const favicon=document.getElementById('favicon-link');if(favicon)favicon.setAttribute('href',iconHref);
+  const themeMeta=document.getElementById('theme-color-meta');if(themeMeta)themeMeta.setAttribute('content',themeColor);
+}
+function toggleDiscretionMode(){
+  const turningOn=!S.discretionMode;
+  S.discretionMode=turningOn;
+  save();
+  applyDiscretionMode();
+  document.getElementById('discretion-toggle').classList.toggle('on',turningOn);
+  if(turningOn){
+    appInfo('Discretion mode is on','Your home screen will now show a neutral name and icon — but your phone only reads this at the moment you save the app. If it\'s already on your Home Screen, remove it and use Share (or the browser menu) → Add to Home Screen again to pick up the new look. Turn this off any time to go back to normal.');
+  }
+}
 function resetApp(){
   const current=S.startDate?new Date(S.startDate):new Date();
   document.getElementById('reset-date-input').value=current.toISOString().slice(0,10);
@@ -7504,6 +7546,7 @@ const HELP_INDEX=[
   {name:'Log out',sub:'Sign out on this device',k:'logout log out sign out exit',go:()=>logOutFromProfile()},
   {name:'Log out on all devices',sub:'Signs out every other phone or computer',k:'logout all devices everywhere security stolen',go:()=>logOutEverywhere()},
   {name:'App lock (PIN)',sub:'Require a PIN to open the app',k:'pin lock privacy private protect passcode',go:()=>toggleAppLock()},
+  {name:'Discretion mode',sub:'Home screen shows a neutral name and icon',k:'discretion discreet hide disguise home screen icon name rename private secret nobody see',go:()=>toggleDiscretionMode()},
   {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Dark mode',sub:'Switch between light and dark',k:'dark mode light theme night',go:()=>toggleDark()},
   {name:'Text size',sub:'Make the app text bigger or smaller',k:'text size font bigger smaller read',go:()=>openFontSizeModal()},
@@ -8031,6 +8074,7 @@ async function submitGateAuth(){
 async function boot(){
   load();
   applyFontSize();
+  applyDiscretionMode();
   try{
     const meRes=await fetch('/api/auth/me');
     if(meRes.ok){

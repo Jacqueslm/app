@@ -1,11 +1,14 @@
-const CACHE_NAME = 'tsid-shell-v4'; // v4: handshake app icons
+const CACHE_NAME = 'tsid-shell-v5'; // v5: discretion mode manifest/icons
 const SHELL_FILES = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/manifest-discrete.json',
   '/data/lessons.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-discrete-192.png',
+  '/icons/icon-discrete-512.png',
 ];
 
 self.addEventListener('install', (event) => {

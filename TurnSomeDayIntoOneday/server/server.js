@@ -44,6 +44,12 @@ app.use(cookieParser());
 app.use('/preview', requireAuth);
 app.use(express.static(path.join(__dirname, '..')));
 
+// Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
+// flyers, and video end cards, instead of the .html extension.
+app.get('/brainreset', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
+});
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,

@@ -1,10 +1,37 @@
+const fs = require('fs');
 const path = require('path');
 const { DatabaseSync } = require('node:sqlite');
 
 // On a hosting platform the database must live on the persistent volume
 // (DB_PATH env var); on a home install it sits next to the code as before.
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.sqlite');
-const db = new DatabaseSync(DB_PATH);
+
+// A hosted redeploy starts the new container while the platform is still moving
+// the storage volume over from the old one, so for a second or two the database
+// folder can be missing or unreadable. Opening it in one shot meant the process
+// died on boot with "unable to open database file" and the whole deployment was
+// marked failed - even though a retry moments later succeeds. So: make sure the
+// folder exists, and give the volume a few seconds to show up before giving up.
+function openDatabase() {
+  const dir = path.dirname(DB_PATH);
+  const ensureDir = () => { try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {} };
+  const RETRIES = 12, WAIT_MS = 500;
+  let lastErr;
+  for (let attempt = 1; attempt <= RETRIES; attempt++) {
+    ensureDir();
+    try {
+      return new DatabaseSync(DB_PATH);
+    } catch (err) {
+      lastErr = err;
+      console.warn(`Database not ready at ${DB_PATH} (attempt ${attempt}/${RETRIES}): ${err.message}`);
+      // Synchronous wait - nothing else has started yet, and the alternative is
+      // an immediate crash-loop.
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, WAIT_MS);
+    }
+  }
+  throw lastErr;
+}
+const db = openDatabase();
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (

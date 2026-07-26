@@ -728,6 +728,7 @@ body.nova-open #audio-pill-label{bottom:222px}
             <div class="tc" onclick="selJourCategory(this,'Food / Binging')">Food / Binging</div>
             <div class="tc" onclick="selJourCategory(this,'Shopping / Spending')">Shopping / Spending</div>
             <div class="tc" onclick="selJourCategory(this,'Work')">Work</div>
+            <div class="tc" onclick="selJourCategory(this,'Anger &amp; Control')">Anger &amp; Control</div>
             <div class="tc" onclick="selJourCategory(this,'Other')">Other</div>
             <div class="tc" onclick="selJourCategory(this,'Supporting Someone')">Supporting Someone</div>
           </div>
@@ -2099,6 +2100,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <div class="add-chip" onclick="toggleAddiction(this, 'Food / Binging')">🍽️ Food / Binging</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
+      <div class="add-chip" onclick="toggleAddiction(this, 'Anger &amp; Control')">🔥 Anger / outbursts</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleAddiction(this, 'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
@@ -2122,6 +2124,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Food / Binging')">🍽️ Food / Binging</div>
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Shopping / Spending')">🛍️ Shopping / Spending</div>
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Work')">💼 Work</div>
+      <div class="add-chip" onclick="toggleCategorySwitch(this,'Anger &amp; Control')">🔥 Anger / outbursts</div>
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleCategorySwitch(this,'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
@@ -3312,6 +3315,14 @@ function goToBehavioralStep(){
       htmlBlock+=`
         <div class="ob-label">What drives the urge to spend?</div>
         ${renderBehaviorChips('behavior-shopping-trigger',['Chasing the thrill of a new purchase','Escaping stress or sadness through buying','Filling a void or boredom with acquiring things'])}`;
+    }else if(addiction==='Anger & Control'){
+      htmlBlock+=`
+        <div class="ob-label">Where does it come out hardest?</div>
+        ${renderBehaviorChips('behavior-anger-target',['At home, on the people closest to me','Behind the wheel, at strangers','At work or with anyone who disrespects me','Everywhere — I can\'t hold it anywhere'])}
+        <div class="ob-label">What sets it off most?</div>
+        ${renderBehaviorChips('behavior-anger-trigger',['Feeling disrespected or talked down to','Being ignored, interrupted, or not listened to','Running late, or things not going to plan','Money, or being told I got something wrong'])}
+        <div class="ob-label">What's usually underneath it?</div>
+        ${renderBehaviorChips('behavior-anger-root',['Feeling like I don\'t matter','Feeling not good enough','Feeling powerless or trapped','Shame about something else I\'m carrying'])}`;
     }else if(addiction==='Supporting Someone'){
       htmlBlock+=`
         <div class="ob-label">What's hardest to carry right now?</div>
@@ -3343,6 +3354,9 @@ function showVoiceStep(){
   const shoppingTrigger=getBehaviorAnswer('behavior-shopping-trigger');if(shoppingTrigger)S.behavioralBlueprint.shoppingTrigger=shoppingTrigger;
   const workTrigger=getBehaviorAnswer('behavior-work-trigger');if(workTrigger)S.behavioralBlueprint.workTrigger=workTrigger;
   const genRoot=getBehaviorAnswer('behavior-gen-root');if(genRoot)S.behavioralBlueprint.genRoot=genRoot;
+  const angerTarget=getBehaviorAnswer('behavior-anger-target');if(angerTarget)S.behavioralBlueprint.angerTarget=angerTarget;
+  const angerTrigger=getBehaviorAnswer('behavior-anger-trigger');if(angerTrigger)S.behavioralBlueprint.angerTrigger=angerTrigger;
+  const angerRoot=getBehaviorAnswer('behavior-anger-root');if(angerRoot)S.behavioralBlueprint.angerRoot=angerRoot;
   const partnerWeight=getBehaviorAnswer('behavior-partner-weight');if(partnerWeight)S.behavioralBlueprint.partnerWeight=partnerWeight;
   const partnerCost=getBehaviorAnswer('behavior-partner-cost');if(partnerCost)S.behavioralBlueprint.partnerCost=partnerCost;
 
@@ -3839,6 +3853,7 @@ const CATEGORY_JOURNAL_PROMPTS={
   'Shopping / Spending':'Was there a moment today you wanted to buy something to feel better?',
   'Work':'Did work become a way to avoid something today?',
   'Other':'What moment today felt the hardest to sit with?',
+  'Anger & Control':'What number did you get to today, and what set it off?',
   'Supporting Someone':'What did you carry today that nobody noticed?',
 };
 const EMOTION_JOURNAL_PROMPTS=[
@@ -3965,6 +3980,7 @@ const CATEGORY_STREAK_MESSAGES={
   'Shopping / Spending':'Your impulse spending is showing real improvement.',
   'Work':'Your relationship with rest is improving.',
   'Other':'Your consistency here is building real momentum.',
+  'Anger & Control':'Your household is getting more predictable — that\'s the whole target.',
   'Supporting Someone':"You've been showing up for yourself, not just for them.",
 };
 function buildStreakInsights(){
@@ -4202,6 +4218,7 @@ const CATEGORY_ANALYTICS_INSIGHTS={
   'Shopping / Spending':'Low mood increases your urge to spend.',
   'Work':'Avoidance of rest increases your urge to overwork.',
   'Other':'Stress and low structure increase your risk.',
+  'Anger & Control':'Short sleep and skipped meals raise your risk more than any single trigger does.',
   'Supporting Someone':'Your hardest days line up with their hardest days — that connection is worth watching.',
 };
 const CATEGORY_LOOP_VERBS={
@@ -4216,6 +4233,7 @@ const CATEGORY_LOOP_VERBS={
   'Shopping / Spending':'wanting to spend',
   'Work':'overworking',
   'Other':'the urge itself',
+  'Anger & Control':'climbing the ladder',
   'Supporting Someone':'carrying it alone',
 };
 function analyticsWindow(days){
@@ -4380,6 +4398,7 @@ const CATEGORY_HABIT_COACHING={
   'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
   'Work':{weakSpot:'Avoiding rest tends to be your highest-risk pattern.',suggestion:'Set one hard stop time in the evening, every day this week.'},
   'Other':{weakSpot:'Unstructured moments tend to be your highest-risk time.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+  'Anger & Control':{weakSpot:'The first hour after you walk in the door tends to be your highest-risk time.',suggestion:'Take 20 minutes before anyone asks you anything — and tell them that\'s what you\'re doing, so it reads as a plan and not a mood.'},
   'Supporting Someone':{weakSpot:'The hours right before they come home tend to be your highest-tension time.',suggestion:'Put one thing that is purely yours in that window — a walk, a call, a shower with the door locked.'},
 };
 const HABIT_MICRO_SUGGESTIONS={
@@ -4938,6 +4957,12 @@ const ROOM_STORIES={
     {name:'Casey V.',tag:'90 days steady · 9h ago',body:"3 months steady. Recovery doesn't fit one neat label some days — it's just choosing better, one hour at a time.",likes:37},
     {name:'Robin T.',tag:'5 days steady · 1d ago',body:"Day 5. New to this and still figuring out what my triggers even are. Glad this space exists for people who don't fit one category.",likes:14},
   ],
+  'Anger & Control':[
+    {name:'Ray M.',tag:'45 days grounded · 3h ago',body:"Took me 40 years to say the real word instead of \"I've got a temper.\" My daughter used to read my face from the driveway. That's the part I can't unsee.",likes:67},
+    {name:'Curtis B.',tag:'21 days grounded · 7h ago',body:"The six rule is the only thing that's ever worked for me. I say the sentence, I walk, I come back in twenty. My wife said last week it's the first time in years she's finished a sentence.",likes:54},
+    {name:'Hector V.',tag:'90 days grounded · 1d ago',body:"Realized I hold it together all day at work and only lose it at home. That was a bad thing to find out about myself and it's the reason I finally started doing something.",likes:73},
+    {name:'Doug S.',tag:'Day 12 · 1d ago',body:"Road rage was the one I thought was harmless. Leaving ten minutes early has done more for me than ten years of telling myself to calm down.",likes:29},
+  ],
   'Supporting Someone':[
     {name:'Denise W.',tag:'30 days on this path · 2h ago',body:"For nine years I thought he stopped wanting me because of my body. Found out last spring it was porn. I'm not sure which hurts worse, but at least now I know it was never me.",likes:76},
     {name:'Angela M.',tag:'14 days on this path · 6h ago',body:"Everybody asks how he's doing. Nobody has asked how I'm doing in three years. I finally told my sister the whole thing last week and cried for an hour. First real breath I've taken.",likes:64},
@@ -5084,6 +5109,7 @@ const RECOVERY_TERMS={
   'Shopping / Spending':'spend-free',
   'Work':'balanced',
   'Other':'steady',
+  'Anger & Control':'grounded',
   // A partner isn't "clean" or "sober" - what they're counting is days of
   // holding themselves steady while someone they love struggles.
   'Supporting Someone':'on this path',
@@ -5108,11 +5134,14 @@ function updateRecoveryTermLabels(){
     const pledgeSub=document.getElementById('pledge-sub');
     if(pledgeSub)pledgeSub.textContent=`Take your pledge to stay ${term} today`;
   }
-  // A partner isn't fighting a craving - they're weathering a hard night.
+  // "Craving" is the wrong word for a partner weathering a hard night, and the
+  // wrong word for someone about to lose their temper.
   const sosBtn=document.getElementById('home-sos-btn');
   if(sosBtn){
-    const partnerFocus=S.currentAddiction==='Supporting Someone';
-    sosBtn.innerHTML=`<i class="ti ti-alert-triangle"></i> ${partnerFocus?"It's a bad night — I need help":"I'm having a craving — SOS"}`;
+    const sosLabel=S.currentAddiction==='Supporting Someone'?"It's a bad night — I need help"
+      :S.currentAddiction==='Anger & Control'?"I'm about to lose it — SOS"
+      :"I'm having a craving — SOS";
+    sosBtn.innerHTML=`<i class="ti ti-alert-triangle"></i> ${sosLabel}`;
   }
 }
 function buildTimeline(){
@@ -5606,6 +5635,7 @@ const CATEGORY_RELAPSE_SCRIPTS={
   'Shopping / Spending':"If the urge hits: close the app or tab and put your card/wallet out of reach. Wait 30 minutes before any purchase — set a timer. Ask what feeling you're trying to buy your way out of. Text your accountability contact the word \"urge.\"",
   'Work':"If the urge hits to overwork past your limits: physically close the laptop or leave your desk. Set a hard stop time and tell someone you're stopping. Do one non-work activity for 15 minutes. Ask what you're avoiding by staying busy.",
   'Other':"If the urge hits: physically leave the environment tied to it. Do one grounding action (cold water, a walk, deep breaths) before deciding anything. Text or call someone you trust and say the word \"urge.\" Remind yourself this feeling has a lifespan — it will pass.",
+  'Anger & Control':"If you're climbing right now: say your sentence — \"I'm at a six, I need twenty minutes\" — and leave the room. No parting shot. Walk, or cold water on your face and wrists. Breathe out twice as long as you breathe in. Don't rehearse the argument, don't drink, don't drive. Come back in twenty minutes and finish the conversation. No decisions and no conversations at an 8. If you're afraid you're about to hurt someone, leave the house now and call 988.",
   'Supporting Someone':"When it's boiling over: get physical distance first — another room, the car, outside. You are not required to stay in a conversation that has turned. Breathe out longer than you breathe in, ten times. Then text the one person who knows the real story and say \"bad night.\" Do not make any decision about the relationship tonight. If you feel unsafe, call 911. To talk it through free and confidential, 24/7: 1-800-799-7233, or text START to 88788.",
 };
 function openCategoryScripts(){
@@ -6045,6 +6075,7 @@ const CATEGORY_REMINDER_TEXT={
   'Shopping / Spending':'Evening browsing is a common trigger for this. Consider staying off shopping apps tonight.',
   'Work':'Evenings can blur into more work. Consider a real stop time tonight.',
   'Other':'Evenings can be a vulnerable time. Stay mindful tonight.',
+  'Anger & Control':'Evenings after a long day are when it usually goes. Check your number before you walk in the door tonight.',
   'Supporting Someone':'Evenings are when the weight lands hardest. Before you take care of anyone else tonight, do one thing for you.',
 };
 function buildCategorySpecificReminder(){
@@ -6232,7 +6263,8 @@ Core traits:
 - Safety first, always, regardless of anything else in this prompt — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7." This overrides every other instruction below.
 - You know the user's recovery journey and reference it naturally when relevant.
 - Some users are here because they LOVE someone with an addiction, not because they have one. Their focus area is "Supporting Someone." Never coach them as if the addiction is theirs. Their work is their own reality, boundaries, health and safety — never fixing their partner. Do not push them to stay, leave, forgive, or understand; that is theirs to decide.
-- If a user describes a pattern of control, intimidation, gaslighting, or physical harm, do not frame it as an addiction symptom to be understood. Name that it sounds serious, and mention: "National Domestic Violence Hotline — 1-800-799-7233, or text START to 88788, free and confidential, 24/7." Addiction never excuses abuse.`;
+- If a user describes a pattern of control, intimidation, gaslighting, or physical harm, do not frame it as an addiction symptom to be understood. Name that it sounds serious, and mention: "National Domestic Violence Hotline — 1-800-799-7233, or text START to 88788, free and confidential, 24/7." Addiction never excuses abuse.
+- Some users are working the "Anger & Control" track — they are the one whose outbursts hurt other people. Meet them with zero shame for showing up, and zero softening of what they did. Never help them build a case against the other person, never accept "they pushed my buttons" or "my father was worse" as a reason, and never let self-hatred stand in for repair. Their tools are: name the feeling under the anger, leave the room at a 6, come back in 20 minutes, apologize with the specific action and no "because". If they describe having been physical with anyone, ever, or frightening a child, tell them plainly that this is past what an app can carry and to look for a certified Batterer Intervention Program (their county's domestic violence agency has the list). If they fear they are about to hurt someone, tell them to leave the house now and call 988.`;
 
 const SYSTEM_FREE_ADDENDUM=`
 
@@ -6349,6 +6381,7 @@ const CATEGORY_FALLBACK_NOTES={
   'Shopping / Spending':" Whatever the pull to spend was today, it doesn't undo the progress you've already made.",
   'Work':" However today went with work, it doesn't undo the balance you're already building.",
   'Other':" Whatever today looked like, it doesn't undo the progress you've already made.",
+  'Anger & Control':" However today went, the work now is repair — not spiraling. Own the specific thing and get back to it.",
   'Supporting Someone':" However today went with them, it doesn't undo the ground you've been rebuilding for yourself.",
 };
 function categoryFallbackNote(){
@@ -7347,7 +7380,7 @@ const APP_VERSION='1.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
-  Work:'💼',Other:'✨','Supporting Someone':'💛'
+  Work:'💼',Other:'✨','Supporting Someone':'💛','Anger & Control':'🔥'
 };
 const CATEGORY_DESCRIPTIONS={
   'Porn & Sex':'Focused on compulsive porn use and sexual behavior patterns that feel out of your control.',
@@ -7361,6 +7394,7 @@ const CATEGORY_DESCRIPTIONS={
   'Shopping / Spending':'Focused on curbing impulsive spending and rebuilding financial peace of mind.',
   'Work':'Focused on breaking the cycle of overworking and reclaiming rest.',
   'Other':"A general recovery focus, tailored to whatever pattern you're working to change.",
+  'Anger & Control':"Focused on outbursts, road rage, and the damage it does to the people closest to you — catching it earlier and repairing it properly.",
   'Supporting Someone':"For you, not them — living with someone else's addiction, recognizing harm, setting boundaries, and getting your own life back.",
 };
 function openCategoryInfo(){
@@ -7868,6 +7902,8 @@ const GUIDE_FAQ=[
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
   {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 30-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Focus areas'},
   {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Focus areas'},
+  {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Focus areas'},
+  {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Focus areas'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v6'; // v6: partner onboarding branch + Supporting Someone track
+const CACHE_NAME = 'tsid-shell-v7'; // v7: Anger & Control track
 const SHELL_FILES = [
   '/',
   '/index.html',

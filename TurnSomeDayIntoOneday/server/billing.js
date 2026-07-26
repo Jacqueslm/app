@@ -1,5 +1,6 @@
 const Stripe = require('stripe');
 const db = require('./db');
+const emailer = require('./email');
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -118,7 +119,7 @@ async function refreshFromStripe(user) {
     const best = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') || subs.data[0];
     if (!best) return;
     const isActive = best.status === 'active' || best.status === 'trialing';
-    db.updateSubscriptionFromStripe(user.id, {
+    const { trialJustStarted } = db.updateSubscriptionFromStripe(user.id, {
       plan: isActive ? ((best.metadata && best.metadata.plan) || user.plan || 'monthly') : 'free',
       subscriptionStatus: best.status,
       stripeSubscriptionId: best.id,
@@ -127,6 +128,10 @@ async function refreshFromStripe(user) {
         : null,
       cancelAtPeriodEnd: best.cancel_at_period_end,
     });
+    if (trialJustStarted) {
+      const freshUser = db.getUserById(user.id);
+      if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
+    }
   } catch (e) {
     // Stripe unreachable - keep the last known local state; the next refresh catches up.
   }
@@ -152,7 +157,7 @@ async function handleWebhookEvent(rawBody, signature) {
         });
       } else if (session.subscription) {
         const sub = await stripe.subscriptions.retrieve(session.subscription);
-        db.updateSubscriptionFromStripe(userId, {
+        const { trialJustStarted } = db.updateSubscriptionFromStripe(userId, {
           plan,
           subscriptionStatus: sub.status,
           stripeSubscriptionId: sub.id,
@@ -161,6 +166,10 @@ async function handleWebhookEvent(rawBody, signature) {
             : null,
           cancelAtPeriodEnd: sub.cancel_at_period_end,
         });
+        if (trialJustStarted) {
+          const freshUser = db.getUserById(userId);
+          if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
+        }
       }
       break;
     }
@@ -170,7 +179,7 @@ async function handleWebhookEvent(rawBody, signature) {
       const user = db.getUserByStripeCustomerId(sub.customer);
       if (!user) break;
       const isActive = sub.status === 'active' || sub.status === 'trialing';
-      db.updateSubscriptionFromStripe(user.id, {
+      const { trialJustStarted } = db.updateSubscriptionFromStripe(user.id, {
         plan: isActive ? (user.plan === 'lifetime' ? 'lifetime' : sub.metadata.plan || user.plan) : 'free',
         subscriptionStatus: sub.status,
         stripeSubscriptionId: sub.id,
@@ -179,6 +188,10 @@ async function handleWebhookEvent(rawBody, signature) {
           : null,
         cancelAtPeriodEnd: sub.cancel_at_period_end,
       });
+      if (trialJustStarted) {
+        const freshUser = db.getUserById(user.id);
+        if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
+      }
       break;
     }
     default:

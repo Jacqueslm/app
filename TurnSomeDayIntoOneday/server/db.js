@@ -151,6 +151,7 @@ addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NUL
 // that's how "log out on all devices" works without tracking sessions server-side.
 addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
 addColumnIfMissing('unsubscribed', 'unsubscribed INTEGER NOT NULL DEFAULT 0');
+addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 function createUser(email, passwordHash, phone) {
@@ -336,6 +337,18 @@ function updateSubscriptionFromStripe(userId, fields) {
     currentPeriodEnd,
     cancelAtPeriodEnd,
   } = fields;
+  // Trial-start detection lives at this choke point because trials activate by
+  // two paths - the Stripe webhook AND the ?refresh=1 reconciliation - and
+  // both funnel through here. The flag flips exactly once per user, ever.
+  let trialJustStarted = false;
+  if (subscriptionStatus === 'trialing') {
+    const row = db.prepare('SELECT trial_started_at FROM users WHERE id = ?').get(userId);
+    if (row && !row.trial_started_at) {
+      db.prepare('UPDATE users SET trial_started_at = ? WHERE id = ?')
+        .run(new Date().toISOString(), userId);
+      trialJustStarted = true;
+    }
+  }
   db.prepare(
     `UPDATE users SET
        plan = ?,
@@ -352,6 +365,14 @@ function updateSubscriptionFromStripe(userId, fields) {
     cancelAtPeriodEnd ? 1 : 0,
     userId
   );
+  return { trialJustStarted };
+}
+
+// Everyone whose trial sequence could still owe an email. 9-day lookback: the
+// day-7 branch may send late, and anything older than that is settled.
+function getUsersInTrialWindow() {
+  const cutoff = new Date(Date.now() - 9 * 86400000).toISOString();
+  return db.prepare('SELECT * FROM users WHERE trial_started_at IS NOT NULL AND trial_started_at > ?').all(cutoff);
 }
 
 module.exports = {
@@ -383,6 +404,7 @@ module.exports = {
   hasEmailBeenSent,
   logEmailSent,
   setUnsubscribed,
+  getUsersInTrialWindow,
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,

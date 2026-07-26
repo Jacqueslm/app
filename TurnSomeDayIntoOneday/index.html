@@ -7376,7 +7376,9 @@ function updateProfileEditUI(){
   const verEl=document.getElementById('app-version-txt');
   if(verEl)verEl.textContent=APP_VERSION;
 }
-const APP_VERSION='1.0.0';
+// Kept in step with the service worker cache version in sw.js - when one moves,
+// the other moves, so "App version" in Profile matches what's actually cached.
+const APP_VERSION='7.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

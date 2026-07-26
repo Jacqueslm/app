@@ -825,8 +825,8 @@ body.nova-open #audio-pill-label{bottom:222px}
           This is your private space — reflections you write here stay on this device (and sync to your account if you're signed in) but aren't shown to other users. Write with the same honesty you'd want to read from someone else.
         </div>
         <div id="userPostList"></div>
-        <div class="sec-hd" style="margin:18px 0 8px">Featured recovery stories</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">Curated stories for this room, shown to everyone here — not a live feed of other app users.</div>
+        <div class="sec-hd" style="margin:18px 0 8px">Today's stories</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts from other users, and the names aren't real people.<br><br><strong>There's no commenting, replying or messaging here, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
         <div id="postList"></div>
       </div>
     </div>
@@ -1541,7 +1541,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-plans')">
         <i class="ti ti-users"></i>
-        <div class="setting-row-txt"><p>Rooms</p><span>Recovery stories, grouped by focus area</span></div>
+        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging.</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="shareMyMilestone()">
@@ -2281,7 +2281,7 @@ let S = {
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
-  userType:'recovering',
+  userType:'recovering',likedStories:[],
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -4901,75 +4901,37 @@ function renderCrvChart(){
 // changes on its own. Posts a user writes save locally the instant they hit
 // send (and sync to their account when online) but are never shown to anyone
 // else - there's no live cross-user feed here.
-const ROOM_STORIES={
-  'Porn & Sex':[
-    {name:'James T.',tag:'60 days clean · 3h ago',body:"60 days clean today. The hardest part wasn't the urges, it was the shame keeping me isolated. Talking about it honestly, even just in an app, took the power out of the secret.",likes:58},
-    {name:'Chris D.',tag:'21 days clean · 6h ago',body:'Deleted every trigger and blocked what I needed to block. Three weeks in and mornings finally feel like mine instead of something controlling me.',likes:34},
-    {name:'Morgan P.',tag:'120 days clean · 1d ago',body:"Four months. My relationship is healing because I stopped lying to the people I love. If you're white-knuckling day one, it does get easier.",likes:91},
-  ],
-  'Alcohol':[
-    {name:'Dana R.',tag:'45 days sober · 2h ago',body:"45 days. Went to my best friend's wedding and didn't touch a drop. Danced all night with a completely clear head. Didn't think that was possible six months ago.",likes:63},
-    {name:'Tom H.',tag:'200 days sober · 5h ago',body:'200 days sober today. My liver enzymes are back in normal range — my doctor was thrilled. Physical healing is real, it just takes time.',likes:88},
-    {name:'Priya S.',tag:'10 days sober · 8h ago',body:'Day 10. The insomnia is rough but the mental fog is already lifting. One day at a time really is the only way I can think about this.',likes:27},
-  ],
-  'Smoking':[
-    {name:'Ben O.',tag:'90 days smoke-free · 3h ago',body:'3 months without a cigarette. Climbed a flight of stairs yesterday without getting winded for the first time in years.',likes:52},
-    {name:'Lena K.',tag:'14 days smoke-free · 7h ago',body:'Two weeks in and the cravings still hit hard after meals, but they get shorter every time. Chewing gum has been a lifesaver.',likes:22},
-    {name:'Marcus J.',tag:'365 days smoke-free · 1d ago',body:'One year smoke-free today. Saved enough money to take my kids on a real vacation. Every craving I said no to added up to this.',likes:114},
-  ],
-  'Substances':[
-    {name:'Angela F.',tag:'30 days clean · 4h ago',body:"30 days clean. Detox was the hardest thing I've ever done, but I had support and made it through. Asking for help wasn't weakness, it was the only way.",likes:71},
-    {name:'Derek W.',tag:'180 days clean · 9h ago',body:"6 months clean. Rebuilding trust with my family one small promise kept at a time. It's slow, but it's real progress.",likes:95},
-    {name:'Nicole B.',tag:'7 days clean · 12h ago',body:'One week clean. Still shaky and my sleep is a mess, but I made it through the hardest physical part. Grateful for every hour.',likes:33},
-  ],
-  'Gambling':[
-    {name:'Steve M.',tag:'60 days gambling-free · 3h ago',body:'2 months without placing a single bet. Blocked every gambling site and app, and gave my card details to my wife to hold. Whatever it takes.',likes:47},
-    {name:'Rachel T.',tag:'300 days gambling-free · 6h ago',body:"300 days. Paid off the debt that almost cost me my marriage. The urge to 'win it back' finally went quiet after the first few months.",likes:102},
-    {name:'Carlos D.',tag:'5 days gambling-free · 10h ago',body:'Day 5. Almost opened the app during a bad moment last night. Used the SOS tool instead and it actually helped. One craving beaten is still a win.',likes:19},
-  ],
-  'Social media':[
-    {name:'Sarah M.',tag:'90 days social-media-free · 2h ago',body:"Just hit 90 days off the apps! Three months ago I couldn't imagine getting through a single evening without checking my phone every five minutes. It gets so much easier.",likes:47},
-    {name:'Jordan A.',tag:'21 days social-media-free · 5h ago',body:"3 weeks off Instagram. My anxiety about how I look and what people think has dropped so much. Didn't expect that.",likes:29},
-    {name:'Wei L.',tag:'45 days social-media-free · 1d ago',body:'45 days. Started reading books again for the first time since college. Turns out I had a lot more free time than I thought.',likes:41},
-  ],
-  'Gaming':[
-    {name:'Alex P.',tag:'30 days gaming-free · 4h ago',body:"30 days without logging in. Didn't realize how many hours I was losing until I actually had them back. Started exercising again.",likes:36},
-    {name:'Tyler B.',tag:'100 days gaming-free · 8h ago',body:'100 days. Grades are up, actually seeing friends in person again instead of just voice chat. No regrets uninstalling.',likes:58},
-    {name:'Sam K.',tag:'10 days gaming-free · 11h ago',body:'Day 10, and honestly the boredom is the hardest part. Trying to fill it with anything else instead of caving.',likes:15},
-  ],
-  'Food / Binging':[
-    {name:'Taylor R.',tag:'3 days binge-free · 3h ago',body:"Day 3 and honestly terrified I'll cave the second I feel stressed. Every hour feels like a mountain. But I found this app and I'm not quitting.",likes:19},
-    {name:'Monica G.',tag:'60 days binge-free · 6h ago',body:'2 months. Learning to actually feel my emotions instead of eating them away. Therapy plus this app has made a real difference.',likes:44},
-    {name:'Diego F.',tag:'14 days binge-free · 1d ago',body:'Two weeks. Stopped weighing myself every day — it was making everything worse. Focusing on how I feel instead of a number.',likes:26},
-  ],
-  'Shopping / Spending':[
-    {name:'Grace L.',tag:'30 days spend-free · 3h ago',body:'30 days without an impulse purchase. Deleted my saved cards from every app. My bank account has never looked better.',likes:38},
-    {name:'Omar H.',tag:'90 days spend-free · 7h ago',body:"3 months. Paid off a credit card I thought I'd be stuck with forever. The urge to buy something when I'm stressed is still there, but I recognize it now.",likes:53},
-    {name:'Elise W.',tag:'7 days spend-free · 10h ago',body:"One week in. Unsubscribed from every retail email list — it's helped more than I expected.",likes:17},
-  ],
-  'Work':[
-    {name:'Priya N.',tag:'6 weeks in · 4h ago',body:"Six weeks of eating lunch away from my desk every single day. Sounds small, but it's the first boundary I've held in years.",likes:31},
-    {name:'Ahmed K.',tag:'45 days in · 9h ago',body:'45 days without checking email after dinner. My kids noticed before I did that I was actually present again.',likes:49},
-    {name:'Liz M.',tag:'Day 10 · 12h ago',body:"Day 10 of not opening my laptop on Saturday or Sunday. It felt wrong at first, like I was falling behind. I wasn't.",likes:22},
-  ],
-  'Other':[
-    {name:'Jamie R.',tag:'21 days steady · 5h ago',body:"21 days of choosing the harder right thing over the easier wrong thing. Whatever you're working on, it's worth it.",likes:24},
-    {name:'Casey V.',tag:'90 days steady · 9h ago',body:"3 months steady. Recovery doesn't fit one neat label some days — it's just choosing better, one hour at a time.",likes:37},
-    {name:'Robin T.',tag:'5 days steady · 1d ago',body:"Day 5. New to this and still figuring out what my triggers even are. Glad this space exists for people who don't fit one category.",likes:14},
-  ],
-  'Anger & Control':[
-    {name:'Ray M.',tag:'45 days grounded · 3h ago',body:"Took me 40 years to say the real word instead of \"I've got a temper.\" My daughter used to read my face from the driveway. That's the part I can't unsee.",likes:67},
-    {name:'Curtis B.',tag:'21 days grounded · 7h ago',body:"The six rule is the only thing that's ever worked for me. I say the sentence, I walk, I come back in twenty. My wife said last week it's the first time in years she's finished a sentence.",likes:54},
-    {name:'Hector V.',tag:'90 days grounded · 1d ago',body:"Realized I hold it together all day at work and only lose it at home. That was a bad thing to find out about myself and it's the reason I finally started doing something.",likes:73},
-    {name:'Doug S.',tag:'Day 12 · 1d ago',body:"Road rage was the one I thought was harmless. Leaving ten minutes early has done more for me than ten years of telling myself to calm down.",likes:29},
-  ],
-  'Supporting Someone':[
-    {name:'Denise W.',tag:'30 days on this path · 2h ago',body:"For nine years I thought he stopped wanting me because of my body. Found out last spring it was porn. I'm not sure which hurts worse, but at least now I know it was never me.",likes:76},
-    {name:'Angela M.',tag:'14 days on this path · 6h ago',body:"Everybody asks how he's doing. Nobody has asked how I'm doing in three years. I finally told my sister the whole thing last week and cried for an hour. First real breath I've taken.",likes:64},
-    {name:'Rob F.',tag:'60 days on this path · 10h ago',body:"I held it together for everyone until the night I put my fist through a door. Then suddenly I was the problem. Learning here that the explosion wasn't the start of it — it was the end of ten years of nobody listening.",likes:58},
-    {name:'Priscilla T.',tag:'90 days on this path · 1d ago',body:"Stopped calling his boss with excuses. Hardest thing I've ever done, felt like betrayal. It wasn't. I'm not the reason he keeps his job anymore and honestly I sleep better.",likes:71},
-  ],
-};
+// Room stories live in data/stories.json, not here - they're content, and
+// content should be editable without touching app code. Each room has a pool;
+// the feed shows a slice of it that moves one story per day, so the room is
+// different tomorrow without ever going empty.
+let ROOM_STORIES={};
+async function loadRoomStories(){
+  try{
+    const res=await fetch('data/stories.json');
+    if(res.ok)ROOM_STORIES=await res.json();
+  }catch(e){/* offline - the room falls back to your own reflections */}
+}
+const STORIES_PER_DAY=5;
+// Days since epoch in LOCAL time, so the feed turns over at the user's
+// midnight rather than UTC's.
+function storyDayIndex(){
+  const n=new Date();
+  return Math.floor(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/86400000);
+}
+// Slide the window by one each day: mostly familiar, one new face daily, and it
+// never runs out because it wraps.
+function todaysStories(room){
+  const pool=ROOM_STORIES[room]||[];
+  if(!pool.length)return [];
+  const offset=storyDayIndex()%pool.length;
+  const out=[];
+  for(let i=0;i<Math.min(STORIES_PER_DAY,pool.length);i++)out.push(pool[(offset+i)%pool.length]);
+  return out;
+}
+// "3h ago" on a feed that turns over daily would be a lie by lunchtime. These
+// are stamped relative to today so the timing is at least internally honest.
+const STORY_AGES=['this morning','2h ago','5h ago','9h ago','yesterday'];
 const ROOM_AV_CLASSES=['av-t','av-c','av-b','av-o'];
 
 let currentRoom=null;
@@ -5016,6 +4978,23 @@ function likePost(btn){
   const span=btn.querySelector('span');
   const liked=btn.classList.toggle('liked');
   span.textContent=parseInt(span.textContent)+(liked?1:-1);
+  // Persist it against the post itself, otherwise the heart resets on reload.
+  const wrapper=btn.closest('[data-post-idx]');
+  if(wrapper){
+    const post=S.communityPosts[Number(wrapper.getAttribute('data-post-idx'))];
+    if(post){post.likes=Math.max(0,(post.likes||0)+(liked?1:-1));save();}
+  }
+}
+// Story likes are private and local - liking one tells nobody and contacts
+// nobody. It's a bookmark for the reader, not a signal to a stranger.
+function likeStory(btn,id){
+  const span=btn.querySelector('span');
+  const liked=btn.classList.toggle('liked');
+  span.textContent=Math.max(0,parseInt(span.textContent)+(liked?1:-1));
+  S.likedStories=S.likedStories||[];
+  if(liked){if(!S.likedStories.includes(id))S.likedStories.push(id);}
+  else S.likedStories=S.likedStories.filter(x=>x!==id);
+  save();
 }
 function reportPost(btn){
   appConfirm("Hide this post? You won't see it again, and it helps us know what to review.",()=>{
@@ -5051,16 +5030,18 @@ function renderCommunityPosts(){
 
   const roomContainer=document.getElementById('postList');
   if(roomContainer){
-    const stories=ROOM_STORIES[room]||[];
-    roomContainer.innerHTML=stories.map((s,i)=>{
+    const stories=todaysStories(room);
+    const term=RECOVERY_TERMS[room]||'sober';
+    roomContainer.innerHTML=stories.length?stories.map((s,i)=>{
       const initials=s.name.split(' ').map(w=>w[0]).join('').toUpperCase();
       const avClass=ROOM_AV_CLASSES[i%ROOM_AV_CLASSES.length];
+      const liked=(S.likedStories||[]).includes(s.id);
       return `<div class="post">
-        <div class="ph"><div class="av ${avClass}">${initials}</div><div><div class="pu">${s.name}</div><div class="pm">${s.tag}</div></div></div>
-        <div class="pb">${s.body}</div>
-        <div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${s.likes}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>
+        <div class="ph"><div class="av ${avClass}">${initials}</div><div><div class="pu">${escapeHtml(s.name)}</div><div class="pm">${s.days} days ${term} · ${STORY_AGES[i%STORY_AGES.length]}</div></div></div>
+        <div class="pb">${escapeHtml(s.body)}</div>
+        <div class="pacts"><button class="pa${liked?' liked':''}" onclick="likeStory(this,'${s.id}')"><i class="ti ti-heart" style="font-size:16px"></i> <span>${s.likes+(liked?1:0)}</span></button></div>
       </div>`;
-    }).join('');
+    }).join(''):'<div style="font-size:13px;color:var(--tm);padding:4px 0">Stories for this room load when you\'re online. Your own reflections above are always here.</div>';
   }
   renderIcons(document.getElementById('s-community'));
 }
@@ -7378,7 +7359,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.0.0';
+const APP_VERSION='8.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7729,7 +7710,7 @@ const HELP_INDEX=[
   {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
   {name:'For the one who loves you',sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
-  {name:'Rooms',sub:'Recovery stories, grouped by focus area',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
+  {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
   {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},
@@ -7904,6 +7885,7 @@ const GUIDE_FAQ=[
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
   {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 30-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Focus areas'},
   {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Focus areas'},
+  {q:'Are the people in the Rooms real? Can I reply to them?',k:'rooms real people fake stories reply comment message contact dm chat others users community',a:"Straight answer: the stories are <b>written reflections</b>, not live posts, and the names aren't real people. A new set appears in each room every day. <b>There is no commenting, replying or messaging — on purpose.</b> Recovery spaces online turn toxic fast, and this app is built to keep that out. You can like a story to keep it; nothing is sent and nobody can reach you. Anything you write in a room stays private to your account.",go:'Rooms'},
   {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Focus areas'},
   {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Focus areas'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
@@ -8186,6 +8168,7 @@ function enterApp(){
   document.getElementById('auth-gate').style.display='none';
   updateAccountUI();
   loadLessonPacks();
+  loadRoomStories();
   if(S.startDate){
     document.getElementById('onboarding').style.display='none';
     if(S.pinEnabled&&S.pinHash){

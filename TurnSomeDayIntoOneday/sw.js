@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v13'; // v13: supporter relation context + minor-child protections
+const CACHE_NAME = 'tsid-shell-v14'; // v14: forgot-password flow
 const SHELL_FILES = [
   '/',
   '/index.html',

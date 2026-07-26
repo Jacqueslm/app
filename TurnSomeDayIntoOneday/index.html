@@ -398,6 +398,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div class="ob-label" style="text-align:left" id="gate-pass-label">Password</div>
   <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
+  <div class="small-text" id="gate-forgot-link" style="display:none;margin-bottom:10px"><span style="color:var(--green);cursor:pointer" onclick="forgotPassword()">Forgot your password?</span></div>
   <p class="small-text" id="gate-legal-consent" style="display:none;color:#8892c0;font-size:11px;text-align:left;margin-bottom:10px">By creating an account you agree to the <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('terms')">Terms of Service</span> and <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('privacy')">Privacy Policy</span>.</p>
   <button class="ob-btn" id="gate-submit-btn" onclick="submitGateAuth()">Log In</button>
 </div>
@@ -7509,7 +7510,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='13.0.0';
+const APP_VERSION='14.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7721,6 +7722,7 @@ function setGateMode(mode){
   gateMode=mode;
   document.getElementById('gate-tab-login').classList.toggle('active',mode==='login');
   document.getElementById('gate-tab-signup').classList.toggle('active',mode==='signup');
+  document.getElementById('gate-forgot-link').style.display=mode==='login'?'block':'none';
   document.getElementById('gate-submit-btn').textContent=mode==='login'?'Log In':'Sign Up';
   document.getElementById('gate-signup-extras').style.display=mode==='signup'?'block':'none';
   document.getElementById('gate-legal-consent').style.display=mode==='signup'?'block':'none';
@@ -8342,6 +8344,21 @@ function enterApp(){
     syncAddictionChips();
     obNext(0);
     armOnboardingBackTrap();
+  }
+}
+
+async function forgotPassword(){
+  const errEl=document.getElementById('gate-error');
+  const emailVal=document.getElementById('gate-email').value.trim();
+  if(!emailVal){errEl.textContent='Type your email above first, then tap "Forgot your password?" again.';return;}
+  errEl.textContent='';
+  try{
+    const res=await fetch('/api/auth/forgot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:emailVal})});
+    const data=await res.json().catch(()=>({}));
+    if(res.status===429){errEl.textContent=data.error||'Too many reset requests. Try again later.';return;}
+    appInfo('Check your email',"If that email has an account, a reset link is on its way. It works once and expires in an hour — check spam if you don't see it.");
+  }catch(e){
+    errEl.textContent='Could not reach the server. Check your connection and try again.';
   }
 }
 

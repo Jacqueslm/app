@@ -15,6 +15,7 @@ const {
   verifyPassword,
   signSession,
   requireAuth,
+  verifyUnsubToken,
 } = require('./auth');
 
 const app = express();
@@ -60,6 +61,18 @@ app.get('/brainreset', (req, res) => {
 // TEMPORARY until Task 8 ships the real /for-her page: the day-2 trial email
 // links here, so it must never 404. Task 8 replaces this route with the page.
 app.get('/for-her', (req, res) => res.redirect('/'));
+
+// One-click unsubscribe from any inbox - no login. Idempotent by design:
+// setting the flag to 1 again is the same write and the same page, so a
+// double-click or a second device never sees an error.
+app.get('/unsubscribe', (req, res) => {
+  const userId = verifyUnsubToken(req.query.token);
+  if (!userId) {
+    return res.status(400).type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">This link isn't valid.</body>");
+  }
+  db.setUnsubscribed(userId, 1);
+  res.type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">You're unsubscribed. Password reset emails still work.</body>");
+});
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

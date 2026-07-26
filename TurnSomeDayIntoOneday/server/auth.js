@@ -22,6 +22,27 @@ if (!JWT_SECRET) {
   );
 }
 
+// Stateless unsubscribe tokens: "{userId}.{HMAC(userId:email)}". Forging one
+// for another user requires the server secret; no table, no expiry - an
+// unsubscribe link in an old email should work forever.
+function signUnsubToken(userId, email) {
+  const mac = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${userId}:${email}`).digest('hex');
+  return `${userId}.${mac}`;
+}
+
+function verifyUnsubToken(token) {
+  const m = /^(\d+)\.([a-f0-9]{64})$/.exec(String(token || ''));
+  if (!m) return null;
+  const userId = Number(m[1]);
+  const user = db.getUserById(userId);
+  if (!user) return null;
+  const expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${userId}:${user.email}`).digest('hex');
+  const a = Buffer.from(m[2]);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  return userId;
+}
+
 function hashPassword(password) {
   return bcrypt.hashSync(password, 10);
 }
@@ -62,6 +83,8 @@ function requireAuth(req, res, next) {
 
 module.exports = {
   COOKIE_NAME,
+  signUnsubToken,
+  verifyUnsubToken,
   hashPassword,
   verifyPassword,
   signSession,

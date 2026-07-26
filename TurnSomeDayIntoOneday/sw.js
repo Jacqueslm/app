@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12'; // v12: supporter onboarding stores loved one's struggle as context
+const CACHE_NAME = 'tsid-shell-v13'; // v13: supporter relation context + minor-child protections
 const SHELL_FILES = [
   '/',
   '/index.html',

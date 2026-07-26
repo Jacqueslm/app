@@ -428,6 +428,15 @@ body.nova-open #audio-pill-label{bottom:222px}
     <i class="ti ti-chevron-right"></i>
   </div>
 
+  <div class="ob-label" id="ob-prelation-label" style="text-align:left;display:none">Who are they to you?</div>
+  <div id="ob-prelation-chips" style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+    <div class="add-chip" data-rel="partner" onclick="selectPartnerRelation(this,'partner')">My partner/spouse</div>
+    <div class="add-chip" data-rel="adult-child" onclick="selectPartnerRelation(this,'adult-child')">My adult child</div>
+    <div class="add-chip" data-rel="minor-child" onclick="selectPartnerRelation(this,'minor-child')">My child (under 18)</div>
+    <div class="add-chip" data-rel="parent" onclick="selectPartnerRelation(this,'parent')">My parent</div>
+    <div class="add-chip" data-rel="sibling" onclick="selectPartnerRelation(this,'sibling')">My sibling</div>
+    <div class="add-chip" data-rel="friend" onclick="selectPartnerRelation(this,'friend')">A friend</div>
+  </div>
   <div class="ob-label" id="ob-addiction-label">What are you recovering from?</div>
   <div class="dd-btn placeholder" id="ob-addiction-btn" onclick="openAddictionModal()">
     <span id="ob-addiction-btn-label">Choose your focus areas</span>
@@ -1650,13 +1659,13 @@ body.nova-open #audio-pill-label{bottom:222px}
         </div>
       </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Together — go deeper</div>
-        <div class="setting-row" onclick="openProTool('couples')">
+        <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
+        <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Do this together</p><span>Weekly couple exercises — check-ins, slip plans, trigger walkthroughs <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="openProTool('partnerCheck')">
+        <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
           <i class="ti ti-heart" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Partner self-check</p><span>Is something quietly running your life too? 10 gentle questions <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -2295,7 +2304,7 @@ let S = {
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
-  userType:'recovering',likedStories:[],partnerFocus:[],
+  userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -2354,6 +2363,9 @@ function load(){
     }
     S.partnerFocusMigrated=true;
   }
+  // Supporter accounts created before the relation question existed were all
+  // written partner-first, so partner/spouse is the accurate default.
+  if(S.userType==='partner'&&!S.partnerRelation)S.partnerRelation='partner';
   // Migrate private reflections written before Rooms existed - tag them with
   // whatever the user's focus was at the time so they still show up somewhere.
   (S.communityPosts||[]).forEach(p=>{
@@ -3159,6 +3171,8 @@ function chooseUserType(type){
     // A supporter's own focus area is Supporting Someone, full stop. What their
     // loved one struggles with is context (partnerFocus), never her track.
     S.selectedAddictions=['Supporting Someone'];
+    // Most supporters are partners; pre-select so nobody gets stuck, let them change.
+    if(!S.partnerRelation)S.partnerRelation='partner';
   }else if(type==='both'){
     if(!S.selectedAddictions.includes('Supporting Someone')){
       S.selectedAddictions.push('Supporting Someone');
@@ -3205,6 +3219,35 @@ function applyUserTypeWording(){
   if(dateLbl){
     dateLbl.textContent=partner?'When did you start carrying this?':'When did you start your journey?';
   }
+  // "Who are they to you?" exists only on the supporter path - it decides which
+  // Together tools fit, and whether Nova is talking to the parent of a minor.
+  const relLbl=document.getElementById('ob-prelation-label');
+  const relChips=document.getElementById('ob-prelation-chips');
+  if(relLbl)relLbl.style.display=partner?'block':'none';
+  if(relChips){
+    relChips.style.display=partner?'flex':'none';
+    relChips.querySelectorAll('.add-chip').forEach(c=>c.classList.toggle('sel',c.getAttribute('data-rel')===S.partnerRelation));
+  }
+}
+
+function selectPartnerRelation(el,val){
+  S.partnerRelation=val;
+  el.parentElement.querySelectorAll('.add-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  save();
+}
+
+// Couples exercises and the partner self-check are written for a romantic
+// partner. A father supporting his son should never be offered "weekly couple
+// exercises" - hide, don't rewrite (content reframe is a future task).
+function updateTogetherSection(){
+  const coupleOnly=S.userType==='partner'&&S.partnerRelation&&S.partnerRelation!=='partner';
+  const couplesRow=document.getElementById('together-couples-row');
+  const checkRow=document.getElementById('together-selfcheck-row');
+  const hd=document.getElementById('together-deeper-hd');
+  if(couplesRow)couplesRow.style.display=coupleOnly?'none':'';
+  if(checkRow)checkRow.style.display=coupleOnly?'none':'';
+  if(hd)hd.parentElement.style.display=coupleOnly?'none':'';
 }
 
 // Reflect S.selectedAddictions onto both chip grids so pre-selected focus
@@ -3245,8 +3288,13 @@ function obNext(n){
     const partnerFocusSentence=isPartner&&(S.partnerFocus||[]).length
       ?`You're carrying someone's struggle with <strong>${S.partnerFocus.join(' and ')}</strong> — this plan stays pointed at you, not them.<br><br>`
       :'';
+    // The parent of a minor gets the honest limit up front: this app is her
+    // tool; her child needs adolescent-specialized help, and we keep saying so.
+    const minorSentence=isPartner&&S.partnerRelation==='minor-child'
+      ?`<br><br>This app supports <em>you</em> as the parent. For your child directly, adolescent-specialized help — a family therapist or pediatrician — is the right tool, and we'll keep saying so.`
+      :'';
     const rootExplanation=isPartner
-      ?`Your plan covers: <strong>${S.selectedAddictions.join(', ')||'your situation'}</strong>.<br><br>${partnerFocusSentence}${triggerSentence}This track is about <em>you</em> — your energy, your boundaries, your safety, and the part of you that keeps getting overlooked while everyone watches them.`
+      ?`Your plan covers: <strong>${S.selectedAddictions.join(', ')||'your situation'}</strong>.<br><br>${partnerFocusSentence}${triggerSentence}This track is about <em>you</em> — your energy, your boundaries, your safety, and the part of you that keeps getting overlooked while everyone watches them.${minorSentence}`
       :`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>${triggerSentence}Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
     document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
@@ -6759,6 +6807,8 @@ User Gender Identity: ${S.userGender||'Not Specified'}
 ${capitalize(recoveryTerm())} Since: ${S.startDate||'today'}
 Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
 ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')} — the user is the SUPPORTER, not the person with the addiction. Never coach them as the addict.`:''}
+${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
+${S.userType==='partner'&&S.partnerRelation==='minor-child'?`CRITICAL - THE LOVED ONE IS A MINOR: keep ALL guidance at the parental/household level (how the parent responds, boundaries at home, the parent's own wellbeing). NEVER discuss the minor's behavior in explicit detail, especially anything sexual - hard refusal, redirect to the parental level. Recommend adolescent-specialized professional support (family therapist, pediatrician) as the primary path for the child, alongside supporting the parent themselves.`:''}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
 Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
@@ -6860,6 +6910,7 @@ function switchTo(id){
   if(id==='plans'){renderPlansScreen();}
   if(id==='habit-coach'){renderHabitCoach();}
   if(id==='tools'){renderMilestones();}
+  if(id==='partner'){updateTogetherSection();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -7458,7 +7509,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.0.0';
+const APP_VERSION='13.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7640,6 +7691,7 @@ function restartOnboarding(){
     S.userType='recovering';
     S.selectedAddictions=[];
     S.partnerFocus=[];
+    S.partnerRelation='';
     applyUserTypeWording();
     syncAddictionChips();
     document.getElementById('obs0').classList.add('on');
@@ -7820,7 +7872,11 @@ const HELP_INDEX=[
 // fail to support, they were just never told what this actually feels like.
 function buildPartnerLetter(){
   const days=getDays();
-  const what=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
+  // A supporter's letter subject can't be "recovery from supporting someone" -
+  // the one honest string swap. (A fully supporter-voiced letter is a future task.)
+  const what=S.userType==='partner'
+    ?"the weight I've been carrying"
+    :(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
   const name=S.name||'';
   return `To the person who loves me,
 

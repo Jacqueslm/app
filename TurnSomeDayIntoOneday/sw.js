@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v5'; // v5: discretion mode manifest/icons
+const CACHE_NAME = 'tsid-shell-v6'; // v6: partner onboarding branch + Supporting Someone track
 const SHELL_FILES = [
   '/',
   '/index.html',

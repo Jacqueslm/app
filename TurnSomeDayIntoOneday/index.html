@@ -389,7 +389,13 @@ body.nova-open #audio-pill-label{bottom:222px}
 </div>
 
 <!-- ONBOARDING --> <div id="onboarding" class="ob" style="display:none"> <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div> <div class="ob-dots"> <div class="ob-dot on" id="od0"></div><div class="ob-dot" id="od1"></div><div class="ob-dot" id="od2"></div><div class="ob-dot" id="od3"></div><div class="ob-dot" id="od4"></div> </div>
-<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.</p> <button class="ob-btn" onclick="obNext(1)">Get started</button> </div>
+<div class="ob-step on" id="obs0"> <h1>Turn Someday<br>Into Day One</h1> <p>Compassionate, honest, and always in your corner — one day at a time.</p>
+  <div style="font-size:13.5px;color:#c0caff;margin:6px 0 14px">Who is this for? Both roads are built here.</div>
+  <button class="ob-btn" onclick="chooseUserType('recovering')">I'm working on my own recovery</button>
+  <button class="ob-btn" style="margin-top:8px" onclick="chooseUserType('partner')">I love someone who's struggling</button>
+  <button class="ob-btn outline" style="margin-top:8px" onclick="chooseUserType('both')">Both — I'm carrying both sides</button>
+  <div style="font-size:12px;color:#8892c0;line-height:1.6;margin-top:14px">If you're the one holding a family together while someone you love struggles, you're not a visitor here. That weight is real, and this app treats it that way.</div>
+</div>
 
 <!-- STEP 1: IDENTITY, GENDER, & SYMPTOMS -->
 <div class="ob-step" id="obs1">
@@ -408,13 +414,14 @@ body.nova-open #audio-pill-label{bottom:222px}
     <i class="ti ti-chevron-right"></i>
   </div>
 
-  <div class="ob-label">What are you recovering from?</div>
+  <div class="ob-label" id="ob-addiction-label">What are you recovering from?</div>
   <div class="dd-btn placeholder" id="ob-addiction-btn" onclick="openAddictionModal()">
     <span id="ob-addiction-btn-label">Choose your focus areas</span>
     <i class="ti ti-chevron-right"></i>
   </div>
   <div class="pin-error" id="obs1-error" style="text-align:left">&nbsp;</div>
   <button class="ob-btn" onclick="goToBehavioralStep()">Continue to Personal Profile</button>
+  <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
@@ -462,7 +469,7 @@ body.nova-open #audio-pill-label{bottom:222px}
 </div>
 
 <!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your sobriety counter</div> <div class="ob-label">Sobriety start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
+<div class="ob-step" id="obs3"> <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500" id="ob-date-label">When did you start your journey?</div> <div style="font-size:13px;color:#6672a0;margin-bottom:20px">This sets your counter</div> <div class="ob-label">Start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:11px;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
 <div class="ob-step" id="obs4"> <div style="font-size:32px;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:12px;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> <button class="ob-btn outline" onclick="obBack(3)">Back</button> </div> </div>
@@ -606,7 +613,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   </div>
 
   <div style="padding:12px 16px 0">
-    <div class="sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
+    <div class="sos-btn" id="home-sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
   </div>
 
   <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
@@ -722,6 +729,7 @@ body.nova-open #audio-pill-label{bottom:222px}
             <div class="tc" onclick="selJourCategory(this,'Shopping / Spending')">Shopping / Spending</div>
             <div class="tc" onclick="selJourCategory(this,'Work')">Work</div>
             <div class="tc" onclick="selJourCategory(this,'Other')">Other</div>
+            <div class="tc" onclick="selJourCategory(this,'Supporting Someone')">Supporting Someone</div>
           </div>
           <div class="jour-actions">
             <button class="cancel-btn" onclick="closeJour()">Cancel</button>
@@ -2078,8 +2086,8 @@ body.nova-open #audio-pill-label{bottom:222px}
 <!-- ADDICTION PICKER MODAL (onboarding, multi-select) -->
 <div class="sos-modal" id="addiction-modal" onclick="if(event.target===this)closeAddictionModal()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">What are you recovering from?</div>
-    <div class="sos-sub">Select all that apply.</div>
+    <div class="sos-title" style="color:var(--accent)" id="addiction-modal-title">What are you recovering from?</div>
+    <div class="sos-sub" id="addiction-modal-sub">Select all that apply.</div>
     <div class="addiction-grid" id="addiction-opt-grid">
       <div class="add-chip" style="grid-column: span 2;" onclick="toggleAddiction(this, 'Porn & Sex')">🔞 Porn &amp; Sex</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Alcohol')">🍺 Alcohol</div>
@@ -2092,6 +2100,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <div class="add-chip" onclick="toggleAddiction(this, 'Shopping / Spending')">🛍️ Shopping / Spending</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Work')">💼 Work</div>
       <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
+      <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleAddiction(this, 'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
     <button class="ob-btn" style="margin-top:4px" onclick="closeAddictionModal()">Done</button>
   </div>
@@ -2114,6 +2123,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Shopping / Spending')">🛍️ Shopping / Spending</div>
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Work')">💼 Work</div>
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Other')">✨ Other</div>
+      <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleCategorySwitch(this,'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
     <div class="pin-error" id="category-switch-error" style="text-align:left">&nbsp;</div>
     <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Done</button>
@@ -2268,6 +2278,7 @@ let S = {
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
+  userType:'recovering',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -3096,6 +3107,63 @@ function openLessonPacksScreen(){
 
 // ─── ONBOARDING ──────────────────────────────────────────────────────────────
 let obStep=0;
+// Onboarding branches on step 0. Partners are not a sub-case of "person in
+// recovery" - the questions, the wording and the first lesson track all change.
+function chooseUserType(type){
+  S.userType=type;
+  if(type==='partner'||type==='both'){
+    if(!S.selectedAddictions.includes('Supporting Someone')){
+      S.selectedAddictions.push('Supporting Someone');
+    }
+  }
+  applyUserTypeWording();
+  syncAddictionChips();
+  updateAddictionBtnLabel();
+  save();
+  obNext(1);
+}
+
+// Every label that assumes "you are the one using" gets a partner version.
+function applyUserTypeWording(){
+  const partner=S.userType==='partner';
+  const both=S.userType==='both';
+  const lbl=document.getElementById('ob-addiction-label');
+  if(lbl){
+    lbl.textContent=partner?'What are they struggling with?':
+      both?'What are you carrying? (Yours and theirs)':
+      'What are you recovering from?';
+  }
+  const modalTitle=document.getElementById('addiction-modal-title');
+  if(modalTitle){
+    modalTitle.textContent=partner?'What are they struggling with?':
+      both?'What are you carrying?':
+      'What are you recovering from?';
+  }
+  const modalSub=document.getElementById('addiction-modal-sub');
+  if(modalSub){
+    modalSub.textContent=partner?'Select all that apply. Keep "Supporting someone I love" selected — that track is written for you, not for them.':
+      'Select all that apply.';
+  }
+  const dateLbl=document.getElementById('ob-date-label');
+  if(dateLbl){
+    dateLbl.textContent=partner?'When did you start carrying this?':'When did you start your journey?';
+  }
+}
+
+// Reflect S.selectedAddictions onto both chip grids so pre-selected focus
+// areas don't look unselected when the user opens the modal.
+function syncAddictionChips(){
+  ['addiction-opt-grid','categorySwitchGrid'].forEach(gridId=>{
+    const grid=document.getElementById(gridId);
+    if(!grid)return;
+    grid.querySelectorAll('.add-chip').forEach(chip=>{
+      const m=(chip.getAttribute('onclick')||'').match(/'([^']+)'\s*\)/);
+      if(!m)return;
+      chip.classList.toggle('sel',S.selectedAddictions.includes(m[1]));
+    });
+  });
+}
+
 function obNext(n){
   document.getElementById('obs'+obStep).classList.remove('on');
   if(document.getElementById('od'+obStep))document.getElementById('od'+obStep).classList.remove('on');
@@ -3112,7 +3180,10 @@ function obNext(n){
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
     const triggerSentence=blueprintVals.length?`Nova has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
-    const rootExplanation=`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>${triggerSentence}Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
+    const isPartner=S.userType==='partner';
+    const rootExplanation=isPartner
+      ?`Your plan covers: <strong>${S.selectedAddictions.join(', ')||'your situation'}</strong>.<br><br>${triggerSentence}This track is about <em>you</em> — your energy, your boundaries, your safety, and the part of you that keeps getting overlooked while everyone watches them.`
+      :`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>${triggerSentence}Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
     document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
   }
@@ -3241,6 +3312,12 @@ function goToBehavioralStep(){
       htmlBlock+=`
         <div class="ob-label">What drives the urge to spend?</div>
         ${renderBehaviorChips('behavior-shopping-trigger',['Chasing the thrill of a new purchase','Escaping stress or sadness through buying','Filling a void or boredom with acquiring things'])}`;
+    }else if(addiction==='Supporting Someone'){
+      htmlBlock+=`
+        <div class="ob-label">What's hardest to carry right now?</div>
+        ${renderBehaviorChips('behavior-partner-weight',['Never knowing which version of them I\'ll get','Being blamed for things I didn\'t do','Feeling rejected and told it isn\'t about me','Holding everything together alone'])}
+        <div class="ob-label">What does it cost you?</div>
+        ${renderBehaviorChips('behavior-partner-cost',['I don\'t sleep or eat like I used to','I snap, then hate myself for snapping','I\'ve stopped telling anyone how bad it is','I don\'t know who I am outside of this'])}`;
     }else if(addiction==='Work'){
       htmlBlock+=`
         <div class="ob-label">What's really driving the overworking?</div>
@@ -3266,6 +3343,8 @@ function showVoiceStep(){
   const shoppingTrigger=getBehaviorAnswer('behavior-shopping-trigger');if(shoppingTrigger)S.behavioralBlueprint.shoppingTrigger=shoppingTrigger;
   const workTrigger=getBehaviorAnswer('behavior-work-trigger');if(workTrigger)S.behavioralBlueprint.workTrigger=workTrigger;
   const genRoot=getBehaviorAnswer('behavior-gen-root');if(genRoot)S.behavioralBlueprint.genRoot=genRoot;
+  const partnerWeight=getBehaviorAnswer('behavior-partner-weight');if(partnerWeight)S.behavioralBlueprint.partnerWeight=partnerWeight;
+  const partnerCost=getBehaviorAnswer('behavior-partner-cost');if(partnerCost)S.behavioralBlueprint.partnerCost=partnerCost;
 
   document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
   document.getElementById('obs2_5').classList.add('on');
@@ -3760,6 +3839,7 @@ const CATEGORY_JOURNAL_PROMPTS={
   'Shopping / Spending':'Was there a moment today you wanted to buy something to feel better?',
   'Work':'Did work become a way to avoid something today?',
   'Other':'What moment today felt the hardest to sit with?',
+  'Supporting Someone':'What did you carry today that nobody noticed?',
 };
 const EMOTION_JOURNAL_PROMPTS=[
   'What emotion hit you hardest today?',
@@ -3885,6 +3965,7 @@ const CATEGORY_STREAK_MESSAGES={
   'Shopping / Spending':'Your impulse spending is showing real improvement.',
   'Work':'Your relationship with rest is improving.',
   'Other':'Your consistency here is building real momentum.',
+  'Supporting Someone':"You've been showing up for yourself, not just for them.",
 };
 function buildStreakInsights(){
   const insights=[];
@@ -4121,6 +4202,7 @@ const CATEGORY_ANALYTICS_INSIGHTS={
   'Shopping / Spending':'Low mood increases your urge to spend.',
   'Work':'Avoidance of rest increases your urge to overwork.',
   'Other':'Stress and low structure increase your risk.',
+  'Supporting Someone':'Your hardest days line up with their hardest days — that connection is worth watching.',
 };
 const CATEGORY_LOOP_VERBS={
   'Porn & Sex':'seeking it out',
@@ -4134,6 +4216,7 @@ const CATEGORY_LOOP_VERBS={
   'Shopping / Spending':'wanting to spend',
   'Work':'overworking',
   'Other':'the urge itself',
+  'Supporting Someone':'carrying it alone',
 };
 function analyticsWindow(days){
   const cutoff=Date.now()-days*86400000;
@@ -4297,6 +4380,7 @@ const CATEGORY_HABIT_COACHING={
   'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
   'Work':{weakSpot:'Avoiding rest tends to be your highest-risk pattern.',suggestion:'Set one hard stop time in the evening, every day this week.'},
   'Other':{weakSpot:'Unstructured moments tend to be your highest-risk time.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+  'Supporting Someone':{weakSpot:'The hours right before they come home tend to be your highest-tension time.',suggestion:'Put one thing that is purely yours in that window — a walk, a call, a shower with the door locked.'},
 };
 const HABIT_MICRO_SUGGESTIONS={
   morning:['Start the day with a 2-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
@@ -4854,6 +4938,12 @@ const ROOM_STORIES={
     {name:'Casey V.',tag:'90 days steady · 9h ago',body:"3 months steady. Recovery doesn't fit one neat label some days — it's just choosing better, one hour at a time.",likes:37},
     {name:'Robin T.',tag:'5 days steady · 1d ago',body:"Day 5. New to this and still figuring out what my triggers even are. Glad this space exists for people who don't fit one category.",likes:14},
   ],
+  'Supporting Someone':[
+    {name:'Denise W.',tag:'30 days on this path · 2h ago',body:"For nine years I thought he stopped wanting me because of my body. Found out last spring it was porn. I'm not sure which hurts worse, but at least now I know it was never me.",likes:76},
+    {name:'Angela M.',tag:'14 days on this path · 6h ago',body:"Everybody asks how he's doing. Nobody has asked how I'm doing in three years. I finally told my sister the whole thing last week and cried for an hour. First real breath I've taken.",likes:64},
+    {name:'Rob F.',tag:'60 days on this path · 10h ago',body:"I held it together for everyone until the night I put my fist through a door. Then suddenly I was the problem. Learning here that the explosion wasn't the start of it — it was the end of ten years of nobody listening.",likes:58},
+    {name:'Priscilla T.',tag:'90 days on this path · 1d ago',body:"Stopped calling his boss with excuses. Hardest thing I've ever done, felt like betrayal. It wasn't. I'm not the reason he keeps his job anymore and honestly I sleep better.",likes:71},
+  ],
 };
 const ROOM_AV_CLASSES=['av-t','av-c','av-b','av-o'];
 
@@ -4994,6 +5084,9 @@ const RECOVERY_TERMS={
   'Shopping / Spending':'spend-free',
   'Work':'balanced',
   'Other':'steady',
+  // A partner isn't "clean" or "sober" - what they're counting is days of
+  // holding themselves steady while someone they love struggles.
+  'Supporting Someone':'on this path',
 };
 function recoveryTerm(){
   return RECOVERY_TERMS[S.currentAddiction]||'sober';
@@ -5014,6 +5107,12 @@ function updateRecoveryTermLabels(){
   if(!S.pledged){
     const pledgeSub=document.getElementById('pledge-sub');
     if(pledgeSub)pledgeSub.textContent=`Take your pledge to stay ${term} today`;
+  }
+  // A partner isn't fighting a craving - they're weathering a hard night.
+  const sosBtn=document.getElementById('home-sos-btn');
+  if(sosBtn){
+    const partnerFocus=S.currentAddiction==='Supporting Someone';
+    sosBtn.innerHTML=`<i class="ti ti-alert-triangle"></i> ${partnerFocus?"It's a bad night — I need help":"I'm having a craving — SOS"}`;
   }
 }
 function buildTimeline(){
@@ -5507,6 +5606,7 @@ const CATEGORY_RELAPSE_SCRIPTS={
   'Shopping / Spending':"If the urge hits: close the app or tab and put your card/wallet out of reach. Wait 30 minutes before any purchase — set a timer. Ask what feeling you're trying to buy your way out of. Text your accountability contact the word \"urge.\"",
   'Work':"If the urge hits to overwork past your limits: physically close the laptop or leave your desk. Set a hard stop time and tell someone you're stopping. Do one non-work activity for 15 minutes. Ask what you're avoiding by staying busy.",
   'Other':"If the urge hits: physically leave the environment tied to it. Do one grounding action (cold water, a walk, deep breaths) before deciding anything. Text or call someone you trust and say the word \"urge.\" Remind yourself this feeling has a lifespan — it will pass.",
+  'Supporting Someone':"When it's boiling over: get physical distance first — another room, the car, outside. You are not required to stay in a conversation that has turned. Breathe out longer than you breathe in, ten times. Then text the one person who knows the real story and say \"bad night.\" Do not make any decision about the relationship tonight. If you feel unsafe, call 911. To talk it through free and confidential, 24/7: 1-800-799-7233, or text START to 88788.",
 };
 function openCategoryScripts(){
   const cat=S.currentAddiction||'Other';
@@ -5945,6 +6045,7 @@ const CATEGORY_REMINDER_TEXT={
   'Shopping / Spending':'Evening browsing is a common trigger for this. Consider staying off shopping apps tonight.',
   'Work':'Evenings can blur into more work. Consider a real stop time tonight.',
   'Other':'Evenings can be a vulnerable time. Stay mindful tonight.',
+  'Supporting Someone':'Evenings are when the weight lands hardest. Before you take care of anyone else tonight, do one thing for you.',
 };
 function buildCategorySpecificReminder(){
   const hour=new Date().getHours();
@@ -6129,7 +6230,9 @@ Core traits:
 - Warm and human — you are not clinical or robotic. You use contractions, gentle language, occasional ellipses. You never start with "I understand."
 - Brief but deep — 3-5 sentences max per response. Quality over quantity. End with one thoughtful, open-ended question.
 - Safety first, always, regardless of anything else in this prompt — if anyone mentions self-harm, suicidal ideation, or crisis, respond with warmth and always mention: "988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7." This overrides every other instruction below.
-- You know the user's recovery journey and reference it naturally when relevant.`;
+- You know the user's recovery journey and reference it naturally when relevant.
+- Some users are here because they LOVE someone with an addiction, not because they have one. Their focus area is "Supporting Someone." Never coach them as if the addiction is theirs. Their work is their own reality, boundaries, health and safety — never fixing their partner. Do not push them to stay, leave, forgive, or understand; that is theirs to decide.
+- If a user describes a pattern of control, intimidation, gaslighting, or physical harm, do not frame it as an addiction symptom to be understood. Name that it sounds serious, and mention: "National Domestic Violence Hotline — 1-800-799-7233, or text START to 88788, free and confidential, 24/7." Addiction never excuses abuse.`;
 
 const SYSTEM_FREE_ADDENDUM=`
 
@@ -6246,6 +6349,7 @@ const CATEGORY_FALLBACK_NOTES={
   'Shopping / Spending':" Whatever the pull to spend was today, it doesn't undo the progress you've already made.",
   'Work':" However today went with work, it doesn't undo the balance you're already building.",
   'Other':" Whatever today looked like, it doesn't undo the progress you've already made.",
+  'Supporting Someone':" However today went with them, it doesn't undo the ground you've been rebuilding for yourself.",
 };
 function categoryFallbackNote(){
   return CATEGORY_FALLBACK_NOTES[S.currentAddiction]||'';
@@ -7243,7 +7347,7 @@ const APP_VERSION='1.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
-  Work:'💼',Other:'✨'
+  Work:'💼',Other:'✨','Supporting Someone':'💛'
 };
 const CATEGORY_DESCRIPTIONS={
   'Porn & Sex':'Focused on compulsive porn use and sexual behavior patterns that feel out of your control.',
@@ -7257,6 +7361,7 @@ const CATEGORY_DESCRIPTIONS={
   'Shopping / Spending':'Focused on curbing impulsive spending and rebuilding financial peace of mind.',
   'Work':'Focused on breaking the cycle of overworking and reclaiming rest.',
   'Other':"A general recovery focus, tailored to whatever pattern you're working to change.",
+  'Supporting Someone':"For you, not them — living with someone else's addiction, recognizing harm, setting boundaries, and getting your own life back.",
 };
 function openCategoryInfo(){
   const cat=S.currentAddiction||'Other';
@@ -7413,14 +7518,21 @@ function restartOnboarding(){
 
     document.getElementById('main-app').style.display='none';
     document.querySelectorAll('.ob-step').forEach(s=>s.classList.remove('on'));
-    document.getElementById('obs1').classList.add('on');
+    // Step 0 asks who they are - someone in recovery, someone loving a person
+    // in it, or both. Everything after it is worded from that answer, so it has
+    // to come before the basic questions, not after them.
+    S.userType='recovering';
+    S.selectedAddictions=[];
+    applyUserTypeWording();
+    syncAddictionChips();
+    document.getElementById('obs0').classList.add('on');
     ['od0','od1','od2','od3','od4'].forEach(id=>{
       const el=document.getElementById(id);
       if(el)el.classList.remove('on');
     });
-    const dot1=document.getElementById('od1');
-    if(dot1)dot1.classList.add('on');
-    obStep=1;
+    const dot0=document.getElementById('od0');
+    if(dot0)dot0.classList.add('on');
+    obStep=0;
     document.getElementById('onboarding').style.display='flex';
     armOnboardingBackTrap();
   });
@@ -7754,6 +7866,8 @@ const GUIDE_FAQ=[
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.",go:'Delete my account'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
+  {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 30-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Focus areas'},
+  {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Focus areas'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){
@@ -8045,7 +8159,11 @@ function enterApp(){
   }else{
     document.getElementById('onboarding').style.display='flex';
     document.getElementById('ob-date').value=new Date().toISOString().split('T')[0];
-    obNext(1);
+    // Start at step 0 - the "who are you here as" question. It decides how the
+    // rest of onboarding is worded, so it can't come later.
+    applyUserTypeWording();
+    syncAddictionChips();
+    obNext(0);
     armOnboardingBackTrap();
   }
 }

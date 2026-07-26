@@ -9,7 +9,7 @@ const path = require('path');
 
 const SOURCE_DIR = path.join(__dirname, 'lessons');
 const OUTPUT_FILE = path.join(__dirname, 'lessons.json');
-const PACK_COUNT = 11;
+const PACK_COUNT = 13;
 
 const merged = {};
 

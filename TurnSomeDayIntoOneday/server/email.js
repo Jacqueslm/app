@@ -9,6 +9,7 @@
 //   APP_URL          - absolute base URL used in links
 //   EMAIL_DRY_RUN=1  - treat sends as successful without calling Resend (tests)
 const db = require('./db');
+const { signUnsubToken } = require('./auth');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'Jacques <jacques@turnsomedayintodayone.com>';
@@ -30,7 +31,8 @@ async function sendEmail({ to, subject, text, force }) {
     return { ok: false, skipped: 'unsubscribed' };
   }
   if (DRY_RUN) {
-    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars)`);
+    const lastLine = text.trimEnd().split('\n').pop();
+    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars) last-line="${lastLine}"`);
     return { ok: true, dryRun: true };
   }
   if (!RESEND_API_KEY) {
@@ -72,7 +74,14 @@ async function sendSequenceEmail(user, sequence, step, subject, text) {
   if (db.hasEmailBeenSent(user.id, sequence, step)) {
     return { ok: false, skipped: 'already-sent' };
   }
-  const result = await sendEmail({ to: user.email, subject, text });
+  // The unsubscribe footer is attached at send time, never stored in the copy:
+  // marketing sequences (trial, future quiz nurture) get it; transactional
+  // account mail does not.
+  let outgoing = text;
+  if (sequence !== 'transactional') {
+    outgoing += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signUnsubToken(user.id, user.email)}`;
+  }
+  const result = await sendEmail({ to: user.email, subject, text: outgoing });
   if (result.ok) {
     db.logEmailSent(user.id, user.email, sequence, step);
   }

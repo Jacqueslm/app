@@ -42,6 +42,11 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use('/preview', requireAuth);
+// The server/ folder must never be reachable over HTTP: it holds the source,
+// .env, and - on home installs, where DB_PATH defaults to server/data.sqlite -
+// the entire user database. express.static below serves the app root, which
+// contains this folder, so it has to be blocked ahead of it.
+app.use('/server', (req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname, '..')));
 
 // Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
@@ -74,6 +79,27 @@ const changePasswordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many password change attempts. Try again in a few minutes.' },
+});
+
+// Broad backstop across the whole auth namespace (logout, logout-all, me) -
+// the credential routes above keep their own stricter buckets, which still apply.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again in a few minutes.' },
+});
+app.use('/api/auth', authLimiter);
+
+// The daily chat quota is per-account; this is the per-IP burst brake so the
+// endpoint can't be hammered request-by-request inside a single day.
+const chatLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Slow down a moment — too many messages at once. Try again in a few minutes.' },
 });
 
 function setSessionCookie(res, userId, sessionVersion) {
@@ -161,17 +187,35 @@ app.get('/api/state', requireAuth, (req, res) => {
 });
 
 app.put('/api/state', requireAuth, (req, res) => {
-  const { state } = req.body || {};
+  let { state } = req.body || {};
   if (typeof state !== 'string') {
     return res.status(400).json({ error: 'state must be a JSON string.' });
   }
+  // Nova conversations are never persisted. Current clients don't send them,
+  // but a stale cached client still might - enforce the promise server-side.
+  try {
+    const parsed = JSON.parse(state);
+    if (parsed && typeof parsed === 'object' && 'chatHistory' in parsed) {
+      delete parsed.chatHistory;
+      state = JSON.stringify(parsed);
+    }
+  } catch (_) { /* not valid JSON - store as-is, same as before */ }
   db.saveState(req.userId, state);
   res.json({ ok: true });
 });
 
 app.use('/api/update', requireAuth, update.router);
 
+// Server error stacks are internals, not user data - same owner gate the
+// update endpoint uses. Unset APP_OWNER_EMAIL keeps the old open behavior.
+const DIAG_OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 app.get('/api/diagnostics', requireAuth, (req, res) => {
+  if (DIAG_OWNER_EMAIL) {
+    const user = db.getUserById(req.userId);
+    if (!user || user.email !== DIAG_OWNER_EMAIL) {
+      return res.status(403).json({ error: 'Only the app owner can view diagnostics.' });
+    }
+  }
   res.json({ errors: db.getRecentErrors(50) });
 });
 
@@ -245,7 +289,7 @@ app.get('/api/billing/status', requireAuth, async (req, res) => {
   res.json(billing.getBillingStatus(user));
 });
 
-app.post('/api/chat', requireAuth, async (req, res) => {
+app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!ANTHROPIC_API_KEY) {
     // No key configured (e.g. running without the API wired up yet) - the client falls back to
     // its offline local-reply mode whenever this endpoint isn't a 2xx, so this is a normal state.

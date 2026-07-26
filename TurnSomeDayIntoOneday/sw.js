@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v8'; // v8: rotating room stories
+const CACHE_NAME = 'tsid-shell-v9'; // v9: Nova chats never persisted
 const SHELL_FILES = [
   '/',
   '/index.html',

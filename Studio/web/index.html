@@ -203,6 +203,12 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2" id="media-upload">⬆ Upload pictures &amp; videos</button>
         <button class="btn2 quiet" id="media-upload-song">🎵 Upload a song</button>
         <button class="btn2 quiet" id="media-record">🎥 Record my screen</button>
+        <label class="usage" style="display:flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="checkbox" id="media-facecam"> Include facecam</label>
+        <select id="media-facecam-size" class="btn2 quiet" style="display:none;padding:4px 8px">
+          <option value="small">Bubble: Small</option>
+          <option value="medium">Bubble: Medium</option>
+          <option value="large">Bubble: Large</option>
+        </select>
         <button class="btn2 quiet" id="media-open-folder">📁 Open my media folder</button>
       </div>
       <p class="usage" id="media-rec-note" style="margin:2px 0 0">Grab any clip you can play on screen — a Manus render, a reference video — straight into your library. Pick the tab/window, and it stops when you press again.</p>
@@ -2315,21 +2321,70 @@ const screenRec = { mr: null, chunks: [], stream: null, t0: 0, timer: null };
 function stopScreenRec() {
   if (screenRec.mr && screenRec.mr.state !== 'inactive') screenRec.mr.stop();
 }
-$('#media-record').onclick = async () => {
-  const b = $('#media-record');
-  const note = $('#media-rec-note');
-  if (screenRec.mr && screenRec.mr.state === 'recording') { stopScreenRec(); return; }
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined') {
-    note.textContent = 'Screen recording needs a desktop browser (Chrome, Edge, or Firefox). Open Studio there and try again.';
-    return;
+
+// --- Facecam bubble: optional webcam overlay composited INTO the recording so
+// the saved file is one finished video - no editing step. Off by default; when
+// the webcam is denied or absent the recording proceeds screen-only. ---
+const FACECAM_SIZES = { small: 0.15, medium: 0.22, large: 0.30 };
+function facecamPrefs() {
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem('studio_facecam') || '{}'); } catch (_) {}
+  return {
+    x: typeof p.x === 'number' ? p.x : 0.86,   // bubble centre, fraction of frame
+    y: typeof p.y === 'number' ? p.y : 0.82,   // default: bottom-right
+    size: FACECAM_SIZES[p.size] ? p.size : 'medium',
+  };
+}
+function saveFacecamPrefs(p) { try { localStorage.setItem('studio_facecam', JSON.stringify(p)); } catch (_) {} }
+$('#media-facecam').onchange = () => { $('#media-facecam-size').style.display = $('#media-facecam').checked ? '' : 'none'; };
+$('#media-facecam-size').value = facecamPrefs().size;
+$('#media-facecam-size').onchange = () => { const p = facecamPrefs(); p.size = $('#media-facecam-size').value; saveFacecamPrefs(p); };
+
+// Small floating panel showing the live composite; dragging inside it moves the
+// bubble (fractions of frame, so any resolution), size presets restyle live.
+function buildFacecamPreview(canvas, prefs, W, H) {
+  const wrap = document.createElement('div');
+  wrap.id = 'facecam-preview';
+  wrap.style.cssText = 'position:fixed;bottom:14px;right:14px;z-index:9999;background:#14122b;border:1px solid #33305c;border-radius:10px;padding:8px;box-shadow:0 6px 24px rgba(0,0,0,.5);width:300px';
+  const pv = document.createElement('canvas');
+  const pw = 284, ph = Math.max(40, Math.round(pw * H / W));
+  pv.width = pw; pv.height = ph; pv.style.cssText = 'width:100%;border-radius:6px;display:block;cursor:grab;touch-action:none';
+  const row = document.createElement('div');
+  row.style.cssText = 'font-size:11px;color:#b8bfe8;margin-top:6px;display:flex;align-items:center;justify-content:space-between';
+  row.innerHTML = '<span>Drag bubble to place it</span>';
+  const sizes = document.createElement('span');
+  const styleBtns = () => { [...sizes.children].forEach((c) => { const on = c.dataset.s === prefs.size; c.style.borderColor = on ? '#534AB7' : '#33305c'; c.style.background = on ? '#534AB7' : 'transparent'; }); };
+  for (const s of ['small', 'medium', 'large']) {
+    const btn = document.createElement('button');
+    btn.textContent = s[0].toUpperCase(); btn.title = s; btn.dataset.s = s;
+    btn.style.cssText = 'margin-left:4px;padding:2px 8px;border-radius:6px;border:1px solid #33305c;background:transparent;color:#fff;cursor:pointer;font-size:11px';
+    btn.onclick = () => { prefs.size = s; $('#media-facecam-size').value = s; saveFacecamPrefs(prefs); styleBtns(); };
+    sizes.appendChild(btn);
   }
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
-  } catch (e) {
-    note.textContent = e.name === 'NotAllowedError' ? 'Recording cancelled — nothing captured.' : `Could not start recording: ${e.message}`;
-    return;
-  }
+  row.appendChild(sizes);
+  wrap.appendChild(pv); wrap.appendChild(row);
+  document.body.appendChild(wrap);
+  styleBtns();
+  const pctx = pv.getContext('2d');
+  const mirror = setInterval(() => { try { pctx.drawImage(canvas, 0, 0, pw, ph); } catch (_) {} }, 66);
+  let dragging = false;
+  const move = (ev) => {
+    const rect = pv.getBoundingClientRect();
+    prefs.x = Math.min(1, Math.max(0, (ev.clientX - rect.left) / rect.width));
+    prefs.y = Math.min(1, Math.max(0, (ev.clientY - rect.top) / rect.height));
+    saveFacecamPrefs(prefs);
+  };
+  pv.addEventListener('pointerdown', (ev) => { dragging = true; pv.setPointerCapture(ev.pointerId); move(ev); });
+  pv.addEventListener('pointermove', (ev) => { if (dragging) move(ev); });
+  pv.addEventListener('pointerup', () => { dragging = false; });
+  const origRemove = wrap.remove.bind(wrap);
+  wrap.remove = () => { clearInterval(mirror); origRemove(); };
+  return wrap;
+}
+
+// The untouched original path - runs exactly as before whenever the facecam
+// toggle is off (or the webcam fails).
+function startPlainRecording(stream, b, note) {
   const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t)) || 'video/webm';
   screenRec.stream = stream; screenRec.chunks = [];
   const mr = new MediaRecorder(stream, { mimeType: mime });
@@ -2360,6 +2415,120 @@ $('#media-record').onclick = async () => {
     const m = Math.floor(screenRec.t0 / 60), s = String(screenRec.t0 % 60).padStart(2, '0');
     b.textContent = `⏺ Stop recording (${m}:${s})`;
   }, 1000);
+}
+
+// Screen + webcam composited onto one canvas at source resolution (capped at
+// 1080p for smooth compositing on tall sources), recorded via captureStream so
+// the bubble is burned into the saved file.
+async function startCompositeRecording(screenStream, camStream, b, note) {
+  const vTrack = screenStream.getVideoTracks()[0];
+  const s0 = vTrack.getSettings();
+  let W = s0.width || 1920, H = s0.height || 1080;
+  let capNote = '';
+  if (H > 1080) { W = Math.max(2, Math.round((W * 1080 / H) / 2) * 2); H = 1080; capNote = ' Compositing at 1080p for smooth performance.'; }
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const sv = document.createElement('video'); sv.srcObject = screenStream; sv.muted = true; sv.playsInline = true;
+  const cv = document.createElement('video'); cv.srcObject = new MediaStream(camStream.getVideoTracks()); cv.muted = true; cv.playsInline = true;
+  await Promise.all([sv.play().catch(() => {}), cv.play().catch(() => {})]);
+  const prefs = facecamPrefs();
+  prefs.size = $('#media-facecam-size').value || prefs.size;
+
+  function drawFrame() {
+    ctx.drawImage(sv, 0, 0, W, H);
+    const d = Math.round(FACECAM_SIZES[prefs.size] * H);
+    const r = d / 2;
+    const cx = Math.min(Math.max(prefs.x * W, r + 8), W - r - 8);
+    const cy = Math.min(Math.max(prefs.y * H, r + 8), H - r - 8);
+    // soft drop shadow under the bubble
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = Math.max(8, r * 0.15); ctx.shadowOffsetY = Math.max(2, r * 0.06);
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = '#000'; ctx.fill();
+    ctx.restore();
+    // circle-cropped webcam, cover-fit so nothing squishes
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, r - 1.5, 0, Math.PI * 2); ctx.clip();
+    const cw = cv.videoWidth || 640, ch = cv.videoHeight || 480;
+    const k = Math.max(d / cw, d / ch);
+    ctx.drawImage(cv, cx - (cw * k) / 2, cy - (ch * k) / 2, cw * k, ch * k);
+    ctx.restore();
+    // 3px brand-accent border
+    ctx.beginPath(); ctx.arc(cx, cy, r - 1.5, 0, Math.PI * 2);
+    ctx.lineWidth = 3; ctx.strokeStyle = '#534AB7'; ctx.stroke();
+  }
+  const drawTimer = setInterval(drawFrame, 33); // ~30fps
+
+  const out = canvas.captureStream(30);
+  // Mic always; tab/system audio only if the display stream actually has it -
+  // exactly what the plain recorder captures today, nothing new.
+  const ac = new (window.AudioContext || window.webkitAudioContext)();
+  const dest = ac.createMediaStreamDestination();
+  if (camStream.getAudioTracks().length) ac.createMediaStreamSource(new MediaStream(camStream.getAudioTracks())).connect(dest);
+  if (screenStream.getAudioTracks().length) ac.createMediaStreamSource(new MediaStream(screenStream.getAudioTracks())).connect(dest);
+  dest.stream.getAudioTracks().forEach((t) => out.addTrack(t));
+
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  screenRec.stream = screenStream; screenRec.chunks = [];
+  const mr = new MediaRecorder(out, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  screenRec.mr = mr;
+  mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) screenRec.chunks.push(ev.data); };
+  screenStream.getVideoTracks()[0].addEventListener('ended', stopScreenRec);
+  const panel = buildFacecamPreview(canvas, prefs, W, H);
+  mr.onstop = async () => {
+    clearInterval(screenRec.timer); clearInterval(drawTimer);
+    screenStream.getTracks().forEach((t) => t.stop());
+    camStream.getTracks().forEach((t) => t.stop());
+    ac.close().catch(() => {});
+    panel.remove();
+    b.classList.remove('primary'); b.disabled = true; b.textContent = '⏳ Saving…';
+    try {
+      const blob = new Blob(screenRec.chunks, { type: mime });
+      if (blob.size < 1000) throw new Error('That recording was empty.');
+      const file = new File([blob], `screen-facecam-${Date.now()}.webm`, { type: 'video/webm' });
+      await uploadFile(file, 'video');
+      await loadAssets();
+      note.textContent = `Saved a ${Math.round(blob.size / 1e5) / 10} MB clip (with facecam) to your Video clips below.`;
+    } catch (e) { setErr('#seq-err', e.message); note.textContent = e.message; }
+    b.disabled = false; b.textContent = '🎥 Record my screen';
+    screenRec.mr = null;
+  };
+  mr.start(1000);
+  screenRec.t0 = 0;
+  b.classList.add('primary'); b.textContent = '⏺ Stop recording (0:00)';
+  screenRec.timer = setInterval(() => {
+    screenRec.t0 += 1;
+    const m = Math.floor(screenRec.t0 / 60), s = String(screenRec.t0 % 60).padStart(2, '0');
+    b.textContent = `⏺ Stop recording (${m}:${s})`;
+  }, 1000);
+  note.textContent = 'Recording with facecam — drag the bubble in the preview to place it.' + capNote;
+}
+
+$('#media-record').onclick = async () => {
+  const b = $('#media-record');
+  const note = $('#media-rec-note');
+  if (screenRec.mr && screenRec.mr.state === 'recording') { stopScreenRec(); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || typeof MediaRecorder === 'undefined') {
+    note.textContent = 'Screen recording needs a desktop browser (Chrome, Edge, or Firefox). Open Studio there and try again.';
+    return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: true });
+  } catch (e) {
+    note.textContent = e.name === 'NotAllowedError' ? 'Recording cancelled — nothing captured.' : `Could not start recording: ${e.message}`;
+    return;
+  }
+  if ($('#media-facecam').checked) {
+    let cam = null;
+    try {
+      cam = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: true });
+    } catch (e) {
+      note.textContent = 'Webcam unavailable — recording screen only.';
+    }
+    if (cam) { startCompositeRecording(stream, cam, b, note); return; }
+  }
+  startPlainRecording(stream, b, note);
 };
 async function mediaAddAll(kind) {
   const list = st.assets.filter((a) => a.kind === kind && !a.meta?.overlay);

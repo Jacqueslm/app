@@ -1,10 +1,11 @@
-const CACHE_NAME = 'tsid-shell-v7'; // v7: Anger & Control track
+const CACHE_NAME = 'tsid-shell-v8'; // v8: rotating room stories
 const SHELL_FILES = [
   '/',
   '/index.html',
   '/manifest.json',
   '/manifest-discrete.json',
   '/data/lessons.json',
+  '/data/stories.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-discrete-192.png',

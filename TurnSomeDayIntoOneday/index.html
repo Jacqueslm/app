@@ -6472,6 +6472,36 @@ const FALLBACK_PATTERNS=[
   {test:/struggl|hard|rough|bad day|tough|heavy/i,
    reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
 ];
+// ─── SUPPORTER GUIDED-MODE REPLIES ─────────────────────────────────────────────
+// A supporter is not the person with the addiction. The recovering library's
+// slip/craving/Day-N language lands on her as an accusation, so this path never
+// borrows from it — not one line, not the default.
+const SUPPORTER_GOOD_NEWS=/something good|good news|proud of (him|her|them)|better day|going well|hopeful/i;
+const SUPPORTER_TALK_TO_THEM=/how do i talk|what do i say|bring (it|this) up|confront|have the conversation|talk to (him|her|them)/i;
+const SUPPORTER_FALLBACKS=[
+  {test:/exhaust|drain(ed|ing)?|worn out|burn(ed|t)? out|no energy|so tired/i,
+   reply:`Of course you're exhausted. You've been on alert — watching, managing, bracing — and that takes something out of you every day, whether or not anyone notices.\n\nWhat's one thing today that's yours? Not for them, not to fix anything. Just yours.`},
+  {test:/found something|found (his|her|their)|caught (him|her|them)|saw (his|her|their)|discovered/i,
+   reply:`That's a gut-punch, and there's no calm way to feel it. Whatever you found, your reaction to it is allowed — you don't have to be measured or fair or fine right now.\n\nYou don't have to decide anything tonight either. What do you need first: to say what you saw out loud, or to figure out what comes next?`},
+  {test:/don'?t know what to believe|believe (him|her|them)|lying|lied|can'?t trust|trust (him|her|them)/i,
+   reply:`That's one of the hardest places to stand — you're not being paranoid, and you're not being naive. When trust has been broken, not knowing is the honest answer, and it's exhausting to live in.\n\nTrust comes back through what they do over time, not what they say tonight. What would you need to see, repeatedly, to start believing again?`},
+  {test:SUPPORTER_GOOD_NEWS,
+   reply:`I'm really glad. Good days are real too, and you're allowed to enjoy this one without waiting for the other shoe to drop.\n\nWhat happened? Tell me the good part — you've earned a minute to sit in it.`},
+  {test:SUPPORTER_TALK_TO_THEM,
+   // The parent of a minor gets the household frame and the adolescent-specialist
+   // path, same hard line the live system prompt holds (Task 4.6).
+   reply:()=>S.partnerRelation==='minor-child'
+     ?`With your own kid, calm and private beats confrontation every time — no audience, no ultimatum in the doorway. Lead with what you noticed and that you're not going anywhere, rather than what they did wrong; shame closes a teenager down fast, and you need them talking.\n\nAnd this isn't yours to carry alone: someone who specializes in adolescents — a family therapist or your pediatrician — should be part of this, for them and for you. What's the piece you're most afraid to say out loud?`
+     :`Pick a calm moment, not the moment you're angriest — nothing lands during a fight. Say what you saw, say how it landed, and say what you need. Skip anything that starts with "you always."\n\nAnd you're allowed to say what you need without having a solution ready. What's the one thing you most want them to actually hear?`},
+];
+function supporterFallbackReply(userText){
+  // Same distress rule as the recovering path: the free SOS tools and 988 ride
+  // along whenever the words get heavy.
+  const footer=DISTRESS_RE.test(userText)?DISTRESS_FOOTER:'';
+  const match=SUPPORTER_FALLBACKS.find(p=>p.test.test(userText));
+  if(match)return (typeof match.reply==='function'?match.reply():match.reply)+footer;
+  return `I'm listening. Whatever's happening with them, what it's doing to you matters too — and this space is for that part, not for fixing them.${footer}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+}
 function localFallbackReply(userText){
   // Crisis language always takes priority over everything else, including structured Pro requests below.
   if(FALLBACK_PATTERNS[0].test.test(userText))return FALLBACK_PATTERNS[0].reply;
@@ -6488,6 +6518,10 @@ function localFallbackReply(userText){
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
+  // A supporter never gets a recovering reply. On the 'both' path only an
+  // explicit supporter match routes here - her own recovery keeps its library.
+  if(S.userType==='partner')return supporterFallbackReply(userText);
+  if(S.userType==='both'&&SUPPORTER_FALLBACKS.some(p=>p.test.test(userText)))return supporterFallbackReply(userText);
   // Distress gets the free SOS tools and 988 attached to whatever reply fires -
   // never just encouragement. (The crisis branch above already leads with 988.)
   const footer=DISTRESS_RE.test(userText)?DISTRESS_FOOTER:'';
@@ -6818,7 +6852,10 @@ async function sendMsg(){
   // Ordinary distress skips the upsell teaser too: "why do I keep slipping"
   // asked on a bad night is a person, not a sales lead.
   const isCrisis=CRISIS_RE.test(text);
-  if(!S.isPro&&!isCrisis&&!DISTRESS_RE.test(text)&&isProFeatureRequest(text)){
+  // A supporter reaching out about someone she loves is not a sales lead. The
+  // only moment an upsell belongs on this path is a win worth celebrating.
+  const supporterNoUpsell=S.userType==='partner'&&!SUPPORTER_GOOD_NEWS.test(text);
+  if(!S.isPro&&!isCrisis&&!supporterNoUpsell&&!DISTRESS_RE.test(text)&&isProFeatureRequest(text)){
     const teaser=proFeaturePreviewText(text);
     addProPreviewBubble(teaser);
     S.chatHistory.push({role:'assistant',content:teaser});
@@ -6876,14 +6913,14 @@ Address the interactions of their unique blueprint and assign structured daily r
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
+    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
   }catch(e){
     setNovaMode(false);
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
+    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
   }
 }
 
@@ -7539,7 +7576,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='15.0.0';
+const APP_VERSION='16.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

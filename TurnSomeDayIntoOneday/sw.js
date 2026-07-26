@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v15'; // v15: Nova greeting and chips per user type
+const CACHE_NAME = 'tsid-shell-v16'; // v16: supporter guided-mode replies + Pro-teaser suppression
 const SHELL_FILES = [
   '/',
   '/index.html',

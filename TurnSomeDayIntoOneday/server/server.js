@@ -57,6 +57,10 @@ app.get('/brainreset', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
 });
 
+// TEMPORARY until Task 8 ships the real /for-her page: the day-2 trial email
+// links here, so it must never 404. Task 8 replaces this route with the page.
+app.get('/for-her', (req, res) => res.redirect('/'));
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,

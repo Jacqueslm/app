@@ -1595,6 +1595,46 @@ router.post('/queue/clear-finished', (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── TELEPROMPTER SCRIPTS ──────────────────────────────────────────────────
+// Scripts live on the server so the same ones are available on the computer
+// that films and the phone that posts.
+function scriptJson(row) {
+  return { id: row.id, title: row.title, body: row.body, updatedAt: row.updated_at };
+}
+router.get('/scripts', (req, res) => {
+  res.json({ scripts: db.getScripts(req.userId).map(scriptJson) });
+});
+router.post('/scripts', (req, res) => {
+  const { title, body } = req.body || {};
+  if (typeof body !== 'string' || !body.trim()) {
+    return res.status(400).json({ error: 'Write the script first.' });
+  }
+  const id = db.createScript(
+    req.userId,
+    (typeof title === 'string' && title.trim() ? title.trim() : 'Untitled script').slice(0, 80),
+    body.slice(0, 20000)
+  );
+  res.status(201).json({ id });
+});
+router.put('/scripts/:id', (req, res) => {
+  const row = db.getScript(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Script not found.' });
+  const { title, body } = req.body || {};
+  if (typeof body !== 'string' || !body.trim()) {
+    return res.status(400).json({ error: 'Write the script first.' });
+  }
+  db.updateScript(
+    req.userId, row.id,
+    (typeof title === 'string' && title.trim() ? title.trim() : row.title).slice(0, 80),
+    body.slice(0, 20000)
+  );
+  res.json({ ok: true });
+});
+router.delete('/scripts/:id', (req, res) => {
+  db.deleteScript(req.userId, Number(req.params.id));
+  res.json({ ok: true });
+});
+
 // ─── SOCIAL SCHEDULER ──────────────────────────────────────────────────────
 // TikTok/Meta/YouTube all require a weeks-long developer app review before
 // they'll let a new app publish for real (TikTok posts land as private

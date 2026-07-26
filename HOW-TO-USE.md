@@ -145,7 +145,33 @@ One music video = a week of posts. Seamless loop makes them replay forever.
 
 ---
 
-## 5a. 📅 The Post tab (your posting schedule)
+## 5a. 🎤 The Teleprompter (stay on script, still sound like you)
+
+At the top of the **📅 Post** tab. Write the words once, then read them steady instead of guessing on camera.
+
+1. **📅 Post** tab → type a **Script name** and paste your script into the box
+   - Put **each thought on its own line** — short lines read naturally; a wall of text makes anyone sound like a robot
+   - Leave a **blank line** where you want to pause and breathe
+2. **💾 Save script** — it's saved to your account, so it's there next week and on your phone too. Tap any saved script to load it back; save again to update it.
+3. **▶ Open teleprompter** → the screen goes black, you get a 3-2-1 countdown, then the words scroll
+
+**Set your camera up like this:** put the screen showing the prompter **directly behind or under your camera**, as close to the lens as you can. The green band across the middle marks the line to read — keeping your eyes in that band is what makes you look like you're talking *to* someone instead of reading.
+
+**While it's rolling:**
+| Control | Does |
+|---|---|
+| **Space** or **▶/❚❚** | Play / pause |
+| **+ speed / − speed** (or ↑ ↓) | Faster or slower — start slow, 3 is a calm speaking pace |
+| **A+ / A−** | Bigger or smaller words (bigger = you can stand further back) |
+| **Mirror** | Flips the text for a teleprompter glass rig |
+| **↺ Restart** (or R) | Back to the top for another take |
+| **✕ Close** (or Esc) | Done |
+
+**Getting it heartfelt, not robotic:** run it slower than feels natural, read a line *then* look at the lens as you say it, and let yourself go off-script when a real feeling shows up — the script is a floor, not a cage. If you flub a line, don't stop; press ↺ Restart and go again. Takes are free.
+
+---
+
+## 5b. 📅 The Post tab (your posting schedule)
 
 Studio can't post for you — TikTok, Instagram and YouTube all make a brand-new app wait weeks for a manual review before it's allowed to publish, and even then a video posted through their back door gets less reach than one you upload yourself. So the Post tab does everything **except** the final tap:
 
@@ -160,7 +186,7 @@ Posting to TikTok now and YouTube tonight? Tick them off one at a time — the p
 
 ---
 
-## 5b. 📱 Open Studio on your phone
+## 5c. 📱 Open Studio on your phone
 
 Studio runs on this computer, but your phone can open it over your home Wi-Fi — which is how finished clips get onto the phone you post from.
 

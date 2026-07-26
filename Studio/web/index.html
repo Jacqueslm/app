@@ -82,6 +82,21 @@ textarea::placeholder{color:var(--tm)}
 .mtabs button{position:relative}
 .mtabs button .due-dot{display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#ff5f57}
 .mtabs button.has-due .due-dot{display:block}
+/* Teleprompter: black field, big calm type, and a soft band marking the line to
+   read from so the eyes stay level with the lens. */
+#tp-stage{display:none;position:fixed;inset:0;z-index:2000;background:#000;color:#fff;overflow:hidden}
+#tp-stage.on{display:block}
+/* The text layer fills the screen, so it must not swallow taps meant for the
+   controls sitting on top of it. */
+#tp-scroll{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#tp-text{padding:52vh 8vw 60vh;font-size:44px;line-height:1.55;font-weight:600;white-space:pre-wrap;text-align:center;letter-spacing:.2px;max-width:1100px;margin:0 auto}
+#tp-stage.mirrored #tp-text{transform:scaleX(-1)}
+#tp-band{position:absolute;left:0;right:0;top:38%;height:22%;background:rgba(126,232,162,0.07);border-top:1px solid rgba(126,232,162,0.28);border-bottom:1px solid rgba(126,232,162,0.28);pointer-events:none}
+#tp-count{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:22vh;font-weight:800;color:var(--green);background:rgba(0,0,0,0.85)}
+#tp-count.on{display:flex}
+#tp-bar{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,0.72)}
+.tp-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);color:#fff;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;font-family:var(--f);cursor:pointer}
+.tp-val{color:var(--green);font-weight:700;min-width:22px;text-align:center}
 .view{display:none;flex-direction:column;gap:14px}
 .view.on{display:flex}
 /* SIMPLE MODE: one screen only — hide the tab bar and every other view */
@@ -895,6 +910,18 @@ body.simple-only #view-simple{display:flex !important}
   <div class="view" id="view-social">
     <div class="banner" id="social-due-banner" style="display:none"></div>
     <div class="card">
+      <h3>🎤 Teleprompter</h3>
+      <p class="usage" style="margin:0">Write it once, read it steady. Put this screen right behind your camera so your eyes stay on the lens — slow speed, short lines, and it still sounds like you.</p>
+      <input class="input" id="tp-title" placeholder="Script name (e.g. The Symptoms)">
+      <textarea class="input" id="tp-body" style="min-height:120px;resize:vertical;line-height:1.6" placeholder="Type or paste your script.&#10;&#10;Put each thought on its own line — short lines are easier to read without sounding stiff.&#10;&#10;Leave a blank line where you want to pause and breathe."></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="gen-btn" id="tp-open" style="flex:2;min-width:150px">▶ Open teleprompter</button>
+        <button class="btn2" id="tp-save" style="flex:1;min-width:110px">💾 Save script</button>
+      </div>
+      <div class="err" id="tp-err"></div>
+      <div id="tp-list" class="row" style="gap:6px"></div>
+    </div>
+    <div class="card">
       <h3>📅 Schedule a post</h3>
       <p class="usage" style="margin:0">No platform lets a brand-new app auto-post for real yet — TikTok/Instagram/YouTube all require a weeks-long review first. So this queue does everything up to the tap: pick the clip, write the caption once, and it tells you the second it's time to post — you do the one tap, which also gets more reach than any API post does anyway.</p>
       <label class="lbl">Clip</label>
@@ -916,6 +943,24 @@ body.simple-only #view-simple{display:flex !important}
     <div class="row"><label class="lbl">Queue</label><div id="soc-list" class="row" style="flex-direction:column;align-items:stretch;gap:10px"></div></div>
   </div>
   </div><!-- /body -->
+
+<!-- TELEPROMPTER (full screen, sits behind the camera) -->
+<div id="tp-stage">
+  <div id="tp-band"></div>
+  <div id="tp-scroll"><div id="tp-text"></div></div>
+  <div id="tp-count"></div>
+  <div id="tp-bar">
+    <button class="tp-btn" id="tp-play" title="Play / pause (space)">▶</button>
+    <button class="tp-btn" id="tp-slower" title="Slower">− speed</button>
+    <span class="tp-val" id="tp-speed-val">3</span>
+    <button class="tp-btn" id="tp-faster" title="Faster">+ speed</button>
+    <button class="tp-btn" id="tp-smaller" title="Smaller text">A−</button>
+    <button class="tp-btn" id="tp-bigger" title="Bigger text">A+</button>
+    <button class="tp-btn" id="tp-mirror" title="Flip for a teleprompter mirror">Mirror</button>
+    <button class="tp-btn" id="tp-restart" title="Back to the top">↺ Restart</button>
+    <button class="tp-btn" id="tp-close" title="Close (Esc)">✕ Close</button>
+  </div>
+</div>
 </div>
 <div class="lightbox" id="lightbox">
   <button class="lb-close" aria-label="Close">✕</button>
@@ -1800,6 +1845,7 @@ async function bootStudio() {
     $('#falkey-manage').style.display = 'none';
   }
   renderLanAddresses();
+  loadScripts();
   renderStockCard();
   renderCrewRoom();
   renderVoiceCard();
@@ -1818,6 +1864,162 @@ async function loadAssets() {
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
   renderSocialAssetPicker();
 }
+
+/* ---------------- Teleprompter ----------------
+   Reading a wall of text makes people sound like a robot, so: big type, one
+   thought per line, a slow default, a green band marking the line to read
+   from (keeps the eyes level with the lens), and a 3-2-1 countdown so the
+   first words aren't spent finding your place. */
+let tpSpeed = 3, tpFont = 44, tpPlaying = false, tpRaf = null, tpPos = 0, tpLast = 0, tpEditingId = null;
+
+async function loadScripts() {
+  const wrap = $('#tp-list');
+  if (!wrap) return;
+  let scripts = [];
+  try { scripts = (await jfetch('/api/studio/scripts')).scripts || []; } catch (e) { return; }
+  st.scripts = scripts;
+  if (!scripts.length) { wrap.innerHTML = '<p class="usage" style="margin:0">No saved scripts yet — write one above and press Save.</p>'; return; }
+  wrap.innerHTML = '<label class="lbl">Saved scripts</label>';
+  for (const s of scripts) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center';
+    const load = document.createElement('button');
+    load.className = 'btn2 quiet';
+    load.style.cssText = 'flex:1;text-align:left';
+    load.textContent = s.title;
+    load.onclick = () => {
+      $('#tp-title').value = s.title;
+      $('#tp-body').value = s.body;
+      tpEditingId = s.id;
+      setErr('#tp-err', '');
+    };
+    const del = document.createElement('button');
+    del.className = 'btn2 quiet';
+    del.textContent = '🗑';
+    del.onclick = async () => {
+      if (!confirm(`Delete "${s.title}"?`)) return;
+      await jfetch(`/api/studio/scripts/${s.id}`, { method: 'DELETE' });
+      if (tpEditingId === s.id) tpEditingId = null;
+      loadScripts();
+    };
+    row.appendChild(load); row.appendChild(del);
+    wrap.appendChild(row);
+  }
+}
+
+$('#tp-save')?.addEventListener('click', async () => {
+  const title = $('#tp-title').value.trim();
+  const body = $('#tp-body').value.trim();
+  setErr('#tp-err', '');
+  if (!body) return setErr('#tp-err', 'Write the script first.');
+  try {
+    if (tpEditingId) {
+      await jfetch(`/api/studio/scripts/${tpEditingId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body }),
+      });
+    } else {
+      const r = await jfetch('/api/studio/scripts', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body }),
+      });
+      tpEditingId = r.id;
+    }
+    loadScripts();
+  } catch (e) { setErr('#tp-err', e.message); }
+});
+
+function tpSetFont(px) {
+  tpFont = Math.max(20, Math.min(96, px));
+  $('#tp-text').style.fontSize = tpFont + 'px';
+}
+function tpSetSpeed(v) {
+  tpSpeed = Math.max(1, Math.min(10, v));
+  $('#tp-speed-val').textContent = tpSpeed;
+}
+function tpApplyPos() { $('#tp-text').style.transform = `translateY(${-tpPos}px)`; }
+
+function tpTick(ts) {
+  if (!tpPlaying) return;
+  if (!tpLast) tpLast = ts;
+  const dt = (ts - tpLast) / 1000;
+  tpLast = ts;
+  tpPos += tpSpeed * 22 * dt; // speed 3 ≈ a calm speaking pace
+  const text = $('#tp-text');
+  const maxPos = text.scrollHeight - window.innerHeight * 0.35;
+  if (tpPos >= maxPos) { tpPos = maxPos; tpPause(); }
+  tpApplyPos();
+  tpRaf = requestAnimationFrame(tpTick);
+}
+function tpPlay() {
+  tpPlaying = true; tpLast = 0;
+  $('#tp-play').textContent = '❚❚';
+  tpRaf = requestAnimationFrame(tpTick);
+}
+function tpPause() {
+  tpPlaying = false;
+  if (tpRaf) cancelAnimationFrame(tpRaf);
+  $('#tp-play').textContent = '▶';
+}
+function tpToggle() { tpPlaying ? tpPause() : tpPlay(); }
+function tpRestart() { tpPause(); tpPos = 0; tpApplyPos(); }
+
+function openTeleprompter() {
+  const body = $('#tp-body').value.trim();
+  setErr('#tp-err', '');
+  if (!body) return setErr('#tp-err', 'Write or load a script first.');
+  $('#tp-text').textContent = body;
+  tpSetFont(tpFont); tpSetSpeed(tpSpeed);
+  tpPos = 0; tpApplyPos();
+  const stage = $('#tp-stage');
+  stage.classList.add('on');
+  // Fullscreen the prompter itself, not the whole page: making the page
+  // fullscreen puts the app container in the top layer and it ends up
+  // covering these controls.
+  try { stage.requestFullscreen?.(); } catch (e) { /* not allowed - the overlay still fills the screen */ }
+  // The button that opened this keeps keyboard focus otherwise, and Space
+  // would press it again instead of pausing.
+  document.activeElement?.blur?.();
+  // 3-2-1 so the first line isn't spent finding your place
+  const count = $('#tp-count');
+  let n = 3;
+  count.textContent = n;
+  count.classList.add('on');
+  const timer = setInterval(() => {
+    n -= 1;
+    if (n <= 0) {
+      clearInterval(timer);
+      count.classList.remove('on');
+      tpPlay();
+    } else {
+      count.textContent = n;
+    }
+  }, 1000);
+}
+function closeTeleprompter() {
+  tpPause();
+  $('#tp-stage').classList.remove('on');
+  $('#tp-count').classList.remove('on');
+  try { if (document.fullscreenElement) document.exitFullscreen?.(); } catch (e) {}
+}
+
+$('#tp-open')?.addEventListener('click', openTeleprompter);
+$('#tp-play')?.addEventListener('click', tpToggle);
+$('#tp-slower')?.addEventListener('click', () => tpSetSpeed(tpSpeed - 1));
+$('#tp-faster')?.addEventListener('click', () => tpSetSpeed(tpSpeed + 1));
+$('#tp-smaller')?.addEventListener('click', () => tpSetFont(tpFont - 4));
+$('#tp-bigger')?.addEventListener('click', () => tpSetFont(tpFont + 4));
+$('#tp-mirror')?.addEventListener('click', () => $('#tp-stage').classList.toggle('mirrored'));
+$('#tp-restart')?.addEventListener('click', tpRestart);
+$('#tp-close')?.addEventListener('click', closeTeleprompter);
+document.addEventListener('keydown', (e) => {
+  if (!$('#tp-stage')?.classList.contains('on')) return;
+  if (e.key === ' ') { e.preventDefault(); tpToggle(); }
+  else if (e.key === 'Escape') closeTeleprompter();
+  else if (e.key === 'ArrowUp') tpSetSpeed(tpSpeed + 1);
+  else if (e.key === 'ArrowDown') tpSetSpeed(tpSpeed - 1);
+  else if (e.key === 'r' || e.key === 'R') tpRestart();
+});
 
 /* ---------------- Open Studio on the phone (same Wi-Fi) ---------------- */
 async function renderLanAddresses() {

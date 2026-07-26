@@ -97,6 +97,15 @@ db.exec(`
     sent_at TEXT
   );
   CREATE INDEX IF NOT EXISTS idx_email_log_guard ON email_log(user_id, sequence, step);
+  CREATE TABLE IF NOT EXISTS leads (
+    id INTEGER PRIMARY KEY,
+    email TEXT UNIQUE,
+    quiz_result TEXT,
+    source TEXT,
+    utm_source TEXT,
+    created_at TEXT,
+    unsubscribed INTEGER DEFAULT 0
+  );
   CREATE TABLE IF NOT EXISTS error_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     scope TEXT NOT NULL,
@@ -152,6 +161,9 @@ addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NUL
 addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
 addColumnIfMissing('unsubscribed', 'unsubscribed INTEGER NOT NULL DEFAULT 0');
 addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
+// Columns land now (Task 7 schema); the capture logic ships in Task 9.
+addColumnIfMissing('utm_source', 'utm_source TEXT');
+addColumnIfMissing('utm_campaign', 'utm_campaign TEXT');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 function createUser(email, passwordHash, phone) {
@@ -311,6 +323,40 @@ function setUnsubscribed(userId, value) {
   db.prepare('UPDATE users SET unsubscribed = ? WHERE id = ?').run(value ? 1 : 0, userId);
 }
 
+function createLead(email, quizResult, source, utmSource) {
+  const info = db
+    .prepare('INSERT INTO leads (email, quiz_result, source, utm_source, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(email, quizResult || null, source || null, utmSource || null, new Date().toISOString());
+  return Number(info.lastInsertRowid);
+}
+
+function getLeadByEmail(email) {
+  return db.prepare('SELECT * FROM leads WHERE email = ?').get(email);
+}
+
+function getLeadById(id) {
+  return db.prepare('SELECT * FROM leads WHERE id = ?').get(id);
+}
+
+function setLeadUnsubscribed(leadId, value) {
+  db.prepare('UPDATE leads SET unsubscribed = ? WHERE id = ?').run(value ? 1 : 0, leadId);
+}
+
+// Leads have no user id, so their double-send guard keys on the address.
+function hasEmailBeenSentToAddress(email, sequence, step) {
+  return Boolean(
+    db.prepare('SELECT 1 FROM email_log WHERE email = ? AND sequence = ? AND step = ?')
+      .get(email, sequence, step)
+  );
+}
+
+// Everyone whose nurture could still owe an email. 7-day lookback: the
+// sequence is 5 days, and anything older is settled.
+function getLeadsInNurtureWindow() {
+  const cutoff = new Date(Date.now() - 7 * 86400000).toISOString();
+  return db.prepare('SELECT * FROM leads WHERE unsubscribed = 0 AND created_at > ?').all(cutoff);
+}
+
 function bumpSessionVersion(userId) {
   db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(userId);
   const row = db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId);
@@ -404,6 +450,12 @@ module.exports = {
   hasEmailBeenSent,
   logEmailSent,
   setUnsubscribed,
+  createLead,
+  getLeadByEmail,
+  getLeadById,
+  setLeadUnsubscribed,
+  hasEmailBeenSentToAddress,
+  getLeadsInNurtureWindow,
   getUsersInTrialWindow,
   getUserByStripeCustomerId,
   setStripeCustomerId,

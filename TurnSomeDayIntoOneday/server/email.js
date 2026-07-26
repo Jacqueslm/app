@@ -9,7 +9,7 @@
 //   APP_URL          - absolute base URL used in links
 //   EMAIL_DRY_RUN=1  - treat sends as successful without calling Resend (tests)
 const db = require('./db');
-const { signUnsubToken } = require('./auth');
+const { signUnsubToken, signLeadUnsubToken } = require('./auth');
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || 'Jacques <jacques@turnsomedayintodayone.com>';
@@ -26,8 +26,13 @@ function isConfigured() {
 // force:true, reserved for account access (password reset): opting out of
 // emails must never lock someone out of their own account.
 async function sendEmail({ to, subject, text, force }) {
-  const user = db.getUserByEmail(String(to).toLowerCase());
+  const addr = String(to).toLowerCase();
+  const user = db.getUserByEmail(addr);
   if (user && user.unsubscribed && !force) {
+    return { ok: false, skipped: 'unsubscribed' };
+  }
+  const lead = db.getLeadByEmail(addr);
+  if (lead && lead.unsubscribed && !force) {
     return { ok: false, skipped: 'unsubscribed' };
   }
   if (DRY_RUN) {
@@ -278,10 +283,155 @@ async function runTrialSequence() {
   }
 }
 
-// Hourly scheduler. Task 5 ships the machinery; Task 6 registers the trial
-// sequence into SEQUENCE_RUNNERS. Each runner must use sendSequenceEmail so
-// the email_log guard applies.
-const SEQUENCE_RUNNERS = [runTrialSequence];
+// ---- Quiz nurture sequence (copy VERBATIM from quiz-nurture-emails.md) -----
+// Day 1 substitutes {result}; days 4-5 substitute {APP_URL}.
+
+const QUIZ_EMAILS = [
+  { step: 1, subject: 'Your result, and the one thing it actually means', text: `Jacques here. You took the check-in, so you're getting an email from me and not a robot.
+
+Your result: {result}.
+
+Here's what that actually means, stripped of anything fancy: the habit has a pattern, and now you've seen a piece of it on paper. Most men never get that far — they fight the fog instead of the pattern, lose, and call themselves weak. You just did the one thing willpower can't: you looked at it.
+
+The single most useful thing you can do this week costs nothing. Pick your worst hour — for most of us it's late, alone, tired — and change ONE thing about it. Phone charges in the kitchen. Lights out at a decided time. A walk at the hour the walls usually close in. Don't fix your life. Move one domino.
+
+That's it. That's day one.
+
+Tomorrow I'll tell you about 2am — the hour that beat me for 38 years.
+
+— Jacques` },
+  { step: 2, subject: 'The 2am problem', text: `At noon you're fine. At noon you're a guy with a plan.
+
+It's never noon when it happens. It's late, the house is quiet, and your head starts talking. And here's the part nobody tells you — it isn't a stupid argument. It's a good one. It's reasonable. It has evidence. You've been rehearsing it for years.
+
+I lost to that argument for 38 years. Not because I was weak. Because I kept trying to out-think it live, at 2am, with the worst version of my brain in the driver's seat.
+
+You cannot win that fight in real time. You can only win it in advance.
+
+Tomorrow I'm going to give you the exact tool for that — the relapse plan. You'll write it on paper, in the daylight, and it'll be waiting for the 2am version of you like a note from someone smarter.
+
+Tonight, just notice the hour your head gets loud. That's all. Name the hour.
+
+— Jacques` },
+  { step: 3, subject: 'Write this down before you need it', text: `Today you write the plan. Ten minutes, on paper, while you're clear-headed. This is the tool that finally worked for me, and I'm giving you the whole thing — no app required, no catch.
+
+Grab a pen. Answer these five, in your own words:
+
+1. MY TOP 3 TRIGGERS ARE:
+   (The exact times, feelings, places. "Alone after 11pm." "After a fight." "Bored on Sunday afternoon.")
+
+2. THE STORY MY HEAD TELLS ME AT THE WORST MOMENT IS:
+   (Write the actual sentence. "One more time won't matter." "I've had a hard week, I deserve it." Seeing it in daylight takes half its power.)
+
+3. WHEN THE URGE HITS, MY FIRST THREE MOVES ARE:
+   (Physical, decided now: 1) Leave the room. 2) Cold water on my face. 3) Walk around the block. Motion first — argue later.)
+
+4. THE PERSON I CAN TEXT, AND THE WORD I'LL SEND:
+   (One safe person. One code word. Secrets are where this thing gets its power.)
+
+5. IF I SLIP, I WILL:
+   (Reset the same hour — not Monday. Ask "what was the trigger," not "what's wrong with me." The slip costs one day. The shame spiral costs thirty.)
+
+Fold it. Put it in your wallet or your nightstand. That paper is now smarter than 2am you — and that's the whole trick.
+
+The app does this with reminders and a panic button, but the paper version works. Start with the paper.
+
+— Jacques` },
+  { step: 4, subject: "If there's someone else in the house", text: `This one you might not read for yourself. That's fine. It might be one to forward.
+
+For 38 years, my addiction made everything about me. My struggle, my shame, my progress, my slips. And the person lying next to me — worrying, wondering, doing quiet math about what was real — got erased. Nobody asked how she was doing. Nobody built anything for her.
+
+If you're the one struggling: the person who loves you is carrying this too, even when they don't say it. You don't have to have the whole conversation today. But know there's something built for them when it's time.
+
+If this email was forwarded to you — if you're the one on the other side of this: you're not crazy, and you're not the only one awake right now. Your emotions are valid. Supporting someone doesn't mean losing yourself. There's a section built just for you — not about them, FOR you:
+
+{APP_URL}/for-her
+
+Whichever side of this you're on, it counts.
+
+— Jacques` },
+  { step: 5, subject: '38 years', text: `I'll keep this one honest and then I'll leave you alone.
+
+I was addicted for 38 years. Porn. Food. Anger. Not one habit — a rotation, each one covering for the others. I made the Sunday promise a thousand times. Broke it by Tuesday a thousand times. I got very good at hiding, and very good at hating myself quietly, and I called that "managing it."
+
+At 50 it was do or die. Not a slogan — an actual fork. I looked at the next thirty years and saw the same fog, just older. And something in me said: someday is a real place, and it's crowded, and nobody there is happy.
+
+So I chose day one. And it held. Not because I found more willpower — because I finally stopped fighting at 2am and started winning at 2pm. The plan on paper. The named triggers. The one safe person. Everything I've sent you this week.
+
+Then I built all of it into an app, because paper doesn't ping you at your worst hour and paper can't talk back at 2am.
+
+Turn Someday Into Day One. A private AI companion for the hour your head gets loud — your 2am conversations are never saved. A relapse plan with a panic button. A day counter that doesn't shame you when you reset. And a section for the partner that no other app has.
+
+The check-in you took is the front door. The free tier is real. Pro is $9.99 a month with 7 days free, and I email you before anything is ever charged.
+
+{APP_URL}
+
+Whatever you decide, you have the tools now. The plan works on paper too — I'd rather you free than subscribed.
+
+Day one is a decision, not a date.
+
+— Jacques` },
+];
+
+// The lead-magnet delivery mail (subject and body approved by Jacques).
+function brainresetPdfEmail() {
+  return {
+    subject: 'The 90-Day Brain Reset (your PDF)',
+    text: `Here it is — the whole 90-day map in six pages. Read section 06 before you need it.
+
+${APP_URL}/The90DayBrainReset.pdf
+
+— Jacques`,
+  };
+}
+
+// Same contract as sendSequenceEmail, but for leads: guard keys on the email
+// address, the unsubscribe footer carries a lead token, log rows carry no user id.
+async function sendLeadSequenceEmail(lead, sequence, step, subject, text) {
+  if (db.hasEmailBeenSentToAddress(lead.email, sequence, step)) {
+    return { ok: false, skipped: 'already-sent' };
+  }
+  const outgoing = text + `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
+  const result = await sendEmail({ to: lead.email, subject, text: outgoing });
+  if (result.ok) {
+    db.logEmailSent(null, lead.email, sequence, step);
+  }
+  return result;
+}
+
+function quizEmailFor(step, lead) {
+  const e = QUIZ_EMAILS.find((x) => x.step === step);
+  if (!e) return null;
+  const text = e.text
+    .replace('{result}', lead.quiz_result || 'your check-in result')
+    .split('{APP_URL}').join(APP_URL);
+  return { subject: e.subject, text };
+}
+
+// Fired at capture time so day 1 lands while the quiz is still open in their
+// other tab. The guard makes any later scheduler pass a no-op.
+async function startQuizNurture(lead) {
+  const e = quizEmailFor(1, lead);
+  return sendLeadSequenceEmail(lead, 'quiz', 1, e.subject, e.text);
+}
+
+// Hourly runner: step N sends only while the lead is actually on day N-1
+// (created day counts as day 0), same skip-if-down policy as the trial.
+// Brainreset leads had step 1 pre-marked consumed at signup, so they start
+// at step 2 with no special casing here.
+async function runQuizNurture() {
+  for (const lead of db.getLeadsInNurtureWindow()) {
+    const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
+    const step = day + 1;
+    if (step < 1 || step > 5) continue;
+    const e = quizEmailFor(step, lead);
+    if (e) await sendLeadSequenceEmail(lead, 'quiz', step, e.subject, e.text);
+  }
+}
+
+// Hourly scheduler. Task 5 ships the machinery; Tasks 6/7 register their
+// sequences. Each runner must use the guarded senders so email_log applies.
+const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture];
 
 async function runScheduledEmails() {
   for (const runner of SEQUENCE_RUNNERS) {
@@ -308,6 +458,10 @@ module.exports = {
   passwordResetEmail,
   startTrialSequence,
   runTrialSequence,
+  startQuizNurture,
+  runQuizNurture,
+  brainresetPdfEmail,
+  sendLeadSequenceEmail,
   runScheduledEmails,
   startScheduler,
   SEQUENCE_RUNNERS,

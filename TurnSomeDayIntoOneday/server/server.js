@@ -66,12 +66,62 @@ app.get('/for-her', (req, res) => res.redirect('/'));
 // setting the flag to 1 again is the same write and the same page, so a
 // double-click or a second device never sees an error.
 app.get('/unsubscribe', (req, res) => {
-  const userId = verifyUnsubToken(req.query.token);
-  if (!userId) {
+  const hit = verifyUnsubToken(req.query.token);
+  if (!hit) {
     return res.status(400).type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">This link isn't valid.</body>");
   }
-  db.setUnsubscribed(userId, 1);
+  if (hit.type === 'lead') db.setLeadUnsubscribed(hit.id, 1);
+  else db.setUnsubscribed(hit.id, 1);
   res.type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">You're unsubscribed. Password reset emails still work.</body>");
+});
+
+// Public lead capture: the quiz result screen and the /brainreset page.
+// Additive and skippable everywhere - skipping changes nothing.
+const leadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this network. Try again later.' },
+});
+
+app.post('/api/lead', leadLimiter, async (req, res) => {
+  const { email: rawEmail, quiz_result, source, utm_source } = req.body || {};
+  const addr = (rawEmail || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(addr)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  const src = source === 'brainreset' ? 'brainreset' : 'quiz';
+  const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
+  const cleanUtm = typeof utm_source === 'string' ? utm_source.slice(0, 60) : null;
+
+  const existingUser = db.getUserByEmail(addr);
+  const existingLead = db.getLeadByEmail(addr);
+
+  // Dedup rule: an email already known (lead or user) never restarts the
+  // nurture - but a brainreset request still gets its PDF.
+  if (existingUser || existingLead) {
+    if (src === 'brainreset') {
+      const pdf = emailer.brainresetPdfEmail();
+      // They just asked for it by typing their address - deliver even if
+      // previously unsubscribed from sequences.
+      emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
+    }
+    return res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : "You're all set." });
+  }
+
+  const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
+  const lead = db.getLeadById(leadId);
+  if (src === 'quiz') {
+    emailer.startQuizNurture(lead).catch(() => {});
+  } else {
+    // Brainreset leads skip day 1 (it restates a quiz result they don't have):
+    // pre-mark step 1 consumed so the scheduler starts them at day 2.
+    db.logEmailSent(null, addr, 'quiz', 1);
+    const pdf = emailer.brainresetPdfEmail();
+    emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
+  }
+  res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : 'Day 1 is on its way to your inbox.' });
 });
 
 const loginLimiter = rateLimit({

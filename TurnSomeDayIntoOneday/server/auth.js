@@ -30,17 +30,34 @@ function signUnsubToken(userId, email) {
   return `${userId}.${mac}`;
 }
 
+// Leads (quiz/brainreset emails, not yet accounts) get their own token form:
+// "L{leadId}.{HMAC(unsub-lead:leadId:email)}".
+function signLeadUnsubToken(leadId, email) {
+  const mac = crypto.createHmac('sha256', JWT_SECRET).update(`unsub-lead:${leadId}:${email}`).digest('hex');
+  return `L${leadId}.${mac}`;
+}
+
+// Returns { type: 'user'|'lead', id } or null. User tokens keep the original
+// pure-digit form so links in already-sent emails stay valid.
 function verifyUnsubToken(token) {
-  const m = /^(\d+)\.([a-f0-9]{64})$/.exec(String(token || ''));
+  const m = /^(L?)(\d+)\.([a-f0-9]{64})$/.exec(String(token || ''));
   if (!m) return null;
-  const userId = Number(m[1]);
-  const user = db.getUserById(userId);
-  if (!user) return null;
-  const expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${userId}:${user.email}`).digest('hex');
-  const a = Buffer.from(m[2]);
+  const isLead = m[1] === 'L';
+  const id = Number(m[2]);
+  let expected;
+  if (isLead) {
+    const lead = db.getLeadById(id);
+    if (!lead) return null;
+    expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub-lead:${id}:${lead.email}`).digest('hex');
+  } else {
+    const user = db.getUserById(id);
+    if (!user) return null;
+    expected = crypto.createHmac('sha256', JWT_SECRET).update(`unsub:${id}:${user.email}`).digest('hex');
+  }
+  const a = Buffer.from(m[3]);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
-  return userId;
+  return { type: isLead ? 'lead' : 'user', id };
 }
 
 function hashPassword(password) {
@@ -84,6 +101,7 @@ function requireAuth(req, res, next) {
 module.exports = {
   COOKIE_NAME,
   signUnsubToken,
+  signLeadUnsubToken,
   verifyUnsubToken,
   hashPassword,
   verifyPassword,

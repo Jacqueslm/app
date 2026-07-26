@@ -64,7 +64,7 @@ input[type=number]:focus{outline:2px solid var(--accent);outline-offset:1px}
   <!-- INTRO -->
   <div class="step on" id="st-intro">
     <h1>What's your relationship with the habit you've been thinking about?</h1>
-    <p class="sub">The habit is rarely the root — it's the symptom of something deeper. This private 2-minute check-in looks at both. Nothing you answer is stored or sent anywhere — the results are computed on your device, for you. No signup needed to see them.</p>
+    <p class="sub">The habit is rarely the root — it's the symptom of something deeper. This private 2-minute check-in looks at both. Nothing you answer is stored or sent anywhere. (If you choose to get your 5-day plan by email at the end, we keep your email and your result — nothing else.) The results are computed on your device, for you. No signup needed to see them.</p>
     <button class="btn" onclick="start()">Start the check-in</button>
     <div class="crisis">This isn't a medical assessment. If you're in crisis right now, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline) — free, confidential, 24/7.</div>
   </div>
@@ -106,6 +106,13 @@ input[type=number]:focus{outline:2px solid var(--accent);outline-offset:1px}
     <p class="sub" id="res-body" style="margin-bottom:4px"></p>
     <div class="stat-cards" id="res-stats"></div>
     <p class="sub" id="res-close"></p>
+    <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:6px 0 14px;text-align:left" id="capture-box">
+      <div style="font-size:15px;font-weight:650;margin-bottom:4px">Want the 5-day plan for this result?</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Five short emails, one a day. No card, no app required.</div>
+      <input type="email" id="cap-email" placeholder="you@email.com" autocomplete="email" style="width:100%;background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--tp);font-family:var(--f);margin-bottom:8px">
+      <button class="btn" style="margin-top:0" id="cap-btn" onclick="sendPlan()">Send it to me</button>
+      <div style="font-size:11.5px;color:var(--tm);margin-top:8px;text-align:center" id="cap-note">One email a day for five days, then I'll leave you alone.</div>
+    </div>
     <a class="btn" href="/?join=1">Start my free journey — today is Day One</a>
     <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
     <div class="fine">Free to start · 7-day free trial on Pro · cancel in two taps.<br>Your journal is nobody's business — private by design, never sold to advertisers.</div>
@@ -148,6 +155,25 @@ function answer(i){
   if(qi<QUESTIONS.length){renderQ();}else{show('st-cost');}
 }
 function money(n){return '$'+Math.round(n).toLocaleString();}
+let lastSeg='';
+// Opt-in email capture. Only the address and the result segment leave the
+// device, exactly as the intro promises - never the answers.
+async function sendPlan(){
+  const em=($('cap-email').value||'').trim();
+  const note=$('cap-note');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){note.textContent='That email doesn\'t look right — check it and try again.';return;}
+  const btn=$('cap-btn');btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const utm=new URLSearchParams(location.search).get('utm_source')||undefined;
+    const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,quiz_result:lastSeg,source:'quiz',utm_source:utm})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){note.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send it to me';return;}
+    $('capture-box').innerHTML='<div style="font-size:14px;color:var(--green);text-align:center;padding:6px 0">Day 1 is on its way to your inbox. ✓</div>';
+  }catch(e){
+    note.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send it to me';
+  }
+}
 function showResult(){
   const spend=Math.max(0,parseFloat($('in-spend').value)||0);
   const hours=Math.min(24,Math.max(0,parseFloat($('in-hours').value)||0));
@@ -175,6 +201,7 @@ function showResult(){
     body=`You didn't need a quiz to tell you this — you needed a moment of honesty, and you just had it. The restarts you've been through weren't failures; they were proof you keep coming back. That's the muscle that wins this.`;
     close="Start with the free tools today: your streak, your first lesson, a private journal, and a plan for the next craving. One day at a time — starting with this one.";
   }
+  lastSeg=seg;
   $('res-seg').textContent=seg;
   $('res-title').textContent=title;
   $('res-body').textContent=body;

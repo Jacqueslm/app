@@ -91,6 +91,24 @@ db.exec(`
   );
 `);
 
+// Nova conversations are never persisted - the client stopped syncing them,
+// and this scrubs any that older builds already stored inside the state blob.
+// Runs at every boot; a row is only rewritten while it still carries the key,
+// so after the first pass this is a no-op.
+try {
+  const rows = db.prepare('SELECT user_id, state_json FROM user_state').all();
+  for (const row of rows) {
+    try {
+      const state = JSON.parse(row.state_json);
+      if (state && typeof state === 'object' && 'chatHistory' in state) {
+        delete state.chatHistory;
+        db.prepare('UPDATE user_state SET state_json = ? WHERE user_id = ?')
+          .run(JSON.stringify(state), row.user_id);
+      }
+    } catch (_) { /* unparseable row - leave it untouched */ }
+  }
+} catch (_) { /* table missing on very first boot - nothing to scrub */ }
+
 function logError(scope, message, detail) {
   db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
     .run(scope, String(message).slice(0, 500), detail ? String(detail).slice(0, 2000) : null, new Date().toISOString());

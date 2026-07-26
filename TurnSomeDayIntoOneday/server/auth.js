@@ -6,6 +6,14 @@ const db = require('./db');
 const COOKIE_NAME = 'tsid_session';
 
 let JWT_SECRET = process.env.SESSION_SECRET;
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  console.error(
+    'FATAL: SESSION_SECRET is not set. In production this would silently log ' +
+      'every user out on each restart, so refusing to start. Set SESSION_SECRET ' +
+      'in the environment (Railway -> Variables) and redeploy.'
+  );
+  process.exit(1);
+}
 if (!JWT_SECRET) {
   JWT_SECRET = crypto.randomBytes(32).toString('hex');
   console.warn(

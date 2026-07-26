@@ -377,7 +377,7 @@ Day one is a decision, not a date.
 function brainresetPdfEmail() {
   return {
     subject: 'The 90-Day Brain Reset (your PDF)',
-    text: `Here it is — the whole 90-day map in six pages. Read section 06 before you need it.
+    text: `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
 
 ${APP_URL}/The90DayBrainReset.pdf
 

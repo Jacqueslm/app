@@ -655,7 +655,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
         <span class="nova-mode-chip" id="nova-mode-chip">Guided mode</span>
       </div>
-      <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI therapist · Non-judgmental · Confidential</div>
+      <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI recovery companion · Non-judgmental · Confidential</div>
     </div>
   </div>
   <div class="quick-chips" id="quickChips">
@@ -1718,7 +1718,7 @@ body.nova-open #audio-pill-label{bottom:222px}
     </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
-      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI therapist, right now</span></div>
+      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI recovery companion, right now</span></div>
     </div>
     <div class="sos-opt" onclick="openTriggeredFlow()">
       <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
@@ -6276,7 +6276,8 @@ You are running in Nova Free mode. In this mode:
 - Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
 - Do NOT provide deep pattern analysis, pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
 - Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
-- Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.`;
+- Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.
+- EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Nova Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
 
 const SYSTEM_PRO_ADDENDUM=`
 
@@ -6299,6 +6300,11 @@ const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and 
 // crisis handling can never drift apart. Errs toward matching: a false positive
 // shows a supportive 988 message, a false negative misses someone in danger.
 const CRISIS_RE=/suicid|kill(ing)?\s+myself|self.?harm|harm(ing)?\s+myself|hurt(ing)?\s+myself|end(ing)?\s+my\s+life|end\s+it\s+all|want(ed)?\s+to\s+end\s+it|take\s+my\s+(own\s+)?life|don'?t\s+want\s+to\s+(be\s+here|live|exist|wake\s+up)|no\s+reason\s+to\s+(live|go\s+on)|better\s+off\s+without\s+me|not\s+worth\s+living/i;
+// Broader than CRISIS_RE on purpose: this gate only decides whether Nova may
+// mention money in a reply, and whether to point at the free SOS tools. A false
+// positive costs one upsell; a false negative upsells someone who's drowning.
+const DISTRESS_RE=/\bhelp\b|struggl|crisis|slipped|relaps|\burge\b|craving|can'?t do this|give up|losing hope|hard night|about to|so close to|white.?knuckl|not okay|falling apart|can'?t stop|what'?s the point|tired of fighting|losing this|rock bottom/i;
+const DISTRESS_FOOTER="\n\nRight now, free and one tap away: the SOS button on Home has guided breathing, grounding, and \"Talk me through it\". And if this is heavier than an urge, call or text 988 — free, confidential, 24/7.";
 const FALLBACK_PATTERNS=[
   {test:CRISIS_RE,
    reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
@@ -6343,10 +6349,13 @@ function localFallbackReply(userText){
     if(/pattern|trigger/i.test(userText))return analyzeCravingPatterns();
     if(/trend|weekly (summary|check-?in)|mood/i.test(userText))return analyzeMoodTrend();
   }
+  // Distress gets the free SOS tools and 988 attached to whatever reply fires -
+  // never just encouragement. (The crisis branch above already leads with 988.)
+  const footer=DISTRESS_RE.test(userText)?DISTRESS_FOOTER:'';
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
-  if(match)return match.reply;
+  if(match)return match.reply+footer;
   const days=getDays();
-  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
+  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}${footer}\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)`;
 }
 
 // ─── NOVA PRO: REAL PATTERN/TREND ANALYSIS (from data the user already logged) ─
@@ -6654,7 +6663,10 @@ async function sendMsg(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
-    addBubble('nova',"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
+    // Never answer distress with a price. The free door stays open and named.
+    addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
+      ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
+      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -6664,8 +6676,10 @@ async function sendMsg(){
   save();
 
   // Crisis language always gets full support, regardless of tier - never gated.
+  // Ordinary distress skips the upsell teaser too: "why do I keep slipping"
+  // asked on a bad night is a person, not a sales lead.
   const isCrisis=CRISIS_RE.test(text);
-  if(!S.isPro&&!isCrisis&&isProFeatureRequest(text)){
+  if(!S.isPro&&!isCrisis&&!DISTRESS_RE.test(text)&&isProFeatureRequest(text)){
     const teaser=proFeaturePreviewText(text);
     addProPreviewBubble(teaser);
     S.chatHistory.push({role:'assistant',content:teaser});
@@ -6740,7 +6754,7 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
 };
-const TITLES={home:'Today',nova:'Nova — AI therapist',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={home:'Today',nova:'Nova — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -7382,7 +7396,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.0.0';
+const APP_VERSION='10.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

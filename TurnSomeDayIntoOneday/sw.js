@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v9'; // v9: Nova chats never persisted
+const CACHE_NAME = 'tsid-shell-v10'; // v10: distress-aware Nova, recovery companion rename
 const SHELL_FILES = [
   '/',
   '/index.html',

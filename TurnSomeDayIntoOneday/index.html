@@ -3231,6 +3231,20 @@ function applyUserTypeWording(){
   }
 }
 
+// Quick-reply chips match who's talking: a supporter never needs "I slipped";
+// someone carrying both sides gets both vocabularies.
+function renderQuickChips(){
+  const row=document.getElementById('quickChips');
+  if(!row)return;
+  const chip=t=>`<div class="qc" onclick="quickSend(this)">${t}</div>`;
+  if(S.userType==='partner'){
+    row.innerHTML=["I'm exhausted","I found something","I don't know what to believe","Something good happened","How do I talk to them?"].map(chip).join('');
+  }else if(S.userType==='both'){
+    row.innerHTML=["I'm struggling today","I had a craving","I'm feeling proud","I slipped","I need motivation","Tell me about PAWS","What patterns do you see in me?","I found something","How do I talk to them?"].map(chip).join('');
+  }
+  // recovering: the original markup stands untouched
+}
+
 function selectPartnerRelation(el,val){
   S.partnerRelation=val;
   el.parentElement.querySelectorAll('.add-chip').forEach(c=>c.classList.remove('sel'));
@@ -3562,10 +3576,23 @@ function initApp(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;save();}
   document.getElementById('chatsLeft').textContent=S.chatsLeft;
-  // init Nova welcome
+  // init Nova welcome - voiced for who's actually sitting there: the person in
+  // recovery, the one carrying someone else's, or the one doing both.
+  renderQuickChips();
   if(document.getElementById('chatArea').children.length===0){
     const days=getDays();
-    addBubble('nova',`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\n${days>0?`Day ${days} is not a small thing — it's ${days} choice${days===1?'':'s'} to choose yourself, over and over. I see that.`:`Day One starts right now — and you already made the hardest choice: you're here.`}\n\nWhat's on your mind right now? You can be completely honest with me.`);
+    let greeting;
+    if(S.userType==='partner'){
+      const secondLine=S.partnerRelation==='minor-child'
+        ?'Being the parent in this is its own weight. How are you doing with it today?'
+        :'This space is yours — not his, not about fixing him. How are YOU holding up today?';
+      greeting=`Hey${S.name?' '+S.name:''}. I'm glad you're here.\n\n${secondLine}`;
+    }else if(S.userType==='both'){
+      greeting=`Hey${S.name?' '+S.name:''}. You're carrying both sides of this — your own day one and someone you love. We can start with either. Which is louder right now?`;
+    }else{
+      greeting=`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\n${days>0?`Day ${days} is not a small thing — it's ${days} choice${days===1?'':'s'} to choose yourself, over and over. I see that.`:`Day One starts right now — and you already made the hardest choice: you're here.`}\n\nWhat's on your mind right now? You can be completely honest with me.`;
+    }
+    addBubble('nova',greeting);
     if(S.chatHistory.length>0){
       S.chatHistory.forEach(m=>{if(m.role!=='system')addBubble(m.role==='assistant'?'nova':'user',m.content);});
     }
@@ -6100,7 +6127,9 @@ function maybeShowDailyLessonReminder(){
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
   save();
-  const reminderText=`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
+  const reminderText=S.userType==='partner'
+    ?"Whenever you're ready, today's lesson in your track is here — it's built for the one carrying this, not the one causing it."
+    :`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
   novaNudge(reminderText);
   sendPhoneNotification("Today's lesson is ready",reminderText);
 }
@@ -7510,7 +7539,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='14.0.0';
+const APP_VERSION='15.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v14'; // v14: forgot-password flow
+const CACHE_NAME = 'tsid-shell-v15'; // v15: Nova greeting and chips per user type
 const SHELL_FILES = [
   '/',
   '/index.html',

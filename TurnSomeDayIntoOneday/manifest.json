@@ -2,7 +2,7 @@
   "name": "Turn Someday Into Day One",
   "short_name": "Day One",
   "description": "Your recovery companion. Compassionate, honest, and always in your corner — one day at a time.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

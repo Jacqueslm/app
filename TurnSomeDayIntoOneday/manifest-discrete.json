@@ -2,7 +2,7 @@
   "name": "Daily Journal",
   "short_name": "Daily Journal",
   "description": "A private daily check-in.",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

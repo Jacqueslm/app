@@ -98,6 +98,18 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// Same validity rules as requireAuth, but a boolean instead of a response -
+// used to decide whether '/' redirects a returning user straight to '/app'.
+function isValidSession(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  if (!payload) return false;
+  const user = db.getUserById(payload.userId);
+  if (!user) return false;
+  if ((payload.sv || 1) !== (user.session_version || 1)) return false;
+  return true;
+}
+
 module.exports = {
   COOKIE_NAME,
   signUnsubToken,
@@ -108,4 +120,5 @@ module.exports = {
   signSession,
   verifySession,
   requireAuth,
+  isValidSession,
 };

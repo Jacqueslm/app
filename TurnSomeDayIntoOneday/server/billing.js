@@ -50,8 +50,8 @@ async function createCheckoutSession(user, plan, origin) {
     customer: customerId,
     mode: plan === 'lifetime' ? 'payment' : 'subscription',
     line_items: [lineItem],
-    success_url: `${origin}/?checkout=success`,
-    cancel_url: `${origin}/?checkout=cancel`,
+    success_url: `${origin}/app?checkout=success`,
+    cancel_url: `${origin}/app?checkout=cancel`,
     metadata: { app_user_id: String(user.id), plan },
     ...(plan !== 'lifetime'
       ? { subscription_data: { trial_period_days: TRIAL_DAYS, metadata: { app_user_id: String(user.id), plan } } }
@@ -67,7 +67,7 @@ async function createPortalSession(user, origin) {
   }
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripe_customer_id,
-    return_url: `${origin}/`,
+    return_url: `${origin}/app`,
   });
   return session.url;
 }

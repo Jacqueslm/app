@@ -16,6 +16,7 @@ const {
   signSession,
   requireAuth,
   verifyUnsubToken,
+  isValidSession,
 } = require('./auth');
 
 const app = express();
@@ -45,6 +46,19 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use('/preview', requireAuth);
+
+// Cold marketing traffic lands here; the app itself lives at /app so a
+// returning signed-in user is sent straight there and never sees marketing
+// copy twice. Registered ahead of express.static below, since static would
+// otherwise auto-serve index.html at '/' by its own default-index behavior.
+app.get('/', (req, res) => {
+  if (isValidSession(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'landing.html'));
+});
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
 // The server/ folder must never be reachable over HTTP: it holds the source,
 // .env, and - on home installs, where DB_PATH defaults to server/data.sqlite -
 // the entire user database. express.static below serves the app root, which
@@ -58,9 +72,11 @@ app.get('/brainreset', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
 });
 
-// TEMPORARY until Task 8 ships the real /for-her page: the day-2 trial email
-// links here, so it must never 404. Task 8 replaces this route with the page.
-app.get('/for-her', (req, res) => res.redirect('/'));
+// The partner-facing landing page - the day-2 trial email and the "Send this
+// page to her" button both link here.
+app.get('/for-her', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'for-her.html'));
+});
 
 // One-click unsubscribe from any inbox - no login. Idempotent by design:
 // setting the flag to 1 again is the same write and the same page, so a

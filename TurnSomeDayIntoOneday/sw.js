@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v10'; // v10: distress-aware Nova, recovery companion rename
+const CACHE_NAME = 'tsid-shell-v11'; // v11: lessons rewritten as lived experience (claims audit)
 const SHELL_FILES = [
   '/',
   '/index.html',

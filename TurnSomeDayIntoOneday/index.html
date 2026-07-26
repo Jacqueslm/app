@@ -2295,7 +2295,7 @@ let S = {
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
-  userType:'recovering',likedStories:[],
+  userType:'recovering',likedStories:[],partnerFocus:[],
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -2339,6 +2339,21 @@ function load(){
     S.lessonProgress[S.currentAddiction]=S.currentDay||1;
   }
   if(!S.notifiedDay30Tracks)S.notifiedDay30Tracks=[];
+  // One-time repair: early supporter accounts had their loved one's addiction
+  // stored as their OWN focus area, which aimed addict-directed questions and
+  // tracks at the supporter. Move those to partnerFocus where they belonged.
+  // Flagged so a partner who later deliberately adds a struggle of their own
+  // in Profile doesn't get it stripped again on every boot.
+  if(!Array.isArray(S.partnerFocus))S.partnerFocus=[];
+  if(S.userType==='partner'&&!S.partnerFocusMigrated){
+    const others=(S.selectedAddictions||[]).filter(a=>a!=='Supporting Someone');
+    if(others.length){
+      others.forEach(a=>{if(!S.partnerFocus.includes(a))S.partnerFocus.push(a);});
+      S.selectedAddictions=['Supporting Someone'];
+      S.currentAddiction='Supporting Someone';
+    }
+    S.partnerFocusMigrated=true;
+  }
   // Migrate private reflections written before Rooms existed - tag them with
   // whatever the user's focus was at the time so they still show up somewhere.
   (S.communityPosts||[]).forEach(p=>{
@@ -3137,7 +3152,14 @@ let obStep=0;
 // recovery" - the questions, the wording and the first lesson track all change.
 function chooseUserType(type){
   S.userType=type;
-  if(type==='partner'||type==='both'){
+  if(!Array.isArray(S.partnerFocus))S.partnerFocus=[];
+  // Fresh accounts never need the old-shape repair in load().
+  S.partnerFocusMigrated=true;
+  if(type==='partner'){
+    // A supporter's own focus area is Supporting Someone, full stop. What their
+    // loved one struggles with is context (partnerFocus), never her track.
+    S.selectedAddictions=['Supporting Someone'];
+  }else if(type==='both'){
     if(!S.selectedAddictions.includes('Supporting Someone')){
       S.selectedAddictions.push('Supporting Someone');
     }
@@ -3155,20 +3177,29 @@ function applyUserTypeWording(){
   const both=S.userType==='both';
   const lbl=document.getElementById('ob-addiction-label');
   if(lbl){
-    lbl.textContent=partner?'What are they struggling with?':
+    lbl.textContent=partner?'What is your loved one struggling with?':
       both?'What are you carrying? (Yours and theirs)':
       'What are you recovering from?';
   }
   const modalTitle=document.getElementById('addiction-modal-title');
   if(modalTitle){
-    modalTitle.textContent=partner?'What are they struggling with?':
+    modalTitle.textContent=partner?'What is your loved one struggling with?':
       both?'What are you carrying?':
       'What are you recovering from?';
   }
   const modalSub=document.getElementById('addiction-modal-sub');
   if(modalSub){
-    modalSub.textContent=partner?'Select all that apply. Keep "Supporting someone I love" selected — that track is written for you, not for them.':
+    modalSub.textContent=partner?"Select what they're struggling with. Your own track stays Supporting Someone — built for you, not them.":
       'Select all that apply.';
+  }
+  // On the supporter path this modal lists THEIR struggles - "Supporting
+  // someone I love" is her track, not one of them, so the chip hides there.
+  const grid=document.getElementById('addiction-opt-grid');
+  if(grid){
+    grid.querySelectorAll('.add-chip').forEach(chip=>{
+      const m=(chip.getAttribute('onclick')||'').match(/'([^']+)'\s*\)/);
+      if(m&&m[1]==='Supporting Someone')chip.style.display=partner?'none':'';
+    });
   }
   const dateLbl=document.getElementById('ob-date-label');
   if(dateLbl){
@@ -3179,13 +3210,17 @@ function applyUserTypeWording(){
 // Reflect S.selectedAddictions onto both chip grids so pre-selected focus
 // areas don't look unselected when the user opens the modal.
 function syncAddictionChips(){
+  // On the supporter path the onboarding grid reflects partnerFocus (their
+  // loved one's struggles); everywhere else it reflects the user's own areas.
+  const partnerGridSource=S.userType==='partner'?(S.partnerFocus||[]):S.selectedAddictions;
   ['addiction-opt-grid','categorySwitchGrid'].forEach(gridId=>{
     const grid=document.getElementById(gridId);
     if(!grid)return;
+    const source=gridId==='addiction-opt-grid'?partnerGridSource:S.selectedAddictions;
     grid.querySelectorAll('.add-chip').forEach(chip=>{
       const m=(chip.getAttribute('onclick')||'').match(/'([^']+)'\s*\)/);
       if(!m)return;
-      chip.classList.toggle('sel',S.selectedAddictions.includes(m[1]));
+      chip.classList.toggle('sel',source.includes(m[1]));
     });
   });
 }
@@ -3207,8 +3242,11 @@ function obNext(n){
     const blueprintVals=Object.values(S.behavioralBlueprint);
     const triggerSentence=blueprintVals.length?`Nova has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
     const isPartner=S.userType==='partner';
+    const partnerFocusSentence=isPartner&&(S.partnerFocus||[]).length
+      ?`You're carrying someone's struggle with <strong>${S.partnerFocus.join(' and ')}</strong> — this plan stays pointed at you, not them.<br><br>`
+      :'';
     const rootExplanation=isPartner
-      ?`Your plan covers: <strong>${S.selectedAddictions.join(', ')||'your situation'}</strong>.<br><br>${triggerSentence}This track is about <em>you</em> — your energy, your boundaries, your safety, and the part of you that keeps getting overlooked while everyone watches them.`
+      ?`Your plan covers: <strong>${S.selectedAddictions.join(', ')||'your situation'}</strong>.<br><br>${partnerFocusSentence}${triggerSentence}This track is about <em>you</em> — your energy, your boundaries, your safety, and the part of you that keeps getting overlooked while everyone watches them.`
       :`Your recovery plan targets: <strong>${S.selectedAddictions.join(', ')||'your goals'}</strong>.<br><br>${triggerSentence}Your plan is customized to protect your energy, stop the drain on your time and money, and build concrete barriers during your highest-risk hours.`;
     document.getElementById('root-cause-preview').innerHTML=rootExplanation;
     save();
@@ -3256,6 +3294,18 @@ function disarmOnboardingBackTrap(){
 
 function toggleAddiction(element,name){
   element.classList.toggle('sel');
+  // Supporter path: this modal records what THEY struggle with, never her own
+  // focus areas - those stay locked to Supporting Someone.
+  if(S.userType==='partner'){
+    S.partnerFocus=S.partnerFocus||[];
+    if(S.partnerFocus.includes(name)){
+      S.partnerFocus=S.partnerFocus.filter(item=>item!==name);
+    }else{
+      S.partnerFocus.push(name);
+    }
+    updateAddictionBtnLabel();
+    return;
+  }
   if(S.selectedAddictions.includes(name)){
     S.selectedAddictions=S.selectedAddictions.filter(item=>item!==name);
   }else{
@@ -3267,6 +3317,12 @@ function updateAddictionBtnLabel(){
   const lbl=document.getElementById('ob-addiction-btn-label');
   const btn=document.getElementById('ob-addiction-btn');
   if(!lbl||!btn)return;
+  if(S.userType==='partner'){
+    const pf=S.partnerFocus||[];
+    if(pf.length){lbl.textContent=pf.join(', ');btn.classList.remove('placeholder');}
+    else{lbl.textContent='Choose their struggle — optional';btn.classList.add('placeholder');}
+    return;
+  }
   if(S.selectedAddictions.length){
     lbl.textContent=S.selectedAddictions.join(', ');
     btn.classList.remove('placeholder');
@@ -3314,7 +3370,12 @@ function goToBehavioralStep(){
   if(errEl)errEl.textContent='';
   const container=document.getElementById('dynamic-behavior-questions');
   container.innerHTML='';
-  S.selectedAddictions.forEach(addiction=>{
+  // On the "both" path the supporter questions always come first - carrying
+  // someone else is the context the personal struggles sit inside.
+  const orderedAddictions=[...S.selectedAddictions];
+  const ssIdx=orderedAddictions.indexOf('Supporting Someone');
+  if(ssIdx>0){orderedAddictions.splice(ssIdx,1);orderedAddictions.unshift('Supporting Someone');}
+  orderedAddictions.forEach(addiction=>{
     let htmlBlock=`<div style="margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:12px;"> <div style="font-size:13px; color:var(--green); font-weight:600; margin-bottom:6px;">Focus: ${addiction}</div>`;
     if(addiction==='Porn & Sex'){
       htmlBlock+=`
@@ -6697,6 +6758,7 @@ User Name: ${S.name||'Recovering Individual'}
 User Gender Identity: ${S.userGender||'Not Specified'}
 ${capitalize(recoveryTerm())} Since: ${S.startDate||'today'}
 Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
+${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')} — the user is the SUPPORTER, not the person with the addiction. Never coach them as the addict.`:''}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
 Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
@@ -7396,7 +7458,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='11.0.0';
+const APP_VERSION='12.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7577,6 +7639,7 @@ function restartOnboarding(){
     // to come before the basic questions, not after them.
     S.userType='recovering';
     S.selectedAddictions=[];
+    S.partnerFocus=[];
     applyUserTypeWording();
     syncAddictionChips();
     document.getElementById('obs0').classList.add('on');

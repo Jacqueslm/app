@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v11'; // v11: lessons rewritten as lived experience (claims audit)
+const CACHE_NAME = 'tsid-shell-v12'; // v12: supporter onboarding stores loved one's struggle as context
 const SHELL_FILES = [
   '/',
   '/index.html',

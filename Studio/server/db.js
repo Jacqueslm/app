@@ -128,6 +128,15 @@ db.exec(`
     updated_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_social_posts_user ON social_posts(user_id, status, scheduled_at);
+  CREATE TABLE IF NOT EXISTS studio_scripts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_studio_scripts_user ON studio_scripts(user_id, id);
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -507,6 +516,34 @@ function getDueSocialPosts(userId) {
   return db.prepare("SELECT * FROM social_posts WHERE user_id = ? AND status = 'due' ORDER BY scheduled_at ASC").all(userId);
 }
 
+/* ---------------- teleprompter scripts ---------------- */
+// Saved on the server rather than in the browser so the same scripts are there
+// on the computer that films and the phone that posts.
+function createScript(userId, title, body) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    'INSERT INTO studio_scripts (user_id, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
+  ).run(userId, title, body, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function getScripts(userId) {
+  return db.prepare('SELECT * FROM studio_scripts WHERE user_id = ? ORDER BY updated_at DESC').all(userId);
+}
+
+function getScript(userId, id) {
+  return db.prepare('SELECT * FROM studio_scripts WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateScript(userId, id, title, body) {
+  db.prepare('UPDATE studio_scripts SET title = ?, body = ?, updated_at = ? WHERE user_id = ? AND id = ?')
+    .run(title, body, new Date().toISOString(), userId, id);
+}
+
+function deleteScript(userId, id) {
+  db.prepare('DELETE FROM studio_scripts WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
 /* ---------------- error log (for in-app diagnostics) ---------------- */
 function logError(scope, message, detail) {
   db.prepare('INSERT INTO error_log (scope, message, detail, created_at) VALUES (?, ?, ?, ?)')
@@ -619,4 +656,9 @@ module.exports = {
   deleteSocialPost,
   promoteDueSocialPosts,
   getDueSocialPosts,
+  createScript,
+  getScripts,
+  getScript,
+  updateScript,
+  deleteScript,
 };

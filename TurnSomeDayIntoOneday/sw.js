@@ -1,7 +1,7 @@
-const CACHE_NAME = 'tsid-shell-v16'; // v16: supporter guided-mode replies + Pro-teaser suppression
+const CACHE_NAME = 'tsid-shell-v17'; // v17: landing page moves the app to /app
 const SHELL_FILES = [
   '/',
-  '/index.html',
+  '/app',
   '/manifest.json',
   '/manifest-discrete.json',
   '/data/lessons.json',

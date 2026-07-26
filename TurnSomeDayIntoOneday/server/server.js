@@ -4,9 +4,11 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
+const crypto = require('crypto');
 const db = require('./db');
 const billing = require('./billing');
 const update = require('./update');
+const emailer = require('./email');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -136,6 +138,58 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
+  // After the response - a slow or failed email must never slow down signup.
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// Same rate as login: this endpoint sends real mail on every valid hit.
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many reset requests. Try again later.' },
+});
+
+app.post('/api/auth/forgot', forgotLimiter, async (req, res) => {
+  const { email: rawEmail } = req.body || {};
+  const normalizedEmail = (rawEmail || '').trim().toLowerCase();
+  // Identical response whether or not the account exists - this endpoint must
+  // never confirm who has an account with a recovery app.
+  const reply = { ok: true, message: 'If that email has an account, a reset link is on its way.' };
+  if (!EMAIL_RE.test(normalizedEmail)) return res.json(reply);
+  const user = db.getUserByEmail(normalizedEmail);
+  if (!user) return res.json(reply);
+  const token = crypto.randomBytes(32).toString('hex');
+  db.createPasswordReset(token, user.id, new Date(Date.now() + 60 * 60 * 1000).toISOString());
+  const msg = emailer.passwordResetEmail(token);
+  // No sequence guard (users may legitimately request several resets) and
+  // force:true - account access must work even for unsubscribed users.
+  emailer.sendEmail({ to: user.email, subject: msg.subject, text: msg.text, force: true }).catch(() => {});
+  res.json(reply);
+});
+
+app.post('/api/auth/reset', (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (typeof token !== 'string' || !token) {
+    return res.status(400).json({ error: 'Missing reset token.' });
+  }
+  if (!validCredential(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
+  }
+  const row = db.consumePasswordReset(token);
+  if (!row) {
+    return res.status(400).json({ error: 'This reset link is invalid or has expired. Request a new one from the login screen.' });
+  }
+  db.updatePassword(row.user_id, hashPassword(newPassword));
+  // A password reset means the old credential may be compromised - kill every
+  // existing session everywhere.
+  db.bumpSessionVersion(row.user_id);
+  res.json({ ok: true });
 });
 
 app.post('/api/auth/login', loginLimiter, (req, res) => {
@@ -362,6 +416,8 @@ process.on('unhandledRejection', (err) => {
   try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
   console.error('Unhandled rejection:', err);
 });
+
+emailer.startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

@@ -82,6 +82,21 @@ db.exec(`
     created_at TEXT NOT NULL
   );
   CREATE INDEX IF NOT EXISTS idx_studio_assets_user ON studio_assets(user_id, kind);
+  CREATE TABLE IF NOT EXISTS password_resets (
+    token TEXT PRIMARY KEY,
+    user_id INTEGER,
+    expires_at TEXT,
+    used INTEGER DEFAULT 0
+  );
+  CREATE TABLE IF NOT EXISTS email_log (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    email TEXT,
+    sequence TEXT,
+    step INTEGER,
+    sent_at TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_email_log_guard ON email_log(user_id, sequence, step);
   CREATE TABLE IF NOT EXISTS error_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     scope TEXT NOT NULL,
@@ -135,6 +150,7 @@ addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NUL
 // Bumping this number invalidates every session token issued before the bump -
 // that's how "log out on all devices" works without tracking sessions server-side.
 addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
+addColumnIfMissing('unsubscribed', 'unsubscribed INTEGER NOT NULL DEFAULT 0');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 function createUser(email, passwordHash, phone) {
@@ -165,6 +181,8 @@ function saveState(userId, stateJson) {
 }
 
 function deleteUser(userId) {
+  db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(userId);
+  db.prepare('DELETE FROM email_log WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM studio_assets WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM studio_characters WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM video_usage WHERE user_id = ?').run(userId);
@@ -262,6 +280,36 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+function createPasswordReset(token, userId, expiresAt) {
+  db.prepare('INSERT INTO password_resets (token, user_id, expires_at, used) VALUES (?, ?, ?, 0)')
+    .run(token, userId, expiresAt);
+}
+
+// Valid = exists, unused, unexpired. Consuming marks it used atomically so a
+// token can never reset a password twice.
+function consumePasswordReset(token) {
+  const row = db.prepare('SELECT * FROM password_resets WHERE token = ?').get(token);
+  if (!row || row.used || new Date(row.expires_at).getTime() < Date.now()) return null;
+  db.prepare('UPDATE password_resets SET used = 1 WHERE token = ?').run(token);
+  return row;
+}
+
+function hasEmailBeenSent(userId, sequence, step) {
+  return Boolean(
+    db.prepare('SELECT 1 FROM email_log WHERE user_id = ? AND sequence = ? AND step = ?')
+      .get(userId, sequence, step)
+  );
+}
+
+function logEmailSent(userId, email, sequence, step) {
+  db.prepare('INSERT INTO email_log (user_id, email, sequence, step, sent_at) VALUES (?, ?, ?, ?, ?)')
+    .run(userId, email, sequence, step, new Date().toISOString());
+}
+
+function setUnsubscribed(userId, value) {
+  db.prepare('UPDATE users SET unsubscribed = ? WHERE id = ?').run(value ? 1 : 0, userId);
+}
+
 function bumpSessionVersion(userId) {
   db.prepare('UPDATE users SET session_version = session_version + 1 WHERE id = ?').run(userId);
   const row = db.prepare('SELECT session_version FROM users WHERE id = ?').get(userId);
@@ -330,6 +378,11 @@ module.exports = {
   deleteAsset,
   bumpSessionVersion,
   updatePassword,
+  createPasswordReset,
+  consumePasswordReset,
+  hasEmailBeenSent,
+  logEmailSent,
+  setUnsubscribed,
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,

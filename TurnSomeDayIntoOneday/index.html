@@ -1645,7 +1645,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="sec-hd">Free — start here</div>
         <div class="setting-row" onclick="openPartnerLetter()">
           <i class="ti ti-pencil" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>A letter to the person who loves me</p><span>Written from your journey — share it with one tap</span></div>
+          <div class="setting-row-txt"><p id="partner-letter-row-title">A letter to the person who loves me</p><span id="partner-letter-row-sub">Written from your journey — share it with one tap</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="card" style="padding:16px 18px;margin-top:10px">
@@ -2236,9 +2236,11 @@ body.nova-open #audio-pill-label{bottom:222px}
 <!-- PARTNER LETTER -->
 <div class="sos-modal" id="partner-letter-modal" onclick="if(event.target===this)closePartnerLetter()">
   <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
-    <div class="sos-title" style="color:var(--accent)">A letter to the person who loves me</div>
-    <div class="sos-sub">Read it first. Then share it with them — this is the conversation that's hard to start out loud.</div>
+    <div class="sos-title" style="color:var(--accent)" id="partner-letter-title">A letter to the person who loves me</div>
+    <div class="sos-sub" id="partner-letter-sub">Read it first. Then share it with them — this is the conversation that's hard to start out loud.</div>
     <div id="partner-letter-text" style="overflow-y:auto;flex:1;min-height:120px;font-size:13.5px;color:var(--ts);line-height:1.8;white-space:pre-wrap;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:12px"></div>
+    <textarea id="partner-letter-edit" style="display:none;overflow-y:auto;flex:1;min-height:180px;font-size:13.5px;color:var(--tp);line-height:1.8;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:8px;font-family:var(--f);resize:none;width:100%"></textarea>
+    <div id="partner-letter-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-bottom:12px;text-align:center">This is yours. Edit anything, delete anything — share it only if and when you're ready.</div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="sharePartnerLetter()">Share this letter</button>
     <button class="sos-close" onclick="closePartnerLetter()">Close</button>
   </div>
@@ -2305,7 +2307,7 @@ let S = {
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
-  userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',
+  userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -3277,6 +3279,13 @@ function updateTogetherSection(){
   if(couplesRow)couplesRow.style.display=coupleOnly?'none':'';
   if(checkRow)checkRow.style.display=coupleOnly?'none':'';
   if(hd)hd.parentElement.style.display=coupleOnly?'none':'';
+  // On the supporter path the letter runs the other way: hers, to the person she's
+  // carrying this with.
+  const supporter=S.userType==='partner';
+  const letterTitle=document.getElementById('partner-letter-row-title');
+  const letterSub=document.getElementById('partner-letter-row-sub');
+  if(letterTitle)letterTitle.textContent=supporter?"A letter to the one I'm carrying this with":'A letter to the person who loves me';
+  if(letterSub)letterSub.textContent=supporter?'Yours to edit — say it once, properly':'Written from your journey — share it with one tap';
 }
 
 // Reflect S.selectedAddictions onto both chip grids so pre-selected focus
@@ -7622,7 +7631,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='21.0.0';
+const APP_VERSION='22.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7984,13 +7993,29 @@ const HELP_INDEX=[
 // ─── TOGETHER (partner support) ──────────────────────────────────────────────
 // Most people fail because they don't have support - and most partners don't
 // fail to support, they were just never told what this actually feels like.
+// The supporter's letter is written TO the person she's carrying this with, in her
+// voice - the opposite direction from the addict-facing letter below. Jacques's copy,
+// verbatim. The two bracketed lines are hers to fill in: nothing in onboarding knows
+// what this has cost her or what she actually needs, so the letter ships editable
+// rather than pretending to generate those.
+const SUPPORTER_LETTER=`A letter to the one I'm carrying this with
+
+I've started this letter more times than you know. Here's the honest version.
+
+I know about the struggle. Maybe not every detail, and I've stopped needing every detail — but I know, and I've known longer than you think. I'm not writing this to punish you with that. I'm writing because the silence between us has been carrying it badly, and I'd rather we carry it out loud.
+
+Here's what's true on my side: [what this has cost you — the sleep, the checking, the wondering]. I'm not saying that to make you feel worse. I'm saying it because you can't make a real decision about us without knowing the real price.
+
+Here's what I need you to hear: I'm not your enemy and I'm not your warden. I don't want to catch you — I want to stop having to look. What I need isn't a promise. Promises are cheap at the moment they're made. What I need is [the one thing you actually need — honesty about slips, effort you can see, a conversation once a week].
+
+And here's what I'm doing either way: I'm taking care of myself now too. Not as a threat — as a fact. I can't pour from empty, and I've been empty a while.
+
+I'm still here. That's not nothing. Don't waste it, and don't mistake it for forever.`;
+function isSupporterLetter(){return S.userType==='partner';}
 function buildPartnerLetter(){
+  if(isSupporterLetter())return S.supporterLetterDraft||SUPPORTER_LETTER;
   const days=getDays();
-  // A supporter's letter subject can't be "recovery from supporting someone" -
-  // the one honest string swap. (A fully supporter-voiced letter is a future task.)
-  const what=S.userType==='partner'
-    ?"the weight I've been carrying"
-    :(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
+  const what=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
   const name=S.name||'';
   return `To the person who loves me,
 
@@ -8010,11 +8035,43 @@ ${name?'— '+name:'— with love'}`;
 }
 function openPartnerLetter(){
   logActivity('partner_letter',{});
-  document.getElementById('partner-letter-text').textContent=buildPartnerLetter();
+  const supporter=isSupporterLetter();
+  const readEl=document.getElementById('partner-letter-text');
+  const editEl=document.getElementById('partner-letter-edit');
+  const noteEl=document.getElementById('partner-letter-note');
+  const titleEl=document.getElementById('partner-letter-title');
+  const subEl=document.getElementById('partner-letter-sub');
+  if(titleEl)titleEl.textContent=supporter?"A letter to the one I'm carrying this with":'A letter to the person who loves me';
+  if(subEl)subEl.textContent=supporter
+    ?"A starting point, not a script. The two bracketed lines are yours to fill in — only you know what this has cost and what you need."
+    :"Read it first. Then share it with them — this is the conversation that's hard to start out loud.";
+  readEl.style.display=supporter?'none':'';
+  editEl.style.display=supporter?'':'none';
+  noteEl.style.display=supporter?'':'none';
+  if(supporter)editEl.value=buildPartnerLetter();
+  else readEl.textContent=buildPartnerLetter();
   document.getElementById('partner-letter-modal').classList.add('open');
 }
-function closePartnerLetter(){document.getElementById('partner-letter-modal').classList.remove('open');}
+// She may work at this across days, so an edited draft survives closing. An untouched
+// one doesn't: persisting the template verbatim would freeze it, so later template
+// changes would never reach someone who once opened the letter and closed it.
+function persistSupporterLetterDraft(){
+  if(!isSupporterLetter())return;
+  const editEl=document.getElementById('partner-letter-edit');
+  if(!editEl)return;
+  const v=editEl.value;
+  const next=(v.trim()&&v!==SUPPORTER_LETTER)?v:'';
+  if(next===(S.supporterLetterDraft||''))return;
+  S.supporterLetterDraft=next;
+  save();
+}
+function closePartnerLetter(){
+  persistSupporterLetterDraft();
+  document.getElementById('partner-letter-modal').classList.remove('open');
+}
 function sharePartnerLetter(){
+  // Share what she actually wrote, not the template she edited away from.
+  persistSupporterLetterDraft();
   const text=buildPartnerLetter();
   if(navigator.share){navigator.share({text}).catch(()=>{});return;}
   if(navigator.clipboard&&navigator.clipboard.writeText){

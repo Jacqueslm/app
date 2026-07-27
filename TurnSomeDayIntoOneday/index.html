@@ -5308,7 +5308,7 @@ function updateRecoveryTermLabels(){
   const totalLbl=document.getElementById('prog-total-days-lbl');
   // "Total on this path days" is broken English - the supporter term is a phrase,
   // not an adjective, so it has to trail the noun.
-  if(totalLbl)totalLbl.textContent=isSupporterUI()?`Total days ${term}`:`Total ${term} days`;
+  if(totalLbl)totalLbl.textContent=isSupporterTrack()?`Total days ${term}`:`Total ${term} days`;
   if(!S.pledged){
     const pledgeSub=document.getElementById('pledge-sub');
     if(pledgeSub)pledgeSub.textContent=pledgeSubText();
@@ -5324,8 +5324,13 @@ function updateRecoveryTermLabels(){
   }
 }
 function isSupporterUI(){return S.userType==='partner';}
+// Keyed on the ACTIVE TRACK, not the person: "on this path" is a phrase rather than
+// an adjective, so any user reading the Supporting Someone track needs the reworded
+// labels - including a 'both' user who has their own recovery too, and a recovering
+// user who added the track as a focus area.
+function isSupporterTrack(){return S.currentAddiction==='Supporting Someone';}
 function pledgeSubText(){
-  return isSupporterUI()?'One promise to yourself today':`Take your pledge to stay ${recoveryTerm()} today`;
+  return isSupporterTrack()?'One promise to yourself today':`Take your pledge to stay ${recoveryTerm()} today`;
 }
 // Screen titles a supporter sees. TITLES itself is never mutated, so nothing leaks
 // across user types when someone switches paths mid-session.
@@ -7736,7 +7741,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='24.0.0';
+const APP_VERSION='25.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

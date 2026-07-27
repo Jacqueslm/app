@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v30-1'; // v30.1: fix lesson audio cutting off
+const CACHE_NAME = 'tsid-shell-v30-2'; // v30.2: fix lesson audio GC cutoff
 const SHELL_FILES = [
   '/',
   '/app',

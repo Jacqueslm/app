@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v21'; // v21: hide supporter-irrelevant tools/stats
+const CACHE_NAME = 'tsid-shell-v22'; // v22: supporter-voiced editable letter
 const SHELL_FILES = [
   '/',
   '/app',

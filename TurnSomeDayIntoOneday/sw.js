@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v20'; // v20: relation-aware supporter lessons
+const CACHE_NAME = 'tsid-shell-v21'; // v21: hide supporter-irrelevant tools/stats
 const SHELL_FILES = [
   '/',
   '/app',

@@ -622,7 +622,7 @@ body.nova-open #audio-pill-label{bottom:222px}
     <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
     <div class="mini-stats">
       <div class="mstat"><div class="mstat-n" id="h-hours">0</div><div class="mstat-l" id="h-hours-lbl">Hours sober</div></div>
-      <div class="mstat"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
+      <div class="mstat" id="h-saved-wrap"><div class="mstat-n" style="color:var(--green)" id="h-saved">$0</div><div class="mstat-l">Saved</div></div>
     </div>
     <div style="display:flex;justify-content:center;gap:18px;margin-top:10px;font-size:12px">
       <span style="color:var(--accent);cursor:pointer" onclick="switchTo('progress');actBn('bn-tools')">See all stats <i class="ti ti-chevron-right" style="font-size:10px"></i></span>
@@ -998,7 +998,7 @@ body.nova-open #audio-pill-label{bottom:222px}
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l" id="prog-total-days-lbl">Total sober days</div></div>
           <div class="ps" style="align-items:center;display:none" id="prog-hours-back-wrap"><div class="ps-n" id="prog-hours-back">0</div><div class="ps-l">Hours won back</div></div>
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-lessons">0</div><div class="ps-l">Lessons done</div></div>
-          <div class="ps" style="align-items:center"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
+          <div class="ps" style="align-items:center" id="prog-cravings-survived-wrap"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
         </div>
       </div>
       <div class="sec" style="padding-top:0">
@@ -1042,12 +1042,12 @@ body.nova-open #audio-pill-label{bottom:222px}
           <div class="setting-row-txt"><p>I'm triggered</p><span>Name it, get simple coping steps</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="openSlippedFlow()">
+        <div class="setting-row" id="toolkit-slipped-row" onclick="openSlippedFlow()">
           <i class="ti ti-heart" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>I slipped</p><span>No judgment — here's what's next</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
+        <div class="setting-row" id="toolkit-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
           <i class="ti ti-activity" style="color:#BA7517"></i>
           <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1220,7 +1220,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="setting-row-txt"><p>Recovery Toolkit</p><span>Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('craving');actBn('bn-tools')">
+      <div class="setting-row" id="tools-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
         <i class="ti ti-activity"></i>
         <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1273,7 +1273,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="setting-row-txt"><p>Habit Coach</p><span>Consistency insights, vulnerability windows, and personalized habit suggestions</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="switchTo('timeline');actBn('bn-tools')">
+      <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
         <i class="ti ti-clock"></i>
         <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1463,7 +1463,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="setting-row-txt"><p>Relationship status</p><span id="rel-status-sub">Choose relationship</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openCostModal()">
+      <div class="setting-row" id="cost-row" onclick="openCostModal()">
         <i class="ti ti-coin"></i>
         <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1734,7 +1734,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
       <div class="sos-opt-info"><p>I'm triggered</p><span>Name it, get simple coping steps</span></div>
     </div>
-    <div class="sos-opt" onclick="openSlippedFlow()">
+    <div class="sos-opt" id="sos-slipped-opt" onclick="openSlippedFlow()">
       <i class="ti ti-heart" style="color:#534AB7"></i>
       <div class="sos-opt-info"><p>I slipped</p><span>No judgment — here's what's next</span></div>
     </div>
@@ -1742,7 +1742,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       <i class="ti ti-wind" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
     </div>
-    <div class="sos-opt" onclick="logCravingFromSOS()">
+    <div class="sos-opt" id="sos-craving-opt" onclick="logCravingFromSOS()">
       <i class="ti ti-activity" style="color:#BA7517"></i>
       <div class="sos-opt-info"><p>Log this craving</p><span>Track it and let it pass</span></div>
     </div>
@@ -3740,6 +3740,7 @@ function getDays(){
 
 function updateStats(){
   updateRecoveryTermLabels();
+  applySupporterUI();
   evaluateProSubscription();
   const start=S.startDate?new Date(S.startDate):new Date();
   const diff=Date.now()-start.getTime();
@@ -4873,7 +4874,9 @@ function buildShareCardCanvas(){
   x.strokeStyle='rgba(255,255,255,0.18)';x.lineWidth=2;
   x.beginPath();x.moveTo(240,880);x.lineTo(840,880);x.stroke();
   const stats=[];
-  if(saved>0)stats.push(`$${saved.toLocaleString()} saved`);
+  // Same gate as the Home hero's Saved stat (#7): money spent on an addiction
+  // that isn't hers has no meaning on a supporter's card.
+  if(saved>0&&S.userType!=='partner')stats.push(`$${saved.toLocaleString()} saved`);
   if(hoursBack>0)stats.push(`${hoursBack.toLocaleString()} hours won back`);
   if(totalDays>days)stats.push(`${totalDays.toLocaleString()} days across my journey`);
   x.fillStyle='#c0caff';
@@ -5298,6 +5301,20 @@ function updateRecoveryTermLabels(){
       :"I'm having a craving — SOS";
     sosBtn.innerHTML=`<i class="ti ti-alert-triangle"></i> ${sosLabel}`;
   }
+}
+// Display-only gate: a supporter's loved one has the addiction, not her, so anything
+// that assumes SHE is the one with cravings, a slip, or money lost to a habit has no
+// meaning on her account. Hides, never deletes - the 'both' path keeps all of it, since
+// that user genuinely has both a recovery and someone else's to carry.
+const SUPPORTER_HIDDEN_IDS=['timeline-row','h-saved-wrap','cost-row','sos-slipped-opt',
+  'sos-craving-opt','tools-craving-row','toolkit-slipped-row','toolkit-craving-row',
+  'prog-cravings-survived-wrap'];
+function applySupporterUI(){
+  const hide=S.userType==='partner';
+  SUPPORTER_HIDDEN_IDS.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=hide?'none':'';
+  });
 }
 function buildTimeline(){
   const tl=document.getElementById('tl-container');
@@ -7605,7 +7622,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='20.0.0';
+const APP_VERSION='21.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7937,7 +7954,7 @@ const HELP_INDEX=[
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
   {name:'Breathing exercise',sub:'4-7-8 calm-down technique',k:'breathe breathing calm anxiety relax',go:()=>breathe()},
   {name:'5-4-3-2-1 grounding',sub:'Step-by-step sensory grounding',k:'ground grounding senses panic anxiety',go:()=>open5to1()},
-  {name:'Log a craving',sub:'Track it and let it pass',k:'log craving track urge record',go:()=>{switchTo('craving');actBn('bn-tools');}},
+  {name:'Log a craving',sub:'Track it and let it pass',k:'log craving track urge record',hideForSupporter:true,go:()=>{switchTo('craving');actBn('bn-tools');}},
   {name:'Write in my journal',sub:'Your private journal',k:'journal write diary note feelings',go:()=>{switchTo('journal');actBn('bn-tools');}},
   {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
   {name:'Listen to today\'s lesson',sub:'The lesson read aloud — hands-free',k:'listen audio hear read aloud voice speak lesson multitask',go:()=>{switchTo('lesson');actBn('bn-home');setTimeout(()=>toggleLessonAudio(),400);}},
@@ -8191,8 +8208,11 @@ function guideSend(){
   if(/thank/.test(ql)){guideBotSay("Any time. I'm right here whenever you need me.");return;}
   const words=ql.replace(/[?!.,']/g,' ').split(/\s+/).filter(w=>w&&!GUIDE_STOP.has(w));
   // A hit in the entry's NAME counts triple - asking for "profile" should rank
-  // the Profile screen itself far above entries that merely mention it.
-  const scored=HELP_INDEX.map((h,i)=>({i,score:words.reduce((s,w)=>s
+  // the Profile screen itself far above entries that merely mention it. Entries
+  // flagged hideForSupporter never surface for a supporter, same as the screens
+  // and rows they point to being hidden - she shouldn't get a shortcut to what's
+  // not shown to her.
+  const scored=HELP_INDEX.map((h,i)=>({i,score:(h.hideForSupporter&&S.userType==='partner')?0:words.reduce((s,w)=>s
     +(h.name.toLowerCase().includes(w)?3:0)
     +((h.sub+' '+h.k).toLowerCase().includes(w)?1:0),0)}))
     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);

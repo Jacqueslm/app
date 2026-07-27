@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v25'; // v25: term labels keyed on active track
+const CACHE_NAME = 'tsid-shell-v26'; // v26: UTM capture + owner stats
 const SHELL_FILES = [
   '/',
   '/app',

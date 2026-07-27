@@ -52,6 +52,20 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
 .partner .italic a{color:var(--green);font-style:normal;font-weight:600;text-decoration:none}
 .foot{font-size:11px;letter-spacing:.1em;color:var(--tm);text-transform:uppercase;text-align:center;margin-top:12px}
 </style>
+<script>
+// First touch wins: someone who lands from TikTok, reads /for-her, then signs up
+// belongs to TikTok - not to whatever page they happened to be on at the end.
+// sessionStorage, not localStorage: it survives the landing -> signup hop and dies
+// with the tab, so it can never misattribute a return visit months later and is
+// not a durable identifier sitting on anyone's device. No cookie, no pageview ping -
+// these tags ride along only on an explicit signup or lead capture.
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
 </head>
 <body>
 <div class="wrap">

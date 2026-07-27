@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stats — Turn Someday Into Day One</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#12111c;color:#e8e8f0;margin:0;padding:20px;line-height:1.5}
+.wrap{max-width:900px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}
+h2{font-size:15px;margin:26px 0 8px;color:#9aa0c8;text-transform:uppercase;letter-spacing:.08em}
+.meta{font-size:12px;color:#7e86b8;margin-bottom:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-bottom:8px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #2b2a3d}
+th{color:#9aa0c8;font-weight:600;font-size:12px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:700;border-top:2px solid #444258;border-bottom:none}
+.cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+.card{background:#1c1b2a;border:1px solid #2b2a3d;border-radius:8px;padding:12px 16px;min-width:120px}
+.card .n{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.card .l{font-size:11px;color:#7e86b8;margin-top:2px}
+.note{font-size:12px;color:#7e86b8;margin-top:6px}
+.err{background:#3a1f24;border:1px solid #6b3540;border-radius:8px;padding:14px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Stats</h1>
+  <div class="meta" id="meta">Loading…</div>
+  <div id="out"></div>
+</div>
+<script>
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function table(cols,rows,totalRow){
+  let h='<table><tr>'+cols.map(c=>`<th class="${c.n?'n':''}">${esc(c.label)}</th>`).join('')+'</tr>';
+  if(!rows.length)h+=`<tr><td colspan="${cols.length}" style="color:#7e86b8">No rows yet.</td></tr>`;
+  rows.forEach(r=>{h+='<tr>'+cols.map(c=>`<td class="${c.n?'n':''}">${esc(r[c.key])}</td>`).join('')+'</tr>';});
+  if(totalRow)h+='<tr class="tot">'+cols.map(c=>`<td class="${c.n?'n':''}">${esc(totalRow[c.key])}</td>`).join('')+'</tr>';
+  return h+'</table>';
+}
+function sum(rows,key){return rows.reduce((a,r)=>a+(r[key]||0),0);}
+fetch('/api/admin/stats').then(async r=>{
+  const d=await r.json();
+  if(!r.ok){
+    document.getElementById('meta').textContent='';
+    document.getElementById('out').innerHTML=`<div class="err">${esc(d.error||'Could not load stats.')}</div>`;
+    return;
+  }
+  document.getElementById('meta').textContent='Generated '+new Date(d.generated_at).toLocaleString();
+  const t=d.totals,u=d.usage;
+  let h='';
+  h+='<h2>Totals</h2><div class="cards">'+
+    [['Signups',t.signups],['Trial starts',t.trial_starts],['Paid (active)',t.paid],['Trialing',t.trialing],['Leads',t.leads]]
+      .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
+    '<div class="note">Paid counts Stripe status <code>active</code> only. Trialing is shown separately — a trial that has not converted is not revenue.</div>';
+
+  const srcCols=[{key:'utm_source',label:'Source'},{key:'signups',label:'Signups',n:1},{key:'trial_starts',label:'Trials',n:1},{key:'paid',label:'Paid',n:1},{key:'leads',label:'Leads',n:1}];
+  h+='<h2>By UTM source</h2>'+table(srcCols,d.by_utm_source,{
+    utm_source:'TOTAL',signups:sum(d.by_utm_source,'signups'),trial_starts:sum(d.by_utm_source,'trial_starts'),
+    paid:sum(d.by_utm_source,'paid'),leads:sum(d.by_utm_source,'leads')});
+  h+='<div class="note">Untagged traffic is grouped as <code>(direct)</code>, so these rows always sum back to the totals above.</div>';
+
+  const wkCols=[{key:'week',label:'Week of'},{key:'signups',label:'Signups',n:1},{key:'trial_starts',label:'Trials',n:1},{key:'paid',label:'Paid',n:1},{key:'leads',label:'Leads',n:1}];
+  h+='<h2>By week</h2>'+table(wkCols,d.by_week,{
+    week:'TOTAL',signups:sum(d.by_week,'signups'),trial_starts:sum(d.by_week,'trial_starts'),
+    paid:sum(d.by_week,'paid'),leads:sum(d.by_week,'leads')});
+  h+='<div class="note">Week starts Monday. Trials bucket by when the trial began, not when the account was created.</div>';
+
+  h+='<h2>Nova usage (free tier)</h2><div class="cards">'+
+    [['Avg chats / active free user / day',u.avg_chats_per_active_free_user_per_day],
+     ['Free users hitting the daily cap',u.users_hitting_daily_cap],
+     ['Active free user-days',u.active_free_user_days]]
+      .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
+    `<div class="note">Last ${esc(u.cap_window_days)} days. Current free limit is <b>${esc(u.free_chat_limit)}</b>/day. The average divides total chats by user-days with activity, not calendar days, so someone who chats twice a week is not averaged down by their quiet days.</div>`;
+  document.getElementById('out').innerHTML=h;
+}).catch(()=>{
+  document.getElementById('meta').textContent='';
+  document.getElementById('out').innerHTML='<div class="err">Could not reach the stats endpoint.</div>';
+});
+</script>
+</body>
+</html>

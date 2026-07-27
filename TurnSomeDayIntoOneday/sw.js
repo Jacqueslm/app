@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v28'; // v28: Founding Lifetime cap
+const CACHE_NAME = 'tsid-shell-v29'; // v29: Play build gating + public privacy page
 const SHELL_FILES = [
   '/',
   '/app',

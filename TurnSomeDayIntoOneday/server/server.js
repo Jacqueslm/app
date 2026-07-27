@@ -444,6 +444,13 @@ function getOrigin(req) {
 }
 
 app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) => {
+  // The Google Play build ships free-tier only: Play requires digital goods sold
+  // inside a Play-distributed app to use Play Billing, so this app sells nothing
+  // there at all. The client hides every purchase surface; this refuses the
+  // request outright, so no code path inside the Android wrapper reaches Stripe.
+  if (req.get('X-TSID-Client') === 'play') {
+    return res.status(403).json({ error: 'Pro is not available in the Android app.' });
+  }
   if (!billing.isConfigured()) {
     return res.status(503).json({ error: 'Billing is not available on this server right now.' });
   }
@@ -467,6 +474,12 @@ app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) =
 // only what the pricing surfaces are allowed to show, and showCount is decided
 // server-side so the app and the landing page can never disagree about when the
 // remaining number becomes visible.
+// Google Play requires a privacy policy reachable without signing in. The text
+// is the same words as the in-app overlay - one policy, three places.
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'privacy.html'));
+});
+
 app.get('/api/lifetime-availability', (req, res) => {
   try {
     res.json(billing.getLifetimeAvailability());

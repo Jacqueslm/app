@@ -1,0 +1,12 @@
+TITLE (limit 30)
+  25 chars : Turn Someday Into Day One
+  22 chars : Day One: Habit Support
+
+SHORT DESCRIPTION (limit 80)
+  73 chars : Daily habit support, a private journal, and a companion for hard moments.
+  74 chars : A private daily companion for building steadier habits, one day at a time.
+  72 chars : Track your days, write it down, and get support when the moment is hard.
+
+FULL DESCRIPTION (limit 4000)
+  2667 chars
+  first paragraph: "This app is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It is a wellness and habit-support tool. If you are struggling with your health, please consult a qualified healthcare professional."

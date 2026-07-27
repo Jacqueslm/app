@@ -2,3 +2,18 @@
 *-source-code.txt
 *-source-code.zip
 buffer-cards/
+
+# Android signing keys. A keystore in git history is a keystore that is public
+# forever, even after a later delete. Never commit one.
+*.keystore
+*.jks
+*.p12
+TurnSomeDayIntoOneday/twa/android-upload.keystore
+TurnSomeDayIntoOneday/twa/*.keystore
+# Bubblewrap build output and its downloaded toolchain
+TurnSomeDayIntoOneday/twa/app/
+TurnSomeDayIntoOneday/twa/build/
+TurnSomeDayIntoOneday/twa/.gradle/
+TurnSomeDayIntoOneday/twa/*.aab
+TurnSomeDayIntoOneday/twa/*.apk
+TurnSomeDayIntoOneday/twa/*.idsig

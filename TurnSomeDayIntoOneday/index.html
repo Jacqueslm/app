@@ -1054,7 +1054,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         </div>
         <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
           <i class="ti ti-heart" style="color:#E24B4A"></i>
-          <div class="setting-row-txt"><p>For the one who loves you</p><span>Help your partner understand — and fight this together</span></div>
+          <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
       </div>
@@ -1227,7 +1227,7 @@ body.nova-open #audio-pill-label{bottom:222px}
       </div>
       <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
         <i class="ti ti-heart" style="color:#E24B4A"></i>
-        <div class="setting-row-txt"><p>For the one who loves you</p><span>Help your partner understand — and fight this together</span></div>
+        <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1636,9 +1636,9 @@ body.nova-open #audio-pill-label{bottom:222px}
     <!-- TOGETHER: for the partner of someone in recovery -->
     <div id="s-partner" class="scr">
       <div class="sec">
-        <div class="sec-hd" style="margin-top:0">For the one who loves you</div>
+        <div class="sec-hd" style="margin-top:0" id="partner-sec-hd">For the one who loves you</div>
         <div class="card" style="padding:18px">
-          <div style="font-size:14px;color:var(--tp);line-height:1.7">Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.</div>
+          <div style="font-size:14px;color:var(--tp);line-height:1.7" id="partner-intro">Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.</div>
         </div>
       </div>
       <div class="sec" style="padding-top:0">
@@ -1649,8 +1649,8 @@ body.nova-open #audio-pill-label{bottom:222px}
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="card" style="padding:16px 18px;margin-top:10px">
-          <div style="font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px">5 things every partner should know</div>
-          <div style="font-size:13px;color:var(--ts);line-height:1.8">
+          <div style="font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px" id="partner-5-label">5 things every partner should know</div>
+          <div style="font-size:13px;color:var(--ts);line-height:1.8" id="partner-5-list">
             <b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it's wiring in the brain's reward system that formed long before you.<br>
             <b style="color:var(--tp)">2.</b> Shame is the fuel. Anger and silent disappointment feed it; understanding starves it.<br>
             <b style="color:var(--tp)">3.</b> Policing doesn't work. Safety to be honest does — "I'm struggling today" should never start a fight.<br>
@@ -5318,12 +5318,60 @@ function updateRecoveryTermLabels(){
 const SUPPORTER_HIDDEN_IDS=['timeline-row','h-saved-wrap','cost-row','sos-slipped-opt',
   'sos-craving-opt','tools-craving-row','toolkit-slipped-row','toolkit-craving-row',
   'prog-cravings-survived-wrap'];
+// The Together section is shared by every user type. For a recovering user it's the
+// page he hands to his partner, and the original wording is right for him; for a
+// supporter it IS her section, and the third-person framing describes her instead of
+// speaking to her. Copy below is Jacques's, verbatim.
+const PARTNER_SECTION_COPY={
+  base:{
+    head:'For the one who loves you',
+    rowTitle:'For the one who loves you',
+    rowSub:'Help your partner understand — and fight this together',
+    intro:"Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.",
+    label:'5 things every partner should know',
+    list:`<b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it's wiring in the brain's reward system that formed long before you.<br>
+            <b style="color:var(--tp)">2.</b> Shame is the fuel. Anger and silent disappointment feed it; understanding starves it.<br>
+            <b style="color:var(--tp)">3.</b> Policing doesn't work. Safety to be honest does — "I'm struggling today" should never start a fight.<br>
+            <b style="color:var(--tp)">4.</b> A slip is a lost battle, not a betrayal — and the days after a slip decide everything.<br>
+            <b style="color:var(--tp)">5.</b> You matter too. Supporters need support — and sometimes their own quiet struggle deserves the same compassion.`
+  },
+  supporter:{
+    head:'For you',
+    rowTitle:'For you',
+    rowSub:"You're the one who loves them. This part is yours.",
+    intro:"Most people who love someone through this don't fail because they're weak. They fail because nobody ever told them what they're actually dealing with — so they take the lying personally, fight the wrong battles, and burn out carrying weight that was never theirs. That ends here. This section isn't about fixing them. It's about keeping you whole while you decide what you can carry.",
+    label:'5 things to hold onto',
+    list:`<b style="color:var(--tp)">1.</b> The lying isn't about your worth. People in active addiction lie to everyone — mostly themselves. It's the disease protecting itself, not a measure of what you deserve.<br>
+            <b style="color:var(--tp)">2.</b> You didn't cause it, and you can't cure it. Their recovery has to be theirs. You can support the person without carrying the outcome.<br>
+            <b style="color:var(--tp)">3.</b> A slip isn't your failure either. You can do everything right and they can still fall. That math was never yours to own.<br>
+            <b style="color:var(--tp)">4.</b> Boundaries are love with a spine. Saying "not in this house" or "not around me" isn't abandonment — it's often the most honest help there is.<br>
+            <b style="color:var(--tp)">5.</b> You matter too — and not as a footnote. Your sleep, your people, your joy. If this app does one thing for you, let it be that you stop disappearing.`
+  }
+};
 function applySupporterUI(){
-  const hide=S.userType==='partner';
+  const supporter=S.userType==='partner';
   SUPPORTER_HIDDEN_IDS.forEach(id=>{
     const el=document.getElementById(id);
-    if(el)el.style.display=hide?'none':'';
+    if(el)el.style.display=supporter?'none':'';
   });
+  const c=supporter?PARTNER_SECTION_COPY.supporter:PARTNER_SECTION_COPY.base;
+  const head=document.getElementById('partner-sec-hd');
+  const intro=document.getElementById('partner-intro');
+  const label=document.getElementById('partner-5-label');
+  const list=document.getElementById('partner-5-list');
+  if(head)head.textContent=c.head;
+  if(intro)intro.textContent=c.intro;
+  if(label)label.textContent=c.label;
+  if(list)list.innerHTML=c.list;
+  document.querySelectorAll('.partner-row-title').forEach(el=>{el.textContent=c.rowTitle;});
+  document.querySelectorAll('.partner-row-sub').forEach(el=>{el.textContent=c.rowSub;});
+  // Keep the guide index in step, so searching for this section finds it under the
+  // name she actually sees. baseName stays put for guideGoName()'s fallback.
+  const entry=HELP_INDEX.find(h=>h.baseName==='For the one who loves you');
+  if(entry){
+    entry.name=supporter?entry.supporterName:entry.baseName;
+    entry.sub=supporter?entry.supporterSub:PARTNER_SECTION_COPY.base.rowSub;
+  }
 }
 function buildTimeline(){
   const tl=document.getElementById('tl-container');
@@ -7631,7 +7679,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='22.0.0';
+const APP_VERSION='23.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -7984,7 +8032,9 @@ const HELP_INDEX=[
   {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
-  {name:'For the one who loves you',sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
+  // baseName never changes, so guideGoName() can still resolve FAQ buttons that
+  // reference this entry by its original name after applySupporterUI() renames it.
+  {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
   {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
   {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-plans');}},
@@ -8218,7 +8268,9 @@ const GUIDE_FAQ=[
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){
-  const i=HELP_INDEX.findIndex(h=>h.name===n);
+  // Match baseName too: entries renamed for supporters must still be reachable from
+  // FAQ answers that reference the original name, or those buttons silently do nothing.
+  const i=HELP_INDEX.findIndex(h=>h.name===n||h.baseName===n);
   if(i>=0)guideGo(i);
 }
 let guideGreeted=false;

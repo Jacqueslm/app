@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v29'; // v29: Play build gating + public privacy page
+const CACHE_NAME = 'tsid-shell-v30'; // v30: both-path letter + supporter FAQs
 const SHELL_FILES = [
   '/',
   '/app',

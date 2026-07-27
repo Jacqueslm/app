@@ -2248,8 +2248,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Are you sure?</div>
     <div class="sos-sub" id="confirm-modal-msg"></div>
-    <button class="ob-btn" style="margin-top:8px;background:#E24B4A" onclick="confirmModalYes()">Yes, continue</button>
-    <button class="sos-close" onclick="closeConfirmModal()">Cancel</button>
+    <button class="ob-btn" style="margin-top:8px;background:#E24B4A" id="confirm-modal-ok" onclick="confirmModalYes()">Yes, continue</button>
+    <button class="sos-close" id="confirm-modal-cancel" onclick="closeConfirmModal()">Cancel</button>
   </div>
 </div>
 
@@ -2280,6 +2280,25 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="partner-letter-text" style="overflow-y:auto;flex:1;min-height:120px;font-size:13.5px;color:var(--ts);line-height:1.8;white-space:pre-wrap;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:12px"></div>
     <textarea id="partner-letter-edit" style="display:none;overflow-y:auto;flex:1;min-height:180px;font-size:13.5px;color:var(--tp);line-height:1.8;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:8px;font-family:var(--f);resize:none;width:100%"></textarea>
     <div id="partner-letter-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-bottom:12px;text-align:center">This is yours. Edit anything, delete anything — share it only if and when you're ready.</div>
+    <!-- Both-path letter only. The relationship was never asked on this path, so
+         it is asked here once - which also backfills accounts that onboarded
+         before this existed, something changing onboarding could not do. -->
+    <div id="both-letter-relation" style="display:none;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--ts);margin-bottom:8px;text-align:center">Who are you supporting?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+        <div class="add-chip" onclick="setBothLetterRelation('partner')">My partner</div>
+        <div class="add-chip" onclick="setBothLetterRelation('adult-child')">My adult child</div>
+        <div class="add-chip" onclick="setBothLetterRelation('minor-child')">My child (under 18)</div>
+        <div class="add-chip" onclick="setBothLetterRelation('parent')">My parent</div>
+        <div class="add-chip" onclick="setBothLetterRelation('sibling')">My sibling</div>
+        <div class="add-chip" onclick="setBothLetterRelation('friend')">A friend</div>
+      </div>
+    </div>
+    <div id="both-letter-reentry" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-bottom:10px;text-align:center"></div>
+    <div id="both-letter-empty" style="display:none;text-align:center;margin-bottom:12px">
+      <div style="font-size:12.5px;color:var(--tm);line-height:1.55;margin-bottom:10px">Not sure where to start? Tap below for a draft you can keep, cut, or replace entirely.</div>
+      <button class="log-btn" style="margin:0" onclick="startBothLetterDraft()">Start me off</button>
+    </div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="sharePartnerLetter()">Share this letter</button>
     <button class="sos-close" onclick="closePartnerLetter()">Close</button>
   </div>
@@ -2347,6 +2366,7 @@ let S = {
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,
   userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
+  bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
@@ -3323,8 +3343,11 @@ function updateTogetherSection(){
   const supporter=S.userType==='partner';
   const letterTitle=document.getElementById('partner-letter-row-title');
   const letterSub=document.getElementById('partner-letter-row-sub');
-  if(letterTitle)letterTitle.textContent=supporter?"A letter to the one I'm carrying this with":'A letter to the person who loves me';
-  if(letterSub)letterSub.textContent=supporter?'Yours to edit — say it once, properly':'Written from your journey — share it with one tap';
+  const both=S.userType==='both';
+  if(letterTitle)letterTitle.textContent=both?'A letter to the version of you who needs it'
+    :supporter?"A letter to the one I'm carrying this with":'A letter to the person who loves me';
+  if(letterSub)letterSub.textContent=both?'Write it now, for the day you can\'t'
+    :supporter?'Yours to edit — say it once, properly':'Written from your journey — share it with one tap';
 }
 
 // Reflect S.selectedAddictions onto both chip grids so pre-selected focus
@@ -5520,6 +5543,7 @@ const PARTNER_SECTION_COPY={
 // literals, so the recovering path can't drift out of sync with the markup.
 const SUPPORTER_TEXT_BASE={};
 function applySupporterUI(){
+  applySupporterFaq();
   const supporter=S.userType==='partner';
   SUPPORTER_HIDDEN_IDS.forEach(id=>{
     const el=document.getElementById(id);
@@ -7387,6 +7411,28 @@ function renderMiniPricingRows(){
   document.querySelectorAll('.mini-pricing-row').forEach(el=>{el.textContent=text;});
 }
 let lifetimeFaqApplied=false;
+// Written in the words supporters actually type, so they surface on a search for
+// the thing being felt rather than the thing being named. Shown on the supporter
+// and both paths only - a recovering user searching the guide should not be
+// answered as though they were the one doing the watching.
+const SUPPORTER_FAQ=[
+  {q:"How do I know if he's really changing or just saying it again?",
+   k:'changing change really different this time promise promises believe trust lying again saying same words',
+   a:"A promise is loud and it usually comes right after he's caught. A change is quiet and it shows up on an ordinary Tuesday when nothing's wrong. Stop grading the promises — watch what happens on the days there's no pressure. Patterns over weeks tell the truth; words on the worst night don't."},
+  {q:'Should I check his phone?',
+   k:'check phone snoop search history look through spy monitor device browser evidence',
+   a:"There's no right answer here, and anyone who gives you one confidently is selling something. What's worth knowing: checking usually calms you for an hour and costs you the rest of the day, and the more you police it the more you become his conscience instead of his partner. If you're checking every night, that's not a character flaw — it's a sign you're carrying something that needs support of its own."},
+  {q:'Is any of this my fault?',
+   k:'my fault blame caused cause because of me did i do something not enough good enough responsible',
+   a:"No. Not the way you're asking it. This started before you and it runs on something that has nothing to do with how you look, what you did, or whether you were enough. You can be a factor in a marriage without being the cause of an addiction — those are different things, and the second one was never yours."},
+];
+let supporterFaqApplied=false;
+function applySupporterFaq(){
+  if(supporterFaqApplied)return;
+  if(S.userType!=='partner'&&S.userType!=='both')return;
+  SUPPORTER_FAQ.forEach(f=>{if(!GUIDE_FAQ.some(g=>g.q===f.q))GUIDE_FAQ.unshift(f);});
+  supporterFaqApplied=true;
+}
 function applyLifetimeFaq(){
   if(lifetimeFaqApplied||!lifetimeSoldOut())return;
   const entry=GUIDE_FAQ.find(f=>f.q==='How much does the app cost?');
@@ -7902,8 +7948,11 @@ function updateRelationshipStatusUI(){
 // window.confirm() is silently suppressed in sandboxed embeds (no allow-modals), which would
 // make every delete/hide action a dead click with zero feedback - this in-app modal always works.
 let _confirmModalCallback=null;
-function appConfirm(message,onConfirm){
+// opts.okText/cancelText are optional; every existing caller keeps the defaults.
+function appConfirm(message,onConfirm,opts){
   document.getElementById('confirm-modal-msg').textContent=message;
+  document.getElementById('confirm-modal-ok').textContent=(opts&&opts.okText)||'Yes, continue';
+  document.getElementById('confirm-modal-cancel').textContent=(opts&&opts.cancelText)||'Cancel';
   _confirmModalCallback=onConfirm;
   document.getElementById('confirm-modal').classList.add('open');
 }
@@ -7969,7 +8018,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='29.0.0';
+const APP_VERSION='30.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8352,7 +8401,95 @@ And here's what I'm doing either way: I'm taking care of myself now too. Not as 
 
 I'm still here. That's not nothing. Don't waste it, and don't mistake it for forever.`;
 function isSupporterLetter(){return S.userType==='partner';}
+// ─── THE BOTH-PATH LETTER ────────────────────────────────────────────────────
+// For someone walking their own recovery AND supporting someone else through
+// theirs. Framed as a letter to their future self, which is the only framing
+// that holds across every relationship - including a parent and a minor child.
+function isBothLetter(){return S.userType==='both';}
+
+// Their OWN focus area. 'Supporting Someone' is filtered out before this is
+// consulted: "I'm working on supporting someone and I'm walking alongside
+// someone" is a sentence that eats itself.
+const BOTH_FOCUS_PHRASE={
+  'Porn & Sex':"breaking a habit I've had longer than most of my friendships",
+  'Alcohol':'my drinking',
+  'Smoking':'quitting nicotine',
+  'Gambling':'staying away from gambling',
+  'Substances':'staying clean',
+  'Food / Binging':'my relationship with food',
+  'Social media':'getting my time back from a screen',
+  'Gaming':'getting my time back from a screen',
+  'Anger & Control':'the way I handle anger',
+};
+const BOTH_FOCUS_FALLBACK="something I've been carrying for a long time";
+// Keyed off the SUPPORTED person's struggle, never the user's own. Those are two
+// different people: a man in gambling recovery supporting a daughter with an
+// eating disorder must not get "when she slips" because of his issue. 'slips'
+// carries a moral edge that lands wrong on the softer set.
+// Verbs agree with "they", which is what the neutral collapse above makes the
+// subject in every variant - "when they has a hard day" is the bug this avoids.
+const BOTH_SLIP_FOCUS=['Porn & Sex','Alcohol','Smoking','Gambling','Substances'];
+const BOTH_STRUGGLE_SLIP='slip';
+const BOTH_STRUGGLE_SOFT='have a hard day';
+// Gender-neutral throughout. The app never asks the supported person's gender,
+// and inventing one to gain "my daughter" would be a guess that misgenders a
+// real person - a worse trade than the warmth it buys.
+const BOTH_RELATION={
+  'partner':{person:'my partner',short:'my partner',verb:'is'},
+  'adult-child':{person:'my child',short:'my child',verb:'is'},
+  'minor-child':{person:'my child',short:'my child',verb:'is'},
+  'parent':{person:'my parent',short:'my parent',verb:'is'},
+  'sibling':{person:'my sibling',short:'my sibling',verb:'is'},
+  'friend':{person:'my friend',short:'my friend',verb:'is'},
+};
+const BOTH_RELATION_FALLBACK={person:'someone I love',short:'they',verb:'are'};
+function bothRelationKey(){
+  const k=S.bothLetterRelation||S.partnerRelation||'';
+  return BOTH_RELATION[k]?k:'';
+}
+function bothFocusPhrase(){
+  const own=(S.selectedAddictions||[]).filter(a=>a!=='Supporting Someone');
+  const pick=own.includes(S.currentAddiction)?S.currentAddiction:own[0];
+  return BOTH_FOCUS_PHRASE[pick]||BOTH_FOCUS_FALLBACK;
+}
+function bothStruggleVerb(){
+  const theirs=S.partnerFocus||[];
+  return theirs.some(f=>BOTH_SLIP_FOCUS.includes(f))?BOTH_STRUGGLE_SLIP:BOTH_STRUGGLE_SOFT;
+}
+function capFirst(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function buildBothLetterDraft(){
+  const key=bothRelationKey();
+  const rel=BOTH_RELATION[key]||BOTH_RELATION_FALLBACK;
+  const minor=key==='minor-child';
+  // A parent isn't a peer in recovery with their own child.
+  const alongside=minor?'raising':'walking alongside';
+  // The peer-framed line reads as distancing when the other person is your kid.
+  const projectLine=minor
+    ?"You are the adult here. That doesn't mean you have to be perfect — it means your steadiness is the thing they're actually reading."
+    :`${capFirst(rel.short)} ${rel.verb} not your project. They are a person.`;
+  return `I'm writing this on a day when I can think straight.
+
+Two things are true right now. I'm working on ${bothFocusPhrase()}. And I'm ${alongside} ${rel.person}, who's carrying their own version of this.
+
+Some days those two things pull in opposite directions. When they ${bothStruggleVerb()}, I want to fix it, and fixing it is easier than looking at my own. That's the trap. I know it's the trap even when I'm standing in it.
+
+So — future me, on the bad day:
+
+Your own recovery is not selfish. It is the only thing you actually control, and it's the one thing that makes you useful to ${rel.short} instead of just anxious about them.
+
+You do not have to be finished to be helpful.
+
+You are allowed to have a hard day without it meaning everything is falling apart.
+
+${projectLine}
+
+And here is why I started:
+
+[ write your own reason here — this is the part nobody else can write for you ]`;
+}
+
 function buildPartnerLetter(){
+  if(isBothLetter())return S.bothLetterDraft||'';
   if(isSupporterLetter())return S.supporterLetterDraft||SUPPORTER_LETTER;
   const days=getDays();
   const what=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions.join(' and '):'my addiction').toLowerCase();
@@ -8373,8 +8510,63 @@ I'm doing this one day at a time. Today, I chose recovery. And if you've read th
 
 ${name?'— '+name:'— with love'}`;
 }
+function setBothLetterRelation(val){
+  S.bothLetterRelation=val;
+  save();
+  openPartnerLetter();
+}
+// Loaded once, on tap, and never re-injected over text they've written.
+function startBothLetterDraft(){
+  const editEl=document.getElementById('partner-letter-edit');
+  if(!editEl)return;
+  const fill=()=>{
+    editEl.value=buildBothLetterDraft();
+    S.bothLetterDraft=editEl.value;
+    S.bothLetterSavedAt=new Date().toISOString();
+    save();
+    openPartnerLetter();
+  };
+  if(editEl.value.trim()){
+    appConfirm("Replace what you've written?",fill,{okText:'Replace',cancelText:'Keep mine'});
+    return;
+  }
+  fill();
+}
+function openBothLetter(){
+  const editEl=document.getElementById('partner-letter-edit');
+  const noteEl=document.getElementById('partner-letter-note');
+  const relEl=document.getElementById('both-letter-relation');
+  const reentryEl=document.getElementById('both-letter-reentry');
+  const emptyEl=document.getElementById('both-letter-empty');
+  document.getElementById('partner-letter-text').style.display='none';
+  document.getElementById('partner-letter-title').textContent='A letter to the version of you who needs it';
+  document.getElementById('partner-letter-sub').textContent="You're carrying two things at once. Write this now, while you can think clearly, so it's here on the day you can't.";
+  noteEl.textContent='Nobody sees this but you. Write it badly. You can change it any time.';
+  const needsRelation=!bothRelationKey();
+  relEl.style.display=needsRelation?'block':'none';
+  editEl.style.display=needsRelation?'none':'';
+  noteEl.style.display=needsRelation?'none':'';
+  emptyEl.style.display='none';
+  reentryEl.style.display='none';
+  if(needsRelation)return;
+  editEl.value=S.bothLetterDraft||'';
+  if(!editEl.value.trim()){
+    emptyEl.style.display='block';
+  }else if(S.bothLetterSavedAt){
+    const d=new Date(S.bothLetterSavedAt);
+    if(!isNaN(d)){
+      reentryEl.textContent=`You wrote this on ${d.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})}. Read it. Change it if it's not true anymore.`;
+      reentryEl.style.display='block';
+    }
+  }
+}
 function openPartnerLetter(){
   logActivity('partner_letter',{});
+  if(isBothLetter()){
+    openBothLetter();
+    document.getElementById('partner-letter-modal').classList.add('open');
+    return;
+  }
   const supporter=isSupporterLetter();
   const readEl=document.getElementById('partner-letter-text');
   const editEl=document.getElementById('partner-letter-edit');
@@ -8395,6 +8587,19 @@ function openPartnerLetter(){
 // She may work at this across days, so an edited draft survives closing. An untouched
 // one doesn't: persisting the template verbatim would freeze it, so later template
 // changes would never reach someone who once opened the letter and closed it.
+// Once the draft is in the field it is their text - interpolation happens at
+// prefill time only, so if they change "my partner" to a name, that sticks.
+function persistBothLetterDraft(){
+  if(!isBothLetter())return;
+  const editEl=document.getElementById('partner-letter-edit');
+  if(!editEl)return;
+  const v=editEl.value;
+  if(v===(S.bothLetterDraft||''))return;
+  S.bothLetterDraft=v;
+  S.bothLetterSavedAt=v.trim()?new Date().toISOString():'';
+  save();
+  if(v.trim())appInfo('Saved',"Saved. It'll be here.");
+}
 function persistSupporterLetterDraft(){
   if(!isSupporterLetter())return;
   const editEl=document.getElementById('partner-letter-edit');
@@ -8406,11 +8611,13 @@ function persistSupporterLetterDraft(){
   save();
 }
 function closePartnerLetter(){
+  persistBothLetterDraft();
   persistSupporterLetterDraft();
   document.getElementById('partner-letter-modal').classList.remove('open');
 }
 function sharePartnerLetter(){
   // Share what she actually wrote, not the template she edited away from.
+  persistBothLetterDraft();
   persistSupporterLetterDraft();
   const text=buildPartnerLetter();
   if(navigator.share){navigator.share({text}).catch(()=>{});return;}

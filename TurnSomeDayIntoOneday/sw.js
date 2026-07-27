@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v23'; // v23: Together section reframed for supporters
+const CACHE_NAME = 'tsid-shell-v24'; // v24: supporter string swaps
 const SHELL_FILES = [
   '/',
   '/app',

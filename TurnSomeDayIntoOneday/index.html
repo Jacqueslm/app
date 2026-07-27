@@ -648,7 +648,7 @@ body.nova-open #audio-pill-label{bottom:222px}
 
   <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
     <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-handshake" style="font-size:20px;color:#fff"></i></div>
-    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Nova</div><div style="font-size:12px;color:var(--tm)">Your AI recovery companion, right now</div></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Nova</div><div style="font-size:12px;color:var(--tm)" id="home-nova-sub">Your AI recovery companion, right now</div></div>
     <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
 
@@ -1114,12 +1114,12 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div class="sec-hd" style="margin-top:0">Smart reminder types</div>
         <div class="setting-row" onclick="toggleSmartReminderType('urgeWindow')">
           <i class="ti ti-clock" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Urge window alerts</p><span>Based on your past urge and setback times</span></div>
+          <div class="setting-row-txt"><p id="rem-urge-title">Urge window alerts</p><span id="rem-urge-sub">Based on your past urge and setback times</span></div>
           <div class="toggle-sw" id="sr-toggle-urgeWindow"><div class="toggle-knob"></div></div>
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('relapseRisk')">
           <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Setback risk alerts</p><span>When stress, mood, or cravings spike</span></div>
+          <div class="setting-row-txt"><p id="rem-risk-title">Setback risk alerts</p><span id="rem-risk-sub">When stress, mood, or cravings spike</span></div>
           <div class="toggle-sw" id="sr-toggle-relapseRisk"><div class="toggle-knob"></div></div>
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('morningCheckin')">
@@ -1214,10 +1214,10 @@ body.nova-open #audio-pill-label{bottom:222px}
 
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0">Recovery tools</div></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p>Recovery Toolkit</p><span>Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
+        <div class="setting-row-txt"><p id="toolkit-row-title">Recovery Toolkit</p><span id="toolkit-row-sub">Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="tools-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
@@ -1358,7 +1358,7 @@ body.nova-open #audio-pill-label{bottom:222px}
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Unlock Days 16–30</div>
           <div>✓ Nova Pro coaching (50 chats/day)</div>
-          <div>✓ Together — couples exercises &amp; partner self-check</div>
+          <div id="plans-pro-together">✓ Together — couples exercises &amp; partner self-check</div>
           <div>✓ Urge Surfing, Panic Mode &amp; Emergency Plan</div>
           <div>✓ Weekly reports &amp; analytics</div>
           <div>✓ Smart reminders</div>
@@ -1385,10 +1385,10 @@ body.nova-open #audio-pill-label{bottom:222px}
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
-            <div class="feat y"><i class="ti ti-check"></i>Sobriety counter &amp; milestones</div>
+            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-counter">Sobriety counter &amp; milestones</span></div>
             <div class="feat y"><i class="ti ti-check"></i>Journal (plain text + mood)</div>
-            <div class="feat y"><i class="ti ti-check"></i>Craving tracker &amp; withdrawal timeline</div>
-            <div class="feat y"><i class="ti ti-check"></i>Partner letter — help them understand</div>
+            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-tracker">Craving tracker &amp; withdrawal timeline</span></div>
+            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-letter">Partner letter — help them understand</span></div>
             <div class="feat y"><i class="ti ti-check"></i>Shareable progress cards</div>
             <div class="feat y"><i class="ti ti-check"></i>App lock (PIN) &amp; in-app guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lesson history, reminders, restart &amp; switch categories</div>
@@ -1717,7 +1717,7 @@ body.nova-open #audio-pill-label{bottom:222px}
 <div class="sos-modal" id="sos-modal" onclick="if(event.target===this)closeSOS()">
   <div class="sos-sheet">
     <div class="sos-title">🆘 You're not alone</div>
-    <div class="sos-sub">A craving is just a wave — it will pass. Choose how to ride it out.</div>
+    <div class="sos-sub" id="sos-sheet-sub">A craving is just a wave — it will pass. Choose how to ride it out.</div>
     <div class="sos-opt sos-opt-crisis" onclick="window.location.href='tel:988'">
       <i class="ti ti-phone" style="color:#E24B4A"></i>
       <div class="sos-opt-info"><p style="color:#E24B4A">Call or text 988</p><span>Suicide &amp; Crisis Lifeline — free, confidential, 24/7</span></div>
@@ -1728,7 +1728,7 @@ body.nova-open #audio-pill-label{bottom:222px}
     </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
-      <div class="sos-opt-info"><p>Talk to Nova</p><span>Your AI recovery companion, right now</span></div>
+      <div class="sos-opt-info"><p>Talk to Nova</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
     </div>
     <div class="sos-opt" onclick="openTriggeredFlow()">
       <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
@@ -4047,6 +4047,15 @@ const EMOTION_JOURNAL_PROMPTS=[
   'What emotion are you avoiding right now?',
   'When did you feel most like yourself today?',
 ];
+// "Tempted" belongs to the person with the addiction; the rest of the pool reads fine
+// either way, so only that one prompt is swapped on the supporter path.
+const SUPPORTER_EMOTION_JOURNAL_PROMPTS=[
+  'What emotion hit you hardest today?',
+  'Describe a moment today you had to hold yourself steady.',
+  'What helped you stay grounded today?',
+  'What emotion are you avoiding right now?',
+  'When did you feel most like yourself today?',
+];
 const REFLECTION_JOURNAL_PROMPTS=[
   'What is one thing you handled better today than you would have a month ago?',
   'What would you tell someone just starting this journey?',
@@ -4059,7 +4068,8 @@ function getGuidedPrompt(){
   const pool=[];
   if(lesson&&lesson.reflection)pool.push({text:lesson.reflection,kind:'lesson'});
   pool.push({text:CATEGORY_JOURNAL_PROMPTS[S.currentAddiction]||CATEGORY_JOURNAL_PROMPTS['Other'],kind:'category'});
-  pool.push({text:EMOTION_JOURNAL_PROMPTS[Math.floor(Math.random()*EMOTION_JOURNAL_PROMPTS.length)],kind:'emotion'});
+  const emotionPool=isSupporterUI()?SUPPORTER_EMOTION_JOURNAL_PROMPTS:EMOTION_JOURNAL_PROMPTS;
+  pool.push({text:emotionPool[Math.floor(Math.random()*emotionPool.length)],kind:'emotion'});
   pool.push({text:REFLECTION_JOURNAL_PROMPTS[Math.floor(Math.random()*REFLECTION_JOURNAL_PROMPTS.length)],kind:'reflection'});
   return pool[Math.floor(Math.random()*pool.length)];
 }
@@ -5296,10 +5306,12 @@ function updateRecoveryTermLabels(){
   const homeHoursLbl=document.getElementById('h-hours-lbl');
   if(homeHoursLbl)homeHoursLbl.textContent=`Hours ${term}`;
   const totalLbl=document.getElementById('prog-total-days-lbl');
-  if(totalLbl)totalLbl.textContent=`Total ${term} days`;
+  // "Total on this path days" is broken English - the supporter term is a phrase,
+  // not an adjective, so it has to trail the noun.
+  if(totalLbl)totalLbl.textContent=isSupporterUI()?`Total days ${term}`:`Total ${term} days`;
   if(!S.pledged){
     const pledgeSub=document.getElementById('pledge-sub');
-    if(pledgeSub)pledgeSub.textContent=`Take your pledge to stay ${term} today`;
+    if(pledgeSub)pledgeSub.textContent=pledgeSubText();
   }
   // "Craving" is the wrong word for a partner weathering a hard night, and the
   // wrong word for someone about to lose their temper.
@@ -5311,6 +5323,37 @@ function updateRecoveryTermLabels(){
     sosBtn.innerHTML=`<i class="ti ti-alert-triangle"></i> ${sosLabel}`;
   }
 }
+function isSupporterUI(){return S.userType==='partner';}
+function pledgeSubText(){
+  return isSupporterUI()?'One promise to yourself today':`Take your pledge to stay ${recoveryTerm()} today`;
+}
+// Screen titles a supporter sees. TITLES itself is never mutated, so nothing leaks
+// across user types when someone switches paths mid-session.
+const SUPPORTER_TITLES={nova:'Nova — someone to talk to','relapse-toolkit':'Steady Yourself'};
+function titleFor(id){
+  if(isSupporterUI()&&SUPPORTER_TITLES[id])return SUPPORTER_TITLES[id];
+  return TITLES[id]||id;
+}
+// Strings that assume the user is the one with the addiction. Same gate as the
+// hidden elements below - swapped in place, originals untouched for everyone else.
+const SUPPORTER_TEXT={
+  'home-nova-sub':'Someone to talk to, right now',
+  'sos-nova-sub':'Someone to talk to, right now',
+  'sos-sheet-sub':'This feeling will pass. Choose how to ride it out.',
+  'tools-sec-hd':'Your tools',
+  'toolkit-row-title':'Steady Yourself',
+  'toolkit-row-sub':'Grounding, breathing, and "I\'m triggered" — plus advanced Pro tools',
+  'plans-free-counter':'Day counter & milestones',
+  // Session 2 hid the craving tracker and the timeline from supporters, so the free
+  // tier can't keep advertising them as things she gets.
+  'plans-free-tracker':'Journal & lesson history',
+  'plans-free-letter':'Your letter — say it once, properly',
+  'plans-pro-together':'✓ Together — tools for you and the person you\'re supporting',
+  'rem-urge-title':'Hard-hour alerts',
+  'rem-urge-sub':'Based on when your hardest hours have been',
+  'rem-risk-title':'Heavy-day check-ins',
+  'rem-risk-sub':'When stress or mood spikes',
+};
 // Display-only gate: a supporter's loved one has the addiction, not her, so anything
 // that assumes SHE is the one with cravings, a slip, or money lost to a habit has no
 // meaning on her account. Hides, never deletes - the 'both' path keeps all of it, since
@@ -5348,12 +5391,26 @@ const PARTNER_SECTION_COPY={
             <b style="color:var(--tp)">5.</b> You matter too — and not as a footnote. Your sleep, your people, your joy. If this app does one thing for you, let it be that you stop disappearing.`
   }
 };
+// Originals are read from the DOM the first time round rather than duplicated as
+// literals, so the recovering path can't drift out of sync with the markup.
+const SUPPORTER_TEXT_BASE={};
 function applySupporterUI(){
   const supporter=S.userType==='partner';
   SUPPORTER_HIDDEN_IDS.forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=supporter?'none':'';
   });
+  Object.keys(SUPPORTER_TEXT).forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(!(id in SUPPORTER_TEXT_BASE))SUPPORTER_TEXT_BASE[id]=el.textContent;
+    el.textContent=supporter?SUPPORTER_TEXT[id]:SUPPORTER_TEXT_BASE[id];
+  });
+  const progEntry=HELP_INDEX.find(h=>h.baseName==='My progress & stats');
+  if(progEntry){
+    if(!('_baseSub' in progEntry))progEntry._baseSub=progEntry.sub;
+    progEntry.sub=supporter?progEntry.supporterSub:progEntry._baseSub;
+  }
   const c=supporter?PARTNER_SECTION_COPY.supporter:PARTNER_SECTION_COPY.base;
   const head=document.getElementById('partner-sec-hd');
   const intro=document.getElementById('partner-intro');
@@ -5455,7 +5512,7 @@ function takePledge(){
   const btn=document.getElementById('pledgeBtn');
   const sub=document.getElementById('pledge-sub');
   if(S.pledged){btn.textContent='Pledged ✓';btn.className='pill pill-ok';sub.textContent='Pledge taken. One day at a time — keep going.';}
-  else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent=`Take your pledge to stay ${recoveryTerm()} today`;}
+  else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent=pledgeSubText();}
 }
 
 // ─── SOS ──────────────────────────────────────────────────────────────────────
@@ -7053,7 +7110,7 @@ function switchTo(id){
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
   if(id==='nova')clearNovaBadge();
-  document.getElementById('scr-title').textContent=TITLES[id]||id;
+  document.getElementById('scr-title').textContent=titleFor(id);
   const screensEl=document.getElementById('screens');
   screensEl.scrollTop=0;
   // Some mobile browsers (notably iOS Safari) haven't finished laying out the
@@ -7679,7 +7736,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='23.0.0';
+const APP_VERSION='24.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8016,7 +8073,7 @@ const HELP_INDEX=[
   {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
   {name:'Listen to today\'s lesson',sub:'The lesson read aloud — hands-free',k:'listen audio hear read aloud voice speak lesson multitask',go:()=>{switchTo('lesson');actBn('bn-home');setTimeout(()=>toggleLessonAudio(),400);}},
   {name:'Talk to Nova',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
-  {name:'My progress & stats',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
+  {name:'My progress & stats',baseName:'My progress & stats',supporterSub:'Your days, streak, and milestones',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
   {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},
   {name:'Upgrade to Pro / see pricing',sub:'Plans, prices, and the free trial',k:'pro upgrade price pricing plan subscribe trial pay',go:()=>{switchTo('plans');actBn('bn-plans');}},
   {name:'Cancel or change my subscription',sub:'Opens secure billing management',k:'cancel subscription refund billing stop paying manage payment card',go:()=>openBillingPortal()},

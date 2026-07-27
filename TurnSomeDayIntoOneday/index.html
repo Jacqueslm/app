@@ -681,7 +681,7 @@ body.nova-open #audio-pill-label{bottom:222px}
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
   <div class="limit-bar" id="limitBar">
     <i class="ti ti-info-circle" style="font-size:16px;color:#854F0B;flex-shrink:0"></i>
-    <span><strong id="chatsLeft">5</strong> free sessions left today</span>
+    <span><strong id="chatsLeft">3</strong> free sessions left today</span>
     <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
   </div>
   <div>
@@ -1381,7 +1381,7 @@ body.nova-open #audio-pill-label{bottom:222px}
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Basic Nova (5 chats/day)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Basic Nova (3 chats/day)</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
@@ -2299,7 +2299,7 @@ let S = {
   notifiedMilestones:[],lastProNudgeDate:'',
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
-  chatsLeft:5,chatHistory:[],chatDate:'',voiceJournalActive:false,
+  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
@@ -3574,7 +3574,7 @@ function initApp(){
   renderTodayMood();
   // reset daily chat limit
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=5;S.chatDate=today;save();}
+  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;save();}
   document.getElementById('chatsLeft').textContent=S.chatsLeft;
   // init Nova welcome - voiced for who's actually sitting there: the person in
   // recovery, the one carrying someone else's, or the one doing both.
@@ -6843,12 +6843,12 @@ async function sendMsg(){
   const inp=document.getElementById('chatInput');
   const text=inp.value.trim();if(!text)return;
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=5;S.chatDate=today;}
+  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
-      ?"You've used your 5 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
-      :"You've used your 5 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
+      ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
+      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -7037,7 +7037,7 @@ function stayFreeForNow(){
 }
 function selectFree(){
   if(S.isPro){cancelProSubscription();return;}
-  S.isPro=false;S.chatsLeft=5;save();updateTierUI();
+  S.isPro=false;S.chatsLeft=3;save();updateTierUI();
   stayFreeForNow();
 }
 async function becomePro(plan){
@@ -7591,7 +7591,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='18.0.0';
+const APP_VERSION='19.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8111,7 +8111,7 @@ const GUIDE_FAQ=[
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Nova and syncing need a connection.",go:null},
   {q:'Is Nova a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Nova is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
-  {q:'How many Nova chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>5 Nova chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Nova'},
+  {q:'How many Nova chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Nova chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Nova'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},

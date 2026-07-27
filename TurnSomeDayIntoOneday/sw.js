@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v18'; // v18: 5 free chats, Nova prompt caching, guided-mode notice once per session
+const CACHE_NAME = 'tsid-shell-v19'; // v19: free chat limit back to 3/day
 const SHELL_FILES = [
   '/',
   '/app',

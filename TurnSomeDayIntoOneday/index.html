@@ -365,7 +365,22 @@ body.nova-open #audio-pill-label{bottom:222px}
 .toggle-sw.on .toggle-knob{left:21px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
 .usage{font-size:12px;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
-/* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> </head> <body> <div class="app" id="app">
+/* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> <script>
+function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
+// First touch wins: someone who lands from TikTok, reads /for-her, then signs up
+// belongs to TikTok - not to whatever page they happened to be on at the end.
+// sessionStorage, not localStorage: it survives the landing -> signup hop and dies
+// with the tab, so it can never misattribute a return visit months later and is
+// not a durable identifier sitting on anyone's device. No cookie, no pageview ping -
+// these tags ride along only on an explicit signup or lead capture.
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
+</head> <body> <div class="app" id="app">
 <!-- PREVIEW (shown before the mandatory account gate) -->
 <div id="preview-gate" class="ob">
   <div class="ob-logo"><i class="ti ti-handshake" style="font-size:32px;color:#fff"></i></div>
@@ -7741,7 +7756,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='25.0.0';
+const APP_VERSION='26.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8662,7 +8677,7 @@ async function submitGateAuth(){
   try{
     const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,password,phone})
+      body:JSON.stringify({email,password,phone,utm:tsidUtm()})
     });
     const data=await res.json();
     if(!res.ok){errEl.textContent=data.error||'Something went wrong.';return;}

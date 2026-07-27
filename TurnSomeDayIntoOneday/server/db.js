@@ -164,7 +164,19 @@ addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
 // Columns land now (Task 7 schema); the capture logic ships in Task 9.
 addColumnIfMissing('utm_source', 'utm_source TEXT');
 addColumnIfMissing('utm_campaign', 'utm_campaign TEXT');
+addColumnIfMissing('utm_medium', 'utm_medium TEXT');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
+
+// leads predates the utm_medium/utm_campaign columns, so it needs the same
+// additive migration users already has - existing rows keep NULL.
+const leadColumns = db.prepare('PRAGMA table_info(leads)').all().map((c) => c.name);
+function addLeadColumnIfMissing(name, ddl) {
+  if (!leadColumns.includes(name)) {
+    db.exec(`ALTER TABLE leads ADD COLUMN ${ddl}`);
+  }
+}
+addLeadColumnIfMissing('utm_medium', 'utm_medium TEXT');
+addLeadColumnIfMissing('utm_campaign', 'utm_campaign TEXT');
 
 function createUser(email, passwordHash, phone) {
   const info = db
@@ -323,11 +335,24 @@ function setUnsubscribed(userId, value) {
   db.prepare('UPDATE users SET unsubscribed = ? WHERE id = ?').run(value ? 1 : 0, userId);
 }
 
-function createLead(email, quizResult, source, utmSource) {
+function createLead(email, quizResult, source, utm) {
+  // utm may be a bare source string (older callers) or the {source,medium,campaign}
+  // object the pages send now.
+  const u = typeof utm === 'string' ? { source: utm } : (utm || {});
   const info = db
-    .prepare('INSERT INTO leads (email, quiz_result, source, utm_source, created_at) VALUES (?, ?, ?, ?, ?)')
-    .run(email, quizResult || null, source || null, utmSource || null, new Date().toISOString());
+    .prepare('INSERT INTO leads (email, quiz_result, source, utm_source, utm_medium, utm_campaign, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(email, quizResult || null, source || null, u.source || null, u.medium || null, u.campaign || null, new Date().toISOString());
   return Number(info.lastInsertRowid);
+}
+
+// Written once, at signup, and only when the columns are still empty - a later
+// visit carrying different tags must not overwrite first-touch attribution.
+function setUserUtm(userId, utm) {
+  const u = utm || {};
+  if (!u.source && !u.medium && !u.campaign) return;
+  db.prepare(
+    'UPDATE users SET utm_source = COALESCE(utm_source, ?), utm_medium = COALESCE(utm_medium, ?), utm_campaign = COALESCE(utm_campaign, ?) WHERE id = ?'
+  ).run(u.source || null, u.medium || null, u.campaign || null, userId);
 }
 
 function getLeadByEmail(email) {
@@ -421,8 +446,105 @@ function getUsersInTrialWindow() {
   return db.prepare('SELECT * FROM users WHERE trial_started_at IS NOT NULL AND trial_started_at > ?').all(cutoff);
 }
 
+// ─── OWNER STATS ──────────────────────────────────────────────────────────────
+// Untagged traffic buckets as "(direct)" rather than being dropped, so the
+// per-source rows always sum back to the totals - a breakdown that quietly
+// omits rows reads as precise while being wrong.
+const DIRECT = '(direct)';
+// A paid account is one Stripe says is 'active'. 'trialing' is counted and
+// reported separately: a 7-day trial that hasn't converted is not revenue.
+const PAID_SQL = "plan != 'free' AND subscription_status = 'active'";
+const TRIALING_SQL = "plan != 'free' AND subscription_status = 'trialing'";
+// SQLite has no ISO week, so derive it: %W is Monday-based but numbers the first
+// partial week 00, and strftime('%Y') can disagree with the ISO year at a year
+// boundary. Grouping by the Monday date sidesteps both and still sorts correctly.
+const WEEK_SQL = "date(created_at, 'weekday 0', '-6 days')";
+
+function getAdminStats(opts) {
+  const freeChatLimit = (opts && opts.freeChatLimit) || 3;
+  const windowDays = (opts && opts.windowDays) || 30;
+  const since = new Date(Date.now() - windowDays * 86400000).toISOString().slice(0, 10);
+
+  const totals = {
+    signups: db.prepare('SELECT COUNT(*) n FROM users').get().n,
+    trial_starts: db.prepare('SELECT COUNT(*) n FROM users WHERE trial_started_at IS NOT NULL').get().n,
+    paid: db.prepare(`SELECT COUNT(*) n FROM users WHERE ${PAID_SQL}`).get().n,
+    trialing: db.prepare(`SELECT COUNT(*) n FROM users WHERE ${TRIALING_SQL}`).get().n,
+    leads: db.prepare('SELECT COUNT(*) n FROM leads').get().n,
+  };
+
+  const bySourceRows = db.prepare(`
+    SELECT COALESCE(NULLIF(utm_source,''), ?) AS utm_source,
+           COUNT(*) AS signups,
+           SUM(CASE WHEN trial_started_at IS NOT NULL THEN 1 ELSE 0 END) AS trial_starts,
+           SUM(CASE WHEN ${PAID_SQL} THEN 1 ELSE 0 END) AS paid
+    FROM users GROUP BY 1
+  `).all(DIRECT);
+  const leadsBySource = db.prepare(`
+    SELECT COALESCE(NULLIF(utm_source,''), ?) AS utm_source, COUNT(*) AS leads
+    FROM leads GROUP BY 1
+  `).all(DIRECT);
+  const sourceMap = new Map();
+  bySourceRows.forEach((r) => sourceMap.set(r.utm_source, { utm_source: r.utm_source, signups: r.signups, trial_starts: r.trial_starts, paid: r.paid, leads: 0 }));
+  leadsBySource.forEach((r) => {
+    const e = sourceMap.get(r.utm_source) || { utm_source: r.utm_source, signups: 0, trial_starts: 0, paid: 0, leads: 0 };
+    e.leads = r.leads;
+    sourceMap.set(r.utm_source, e);
+  });
+  const by_utm_source = [...sourceMap.values()].sort((a, b) => b.signups - a.signups || b.leads - a.leads);
+
+  // Signups and leads bucket by their own created_at; trials bucket by
+  // trial_started_at, so a trial shows in the week it actually began rather than
+  // the week the account was created.
+  const signupsByWeek = db.prepare(`SELECT ${WEEK_SQL} AS week, COUNT(*) n FROM users GROUP BY 1`).all();
+  const trialsByWeek = db.prepare(`SELECT date(trial_started_at, 'weekday 0', '-6 days') AS week, COUNT(*) n FROM users WHERE trial_started_at IS NOT NULL GROUP BY 1`).all();
+  const paidByWeek = db.prepare(`SELECT ${WEEK_SQL} AS week, COUNT(*) n FROM users WHERE ${PAID_SQL} GROUP BY 1`).all();
+  const leadsByWeek = db.prepare(`SELECT ${WEEK_SQL} AS week, COUNT(*) n FROM leads GROUP BY 1`).all();
+  const weekMap = new Map();
+  const weekBucket = (w) => {
+    if (!weekMap.has(w)) weekMap.set(w, { week: w, signups: 0, trial_starts: 0, paid: 0, leads: 0 });
+    return weekMap.get(w);
+  };
+  signupsByWeek.forEach((r) => { weekBucket(r.week).signups = r.n; });
+  trialsByWeek.forEach((r) => { weekBucket(r.week).trial_starts = r.n; });
+  paidByWeek.forEach((r) => { weekBucket(r.week).paid = r.n; });
+  leadsByWeek.forEach((r) => { weekBucket(r.week).leads = r.n; });
+  const by_week = [...weekMap.values()].filter((w) => w.week).sort((a, b) => (a.week < b.week ? 1 : -1));
+
+  // Average over user-days with activity, not calendar days: someone who chats
+  // twice a week shouldn't be averaged down to near zero by their quiet days.
+  const freeUsage = db.prepare(`
+    SELECT SUM(c.count) AS chats, COUNT(*) AS user_days
+    FROM chat_usage c JOIN users u ON u.id = c.user_id
+    WHERE c.usage_date >= ? AND NOT (${PAID_SQL.replace(/plan/g, 'u.plan').replace(/subscription_status/g, 'u.subscription_status')})
+  `).get(since);
+  const capped = db.prepare(`
+    SELECT COUNT(DISTINCT c.user_id) AS n
+    FROM chat_usage c JOIN users u ON u.id = c.user_id
+    WHERE c.usage_date >= ? AND c.count >= ?
+      AND NOT (${PAID_SQL.replace(/plan/g, 'u.plan').replace(/subscription_status/g, 'u.subscription_status')})
+  `).get(since, freeChatLimit).n;
+
+  return {
+    generated_at: new Date().toISOString(),
+    totals,
+    by_utm_source,
+    by_week,
+    usage: {
+      avg_chats_per_active_free_user_per_day:
+        freeUsage.user_days ? Math.round((freeUsage.chats / freeUsage.user_days) * 100) / 100 : 0,
+      active_free_user_days: freeUsage.user_days || 0,
+      users_hitting_daily_cap: capped,
+      cap_window_days: windowDays,
+      free_chat_limit: freeChatLimit,
+    },
+  };
+}
+
 module.exports = {
   createUser,
+  setUserUtm,
+  getAdminStats,
   getUserByEmail,
   getUserById,
   getState,

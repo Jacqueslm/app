@@ -14,6 +14,7 @@ const {
   hashPassword,
   verifyPassword,
   signSession,
+  verifySession,
   requireAuth,
   verifyUnsubToken,
   isValidSession,
@@ -64,6 +65,9 @@ app.get('/app', (req, res) => {
 // the entire user database. express.static below serves the app root, which
 // contains this folder, so it has to be blocked ahead of it.
 app.use('/server', (req, res) => res.status(404).end());
+// The admin page is served only through the owner-gated /admin/stats route below.
+// It carries no data of its own, but static would hand out the shell to anyone.
+app.get('/admin-stats.html', (req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname, '..')));
 
 // Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
@@ -101,15 +105,30 @@ const leadLimiter = rateLimit({
   message: { error: 'Too many requests from this network. Try again later.' },
 });
 
+// UTM values are attacker-supplied query strings, so every field is length-capped
+// before it reaches the database.
+function cleanUtmTag(v) {
+  return typeof v === 'string' && v.trim() ? v.trim().slice(0, 60) : null;
+}
+function readUtm(body) {
+  const b = body || {};
+  const u = b.utm && typeof b.utm === 'object' ? b.utm : {};
+  return {
+    source: cleanUtmTag(u.source) || cleanUtmTag(b.utm_source),
+    medium: cleanUtmTag(u.medium) || cleanUtmTag(b.utm_medium),
+    campaign: cleanUtmTag(u.campaign) || cleanUtmTag(b.utm_campaign),
+  };
+}
+
 app.post('/api/lead', leadLimiter, async (req, res) => {
-  const { email: rawEmail, quiz_result, source, utm_source } = req.body || {};
+  const { email: rawEmail, quiz_result, source } = req.body || {};
   const addr = (rawEmail || '').trim().toLowerCase();
   if (!EMAIL_RE.test(addr)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
   const src = source === 'brainreset' ? 'brainreset' : 'quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
-  const cleanUtm = typeof utm_source === 'string' ? utm_source.slice(0, 60) : null;
+  const cleanUtm = readUtm(req.body);
 
   const existingUser = db.getUserByEmail(addr);
   const existingLead = db.getLeadByEmail(addr);
@@ -219,6 +238,9 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   }
   const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : '';
   const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
+  // Attribution must never be able to fail a signup - a malformed tag is worth
+  // losing, an account is not.
+  try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
   // After the response - a slow or failed email must never slow down signup.
@@ -354,6 +376,42 @@ app.get('/api/diagnostics', requireAuth, (req, res) => {
     }
   }
   res.json({ errors: db.getRecentErrors(50) });
+});
+
+// Funnel numbers are business data, so unlike diagnostics this gate has no
+// open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
+function isOwnerRequest(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  const userId = req.userId || (payload && payload.userId);
+  if (!userId) return false;
+  const user = db.getUserById(userId);
+  return !!(user && user.email === DIAG_OWNER_EMAIL);
+}
+function requireOwner(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Admin stats are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  if (!isOwnerRequest(req)) {
+    res.status(403).json({ error: 'Only the app owner can view stats.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/admin/stats', requireAuth, (req, res) => {
+  if (!requireOwner(req, res)) return;
+  res.json(db.getAdminStats({ freeChatLimit: FREE_CHAT_LIMIT, windowDays: 30 }));
+});
+// A page route, not an API one: requireAuth would render its JSON error as the
+// page body, so a logged-out visit is sent to the app to sign in instead, and a
+// signed-in non-owner gets a sentence rather than a JSON blob.
+app.get('/admin/stats', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!DIAG_OWNER_EMAIL || !isOwnerRequest(req)) {
+    return res.status(403).type('text/plain').send('Only the app owner can view stats.');
+  }
+  res.sendFile(path.join(__dirname, '..', 'admin-stats.html'));
 });
 
 app.get('/api/account/export', requireAuth, (req, res) => {

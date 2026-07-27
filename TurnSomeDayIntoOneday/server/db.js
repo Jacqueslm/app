@@ -441,6 +441,13 @@ function updateSubscriptionFromStripe(userId, fields) {
 
 // Everyone whose trial sequence could still owe an email. 9-day lookback: the
 // day-7 branch may send late, and anything older than that is settled.
+// The authoritative seat count for the Founding Lifetime cap. Cheap enough to
+// run on every checkout attempt, which is what makes the cached copy elsewhere
+// safe: the cache can go stale without ever overselling.
+function countLifetimeSold() {
+  return db.prepare("SELECT COUNT(*) n FROM users WHERE plan = 'lifetime'").get().n;
+}
+
 function getUsersInTrialWindow() {
   const cutoff = new Date(Date.now() - 9 * 86400000).toISOString();
   return db.prepare('SELECT * FROM users WHERE trial_started_at IS NOT NULL AND trial_started_at > ?').all(cutoff);
@@ -545,6 +552,7 @@ module.exports = {
   createUser,
   setUserUtm,
   getAdminStats,
+  countLifetimeSold,
   getUserByEmail,
   getUserById,
   getState,

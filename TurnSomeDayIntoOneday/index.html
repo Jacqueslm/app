@@ -1409,6 +1409,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <button id="abtn" onclick="setBill('a')">Yearly · save 50%</button>
           <button id="lbtn" onclick="setBill('l')">Lifetime</button>
         </div>
+        <!-- Founding Lifetime cap. Dormant until the count is low enough to state
+             or the seats are gone - a number, quietly, with no urgency styling. -->
+        <div id="lifetime-note" style="display:none;font-size:11.5px;color:var(--tm);text-align:center;margin-top:8px"></div>
       </div>
       <div class="tier-cards" id="pricing-cards">
         <div class="tc-card">
@@ -3608,6 +3611,7 @@ function initApp(){
   const fabLabel=document.getElementById('guide-fab-label');
   if(fabLabel)fabLabel.style.display=S.guideFabExplained?'none':'block';
   renderMiniPricingRows();
+  loadLifetimeAvailability();
   applyDarkMode();
   applyDiscretionMode();
   document.getElementById('dark-toggle').classList.toggle('on',!!S.darkMode);
@@ -7289,9 +7293,58 @@ function setBill(type){
     if(subEl)subEl.textContent='7-day free trial, then billed monthly. Cancel anytime in two taps.';
   }
 }
+// ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
+// The server owns both the cap and the threshold at which the remaining count
+// becomes public, so this screen and the landing page can never disagree. Until
+// the fetch lands, everything here stays in its default (available) state; the
+// server refuses an over-cap checkout regardless of what this screen shows, so
+// the worst a failed fetch can do is look out of date.
+let lifetimeAvail=null;
+async function loadLifetimeAvailability(){
+  try{
+    const res=await fetch('/api/lifetime-availability');
+    if(!res.ok)return;
+    lifetimeAvail=await res.json();
+    applyLifetimeAvailability();
+  }catch(e){/* offline or self-hosted without the route - leave defaults */}
+}
+function lifetimeSoldOut(){return !!(lifetimeAvail&&lifetimeAvail.soldOut);}
+function applyLifetimeAvailability(){
+  const note=document.getElementById('lifetime-note');
+  const lbtn=document.getElementById('lbtn');
+  if(!lifetimeAvail){if(note)note.style.display='none';return;}
+  if(lbtn)lbtn.style.display=lifetimeAvail.soldOut?'none':'';
+  // A man mid-decision on the Lifetime tab when the last seat goes shouldn't be
+  // left looking at a price he can no longer buy.
+  if(lifetimeAvail.soldOut&&currentBillSelection==='l')setBill('a');
+  if(note){
+    if(lifetimeAvail.soldOut){
+      note.textContent=lifetimeAvail.soldOutMessage;
+      note.style.display='block';
+    }else if(lifetimeAvail.showCount){
+      note.textContent=`Founding Lifetime — only ${lifetimeAvail.remaining} of ${lifetimeAvail.limit} left.`;
+      note.style.display='block';
+    }else{
+      note.style.display='none';
+    }
+  }
+  renderMiniPricingRows();
+  applyLifetimeFaq();
+}
+// Once the seats are gone these two stop quoting a price nobody can pay. Both are
+// clause removals, not rewrites - the rest of each string is untouched.
 function renderMiniPricingRows(){
-  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save ${YEARLY_SAVE_PCT}%) · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
+  const lifetimePart=lifetimeSoldOut()?'':` · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
+  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save ${YEARLY_SAVE_PCT}%)${lifetimePart}`;
   document.querySelectorAll('.mini-pricing-row').forEach(el=>{el.textContent=text;});
+}
+let lifetimeFaqApplied=false;
+function applyLifetimeFaq(){
+  if(lifetimeFaqApplied||!lifetimeSoldOut())return;
+  const entry=GUIDE_FAQ.find(f=>f.q==='How much does the app cost?');
+  if(!entry)return;
+  entry.a="The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b> or <b>$59.99/year</b> (about half price). Both start with a 7-day free trial.";
+  lifetimeFaqApplied=true;
 }
 function scrollToPricingCards(){
   const el=document.getElementById('pricing-cards');
@@ -7318,6 +7371,11 @@ async function becomePro(plan){
     const data=await res.json();
     if(res.ok&&data.url){
       window.location.href=data.url;
+    }else if(data.soldOut){
+      // The seat went while he was on this screen. Refresh the surface so it
+      // matches what the server just told him, then say it plainly.
+      loadLifetimeAvailability();
+      appInfo('Founding Lifetime',data.error);
     }else{
       appInfo('Upgrade unavailable',data.error||'Could not start checkout right now. Please try again in a moment.');
     }
@@ -7398,6 +7456,8 @@ function handleCheckoutReturn(){
 }
 function renderPlansScreen(){
   setBill(currentBillSelection);
+  applyLifetimeAvailability();
+  loadLifetimeAvailability();
   const graceBanner=document.getElementById('grace-banner');
   const statusSection=document.getElementById('sub-status-section');
   const statusTitle=document.getElementById('sub-status-title');
@@ -7856,7 +7916,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='27.0.0';
+const APP_VERSION='28.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

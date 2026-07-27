@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v27'; // v27: milestone share cards
+const CACHE_NAME = 'tsid-shell-v28'; // v28: Founding Lifetime cap
 const SHELL_FILES = [
   '/',
   '/app',

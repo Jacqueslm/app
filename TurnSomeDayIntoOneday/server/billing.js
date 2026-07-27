@@ -17,6 +17,58 @@ const PLANS = {
 // people are willing to start, and the card is only charged after day 7.
 const TRIAL_DAYS = 7;
 
+// ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
+// 50 means 50. The landing page has promised "limited to the first 50 members"
+// since launch, so this is a commitment being kept, not a marketing device.
+const LIFETIME_CAP = 50;
+// Shown once the cap is reached, and returned verbatim as the checkout refusal.
+const LIFETIME_SOLD_OUT_MESSAGE = 'Founding Lifetime — sold out. Lifetime returns at $249.';
+// The remaining count stays private until it is low enough to be worth stating.
+const LIFETIME_COUNT_VISIBLE_BELOW = 25;
+
+// Two lines of defense. The cached count serves the public availability endpoint,
+// which every landing-page view hits, so it must not COUNT on each request. The
+// authoritative count runs on every checkout attempt, so a stale cache can only
+// ever make the page look wrong - never sell a 51st seat. The cache is
+// invalidated the moment a purchase confirms (webhook or ?refresh=1) and
+// otherwise expires on a short TTL.
+const LIFETIME_CACHE_TTL_MS = 60000;
+let lifetimeSoldCache = null;
+let lifetimeSoldCachedAt = 0;
+
+function invalidateLifetimeCount() {
+  lifetimeSoldCache = null;
+  lifetimeSoldCachedAt = 0;
+}
+
+function cachedLifetimeSold() {
+  const now = Date.now();
+  if (lifetimeSoldCache === null || now - lifetimeSoldCachedAt > LIFETIME_CACHE_TTL_MS) {
+    lifetimeSoldCache = db.countLifetimeSold();
+    lifetimeSoldCachedAt = now;
+  }
+  return lifetimeSoldCache;
+}
+
+// showCount is decided here rather than on each surface, so the app and the
+// landing page can never disagree about when the number becomes public.
+function getLifetimeAvailability() {
+  const sold = cachedLifetimeSold();
+  const remaining = Math.max(0, LIFETIME_CAP - sold);
+  return {
+    limit: LIFETIME_CAP,
+    sold,
+    remaining,
+    soldOut: remaining === 0,
+    showCount: remaining > 0 && remaining < LIFETIME_COUNT_VISIBLE_BELOW,
+    soldOutMessage: LIFETIME_SOLD_OUT_MESSAGE,
+  };
+}
+
+function isLifetimeSoldOut() {
+  return db.countLifetimeSold() >= LIFETIME_CAP;
+}
+
 function isConfigured() {
   return !!stripe;
 }
@@ -34,6 +86,14 @@ async function getOrCreateCustomer(user) {
 async function createCheckoutSession(user, plan, origin) {
   const planDef = PLANS[plan];
   if (!planDef) throw new Error('Unknown plan.');
+  // The cap is enforced here, against the authoritative count, before Stripe is
+  // touched at all - hiding the option in the UI is a courtesy, this is the rule.
+  // An existing lifetime owner already holds their seat, so they are never blocked.
+  if (plan === 'lifetime' && user.plan !== 'lifetime' && isLifetimeSoldOut()) {
+    const err = new Error(LIFETIME_SOLD_OUT_MESSAGE);
+    err.code = 'lifetime_sold_out';
+    throw err;
+  }
   const customerId = await getOrCreateCustomer(user);
 
   const lineItem = {
@@ -59,6 +119,32 @@ async function createCheckoutSession(user, plan, origin) {
   });
 
   return session.url;
+}
+
+// The second line of defense. By the time a purchase confirms the money is
+// already taken, so an over-cap seat is still granted - refusing someone their
+// product after charging them would be the worse failure. It is recorded loudly
+// instead, so an oversell surfaces in diagnostics rather than silently.
+function recordLifetimePurchase(userId) {
+  const alreadyOwned = (db.getUserById(userId) || {}).plan === 'lifetime';
+  const soldBefore = db.countLifetimeSold();
+  db.updateSubscriptionFromStripe(userId, {
+    plan: 'lifetime',
+    subscriptionStatus: 'active',
+    stripeSubscriptionId: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+  });
+  invalidateLifetimeCount();
+  if (!alreadyOwned && soldBefore >= LIFETIME_CAP) {
+    try {
+      db.logError(
+        'lifetime_cap',
+        `Founding Lifetime oversold: seat ${soldBefore + 1} of ${LIFETIME_CAP} granted to user ${userId}`,
+        'Payment already completed, so access was granted. Check Stripe for a refund decision.'
+      );
+    } catch (e) { /* logging must never break a paid upgrade */ }
+  }
 }
 
 async function createPortalSession(user, origin) {
@@ -106,13 +192,7 @@ async function refreshFromStripe(user) {
       (s) => s.mode === 'payment' && s.payment_status === 'paid' && s.metadata && s.metadata.plan === 'lifetime'
     );
     if (lifetimePaid || user.plan === 'lifetime') {
-      db.updateSubscriptionFromStripe(user.id, {
-        plan: 'lifetime',
-        subscriptionStatus: 'active',
-        stripeSubscriptionId: null,
-        currentPeriodEnd: null,
-        cancelAtPeriodEnd: false,
-      });
+      recordLifetimePurchase(user.id);
       return;
     }
     const subs = await stripe.subscriptions.list({ customer: user.stripe_customer_id, status: 'all', limit: 10 });
@@ -148,13 +228,7 @@ async function handleWebhookEvent(rawBody, signature) {
       const plan = session.metadata && session.metadata.plan;
       if (!userId || !plan) break;
       if (plan === 'lifetime') {
-        db.updateSubscriptionFromStripe(userId, {
-          plan: 'lifetime',
-          subscriptionStatus: 'active',
-          stripeSubscriptionId: null,
-          currentPeriodEnd: null,
-          cancelAtPeriodEnd: false,
-        });
+        recordLifetimePurchase(userId);
       } else if (session.subscription) {
         const sub = await stripe.subscriptions.retrieve(session.subscription);
         const { trialJustStarted } = db.updateSubscriptionFromStripe(userId, {
@@ -201,6 +275,10 @@ async function handleWebhookEvent(rawBody, signature) {
 
 module.exports = {
   isConfigured,
+  LIFETIME_CAP,
+  getLifetimeAvailability,
+  recordLifetimePurchase,
+  invalidateLifetimeCount,
   createCheckoutSession,
   createPortalSession,
   getBillingStatus,

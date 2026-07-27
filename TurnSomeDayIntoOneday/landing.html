@@ -199,10 +199,12 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
         <div class="plan-price">$59.99<span>/yr</span></div>
         <div class="plan-desc">Same thing, half price. 7-day free trial.</div>
       </div>
-      <div class="plan featured">
+      <div class="plan featured" id="plan-lifetime">
         <div class="plan-name">Founding Lifetime</div>
-        <div class="plan-price">$149.99<span> once</span></div>
-        <div class="plan-desc">Pay once, keep it forever, including everything I add. Limited to the first 50 members.</div>
+        <div class="plan-price" id="lifetime-price">$149.99<span> once</span></div>
+        <div class="plan-desc" id="lifetime-desc">Pay once, keep it forever, including everything I add. Limited to the first 50 members.</div>
+        <!-- Dormant until the server says the count is low enough to state. -->
+        <div class="plan-desc" id="lifetime-remaining" style="display:none"></div>
       </div>
     </div>
     <p class="fine">Trial reminder: I email you on day 5 before anything is charged. No surprises.</p>
@@ -242,6 +244,26 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
   <div class="foot">Turn Someday Into Day One</div>
 </div>
 <script>
+// Founding Lifetime availability is fetched, never baked into this file - a
+// static page would go stale the moment a seat sold. Until it lands the card
+// shows its normal state; the server refuses an over-cap checkout regardless,
+// so a failed fetch can only ever make this card look out of date.
+(function(){
+  fetch('/api/lifetime-availability').then(function(r){return r.ok?r.json():null;}).then(function(a){
+    if(!a)return;
+    if(a.soldOut){
+      var price=document.getElementById('lifetime-price');
+      var desc=document.getElementById('lifetime-desc');
+      if(price)price.textContent='Sold out';
+      if(desc)desc.textContent=a.soldOutMessage;
+      return;
+    }
+    if(a.showCount){
+      var rem=document.getElementById('lifetime-remaining');
+      if(rem){rem.textContent='Only '+a.remaining+' of '+a.limit+' left.';rem.style.display='';}
+    }
+  }).catch(function(){});
+})();
 function sendToHer(){
   const url='https://www.turnsomedayintodayone.com/for-her';
   const btn=document.getElementById('send-her-btn');

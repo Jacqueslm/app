@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v30'; // v30: both-path letter + supporter FAQs
+const CACHE_NAME = 'tsid-shell-v30-1'; // v30.1: fix lesson audio cutting off
 const SHELL_FILES = [
   '/',
   '/app',

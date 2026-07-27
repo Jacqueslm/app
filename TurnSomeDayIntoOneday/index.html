@@ -5826,7 +5826,21 @@ function closeVoiceGuide(){
 // ─── LESSON AUDIO ────────────────────────────────────────────────────────────
 // Every lesson can be listened to instead of read - same free built-in voice
 // as the guide, so someone cooking, driving, or working can still do their day.
-let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null;
+let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null;
+// Chrome's speech engine silently stops producing audio after ~15s of continuous
+// speaking (a long-standing browser bug, not something sentence-chunking can
+// dodge - it fires on total speaking time, not per-utterance length). The
+// documented workaround is a periodic pause/resume nudge while it's talking.
+function lessonAudioStartKeepAlive(){
+  clearInterval(lessonAudioKeepAlive);
+  lessonAudioKeepAlive=setInterval(()=>{
+    if(lessonAudioState==='playing'&&speechSynthesis.speaking){speechSynthesis.pause();speechSynthesis.resume();}
+  },10000);
+}
+function lessonAudioStopKeepAlive(){
+  clearInterval(lessonAudioKeepAlive);
+  lessonAudioKeepAlive=null;
+}
 function splitForSpeech(text){
   // browsers cut long utterances off mid-sentence - feed the voice bite-sized pieces
   const sentences=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)];
@@ -5877,6 +5891,7 @@ function startLessonAudio(text,btnId){
   lessonAudioIdx=0;lessonAudioState='playing';lessonAudioBtnId=btnId;
   updateListenBtn();
   logActivity('lesson_listen',{});
+  lessonAudioStartKeepAlive();
   speechSynthesis.cancel();
   const go=()=>lessonAudioNext();
   if(speechSynthesis.getVoices().length)go();
@@ -5897,6 +5912,7 @@ function lessonAudioNext(){
 function stopLessonAudio(){
   if(lessonAudioState!=='playing')return;
   lessonAudioState='idle';
+  lessonAudioStopKeepAlive();
   try{speechSynthesis.cancel();}catch(e){}
   updateListenBtn();
   lessonAudioBtnId=null;
@@ -8018,7 +8034,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='30.0.0';
+const APP_VERSION='30.1.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

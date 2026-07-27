@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v30-3'; // v30.3: android audio keepalive + watchdog
+const CACHE_NAME = 'tsid-shell-v30-4'; // v30.4: audio wake lock + stall detection
 const SHELL_FILES = [
   '/',
   '/app',

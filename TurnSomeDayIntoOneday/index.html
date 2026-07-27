@@ -5856,8 +5856,21 @@ function lessonAudioStartWatchdog(){
   lessonAudioRetryIdx=-1;lessonAudioRetryCount=0;
   lessonAudioWatchdog=setInterval(()=>{
     if(lessonAudioState!=='playing')return;
-    if(speechSynthesis.speaking||speechSynthesis.pending)return;
-    if(Date.now()-lessonAudioChunkStartedAt<2500)return;
+    const elapsed=Date.now()-lessonAudioChunkStartedAt;
+    const busy=speechSynthesis.speaking||speechSynthesis.pending;
+    // Two different deaths look identical from here. Either the engine has gone
+    // idle without ever firing 'end', or it is still claiming to speak while
+    // producing no sound at all - the stall this app has been chasing. The
+    // second needs a time limit, generously sized off the chunk's own length so
+    // a slow voice is never cut off mid-word: a chunk gets roughly double the
+    // time its text could possibly take before it is treated as dead.
+    if(busy){
+      const chars=(lessonAudioQueue[lessonAudioIdx-1]||'').length;
+      const rate=S.lessonRate||0.95;
+      const expectedMs=(chars/(11*rate))*1000;
+      if(elapsed<expectedMs*2+8000)return;
+      try{speechSynthesis.cancel();}catch(e){}
+    }else if(elapsed<2500)return;
     const deadIdx=lessonAudioIdx-1;
     if(deadIdx<0)return;
     if(lessonAudioRetryIdx===deadIdx)lessonAudioRetryCount++;
@@ -5866,8 +5879,11 @@ function lessonAudioStartWatchdog(){
     // back. Say so plainly rather than leaving them in silence wondering.
     if(lessonAudioRetryCount>3){
       const why=lessonAudioLastError?` (${lessonAudioLastError})`:'';
+      const hidden=lessonAudioWentHidden;
       stopLessonAudio();
-      appInfo('Audio stopped',`Your phone's voice stopped part-way through and wouldn't restart${why}. The lesson is all here to read.`);
+      appInfo('Audio stopped',hidden
+        ?"Your phone paused the app while it was in the background, which stops the voice. Keeping this screen open while you listen will hold it."
+        :`Your phone's voice stopped part-way through and wouldn't restart${why}. The lesson is all here to read.`);
       return;
     }
     lessonAudioIdx=deadIdx;
@@ -5878,6 +5894,28 @@ function lessonAudioStopWatchdog(){
   clearInterval(lessonAudioWatchdog);
   lessonAudioWatchdog=null;
 }
+// Listening to a lesson means not touching the phone, so the screen times out -
+// and once Android locks the screen it suspends the page and speech dies mid
+// sentence with no error. A wake lock keeps the screen up for exactly as long
+// as audio is playing, and is released the moment it stops. The lock is dropped
+// by the system whenever the page is hidden, so it has to be re-taken on return.
+let lessonAudioWakeLock=null,lessonAudioWentHidden=false;
+async function lessonAudioAcquireWakeLock(){
+  try{
+    if(!('wakeLock'in navigator))return;
+    lessonAudioWakeLock=await navigator.wakeLock.request('screen');
+  }catch(e){/* denied or unsupported - playback still works, screen may sleep */}
+}
+function lessonAudioReleaseWakeLock(){
+  try{if(lessonAudioWakeLock)lessonAudioWakeLock.release();}catch(e){}
+  lessonAudioWakeLock=null;
+}
+document.addEventListener('visibilitychange',()=>{
+  if(lessonAudioState!=='playing')return;
+  if(document.hidden){lessonAudioWentHidden=true;return;}
+  // Back in the foreground: the system took the lock away, so take it again.
+  lessonAudioAcquireWakeLock();
+});
 function splitForSpeech(text){
   // browsers cut long utterances off mid-sentence - feed the voice bite-sized pieces
   const sentences=String(text).match(/[^.!?]+[.!?]*/g)||[String(text)];
@@ -5930,7 +5968,8 @@ function startLessonAudio(text,btnId){
   logActivity('lesson_listen',{});
   lessonAudioStartKeepAlive();
   lessonAudioStartWatchdog();
-  lessonAudioLastError='';
+  lessonAudioLastError='';lessonAudioWentHidden=false;
+  lessonAudioAcquireWakeLock();
   speechSynthesis.cancel();
   const go=()=>lessonAudioNext();
   if(speechSynthesis.getVoices().length)go();
@@ -5964,6 +6003,7 @@ function stopLessonAudio(){
   lessonAudioState='idle';
   lessonAudioStopKeepAlive();
   lessonAudioStopWatchdog();
+  lessonAudioReleaseWakeLock();
   try{speechSynthesis.cancel();}catch(e){}
   updateListenBtn();
   lessonAudioBtnId=null;
@@ -8086,7 +8126,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='30.3.0';
+const APP_VERSION='30.4.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

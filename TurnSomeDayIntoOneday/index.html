@@ -2510,12 +2510,26 @@ function getTodayLesson(){
   return getLessonForDay(getLessonDayFor(S.currentAddiction));
 }
 
+// Supporter relations where the loved one is NOT a romantic partner. Four lessons in
+// the Supporting Someone track are written around a marriage - a father working through
+// his son's addiction should never open Day 20 and find a lesson about consent in a
+// marriage - so those four carry a family_variant that swaps in here instead.
+const FAMILY_RELATIONS=['minor-child','adult-child','parent','sibling','friend'];
+function usesFamilyVariant(){
+  return S.userType==='partner'&&FAMILY_RELATIONS.includes(S.partnerRelation);
+}
 // Some lessons assume a partner exists (e.g. a "talk to your partner" conversation) - if the
 // user told us they're single, swap in the lesson's single_variant fields where one is authored.
 function applyRelationshipVariant(lesson){
+  if(!lesson)return lesson;
+  // Relation is the stronger signal, so it wins: a sibling's own relationship status
+  // doesn't make a marriage-framed lesson any more appropriate for them.
+  if(lesson.family_variant&&usesFamilyVariant())return mergeLessonVariant(lesson,lesson.family_variant);
   const usesSingleVariant=S.relationshipStatus==='single'||S.relationshipStatus==='complicated';
-  if(!lesson||!usesSingleVariant||!lesson.single_variant)return lesson;
-  const v=lesson.single_variant;
+  if(!usesSingleVariant||!lesson.single_variant)return lesson;
+  return mergeLessonVariant(lesson,lesson.single_variant);
+}
+function mergeLessonVariant(lesson,v){
   return Object.assign({},lesson,{
     title:v.title||lesson.title,
     content:v.content||lesson.content,
@@ -7591,7 +7605,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='19.0.0';
+const APP_VERSION='20.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

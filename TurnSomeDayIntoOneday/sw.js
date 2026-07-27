@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v19'; // v19: free chat limit back to 3/day
+const CACHE_NAME = 'tsid-shell-v20'; // v20: relation-aware supporter lessons
 const SHELL_FILES = [
   '/',
   '/app',

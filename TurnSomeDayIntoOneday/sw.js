@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v26'; // v26: UTM capture + owner stats
+const CACHE_NAME = 'tsid-shell-v27'; // v27: milestone share cards
 const SHELL_FILES = [
   '/',
   '/app',

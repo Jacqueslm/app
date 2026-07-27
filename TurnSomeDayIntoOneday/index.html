@@ -5827,12 +5827,16 @@ function closeVoiceGuide(){
 // Every lesson can be listened to instead of read - same free built-in voice
 // as the guide, so someone cooking, driving, or working can still do their day.
 let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null,lessonAudioCurrentUtterance=null;
-// Chrome's speech engine silently stops producing audio after ~15s of continuous
-// speaking (a long-standing browser bug, not something sentence-chunking can
-// dodge - it fires on total speaking time, not per-utterance length). The
-// documented workaround is a periodic pause/resume nudge while it's talking.
+let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='';
+const IS_ANDROID=/Android/i.test(navigator.userAgent||'');
+// Desktop Chrome's speech engine silently stops producing audio after ~15s of
+// continuous speaking, and the documented workaround is a periodic pause/resume
+// nudge. On ANDROID that same call is actively destructive: pause() there
+// behaves like cancel(), so nudging every 10s would kill playback rather than
+// protect it. Desktop only, deliberately.
 function lessonAudioStartKeepAlive(){
   clearInterval(lessonAudioKeepAlive);
+  if(IS_ANDROID)return;
   lessonAudioKeepAlive=setInterval(()=>{
     if(lessonAudioState==='playing'&&speechSynthesis.speaking){speechSynthesis.pause();speechSynthesis.resume();}
   },10000);
@@ -5840,6 +5844,39 @@ function lessonAudioStartKeepAlive(){
 function lessonAudioStopKeepAlive(){
   clearInterval(lessonAudioKeepAlive);
   lessonAudioKeepAlive=null;
+}
+// Belt and braces for every remaining way the engine can die quietly. Rather
+// than guess at which browser bug is responsible, this watches for the symptom
+// they all share: we still believe we're playing, but the engine is idle and no
+// 'end' event ever arrived. When that happens the dead chunk is spoken again
+// from its start, so the listener loses nothing. The 2.5s grace keeps the normal
+// gap between chunks from ever tripping it.
+function lessonAudioStartWatchdog(){
+  clearInterval(lessonAudioWatchdog);
+  lessonAudioRetryIdx=-1;lessonAudioRetryCount=0;
+  lessonAudioWatchdog=setInterval(()=>{
+    if(lessonAudioState!=='playing')return;
+    if(speechSynthesis.speaking||speechSynthesis.pending)return;
+    if(Date.now()-lessonAudioChunkStartedAt<2500)return;
+    const deadIdx=lessonAudioIdx-1;
+    if(deadIdx<0)return;
+    if(lessonAudioRetryIdx===deadIdx)lessonAudioRetryCount++;
+    else{lessonAudioRetryIdx=deadIdx;lessonAudioRetryCount=1;}
+    // Three failed restarts of the same chunk means the engine isn't coming
+    // back. Say so plainly rather than leaving them in silence wondering.
+    if(lessonAudioRetryCount>3){
+      const why=lessonAudioLastError?` (${lessonAudioLastError})`:'';
+      stopLessonAudio();
+      appInfo('Audio stopped',`Your phone's voice stopped part-way through and wouldn't restart${why}. The lesson is all here to read.`);
+      return;
+    }
+    lessonAudioIdx=deadIdx;
+    lessonAudioNext();
+  },1000);
+}
+function lessonAudioStopWatchdog(){
+  clearInterval(lessonAudioWatchdog);
+  lessonAudioWatchdog=null;
 }
 function splitForSpeech(text){
   // browsers cut long utterances off mid-sentence - feed the voice bite-sized pieces
@@ -5892,6 +5929,8 @@ function startLessonAudio(text,btnId){
   updateListenBtn();
   logActivity('lesson_listen',{});
   lessonAudioStartKeepAlive();
+  lessonAudioStartWatchdog();
+  lessonAudioLastError='';
   speechSynthesis.cancel();
   const go=()=>lessonAudioNext();
   if(speechSynthesis.getVoices().length)go();
@@ -5912,13 +5951,19 @@ function lessonAudioNext(){
   u.rate=S.lessonRate||0.95;u.pitch=1;
   let advanced=false;
   const next=()=>{if(advanced)return;advanced=true;lessonAudioNext();};
-  u.onend=next;u.onerror=next;
+  u.onend=()=>{lessonAudioRetryIdx=-1;lessonAudioRetryCount=0;next();};
+  // The error code is the one piece of evidence about why audio died on a real
+  // device, and it was previously thrown away. Keep it for the message shown
+  // if the watchdog can't recover.
+  u.onerror=(e)=>{lessonAudioLastError=(e&&e.error)||'unknown';next();};
+  lessonAudioChunkStartedAt=Date.now();
   speechSynthesis.speak(u);
 }
 function stopLessonAudio(){
   if(lessonAudioState!=='playing')return;
   lessonAudioState='idle';
   lessonAudioStopKeepAlive();
+  lessonAudioStopWatchdog();
   try{speechSynthesis.cancel();}catch(e){}
   updateListenBtn();
   lessonAudioBtnId=null;
@@ -8041,7 +8086,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='30.2.0';
+const APP_VERSION='30.3.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

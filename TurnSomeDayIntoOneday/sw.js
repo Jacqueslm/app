@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v30-2'; // v30.2: fix lesson audio GC cutoff
+const CACHE_NAME = 'tsid-shell-v30-3'; // v30.3: android audio keepalive + watchdog
 const SHELL_FILES = [
   '/',
   '/app',

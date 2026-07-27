@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v17'; // v17: landing page moves the app to /app
+const CACHE_NAME = 'tsid-shell-v18'; // v18: 5 free chats, Nova prompt caching, guided-mode notice once per session
 const SHELL_FILES = [
   '/',
   '/app',

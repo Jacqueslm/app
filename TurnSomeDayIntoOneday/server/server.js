@@ -29,7 +29,7 @@ const ANTHROPIC_VERSION = '2023-06-01';
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FREE_CHAT_LIMIT = 3;
+const FREE_CHAT_LIMIT = 5;
 const PRO_CHAT_LIMIT = 50;
 
 // Stripe webhook signature verification needs the raw request body, so this route is

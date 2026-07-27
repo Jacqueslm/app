@@ -645,6 +645,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
   </div>
 
+  <!-- Milestone offer: appears on the day a milestone is reached and on later
+       visits until it is shared or dismissed. An offer, never an interruption -
+       no modal, no blocking, and "Not now" means never for that milestone. -->
+  <div id="milestone-offer" style="display:none;margin:12px 16px 0;background:var(--ok);border-radius:12px;padding:14px 16px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-award" style="font-size:19px;color:#fff"></i></div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--ok-t)" id="milestone-offer-title">Day 30</div>
+        <div style="font-size:12px;color:#0F6E56;line-height:1.45" id="milestone-offer-sub">Worth marking. Want a card for it?</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="log-btn" style="flex:1;margin:0" onclick="shareOfferedMilestone()">Share this</button>
+      <button class="log-btn" style="flex:1;margin:0;background:none;border:1px solid rgba(15,110,86,0.35);color:#0F6E56" onclick="dismissOfferedMilestone()">Not now</button>
+    </div>
+  </div>
+
   <div class="row">
     <i class="ti ti-hand-stop"></i>
     <div class="row-info" style="flex:1"><p>Daily pledge</p><span id="pledge-sub">Take your pledge to stay sober today</span></div>
@@ -1006,6 +1023,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="ps"><div class="ps-n" id="prog-longest">0</div><div class="ps-l">Longest streak ever</div></div>
           </div>
         </div>
+      </div>
+      <div class="sec" style="padding-top:0" id="milestone-share-sec">
+        <div class="sec-hd">Share a milestone</div>
+        <div class="card" style="padding:6px 14px" id="milestone-share-list"></div>
       </div>
       <div class="sec" style="padding-top:0">
         <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:11px">— never resets, even after a setback</span></div>
@@ -2313,7 +2334,7 @@ let S = {
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   novaDisclaimerDismissed:false,fontSize:'default',
-  notifiedMilestones:[],lastProNudgeDate:'',
+  notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
@@ -3781,6 +3802,7 @@ function updateStats(){
     maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
   }
   maybeShowProMilestoneCelebration(days);
+  maybeShowMilestoneOffer();
   maybeShowHabitCelebration(days);
   maybeShowHabitAlert();
 
@@ -4879,9 +4901,26 @@ function saveVoiceJournal(text){
 // A milestone image people actually want to post is the cheapest organic growth
 // loop in this category. The card renders locally on a canvas - nothing about
 // the journey leaves the device unless the user chooses to share it.
-function buildShareCardCanvas(){
+// Milestones that earn a shareable card. Deliberately not the same list as
+// MILESTONES (the Home strip) or PRO_MILESTONE_DAYS (the Pro modal) - this is the
+// set worth putting in front of other people.
+const SHARE_MILESTONES=[1,7,30,60,90,180,365];
+function reachedShareMilestones(){
   const days=getDays();
-  const term=recoveryTerm();
+  return SHARE_MILESTONES.filter(m=>days>=m);
+}
+// HARD RULE: nothing on this card may name the habit. It lands in feeds and group
+// chats, and "Day 30" says everything to the person who earned it and nothing to
+// anyone else. recoveryTerm() returns things like "gambling-free" and "binge-free",
+// so it is deliberately NOT used here - the Home screen keeps that wording because
+// that screen is private; this image is not.
+function shareCardLabel(days){
+  const unit=days===1?'DAY':'DAYS';
+  return isSupporterTrack()?`${unit} ON THIS PATH`:unit;
+}
+function buildShareCardCanvas(day){
+  // A re-shared milestone renders that milestone's numbers, not today's.
+  const days=(typeof day==='number'&&day>0)?Math.min(day,getDays()):getDays();
   const saved=Math.round(days*(S.dailySpend||0));
   const hoursBack=Math.round(days*(S.dailyHoursLost||0));
   const totalDays=(S.totalSoberDaysEver||0)+days;
@@ -4892,7 +4931,7 @@ function buildShareCardCanvas(){
   g.addColorStop(0,'#0f0c29');g.addColorStop(0.55,'#24243e');g.addColorStop(1,'#302b63');
   x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
   const glow=x.createRadialGradient(540,600,60,540,600,480);
-  glow.addColorStop(0,'rgba(240,177,90,0.32)');glow.addColorStop(1,'rgba(240,177,90,0)');
+  glow.addColorStop(0,'rgba(126,232,162,0.26)');glow.addColorStop(1,'rgba(126,232,162,0)');
   x.fillStyle=glow;x.fillRect(0,120,1080,960);
   const F='-apple-system,"Segoe UI",Roboto,sans-serif';
   x.textAlign='center';
@@ -4902,9 +4941,9 @@ function buildShareCardCanvas(){
   x.fillStyle='#ffffff';
   x.font=`700 300px ${F}`;
   x.fillText(String(days),540,700);
-  x.fillStyle='#f0b15a';
+  x.fillStyle='#7ee8a2';
   x.font=`600 52px ${F}`;
-  x.fillText(`DAY${days===1?'':'S'} ${term.toUpperCase()}`,540,790);
+  x.fillText(shareCardLabel(days),540,790);
   x.strokeStyle='rgba(255,255,255,0.18)';x.lineWidth=2;
   x.beginPath();x.moveTo(240,880);x.lineTo(840,880);x.stroke();
   const stats=[];
@@ -4925,16 +4964,23 @@ function buildShareCardCanvas(){
   x.fillText('One day at a time.',540,1250);
   return c;
 }
-function shareProgressCard(){
+function shareProgressCard(day){
   if(!S.startDate){
     appInfo('Share my progress','Set your start date first — then your card will show your real numbers.');
     return;
   }
-  logActivity('share_card');
-  const canvas=buildShareCardCanvas();
+  // A milestone can only be shared once it has actually been reached - a day-15
+  // account cannot produce a day-30 card, even by calling this directly.
+  if(typeof day==='number'&&day>getDays()){
+    appInfo('Not yet','That milestone is still ahead of you. It will be here when you reach it.');
+    return;
+  }
+  const cardDay=(typeof day==='number'&&day>0)?day:getDays();
+  logActivity('share_card',{day:cardDay});
+  const canvas=buildShareCardCanvas(cardDay);
   canvas.toBlob(async blob=>{
     if(!blob){appInfo('Share my progress','Could not create your card. Please try again.');return;}
-    const file=new File([blob],`day-${getDays()}-of-my-journey.png`,{type:'image/png'});
+    const file=new File([blob],`day-${cardDay}.png`,{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{await navigator.share({files:[file],title:'My progress'});return;}
       catch(e){if(e&&e.name==='AbortError')return;/* fall through to download */}
@@ -4946,6 +4992,60 @@ function shareProgressCard(){
     setTimeout(()=>URL.revokeObjectURL(url),5000);
     appInfo('Share my progress','Your progress card was saved as an image — post it anywhere you like.');
   },'image/png');
+}
+function milestoneCardTitle(d){return d===1?'Day One':`Day ${d}`;}
+// The offer is deliberately not tied to "today is the milestone". Real usage is
+// gappy - someone who hits Day 30 on a Tuesday they never open the app misses it
+// forever under a same-day trigger. Instead the highest unclaimed milestone is
+// offered on any visit, once, and "Not now" retires it permanently.
+let offeredMilestone=null;
+function maybeShowMilestoneOffer(){
+  const bar=document.getElementById('milestone-offer');
+  if(!bar)return;
+  const seen=S.seenMilestones||[];
+  const unclaimed=reachedShareMilestones().filter(m=>!seen.includes(m));
+  offeredMilestone=unclaimed.length?unclaimed[unclaimed.length-1]:null;
+  if(offeredMilestone===null||!S.startDate){bar.style.display='none';return;}
+  document.getElementById('milestone-offer-title').textContent=milestoneCardTitle(offeredMilestone);
+  bar.style.display='block';
+}
+function markMilestoneSeen(d){
+  if(!(S.seenMilestones||[]).includes(d)){
+    S.seenMilestones=(S.seenMilestones||[]).concat(d);
+    save();
+  }
+}
+function shareOfferedMilestone(){
+  const d=offeredMilestone;
+  if(d===null)return;
+  markMilestoneSeen(d);
+  maybeShowMilestoneOffer();
+  renderMilestoneShareList();
+  shareProgressCard(d);
+}
+function dismissOfferedMilestone(){
+  if(offeredMilestone===null)return;
+  markMilestoneSeen(offeredMilestone);
+  maybeShowMilestoneOffer();
+  renderMilestoneShareList();
+}
+// Re-share: a milestone reached last week is still worth a card today. Only
+// milestones actually reached appear here, so the list itself can never offer a
+// day the user has not earned.
+function renderMilestoneShareList(){
+  const sec=document.getElementById('milestone-share-sec');
+  const list=document.getElementById('milestone-share-list');
+  if(!sec||!list)return;
+  const reached=S.startDate?reachedShareMilestones():[];
+  if(!reached.length){sec.style.display='none';list.innerHTML='';return;}
+  sec.style.display='';
+  list.innerHTML=reached.slice().reverse().map(d=>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--bdr)">`+
+    `<div style="font-size:14px;color:var(--tp);font-weight:500">${milestoneCardTitle(d)}</div>`+
+    `<span style="color:var(--accent);font-size:12px;cursor:pointer" onclick="shareProgressCard(${d})"><i class="ti ti-share" style="font-size:11px"></i> Share</span>`+
+    `</div>`
+  ).join('');
+  list.lastElementChild.style.borderBottom='none';
 }
 
 // ─── CRAVINGS ─────────────────────────────────────────────────────────────────
@@ -7138,7 +7238,7 @@ function switchTo(id){
   // silently no-op. Re-apply it after layout settles.
   requestAnimationFrame(()=>{screensEl.scrollTop=0;});
   // refresh screens
-  if(id==='progress'){buildProgress();updateStats();}
+  if(id==='progress'){buildProgress();updateStats();renderMilestoneShareList();}
   if(id==='timeline'){buildTimeline();}
   if(id==='journal'){renderJournal();}
   if(id==='craving'){renderCravings();}
@@ -7756,7 +7856,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='26.0.0';
+const APP_VERSION='27.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

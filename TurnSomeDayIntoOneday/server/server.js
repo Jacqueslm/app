@@ -454,7 +454,24 @@ app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) =
     const url = await billing.createCheckoutSession(user, plan, getOrigin(req));
     res.json({ url });
   } catch (err) {
+    // A sold-out cap is a different kind of "no" from a broken checkout, and the
+    // client shows a different screen for it.
+    if (err && err.code === 'lifetime_sold_out') {
+      return res.status(409).json({ error: err.message, soldOut: true });
+    }
     res.status(400).json({ error: err.message || 'Could not start checkout.' });
+  }
+});
+
+// Public on purpose: the landing page asks this while logged out. It publishes
+// only what the pricing surfaces are allowed to show, and showCount is decided
+// server-side so the app and the landing page can never disagree about when the
+// remaining number becomes visible.
+app.get('/api/lifetime-availability', (req, res) => {
+  try {
+    res.json(billing.getLifetimeAvailability());
+  } catch (e) {
+    res.status(503).json({ error: 'Unavailable.' });
   }
 });
 

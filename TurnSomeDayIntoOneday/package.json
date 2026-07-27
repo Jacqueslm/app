@@ -1,6 +1,6 @@
 {
   "name": "turn-someday-into-day-one",
-  "version": "27.0.0",
+  "version": "28.0.0",
   "private": true,
   "description": "Recovery companion app - deployable root for hosting platforms",
   "engines": {

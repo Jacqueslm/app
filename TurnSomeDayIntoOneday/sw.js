@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v22'; // v22: supporter-voiced editable letter
+const CACHE_NAME = 'tsid-shell-v23'; // v23: Together section reframed for supporters
 const SHELL_FILES = [
   '/',
   '/app',

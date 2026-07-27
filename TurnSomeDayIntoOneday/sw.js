@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v24'; // v24: supporter string swaps
+const CACHE_NAME = 'tsid-shell-v25'; // v25: term labels keyed on active track
 const SHELL_FILES = [
   '/',
   '/app',

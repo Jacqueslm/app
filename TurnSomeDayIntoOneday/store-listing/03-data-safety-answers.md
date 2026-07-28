@@ -25,6 +25,11 @@ you can defend the answer if Play ever asks.
 | **Email address** | Yes | No | Account management | Required |
 | **Name** | Yes | No | App functionality (the app greets you by first name) | Required |
 | **Phone number** | Yes | No | Account management (account recovery) | **Optional** — the signup field is optional |
+| **User IDs** | Yes | No | Account management | Required |
+
+> **User IDs** covers the internal account ID rows are keyed on. It never leaves
+> the server and is not an advertising or device identifier, but Play counts an
+> account ID as a user ID, so it is declared.
 
 ### Health and fitness
 
@@ -49,6 +54,30 @@ you can defend the answer if Play ever asks.
 > server stores only a per-day integer count in the `chat_usage` table — there
 > is no column anywhere that holds message text. Conversation text is sent to
 > the model provider to generate a reply and is not retained by the app.
+
+### Photos and videos
+
+| Data type | Collected | Shared | Purpose | Optional? |
+|---|---|---|---|---|
+| **Photos** | Yes | No | App functionality | **Optional** |
+
+> The profile photo. It is resized to 300px and stored as a data URL inside the
+> user's own synced state (`S.profilePhoto` in `index.html`, written by `save()`
+> and pushed by `pushStateToServer`), which means it does reach the server and
+> must be declared. It is deleted with the account.
+
+### Audio files
+
+| Data type | Collected | Shared | Purpose | Optional? |
+|---|---|---|---|---|
+| **Voice or sound recordings** | Yes — **processed ephemerally** | No | App functionality | **Optional** |
+
+> Voice journaling uses the browser's Web Speech API. The app never receives,
+> stores or transmits audio itself — only the finished transcript, which the
+> user then saves as an ordinary journal entry. But the platform's speech
+> service does take the audio off the device to produce that transcript, so
+> declaring it is the honest answer. Tick **processed ephemerally**: no
+> recording is ever retained anywhere in this system.
 
 ### App activity
 

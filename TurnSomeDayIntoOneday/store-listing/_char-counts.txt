@@ -8,5 +8,8 @@ SHORT DESCRIPTION (limit 80)
   72 chars : Track your days, write it down, and get support when the moment is hard.
 
 FULL DESCRIPTION (limit 4000)
-  2667 chars
+  3290 chars
   first paragraph: "This app is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It is a wellness and habit-support tool. If you are struggling with your health, please consult a qualified healthcare professional."
+
+Regenerate with the snippet in store-listing/05-graphics.md after editing
+02-full-description.md, so these never drift from the real text again.

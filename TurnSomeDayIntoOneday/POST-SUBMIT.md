@@ -34,8 +34,11 @@ verified in the build environment. It has to be done on a real phone.
       - `pro_lifetime`  (one-time product)
       The IDs must match exactly — `PRODUCT_PLANS` in `server/store-billing.js`
       maps them, and an unknown ID is rejected rather than guessed at.
-- [ ] Google Cloud → service account with the Android Publisher role, download
-      the JSON key, grant it access in Play Console → Users and permissions.
+- [x] Google Cloud project `day-one-play`, Google Play Android Developer API enabled
+- [ ] Service account in that project + JSON key downloaded
+- [ ] Invite the service account's email in Play Console → Users and permissions,
+      granting it access to this app (the Cloud role alone is not enough — Play
+      checks its own permissions, not Cloud's)
 - [ ] Railway → env var `PLAY_SERVICE_ACCOUNT_JSON` = the whole JSON, one line.
       Until this is set the app **refuses to open the payment sheet at all** and
       says "Purchases are temporarily unavailable — nothing has been charged."

@@ -513,6 +513,12 @@ app.post('/api/billing/store/verify', requireAuth, async (req, res) => {
 app.get('/privacy', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'privacy.html'));
 });
+// Play requires the account-deletion instructions to be reachable from the
+// store listing, which means without signing in - a signed-out visitor is
+// exactly the person who cannot find the in-app button.
+app.get('/delete-account', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'delete-account.html'));
+});
 
 app.get('/api/lifetime-availability', (req, res) => {
   try {

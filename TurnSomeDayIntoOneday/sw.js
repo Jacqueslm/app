@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v33'; // v33: complimentary Pro access for review + testers
+const CACHE_NAME = 'tsid-shell-v34'; // v34: public account-deletion page for Play
 const SHELL_FILES = [
   '/',
   '/app',

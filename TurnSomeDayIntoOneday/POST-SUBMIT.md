@@ -77,3 +77,11 @@ is created, to match `TRIAL_DAYS = 7` on the Stripe side. A base plan is not
 purchasable until it is **activated**.
 
 Grace period left at Google's recommended 7 days, account hold auto-calculated.
+
+### Progress
+- [x] `pro_monthly` created, base plan `monthly-autorenew` at $9.99, **Active**
+- [ ] `pro_monthly` 7-day free trial offer
+- [ ] `pro_yearly` + base plan + trial offer
+- [ ] `pro_lifetime` one-time product
+- [ ] `PLAY_SERVICE_ACCOUNT_JSON` in Railway — until this is set the app refuses
+      to open the payment sheet, so none of the above can be bought yet

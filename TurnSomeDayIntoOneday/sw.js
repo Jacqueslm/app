@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v9'; // v9: document partial data deletion
+const CACHE_NAME = 'tsid-shell-v10'; // v10: refuse purchases the server cannot honour
 const SHELL_FILES = [
   '/',
   '/app',

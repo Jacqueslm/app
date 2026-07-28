@@ -7483,6 +7483,19 @@ async function becomeProViaStore(plan){
     appInfo('Upgrade unavailable','In-app purchases are not available on this device. You can also upgrade on our website.');
     return;
   }
+  // Asked fresh rather than read from the last sync: this is the last moment
+  // before the store takes real money, and a stale "ready" here costs a
+  // customer a payment that cannot be honoured.
+  try{
+    const ready=await fetch('/api/billing/status').then(r=>r.ok?r.json():null);
+    if(!ready||!ready.storeBillingReady){
+      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.");
+      return;
+    }
+  }catch(e){
+    appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
+    return;
+  }
   try{
     const service=await window.getDigitalGoodsService('https://play.google.com/billing');
     const details=await service.getDetails([productId]);
@@ -8179,7 +8192,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.0.0';
+const APP_VERSION='10.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

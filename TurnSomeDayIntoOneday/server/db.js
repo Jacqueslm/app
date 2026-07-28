@@ -165,6 +165,14 @@ addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
 addColumnIfMissing('utm_source', 'utm_source TEXT');
 addColumnIfMissing('utm_campaign', 'utm_campaign TEXT');
 addColumnIfMissing('utm_medium', 'utm_medium TEXT');
+// Where a subscription was bought. Deliberately not a play-specific flag: the
+// same three columns serve Apple when that ships, so adding a second store is a
+// new verifier rather than a schema change. Entitlement never reads this - Pro
+// is Pro wherever it was paid for - it exists so refunds, cancellations and
+// support can be traced back to the right billing system.
+addColumnIfMissing('billing_source', "billing_source TEXT NOT NULL DEFAULT 'stripe'");
+addColumnIfMissing('store_product_id', 'store_product_id TEXT');
+addColumnIfMissing('store_purchase_token', 'store_purchase_token TEXT');
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 // leads predates the utm_medium/utm_campaign columns, so it needs the same
@@ -444,8 +452,30 @@ function updateSubscriptionFromStripe(userId, fields) {
 // The authoritative seat count for the Founding Lifetime cap. Cheap enough to
 // run on every checkout attempt, which is what makes the cached copy elsewhere
 // safe: the cache can go stale without ever overselling.
+// Counts lifetime seats from every billing source. The Founding 50 is a promise
+// about how many people get it, not about how they paid.
 function countLifetimeSold() {
   return db.prepare("SELECT COUNT(*) n FROM users WHERE plan = 'lifetime'").get().n;
+}
+
+// A store purchase is recorded through the same fields Stripe writes, so
+// entitlement, the trial sequence and the admin stats keep working untouched.
+function recordStorePurchase(userId, fields) {
+  const { source, plan, productId, purchaseToken, subscriptionStatus, currentPeriodEnd } = fields;
+  db.prepare(
+    `UPDATE users SET
+       plan = ?, subscription_status = ?, current_period_end = ?,
+       cancel_at_period_end = 0,
+       billing_source = ?, store_product_id = ?, store_purchase_token = ?
+     WHERE id = ?`
+  ).run(plan, subscriptionStatus || 'active', currentPeriodEnd || null,
+        source, productId || null, purchaseToken || null, userId);
+}
+
+// A purchase token may only ever belong to one account - this is what stops the
+// same receipt being replayed to upgrade a second account for free.
+function getUserByPurchaseToken(token) {
+  return db.prepare('SELECT * FROM users WHERE store_purchase_token = ?').get(token);
 }
 
 function getUsersInTrialWindow() {
@@ -553,6 +583,8 @@ module.exports = {
   setUserUtm,
   getAdminStats,
   countLifetimeSold,
+  recordStorePurchase,
+  getUserByPurchaseToken,
   getUserByEmail,
   getUserById,
   getState,

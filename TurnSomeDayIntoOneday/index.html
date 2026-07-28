@@ -7222,7 +7222,7 @@ function novaNudge(text){
   showNovaBadge();
 }
 function maybeNovaProNudge(text){
-  if(S.isPro||isPlayBuild())return;
+  if(S.isPro)return;
   const today=new Date().toDateString();
   if(S.lastProNudgeDate===today)return;
   S.lastProNudgeDate=today;
@@ -7250,9 +7250,7 @@ async function sendMsg(){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
       ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
-      :isPlayBuild()
-        ?"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988. 💜"
-        :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
+      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -7357,9 +7355,6 @@ const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-p
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 function switchTo(id){
-  // The Plans screen does not exist in the Play build. Anything that still asks
-  // for it - a guide entry, a cached modal, a deep link - lands on Profile.
-  if(id==='plans'&&isPlayBuild())id='profile';
   document.body.classList.toggle('nova-open',id==='nova');
   if(id==='plans'){
     const activeEl=document.querySelector('.scr.on');
@@ -7455,21 +7450,67 @@ function detectPlayBuild(){
 }
 let playBuild=detectPlayBuild();
 function isPlayBuild(){return playBuild;}
-// Every purchase entry point in the app routes through switchTo('plans'), so
-// scanning for that is what makes this complete rather than a list of IDs that
-// silently goes stale the next time a CTA is added.
+// The Play build sells Pro through Google Play Billing rather than Stripe, so
+// nothing is hidden any more - the whole pricing surface is shown, and only the
+// checkout mechanism differs. What must never happen is a Play user reaching
+// Stripe: that is the policy violation, and the server refuses it independently.
 function applyPlayBuildUI(){
   if(!isPlayBuild())return;
   document.body.classList.add('play-build');
-  document.querySelectorAll('[onclick*="\'plans\'"]').forEach(el=>{el.style.display='none';});
-  ['tier-badge','home-chip','pro-cta','lifetime-note','plans-continue-btn','plans-stayfree-btn']
-    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  document.querySelectorAll('.mini-pricing-row,.up-sm,.tier-toggle,.tier-cards').forEach(el=>{el.style.display='none';});
-  // Pricing answers in the guide and FAQ would otherwise still quote prices.
-  const idx=HELP_INDEX.findIndex(h=>h.name==='Upgrade to Pro / see pricing');
-  if(idx>=0)HELP_INDEX.splice(idx,1);
-  for(let i=GUIDE_FAQ.length-1;i>=0;i--){
-    if(/free trial work|What do I get with Pro|How much does the app cost/i.test(GUIDE_FAQ[i].q))GUIDE_FAQ.splice(i,1);
+}
+
+// ─── IN-APP PURCHASE (GOOGLE PLAY, LATER APPLE) ──────────────────────────────
+// Product IDs are configured in the store console and must match the server's
+// map exactly - a mismatch is an unknown product, never a guessed plan.
+const STORE_PRODUCTS={monthly:'pro_monthly',yearly:'pro_yearly',lifetime:'pro_lifetime'};
+// The Digital Goods API is the bridge a Trusted Web Activity uses to reach the
+// store it was installed from. Absent in a normal browser, which is exactly how
+// the web build keeps using Stripe without any extra branching.
+function storeBillingAvailable(){
+  return typeof window!=='undefined'&&'getDigitalGoodsService'in window;
+}
+function currentStoreSource(){
+  // One place to teach this about Apple later; everything downstream is generic.
+  return isPlayBuild()?'play':null;
+}
+async function becomeProViaStore(plan){
+  const productId=STORE_PRODUCTS[plan];
+  const source=currentStoreSource();
+  if(!productId||!source){appInfo('Upgrade unavailable','That plan is not available here right now.');return;}
+  if(!storeBillingAvailable()){
+    appInfo('Upgrade unavailable','In-app purchases are not available on this device. You can also upgrade on our website.');
+    return;
+  }
+  try{
+    const service=await window.getDigitalGoodsService('https://play.google.com/billing');
+    const details=await service.getDetails([productId]);
+    if(!details||!details.length){appInfo('Upgrade unavailable','That plan is not available in the store right now.');return;}
+    const item=details[0];
+    const request=new PaymentRequest(
+      [{supportedMethods:'https://play.google.com/billing',data:{sku:productId}}],
+      {total:{label:item.title||'Pro',amount:{currency:item.price.currency,value:item.price.value}}}
+    );
+    const response=await request.show();
+    const purchaseToken=response.details&&response.details.purchaseToken;
+    // The store says it took the money; the server still asks the store itself
+    // before granting anything, because a token from a device proves nothing.
+    const verify=await fetch('/api/billing/store/verify',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({source,productId,purchaseToken})
+    });
+    const data=await verify.json().catch(()=>({}));
+    if(!verify.ok){
+      await response.complete('fail');
+      appInfo(data.soldOut?'Founding Lifetime':'Upgrade unavailable',data.error||'Could not confirm that purchase.');
+      return;
+    }
+    await response.complete('success');
+    await syncBillingStatus(true);
+    appInfo('You\'re Pro','Your purchase is confirmed. Everything is unlocked.');
+  }catch(e){
+    // A user dismissing the store sheet lands here too - say nothing then.
+    if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
+    appInfo('Upgrade unavailable','Could not complete that purchase. Please try again in a moment.');
   }
 }
 
@@ -7561,10 +7602,16 @@ function selectFree(){
   stayFreeForNow();
 }
 async function becomePro(plan){
-  // Hard stop for the Play build. Nothing in the UI can reach here, but a stale
-  // deep link or an old cached screen must not either.
-  if(isPlayBuild())return;
   plan=plan||billTypeToPlan(currentBillSelection);
+  // A Play install buys through Google, never Stripe. This is the policy line,
+  // and the server enforces it again independently of what happens here.
+  if(isPlayBuild()){
+    if(!S.accountEmail){
+      appInfo('Sign in required','Create a free account first so your purchase can be restored on any device.');
+      return;
+    }
+    return becomeProViaStore(plan);
+  }
   if(!S.accountEmail){
     appInfo('Sign in required','Create a free account first so your Pro purchase can be linked to you and restored on any device. Go to Profile > Account & Sync, then come back to upgrade.');
     return;
@@ -8126,7 +8173,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='31.0.0';
+const APP_VERSION='32.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

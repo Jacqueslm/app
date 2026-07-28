@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const db = require('./db');
 const billing = require('./billing');
+const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
 const {
@@ -444,12 +445,15 @@ function getOrigin(req) {
 }
 
 app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) => {
-  // The Google Play build ships free-tier only: Play requires digital goods sold
-  // inside a Play-distributed app to use Play Billing, so this app sells nothing
-  // there at all. The client hides every purchase surface; this refuses the
-  // request outright, so no code path inside the Android wrapper reaches Stripe.
+  // A Play install must buy through Google, never Stripe - that is the Play
+  // policy line. The client routes there already; this refuses independently, so
+  // no code path inside the Android wrapper can reach Stripe even if the client
+  // is stale, tampered with, or wrong.
   if (req.get('X-TSID-Client') === 'play') {
-    return res.status(403).json({ error: 'Pro is not available in the Android app.' });
+    return res.status(403).json({
+      error: 'Purchases in the Android app go through Google Play.',
+      usePlayBilling: true,
+    });
   }
   if (!billing.isConfigured()) {
     return res.status(503).json({ error: 'Billing is not available on this server right now.' });
@@ -467,6 +471,36 @@ app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) =
       return res.status(409).json({ error: err.message, soldOut: true });
     }
     res.status(400).json({ error: err.message || 'Could not start checkout.' });
+  }
+});
+
+// An in-app purchase made through an app store. The client sends the receipt;
+// this asks the store directly whether it is real, because a purchase token
+// from a device is meaningless on its own. Store-agnostic by design - Apple
+// will use this same route.
+app.post('/api/billing/store/verify', requireAuth, async (req, res) => {
+  const { source, productId, purchaseToken } = req.body || {};
+  const user = db.getUserById(req.userId);
+  if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  try {
+    // The Founding 50 is a promise about how many people get lifetime, not about
+    // how they paid, so a store lifetime purchase counts against the same cap.
+    const mapping = storeBilling.planForProduct(productId);
+    if (mapping && mapping.plan === 'lifetime' && user.plan !== 'lifetime'
+        && db.countLifetimeSold() >= billing.LIFETIME_CAP) {
+      return res.status(409).json({
+        error: 'Founding Lifetime — sold out. Lifetime returns at $249.',
+        soldOut: true,
+      });
+    }
+    const result = await storeBilling.redeemPurchase({
+      userId: req.userId, source, productId, purchaseToken,
+    });
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    const status = err.code === 'token_already_used' ? 409 : 400;
+    try { db.logError('store_billing', err.message, `${source}/${productId}`); } catch (_) {}
+    res.status(status).json({ error: err.message || 'Could not confirm that purchase.' });
   }
 });
 

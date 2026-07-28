@@ -56,7 +56,7 @@ html,body{height:100%;background:#0f0c29;font-family:var(--f)}
 body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden}
 /* zoom scales 100dvh past the real viewport - compensate so pinned layouts
-   (Nova's input, the bottom nav) stay on screen at every text size. */
+   (Friendly's input, the bottom nav) stay on screen at every text size. */
 .app.fs-smaller{zoom:0.88;min-height:calc(100dvh/0.88)}
 .app.fs-bigger{zoom:1.18;min-height:calc(100dvh/1.18)}
 .app.fs-smaller .ob{min-height:calc(100dvh/0.88);max-height:calc(100dvh/0.88)}
@@ -166,7 +166,7 @@ body{display:flex;justify-content:center}
 .nova-mode-chip{font-size:10px;background:rgba(255,255,255,0.12);color:#c0caff;border-radius:20px;padding:2px 8px}
 .nova-mode-chip.live{background:var(--green-dim);color:var(--green)}
 .chat-area{padding:14px 16px 20px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;min-height:0}
-/* Nova is a real chat layout: header/chips fixed, messages scroll in the middle,
+/* Friendly is a real chat layout: header/chips fixed, messages scroll in the middle,
    the typing bar pinned to the bottom - nothing ever renders below the input. */
 #s-nova.on{display:flex;flex-direction:column;height:100%}
 .bub{max-width:85%;border-radius:18px;padding:11px 14px;font-size:14px;line-height:1.55}
@@ -209,7 +209,7 @@ body{display:flex;justify-content:center}
 .sos-close{width:100%;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:13px;font-size:14px;color:var(--ts);cursor:pointer;font-family:var(--f);margin-top:4px}
 #guide-fab{position:fixed;bottom:80px;right:max(12px,calc(50% - 203px));width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:500;box-shadow:0 4px 14px rgba(0,0,0,0.35)}
 #guide-fab i{font-size:24px}
-/* Nova's typing bar lives exactly where the floating buttons sit - lift them
+/* Friendly's typing bar lives exactly where the floating buttons sit - lift them
    clear of it so a tap on "send" is never stolen by the guide. */
 body.nova-open #guide-fab{bottom:164px}
 body.nova-open #guide-fab-label{bottom:172px}
@@ -466,7 +466,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
 <div class="ob-step" id="obs2">
   <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
-  <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Nova can tailor your plan to how this actually shows up for you.</p>
+  <p style="font-size:12px;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Friendly can tailor your plan to how this actually shows up for you.</p>
   <div id="dynamic-behavior-questions"></div>
   <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
   <button class="ob-btn outline" onclick="obBack(1)">Back</button>
@@ -474,7 +474,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
 <!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
 <div class="ob-step" id="obs2_5">
-  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Nova's Presence</div>
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Friendly's Presence</div>
   <p style="font-size:12px; color:#8892c0; text-align: left; margin-bottom: 20px;">
     Select the voice and presence you feel most secure opening up to. Trust is everything—you can change this at any time.
   </p>
@@ -483,21 +483,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="voice-card" id="vc-female" onclick="selectVoice('female')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
       <div style="font-size: 24px;">👩‍💼</div>
       <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Female Presence)</div>
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Friendly (Female Presence)</div>
         <div style="font-size: 11px; color: #8892c0;">Deeply perceptive, warm, and protective therapeutic tone.</div>
       </div>
     </div>
     <div class="voice-card" id="vc-male" onclick="selectVoice('male')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
       <div style="font-size: 24px;">👨‍💼</div>
       <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Male Presence)</div>
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Friendly (Male Presence)</div>
         <div style="font-size: 11px; color: #8892c0;">Grounding, steady, and firmly analytical protective tone.</div>
       </div>
     </div>
     <div class="voice-card" id="vc-neutral" onclick="selectVoice('neutral')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
       <div style="font-size: 24px;">🧑‍💼</div>
       <div style="text-align: left;">
-        <div style="font-size: 13px; font-weight: 600; color: #fff;">Nova (Neutral Presence)</div>
+        <div style="font-size: 13px; font-weight: 600; color: #fff;">Friendly (Neutral Presence)</div>
         <div style="font-size: 11px; color: #8892c0;">Blended, objective, hyper-focused environmental coach.</div>
       </div>
     </div>
@@ -555,23 +555,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
       <h3 style="color:var(--tp);margin:16px 0 6px">What we collect</h3>
       <p style="margin-bottom:8px">When you create an account: your email address, a phone number if you choose to add one, and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
-      <p style="margin-bottom:8px">As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Nova (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Nova respond with real context.</p>
+      <p style="margin-bottom:8px">As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Friendly (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Friendly respond with real context.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Where it lives</h3>
       <p style="margin-bottom:8px">This app is self-hosted: your data is stored in a local database on the server you (or whoever runs this instance) is running — not in a shared cloud service we control. If you're using an instance someone else operates, they are the ones storing your data, on their own server.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Who else sees it</h3>
       <p style="margin-bottom:8px">Two outside services are used, and only for the specific job each does:</p>
-      <p style="margin-bottom:8px">• <b>Anthropic</b> processes the messages you send to Nova, in order to generate Nova's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Nova is only available when the app operator has configured this connection.</p>
+      <p style="margin-bottom:8px">• <b>Anthropic</b> processes the messages you send to Friendly, in order to generate Friendly's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Friendly is only available when the app operator has configured this connection.</p>
       <p style="margin-bottom:8px">• <b>Stripe</b> processes payment if you subscribe to a paid plan. Your card details go directly to Stripe — this app never sees or stores your full card number.</p>
-      <p style="margin-bottom:8px">Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Nova yourself.</p>
+      <p style="margin-bottom:8px">Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Friendly yourself.</p>
       <p style="margin-bottom:8px">We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Your controls</h3>
       <p style="margin-bottom:8px">From Profile, at any time: <b>Export my data</b> downloads everything as a file. <b>Delete my account</b> or <b>Erase everything &amp; start over</b> permanently removes your account and all associated data from the server — this cannot be undone once confirmed.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Not a substitute for professional care</h3>
-      <p style="margin-bottom:8px">Nova is a supportive tool, not a licensed therapist, doctor, or crisis service. In an emergency, or if you're in crisis, contact the <b>988 Suicide &amp; Crisis Lifeline</b> (call or text 988) or your local emergency number — not this app.</p>
+      <p style="margin-bottom:8px">Friendly is a supportive tool, not a licensed therapist, doctor, or crisis service. In an emergency, or if you're in crisis, contact the <b>988 Suicide &amp; Crisis Lifeline</b> (call or text 988) or your local emergency number — not this app.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Who this app is for</h3>
       <p style="margin-bottom:8px">This app discusses addiction, recovery, and related sensitive topics and is intended for adults. It is not directed at children under 18.</p>
@@ -590,10 +590,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:12px">By creating an account and using Turn Someday Into Day One, you agree to the terms below.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">What this app is</h3>
-      <p style="margin-bottom:8px">A recovery companion offering daily lessons, journaling, streak tracking, an AI chat companion (Nova), and related tools. Free features remain free; some features require a paid Pro subscription.</p>
+      <p style="margin-bottom:8px">A recovery companion offering daily lessons, journaling, streak tracking, an AI chat companion (Friendly), and related tools. Free features remain free; some features require a paid Pro subscription.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Not medical or professional advice</h3>
-      <p style="margin-bottom:8px">Nothing in this app — including anything Nova says — is medical, psychiatric, legal, or professional advice, and it does not create a therapist-patient or doctor-patient relationship. It is a self-help and support tool. If you are in crisis or danger, contact the 988 Suicide &amp; Crisis Lifeline or emergency services immediately, not this app.</p>
+      <p style="margin-bottom:8px">Nothing in this app — including anything Friendly says — is medical, psychiatric, legal, or professional advice, and it does not create a therapist-patient or doctor-patient relationship. It is a self-help and support tool. If you are in crisis or danger, contact the 988 Suicide &amp; Crisis Lifeline or emergency services immediately, not this app.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Your account</h3>
       <p style="margin-bottom:8px">You're responsible for keeping your password or PIN confidential and for anything that happens under your account. You must be at least 18 years old to use this app.</p>
@@ -602,13 +602,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:8px">Paid plans are billed through Stripe on a recurring basis until cancelled. You can manage or cancel your subscription from Profile. Refunds, if any, are handled case by case.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Acceptable use</h3>
-      <p style="margin-bottom:8px">Don't use this app to harm others, attempt to break or abuse the service, or use Nova's responses as a substitute for emergency care.</p>
+      <p style="margin-bottom:8px">Don't use this app to harm others, attempt to break or abuse the service, or use Friendly's responses as a substitute for emergency care.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Your content</h3>
       <p style="margin-bottom:8px">Your journal entries, messages, and other content you create belong to you. We don't claim ownership of it, and (per the Privacy Policy) don't sell it or use it to train anything beyond what's needed to run the app itself.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">No guarantees</h3>
-      <p style="margin-bottom:8px">This app is provided "as is." Recovery outcomes are personal and cannot be guaranteed by any app. We aren't liable for decisions made based on the app's content, including Nova's responses.</p>
+      <p style="margin-bottom:8px">This app is provided "as is." Recovery outcomes are personal and cannot be guaranteed by any app. We aren't liable for decisions made based on the app's content, including Friendly's responses.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Ending your account</h3>
       <p style="margin-bottom:8px">You may delete your account at any time from Profile. We may suspend or terminate accounts that violate these terms.</p>
@@ -680,7 +680,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
   <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
     <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-handshake" style="font-size:20px;color:#fff"></i></div>
-    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Nova</div><div style="font-size:12px;color:var(--tm)" id="home-nova-sub">Your AI recovery companion, right now</div></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Talk to Friendly</div><div style="font-size:12px;color:var(--tm)" id="home-nova-sub">Your AI recovery companion, right now</div></div>
     <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
 
@@ -693,7 +693,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="nova-av"><i class="ti ti-handshake" style="font-size:22px;color:#fff"></i></div>
     <div>
       <div style="display:flex;align-items:center;gap:6px">
-        <span class="nova-name">Nova</span>
+        <span class="nova-name">Friendly</span>
         <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
         <span class="nova-mode-chip" id="nova-mode-chip">Guided mode</span>
       </div>
@@ -717,7 +717,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
   </div>
   <div>
-    <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Nova is here to support your journey — not replace real human help</div>
+    <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Friendly is here to support your journey — not replace real human help</div>
     <div class="chat-bar" style="position:static;bottom:auto">
       <textarea id="chatInput" placeholder="Share what you're feeling..." rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
       <button class="send-btn" onclick="sendMsg()"><i class="ti ti-send" style="font-size:16px"></i></button>
@@ -725,12 +725,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 
-<!-- NOVA SAFETY DISCLAIMER (brief flash on opening Nova) -->
+<!-- NOVA SAFETY DISCLAIMER (brief flash on opening Friendly) -->
 <div id="nova-disclaimer-flash" style="display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:24px">
   <div style="max-width:380px;background:var(--s2);border:1px solid var(--bdr);border-radius:16px;padding:22px 20px;text-align:center;position:relative">
     <div style="position:absolute;top:8px;right:12px;cursor:pointer;color:var(--tm);font-size:20px;padding:4px;line-height:1" onclick="dismissNovaDisclaimer()">&times;</div>
     <i class="ti ti-alert-triangle" style="font-size:24px;color:var(--accent);margin-bottom:10px"></i>
-    <div style="font-size:13px;color:var(--ts);line-height:1.6">Nova is not a therapist, doctor, or emergency service. It cannot diagnose, treat, or respond to crises. If you ever feel unsafe or in danger, please contact local emergency services or a licensed professional immediately.</div>
+    <div style="font-size:13px;color:var(--ts);line-height:1.6">Friendly is not a therapist, doctor, or emergency service. It cannot diagnose, treat, or respond to crises. If you ever feel unsafe or in danger, please contact local emergency services or a licensed professional immediately.</div>
     <div style="font-size:12px;color:var(--accent);margin-top:14px;cursor:pointer" onclick="dontShowNovaDisclaimerAgain()">Don't show this again</div>
   </div>
 </div>
@@ -795,7 +795,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div id="jour-insights-pro" style="display:none"></div>
         <div id="jour-insights-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:12px;padding:14px;margin-bottom:14px;cursor:pointer;text-align:center;color:var(--ts);font-size:12.5px" onclick="openProTool('proJournal')">
-          Nova Pro insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
+          Friendly Pro insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
         </div>
         <div id="journalList"></div>
       </div>
@@ -964,7 +964,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
             <div>✓ Days 16–30, the rest of your program</div>
-            <div>✓ 50 Nova AI chats/day</div>
+            <div>✓ 50 Friendly AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
         </div>
@@ -1170,7 +1170,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('motivational')">
           <i class="ti ti-heart" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Nova motivational messages</p><span>Encouragement based on your consistency</span></div>
+          <div class="setting-row-txt"><p>Friendly motivational messages</p><span>Encouragement based on your consistency</span></div>
           <div class="toggle-sw" id="sr-toggle-motivational"><div class="toggle-knob"></div></div>
         </div>
         <div class="setting-row" onclick="toggleSmartReminderType('categorySpecific')">
@@ -1393,7 +1393,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">If you want deeper support, you can unlock the full program with Pro. There's no pressure either way — every core recovery tool stays free.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Unlock Days 16–30</div>
-          <div>✓ Nova Pro coaching (50 chats/day)</div>
+          <div>✓ Friendly Pro coaching (50 chats/day)</div>
           <div id="plans-pro-together">✓ Together — couples exercises &amp; partner self-check</div>
           <div>✓ Urge Surfing, Panic Mode &amp; Emergency Plan</div>
           <div>✓ Weekly reports &amp; analytics</div>
@@ -1420,7 +1420,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Basic Nova (3 chats/day)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Basic Friendly (3 chats/day)</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
@@ -1443,7 +1443,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>50 Nova AI chats/day</div>
+            <div class="feat y"><i class="ti ti-check"></i>50 Friendly AI chats/day</div>
             <div class="feat y"><i class="ti ti-check"></i>Together for couples — guided exercises &amp; partner self-check</div>
             <div class="feat y"><i class="ti ti-check"></i>Urge Surfing timer, Panic Mode &amp; Emergency Plan</div>
             <div class="feat y"><i class="ti ti-check"></i>Recovery scripts &amp; distraction tools</div>
@@ -1464,7 +1464,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 50 chats a day with Nova.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 50 chats a day with Friendly.</div>
     </div>
 
     <!-- PROFILE -->
@@ -1494,7 +1494,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="openVoiceModal()">
         <i class="ti ti-handshake"></i>
-        <div class="setting-row-txt"><p>Nova's presence</p><span id="voice-row-sub">Neutral</span></div>
+        <div class="setting-row-txt"><p>Friendly's presence</p><span id="voice-row-sub">Neutral</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openRelationshipModal()">
@@ -1574,7 +1574,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="toggleNovaDisclaimer()">
         <i class="ti ti-alert-triangle"></i>
-        <div class="setting-row-txt"><p>Nova safety reminder</p><span>Brief disclaimer shown when opening Nova</span></div>
+        <div class="setting-row-txt"><p>Friendly safety reminder</p><span>Brief disclaimer shown when opening Friendly</span></div>
         <div class="toggle-sw on" id="nova-disclaimer-toggle"><div class="toggle-knob"></div></div>
       </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
@@ -1723,7 +1723,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
-      <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Nova</span>
+      <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
   </div>
@@ -1767,7 +1767,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
-      <div class="sos-opt-info"><p>Talk to Nova</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
+      <div class="sos-opt-info"><p>Talk to Friendly</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
     </div>
     <div class="sos-opt" onclick="openTriggeredFlow()">
       <i class="ti ti-alert-triangle" style="color:#BA7517"></i>
@@ -1832,7 +1832,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-tools');openJour()">Write about it in your journal</button>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp()">Reset my date &amp; restart</button>
-    <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Nova</button>
+    <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Friendly</button>
     <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
   </div>
 </div>
@@ -2223,20 +2223,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- NOVA VOICE MODAL -->
 <div class="sos-modal" id="voice-modal" onclick="if(event.target===this)closeVoiceModal()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">Nova's presence</div>
+    <div class="sos-title" style="color:var(--accent)">Friendly's presence</div>
     <div class="sos-sub">You can change this any time.</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
       <div class="voice-card" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👩‍💼</div>
-        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
       </div>
       <div class="voice-card" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👨‍💼</div>
-        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
       </div>
       <div class="voice-card" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">🧑‍💼</div>
-        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Nova (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
+        <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
       </div>
     </div>
     <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
@@ -2384,7 +2384,7 @@ let S = {
   soberDays:[]
 };
 
-// Nova conversations live only in memory - they are deliberately excluded from
+// Friendly conversations live only in memory - they are deliberately excluded from
 // everything that persists (localStorage and the server state sync). Close the
 // app and the conversation is gone. Privacy promise; keep it true.
 function serializeState(){
@@ -2656,7 +2656,7 @@ function renderTodayLesson(){
       ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Long-Term Stability Pack (in Lesson Packs) are built for exactly this stage."
       :hasTrack
         ?"You've completed every lesson available for this focus area so far. Check back soon for more."
-        :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. In the meantime, Nova AI and your other tools are ready whenever you need them.`;
+        :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. In the meantime, Friendly AI and your other tools are ready whenever you need them.`;
     actionEl.textContent='';
     reflectionEl.textContent='';
     actionBox.style.display='none';
@@ -3155,7 +3155,7 @@ function renderPackLesson(){
     <button class="log-btn" style="margin-bottom:8px" onclick="saveLessonReflection('pack-reflect-input','pack-reflect-saved')">Save to my journal</button>
     <div id="pack-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-bottom:8px">Saved to your journal ✓</div>
     <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
-    <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Nova to guide this reflection</button>
+    <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Friendly to guide this reflection</button>
   </div>`;
   renderIcons(wrap);
   if(typeof updateSpeedBtns==='function')updateSpeedBtns();
@@ -3296,7 +3296,7 @@ function applyUserTypeWording(){
     dateLbl.textContent=partner?'When did you start carrying this?':'When did you start your journey?';
   }
   // "Who are they to you?" exists only on the supporter path - it decides which
-  // Together tools fit, and whether Nova is talking to the parent of a minor.
+  // Together tools fit, and whether Friendly is talking to the parent of a minor.
   const relLbl=document.getElementById('ob-prelation-label');
   const relChips=document.getElementById('ob-prelation-chips');
   if(relLbl)relLbl.style.display=partner?'block':'none';
@@ -3383,7 +3383,7 @@ function obNext(n){
     S.startDate=dt&&dt!==todayStr?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
-    const triggerSentence=blueprintVals.length?`Nova has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
+    const triggerSentence=blueprintVals.length?`Friendly has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
     const isPartner=S.userType==='partner';
     const partnerFocusSentence=isPartner&&(S.partnerFocus||[]).length
       ?`You're carrying someone's struggle with <strong>${S.partnerFocus.join(' and ')}</strong> — this plan stays pointed at you, not them.<br><br>`
@@ -3491,7 +3491,7 @@ function closeAddictionModal(){
 // or embedded viewports.
 function renderBehaviorChips(key,options){
   // No option is pre-selected - defaulting a sensitive self-assessment answer without the
-  // user ever tapping it would let Nova confidently "register a trigger" they never confirmed.
+  // user ever tapping it would let Friendly confidently "register a trigger" they never confirmed.
   const chips=options.map(opt=>`<div class="behavior-chip" data-value="${opt.replace(/"/g,'&quot;')}" onclick="selectBehaviorChip(this)">${opt}</div>`).join('');
   return `<div class="behavior-chip-group" data-key="${key}">${chips}</div>`;
 }
@@ -3663,7 +3663,7 @@ function initApp(){
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;save();}
   document.getElementById('chatsLeft').textContent=S.chatsLeft;
-  // init Nova welcome - voiced for who's actually sitting there: the person in
+  // init Friendly welcome - voiced for who's actually sitting there: the person in
   // recovery, the one carrying someone else's, or the one doing both.
   renderQuickChips();
   if(document.getElementById('chatArea').children.length===0){
@@ -3700,7 +3700,7 @@ function initApp(){
 }
 
 // ─── PROACTIVE CHECK-INS ─────────────────────────────────────────────────────
-// Nova reaches out first when yesterday left something worth asking about - the
+// Friendly reaches out first when yesterday left something worth asking about - the
 // day after a slip, after a hard craving, a rough journal day, or after days
 // away. One per day, most important trigger wins, free for everyone: showing up
 // for people is the product, not a paywalled extra.
@@ -3827,7 +3827,7 @@ function updateStats(){
   if(justHitMilestone){
     S.notifiedMilestones=(S.notifiedMilestones||[]).concat(justHitMilestone.days);
     save();
-    maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Nova Pro. No pressure though — today is worth celebrating on its own.`);
+    maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Friendly Pro. No pressure though — today is worth celebrating on its own.`);
   }
   maybeShowProMilestoneCelebration(days);
   maybeShowMilestoneOffer();
@@ -4054,7 +4054,7 @@ function saveEntry(){
   renderJournal();closeJour();
   if(isFirstEntry)novaNudge("First journal entry — that's a real step, and it's saved for good.");
   if(txt.length>=150){
-    maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Nova Pro can go deeper on with you — I'm always here either way.");
+    maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Friendly Pro can go deeper on with you — I'm always here either way.");
     if(S.isPro)novaNudge(buildHabitReinforcement());
   }
 }
@@ -4214,9 +4214,9 @@ function renderJournalInsights(){
   if(!(S.journals||[]).length){proBox.style.display='none';return;}
   proBox.style.display='block';
   proBox.innerHTML=`<div class="card" style="margin-bottom:14px">
-    <div class="sec-hd" style="margin-top:0">Nova Pro journal insights</div>
+    <div class="sec-hd" style="margin-top:0">Friendly Pro journal insights</div>
     <div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:10px">${buildJournalWeeklySummary()}</div>
-    <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussJournalWithNova()">Ask Nova about my journal</button>
+    <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussJournalWithNova()">Ask Friendly about my journal</button>
   </div>`;
 }
 function discussJournalWithNova(){
@@ -4451,7 +4451,7 @@ function renderAdvancedStreaks(){
   }
   html+=`</div>`;
 
-  html+=`<button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussStreaksWithNova()">Ask Nova about my streaks</button>`;
+  html+=`<button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussStreaksWithNova()">Ask Friendly about my streaks</button>`;
 
   wrap.innerHTML=html;
 }
@@ -4630,7 +4630,7 @@ function renderAnalytics(){
     });
   }
   html+='</div>';
-  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussAnalyticsWithNova()">Ask Nova to explain my insights</button>';
+  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussAnalyticsWithNova()">Ask Friendly to explain my insights</button>';
   wrap.innerHTML=html;
 }
 function openAnalyticsScreen(){
@@ -4797,7 +4797,7 @@ function renderHabitCoach(){
     ['Lesson consistency',tracking.lessons?`${tracking.lessons} lesson${tracking.lessons===1?'':'s'} completed`:null],
     ['Journaling consistency',tracking.journaled?`${tracking.journaled} entr${tracking.journaled===1?'y':'ies'} logged`:null],
     ['Recovery tool usage',tracking.tools?`${tracking.tools} time${tracking.tools===1?'':'s'}`:null],
-    ['Nova conversations',tracking.chatCount?`${tracking.chatCount} total`:null],
+    ['Friendly conversations',tracking.chatCount?`${tracking.chatCount} total`:null],
     ['Emotional stability',tracking.stability],
   ];
   const anyTracking=rows.some(([,v])=>v);
@@ -4810,7 +4810,7 @@ function renderHabitCoach(){
     });
   }
   html+='</div>';
-  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussHabitsWithNova()">Ask Nova about my habits</button>';
+  html+='<button class="ob-btn outline" style="margin-top:14px;color:var(--accent);border-color:var(--accent)" onclick="discussHabitsWithNova()">Ask Friendly about my habits</button>';
   wrap.innerHTML=html;
 }
 function openHabitCoachScreen(){
@@ -4874,11 +4874,11 @@ function maybeShowHabitCelebration(days){
 }
 
 // Feedback here must use appInfo, not addBubble - the user is on the Journal
-// screen, and addBubble writes to the Nova chat area they can't see, which made
+// screen, and addBubble writes to the Friendly chat area they can't see, which made
 // this button look like it silently did nothing.
 function startVoiceJournal(){
   if(!S.isPro){
-    appInfo('Voice journaling',"Voice journaling is part of Nova Pro. You can still type your journal anytime.");
+    appInfo('Voice journaling',"Voice journaling is part of Friendly Pro. You can still type your journal anytime.");
     return;
   }
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -5402,7 +5402,7 @@ const TL_DATA_CHEMICAL=[
 // doesn't apply to gambling, gaming, social media, work, shopping, porn/sex, or binge eating.
 const TL_DATA_BEHAVIORAL=[
   {range:'Hours 6–24',phase:'Early urge spike',desc:'The pull toward the behavior often gets sharper before it eases — a normal "extinction burst," not a sign anything is going wrong.',days:[0,1]},
-  {range:'Days 1–3',phase:'Peak psychological pull',desc:'Cravings and restlessness typically peak here. Sleep and mood may be disrupted as your brain adjusts to the missing reward pattern.',warn:'If urges feel unmanageable, use the SOS button or talk to Nova right now — you do not have to ride this out alone.',days:[1,3]},
+  {range:'Days 1–3',phase:'Peak psychological pull',desc:'Cravings and restlessness typically peak here. Sleep and mood may be disrupted as your brain adjusts to the missing reward pattern.',warn:'If urges feel unmanageable, use the SOS button or talk to Friendly right now — you do not have to ride this out alone.',days:[1,3]},
   {range:'Days 4–7',phase:'Early stabilising',desc:'The sharpest urges begin to ease. Boredom, irritability, and the pull to "just check" or "just this once" remain common.',days:[3,7]},
   {range:'Weeks 2–4',phase:'Early recovery',desc:'Mood swings and occasional strong urges continue, but usually less often and less intensely. Energy and focus often start improving.',days:[7,30]},
   {range:'Weeks 4–12',phase:'Habit rewiring',desc:'Your brain is actively building new default responses to the situations that used to trigger the behavior. Strong pulls around old triggers are still normal here.',days:[30,84]},
@@ -5477,7 +5477,7 @@ function pledgeSubText(){
 }
 // Screen titles a supporter sees. TITLES itself is never mutated, so nothing leaks
 // across user types when someone switches paths mid-session.
-const SUPPORTER_TITLES={nova:'Nova — someone to talk to','relapse-toolkit':'Steady Yourself'};
+const SUPPORTER_TITLES={nova:'Friendly — someone to talk to','relapse-toolkit':'Steady Yourself'};
 function titleFor(id){
   if(isSupporterUI()&&SUPPORTER_TITLES[id])return SUPPORTER_TITLES[id];
   return TITLES[id]||id;
@@ -6453,9 +6453,9 @@ function renderReportCard(report,idx,expanded){
       <div style="margin-bottom:12px">${highlightsHTML}</div>
       <div class="sec-hd">F. Personalized recommendations</div>
       <div style="margin-bottom:12px">${recsHTML}</div>
-      <div class="sec-hd">G. Nova Pro summary</div>
+      <div class="sec-hd">G. Friendly Pro summary</div>
       <div style="background:var(--acc);border-radius:10px;padding:12px;color:var(--acc-t);font-size:13px;line-height:1.6;margin-bottom:10px">${report.novaSummary}</div>
-      <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussLatestReportWithNova()">Ask Nova to explain this report</button>
+      <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussLatestReportWithNova()">Ask Friendly to explain this report</button>
     </div>
   </div>`;
 }
@@ -6599,7 +6599,7 @@ function buildRelapseRiskAlert(){
   return null;
 }
 
-// E. Nova Motivational Messages - based on real consistency in the activity log
+// E. Friendly Motivational Messages - based on real consistency in the activity log
 function buildMotivationalMessage(){
   const cutoff=Date.now()-7*86400000;
   const activeDays=new Set((S.activityLog||[]).filter(a=>new Date(a.ts).getTime()>=cutoff).map(a=>new Date(a.ts).toDateString()));
@@ -6798,7 +6798,7 @@ function setSmartReminderFrequency(freq){
 }
 
 // ─── NOVA AI ──────────────────────────────────────────────────────────────────
-const SYSTEM_BASE=`You are Nova, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
+const SYSTEM_BASE=`You are Friendly, a compassionate AI presence inside the recovery app "Turn Someday Into Day One."
 
 Core traits:
 - Deeply empathetic and sentimental — you genuinely feel the weight of recovery. You understand it's one of the hardest things a human can do.
@@ -6813,16 +6813,16 @@ Core traits:
 
 const SYSTEM_FREE_ADDENDUM=`
 
-You are running in Nova Free mode. In this mode:
+You are running in Friendly Free mode. In this mode:
 - Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
 - Do NOT provide deep pattern analysis, pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
 - Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
-- Do NOT bring up Nova Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Nova Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.
-- EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Nova Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
+- Do NOT bring up Friendly Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Friendly Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.
+- EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
 
 const SYSTEM_PRO_ADDENDUM=`
 
-You are running in Nova Pro mode - the user has unlocked full coaching. In this mode you may, when it's genuinely useful:
+You are running in Friendly Pro mode - the user has unlocked full coaching. In this mode you may, when it's genuinely useful:
 - Go deeper: real emotional analysis, pattern recognition across their triggers, moods, and slips, long-form support, remembering and naming patterns you notice across the conversation.
 - Reference and connect any lesson from Days 1-30 to what they're actually experiencing, and offer personalized next actions.
 - Help identify triggers, emotional cycles, vulnerable times of day, and pattern loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
@@ -6850,7 +6850,7 @@ function guidedModeNotice(){
 // crisis handling can never drift apart. Errs toward matching: a false positive
 // shows a supportive 988 message, a false negative misses someone in danger.
 const CRISIS_RE=/suicid|kill(ing)?\s+myself|self.?harm|harm(ing)?\s+myself|hurt(ing)?\s+myself|end(ing)?\s+my\s+life|end\s+it\s+all|want(ed)?\s+to\s+end\s+it|take\s+my\s+(own\s+)?life|don'?t\s+want\s+to\s+(be\s+here|live|exist|wake\s+up)|no\s+reason\s+to\s+(live|go\s+on)|better\s+off\s+without\s+me|not\s+worth\s+living/i;
-// Broader than CRISIS_RE on purpose: this gate only decides whether Nova may
+// Broader than CRISIS_RE on purpose: this gate only decides whether Friendly may
 // mention money in a reply, and whether to point at the free SOS tools. A false
 // positive costs one upsell; a false negative upsells someone who's drowning.
 const DISTRESS_RE=/\bhelp\b|struggl|crisis|slipped|relaps|\burge\b|craving|can'?t do this|give up|losing hope|hard night|about to|so close to|white.?knuckl|not okay|falling apart|can'?t stop|what'?s the point|tired of fighting|losing this|rock bottom/i;
@@ -7043,7 +7043,7 @@ const PRO_TOOLS={
   },
   weeklyReports:{
     title:'Weekly Recovery Reports',
-    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus Nova Pro's personalized recommendations.",
+    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus Friendly Pro's personalized recommendations.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top mood: ●●●●●● (●●%)<br>Top trigger: ●●●●●●<br>Risk level: ●●●●●●●●</div>',
     open:'openWeeklyReportsScreen'
   },
@@ -7055,13 +7055,13 @@ const PRO_TOOLS={
   },
   proJournal:{
     title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and slip-aware prompts, mood tracking, and Nova Pro analysis of your own entries.',
+    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and slip-aware prompts, mood tracking, and Friendly Pro analysis of your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
   },
   streaks:{
     title:'Advanced Streaks',
-    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and Nova Pro streak coaching, all built from your real data.',
+    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and Friendly Pro streak coaching, all built from your real data.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
     open:'openAdvancedStreaksScreen'
   },
@@ -7123,16 +7123,16 @@ function isProFeatureRequest(text){
   return PRO_FEATURE_TEST.test(text);
 }
 function proFeaturePreviewText(text){
-  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Nova Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Nova Pro to continue.";
-  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
-  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Nova Pro.\n\nUnlock Nova Pro to continue.";
+  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Friendly Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Friendly Pro to continue.";
+  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
+  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
 }
 function addProPreviewBubble(teaserText){
   const area=document.getElementById('chatArea');
@@ -7218,7 +7218,7 @@ function novaNudge(text){
   S.chatHistory.push({role:'assistant',content:text});
   if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
   save();
-  systemNotify('Nova',text);
+  systemNotify('Friendly',text);
   showNovaBadge();
 }
 function maybeNovaProNudge(text){
@@ -7290,10 +7290,10 @@ ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')
 ${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
 ${S.userType==='partner'&&S.partnerRelation==='minor-child'?`CRITICAL - THE LOVED ONE IS A MINOR: keep ALL guidance at the parental/household level (how the parent responds, boundaries at home, the parent's own wellbeing). NEVER discuss the minor's behavior in explicit detail, especially anything sexual - hard refusal, redirect to the parental level. Recommend adolescent-specialized professional support (family therapist, pediatrician) as the primary path for the child, alongside supporting the parent themselves.`:''}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
-Nova Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
+Friendly Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
 
-[Nova Clinical Archetype Deployment Guide]:
+[Friendly Clinical Archetype Deployment Guide]:
 - MALE: grounding, steady, analytical, protective.
 - FEMALE: deeply perceptive, validating, warm, honest.
 - NEUTRAL: blended, objective, environmental accountability coach.
@@ -7315,7 +7315,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     if(res.status===429){
       const reply=S.isPro
         ?"Looks like you've reached today's 50-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"Looks like you've reached today's Nova AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 50 chats a day. 💜";
+        :"Looks like you've reached today's Friendly AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 50 chats a day. 💜";
       S.chatHistory.push({role:'assistant',content:reply});
       if(!S.isPro){
         S.chatsLeft=0;
@@ -7332,14 +7332,14 @@ Address the interactions of their unique blueprint and assign structured daily r
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
+    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Friendly Pro — but I'm right here either way.");
   }catch(e){
     setNovaMode(false);
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Nova Pro — but I'm right here either way.");
+    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Friendly Pro — but I'm right here either way.");
   }
 }
 
@@ -7352,7 +7352,7 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
 };
-const TITLES={home:'Today',nova:'Nova — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -7995,7 +7995,7 @@ function confirmResetDate(){
   S.lastCandidateNudgeDate=new Date().toDateString();
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
-  maybeNovaProNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Nova Pro — but for now, let's just focus on today.`);
+  maybeNovaProNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Friendly Pro — but for now, let's just focus on today.`);
   if(S.isPro){
     novaNudge(buildCombinedResetMessage(priorStreakLength));
   }
@@ -8126,7 +8126,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='30.4.0';
+const APP_VERSION='31.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8462,7 +8462,7 @@ const HELP_INDEX=[
   {name:'Write in my journal',sub:'Your private journal',k:'journal write diary note feelings',go:()=>{switchTo('journal');actBn('bn-tools');}},
   {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
   {name:'Listen to today\'s lesson',sub:'The lesson read aloud — hands-free',k:'listen audio hear read aloud voice speak lesson multitask',go:()=>{switchTo('lesson');actBn('bn-home');setTimeout(()=>toggleLessonAudio(),400);}},
-  {name:'Talk to Nova',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
+  {name:'Talk to Friendly',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
   {name:'My progress & stats',baseName:'My progress & stats',supporterSub:'Your days, streak, and milestones',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
   {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},
   {name:'Upgrade to Pro / see pricing',sub:'Plans, prices, and the free trial',k:'pro upgrade price pricing plan subscribe trial pay',go:()=>{switchTo('plans');actBn('bn-plans');}},
@@ -8843,18 +8843,18 @@ function buildGuideIndex(){
   });
 }
 // Built-in answers for the most common "how/why" questions - free and offline,
-// so none of them ever burn a Nova chat. Each can carry a take-me-there button.
+// so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>50 Nova chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>50 Friendly chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
-  {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Nova and syncing need a connection.",go:null},
-  {q:'Is Nova a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Nova is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
-  {q:'How many Nova chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Nova chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Nova'},
+  {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
+  {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
+  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Friendly chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},
@@ -8945,9 +8945,9 @@ function guideSend(){
     guideBotSay('Here you go — tap one and I\'ll take you there:'+
       scored.map(s=>`<button class="gb-go" onclick="guideGo(${s.i})">→ ${escapeHtml(HELP_INDEX[s.i].name)}</button>`).join(''));
   }else{
-    const novaIdx=HELP_INDEX.findIndex(h=>h.name.indexOf('Nova')>=0);
-    guideBotSay('I couldn\'t find that in the app — I only know my way around the menus. For anything deeper, Nova\'s the one to ask.'+
-      `<button class="gb-go" onclick="guideGo(${novaIdx})">→ Talk to Nova</button>`);
+    const novaIdx=HELP_INDEX.findIndex(h=>h.name.indexOf('Friendly')>=0);
+    guideBotSay('I couldn\'t find that in the app — I only know my way around the menus. For anything deeper, Friendly\'s the one to ask.'+
+      `<button class="gb-go" onclick="guideGo(${novaIdx})">→ Talk to Friendly</button>`);
   }
 }
 
@@ -8972,7 +8972,7 @@ function renderHelpResults(){
       const i=HELP_INDEX.indexOf(h);
       return `<div class="sos-opt" onclick="helpGo(${i})"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><div class="sos-opt-info"><p>${escapeHtml(h.name)}</p><span>${escapeHtml(h.sub)}</span></div></div>`;
     }).join('')
-    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word, or ask Nova on the Nova tab.</div>';
+    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word, or ask Friendly on the Friendly tab.</div>';
 }
 
 // Erase absolutely everything: account + synced data on the server, plus every

@@ -555,9 +555,14 @@ app.get('/api/billing/status', requireAuth, async (req, res) => {
   // honoured. Without it, a misconfigured server takes the customer's money in
   // the store and then fails verification - they have paid and got nothing.
   // Better to refuse before the payment sheet opens than to refund afterwards.
+  // lifetimeSoldOut travels with this for the same reason storeBillingReady
+  // does: on a store purchase the money is taken before the server is asked
+  // anything, so every reason a purchase could be refused has to be knowable
+  // before the payment sheet opens.
   res.json({
     ...billing.getBillingStatus(user),
     storeBillingReady: storeBilling.isPlayConfigured(),
+    lifetimeSoldOut: user.plan !== 'lifetime' && billing.getLifetimeAvailability().soldOut,
   });
 });
 

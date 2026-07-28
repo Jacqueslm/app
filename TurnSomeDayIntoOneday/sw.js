@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v10'; // v10: refuse purchases the server cannot honour
+const CACHE_NAME = 'tsid-shell-v11'; // v11: check the Founding 50 before the payment sheet
 const SHELL_FILES = [
   '/',
   '/app',

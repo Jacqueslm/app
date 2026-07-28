@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7'; // v7: version reset ahead of launch - bump to v8, v9... from here
+const CACHE_NAME = 'tsid-shell-v8'; // v8: erase history, keep account
 const SHELL_FILES = [
   '/',
   '/app',

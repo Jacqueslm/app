@@ -175,7 +175,7 @@ The old way — the way I did it for decades — a slip erased everything. Back 
 
 In this app you reset the number and you keep everything else. What you learned. What you noticed. The plan you wrote. Those don't go to zero, because they didn't.
 
-If it happens this week, open Nova and say what happened. That's what it's there for at that hour.
+If it happens this week, open Friendly and say what happened. That's what it's there for at that hour.
 
 — Jacques` },
   { step: 4, subject: '"I\'ve tried before"', text: `Someone emailed me this week: I've quit six times. Why would an app change that?
@@ -225,7 +225,7 @@ const TRIAL_DAY7_CHARGED = { subject: "You're Pro. Here's what that means.", tex
 
 Three things:
 
-Everything's unlocked. All 11 lesson packs, unlimited Nova, the full partner section.
+Everything's unlocked. All 13 lesson packs, unlimited Friendly, the full partner section.
 Cancel any time, two clicks, no phone call, no retention trap.
 Reply to this email whenever you want. I read them. It's still just me.
 

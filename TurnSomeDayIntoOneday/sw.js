@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v30-4'; // v30.4: audio wake lock + stall detection
+const CACHE_NAME = 'tsid-shell-v31'; // v31: Nova renamed Friendly + crisis copy
 const SHELL_FILES = [
   '/',
   '/app',

@@ -1627,6 +1627,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" style="color:#E24B4A">Danger zone</div>
         <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
+        <button class="reset-btn" style="margin-top:14px" onclick="eraseMyHistory()">Erase my history, keep my account</button>
+        <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes every journal entry, your craving and mood logs, lesson progress, milestone history, emergency plan and letter drafts. You stay signed in and your day count and lifetime total are kept.</div>
         <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Delete my account &amp; erase everything</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
@@ -8177,7 +8179,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.0.0';
+const APP_VERSION='8.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8313,6 +8315,60 @@ function chooseVoice(v){
   closeVoiceModal();
 }
 
+// Wipes what the user wrote, keeps who they are. The case this exists for is
+// someone who put something raw on the page at 2am, wants it gone, and should
+// not have to surrender a 200-day streak and their account to get that.
+//
+// The day counter derives from startDate alone, so nothing here can touch it -
+// that is deliberate, and worth preserving if this list ever grows.
+function eraseMyHistory(){
+  appConfirm(
+    "Erase your history? This permanently deletes every journal entry, your craving and mood logs, your lesson progress, your milestone history, your emergency plan and any letter drafts.\n\nYou stay signed in. Your day count, lifetime total, name and settings are kept.\n\nThis cannot be undone.",
+    ()=>{
+      S.journals=[];
+      S.cravings=[];
+      S.soberDays=[];
+      S.streakHistory=[];
+      S.activityLog=[];
+      S.weeklyReports=[];
+      S.communityPosts=[];
+      S.likedStories=[];
+      // Lesson progress, including any custom pack the user was partway through.
+      S.lessonProgress={};
+      S.currentDay=1;
+      S.customPackProgress={};
+      S.activeCustomPack='';
+      S.lessonsCompletedCount=0;
+      S.cravingsSurvivedCount=0;
+      // Milestone bookkeeping has to go too, or old milestones stay marked as
+      // seen and silently never celebrate again on the rebuilt history.
+      S.seenMilestones=[];
+      S.notifiedMilestones=[];
+      S.notifiedProMilestones=[];
+      S.notifiedHabitCelebrations=[];
+      S.notifiedDay30Tracks=[];
+      S.lastHabitAlertDate='';
+      // Things the user wrote about other people, which is exactly what someone
+      // asking for a wipe means by "my history".
+      S.supporterLetterDraft='';
+      S.bothLetterDraft='';
+      S.bothLetterSavedAt='';
+      S.bothLetterRelation='';
+      S.emergencyPlan={contactName:'',contactPhone:'',steps:''};
+      S.pledged=false;
+      S.pledgeDate='';
+      S.chatHistory=[];
+      S.chatDate='';
+      S.currentJourMood='🙂';
+      S.currentJourMoodLabel='Good';
+      save();
+      updateStats();
+      if(typeof renderJournal==='function')renderJournal();
+      appInfo('History erased','Your journal, logs and progress are gone. Your account, your day count and your lifetime total are untouched.');
+    },
+    {okText:'Erase my history'}
+  );
+}
 function restartOnboarding(){
   appConfirm("Restart the setup process? Your journal, cravings, and progress stay saved — you'll just redo your name, focus areas, and preferences.",()=>{
     S.name='';

@@ -59,3 +59,21 @@ of the same version code.
 ## The keystore
 `android-upload.keystore`, alias `upload`. It is the only way to ever ship an
 update to this listing. It is backed up off the machine — keep it that way.
+
+## Play product setup — record of what was created
+
+| Product ID | Type | Base plan / offer | Price |
+|---|---|---|---|
+| `pro_monthly` | Subscription, auto-renewing | `monthly-autorenew`, monthly | $9.99 USD |
+| `pro_yearly` | Subscription, auto-renewing | `yearly-autorenew`, yearly | $59.99 USD |
+| `pro_lifetime` | One-time product | — | $149.99 USD |
+
+Prices mirror `PLANS` in `server/billing.js` exactly. If one side changes and
+the other does not, an Android user sees a different number in the app than at
+checkout.
+
+Both subscriptions need a **7-day free trial offer** added after the base plan
+is created, to match `TRIAL_DAYS = 7` on the Stripe side. A base plan is not
+purchasable until it is **activated**.
+
+Grace period left at Google's recommended 7 days, account hold auto-calculated.

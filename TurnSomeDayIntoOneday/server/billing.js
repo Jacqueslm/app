@@ -17,6 +17,24 @@ const PLANS = {
 // people are willing to start, and the card is only charged after day 7.
 const TRIAL_DAYS = 7;
 
+// ─── COMPLIMENTARY ACCESS ────────────────────────────────────────────────────
+// Emails listed in COMP_PRO_EMAILS get Pro entitlement without paying. This
+// exists for the Google Play review account - a reviewer who cannot see paid
+// content is a reviewer who rejects the app - and for closed-test testers.
+//
+// Deliberately env-only: there is no in-app or admin way to grant it, so the
+// only path to free Pro is a deploy. It writes nothing to the database, which
+// is why it cannot consume a Founding Lifetime seat or appear in revenue stats.
+const COMP_PRO_EMAILS = new Set(
+  (process.env.COMP_PRO_EMAILS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+);
+function isComped(user) {
+  return !!(user && user.email && COMP_PRO_EMAILS.has(String(user.email).toLowerCase()));
+}
+
 // ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
 // 50 means 50. The landing page has promised "limited to the first 50 members"
 // since launch, so this is a commitment being kept, not a marketing device.
@@ -159,9 +177,13 @@ async function createPortalSession(user, origin) {
 }
 
 function getBillingStatus(user) {
+  const paid = user.plan === 'monthly' || user.plan === 'yearly' || user.plan === 'lifetime';
+  // A comp only applies when there is no real plan, so an account that later
+  // pays keeps its actual plan and its renewal dates.
+  const comped = !paid && isComped(user);
   return {
-    isPro: user.plan === 'monthly' || user.plan === 'yearly' || user.plan === 'lifetime',
-    plan: user.plan || 'free',
+    isPro: paid || comped,
+    plan: paid ? user.plan : comped ? 'comp' : user.plan || 'free',
     subscriptionStatus: user.subscription_status || null,
     currentPeriodEnd: user.current_period_end || null,
     cancelAtPeriodEnd: !!user.cancel_at_period_end,

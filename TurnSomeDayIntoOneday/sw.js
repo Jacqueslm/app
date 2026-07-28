@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v32'; // v32: in-app purchases via store billing
+const CACHE_NAME = 'tsid-shell-v33'; // v33: complimentary Pro access for review + testers
 const SHELL_FILES = [
   '/',
   '/app',

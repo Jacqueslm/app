@@ -7728,9 +7728,13 @@ function renderPlansScreen(){
   }
   if(S.isPro){
     statusSection.style.display='block';
-    const planLabel=S.proPlan==='yearly'?'Yearly':S.proPlan==='lifetime'?'Lifetime':'Monthly';
+    const planLabel=S.proPlan==='yearly'?'Yearly':S.proPlan==='lifetime'?'Lifetime':S.proPlan==='comp'?'Complimentary':'Monthly';
     statusTitle.textContent=`Pro plan — ${planLabel}`;
-    if(S.proPlan==='lifetime'){
+    if(S.proPlan==='comp'){
+      // No Stripe subscription behind this one, so there is nothing to cancel.
+      statusDetail.textContent='Complimentary access. Nothing to pay and nothing to renew.';
+      statusBtn.style.display='none';
+    }else if(S.proPlan==='lifetime'){
       statusDetail.textContent='One-time payment. Permanent access, no renewals.';
       statusBtn.style.display='none';
     }else if(S.proCancelled){
@@ -7764,7 +7768,7 @@ function updateTierUI(){
     if(limitBar)limitBar.style.display='none';
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
-    if(freeCta)freeCta.textContent=S.proPlan==='lifetime'?'Lifetime plan':'Cancel subscription';
+    if(freeCta)freeCta.textContent=S.proPlan==='lifetime'?'Lifetime plan':S.proPlan==='comp'?'Complimentary plan':'Cancel subscription';
     if(proCta){proCta.textContent='Current plan ✓';proCta.style.background='var(--ok)';proCta.style.color='var(--ok-t)';}
   }else{
     badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
@@ -8173,7 +8177,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='32.0.0';
+const APP_VERSION='33.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

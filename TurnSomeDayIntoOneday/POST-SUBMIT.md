@@ -6,6 +6,15 @@
       deploy has to finish first.
 - [ ] Confirm `/privacy` and `/delete-account` load signed out.
 
+## Tester opt-in link
+
+    https://play.google.com/apps/testing/com.turnsomedayintodayone.app
+
+This is a **closed** test: the link only works for Gmail addresses already on
+the Closed testers list in Play Console. Posting it publicly does nothing for
+anyone not on that list. The order is always: get their Gmail address, add it
+to the list, then send the link.
+
 ## Once the closed test is live
 - [ ] Install from the Play link on a real Android phone.
 - [ ] **No address bar at the top.** If there is one, assetlinks is not being

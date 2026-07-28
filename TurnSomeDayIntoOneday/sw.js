@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v34'; // v34: public account-deletion page for Play
+const CACHE_NAME = 'tsid-shell-v35'; // v35: honest delete-account labelling
 const SHELL_FILES = [
   '/',
   '/app',

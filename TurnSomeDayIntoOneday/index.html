@@ -568,7 +568,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:8px">We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Your controls</h3>
-      <p style="margin-bottom:8px">From Profile, at any time: <b>Export my data</b> downloads everything as a file. <b>Delete my account</b> or <b>Erase everything &amp; start over</b> permanently removes your account and all associated data from the server — this cannot be undone once confirmed.</p>
+      <p style="margin-bottom:8px">From Profile, at any time: <b>Export my data</b> downloads everything as a file. <b>Delete my account</b> permanently removes your account and all associated data from the server — this cannot be undone once confirmed.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Not a substitute for professional care</h3>
       <p style="margin-bottom:8px">Friendly is a supportive tool, not a licensed therapist, doctor, or crisis service. In an emergency, or if you're in crisis, contact the <b>988 Suicide &amp; Crisis Lifeline</b> (call or text 988) or your local emergency number — not this app.</p>
@@ -1627,7 +1627,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" style="color:#E24B4A">Danger zone</div>
         <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
-        <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Erase everything &amp; start over</button>
+        <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Delete my account &amp; erase everything</button>
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -8177,7 +8177,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='34.0.0';
+const APP_VERSION='35.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v8'; // v8: erase history, keep account
+const CACHE_NAME = 'tsid-shell-v9'; // v9: document partial data deletion
 const SHELL_FILES = [
   '/',
   '/app',

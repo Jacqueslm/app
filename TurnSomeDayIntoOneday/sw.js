@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v31'; // v31: Nova renamed Friendly + crisis copy
+const CACHE_NAME = 'tsid-shell-v32'; // v32: in-app purchases via store billing
 const SHELL_FILES = [
   '/',
   '/app',

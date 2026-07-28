@@ -43,6 +43,12 @@ IF YOU ARE IN CRISIS
 
 This app is not an emergency service. If you are in danger or thinking about harming yourself, please contact your local emergency number. In the US you can call or text 988 for the Suicide & Crisis Lifeline — free, confidential, and available 24/7.
 
+WHAT COSTS MONEY
+
+The app is free to download and the core of it is free to keep using — the day counter, the first half of every programme, the SOS tools, the journal, and the companion. There is no card required to start and no time limit on the free version.
+
+Pro is an optional in-app subscription that unlocks the rest: the second half of every programme, more daily conversations, weekly reports, reminders, voice journaling and the couples exercises. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
+
 WHO MADE THIS
 
 One person, who needed it first and could not find it. It is not a clinic and does not pretend to be. It is the thing I wanted at 2am, built properly.
@@ -54,9 +60,11 @@ One person, who needed it first and could not find it. It is not a clinic and do
 
 ## What I deliberately left out, and why
 
-- **No prices, no mention of Pro, no "upgrade".** The Android build ships free
-  tier only. Describing a paid tier that cannot be bought in the app invites the
-  exact question you do not want a reviewer asking.
+- **In-app purchases are disclosed, without listing prices.** Play requires an
+  accurate description of what costs money; it does not require the numbers, and
+  leaving them out means the listing never goes stale when pricing changes. The
+  cancellation line is there on purpose - it is the single most common worry
+  about app subscriptions, and answering it up front converts.
 - **No "recovery", "addiction", "sobriety", "relapse"** in the marketing register.
   They are accurate words and you may want them back — but paired with a health
   category they read as clinical claims. Your call; flagging the trade-off.

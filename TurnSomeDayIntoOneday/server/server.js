@@ -551,7 +551,14 @@ app.get('/api/billing/status', requireAuth, async (req, res) => {
     await billing.refreshFromStripe(user);
     user = db.getUserById(req.userId) || user;
   }
-  res.json(billing.getBillingStatus(user));
+  // storeBillingReady tells the client whether a purchase can actually be
+  // honoured. Without it, a misconfigured server takes the customer's money in
+  // the store and then fails verification - they have paid and got nothing.
+  // Better to refuse before the payment sheet opens than to refund afterwards.
+  res.json({
+    ...billing.getBillingStatus(user),
+    storeBillingReady: storeBilling.isPlayConfigured(),
+  });
 });
 
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {

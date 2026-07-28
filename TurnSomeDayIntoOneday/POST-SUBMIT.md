@@ -28,7 +28,12 @@ verified in the build environment. It has to be done on a real phone.
 - [ ] Google Cloud → service account with the Android Publisher role, download
       the JSON key, grant it access in Play Console → Users and permissions.
 - [ ] Railway → env var `PLAY_SERVICE_ACCOUNT_JSON` = the whole JSON, one line.
-      Without it every purchase fails verification and nobody gets Pro.
+      Until this is set the app **refuses to open the payment sheet at all** and
+      says "Purchases are temporarily unavailable — nothing has been charged."
+      That is deliberate: without the key the server cannot verify a purchase,
+      so a customer would otherwise pay and receive nothing. Setting the
+      variable is what switches purchases on; no code change or redeploy of the
+      app is needed beyond Railway restarting.
 - [ ] Add your tester accounts to Play Console → Settings → License testing so
       test purchases are free.
 - [ ] Buy Pro on a real device and confirm the account flips to Pro.

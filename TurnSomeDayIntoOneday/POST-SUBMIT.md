@@ -81,10 +81,9 @@ Grace period left at Google's recommended 7 days, account hold auto-calculated.
 ### Progress
 - [x] `pro_monthly` created, base plan `monthly-autorenew` at $9.99, **Active**
 - [x] `pro_monthly` offer `freetrial-7day` — new customer acquisition, 7-day free trial
-- [ ] `pro_yearly` — base plan `yearly-autorenew`, Yearly, $59.99, then activate
-- [ ] `pro_yearly` offer `freetrial-7day`, new customer acquisition, 7 days,
-      entitlement **Never had any subscription** (one trial per person across
-      the app, not one per product)
-- [ ] `pro_lifetime` one-time product
+- [x] `pro_yearly` — base plan `yearly-autorenew` + offer `freetrial-7day`, both **Active**
+- [x] `pro_lifetime` — one-time product, purchase option `lifetime`, **Active**
+- [ ] Verify the US price on each: $9.99 / $59.99 / $149.99. A wrong number here
+      is invisible until someone is charged it.
 - [ ] `PLAY_SERVICE_ACCOUNT_JSON` in Railway — until this is set the app refuses
       to open the payment sheet, so none of the above can be bought yet

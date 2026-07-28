@@ -70,14 +70,20 @@ you can defend the answer if Play ever asks.
 
 ### Financial info
 
-| Data type | Collected | Shared |
-|---|---|---|
-| **Payment info** | **No** | No |
+| Data type | Collected | Shared | Purpose | Optional? |
+|---|---|---|---|---|
+| **Payment info** | **No** | No | — | — |
+| **Purchase history** | Yes | No | App functionality, Account management | Required |
 
-> The Android build sells nothing — every purchase surface is removed and the
-> server refuses a checkout request from it. No payment details are handled by
-> the app on any platform: on the web, card details go directly to Stripe and
-> never touch this server.
+> **Payment info: No.** Card details are never handled by this app on any
+> platform. In the Android build the purchase happens inside Google Play and the
+> app only ever receives a purchase token; on the web, card details go straight
+> to Stripe and never touch this server.
+>
+> **Purchase history: Yes.** The Android build sells Pro through Google Play, and
+> `recordStorePurchase` in `server/db.js` stores the plan, the store product ID
+> and the purchase token against the account. That is purchase history in Play's
+> sense and must be declared — it is what keeps Pro unlocked across devices.
 
 ### Everything else — declare NO
 
@@ -93,7 +99,9 @@ third-party analytics SDKs, and no trackers.
 for their own use). Two processors are worth stating plainly if asked:
 
 - **The model provider** receives conversation text solely to generate a reply.
-- **Stripe** processes payments — **on the website only**, never in the Android app.
+- **Stripe** processes payments on the website. In the Android app the purchase
+  runs through **Google Play**, and the server only verifies the resulting token
+  against Google's own API.
 
 Play does not classify a service provider acting on your instructions as
 "sharing", so both remain **Collected: yes / Shared: no**.

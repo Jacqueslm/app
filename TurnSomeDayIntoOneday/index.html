@@ -7492,6 +7492,16 @@ async function becomeProViaStore(plan){
       appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.");
       return;
     }
+    // The Founding 50 is checked here as well as on the server. The server check
+    // is the authority, but it only runs after the store has already charged the
+    // card - seat 51 would pay and then be told it was sold out.
+    if(plan==='lifetime'&&ready.lifetimeSoldOut){
+      lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
+      applyLifetimeAvailability&&applyLifetimeAvailability();
+      const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — sold out. Lifetime returns at $249.';
+      appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
+      return;
+    }
   }catch(e){
     appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
     return;
@@ -8192,7 +8202,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='10.0.0';
+const APP_VERSION='11.0.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

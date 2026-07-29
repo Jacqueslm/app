@@ -35,10 +35,11 @@ verified in the build environment. It has to be done on a real phone.
       The IDs must match exactly — `PRODUCT_PLANS` in `server/store-billing.js`
       maps them, and an unknown ID is rejected rather than guessed at.
 - [x] Google Cloud project `day-one-play`, Google Play Android Developer API enabled
-- [ ] Service account in that project + JSON key downloaded
-- [ ] Invite the service account's email in Play Console → Users and permissions,
-      granting it access to this app (the Cloud role alone is not enough — Play
-      checks its own permissions, not Cloud's)
+- [x] Service account `day-one-play-billing@day-one-play.iam.gserviceaccount.com` + JSON key
+- [x] Invited in Play Console with View app information, View financial data and
+      **Manage orders and subscriptions**. That last one is what lets the server
+      acknowledge purchases; without it acknowledgement 403s and Google refunds
+      every sale after three days.
 - [ ] Railway → env var `PLAY_SERVICE_ACCOUNT_JSON` = the whole JSON, one line.
       Until this is set the app **refuses to open the payment sheet at all** and
       says "Purchases are temporarily unavailable — nothing has been charged."
@@ -58,7 +59,7 @@ verified in the build environment. It has to be done on a real phone.
 | Name | Purpose | Set? |
 |---|---|---|
 | `COMP_PRO_EMAILS` | Free Pro for the Play review account and testers | yes |
-| `PLAY_SERVICE_ACCOUNT_JSON` | Verifies Play purchases | **not yet** |
+| `PLAY_SERVICE_ACCOUNT_JSON` | Verifies and acknowledges Play purchases | yes |
 | `PLAY_PACKAGE_NAME` | Defaults to `com.turnsomedayintodayone.app` | optional |
 
 ## Rebuilding the .aab
@@ -101,5 +102,4 @@ Grace period left at Google's recommended 7 days, account hold auto-calculated.
 - [x] `pro_lifetime` — one-time product, purchase option `lifetime`, **Active**
 - [ ] Verify the US price on each: $9.99 / $59.99 / $149.99. A wrong number here
       is invisible until someone is charged it.
-- [ ] `PLAY_SERVICE_ACCOUNT_JSON` in Railway — until this is set the app refuses
-      to open the payment sheet, so none of the above can be bought yet
+- [x] `PLAY_SERVICE_ACCOUNT_JSON` set in Railway — purchases are now switched on

@@ -75,6 +75,27 @@ async function playAccessToken() {
   return data.access_token;
 }
 
+// Google refunds any purchase that is not acknowledged within three days. Miss
+// this and every Android sale quietly reverses 72 hours later while the customer
+// keeps Pro - no error, no webhook, nothing to notice until the payouts do not
+// add up. It has to happen after the purchase is confirmed valid, never before.
+async function acknowledgePlayPurchase({ token, productId, purchaseToken, recurring }) {
+  const url = recurring
+    ? `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PLAY_PACKAGE}/purchases/subscriptions/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}:acknowledge`
+    : `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${PLAY_PACKAGE}/purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}:acknowledge`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: '{}',
+  });
+  // 200 and 204 are both success; Google returns an empty body either way.
+  if (!res.ok) {
+    const err = new Error(`Play refused to acknowledge the purchase (${res.status}).`);
+    err.code = 'store_acknowledge_failed';
+    throw err;
+  }
+}
+
 async function verifyPlayPurchase({ productId, purchaseToken, recurring }) {
   const token = await playAccessToken();
   // Subscriptions and one-time products live on different endpoints.
@@ -100,6 +121,7 @@ async function verifyPlayPurchase({ productId, purchaseToken, recurring }) {
       err.code = 'store_purchase_expired';
       throw err;
     }
+    await ackIfNeeded(p, { token, productId, purchaseToken, recurring });
     return {
       active: true,
       currentPeriodEnd: new Date(expiry).toISOString(),
@@ -112,7 +134,30 @@ async function verifyPlayPurchase({ productId, purchaseToken, recurring }) {
     err.code = 'store_purchase_not_valid';
     throw err;
   }
+  await ackIfNeeded(p, { token, productId, purchaseToken, recurring });
   return { active: true, currentPeriodEnd: null, subscriptionStatus: 'active' };
+}
+
+// acknowledgementState: 0 = not yet acknowledged, 1 = already done. Acknowledging
+// twice is harmless but pointless, and a purchase restored on a second device
+// arrives already acknowledged.
+//
+// A failure here is logged, not thrown: the customer has genuinely paid, so
+// refusing them Pro on top of a refund that has not happened yet would be the
+// worse of the two outcomes. The log is what makes it findable.
+async function ackIfNeeded(purchase, args) {
+  if (Number(purchase.acknowledgementState) === 1) return;
+  try {
+    await acknowledgePlayPurchase(args);
+  } catch (e) {
+    try {
+      db.logError(
+        'store_billing',
+        `ACKNOWLEDGE FAILED - Google will refund this purchase in 3 days: ${e.message}`,
+        `${args.productId}/${String(args.purchaseToken).slice(0, 12)}...`
+      );
+    } catch (_) { /* logging must never break a paid upgrade */ }
+  }
 }
 
 // ─── APPLE ───────────────────────────────────────────────────────────────────

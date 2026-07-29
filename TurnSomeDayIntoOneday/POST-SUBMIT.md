@@ -49,6 +49,10 @@ verified in the build environment. It has to be done on a real phone.
 - [ ] Add your tester accounts to Play Console → Settings → License testing so
       test purchases are free.
 - [ ] Buy Pro on a real device and confirm the account flips to Pro.
+- [ ] **Three days after that test purchase, check it was not refunded.** That is
+      the only real proof acknowledgement is working. If it was refunded, look in
+      the error log for `ACKNOWLEDGE FAILED` — the code logs it rather than
+      refusing the customer.
 
 ## Env vars this app now expects
 | Name | Purpose | Set? |

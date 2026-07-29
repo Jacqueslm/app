@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v11'; // v11: check the Founding 50 before the payment sheet
+const CACHE_NAME = 'tsid-shell-v12'; // v12: acknowledge Play purchases
 const SHELL_FILES = [
   '/',
   '/app',

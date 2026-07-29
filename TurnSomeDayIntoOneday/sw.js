@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12'; // v12: acknowledge Play purchases
+const CACHE_NAME = 'tsid-shell-v12.0.1'; // v12.0.1: Play mode never latches on the web
 const SHELL_FILES = [
   '/',
   '/app',

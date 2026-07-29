@@ -7440,9 +7440,22 @@ function setBill(type){
 // the referrer to android-app://<package> on a TWA launch. Either one latches
 // the flag into localStorage, so it survives in-app navigation that drops the
 // query string.
+//
+// The latch is Android-only. The Play build can only ever exist inside the
+// Play-installed Android wrapper, but the start URL with ?src=play is easy to
+// open anywhere - pasted on a PC while testing, shared in a chat, followed from
+// a doc. Before this check, one such visit latched a desktop browser into Play
+// mode forever: every Upgrade tap ended in "In-app purchases are not available
+// on this device" and Stripe was unreachable. So a non-Android browser never
+// latches, and one that already latched (from the earlier build) is cleaned up
+// and put back on the web path.
 const PLAY_PACKAGE='com.turnsomedayintodayone.app';
 function detectPlayBuild(){
   try{
+    if(!/\bAndroid\b/.test(navigator.userAgent||'')){
+      localStorage.removeItem('tsid_play_build');
+      return false;
+    }
     if(localStorage.getItem('tsid_play_build')==='1')return true;
     const fromParam=new URLSearchParams(location.search).get('src')==='play';
     const fromReferrer=(document.referrer||'').startsWith('android-app://'+PLAY_PACKAGE);
@@ -8202,7 +8215,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.0.0';
+const APP_VERSION='12.0.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

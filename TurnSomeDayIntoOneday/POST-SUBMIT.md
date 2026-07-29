@@ -6,6 +6,30 @@
       deploy has to finish first.
 - [ ] Confirm `/privacy` and `/delete-account` load signed out.
 
+## Digital Asset Links — why both fingerprints are listed
+
+`.well-known/assetlinks.json` lists **two** certificates:
+
+- `99:D2:75...` — the Play **app signing key** (what Play re-signs installs with)
+- `91:7B:4C...` — the **upload key** (what the .aab is signed with locally)
+
+Listing only the app signing key left the TWA falling back to Custom Tabs with a
+browser bar on two separate devices, while every other artifact checked out: the
+app declared the right origin, the file was live, and Google's validator called
+the statement valid. That validator only checks the file — it has no idea which
+certificate is on the installed app, so a mismatch there looks like success.
+
+If the key is ever rotated again, add the new fingerprint here **before** the
+rotation reaches installs. Verification is evaluated at install time, so an
+existing install keeps its cached result until it is reinstalled.
+
+Check the whole chain from anywhere with:
+
+    curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
+
+Note the apex domain (no `www`) serves nothing — the TWA uses `www`, so this does
+not matter, but a bare-domain link would not verify.
+
 ## Tester opt-in link
 
     https://play.google.com/apps/testing/com.turnsomedayintodayone.app

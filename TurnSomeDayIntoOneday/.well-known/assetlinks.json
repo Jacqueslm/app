@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "com.turnsomedayintodayone.app",
       "sha256_cert_fingerprints": [
-        "99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5"
+        "99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5",
+        "91:7B:4C:99:B1:13:F3:EC:27:E1:EB:87:3B:04:49:11:4C:FB:9E:04:1B:C3:B4:94:A2:D4:55:8D:73:E4:D4:F4"
       ]
     }
   }

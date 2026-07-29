@@ -1,8 +1,8 @@
 # Handoff — Turn Someday Into Day One
 
 State as of 29 July 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **12.0.0** (`APP_VERSION` in `index.html`,
-`tsid-shell-v12` in `sw.js`).
+to rediscover it. Current version: **12.0.1** (`APP_VERSION` in `index.html`,
+`tsid-shell-v12.0.1` in `sw.js`).
 
 ---
 
@@ -56,6 +56,13 @@ SDK): `cd twa && bubblewrap build`, after bumping `appVersionCode` in
   way to ever ship an update to this listing.** It is backed up off the machine.
 - `?src=play` is how the client knows it is the Play build and must route
   purchases to Google rather than Stripe. Do not remove it from `startUrl`.
+- The Play-mode latch is **Android-only** as of 12.0.1. Opening `?src=play` in
+  a desktop browser used to latch Play mode into localStorage forever, which
+  blocked Stripe checkout from that browser with "In-app purchases are not
+  available on this device". `detectPlayBuild()` now refuses to latch on a
+  non-Android UA and clears a stale latch on load, so affected browsers
+  self-heal. Do not paste the start URL anywhere a person might click it, all
+  the same.
 
 ## Money
 
@@ -118,6 +125,43 @@ enrolment, service account wired up.
 Opt-in link (closed test — only works for addresses already on the tester list):
 
     https://play.google.com/apps/testing/com.turnsomedayintodayone.app
+
+### Play Billing Library 8 deadline (policy warning, July 2026)
+
+Play Console flags: "App must use Google Play Billing Library version 8.0.0 or
+later" — the console tile says fix by **Aug 30, 2026** (docs say Aug 31; treat
+the earlier date as real). After that date new `.aab` uploads are rejected.
+Nothing installed breaks, the tester clock keeps running, and the server is
+unaffected — the Billing Library lives only inside the Android shell.
+
+**The fix does not exist yet.** The shell gets its Billing Library from
+`com.google.androidbrowserhelper:billing`, and the latest **published** version
+is 1.1.0 (bundles BillingClient 7.1.1). The v8 bump (wrapper 1.2.0,
+BillingClient 8.3.0) is merged on android-browser-helper's `main` but not
+released to Maven. Do **not** pin `billing:1.2.0` (fails to resolve) and do
+**not** force `com.android.billingclient:billing:8.x` alongside wrapper 1.1.0 —
+it compiles, then crashes at purchase time, because PBL 8 removed deprecated
+APIs the 1.1.0 wrapper was built against. Real money runs through this path.
+
+What to do instead:
+
+1. **Extension filed** (or to file): Play Console → Policy status → open the
+   Billing Library issue → request the extension to **Nov 1, 2026**. A form on
+   that page; granted routinely last cycle.
+2. **Watch** https://github.com/GoogleChrome/android-browser-helper/releases
+   for `billing-1.2.0` (last cycle Google shipped the v7 wrapper ahead of the
+   deadline, announced on chromeos.dev).
+3. When it ships, the whole fix is: bump `appVersionCode` in
+   `twa-manifest.json`, then `npm install -g @bubblewrap/cli`,
+   `bubblewrap update`, `bubblewrap build`, upload to the closed-testing track.
+   No manual gradle edit — the updated Bubblewrap template will pull the new
+   wrapper. Verify `app/build.gradle` shows `billing:1.2.0` (or later) before
+   uploading; if it still says 1.1.0, the template hasn't caught up yet and the
+   one-line edit to the published 1.2.0 is then safe.
+
+Until then keep uploading to closed testing normally — the deadline only bites
+uploads after it passes, and the 12-tester/14-day clock remains the actual
+launch blocker.
 
 ## Open bug
 

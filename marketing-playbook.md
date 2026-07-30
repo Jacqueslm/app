@@ -50,7 +50,14 @@ angle) got 428 views; generic "you come first" got 14. Specific wins.
 
 **Content you already have:**
 - `marketing-content-pack.md` — 9 scripts + 10 cards (lanes A/B/C/D)
+- `ai-shorts-scripts.md` — 5 AI cinematic-short storyboards (porn/food/
+  consequence/her arcs) with per-shot AI scene directions
 - Your Buffer 42-post batch (SLOT A him / B her / C proof)
+
+**Two production methods, both feed the same doors:**
+- **Teleprompter talking-heads** (you on camera) = trust-builders. `marketing-content-pack.md`.
+- **AI cinematic shorts** (generated scenes + voiceover) = scroll-stoppers. `ai-shorts-scripts.md`.
+  Use character-lock so the same man/wife appear across every clip. Run ~1/week.
 
 **Your production line (all free, in Studio):**
 Teleprompter → webcam recorder (countdown, photo, background blur, self-view)

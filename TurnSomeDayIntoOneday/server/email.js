@@ -421,6 +421,10 @@ async function startQuizNurture(lead) {
 // at step 2 with no special casing here.
 async function runQuizNurture() {
   for (const lead of db.getLeadsInNurtureWindow()) {
+    // The sequence is written in the voice of the man doing the work. Partner
+    // leads (source 'for-her') asked for one PDF, not his emails - and any
+    // future source is excluded until a sequence is written for it.
+    if (lead.source && lead.source !== 'quiz' && lead.source !== 'brainreset') continue;
     const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
     const step = day + 1;
     if (step < 1 || step > 5) continue;

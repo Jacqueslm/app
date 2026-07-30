@@ -8631,12 +8631,19 @@ function manualSync(){
 
 async function signOutAccount(){
   try{await fetch('/api/auth/logout',{method:'POST'});}catch(e){}
-  S.accountEmail=null;
-  save();
-  closeAuthModal();
-  document.getElementById('main-app').style.display='none';
-  document.getElementById('onboarding').style.display='none';
-  showAuthGate();
+  // Wipe this device's cached recovery data on the way out. This app's core
+  // users share a laptop with the partner they're recovering with, and the
+  // promise is "he doesn't see what you write" - so the next person to open
+  // the app (or sign up) must never inherit the previous person's journal,
+  // craving logs or letters. Account holders lose nothing: their data lives
+  // on the server and is restored from /api/state the moment they log back in.
+  // Reloading guarantees the in-memory state is reset too, not just storage.
+  try{
+    localStorage.removeItem('tsid_v2');
+    localStorage.removeItem('tsid_pin_reset');
+    localStorage.removeItem('tsid_pin_guard');
+  }catch(e){}
+  location.reload();
 }
 
 function logOutFromProfile(){
@@ -9486,7 +9493,19 @@ async function boot(){
       enterApp();
       return;
     }
-  }catch(e){/* server unreachable - fall through to the gate */}
+  }catch(e){
+    // Server unreachable (offline / dead spot). A user who has already
+    // onboarded on this device has everything they need cached in tsid_v2,
+    // and the whole point of the app - the day counter, SOS tools, journal -
+    // works with no network. Locking them out at the signup wall would be the
+    // PIN-brick bug all over again, and it breaks the offline promise in the
+    // in-app guide. So enter the app on the cached identity; the next
+    // successful boot reconciles with the server.
+    if(S.startDate){
+      enterApp();
+      return;
+    }
+  }
   // Arriving from the check-in quiz (/?join=1): skip the welcome screen and land
   // straight on signup while the motivation is still warm.
   if(new URLSearchParams(window.location.search).get('join')){

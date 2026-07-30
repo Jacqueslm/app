@@ -5793,10 +5793,15 @@ function toggleSosMusic(){
 }
 
 // ─── VOICE GUIDE (hands-free craving support) ────────────────────────────────
-// Someone mid-craving won't read a screen or watch a video. One tap, and the
-// browser's built-in voice (free, no API, works offline) talks them through
-// the wave while the circle breathes with them. Muted phone still works: every
-// line is shown as an on-screen caption while it's spoken.
+// Someone mid-craving won't read a screen or watch a video. One tap and a calm
+// voice talks them through the wave while the circle breathes with them. Muted
+// phone still works: every line is an on-screen caption while it's spoken.
+// The talk itself is a pre-recorded MP3 (generated once, locally, with the free
+// Piper TTS - see tools/generate-sos-talk.py) because a real <audio> element is
+// the only audio Android keeps playing when the screen locks or the user
+// switches apps mid-craving. If the MP3 can't load, the browser's built-in
+// voice takes over from the same step; if even that is missing, the captions
+// pace the talk on their own.
 const VG_STEPS=[
   {t:"I'm here with you. You don't have to do anything right now except listen.",ph:'rest'},
   {t:"This craving is a wave. It rises, it peaks, and it always comes back down. Your only job is to ride it out with me.",ph:'rest'},
@@ -5814,7 +5819,11 @@ const VG_STEPS=[
   {t:"The wave is already losing power. You don't need to be perfect today. You just need this next minute — and you're already in it.",ph:'rest'},
   {t:"Stay here breathing with the circle as long as you like. When you're ready, tap the button and go do the next small thing.",ph:'rest'},
 ];
-let vgActive=false,vgTimer=null;
+// Start time (seconds) of each step inside audio/sos-talk.mp3, printed by the
+// generator script. Regenerate BOTH together if the script text ever changes.
+const VG_AUDIO_URL='audio/sos-talk.mp3';
+const VG_CUES=[0,4.49,12.45,19.14,27.57,36.85,42.62,49.57,56.2,62.71,68.92,74.15,79.97,86.13,93.82];
+let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1;
 function vgPickVoice(){
   const vs=window.speechSynthesis?speechSynthesis.getVoices():[];
   const en=vs.filter(v=>/^en/i.test(v.lang));
@@ -5829,16 +5838,72 @@ function vgSetPhase(ph){
   else{c.style.transition='transform 3s ease';c.style.transform='scale(1.1)';}
 }
 function startVoiceGuide(){
-  if(!('speechSynthesis' in window)){breathe();return;}// no voice engine - breathing still helps
   closeSOS();
   logActivity('grounding',{tool:'voice_guide'});
   vgActive=true;
   document.getElementById('voiceguide-overlay').style.display='flex';
-  wakeLockAcquire('voice-guide');// screen off would freeze the page and kill the voice mid-talk
+  wakeLockAcquire('voice-guide');// keeps the circle on screen; the MP3 itself survives a lock
   calmSoundOn();updateCalmToggles();
+  vgStartAudio();
+}
+function vgStartAudio(){
+  const a=new Audio(VG_AUDIO_URL);
+  vgAudio=a;vgAudioStep=-1;
+  a.preload='auto';
+  a.addEventListener('timeupdate',vgSyncFromAudio);
+  a.addEventListener('ended',()=>{if(vgActive&&vgAudio===a){vgStopAudio();vgSilentLoop();}});
+  a.addEventListener('error',()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
+  const p=a.play();
+  if(p&&p.catch)p.catch(()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
+  vgMediaSession();
+  vgSyncStep(0);
+}
+function vgSyncStep(i){
+  if(i===vgAudioStep||!vgActive)return;
+  vgAudioStep=i;
+  const s=VG_STEPS[i];
+  document.getElementById('vg-caption').textContent=s.t;
+  vgSetPhase(s.ph);
+}
+function vgSyncFromAudio(){
+  if(!vgActive||!vgAudio)return;
+  const t=vgAudio.currentTime;
+  let i=0;
+  while(i+1<VG_CUES.length&&t>=VG_CUES[i+1])i++;
+  vgSyncStep(i);
+}
+// Lock-screen "Now Playing" card: without metadata Android shows a bare notification;
+// with it the talk can be paused/resumed from the lock screen like a podcast.
+function vgMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    navigator.mediaSession.metadata=new MediaMetadata({title:'Talk me through it',artist:'Day One',artwork:[{src:'icons/icon-192.png',sizes:'192x192',type:'image/png'},{src:'icons/icon-512.png',sizes:'512x512',type:'image/png'}]});
+    navigator.mediaSession.setActionHandler('play',()=>{if(vgAudio)vgAudio.play();});
+    navigator.mediaSession.setActionHandler('pause',()=>{if(vgAudio)vgAudio.pause();});
+    navigator.mediaSession.setActionHandler('stop',()=>closeVoiceGuide());
+  }catch(e){}
+}
+function vgClearMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    navigator.mediaSession.metadata=null;
+    ['play','pause','stop'].forEach(x=>navigator.mediaSession.setActionHandler(x,null));
+  }catch(e){}
+}
+function vgStopAudio(){
+  const a=vgAudio;vgAudio=null;
+  if(a){try{a.pause();a.removeAttribute('src');a.load();}catch(e){}}
+  vgClearMediaSession();
+}
+function vgFallbackToTTS(){
+  // The MP3 couldn't load or play - the built-in voice picks up from the same step.
+  const from=Math.max(0,vgAudioStep);
+  vgStopAudio();
+  if(!vgActive)return;
+  if(!('speechSynthesis' in window)){vgSpeakStep(from);return;}// captions alone still pace the talk
   speechSynthesis.cancel();
   // Voice lists load lazily in Chrome - warm the list, then start.
-  const begin=()=>vgSpeakStep(0);
+  const begin=()=>vgSpeakStep(from);
   if(speechSynthesis.getVoices().length)begin();
   else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;begin();};setTimeout(()=>{if(vgActive&&!speechSynthesis.speaking)begin();},700);}
 }
@@ -5848,15 +5913,23 @@ function vgSpeakStep(i){
   const step=VG_STEPS[i];
   document.getElementById('vg-caption').textContent=step.t;
   vgSetPhase(step.ph);
+  let advanced=false;
+  const next=()=>{if(advanced||!vgActive)return;advanced=true;vgTimer=setTimeout(()=>vgSpeakStep(i+1),600);};
+  // Safety net: if the engine stalls silently (or doesn't exist here at all),
+  // captions keep the guide moving at reading pace.
+  vgTimer=setTimeout(next,Math.max(6000,step.t.length*120));
+  if(!('speechSynthesis' in window))return;
   const u=new SpeechSynthesisUtterance(step.t);
   const voice=vgPickVoice();
   if(voice)u.voice=voice;
   u.rate=0.88;u.pitch=1;
-  let advanced=false;
-  const next=()=>{if(advanced||!vgActive)return;advanced=true;vgTimer=setTimeout(()=>vgSpeakStep(i+1),600);};
-  u.onend=next;u.onerror=next;
-  // Safety net: if the engine stalls silently, captions keep the guide moving.
-  vgTimer=setTimeout(next,Math.max(6000,step.t.length*120));
+  const spokeAt=Date.now();
+  u.onend=next;
+  // A present-but-voiceless engine errors within milliseconds of speak();
+  // advancing on that would race all 15 captions past in seconds. Only an
+  // error after real speaking time advances early - an instant one leaves
+  // the caption timer above to pace the step instead.
+  u.onerror=()=>{if(Date.now()-spokeAt>1500)next();};
   speechSynthesis.speak(u);
 }
 function vgSilentLoop(){
@@ -5877,17 +5950,18 @@ function vgSilentLoop(){
 function closeVoiceGuide(){
   vgActive=false;
   clearTimeout(vgTimer);
+  vgStopAudio();
   wakeLockRelease('voice-guide');
   if('speechSynthesis' in window)speechSynthesis.cancel();
   calmSoundOff();
   document.getElementById('voiceguide-overlay').style.display='none';
 }
 document.addEventListener('visibilitychange',()=>{
-  // The power button beats any wake lock. Coming back to the guide from a
-  // locked phone the engine is often left paused; nudge it, and the per-step
-  // caption timer keeps the talk moving even if this utterance is gone.
-  if(!vgActive||document.hidden)return;
-  try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}
+  // Only relevant on the TTS fallback path (vgAudio null): the MP3 keeps
+  // playing through a lock, but a locked phone often leaves the speech engine
+  // paused - nudge it, and the per-step caption timer keeps the talk moving.
+  if(!vgActive||document.hidden||vgAudio)return;
+  try{if(window.speechSynthesis&&speechSynthesis.paused)speechSynthesis.resume();}catch(e){}
 });
 
 // ─── LESSON AUDIO ────────────────────────────────────────────────────────────

@@ -8939,6 +8939,10 @@ function setGateCred(kind){
     input.maxLength=100;
   }
   input.value='';
+  // Switching mode starts a fresh credential, so it must start hidden too -
+  // otherwise a reveal from the previous mode carries over and the PIN someone
+  // types next sits on screen in the clear without them ever asking for it.
+  resetPwToggle('gate-password');
 }
 
 function openAuthModal(){

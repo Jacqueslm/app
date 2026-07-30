@@ -2358,7 +2358,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div id="vg-caption" style="font-size:18px;font-weight:500;line-height:1.5;max-width:320px;min-height:84px;margin:0 auto 28px;color:#fff">I'm here with you.</div>
   <div style="font-size:12px;color:#8892c0;margin-bottom:20px">Close your eyes if you want — the voice will keep going.</div>
   <button onclick="closeVoiceGuide()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:12px;padding:13px 32px;font-size:14px;color:#fff;cursor:pointer;font-family:var(--f)">I'm steadier — stop</button>
-  <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
+  <div>
+    <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
+    <button class="calm-toggle" id="vg-voice-btn" onclick="cycleVgVoice()" style="margin-left:8px" title="Tap to try a different voice">Voice: Warm</button>
+  </div>
 </div>
 
 </div><!-- /app -->
@@ -5819,11 +5822,20 @@ const VG_STEPS=[
   {t:"The wave is already losing power. You don't need to be perfect today. You just need this next minute — and you're already in it.",ph:'rest'},
   {t:"Stay here breathing with the circle as long as you like. When you're ready, tap the button and go do the next small thing.",ph:'rest'},
 ];
-// Start time (seconds) of each step inside audio/sos-talk.mp3, printed by the
-// generator script. Regenerate BOTH together if the script text ever changes.
-const VG_AUDIO_URL='audio/sos-talk.mp3';
-const VG_CUES=[0,4.49,12.45,19.14,27.57,36.85,42.62,49.57,56.2,62.71,68.92,74.15,79.97,86.13,93.82];
-let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1;
+// Three pre-recorded voices (all generated locally and free - see
+// tools/generate-sos-talk.py) plus the phone's own speech engine as a fourth
+// choice for anyone who prefers it. Each recording has its own cue timeline
+// (start second of every step) so captions stay in sync no matter the voice.
+// Regenerate recordings AND cues together if the script text ever changes.
+const VG_VOICES={
+  warm:{label:'Warm',url:'audio/sos-talk-warm.mp3',cues:[0,4.47,12.17,19.07,28.03,37.61,43.03,50.14,57.13,63.29,69.12,74.54,80.68,87.17,94.28]},
+  soft:{label:'Soft',url:'audio/sos-talk-soft.mp3',cues:[0,5.71,15.39,23.66,33.46,44.44,50.83,58.94,66.9,74.71,82.18,88.35,95.19,102.35,111.87]},
+  clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,4.58,12.42,19.22,28,37.36,43.03,49.98,56.86,63.49,69.86,75.22,81.27,87.45,95.38]},
+  phone:{label:"Phone's own"},
+};
+const VG_VOICE_ORDER=['warm','soft','clear','phone'];
+function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
+let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null;
 function vgPickVoice(){
   const vs=window.speechSynthesis?speechSynthesis.getVoices():[];
   const en=vs.filter(v=>/^en/i.test(v.lang));
@@ -5843,20 +5855,44 @@ function startVoiceGuide(){
   vgActive=true;
   document.getElementById('voiceguide-overlay').style.display='flex';
   wakeLockAcquire('voice-guide');// keeps the circle on screen; the MP3 itself survives a lock
-  calmSoundOn();updateCalmToggles();
-  vgStartAudio();
+  calmSoundOn();updateCalmToggles();updateVgVoiceBtn();
+  vgStartVoice(0);
 }
-function vgStartAudio(){
-  const a=new Audio(VG_AUDIO_URL);
-  vgAudio=a;vgAudioStep=-1;
+function vgStartVoice(fromStep){
+  if(fromStep>=VG_STEPS.length){vgSilentLoop();return;}
+  const key=vgVoiceKey();
+  if(key==='phone'){vgStartTTS(fromStep);return;}
+  vgStartAudio(key,fromStep);
+}
+function vgStartAudio(key,fromStep){
+  const v=VG_VOICES[key];
+  const a=new Audio(v.url);
+  vgAudio=a;vgAudioStep=-1;vgCues=v.cues;
   a.preload='auto';
+  if(fromStep>0)a.addEventListener('loadedmetadata',()=>{try{a.currentTime=v.cues[fromStep];}catch(e){}},{once:true});
   a.addEventListener('timeupdate',vgSyncFromAudio);
   a.addEventListener('ended',()=>{if(vgActive&&vgAudio===a){vgStopAudio();vgSilentLoop();}});
   a.addEventListener('error',()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
   const p=a.play();
   if(p&&p.catch)p.catch(()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
   vgMediaSession();
-  vgSyncStep(0);
+  vgSyncStep(fromStep);
+}
+function cycleVgVoice(){
+  const next=VG_VOICE_ORDER[(VG_VOICE_ORDER.indexOf(vgVoiceKey())+1)%VG_VOICE_ORDER.length];
+  S.vgVoice=next;save();
+  updateVgVoiceBtn();
+  if(!vgActive)return;
+  // Mid-talk switch: pick the new voice up from the step being spoken now.
+  const from=Math.max(0,vgAudioStep);
+  clearTimeout(vgTimer);
+  vgStopAudio();
+  try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
+  vgStartVoice(from);
+}
+function updateVgVoiceBtn(){
+  const b=document.getElementById('vg-voice-btn');
+  if(b)b.textContent='Voice: '+VG_VOICES[vgVoiceKey()].label;
 }
 function vgSyncStep(i){
   if(i===vgAudioStep||!vgActive)return;
@@ -5866,10 +5902,10 @@ function vgSyncStep(i){
   vgSetPhase(s.ph);
 }
 function vgSyncFromAudio(){
-  if(!vgActive||!vgAudio)return;
+  if(!vgActive||!vgAudio||!vgCues)return;
   const t=vgAudio.currentTime;
   let i=0;
-  while(i+1<VG_CUES.length&&t>=VG_CUES[i+1])i++;
+  while(i+1<vgCues.length&&t>=vgCues[i+1])i++;
   vgSyncStep(i);
 }
 // Lock-screen "Now Playing" card: without metadata Android shows a bare notification;
@@ -5900,16 +5936,20 @@ function vgFallbackToTTS(){
   const from=Math.max(0,vgAudioStep);
   vgStopAudio();
   if(!vgActive)return;
-  if(!('speechSynthesis' in window)){vgSpeakStep(from);return;}// captions alone still pace the talk
+  vgStartTTS(from);
+}
+function vgStartTTS(fromStep){
+  if(!('speechSynthesis' in window)){vgSpeakStep(fromStep);return;}// captions alone still pace the talk
   speechSynthesis.cancel();
   // Voice lists load lazily in Chrome - warm the list, then start.
-  const begin=()=>vgSpeakStep(from);
+  const begin=()=>vgSpeakStep(fromStep);
   if(speechSynthesis.getVoices().length)begin();
   else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;begin();};setTimeout(()=>{if(vgActive&&!speechSynthesis.speaking)begin();},700);}
 }
 function vgSpeakStep(i){
   if(!vgActive)return;
   if(i>=VG_STEPS.length){vgSilentLoop();return;}
+  vgAudioStep=i;// so a mid-talk voice switch knows where the talk is
   const step=VG_STEPS[i];
   document.getElementById('vg-caption').textContent=step.t;
   vgSetPhase(step.ph);
@@ -5935,6 +5975,7 @@ function vgSpeakStep(i){
 function vgSilentLoop(){
   // Script finished - keep the circle breathing quietly until they stop it.
   if(!vgActive)return;
+  vgAudioStep=VG_STEPS.length;// a voice switch during the quiet loop stays quiet
   const phases=[{ph:'in',s:4},{ph:'hold',s:7},{ph:'out',s:8}];
   let idx=0;
   const cap=document.getElementById('vg-caption');
@@ -8519,7 +8560,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.1.0';
+const APP_VERSION='12.2.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

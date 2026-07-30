@@ -696,7 +696,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div style="display:flex;align-items:center;gap:6px">
         <span class="nova-name">Friendly</span>
         <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
-        <span class="nova-mode-chip" id="nova-mode-chip">Guided mode</span>
+        <span class="nova-mode-chip" id="nova-mode-chip" style="display:none"></span>
       </div>
       <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI recovery companion · Non-judgmental · Confidential</div>
     </div>
@@ -6896,13 +6896,11 @@ function buildSystemPrompt(){
 const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
 // Not persisted on purpose - chatHistory itself resets on every app load (see load()),
 // so this should too: the notice earns its place back the next time someone opens the app.
-let guidedModeNoticeShown=false;
-const GUIDED_MODE_NOTICE="\n\n(I'm running in guided mode right now — my full AI responses aren't available, but I'm still here. What's on your mind?)";
-function guidedModeNotice(){
-  if(guidedModeNoticeShown)return'';
-  guidedModeNoticeShown=true;
-  return GUIDED_MODE_NOTICE;
-}
+// The guided-mode notice ("my full AI responses aren't available") is
+// intentionally suppressed for every tier: it announces the app is running in a
+// lesser mode, which reads as broken/discouraging - especially to a Pro user.
+// Kept as a no-op so the callers don't need touching.
+function guidedModeNotice(){return'';}
 // One shared pattern for crisis language so the fallback reply and the live-chat
 // crisis handling can never drift apart. Errs toward matching: a false positive
 // shows a supportive 988 message, a false negative misses someone in danger.
@@ -7166,8 +7164,10 @@ function closeProToolPreview(){
 function setNovaMode(isLive){
   const chip=document.getElementById('nova-mode-chip');
   if(!chip)return;
-  chip.textContent=isLive?'AI mode':'Guided mode';
-  chip.classList.toggle('live',isLive);
+  // Only ever surface a positive "AI mode" badge; never label the app as being
+  // in a lesser "Guided mode" - that reads as broken to any user, paid or free.
+  if(isLive){chip.textContent='AI mode';chip.style.display='';chip.classList.add('live');}
+  else{chip.textContent='';chip.style.display='none';chip.classList.remove('live');}
 }
 
 function addBubble(who,text){

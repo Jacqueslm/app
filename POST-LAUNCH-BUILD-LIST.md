@@ -5,35 +5,11 @@ Store testing and live. Not started — captured here so they're ready to build.
 
 ---
 
-## 1. Real background lesson audio (podcast-style) — HIGH VALUE
+## 1. Real background lesson audio (podcast-style) — ✅ DONE (in another session)
 
-**Problem:** lessons are read by the browser's built-in text-to-speech
-(`speechSynthesis`). Every mobile browser suspends that engine when the screen
-locks or the app is backgrounded, so the voice dies. A wake-lock currently keeps
-the screen awake during playback, but locked/multitasking playback is impossible
-with TTS — it's a browser limitation, not a bug.
-
-**Fix:** convert lessons to real audio files and play them through an `<audio>`
-element with the MediaSession API.
-
-**Scope:**
-1. Pick a text-to-speech *service* (not the browser engine). Options: the same
-   voice backend used for Friendly's AI when it's wired up, or fal.ai's TTS
-   (F5-TTS) already used in Studio, or a dedicated TTS API.
-2. Batch-generate one MP3 per lesson day across all 13 tracks (script it; store
-   the files; regenerate only when lesson text changes).
-3. Host the audio (served from the app's own server or a static bucket).
-4. Swap the lesson player from `speechSynthesis` over to an `<audio>` element
-   pointed at the MP3.
-5. Add MediaSession metadata (title = lesson name, artwork = app icon) so the
-   lock screen shows "Now Playing" with play/pause/scrubbing — real background
-   and locked playback, like any podcast app.
-6. Keep the current speed control (browser can vary playbackRate on `<audio>`).
-
-**Why it's worth it:** "listen to your lessons anywhere, screen off, while you
-drive" is a genuine feature, not a patch — turns the lessons into a podcast.
-
-**Blocked on:** a TTS service being available/approved (ties to item 2).
+Completed elsewhere: lessons converted to real audio for background/locked
+playback. No further work here. (If it shipped on a different branch, make sure
+it's merged into main / the vibe-code-uwxxlk branch before the Play-side update.)
 
 ---
 

@@ -9510,7 +9510,9 @@ async function forgotPassword(){
   }
 }
 
+let gateSubmitting=false;
 async function submitGateAuth(){
+  if(gateSubmitting)return; // a slow network used to let a double-tap fire duplicate signups
   const email=document.getElementById('gate-email').value.trim();
   const password=document.getElementById('gate-password').value;
   const errEl=document.getElementById('gate-error');
@@ -9521,13 +9523,18 @@ async function submitGateAuth(){
     if(gateCred==='password'&&password.length<8){errEl.textContent='Password must be at least 8 characters.';return;}
   }
   const phone=gateMode==='signup'?document.getElementById('gate-phone').value.trim():undefined;
+  const submitBtn=document.getElementById('gate-submit-btn');
+  const btnLabel=submitBtn?submitBtn.textContent:'';
+  gateSubmitting=true;
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent=gateMode==='login'?'Signing in…':'Creating…';}
+  const releaseGate=()=>{gateSubmitting=false;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent=btnLabel;}};
   try{
     const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({email,password,phone,utm:tsidUtm()})
     });
     const data=await res.json();
-    if(!res.ok){errEl.textContent=data.error||'Something went wrong.';return;}
+    if(!res.ok){errEl.textContent=data.error||'Something went wrong.';releaseGate();return;}
     S.accountEmail=data.email;
 
     if(gateMode==='signup'){
@@ -9562,6 +9569,7 @@ async function submitGateAuth(){
     enterApp();
   }catch(e){
     errEl.textContent='Could not reach the server. Check your connection and try again.';
+    releaseGate();
   }
 }
 

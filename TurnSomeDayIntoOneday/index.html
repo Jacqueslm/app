@@ -534,6 +534,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="pin-key" onclick="pinBackspace()"><i class="ti ti-backspace"></i></button>
   </div>
   <button class="ob-btn" id="pin-continue-btn" style="display:none;max-width:280px;margin-top:18px" onclick="submitPinEntry()">Continue</button>
+  <button id="pin-forgot-link" onclick="forgotPinFromLock()" style="display:none;background:transparent;border:none;color:#8892c0;font-size:13.5px;margin-top:22px;cursor:pointer;font-family:var(--f)">Forgot your PIN?</button>
 </div>
 
 <!-- PRIVACY POLICY / TERMS OF SERVICE (top-level: reachable from the auth
@@ -7836,18 +7837,25 @@ function setPinTitles(mode){
   const cancelBtn=document.getElementById('pin-cancel-btn');
   const titleEl=document.getElementById('pin-title');
   const subEl=document.getElementById('pin-sub');
+  const forgotLink=document.getElementById('pin-forgot-link');
   if(mode==='setup1'){
     titleEl.textContent='Create a PIN';
     subEl.textContent='Pick 4 to 6 digits, then tap Continue';
     cancelBtn.style.visibility='visible';
+    forgotLink.style.display='none';
   }else if(mode==='disable'){
     titleEl.textContent='Enter your PIN';
     subEl.textContent='Confirm to turn off App lock';
     cancelBtn.style.visibility='visible';
+    forgotLink.style.display='none';
   }else{
     titleEl.textContent='Enter your PIN';
     subEl.textContent='Your recovery data is private';
     cancelBtn.style.visibility='hidden';
+    // The unlock screen must never be a dead end - a forgotten PIN has to have
+    // a way out that doesn't bypass privacy: sign out here, prove identity by
+    // signing back in, and only then does the lock come off.
+    forgotLink.style.display='';
   }
 }
 
@@ -7886,6 +7894,19 @@ function cancelPinFlow(){
   pinFlow=null;pinBuffer='';pinFirstEntry='';
   document.getElementById('pin-lock').style.display='none';
   document.getElementById('main-app').style.display='flex';
+}
+
+// Escape hatch for a forgotten PIN. Signing out is safe (data lives on the
+// account), and the flag below only takes effect after a successful password
+// sign-in - so someone who just picked up an unlocked phone can't use this to
+// get past the lock, but the real owner is never permanently bricked.
+function forgotPinFromLock(){
+  appConfirm("Reset your PIN by signing back in. You'll be signed out on this device — your data stays saved on your account. Sign in again with your email and the App lock turns off; you can pick a new PIN in Profile any time.",async()=>{
+    try{localStorage.setItem('tsid_pin_reset','1');}catch(e){}
+    try{await fetch('/api/auth/logout',{method:'POST'});}catch(e){}
+    try{localStorage.removeItem('tsid_v2');}catch(e){}
+    location.reload();
+  });
 }
 
 function updatePinDots(err){
@@ -9375,6 +9396,13 @@ async function submitGateAuth(){
       Object.assign(S,JSON.parse(stateData.state));
       S.accountEmail=data.email;
     }
+    // Arriving from "Forgot your PIN?" on the lock screen: this password
+    // sign-in is the identity proof, so the App lock comes off now. Without
+    // this, the state fetched above would relock the app with the same
+    // forgotten PIN and the reset would loop forever.
+    let pinReset=false;
+    try{pinReset=localStorage.getItem('tsid_pin_reset')==='1';localStorage.removeItem('tsid_pin_reset');}catch(e){}
+    if(pinReset){S.pinEnabled=false;S.pinHash=null;S.pinLen=null;}
     save();
     enterApp();
   }catch(e){
@@ -9391,6 +9419,10 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
+      // A pin-reset flag only counts when it's followed by a fresh credential
+      // sign-in. Landing here means the old session survived (e.g. the logout
+      // request failed offline) - drop the flag so it can't unlock anything.
+      try{localStorage.removeItem('tsid_pin_reset');}catch(e){}
       // Signed in but no local data (cleared browser storage, new browser profile): adopt the
       // account's synced state. Without this the app would re-onboard and the first save()
       // would overwrite the account's real data with a blank slate.

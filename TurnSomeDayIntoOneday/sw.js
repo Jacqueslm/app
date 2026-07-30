@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.3.2'; // v12.3.2: resume the SOS talk if the phone pauses it; say plainly when the phone's own voice is in use
+const CACHE_NAME = 'tsid-shell-v12.4.0'; // v12.4.0: show/hide toggle on every password field
 const SHELL_FILES = [
   '/',
   '/app',

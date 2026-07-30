@@ -230,6 +230,24 @@ const chatLimiter = rateLimit({
   message: { error: 'Slow down a moment — too many messages at once. Try again in a few minutes.' },
 });
 
+// Authenticated but still abusable: state sync writes a 2MB row, and the
+// billing endpoints each fan out to Stripe/Google. Generous ceilings that
+// normal use never touches, so a loop can't burn disk or an external API quota.
+const stateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Syncing too often — give it a moment.' },
+});
+const billingLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many billing checks — try again in a few minutes.' },
+});
+
 function setSessionCookie(res, userId, sessionVersion) {
   res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
@@ -355,6 +373,11 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
     return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
   }
   db.updatePassword(req.userId, hashPassword(newPassword));
+  // Someone changing their password often does it because another device or
+  // person may have access - so invalidate every existing session, then
+  // immediately re-cookie this device at the new version (same as logout-all).
+  const newVersion = db.bumpSessionVersion(req.userId);
+  setSessionCookie(res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -369,7 +392,7 @@ app.get('/api/state', requireAuth, (req, res) => {
   res.json({ state: stateJson || null });
 });
 
-app.put('/api/state', requireAuth, (req, res) => {
+app.put('/api/state', stateLimiter, requireAuth, (req, res) => {
   let { state } = req.body || {};
   if (typeof state !== 'string') {
     return res.status(400).json({ error: 'state must be a JSON string.' });
@@ -389,15 +412,17 @@ app.put('/api/state', requireAuth, (req, res) => {
 
 app.use('/api/update', requireAuth, update.router);
 
-// Server error stacks are internals, not user data - same owner gate the
-// update endpoint uses. Unset APP_OWNER_EMAIL keeps the old open behavior.
+// Server error stacks are internals, not user data - owner-only, and it fails
+// CLOSED: with APP_OWNER_EMAIL unset nobody reads the error log (the old
+// behavior leaked stacks to any signed-in user when the env var was missing).
 const DIAG_OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 app.get('/api/diagnostics', requireAuth, (req, res) => {
-  if (DIAG_OWNER_EMAIL) {
-    const user = db.getUserById(req.userId);
-    if (!user || user.email !== DIAG_OWNER_EMAIL) {
-      return res.status(403).json({ error: 'Only the app owner can view diagnostics.' });
-    }
+  if (!DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Diagnostics are unavailable: APP_OWNER_EMAIL is not configured.' });
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Only the app owner can view diagnostics.' });
   }
   res.json({ errors: db.getRecentErrors(50) });
 });
@@ -501,7 +526,7 @@ app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) =
 // this asks the store directly whether it is real, because a purchase token
 // from a device is meaningless on its own. Store-agnostic by design - Apple
 // will use this same route.
-app.post('/api/billing/store/verify', requireAuth, async (req, res) => {
+app.post('/api/billing/store/verify', billingLimiter, requireAuth, async (req, res) => {
   const { source, productId, purchaseToken } = req.body || {};
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
@@ -565,7 +590,7 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
 });
 
-app.get('/api/billing/status', requireAuth, async (req, res) => {
+app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => {
   let user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   // ?refresh=1 asks Stripe directly instead of waiting for a webhook - a home

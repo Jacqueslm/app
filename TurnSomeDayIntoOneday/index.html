@@ -965,7 +965,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
             <div>✓ Days 16–30, the rest of your program</div>
-            <div>✓ 50 Friendly AI chats/day</div>
+            <div>✓ 30 Friendly AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
         </div>
@@ -1394,7 +1394,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">If you want deeper support, you can unlock the full program with Pro. There's no pressure either way — every core recovery tool stays free.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Unlock Days 16–30</div>
-          <div>✓ Friendly Pro coaching (50 chats/day)</div>
+          <div>✓ Friendly Pro coaching (30 chats/day)</div>
           <div id="plans-pro-together">✓ Together — couples exercises &amp; partner self-check</div>
           <div>✓ Urge Surfing, Panic Mode &amp; Emergency Plan</div>
           <div>✓ Weekly reports &amp; analytics</div>
@@ -1444,7 +1444,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>50 Friendly AI chats/day</div>
+            <div class="feat y"><i class="ti ti-check"></i>30 Friendly AI chats/day</div>
             <div class="feat y"><i class="ti ti-check"></i>Together for couples — guided exercises &amp; partner self-check</div>
             <div class="feat y"><i class="ti ti-check"></i>Urge Surfing timer, Panic Mode &amp; Emergency Plan</div>
             <div class="feat y"><i class="ti ti-check"></i>Recovery scripts &amp; distraction tools</div>
@@ -1465,7 +1465,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 50 chats a day with Friendly.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 30 chats a day with Friendly.</div>
     </div>
 
     <!-- PROFILE -->
@@ -7317,7 +7317,7 @@ async function sendMsg(){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
       ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
-      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 50 sessions a day with me. 💜");
+      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 30 sessions a day with me. 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -7379,8 +7379,8 @@ Address the interactions of their unique blueprint and assign structured daily r
     });
     if(res.status===429){
       const reply=S.isPro
-        ?"Looks like you've reached today's 50-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"Looks like you've reached today's Friendly AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 50 chats a day. 💜";
+        ?"Looks like you've reached today's 30-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
+        :"Looks like you've reached today's Friendly AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 30 chats a day. 💜";
       S.chatHistory.push({role:'assistant',content:reply});
       if(!S.isPro){
         S.chatsLeft=0;
@@ -7872,7 +7872,7 @@ function updateTierUI(){
   const proCta=document.getElementById('pro-cta');
   if(S.isPro){
     badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
-    if(novaLbl)novaLbl.textContent='Pro · 100/day';
+    if(novaLbl)novaLbl.textContent='Pro · 30/day';
     if(limitBar)limitBar.style.display='none';
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
@@ -9166,7 +9166,7 @@ function buildGuideIndex(){
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>50 Friendly chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>30 Friendly chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
@@ -9174,7 +9174,7 @@ const GUIDE_FAQ=[
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
-  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Friendly chats a day</b>; Pro gets up to <b>50 a day</b>. The counter resets every day at midnight.",go:'Talk to Friendly'},
+  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Friendly chats a day</b>; Pro gets up to <b>30 a day</b>. The counter resets every day at midnight.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},

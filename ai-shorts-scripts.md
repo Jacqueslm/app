@@ -1,154 +1,173 @@
-# AI Cinematic Shorts — storyboard scripts
+# AI shorts — paste-ready prompts
 
-A second production method alongside the teleprompter talking-heads: AI-generated
-scenes (like the ones you made) cut together with a voiceover or on-screen text.
-Studio generates every shot. Use **character-lock** (attach 2–6 reference photos
-of your "JM" character) so the same man appears across every scene and across
-every video — that continuity is what turns one-off clips into a recognizable
-series.
+Each shot = **one image prompt** (make the still) + **one motion prompt**
+(animate it). Studio animates in **5s or 10s** clips — these are built for **5s**.
 
-**Format:** each short is 4–6 shots, ~20–35 seconds. For each shot:
-- **SCENE** = the image/video you generate in Studio (the AI prompt direction)
-- **TEXT/VO** = the on-screen caption or the voiceover line
-
-**Read this first — platform reality (important):**
-- **Never show anything explicit.** For the porn arc the "tell" is the *blue
-  screen glow, the closed door, the hidden posture, her face* — never the screen
-  content. Explicit = instant suppression or a ban. Implied = allowed and
-  actually more powerful.
-- **Porn angle is organic-only.** TikTok/Meta/YouTube won't let you *advertise*
-  it, and even organic porn-labeled posts get throttled — so write it as
-  "secrets / hiding / what it costs a marriage," never the word. Food and the
-  rock-bottom arc are far safer and can carry the account.
-- **Caption:** one line + "link in bio." Tick AI-generated disclosure every time.
-- **Voice rules still apply:** story, not statistics. No "research shows," no
-  brain-chemical talk.
+**5 shots × 5s = 25 seconds.** That's the target length. 4 shots (20s) is fine too.
 
 ---
 
-## SHORT 1 — "The door" (the hiding, caught)
-*Lane: the man in it + her side. The scene you already shot is the centerpiece.*
+## HOW TO USE (per shot)
 
-**SHOT 1** — SCENE: Dark room, a man hunched at a computer, face lit blue by the
-screen, tense, alone at night. Close on his eyes.
-TEXT/VO: *"You think the worst part is the habit."*
+1. **Scenes tab** → paste the IMAGE prompt → generate the still.
+2. **Animate** that still → paste the MOTION prompt → **5s**.
+3. Repeat for each shot.
+4. **Sequencer** → drop the clips in order → record/add the voiceover lines.
+5. Captions → reframe 9:16 → audio remaster → post.
 
-**SHOT 2** — SCENE: Same room, a woman appears in the doorway behind him, hand
-over her mouth, shocked — he hasn't noticed her yet. (Your doorway shot.)
-TEXT/VO: *"It's not. It's the second she sees you."*
+**Character-lock (do this once):** attach 2–6 reference photos of your man to
+every Animate action so it's the same face in every clip and every video. Same
+for the woman. This is what makes it a series instead of random clips.
 
-**SHOT 3** — SCENE: His hand slamming a laptop shut, half a beat too late.
-TEXT/VO: *"And the rehearsed face that doesn't work anymore."*
+**Paste this STYLE LINE at the end of every image prompt** (keeps the look consistent):
 
-**SHOT 4** — SCENE: The two of them sitting on opposite ends of a bed, a foot of
-space and a mile between them, both looking away.
-TEXT/VO: *"The secret was never just yours. She's been carrying it too."*
+> cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16 composition
 
-**SHOT 5** — SCENE: Morning light, the man alone at a kitchen table, phone in
-hand, a small flicker of resolve on his face.
-TEXT/VO: *"Day One doesn't start when you get caught. It starts when you stop hiding."*
+**Platform safety:** never show anything explicit. The story is told by the *glow,
+the closed door, the posture, her face* — never a screen's content. Implied is
+allowed, and hits harder anyway.
+
+---
+
+# SHORT 1 — "The door" (25s)
+*The hiding, and the moment she sees. Your strongest visual.*
+
+**SHOT 1 (5s)**
+IMAGE: `A bald bearded Black man in his late 40s sitting alone at a desk in a dark home office at night, face lit only by the cold blue glow of a computer monitor, tense jaw, shoulders hunched forward, the rest of the room in deep shadow, [STYLE LINE]`
+MOTION: `Very slow push in toward his face, subtle screen flicker, he blinks slowly, almost no movement`
+VO: *"You think the worst part is the habit."*
+
+**SHOT 2 (5s)**
+IMAGE: `Over-the-shoulder view from a dark hallway: a woman with long braids stands frozen in a doorway, one hand covering her mouth, eyes wide with shock, looking toward a man at a desk lit blue in the background who hasn't noticed her, warm hallway light behind her, [STYLE LINE]`
+MOTION: `She takes one small step forward then stops, her hand stays over her mouth, he does not turn around`
+VO: *"It's not. It's the second she sees you."*
+
+**SHOT 3 (5s)**
+IMAGE: `Close-up of a man's hands slamming a laptop shut in a dark room, motion blur on the screen closing, blue light cut off mid-frame, [STYLE LINE]`
+MOTION: `The laptop snaps shut, the blue light vanishes, the room goes dark, his hands stay frozen on the lid`
+VO: *"And the face you practiced doesn't work anymore."*
+
+**SHOT 4 (5s)**
+IMAGE: `A man and a woman sitting on opposite ends of the same bed in a dim bedroom, both facing away from each other, a wide empty gap of rumpled sheets between them, early morning grey light through a window, [STYLE LINE]`
+MOTION: `Neither moves, she exhales slowly, the curtain shifts slightly in the light`
+VO: *"The secret was never just yours. She's been carrying it too."*
+
+**SHOT 5 (5s)**
+IMAGE: `The same man alone at a kitchen table in warm morning sunlight, phone face-down in front of him, hands folded, a quiet steady resolve in his eyes, bright airy kitchen, [STYLE LINE]`
+MOTION: `He lifts his head slightly and looks toward the window, breathes in, a small nod`
+VO: *"Day One doesn't start when you get caught. It starts when you stop hiding."*
 
 CAPTION: The secret was never just his. Link in bio.
 
 ---
 
-## SHORT 2 — "The feast" (food binge)
-*Lane: food / binging. Your fast-food spread is the centerpiece.*
+# SHORT 2 — "The feast" (20s)
+*Food / binging.*
 
-**SHOT 1** — SCENE: A man alone at a table covered in fast food — stacked burgers,
-fries, pizza, shakes — mid-bite, eyes not really enjoying it. (Your feast shot.)
-TEXT/VO: *"This was never about being hungry."*
+**SHOT 1 (5s)**
+IMAGE: `A bald bearded Black man sitting alone in a fast food booth surrounded by an overwhelming spread of burgers, fries, pizza slices and milkshakes covering the entire table, mid-bite, eyes empty and unfocused, harsh fluorescent diner lighting, [STYLE LINE]`
+MOTION: `He chews slowly without expression, still looking at nothing, fluorescent light hums`
+VO: *"This was never about being hungry."*
 
-**SHOT 2** — SCENE: Close on his eyes over the food — tired, somewhere else,
-going through the motions.
-TEXT/VO: *"Hungry stops. This doesn't. Because it was never the food."*
+**SHOT 2 (5s)**
+IMAGE: `Extreme close-up of the same man's eyes above the food, exhausted and far away, not enjoying anything, [STYLE LINE]`
+MOTION: `He blinks slowly, his jaw keeps moving mechanically`
+VO: *"Hungry stops. This doesn't. Because it was never the food."*
 
-**SHOT 3** — SCENE: The aftermath — empty wrappers everywhere, him sitting back
-in the dark, one hand over his face.
-TEXT/VO: *"For about ten minutes it quiets everything. Then it's louder than before."*
+**SHOT 3 (5s)**
+IMAGE: `The aftermath: the same table covered in crumpled wrappers and empty containers, the man sitting back in the booth in dim light, one hand covering his face, [STYLE LINE]`
+MOTION: `He drags his hand down his face slowly and lets it fall, shoulders drop`
+VO: *"Ten minutes of quiet. Then it's louder than before."*
 
-**SHOT 4** — SCENE: Same man, next morning, lacing up shoes by the door, quiet
-and deliberate.
-TEXT/VO: *"You don't beat it with a diet. You beat it by facing what it was feeding."*
+**SHOT 4 (5s)**
+IMAGE: `The same man sitting on the edge of his bed at dawn lacing up running shoes, calm and deliberate, soft blue morning light through a window, [STYLE LINE]`
+MOTION: `He pulls the laces tight, stands up, and steps out of frame`
+VO: *"You don't beat it with a diet. You beat it by facing what it was feeding."*
 
 CAPTION: It was never the food. Link in bio.
 
 ---
 
-## SHORT 3 — "Where it goes" (the imagined bottom)
-*Lane: consequence / all doors. Your alley/dumpster shot is the gut-punch —
-frame it as the FEARED future, not a claim about anyone.*
+# SHORT 3 — "Where it goes" (20s)
+*The feared future — never framed as a claim about anyone.*
 
-**SHOT 1** — SCENE: A man in a clean, ordinary living room at night, staring at a
-screen, small in the frame.
-TEXT/VO: *"Nobody thinks it'll take everything."*
+**SHOT 1 (5s)**
+IMAGE: `Wide shot of a bald bearded Black man alone on a couch in an ordinary tidy living room at night, small in the frame, face lit by a phone screen, everything else dark, [STYLE LINE]`
+MOTION: `Very slow push in, he doesn't move, the phone light flickers on his face`
+VO: *"Nobody thinks it'll take everything."*
 
-**SHOT 2** — SCENE: Slow push toward him; the room subtly darkens around him.
-TEXT/VO: *"It doesn't happen fast. It happens one 'just tonight' at a time."*
+**SHOT 2 (5s)**
+IMAGE: `The same living room but the shadows have crept in closer around him, the room feels smaller and darker, he is still on the phone, [STYLE LINE]`
+MOTION: `Slow push in continues, the darkness closes in around the edges of frame`
+VO: *"It doesn't happen fast. It happens one 'just tonight' at a time."*
 
-**SHOT 3** — SCENE: The rough alley — a man in tattered clothes at a dumpster,
-head down, rain-soaked. (Your bottom shot.) Keep it brief.
-TEXT/VO: *"This is just the far end of the same road. Most people never picture it. That's the problem."*
+**SHOT 3 (5s)**
+IMAGE: `A gaunt man in torn filthy clothes leaning over a rusted dumpster in a wet graffiti-covered alley, head down, overcast grey daylight, rain-slicked pavement, [STYLE LINE]`
+MOTION: `He shifts through the dumpster slowly, rain drips from the rim, he does not look up`
+VO: *"This is just the far end of the same road. Most people never picture it. That's the problem."*
 
-**SHOT 4** — SCENE: Hard cut back to the ordinary living room, the man setting the
-phone face-down on the table, exhaling.
-TEXT/VO: *"You don't have to hit the bottom to turn around. You can turn around tonight."*
+**SHOT 4 (5s)**
+IMAGE: `Hard cut back to the ordinary living room, the same man setting his phone face-down on the coffee table, sitting up straighter, a lamp switched on beside him, warm light, [STYLE LINE]`
+MOTION: `He sets the phone down, exhales, and leans back into the warm light`
+VO: *"You don't have to hit the bottom to turn around. You can turn around tonight."*
 
 CAPTION: You can turn around tonight. Link in bio.
 
 ---
 
-## SHORT 4 — "Her 2am" (the partner's side)
-*Lane: her / drinking-or-any door. Ties AI shorts to your lead audience.*
+# SHORT 4 — "Her 2am" (20s)
+*Her side — feeds your lead audience.*
 
-**SHOT 1** — SCENE: A woman lying awake in bed, eyes open, the other side of the
-bed empty, a strip of light under the bedroom door.
-TEXT/VO: *"Everybody asks how he's doing."*
+**SHOT 1 (5s)**
+IMAGE: `A woman with long braids lying awake on her side in bed at night, eyes open staring at nothing, the other half of the bed empty and undisturbed, a thin strip of light under the closed bedroom door, [STYLE LINE]`
+MOTION: `She blinks slowly, the strip of light under the door stays constant, she doesn't move`
+VO: *"Everybody asks how he's doing."*
 
-**SHOT 2** — SCENE: Her sitting up alone in the dark hallway, listening.
-TEXT/VO: *"Nobody asks how she is."*
+**SHOT 2 (5s)**
+IMAGE: `The same woman sitting alone on the floor of a dark hallway, back against the wall, knees pulled up, listening toward a closed door, [STYLE LINE]`
+MOTION: `She tilts her head slightly toward the door and holds still, listening`
+VO: *"Nobody asks how she is."*
 
-**SHOT 3** — SCENE: Her at the kitchen table at dawn, a cold cup of coffee, staring
-at nothing.
-TEXT/VO: *"She's been carrying two recoveries. Only one of them has a program."*
+**SHOT 3 (5s)**
+IMAGE: `The same woman at a kitchen table at dawn, a cold untouched cup of coffee in front of her, staring past it, pale blue morning light, [STYLE LINE]`
+MOTION: `Steam is long gone from the cup, she blinks and looks down at her hands`
+VO: *"She's been carrying two recoveries. Only one of them has a program."*
 
-**SHOT 4** — SCENE: Her opening a phone, a soft screen glow on her face — the first
-thing that's actually for her.
-TEXT/VO: *"There's a part of this built for her. Finally."*
+**SHOT 4 (5s)**
+IMAGE: `The same woman holding a phone, its soft screen light on her face in the dim kitchen, a small flicker of relief in her expression, [STYLE LINE]`
+MOTION: `She scrolls slowly, then stops, and her shoulders drop as she exhales`
+VO: *"There's a part of this built for her. Finally."*
 
-CAPTION: There's a whole section built for you. Link in bio → /for-her.
+CAPTION: There's a whole section built for you. Link in bio.
 
 ---
 
-## SHORT 5 — "The rehearsed face" (short + punchy, 15s)
-*Lane: the man in it. Fast, one idea.*
+# SHORT 5 — "The rehearsed face" (15s)
+*Fast, one idea.*
 
-**SHOT 1** — SCENE: Extreme close-up, a man practicing a neutral expression in a
-bathroom mirror.
-TEXT/VO: *"You've got a face you make so nobody asks."*
+**SHOT 1 (5s)**
+IMAGE: `Extreme close-up of a bald bearded Black man's face in a bathroom mirror, practicing a neutral pleasant expression, harsh overhead bathroom light, [STYLE LINE]`
+MOTION: `He arranges his face into a small smile, holds it, checks it`
+VO: *"You've got a face you make so nobody asks."*
 
-**SHOT 2** — SCENE: Same man at a dinner table, smiling, but the eyes are gone.
-TEXT/VO: *"You've gotten so good at it you use it on yourself."*
+**SHOT 2 (5s)**
+IMAGE: `The same man at a lively family dinner table, smiling politely among other people, but his eyes are completely absent, warm domestic lighting, [STYLE LINE]`
+MOTION: `Others move and talk around him, he holds the smile, his eyes stay dead`
+VO: *"You've gotten so good at it you use it on yourself."*
 
-**SHOT 3** — SCENE: Him alone, the smile dropping, looking dead-on into the lens.
-TEXT/VO: *"The day you stop performing is the day it starts to change."*
+**SHOT 3 (5s)**
+IMAGE: `The same man alone, close-up, the smile completely gone, looking directly into the camera lens, plain dark background, [STYLE LINE]`
+MOTION: `The smile fades, he holds the direct look at camera, one slow blink`
+VO: *"The day you stop performing is the day it changes."*
 
 CAPTION: Stop performing. Link in bio.
 
 ---
 
-## Production notes (Studio)
-
-- **Character-lock:** attach the same reference photos of "JM" to every Animate
-  action so his face stays consistent across all shots and all videos. Same for
-  the wife character. Consistency = a series people follow.
-- **These use paid AI generation** (fal.ai), so each short costs a little — watch
-  the daily spend cap in Settings. Batch a few in one session.
-- **9:16, captions burned in** (a lot of people watch muted), audio remaster,
-  then schedule from the Post tab.
-- **Cadence:** slot 1 AI-cinematic short per week into the rhythm alongside the
-  teleprompter ones — the AI ones are your scroll-stoppers, the talking-heads are
-  your trust-builders. You need both.
-- **The porn arc (Short 1, 5)** carries the most suppression risk — post those to
-  YouTube (more tolerant of serious content) first, and keep TikTok/Facebook
-  leaning on the food, partner, and consequence arcs.
+## Notes
+- **Cost:** each image + animate is a paid generation (fal.ai). A 5-shot short is
+  ~10 generations. Watch the daily spend cap in Settings; batch in one session.
+- **Cadence:** ~1 AI short per week alongside the teleprompter talking-heads.
+  AI shorts stop the scroll; talking-heads build the trust. You need both.
+- **The porn arc (Shorts 1, 5)** carries the most suppression risk — post those to
+  YouTube first; lean TikTok/Facebook on the food, her, and consequence arcs.

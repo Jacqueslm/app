@@ -929,9 +929,22 @@ body.simple-only #view-simple{display:flex !important}
       <div style="border-top:1px solid var(--bd,#33305c);margin-top:10px;padding-top:10px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <button class="btn2" id="webcam-record">🎥 Record my webcam</button>
-          <video id="webcam-preview" muted playsinline style="display:none;width:160px;border-radius:8px;background:#000"></video>
+          <button class="btn2" id="webcam-photo">📸 Take a picture</button>
+          <select class="input" id="webcam-count" style="width:auto" title="Countdown before capture starts">
+            <option value="0">No countdown</option>
+            <option value="3">3s countdown</option>
+            <option value="5" selected>5s countdown</option>
+            <option value="10">10s countdown</option>
+          </select>
+          <select class="input" id="webcam-bg" style="width:auto" title="Background">
+            <option value="none">Real background</option>
+            <option value="blur">Blur background</option>
+            <option value="image">Picture background…</option>
+          </select>
+          <input type="file" id="webcam-bg-file" accept="image/*" style="display:none">
+          <video id="webcam-preview" muted playsinline style="display:none;width:220px;border-radius:8px;background:#000"></video>
         </div>
-        <p class="usage" id="webcam-rec-note" style="margin:6px 0 0">Full-frame webcam recording — no screen capture. Open the teleprompter first, position it behind your camera, then hit record here.</p>
+        <p class="usage" id="webcam-rec-note" style="margin:6px 0 0">Records your camera and your mic audio — no screen capture. Pick a countdown so you can get set, open the teleprompter behind your camera, then hit record (or snap a still). Background blur/swap fetches a small on-device model the first time, so it needs internet once.</p>
       </div>
     </div>
     <div class="card">
@@ -2538,40 +2551,191 @@ $('#media-record').onclick = async () => {
   startPlainRecording(stream, b, note);
 };
 // --- Webcam-only recorder: full-frame face, no screen capture. Lives next to
-// the teleprompter so you can read your script and record in one place. ---
-const webcamRec = { mr: null, chunks: [], stream: null, t0: 0, timer: null };
-$('#webcam-record').onclick = async () => {
-  const b = $('#webcam-record');
-  const note = $('#webcam-rec-note');
-  const preview = $('#webcam-preview');
+// the teleprompter so you can read your script and record in one place.
+// Extras: a start countdown so you can get set before it rolls, still-photo
+// capture, and background blur/replace via on-device segmentation (MediaPipe,
+// fetched from CDN once; falls back to the real background when offline).
+// Mic audio is always recorded alongside the video. ---
+const webcamRec = { phase: 'idle', mr: null, chunks: [], stream: null, t0: 0, timer: null, cancel: null, bgImg: null, seg: null, segActive: false, rawVid: null, canvas: null };
+const wcNote = () => $('#webcam-rec-note');
 
-  if (webcamRec.mr && webcamRec.mr.state === 'recording') { webcamRec.mr.stop(); return; }
+$('#webcam-bg').onchange = () => { if ($('#webcam-bg').value === 'image') $('#webcam-bg-file').click(); };
+$('#webcam-bg-file').onchange = () => {
+  const f = $('#webcam-bg-file').files[0];
+  if (!f) { $('#webcam-bg').value = webcamRec.bgImg ? 'image' : 'none'; return; }
+  const img = new Image();
+  img.onload = () => { webcamRec.bgImg = img; wcNote().textContent = `Background picture set: ${f.name}`; };
+  img.src = URL.createObjectURL(f);
+};
 
+function wcSupported(note) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
-    note.textContent = 'Webcam recording needs a desktop browser (Chrome, Edge, or Firefox).';
-    return;
+    note.textContent = 'Webcam capture needs a desktop browser (Chrome, Edge, or Firefox).';
+    return false;
   }
-  let stream;
+  return true;
+}
+
+async function wcOpenCam(note, withMic) {
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
+    return await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: !!withMic });
   } catch (e) {
     note.textContent = e.name === 'NotAllowedError' ? 'Camera/mic permission denied — allow access and try again.' : `Could not access webcam: ${e.message}`;
-    return;
+    return null;
   }
+}
 
-  preview.srcObject = stream;
-  preview.style.display = '';
-  preview.play().catch(() => {});
+// MediaPipe selfie segmentation, loaded once from CDN. Runs fully on-device
+// after the small model downloads.
+async function wcLoadSeg() {
+  if (webcamRec.seg) return webcamRec.seg;
+  if (!window.SelfieSegmentation) {
+    await new Promise((ok, bad) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js';
+      s.onload = ok; s.onerror = () => bad(new Error('offline'));
+      document.head.appendChild(s);
+    });
+  }
+  const seg = new window.SelfieSegmentation({ locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${f}` });
+  seg.setOptions({ modelSelection: 1 });
+  webcamRec.seg = seg;
+  return seg;
+}
+
+// Draw an image like CSS object-fit: cover (fill the frame, no squishing).
+function wcDrawCover(ctx, img, w, h) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const s = Math.max(w / iw, h / ih);
+  ctx.drawImage(img, (w - iw * s) / 2, (h - ih * s) / 2, iw * s, ih * s);
+}
+
+// Wrap the raw camera stream in a canvas pipeline that swaps the background.
+// Returns the stream to preview/record; falls back to the raw stream if the
+// model can't load (offline) so a take never fails over a nice-to-have.
+async function wcEffectStream(stream, mode, note) {
+  if (mode === 'none' || (mode === 'image' && !webcamRec.bgImg)) return stream;
+  let seg;
+  try { seg = await wcLoadSeg(); } catch (_) {
+    note.textContent = 'Background effects need internet once to fetch the model — using your real background.';
+    return stream;
+  }
+  const vid = document.createElement('video');
+  vid.muted = true; vid.playsInline = true; vid.srcObject = stream;
+  await vid.play();
+  const w = vid.videoWidth || 1280, h = vid.videoHeight || 720;
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  seg.onResults((res) => {
+    ctx.save();
+    ctx.clearRect(0, 0, w, h);
+    ctx.filter = 'blur(3px)'; // soften the cut-out edge
+    ctx.drawImage(res.segmentationMask, 0, 0, w, h);
+    ctx.filter = 'none';
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.drawImage(res.image, 0, 0, w, h); // you, cut out
+    ctx.globalCompositeOperation = 'destination-over';
+    if (mode === 'blur') {
+      ctx.filter = 'blur(18px)';
+      ctx.drawImage(res.image, -20, -20, w + 40, h + 40); // overscan hides the blurred border
+      ctx.filter = 'none';
+    } else {
+      wcDrawCover(ctx, webcamRec.bgImg, w, h);
+    }
+    ctx.restore();
+  });
+  webcamRec.segActive = true;
+  webcamRec.rawVid = vid; webcamRec.canvas = canvas;
+  const tick = async () => {
+    if (!webcamRec.segActive) return;
+    try { await seg.send({ image: vid }); } catch (_) {}
+    requestAnimationFrame(tick);
+  };
+  tick();
+  const out = canvas.captureStream(30);
+  for (const t of stream.getAudioTracks()) out.addTrack(t);
+  return out;
+}
+
+function wcTeardown(preview) {
+  webcamRec.segActive = false;
+  if (webcamRec.rawVid) { try { webcamRec.rawVid.srcObject = null; } catch (_) {} webcamRec.rawVid = null; }
+  webcamRec.canvas = null;
+  if (webcamRec.stream) { webcamRec.stream.getTracks().forEach((t) => t.stop()); webcamRec.stream = null; }
+  if (preview) { preview.srcObject = null; preview.style.display = 'none'; }
+  webcamRec.phase = 'idle';
+}
+
+// Countdown shown on the button itself so you can step back and get set.
+// Clicking the button again during the countdown cancels.
+function wcCountdown(btn, idleLabel) {
+  const secs = parseInt($('#webcam-count').value, 10) || 0;
+  if (!secs) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let left = secs;
+    webcamRec.phase = 'counting';
+    btn.textContent = `✋ Starting in ${left}… (tap to cancel)`;
+    const iv = setInterval(() => {
+      left -= 1;
+      if (webcamRec.phase !== 'counting') { clearInterval(iv); resolve(false); return; }
+      if (left <= 0) { clearInterval(iv); resolve(true); return; }
+      btn.textContent = `✋ Starting in ${left}… (tap to cancel)`;
+    }, 1000);
+    webcamRec.cancel = () => { webcamRec.phase = 'idle'; clearInterval(iv); btn.textContent = idleLabel; resolve(false); };
+  });
+}
+
+// Grab the frame currently showing in the preview (which already has any
+// background effect applied) and save it as a still image.
+async function wcSnap(note) {
+  const preview = $('#webcam-preview');
+  const src = webcamRec.canvas || preview;
+  const w = webcamRec.canvas ? src.width : (preview.videoWidth || 1280);
+  const h = webcamRec.canvas ? src.height : (preview.videoHeight || 720);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(src, 0, 0, w, h);
+  const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.92));
+  if (!blob) { note.textContent = 'Could not capture that frame.'; return; }
+  try {
+    const file = new File([blob], `webcam-photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    await uploadFile(file, 'image');
+    await loadAssets();
+    note.textContent = 'Photo saved to your Images below.';
+  } catch (e) { note.textContent = e.message; }
+}
+
+$('#webcam-record').onclick = async () => {
+  const b = $('#webcam-record');
+  const note = wcNote();
+  const preview = $('#webcam-preview');
+
+  if (webcamRec.phase === 'counting') { if (webcamRec.cancel) webcamRec.cancel(); return; }
+  if (webcamRec.mr && webcamRec.mr.state === 'recording') { webcamRec.mr.stop(); return; }
+  if (webcamRec.phase !== 'idle') return;
+  if (!wcSupported(note)) return;
+
+  const stream = await wcOpenCam(note, true);
+  if (!stream) return;
+  webcamRec.stream = stream;
+
+  // Show yourself (with the chosen background) while the countdown runs.
+  const rec = await wcEffectStream(stream, $('#webcam-bg').value, note);
+  preview.srcObject = rec; preview.style.display = ''; preview.play().catch(() => {});
+
+  const ok = await wcCountdown(b, '🎥 Record my webcam');
+  if (!ok) { wcTeardown(preview); note.textContent = 'Cancelled — nothing recorded.'; return; }
+  webcamRec.phase = 'recording';
 
   const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t)) || 'video/webm';
-  webcamRec.stream = stream; webcamRec.chunks = [];
-  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  webcamRec.chunks = [];
+  const mr = new MediaRecorder(rec, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
   webcamRec.mr = mr;
   mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) webcamRec.chunks.push(ev.data); };
   mr.onstop = async () => {
     clearInterval(webcamRec.timer);
-    stream.getTracks().forEach((t) => t.stop());
-    preview.srcObject = null; preview.style.display = 'none';
+    wcTeardown(preview);
     b.classList.remove('primary'); b.disabled = true; b.textContent = '⏳ Saving…';
     try {
       const blob = new Blob(webcamRec.chunks, { type: mime });
@@ -2579,7 +2743,7 @@ $('#webcam-record').onclick = async () => {
       const file = new File([blob], `webcam-recording-${Date.now()}.webm`, { type: 'video/webm' });
       await uploadFile(file, 'video');
       await loadAssets();
-      note.textContent = `Saved a ${Math.round(blob.size / 1e5) / 10} MB clip to your Video clips below.`;
+      note.textContent = `Saved a ${Math.round(blob.size / 1e5) / 10} MB clip (with your mic audio) to Video clips below.`;
     } catch (e) { note.textContent = e.message; }
     b.disabled = false; b.textContent = '🎥 Record my webcam';
     webcamRec.mr = null;
@@ -2587,12 +2751,38 @@ $('#webcam-record').onclick = async () => {
   mr.start(1000);
   webcamRec.t0 = 0;
   b.classList.add('primary'); b.textContent = '⏺ Stop recording (0:00)';
-  note.textContent = 'Recording — read from the teleprompter above, look at the lens.';
+  note.textContent = 'Recording (camera + mic) — read from the teleprompter above, look at the lens.';
   webcamRec.timer = setInterval(() => {
     webcamRec.t0 += 1;
     const m = Math.floor(webcamRec.t0 / 60), s = String(webcamRec.t0 % 60).padStart(2, '0');
     b.textContent = `⏺ Stop recording (${m}:${s})`;
   }, 1000);
+};
+
+$('#webcam-photo').onclick = async () => {
+  const b = $('#webcam-photo');
+  const note = wcNote();
+  const preview = $('#webcam-preview');
+
+  // Snap mid-recording without interrupting the take.
+  if (webcamRec.mr && webcamRec.mr.state === 'recording') { await wcSnap(note); return; }
+  if (webcamRec.phase === 'counting') { if (webcamRec.cancel) webcamRec.cancel(); return; }
+  if (webcamRec.phase !== 'idle') return;
+  if (!wcSupported(note)) return;
+
+  const stream = await wcOpenCam(note, false);
+  if (!stream) return;
+  webcamRec.stream = stream;
+  const shown = await wcEffectStream(stream, $('#webcam-bg').value, note);
+  preview.srcObject = shown; preview.style.display = ''; preview.play().catch(() => {});
+
+  const ok = await wcCountdown(b, '📸 Take a picture');
+  if (!ok) { wcTeardown(preview); note.textContent = 'Cancelled.'; return; }
+  webcamRec.phase = 'photo';
+  await new Promise((r) => setTimeout(r, 250)); // let exposure/focus settle
+  await wcSnap(note);
+  wcTeardown(preview);
+  b.textContent = '📸 Take a picture';
 };
 
 async function mediaAddAll(kind) {

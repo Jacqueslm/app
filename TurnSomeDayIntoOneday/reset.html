@@ -43,7 +43,7 @@ input:focus{outline:2px solid var(--green);outline-offset:1px}
     <p class="sub">Your password is changed, and every other device has been signed out. Log in with the new one.</p>
     <a class="btn" href="/app">Go to login</a>
   </div>
-  <div class="fine">Link expired? Request a new one from the login screen.</div>
+  <div class="fine">Link expired? <a href="/app" style="color:var(--green);font-weight:600">Go to the login screen</a> and tap "Forgot your password?" to request a new one.</div>
 </div>
 <script>
 const token=new URLSearchParams(location.search).get('token')||'';

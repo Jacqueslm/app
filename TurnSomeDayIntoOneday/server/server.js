@@ -32,7 +32,7 @@ const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
-const PRO_CHAT_LIMIT = 50;
+const PRO_CHAT_LIMIT = 30;
 
 // Stripe webhook signature verification needs the raw request body, so this route is
 // registered with express.raw() before the global express.json() middleware below.

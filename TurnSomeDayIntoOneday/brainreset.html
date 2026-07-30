@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The 90-Day Brain Reset — Free PDF</title>
+<meta name="description" content="The free 90-day brain reset guide, from someone who lived it for 38 years. Straight to your inbox.">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{
+  --brand:#0f0c29;--s1:#201d3f;--s2:#262347;--bdr:#33305c;
+  --tp:#eef0ff;--ts:#b8bfe8;--tm:#7e86b8;--green:#4ecb9b;--accent:#534AB7;
+  --f:-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#08071a}
+body{font-family:var(--f);background:linear-gradient(180deg,var(--brand) 0%,#24243e 55%,#302b63 100%);color:var(--tp);min-height:100dvh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:36px 22px}
+.brand{font-size:11px;letter-spacing:.18em;color:var(--tm);text-transform:uppercase;text-align:center;font-weight:600;margin-bottom:26px}
+h1{font-size:26px;line-height:1.3;font-weight:700;margin-bottom:10px}
+.sub{font-size:14.5px;color:var(--ts);line-height:1.6;margin-bottom:22px}
+input{width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin-bottom:10px}
+input:focus{outline:2px solid var(--green);outline-offset:1px}
+.btn{display:block;width:100%;background:linear-gradient(135deg,#4ecb9b,#2f9d76);color:#06281c;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:650;font-family:var(--f);cursor:pointer;text-align:center;text-decoration:none}
+.err{font-size:13px;color:#f38b8a;min-height:18px;margin:4px 0;line-height:1.5}
+.ok{display:none;font-size:15px;color:var(--green);line-height:1.6;text-align:center;padding:16px 0}
+.fine{font-size:11.5px;color:var(--tm);line-height:1.7;margin-top:22px;text-align:center}
+.fine a{color:var(--ts)}
+</style>
+<script>
+function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
+// First touch wins: someone who lands from TikTok, reads /for-her, then signs up
+// belongs to TikTok - not to whatever page they happened to be on at the end.
+// sessionStorage, not localStorage: it survives the landing -> signup hop and dies
+// with the tab, so it can never misattribute a return visit months later and is
+// not a durable identifier sitting on anyone's device. No cookie, no pageview ping -
+// these tags ride along only on an explicit signup or lead capture.
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Turn Someday Into Day One</div>
+  <div id="form-box">
+    <h1>The 90-Day Brain Reset — free PDF.</h1>
+    <p class="sub">The whole 90-day map, from someone who fought this for 38 years and got free at 50. No catch, no card — it lands in your inbox.</p>
+    <input id="em" type="email" placeholder="you@email.com" autocomplete="email">
+    <div class="err" id="err"></div>
+    <button class="btn" id="btn" onclick="go()">Send me the PDF</button>
+  </div>
+  <div class="ok" id="ok-box">Check your email — it's on the way. ✓<br><span style="font-size:12.5px;color:var(--tm)">Nothing there in a minute? Check spam, then request it again.</span></div>
+  <div class="fine">Not medical advice. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.<br>
+  <a href="/">turnsomedayintodayone.com</a></div>
+</div>
+<script>
+async function go(){
+  const em=(document.getElementById('em').value||'').trim();
+  const err=document.getElementById('err');
+  err.textContent='';
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){err.textContent="That email doesn't look right — check it and try again.";return;}
+  const btn=document.getElementById('btn');btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,source:'brainreset',utm:tsidUtm()})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){err.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send me the PDF';return;}
+    document.getElementById('form-box').style.display='none';
+    document.getElementById('ok-box').style.display='block';
+  }catch(e){
+    err.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send me the PDF';
+  }
+}
+</script>
+</body>
+</html>

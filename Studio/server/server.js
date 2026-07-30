@@ -2,6 +2,7 @@
 // Runs entirely on your machine; AI features light up when a fal.ai key is
 // pasted into the app. Completely independent from Turn Someday Into Day One.
 require('dotenv').config();
+const os = require('os');
 const path = require('path');
 const express = require('express');
 const cookieParser = require('cookie-parser');
@@ -120,6 +121,35 @@ process.on('unhandledRejection', (err) => {
   console.error('Unhandled rejection:', err);
 });
 
+// The addresses this computer answers to on the home network, so a phone on the
+// same Wi-Fi can open Studio - that's how finished clips get onto the phone for
+// posting, without emailing files to yourself. Home-network ranges only; a
+// laptop's virtual adapters (VPN, Docker, WSL) would just be dead ends.
+function lanAddresses() {
+  const out = [];
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name] || []) {
+      if (net.family !== 'IPv4' || net.internal) continue;
+      if (/^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(net.address)) {
+        out.push({ name, url: `http://${net.address}:${PORT}` });
+      }
+    }
+  }
+  return out;
+}
+
+app.get('/api/studio-lan', requireAuth, (req, res) => {
+  res.json({ addresses: lanAddresses(), port: PORT });
+});
+
 app.listen(PORT, () => {
   console.log(`Studio running on http://localhost:${PORT}`);
+  const lan = lanAddresses();
+  if (lan.length) {
+    console.log('');
+    console.log('  On your phone (same Wi-Fi), open:');
+    for (const a of lan) console.log(`     ${a.url}`);
+    console.log('');
+  }
 });

@@ -23,12 +23,11 @@ const GH_HEADERS = {
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
   || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${encodeURIComponent(UPDATE_BRANCH)}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
-// Running launcher scripts are never overwritten mid-run (Windows corrupts
-// a batch file that changes underneath it).
-const UPDATE_SKIP = new Set([
-  'Start My App.bat', 'Start My App.command', 'start-app.sh',
-  'Start Studio.bat', 'Start Studio.command', 'start-studio.sh', '.git',
-]);
+// Strict whitelist: an update only ever copies this app's own files. The repo
+// also contains Studio, and the two apps must stay fully separate on disk -
+// updating one never adds or touches the other's files. (Launchers are excluded
+// too: Windows corrupts a batch file that changes underneath a running script.)
+const UPDATE_ONLY = new Set(['TurnSomeDayIntoOneday']);
 // When the app goes public, only this account may trigger a server update.
 const OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 
@@ -97,7 +96,7 @@ router.post('/', async (req, res) => {
 
     // 3. overlay the new code onto the install (data files aren't in the ZIP)
     for (const entry of fs.readdirSync(src)) {
-      if (UPDATE_SKIP.has(entry)) continue;
+      if (!UPDATE_ONLY.has(entry)) continue;
       fs.cpSync(path.join(src, entry), path.join(APP_ROOT, entry), { recursive: true, force: true });
     }
 

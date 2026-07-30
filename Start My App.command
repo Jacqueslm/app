@@ -13,6 +13,14 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 # First run: create .env with a stable session secret so you stay signed in.
+if ! node -e "const[a,b]=process.versions.node.split('.').map(Number);process.exit(a>22||(a===22&&b>=5)?0:1)" >/dev/null 2>&1; then
+  echo ""
+  echo "Your Node.js ($(node -v)) is too old - this app needs Node 22.5 or newer."
+  echo "Update it at https://nodejs.org (LTS version), then run this again."
+  read -r -p "Press Enter to close..."
+  exit 1
+fi
+
 if [ ! -f .env ]; then
   echo "PORT=4300" > .env
   echo "SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> .env

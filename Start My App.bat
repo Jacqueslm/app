@@ -12,6 +12,15 @@ if errorlevel 1 (
   exit /b 1
 )
 
+node -e "const[a,b]=process.versions.node.split('.').map(Number);process.exit(a>22||(a===22&&b>=5)?0:1)" >nul 2>nul
+if errorlevel 1 (
+  echo.
+  echo Your Node.js is too old - this app needs Node 22.5 or newer.
+  echo Update it at https://nodejs.org ^(LTS version^), then double-click this again.
+  pause
+  exit /b 1
+)
+
 rem First run: create .env with a stable session secret so you stay signed in.
 if not exist .env (
   echo PORT=4300> .env

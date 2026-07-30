@@ -1,9 +1,10 @@
-const CACHE_NAME = 'tsid-shell-v12.0.2'; // v12.0.2: offline page loads fall back to the cached shell even with a query string
+const CACHE_NAME = 'tsid-shell-v12.1.0'; // v12.1.0: precache the SOS talk MP3 so it plays offline; never cache partial (206) media responses
 const SHELL_FILES = [
   '/',
   '/app',
   '/manifest.json',
   '/manifest-discrete.json',
+  '/audio/sos-talk.mp3',
   '/data/lessons.json',
   '/data/stories.json',
   '/icons/icon-192.png',
@@ -61,11 +62,16 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Static assets: cache-first for speed, revalidating in the background.
+  // Audio elements fetch with Range headers and get 206 partials back;
+  // cache.put() rejects those, so only full 200 responses are stored (the MP3
+  // itself is already precached whole above). ignoreSearch/ignoreVary aren't
+  // needed here, but a Range request must still match the cached full copy -
+  // Cache.match ignores request headers, so it does.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)
         .then((res) => {
-          if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
+          if (res.ok && res.status === 200) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
           return res;
         })
         .catch(() => cached);

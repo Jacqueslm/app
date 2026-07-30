@@ -14,11 +14,24 @@ revokes it, plus a nudge to restart a paused speech engine when returning from a
 manual lock. This fixes the common case — the screen no longer times out and
 kills the narration mid-lesson.
 
-**Still open (only if wanted):** true *background* audio with the screen manually
-locked or the app switched away needs the MP3 + MediaSession conversion (browser
-TTS can't background). The wake-lock fix covers "keep listening while the lesson
-is on screen"; the MP3 route is the "listen with screen off / in another app /
-lock-screen controls" upgrade. Free feature. Revisit only if users ask for it.
+**✅ Also shipped — the SOS "Talk me through it" talk is now a real MP3:** its
+script is fixed text, so it was pre-recorded once as `audio/sos-talk.mp3`
+(generated locally with the free open-source Piper TTS — no API, no cost) and
+plays through an `<audio>` element with MediaSession. It survives screen lock
+and app switching, shows lock-screen play/pause, is precached by the service
+worker for offline, and falls back to `speechSynthesis` automatically if the
+MP3 can't load. Regeneration script + voice-download instructions:
+`TurnSomeDayIntoOneday/tools/generate-sos-talk.py`.
+
+**Still open (lessons only, if wanted):** true *background* audio for lessons
+needs the same MP3 + MediaSession conversion (browser TTS can't background).
+Scope: batch-generate one MP3 per lesson day across all 13 tracks — either via
+a TTS service (fal.ai F5-TTS, or Friendly's voice backend when wired up) or the
+same free local Piper route the SOS talk used, if the voice quality is judged
+good enough for lessons; host the files; swap the lesson player to `<audio>`
+with MediaSession metadata (title = lesson name, artwork = app icon) for
+lock-screen "Now Playing"; keep the speed control (playbackRate works on
+`<audio>`). Free feature. Revisit only if users ask for it.
 
 ---
 

@@ -34,17 +34,23 @@ the person struggling (porn, alcohol, food, gambling).
 
 ---
 
-## The map — read these for context
+## The map
 
-**Marketing (the current focus):**
-- `marketing-playbook.md` — full strategy + step-by-step + both production methods.
-- `marketing-content-pack.md` — teleprompter talking-head scripts + card lines.
-- `ai-shorts-scripts.md` — AI cinematic-short storyboards (scene + line per shot).
-- `search-titles.md` — real search-language titles + forum hooks + strategy notes.
+**Jacques only ever needs these two — keep it that way:**
+- `DO-THIS-NEXT.md` — his routine. Record → post → check stats Monday.
+- `SCRIPTS.md` — numbered videos. Each number = one complete video (title,
+  script or AI prompts, caption). He picks a number and makes it.
 
-**Build state:**
-- `POST-LAUNCH-BUILD-LIST.md` — deferred features and what's already done.
-- `medical-claims-audit.md` — claims to keep out of copy (no "research shows," etc.).
+**Do NOT add more top-level files or hand him more docs.** He works best with one
+next action at a time. If something new is needed, fold it into one of those two.
+
+**Reference (background, for sessions — not for him):**
+- `reference/marketing-playbook.md` — full strategy, the door/positioning thinking.
+- `reference/search-titles.md` — search-language research + forum hooks.
+- `reference/marketing-content-pack.md`, `reference/ai-shorts-scripts.md` — the
+  older script sets that SCRIPTS.md was built from.
+- `reference/POST-LAUNCH-BUILD-LIST.md` — deferred features, what's done.
+- `reference/medical-claims-audit.md` — claims to keep out of copy.
 - `TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` — Play Store steps.
 
 ---

@@ -91,6 +91,10 @@ textarea::placeholder{color:var(--tm)}
 #tp-scroll{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 #tp-text{padding:52vh 8vw 60vh;font-size:44px;line-height:1.55;font-weight:600;white-space:pre-wrap;text-align:center;letter-spacing:.2px;max-width:1100px;margin:0 auto}
 #tp-stage.mirrored #tp-text{transform:scaleX(-1)}
+/* Self-view bubble: see yourself while you read. Mirrored like a selfie so
+   moving feels natural — the actual recording stays un-mirrored. */
+#tp-selfview{display:none;position:absolute;right:14px;bottom:70px;width:230px;max-width:34vw;border-radius:12px;background:#000;transform:scaleX(-1);box-shadow:0 6px 24px rgba(0,0,0,.65);z-index:5;border:1px solid rgba(255,255,255,.25)}
+#tp-selfview.on{display:block}
 #tp-band{position:absolute;left:0;right:0;top:38%;height:22%;background:rgba(126,232,162,0.07);border-top:1px solid rgba(126,232,162,0.28);border-bottom:1px solid rgba(126,232,162,0.28);pointer-events:none}
 #tp-count{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-size:22vh;font-weight:800;color:var(--green);background:rgba(0,0,0,0.85)}
 #tp-count.on{display:flex}
@@ -993,7 +997,9 @@ body.simple-only #view-simple{display:flex !important}
   <div id="tp-band"></div>
   <div id="tp-scroll"><div id="tp-text"></div></div>
   <div id="tp-count"></div>
+  <video id="tp-selfview" muted playsinline></video>
   <div id="tp-bar">
+    <button class="tp-btn" id="tp-rec" title="Start / stop recording your webcam">🎥 Record my webcam</button>
     <button class="tp-btn" id="tp-play" title="Play / pause (space)">▶</button>
     <button class="tp-btn" id="tp-slower" title="Slower">− speed</button>
     <span class="tp-val" id="tp-speed-val">3</span>
@@ -2017,6 +2023,7 @@ function openTeleprompter() {
   tpPos = 0; tpApplyPos();
   const stage = $('#tp-stage');
   stage.classList.add('on');
+  wcSelfviewSync(); // if the camera is already live, show yourself here too
   // Fullscreen the prompter itself, not the whole page: making the page
   // fullscreen puts the app container in the top layer and it ends up
   // covering these controls.
@@ -2577,6 +2584,27 @@ $('#media-record').onclick = async () => {
 const webcamRec = { phase: 'idle', mr: null, chunks: [], stream: null, t0: 0, timer: null, cancel: null, bgImg: null, seg: null, segActive: false, rawVid: null, canvas: null, paused: false, track: null };
 const wcNote = () => $('#webcam-rec-note');
 
+// --- Self-view inside the teleprompter: whatever the little preview is
+// showing also plays in a bubble on the prompter screen, so you can read the
+// script and see your framing at the same time on one laptop. ---
+function wcSelfviewSync() {
+  const sv = $('#tp-selfview');
+  if (!sv) return;
+  const src = $('#webcam-preview').srcObject;
+  if (src) { sv.srcObject = src; sv.classList.add('on'); sv.play().catch(() => {}); }
+  else { sv.srcObject = null; sv.classList.remove('on'); }
+}
+// The prompter's record button just presses the real one, and mirrors its
+// label (countdown, running timer) so you can start/stop without leaving
+// the script.
+$('#tp-rec')?.addEventListener('click', () => $('#webcam-record').click());
+setInterval(() => {
+  if (!$('#tp-stage')?.classList.contains('on')) return;
+  const t = $('#webcam-record').textContent;
+  const r = $('#tp-rec');
+  if (r && r.textContent !== t) r.textContent = t;
+}, 400);
+
 // --- Device pickers. Labels only appear after camera permission is granted,
 // so refresh the lists whenever the panel opens or a stream starts. Choices
 // stick in localStorage so your good mic stays picked next session. ---
@@ -2789,6 +2817,7 @@ function wcTeardown(preview) {
   webcamRec.canvas = null;
   if (webcamRec.stream) { webcamRec.stream.getTracks().forEach((t) => t.stop()); webcamRec.stream = null; }
   if (preview) { preview.srcObject = null; preview.style.display = 'none'; }
+  wcSelfviewSync();
   webcamRec.phase = 'idle';
 }
 
@@ -2849,6 +2878,7 @@ $('#webcam-record').onclick = async () => {
   // Show yourself (with the chosen background) while the countdown runs.
   const rec = await wcEffectStream(stream, $('#webcam-bg').value, note);
   preview.srcObject = rec; preview.style.display = ''; preview.play().catch(() => {});
+  wcSelfviewSync();
 
   const ok = await wcCountdown(b, '🎥 Record my webcam');
   if (!ok) { wcTeardown(preview); note.textContent = 'Cancelled — nothing recorded.'; return; }
@@ -2918,6 +2948,7 @@ $('#webcam-photo').onclick = async () => {
   wcBuildCaps(stream);
   const shown = await wcEffectStream(stream, $('#webcam-bg').value, note);
   preview.srcObject = shown; preview.style.display = ''; preview.play().catch(() => {});
+  wcSelfviewSync();
 
   const ok = await wcCountdown(b, '📸 Take a picture');
   if (!ok) { wcTeardown(preview); note.textContent = 'Cancelled.'; return; }

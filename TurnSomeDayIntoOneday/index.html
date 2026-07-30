@@ -2362,6 +2362,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
     <button class="calm-toggle" id="vg-voice-btn" onclick="cycleVgVoice()" style="margin-left:8px" title="Tap to try a different voice">Voice: Warm</button>
   </div>
+  <div id="vg-fallback-note" style="display:none;font-size:11.5px;color:#8892c0;margin-top:10px;max-width:300px">Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app.</div>
 </div>
 
 </div><!-- /app -->
@@ -5837,7 +5838,7 @@ const VG_VOICES={
 };
 const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','phone'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
-let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null;
+let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null,vgFellBack=false,vgUserPaused=false;
 function vgPickVoice(){
   const vs=window.speechSynthesis?speechSynthesis.getVoices():[];
   const en=vs.filter(v=>/^en/i.test(v.lang));
@@ -5862,6 +5863,7 @@ function startVoiceGuide(){
 }
 function vgStartVoice(fromStep){
   if(fromStep>=VG_STEPS.length){vgSilentLoop();return;}
+  vgFellBack=false;updateVgVoiceBtn();
   const key=vgVoiceKey();
   if(key==='phone'){vgStartTTS(fromStep);return;}
   vgStartAudio(key,fromStep);
@@ -5869,12 +5871,21 @@ function vgStartVoice(fromStep){
 function vgStartAudio(key,fromStep){
   const v=VG_VOICES[key];
   const a=new Audio(v.url);
-  vgAudio=a;vgAudioStep=-1;vgCues=v.cues;
+  vgAudio=a;vgAudioStep=-1;vgCues=v.cues;vgUserPaused=false;
   a.preload='auto';
   if(fromStep>0)a.addEventListener('loadedmetadata',()=>{try{a.currentTime=v.cues[fromStep];}catch(e){}},{once:true});
   a.addEventListener('timeupdate',vgSyncFromAudio);
   a.addEventListener('ended',()=>{if(vgActive&&vgAudio===a){vgStopAudio();vgSilentLoop();}});
   a.addEventListener('error',()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
+  // Leaving the app should NOT end the talk - that is the whole point of a real
+  // recording. But a phone can still pause it from outside: battery saver, a
+  // call, another app taking audio focus, or the user's own pause from the
+  // lock-screen card. Everything except a deliberate pause is retried, once
+  // immediately and again on return, so the talk resumes instead of dying.
+  a.addEventListener('pause',()=>{
+    if(!vgActive||vgAudio!==a||a.ended||vgUserPaused)return;
+    setTimeout(()=>{if(vgActive&&vgAudio===a&&a.paused&&!a.ended&&!vgUserPaused)a.play().catch(()=>{});},400);
+  });
   const p=a.play();
   if(p&&p.catch)p.catch(()=>{if(vgActive&&vgAudio===a)vgFallbackToTTS();});
   vgMediaSession();
@@ -5895,6 +5906,16 @@ function cycleVgVoice(){
 function updateVgVoiceBtn(){
   const b=document.getElementById('vg-voice-btn');
   if(b)b.textContent='Voice: '+VG_VOICES[vgVoiceKey()].label;
+  // The phone's own voice is the one voice that cannot survive leaving the app,
+  // whether it was picked deliberately or fallen back to. Say so in that case
+  // and only that case - on a recorded voice this stays silent.
+  const n=document.getElementById('vg-fallback-note');
+  if(!n)return;
+  const onPhoneVoice=vgFellBack||vgVoiceKey()==='phone';
+  n.style.display=onPhoneVoice?'block':'none';
+  if(onPhoneVoice)n.textContent=vgFellBack
+    ?"Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app."
+    :"Your phone's own voice pauses if you leave the app. Tap Voice for a recorded one that keeps playing.";
 }
 function vgSyncStep(i){
   if(i===vgAudioStep||!vgActive)return;
@@ -5916,8 +5937,9 @@ function vgMediaSession(){
   if(!('mediaSession' in navigator))return;
   try{
     navigator.mediaSession.metadata=new MediaMetadata({title:'Talk me through it',artist:'Day One',artwork:[{src:'icons/icon-192.png',sizes:'192x192',type:'image/png'},{src:'icons/icon-512.png',sizes:'512x512',type:'image/png'}]});
-    navigator.mediaSession.setActionHandler('play',()=>{if(vgAudio)vgAudio.play();});
-    navigator.mediaSession.setActionHandler('pause',()=>{if(vgAudio)vgAudio.pause();});
+    navigator.mediaSession.setActionHandler('play',()=>{vgUserPaused=false;if(vgAudio)vgAudio.play().catch(()=>{});});
+    // A pause from the lock-screen card is the one pause that must stick.
+    navigator.mediaSession.setActionHandler('pause',()=>{vgUserPaused=true;if(vgAudio)vgAudio.pause();});
     navigator.mediaSession.setActionHandler('stop',()=>closeVoiceGuide());
   }catch(e){}
 }
@@ -5938,6 +5960,7 @@ function vgFallbackToTTS(){
   const from=Math.max(0,vgAudioStep);
   vgStopAudio();
   if(!vgActive)return;
+  vgFellBack=true;updateVgVoiceBtn();
   vgStartTTS(from);
 }
 function vgStartTTS(fromStep){
@@ -6000,10 +6023,13 @@ function closeVoiceGuide(){
   document.getElementById('voiceguide-overlay').style.display='none';
 }
 document.addEventListener('visibilitychange',()=>{
-  // Only relevant on the TTS fallback path (vgAudio null): the MP3 keeps
-  // playing through a lock, but a locked phone often leaves the speech engine
-  // paused - nudge it, and the per-step caption timer keeps the talk moving.
-  if(!vgActive||document.hidden||vgAudio)return;
+  if(!vgActive||document.hidden)return;
+  // Back in the app. A recording that something paused while we were away is
+  // restarted here; the phone's-own voice is nudged out of its paused state.
+  if(vgAudio){
+    if(vgAudio.paused&&!vgAudio.ended&&!vgUserPaused)vgAudio.play().catch(()=>{});
+    return;
+  }
   try{if(window.speechSynthesis&&speechSynthesis.paused)speechSynthesis.resume();}catch(e){}
 });
 
@@ -8562,7 +8588,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.3.0';
+const APP_VERSION='12.3.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

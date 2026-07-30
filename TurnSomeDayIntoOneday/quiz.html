@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The 2-Minute Check-In — Turn Someday Into Day One</title>
+<meta name="description" content="A free, private 2-minute check-in on your relationship with a habit you've been thinking about — no signup needed, honest results, and what your next step could look like.">
+<link rel="canonical" href="https://www.turnsomedayintodayone.com/quiz">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Turn Someday Into Day One">
+<meta property="og:url" content="https://www.turnsomedayintodayone.com/quiz">
+<meta property="og:title" content="The 2-minute check-in. Free, private, no signup.">
+<meta property="og:description" content="A free, private 2-minute check-in. No signup needed. Honest results.">
+<meta property="og:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The 2-minute check-in. Free, private, no signup.">
+<meta name="twitter:description" content="A free, private 2-minute check-in. No signup needed. Honest results.">
+<meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<style>
+:root{
+  --brand:#0f0c29;--s0:#181632;--s1:#201d3f;--s2:#262347;--bdr:#33305c;
+  --tp:#eef0ff;--ts:#b8bfe8;--tm:#7e86b8;--accent:#f0b15a;--green:#4ecb9b;--f:-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#08071a}
+body{font-family:var(--f);background:linear-gradient(180deg,var(--brand) 0%,#24243e 55%,#302b63 100%);color:var(--tp);min-height:100dvh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;padding:28px 22px calc(28px + env(safe-area-inset-bottom))}
+.brand{font-size:11px;letter-spacing:.18em;color:var(--tm);text-transform:uppercase;text-align:center;font-weight:600;margin-bottom:26px}
+.step{display:none;flex:1;flex-direction:column}
+.step.on{display:flex}
+h1{font-size:26px;line-height:1.25;font-weight:700;margin-bottom:12px}
+h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
+.sub{font-size:14px;color:var(--ts);line-height:1.55;margin-bottom:22px}
+.qnum{font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.bar{height:4px;background:var(--s2);border-radius:99px;margin-bottom:26px;overflow:hidden}
+.bar>div{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s ease}
+.opt{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:14.5px;color:var(--tp);margin-bottom:10px;cursor:pointer;line-height:1.4;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--s2)}
+.btn{display:block;width:100%;background:linear-gradient(135deg,#f0b15a,#e08a2e);color:#241503;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:650;font-family:var(--f);cursor:pointer;text-align:center;text-decoration:none;margin-top:auto}
+.btn.ghost{background:none;color:var(--tm);font-weight:500;font-size:13px;margin-top:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid .opt{margin-bottom:0;text-align:center}
+input[type=number]{width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin-bottom:10px}
+input[type=number]:focus{outline:2px solid var(--accent);outline-offset:1px}
+.lbl{font-size:12.5px;color:var(--tm);margin-bottom:6px}
+.result-seg{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.stat{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center}
+.stat .n{font-size:22px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .l{font-size:11px;color:var(--tm);margin-top:3px;line-height:1.4}
+.fine{font-size:11.5px;color:var(--tm);line-height:1.6;margin-top:16px;text-align:center}
+.fine a{color:var(--ts)}
+.crisis{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ts);line-height:1.5;margin-top:14px;text-align:center}
+@media (prefers-reduced-motion: reduce){.bar>div{transition:none}}
+</style>
+<script>
+function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
+// First touch wins: someone who lands from TikTok, reads /for-her, then signs up
+// belongs to TikTok - not to whatever page they happened to be on at the end.
+// sessionStorage, not localStorage: it survives the landing -> signup hop and dies
+// with the tab, so it can never misattribute a return visit months later and is
+// not a durable identifier sitting on anyone's device. No cookie, no pageview ping -
+// these tags ride along only on an explicit signup or lead capture.
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Turn Someday Into Day One</div>
+
+  <!-- INTRO -->
+  <div class="step on" id="st-intro">
+    <h1>What's your relationship with the habit you've been thinking about?</h1>
+    <p class="sub">The habit is rarely the root — it's the symptom of something deeper. This private 2-minute check-in looks at both. Nothing you answer is stored or sent anywhere. (If you choose to get your 5-day plan by email at the end, we keep your email and your result — nothing else.) The results are computed on your device, for you. No signup needed to see them.</p>
+    <button class="btn" onclick="start()">Start the check-in</button>
+    <div class="crisis">This isn't a medical assessment. If you're in crisis right now, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline) — free, confidential, 24/7.</div>
+  </div>
+
+  <!-- FOCUS -->
+  <div class="step" id="st-focus">
+    <div class="bar"><div id="barfill"></div></div>
+    <div class="qnum">First things first</div>
+    <h2>Which habit is on your mind?</h2>
+    <p class="sub">Pick the loudest one. Most people carry more than one — they feed the same root — and you can work on the others inside the app.</p>
+    <div class="grid" id="focus-grid"></div>
+  </div>
+
+  <!-- QUESTIONS (rendered dynamically) -->
+  <div class="step" id="st-q">
+    <div class="bar"><div id="barfill-q"></div></div>
+    <div class="qnum" id="q-num"></div>
+    <h2 id="q-title"></h2>
+    <div id="q-opts"></div>
+  </div>
+
+  <!-- COST INPUTS -->
+  <div class="step" id="st-cost">
+    <div class="bar"><div style="width:88%"></div></div>
+    <div class="qnum">Almost done</div>
+    <h2>What does it cost you?</h2>
+    <p class="sub">Rough guesses are fine — this powers your personal math on the next screen.</p>
+    <div class="lbl">Money spent on it per day (in $)</div>
+    <input type="number" id="in-spend" inputmode="decimal" min="0" max="10000" placeholder="e.g. 12">
+    <div class="lbl">Hours it takes from you per day (including the recovery after)</div>
+    <input type="number" id="in-hours" inputmode="decimal" min="0" max="24" placeholder="e.g. 2">
+    <button class="btn" onclick="showResult()">See my results</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="st-result">
+    <div class="result-seg" id="res-seg"></div>
+    <h2 id="res-title"></h2>
+    <p class="sub" id="res-body" style="margin-bottom:4px"></p>
+    <div class="stat-cards" id="res-stats"></div>
+    <p class="sub" id="res-close"></p>
+    <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:6px 0 14px;text-align:left" id="capture-box">
+      <div style="font-size:15px;font-weight:650;margin-bottom:4px">Want the 5-day plan for this result?</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Five short emails, one a day. No card, no app required.</div>
+      <input type="email" id="cap-email" placeholder="you@email.com" autocomplete="email" style="width:100%;background:var(--s2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--tp);font-family:var(--f);margin-bottom:8px">
+      <button class="btn" style="margin-top:0" id="cap-btn" onclick="sendPlan()">Send it to me</button>
+      <div style="font-size:11.5px;color:var(--tm);margin-top:8px;text-align:center" id="cap-note">One email a day for five days, then I'll leave you alone.</div>
+    </div>
+    <a class="btn" href="/app?join=1">Start my free journey — today is Day One</a>
+    <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
+    <div class="fine">Free to start · 7-day free trial on Pro · cancel in two taps.<br>Your journal is nobody's business — private by design, never sold to advertisers.</div>
+    <div class="crisis">Not a medical assessment. In crisis? Call or text <strong>988</strong> — free, confidential, 24/7.</div>
+  </div>
+</div>
+
+<script>
+const FOCUS=['Alcohol','Smoking','Substances','Gambling','Social media','Gaming','Porn & Sex','Food / Binging','Shopping / Spending','Work','Something else'];
+const QUESTIONS=[
+  {t:'How often does it happen lately?',o:[['Once in a while',0],['Most weeks',1],['Most days',2],['Every day, pretty much automatically',3]]},
+  {t:'When you decide "not today" or "just one" — how does that usually go?',o:[['I stick to it fine',0],['I stick to it, but it takes real effort',1],['It works maybe half the time',2],['It almost never holds',3]]},
+  {t:'The morning after a heavy one, how do you feel about it?',o:[['Fine — it was a choice',0],['A little regret, then I move on',1],['Real regret that hangs around',2],['Dread. I try not to think about it',3]]},
+  {t:'Have you downplayed or hidden it from someone who matters?',o:[['Never needed to',0],['Once or twice',1],['More than I like to admit',2],['It has its own hiding system at this point',3]]},
+  {t:'Have you tried to quit or cut back before?',o:[['No — this is my first serious look at it',1],['Once',1],['A few times',2],['Many times. The restart is the hard part',3]]},
+  {t:'When a streak breaks, what happens next?',o:[['I just start again',0],['I restart within a few days',1],['I spiral for a while first',2],['I usually give up on trying for a long time',3]]},
+  {t:'What would "better" look like for you?',o:[['Understanding it before deciding anything',0],['Cutting way back',1],['Quitting fully',2],['Getting my life back. All of it',2]]},
+  {t:"What's stopping you from starting today?",o:[["I'm honestly just curious",0],['Fear of failing again',2],['My social life / environment',1],["Nothing. I'm ready",1]]}
+];
+let focus='',score=0,qi=0;
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');window.scrollTo(0,0);}
+function start(){
+  const grid=$('focus-grid');
+  grid.innerHTML=FOCUS.map(f=>`<div class="opt" onclick="pickFocus('${f.replace(/'/g,"\\'")}')">${f}</div>`).join('');
+  $('barfill').style.width='8%';
+  show('st-focus');
+}
+function pickFocus(f){focus=f;qi=0;score=0;renderQ();show('st-q');}
+function renderQ(){
+  const q=QUESTIONS[qi];
+  $('q-num').textContent=`Question ${qi+1} of ${QUESTIONS.length}`;
+  $('q-title').textContent=q.t;
+  $('barfill-q').style.width=Math.round(10+(qi/QUESTIONS.length)*75)+'%';
+  $('q-opts').innerHTML=q.o.map((o,i)=>`<div class="opt" onclick="answer(${i})">${o[0]}</div>`).join('');
+}
+function answer(i){
+  score+=QUESTIONS[qi].o[i][1];
+  qi++;
+  if(qi<QUESTIONS.length){renderQ();}else{show('st-cost');}
+}
+function money(n){return '$'+Math.round(n).toLocaleString();}
+let lastSeg='';
+// Opt-in email capture. Only the address and the result segment leave the
+// device, exactly as the intro promises - never the answers.
+async function sendPlan(){
+  const em=($('cap-email').value||'').trim();
+  const note=$('cap-note');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){note.textContent='That email doesn\'t look right — check it and try again.';return;}
+  const btn=$('cap-btn');btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,quiz_result:lastSeg,source:'quiz',utm:tsidUtm()})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){note.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send it to me';return;}
+    $('capture-box').innerHTML='<div style="font-size:14px;color:var(--green);text-align:center;padding:6px 0">Day 1 is on its way to your inbox. ✓</div>';
+  }catch(e){
+    note.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send it to me';
+  }
+}
+function showResult(){
+  const spend=Math.max(0,parseFloat($('in-spend').value)||0);
+  const hours=Math.min(24,Math.max(0,parseFloat($('in-hours').value)||0));
+  const yearSpend=spend*365,yearHours=hours*365,workWeeks=yearHours/40;
+  // Max score is 22. Bands tuned so honest middling answers land in the middle.
+  let seg,title,body,close;
+  if(score<=5){
+    seg='Curious & early';
+    title="You're paying attention before it costs you. That's rare.";
+    body=`Most people only look at their relationship with ${focus.toLowerCase()} after it's already expensive. You're looking now — which means you have the easiest version of this available: building awareness while the stakes are still low.`;
+    close='A daily 3-minute lesson and a private journal are exactly the right tools for this stage — no pressure, just clarity.';
+  }else if(score<=11){
+    seg='The gray area';
+    title="It's not a crisis. But it's not nothing, and you know it.";
+    body=`This is the gray area — where ${focus.toLowerCase()} still looks casual from the outside but has started making some of your decisions for you. The honest answers you just gave are the proof.`;
+    close="The gray area is where change is cheapest. A structured daily practice — lessons, a private journal, a streak you can actually see — is usually all this stage takes.";
+  }else if(score<=17){
+    seg='The loop is running';
+    title="The loop is doing your deciding. Time to take it back.";
+    body=`What you described isn't a habit anymore — it's a loop: trigger, ritual, regret, repeat. Loops don't break through willpower alone; they break through structure, honesty, and knowing your own patterns better than the loop does.`;
+    close='Daily lessons built for '+focus.toLowerCase()+', a craving SOS button, and an AI companion for the 2am moments — that structure is what this stage needs.';
+  }else{
+    seg='Day One ready';
+    title="You already know. Today can be Day One.";
+    body=`You didn't need a quiz to tell you this — you needed a moment of honesty, and you just had it. The restarts you've been through weren't failures; they were proof you keep coming back. That's the muscle that wins this.`;
+    close="Start with the free tools today: your streak, your first lesson, a private journal, and a plan for the next craving. One day at a time — starting with this one.";
+  }
+  lastSeg=seg;
+  $('res-seg').textContent=seg;
+  $('res-title').textContent=title;
+  $('res-body').textContent=body;
+  const stats=[];
+  if(yearSpend>0)stats.push(`<div class="stat"><div class="n">${money(yearSpend)}</div><div class="l">per year, at your numbers</div></div>`);
+  if(yearHours>0)stats.push(`<div class="stat"><div class="n">${Math.round(yearHours).toLocaleString()}h</div><div class="l">per year — about ${workWeeks<1?'a full work-week':Math.round(workWeeks)+' work-weeks'}</div></div>`);
+  $('res-stats').innerHTML=stats.join('');
+  $('res-stats').style.display=stats.length?'grid':'none';
+  $('res-close').textContent=close;
+  show('st-result');
+}
+</script>
+</body>
+</html>

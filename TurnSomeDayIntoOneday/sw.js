@@ -1,11 +1,15 @@
-const CACHE_NAME = 'tsid-shell-v3';
+const CACHE_NAME = 'tsid-shell-v30'; // v30: both-path letter + supporter FAQs
 const SHELL_FILES = [
   '/',
-  '/index.html',
+  '/app',
   '/manifest.json',
+  '/manifest-discrete.json',
   '/data/lessons.json',
+  '/data/stories.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/icons/icon-discrete-192.png',
+  '/icons/icon-discrete-512.png',
 ];
 
 self.addEventListener('install', (event) => {

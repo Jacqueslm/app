@@ -4,18 +4,26 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
+const crypto = require('crypto');
 const db = require('./db');
 const billing = require('./billing');
 const update = require('./update');
+const emailer = require('./email');
 const {
   COOKIE_NAME,
   hashPassword,
   verifyPassword,
   signSession,
+  verifySession,
   requireAuth,
+  verifyUnsubToken,
+  isValidSession,
 } = require('./auth');
 
 const app = express();
+// Hosted deployments sit behind the platform's HTTPS proxy - trust its
+// forwarded headers so secure cookies and per-IP rate limits work correctly.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_VERSION = '2023-06-01';
@@ -39,7 +47,117 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use('/preview', requireAuth);
+
+// Cold marketing traffic lands here; the app itself lives at /app so a
+// returning signed-in user is sent straight there and never sees marketing
+// copy twice. Registered ahead of express.static below, since static would
+// otherwise auto-serve index.html at '/' by its own default-index behavior.
+app.get('/', (req, res) => {
+  if (isValidSession(req)) return res.redirect('/app');
+  res.sendFile(path.join(__dirname, '..', 'landing.html'));
+});
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
+// The server/ folder must never be reachable over HTTP: it holds the source,
+// .env, and - on home installs, where DB_PATH defaults to server/data.sqlite -
+// the entire user database. express.static below serves the app root, which
+// contains this folder, so it has to be blocked ahead of it.
+app.use('/server', (req, res) => res.status(404).end());
+// The admin page is served only through the owner-gated /admin/stats route below.
+// It carries no data of its own, but static would hand out the shell to anyone.
+app.get('/admin-stats.html', (req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname, '..')));
+
+// Clean marketing URL - turnsomedayintodayone.com/brainreset - for bios,
+// flyers, and video end cards, instead of the .html extension.
+app.get('/brainreset', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
+});
+
+// The partner-facing landing page - the day-2 trial email and the "Send this
+// page to her" button both link here.
+app.get('/for-her', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'for-her.html'));
+});
+
+// One-click unsubscribe from any inbox - no login. Idempotent by design:
+// setting the flag to 1 again is the same write and the same page, so a
+// double-click or a second device never sees an error.
+app.get('/unsubscribe', (req, res) => {
+  const hit = verifyUnsubToken(req.query.token);
+  if (!hit) {
+    return res.status(400).type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">This link isn't valid.</body>");
+  }
+  if (hit.type === 'lead') db.setLeadUnsubscribed(hit.id, 1);
+  else db.setUnsubscribed(hit.id, 1);
+  res.type('html').send("<!doctype html><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><body style=\"font-family:sans-serif;background:#0f0c29;color:#eef0ff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center\">You're unsubscribed. Password reset emails still work.</body>");
+});
+
+// Public lead capture: the quiz result screen and the /brainreset page.
+// Additive and skippable everywhere - skipping changes nothing.
+const leadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this network. Try again later.' },
+});
+
+// UTM values are attacker-supplied query strings, so every field is length-capped
+// before it reaches the database.
+function cleanUtmTag(v) {
+  return typeof v === 'string' && v.trim() ? v.trim().slice(0, 60) : null;
+}
+function readUtm(body) {
+  const b = body || {};
+  const u = b.utm && typeof b.utm === 'object' ? b.utm : {};
+  return {
+    source: cleanUtmTag(u.source) || cleanUtmTag(b.utm_source),
+    medium: cleanUtmTag(u.medium) || cleanUtmTag(b.utm_medium),
+    campaign: cleanUtmTag(u.campaign) || cleanUtmTag(b.utm_campaign),
+  };
+}
+
+app.post('/api/lead', leadLimiter, async (req, res) => {
+  const { email: rawEmail, quiz_result, source } = req.body || {};
+  const addr = (rawEmail || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(addr)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  const src = source === 'brainreset' ? 'brainreset' : 'quiz';
+  const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
+  const cleanUtm = readUtm(req.body);
+
+  const existingUser = db.getUserByEmail(addr);
+  const existingLead = db.getLeadByEmail(addr);
+
+  // Dedup rule: an email already known (lead or user) never restarts the
+  // nurture - but a brainreset request still gets its PDF.
+  if (existingUser || existingLead) {
+    if (src === 'brainreset') {
+      const pdf = emailer.brainresetPdfEmail();
+      // They just asked for it by typing their address - deliver even if
+      // previously unsubscribed from sequences.
+      emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
+    }
+    return res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : "You're all set." });
+  }
+
+  const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
+  const lead = db.getLeadById(leadId);
+  if (src === 'quiz') {
+    emailer.startQuizNurture(lead).catch(() => {});
+  } else {
+    // Brainreset leads skip day 1 (it restates a quiz result they don't have):
+    // pre-mark step 1 consumed so the scheduler starts them at day 2.
+    db.logEmailSent(null, addr, 'quiz', 1);
+    const pdf = emailer.brainresetPdfEmail();
+    emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
+  }
+  res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : 'Day 1 is on its way to your inbox.' });
+});
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -57,8 +175,39 @@ const signupLimiter = rateLimit({
   message: { error: 'Too many accounts created from this network. Try again later.' },
 });
 
-function setSessionCookie(res, userId) {
-  res.cookie(COOKIE_NAME, signSession(userId), {
+// Separate bucket from login: sharing the 5-per-15-min login limiter meant a couple of
+// mistyped logins plus a password change could lock a legitimate user out for 15 minutes.
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password change attempts. Try again in a few minutes.' },
+});
+
+// Broad backstop across the whole auth namespace (logout, logout-all, me) -
+// the credential routes above keep their own stricter buckets, which still apply.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Try again in a few minutes.' },
+});
+app.use('/api/auth', authLimiter);
+
+// The daily chat quota is per-account; this is the per-IP burst brake so the
+// endpoint can't be hammered request-by-request inside a single day.
+const chatLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Slow down a moment — too many messages at once. Try again in a few minutes.' },
+});
+
+function setSessionCookie(res, userId, sessionVersion) {
+  res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -89,8 +238,63 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   }
   const cleanPhone = typeof phone === 'string' ? phone.trim().slice(0, 30) : '';
   const userId = db.createUser(normalizedEmail, hashPassword(password), cleanPhone || null);
+  // Attribution must never be able to fail a signup - a malformed tag is worth
+  // losing, an account is not.
+  try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
+  // After the response - a slow or failed email must never slow down signup.
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// Same rate as login: this endpoint sends real mail on every valid hit.
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many reset requests. Try again later.' },
+});
+
+app.post('/api/auth/forgot', forgotLimiter, async (req, res) => {
+  const { email: rawEmail } = req.body || {};
+  const normalizedEmail = (rawEmail || '').trim().toLowerCase();
+  // Identical response whether or not the account exists - this endpoint must
+  // never confirm who has an account with a recovery app.
+  const reply = { ok: true, message: 'If that email has an account, a reset link is on its way.' };
+  if (!EMAIL_RE.test(normalizedEmail)) return res.json(reply);
+  const user = db.getUserByEmail(normalizedEmail);
+  if (!user) return res.json(reply);
+  const token = crypto.randomBytes(32).toString('hex');
+  db.createPasswordReset(token, user.id, new Date(Date.now() + 60 * 60 * 1000).toISOString());
+  const msg = emailer.passwordResetEmail(token);
+  // No sequence guard (users may legitimately request several resets) and
+  // force:true - account access must work even for unsubscribed users.
+  emailer.sendEmail({ to: user.email, subject: msg.subject, text: msg.text, force: true }).catch(() => {});
+  res.json(reply);
+});
+
+app.post('/api/auth/reset', (req, res) => {
+  const { token, newPassword } = req.body || {};
+  if (typeof token !== 'string' || !token) {
+    return res.status(400).json({ error: 'Missing reset token.' });
+  }
+  if (!validCredential(newPassword)) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters (or a 4-6 digit PIN).' });
+  }
+  const row = db.consumePasswordReset(token);
+  if (!row) {
+    return res.status(400).json({ error: 'This reset link is invalid or has expired. Request a new one from the login screen.' });
+  }
+  db.updatePassword(row.user_id, hashPassword(newPassword));
+  // A password reset means the old credential may be compromised - kill every
+  // existing session everywhere.
+  db.bumpSessionVersion(row.user_id);
+  res.json({ ok: true });
 });
 
 app.post('/api/auth/login', loginLimiter, (req, res) => {
@@ -100,7 +304,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
-  setSessionCookie(res, user.id);
+  setSessionCookie(res, user.id, user.session_version || 1);
   res.json({ email: user.email });
 });
 
@@ -109,7 +313,15 @@ app.post('/api/auth/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-app.post('/api/auth/change-password', loginLimiter, requireAuth, (req, res) => {
+// Signs the account out everywhere EXCEPT this device: the version bump kills every
+// existing token, then this device immediately gets a fresh cookie at the new version.
+app.post('/api/auth/logout-all', requireAuth, (req, res) => {
+  const newVersion = db.bumpSessionVersion(req.userId);
+  setSessionCookie(res, req.userId, newVersion);
+  res.json({ ok: true });
+});
+
+app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, res) => {
   const { currentPassword, newPassword } = req.body || {};
   const user = db.getUserById(req.userId);
   if (!user || !verifyPassword(currentPassword || '', user.password_hash)) {
@@ -134,18 +346,72 @@ app.get('/api/state', requireAuth, (req, res) => {
 });
 
 app.put('/api/state', requireAuth, (req, res) => {
-  const { state } = req.body || {};
+  let { state } = req.body || {};
   if (typeof state !== 'string') {
     return res.status(400).json({ error: 'state must be a JSON string.' });
   }
+  // Nova conversations are never persisted. Current clients don't send them,
+  // but a stale cached client still might - enforce the promise server-side.
+  try {
+    const parsed = JSON.parse(state);
+    if (parsed && typeof parsed === 'object' && 'chatHistory' in parsed) {
+      delete parsed.chatHistory;
+      state = JSON.stringify(parsed);
+    }
+  } catch (_) { /* not valid JSON - store as-is, same as before */ }
   db.saveState(req.userId, state);
   res.json({ ok: true });
 });
 
 app.use('/api/update', requireAuth, update.router);
 
+// Server error stacks are internals, not user data - same owner gate the
+// update endpoint uses. Unset APP_OWNER_EMAIL keeps the old open behavior.
+const DIAG_OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 app.get('/api/diagnostics', requireAuth, (req, res) => {
+  if (DIAG_OWNER_EMAIL) {
+    const user = db.getUserById(req.userId);
+    if (!user || user.email !== DIAG_OWNER_EMAIL) {
+      return res.status(403).json({ error: 'Only the app owner can view diagnostics.' });
+    }
+  }
   res.json({ errors: db.getRecentErrors(50) });
+});
+
+// Funnel numbers are business data, so unlike diagnostics this gate has no
+// open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
+function isOwnerRequest(req) {
+  const token = req.cookies && req.cookies[COOKIE_NAME];
+  const payload = token && verifySession(token);
+  const userId = req.userId || (payload && payload.userId);
+  if (!userId) return false;
+  const user = db.getUserById(userId);
+  return !!(user && user.email === DIAG_OWNER_EMAIL);
+}
+function requireOwner(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Admin stats are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  if (!isOwnerRequest(req)) {
+    res.status(403).json({ error: 'Only the app owner can view stats.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/admin/stats', requireAuth, (req, res) => {
+  if (!requireOwner(req, res)) return;
+  res.json(db.getAdminStats({ freeChatLimit: FREE_CHAT_LIMIT, windowDays: 30 }));
+});
+// A page route, not an API one: requireAuth would render its JSON error as the
+// page body, so a logged-out visit is sent to the app to sign in instead, and a
+// signed-in non-owner gets a sentence rather than a JSON blob.
+app.get('/admin/stats', (req, res) => {
+  if (!isValidSession(req)) return res.redirect('/app');
+  if (!DIAG_OWNER_EMAIL || !isOwnerRequest(req)) {
+    return res.status(403).type('text/plain').send('Only the app owner can view stats.');
+  }
+  res.sendFile(path.join(__dirname, '..', 'admin-stats.html'));
 });
 
 app.get('/api/account/export', requireAuth, (req, res) => {
@@ -178,6 +444,13 @@ function getOrigin(req) {
 }
 
 app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) => {
+  // The Google Play build ships free-tier only: Play requires digital goods sold
+  // inside a Play-distributed app to use Play Billing, so this app sells nothing
+  // there at all. The client hides every purchase surface; this refuses the
+  // request outright, so no code path inside the Android wrapper reaches Stripe.
+  if (req.get('X-TSID-Client') === 'play') {
+    return res.status(403).json({ error: 'Pro is not available in the Android app.' });
+  }
   if (!billing.isConfigured()) {
     return res.status(503).json({ error: 'Billing is not available on this server right now.' });
   }
@@ -188,7 +461,30 @@ app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) =
     const url = await billing.createCheckoutSession(user, plan, getOrigin(req));
     res.json({ url });
   } catch (err) {
+    // A sold-out cap is a different kind of "no" from a broken checkout, and the
+    // client shows a different screen for it.
+    if (err && err.code === 'lifetime_sold_out') {
+      return res.status(409).json({ error: err.message, soldOut: true });
+    }
     res.status(400).json({ error: err.message || 'Could not start checkout.' });
+  }
+});
+
+// Public on purpose: the landing page asks this while logged out. It publishes
+// only what the pricing surfaces are allowed to show, and showCount is decided
+// server-side so the app and the landing page can never disagree about when the
+// remaining number becomes visible.
+// Google Play requires a privacy policy reachable without signing in. The text
+// is the same words as the in-app overlay - one policy, three places.
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'privacy.html'));
+});
+
+app.get('/api/lifetime-availability', (req, res) => {
+  try {
+    res.json(billing.getLifetimeAvailability());
+  } catch (e) {
+    res.status(503).json({ error: 'Unavailable.' });
   }
 });
 
@@ -206,13 +502,19 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
 });
 
-app.get('/api/billing/status', requireAuth, (req, res) => {
-  const user = db.getUserById(req.userId);
+app.get('/api/billing/status', requireAuth, async (req, res) => {
+  let user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // ?refresh=1 asks Stripe directly instead of waiting for a webhook - a home
+  // install has no public URL Stripe can reach, so this is how Pro activates.
+  if (req.query.refresh === '1' && billing.isConfigured()) {
+    await billing.refreshFromStripe(user);
+    user = db.getUserById(req.userId) || user;
+  }
   res.json(billing.getBillingStatus(user));
 });
 
-app.post('/api/chat', requireAuth, async (req, res) => {
+app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!ANTHROPIC_API_KEY) {
     // No key configured (e.g. running without the API wired up yet) - the client falls back to
     // its offline local-reply mode whenever this endpoint isn't a 2xx, so this is a normal state.
@@ -267,6 +569,12 @@ app.post('/api/chat', requireAuth, async (req, res) => {
 // Anything that reaches here escaped every route's own try/catch - log it so
 // it shows up in Profile diagnostics instead of vanishing silently.
 app.use((err, req, res, next) => {
+  // Malformed JSON in a request body is a client mistake, not a server fault - answer 400
+  // and keep it out of the user-visible diagnostics log so real server errors stand out.
+  if (err.type === 'entity.parse.failed' || err instanceof SyntaxError) {
+    if (res.headersSent) return next(err);
+    return res.status(400).json({ error: 'Invalid JSON in request body.' });
+  }
   try { db.logError('http', err.message, err.stack); } catch (_) {}
   if (res.headersSent) return next(err);
   res.status(500).json({ error: 'Something went wrong on the server.' });
@@ -279,6 +587,8 @@ process.on('unhandledRejection', (err) => {
   try { db.logError('unhandledRejection', err?.message || String(err), err?.stack); } catch (_) {}
   console.error('Unhandled rejection:', err);
 });
+
+emailer.startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

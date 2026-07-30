@@ -6,6 +6,7 @@
 // simply hides those features. Uploads and the Sequencer work with no keys.
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const express = require('express');
@@ -14,23 +15,27 @@ const db = require('./db');
 const { requireAuth } = require('./auth');
 
 let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
+let PEXELS_KEY = process.env.PEXELS_KEY; // free stock b-roll key, also settable from the app
 const FAL_QUEUE_BASE = process.env.FAL_QUEUE_BASE || 'https://queue.fal.run'; // overridable for tests
+const PEXELS_BASE = process.env.PEXELS_BASE || 'https://api.pexels.com'; // overridable for tests
 const ENV_PATH = path.join(__dirname, '.env');
 
 // Optional: the same Anthropic key that powers Nova chat (server.js) sharpens
 // storyboard prompts. Neither this feature nor Nova requires the other.
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+let ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY; // mutable: settable from the app
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
+const ANTHROPIC_BASE = process.env.ANTHROPIC_BASE || 'https://api.anthropic.com'; // overridable for tests
 
-// Persist (or remove) FAL_KEY in server/.env so it survives restarts, keeping
+// Persist (or remove) a key in server/.env so it survives restarts, keeping
 // every other line (PORT, SESSION_SECRET, ...) untouched.
-function persistFalKey(key) {
+function persistEnvKey(name, value) {
   let lines = [];
   try { lines = fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/); } catch (_) {}
-  lines = lines.filter((l) => !l.startsWith('FAL_KEY=') && l.trim() !== '');
-  if (key) lines.push(`FAL_KEY=${key}`);
+  lines = lines.filter((l) => !l.startsWith(`${name}=`) && l.trim() !== '');
+  if (value) lines.push(`${name}=${value}`);
   fs.writeFileSync(ENV_PATH, lines.join('\n') + '\n');
 }
+function persistFalKey(key) { persistEnvKey('FAL_KEY', key); }
 
 // Model ids move fast in this space - override any of these in .env without code changes.
 const MODEL_TEXT_TO_IMAGE = process.env.FAL_MODEL_TEXT_TO_IMAGE || 'fal-ai/flux/dev';
@@ -49,22 +54,37 @@ const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // the app as estimates with an as-of date, and every id/rate is env-overridable.
 const PRICES_AS_OF = 'July 2026';
 const VIDEO_TIERS = {
+  // Rates updated to match real fal billing (Jul 2026 invoice): Seedance and
+  // Kling both cost far more than the old placeholder rates, which under-quoted
+  // by 2-3x and led to surprise overspend. These are conservative (round-up)
+  // per-second estimates; always confirm against your live fal balance.
+  // Tiers re-pointed to the genuinely cost-effective models (confirmed fal
+  // pricing, Jul 2026): Wan 2.5 is the cheapest good model, Kling 2.5 Turbo is
+  // the value pick, Seedance is premium and reserved for hero shots. The old
+  // setup had Seedance (the priciest) mislabeled as "Draft", which is what
+  // caused the surprise overspend. All overridable via FAL_MODEL_*/STUDIO_RATE_*.
   draft: {
-    label: 'Draft', desc: 'Seedance - cheap takes',
-    model: process.env.FAL_MODEL_I2V_DRAFT || 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.042),
+    label: 'Draft', desc: 'Wan 2.5 - best value',
+    model: process.env.FAL_MODEL_I2V_DRAFT || 'fal-ai/wan-25-preview/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.05),
   },
   standard: {
-    label: 'Standard', desc: 'Kling 3.0 Standard',
-    model: process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v3/standard/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_STANDARD || 0.084),
+    label: 'Standard', desc: 'Kling 2.5 Turbo - great quality',
+    model: process.env.FAL_MODEL_IMAGE_TO_VIDEO || 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_STANDARD || 0.07),
   },
   best: {
-    label: 'Best', desc: 'Kling 3.0 Pro - hero shots',
-    model: process.env.FAL_MODEL_I2V_BEST || 'fal-ai/kling-video/v3/pro/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_BEST || 0.112),
+    label: 'Best', desc: 'Seedance - premium hero shots',
+    model: process.env.FAL_MODEL_I2V_BEST || 'fal-ai/bytedance/seedance/v1/pro/image-to-video',
+    rate: Number(process.env.STUDIO_RATE_BEST || 0.24),
   },
 };
+// Reference-to-video: when you attach character reference photos to an Animate,
+// we switch to a model that keeps the character consistent using those refs
+// (Vidu Q1 supports up to 7 reference images via reference_image_urls). Priced
+// per clip (round-up estimate); shown on the button and guarded by the cap.
+const MODEL_I2V_REF = process.env.FAL_MODEL_I2V_REF || 'fal-ai/vidu/q1/reference-to-video';
+const ANIM_REF_RATE = Number(process.env.STUDIO_RATE_ANIM_REF || 0.40); // per clip, conservative
 const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballpark per image
 // FLUX.2 pro edit bills $0.03 for the first output MP + $0.015 per extra MP of
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
@@ -94,19 +114,74 @@ const MODEL_MOTION = process.env.FAL_MODEL_MOTION || 'fal-ai/wan-animate';
 // Kling motion-control takes image_url + video_url + character_orientation.
 const MODEL_MOTION_STD = process.env.FAL_MODEL_MOTION_STD || 'fal-ai/kling-video/v2.6/standard/motion-control';
 const MODEL_MOTION_HERO = process.env.FAL_MODEL_MOTION_HERO || 'fal-ai/kling-video/v3/pro/motion-control';
-const DANCE_DRAFT_RATE = Number(process.env.STUDIO_RATE_DANCE_DRAFT || 0.05);  // per second, estimates
-const DANCE_STD_RATE = Number(process.env.STUDIO_RATE_DANCE_STD || 0.07);
-const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.12);
+// Dance rates verified against fal Jul 2026, quoted per OUTPUT second and rounded
+// UP so the real bill is never a surprise (this is what caused the overspend before):
+//  - Draft = wan-animate. fal bills it per 16-frame "video second," so a 720p clip
+//    from ~30fps source lands near $0.15/output-sec, not the naive $0.05.
+//  - Standard = kling v2.6 standard motion-control (~$0.13/sec by credit math).
+//  - Hero = kling v3 pro motion-control, listed at $0.168/sec.
+const DANCE_DRAFT_RATE = Number(process.env.STUDIO_RATE_DANCE_DRAFT || 0.15);
+const DANCE_STD_RATE = Number(process.env.STUDIO_RATE_DANCE_STD || 0.13);
+const DANCE_HERO_RATE = Number(process.env.STUDIO_RATE_DANCE_HERO || 0.17);
 
 // Server-side daily caps so a runaway loop (or, later, a public user) can't
 // silently drain the fal.ai balance. Generous for personal use; tune in .env.
 const DAILY_AI_IMAGE_LIMIT = Number(process.env.STUDIO_DAILY_IMAGE_LIMIT || 300);
 const DAILY_AI_VIDEO_LIMIT = Number(process.env.STUDIO_DAILY_VIDEO_LIMIT || 60);
+// Hard DOLLAR cap: once today's estimated AI spend hits this, Studio refuses to
+// start any new paid generation until tomorrow (UTC). 0 = off. Set from the app;
+// this is the "runaway spend is impossible" guarantee.
+let DAILY_USD_CAP = Number(process.env.STUDIO_DAILY_USD_CAP || 0);
+
+// Estimated cost of a single paid action, from the same verified rates shown on
+// the buttons. Used by both the spend ledger and the dollar cap. Round-up bias.
+function estActionCost(kind, opts = {}) {
+  const s = Number(opts.seconds) || 5;
+  switch (kind) {
+    case 'video':
+      if (opts.tier === 'reference') return ANIM_REF_RATE; // flat per-clip for character-lock
+      return (VIDEO_TIERS[opts.tier] || VIDEO_TIERS.standard).rate * s;
+    case 'image': return (opts.characterId ? CHARACTER_IMAGE_RATE : IMAGE_RATE) * (Number(opts.count) || 1);
+    case 'imageBest': return IMAGE_BEST_RATE * (Number(opts.count) || 1);
+    case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
+    case 'dance': return ({ draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE }[opts.tier] || DANCE_STD_RATE) * s;
+    case 'sing': return opts.tier === 'hero' ? SING_HERO_RATE : SING_DRAFT_RATE;
+    case 'liveportrait': return LIVEPORTRAIT_RATE;
+    case 'voice': return (opts.emotion ? VOICE_EMO_RATE : VOICE_RATE) * Math.max(1, (Number(opts.chars) || 0) / 1000);
+    case 'transcript': return TRANSCRIBE_RATE;
+    case 'qc': return QC_RATE;
+    default: return 0;
+  }
+}
+
+// Sum of today's (UTC) estimated spend from the durable receipts. Failed
+// generations aren't billed, so they don't count.
+function todaySpendUSD(userId) {
+  const day = todayUTC();
+  let total = 0;
+  for (const r of db.getFalReceipts(userId, 500)) {
+    if (r.status === 'error') continue;
+    if (String(r.created_at || '').slice(0, 10) !== day) continue;
+    let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+    total += estActionCost(r.expect, { tier: r.tier, seconds: meta.seconds, characterId: r.character_id });
+  }
+  return total;
+}
+
+// Returns an error string if starting an action costing `addUSD` would push
+// today's spend over the cap, else null. No cap set → always allowed.
+function overDailyCap(userId, addUSD) {
+  if (!(DAILY_USD_CAP > 0)) return null;
+  const spent = todaySpendUSD(userId);
+  if (spent + addUSD > DAILY_USD_CAP + 1e-9) {
+    return `Daily spend cap reached — you set $${DAILY_USD_CAP.toFixed(2)}/day and today is at ~$${spent.toFixed(2)}. This action (~$${addUSD.toFixed(2)}) would go over. Raise or clear the cap in Recover paid clips → Daily spend cap, or try again tomorrow.`;
+  }
+  return null;
+}
 
 const MEDIA_DIR = path.join(__dirname, 'media');
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
 
-const UPLOAD_LIMIT = '400mb';
 const EXT_BY_KIND = {
   image: new Set(['.png', '.jpg', '.jpeg', '.webp']),
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
@@ -199,6 +274,22 @@ function probeHasAudio(file) {
   });
 }
 
+// Read pixel dimensions the same stderr-parsing way (no ffprobe dependency).
+// Returns {w,h} or null. Grabs the first "<W>x<H>" that appears on a Video line.
+function probeDimensions(file) {
+  return new Promise((resolve) => {
+    let out = '';
+    const proc = spawn(ffmpegBin(), ['-i', file]);
+    proc.stderr.on('data', (c) => { out += c.toString(); });
+    proc.on('close', () => {
+      const line = (out.match(/Stream #\d+:\d+.*Video:.*/) || [null])[0];
+      const m = line && line.match(/(\d{2,5})x(\d{2,5})/);
+      resolve(m ? { w: Number(m[1]), h: Number(m[2]) } : null);
+    });
+    proc.on('error', () => resolve(null));
+  });
+}
+
 function ffmpegBin() {
   if (process.env.FFMPEG_PATH) return process.env.FFMPEG_PATH;
   try {
@@ -217,8 +308,26 @@ let jobCounter = 0;
 
 function createJob(userId, type, extra) {
   const id = `job-${++jobCounter}-${crypto.randomBytes(4).toString('hex')}`;
-  const job = { id, userId, type, status: 'running', progress: 0, error: null, assetId: null, ...extra };
+  const job = { id, userId, type, status: 'running', progress: 0, error: null, assetId: null, startedAt: Date.now(), ...extra };
   jobs.set(id, job);
+  // Durable receipt for every fal (paid) submission, so a clip we're billed for
+  // can always be recovered later — even after a restart wipes this in-memory job.
+  if (job.fal && job.fal.statusUrl && job.fal.responseUrl) {
+    try {
+      const requestId = (String(job.fal.responseUrl).match(/requests\/([^/?]+)/) || [])[1] || null;
+      job._receiptId = db.logFalReceipt(userId, {
+        requestId,
+        statusUrl: job.fal.statusUrl,
+        responseUrl: job.fal.responseUrl,
+        expect: job.fal.expect,
+        label: job.fal.label,
+        characterId: job.fal.characterId,
+        model: job.fal.meta && job.fal.meta.model,
+        tier: job.fal.meta && job.fal.meta.tier,
+        meta: job.fal.meta,
+      });
+    } catch (_) { /* logging must never block a generation */ }
+  }
   // Don't let the map grow forever on a long-lived server.
   if (jobs.size > 500) {
     for (const [key, j] of jobs) {
@@ -356,13 +465,58 @@ async function falUploadFile(buf, filename, contentType) {
   return url;
 }
 
+// How long a fal job may run before we stop waiting and surface an error, so a
+// stuck request never spins forever. Training is legitimately slow (~10 min).
+const FAL_MAX_MS = { lora: 25 * 60e3, video: 12 * 60e3 };
+function falMaxMs(expect) { return FAL_MAX_MS[expect] || 6 * 60e3; }
+
+// fal video/image models don't all return the output in the same place. Dig
+// through every shape they're known to use so a COMPLETED (already-billed)
+// job never gets thrown away as "no output" — that would mean paying for a
+// clip we failed to save. Returns the first URL found, or null.
+function extractMediaUrl(result, expect) {
+  if (!result || typeof result !== 'object') return null;
+  const asUrl = (v) => {
+    if (!v) return null;
+    if (typeof v === 'string' && /^https?:\/\//i.test(v)) return v;
+    if (typeof v === 'object' && typeof v.url === 'string') return v.url;
+    return null;
+  };
+  const first = (v) => (Array.isArray(v) ? v[0] : v);
+  const candidates = expect === 'video'
+    ? [result.video, first(result.videos), result.output, first(result.outputs),
+       result.video_url, result.url, result.data && result.data.video]
+    : [first(result.images), result.image, result.output, first(result.outputs),
+       result.image_url, result.url, result.data && first(result.data.images)];
+  for (const c of candidates) { const u = asUrl(c); if (u) return u; }
+  return null;
+}
+
 async function refreshFalJob(job) {
   if (job.status !== 'running') return;
+  // Guard against the background sweeper and a browser poll advancing the same
+  // job at once — that could download twice / create two assets for one charge.
+  if (job._refreshing) return;
+  job._refreshing = true;
   try {
     const status = await falGet(job.fal.statusUrl);
-    if (status.status === 'IN_QUEUE') { job.progress = 5; return; }
-    if (status.status === 'IN_PROGRESS') { job.progress = Math.min(90, (job.progress || 5) + 5); return; }
-    if (status.status !== 'COMPLETED') return;
+    if (status.status === 'IN_QUEUE' || status.status === 'IN_PROGRESS') {
+      // Give up on a job that's been running far too long rather than spin
+      // forever. Nothing new was produced, so it never counts against your cap.
+      if (Date.now() - (job.startedAt || 0) > falMaxMs(job.fal.expect)) {
+        throw new Error('This one took far too long and was given up on — nothing was produced, and it doesn\'t count against your daily limit. Try again.');
+      }
+      job.progress = status.status === 'IN_QUEUE' ? 5 : Math.min(90, (job.progress || 5) + 5);
+      return;
+    }
+    // Any terminal state that isn't a clean completion is a failure — surface it
+    // instead of silently returning (which left the job spinning forever).
+    if (status.status !== 'COMPLETED') {
+      if (/FAIL|ERROR|CANCEL/i.test(String(status.status || ''))) {
+        throw new Error('The model reported an error and produced nothing — it doesn\'t count against your daily limit. Try again, or tweak the prompt a little.');
+      }
+      return; // unknown non-terminal status: keep polling (timeout above still applies)
+    }
 
     const result = await falGet(job.fal.responseUrl);
 
@@ -415,10 +569,27 @@ async function refreshFalJob(job) {
       return;
     }
 
-    const media = job.fal.expect === 'video'
-      ? (result.video && result.video.url)
-      : (result.images && result.images[0] && result.images[0].url);
-    if (!media) throw new Error('The model finished but returned no output file.');
+    if (job.fal.expect === 'audio') {
+      // Voice clone (F5-TTS) returns a generated speech clip. File it as audio;
+      // it's cheap and not gated by the image/video caps.
+      const outAudio = result.audio_url || result.audio || result.output;
+      const url = typeof outAudio === 'string' ? outAudio : (outAudio && outAudio.url);
+      if (!url) throw new Error('The voice model finished but returned no audio.');
+      const filename = await downloadToMedia(job.userId, url, '.wav');
+      const meta = { ...(job.fal.meta || {}), source: 'voice', duration: await probeMediaDuration(mediaPath(filename)) };
+      job.assetId = db.createAsset(job.userId, 'audio', job.fal.label, filename, null, meta);
+      job.progress = 100;
+      job.status = 'done';
+      return;
+    }
+
+    const media = extractMediaUrl(result, job.fal.expect);
+    if (!media) {
+      // Completed (so fal billed it) but we can't find the file. Log the raw
+      // payload so the URL is recoverable instead of silently lost.
+      try { console.error('[fal] COMPLETED but no media URL found. Raw result:', JSON.stringify(result).slice(0, 2000)); } catch (_) {}
+      throw new Error('The model finished but returned no output file. (Logged for recovery — tell support if this repeats.)');
+    }
 
     const ext = job.fal.expect === 'video' ? '.mp4' : '.png';
     const filename = await downloadToMedia(job.userId, media, ext);
@@ -432,8 +603,35 @@ async function refreshFalJob(job) {
   } catch (err) {
     job.status = 'error';
     job.error = err.message;
+  } finally {
+    job._refreshing = false;
+    // Close out the durable receipt once the job reaches a terminal state, so
+    // the recovery view knows this one is collected (and won't re-offer it).
+    if (job._receiptId && (job.status === 'done' || job.status === 'error')) {
+      try { db.setFalReceiptStatus(job._receiptId, { status: job.status, assetId: job.assetId || null, error: job.error || null }); } catch (_) {}
+    }
   }
 }
+
+// Background sweeper. fal jobs otherwise ONLY advance when the browser polls
+// GET /jobs/:id — so if the tab closes, refreshes, sleeps, or a render outlives
+// the page, the job stalls while fal still finishes AND BILLS it, and the clip
+// you paid for never downloads. This finishes every running fal job server-side
+// on a timer, so completed work always lands in the library regardless of the
+// browser. Reading fal results never re-charges, so this can't cost extra.
+let falSweeperTimer = null;
+function startFalSweeper() {
+  if (falSweeperTimer) return;
+  falSweeperTimer = setInterval(async () => {
+    for (const job of jobs.values()) {
+      if (job.status === 'running' && job.fal && !job._refreshing) {
+        try { await refreshFalJob(job); } catch (_) {}
+      }
+    }
+  }, 6000);
+  if (falSweeperTimer.unref) falSweeperTimer.unref(); // don't hold the process open
+}
+startFalSweeper();
 
 /* ------------------------------------------------------------------ */
 /* Router                                                              */
@@ -457,6 +655,8 @@ router.get('/config', (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
   res.json({
     falAvailable: Boolean(FAL_KEY),
+    stockAvailable: Boolean(PEXELS_KEY),
+    chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
     videosUsed: db.getVideoCount(req.userId, todayUTC()),
@@ -478,8 +678,12 @@ router.get('/config', (req, res) => {
       sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
       livePortrait: LIVEPORTRAIT_RATE,
       transcribe: TRANSCRIBE_RATE,
+      captionFix: CAPTION_FIX_RATE,
       dance: { draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE },
       qc: QC_RATE,
+      voicePer1k: VOICE_RATE,
+      voiceEmoPer1k: VOICE_EMO_RATE,
+      animRef: ANIM_REF_RATE,
       tiers: Object.fromEntries(Object.entries(VIDEO_TIERS).map(([k, t]) =>
         [k, { label: t.label, desc: t.desc, rate: t.rate }])),
     },
@@ -518,6 +722,177 @@ router.post('/settings/falkey', (req, res) => {
     res.json({ falAvailable: Boolean(FAL_KEY) });
   } catch (err) {
     res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+/* ---------------- settings: daily spend cap ---------------- */
+// The hard dollar ceiling. Persisted to .env so it survives restarts. Send 0
+// (or blank) to turn it off. Once today's estimated spend + a new action would
+// exceed it, that action is refused until tomorrow (UTC).
+router.post('/settings/spendcap', (req, res) => {
+  let cap = Number(req.body?.cap);
+  if (!Number.isFinite(cap) || cap < 0) cap = 0;
+  cap = Math.min(1000, Math.round(cap * 100) / 100); // sane ceiling + cents precision
+  try {
+    persistEnvKey('STUDIO_DAILY_USD_CAP', cap > 0 ? String(cap) : null);
+    DAILY_USD_CAP = cap;
+    res.json({ cap: DAILY_USD_CAP, spentToday: Number(todaySpendUSD(req.userId).toFixed(2)) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the cap: ${err.message}` });
+  }
+});
+
+/* ---------------- free stock b-roll (Pexels) ---------------- */
+// A free Pexels key (pexels.com/api) unlocks free, no-attribution-required
+// stock photos and video for establishing shots, textures, and transitions -
+// so you don't spend on AI to generate filler.
+router.post('/settings/pexelskey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 10 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a Pexels key. Copy it from pexels.com/api." });
+  }
+  try {
+    persistEnvKey('PEXELS_KEY', clean || null);
+    PEXELS_KEY = clean || undefined;
+    res.json({ stockAvailable: Boolean(PEXELS_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+router.post('/settings/anthropickey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 15 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like an Anthropic key. It starts with sk-ant-." });
+  }
+  try {
+    persistEnvKey('ANTHROPIC_API_KEY', clean || null);
+    ANTHROPIC_API_KEY = clean || undefined;
+    res.json({ chatAvailable: Boolean(ANTHROPIC_API_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+/* ---------------- talk to your crew (per-role AI advisors) ---------------- */
+// Each crew member is a focused persona. They give short, concrete, encouraging
+// advice grounded in Studio's actual tools and the artist's own characters.
+const CREW = {
+  creative: { name: 'Creative Director', emoji: '🎨', role:
+    'the CREATIVE DIRECTOR. You own the big vision: the concept, mood, emotional arc, and what makes a video unforgettable and unmistakably THIS artist. You think in story and feeling, not shot lists. You protect the artist\'s brand and their recurring characters\' identity across every video. You push for one strong idea over ten scattered ones.' },
+  director: { name: 'Director', emoji: '🎬', role:
+    'the DIRECTOR. You turn the vision into shots: camera moves, framing, pacing, coverage, how scenes cut to the beat. You give specific, practical shot direction and keep the video flowing.' },
+  casting: { name: 'Casting Director', emoji: '🎭', role:
+    'the CASTING DIRECTOR. You decide which character appears in which scene, protect their likeness and face-lock consistency, and think about wardrobe and who carries each moment.' },
+  designer: { name: 'Production Designer', emoji: '🖌', role:
+    'the PRODUCTION DESIGNER. You own the look: color grade, lighting mood, locations, and keeping one consistent world across the whole video.' },
+  qc: { name: 'QC Supervisor', emoji: '🔍', role:
+    'the QC SUPERVISOR. You catch problems before they cost a render: off-model faces, wrong hands/fingers, wrong tattoos, continuity slips, and technical issues. You are picky but constructive.' },
+  producer: { name: 'Producer', emoji: '💼', role:
+    'the PRODUCER. You watch the money and the clock: what is worth spending AI credits on vs doing free, how to hit a deadline, and how to get the most video for the least spend. You always suggest the free/cheap path first.' },
+};
+
+router.post('/crew-chat', async (req, res) => {
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'Add an Anthropic key in Settings to chat with your crew.' });
+  const { member, message, history, context } = req.body || {};
+  const who = CREW[member];
+  if (!who) return res.status(400).json({ error: 'Pick a crew member to talk to.' });
+  const msg = typeof message === 'string' ? message.trim().slice(0, 2000) : '';
+  if (!msg) return res.status(400).json({ error: 'Type a message first.' });
+
+  const ctx = context && typeof context === 'object' ? context : {};
+  const projectBits = [
+    ctx.characters ? `The artist's recurring characters: ${String(ctx.characters).slice(0, 300)}.` : null,
+    ctx.song ? `Current song: ${String(ctx.song).slice(0, 120)}.` : null,
+    ctx.brief ? `Current creative brief: ${String(ctx.brief).slice(0, 300)}.` : null,
+  ].filter(Boolean).join(' ');
+
+  const system = `You are ${who.role}
+You work inside "Studio", a personal music-video app the artist runs on their own computer. It can: generate AI scene images, animate stills, lip-sync (Sing), dance/motion transfer, train face-locks (LoRA) for recurring characters, reframe to 9:16/1:1, master audio, add captions, and assemble beat-matched videos — most editing is free, only AI generation costs money (shown before each action).
+${projectBits ? 'Project context: ' + projectBits : ''}
+Style: talk like a real, warm creative collaborator on this artist's team. Be specific and practical, reference Studio's tools when relevant, and keep replies short — 2 to 5 sentences or a tight list. No preamble, no restating the question. Never invent prices; if asked about cost, say the button shows it. Stay in your role.`;
+
+  const msgs = [];
+  if (Array.isArray(history)) {
+    for (const h of history.slice(-8)) {
+      if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string') {
+        msgs.push({ role: h.role, content: h.content.slice(0, 2000) });
+      }
+    }
+  }
+  msgs.push({ role: 'user', content: msg });
+
+  try {
+    const r = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: ANTHROPIC_MODEL, max_tokens: 700, system, messages: msgs }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error((data && data.error && data.error.message) || 'Chat request failed.');
+    const reply = (data.content || []).map((b) => b.text || '').join('').trim();
+    res.json({ reply: reply || '(no reply)', member });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach your ${who.name}: ${err.message}` });
+  }
+});
+
+router.get('/stock/search', async (req, res) => {
+  if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings to search stock b-roll.' });
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.status(400).json({ error: 'What should I search for? Try "city night", "rain window", "smoke".' });
+  const type = req.query.type === 'photos' ? 'photos' : 'videos';
+  const url = type === 'videos'
+    ? `${PEXELS_BASE}/videos/search?query=${encodeURIComponent(q)}&per_page=16&size=medium`
+    : `${PEXELS_BASE}/v1/search?query=${encodeURIComponent(q)}&per_page=16`;
+  try {
+    const r = await fetch(url, { headers: { Authorization: PEXELS_KEY } });
+    if (!r.ok) return res.status(502).json({ error: `Pexels error ${r.status}. Check your key in Settings.` });
+    const data = await r.json();
+    let results;
+    if (type === 'videos') {
+      results = (data.videos || []).map((v) => {
+        // pick a reasonably sized mp4 (<=1280 wide), else the smallest
+        const files = (v.video_files || []).filter((f) => f.file_type === 'video/mp4');
+        const pick = files.filter((f) => (f.width || 0) <= 1280).sort((a, b) => (b.width || 0) - (a.width || 0))[0] || files.sort((a, b) => (a.width || 0) - (b.width || 0))[0];
+        return pick ? { id: v.id, kind: 'video', thumb: v.image, url: pick.link, label: (v.user && v.user.name) ? `stock · ${q}` : `stock · ${q}`, credit: v.user && v.user.name } : null;
+      }).filter(Boolean);
+    } else {
+      results = (data.photos || []).map((p) => ({ id: p.id, kind: 'image', thumb: p.src.medium, url: p.src.large2x || p.src.large || p.src.original, label: `stock · ${q}`, credit: p.photographer }));
+    }
+    res.json({ results });
+  } catch (err) {
+    res.status(502).json({ error: `Could not reach Pexels: ${err.message}` });
+  }
+});
+
+router.post('/stock/import', async (req, res) => {
+  if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings first.' });
+  const { url, kind, label } = req.body || {};
+  const trustedBase = (PEXELS_BASE || '').replace(/\/$/, '');
+  const okUrl = typeof url === 'string' && !/\s/.test(url) && (
+    /^https:\/\/([^/\s]*\.)?(pexels\.com|pexels\.io|pexelsusercontent\.com)\//.test(url) ||
+    (trustedBase && url.startsWith(trustedBase + '/'))
+  );
+  if (!okUrl) return res.status(400).json({ error: 'That is not a valid Pexels media link.' });
+  const isVideo = kind === 'video';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return res.status(502).json({ error: `Download failed (${r.status}).` });
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (!buf.length) return res.status(502).json({ error: 'Downloaded an empty file.' });
+    const ext = isVideo ? '.mp4' : '.jpg';
+    const filename = newFilename(req.userId, ext);
+    fs.writeFileSync(mediaPath(filename), buf);
+    const meta = { source: 'stock', stock: 'pexels' };
+    if (isVideo) meta.duration = await probeMediaDuration(mediaPath(filename));
+    const cleanLabel = String(label || 'stock clip').slice(0, 80);
+    const id = db.createAsset(req.userId, isVideo ? 'video' : 'image', cleanLabel, filename, null, meta);
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(502).json({ error: `Could not import: ${err.message}` });
   }
 });
 
@@ -566,6 +941,40 @@ router.get('/backup', (req, res) => {
   }
 });
 
+// Reveal the folder where every uploaded/generated picture, video and song is
+// stored, in the OS file manager. Studio runs on your own machine, so this
+// opens Explorer/Finder right on your media. Always returns the path too.
+router.post('/reveal-media', (req, res) => {
+  let opened = false;
+  try {
+    const plat = process.platform;
+    const cmd = plat === 'win32' ? 'explorer' : plat === 'darwin' ? 'open' : 'xdg-open';
+    const child = spawn(cmd, [MEDIA_DIR], { detached: true, stdio: 'ignore' });
+    child.on('error', () => {});
+    child.unref();
+    opened = true;
+  } catch (_) { opened = false; }
+  res.json({ opened, path: MEDIA_DIR });
+});
+
+// Start fresh: wipe ALL of this user's content and the media files on disk, so
+// the app is empty. The account/login stays. Requires an explicit confirm flag.
+router.post('/reset-everything', (req, res) => {
+  if (!req.body || req.body.confirm !== 'DELETE') {
+    return res.status(400).json({ error: 'Reset not confirmed.' });
+  }
+  try {
+    const files = db.resetUserContent(req.userId);
+    let removed = 0;
+    for (const f of files) {
+      try { fs.unlinkSync(mediaPath(f)); removed++; } catch (_) {}
+    }
+    res.json({ ok: true, removed, message: `Cleared everything — ${removed} file(s) deleted. The app is empty and ready for a fresh start.` });
+  } catch (err) {
+    res.status(500).json({ error: `Reset failed: ${err.message}` });
+  }
+});
+
 /* ---------------- assets ---------------- */
 router.get('/assets', (req, res) => {
   const kind = ['image', 'video', 'audio', 'project', 'archive'].includes(req.query.kind) ? req.query.kind : null;
@@ -600,8 +1009,11 @@ router.delete('/assets/:id', (req, res) => {
 });
 
 // Raw-body upload keeps us dependency-free (no multer). The client sends the
-// file bytes directly with metadata in the query string.
-router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), async (req, res) => {
+// file bytes directly with metadata in the query string. The body streams to
+// disk as it arrives - the old express.raw() approach buffered the whole file
+// in RAM with a 400MB ceiling, which rejected any long phone-camera video.
+const UPLOAD_LIMIT_BYTES = 4 * 1024 * 1024 * 1024; // 4GB - covers a 15+ min 4K filming
+router.put('/upload', async (req, res) => {
   const { kind } = req.query;
   const name = String(req.query.name || 'upload');
   const characterId = req.query.characterId ? Number(req.query.characterId) : null;
@@ -611,24 +1023,51 @@ router.put('/upload', express.raw({ type: () => true, limit: UPLOAD_LIMIT }), as
   if (!EXT_BY_KIND[kind].has(ext)) {
     return res.status(400).json({ error: `Unsupported ${kind} file type: ${ext || '(none)'}` });
   }
-  // If a JSON-typed body slipped through express.json() first, req.body is a
-  // parsed object rather than a Buffer - re-serialize it.
-  let body = req.body;
-  if (body && !Buffer.isBuffer(body) && typeof body === 'object') body = Buffer.from(JSON.stringify(body));
-  if (!body || !body.length) return res.status(400).json({ error: 'Empty upload.' });
   if (characterId && !db.getCharacter(req.userId, characterId)) {
     return res.status(404).json({ error: 'Character not found.' });
   }
+  if (locationId && !db.getLocation(req.userId, locationId)) {
+    return res.status(404).json({ error: 'Location not found.' });
+  }
   const filename = newFilename(req.userId, ext);
-  fs.writeFileSync(mediaPath(filename), body);
+  const dest = mediaPath(filename);
+  try {
+    if (Buffer.isBuffer(req.body) || (req.body && typeof req.body === 'object' && Object.keys(req.body).length)) {
+      // A JSON-typed body already consumed by express.json() upstream - re-serialize it.
+      const body = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body));
+      if (!body.length) return res.status(400).json({ error: 'Empty upload.' });
+      fs.writeFileSync(dest, body);
+    } else {
+      let bytes = 0;
+      await new Promise((resolve, reject) => {
+        const out = fs.createWriteStream(dest);
+        req.on('data', (chunk) => {
+          bytes += chunk.length;
+          if (bytes > UPLOAD_LIMIT_BYTES) {
+            reject(Object.assign(new Error('File is too large (4GB max).'), { status: 413 }));
+            req.destroy();
+            out.destroy();
+          }
+        });
+        req.pipe(out);
+        out.on('finish', resolve);
+        out.on('error', reject);
+        req.on('error', reject);
+      });
+      if (!bytes) {
+        try { fs.unlinkSync(dest); } catch (_) {}
+        return res.status(400).json({ error: 'Empty upload.' });
+      }
+    }
+  } catch (err) {
+    try { fs.unlinkSync(dest); } catch (_) {}
+    return res.status(err.status || 500).json({ error: err.message || 'Upload failed.' });
+  }
   const label = path.basename(name, ext).slice(0, 80) || 'Upload';
   const meta = { source: 'upload' };
   if (req.query.overlay === '1') meta.overlay = true; // text-card PNGs stay out of the pickers
-  if (locationId) {
-    if (!db.getLocation(req.userId, locationId)) return res.status(404).json({ error: 'Location not found.' });
-    meta.locationRef = locationId;
-  }
-  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(mediaPath(filename));
+  if (locationId) meta.locationRef = locationId;
+  if (kind === 'video' || kind === 'audio') meta.duration = await probeMediaDuration(dest);
   const id = db.createAsset(req.userId, kind, label, filename, characterId, meta);
   res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
 });
@@ -747,6 +1186,10 @@ router.post('/characters/:id/train-lora', async (req, res) => {
     .slice(0, 20);
   if (refs.length < 6) {
     return res.status(400).json({ error: `Training needs at least 6 photos of ${character.name} (10-20 varied ones is ideal) - they have ${refs.length}. Add more on this tab first.` });
+  }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('lora'));
+    if (capMsg) return res.status(429).json({ error: capMsg });
   }
 
   const os = require('os');
@@ -964,6 +1407,12 @@ router.post('/scene', async (req, res) => {
   if (db.getImageCount(req.userId, todayUTC()) + howMany > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached. Raise STUDIO_DAILY_IMAGE_LIMIT in .env if this is really you.` });
   }
+  {
+    const hasChar = !!characterId || (Array.isArray(characterIds) && characterIds.length > 0);
+    const imgCost = quality === 'best' ? estActionCost('imageBest', { count: howMany }) : estActionCost('image', { characterId: hasChar, count: howMany });
+    const capMsg = overDailyCap(req.userId, imgCost);
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   let built;
   try {
@@ -1059,6 +1508,11 @@ router.post('/coverage', async (req, res) => {
   if (db.getImageCount(req.userId, todayUTC()) + shots.length > DAILY_AI_IMAGE_LIMIT) {
     return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached.` });
   }
+  {
+    const hasChar = !!(meta.castIds?.length || scene.character_id);
+    const capMsg = overDailyCap(req.userId, estActionCost('image', { characterId: hasChar, count: shots.length }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   // drop any leading shot-type phrase so framings don't fight each other
   const base = meta.prompt.replace(/^an?\s+[\w -]*shot\s+(?:of\s+)?/i, '').trim();
@@ -1138,6 +1592,149 @@ router.delete('/queue/:id', (req, res) => {
 
 router.post('/queue/clear-finished', (req, res) => {
   db.clearFinishedQueue(req.userId);
+  res.json({ ok: true });
+});
+
+// ─── TELEPROMPTER SCRIPTS ──────────────────────────────────────────────────
+// Scripts live on the server so the same ones are available on the computer
+// that films and the phone that posts.
+function scriptJson(row) {
+  return { id: row.id, title: row.title, body: row.body, updatedAt: row.updated_at };
+}
+router.get('/scripts', (req, res) => {
+  res.json({ scripts: db.getScripts(req.userId).map(scriptJson) });
+});
+router.post('/scripts', (req, res) => {
+  const { title, body } = req.body || {};
+  if (typeof body !== 'string' || !body.trim()) {
+    return res.status(400).json({ error: 'Write the script first.' });
+  }
+  const id = db.createScript(
+    req.userId,
+    (typeof title === 'string' && title.trim() ? title.trim() : 'Untitled script').slice(0, 80),
+    body.slice(0, 20000)
+  );
+  res.status(201).json({ id });
+});
+router.put('/scripts/:id', (req, res) => {
+  const row = db.getScript(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Script not found.' });
+  const { title, body } = req.body || {};
+  if (typeof body !== 'string' || !body.trim()) {
+    return res.status(400).json({ error: 'Write the script first.' });
+  }
+  db.updateScript(
+    req.userId, row.id,
+    (typeof title === 'string' && title.trim() ? title.trim() : row.title).slice(0, 80),
+    body.slice(0, 20000)
+  );
+  res.json({ ok: true });
+});
+router.delete('/scripts/:id', (req, res) => {
+  db.deleteScript(req.userId, Number(req.params.id));
+  res.json({ ok: true });
+});
+
+// ─── SOCIAL SCHEDULER ──────────────────────────────────────────────────────
+// TikTok/Meta/YouTube all require a weeks-long developer app review before
+// they'll let a new app publish for real (TikTok posts land as private
+// drafts, Meta needs App Review, YouTube uploads stay locked) - and even once
+// approved, API-posted video is quietly ranked below native uploads on every
+// one of these platforms. So this queue automates everything up to the tap
+// that actually has to happen on the phone: it holds the caption + platform
+// list + time, surfaces a loud "time to post" banner the moment it's due
+// (even if the browser was closed when the time hit), and hands over the
+// video file and a one-tap copy of the caption. A real per-platform
+// publish() dispatcher can slot in later, once each platform's app review
+// clears, without changing this schema or the UI around it.
+const SOCIAL_PLATFORMS = new Set(['tiktok', 'youtube', 'instagram', 'facebook']);
+function socialPostJson(row) {
+  return {
+    id: row.id,
+    assetId: row.asset_id,
+    platforms: JSON.parse(row.platforms || '[]'),
+    caption: row.caption,
+    scheduledAt: row.scheduled_at,
+    status: row.status,
+    postedPlatforms: JSON.parse(row.posted_platforms || '[]'),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+router.post('/schedule', (req, res) => {
+  const { assetId, platforms, caption, scheduledAt } = req.body || {};
+  if (!Array.isArray(platforms) || !platforms.length || !platforms.every((p) => SOCIAL_PLATFORMS.has(p))) {
+    return res.status(400).json({ error: 'platforms must include at least one of tiktok, youtube, instagram, facebook.' });
+  }
+  if (!scheduledAt || Number.isNaN(new Date(scheduledAt).getTime())) {
+    return res.status(400).json({ error: 'scheduledAt must be a valid date/time.' });
+  }
+  let cleanAssetId = null;
+  if (assetId) {
+    const asset = db.getAsset(req.userId, Number(assetId));
+    if (!asset) return res.status(400).json({ error: 'That asset was not found in your library.' });
+    cleanAssetId = asset.id;
+  }
+  const id = db.createSocialPost(req.userId, {
+    assetId: cleanAssetId,
+    platforms,
+    caption: typeof caption === 'string' ? caption.slice(0, 2200) : '',
+    scheduledAt: new Date(scheduledAt).toISOString(),
+  });
+  res.status(201).json({ id });
+});
+router.get('/schedule', (req, res) => {
+  db.promoteDueSocialPosts();
+  res.json({ posts: db.getSocialPosts(req.userId).map(socialPostJson) });
+});
+router.get('/schedule/due', (req, res) => {
+  db.promoteDueSocialPosts();
+  res.json({ posts: db.getDueSocialPosts(req.userId).map(socialPostJson) });
+});
+router.put('/schedule/:id', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  const { platforms, caption, scheduledAt } = req.body || {};
+  const fields = {};
+  if (platforms !== undefined) {
+    if (!Array.isArray(platforms) || !platforms.length || !platforms.every((p) => SOCIAL_PLATFORMS.has(p))) {
+      return res.status(400).json({ error: 'platforms must include at least one valid platform.' });
+    }
+    fields.platforms = platforms;
+  }
+  if (caption !== undefined) fields.caption = String(caption).slice(0, 2200);
+  if (scheduledAt !== undefined) {
+    if (Number.isNaN(new Date(scheduledAt).getTime())) return res.status(400).json({ error: 'scheduledAt must be a valid date/time.' });
+    fields.scheduledAt = new Date(scheduledAt).toISOString();
+    // Editing the time on an already-due/posted item puts it back in the queue.
+    if (row.status !== 'pending') fields.status = 'pending';
+  }
+  db.updateSocialPost(req.userId, row.id, fields);
+  res.json({ ok: true });
+});
+router.delete('/schedule/:id', (req, res) => {
+  db.deleteSocialPost(req.userId, Number(req.params.id));
+  res.json({ ok: true });
+});
+// Marked posted after the founder does the native tap - platforms is which
+// ones got done (lets a partial post - e.g. TikTok now, YouTube later - stay
+// visible until every platform is checked off).
+router.post('/schedule/:id/complete', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  const { platforms } = req.body || {};
+  const already = JSON.parse(row.posted_platforms || '[]');
+  const target = JSON.parse(row.platforms || '[]');
+  const newlyDone = Array.isArray(platforms) && platforms.length ? platforms.filter((p) => target.includes(p)) : target;
+  const postedPlatforms = [...new Set([...already, ...newlyDone])];
+  const allDone = target.every((p) => postedPlatforms.includes(p));
+  db.updateSocialPost(req.userId, row.id, { postedPlatforms, status: allDone ? 'posted' : 'due' });
+  res.json({ ok: true, done: allDone });
+});
+router.post('/schedule/:id/skip', (req, res) => {
+  const row = db.getSocialPost(req.userId, Number(req.params.id));
+  if (!row) return res.status(404).json({ error: 'Post not found.' });
+  db.updateSocialPost(req.userId, row.id, { status: 'skipped' });
   res.json({ ok: true });
 });
 
@@ -1221,40 +1818,60 @@ function failQueueItem(item, message) {
 const QUEUE_TICK_MS = Number(process.env.STUDIO_QUEUE_TICK_MS || 4000);
 setInterval(() => { processQueueTick().catch(() => {}); }, QUEUE_TICK_MS);
 
+// Flips scheduled posts to 'due' the moment their time hits, independent of
+// any browser being open - the web client just polls /schedule/due to raise
+// the banner once it's back.
+setInterval(() => { try { db.promoteDueSocialPosts(); } catch (_) {} }, 30000);
+
 router.post('/animate', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Add FAL_KEY to server/.env (get one at fal.ai) and restart the server.' });
   }
-  const { assetId, prompt, duration, tier } = req.body || {};
+  const { assetId, prompt, duration, tier, refAssetIds } = req.body || {};
   const still = db.getAsset(req.userId, Number(assetId));
   if (!still || still.kind !== 'image') {
     return res.status(404).json({ error: 'Pick an image from your library to animate.' });
   }
-  const chosenTier = VIDEO_TIERS[tier] ? tier : 'standard';
-  const model = VIDEO_TIERS[chosenTier].model;
+  // Reference photos attached → character-lock mode (reference-to-video model).
+  const refIds = Array.isArray(refAssetIds) ? refAssetIds.map(Number).filter(Boolean).slice(0, 6) : [];
+  const useRefs = refIds.length > 0;
+  const chosenTier = useRefs ? 'reference' : (VIDEO_TIERS[tier] ? tier : 'standard');
+  const model = useRefs ? MODEL_I2V_REF : VIDEO_TIERS[chosenTier].model;
   const seconds = [5, 10].includes(Number(duration)) ? Number(duration) : 5;
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  const capMsg = overDailyCap(req.userId, estActionCost('video', { tier: chosenTier, seconds }));
+  if (capMsg) return res.status(429).json({ error: capMsg });
 
   const motionPrompt = (typeof prompt === 'string' && prompt.trim())
     ? prompt.trim().slice(0, 1000)
     : 'subtle cinematic motion, natural movement, keep the subject consistent';
 
   try {
-    const submitted = await falSubmit(model, {
-      prompt: motionPrompt,
-      image_url: fileToDataUri(still.filename),
-      duration: String(seconds),
-    });
+    let input;
+    if (useRefs) {
+      // Feed the still plus the character reference photos (scaled down to keep
+      // the payload light) so the model locks the character's look.
+      const refUris = [];
+      for (const id of refIds) {
+        const r = db.getAsset(req.userId, id);
+        if (r && r.kind === 'image') refUris.push(await scaledRefDataUri(r.filename));
+      }
+      const reference_image_urls = [fileToDataUri(still.filename), ...refUris.filter(Boolean)].slice(0, 7);
+      input = { prompt: motionPrompt, reference_image_urls };
+    } else {
+      input = { prompt: motionPrompt, image_url: fileToDataUri(still.filename), duration: String(seconds) };
+    }
+    const submitted = await falSubmit(model, input);
     const job = createJob(req.userId, 'ai-video', {
       fal: {
         statusUrl: submitted.status_url,
         responseUrl: submitted.response_url,
         expect: 'video',
-        label: still.label,
+        label: useRefs ? `${still.label} · locked` : still.label,
         characterId: still.character_id,
-        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds },
+        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds, refCount: refIds.length || undefined },
       },
     });
     res.status(202).json({ job: jobJson(job) });
@@ -1266,10 +1883,15 @@ router.post('/animate', async (req, res) => {
 /* ---------------- ffmpeg job runner ---------------- */
 // Spawn ffmpeg with the given args, track progress against expectedDur, and
 // register the output as a video asset when it succeeds.
-function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
+function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 'video', opts) {
   const job = createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
-  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]));
+  const cleanup = () => {
+    for (const f of (opts && opts.cleanupFiles) || []) { try { fs.unlinkSync(f); } catch (_) {} }
+  };
+  // opts.cwd lets a filter reference a side file (e.g. a generated .ass subtitle
+  // file) by bare relative name - no cross-platform path escaping in the graph.
+  const proc = spawn(ffmpegBin(), args.concat(['-y', outPath]), opts && opts.cwd ? { cwd: opts.cwd } : undefined);
   let stderrTail = '';
   proc.stderr.on('data', (chunk) => {
     const text = chunk.toString();
@@ -1281,13 +1903,15 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta) {
     }
   });
   proc.on('error', (err) => {
+    cleanup();
     job.status = 'error';
     job.error = `Could not start ffmpeg: ${err.message}. Run npm install in server/ (or install ffmpeg / set FFMPEG_PATH).`;
   });
   proc.on('close', (code) => {
+    cleanup();
     if (job.status === 'error') return;
     if (code === 0) {
-      job.assetId = db.createAsset(userId, 'video', label, outFile, null, { ...meta, duration: expectedDur });
+      job.assetId = db.createAsset(userId, kind, label, outFile, null, { ...meta, duration: expectedDur });
       job.progress = 100;
       job.status = 'done';
     } else {
@@ -1414,15 +2038,44 @@ router.post('/resound', async (req, res) => {
 const CROP_ASPECTS = { '9:16': 9 / 16, '1:1': 1, '4:5': 4 / 5, '16:9': 16 / 9 };
 
 router.post('/crop', (req, res) => {
-  const { assetId, aspect, keep } = req.body || {};
+  const { assetId, aspect, keep, zoom, corner } = req.body || {};
   const src = db.getAsset(req.userId, Number(assetId));
   if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to crop.' });
-  const R = CROP_ASPECTS[aspect];
-  if (!R) return res.status(400).json({ error: `aspect must be one of ${Object.keys(CROP_ASPECTS).join(', ')}` });
-  const f = keep === 'start' ? 0 : keep === 'end' ? 1 : 0.5;
+
+  // Two modes:
+  //  (a) aspect crop  — cut to a target shape (9:16, 1:1, ...), keeping start/center/end.
+  //  (b) zoom crop    — keep the SAME shape, zoom in by a % and push toward a corner so
+  //                     whatever sits in the opposite corner (e.g. a corner watermark /
+  //                     sparkle) falls outside the frame. This is what removes a corner
+  //                     mark from an already-9:16 still without changing its shape.
+  const isZoom = zoom !== undefined && zoom !== null && zoom !== '';
+  let filter, tag, cropMeta;
+  if (isZoom) {
+    let z = Number(zoom);
+    if (!Number.isFinite(z)) return res.status(400).json({ error: 'zoom must be a number' });
+    z = Math.min(0.4, Math.max(0.04, z)); // clamp 4%–40%
+    const keepFrac = 1 - z;
+    // Which corner do we KEEP? To erase a mark in the bottom-right, keep the top-left,
+    // so the crop window hugs the opposite corner. corner = where the MARK is.
+    const c = ['tl', 'tr', 'bl', 'br'].includes(corner) ? corner : 'br';
+    const keepLeft = c === 'tr' || c === 'br';   // mark on the right → keep the left
+    const keepTop = c === 'bl' || c === 'br';    // mark on the bottom → keep the top
+    const fx = keepLeft ? 0 : 1;
+    const fy = keepTop ? 0 : 1;
+    filter = `crop=iw*${keepFrac}:ih*${keepFrac}:(iw-ow)*${fx}:(ih-oh)*${fy}`;
+    tag = `${src.label} · mark-free`;
+    cropMeta = { cornerCrop: c, zoom: z };
+  } else {
+    const R = CROP_ASPECTS[aspect];
+    if (!R) return res.status(400).json({ error: `aspect must be one of ${Object.keys(CROP_ASPECTS).join(', ')}` });
+    const f = keep === 'start' ? 0 : keep === 'end' ? 1 : 0.5;
+    filter = `crop=min(iw\\,ih*${R}):min(ih\\,iw/${R}):(iw-ow)*${f}:(ih-oh)*${f}`;
+    tag = `${src.label} · ${aspect} crop`;
+    cropMeta = { crop: aspect };
+  }
+
   const ext = path.extname(src.filename).toLowerCase() || '.png';
   const outFile = newFilename(req.userId, ext);
-  const filter = `crop=min(iw\\,ih*${R}):min(ih\\,iw/${R}):(iw-ow)*${f}:(ih-oh)*${f}`;
   const proc = spawn(ffmpegBin(), ['-y', '-i', mediaPath(src.filename), '-vf', filter, '-frames:v', '1', mediaPath(outFile)]);
   proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
   proc.on('close', (code) => {
@@ -1431,14 +2084,326 @@ router.post('/crop', (req, res) => {
     }
     let srcMeta = {};
     try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
-    const id = db.createAsset(req.userId, 'image', `${src.label} · ${aspect} crop`, outFile, src.character_id || null, {
+    const id = db.createAsset(req.userId, 'image', tag, outFile, src.character_id || null, {
       ...(srcMeta.source ? { source: srcMeta.source } : {}),
       ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
-      crop: aspect,
+      ...cropMeta,
       fromAssetId: src.id,
     });
     res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
   });
+});
+
+/* ---------------- free local watermark remover (patch it out) ---------------- */
+// Removes a small corner mark (e.g. the Gemini sparkle) from the artist's OWN
+// image by interpolating the surrounding pixels over it — ffmpeg's `delogo`.
+// Pure ffmpeg, free, instant, keeps the FULL frame (nothing cropped). Intended
+// for cleaning a provider's decorative sparkle off your own generated art; it
+// cannot touch invisible watermarks (SynthID) and isn't for other people's work.
+const MARK_BOXES = {
+  // fractional x, y, w, h of the patch box, per corner. Tightened to hug a small
+  // corner sparkle (a big box makes delogo smear a big smooth blob). Insets from
+  // the edge so delogo always has a border of real pixels to sample from.
+  br: { x: 0.76, y: 0.83, w: 0.20, h: 0.14 },
+  bl: { x: 0.04, y: 0.83, w: 0.20, h: 0.14 },
+  tr: { x: 0.76, y: 0.03, w: 0.20, h: 0.14 },
+  tl: { x: 0.04, y: 0.03, w: 0.20, h: 0.14 },
+};
+const MARK_SIZES = { small: 0.65, medium: 1.0, large: 1.5 };
+router.post('/cleanmark', async (req, res) => {
+  const { assetId, corner, size, blend } = req.body || {};
+  const src = db.getAsset(req.userId, Number(assetId));
+  if (!src || src.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library to clean.' });
+  const c = MARK_BOXES[corner] ? corner : 'br';
+  const box = MARK_BOXES[c];
+  const k = MARK_SIZES[size] || 1.0;
+  // Scale the box around its own centre by k, then re-clamp inside a safe border.
+  const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
+  let bw = box.w * k, bh = box.h * k;
+  let bx = cx - bw / 2, by = cy - bh / 2;
+  bx = Math.max(0.006, bx); by = Math.max(0.006, by);
+  bw = Math.min(bw, 0.988 - bx); bh = Math.min(bh, 0.988 - by);
+
+  // delogo needs constant integer pixels (it does NOT accept iw/ih expressions),
+  // so read the real dimensions first and compute an even, in-bounds box that
+  // always leaves a >=1px border of real pixels for delogo to interpolate from.
+  const dim = await probeDimensions(mediaPath(src.filename));
+  if (!dim) return res.status(500).json({ error: "Couldn't read that image's size — try a PNG or JPG." });
+  const { w: iw, h: ih } = dim;
+  let X = Math.max(1, Math.floor(iw * bx));
+  let Y = Math.max(1, Math.floor(ih * by));
+  let W = Math.min(iw - 2 - X, Math.floor(iw * bw));
+  let H = Math.min(ih - 2 - Y, Math.floor(ih * bh));
+  W = Math.max(8, W); H = Math.max(8, H);
+
+  // Two-stage clean-up so it doesn't leave a tell-tale smooth blob:
+  //   1) delogo interpolates the sparkle away (leaves a smooth patch).
+  //   2) unless disabled, sprinkle fine grain back over JUST that patch so it
+  //      matches the surrounding photo texture instead of reading as a blur.
+  const useBlend = blend === undefined ? true : !!blend;
+  const ext = path.extname(src.filename).toLowerCase() || '.png';
+  const outFile = newFilename(req.userId, ext);
+  const args = ['-y', '-i', mediaPath(src.filename)];
+  if (useBlend) {
+    const fc =
+      `[0:v]delogo=x=${X}:y=${Y}:w=${W}:h=${H},split=2[base][src];` +
+      `[src]crop=${W}:${H}:${X}:${Y},noise=alls=7:allf=u[gp];` +
+      `[base][gp]overlay=${X}:${Y}`;
+    args.push('-filter_complex', fc);
+  } else {
+    args.push('-vf', `delogo=x=${X}:y=${Y}:w=${W}:h=${H}`);
+  }
+  args.push('-frames:v', '1', mediaPath(outFile));
+  const proc = spawn(ffmpegBin(), args);
+  proc.on('error', (err) => res.status(500).json({ error: `Could not start ffmpeg: ${err.message}` }));
+  proc.on('close', (code) => {
+    if (code !== 0 || !fs.existsSync(mediaPath(outFile))) {
+      return res.status(500).json({ error: 'Clean-up failed — is that file really an image?' });
+    }
+    let srcMeta = {};
+    try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
+    const id = db.createAsset(req.userId, 'image', `${src.label} · mark-free`, outFile, src.character_id || null, {
+      ...(srcMeta.source ? { source: srcMeta.source } : {}),
+      ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
+      cleanMark: c,
+      fromAssetId: src.id,
+    });
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  });
+});
+
+/* ---------------- free local transforms: mirror / slow-mo / freeze ---------------- */
+// All pure ffmpeg, zero AI cost. Reuse-focused: flip a shot for variety, slow it
+// for drama (also DOUBLES its length to help fill a song), or grab a still from a
+// clip. Originals are never touched — each makes a new library asset.
+router.post('/transform', async (req, res) => {
+  const { assetId, op } = req.body || {};
+  const src = db.getAsset(req.userId, Number(assetId));
+  if (!src) return res.status(404).json({ error: 'Pick an item from your library first.' });
+  const srcPath = mediaPath(src.filename);
+  let srcMeta = {}; try { srcMeta = JSON.parse(src.meta || 'null') || {}; } catch (_) {}
+  const carry = {
+    ...(srcMeta.source ? { source: srcMeta.source } : {}),
+    ...(srcMeta.prompt ? { prompt: srcMeta.prompt } : {}),
+    fromAssetId: src.id,
+  };
+  const enc = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
+
+  try {
+    // MIRROR — image or video, horizontal flip
+    if (op === 'mirror') {
+      if (src.kind === 'image') {
+        const ext = path.extname(src.filename).toLowerCase() || '.png';
+        const outFile = newFilename(req.userId, ext);
+        const proc = spawn(ffmpegBin(), ['-y', '-i', srcPath, '-vf', 'hflip', '-frames:v', '1', mediaPath(outFile)]);
+        proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+        proc.on('close', (code) => {
+          if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Mirror failed.' });
+          const id = db.createAsset(req.userId, 'image', `${src.label} · mirrored`, outFile, src.character_id || null, { ...carry, transform: 'mirror' });
+          res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+        });
+        return;
+      }
+      if (src.kind === 'video') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const hasAudio = await probeHasAudio(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, '-vf', 'hflip', ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · mirrored`, { ...carry, transform: 'mirror' });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Mirror works on pictures and clips.' });
+    }
+
+    // SLOW MOTION — video only, 0.5x (audio dropped; your song carries the sound)
+    if (op === 'slowmo') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Slow motion is for video clips.' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', 'setpts=2.0*PTS', '-an', ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur ? dur * 2 : null, `${src.label} · slow-mo`, { ...carry, transform: 'slowmo' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
+    // FREEZE FRAME — grab a still from a clip (reuse a video moment as a picture)
+    if (op === 'freeze') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Freeze-frame grabs a still from a video clip.' });
+      const outFile = newFilename(req.userId, '.png');
+      const proc = spawn(ffmpegBin(), ['-y', '-sseof', '-0.2', '-i', srcPath, '-frames:v', '1', mediaPath(outFile)]);
+      proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+      proc.on('close', (code) => {
+        if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Freeze-frame failed.' });
+        const id = db.createAsset(req.userId, 'image', `${src.label} · freeze`, outFile, src.character_id || null, { ...carry, transform: 'freeze' });
+        res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+      });
+      return;
+    }
+
+    // CLEAN UP AUDIO — free narration/voice cleanup: de-rumble, denoise, normalize
+    // loudness. Great for phone-recorded narration (DBC) before it goes in a video.
+    if (op === 'cleanaudio') {
+      const AUDIO_CHAIN = 'highpass=f=90,afftdn=nf=-25,loudnorm=I=-16:TP=-1.5:LRA=11';
+      if (src.kind === 'audio') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.m4a');
+        const args = ['-i', srcPath, '-af', AUDIO_CHAIN, '-c:a', 'aac', '-b:a', '192k'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · cleaned`, { ...carry, transform: 'cleanaudio' }, 'audio');
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      if (src.kind === 'video') {
+        if (!(await probeHasAudio(srcPath))) return res.status(400).json({ error: 'That clip has no sound to clean up.' });
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, '-c:v', 'copy', '-af', AUDIO_CHAIN, '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · cleaned`, { ...carry, transform: 'cleanaudio' });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Clean-up audio works on songs, narration, or video clips with sound.' });
+    }
+
+    // REMASTER — full "make it sound professional" pass, then export a
+    // streaming-standard 48 kHz / 24-bit WAV that uploads anywhere. The chain,
+    // in order: repair clicks/pops (adeclick) and clipping distortion (adeclip),
+    // cut sub-rumble (highpass), reduce background hiss/noise (afftdn), tame
+    // harsh 's' sounds (deesser), glue the dynamics (acompressor), then match
+    // loudness to -14 LUFS with a -1 dBTP true-peak ceiling (loudnorm). Free.
+    if (op === 'remaster') {
+      const MASTER_CHAIN = 'adeclick,adeclip,highpass=f=35,afftdn=nf=-25,deesser,acompressor=threshold=-16dB:ratio=2.5:attack=20:release=250,loudnorm=I=-14:TP=-1.0:LRA=11';
+      if (src.kind === 'audio' || src.kind === 'video') {
+        if (src.kind === 'video' && !(await probeHasAudio(srcPath))) return res.status(400).json({ error: 'That clip has no sound to remaster.' });
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const outFile = newFilename(req.userId, '.wav');
+        // -vn drops any video; 24-bit PCM at 48 kHz
+        const args = ['-i', srcPath, '-vn', '-af', MASTER_CHAIN, '-ar', '48000', '-c:a', 'pcm_s24le'];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · mastered 48k`, { ...carry, transform: 'remaster' }, 'audio');
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Remaster works on songs or clips with sound.' });
+    }
+
+    // POLISH — one-tap "make it look finished" pass for a rendered video: a
+    // gentle cinematic colour grade (lift contrast + saturation a touch, tiny
+    // brightness lift), a light sharpen for crispness, and — if it has sound —
+    // a loudness master so it plays as loud and balanced as commercial music
+    // video. Free, no AI. Makes a new copy; the original stays.
+    if (op === 'polish') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Polish is for a finished video (render your timeline first, then polish the result).' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const grade = 'eq=contrast=1.06:saturation=1.12:brightness=0.02,unsharp=5:5:0.5:5:5:0.0';
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', grade,
+        ...(hasAudio ? ['-af', 'loudnorm=I=-14:TP=-1.0:LRA=11', '-c:a', 'aac', '-b:a', '192k'] : ['-an']),
+        ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · polished`, { ...carry, transform: 'polish' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
+    // LOOK THEMES — one-tap whole-video colour grades (like CapCut filters).
+    // Each is a themed grade + sharpen; audio is preserved. Free, no AI.
+    if (op === 'grade') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Look themes apply to a video (render first, then pick a look).' });
+      const GRADE_THEMES = {
+        luxury: 'eq=contrast=1.12:saturation=0.9:brightness=-0.02,colorbalance=rh=0.04:bh=-0.03,unsharp=5:5:0.4:5:5:0',
+        neon: 'eq=contrast=1.12:saturation=1.35,colorbalance=bs=0.12:rm=-0.04:bh=0.06,unsharp=5:5:0.5:5:5:0',
+        cinematic: 'eq=contrast=1.12:saturation=1.02,colorbalance=rm=0.06:bs=0.06:rh=0.03:bh=-0.03,unsharp=5:5:0.4:5:5:0',
+        warm: 'eq=contrast=1.05:saturation=1.1:brightness=0.02,colorbalance=rm=0.08:bm=-0.05',
+        bw: 'hue=s=0,eq=contrast=1.14:brightness=0.01,unsharp=5:5:0.5:5:5:0',
+        vibrant: 'eq=contrast=1.08:saturation=1.32,unsharp=5:5:0.5:5:5:0',
+      };
+      const theme = GRADE_THEMES[req.body.theme] ? req.body.theme : 'cinematic';
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', GRADE_THEMES[theme], ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · ${theme} look`, { ...carry, transform: 'grade', theme });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
+    // MOTION BLUR — averages neighbouring frames (tmix) so fast motion smears
+    // into a silky cinematic blur, and hard cuts/jumps read softer. Same length,
+    // audio preserved. Free, no AI.
+    if (op === 'motionblur') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Motion blur is for video clips.' });
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const strength = [2, 3, 4, 5].includes(Number(req.body.strength)) ? Number(req.body.strength) : 3;
+      const outFile = newFilename(req.userId, '.mp4');
+      const args = ['-i', srcPath, '-vf', `tmix=frames=${strength}`, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${src.label} · motion blur`, { ...carry, transform: 'motionblur' });
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
+    // REFRAME — turn any clip/photo into a vertical Short (9:16), Square (1:1),
+    // or Wide (16:9). 'fill' crops to fill the frame (subject-centered); 'blur'
+    // fits the whole shot with a blurred zoom behind it (nothing cropped). Free.
+    if (op === 'reframe') {
+      const DIMS = { '9:16': [1080, 1920], '1:1': [1080, 1080], '16:9': [1920, 1080] };
+      const target = DIMS[req.body.target] ? req.body.target : '9:16';
+      const [W, H] = DIMS[target];
+      const mode = req.body.mode === 'blur' ? 'blur' : 'fill';
+      const fill = `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1`;
+      const blur = `[0:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},gblur=sigma=20,setsar=1[bg];[0:v]scale=${W}:${H}:force_original_aspect_ratio=decrease[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1`;
+      const vArgs = mode === 'blur' ? ['-filter_complex', blur] : ['-vf', fill];
+      const tag = `${src.label} · ${target}`;
+      if (src.kind === 'image') {
+        const outFile = newFilename(req.userId, '.jpg');
+        const proc = spawn(ffmpegBin(), ['-y', '-i', srcPath, ...vArgs, '-frames:v', '1', '-q:v', '3', mediaPath(outFile)]);
+        proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+        proc.on('close', (code) => {
+          if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Reframe failed.' });
+          const id = db.createAsset(req.userId, 'image', tag, outFile, src.character_id || null, { ...carry, transform: 'reframe', reframe: target });
+          res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+        });
+        return;
+      }
+      if (src.kind === 'video') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const hasAudio = await probeHasAudio(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, ...vArgs, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, tag, { ...carry, transform: 'reframe', reframe: target });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Reframe works on photos and clips.' });
+    }
+
+    return res.status(400).json({ error: 'Unknown transform.' });
+  } catch (err) {
+    if (!res.headersSent) res.status(500).json({ error: `Transform failed: ${err.message}` });
+  }
+});
+
+/* ---------------- green screen / chroma key (free, local) ---------------- */
+// Drop a subject shot/generated on a solid colour onto any picture or clip.
+// scale2ref sizes the background to the foreground, chromakey removes the colour,
+// overlay composites. Foreground audio (if any) is kept; original never touched.
+router.post('/chroma', async (req, res) => {
+  const { fgAssetId, bgAssetId, color } = req.body || {};
+  const fg = db.getAsset(req.userId, Number(fgAssetId));
+  const bg = db.getAsset(req.userId, Number(bgAssetId));
+  if (!fg || fg.kind !== 'video') return res.status(404).json({ error: 'Pick the green-screen video clip first (the subject on a solid colour).' });
+  if (!bg || (bg.kind !== 'image' && bg.kind !== 'video')) return res.status(404).json({ error: 'Pick a picture or clip from your library as the new background.' });
+  const key = /^0x[0-9a-fA-F]{6}$/.test(color) ? color : '0x00d600';
+  const fgPath = mediaPath(fg.filename);
+  const bgPath = mediaPath(bg.filename);
+  let fgMeta = {}; try { fgMeta = JSON.parse(fg.meta || 'null') || {}; } catch (_) {}
+  const dur = fgMeta.duration || await probeMediaDuration(fgPath);
+  const hasAudio = await probeHasAudio(fgPath);
+  const outFile = newFilename(req.userId, '.mp4');
+  // background loops to cover the whole clip; image is held with -loop 1
+  const bgInput = bg.kind === 'image' ? ['-loop', '1', '-i', bgPath] : ['-stream_loop', '-1', '-i', bgPath];
+  const filter = `[0:v][1:v]scale2ref[bg][fg];[fg]chromakey=${key}:0.14:0.08[cf];[bg][cf]overlay=shortest=1,format=yuv420p[out]`;
+  const args = [
+    ...bgInput, '-i', fgPath,
+    '-filter_complex', filter,
+    '-map', '[out]', ...(hasAudio ? ['-map', '1:a?'] : []),
+    '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p',
+    ...(hasAudio ? ['-c:a', 'aac', '-b:a', '192k'] : ['-an']),
+    ...(dur ? ['-t', String(dur)] : []), '-movflags', '+faststart',
+  ];
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur, `${fg.label} on ${bg.label}`, { source: 'chroma', fromAssetId: fg.id, bgAssetId: bg.id });
+  res.status(202).json({ job: jobJson(job) });
 });
 
 /* ---------------- output sizes ---------------- */
@@ -1548,6 +2513,10 @@ router.post('/lipsync', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('sing', { tier }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   try {
     const audioUri = await extractAudioSegment(mediaPath(song.filename), segStart, segLen);
@@ -1618,6 +2587,10 @@ router.post('/dance', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('dance', { tier, seconds: segLen }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
 
   try {
     const drivingUri = await extractVideoSegment(mediaPath(dance.filename), segStart, segLen);
@@ -1664,6 +2637,10 @@ router.post('/liveportrait', async (req, res) => {
   if (db.getVideoCount(req.userId, todayUTC()) >= DAILY_AI_VIDEO_LIMIT) {
     return res.status(429).json({ error: `Daily AI video cap (${DAILY_AI_VIDEO_LIMIT}) reached. Raise STUDIO_DAILY_VIDEO_LIMIT in .env if this is really you.` });
   }
+  {
+    const capMsg = overDailyCap(req.userId, estActionCost('liveportrait'));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
   try {
     const drivingUri = await extractVideoSegment(mediaPath(driver.filename), segStart, segLen);
     const submitted = await falSubmit(MODEL_LIVEPORTRAIT, {
@@ -1698,8 +2675,48 @@ function eqFilter(eq) {
   return `,eq=brightness=${b}:contrast=${c}:saturation=${s}`;
 }
 
+// Text captions burn in via a generated .ass subtitle file (libass). Unlike the
+// caption-PNG path there is no line cap and no per-line upload, so a 10-minute
+// talking video captions cleanly. Styled to match the old canvas look: bold
+// white, soft shadow, bottom-center.
+// styleKey mirrors the client's CAPTION_STYLES picker (outline/boxed/pop/classic).
+// ASS colors are &HAABBGGRR (alpha 00 = opaque); BorderStyle 3 = opaque box.
+const ASS_STYLES = {
+  outline: { color: '&H00FFFFFF', border: 1, outlineMul: 1.0, back: '&H7F000000' },
+  boxed: { color: '&H00FFFFFF', border: 3, outlineMul: 0.6, back: '&H66000000' },
+  pop: { color: '&H0000DDFF', border: 1, outlineMul: 1.1, back: '&H7F000000' },
+  classic: { color: '&H00FFFFFF', border: 1, outlineMul: 0.5, back: '&H7F000000' },
+};
+function buildAssFile(lines, W, H, styleKey) {
+  const st = ASS_STYLES[styleKey] || ASS_STYLES.outline;
+  const esc = (t) => String(t).replace(/\r?\n/g, '\\N').replace(/[{}]/g, '');
+  const ts = (s) => {
+    const cs = Math.max(0, Math.round(s * 100));
+    const h = Math.floor(cs / 360000);
+    const m = String(Math.floor((cs % 360000) / 6000)).padStart(2, '0');
+    const sec = String(Math.floor((cs % 6000) / 100)).padStart(2, '0');
+    return `${h}:${m}:${sec}.${String(cs % 100).padStart(2, '0')}`;
+  };
+  const fontSize = Math.round(H * 0.048);
+  const outline = Math.max(1, Math.round((fontSize / 16) * st.outlineMul));
+  const marginV = Math.round(H * 0.08);
+  return `[Script Info]
+ScriptType: v4.00+
+PlayResX: ${W}
+PlayResY: ${H}
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Arial,${fontSize},${st.color},${st.color},&H00000000,${st.back},-1,0,0,0,100,100,0,0,${st.border},${outline},1,2,40,40,${marginV},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+` + lines.map((l) => `Dialogue: 0,${ts(l.start)},${ts(l.end)},Cap,,0,0,0,,${esc(l.text)}`).join('\n') + '\n';
+}
+
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, captions, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance } = req.body || {};
+  const { clips, transitions, music, overlays, captions, captionLines, captionStyle, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -1727,7 +2744,10 @@ router.post('/render', async (req, res) => {
       if (!end || end <= start) {
         return res.status(400).json({ error: `Clip "${row.label}" has an invalid trim range.` });
       }
-      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label });
+      // keepAudio: preserve this clip's own sound (e.g. dialogue) in the mix.
+      // Only honour it if the clip actually has an audio stream.
+      const keepAudio = !!c.keepAudio && await probeHasAudio(file);
+      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label, keepAudio });
     }
   }
 
@@ -1742,6 +2762,10 @@ router.post('/render', async (req, res) => {
     trans.push({ type, td: type === 'cut' ? 0 : td });
   }
   const totalDur = resolved.reduce((s, c) => s + c.dur, 0) - trans.reduce((s, t) => s + t.td, 0);
+  // each clip's start position on the assembled timeline (accounts for xfade overlap)
+  const clipStart = resolved.length ? [0] : [];
+  { let end = resolved.length ? resolved[0].dur : 0;
+    for (let i = 0; i < trans.length; i++) { clipStart[i + 1] = end - trans[i].td; end = clipStart[i + 1] + resolved[i + 1].dur; } }
 
   // --- optional cutdown window (timeline seconds)
   let winStart = 0, winEnd = totalDur;
@@ -1772,6 +2796,10 @@ router.post('/render', async (req, res) => {
       fadeIn: music.fadeIn !== false,
       fadeOut: music.fadeOut !== false,
       crossfade: music.crossfade !== false && tracks.length > 1,
+      // Loop the song to fill a video that runs longer than the music, so the
+      // tail is never silent. On by default; harmless when the song is already
+      // long enough (nothing repeats). Send music.loop === false to disable.
+      loop: music.loop !== false,
     };
   }
 
@@ -1806,16 +2834,29 @@ router.post('/render', async (req, res) => {
   if (musicIn) for (const t of musicIn.tracks) args.push('-i', t.file);
   const ovBase = musicIdx + (musicIn ? musicIn.tracks.length : 0);
   for (const o of allOverlays) args.push('-loop', '1', '-t', (o.end + 0.2).toFixed(3), '-i', o.file);
+  // Brand watermark: a small logo pinned top-left for the whole video. The
+  // image lives at server/watermark.png - replace that file to change the logo.
+  const WATERMARK_FILE = path.join(__dirname, 'watermark.png');
+  const useWatermark = !!req.body.watermark && fs.existsSync(WATERMARK_FILE);
+  const wmIdx = ovBase + allOverlays.length;
+  if (useWatermark) args.push('-i', WATERMARK_FILE);
 
   // --- filter graph
   const filters = [];
   // "Auto enhance": gentle color pop + sharpen per clip, plus a cinematic
   // vignette and a whisper of film grain on the finished picture.
   const enhanceClip = enhance ? ',eq=contrast=1.06:saturation=1.14,unsharp=5:5:0.5:5:5:0.0' : '';
+  // fit:'crop' fills the frame by scaling up and cropping the overflow (with an
+  // optional 0..1 focusX picking which horizontal slice survives) instead of
+  // letterboxing - the difference between a real vertical Short and a 16:9
+  // video floating between black bars.
+  const fx = Math.min(1, Math.max(0, focusX == null ? 0.5 : Number(focusX)));
+  const fitFilter = fit === 'crop'
+    ? `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}:(iw-${W})*${fx.toFixed(3)}:(ih-${H})/2`
+    : `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2`;
   resolved.forEach((c, i) => {
     filters.push(
-      `[${i}:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-      `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
+      `[${i}:v]${fitFilter},setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
     );
   });
@@ -1845,6 +2886,31 @@ router.post('/render', async (req, res) => {
     current = `[vo${k}]`;
   });
 
+  // Burned-in text captions ride the assembled timeline (before windowing, in
+  // timeline coordinates - same convention as the overlay captions above).
+  let assFile = null;
+  const capLines = (Array.isArray(captionLines) ? captionLines : [])
+    .map((l) => ({ text: String(l.text || '').trim(), start: Math.max(0, Number(l.start) || 0), end: Math.max(0, Number(l.end) || 0) }))
+    .filter((l) => l.text && l.end > l.start && l.start < winEnd && l.end > winStart)
+    .slice(0, 5000)
+    .sort((a, b) => a.start - b.start);
+  if (capLines.length) {
+    assFile = `captions-${crypto.randomBytes(5).toString('hex')}.ass`;
+    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle));
+    filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
+    current = '[vcap]';
+  }
+
+  // Watermark rides above everything, for the full duration (eof_action=repeat
+  // holds the single PNG frame). ~13% of the width, top-left, slightly sheer.
+  if (useWatermark) {
+    const wmW = Math.round(W * 0.13);
+    const wmM = Math.round(W * 0.035);
+    filters.push(`[${wmIdx}:v]scale=${wmW}:-1,format=rgba,colorchannelmixer=aa=0.85[wmk]`);
+    filters.push(`${current}[wmk]overlay=${wmM}:${wmM}:eof_action=repeat[vwm]`);
+    current = '[vwm]';
+  }
+
   // Cutdown window, then loop treatment, then the final fades so they always
   // sit at the output's edges.
   filters.push(`${current}trim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},setpts=PTS-STARTPTS,settb=AVTB[vwin]`);
@@ -1864,6 +2930,32 @@ router.post('/render', async (req, res) => {
   if (fadeToBlack) postFades.push(`fade=t=out:st=${Math.max(0, outDur - 0.8).toFixed(3)}:d=0.8`);
   filters.push(`${vcur}${postFades.length ? postFades.join(',') : 'null'}[vout]`);
 
+  // --- kept clip audio (dialogue): trim to the clip, level up, delay to its
+  // spot on the output timeline. The song ducks under these windows.
+  const voiceLabels = [];
+  const voiceWindows = [];
+  resolved.forEach((c, i) => {
+    if (!(c.kind === 'video' && c.keepAudio)) return;
+    const s = clipStart[i] - winStart; // clip start in output coordinates
+    if (s + c.dur <= 0 || s >= outDur) return; // outside the window
+    const skip = s < 0 ? -s : 0;
+    const audible = Math.min(c.dur - skip, outDur - Math.max(0, s));
+    if (audible <= 0.05) return;
+    const delayMs = Math.max(0, Math.round(s * 1000));
+    filters.push(`[${i}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,` +
+      `atrim=${skip.toFixed(3)}:${(skip + audible).toFixed(3)},asetpts=PTS-STARTPTS,volume=1.5` +
+      `${delayMs > 0 ? `,adelay=${delayMs}|${delayMs}` : ''}[cv${i}]`);
+    voiceLabels.push(`[cv${i}]`);
+    voiceWindows.push({ s: Math.max(0, s), e: Math.min(outDur, s + c.dur) });
+  });
+
+  let hasAudioOut = false;
+  const master = (fadeIn, fadeOut) => {
+    let m = `,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,alimiter=limit=0.95`;
+    if (fadeIn) m += `,afade=t=in:st=0:d=1`;
+    if (fadeOut) m += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
+    return m;
+  };
   if (musicIn) {
     // Normalize every track so they can be joined regardless of source format.
     musicIn.tracks.forEach((t, i) => {
@@ -1878,25 +2970,47 @@ router.post('/render', async (req, res) => {
       else filters.push(`${mcur}[mt${i}]concat=n=2:v=0:a=1${out}`);
       mcur = out;
     }
-    let achain = `${mcur}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
+    // If the song is shorter than the video, repeat it to fill the whole
+    // window (bounded to the window length so memory stays tied to the video,
+    // not the source). When the song is already long enough this loops nothing
+    // audible — atrim reads the straight-through portion before any repeat.
+    const loopFilter = musicIn.loop
+      ? `aloop=loop=-1:size=${Math.ceil((winEnd + 2) * 44100)},`
+      : '';
+    let mchain = `${mcur}${loopFilter}atrim=${winStart.toFixed(3)}:${winEnd.toFixed(3)},asetpts=PTS-STARTPTS` +
       `,volume=${musicIn.volume.toFixed(2)}`;
-    // duck the music a touch while text is on screen so titles read clearly
+    // duck lightly under titles so text reads
     const duckWindows = ovs
       .map((o) => ({ s: Math.max(0, o.start - winStart), e: Math.min(outDur, o.end - winStart) }))
       .filter((w) => w.e > 0 && w.s < outDur);
     if (duckWindows.length) {
       const terms = duckWindows.map((w) => `between(t\\,${w.s.toFixed(2)}\\,${w.e.toFixed(2)})`).join('+');
-      achain += `,volume='1-0.3*min(1\\,${terms})':eval=frame`;
+      mchain += `,volume='1-0.3*min(1\\,${terms})':eval=frame`;
     }
-    // gentle mastering: keep levels steady and never clip
-    achain += `,acompressor=threshold=-18dB:ratio=3:attack=20:release=250,alimiter=limit=0.95`;
-    if (musicIn.fadeIn) achain += `,afade=t=in:st=0:d=1`;
-    if (musicIn.fadeOut) achain += `,afade=t=out:st=${Math.max(0, outDur - 2).toFixed(3)}:d=2`;
-    filters.push(`${achain}[aout]`);
+    // duck harder under kept dialogue so the voice is clear
+    if (voiceWindows.length) {
+      const terms = voiceWindows.map((w) => `between(t\\,${w.s.toFixed(2)}\\,${w.e.toFixed(2)})`).join('+');
+      mchain += `,volume='1-0.65*min(1\\,${terms})':eval=frame`;
+    }
+    if (voiceLabels.length) {
+      filters.push(`${mchain}[musd]`);
+      filters.push(`[musd]${voiceLabels.join('')}amix=inputs=${1 + voiceLabels.length}:normalize=0:dropout_transition=0` +
+        `${master(musicIn.fadeIn, musicIn.fadeOut)}[aout]`);
+    } else {
+      filters.push(`${mchain}${master(musicIn.fadeIn, musicIn.fadeOut)}[aout]`);
+    }
+    hasAudioOut = true;
+  } else if (voiceLabels.length) {
+    // no song, but kept dialogue — that becomes the audio
+    const mixed = voiceLabels.length > 1
+      ? (filters.push(`${voiceLabels.join('')}amix=inputs=${voiceLabels.length}:normalize=0:dropout_transition=0[vmix]`), '[vmix]')
+      : voiceLabels[0];
+    filters.push(`${mixed}anull${master(false, false)}[aout]`);
+    hasAudioOut = true;
   }
 
   args.push('-filter_complex', filters.join(';'), '-map', '[vout]');
-  if (musicIn) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
+  if (hasAudioOut) args.push('-map', '[aout]', '-c:a', 'aac', '-b:a', '192k');
   // -pix_fmt yuv420p is REQUIRED for the file to play outside a browser
   // (Windows Media Player, QuickTime, phones reject other pixel formats).
   // Without it a downloaded short/video shows a black screen or won't open.
@@ -1907,7 +3021,8 @@ router.post('/render', async (req, res) => {
     ? name.trim().slice(0, 80)
     : `${isCutdown ? 'Cutdown' : 'Sequence'} ${target} ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`;
   const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), outDur, label,
-    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop });
+    { source: 'render', clips: resolved.length, cutdown: isCutdown, loop: !!loop }, 'video',
+    assFile ? { cwd: os.tmpdir(), cleanupFiles: [path.join(os.tmpdir(), assFile)] } : undefined);
   res.status(202).json({ job: jobJson(job) });
 });
 
@@ -1975,7 +3090,28 @@ router.post('/import-song', async (req, res) => {
 
 /* ---------------- auto-captions: transcribe a song with word timings ---------------- */
 const MODEL_TRANSCRIBE = process.env.FAL_MODEL_TRANSCRIBE || 'fal-ai/wizper';
-const TRANSCRIBE_RATE = Number(process.env.STUDIO_RATE_TRANSCRIBE || 0.02); // ~per song, displayed estimate
+// Voice clone: F5-TTS is zero-shot (no training) — pass a reference clip + text.
+// fal charges ~$0.05 / 1,000 characters (~1 minute of speech).
+const MODEL_VOICE = process.env.FAL_MODEL_VOICE || 'fal-ai/f5-tts';
+const VOICE_RATE = Number(process.env.STUDIO_RATE_VOICE || 0.05); // per 1,000 characters
+const VOICE_MAX_CHARS = 2000;
+// Emotional delivery: index-tts-2 clones from the same reference clip AND takes
+// an emotion prompt, all in one call. Billed per second (~$0.002/s); ~1,000
+// chars ≈ 1 min of speech, so the per-1k estimate is ~$0.12.
+const MODEL_VOICE_EMO = process.env.FAL_MODEL_VOICE_EMO || 'fal-ai/index-tts-2/text-to-speech';
+const VOICE_EMO_RATE = Number(process.env.STUDIO_RATE_VOICE_EMO || 0.12); // per ~1,000 characters (estimate)
+const VOICE_MOODS = {
+  neutral: '',
+  happy: 'happy, warm and upbeat',
+  hyped: 'excited, energetic and hyped up',
+  sad: 'sad, soft and reflective',
+  angry: 'angry, intense and forceful',
+  calm: 'calm, smooth and reassuring',
+};
+// Whisper (wizper) bills ~$0.10 per minute of audio, so a full 3-4 min song is
+// ~$0.30-0.40, NOT 2c. Flat estimate raised to a realistic per-song figure so
+// the confirm dialog stops under-quoting. Override via STUDIO_RATE_TRANSCRIBE.
+const TRANSCRIBE_RATE = Number(process.env.STUDIO_RATE_TRANSCRIBE || 0.35);
 
 router.post('/transcribe', async (req, res) => {
   if (!FAL_KEY) {
@@ -2009,6 +3145,239 @@ router.post('/transcribe', async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+});
+
+/* ---------------- voice clone: narrate in a character's voice (F5-TTS) ---------------- */
+router.post('/voice-clone', async (req, res) => {
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
+  const ref = db.getAsset(req.userId, Number(req.body?.refAssetId));
+  if (!ref || ref.kind !== 'audio') return res.status(404).json({ error: 'Pick a reference voice clip (an audio file — e.g. a vocal stem) first.' });
+  const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
+  if (!text) return res.status(400).json({ error: 'Type the words you want spoken.' });
+  if (text.length > VOICE_MAX_CHARS) return res.status(400).json({ error: `Keep it under ${VOICE_MAX_CHARS} characters per take (about ${Math.round(VOICE_MAX_CHARS / 1000)} minutes). Split longer narration into a few takes.` });
+  {
+    const emo = typeof req.body?.mood === 'string' && req.body.mood !== 'neutral' && VOICE_MOODS[req.body.mood];
+    const capMsg = overDailyCap(req.userId, estActionCost('voice', { emotion: !!emo, chars: text.length }));
+    if (capMsg) return res.status(429).json({ error: capMsg });
+  }
+  try {
+    const buf = fs.readFileSync(mediaPath(ref.filename));
+    let refUrl;
+    try {
+      refUrl = await falUploadFile(buf, path.basename(ref.filename), 'audio/mpeg');
+    } catch (_) {
+      if (buf.length > 9_000_000) throw new Error('could not upload the reference clip to fal and it is too large to send inline — trim it to ~20 seconds first');
+      refUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
+    }
+    const mood = typeof req.body?.mood === 'string' && VOICE_MOODS[req.body.mood] !== undefined ? req.body.mood : 'neutral';
+    const emoPrompt = VOICE_MOODS[mood];
+    let model, input;
+    if (mood !== 'neutral' && emoPrompt) {
+      // index-tts-2: zero-shot clone + emotion prompt, one call
+      model = MODEL_VOICE_EMO;
+      input = { audio_url: refUrl, prompt: text, should_use_prompt_for_emotion: true, emotion_prompt: emoPrompt };
+    } else {
+      model = MODEL_VOICE;
+      input = { gen_text: text, ref_audio_url: refUrl, model_type: 'F5-TTS', remove_silence: true };
+    }
+    const submitted = await falSubmit(model, input);
+    const job = createJob(req.userId, 'voice', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'audio',
+        label: `${ref.label}${mood !== 'neutral' ? ` (${mood})` : ''} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`,
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+/* ---------------- local speech-to-text (free, runs on this computer) ---------------- */
+const localStt = require('./transcribe');
+
+// Automatic caption cleanup: the raw local transcript goes through a large
+// language model (via the already-configured fal key - no extra setup) that
+// fixes mishears, garbled fragments, and chunk-overlap duplicates while
+// preserving the speaker's exact voice. Fails soft: any problem returns null
+// and the raw transcript is used unchanged.
+// fal's any-llm routes through OpenRouter, whose catalog changes constantly -
+// hardcoded ids rot. Primary source of truth: OpenRouter's public model list,
+// fetched live (free, no key) to pick the newest Claude Sonnet automatically.
+// The static list below is only the last-resort fallback (ids confirmed
+// against openrouter.ai, Jul 2026).
+const CAPTION_FIX_MODELS = (process.env.STUDIO_CAPTION_FIX_MODEL
+  ? [process.env.STUDIO_CAPTION_FIX_MODEL]
+  : ['anthropic/claude-sonnet-4.6', 'anthropic/claude-sonnet-4.5', 'google/gemini-2.5-flash']);
+let liveModelCandidates = null; // cached for the server's lifetime
+async function fetchLiveModelCandidates() {
+  if (liveModelCandidates) return liveModelCandidates;
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15_000);
+    const res = await fetch('https://openrouter.ai/api/v1/models', { signal: ctl.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const ids = (((await res.json()).data) || [])
+      .map((m) => m && m.id)
+      .filter((s) => typeof s === 'string' && !s.includes(':'));
+    // Lexicographic descending sorts 5 above 4.6 above 4.5 - good enough here.
+    const sonnets = ids.filter((s) => s.startsWith('anthropic/claude-sonnet')).sort().reverse();
+    const haikus = ids.filter((s) => s.startsWith('anthropic/claude-haiku')).sort().reverse();
+    const flash = ids.filter((s) => /^google\/gemini-[\d.]+-flash$/.test(s)).sort().reverse();
+    const picked = [...sonnets.slice(0, 2), ...haikus.slice(0, 1), ...flash.slice(0, 1)];
+    if (picked.length) {
+      liveModelCandidates = picked;
+      try { db.logError('caption-fix', `Using live model catalog: ${picked.join(', ')}`); } catch (_) {}
+    }
+    return liveModelCandidates;
+  } catch (_) { return null; }
+}
+const CAPTION_FIX_RATE = Number(process.env.STUDIO_RATE_CAPTION_FIX || 0.03); // ~per 5-min video, displayed estimate
+const CAPTION_FIX_SYSTEM = 'You clean up speech-to-text transcripts of personal spoken-word videos. The speaker is telling their own true recovery story; keep their exact voice, slang, grammar, and every sensitive word faithfully - never censor, soften, summarize, or rewrite. Fix ONLY: clearly misheard words (use context to infer what was actually said), garbled fragments, and passages duplicated by transcription-chunk overlap.';
+
+// fal's model catalog changes over time; a retired id gets HTTP 400 whose
+// error text lists the ids fal currently accepts. Harvest those and retry -
+// the polish self-heals instead of dying on a stale name.
+function harvestModelIds(body) {
+  // fal's validation error quotes its allowed ids ('x', 'y', ...) - prefer
+  // those complete quoted names; fall back to any id-shaped token. Any text
+  // model is acceptable as a last resort (deepseek etc.) - a working cheap
+  // model beats a dead perfect one.
+  const quoted = [...String(body).matchAll(/'([a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,})'/gi)].map((m) => m[1].toLowerCase());
+  const pool = quoted.length ? quoted : (String(body).match(/[a-z0-9]+\/[a-z0-9][a-z0-9._-]{2,}/gi) || []).map((s) => s.toLowerCase());
+  const ids = pool.filter((s) => !/vision|audio|image|embed|whisper/i.test(s));
+  const rank = (s) => (/claude/i.test(s) ? 0 : /gemini/i.test(s) ? 1 : /gpt/i.test(s) ? 2 : 3);
+  return [...new Set(ids)].sort((a, b) => rank(a) - rank(b));
+}
+let discoveredModel = null; // a model that worked this run - goes first next batch
+
+// One batch of lines through the models. Returns a Map(index -> fixed text, ''
+// meaning delete) or null. Every failure reason is logged to Diagnostics with
+// fal's own words, so a silent no-op polish can't hide.
+async function aiFixBatch(chunk, offset) {
+  const numbered = chunk.map((l, j) => `${offset + j}|${l.text}`).join('\n');
+  const prompt = `Each line is "index|text". Return ONLY a JSON array covering EVERY index, like [{"i":${offset},"text":"..."}]. For a line that is pure duplication or a transcription glitch, return "" as its text so it gets removed. Change nothing that already reads as natural speech.\n\n${numbered}`;
+  const live = (await fetchLiveModelCandidates()) || [];
+  const queue = [...new Set([...(discoveredModel ? [discoveredModel] : []), ...live, ...CAPTION_FIX_MODELS])];
+  const tried = new Set();
+  let attempts = 0;
+  while (queue.length && attempts < 6) {
+    const model = queue.shift();
+    if (tried.has(model)) continue;
+    tried.add(model);
+    attempts++;
+    // Hard 60s cap per attempt - a slow provider must never hang the job.
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 60_000);
+    try {
+      const res = await fetch('https://fal.run/fal-ai/any-llm', {
+        method: 'POST',
+        headers: { Authorization: `Key ${FAL_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, system_prompt: CAPTION_FIX_SYSTEM, prompt }),
+        signal: ctl.signal,
+      });
+      if (!res.ok) {
+        // Read the WHOLE error - fal's 422 lists its complete allowed-model
+        // enum, and truncating it once cost us the answer mid-name.
+        const body = await res.text().catch(() => '');
+        try { db.logError('caption-fix', `${model} → HTTP ${res.status}: ${body.slice(0, 160)}`, body.slice(0, 2000)); } catch (_) {}
+        for (const id of harvestModelIds(body)) if (!tried.has(id)) queue.push(id);
+        continue;
+      }
+      const data = await res.json();
+      const text = String(data.output || data.response || '');
+      const m = text.match(/\[[\s\S]*\]/);
+      if (!m) {
+        try { db.logError('caption-fix', `${model} returned no JSON`, text.slice(0, 200)); } catch (_) {}
+        continue;
+      }
+      const arr = JSON.parse(m[0]);
+      if (!Array.isArray(arr) || arr.length < chunk.length * 0.8) {
+        try { db.logError('caption-fix', `${model} covered ${Array.isArray(arr) ? arr.length : 0}/${chunk.length} lines`); } catch (_) {}
+        continue;
+      }
+      if (discoveredModel !== model) {
+        try { db.logError('caption-fix', `✓ Words polished by ${model}`); } catch (_) {}
+      }
+      discoveredModel = model;
+      return new Map(arr.map((e) => [Number(e.i), String(e.text ?? '').trim()]));
+    } catch (err) {
+      const msg = err && err.name === 'AbortError' ? 'timed out after 60s' : (err && err.message);
+      try { db.logError('caption-fix', `${model} failed: ${msg}`); } catch (_) {}
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return null;
+}
+
+// Batched (25 lines per request) so long videos can't overflow the model's
+// output and lose the whole cleanup. A failed batch keeps its raw lines.
+async function aiCleanTranscriptLines(lines) {
+  if (!FAL_KEY || !lines.length) return null;
+  const out = [...lines];
+  const deletions = new Set();
+  let anyFixed = false;
+  for (let base = 0; base < lines.length; base += 25) {
+    const chunk = lines.slice(base, base + 25);
+    const fixes = await aiFixBatch(chunk, base);
+    if (!fixes) continue;
+    anyFixed = true;
+    chunk.forEach((l, j) => {
+      const i = base + j;
+      if (!fixes.has(i)) return;
+      const t = fixes.get(i);
+      if (t === '') deletions.add(i);
+      else out[i] = { ...out[i], text: t };
+    });
+  }
+  if (!anyFixed) return null;
+  return out.filter((_, i) => !deletions.has(i));
+}
+
+router.post('/transcribe-local', (req, res) => {
+  const asset = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!asset || (asset.kind !== 'video' && asset.kind !== 'audio')) {
+    return res.status(404).json({ error: 'Pick a video or audio file from your library first.' });
+  }
+  const job = createJob(req.userId, 'transcribe', {});
+  res.status(202).json({ job: jobJson(job) });
+  (async () => {
+    try {
+      const result = await localStt.transcribeLocal(
+        ffmpegBin(),
+        mediaPath(asset.filename),
+        (phase, pct) => {
+          if (phase === 'extract') job.progress = 3;
+          else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
+          else job.progress = 40 + Math.round((pct || 0) * 0.5); // 40-90%: listening, moves per audio piece
+        },
+        (note) => { try { db.logError('transcribe', note); } catch (_) {} }
+      );
+      // AI cleanup of mishears/garbles - ONLY when the user said yes to the
+      // priced confirm (falls back to the raw transcript if it fails).
+      job.progress = 92;
+      const cleaned = req.body?.polish ? await aiCleanTranscriptLines(result.lines) : null;
+      const lines = cleaned || result.lines;
+      const text = lines.map((l) => l.text).join(' ').trim();
+      // Keep the transcript on the asset - the clip picker and future features
+      // read it from here instead of transcribing again.
+      const meta = asset.meta ? JSON.parse(asset.meta) : {};
+      meta.transcript = { lines, text };
+      db.updateAssetMeta(req.userId, asset.id, meta);
+      job.transcript = { lines, text, srt: localStt.toSrt(lines), aiCleaned: !!cleaned };
+      job.progress = 100;
+      job.status = 'done';
+    } catch (err) {
+      job.error = err.message || 'Transcription failed.';
+      job.status = 'error';
+    }
+  })();
 });
 
 /* ---------------- storyboard: lyric sheet -> scene-by-scene prompts ---------------- */
@@ -2145,7 +3514,7 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
     `Lyrics:\n${lyrics}`,
   ].filter(Boolean).join('\n');
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -2355,7 +3724,7 @@ router.post('/campaign', async (req, res) => {
 // code onto the install folder, refresh dependencies. Your data survives by
 // construction - .env, data.sqlite and media/ are gitignored so they are never
 // inside the ZIP being copied over.
-const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the launchers, Studio and TurnSomeDayIntoOneday
+const APP_ROOT = path.join(__dirname, '..', '..'); // the folder holding the Start Studio launcher and the Studio app
 const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
 // A private repo needs a token (GitHub → Settings → Developer settings →
@@ -2374,23 +3743,26 @@ const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
   || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
-// The running launcher scripts are skipped during the overlay copy: overwriting
-// a batch file mid-run corrupts its execution on Windows.
-const UPDATE_SKIP = new Set([
-  'Start My App.bat', 'Start My App.command', 'start-app.sh',
-  'Start Studio.bat', 'Start Studio.command', 'start-studio.sh', '.git',
-]);
+// Strict whitelist: an update only ever copies Studio's own files. The repo also
+// contains the Turn Someday Into Day One app, and the two must stay fully
+// separate on disk - updating one never adds or touches the other's files.
+// (Launchers are excluded too: overwriting a batch file mid-run corrupts its
+// execution on Windows, and they almost never change.)
+const UPDATE_ONLY = new Set(['Studio', 'HOW-TO-USE.md']);
 
 function runCmd(cmd, args, opts) {
   return new Promise((resolve, reject) => {
     // No shell: cmd.exe re-splits arguments on spaces, which breaks temp paths
     // like C:\Users\First Last\AppData\... . Windows-only .cmd shims (npm) are
     // wrapped in `cmd /c` by the caller instead.
-    const proc = spawn(cmd, args, opts);
+    const { timeoutMs, ...spawnOpts } = opts || {};
+    const proc = spawn(cmd, args, spawnOpts);
     let err = '';
+    let timer = null;
+    if (timeoutMs) timer = setTimeout(() => { try { proc.kill(); } catch (_) {} reject(new Error(`${cmd} timed out`)); }, timeoutMs);
     proc.stderr?.on('data', (c) => { err = (err + c.toString()).slice(-800); });
-    proc.on('error', reject);
-    proc.on('close', (code) => (code === 0 ? resolve() : reject(new Error(err || `${cmd} exited ${code}`))));
+    proc.on('error', (e) => { if (timer) clearTimeout(timer); reject(e); });
+    proc.on('close', (code) => { if (timer) clearTimeout(timer); code === 0 ? resolve() : reject(new Error(err || `${cmd} exited ${code}`)); });
   });
 }
 
@@ -2421,6 +3793,10 @@ router.get('/update/check', async (req, res) => {
 router.post('/update', async (req, res) => {
   const os = require('os');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
+  // remember the current dependencies so we only run the slow npm install when
+  // they actually changed (a code-only update should never touch npm)
+  let pkgBefore = '';
+  try { pkgBefore = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'); } catch (_) {}
   try {
     // 1. download the latest code
     const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
@@ -2438,21 +3814,34 @@ router.post('/update', async (req, res) => {
 
     // 3. overlay the new code onto the install (data files aren't in the ZIP)
     for (const entry of fs.readdirSync(src)) {
-      if (UPDATE_SKIP.has(entry)) continue;
+      if (!UPDATE_ONLY.has(entry)) continue;
       fs.cpSync(path.join(src, entry), path.join(APP_ROOT, entry), { recursive: true, force: true });
     }
 
-    // 4. refresh dependencies (fast no-op when nothing changed)
-    await (process.platform === 'win32'
-      ? runCmd('cmd', ['/c', 'npm', 'install', '--no-audit', '--no-fund'], { cwd: __dirname })
-      : runCmd('npm', ['install', '--no-audit', '--no-fund'], { cwd: __dirname }));
+    // 4. refresh dependencies ONLY when package.json actually changed. npm
+    // install is the slow, hang-prone step; skipping it for the usual
+    // code-only update is what makes the updater finish instead of appearing
+    // stuck forever. The new files are already in place from step 3.
+    let depsNote = '';
+    let pkgAfter = '';
+    try { pkgAfter = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'); } catch (_) {}
+    if (pkgAfter && pkgAfter !== pkgBefore) {
+      try {
+        await (process.platform === 'win32'
+          ? runCmd('cmd', ['/c', 'npm', 'install', '--no-audit', '--no-fund'], { cwd: __dirname, timeoutMs: 240000 })
+          : runCmd('npm', ['install', '--no-audit', '--no-fund'], { cwd: __dirname, timeoutMs: 240000 }));
+        depsNote = ' New add-ons were installed too.';
+      } catch (e) {
+        depsNote = ' (Heads up: a dependency refresh timed out — the app still updated. If anything misbehaves, run "npm install" in Studio/server once.)';
+      }
+    }
 
     // 5. remember what we're on now
     let state = { sha: 'unknown', date: new Date().toISOString() };
     try { state = await fetchLatestCommit(); } catch (_) {}
     fs.writeFileSync(UPDATE_STATE_FILE, JSON.stringify({ ...state, updatedAt: new Date().toISOString() }));
 
-    res.json({ ok: true, message: 'Update installed! Close the black window, then double-click Start My App again.' });
+    res.json({ ok: true, message: `Update installed! Close the black window, double-click Start Studio again, then press Ctrl+Shift+R in your browser.${depsNote}` });
   } catch (err) {
     res.status(500).json({ error: `Update failed: ${err.message}. Your app is untouched - you can also update by re-downloading the ZIP.` });
   } finally {
@@ -2466,6 +3855,96 @@ router.get('/jobs/:id', async (req, res) => {
   if (!job || job.userId !== req.userId) return res.status(404).json({ error: 'Job not found.' });
   if (job.fal) await refreshFalJob(job);
   res.json({ job: jobJson(job) });
+});
+
+/* ---------------- built-in documents (guide + price list PDFs) ---------------- */
+// Served straight from the Studio folder so they're always one tap from Settings.
+function sendStudioDoc(res, filename, downloadName) {
+  const p = path.join(__dirname, '..', filename);
+  if (!fs.existsSync(p)) return res.status(404).json({ error: 'That document is not installed in this copy of Studio.' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="${downloadName || filename}"`);
+  fs.createReadStream(p).pipe(res);
+}
+router.get('/docs/guide.pdf', (req, res) => sendStudioDoc(res, 'Studio-Guide.pdf', 'Studio-Guide.pdf'));
+router.get('/docs/pricelist.pdf', (req, res) => sendStudioDoc(res, 'Studio-Price-List.pdf', 'Studio-Price-List.pdf'));
+
+/* ---------------- paid-generation recovery + spend ledger ---------------- */
+// Best-effort estimate of what a single generation cost, from its type/tier and
+// stored details. Marked as an estimate everywhere — your real fal balance is
+// the final word — but it's built from the same verified rates shown on the
+// buttons, so the running total is honest about where money actually went.
+function estReceiptCost(r) {
+  if (r.expect === 'audio') return null; // voice length isn't stored — don't guess
+  let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+  const c = estActionCost(r.expect, { tier: r.tier, seconds: meta.seconds, characterId: r.character_id });
+  return c || (r.expect === 'video' || r.expect === 'image' ? c : null);
+}
+
+// List recent fal receipts + a running spend estimate so the artist can see
+// exactly what they've paid for and which ones did / didn't land.
+router.get('/fal/receipts', (req, res) => {
+  const rows = db.getFalReceipts(req.userId, 200);
+  let total = 0, counted = 0;
+  const receipts = rows.map((r) => {
+    // Failed generations that never completed weren't billed — don't count them.
+    const cost = r.status === 'error' ? null : estReceiptCost(r);
+    if (cost != null) { total += cost; counted += 1; }
+    return {
+      id: r.id, requestId: r.request_id, expect: r.expect, label: r.label,
+      tier: r.tier, status: r.status, assetId: r.asset_id, createdAt: r.created_at,
+      cost: cost == null ? null : Number(cost.toFixed(3)),
+    };
+  });
+  const open = receipts.filter((r) => r.status === 'running').length;
+  res.json({
+    receipts: receipts.slice(0, 60), open, totalSpent: Number(total.toFixed(2)), counted,
+    cap: DAILY_USD_CAP, spentToday: Number(todaySpendUSD(req.userId).toFixed(2)),
+  });
+});
+
+// One button: re-check every still-open receipt against fal. Any that finished
+// while the browser was gone get downloaded into the library now. Never charges
+// — reading a fal result is free — so it's safe to run any time.
+router.post('/fal/recover', async (req, res) => {
+  if (!FAL_KEY) return res.status(503).json({ error: 'AI generation is not set up yet.' });
+  const open = db.getOpenFalReceipts(req.userId);
+  let recovered = 0, stillWorking = 0, failed = 0;
+  for (const r of open) {
+    let meta = {}; try { meta = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
+    const job = {
+      id: `recover-${r.id}`, userId: req.userId, status: 'running', progress: 0, assetId: null,
+      startedAt: Date.parse(r.created_at) || Date.now(), _receiptId: r.id,
+      fal: { statusUrl: r.status_url, responseUrl: r.response_url, expect: r.expect, label: r.label || 'Recovered', characterId: r.character_id, meta },
+    };
+    try { await refreshFalJob(job); } catch (_) {}
+    if (job.status === 'done') recovered++;
+    else if (job.status === 'error') failed++;
+    else stillWorking++;
+  }
+  res.json({ recovered, stillWorking, failed, checked: open.length });
+});
+
+// Manual rescue for clips paid for BEFORE receipts existed: paste the output
+// file URL straight from your fal.ai dashboard (open the request → copy the
+// video/image URL) and Studio downloads it into your library. Free.
+router.post('/fal/import', async (req, res) => {
+  const { url, kind } = req.body || {};
+  const clean = typeof url === 'string' ? url.trim() : '';
+  if (!/^https?:\/\//i.test(clean)) return res.status(400).json({ error: 'Paste a direct file link (starts with http) from your fal.ai dashboard.' });
+  const isVideo = kind === 'video' || /\.(mp4|mov|webm|m4v)(\?|$)/i.test(clean) || (kind !== 'image' && kind !== 'audio' && /video/i.test(clean));
+  const isAudio = kind === 'audio' || /\.(wav|mp3|m4a|aac)(\?|$)/i.test(clean);
+  const assetKind = isVideo ? 'video' : isAudio ? 'audio' : 'image';
+  const ext = isVideo ? '.mp4' : isAudio ? '.wav' : /\.(jpe?g)(\?|$)/i.test(clean) ? '.jpg' : '.png';
+  try {
+    const filename = await downloadToMedia(req.userId, clean, ext);
+    const meta = { source: 'fal-import' };
+    if (assetKind !== 'image') meta.duration = await probeMediaDuration(mediaPath(filename));
+    const id = db.createAsset(req.userId, assetKind, 'Recovered from fal', filename, null, meta);
+    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+  } catch (err) {
+    res.status(502).json({ error: `Couldn't import that link: ${err.message}` });
+  }
 });
 
 module.exports = { router, deleteUserAssets };

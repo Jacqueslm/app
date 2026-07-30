@@ -2,7 +2,7 @@
 
 *Everything you need to run Studio. No tech knowledge required.*
 
-> This folder holds TWO separate apps: **Start Studio** = your music-video maker (this manual). **Start My App** = the Turn Someday Into Day One recovery app. They don't share anything — different windows, different accounts.
+> This is **Studio**, your music-video maker. Start it with **Start Studio** — it opens at **localhost:4400**. (Studio is now its own standalone download; nothing else comes bundled with it.)
 
 ---
 
@@ -29,20 +29,22 @@ That's it. No internet needed except for AI generations.
 ## 2. First-Time Setup (only once)
 
 1. **Sign up** — Studio greets you with a welcome screen: type any email + a password and your account is created right there. It lives only on your computer.
-2. **Turn on AI** — Studio → **AI Scenes** tab → paste your fal.ai key in the 🔑 box → Save.
-   The badge at the top says **AI READY** when it worked.
+2. **Turn on AI** — Studio → **⚙ Settings** tab → **🔑 AI key (fal.ai)** → paste your key → Save.
+   The badge at the top says **AI READY** when it worked. (AI buttons like Sing/Animate stay hidden until the key is set.)
 3. **Credits** — your fal.ai account needs money on it ($10 lasts a while). No credits = every AI button fails.
 
 ---
 
-## 3. The Four Tabs
+## 3. The Six Tabs
 
 | Tab | What it's for |
 |---|---|
-| **Art** | Free art from a text prompt (wallpapers, backgrounds). No AI key needed. |
-| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, sing, dance, Live Portrait, simple screens. Your **Library** (with its free editing tools) lives here. |
-| **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. |
-| **Sequencer** | Where videos get made — Quick Video, lyrics, shorts, campaigns, everything. |
+| **🖼 My Media** | Your home base — every picture, video clip and song you've uploaded or made, shown as thumbnails, split into Pictures / Video clips / Songs. Upload here, and "Open my media folder". |
+| **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, **Sing** (lip-sync), dance, Live Portrait, simple screens. Your **Library** (with its free editing tools, incl. the **Sing** button on each picture) lives here. |
+| **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. Paste a LoRA URL + trigger word here to restore a face lock. |
+| **Sequencer** | Where videos get made — Quick Video, timeline, lyrics, shorts, campaigns, everything. |
+| **📅 Post** | Your posting schedule — line up finished clips with captions and times, and Studio tells you the moment each one is due. |
+| **⚙ Settings** | AI key, open Studio on your phone, update the app, back up everything, and **🗑 Start fresh** (wipe everything). |
 
 The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the full editor.
 
@@ -143,6 +145,59 @@ One music video = a week of posts. Seamless loop makes them replay forever.
 
 ---
 
+## 5a. 🎤 The Teleprompter (stay on script, still sound like you)
+
+At the top of the **📅 Post** tab. Write the words once, then read them steady instead of guessing on camera.
+
+1. **📅 Post** tab → type a **Script name** and paste your script into the box
+   - Put **each thought on its own line** — short lines read naturally; a wall of text makes anyone sound like a robot
+   - Leave a **blank line** where you want to pause and breathe
+2. **💾 Save script** — it's saved to your account, so it's there next week and on your phone too. Tap any saved script to load it back; save again to update it.
+3. **▶ Open teleprompter** → the screen goes black, you get a 3-2-1 countdown, then the words scroll
+
+**Set your camera up like this:** put the screen showing the prompter **directly behind or under your camera**, as close to the lens as you can. The green band across the middle marks the line to read — keeping your eyes in that band is what makes you look like you're talking *to* someone instead of reading.
+
+**While it's rolling:**
+| Control | Does |
+|---|---|
+| **Space** or **▶/❚❚** | Play / pause |
+| **+ speed / − speed** (or ↑ ↓) | Faster or slower — start slow, 3 is a calm speaking pace |
+| **A+ / A−** | Bigger or smaller words (bigger = you can stand further back) |
+| **Mirror** | Flips the text for a teleprompter glass rig |
+| **↺ Restart** (or R) | Back to the top for another take |
+| **✕ Close** (or Esc) | Done |
+
+**Getting it heartfelt, not robotic:** run it slower than feels natural, read a line *then* look at the lens as you say it, and let yourself go off-script when a real feeling shows up — the script is a floor, not a cage. If you flub a line, don't stop; press ↺ Restart and go again. Takes are free.
+
+---
+
+## 5b. 📅 The Post tab (your posting schedule)
+
+Studio can't post for you — TikTok, Instagram and YouTube all make a brand-new app wait weeks for a manual review before it's allowed to publish, and even then a video posted through their back door gets less reach than one you upload yourself. So the Post tab does everything **except** the final tap:
+
+1. **📅 Post** tab → pick a clip, write the caption once, tick the platforms, set the date and time
+2. **Add to schedule** — repeat for the whole week (do this right after a Sunday batch)
+3. When a post comes due, a red banner appears and a red dot lights on the **Post** tab — even if Studio was closed when the moment passed
+4. On that due post: **Copy caption** · **⬇ Download clip** · **Open TikTok / YouTube / Instagram / Facebook** → post it natively → tap **Posted ✓**
+
+Posting to TikTok now and YouTube tonight? Tick them off one at a time — the post stays on the list until every platform is done.
+
+**Tip:** open Studio on your phone (⚙ Settings → 📱 Open Studio on your phone, same Wi-Fi) and you can download the clip straight to the phone you're posting from.
+
+---
+
+## 5c. 📱 Open Studio on your phone
+
+Studio runs on this computer, but your phone can open it over your home Wi-Fi — which is how finished clips get onto the phone you post from.
+
+1. **⚙ Settings** → **📱 Open Studio on your phone** → tap **Copy** (the address looks like `http://192.168.1.47:4400`). It's also printed in the black window when Studio starts.
+2. On your phone (same Wi-Fi), type that address into the browser → sign in
+3. Add it to your phone's home screen — then it's an icon, and you never type it again
+
+The first time, Windows may ask to allow Studio through the firewall — choose **Allow** on private networks. This computer has to be on with Studio running; the phone is a window into it, not a copy.
+
+---
+
 ## 6. Campaign Export (ready to post)
 
 1. **Campaign Export** card → fill in song title, artist, link, hashtags
@@ -158,7 +213,11 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 ## 7. Lyrics & Captions (words on screen)
 
 1. **Lyrics & Captions** card → paste lyrics, one line per caption
-2. Three ways to time them: **Auto-spread** = instant guess. **▶ Tap to sync** = perfect and free: the song plays, you tap once per line. **🪄 Auto-captions (AI, ~2¢)** = the app *listens to your song* and writes every line with its real timing — no pasting, no tapping. (Check the words after — AI hearing isn't perfect on fast verses.)
+2. Four ways to time them:
+   - **Auto-spread** — instant guess, free
+   - **▶ Tap to sync** — perfect and free: the song plays, you tap once per line
+   - **🎙️ Captions from my voice (free)** — Studio listens on **your own computer** and writes every line with its real timing. Nothing is uploaded, nothing is charged, and it works offline after the first use. **Best choice for talking videos.** The first run downloads the listening model once (a few minutes); after that it's instant. Optional afterwards: a paid AI tidy-up of the wording — the price is shown before you agree, and you can always say no.
+   - **🪄 Auto-captions (AI)** — the cloud version, for songs. Costs cents; price shows on the button.
 3. Captions burn into your video AND your shorts automatically
 4. **+ Song title intro** puts your title card at the start
 
@@ -166,26 +225,57 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions, shorts, campaigns, thumbnails, storyboard prompts, backups — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, and 🎙️ Captions from my voice (listening happens on your own computer)** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
 
-**AI (from your fal.ai balance):**
+> 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
+>
+> 📖 **The full guide is built in.** Open **⚙ Settings → 📖 Guide & help → Open the guide (PDF)** for the complete Studio manual (every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow). The price list is right beside it.
+
+**AI (from your fal.ai balance) — verified July 2026, and every price shows on the button before you tap:**
 | Thing | Rough cost |
 |---|---|
 | Scene image | ~4¢ |
 | Scene image starring your character | ~9¢ |
 | Scene image on ✨ Best (Banana Pro) | ~15¢ |
 | 🔒 Face lock training (per character, one-time) | ~$3.60 |
-| 5-second clip (Draft/Seedance) | ~21¢ |
-| 5-second clip (Standard/Kling) | ~42¢ |
-| 5-second clip (Best/Kling Pro) | ~56¢ |
+| 5-second clip — Draft (Wan) | ~25¢ |
+| 5-second clip — Standard (Kling Turbo) | ~35¢ |
+| 5-second clip — ✨ Best (Seedance) | ~$1.20 |
 | Sing on a video — Draft / ✨ Hero | ~4¢ / 20¢ |
 | Sing on a still | ~50¢–$1.50 |
-| Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~50¢ / 70¢ / $1.20 |
+| Dance Transfer (10s) — Draft / Standard / ✨ Hero | ~$1.50 / $1.30 / $1.70 |
 | 🎭 Live Portrait clip | ~10¢ |
-| 🪄 Auto-captions (whole song) | ~2¢ |
+| 🎙 Voice — Neutral | $0.05 / 1,000 chars (~½¢ a line, ~5¢/min) |
+| 🎙 Voice — with a mood (emotion) | ~$0.12 / 1,000 chars |
+| 🪄 Auto-captions (whole song) | ~35¢ *(free if you paste your own lyrics)* |
 | 🔍 QC inspection (per image) | ~½¢ |
+| 🎧 Crew Room chat (Creative Director, etc.) | fraction of a cent per message |
 
-The exact price shows **on the button** before you tap. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
+The exact price shows **on the button** before you tap, and every number above rounds **up** so a real bill is never a surprise. Smart habit: draft cheap, re-make only the keepers on Best. The app has a daily safety cap so nothing can drain your balance.
+
+### 💸 Recover paid clips + spend ledger (Settings → Storage area)
+Every AI generation is now saved the moment it's sent. The card shows a **running total of what you've spent on AI** (estimated from the verified button rates — your real fal.ai balance is the final word) and a per-item breakdown, so you can always see where the money went. Failed generations aren't counted (they aren't billed).
+
+**🛑 Daily spend cap:** set a dollar limit (e.g. $5/day) and Studio **flat refuses to start any AI generation that would go over it** — every button: Animate, Scenes, Sing, Dance, Voice, face-lock training. Runaway spend becomes impossible. It resets at midnight UTC. Set it to 0 to turn it off. If a clip you paid for didn't land in your library (you closed the tab, refreshed, or the render ran long), tap **Find my finished clips** — Studio pulls in anything fal already finished. This never costs anything (reading a result is free). For clips paid for *before* this existed, paste the output file link from your fal.ai dashboard into the "Recover an older one" box.
+
+### The free toolbox (no AI, on every clip/photo in My Media)
+- **🧽 Remove corner mark** (Crop → *Remove corner mark ✦*) — cleans a decorative sparkle / corner watermark off **your own** generated image. *Patch it out* blends it into the pixels around it and keeps the whole frame (best when the subject is near the corner); *Zoom past it* crops the corner off. Free & instant. It's for tidying a provider's sparkle on your own art — it can't touch invisible watermarks and isn't for anyone else's work.
+- **▶ Continue (extend a clip)** — on any video, tap **▶ Continue**: Studio grabs its last frame and opens Animate pre-loaded with a "keep the motion going" prompt. The new clip carries on from exactly where the first ended — place them back-to-back in the Sequencer for one seamless longer shot (chain it as many times as you want). This is real *forward* motion, unlike Loop which repeats. Costs one Animate per extension.
+- **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
+- **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
+- **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.
+- **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
+- **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
+- **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).
+- **One-click setups** (AI Scenes → Director's brief) — tap a face-locked character to make them the star; save your vibe/energy/star/place as a reusable setup; your last brief is remembered.
+
+### Make a character TALK (with a moving, expressive face)
+It's three steps, and each one is its own button:
+1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. Pick a **mood** (Happy / Hyped / Sad / Angry / Calm) to change the delivery — no filming needed. Neutral is cheapest (~½¢ a line); a mood is a touch more (~pennies), and the price shows before you spend.
+2. **🎤 Sing** — on DBC's photo or clip, tap **Sing**, and in the song list pick the **voice line you just made**. It lip-syncs his mouth to the words. (Draft ~4¢ / Hero 20¢.)
+3. **🎭 Live Portrait** — for full expressions (eyes, head, mood), film your own face doing the performance and it maps that onto his still. (~10¢.)
+
+For expressions in **still scenes**, just say it in the prompt — "DBC looking intense," "SBGQ smiling softly." That's free (part of the image).
 
 ---
 
@@ -224,7 +314,10 @@ Also on that card: see what's using disk space and delete big old files.
 | "You already have an almost identical scene" | The duplicate guard saving you money. Check the existing shot in your Library before paying to regenerate. |
 | ⚠ QC badge on an image | The AI inspector spotted a likely defect (hover the badge for the reason — e.g. wrong finger count). Regenerate the scene if it bothers you; ✅ QC means it passed. |
 | Suno import fails | Make sure you paste the **Share → Copy link** URL from Suno. If it still fails, download the song in your browser and use the normal upload button — same result. |
-| Windows blocks Start My App | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
+| Windows blocks Start Studio | Right-click → Properties → Unblock → OK. Or "More info → Run anyway". |
+| I see "Turn Someday Into Day One" / localhost:4300 | That's a different app from an OLD download. Close it and use **Start Studio** (localhost:4400). A fresh Studio download has only one launcher. |
+| A feature (Sing, Animate) is missing | Those show only when AI is on. Check the badge says **AI READY**; if not, set your key in ⚙ Settings. **Sing** appears **on each picture in the AI Scenes → Library**, so you need at least one picture there. |
+| My face lock / character disappeared | If you have your old `data.sqlite`, copy it back into `Studio\server\`. Otherwise the LoRA link may still be on **fal.ai/dashboard** under the `flux-lora-portrait-trainer` training request — "Show files" → copy the `.safetensors` link → paste it into the character's **LoRA URL** box (+ its trigger word) → Save. If the file expired, retrain (~$3.60). |
 | Daily cap reached | You generated a LOT today. It resets at midnight UTC (or raise it in server/.env). |
 | Something weird I can't figure out | Open a Claude Code session on the repo and describe it. Screenshots help. |
 
@@ -238,6 +331,10 @@ Also on that card: see what's using disk space and delete big old files.
 - **Your account**: `Studio\server\data.sqlite`
 
 Those three files/folders = your stuff. Everything else is replaceable code.
+
+**⭐ BACK UP `data.sqlite` — this is the one that hurts to lose.** It holds your account, your characters, and your **face locks**. After you train or restore a face lock, copy `Studio\server\data.sqlite` to your Desktop (and a cloud folder / USB). Do it again whenever you add characters. The in-app **⚙ Settings → ⬇ Back up everything (ZIP)** button saves media + a manifest too. If you ever lose your setup, copying an old `data.sqlite` back into `Studio\server\` restores everything at once.
+
+**Updating:** ⚙ Settings → **⬆ Update my app** (wait ~2 min even if it looks stuck, then close the black window, run **Start Studio** again, and press Ctrl+Shift+R). Or grab a fresh copy — extract it to a **new empty folder** to avoid leftover files, then copy your saved `.env` and `data.sqlite` into its `Studio\server\`.
 
 ---
 

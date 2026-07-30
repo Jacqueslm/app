@@ -96,6 +96,47 @@ db.exec(`
     descriptor TEXT NOT NULL,
     UNIQUE(user_id, char_a, char_b)
   );
+  CREATE TABLE IF NOT EXISTS fal_receipts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    request_id TEXT,
+    status_url TEXT NOT NULL,
+    response_url TEXT NOT NULL,
+    expect TEXT NOT NULL,
+    label TEXT,
+    character_id INTEGER,
+    model TEXT,
+    tier TEXT,
+    meta TEXT,
+    status TEXT NOT NULL DEFAULT 'running',
+    asset_id INTEGER,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_fal_receipts_user ON fal_receipts(user_id, status, id);
+  CREATE TABLE IF NOT EXISTS social_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    asset_id INTEGER REFERENCES studio_assets(id),
+    platforms TEXT NOT NULL,
+    caption TEXT NOT NULL DEFAULT '',
+    scheduled_at TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    posted_platforms TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_social_posts_user ON social_posts(user_id, status, scheduled_at);
+  CREATE TABLE IF NOT EXISTS studio_scripts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_studio_scripts_user ON studio_scripts(user_id, id);
 `);
 
 const userColumns = db.prepare("PRAGMA table_info(users)").all().map((c) => c.name);
@@ -245,6 +286,17 @@ function deleteAsset(userId, id) {
   db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
+// Wipe ALL of a user's content (pictures, videos, songs, characters, locations,
+// relationships, queue and the saved project) but KEEP their account/login.
+// Returns the media filenames so the caller can delete the files on disk.
+function resetUserContent(userId) {
+  const files = db.prepare('SELECT filename FROM studio_assets WHERE user_id = ?').all(userId).map((r) => r.filename);
+  for (const t of ['studio_assets', 'studio_characters', 'studio_locations', 'studio_relationships', 'studio_queue', 'user_state']) {
+    try { db.prepare(`DELETE FROM ${t} WHERE user_id = ?`).run(userId); } catch (_) {}
+  }
+  return files;
+}
+
 function unlinkAssetFromCharacter(userId, id) {
   db.prepare('UPDATE studio_assets SET character_id = NULL WHERE user_id = ? AND id = ?').run(userId, id);
 }
@@ -352,6 +404,38 @@ function clearFinishedQueue(userId) {
   db.prepare("DELETE FROM studio_queue WHERE user_id = ? AND status IN ('done','error')").run(userId);
 }
 
+/* ---------------- fal receipts (paid-generation recovery) ---------------- */
+// Every fal submission is logged here the moment it's sent, BEFORE any result
+// comes back. Because fal bills whether or not the browser is around to collect
+// the output, this is the durable record that lets Studio recover a paid clip
+// later — even after a server restart wipes the in-memory job. request_id is
+// parsed out of the response URL for display.
+function logFalReceipt(userId, r) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO fal_receipts (user_id, request_id, status_url, response_url, expect, label, character_id, model, tier, meta, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?)`
+  ).run(userId, r.requestId || null, r.statusUrl, r.responseUrl, r.expect, r.label || null,
+        r.characterId || null, r.model || null, r.tier || null, r.meta ? JSON.stringify(r.meta) : null, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function setFalReceiptStatus(id, fields) {
+  db.prepare('UPDATE fal_receipts SET status = ?, asset_id = COALESCE(?, asset_id), error = ?, updated_at = ? WHERE id = ?')
+    .run(fields.status, fields.assetId || null, fields.error || null, new Date().toISOString(), id);
+}
+
+// Receipts still worth re-checking: anything not cleanly finished. (A 'running'
+// row whose fal request actually completed while the tab was gone is exactly
+// what recovery pulls in.)
+function getOpenFalReceipts(userId) {
+  return db.prepare("SELECT * FROM fal_receipts WHERE user_id = ? AND status = 'running' ORDER BY id ASC").all(userId);
+}
+
+function getFalReceipts(userId, limit) {
+  return db.prepare('SELECT * FROM fal_receipts WHERE user_id = ? ORDER BY id DESC LIMIT ?').all(userId, limit || 50);
+}
+
 /* ---------------- owned-audience email list ---------------- */
 // Returns true if this was a new signup, false if the email was already on
 // the list (so the public endpoint can still say "you're on the list!"
@@ -373,6 +457,91 @@ function getFanSignups() {
 
 function getFanSignupCount() {
   return db.prepare('SELECT COUNT(*) AS n FROM fan_signups').get().n;
+}
+
+/* ---------------- social post scheduler ---------------- */
+// Platform APIs for TikTok/Instagram/YouTube all require weeks-long developer
+// audits before they'll let a new app post publicly (TikTok posts land as
+// private drafts, Meta/YouTube uploads stay locked, until Google/Meta/TikTok
+// manually review the app). Auto-publishing on day one isn't available at any
+// price, so this queue automates everything up to the final tap: it tracks
+// what's due, hands over the caption and the file, and the founder does the
+// one thing an API can't do better anyway - native uploads outperform
+// API-posted video on every platform's own feed ranking.
+function createSocialPost(userId, { assetId, platforms, caption, scheduledAt }) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    `INSERT INTO social_posts (user_id, asset_id, platforms, caption, scheduled_at, status, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
+  ).run(userId, assetId || null, JSON.stringify(platforms || []), caption || '', scheduledAt, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function getSocialPosts(userId) {
+  return db.prepare('SELECT * FROM social_posts WHERE user_id = ? ORDER BY scheduled_at ASC').all(userId);
+}
+
+function getSocialPost(userId, id) {
+  return db.prepare('SELECT * FROM social_posts WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateSocialPost(userId, id, fields) {
+  const sets = [];
+  const vals = [];
+  if (fields.caption !== undefined) { sets.push('caption = ?'); vals.push(fields.caption); }
+  if (fields.platforms !== undefined) { sets.push('platforms = ?'); vals.push(JSON.stringify(fields.platforms)); }
+  if (fields.scheduledAt !== undefined) { sets.push('scheduled_at = ?'); vals.push(fields.scheduledAt); }
+  if (fields.status !== undefined) { sets.push('status = ?'); vals.push(fields.status); }
+  if (fields.postedPlatforms !== undefined) { sets.push('posted_platforms = ?'); vals.push(JSON.stringify(fields.postedPlatforms)); }
+  if (!sets.length) return;
+  sets.push('updated_at = ?'); vals.push(new Date().toISOString());
+  vals.push(userId, id);
+  db.prepare(`UPDATE social_posts SET ${sets.join(', ')} WHERE user_id = ? AND id = ?`).run(...vals);
+}
+
+function deleteSocialPost(userId, id) {
+  db.prepare('DELETE FROM social_posts WHERE user_id = ? AND id = ?').run(userId, id);
+}
+
+// Flips any 'pending' post whose time has come to 'due' - the tick worker in
+// studio.js calls this, then the client polls for 'due' posts to raise the
+// "time to post" banner even if the browser was closed when the time hit.
+function promoteDueSocialPosts() {
+  const nowIso = new Date().toISOString();
+  db.prepare("UPDATE social_posts SET status = 'due', updated_at = ? WHERE status = 'pending' AND scheduled_at <= ?")
+    .run(nowIso, nowIso);
+}
+
+function getDueSocialPosts(userId) {
+  return db.prepare("SELECT * FROM social_posts WHERE user_id = ? AND status = 'due' ORDER BY scheduled_at ASC").all(userId);
+}
+
+/* ---------------- teleprompter scripts ---------------- */
+// Saved on the server rather than in the browser so the same scripts are there
+// on the computer that films and the phone that posts.
+function createScript(userId, title, body) {
+  const now = new Date().toISOString();
+  const info = db.prepare(
+    'INSERT INTO studio_scripts (user_id, title, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
+  ).run(userId, title, body, now, now);
+  return Number(info.lastInsertRowid);
+}
+
+function getScripts(userId) {
+  return db.prepare('SELECT * FROM studio_scripts WHERE user_id = ? ORDER BY updated_at DESC').all(userId);
+}
+
+function getScript(userId, id) {
+  return db.prepare('SELECT * FROM studio_scripts WHERE user_id = ? AND id = ?').get(userId, id);
+}
+
+function updateScript(userId, id, title, body) {
+  db.prepare('UPDATE studio_scripts SET title = ?, body = ?, updated_at = ? WHERE user_id = ? AND id = ?')
+    .run(title, body, new Date().toISOString(), userId, id);
+}
+
+function deleteScript(userId, id) {
+  db.prepare('DELETE FROM studio_scripts WHERE user_id = ? AND id = ?').run(userId, id);
 }
 
 /* ---------------- error log (for in-app diagnostics) ---------------- */
@@ -448,6 +617,7 @@ module.exports = {
   getAssets,
   getAsset,
   deleteAsset,
+  resetUserContent,
   unlinkAssetFromCharacter,
   createLocation,
   getLocations,
@@ -475,4 +645,20 @@ module.exports = {
   addFanSignup,
   getFanSignups,
   getFanSignupCount,
+  logFalReceipt,
+  setFalReceiptStatus,
+  getOpenFalReceipts,
+  getFalReceipts,
+  createSocialPost,
+  getSocialPosts,
+  getSocialPost,
+  updateSocialPost,
+  deleteSocialPost,
+  promoteDueSocialPosts,
+  getDueSocialPosts,
+  createScript,
+  getScripts,
+  getScript,
+  updateScript,
+  deleteScript,
 };

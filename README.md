@@ -1,70 +1,49 @@
-# Turn Someday Into Day One
+# 🎬 Studio — AI music-video maker
 
-A recovery companion app: daily lessons, journaling, streak tracking, an AI chat companion (Nova), and Pro tools for deeper support.
+Turn your song + your pictures into a finished music video on your own machine. Generate scenes with consistent characters (trained face locks), animate stills, lip-sync, dance-transfer, beat-match a timeline, and export shorts + a posting campaign. Runs locally on your fal.ai key; free editing/rendering, AI steps cost cents and always show their price first.
+
+**Non-technical owner's manual: [HOW-TO-USE.md](HOW-TO-USE.md).**
 
 ## Setup
 
-**This repo contains two separate apps:**
-
-| App | Launcher | Address |
-|---|---|---|
-| **Turn Someday Into Day One** (recovery companion) | `Start My App` (.bat / .command / start-app.sh) | `localhost:4300` |
-| **Studio** (music-video production suite) | `Start Studio` (.bat / .command / start-studio.sh) | `localhost:4400` |
-
-They share nothing — separate servers, accounts, databases, and media. Double-click a launcher and it installs what's needed on first run, creates its `.env` with a session secret automatically, starts its server, and opens the right page. (Only requirement: [Node.js](https://nodejs.org) installed.) Studio's full manual: [HOW-TO-USE.md](HOW-TO-USE.md).
+Just double-click **Start Studio** (`.bat` on Windows, `.command` on Mac, or `start-studio.sh` on Linux). On first run it installs what's needed, writes `Studio/server/.env` with a session secret, starts the server on `localhost:4400`, and opens your browser. Only requirement: [Node.js](https://nodejs.org) (LTS).
 
 **Manual way:**
 
 ```bash
 git clone https://github.com/Jacqueslm/app.git
-cd app/TurnSomeDayIntoOneday/server
+cd app/Studio/server
 npm install
+node server.js          # serves http://localhost:4400
 ```
 
-Create `server/.env`:
+`Studio/server/.env` (auto-created on first launch):
 
 ```
-PORT=4300
+PORT=4400
 SESSION_SECRET=<a long random string>
+FAL_KEY=<your fal.ai key>     # or set it in-app: ⚙ Settings → 🔑 AI key
 ```
 
-Optional, if you want these features working too:
+## Turn on AI
 
-```
-ANTHROPIC_API_KEY=<your key>              # without this, Nova falls back to local canned replies
-STRIPE_PUBLISHABLE_KEY=<pk_test_... or pk_live_...>
-STRIPE_SECRET_KEY=<sk_test_... or sk_live_...>
-STRIPE_WEBHOOK_SECRET=<whsec_...>         # from `stripe listen` (local) or your webhook endpoint (production)
-```
+Sign up (any email + password/PIN, stored only on your machine), then **⚙ Settings → 🔑 AI key (fal.ai)** → paste your key → Save. The top badge reads **AI READY**. Your fal.ai account needs a little credit; AI buttons stay hidden until the key is set. Free stuff (uploads, timeline, camera moves, transitions, captions, rendering) needs no key.
 
-## Run
+## Your data & backups
 
-```bash
-node server.js
-```
+Everything lives under `Studio/server/`: your account + characters + **face locks** in `data.sqlite`, your media in `media/`, your key in `.env`. **Back up `data.sqlite`** after training/restoring a face lock (or use ⚙ Settings → ⬇ Back up everything). Copying an old `data.sqlite` back restores everything at once.
 
-Open `http://localhost:4300` in a browser and sign up.
+## The five tabs
 
-## Test on your phone
+- **🖼 My Media** — your uploads and generations as thumbnails (Pictures / Video clips / Songs); upload, open the media folder.
+- **⚙ Settings** — AI key, update the app, back up everything, **🗑 Start fresh** (wipe all content, keep login).
+- **Characters** — create a star, upload 6–20 reference photos, **🔒 Train face lock**, or paste an existing LoRA URL + trigger word to restore one.
+- **AI Scenes** — the generation pipeline (details below). Your **Library** with the per-image **Sing**, Animate, Motion, Crop tools lives here.
+- **Sequencer** — where videos get made: Quick Video, timeline, lyrics/captions, shorts, campaign export.
 
-1. Find your computer's local IP while the server is running:
-   - Mac: `ipconfig getifaddr en0`
-   - Windows: `ipconfig` (look for "IPv4 Address")
-   - Linux: `hostname -I`
-2. Connect your phone to the **same Wi-Fi network**.
-3. On your phone's browser, go to `http://<that-IP>:4300`.
-4. Optional — install it as a home-screen app: Safari → Share → "Add to Home Screen", or Chrome → ⋮ menu → "Add to Home Screen".
+## Studio internals (developer reference)
 
-## Notes
-
-- Data is stored locally in `server/data.sqlite` (SQLite).
-- Signup accepts a password (8+ characters) **or a 4–6 digit PIN**, plus an optional phone number. Pro accounts get 50 Nova chats/day (free: 3).
-- A Privacy Policy and Terms of Service live in Profile → About (and are linked from signup). They're a plain-language template describing how the app actually works — **have an attorney review both before opening signups to the public**, and fill in the placeholder contact email in `index.html`.
-- Profile page extras: one-click **app updates** (`APP_UPDATE_REPO`/`APP_UPDATE_BRANCH`/`APP_UPDATE_TOKEN` env overrides; set `APP_OWNER_EMAIL` before going public so only you can trigger a server update), **Log out**, and **Erase everything & start over** (deletes the account and all data after password confirmation).
-- The free tier (Days 1–15, basic Nova, journal, streaks, SOS tools) works fully with no optional keys configured. Pro screens show an upgrade preview until Stripe is configured and a real subscription/purchase completes.
-- **Studio** is its own standalone app in `/Studio` (own server on port 4400, own accounts, own library — start it with `Start Studio`; paste a fal.ai key into its "Turn on AI" box for the AI features). Four tabs:
-  - **Art** — local generative art: prompt-seeded styles (Aurora, Nebula, Waves, Flow, Mosaic), PNG wallpapers and looping WebM videos, all rendered in the browser with no keys. With `OPENAI_API_KEY` set, adds an "AI Photo" mode (3/day free, 20/day Pro).
-  - **AI Scenes** (needs a fal.ai key + sign-in — paste it once into the "Turn on AI" box in the app, no `.env` editing or restart needed; the key is stored in `server/.env` and removable from Storage & Backup) — the music-video pipeline: generate scene stills with Flux (a 1/2/3/4-at-once picker gives multiple takes of the same prompt in parallel; a quality picker swaps in Google's Nano Banana Pro at ~$0.15/image — `FAL_MODEL_IMAGE_BEST(_EDIT)`, `STUDIO_RATE_IMAGE_BEST` — for best-in-class text-inside-the-image and multi-person shots), keep characters consistent via reference photos (FLUX.2 pro edit studies up to 4 of them at once, 6 on Banana Pro — refs are downscaled locally to keep payloads and per-megapixel billing down; ~$0.09/image, `STUDIO_RATE_CHARACTER_IMAGE`) or a trained LoRA, put **two characters in one scene** (a second dropdown sends 3–5 reference photos per person with a keep-both-faces instruction), then animate any still into a 5s/10s clip with Kling image-to-video. Guardrails: every generation carries a one-continuous-frame instruction (skipped when the prompt explicitly asks for a collage) so multi-moment prompts don't render as split-screen panels; a duplicate-shot check warns before regenerating a near-identical prompt; inlined reference payloads are capped (~6MB) with network-level submit retries; fal content-policy 422s surface as one plain sentence instead of the raw response. A **Sing** button on any image or video lip-syncs the face to a chosen slice of your song (stills via SadTalker; videos get a Draft/Hero tier picker — MuseTalk ~$0.04 vs LatentSync $0.20 flat under 40s, `FAL_MODEL_LIPSYNC_DRAFT`/`FAL_MODEL_LIPSYNC_HERO`, `STUDIO_RATE_SING_*`; segment cut locally with ffmpeg, max 30s per clip). **🎭 Live Portrait** (`fal-ai/live-portrait`, ~10¢, `STUDIO_RATE_LIVEPORTRAIT`) animates an approved still's face/eyes/head from a driving clip you film — canon-safe, the image is never regenerated. **Dance Transfer** maps your own recorded dance onto a character image with a Draft/Standard/Hero tier picker (Wan-Animate / Kling v2.6 standard / Kling v3 pro motion-control — `FAL_MODEL_MOTION(_STD/_HERO)`, `STUDIO_RATE_DANCE_*` per-second estimates on the chips; Kling paths add `character_orientation:'video'`. Viggle isn't on fal — the original spec's free tier doesn't exist): film yourself full-body, pick the character image + your clip + which seconds of moves, and the character performs them — the driving video is trimmed and downscaled locally before upload. Results land in your library. Animate has a Draft / Standard / Best quality picker (Seedance ~\$0.04/s, Kling 3.0 Standard ~\$0.08/s, Kling 3.0 Pro ~\$0.11/s) with the estimated cost shown right on the 5s/10s buttons before you generate — rates are a July 2026 snapshot, overridable via STUDIO_RATE_* and FAL_MODEL_I2V_* env vars. Daily caps default to 300 images / 60 videos (`STUDIO_DAILY_IMAGE_LIMIT` / `STUDIO_DAILY_VIDEO_LIMIT`); fal model ids can be overridden via `FAL_MODEL_*` env vars if fal renames them.
+- **AI Scenes** (needs a fal.ai key + sign-in — paste it once into the "Turn on AI" box in the app, no `.env` editing or restart needed; the key is stored in `server/.env` and removable from Storage & Backup) — the music-video pipeline: generate scene stills with Flux (a 1/2/3/4-at-once picker gives multiple takes of the same prompt in parallel; a quality picker swaps in Google's Nano Banana Pro at ~$0.15/image — `FAL_MODEL_IMAGE_BEST(_EDIT)`, `STUDIO_RATE_IMAGE_BEST` — for best-in-class text-inside-the-image and multi-person shots), keep characters consistent via reference photos (FLUX.2 pro edit studies up to 4 of them at once, 6 on Banana Pro — refs are downscaled locally to keep payloads and per-megapixel billing down; ~$0.09/image, `STUDIO_RATE_CHARACTER_IMAGE`) or a trained LoRA, put **two characters in one scene** (a second dropdown sends 3–5 reference photos per person with a keep-both-faces instruction), then animate any still into a 5s/10s clip with Kling image-to-video. Guardrails: every generation carries a one-continuous-frame instruction (skipped when the prompt explicitly asks for a collage) so multi-moment prompts don't render as split-screen panels; a duplicate-shot check warns before regenerating a near-identical prompt; inlined reference payloads are capped (~6MB) with network-level submit retries; fal content-policy 422s surface as one plain sentence instead of the raw response. A **Sing** button on any image or video lip-syncs the face to a chosen slice of your song (stills via SadTalker; videos get a Draft/Hero tier picker — MuseTalk ~$0.04 vs LatentSync $0.20 flat under 40s, `FAL_MODEL_LIPSYNC_DRAFT`/`FAL_MODEL_LIPSYNC_HERO`, `STUDIO_RATE_SING_*`; segment cut locally with ffmpeg, max 30s per clip). **🎭 Live Portrait** (`fal-ai/live-portrait`, ~10¢, `STUDIO_RATE_LIVEPORTRAIT`) animates an approved still's face/eyes/head from a driving clip you film — canon-safe, the image is never regenerated. **Dance Transfer** maps your own recorded dance onto a character image with a Draft/Standard/Hero tier picker (Wan-Animate / Kling v2.6 standard / Kling v3 pro motion-control — `FAL_MODEL_MOTION(_STD/_HERO)`, `STUDIO_RATE_DANCE_*` per-second estimates on the chips; Kling paths add `character_orientation:'video'`. Viggle isn't on fal — the original spec's free tier doesn't exist): film yourself full-body, pick the character image + your clip + which seconds of moves, and the character performs them — the driving video is trimmed and downscaled locally before upload. Results land in your library. Animate has a Draft / Standard / Best quality picker (Seedance ~\$0.04/s, Kling 3.0 Standard ~\$0.08/s, Kling 3.0 Pro ~\$0.11/s) with the estimated cost shown right on the 5s/10s buttons before you generate — rates are a July 2026 snapshot, overridable via STUDIO_RATE_* and FAL_MODEL_I2V_* env vars. Daily caps default to 300 images / 60 videos (`STUDIO_DAILY_IMAGE_LIMIT` / `STUDIO_DAILY_VIDEO_LIMIT`); fal model ids can be overridden via `FAL_MODEL_*` env vars if fal renames them.
   - **Scene memory**: **Locations** (`studio_locations` + CRUD routes; photos attach via upload `?locationId=` → `meta.locationRef`) add a dropdown to AI Scenes — up to 2 location photos join the reference images with a set-the-scene-exactly-here instruction (plain-prompt scenes switch to the photo-conditioned editor; the LoRA path takes the description as text since it's text-only). **Relationships** (`studio_relationships`, unordered pair per user) store a chemistry descriptor that auto-appends to every duo scene's identity instruction. **Camera coverage** (`POST /coverage`) re-renders an approved generated scene as wide/medium/closeup/over-the-shoulder/detail variants — it reuses the scene's stored prompt (leading shot-phrase stripped), cast, location, size and quality, with a same-moment-only-the-framing-changes instruction; per-shot pricing on the button, results tagged `coverageOf`/`shot`.
   - **Casting Director + QC**: characters carry a `description` cast-sheet column (migrated via PRAGMA check) shown on their card; the crew's Director matches scene lyrics/prompts against star names + cast-sheet words (token match, ≥3-char words or full-name phrase) and casts up to two stars per scene ("starring X" in the plan; the Producer generates with those characterIds, falling back to the dropdown). Cast-sheet notes append to generated identity prompts. `POST /qc` runs a generated image through fal Moondream (`fal-ai/moondream3-preview/query`, `FAL_MODEL_QC`, ~½¢ `STUDIO_RATE_QC`) with a strict PASS/FLAG inspection prompt (faces, finger counts, limbs, structure); the verdict + reason land in `meta.qc`, badge (⚠/✅) in the Library with the reason on hover, manual 🔍 QC button on generated images, and the Producer auto-QCs every scene it generates (best-effort, never blocks) and reports flag counts in its final status.
   - **Library editing toolbox** (free, local ffmpeg/canvas, originals always kept): **Crop** photos to 9:16/1:1/4:5/16:9 with keep-side choice (crops of uploads inherit the character link and count as reference photos); **2×** sharp-resize upscale; **Cut** videos (keep-only a span, or remove a middle chunk with the sides rejoined, audio preserved and only mapped when the source has an audio stream); **Loop** videos 2×/4×/6× as a seamless forward-reverse ping-pong (inputs capped at 15s — reverse buffers frames in RAM); **Sound** on videos (mute, or swap in a library song from a chosen offset; `-c:v copy` so both are instant); **🎨 Simple screens** card makes black/white/gradient/custom-color 1920×1080 stills client-side.

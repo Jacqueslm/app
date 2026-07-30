@@ -942,8 +942,26 @@ body.simple-only #view-simple{display:flex !important}
             <option value="image">Picture background…</option>
           </select>
           <input type="file" id="webcam-bg-file" accept="image/*" style="display:none">
+          <button class="btn2 quiet" id="webcam-pause" style="display:none">⏸ Pause</button>
           <video id="webcam-preview" muted playsinline style="display:none;width:220px;border-radius:8px;background:#000"></video>
         </div>
+        <details id="wc-opts" style="margin-top:8px">
+          <summary style="cursor:pointer;font-size:13px;color:var(--ts)">⚙ Camera options (device, focus, exposure, auto-stop…)</summary>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <select class="input" id="wc-cam-dev" style="flex:1;min-width:140px" title="Camera"><option value="">Default camera</option></select>
+            <select class="input" id="wc-mic-dev" style="flex:1;min-width:140px" title="Microphone"><option value="">Default microphone</option></select>
+            <select class="input" id="wc-autostop" style="width:auto" title="Stop recording automatically">
+              <option value="0">No auto-stop</option>
+              <option value="30">Stop after 30s</option>
+              <option value="60">Stop after 1 min</option>
+              <option value="180">Stop after 3 min</option>
+              <option value="300">Stop after 5 min</option>
+              <option value="600">Stop after 10 min</option>
+            </select>
+          </div>
+          <div id="wc-caps" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+          <p class="usage" id="wc-caps-note" style="margin:6px 0 0">Start the camera once and the tune-up sliders your webcam supports (focus, white balance, exposure, zoom…) appear here and apply live. What shows up depends on the camera and browser — Chrome and Edge expose the most.</p>
+        </details>
         <p class="usage" id="webcam-rec-note" style="margin:6px 0 0">Records your camera and your mic audio — no screen capture. Pick a countdown so you can get set, open the teleprompter behind your camera, then hit record (or snap a still). Background blur/swap fetches a small on-device model the first time, so it needs internet once.</p>
       </div>
     </div>
@@ -2556,8 +2574,109 @@ $('#media-record').onclick = async () => {
 // capture, and background blur/replace via on-device segmentation (MediaPipe,
 // fetched from CDN once; falls back to the real background when offline).
 // Mic audio is always recorded alongside the video. ---
-const webcamRec = { phase: 'idle', mr: null, chunks: [], stream: null, t0: 0, timer: null, cancel: null, bgImg: null, seg: null, segActive: false, rawVid: null, canvas: null };
+const webcamRec = { phase: 'idle', mr: null, chunks: [], stream: null, t0: 0, timer: null, cancel: null, bgImg: null, seg: null, segActive: false, rawVid: null, canvas: null, paused: false, track: null };
 const wcNote = () => $('#webcam-rec-note');
+
+// --- Device pickers. Labels only appear after camera permission is granted,
+// so refresh the lists whenever the panel opens or a stream starts. Choices
+// stick in localStorage so your good mic stays picked next session. ---
+async function wcListDevices() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+  let devs = [];
+  try { devs = await navigator.mediaDevices.enumerateDevices(); } catch (_) { return; }
+  const fill = (sel, kind, defLabel) => {
+    const saved = localStorage.getItem('wc-dev-' + kind) || '';
+    sel.innerHTML = `<option value="">${defLabel}</option>`;
+    let n = 0;
+    for (const d of devs) {
+      if (d.kind !== kind) continue;
+      n += 1;
+      const o = document.createElement('option');
+      o.value = d.deviceId;
+      o.textContent = d.label || `${defLabel} ${n}`;
+      sel.appendChild(o);
+    }
+    if ([...sel.options].some((o) => o.value === saved)) sel.value = saved;
+  };
+  fill($('#wc-cam-dev'), 'videoinput', 'Default camera');
+  fill($('#wc-mic-dev'), 'audioinput', 'Default microphone');
+}
+$('#wc-cam-dev').onchange = () => { localStorage.setItem('wc-dev-videoinput', $('#wc-cam-dev').value); if (webcamRec.phase !== 'idle') wcNote().textContent = 'New camera applies on the next take.'; };
+$('#wc-mic-dev').onchange = () => { localStorage.setItem('wc-dev-audioinput', $('#wc-mic-dev').value); if (webcamRec.phase !== 'idle') wcNote().textContent = 'New microphone applies on the next take.'; };
+$('#wc-opts').addEventListener('toggle', () => { if ($('#wc-opts').open) wcListDevices(); });
+
+// --- Live camera tune-up: read what THIS camera actually supports via
+// getCapabilities() and render a slider per control. Applies instantly to the
+// running track; HDR/denoising style extras never reach the browser, so only
+// real, supported controls are shown. ---
+const WC_SLIDERS = [
+  ['zoom', 'Zoom', null],
+  ['brightness', 'Brightness', null],
+  ['contrast', 'Contrast', null],
+  ['saturation', 'Saturation', null],
+  ['sharpness', 'Sharpness', null],
+  ['exposureCompensation', 'Exposure / backlight comp.', null],
+  ['colorTemperature', 'White balance (K)', ['whiteBalanceMode', 'Auto white balance']],
+  ['focusDistance', 'Focus', ['focusMode', 'Auto focus']],
+];
+function wcApply(track, c) { track.applyConstraints({ advanced: [c] }).catch(() => {}); }
+function wcBuildCaps(stream) {
+  const box = $('#wc-caps');
+  box.innerHTML = '';
+  const track = stream.getVideoTracks()[0];
+  webcamRec.track = track;
+  if (!track || !track.getCapabilities) { $('#wc-caps-note').textContent = 'This browser does not expose camera tuning — try Chrome or Edge.'; return; }
+  const caps = track.getCapabilities();
+  const cur = track.getSettings ? track.getSettings() : {};
+  let shown = 0;
+  for (const [key, label, autoPair] of WC_SLIDERS) {
+    const cap = caps[key];
+    if (!cap || cap.max === undefined || cap.max === cap.min) continue;
+    shown += 1;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+    const lab = document.createElement('span');
+    lab.style.cssText = 'font-size:12px;color:var(--ts);min-width:150px';
+    lab.textContent = label;
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = cap.min; slider.max = cap.max; slider.step = cap.step || 1;
+    slider.value = cur[key] !== undefined ? cur[key] : (cap.min + cap.max) / 2;
+    slider.style.flex = '1';
+    row.appendChild(lab); row.appendChild(slider);
+    if (autoPair && Array.isArray(caps[autoPair[0]]) && caps[autoPair[0]].includes('continuous')) {
+      const autoLab = document.createElement('label');
+      autoLab.style.cssText = 'font-size:12px;color:var(--ts);display:flex;align-items:center;gap:4px';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = cur[autoPair[0]] !== 'manual';
+      cb.onchange = () => {
+        if (cb.checked) wcApply(track, { [autoPair[0]]: 'continuous' });
+        else wcApply(track, { [autoPair[0]]: 'manual', [key]: Number(slider.value) });
+      };
+      autoLab.appendChild(cb); autoLab.appendChild(document.createTextNode(autoPair[1]));
+      row.appendChild(autoLab);
+      slider.oninput = () => { cb.checked = false; wcApply(track, { [autoPair[0]]: 'manual', [key]: Number(slider.value) }); };
+    } else {
+      slider.oninput = () => wcApply(track, { [key]: Number(slider.value) });
+    }
+    box.appendChild(row);
+  }
+  if (caps.torch) {
+    shown += 1;
+    const tl = document.createElement('label');
+    tl.style.cssText = 'font-size:12px;color:var(--ts);display:flex;align-items:center;gap:6px';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.onchange = () => wcApply(track, { torch: cb.checked });
+    tl.appendChild(cb); tl.appendChild(document.createTextNode('Flash / torch'));
+    box.appendChild(tl);
+  }
+  $('#wc-caps-note').textContent = shown
+    ? 'Sliders apply live — what you see in the preview is what gets recorded.'
+    : 'This camera does not expose extra tuning to the browser (backlight, focus, HDR live in its own driver app).';
+  wcListDevices();
+}
 
 $('#webcam-bg').onchange = () => { if ($('#webcam-bg').value === 'image') $('#webcam-bg-file').click(); };
 $('#webcam-bg-file').onchange = () => {
@@ -2577,8 +2696,12 @@ function wcSupported(note) {
 }
 
 async function wcOpenCam(note, withMic) {
+  const camId = $('#wc-cam-dev').value, micId = $('#wc-mic-dev').value;
+  const video = { width: { ideal: 1920 }, height: { ideal: 1080 } };
+  if (camId) video.deviceId = { exact: camId };
+  const audio = withMic ? (micId ? { deviceId: { exact: micId } } : true) : false;
   try {
-    return await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: !!withMic });
+    return await navigator.mediaDevices.getUserMedia({ video, audio });
   } catch (e) {
     note.textContent = e.name === 'NotAllowedError' ? 'Camera/mic permission denied — allow access and try again.' : `Could not access webcam: ${e.message}`;
     return null;
@@ -2660,6 +2783,8 @@ async function wcEffectStream(stream, mode, note) {
 
 function wcTeardown(preview) {
   webcamRec.segActive = false;
+  webcamRec.track = null;
+  $('#wc-caps').querySelectorAll('input').forEach((i) => { i.disabled = true; });
   if (webcamRec.rawVid) { try { webcamRec.rawVid.srcObject = null; } catch (_) {} webcamRec.rawVid = null; }
   webcamRec.canvas = null;
   if (webcamRec.stream) { webcamRec.stream.getTracks().forEach((t) => t.stop()); webcamRec.stream = null; }
@@ -2719,6 +2844,7 @@ $('#webcam-record').onclick = async () => {
   const stream = await wcOpenCam(note, true);
   if (!stream) return;
   webcamRec.stream = stream;
+  wcBuildCaps(stream);
 
   // Show yourself (with the chosen background) while the countdown runs.
   const rec = await wcEffectStream(stream, $('#webcam-bg').value, note);
@@ -2736,6 +2862,8 @@ $('#webcam-record').onclick = async () => {
   mr.onstop = async () => {
     clearInterval(webcamRec.timer);
     wcTeardown(preview);
+    $('#webcam-pause').style.display = 'none';
+    webcamRec.paused = false;
     b.classList.remove('primary'); b.disabled = true; b.textContent = '⏳ Saving…';
     try {
       const blob = new Blob(webcamRec.chunks, { type: mime });
@@ -2750,13 +2878,27 @@ $('#webcam-record').onclick = async () => {
   };
   mr.start(1000);
   webcamRec.t0 = 0;
+  webcamRec.paused = false;
+  $('#webcam-pause').style.display = ''; $('#webcam-pause').textContent = '⏸ Pause';
+  const autoStop = parseInt($('#wc-autostop').value, 10) || 0;
   b.classList.add('primary'); b.textContent = '⏺ Stop recording (0:00)';
   note.textContent = 'Recording (camera + mic) — read from the teleprompter above, look at the lens.';
   webcamRec.timer = setInterval(() => {
+    if (webcamRec.paused) return; // paused time doesn't count toward auto-stop
     webcamRec.t0 += 1;
     const m = Math.floor(webcamRec.t0 / 60), s = String(webcamRec.t0 % 60).padStart(2, '0');
     b.textContent = `⏺ Stop recording (${m}:${s})`;
+    if (autoStop && webcamRec.t0 >= autoStop && mr.state !== 'inactive') { note.textContent = 'Auto-stop reached — saving.'; mr.stop(); }
   }, 1000);
+};
+
+// Pause/resume the take without splitting it into two clips. Paused stretches
+// are simply absent from the saved video.
+$('#webcam-pause').onclick = () => {
+  const mr = webcamRec.mr;
+  if (!mr) return;
+  if (mr.state === 'recording') { mr.pause(); webcamRec.paused = true; $('#webcam-pause').textContent = '▶ Resume'; wcNote().textContent = 'Paused — hit Resume to keep going in the same clip.'; }
+  else if (mr.state === 'paused') { mr.resume(); webcamRec.paused = false; $('#webcam-pause').textContent = '⏸ Pause'; wcNote().textContent = 'Recording (camera + mic) — read from the teleprompter above, look at the lens.'; }
 };
 
 $('#webcam-photo').onclick = async () => {
@@ -2773,6 +2915,7 @@ $('#webcam-photo').onclick = async () => {
   const stream = await wcOpenCam(note, false);
   if (!stream) return;
   webcamRec.stream = stream;
+  wcBuildCaps(stream);
   const shown = await wcEffectStream(stream, $('#webcam-bg').value, note);
   preview.srcObject = shown; preview.style.display = ''; preview.play().catch(() => {});
 

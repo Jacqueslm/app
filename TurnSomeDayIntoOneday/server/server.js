@@ -90,6 +90,16 @@ app.get('/when-he-drinks', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
 });
 
+// Short bio links with tracking baked in, so a platform bio only ever needs
+// "/go/tiktok" - the redirect adds the UTM tags and stats attribution works
+// without anyone hand-building tagged URLs. Unknown names still land safely.
+const GO_SOURCES = new Set(['tiktok', 'youtube', 'facebook', 'instagram', 'buffer']);
+app.get('/go/:src', (req, res) => {
+  const src = String(req.params.src || '').toLowerCase();
+  if (!GO_SOURCES.has(src)) return res.redirect('/when-he-drinks');
+  res.redirect(`/when-he-drinks?utm_source=${src}&utm_medium=social&utm_campaign=her-drinking`);
+});
+
 // One-click unsubscribe from any inbox - no login. Idempotent by design:
 // setting the flag to 1 again is the same write and the same page, so a
 // double-click or a second device never sees an error.

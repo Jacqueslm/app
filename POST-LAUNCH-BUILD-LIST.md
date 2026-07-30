@@ -5,11 +5,20 @@ Store testing and live. Not started — captured here so they're ready to build.
 
 ---
 
-## 1. Real background lesson audio (podcast-style) — ✅ DONE (in another session)
+## 1. Lesson/SOS audio cutting off — ✅ SUBSTANTIALLY FIXED (another session)
 
-Completed elsewhere: lessons converted to real audio for background/locked
-playback. No further work here. (If it shipped on a different branch, make sure
-it's merged into main / the vibe-code-uwxxlk branch before the Play-side update.)
+Shipped (commit bf291bd, merged to main): a shared **wake-lock manager** that
+keeps the screen awake during lesson audio AND the SOS tools (voice guide,
+breathing, urge surfing, panic mode), re-acquiring the lock whenever the system
+revokes it, plus a nudge to restart a paused speech engine when returning from a
+manual lock. This fixes the common case — the screen no longer times out and
+kills the narration mid-lesson.
+
+**Still open (only if wanted):** true *background* audio with the screen manually
+locked or the app switched away needs the MP3 + MediaSession conversion (browser
+TTS can't background). The wake-lock fix covers "keep listening while the lesson
+is on screen"; the MP3 route is the "listen with screen off / in another app /
+lock-screen controls" upgrade. Free feature. Revisit only if users ask for it.
 
 ---
 

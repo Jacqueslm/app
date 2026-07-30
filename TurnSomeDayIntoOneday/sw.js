@@ -1,10 +1,12 @@
-const CACHE_NAME = 'tsid-shell-v12.1.0'; // v12.1.0: precache the SOS talk MP3 so it plays offline; never cache partial (206) media responses
+const CACHE_NAME = 'tsid-shell-v12.2.0'; // v12.2.0: SOS talk voice picker - three recordings, all precached for offline
 const SHELL_FILES = [
   '/',
   '/app',
   '/manifest.json',
   '/manifest-discrete.json',
-  '/audio/sos-talk.mp3',
+  '/audio/sos-talk-warm.mp3',
+  '/audio/sos-talk-soft.mp3',
+  '/audio/sos-talk-clear.mp3',
   '/data/lessons.json',
   '/data/stories.json',
   '/icons/icon-192.png',

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.3.0'; // v12.3.0: two more SOS talk voices - Gentle (soft-spoken woman) and Calm male
+const CACHE_NAME = 'tsid-shell-v12.3.2'; // v12.3.2: resume the SOS talk if the phone pauses it; say plainly when the phone's own voice is in use
 const SHELL_FILES = [
   '/',
   '/app',

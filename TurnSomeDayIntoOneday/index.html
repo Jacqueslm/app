@@ -5906,11 +5906,16 @@ function cycleVgVoice(){
 function updateVgVoiceBtn(){
   const b=document.getElementById('vg-voice-btn');
   if(b)b.textContent='Voice: '+VG_VOICES[vgVoiceKey()].label;
-  // Only shown when a chosen recording could not be played, because that is
-  // exactly when the talk stops on leaving the app - the recorded voices keep
-  // going, the phone's own voice cannot. Silent otherwise.
+  // The phone's own voice is the one voice that cannot survive leaving the app,
+  // whether it was picked deliberately or fallen back to. Say so in that case
+  // and only that case - on a recorded voice this stays silent.
   const n=document.getElementById('vg-fallback-note');
-  if(n)n.style.display=vgFellBack?'block':'none';
+  if(!n)return;
+  const onPhoneVoice=vgFellBack||vgVoiceKey()==='phone';
+  n.style.display=onPhoneVoice?'block':'none';
+  if(onPhoneVoice)n.textContent=vgFellBack
+    ?"Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app."
+    :"Your phone's own voice pauses if you leave the app. Tap Voice for a recorded one that keeps playing.";
 }
 function vgSyncStep(i){
   if(i===vgAudioStep||!vgActive)return;
@@ -8583,7 +8588,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.3.1';
+const APP_VERSION='12.3.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

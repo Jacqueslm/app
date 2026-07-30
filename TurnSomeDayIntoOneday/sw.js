@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.3.1'; // v12.3.1: resume the SOS talk if the phone pauses it in the background; say so when a recording can't load
+const CACHE_NAME = 'tsid-shell-v12.3.2'; // v12.3.2: resume the SOS talk if the phone pauses it; say plainly when the phone's own voice is in use
 const SHELL_FILES = [
   '/',
   '/app',

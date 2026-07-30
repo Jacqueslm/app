@@ -2265,6 +2265,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 
+<!-- PASSWORD-CONFIRM MODAL. Replaces native prompt(), which returns null in
+     many WebViews/embeds and silently kills delete/erase - the exact flows a
+     Play-compliance page (delete-account.html) sends users to. -->
+<div class="sos-modal" id="pwconfirm-modal" onclick="if(event.target===this)closePwConfirmModal()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:#E24B4A" id="pwconfirm-title">Confirm</div>
+    <div class="sos-sub" id="pwconfirm-msg"></div>
+    <input id="pwconfirm-input" type="password" autocomplete="current-password" placeholder="Password or PIN" style="width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin:6px 0 10px">
+    <div class="pin-error" id="pwconfirm-err" style="text-align:left">&nbsp;</div>
+    <button class="ob-btn" style="margin-top:4px;background:#E24B4A" id="pwconfirm-ok" onclick="pwConfirmYes()">Confirm</button>
+    <button class="sos-close" onclick="closePwConfirmModal()">Cancel</button>
+  </div>
+</div>
+
 <!-- BREATHE OVERLAY -->
 <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
@@ -2402,6 +2416,11 @@ function load(){
   try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}
   // Blobs written by older builds still carry a stored conversation - drop it.
   S.chatHistory=[];
+  // voiceJournalActive is a runtime flag, not saved data. It gets persisted if
+  // the app closes mid-recording (save() runs before the recognizer's onend),
+  // and a stuck 'true' makes startVoiceJournal return silently forever. Always
+  // clear it on load so the feature can never brick itself.
+  S.voiceJournalActive=false;
   // Migrate the old single global lesson-day counter into a per-focus-area map, so
   // users who picked multiple focus areas before this existed don't lose their spot
   // in the track they were already on.
@@ -5339,7 +5358,7 @@ function likeStory(btn,id){
   save();
 }
 function reportPost(btn){
-  appConfirm("Hide this post? You won't see it again, and it helps us know what to review.",()=>{
+  appConfirm("Hide this post? You won't see it again.",()=>{
     const wrapper=btn.closest('[data-post-idx]');
     if(wrapper){
       S.communityPosts.splice(Number(wrapper.getAttribute('data-post-idx')),1);
@@ -7336,6 +7355,11 @@ Address the interactions of their unique blueprint and assign structured daily r
     if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Friendly Pro — but I'm right here either way.");
   }catch(e){
     setNovaMode(false);
+    // The credit was spent up front, but a network failure means no real
+    // session happened - only a canned local reply. Refund it so three flaky
+    // attempts at 2am don't burn the day's free chats without a single answer.
+    // (A 429 real-limit hit returns earlier and never reaches here.)
+    if(!S.isPro){S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;}
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
@@ -8238,6 +8262,35 @@ function closeInfoModal(){
   document.getElementById('info-modal').classList.remove('open');
 }
 
+// In-app password prompt (replaces native prompt() for destructive actions).
+// onConfirm receives the entered value; the modal stays open on empty input so
+// the flow can't dead-end. Callers close it via closePwConfirmModal() after a
+// server error, or it closes itself once onConfirm is invoked with a value.
+let _pwConfirmCallback=null;
+function appPassword(title,message,onConfirm){
+  document.getElementById('pwconfirm-title').textContent=title||'Confirm';
+  document.getElementById('pwconfirm-msg').textContent=message||'';
+  const inp=document.getElementById('pwconfirm-input');
+  inp.value='';
+  document.getElementById('pwconfirm-err').innerHTML='&nbsp;';
+  _pwConfirmCallback=onConfirm;
+  document.getElementById('pwconfirm-modal').classList.add('open');
+  setTimeout(()=>inp.focus(),50);
+}
+function closePwConfirmModal(){
+  document.getElementById('pwconfirm-modal').classList.remove('open');
+  _pwConfirmCallback=null;
+}
+function pwConfirmError(msg){
+  document.getElementById('pwconfirm-err').textContent=msg;
+}
+function pwConfirmYes(){
+  const val=document.getElementById('pwconfirm-input').value;
+  if(!val){pwConfirmError('Enter your password or PIN.');return;}
+  const cb=_pwConfirmCallback;
+  if(cb)cb(val);
+}
+
 // ─── SHARE ─────────────────────────────────────────────────────────────────────
 function shareMyMilestone(){
   const days=getDays();
@@ -8618,15 +8671,21 @@ async function submitChangePassword(){
 }
 
 async function pushStateToServer(){
-  if(!S.accountEmail)return;
+  if(!S.accountEmail)return false;
   try{
-    await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:serializeState()})});
-  }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */}
+    const res=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:serializeState()})});
+    return res.ok;
+  }catch(e){/* offline - localStorage already has the latest copy, next save() will retry */return false;}
 }
 
-function manualSync(){
-  pushStateToServer();
-  alert('Synced to your account.');
+async function manualSync(){
+  // Report the real outcome - the old version claimed success even when the
+  // push silently failed offline, so a user believed their data was safe on
+  // the server when it wasn't. appInfo (not native alert) so it always shows,
+  // including in sandboxed WebViews.
+  const ok=await pushStateToServer();
+  if(ok)appInfo('Synced','Your latest data is saved to your account.');
+  else appInfo("Couldn't sync","You look offline right now. Your data is safe on this device and will sync automatically once you're back online.");
 }
 
 async function signOutAccount(){
@@ -8647,8 +8706,7 @@ async function signOutAccount(){
 }
 
 function logOutFromProfile(){
-  if(!confirm('Log out? Your data stays saved on this account — log back in any time.'))return;
-  signOutAccount();
+  appConfirm('Log out? Your data stays saved on this account — log back in any time. This device will be cleared so nobody else here can see it.',()=>{signOutAccount();},{okText:'Log out',cancelText:'Stay signed in'});
 }
 
 function logOutEverywhere(){
@@ -9195,25 +9253,27 @@ function renderHelpResults(){
 // Erase absolutely everything: account + synced data on the server, plus every
 // trace in this browser. The person lands on a fresh signup, like day zero.
 async function hardResetApp(){
-  if(!confirm('Erase EVERYTHING and start over?\n\nThis deletes your account and all of its data — journal, streaks, chats, lessons, settings. There is no undo and no recovery.'))return;
-  const password=prompt('This is permanent. Enter your password (or PIN) to confirm:');
-  if(!password)return;
-  try{
-    const res=await fetch('/api/account',{
-      method:'DELETE',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password})
+  appConfirm('Erase EVERYTHING and start over? This deletes your account and all of its data — journal, streaks, chats, lessons, settings. There is no undo and no recovery.',()=>{
+    appPassword('This is permanent','Enter your password (or PIN) to confirm you want to erase everything.',async(password)=>{
+      try{
+        const res=await fetch('/api/account',{
+          method:'DELETE',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({password})
+        });
+        if(!res.ok){
+          const data=await res.json().catch(()=>({}));
+          pwConfirmError(data.error||'Could not erase your account.');
+          return;
+        }
+      }catch(e){
+        pwConfirmError('Could not reach the server. Check your connection and try again.');
+        return;
+      }
+      closePwConfirmModal();
+      localStorage.clear();
+      location.reload();
     });
-    if(!res.ok){
-      const data=await res.json().catch(()=>({}));
-      alert(data.error||'Could not erase your account.');
-      return;
-    }
-  }catch(e){
-    alert('Could not reach the server. Check that the app window is running and try again.');
-    return;
-  }
-  localStorage.clear();
-  location.reload();
+  },{okText:'Erase everything',cancelText:'Keep my data'});
 }
 
 async function loadDiagnostics(){
@@ -9288,26 +9348,27 @@ async function maybeAutoUpdate(){
 let appUpdateRunning=false;
 async function runAppUpdate(){
   if(appUpdateRunning)return;
-  if(!confirm('Update the app now? Takes a minute or two. Your account, journal, and data are kept.'))return;
-  appUpdateRunning=true;
-  const sub=document.getElementById('upd-run-sub');
-  sub.textContent='Updating… keep this page open.';
-  try{
-    const res=await fetch('/api/update',{method:'POST'});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok){sub.textContent=data.error||'Update failed.';appUpdateRunning=false;return;}
-    sub.textContent='Update installed! Close the black window, then start the app again.';
-    alert(data.message||'Update installed! Close the black window, then double-click Start My App again.');
-  }catch(e){
-    sub.textContent='Could not reach the server.';
-    appUpdateRunning=false;
-  }
+  appConfirm('Update the app now? Takes a minute or two. Your account, journal, and data are kept.',async()=>{
+    appUpdateRunning=true;
+    const sub=document.getElementById('upd-run-sub');
+    sub.textContent='Updating… keep this page open.';
+    try{
+      const res=await fetch('/api/update',{method:'POST'});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){sub.textContent=data.error||'Update failed.';appUpdateRunning=false;return;}
+      sub.textContent='Update installed! Close the black window, then start the app again.';
+      appInfo('Update installed',data.message||'Update installed! Close the black window, then double-click Start My App again.');
+    }catch(e){
+      sub.textContent='Could not reach the server.';
+      appUpdateRunning=false;
+    }
+  },{okText:'Update now',cancelText:'Not now'});
 }
 
 async function exportAccountData(){
   try{
     const res=await fetch('/api/account/export');
-    if(!res.ok){alert('Could not export your data. Try again in a moment.');return;}
+    if(!res.ok){appInfo('Export failed','Could not export your data. Try again in a moment.');return;}
     const data=await res.json();
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
@@ -9319,34 +9380,36 @@ async function exportAccountData(){
     a.remove();
     URL.revokeObjectURL(url);
   }catch(e){
-    alert('Could not reach the server to export your data.');
+    appInfo('Export failed','Could not reach the server to export your data.');
   }
 }
 
 async function deleteAccountFlow(){
-  if(!confirm('Delete your account permanently? Your synced data will be erased from our servers. This cannot be undone.\n\n(The data on this device will stay put unless you clear it yourself.)'))return;
-  const password=prompt('Confirm your password to delete your account:');
-  if(!password)return;
-  try{
-    const res=await fetch('/api/account',{
-      method:'DELETE',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({password})
+  appConfirm('Delete your account permanently? Your synced data will be erased from our servers. This cannot be undone. (The data on this device stays put unless you clear it yourself.)',()=>{
+    appPassword('Delete account','Confirm your password (or PIN) to delete your account.',async(password)=>{
+      try{
+        const res=await fetch('/api/account',{
+          method:'DELETE',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({password})
+        });
+        if(!res.ok){
+          const data=await res.json().catch(()=>({}));
+          pwConfirmError(data.error||'Could not delete your account.');
+          return;
+        }
+        closePwConfirmModal();
+        S.accountEmail=null;
+        save();
+        closeAuthModal();
+        appInfo('Account deleted',"Your account has been deleted. You'll need a new account to keep using the app.");
+        document.getElementById('main-app').style.display='none';
+        document.getElementById('onboarding').style.display='none';
+        showAuthGate();
+      }catch(e){
+        pwConfirmError('Could not reach the server. Check your connection and try again.');
+      }
     });
-    if(!res.ok){
-      const data=await res.json().catch(()=>({}));
-      alert(data.error||'Could not delete your account.');
-      return;
-    }
-    S.accountEmail=null;
-    save();
-    closeAuthModal();
-    alert("Your account has been deleted. You'll need a new account to keep using the app.");
-    document.getElementById('main-app').style.display='none';
-    document.getElementById('onboarding').style.display='none';
-    showAuthGate();
-  }catch(e){
-    alert('Could not reach the server to delete your account.');
-  }
+  },{okText:'Delete account',cancelText:'Keep my account'});
 }
 
 function showPreviewGate(){

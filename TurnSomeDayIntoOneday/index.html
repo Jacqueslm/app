@@ -88,6 +88,13 @@ body{display:flex;justify-content:center}
 .ob-label{font-size:13px;color:#8892c0;margin-bottom:8px;text-align:left}
 .ob-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);outline:none}
 .ob-input:focus{border-color:var(--green)}
+/* Show/hide password. The wrapper carries the field's own bottom margin so it
+   hugs the input exactly, letting the eye sit dead-centre with top/bottom:0. */
+.pw-wrap{position:relative}
+.pw-wrap .ob-input{margin-bottom:0;padding-right:46px}
+.pw-eye{position:absolute;top:0;bottom:0;right:4px;width:40px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:#8892c0;cursor:pointer;font-family:var(--f)}
+.pw-eye:hover{color:#fff}
+.pw-eye svg{width:19px;height:19px}
 .ob-input::placeholder{color:#6672a0}
 .dd-btn{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;box-sizing:border-box}
 .dd-btn.placeholder{color:#6672a0}
@@ -411,7 +418,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
   </div>
   <div class="ob-label" style="text-align:left" id="gate-pass-label">Password</div>
-  <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
+  <div class="pw-wrap" style="margin-bottom:14px">
+    <input class="ob-input" id="gate-password" placeholder="At least 8 characters" type="password" autocomplete="current-password">
+    <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('gate-password',this)"><i class="ti ti-eye"></i></button>
+  </div>
   <div class="small-text" id="gate-error" style="color:#f38b8a;min-height:14px;margin-bottom:8px"></div>
   <div class="small-text" id="gate-forgot-link" style="display:none;margin-bottom:10px"><span style="color:var(--green);cursor:pointer" onclick="forgotPassword()">Forgot your password?</span></div>
   <p class="small-text" id="gate-legal-consent" style="display:none;color:#8892c0;font-size:11px;text-align:left;margin-bottom:10px">By creating an account you agree to the <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('terms')">Terms of Service</span> and <span style="color:var(--green);cursor:pointer" onclick="openLegalOverlay('privacy')">Privacy Policy</span>.</p>
@@ -2068,11 +2078,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="sos-title" style="color:var(--accent)">Change password</div>
     <div class="sos-sub">Your new password takes effect immediately.</div>
     <div class="ob-label" style="text-align:left;margin-top:4px">Current password</div>
-    <input class="ob-input" id="cp-current" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="pw-wrap" style="margin-bottom:14px">
+      <input class="ob-input" id="cp-current" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+      <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('cp-current',this)"><i class="ti ti-eye"></i></button>
+    </div>
     <div class="ob-label" style="text-align:left">New password</div>
-    <input class="ob-input" id="cp-new" type="password" placeholder="At least 8 characters" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="pw-wrap" style="margin-bottom:14px">
+      <input class="ob-input" id="cp-new" type="password" placeholder="At least 8 characters" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+      <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('cp-new',this)"><i class="ti ti-eye"></i></button>
+    </div>
     <div class="ob-label" style="text-align:left">Confirm new password</div>
-    <input class="ob-input" id="cp-confirm" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <div class="pw-wrap" style="margin-bottom:14px">
+      <input class="ob-input" id="cp-confirm" type="password" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+      <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('cp-confirm',this)"><i class="ti ti-eye"></i></button>
+    </div>
     <div class="reset-date-error" id="cp-error">&nbsp;</div>
     <button class="ob-btn" style="margin-top:4px" onclick="submitChangePassword()">Save new password</button>
     <button class="sos-close" onclick="closeChangePasswordModal()">Cancel</button>
@@ -2272,7 +2291,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title" style="color:#E24B4A" id="pwconfirm-title">Confirm</div>
     <div class="sos-sub" id="pwconfirm-msg"></div>
-    <input id="pwconfirm-input" type="password" autocomplete="current-password" placeholder="Password or PIN" style="width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin:6px 0 10px">
+    <div class="pw-wrap" style="margin:6px 0 10px">
+      <input id="pwconfirm-input" type="password" autocomplete="current-password" placeholder="Password or PIN" style="width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 46px 14px 16px;font-size:16px;color:var(--tp);font-family:var(--f)">
+      <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('pwconfirm-input',this)"><i class="ti ti-eye"></i></button>
+    </div>
     <div class="pin-error" id="pwconfirm-err" style="text-align:left">&nbsp;</div>
     <button class="ob-btn" style="margin-top:4px;background:#E24B4A" id="pwconfirm-ok" onclick="pwConfirmYes()">Confirm</button>
     <button class="sos-close" onclick="closePwConfirmModal()">Cancel</button>
@@ -2544,7 +2566,38 @@ const ICON_PATHS={
 'ti-x':'<path d="M18 6L6 18"/><path d="M6 6l12 12"/>',
 'ti-player-stop':'<rect x="6" y="6" width="12" height="12" rx="2"/>',
 'ti-eye-off':'<path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c5 0 9 4 10.5 7-.5 1-1.2 2.1-2.1 3.1M6.6 6.6C4.5 8 3 10 1.5 12c1.5 3 5.5 7 10.5 7 1.5 0 2.9-.4 4.1-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+'ti-eye':'<circle cx="12" cy="12" r="3"/><path d="M1.5 12c1.5-3 5.5-7 10.5-7s9 4 10.5 7c-1.5 3-5.5 7-10.5 7s-9-4-10.5-7z"/>',
 };
+// Show/hide a password field. Typing a password blind is where most failed
+// logins come from, and it matters more here than most apps: someone reaching
+// for this at 2am should not be locked out by a typo they cannot see.
+function togglePw(id,btn){
+  const inp=document.getElementById(id);
+  if(!inp)return;
+  const reveal=inp.type==='password';
+  const caret=inp.selectionStart;
+  inp.type=reveal?'text':'password';
+  btn.setAttribute('aria-label',reveal?'Hide password':'Show password');
+  btn.innerHTML=`<i class="ti ti-${reveal?'eye-off':'eye'}"></i>`;
+  renderIcons(btn);
+  // Changing type drops focus and the caret in some browsers - put both back
+  // so the toggle never costs the user their place mid-word.
+  try{inp.focus();if(caret!=null)inp.setSelectionRange(caret,caret);}catch(e){}
+}
+// Put a field back to hidden when its screen is reopened, so a password left
+// revealed is never shown to whoever opens the app next.
+function resetPwToggle(id){
+  const inp=document.getElementById(id);
+  if(!inp||inp.type==='password')return;
+  inp.type='password';
+  // Deliberately not routed through togglePw: this runs on screen open, and
+  // that would pull focus into the password box before the user asked for it.
+  const btn=inp.parentElement&&inp.parentElement.querySelector('.pw-eye');
+  if(!btn)return;
+  btn.setAttribute('aria-label','Show password');
+  btn.innerHTML='<i class="ti ti-eye"></i>';
+  renderIcons(btn);
+}
 function renderIcons(root){
   (root||document).querySelectorAll('i.ti').forEach(el=>{
     if(el.querySelector('svg'))return;
@@ -8525,6 +8578,7 @@ function appPassword(title,message,onConfirm){
   document.getElementById('pwconfirm-msg').textContent=message||'';
   const inp=document.getElementById('pwconfirm-input');
   inp.value='';
+  resetPwToggle('pwconfirm-input');
   document.getElementById('pwconfirm-err').innerHTML='&nbsp;';
   _pwConfirmCallback=onConfirm;
   document.getElementById('pwconfirm-modal').classList.add('open');
@@ -8588,7 +8642,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.3.2';
+const APP_VERSION='12.4.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -8898,6 +8952,7 @@ function openChangePasswordModal(){
   document.getElementById('cp-new').value='';
   document.getElementById('cp-confirm').value='';
   document.getElementById('cp-error').textContent=' ';
+  ['cp-current','cp-new','cp-confirm'].forEach(resetPwToggle);
   document.getElementById('change-password-modal').classList.add('open');
 }
 function closeChangePasswordModal(){document.getElementById('change-password-modal').classList.remove('open');}
@@ -9680,6 +9735,7 @@ function showAuthGate(mode){
   document.getElementById('auth-gate').style.display='flex';
   document.getElementById('gate-email').value='';
   document.getElementById('gate-password').value='';
+  resetPwToggle('gate-password');// a revealed password must not survive into the next visit
   setGateMode(mode||'login');
 }
 

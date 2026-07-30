@@ -7888,6 +7888,8 @@ function openPinFlow(mode){
   updatePinDots();
   document.getElementById('main-app').style.display='none';
   document.getElementById('pin-lock').style.display='flex';
+  // Reloading the page never resets an active cooldown - show it right away.
+  if((mode==='unlock'||mode==='disable')&&pinGuardRemaining()>0)pinShowCooldown();
 }
 
 function cancelPinFlow(){
@@ -7917,6 +7919,9 @@ function updatePinDots(err){
 }
 
 function pinPress(d){
+  // During a cooldown the pad ignores digits on the flows that verify a PIN;
+  // creating a fresh PIN (setup) was never a guessing surface.
+  if((pinFlow==='unlock'||pinFlow==='disable')&&pinGuardRemaining()>0){pinBuffer='';updatePinDots();pinShowCooldown();return;}
   if(pinBuffer.length>=pinMaxLen())return;
   pinBuffer+=d;
   document.getElementById('pin-error').textContent=' ';
@@ -7936,6 +7941,41 @@ async function hashPin(pin){
   const enc=new TextEncoder().encode('tsid-pin:'+pin);
   const buf=await crypto.subtle.digest('SHA-256',enc);
   return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Brute-force guard for the lock screen. Five wrong PINs starts a cooldown
+// that doubles on every further miss (30s → 1m → 2m → 4m, capped at 5m) and
+// survives a page reload. The "Forgot your PIN?" path stays available during
+// a cooldown on purpose - the legitimate way out is never rate-limited.
+const PIN_GUARD_KEY='tsid_pin_guard';
+function pinGuardRead(){try{const g=JSON.parse(localStorage.getItem(PIN_GUARD_KEY)||'null');if(g&&typeof g.fails==='number')return g;}catch(e){}return {fails:0,until:0};}
+function pinGuardFail(){
+  const g=pinGuardRead();
+  g.fails=(g.fails||0)+1;
+  if(g.fails>=5){
+    const step=Math.min(g.fails-5,4);
+    g.until=Date.now()+Math.min(30000*Math.pow(2,step),300000);
+  }
+  try{localStorage.setItem(PIN_GUARD_KEY,JSON.stringify(g));}catch(e){}
+}
+function pinGuardClear(){try{localStorage.removeItem(PIN_GUARD_KEY);}catch(e){}}
+function pinGuardRemaining(){return Math.max(0,(pinGuardRead().until||0)-Date.now());}
+let pinCooldownTimer=null;
+function pinShowCooldown(){
+  const err=document.getElementById('pin-error');
+  const tick=()=>{
+    const ms=pinGuardRemaining();
+    if(ms<=0){
+      if(pinCooldownTimer){clearInterval(pinCooldownTimer);pinCooldownTimer=null;}
+      err.textContent=' ';
+      return;
+    }
+    const s=Math.ceil(ms/1000);
+    err.textContent=`Too many attempts — wait ${s>=60?Math.ceil(s/60)+'m':s+'s'}, or use "Forgot your PIN?"`;
+  };
+  if(pinCooldownTimer)clearInterval(pinCooldownTimer);
+  tick();
+  pinCooldownTimer=setInterval(tick,500);
 }
 
 function pinMismatch(msg,resetTo){
@@ -7979,7 +8019,13 @@ async function submitPinEntry(){
   }
   // unlock or disable: verify against the stored PIN
   const attempt=await hashPin(pinBuffer);
-  if(attempt!==S.pinHash){pinMismatch('Incorrect PIN — try again',pinFlow);return;}
+  if(attempt!==S.pinHash){
+    pinGuardFail();
+    pinMismatch('Incorrect PIN — try again',pinFlow);
+    if(pinGuardRemaining()>0)setTimeout(pinShowCooldown,950);// after the dots reset
+    return;
+  }
+  pinGuardClear();
   if(pinFlow==='disable'){
     S.pinHash=null;
     S.pinEnabled=false;

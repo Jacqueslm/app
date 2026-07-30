@@ -1,22 +1,26 @@
-"""Generate audio/sos-talk.mp3 + the VG_CUES timeline for index.html.
+"""Generate the three SOS "Talk me through it" recordings + their cue timelines.
 
-The SOS "Talk me through it" voice is a pre-recorded MP3 because a real
-<audio> element is the only audio Android keeps playing when the screen locks.
-This script builds that MP3 locally with Piper TTS - free, no API, no account.
+The SOS talk plays as pre-recorded MP3s because a real <audio> element is the
+only audio Android keeps playing when the screen locks. The app offers three
+voices (Warm / Soft / Clear - VG_VOICES in index.html) plus the phone's own
+speech engine; this script builds the three recordings locally with Piper TTS -
+free, no API, no account.
 
 One-time setup (all free):
     pip install piper-tts lameenc numpy
     # Piper's own voice host is huggingface; the same files are mirrored in
     # sherpa-onnx's GitHub releases, which is what this uses:
-    curl -L -o vits-piper.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-en_US-lessac-medium.tar.bz2
-    tar xjf vits-piper.tar.bz2
+    for v in vits-piper-en_US-hfc_female-medium vits-piper-en_US-amy-medium vits-piper-en_US-lessac-high; do
+        curl -L -o $v.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/$v.tar.bz2
+        tar xjf $v.tar.bz2
+    done
 
 Run from the TurnSomeDayIntoOneday directory:
-    python3 tools/generate-sos-talk.py path/to/vits-piper-en_US-lessac-medium/en_US-lessac-medium.onnx
+    python3 tools/generate-sos-talk.py path/to/folder-containing-the-three-voice-folders
 
-It writes audio/sos-talk.mp3 and prints the cue list. If STEPS below ever
-changes, VG_STEPS and VG_CUES in index.html MUST be updated in the same commit -
-the captions are synced to these exact timings.
+It writes audio/sos-talk-{warm,soft,clear}.mp3 and prints the VG_VOICES cue
+lines. If STEPS below ever changes, VG_STEPS and VG_VOICES in index.html MUST
+be updated in the same commit - captions are synced to these exact timings.
 """
 import json, os, sys
 import numpy as np
@@ -24,7 +28,7 @@ import lameenc
 from piper import PiperVoice, SynthesisConfig
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_MP3 = os.path.join(HERE, 'audio', 'sos-talk.mp3')
+OUT_DIR = os.path.join(HERE, 'audio')
 
 # Must mirror VG_STEPS in index.html exactly.
 STEPS = [
@@ -48,57 +52,64 @@ STEPS = [
 GAP_S = 0.6          # silence between steps, matches the speechSynthesis pacing
 COUNT_PAUSE_S = 0.55 # breathing-count pause where the script writes "..."
 
+# App voice key -> Piper model, relative to the folder passed on the command line.
+VOICES = {
+    'warm':  'vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx',
+    'soft':  'vits-piper-en_US-amy-medium/en_US-amy-medium.onnx',
+    'clear': 'vits-piper-en_US-lessac-high/en_US-lessac-high.onnx',
+}
+
 if len(sys.argv) != 2:
-    sys.exit("usage: python3 tools/generate-sos-talk.py path/to/en_US-lessac-medium.onnx")
+    sys.exit("usage: python3 tools/generate-sos-talk.py path/to/folder-with-voice-folders")
+base = sys.argv[1]
 
-voice = PiperVoice.load(sys.argv[1])
-rate = voice.config.sample_rate
-cfg = SynthesisConfig(length_scale=1.12)  # a touch slower = calmer
+os.makedirs(OUT_DIR, exist_ok=True)
+for key, rel in VOICES.items():
+    voice = PiperVoice.load(os.path.join(base, rel))
+    rate = voice.config.sample_rate
+    cfg = SynthesisConfig(length_scale=1.12)  # a touch slower = calmer
 
-def synth(text):
-    chunks = [np.frombuffer(c.audio_int16_bytes, dtype=np.int16)
-              for c in voice.synthesize(text.replace("—", ","), cfg)]
-    return np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
+    def synth(text):
+        chunks = [np.frombuffer(c.audio_int16_bytes, dtype=np.int16)
+                  for c in voice.synthesize(text.replace("—", ","), cfg)]
+        return np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.int16)
 
-def trim(a, thresh=300):
-    # trim leading/trailing near-silence so our own gaps set the rhythm
-    idx = np.where(np.abs(a.astype(np.int32)) > thresh)[0]
-    if not len(idx):
-        return a
-    pad = int(0.08 * rate)
-    return a[max(0, idx[0] - pad):min(len(a), idx[-1] + pad)]
+    def trim(a, thresh=300):
+        # trim leading/trailing near-silence so our own gaps set the rhythm
+        idx = np.where(np.abs(a.astype(np.int32)) > thresh)[0]
+        if not len(idx):
+            return a
+        pad = int(0.08 * rate)
+        return a[max(0, idx[0] - pad):min(len(a), idx[-1] + pad)]
 
-silence_gap = np.zeros(int(GAP_S * rate), dtype=np.int16)
-silence_count = np.zeros(int(COUNT_PAUSE_S * rate), dtype=np.int16)
+    silence_gap = np.zeros(int(GAP_S * rate), dtype=np.int16)
+    silence_count = np.zeros(int(COUNT_PAUSE_S * rate), dtype=np.int16)
 
-cues, out, pos = [], [], 0
-for text in STEPS:
-    cues.append(round(pos / rate, 2))
-    # "..." carries the breathing pace; Piper reads it too fast, so each beat
-    # is synthesized alone and the pause inserted as real silence.
-    pieces = [p.strip() for p in text.split("...") if p.strip()]
-    parts = []
-    for i, piece in enumerate(pieces):
-        parts.append(trim(synth(piece)))
-        if i < len(pieces) - 1:
-            parts.append(silence_count)
-    step_audio = np.concatenate(parts)
-    out.append(step_audio)
-    out.append(silence_gap)
-    pos += len(step_audio) + len(silence_gap)
+    cues, out, pos = [], [], 0
+    for text in STEPS:
+        cues.append(round(pos / rate, 2))
+        # "..." carries the breathing pace; Piper reads it too fast, so each
+        # beat is synthesized alone and the pause inserted as real silence.
+        pieces = [p.strip() for p in text.split("...") if p.strip()]
+        parts = []
+        for i, piece in enumerate(pieces):
+            parts.append(trim(synth(piece)))
+            if i < len(pieces) - 1:
+                parts.append(silence_count)
+        step_audio = np.concatenate(parts)
+        out.append(step_audio)
+        out.append(silence_gap)
+        pos += len(step_audio) + len(silence_gap)
 
-pcm = np.concatenate(out)
-
-enc = lameenc.Encoder()
-enc.set_bit_rate(64)
-enc.set_in_sample_rate(rate)
-enc.set_channels(1)
-enc.set_quality(2)
-mp3 = enc.encode(pcm.tobytes()) + enc.flush()
-
-os.makedirs(os.path.dirname(OUT_MP3), exist_ok=True)
-with open(OUT_MP3, 'wb') as f:
-    f.write(bytes(mp3))
-
-print("wrote", OUT_MP3, f"({len(mp3)/1024:.0f} KB, {len(pcm)/rate:.1f}s)")
-print("VG_CUES=[" + ",".join(str(c) for c in cues) + "];")
+    pcm = np.concatenate(out)
+    enc = lameenc.Encoder()
+    enc.set_bit_rate(64)
+    enc.set_in_sample_rate(rate)
+    enc.set_channels(1)
+    enc.set_quality(2)
+    mp3 = enc.encode(pcm.tobytes()) + enc.flush()
+    path = os.path.join(OUT_DIR, f'sos-talk-{key}.mp3')
+    with open(path, 'wb') as f:
+        f.write(bytes(mp3))
+    print(f"wrote {path} ({len(mp3)/1024:.0f} KB, {len(pcm)/rate:.1f}s)")
+    print(f"  {key}: cues={json.dumps(cues)}")

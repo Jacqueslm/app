@@ -5830,10 +5830,12 @@ const VG_STEPS=[
 const VG_VOICES={
   warm:{label:'Warm',url:'audio/sos-talk-warm.mp3',cues:[0,4.47,12.17,19.07,28.03,37.61,43.03,50.14,57.13,63.29,69.12,74.54,80.68,87.17,94.28]},
   soft:{label:'Soft',url:'audio/sos-talk-soft.mp3',cues:[0,5.71,15.39,23.66,33.46,44.44,50.83,58.94,66.9,74.71,82.18,88.35,95.19,102.35,111.87]},
+  gentle:{label:'Gentle',url:'audio/sos-talk-gentle.mp3',cues:[0,4.7,15.27,23.73,34.6,47.59,54.27,63.27,73.15,80.34,86.7,94.86,102.72,111.63,120.49]},
   clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,4.58,12.42,19.22,28,37.36,43.03,49.98,56.86,63.49,69.86,75.22,81.27,87.45,95.38]},
+  male:{label:'Calm male',url:'audio/sos-talk-male.mp3',cues:[0,4.76,13.19,20.19,29.37,39.43,45.44,52.81,59.93,66.57,72.92,78.75,85.34,92.16,100.14]},
   phone:{label:"Phone's own"},
 };
-const VG_VOICE_ORDER=['warm','soft','clear','phone'];
+const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','phone'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
 let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null;
 function vgPickVoice(){
@@ -8560,7 +8562,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.2.0';
+const APP_VERSION='12.3.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

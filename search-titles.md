@@ -1,66 +1,95 @@
-# Search titles — what people actually type
+# Search titles & hooks — from real search language
 
-Use these as video titles (YouTube especially — it's a search engine). They're
-phrased the way real people search at 1am. Match one title to one video.
-
----
-
-## HER — partner of someone struggling (your #1 lane, highest intent)
-
-**Drinking:**
-- My husband drinks too much and I don't know what to do
-- How to deal with a husband who drinks every night
-- Am I overreacting to my husband's drinking?
-- Married to an alcoholic and exhausted
-- How do I know if he's really going to change
-- My husband won't admit he has a drinking problem
-- Living with a functioning alcoholic
-
-**Any habit / porn / general:**
-- I found out my husband was hiding something — what now
-- How to support someone in recovery without enabling them
-- How to know if he's actually changing or just saying it
-- What to do when your partner relapses
-- Loving someone with an addiction is exhausting
-- Signs your partner is hiding an addiction
+Researched from how people actually search + the verbatim language on recovery
+forums and advice threads. "Recurs" phrases appeared word-for-word across many
+independent sites = proven real demand. Use as video titles / spoken hooks.
+One title = one video. Lead with the HER/drinking lane.
 
 ---
 
-## HIM — the person in it
+## HER — partner of someone who drinks (your #1 lane)
 
-- Why do I keep relapsing when I really want to stop
+Her language splits by stage. Match her exact words at each step.
+
+**Stage 1 — Doubt ("is this even a problem?") — catches her earliest & warmest:**
+- Am I overreacting about my husband's drinking?  ← the true top-of-funnel doorway
+- Is my husband an alcoholic? The signs I ignored
+- How do I know if my husband is an alcoholic
+- Signs you're married to a functioning alcoholic
+
+**Stage 2 — Coping / living with it:**
+- Living with a functioning alcoholic (what no one tells you)
+- I'm done walking on eggshells around his drinking
+- Am I enabling my husband's drinking?
+
+**Stage 3 — Ready to act (closest to buying):**
+- My husband's drinking is ruining our marriage  ← STRONGEST (verbatim on 6+ sites)
+- How to help your husband stop drinking without enabling him
+- How to get him to stop drinking without nagging
+- How to talk to him about his drinking without it turning into a fight
+- What to do when your husband won't stop drinking
+- My husband won't admit he has a drinking problem — do this instead
+
+**Stage 4 — Exit:**
+- Should I stay or leave my alcoholic husband? How to know
+
+**Porn (strong secondary partner lane):**
+- I found out my husband watches porn — here's what helped us recover together
+- What to do when you catch your husband watching porn
+
+---
+
+## HIM — the person struggling
+
+- **Day 1 again? Why you keep relapsing — and how to make this one stick**
+  ← his most-typed, most-shamed phrase, and it IS your brand. Use it a lot.
+- How to quit drinking on your own (when willpower keeps failing)
+- Why do I keep relapsing
 - How to stop watching porn for good
-- How to quit drinking on my own
-- Day 1 again — how to actually make it stick
+- PAWS: why sobriety feels worse before it feels better
 - How to stop the binge eating cycle
-- I can't stop no matter what I try
-- How to rebuild trust after addiction
-- PAWS — how long does it last
 
 ---
 
-## GENERAL / app-intent (buyer searches)
+## APP-BUYER
 
-- Best app for addiction recovery 2026
-- Recovery app that includes the family
-- App to track sobriety and support your partner
-- Habit recovery app for couples
-
----
-
-## How to use them
-
-- **YouTube:** title = one of these, word-for-word-ish. This is where search wins.
-- **TikTok/Reels:** open the video by SAYING the search phrase as your first line
-  ("My husband drinks and I don't know what to do…") — the caption + spoken hook
-  are what the algorithm reads.
-- **One title = one video.** Don't reuse.
-- **Lead with the HER list** — it's the emptiest, highest-intent search space
-  (nobody's built for her, and she's the buyer).
+- Best sobriety app / best app to quit drinking (what people type)
+- **The recovery app that includes the person who loves them** ← own this; the
+  exact "recovery app for couples" space is empty. Every competitor is solo.
 
 ---
 
-## Want the real numbers?
-These are the right phrases from how this niche searches. If you want actual
-monthly search-volume data (which exact wording gets the most searches), I can
-pull it from Semrush next session and rank them.
+## RAW HOOKS (cold-open lines from real forum language)
+
+1. "You never know who's walking through that door — the sober one, the tipsy
+   one, the shouty drunk one, or the grumpy hungover one." (Jekyll & Hyde — HER)
+2. "It started as worrying about him. It turned into a full-time job of holding
+   everything together while my own needs went to the bottom."
+3. "I keep telling myself I'm overreacting. Everyone keeps telling me to relax."
+4. (HIM) "I've tried this so many times. I wake up rough and disappointed in myself."
+5. (HIM) "I was sober for months. I relapsed. Now I'm right back where I started."
+6. (HER/porn) "Finding out left me nauseous, betrayed, and unloved — and I
+   couldn't tell anyone."
+7. "You didn't cause it, you can't control it, you can't cure it." (partner mantra)
+
+---
+
+## STRATEGIC NOTES (important)
+
+- **"Am I overreacting" is her earliest doorway.** She's not searching
+  "alcoholism" yet — she's searching whether she's *allowed* to be upset.
+  Validate the doubt; don't diagnose him. Catches her warmest.
+- **"Day 1 again" is HIM's rawest phrase — and it's literally your app name.**
+  The struggler's most-shamed sentence, reframed as hope. Lean on it hard.
+- **"Recovery app for couples" is wide-open whitespace.** Every ranking app
+  (I Am Sober, Nomo, Reframe, Loosid) is a solo tracker. Nobody includes the
+  partner. Define the category.
+- **Her demand is huge but owned by rehab centers** — "my husband's drinking is
+  ruining our marriage" is the page title on 6+ treatment sites. A *real person*
+  saying those exact words on TikTok/YouTube is empty, high-empathy space.
+- **Name-collision watch:** there's a competitor for the same women called
+  "Hello Someday Coaching." You're "Turn Someday Into *Day One*." Lean on the
+  "Someday → Day One" hook so you own the distinction.
+- **Content ladder:** make videos for each of her 4 stages (doubt → coping →
+  act → exit). Each matches her exact wording and pulls her toward the app at
+  "ready to act."

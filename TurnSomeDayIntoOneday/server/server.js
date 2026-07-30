@@ -614,6 +614,17 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
   });
 });
 
+// Today's chat usage so the client can show a live "X of N left" meter for
+// Pro (Free is counted on the client already). Cheap authed read; the count is
+// the same server-side number the cap is enforced against, so it never drifts.
+app.get('/api/chat/usage', requireAuth, (req, res) => {
+  const user = db.getUserById(req.userId);
+  const isPro = !!(user && billing.getBillingStatus(user).isPro);
+  const limit = isPro ? PRO_CHAT_LIMIT : FREE_CHAT_LIMIT;
+  const used = db.getChatCount(req.userId, todayUTC());
+  res.json({ used, limit, remaining: Math.max(0, limit - used), isPro });
+});
+
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!ANTHROPIC_API_KEY) {
     // No key configured (e.g. running without the API wired up yet) - the client falls back to

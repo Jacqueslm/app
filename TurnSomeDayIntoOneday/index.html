@@ -714,8 +714,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
   <div class="limit-bar" id="limitBar">
     <i class="ti ti-info-circle" style="font-size:16px;color:#854F0B;flex-shrink:0"></i>
-    <span><strong id="chatsLeft">3</strong> free sessions left today</span>
-    <button class="up-sm" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
+    <span id="limitBarText"><strong id="chatsLeft">3</strong> free sessions left today</span>
+    <button class="up-sm" id="limitBarUpgrade" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
   </div>
   <div>
     <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Friendly is here to support your journey — not replace real human help</div>
@@ -7394,6 +7394,9 @@ Address the interactions of their unique blueprint and assign structured daily r
     const liveText=data.content&&data.content[0]&&data.content[0].text;
     const reply=liveText||localFallbackReply(text);
     setNovaMode(!!liveText);
+    // A real AI reply consumed one of the day's chats server-side - refresh the
+    // Pro meter so it ticks down live. (Guided-mode fallbacks don't count.)
+    if(S.isPro&&liveText)updateChatMeter();
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
@@ -7438,7 +7441,7 @@ function switchTo(id){
   Object.values(SCREEN_MAP).forEach(s=>{const el=document.getElementById(s);if(el)el.classList.remove('on');});
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
-  if(id==='nova')clearNovaBadge();
+  if(id==='nova'){clearNovaBadge();updateChatMeter();}
   document.getElementById('scr-title').textContent=titleFor(id);
   const screensEl=document.getElementById('screens');
   screensEl.scrollTop=0;
@@ -7862,6 +7865,23 @@ function handleSubStatusAction(){
   if(S.proCancelled)resumeProSubscription();
   else cancelProSubscription();
 }
+// Pull today's Pro chat count from the server and show it in the meter bar.
+// Only Pro uses this - Free is counted on the client. If the fetch fails
+// (offline), the bar just shows the daily cap rather than a wrong number.
+async function updateChatMeter(){
+  if(!S.isPro)return;
+  const barTxt=document.getElementById('limitBarText');
+  if(!barTxt)return;
+  try{
+    const r=await fetch('/api/chat/usage');
+    if(!r.ok)throw new Error();
+    const d=await r.json();
+    const left=Math.max(0,d.remaining);
+    barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' Friendly chats left today';
+  }catch(e){
+    barTxt.innerHTML='Up to <strong>30</strong> Friendly chats a day';
+  }
+}
 function updateTierUI(){
   const badge=document.getElementById('tier-badge');
   const novaLbl=document.getElementById('nova-tier-lbl');
@@ -7873,7 +7893,11 @@ function updateTierUI(){
   if(S.isPro){
     badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
     if(novaLbl)novaLbl.textContent='Pro · 30/day';
-    if(limitBar)limitBar.style.display='none';
+    // Pro now sees a live "X of 30 left today" meter too (no upgrade button).
+    // The actual number comes from the server via updateChatMeter().
+    if(limitBar)limitBar.style.display='flex';
+    const upg=document.getElementById('limitBarUpgrade');if(upg)upg.style.display='none';
+    updateChatMeter();
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
     if(freeCta)freeCta.textContent=S.proPlan==='lifetime'?'Lifetime plan':S.proPlan==='comp'?'Complimentary plan':'Cancel subscription';
@@ -7882,6 +7906,9 @@ function updateTierUI(){
     badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
     if(novaLbl)novaLbl.textContent='Free · 3/day';
     if(limitBar)limitBar.style.display='flex';
+    // Restore the free meter text + upgrade button (Pro rewrites both).
+    const upg=document.getElementById('limitBarUpgrade');if(upg)upg.style.display='';
+    const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='<strong id="chatsLeft">'+S.chatsLeft+'</strong> free sessions left today';
     if(subLbl)subLbl.textContent='Free plan';
     if(profChip){profChip.textContent='Free plan';profChip.style.color='var(--green)';profChip.style.borderColor='rgba(126,232,162,0.3)';profChip.style.background='var(--green-dim)';}
     if(freeCta)freeCta.textContent='Current plan';

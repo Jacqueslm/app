@@ -772,7 +772,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <div class="tc" onclick="selJourProMood(this,'proud')">Proud</div>
             </div>
           </div>
-          <textarea id="jourText" placeholder="Write freely — this is your private space..."></textarea>
+          <textarea id="jourText" placeholder="Write freely — this is your private space..." oninput="jourDraftSave()"></textarea>
           <div style="font-size:12px;color:var(--tm);margin:10px 0 8px">Tag a category (optional)</div>
           <div class="tc-wrap" id="jour-category-row" style="margin-bottom:4px">
             <div class="tc" onclick="selJourCategory(this,'Porn & Sex')">Porn &amp; Sex</div>
@@ -790,7 +790,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="tc" onclick="selJourCategory(this,'Supporting Someone')">Supporting Someone</div>
           </div>
           <div class="jour-actions">
-            <button class="cancel-btn" onclick="closeJour()">Cancel</button>
+            <button class="cancel-btn" onclick="cancelJour()">Cancel</button>
             <button class="save-btn" onclick="saveEntry()" id="jourSaveBtn">Save entry</button>
           </div>
         </div>
@@ -3438,14 +3438,22 @@ function obBack(n){
 // Lets the phone/browser back button step back through onboarding one screen at
 // a time (matching the in-screen Back buttons) instead of exiting or reloading
 // the app, which used to look like the whole thing had started over.
-const OB_PREV_STEP={2:1,'2_5':2,3:'2_5',4:3};
+// Step 1 goes back to step 0 (obs1 renders obBack(0)) - it was missing here,
+// which sent a step-1 back-press into the underflow branch and disarmed the
+// trap for the rest of onboarding. Once disarmed, the next back exited the SPA
+// and lost every unsaved answer (name/gender/focus aren't persisted until the
+// end). Now the map is complete, and underflow never disarms mid-flow.
+const OB_PREV_STEP={1:0,2:1,'2_5':2,3:'2_5',4:3};
 let obBackTrapArmed=false;
 function handleOnboardingPopstate(){
   if(document.getElementById('onboarding').style.display!=='flex')return;
   const prev=OB_PREV_STEP[obStep];
   if(prev===undefined){
-    obBackTrapArmed=false;
-    window.removeEventListener('popstate',handleOnboardingPopstate);
+    // At the first step (0) there's nowhere further back. Stay put and re-arm
+    // the history entry rather than disarming - so a stray back-press here can
+    // never strand later steps with no guard. The trap is only ever torn down
+    // in finishOnboard, when onboarding genuinely completes.
+    try{history.pushState({tsidOnboarding:true},'');}catch(e){}
     return;
   }
   obBack(prev);
@@ -3968,13 +3976,39 @@ function resetJourForm(){
   jourMoodSel='🙂';jourMoodLabel='Good';
   document.getElementById('jourSaveBtn').textContent='Save entry';
 }
+// Journal draft: a long, emotional entry written at 2am must survive a reload,
+// a backgrounded tab getting killed, or a mis-tapped Cancel. The body text is
+// mirrored to localStorage on every keystroke (new entries only, never while
+// editing a saved one) and restored when the writer reopens a fresh entry.
+const JOUR_DRAFT_KEY='tsid_jour_draft';
+function jourDraftSave(){
+  if(journalEditingIdx!==null)return; // editing an existing entry - don't shadow it
+  try{
+    const t=document.getElementById('jourText').value;
+    if(t.trim())localStorage.setItem(JOUR_DRAFT_KEY,t);
+    else localStorage.removeItem(JOUR_DRAFT_KEY);
+  }catch(e){}
+}
+function jourDraftClear(){try{localStorage.removeItem(JOUR_DRAFT_KEY);}catch(e){}}
 function openJour(){
   journalEditingIdx=null;
   resetJourForm();
+  let draft='';
+  try{draft=localStorage.getItem(JOUR_DRAFT_KEY)||'';}catch(e){}
+  if(draft)document.getElementById('jourText').value=draft;
   document.getElementById('newJourBtn').style.display='none';
   document.getElementById('jourForm').classList.add('open');
   updateJourFormProUI();
   document.getElementById('jourText').focus();
+}
+// Cancel with unsaved text asks first; the save path clears the draft on its own.
+function cancelJour(){
+  const t=document.getElementById('jourText').value.trim();
+  if(t&&journalEditingIdx===null){
+    appConfirm('Discard this entry? What you wrote here will be lost.',()=>{jourDraftClear();closeJour();},{okText:'Discard',cancelText:'Keep writing'});
+    return;
+  }
+  closeJour();
 }
 function editJournalEntry(idx){
   const j=S.journals[idx];
@@ -4067,6 +4101,7 @@ function saveEntry(){
     if(jourPromptShown)entry.promptUsed=jourPromptShown;
   }
   S.journals.unshift(entry);
+  jourDraftClear(); // the entry is saved for real now - the draft has done its job
   logActivity('journal',{moodLabel:jourMoodLabel});
   // journals ships pre-seeded with 2 demo entries for new users, so length===1 never
   // reflects a genuine first entry - the one-time flag alone is what actually matters here.
@@ -7218,6 +7253,10 @@ function requestNotificationPermission(){
   }
   Notification.requestPermission().then(p=>{
     updateNotifPermissionRow();
+    // A second, identically-named function used to shadow this one, so the
+    // "Reminder sound" row (notif-sound-sub) never refreshed after granting.
+    // Both rows request the same OS permission, so update both subtitles here.
+    if(typeof updateNotificationPermissionUI==='function')updateNotificationPermissionUI();
     if(p==='granted'){
       appInfo('Notifications','Reminders can now reach you even when the app is in the background.');
     }else if(p==='denied'){

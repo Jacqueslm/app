@@ -19,9 +19,15 @@ const GH_HEADERS = {
   'User-Agent': 'tsid-app-updater',
   ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
 };
-// The API zipball endpoint honors the Authorization header (codeload doesn't).
+// Tarball, not zipball: GNU tar (standard on every Linux host) reads .tar.gz
+// natively via `tar -xzf`, but cannot read a .zip - so a zip forced a fallback
+// to the `unzip` binary, which most servers don't have installed, and the whole
+// in-app update failed with "spawn unzip ENOENT". The tarball needs no extra
+// tool anywhere: Linux GNU tar, plus the bsdtar shipped on Windows 10+/macOS,
+// all handle .tar.gz. The API endpoint honors the Authorization header
+// (codeload doesn't), so private repos keep working.
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
-  || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${encodeURIComponent(UPDATE_BRANCH)}`;
+  || `https://api.github.com/repos/${UPDATE_REPO}/tarball/${encodeURIComponent(UPDATE_BRANCH)}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // Strict whitelist: an update only ever copies this app's own files. The repo
 // also contains Studio, and the two apps must stay fully separate on disk -
@@ -89,13 +95,15 @@ router.post('/', async (req, res) => {
     const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
     if (zipRes.status === 404 && !UPDATE_TOKEN) throw new Error('download blocked - GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to server/.env (or make the repo public)');
     if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
-    const zipPath = path.join(tmp, 'update.zip');
-    fs.writeFileSync(zipPath, Buffer.from(await zipRes.arrayBuffer()));
+    const tarPath = path.join(tmp, 'update.tar.gz');
+    fs.writeFileSync(tarPath, Buffer.from(await zipRes.arrayBuffer()));
 
-    // 2. extract (tar reads zips on Windows 10+/mac; unzip covers most Linux)
-    try { await runCmd('tar', ['-xf', zipPath, '-C', tmp]); }
-    catch (_) { await runCmd('unzip', ['-q', zipPath, '-d', tmp]); }
-    const rootName = fs.readdirSync(tmp).find((n) => n !== 'update.zip' && fs.statSync(path.join(tmp, n)).isDirectory());
+    // 2. extract. `tar -xzf` reads .tar.gz on Linux (GNU tar), Windows 10+ and
+    // macOS (bsdtar) alike - no external unzip needed. Plain `tar -xf` is kept
+    // as a fallback for any tar that auto-detects gzip but rejects an explicit -z.
+    try { await runCmd('tar', ['-xzf', tarPath, '-C', tmp]); }
+    catch (_) { await runCmd('tar', ['-xf', tarPath, '-C', tmp]); }
+    const rootName = fs.readdirSync(tmp).find((n) => n !== 'update.tar.gz' && fs.statSync(path.join(tmp, n)).isDirectory());
     if (!rootName) throw new Error('The downloaded ZIP looked empty.');
     const src = path.join(tmp, rootName);
 

@@ -10,7 +10,7 @@ One-time setup (all free):
     pip install piper-tts lameenc numpy
     # Piper's own voice host is huggingface; the same files are mirrored in
     # sherpa-onnx's GitHub releases, which is what this uses:
-    for v in vits-piper-en_US-hfc_female-medium vits-piper-en_US-amy-medium vits-piper-en_US-lessac-high; do
+    for v in vits-piper-en_US-hfc_female-medium vits-piper-en_US-amy-medium vits-piper-en_US-kristin-medium vits-piper-en_US-lessac-high vits-piper-en_US-hfc_male-medium; do
         curl -L -o $v.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/$v.tar.bz2
         tar xjf $v.tar.bz2
     done
@@ -52,11 +52,15 @@ STEPS = [
 GAP_S = 0.6          # silence between steps, matches the speechSynthesis pacing
 COUNT_PAUSE_S = 0.55 # breathing-count pause where the script writes "..."
 
-# App voice key -> Piper model, relative to the folder passed on the command line.
+# App voice key -> (Piper model relative to the folder passed on the command
+# line, length_scale). Higher length_scale = slower delivery; the two
+# soft-spoken voices are paced slower than the rest by design.
 VOICES = {
-    'warm':  'vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx',
-    'soft':  'vits-piper-en_US-amy-medium/en_US-amy-medium.onnx',
-    'clear': 'vits-piper-en_US-lessac-high/en_US-lessac-high.onnx',
+    'warm':   ('vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx', 1.12),
+    'soft':   ('vits-piper-en_US-amy-medium/en_US-amy-medium.onnx', 1.12),
+    'gentle': ('vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx', 1.18),
+    'clear':  ('vits-piper-en_US-lessac-high/en_US-lessac-high.onnx', 1.12),
+    'male':   ('vits-piper-en_US-hfc_male-medium/en_US-hfc_male-medium.onnx', 1.18),
 }
 
 if len(sys.argv) != 2:
@@ -64,10 +68,10 @@ if len(sys.argv) != 2:
 base = sys.argv[1]
 
 os.makedirs(OUT_DIR, exist_ok=True)
-for key, rel in VOICES.items():
+for key, (rel, length_scale) in VOICES.items():
     voice = PiperVoice.load(os.path.join(base, rel))
     rate = voice.config.sample_rate
-    cfg = SynthesisConfig(length_scale=1.12)  # a touch slower = calmer
+    cfg = SynthesisConfig(length_scale=length_scale)
 
     def synth(text):
         chunks = [np.frombuffer(c.audio_int16_bytes, dtype=np.int16)

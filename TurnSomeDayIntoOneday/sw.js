@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.2.0'; // v12.2.0: SOS talk voice picker - three recordings, all precached for offline
+const CACHE_NAME = 'tsid-shell-v12.3.0'; // v12.3.0: two more SOS talk voices - Gentle (soft-spoken woman) and Calm male
 const SHELL_FILES = [
   '/',
   '/app',
@@ -6,7 +6,9 @@ const SHELL_FILES = [
   '/manifest-discrete.json',
   '/audio/sos-talk-warm.mp3',
   '/audio/sos-talk-soft.mp3',
+  '/audio/sos-talk-gentle.mp3',
   '/audio/sos-talk-clear.mp3',
+  '/audio/sos-talk-male.mp3',
   '/data/lessons.json',
   '/data/stories.json',
   '/icons/icon-192.png',

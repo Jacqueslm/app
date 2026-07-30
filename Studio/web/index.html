@@ -926,6 +926,13 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <div class="err" id="tp-err"></div>
       <div id="tp-list" class="row" style="gap:6px"></div>
+      <div style="border-top:1px solid var(--bd,#33305c);margin-top:10px;padding-top:10px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn2" id="webcam-record">🎥 Record my webcam</button>
+          <video id="webcam-preview" muted playsinline style="display:none;width:160px;border-radius:8px;background:#000"></video>
+        </div>
+        <p class="usage" id="webcam-rec-note" style="margin:6px 0 0">Full-frame webcam recording — no screen capture. Open the teleprompter first, position it behind your camera, then hit record here.</p>
+      </div>
     </div>
     <div class="card">
       <h3>📅 Schedule a post</h3>
@@ -2530,6 +2537,64 @@ $('#media-record').onclick = async () => {
   }
   startPlainRecording(stream, b, note);
 };
+// --- Webcam-only recorder: full-frame face, no screen capture. Lives next to
+// the teleprompter so you can read your script and record in one place. ---
+const webcamRec = { mr: null, chunks: [], stream: null, t0: 0, timer: null };
+$('#webcam-record').onclick = async () => {
+  const b = $('#webcam-record');
+  const note = $('#webcam-rec-note');
+  const preview = $('#webcam-preview');
+
+  if (webcamRec.mr && webcamRec.mr.state === 'recording') { webcamRec.mr.stop(); return; }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+    note.textContent = 'Webcam recording needs a desktop browser (Chrome, Edge, or Firefox).';
+    return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: true });
+  } catch (e) {
+    note.textContent = e.name === 'NotAllowedError' ? 'Camera/mic permission denied — allow access and try again.' : `Could not access webcam: ${e.message}`;
+    return;
+  }
+
+  preview.srcObject = stream;
+  preview.style.display = '';
+  preview.play().catch(() => {});
+
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((t) => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+  webcamRec.stream = stream; webcamRec.chunks = [];
+  const mr = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
+  webcamRec.mr = mr;
+  mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) webcamRec.chunks.push(ev.data); };
+  mr.onstop = async () => {
+    clearInterval(webcamRec.timer);
+    stream.getTracks().forEach((t) => t.stop());
+    preview.srcObject = null; preview.style.display = 'none';
+    b.classList.remove('primary'); b.disabled = true; b.textContent = '⏳ Saving…';
+    try {
+      const blob = new Blob(webcamRec.chunks, { type: mime });
+      if (blob.size < 1000) throw new Error('That recording was empty.');
+      const file = new File([blob], `webcam-recording-${Date.now()}.webm`, { type: 'video/webm' });
+      await uploadFile(file, 'video');
+      await loadAssets();
+      note.textContent = `Saved a ${Math.round(blob.size / 1e5) / 10} MB clip to your Video clips below.`;
+    } catch (e) { note.textContent = e.message; }
+    b.disabled = false; b.textContent = '🎥 Record my webcam';
+    webcamRec.mr = null;
+  };
+  mr.start(1000);
+  webcamRec.t0 = 0;
+  b.classList.add('primary'); b.textContent = '⏺ Stop recording (0:00)';
+  note.textContent = 'Recording — read from the teleprompter above, look at the lens.';
+  webcamRec.timer = setInterval(() => {
+    webcamRec.t0 += 1;
+    const m = Math.floor(webcamRec.t0 / 60), s = String(webcamRec.t0 % 60).padStart(2, '0');
+    b.textContent = `⏺ Stop recording (${m}:${s})`;
+  }, 1000);
+};
+
 async function mediaAddAll(kind) {
   const list = st.assets.filter((a) => a.kind === kind && !a.meta?.overlay);
   if (!list.length) return;

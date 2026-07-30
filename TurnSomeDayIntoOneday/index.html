@@ -6996,7 +6996,13 @@ function localFallbackReply(userText){
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
   if(match)return match.reply+footer;
   const days=getDays();
-  return `I hear you. Day ${days} is still a day you showed up for yourself, and that counts for something.${categoryFallbackNote()}${footer}${guidedModeNotice()}`;
+  // Never lead with "Day 0" - to someone who just started or just reset, being
+  // told "Day 0 counts" reads as "you have nothing." Only name the day count
+  // once there's a real number behind them; otherwise affirm showing up now.
+  const dayLine=days>=1
+    ?`Day ${days} is still a day you showed up for yourself, and that counts for something.`
+    :`Showing up here, right now, is you choosing yourself — and that already counts for something.`;
+  return `I hear you. ${dayLine}${categoryFallbackNote()}${footer}${guidedModeNotice()}`;
 }
 
 // ─── NOVA PRO: REAL PATTERN/TREND ANALYSIS (from data the user already logged) ─

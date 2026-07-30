@@ -58,9 +58,14 @@ async function fetchLatestCommit() {
 
 const router = express.Router();
 
-// Owner gate (only when configured): a public user must never update the server.
+// Owner gate - fails CLOSED. Updating the server overwrites code and runs
+// npm install, so an unconfigured owner email must lock everyone out, not let
+// everyone in. (Matches requireOwner for admin stats; the old open fallback
+// let any signed-in user trigger an update when APP_OWNER_EMAIL was unset.)
 router.use((req, res, next) => {
-  if (!OWNER_EMAIL) return next();
+  if (!OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Updates are unavailable: APP_OWNER_EMAIL is not configured.' });
+  }
   const user = db.getUserById(req.userId);
   if (user && user.email === OWNER_EMAIL) return next();
   res.status(403).json({ error: 'Only the app owner can update this server.' });

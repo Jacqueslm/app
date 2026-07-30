@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.0.1'; // v12.0.1: Play mode never latches on the web
+const CACHE_NAME = 'tsid-shell-v12.0.2'; // v12.0.2: offline page loads fall back to the cached shell even with a query string
 const SHELL_FILES = [
   '/',
   '/app',
@@ -37,6 +37,30 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
+
+  if (isPage) {
+    // Network-first so updates appear on the next load. Offline, fall back to
+    // the cached copy - and because a navigation often carries a query string
+    // (e.g. /app?join=1) that won't exact-match the cached '/app', ignoreSearch
+    // is used, with '/app' and '/' as last resorts. Without this, an offline
+    // PWA launch with any query string got a blank error page - stranding a
+    // user the app is otherwise fully able to serve offline.
+    event.respondWith(
+      fetch(event.request)
+        .then((res) => {
+          if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, res.clone()));
+          return res;
+        })
+        .catch(() =>
+          caches.match(event.request, { ignoreSearch: true })
+            .then((c) => c || caches.match('/app'))
+            .then((c) => c || caches.match('/'))
+        )
+    );
+    return;
+  }
+
+  // Static assets: cache-first for speed, revalidating in the background.
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const network = fetch(event.request)
@@ -45,7 +69,7 @@ self.addEventListener('fetch', (event) => {
           return res;
         })
         .catch(() => cached);
-      return isPage ? network : (cached || network);
+      return cached || network;
     })
   );
 });

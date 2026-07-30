@@ -99,6 +99,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="qnum" id="q-num"></div>
     <h2 id="q-title"></h2>
     <div id="q-opts"></div>
+    <div id="q-back" style="text-align:center;margin-top:14px;display:none"><span onclick="qBack()" style="color:var(--tm);font-size:14px;cursor:pointer">← Back</span></div>
   </div>
 
   <!-- COST INPUTS -->
@@ -156,18 +157,30 @@ function start(){
   $('barfill').style.width='8%';
   show('st-focus');
 }
-function pickFocus(f){focus=f;qi=0;score=0;renderQ();show('st-q');}
+// Track each answer's score so Back can undo a mis-tap instead of stranding
+// the user on a wrong answer with only a full restart to fix it.
+let answerScores=[];
+function pickFocus(f){focus=f;qi=0;score=0;answerScores=[];renderQ();show('st-q');}
 function renderQ(){
   const q=QUESTIONS[qi];
   $('q-num').textContent=`Question ${qi+1} of ${QUESTIONS.length}`;
   $('q-title').textContent=q.t;
   $('barfill-q').style.width=Math.round(10+(qi/QUESTIONS.length)*75)+'%';
   $('q-opts').innerHTML=q.o.map((o,i)=>`<div class="opt" onclick="answer(${i})">${o[0]}</div>`).join('');
+  $('q-back').style.display=qi>0?'block':'none';
 }
 function answer(i){
-  score+=QUESTIONS[qi].o[i][1];
+  const pts=QUESTIONS[qi].o[i][1];
+  answerScores[qi]=pts;
+  score+=pts;
   qi++;
   if(qi<QUESTIONS.length){renderQ();}else{show('st-cost');}
+}
+function qBack(){
+  if(qi<=0)return;
+  qi--;
+  score-=answerScores[qi]||0; // take back the points from the answer we're undoing
+  renderQ();
 }
 function money(n){return '$'+Math.round(n).toLocaleString();}
 let lastSeg='';

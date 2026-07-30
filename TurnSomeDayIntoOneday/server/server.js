@@ -83,6 +83,13 @@ app.get('/for-her', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'for-her.html'));
 });
 
+// Door-specific partner landing: the wife of the man who drinks. Same house,
+// narrower front door - drinking-angle videos and ads point here so the page
+// continues the exact sentence the post started.
+app.get('/when-he-drinks', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
+});
+
 // One-click unsubscribe from any inbox - no login. Idempotent by design:
 // setting the flag to 1 again is the same write and the same page, so a
 // double-click or a second device never sees an error.
@@ -127,7 +134,9 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   if (!EMAIL_RE.test(addr)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
-  const src = source === 'brainreset' ? 'brainreset' : 'quiz';
+  // 'for-her' is the partner pages: she gets the PDF she asked for and nothing
+  // else - the quiz nurture is written in his voice and never goes to her.
+  const src = source === 'brainreset' ? 'brainreset' : source === 'for-her' ? 'for-her' : 'quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
   const cleanUtm = readUtm(req.body);
 
@@ -137,13 +146,13 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // Dedup rule: an email already known (lead or user) never restarts the
   // nurture - but a brainreset request still gets its PDF.
   if (existingUser || existingLead) {
-    if (src === 'brainreset') {
+    if (src === 'brainreset' || src === 'for-her') {
       const pdf = emailer.brainresetPdfEmail();
       // They just asked for it by typing their address - deliver even if
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
     }
-    return res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : "You're all set." });
+    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : 'Check your email — the PDF is on the way.' });
   }
 
   const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
@@ -151,13 +160,17 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   if (src === 'quiz') {
     emailer.startQuizNurture(lead).catch(() => {});
   } else {
-    // Brainreset leads skip day 1 (it restates a quiz result they don't have):
-    // pre-mark step 1 consumed so the scheduler starts them at day 2.
-    db.logEmailSent(null, addr, 'quiz', 1);
+    if (src === 'brainreset') {
+      // Brainreset leads skip day 1 (it restates a quiz result they don't have):
+      // pre-mark step 1 consumed so the scheduler starts them at day 2.
+      // for-her leads are excluded from the nurture entirely (see runQuizNurture),
+      // so no pre-marking is needed for them.
+      db.logEmailSent(null, addr, 'quiz', 1);
+    }
     const pdf = emailer.brainresetPdfEmail();
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
-  res.json({ ok: true, message: src === 'brainreset' ? 'Check your email — the PDF is on the way.' : 'Day 1 is on its way to your inbox.' });
+  res.json({ ok: true, message: src === 'quiz' ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
 const loginLimiter = rateLimit({

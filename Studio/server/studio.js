@@ -3740,8 +3740,12 @@ const GH_HEADERS = {
 // raw slashes ("claude/vibe-code-uwxxlk"), and %2F makes them 404, which
 // silently broke every in-app update. Encode only individual path segments.
 const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
+// Tarball, not zipball: GNU tar on Linux reads .tar.gz via `tar -xzf` with no
+// external tool, whereas a .zip needs the `unzip` binary most servers lack
+// (the in-app update failed with "spawn unzip ENOENT"). bsdtar on Windows
+// 10+/macOS reads .tar.gz too, so the tarball works everywhere.
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
-  || `https://api.github.com/repos/${UPDATE_REPO}/zipball/${UPDATE_REF}`;
+  || `https://api.github.com/repos/${UPDATE_REPO}/tarball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // Strict whitelist: an update only ever copies Studio's own files. The repo also
 // contains the Turn Someday Into Day One app, and the two must stay fully
@@ -3802,14 +3806,16 @@ router.post('/update', async (req, res) => {
     const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
     if (zipRes.status === 404 && !UPDATE_TOKEN) throw new Error('download blocked - GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to Studio/server/.env (or make the repo public)');
     if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
-    const zipPath = path.join(tmp, 'update.zip');
-    fs.writeFileSync(zipPath, Buffer.from(await zipRes.arrayBuffer()));
+    const tarPath = path.join(tmp, 'update.tar.gz');
+    fs.writeFileSync(tarPath, Buffer.from(await zipRes.arrayBuffer()));
 
-    // 2. extract (tar reads zips on Windows 10+/mac; unzip covers most Linux)
-    try { await runCmd('tar', ['-xf', zipPath, '-C', tmp]); }
-    catch (_) { await runCmd('unzip', ['-q', zipPath, '-d', tmp]); }
-    const rootName = fs.readdirSync(tmp).find((n) => n !== 'update.zip' && fs.statSync(path.join(tmp, n)).isDirectory());
-    if (!rootName) throw new Error('The downloaded ZIP looked empty.');
+    // 2. extract. `tar -xzf` reads .tar.gz on Linux, Windows 10+ and macOS with
+    // no external unzip; plain `tar -xf` is a fallback for tar builds that
+    // auto-detect gzip but reject an explicit -z.
+    try { await runCmd('tar', ['-xzf', tarPath, '-C', tmp]); }
+    catch (_) { await runCmd('tar', ['-xf', tarPath, '-C', tmp]); }
+    const rootName = fs.readdirSync(tmp).find((n) => n !== 'update.tar.gz' && fs.statSync(path.join(tmp, n)).isDirectory());
+    if (!rootName) throw new Error('The downloaded archive looked empty.');
     const src = path.join(tmp, rootName);
 
     // 3. overlay the new code onto the install (data files aren't in the ZIP)

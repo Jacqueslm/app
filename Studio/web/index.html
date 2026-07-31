@@ -557,6 +557,7 @@ body.simple-only #view-simple{display:flex !important}
         <div class="progress-line" id="voice-prog"><div></div></div>
         <p class="usage" id="voice-note" style="margin:4px 0 0"></p>
         <audio id="voice-audio" controls style="width:100%;margin-top:6px;display:none"></audio>
+        <button class="btn2" id="voice-use" style="width:100%;margin-top:6px;display:none">🎬 Use in video (narration + captions)</button>
       </div>
     </div>
     <div class="card" id="pipe-card">
@@ -3534,7 +3535,7 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   const p = voicePrice();
   if (!confirm(`Generate this line in that voice?\n\nUses AI on your fal key (~$${(p || 0.01).toFixed(3)}).`)) return;
   const b = $('#voice-go'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Speaking…';
-  note.textContent = ''; $('#voice-audio').style.display = 'none'; setProg('#voice-prog', 3);
+  note.textContent = ''; $('#voice-audio').style.display = 'none'; $('#voice-use').style.display = 'none'; setProg('#voice-prog', 3);
   try {
     const { job } = await jfetch('/api/studio/voice-clone', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3544,7 +3545,24 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
     await loadAssets();
     setProg('#voice-prog', 100);
     const made = done && done.assetId && st.assets.find((a) => a.id === done.assetId);
-    if (made) { const au = $('#voice-audio'); au.src = made.url; au.style.display = 'block'; au.play().catch(() => {}); note.textContent = 'Saved to your Songs in My Media. Add it to a video, or use it as narration.'; }
+    if (made) {
+      const au = $('#voice-audio'); au.src = made.url; au.style.display = 'block'; au.play().catch(() => {});
+      note.textContent = 'Saved to your Songs in My Media.';
+      // A generated voice is filed as an audio asset exactly like an uploaded
+      // song, so everything the timeline does with a song - captions, spread,
+      // tap-sync - works on it too. Without this button the only way through
+      // was to leave the card, hunt it down in My Media and press "Use in
+      // video" there, which made narration look unsupported.
+      const useBtn = $('#voice-use');
+      useBtn.style.display = 'block';
+      useBtn.onclick = () => {
+        addMusicUnique(made.id);
+        renderMusicList();
+        updateQkMusicLabel && updateQkMusicLabel();
+        persistDraft();
+        document.querySelector('#mtabs button[data-view="seq"]').click();
+      };
+    }
   } catch (e) { note.textContent = e.message; }
   b.disabled = false; b.innerHTML = old; updateVoicePrice();
 };

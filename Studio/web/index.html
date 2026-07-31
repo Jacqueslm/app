@@ -469,9 +469,14 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" style="margin:8px 0 0"><b>2. Your lyrics</b></p>
       <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
       <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~35¢ — or paste lyrics above for free)</button>
+      <button class="btn2 quiet" id="crew-voicecap" style="width:100%;margin-top:6px">🎙️ Captions from my own voice (free)</button>
 
       <p class="usage" style="margin:8px 0 0"><b>3. Your pictures &amp; video clips</b> <span class="usage">(optional — the crew generates the rest)</span></p>
-      <button class="btn2" id="crew-drop">🎞 Drop your images or video clips (pick several)</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="crew-drop" style="flex:1">🎞 Drop images or clips from this device</button>
+        <button class="btn2" id="crew-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
+      </div>
+      <div id="crew-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
@@ -557,6 +562,7 @@ body.simple-only #view-simple{display:flex !important}
         <div class="progress-line" id="voice-prog"><div></div></div>
         <p class="usage" id="voice-note" style="margin:4px 0 0"></p>
         <audio id="voice-audio" controls style="width:100%;margin-top:6px;display:none"></audio>
+        <button class="btn2" id="voice-use" style="width:100%;margin-top:6px;display:none">🎬 Use in video (narration + captions)</button>
       </div>
     </div>
     <div class="card" id="pipe-card">
@@ -566,7 +572,11 @@ body.simple-only #view-simple{display:flex !important}
     </div>
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
-      <button class="btn2" id="qk-add-imgs">1️⃣ &nbsp;Add your pictures</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="qk-add-imgs" style="flex:1">1️⃣ &nbsp;Add pictures from this device</button>
+        <button class="btn2" id="qk-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
+      </div>
+      <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
@@ -745,6 +755,11 @@ body.simple-only #view-simple{display:flex !important}
         <a href="#" id="wm-logo-remove" style="display:none;font-size:12px;color:var(--tm)">remove logo</a>
       </div>
       <div class="chips" id="wm-pos" style="margin-top:6px"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span class="usage" style="margin:0;white-space:nowrap">Size</span>
+        <input type="range" id="wm-size" min="4" max="40" step="1" style="flex:1">
+        <span class="usage" id="wm-size-val" style="margin:0;min-width:56px;text-align:right"></span>
+      </div>
       <canvas id="wm-preview" style="width:100%;max-width:280px;border-radius:8px;margin-top:6px;background:linear-gradient(135deg,#3a3a5a,#14121f);display:none"></canvas>
       <p class="usage">A small, subtle tag or logo stays on screen the whole video — so when your clips get reshared, they're always tied to you. A logo (like Synborn Studios) is used if you upload one; otherwise your @handle.</p>
     </div>
@@ -3534,7 +3549,7 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   const p = voicePrice();
   if (!confirm(`Generate this line in that voice?\n\nUses AI on your fal key (~$${(p || 0.01).toFixed(3)}).`)) return;
   const b = $('#voice-go'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Speaking…';
-  note.textContent = ''; $('#voice-audio').style.display = 'none'; setProg('#voice-prog', 3);
+  note.textContent = ''; $('#voice-audio').style.display = 'none'; $('#voice-use').style.display = 'none'; setProg('#voice-prog', 3);
   try {
     const { job } = await jfetch('/api/studio/voice-clone', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3544,7 +3559,24 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
     await loadAssets();
     setProg('#voice-prog', 100);
     const made = done && done.assetId && st.assets.find((a) => a.id === done.assetId);
-    if (made) { const au = $('#voice-audio'); au.src = made.url; au.style.display = 'block'; au.play().catch(() => {}); note.textContent = 'Saved to your Songs in My Media. Add it to a video, or use it as narration.'; }
+    if (made) {
+      const au = $('#voice-audio'); au.src = made.url; au.style.display = 'block'; au.play().catch(() => {});
+      note.textContent = 'Saved to your Songs in My Media.';
+      // A generated voice is filed as an audio asset exactly like an uploaded
+      // song, so everything the timeline does with a song - captions, spread,
+      // tap-sync - works on it too. Without this button the only way through
+      // was to leave the card, hunt it down in My Media and press "Use in
+      // video" there, which made narration look unsupported.
+      const useBtn = $('#voice-use');
+      useBtn.style.display = 'block';
+      useBtn.onclick = () => {
+        addMusicUnique(made.id);
+        renderMusicList();
+        updateQkMusicLabel && updateQkMusicLabel();
+        persistDraft();
+        document.querySelector('#mtabs button[data-view="seq"]').click();
+      };
+    }
   } catch (e) { note.textContent = e.message; }
   b.disabled = false; b.innerHTML = old; updateVoicePrice();
 };
@@ -3613,12 +3645,25 @@ async function loadReceipts() {
     if (!receipts.length) { list.innerHTML = '<p class="usage">No AI generations recorded yet.</p>'; return; }
     const label = { video: '🎬 clip', image: '🖼 image', audio: '🎵 audio', lora: '🧬 face-lock', qc: 'check', transcript: 'captions' };
     const badge = { running: '<span style="color:#c9a227">⏳ working / unclaimed</span>', done: '<span style="color:#1f9d55">✓ in library</span>', error: '<span style="color:#c0392b">✕ failed (not billed)</span>' };
-    list.innerHTML = receipts.slice(0, 30).map((r) => `
-      <div style="background:var(--s1);border-radius:8px;padding:7px 10px;font-size:11.5px;display:flex;justify-content:space-between;gap:8px;align-items:center">
-        <span style="color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label[r.expect] || r.expect} · ${escapeHtml(r.label || '—')}${r.tier ? ` · ${escapeHtml(r.tier)}` : ''}</span>
-        <span style="white-space:nowrap;color:var(--tm)">${r.cost != null ? `~$${r.cost.toFixed(2)}` : ''}</span>
-        <span style="white-space:nowrap">${badge[r.status] || r.status}</span>
-      </div>`).join('');
+    // Second line = exactly what set the price, plus fal's own request id, so
+    // this can be checked against the dashboard line by line. A clip billed at
+    // a resolution you didn't expect shows up here instead of only in the bill.
+    list.innerHTML = receipts.slice(0, 30).map((r) => {
+      const facts = [
+        r.seconds ? `${r.seconds}s` : '',
+        r.resolution || '',
+        r.model || '',
+      ].filter(Boolean).map(escapeHtml).join(' · ');
+      return `
+      <div style="background:var(--s1);border-radius:8px;padding:7px 10px;font-size:11.5px">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+          <span style="color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${label[r.expect] || r.expect} · ${escapeHtml(r.label || '—')}${r.tier ? ` · ${escapeHtml(r.tier)}` : ''}</span>
+          <span style="white-space:nowrap;color:var(--tm)">${r.cost != null ? `~$${r.cost.toFixed(2)}` : ''}</span>
+          <span style="white-space:nowrap">${badge[r.status] || r.status}</span>
+        </div>
+        ${facts || r.requestId ? `<div style="color:var(--tm);font-size:10.5px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${facts}${facts && r.requestId ? ' · ' : ''}${r.requestId ? `id ${escapeHtml(String(r.requestId).slice(0, 8))}` : ''}</div>` : ''}
+      </div>`;
+    }).join('');
   } catch (_) { /* not signed in */ }
 }
 $('#cap-save') && ($('#cap-save').onclick = async () => {
@@ -3941,6 +3986,11 @@ function renderLibrary() {
     }, 'finish');
     if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio'), 'finish'); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
     if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release'), 'finish'); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
+    // Same op as Master, which already drops the picture (-vn) and files the
+    // result as audio - so pulling the voice off a clip was always possible,
+    // just hidden behind a name that reads like a mastering tool. Named for
+    // what people actually come looking for.
+    if (a.kind === 'video') { const vb = btn('🎙 Take the voice out', '', (e) => freeTransform(a.id, 'remaster', e.target, '🎙 Take the voice out'), 'finish'); vb.title = 'FREE — lifts the sound off this clip into its own audio file in your Songs, cleaned up. Use it as narration, or caption it.'; }
     // Use
     btn('+ Add to video', a.kind === 'video' ? 'primary' : '', () => addToSeq(a), 'use');
     btn('⬇ Download', '', (e) => downloadFile(a.url, slug(a.label) || (a.kind === 'video' ? 'studio-clip' : 'studio-image'), e.target), 'use');
@@ -5452,6 +5502,10 @@ function wmSpec() {
     text: (localStorage.getItem('tsid-wm-text') || '').trim(),
     logo: localStorage.getItem('tsid-wm-logo') || '',
     pos: Number(localStorage.getItem('tsid-wm-pos')) || 9,
+    // Width of the logo as a share of the video's width. Was fixed at 0.26,
+    // which is a quarter of the frame - fine for a wordmark, far too big for a
+    // square icon. Kept as the default so nobody's existing renders change.
+    size: Number(localStorage.getItem('tsid-wm-size')) || 0.26,
   };
 }
 function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
@@ -5462,7 +5516,7 @@ async function drawWatermarkCanvas(W, H, canvas) {
     const c = canvas || document.createElement('canvas'); c.width = W; c.height = H;
     const ctx = c.getContext('2d'); ctx.clearRect(0, 0, W, H);
     const img = await loadImg(wm.logo);
-    const lw = W * 0.26, lh = lw * (img.height / img.width || 0.3);
+    const lw = W * wm.size, lh = lw * (img.height / img.width || 0.3);
     const col = (wm.pos - 1) % 3, row = Math.floor((wm.pos - 1) / 3), m = 0.045;
     const x = col === 0 ? W * m : col === 1 ? (W - lw) / 2 : W - lw - W * m;
     const y = row === 0 ? H * m : row === 1 ? (H - lh) / 2 : H - lh - H * m;
@@ -5472,7 +5526,10 @@ async function drawWatermarkCanvas(W, H, canvas) {
     ctx.globalAlpha = 1;
     return c;
   }
-  return drawOverlay({ text: wm.text, font: 'system-ui', size: 40, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.95)', stroke: { color: 'rgba(0,0,0,0.6)', width: 0.13 } }, W, H, canvas);
+  // The handle scales off the same slider, so Size means one thing whether the
+  // brand is a logo or text.
+  const textSize = Math.max(12, Math.round(40 * (wm.size / 0.26)));
+  return drawOverlay({ text: wm.text, font: 'system-ui', size: textSize, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.95)', stroke: { color: 'rgba(0,0,0,0.6)', width: 0.13 } }, W, H, canvas);
 }
 async function uploadOverlayPngs() {
   const [W, H] = currentSize().split('x').map(Number);
@@ -5513,6 +5570,11 @@ function renderWatermark() {
     b.onclick = () => { localStorage.setItem('tsid-wm-pos', String(p)); renderWatermark(); };
     posBox.appendChild(b);
   });
+  const sz = $('#wm-size'), szVal = $('#wm-size-val');
+  if (sz) {
+    if (document.activeElement !== sz) sz.value = String(Math.round(wm.size * 100));
+    szVal.textContent = `${Math.round(wm.size * 100)}% wide`;
+  }
   const pv = $('#wm-preview');
   if (wm.on && (wm.logo || wm.text)) { pv.style.display = 'block'; drawWatermarkCanvas(560, 315, pv); }
   else pv.style.display = 'none';
@@ -5532,6 +5594,10 @@ if (document.getElementById('wm-on')) {
     } catch (e) { setErr('#seq-err', 'That logo was too large to store — try a smaller PNG.'); }
   });
   $('#wm-logo-remove').onclick = (e) => { e.preventDefault(); localStorage.removeItem('tsid-wm-logo'); renderWatermark(); };
+  $('#wm-size').addEventListener('input', () => {
+    localStorage.setItem('tsid-wm-size', String(Number($('#wm-size').value) / 100));
+    renderWatermark();// preview redraws live, so you size it by eye
+  });
 }
 
 async function runRender(windowOpt, btnSel, opts) {
@@ -5706,6 +5772,42 @@ $('#crew-drop').onclick = () => pickFiles('image/*,video/*', async (files) => {
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = old;
 });
+// Storyboard and AI Scene pictures are already in the library, but this card
+// only ever opened the device file picker - so the images Studio itself made
+// were the one set you could not drop in here. Tap to add, in your order.
+function renderCrewStudioGrid() {
+  const grid = $('#crew-studio-grid');
+  const chosen = new Set(crew.images.map((im) => im.id));
+  const media = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
+  if (!media.length) {
+    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">Nothing in your library yet — generate scenes in AI Scenes or Storyboard first.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  media.forEach((a) => {
+    const cell = document.createElement('div');
+    const already = chosen.has(a.id);
+    cell.style.cssText = `position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${already ? 'var(--green)' : 'transparent'}`;
+    cell.title = already ? `Already added: ${a.label}` : `Tap to add: ${a.label}`;
+    cell.innerHTML = (a.kind === 'image'
+      ? `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`
+      : `<video src="${a.url}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}"></video>`)
+      + `<span style="position:absolute;top:2px;left:3px;font-size:11px;filter:drop-shadow(0 1px 1px #000)">${a.kind === 'video' ? '🎬' : '🖼'}</span>`;
+    cell.onclick = () => {
+      crew.images.push({ ...a, kind: a.kind });
+      renderCrewThumbs(); renderCrewStudioGrid();
+    };
+    grid.appendChild(cell);
+  });
+}
+$('#crew-pick-studio').onclick = () => {
+  const grid = $('#crew-studio-grid');
+  const show = grid.style.display === 'none';
+  grid.style.display = show ? 'grid' : 'none';
+  $('#crew-pick-studio').textContent = show ? '🖼 Hide Studio pictures' : '🖼 Use pictures made in Studio';
+  if (show) renderCrewStudioGrid();
+};
+
 // Show the actual dropped pictures/clips (thumbnails), not just a count. Tap one to remove it.
 function renderCrewThumbs() {
   const box = $('#crew-thumbs');
@@ -5760,6 +5862,9 @@ $('#crew-song-import').onclick = async () => {
 // Director/storyboard read the same words
 $('#crew-lyrics').oninput = () => { $('#lyr-text').value = $('#crew-lyrics').value; persistDraft(); };
 $('#crew-autocap').onclick = () => $('#lyr-auto').onclick();
+// The free route to captions was only ever on the Captions card, so from here
+// the paid "AI listens" button looked like the only way to caption a recording.
+$('#crew-voicecap').onclick = () => $('#lyr-speech').onclick();
 
 // --- Director's brief: the answers steer the plan, and each choice earns a
 // specific, targeted tip (real advice, not boilerplate) ---
@@ -6151,7 +6256,14 @@ $('#seq-render-cut').onclick = () => {
 const lyr = { audio: null, lines: [], idx: 0 };
 
 function lyrLines() {
-  return $('#lyr-text').value.split('\n').map((l) => l.trim()).filter(Boolean);
+  // Text pasted from a chat window, doc or notes app usually arrives carrying
+  // quote and bullet markers. Left in, "> " burns into the caption on screen,
+  // and a marker-only line (a bare ">" between paragraphs) becomes an empty
+  // caption that still eats a timing slot - so the words drift out of step with
+  // the picture. Strip the markers, then drop whatever is left with no words.
+  return $('#lyr-text').value.split('\n')
+    .map((l) => l.replace(/^\s*(?:[>»|]+|[•·▪]|\*)\s*/, '').trim())
+    .filter((l) => /[a-z0-9]/i.test(l));
 }
 function finishCaptionEnds() {
   st.captions.forEach((c, i) => {
@@ -6197,7 +6309,7 @@ $('#lyr-tap').onclick = () => {
   const lines = lyrLines();
   if (!lines.length) return setErr('#seq-err', 'Paste your lyrics first.');
   const song = firstMusicAsset();
-  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card).');
+  if (!song) return setErr('#seq-err', 'Tap-to-sync needs audio playing to tap along to. Add your song or voice-over first — or press Auto-spread to place these lines evenly across the video with no audio at all.');
   lyr.lines = lines; lyr.idx = 0;
   st.captions = [];
   lyr.audio = new Audio(song.url);
@@ -6230,7 +6342,7 @@ $('#lyr-auto').onclick = async () => {
   if (!st.cfg?.falAvailable) return setErr('#seq-err', 'Turn on AI first (AI Scenes tab).');
   const entry = st.musicList[0];
   const song = entry && st.assets.find((a) => a.id === entry.assetId);
-  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card) — captions come from listening to it.');
+  if (!song) return setErr('#seq-err', 'Nothing to listen to yet — add your song or voice-over (Quick Video or Music card). Free instead: paste your lines above and press Auto-spread.');
   const est = st.cfg?.pricing?.transcribe;
   if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.35).toFixed(2)}). Free instead: paste your lyrics and use Auto-spread or Tap-to-sync.\n\nYour current caption list will be replaced.`)) return;
   const b = $('#lyr-auto');
@@ -6258,8 +6370,20 @@ $('#lyr-auto').onclick = async () => {
 // first model download. Fills the caption list with real timings.
 $('#lyr-speech').onclick = async () => {
   setErr('#seq-err', null);
-  const clip = st.seq.find((c) => c.kind === 'video');
-  if (!clip) return setErr('#seq-err', 'Add your filmed video to the timeline first — captions come from listening to it.');
+  // Listening only needs the recording, not a slot on the timeline. Requiring a
+  // video ON the timeline blocked the common cut entirely: storyboard pictures
+  // as the visuals, with the voice coming from a filmed clip or a generated
+  // voice-over. The server already accepts video OR audio, so fall back to the
+  // newest one in the library and name it before spending anything.
+  const onTimeline = st.seq.find((c) => c.kind === 'video');
+  let clip = onTimeline;
+  if (!clip) {
+    const candidates = st.assets.filter((a) => a.kind === 'video' || a.kind === 'audio');
+    const pick = candidates[candidates.length - 1];
+    if (!pick) return setErr('#seq-err', 'No recording to listen to yet. Add a filmed clip or make a voice-over first — or paste your lines above and press Auto-spread to place them without audio.');
+    if (!confirm(`No filmed video on the timeline.\n\nListen to "${pick.label}" from your library instead?`)) return;
+    clip = { assetId: pick.id };
+  }
   // A finished transcript is saved on the video itself - if one exists, offer
   // it instantly (free) instead of listening all over again. This also rescues
   // runs whose result never reached the page (refresh mid-job).
@@ -6399,8 +6523,10 @@ function renderStoryboard() {
           ? `<span class="btn2 quiet" style="flex:1;text-align:center;cursor:default">🌙 Queued${sc.queueStatus === 'running' ? ' — generating…' : ' — waiting'}</span>`
           : `<button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>`}
         ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
+        <button class="btn2 quiet sb-own" title="Use a picture you already have instead of generating one">🖼 My own</button>
         <button class="btn2 quiet sb-del" title="Delete this scene" style="padding:7px 10px">✕</button>
       </div>
+      <div class="sb-own-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin-top:6px"></div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
     const sbImg = card.querySelector('img');
     if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, "image", asset.label);
@@ -6411,6 +6537,39 @@ function renderStoryboard() {
     // section-aware pacing: chorus stills hit the timeline with short punchy
     // holds, intro/outro breathe longer, verses sit in between
     if (addBtn) addBtn.onclick = () => addToSeq(asset, { holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4 });
+    // Not every shot needs generating - a scene you already have a photo for
+    // (or generated earlier, or made elsewhere) can just use it. Picking one
+    // fills the scene exactly as a generated image would, so + Timeline and
+    // "Add all generated scenes" pick it up with the same section pacing.
+    const ownBtn = card.querySelector('.sb-own');
+    const ownGrid = card.querySelector('.sb-own-grid');
+    ownBtn.onclick = () => {
+      const show = ownGrid.style.display === 'none';
+      ownGrid.style.display = show ? 'grid' : 'none';
+      ownBtn.textContent = show ? '✕ Close' : '🖼 My own';
+      if (!show) return;
+      ownGrid.innerHTML = '';
+      const up = document.createElement('div');
+      up.style.cssText = 'aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--s0);border:1px dashed var(--bdr2);cursor:pointer;font-size:11px;color:var(--ts);text-align:center;padding:4px';
+      up.textContent = '⬆ From this device';
+      up.onclick = () => pickFile('image/*', async (file) => {
+        try {
+          const a = await uploadFile(file, 'image');
+          await loadAssets();
+          sc.assetId = a.id; sc.queueId = null;
+          renderStoryboard(); persistDraft();
+        } catch (e) { setErr('#seq-err', e.message); }
+      });
+      ownGrid.appendChild(up);
+      st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay).forEach((a) => {
+        const cell = document.createElement('div');
+        cell.style.cssText = `aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${sc.assetId === a.id ? 'var(--green)' : 'transparent'}`;
+        cell.title = `Use for scene ${i + 1}: ${a.label}`;
+        cell.innerHTML = `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover" alt="">`;
+        cell.onclick = () => { sc.assetId = a.id; sc.queueId = null; renderStoryboard(); persistDraft(); };
+        ownGrid.appendChild(cell);
+      });
+    };
     card.querySelector('.sb-del').onclick = () => {
       if (!confirm(`Delete scene ${i + 1}? (Any generated image stays in your Library.)`)) return;
       st.storyboard.splice(i, 1); renderStoryboard(); persistDraft();
@@ -7073,6 +7232,45 @@ $('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
     setErr('#seq-err', e.message);
   }
 });
+
+// Pictures generated in Studio (AI Scenes, storyboard) are already in the
+// library, but "Add pictures" only ever opened the device file picker - so the
+// images the app itself just made were the one set you couldn't reach here.
+// This grid lists them; tap to add, exactly like the upload path does.
+function renderQkStudioGrid() {
+  const grid = $('#qk-studio-grid');
+  const chosen = new Set(qk.shots.map((s) => s.assetId));
+  const imgs = st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay);
+  if (!imgs.length) {
+    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">No pictures made in Studio yet — generate some in AI Scenes or Storyboard first.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  imgs.forEach((a) => {
+    const cell = document.createElement('div');
+    const already = chosen.has(a.id);
+    cell.style.cssText = `position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${already ? 'var(--green)' : 'transparent'}`;
+    cell.title = already ? `Already added: ${a.label}` : `Tap to add: ${a.label}`;
+    cell.innerHTML = `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`;
+    cell.onclick = () => {
+      qk.shots.push({
+        assetId: a.id, url: a.url, label: a.label,
+        move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
+        dur: 4, text: '', transAfter: 'fade',
+      });
+      renderQkShots(); renderQkStudioGrid();
+      $('#qk-status').textContent = `${qk.shots.length} picture${qk.shots.length > 1 ? 's' : ''} ready. Add your song or voice, then press Assemble!`;
+    };
+    grid.appendChild(cell);
+  });
+}
+$('#qk-pick-studio').onclick = () => {
+  const grid = $('#qk-studio-grid');
+  const show = grid.style.display === 'none';
+  grid.style.display = show ? 'grid' : 'none';
+  $('#qk-pick-studio').textContent = show ? '🖼 Hide Studio pictures' : '🖼 Use pictures made in Studio';
+  if (show) renderQkStudioGrid();
+};
 
 $('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
   setErr('#seq-err', null);

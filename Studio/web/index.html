@@ -567,7 +567,11 @@ body.simple-only #view-simple{display:flex !important}
     </div>
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
-      <button class="btn2" id="qk-add-imgs">1️⃣ &nbsp;Add your pictures</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="qk-add-imgs" style="flex:1">1️⃣ &nbsp;Add pictures from this device</button>
+        <button class="btn2" id="qk-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
+      </div>
+      <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
@@ -6215,7 +6219,7 @@ $('#lyr-tap').onclick = () => {
   const lines = lyrLines();
   if (!lines.length) return setErr('#seq-err', 'Paste your lyrics first.');
   const song = firstMusicAsset();
-  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card).');
+  if (!song) return setErr('#seq-err', 'Tap-to-sync needs audio playing to tap along to. Add your song or voice-over first — or press Auto-spread to place these lines evenly across the video with no audio at all.');
   lyr.lines = lines; lyr.idx = 0;
   st.captions = [];
   lyr.audio = new Audio(song.url);
@@ -6248,7 +6252,7 @@ $('#lyr-auto').onclick = async () => {
   if (!st.cfg?.falAvailable) return setErr('#seq-err', 'Turn on AI first (AI Scenes tab).');
   const entry = st.musicList[0];
   const song = entry && st.assets.find((a) => a.id === entry.assetId);
-  if (!song) return setErr('#seq-err', 'Add your song first (Quick Video or Music card) — captions come from listening to it.');
+  if (!song) return setErr('#seq-err', 'Nothing to listen to yet — add your song or voice-over (Quick Video or Music card). Free instead: paste your lines above and press Auto-spread.');
   const est = st.cfg?.pricing?.transcribe;
   if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.35).toFixed(2)}). Free instead: paste your lyrics and use Auto-spread or Tap-to-sync.\n\nYour current caption list will be replaced.`)) return;
   const b = $('#lyr-auto');
@@ -6276,8 +6280,20 @@ $('#lyr-auto').onclick = async () => {
 // first model download. Fills the caption list with real timings.
 $('#lyr-speech').onclick = async () => {
   setErr('#seq-err', null);
-  const clip = st.seq.find((c) => c.kind === 'video');
-  if (!clip) return setErr('#seq-err', 'Add your filmed video to the timeline first — captions come from listening to it.');
+  // Listening only needs the recording, not a slot on the timeline. Requiring a
+  // video ON the timeline blocked the common cut entirely: storyboard pictures
+  // as the visuals, with the voice coming from a filmed clip or a generated
+  // voice-over. The server already accepts video OR audio, so fall back to the
+  // newest one in the library and name it before spending anything.
+  const onTimeline = st.seq.find((c) => c.kind === 'video');
+  let clip = onTimeline;
+  if (!clip) {
+    const candidates = st.assets.filter((a) => a.kind === 'video' || a.kind === 'audio');
+    const pick = candidates[candidates.length - 1];
+    if (!pick) return setErr('#seq-err', 'No recording to listen to yet. Add a filmed clip or make a voice-over first — or paste your lines above and press Auto-spread to place them without audio.');
+    if (!confirm(`No filmed video on the timeline.\n\nListen to "${pick.label}" from your library instead?`)) return;
+    clip = { assetId: pick.id };
+  }
   // A finished transcript is saved on the video itself - if one exists, offer
   // it instantly (free) instead of listening all over again. This also rescues
   // runs whose result never reached the page (refresh mid-job).
@@ -7091,6 +7107,45 @@ $('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
     setErr('#seq-err', e.message);
   }
 });
+
+// Pictures generated in Studio (AI Scenes, storyboard) are already in the
+// library, but "Add pictures" only ever opened the device file picker - so the
+// images the app itself just made were the one set you couldn't reach here.
+// This grid lists them; tap to add, exactly like the upload path does.
+function renderQkStudioGrid() {
+  const grid = $('#qk-studio-grid');
+  const chosen = new Set(qk.shots.map((s) => s.assetId));
+  const imgs = st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay);
+  if (!imgs.length) {
+    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">No pictures made in Studio yet — generate some in AI Scenes or Storyboard first.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  imgs.forEach((a) => {
+    const cell = document.createElement('div');
+    const already = chosen.has(a.id);
+    cell.style.cssText = `position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${already ? 'var(--green)' : 'transparent'}`;
+    cell.title = already ? `Already added: ${a.label}` : `Tap to add: ${a.label}`;
+    cell.innerHTML = `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`;
+    cell.onclick = () => {
+      qk.shots.push({
+        assetId: a.id, url: a.url, label: a.label,
+        move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
+        dur: 4, text: '', transAfter: 'fade',
+      });
+      renderQkShots(); renderQkStudioGrid();
+      $('#qk-status').textContent = `${qk.shots.length} picture${qk.shots.length > 1 ? 's' : ''} ready. Add your song or voice, then press Assemble!`;
+    };
+    grid.appendChild(cell);
+  });
+}
+$('#qk-pick-studio').onclick = () => {
+  const grid = $('#qk-studio-grid');
+  const show = grid.style.display === 'none';
+  grid.style.display = show ? 'grid' : 'none';
+  $('#qk-pick-studio').textContent = show ? '🖼 Hide Studio pictures' : '🖼 Use pictures made in Studio';
+  if (show) renderQkStudioGrid();
+};
 
 $('#qk-add-music').onclick = () => pickFile('audio/*', async (file) => {
   setErr('#seq-err', null);

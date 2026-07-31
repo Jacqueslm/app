@@ -52,8 +52,10 @@ const MODEL_IMAGE_BEST_EDIT = process.env.FAL_MODEL_IMAGE_BEST_EDIT || 'fal-ai/n
 // same job queue, the same receipts and the same spend cap as everything else.
 // No second provider, no second bill. GPT-Image is the strongest model here for
 // text inside an image (posters, signs, titles) and for literal prompt-following.
-const MODEL_IMAGE_GPT = process.env.FAL_MODEL_IMAGE_GPT || 'fal-ai/gpt-image-1.5';
-const MODEL_IMAGE_GPT_EDIT = process.env.FAL_MODEL_IMAGE_GPT_EDIT || 'fal-ai/gpt-image-1.5/edit';
+// Note the openai/ prefix: GPT-Image 2 lives there on fal, not under fal-ai/
+// like the 1.5 endpoints. Override to 'fal-ai/gpt-image-1.5' to drop back.
+const MODEL_IMAGE_GPT = process.env.FAL_MODEL_IMAGE_GPT || 'openai/gpt-image-2';
+const MODEL_IMAGE_GPT_EDIT = process.env.FAL_MODEL_IMAGE_GPT_EDIT || 'openai/gpt-image-2/edit';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // Image-to-video quality tiers with price estimates (USD/second, audio off).
 // Rates are a snapshot - fal has no public pricing API - so they're shown in
@@ -96,10 +98,11 @@ const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballp
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
 const CHARACTER_IMAGE_RATE = Number(process.env.STUDIO_RATE_CHARACTER_IMAGE || 0.09);
 const IMAGE_BEST_RATE = Number(process.env.STUDIO_RATE_IMAGE_BEST || 0.15); // Nano Banana Pro flat per image
-// GPT-Image 1.5 on fal is billed per output image by quality tier. Studio asks
-// for medium, whose list price sits between low and high; quoted round-up so
-// the real bill is never a surprise, same rule as every other rate here.
-const IMAGE_GPT_RATE = Number(process.env.STUDIO_RATE_IMAGE_GPT || 0.05);
+// GPT-Image 2 on fal bills per output image by quality tier, PLUS token charges
+// layered on every request. Medium lands at $0.034 (1:1) to $0.051 (portrait),
+// landscape $0.050 - and Studio defaults to landscape. Quoted at $0.07 to cover
+// the top size plus tokens, round-up so the real bill is never a surprise.
+const IMAGE_GPT_RATE = Number(process.env.STUDIO_RATE_IMAGE_GPT || 0.07);
 // One-time LoRA face training, driven from the Characters tab. Billed per
 // step by fal (~$0.0024/step); 1500 steps is a solid portrait lock (~$3.60).
 const MODEL_LORA_TRAINER = process.env.FAL_MODEL_LORA_TRAINER || 'fal-ai/flux-lora-portrait-trainer';

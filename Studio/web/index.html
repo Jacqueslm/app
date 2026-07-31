@@ -755,6 +755,11 @@ body.simple-only #view-simple{display:flex !important}
         <a href="#" id="wm-logo-remove" style="display:none;font-size:12px;color:var(--tm)">remove logo</a>
       </div>
       <div class="chips" id="wm-pos" style="margin-top:6px"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span class="usage" style="margin:0;white-space:nowrap">Size</span>
+        <input type="range" id="wm-size" min="4" max="40" step="1" style="flex:1">
+        <span class="usage" id="wm-size-val" style="margin:0;min-width:56px;text-align:right"></span>
+      </div>
       <canvas id="wm-preview" style="width:100%;max-width:280px;border-radius:8px;margin-top:6px;background:linear-gradient(135deg,#3a3a5a,#14121f);display:none"></canvas>
       <p class="usage">A small, subtle tag or logo stays on screen the whole video — so when your clips get reshared, they're always tied to you. A logo (like Synborn Studios) is used if you upload one; otherwise your @handle.</p>
     </div>
@@ -5484,6 +5489,10 @@ function wmSpec() {
     text: (localStorage.getItem('tsid-wm-text') || '').trim(),
     logo: localStorage.getItem('tsid-wm-logo') || '',
     pos: Number(localStorage.getItem('tsid-wm-pos')) || 9,
+    // Width of the logo as a share of the video's width. Was fixed at 0.26,
+    // which is a quarter of the frame - fine for a wordmark, far too big for a
+    // square icon. Kept as the default so nobody's existing renders change.
+    size: Number(localStorage.getItem('tsid-wm-size')) || 0.26,
   };
 }
 function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
@@ -5494,7 +5503,7 @@ async function drawWatermarkCanvas(W, H, canvas) {
     const c = canvas || document.createElement('canvas'); c.width = W; c.height = H;
     const ctx = c.getContext('2d'); ctx.clearRect(0, 0, W, H);
     const img = await loadImg(wm.logo);
-    const lw = W * 0.26, lh = lw * (img.height / img.width || 0.3);
+    const lw = W * wm.size, lh = lw * (img.height / img.width || 0.3);
     const col = (wm.pos - 1) % 3, row = Math.floor((wm.pos - 1) / 3), m = 0.045;
     const x = col === 0 ? W * m : col === 1 ? (W - lw) / 2 : W - lw - W * m;
     const y = row === 0 ? H * m : row === 1 ? (H - lh) / 2 : H - lh - H * m;
@@ -5504,7 +5513,10 @@ async function drawWatermarkCanvas(W, H, canvas) {
     ctx.globalAlpha = 1;
     return c;
   }
-  return drawOverlay({ text: wm.text, font: 'system-ui', size: 40, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.95)', stroke: { color: 'rgba(0,0,0,0.6)', width: 0.13 } }, W, H, canvas);
+  // The handle scales off the same slider, so Size means one thing whether the
+  // brand is a logo or text.
+  const textSize = Math.max(12, Math.round(40 * (wm.size / 0.26)));
+  return drawOverlay({ text: wm.text, font: 'system-ui', size: textSize, bold: true, pos: wm.pos, color: 'rgba(255,255,255,0.95)', stroke: { color: 'rgba(0,0,0,0.6)', width: 0.13 } }, W, H, canvas);
 }
 async function uploadOverlayPngs() {
   const [W, H] = currentSize().split('x').map(Number);
@@ -5545,6 +5557,11 @@ function renderWatermark() {
     b.onclick = () => { localStorage.setItem('tsid-wm-pos', String(p)); renderWatermark(); };
     posBox.appendChild(b);
   });
+  const sz = $('#wm-size'), szVal = $('#wm-size-val');
+  if (sz) {
+    if (document.activeElement !== sz) sz.value = String(Math.round(wm.size * 100));
+    szVal.textContent = `${Math.round(wm.size * 100)}% wide`;
+  }
   const pv = $('#wm-preview');
   if (wm.on && (wm.logo || wm.text)) { pv.style.display = 'block'; drawWatermarkCanvas(560, 315, pv); }
   else pv.style.display = 'none';
@@ -5564,6 +5581,10 @@ if (document.getElementById('wm-on')) {
     } catch (e) { setErr('#seq-err', 'That logo was too large to store — try a smaller PNG.'); }
   });
   $('#wm-logo-remove').onclick = (e) => { e.preventDefault(); localStorage.removeItem('tsid-wm-logo'); renderWatermark(); };
+  $('#wm-size').addEventListener('input', () => {
+    localStorage.setItem('tsid-wm-size', String(Number($('#wm-size').value) / 100));
+    renderWatermark();// preview redraws live, so you size it by eye
+  });
 }
 
 async function runRender(windowOpt, btnSel, opts) {

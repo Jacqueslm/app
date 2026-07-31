@@ -1903,7 +1903,7 @@ router.post('/animate', async (req, res) => {
         expect: 'video',
         label: useRefs ? `${still.label} · locked` : still.label,
         characterId: still.character_id,
-        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds, refCount: refIds.length || undefined },
+        meta: { source: 'fal', model, tier: chosenTier, prompt: motionPrompt, fromAssetId: still.id, seconds, resolution: input.resolution, refCount: refIds.length || undefined },
       },
     });
     res.status(202).json({ job: jobJson(job) });
@@ -3928,9 +3928,14 @@ router.get('/fal/receipts', (req, res) => {
     // Failed generations that never completed weren't billed — don't count them.
     const cost = r.status === 'error' ? null : estReceiptCost(r);
     if (cost != null) { total += cost; counted += 1; }
+    // The numbers that decide the price (seconds, resolution) and the id that
+    // identifies the run on fal's own dashboard, so this list can be checked
+    // against the real bill line by line instead of taken on trust.
+    let m = {}; try { m = JSON.parse(r.meta || 'null') || {}; } catch (_) {}
     return {
       id: r.id, requestId: r.request_id, expect: r.expect, label: r.label,
       tier: r.tier, status: r.status, assetId: r.asset_id, createdAt: r.created_at,
+      seconds: m.seconds || null, resolution: m.resolution || null, model: m.model || null,
       cost: cost == null ? null : Number(cost.toFixed(3)),
     };
   });

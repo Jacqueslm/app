@@ -16,9 +16,22 @@ Do 2–3 in one sitting. That's your week.
 
 ---
 
+## SCHEDULE IT (so you don't have to remember)
+
+Studio → **Post** tab → **📅 Schedule a post**:
+pick the clip → paste the caption → tick TikTok / YouTube / Facebook → set the
+day and time → save.
+
+Studio tells you when it's due. Then you do the upload below.
+
+**One clip works on all three.** Same 9:16 file for TikTok, Shorts and Reels —
+make it once, post it three times.
+
+---
+
 ## WHEN YOU POST ONE
 
-Upload it in the app itself (not Buffer — native gets more reach):
+Upload it in the app itself (not auto-posted — native gets more reach):
 
 - **TikTok:** ＋ → Upload → paste the title as the caption → **AI-generated: ON** → Post
 - **YouTube:** Create → Upload → paste the title → **synthetic content: Yes** → Publish

@@ -469,9 +469,14 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" style="margin:8px 0 0"><b>2. Your lyrics</b></p>
       <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
       <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~35¢ — or paste lyrics above for free)</button>
+      <button class="btn2 quiet" id="crew-voicecap" style="width:100%;margin-top:6px">🎙️ Captions from my own voice (free)</button>
 
       <p class="usage" style="margin:8px 0 0"><b>3. Your pictures &amp; video clips</b> <span class="usage">(optional — the crew generates the rest)</span></p>
-      <button class="btn2" id="crew-drop">🎞 Drop your images or video clips (pick several)</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="crew-drop" style="flex:1">🎞 Drop images or clips from this device</button>
+        <button class="btn2" id="crew-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
+      </div>
+      <div id="crew-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
@@ -5728,6 +5733,42 @@ $('#crew-drop').onclick = () => pickFiles('image/*,video/*', async (files) => {
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = old;
 });
+// Storyboard and AI Scene pictures are already in the library, but this card
+// only ever opened the device file picker - so the images Studio itself made
+// were the one set you could not drop in here. Tap to add, in your order.
+function renderCrewStudioGrid() {
+  const grid = $('#crew-studio-grid');
+  const chosen = new Set(crew.images.map((im) => im.id));
+  const media = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
+  if (!media.length) {
+    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">Nothing in your library yet — generate scenes in AI Scenes or Storyboard first.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  media.forEach((a) => {
+    const cell = document.createElement('div');
+    const already = chosen.has(a.id);
+    cell.style.cssText = `position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${already ? 'var(--green)' : 'transparent'}`;
+    cell.title = already ? `Already added: ${a.label}` : `Tap to add: ${a.label}`;
+    cell.innerHTML = (a.kind === 'image'
+      ? `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`
+      : `<video src="${a.url}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}"></video>`)
+      + `<span style="position:absolute;top:2px;left:3px;font-size:11px;filter:drop-shadow(0 1px 1px #000)">${a.kind === 'video' ? '🎬' : '🖼'}</span>`;
+    cell.onclick = () => {
+      crew.images.push({ ...a, kind: a.kind });
+      renderCrewThumbs(); renderCrewStudioGrid();
+    };
+    grid.appendChild(cell);
+  });
+}
+$('#crew-pick-studio').onclick = () => {
+  const grid = $('#crew-studio-grid');
+  const show = grid.style.display === 'none';
+  grid.style.display = show ? 'grid' : 'none';
+  $('#crew-pick-studio').textContent = show ? '🖼 Hide Studio pictures' : '🖼 Use pictures made in Studio';
+  if (show) renderCrewStudioGrid();
+};
+
 // Show the actual dropped pictures/clips (thumbnails), not just a count. Tap one to remove it.
 function renderCrewThumbs() {
   const box = $('#crew-thumbs');
@@ -5782,6 +5823,9 @@ $('#crew-song-import').onclick = async () => {
 // Director/storyboard read the same words
 $('#crew-lyrics').oninput = () => { $('#lyr-text').value = $('#crew-lyrics').value; persistDraft(); };
 $('#crew-autocap').onclick = () => $('#lyr-auto').onclick();
+// The free route to captions was only ever on the Captions card, so from here
+// the paid "AI listens" button looked like the only way to caption a recording.
+$('#crew-voicecap').onclick = () => $('#lyr-speech').onclick();
 
 // --- Director's brief: the answers steer the plan, and each choice earns a
 // specific, targeted tip (real advice, not boilerplate) ---

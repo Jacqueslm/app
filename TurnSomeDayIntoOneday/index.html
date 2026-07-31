@@ -2824,6 +2824,11 @@ function completeLessonForToday(){
   if(justFinishedProgram)S.notifiedDay30Tracks.push(S.currentAddiction);
   const justHitLessonConsistency=S.lessonsCompletedCount===7&&!S.notifiedLessonConsistency;
   if(justHitLessonConsistency)S.notifiedLessonConsistency=true;
+  // Completing advances the track, so any pinned day from "View all lessons" is
+  // now stale. Left set, the re-render below stays on the day just finished -
+  // which is no longer the current day, so the button hides and the next lesson
+  // can never be marked done. Clearing it snaps the screen to the new day.
+  viewingDay=null;
   save();
   updateStats();
   const btn=document.getElementById('lessonCompleteBtn');
@@ -3243,8 +3248,9 @@ function completePackLessonToday(){
   const key=S.activeCustomPack;
   if(!key)return;
   S.customPackProgress=S.customPackProgress||{};
-  S.customPackProgress[key]=getPackDay(key)+1;
-  logActivity('lesson_completed',{day:getPackDay(key),pack:key});
+  const doneDay=getPackDay(key);
+  S.customPackProgress[key]=doneDay+1;
+  logActivity('lesson_completed',{day:doneDay,pack:key});// the day finished, not the next one
   save();
   renderPackLesson();
 }
@@ -8642,7 +8648,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.4.0';
+const APP_VERSION='12.4.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

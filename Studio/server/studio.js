@@ -71,10 +71,17 @@ const VIDEO_TIERS = {
   // the value pick, Seedance is premium and reserved for hero shots. The old
   // setup had Seedance (the priciest) mislabeled as "Draft", which is what
   // caused the surprise overspend. All overridable via FAL_MODEL_*/STUDIO_RATE_*.
+  // Wan 2.5 is priced by resolution - $0.05/s at 480p, $0.10/s at 720p,
+  // $0.15/s at 1080p - and fal DEFAULTS TO 1080p when no resolution is sent.
+  // Studio sent none, so every "Draft" clip was billed at 1080p: a 5s clip cost
+  // $0.75 against a $0.25 button. The resolution is now always stated, and the
+  // rate is looked up from it, so the button and the bill cannot drift apart.
   draft: {
-    label: 'Draft', desc: 'Wan 2.5 - best value',
+    label: 'Draft', desc: 'Wan 2.5 480p - cheapest way to test a shot',
     model: process.env.FAL_MODEL_I2V_DRAFT || 'fal-ai/wan-25-preview/image-to-video',
-    rate: Number(process.env.STUDIO_RATE_DRAFT || 0.05),
+    resolution: process.env.STUDIO_WAN_RESOLUTION || '480p',
+    rate: Number(process.env.STUDIO_RATE_DRAFT || 0)
+      || ({ '480p': 0.05, '720p': 0.10, '1080p': 0.15 }[process.env.STUDIO_WAN_RESOLUTION || '480p'] || 0.15),
   },
   standard: {
     label: 'Standard', desc: 'Kling 2.5 Turbo - great quality',
@@ -1882,6 +1889,11 @@ router.post('/animate', async (req, res) => {
       input = { prompt: motionPrompt, reference_image_urls };
     } else {
       input = { prompt: motionPrompt, image_url: fileToDataUri(still.filename), duration: String(seconds) };
+      // State the resolution rather than inheriting the model's default. Wan's
+      // default is its most expensive one (1080p), which is how a $0.25 button
+      // ran up a $0.75 charge; a tier that names a resolution now gets it.
+      const tierCfg = VIDEO_TIERS[chosenTier];
+      if (tierCfg && tierCfg.resolution) input.resolution = tierCfg.resolution;
     }
     const submitted = await falSubmit(model, input);
     const job = createJob(req.userId, 'ai-video', {

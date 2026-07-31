@@ -6173,7 +6173,14 @@ $('#seq-render-cut').onclick = () => {
 const lyr = { audio: null, lines: [], idx: 0 };
 
 function lyrLines() {
-  return $('#lyr-text').value.split('\n').map((l) => l.trim()).filter(Boolean);
+  // Text pasted from a chat window, doc or notes app usually arrives carrying
+  // quote and bullet markers. Left in, "> " burns into the caption on screen,
+  // and a marker-only line (a bare ">" between paragraphs) becomes an empty
+  // caption that still eats a timing slot - so the words drift out of step with
+  // the picture. Strip the markers, then drop whatever is left with no words.
+  return $('#lyr-text').value.split('\n')
+    .map((l) => l.replace(/^\s*(?:[>»|]+|[•·▪]|\*)\s*/, '').trim())
+    .filter((l) => /[a-z0-9]/i.test(l));
 }
 function finishCaptionEnds() {
   st.captions.forEach((c, i) => {

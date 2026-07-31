@@ -48,6 +48,12 @@ const MODEL_CHARACTER_IMAGE = process.env.FAL_MODEL_CHARACTER_IMAGE || 'fal-ai/f
 // ~4x Flux, so it's a per-generation choice, not the default.
 const MODEL_IMAGE_BEST = process.env.FAL_MODEL_IMAGE_BEST || 'fal-ai/nano-banana-pro';
 const MODEL_IMAGE_BEST_EDIT = process.env.FAL_MODEL_IMAGE_BEST_EDIT || 'fal-ai/nano-banana-pro/edit';
+// OpenAI's image model, served through fal - so it uses the same fal key, the
+// same job queue, the same receipts and the same spend cap as everything else.
+// No second provider, no second bill. GPT-Image is the strongest model here for
+// text inside an image (posters, signs, titles) and for literal prompt-following.
+const MODEL_IMAGE_GPT = process.env.FAL_MODEL_IMAGE_GPT || 'fal-ai/gpt-image-1.5';
+const MODEL_IMAGE_GPT_EDIT = process.env.FAL_MODEL_IMAGE_GPT_EDIT || 'fal-ai/gpt-image-1.5/edit';
 const MODEL_LORA_IMAGE = process.env.FAL_MODEL_LORA_IMAGE || 'fal-ai/flux-lora';
 // Image-to-video quality tiers with price estimates (USD/second, audio off).
 // Rates are a snapshot - fal has no public pricing API - so they're shown in
@@ -90,6 +96,10 @@ const IMAGE_RATE = Number(process.env.STUDIO_RATE_IMAGE || 0.035); // Flux ballp
 // input and output; ~2MP output + 3-4 downscaled reference photos lands here.
 const CHARACTER_IMAGE_RATE = Number(process.env.STUDIO_RATE_CHARACTER_IMAGE || 0.09);
 const IMAGE_BEST_RATE = Number(process.env.STUDIO_RATE_IMAGE_BEST || 0.15); // Nano Banana Pro flat per image
+// GPT-Image 1.5 on fal is billed per output image by quality tier. Studio asks
+// for medium, whose list price sits between low and high; quoted round-up so
+// the real bill is never a surprise, same rule as every other rate here.
+const IMAGE_GPT_RATE = Number(process.env.STUDIO_RATE_IMAGE_GPT || 0.05);
 // One-time LoRA face training, driven from the Characters tab. Billed per
 // step by fal (~$0.0024/step); 1500 steps is a solid portrait lock (~$3.60).
 const MODEL_LORA_TRAINER = process.env.FAL_MODEL_LORA_TRAINER || 'fal-ai/flux-lora-portrait-trainer';
@@ -143,6 +153,7 @@ function estActionCost(kind, opts = {}) {
       return (VIDEO_TIERS[opts.tier] || VIDEO_TIERS.standard).rate * s;
     case 'image': return (opts.characterId ? CHARACTER_IMAGE_RATE : IMAGE_RATE) * (Number(opts.count) || 1);
     case 'imageBest': return IMAGE_BEST_RATE * (Number(opts.count) || 1);
+    case 'imageGpt': return IMAGE_GPT_RATE * (Number(opts.count) || 1);
     case 'lora': return LORA_TRAIN_STEPS * LORA_STEP_RATE;
     case 'dance': return ({ draft: DANCE_DRAFT_RATE, standard: DANCE_STD_RATE, hero: DANCE_HERO_RATE }[opts.tier] || DANCE_STD_RATE) * s;
     case 'sing': return opts.tier === 'hero' ? SING_HERO_RATE : SING_DRAFT_RATE;
@@ -674,6 +685,7 @@ router.get('/config', (req, res) => {
       imageRate: IMAGE_RATE,
       characterImageRate: CHARACTER_IMAGE_RATE,
       imageBestRate: IMAGE_BEST_RATE,
+      imageGptRate: IMAGE_GPT_RATE,
       loraTrain: { steps: LORA_TRAIN_STEPS, estCost: LORA_TRAIN_STEPS * LORA_STEP_RATE },
       sing: { draft: SING_DRAFT_RATE, hero: SING_HERO_RATE },
       livePortrait: LIVEPORTRAIT_RATE,
@@ -1274,11 +1286,14 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
     throw Object.assign(new Error('imageSize must be square_hd, portrait_16_9, or landscape_16_9.'), { status: 400 });
   }
   const best = quality === 'best'; // Nano Banana Pro instead of Flux
+  const gpt = quality === 'gpt';   // OpenAI GPT-Image, served through fal
+  // Both premium tiers share the reference-photo path below (LoRAs are Flux-only).
+  const premium = best || gpt;
   const cleanPrompt = prompt.trim().slice(0, 2000);
-  let model = best ? MODEL_IMAGE_BEST : MODEL_TEXT_TO_IMAGE;
+  let model = gpt ? MODEL_IMAGE_GPT : best ? MODEL_IMAGE_BEST : MODEL_TEXT_TO_IMAGE;
   // No num_images here: every model defaults to 1 and the FLUX.2 edit schema
   // doesn't take it. Multiple takes are separate submits (one job each).
-  // Banana speaks aspect_ratio; Flux speaks image_size.
+  // Banana speaks aspect_ratio; Flux and GPT-Image speak image_size.
   const size = imageSize || 'landscape_16_9';
   const input = best
     ? { prompt: cleanPrompt, aspect_ratio: { landscape_16_9: '16:9', portrait_16_9: '9:16', square_hd: '1:1' }[size] }
@@ -1297,7 +1312,7 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
   }
   const character = cast[0] || null;
 
-  if (cast.length === 1 && cast[0].lora_url && !best) {
+  if (cast.length === 1 && cast[0].lora_url && !premium) {
     // Strongest consistency: the trained LoRA is baked into generation.
     // (LoRAs are Flux-only - on Best quality a LoRA character falls through
     // to the photo path below, or errors if it has no photos.)
@@ -1309,10 +1324,10 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
   } else if (cast.length) {
     // Photo-reference path (solo or duo). A duo always works from photos: two
     // identity LoRAs in one generation bleed into each other.
-    model = best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
+    model = gpt ? MODEL_IMAGE_GPT_EDIT : best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
     // Banana Pro edit accepts up to 14 reference images (Flux bills per input
     // megapixel, so it stays leaner) - more angles = a stronger likeness lock.
-    const perChar = best ? (cast.length > 1 ? 5 : 6) : (cast.length > 1 ? 3 : 4);
+    const perChar = premium ? (cast.length > 1 ? 5 : 6) : (cast.length > 1 ? 3 : 4);
     const allUris = [];
     const whose = []; // which reference photos belong to which character
     for (const c of cast) {
@@ -1372,7 +1387,7 @@ async function buildSceneModelInput(userId, { prompt, characterId, characterIds,
     if (canTakeImages) {
       if (!input.image_urls) {
         // no characters in this scene: switch to the photo-conditioned editor
-        model = best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
+        model = gpt ? MODEL_IMAGE_GPT_EDIT : best ? MODEL_IMAGE_BEST_EDIT : MODEL_CHARACTER_IMAGE;
         input.image_urls = [];
         input.prompt = cleanPrompt;
       }
@@ -1409,7 +1424,9 @@ router.post('/scene', async (req, res) => {
   }
   {
     const hasChar = !!characterId || (Array.isArray(characterIds) && characterIds.length > 0);
-    const imgCost = quality === 'best' ? estActionCost('imageBest', { count: howMany }) : estActionCost('image', { characterId: hasChar, count: howMany });
+    const imgCost = quality === 'best' ? estActionCost('imageBest', { count: howMany })
+      : quality === 'gpt' ? estActionCost('imageGpt', { count: howMany })
+      : estActionCost('image', { characterId: hasChar, count: howMany });
     const capMsg = overDailyCap(req.userId, imgCost);
     if (capMsg) return res.status(429).json({ error: capMsg });
   }
@@ -1438,7 +1455,7 @@ router.post('/scene', async (req, res) => {
             ...(cast.length > 1 ? { castIds: cast.map((c) => c.id) } : {}),
             ...(locationId ? { locationId: Number(locationId) } : {}),
             ...(imageSize ? { imageSize } : {}),
-            ...(quality === 'best' ? { quality: 'best' } : {}),
+            ...(quality === 'best' || quality === 'gpt' ? { quality } : {}),
           },
         },
       }));

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.4.0'; // v12.4.0: show/hide toggle on every password field
+const CACHE_NAME = 'tsid-shell-v12.4.1'; // v12.4.1: fix lessons opened from the list blocking the next Mark as done
 const SHELL_FILES = [
   '/',
   '/app',

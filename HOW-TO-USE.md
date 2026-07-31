@@ -6,6 +6,20 @@
 
 ---
 
+## No subscription. Ever.
+
+Studio isn't rented. There's no monthly fee, no plan, no seat, no trial that turns into a bill. You run it on your own computer, your files stay on your own drive, and it keeps working whether or not you ever spend another cent.
+
+The only money that ever leaves your pocket is **AI generation**, and it works like a pay-as-you-go phone: you put a few dollars on a fal.ai account, each button tells you what it costs *before* you tap it, and when you stop tapping, the spending stops. No auto-renew to cancel.
+
+**If your budget is tight, read this bit:**
+- **Most of Studio is free and unlimited.** Whole videos, captions, shorts, editing, mastering — see *What Things Cost* below for the full list.
+- **Set a daily cap** (⚙ Settings → daily spend cap). Say $2. Studio then flat refuses any generation that would go over it. Overspending becomes impossible, not just unlikely.
+- **You already own more than you think.** Photos you've taken, clips you've filmed, your own voice — all of it can go straight in, free. Generating is for the shots you *can't* get any other way.
+- **Draft cheap, finish expensive.** Make it on the cheapest tier, and only re-make the keepers on Best.
+
+---
+
 ## The 5 Golden Rules
 
 1. **Always start Studio with `Start Studio`** (the file with gears). Never by opening index.html.
@@ -28,7 +42,7 @@ That's it. No internet needed except for AI generations.
 
 ## 2. First-Time Setup (only once)
 
-1. **Sign up** — Studio greets you with a welcome screen: type any email + a password and your account is created right there. It lives only on your computer.
+1. **Sign up** — Studio greets you with a welcome screen: type any email + a password and your account is created right there. It lives only on your computer. Tap the **👁 eye** in the password box to check what you typed. To leave, there's **Sign out** in the top bar — it signs out only the device you're on, so the computer stays signed in when you sign out on your phone.
 2. **Turn on AI** — Studio → **⚙ Settings** tab → **🔑 AI key (fal.ai)** → paste your key → Save.
    The badge at the top says **AI READY** when it worked. (AI buttons like Sing/Animate stay hidden until the key is set.)
 3. **Credits** — your fal.ai account needs money on it ($10 lasts a while). No credits = every AI button fails.
@@ -53,7 +67,9 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
 ## 4. Make a Music Video (the recipe)
 
 **The 5-minute way (Quick Video):**
-1. Sequencer tab → **1️⃣ Add your pictures** (pick several at once)
+1. Sequencer tab → pictures come from either place:
+   - **1️⃣ Add pictures from this device** — photos off your computer or phone
+   - **🖼 Use pictures made in Studio** — a grid of everything Studio has already made for you (AI Scenes, Storyboard). Tap to add; anything already in the cut goes dim with a green edge so you don't double it up
 2. **2️⃣ Add your song** — or paste a **Suno link** (Share → Copy link) in the box underneath and press **🔗 Import**; the song downloads straight into Studio
 3. Pick a shape: Phone 9:16 · YouTube 16:9 · Square 1:1
 4. **3️⃣ Assemble my video** → wait for the bar → **Download my video**
@@ -69,6 +85,7 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 2. Press **🔒 Train face lock** (~$3.60, one-time, ~10 minutes — keep the tab open). This teaches the AI that face permanently; every solo scene with that character then uses it automatically. Changed their photos later? Press **↻ Retrain face lock** — the new lock replaces the old one.
 3. **Lyrics & Captions** card → paste your lyrics
 4. **Storyboard** card → **Build storyboard from my lyrics** → it detects your song's structure (🎬 Intro · 🎤 Verse · 🔥 Chorus · 🌉 Bridge · 🌅 Outro — it spots repeated stanzas as the chorus, and `[Chorus]`-style tags in your sheet work too) and matches each scene's energy: big dynamic shots on choruses, intimate shots on verses, moody on the bridge. **Generate** each scene (~4–9¢). Chorus stills even land on the timeline with shorter, punchier holds.
+   - **Already have a picture for a shot?** Tap **🖼 My own** on that scene and pick it — from your Studio library or straight off your device. It fills the scene exactly like a generated one, so **+ Timeline** and **Add all generated scenes** carry it with the same pacing. Costs nothing, and it's the cheapest way to build a storyboard: use your own photos for everything you can, generate only the shots you can't film.
 5. On each scene in your Library → **Animate** → pick quality → tap the price button
 6. Clips land on your timeline → add your song → **Render full video**
 
@@ -76,7 +93,9 @@ Leave "⚡ Cut on the beat" checked — your cuts will land on the music automat
 1. **One subject per image.** Five ideas = five separate scenes cut together on the timeline, not one crowded picture. (The app automatically stops the AI from drawing split-screen collages.)
 2. **Pick characters in the dropdowns, keep names out of the prompt.** Writing a name does nothing — only the dropdown attaches their face. Say "he leans on the car," not "DBC leans on the car."
 3. **Describe what the camera sees** — who, where, light, mood. Story logic ("unaware they miss each other") isn't visible and just confuses it.
-4. **Words inside the picture** (phone screens, signs, jewelry text)? Use **✨ Best (Banana Pro)** — it's the only tier that spells reliably.
+4. **Words inside the picture** (phone screens, signs, jewelry text)? Use **✨ Best (Banana Pro)** or **🤖 GPT-Image** — those two spell reliably.
+
+**Which image tier?** Four chips, cheapest first: **Flux** (~4¢, the everyday workhorse) · **🤖 GPT-Image** (~7¢, best at following a prompt literally and at text in the picture) · **✨ Banana Pro** (~15¢, top-quality finish) — and a character's face lock only works on Flux, so scenes starring a trained character stay there. GPT-Image and Banana Pro both hold a likeness using the character's reference photos instead.
 
 If you try to generate a scene nearly identical to one you already have, Studio warns you first so you don't pay twice by accident.
 
@@ -110,8 +129,8 @@ Tap any picture or video in the Library to see it **full-screen**.
 
 The laziest good way to make a video, at the top of the Sequencer:
 
-1. Have a **song** loaded (upload or Suno link) and **words** (paste lyrics or press 🪄 Auto-captions)
-2. **🎞 Drop your images** — as many or few as you have
+1. Have **audio** loaded (a song via upload or Suno link — or your own recorded voice) and **words** (paste lyrics, press 🪄 Auto-captions, or **🎙️ Captions from my own voice**, which is free)
+2. Give it visuals — **🎞 Drop images or clips from this device**, or **🖼 Use pictures made in Studio** to pull from your own library. Tap them in the order you want them; the Director follows that order
 3. Set the **Producer's budget** (max AI spend for filling gaps)
 4. **🎬 Director: plan my video** — the Director reads your song's structure and shows you the full plan: which of your images plays which scene, what gets generated to fill gaps (choruses first, inside budget), and the camera move + pacing for every section
 5. Like the plan? **💼 Producer: make it** — generates the gap scenes (using your selected character/location dropdowns from AI Scenes), gives every shot its camera move, and assembles the whole video on the beat with your captions
@@ -196,6 +215,10 @@ Studio runs on this computer, but your phone can open it over your home Wi-Fi �
 
 The first time, Windows may ask to allow Studio through the firewall — choose **Allow** on private networks. This computer has to be on with Studio running; the phone is a window into it, not a copy.
 
+**Use the same account on both.** One account works on as many devices as you like — just sign in with the same email and password. Two things that trip people up:
+- **Don't type `localhost` on the phone.** On a phone that means the phone itself. Use the `192.168.…` address from Settings.
+- **If it says the password is wrong, it means the password is wrong** — tap the 👁 eye to see what you typed. (Phone keyboards and a hidden password are a bad combination.)
+
 ---
 
 ## 6. Campaign Export (ready to post)
@@ -217,15 +240,22 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
    - **Auto-spread** — instant guess, free
    - **▶ Tap to sync** — perfect and free: the song plays, you tap once per line
    - **🎙️ Captions from my voice (free)** — Studio listens on **your own computer** and writes every line with its real timing. Nothing is uploaded, nothing is charged, and it works offline after the first use. **Best choice for talking videos.** The first run downloads the listening model once (a few minutes); after that it's instant. Optional afterwards: a paid AI tidy-up of the wording — the price is shown before you agree, and you can always say no.
+     *It doesn't need the recording on your timeline.* If your timeline is pictures (a storyboard cut, say), Studio offers the newest recording in your library by name and listens to that once you say yes. So "storyboard pictures + my own voice + captions" works without a filmed clip anywhere in the edit. This button is also on the **Make My Video** card now, so you don't have to go hunting for it.
    - **🪄 Auto-captions (AI)** — the cloud version, for songs. Costs cents; price shows on the button.
 3. Captions burn into your video AND your shorts automatically
 4. **+ Song title intro** puts your title card at the start
+
+**Pasting from a chat, doc or notes app?** Just paste it. Studio strips the `>` quote marks and bullet dots people's apps add, and throws away the marker-only lines between paragraphs — those used to become blank captions that ate a timing slot and pushed every later line early.
+
+> ⚠️ **Captions are words, not sound.** A video with captions and nothing else renders **silent** — Studio warns you before you render. To hear your voice, the recording has to be added as audio: **🎬 Use in video** on the Voice card, the Music card, or the extraction trick below.
 
 ---
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, and 🎙️ Captions from my voice (listening happens on your own computer)** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, 🎙️ Captions from my voice (listening happens on your own computer), 🎙 Take the voice out of a clip, and using your own pictures for storyboard scenes** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+
+**A whole video for $0 is a real option.** Your own photos or filmed clips → your own voice (film it, take the voice out) → free captions from that voice → assemble, master, render, and cut shorts. Every step above is free and unlimited. AI generation is for the shots you can't get any other way, not a toll on the door.
 
 > 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
 >
@@ -237,6 +267,7 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 | Scene image | ~4¢ |
 | Scene image starring your character | ~9¢ |
 | Scene image on ✨ Best (Banana Pro) | ~15¢ |
+| Scene image on 🤖 GPT-Image | ~7¢ |
 | 🔒 Face lock training (per character, one-time) | ~$3.60 |
 | 5-second clip — Draft (Wan) | ~25¢ |
 | 5-second clip — Standard (Kling Turbo) | ~35¢ |
@@ -262,6 +293,7 @@ Every AI generation is now saved the moment it's sent. The card shows a **runnin
 - **🧽 Remove corner mark** (Crop → *Remove corner mark ✦*) — cleans a decorative sparkle / corner watermark off **your own** generated image. *Patch it out* blends it into the pixels around it and keeps the whole frame (best when the subject is near the corner); *Zoom past it* crops the corner off. Free & instant. It's for tidying a provider's sparkle on your own art — it can't touch invisible watermarks and isn't for anyone else's work.
 - **▶ Continue (extend a clip)** — on any video, tap **▶ Continue**: Studio grabs its last frame and opens Animate pre-loaded with a "keep the motion going" prompt. The new clip carries on from exactly where the first ended — place them back-to-back in the Sequencer for one seamless longer shot (chain it as many times as you want). This is real *forward* motion, unlike Loop which repeats. Costs one Animate per extension.
 - **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
+- **🎙 Take the voice out** (on any video clip) — lifts the sound off a filmed clip into its own audio file in your Songs, cleaned up on the way. Free. This is how you use your **own voice** without re-recording it: film yourself talking, take the voice out, then add it as narration and caption it with 🎙️ Captions from my voice. (It's the same job as **✨ Master for release** on a video — just named for what people actually go looking for.)
 - **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
 - **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.
 - **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
@@ -271,7 +303,8 @@ Every AI generation is now saved the moment it's sent. The card shows a **runnin
 
 ### Make a character TALK (with a moving, expressive face)
 It's three steps, and each one is its own button:
-1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. Pick a **mood** (Happy / Hyped / Sad / Angry / Calm) to change the delivery — no filming needed. Neutral is cheapest (~½¢ a line); a mood is a touch more (~pennies), and the price shows before you spend.
+1. **🎙 Voice** — pick a reference voice clip (a vocal stem you pulled from Suno, or one you made free with **🎙 Take the voice out** of a clip you filmed), type the line, generate. Out comes DBC (or SBGQ) *saying* it, in their voice. Pick a **mood** (Happy / Hyped / Sad / Angry / Calm) to change the delivery — no filming needed. Neutral is cheapest (~½¢ a line); a mood is a touch more (~pennies), and the price shows before you spend.
+   When it's done, **🎬 Use in video** puts it straight into your video as narration and jumps you to the timeline — from there it captions like anything else. (It's saved in your Songs either way.)
 2. **🎤 Sing** — on DBC's photo or clip, tap **Sing**, and in the song list pick the **voice line you just made**. It lip-syncs his mouth to the words. (Draft ~4¢ / Hero 20¢.)
 3. **🎭 Live Portrait** — for full expressions (eyes, head, mood), film your own face doing the performance and it maps that onto his still. (~10¢.)
 

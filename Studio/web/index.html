@@ -3968,6 +3968,11 @@ function renderLibrary() {
     }, 'finish');
     if (a.kind === 'audio' || a.kind === 'video') { const cb = btn('🔊 Clean audio', '', (e) => freeTransform(a.id, 'cleanaudio', e.target, '🔊 Clean audio'), 'finish'); cb.title = 'FREE — de-noise, de-rumble & normalize loudness (great for narration)'; }
     if (a.kind === 'audio' || a.kind === 'video') { const mb = btn('✨ Master for release', '', (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master for release'), 'finish'); mb.title = 'FREE — repairs noise & distortion, evens it out, and exports a release-ready 48kHz/24-bit WAV for any platform'; }
+    // Same op as Master, which already drops the picture (-vn) and files the
+    // result as audio - so pulling the voice off a clip was always possible,
+    // just hidden behind a name that reads like a mastering tool. Named for
+    // what people actually come looking for.
+    if (a.kind === 'video') { const vb = btn('🎙 Take the voice out', '', (e) => freeTransform(a.id, 'remaster', e.target, '🎙 Take the voice out'), 'finish'); vb.title = 'FREE — lifts the sound off this clip into its own audio file in your Songs, cleaned up. Use it as narration, or caption it.'; }
     // Use
     btn('+ Add to video', a.kind === 'video' ? 'primary' : '', () => addToSeq(a), 'use');
     btn('⬇ Download', '', (e) => downloadFile(a.url, slug(a.label) || (a.kind === 'video' ? 'studio-clip' : 'studio-image'), e.target), 'use');
@@ -6484,8 +6489,10 @@ function renderStoryboard() {
           ? `<span class="btn2 quiet" style="flex:1;text-align:center;cursor:default">🌙 Queued${sc.queueStatus === 'running' ? ' — generating…' : ' — waiting'}</span>`
           : `<button class="btn2 sb-gen" style="flex:1">${asset ? 'Regenerate' : 'Generate this scene'}</button>`}
         ${asset ? '<button class="btn2 quiet sb-add">+ Timeline</button>' : ''}
+        <button class="btn2 quiet sb-own" title="Use a picture you already have instead of generating one">🖼 My own</button>
         <button class="btn2 quiet sb-del" title="Delete this scene" style="padding:7px 10px">✕</button>
       </div>
+      <div class="sb-own-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin-top:6px"></div>
       <div class="progress-line sb-item-prog"><div></div></div>`;
     const sbImg = card.querySelector('img');
     if (sbImg && asset) sbImg.onclick = () => openLightbox(asset.url, "image", asset.label);
@@ -6496,6 +6503,39 @@ function renderStoryboard() {
     // section-aware pacing: chorus stills hit the timeline with short punchy
     // holds, intro/outro breathe longer, verses sit in between
     if (addBtn) addBtn.onclick = () => addToSeq(asset, { holdDur: { chorus: 2, intro: 5, outro: 5 }[sc.section] || 4 });
+    // Not every shot needs generating - a scene you already have a photo for
+    // (or generated earlier, or made elsewhere) can just use it. Picking one
+    // fills the scene exactly as a generated image would, so + Timeline and
+    // "Add all generated scenes" pick it up with the same section pacing.
+    const ownBtn = card.querySelector('.sb-own');
+    const ownGrid = card.querySelector('.sb-own-grid');
+    ownBtn.onclick = () => {
+      const show = ownGrid.style.display === 'none';
+      ownGrid.style.display = show ? 'grid' : 'none';
+      ownBtn.textContent = show ? '✕ Close' : '🖼 My own';
+      if (!show) return;
+      ownGrid.innerHTML = '';
+      const up = document.createElement('div');
+      up.style.cssText = 'aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--s0);border:1px dashed var(--bdr2);cursor:pointer;font-size:11px;color:var(--ts);text-align:center;padding:4px';
+      up.textContent = '⬆ From this device';
+      up.onclick = () => pickFile('image/*', async (file) => {
+        try {
+          const a = await uploadFile(file, 'image');
+          await loadAssets();
+          sc.assetId = a.id; sc.queueId = null;
+          renderStoryboard(); persistDraft();
+        } catch (e) { setErr('#seq-err', e.message); }
+      });
+      ownGrid.appendChild(up);
+      st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay).forEach((a) => {
+        const cell = document.createElement('div');
+        cell.style.cssText = `aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${sc.assetId === a.id ? 'var(--green)' : 'transparent'}`;
+        cell.title = `Use for scene ${i + 1}: ${a.label}`;
+        cell.innerHTML = `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover" alt="">`;
+        cell.onclick = () => { sc.assetId = a.id; sc.queueId = null; renderStoryboard(); persistDraft(); };
+        ownGrid.appendChild(cell);
+      });
+    };
     card.querySelector('.sb-del').onclick = () => {
       if (!confirm(`Delete scene ${i + 1}? (Any generated image stays in your Library.)`)) return;
       st.storyboard.splice(i, 1); renderStoryboard(); persistDraft();

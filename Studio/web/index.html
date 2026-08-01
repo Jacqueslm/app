@@ -743,6 +743,10 @@ body.simple-only #view-simple{display:flex !important}
         <span class="usage">Caption look:</span>
         <div class="chips" id="cap-styles" style="margin-top:4px"></div>
       </div>
+      <div style="margin-top:6px">
+        <span class="usage">Caption size — go smaller if they cover your face:</span>
+        <div class="chips" id="cap-sizes" style="margin-top:4px"></div>
+      </div>
       <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
     </div>
 
@@ -5648,6 +5652,7 @@ async function runRender(windowOpt, btnSel, opts) {
         watermark: spec.watermark,
         captionLines: captionLinesPayload(),
         captionStyle: captionStyleKey(),
+        captionSize: captionSizeKey(),
       }),
     });
     const done = await pollJob(job.id, (j) => {
@@ -6479,7 +6484,28 @@ function captionStyleKey() {
   const k = localStorage.getItem('tsid-caption-style') || 'outline';
   return CAPTION_STYLES[k] ? k : 'outline';
 }
+// Size is separate from look: talking-head clips need smaller text than a music
+// video, and that's a different choice from which style you like.
+const CAPTION_SIZES = { small: 'Small', medium: 'Medium', large: 'Large' };
+function captionSizeKey() {
+  const k = localStorage.getItem('tsid-caption-size') || 'medium';
+  return CAPTION_SIZES[k] ? k : 'medium';
+}
+function renderCaptionSizes() {
+  const box = document.getElementById('cap-sizes');
+  if (!box) return;
+  const cur = captionSizeKey();
+  box.innerHTML = '';
+  Object.entries(CAPTION_SIZES).forEach(([key, label]) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (key === cur ? ' on' : '');
+    b.textContent = label;
+    b.onclick = () => { localStorage.setItem('tsid-caption-size', key); renderCaptionSizes(); };
+    box.appendChild(b);
+  });
+}
 function renderCaptionStyles() {
+  renderCaptionSizes();
   const box = document.getElementById('cap-styles');
   if (!box) return;
   const cur = captionStyleKey();
@@ -7085,6 +7111,7 @@ async function renderOneShort(s, statusEl) {
       watermark: spec.watermark,
       captionLines: captionLinesPayload(),
       captionStyle: captionStyleKey(),
+      captionSize: captionSizeKey(),
     }),
   });
   const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });

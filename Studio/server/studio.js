@@ -2719,8 +2719,17 @@ const ASS_STYLES = {
   pop: { color: '&H0000DDFF', border: 1, outlineMul: 1.1, back: '&H7F000000' },
   classic: { color: '&H00FFFFFF', border: 1, outlineMul: 0.5, back: '&H7F000000' },
 };
-function buildAssFile(lines, W, H, styleKey) {
+// Caption size as a share of video height. Talking-head footage puts the
+// speaker's face low in frame, so oversized captions cover it - these let the
+// text be shrunk (or raised) instead of forcing a re-record.
+const ASS_SIZES = {
+  small: { font: 0.034, margin: 0.06 },
+  medium: { font: 0.042, margin: 0.07 },
+  large: { font: 0.048, margin: 0.08 }, // the original size
+};
+function buildAssFile(lines, W, H, styleKey, sizeKey) {
   const st = ASS_STYLES[styleKey] || ASS_STYLES.outline;
+  const sz = ASS_SIZES[sizeKey] || ASS_SIZES.medium;
   const esc = (t) => String(t).replace(/\r?\n/g, '\\N').replace(/[{}]/g, '');
   const ts = (s) => {
     const cs = Math.max(0, Math.round(s * 100));
@@ -2729,9 +2738,9 @@ function buildAssFile(lines, W, H, styleKey) {
     const sec = String(Math.floor((cs % 6000) / 100)).padStart(2, '0');
     return `${h}:${m}:${sec}.${String(cs % 100).padStart(2, '0')}`;
   };
-  const fontSize = Math.round(H * 0.048);
+  const fontSize = Math.round(H * sz.font);
   const outline = Math.max(1, Math.round((fontSize / 16) * st.outlineMul));
-  const marginV = Math.round(H * 0.08);
+  const marginV = Math.round(H * sz.margin);
   return `[Script Info]
 ScriptType: v4.00+
 PlayResX: ${W}
@@ -2748,7 +2757,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 }
 
 router.post('/render', async (req, res) => {
-  const { clips, transitions, music, overlays, captions, captionLines, captionStyle, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
+  const { clips, transitions, music, overlays, captions, captionLines, captionStyle, captionSize, size, fadeFromBlack, fadeToBlack, window: win, loop, name, enhance, fit, focusX } = req.body || {};
   if (!Array.isArray(clips) || !clips.length) {
     return res.status(400).json({ error: 'Add at least one clip to the timeline.' });
   }
@@ -2928,7 +2937,7 @@ router.post('/render', async (req, res) => {
     .sort((a, b) => a.start - b.start);
   if (capLines.length) {
     assFile = `captions-${crypto.randomBytes(5).toString('hex')}.ass`;
-    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle));
+    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle, captionSize));
     filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
     current = '[vcap]';
   }

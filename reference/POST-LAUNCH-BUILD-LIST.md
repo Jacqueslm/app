@@ -70,6 +70,24 @@ off one primitive.
 
 ---
 
+## 4. Start time / end time — user-set — ✅ BUILT (v12.5.0)
+
+Requested 31 Jul 2026, scope confirmed as the recovery app the same day, and
+shipped: **the daily lesson reminder now has user-set hours.** Profile settings
+gained an "Only remind me between" row with start and end pickers (default
+9am–9pm). Outside the window the app stays silent *without* marking the day as
+reminded, so the nudge still lands once the user is back inside their hours
+rather than being skipped altogether. A window that crosses midnight (e.g.
+10pm–6am) works. Setting both ends to the same hour means no restriction.
+
+**Still open, if wanted later:** the other readings of the same request that
+were never picked — a user-set Day One date / goal date in the recovery app, or
+typed in/out seconds for clips and captions in Studio (note Studio's Cut tool
+already keeps a chosen section, so that one is a friendlier front end rather
+than new capability).
+
+---
+
 ## Guardrail reminder
 None of these get built until through the 12-tester/14-day window and live.
 Items 1 and 3 also need the Data safety form checked before they go live.

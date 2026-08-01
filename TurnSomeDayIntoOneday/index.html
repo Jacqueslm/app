@@ -1578,6 +1578,18 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
         <div class="toggle-sw on" id="notif-toggle"><div class="toggle-knob"></div></div>
       </div>
+      <div class="setting-row" id="reminder-window-row" style="align-items:flex-start">
+        <i class="ti ti-clock"></i>
+        <div class="setting-row-txt" style="flex:1">
+          <p>Only remind me between</p>
+          <span id="reminder-window-sub">Outside these hours the app stays quiet</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+            <select id="reminder-start" class="ob-input" style="margin:0;padding:8px 10px;font-size:14px;width:auto;background:var(--s1);color:var(--tp);border-color:var(--bdr)"></select>
+            <span style="font-size:13px;color:var(--ts)">and</span>
+            <select id="reminder-end" class="ob-input" style="margin:0;padding:8px 10px;font-size:14px;width:auto;background:var(--s1);color:var(--tp);border-color:var(--bdr)"></select>
+          </div>
+        </div>
+      </div>
       <div class="setting-row" onclick="requestNotificationPermission()">
         <i class="ti ti-bell"></i>
         <div class="setting-row-txt"><p>Reminder sound</p><span id="notif-sound-sub">Tap to enable your phone's notification sound</span></div>
@@ -2398,6 +2410,9 @@ let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
+  // Hours (0-23) the daily lesson reminder is allowed to speak up. Defaults to
+  // a civilised 9am-9pm rather than "whenever the app happens to be opened".
+  reminderStartHour:9,reminderEndHour:21,
   novaDisclaimerDismissed:false,fontSize:'default',
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
@@ -3740,6 +3755,7 @@ function initApp(){
   updateFontSizeUI();
   document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled!==false);
   updateHomeReminderStatus();
+  renderReminderWindow();
   updateRelationshipStatusUI();
   updateProfileEditUI();
   updateLessonPromo();
@@ -6820,6 +6836,10 @@ function updateNotificationPermissionUI(){
 function maybeShowDailyLessonReminder(){
   if(S.isPro)return;
   if(S.remindersEnabled===false)return;
+  // Outside the user's chosen hours, say nothing at all - and crucially, don't
+  // mark today as reminded, so the nudge still lands once they're inside the
+  // window instead of being silently skipped for the day.
+  if(!withinReminderWindow())return;
   const today=new Date().toDateString();
   if(S.lastDailyLessonReminderDate===today)return;
   const completedToday=(S.activityLog||[]).some(a=>a.type==='lesson_completed'&&new Date(a.ts).toDateString()===today);
@@ -8381,6 +8401,55 @@ function toggleNotif(){
   document.getElementById('notif-toggle').classList.toggle('on',S.remindersEnabled);
   save();
   updateHomeReminderStatus();
+  renderReminderWindow();
+}
+// ─── REMINDER HOURS ───────────────────────────────────────────────────────────
+function reminderHour(which){
+  const v=which==='start'?S.reminderStartHour:S.reminderEndHour;
+  const n=Number(v);
+  return Number.isFinite(n)&&n>=0&&n<=23?n:(which==='start'?9:21);
+}
+function hourLabel(h){
+  const ampm=h<12?'am':'pm';
+  const twelve=h%12===0?12:h%12;
+  return `${twelve}:00 ${ampm}`;
+}
+function withinReminderWindow(){
+  const h=new Date().getHours();
+  const s=reminderHour('start'),e=reminderHour('end');
+  if(s===e)return true;// same hour both ends = no restriction, don't trap them in silence
+  return s<e?(h>=s&&h<e):(h>=s||h<e);// the second case is a window that crosses midnight
+}
+function renderReminderWindow(){
+  const row=document.getElementById('reminder-window-row');
+  if(!row)return;
+  const on=S.remindersEnabled!==false;
+  row.style.opacity=on?'1':'0.45';
+  const s=reminderHour('start'),e=reminderHour('end');
+  [['reminder-start',s],['reminder-end',e]].forEach(([id,val])=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    if(!sel.options.length){
+      for(let h=0;h<24;h++){
+        const o=document.createElement('option');
+        o.value=String(h);o.textContent=hourLabel(h);
+        sel.appendChild(o);
+      }
+      sel.onchange=()=>{
+        const v=Number(sel.value);
+        if(id==='reminder-start')S.reminderStartHour=v;else S.reminderEndHour=v;
+        save();
+        renderReminderWindow();
+      };
+    }
+    sel.value=String(val);
+    sel.disabled=!on;
+  });
+  const sub=document.getElementById('reminder-window-sub');
+  if(sub)sub.textContent=!on
+    ?'Reminders are off'
+    :s===e?'Any time of day'
+    :`Quiet outside ${hourLabel(s)}–${hourLabel(e)}`;
 }
 function toggleDark(){
   S.darkMode=!S.darkMode;
@@ -8648,7 +8717,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.4.1';
+const APP_VERSION='12.5.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

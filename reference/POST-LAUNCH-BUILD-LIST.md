@@ -70,26 +70,21 @@ off one primitive.
 
 ---
 
-## 4. Start time / end time — user-set (REQUESTED 31 Jul 2026, scope not yet pinned)
+## 4. Start time / end time — user-set — ✅ BUILT (v12.5.0)
 
-**Jacques asked for this and asked that it be written down rather than built on
-the spot.** He didn't say which app, and the readings lead to genuinely different
-work, so pin the scope before building. Ask him which of these he meant:
+Requested 31 Jul 2026, scope confirmed as the recovery app the same day, and
+shipped: **the daily lesson reminder now has user-set hours.** Profile settings
+gained an "Only remind me between" row with start and end pickers (default
+9am–9pm). Outside the window the app stays silent *without* marking the day as
+reminded, so the nudge still lands once the user is back inside their hours
+rather than being skipped altogether. A window that crosses midnight (e.g.
+10pm–6am) works. Setting both ends to the same hour means no restriction.
 
-- **Recovery app — reminder window.** Today the daily lesson reminder is only
-  On/Off; the user can't choose *when* it fires. Letting them set a start and end
-  time (or quiet hours) is a real gap and the most likely reading of "on the app".
-- **Recovery app — dates.** Set their own Day One date, and/or a goal/end date
-  for a streak or challenge.
-- **Studio — clip in/out.** Type exact start and end seconds on a clip instead of
-  using the Cut tool or dragging. Note Cut already keeps a chosen section, so
-  this would be a friendlier front end on something that exists, not new capability.
-- **Studio — timeline/caption timings.** Type exact in/out seconds for a caption
-  or a picture's hold, instead of Tap-to-sync or Auto-spread.
-
-**Context when it was raised:** he was working in Studio on watermarks, pricing
-and clip audio, so the Studio readings are plausible — but "on the app" is how he
-usually refers to the recovery app, and the reminder-window gap is real.
+**Still open, if wanted later:** the other readings of the same request that
+were never picked — a user-set Day One date / goal date in the recovery app, or
+typed in/out seconds for clips and captions in Studio (note Studio's Cut tool
+already keeps a chosen section, so that one is a friendlier front end rather
+than new capability).
 
 ---
 

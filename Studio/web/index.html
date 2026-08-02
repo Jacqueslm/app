@@ -708,7 +708,21 @@ body.simple-only #view-simple{display:flex !important}
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-in"> Fade in from black</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-out"> Fade out to black</label>
       </div>
-      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ken-burns" checked> 🎞 Still motion (slow zoom on photos — free, no AI)</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ken-burns" checked> 🎞 Still motion on photos (free, no AI)</label>
+      <div class="trim" style="font-size:12px;gap:8px;flex-wrap:wrap">
+        <select class="input" id="kb-amount" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="0.08">Barely there</option>
+          <option value="0.15">Subtle</option>
+          <option value="0.25" selected>Noticeable</option>
+          <option value="0.40">Strong</option>
+          <option value="0.55">Dramatic</option>
+        </select>
+        <select class="input" id="kb-dir" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="auto" selected>Alternate in / out</option>
+          <option value="in">Always zoom in</option>
+          <option value="out">Always zoom out</option>
+        </select>
+      </div>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="enhance-auto" checked> ✨ Auto enhance (color pop · vignette · film grain · mastered audio)</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="brand-watermark" checked> 🏷 Day One watermark (small logo, top-left)</label>
       <button class="gen-btn" id="seq-render">Render full video</button>
@@ -4779,6 +4793,8 @@ function collectSpec() {
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
     kenBurns: $('#ken-burns') ? $('#ken-burns').checked : true,
+    kenBurnsAmount: $('#kb-amount') ? Number($('#kb-amount').value) : 0.25,
+    kenBurnsMove: $('#kb-dir') ? $('#kb-dir').value : 'auto',
     watermark: $('#brand-watermark').checked,
     music: {
       tracks: st.musicList,
@@ -5652,6 +5668,8 @@ async function runRender(windowOpt, btnSel, opts) {
         name: ui.name || null,
         enhance: spec.enhance,
         kenBurns: spec.kenBurns,
+        kenBurnsAmount: spec.kenBurnsAmount,
+        kenBurnsMove: spec.kenBurnsMove,
         watermark: spec.watermark,
         captionLines: captionLinesPayload(),
         captionStyle: captionStyleKey(),
@@ -7112,6 +7130,8 @@ async function renderOneShort(s, statusEl) {
       name: s.name,
       enhance: spec.enhance,
       kenBurns: spec.kenBurns,
+      kenBurnsAmount: spec.kenBurnsAmount,
+      kenBurnsMove: spec.kenBurnsMove,
       watermark: spec.watermark,
       captionLines: captionLinesPayload(),
       captionStyle: captionStyleKey(),

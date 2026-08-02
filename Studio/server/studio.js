@@ -2906,15 +2906,19 @@ router.post('/render', async (req, res) => {
   //  - scaling to 2x before the zoom is what stops the pixel-jitter that makes
   //    a naive zoompan look cheap.
   const kenBurns = !!req.body.kenBurns;
+  // How far the camera travels, and which way - both the user's choice, not a
+  // hardcoded house style. amount is a fraction (0.10 = a 10% push).
+  const kbAmount = Math.min(0.6, Math.max(0.02, Number(req.body.kenBurnsAmount) || 0.20));
+  const kbMove = ['auto', 'in', 'out'].includes(req.body.kenBurnsMove) ? req.body.kenBurnsMove : 'auto';
   function stillMotion(c, i) {
     const frames = Math.max(1, Math.round(c.dur * FPS));
-    // Alternate push-in and pull-out so a long slideshow doesn't feel like one
-    // repeating move.
-    // 20% travel: subtle enough to stay cinematic, big enough that you can
-    // actually see it happening on a phone screen.
-    const z = i % 2 === 0
-      ? `min(1+0.20*on/${frames},1.20)`
-      : `max(1.20-0.20*on/${frames},1)`;
+    const a = kbAmount.toFixed(3);
+    const top = (1 + kbAmount).toFixed(3);
+    // 'auto' alternates so a long slideshow doesn't feel like one repeating move.
+    const zoomIn = kbMove === 'in' || (kbMove === 'auto' && i % 2 === 0);
+    const z = zoomIn
+      ? `min(1+${a}*on/${frames},${top})`
+      : `max(${top}-${a}*on/${frames},1)`;
     return `fps=${FPS},scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,` +
       `crop=${W * 2}:${H * 2},zoompan=z='${z}':d=1:` +
       `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${FPS}`;

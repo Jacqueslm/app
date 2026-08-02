@@ -14,9 +14,10 @@ The only file you need. Everything else is reference.
 
 **Monday — plan (45 min):**
 1. `/admin/stats` — read Leads by source, Signups, Trials. More of what grew.
-2. Fill Buffer for the whole week: 4 videos max this week (midday HER slot
-   first), cards in the other slots. Bank the rest of your videos for next
-   week — 8 made = 2 weeks of content, don't dump them all.
+2. Fill Buffer for the whole week: 4 videos max this week, spread across the
+   lanes — HIM, HER, alcohol, food — cards in the other slots. Bank the rest
+   of your videos for next week — 8 made = 2 weeks of content, don't dump
+   them all.
 
 **Tuesday — sales (45 min):**
 Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. The
@@ -113,7 +114,10 @@ a missed comment. Your recovery is the whole product.
 
 ## RULES (only 4)
 
-1. **Lead with the "her" videos.** That's your best audience.
+1. **Post for everybody.** The man fighting it, the woman fighting it, the
+   person who loves them — the daily mix covers all three (Morning = HIM,
+   Midday = HER, Night = PROOF). Watch `/admin/stats` Mondays and do more of
+   whichever lane actually grows — the numbers decide, not a theory.
 2. **When someone asks what the app is, tell them.** Only send the link if they
    ask for it.
 3. **Never say "research shows"** or name a brain chemical. Your story only.

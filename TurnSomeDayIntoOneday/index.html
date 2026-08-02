@@ -1856,7 +1856,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       3. Reset your date when you're ready. No rush, no shame.
     </div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-tools');openJour()">Write about it in your journal</button>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp()">Reset my date &amp; restart</button>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp(true)">Reset my date &amp; restart</button>
     <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Friendly</button>
     <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
   </div>
@@ -2113,7 +2113,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- RESET SOBRIETY DATE MODAL -->
 <div class="sos-modal" id="reset-date-modal" onclick="if(event.target===this)closeResetDate()">
   <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">Reset Recovery</div>
+    <div class="sos-title" style="color:var(--accent)" id="reset-date-title">Reset Recovery</div>
     <div class="sos-sub">Use this to correct a setback or start date — your streak and stats recalculate from here.</div>
     <div class="ob-label" style="text-align:left;margin-top:4px">Date</div>
     <input class="ob-input" id="reset-date-input" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
@@ -8521,11 +8521,27 @@ function toggleDiscretionMode(){
     appInfo('Discretion mode is on','Your home screen will now show a neutral name and icon — but your phone only reads this at the moment you save the app. If it\'s already on your Home Screen, remove it and use Share (or the browser menu) → Add to Home Screen again to pick up the new look. Turn this off any time to go back to normal.');
   }
 }
-function resetApp(){
-  const current=S.startDate?new Date(S.startDate):new Date();
-  document.getElementById('reset-date-input').value=current.toISOString().slice(0,10);
-  document.getElementById('reset-time-input').value=current.toTimeString().slice(0,5);
+// toISOString() is UTC. Filling the date box from it while the time box is
+// filled from local time made the two disagree by a day for anyone west of
+// Greenwich in the evening - and the mismatched pair often landed in the
+// future, so "Save date" just errored. Both boxes are local now.
+function localDateValue(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function localTimeValue(d){
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+// fromSlip: starting over after a setback means starting NOW. Prefilling the
+// old start date there asked someone at their lowest to do date arithmetic
+// before they could restart. Correcting a start date from Settings still opens
+// on the date being corrected, because that's the one you're editing.
+function resetApp(fromSlip){
+  const current=fromSlip||!S.startDate?new Date():new Date(S.startDate);
+  document.getElementById('reset-date-input').value=localDateValue(current);
+  document.getElementById('reset-time-input').value=localTimeValue(current);
   document.getElementById('reset-date-error').textContent=' ';
+  const t=document.getElementById('reset-date-title');
+  if(t)t.textContent=fromSlip?'Start over from now':'Reset Recovery';
   document.getElementById('reset-date-modal').classList.add('open');
 }
 function closeResetDate(){
@@ -8538,7 +8554,16 @@ function confirmResetDate(){
   if(!dateVal){errEl.textContent='Enter a date.';return;}
   const chosen=new Date(`${dateVal}T${timeVal}:00`);
   if(isNaN(chosen.getTime())){errEl.textContent='That date/time is not valid.';return;}
-  if(chosen.getTime()>Date.now()){errEl.textContent='That date is in the future.';return;}
+  // Naming the field that's wrong matters here: the usual cause is today's date
+  // paired with a time later than right now, and "that date is in the future"
+  // sends people editing the date, which was never the problem.
+  if(chosen.getTime()>Date.now()){
+    const today=new Date();
+    errEl.textContent=dateVal===localDateValue(today)
+      ? `That time hasn't happened yet today — try ${localTimeValue(today)} or earlier.`
+      : "That date is in the future — pick today or a day that's already passed.";
+    return;
+  }
   const priorStreakLength=getDays();
   S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
   S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
@@ -8717,7 +8742,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.5.0';
+const APP_VERSION='12.5.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

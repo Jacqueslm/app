@@ -5405,7 +5405,8 @@ $('#beats-snap').onclick = () => {
 };
 
 /* ---------------- text overlays ---------------- */
-function drawOverlay(spec, W, H, canvas) {
+function drawOverlay(specIn, W, H, canvas) {
+  let spec = specIn;
   const c = canvas || document.createElement('canvas');
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
@@ -5413,10 +5414,36 @@ function drawOverlay(spec, W, H, canvas) {
   let size = (spec.size || 80) * (H / 1080);
   const setFont = () => { ctx.font = `${spec.bold ? '800' : '400'} ${size}px ${spec.font || 'system-ui'}`; };
   setFont();
-  // shrink-to-fit: long captions scale down instead of running off the frame
-  const widest = Math.max(...String(spec.text || ' ').split('\n').map((l) => ctx.measureText(l).width));
+  // Keep text inside the frame, guaranteed. Two passes, because a single
+  // shrink-to-fit was still letting long lines run off the edges:
+  //   1. word-wrap every line to the allowed width
+  //   2. if a line STILL measures too wide (one very long word, or a font whose
+  //      real metrics differ from the first measurement), shrink and re-wrap
+  //      until it genuinely fits. Measured each time - never assumed.
   const fitW = W * captionWidthPct();
-  if (widest > fitW) { size *= fitW / widest; setFont(); }
+  const wrapToWidth = () => {
+    const out = [];
+    for (const raw of String(spec.text || '').split('\n')) {
+      const words = raw.split(/\s+/).filter(Boolean);
+      if (!words.length) { out.push(''); continue; }
+      let line = words[0];
+      for (let i = 1; i < words.length; i++) {
+        const test = line + ' ' + words[i];
+        if (ctx.measureText(test).width <= fitW) line = test;
+        else { out.push(line); line = words[i]; }
+      }
+      out.push(line);
+    }
+    return out;
+  };
+  let wrapped = wrapToWidth();
+  let guard = 0;
+  while (guard++ < 40 && Math.max(...wrapped.map((l) => ctx.measureText(l).width)) > fitW && size > 6) {
+    size *= 0.94;
+    setFont();
+    wrapped = wrapToWidth();
+  }
+  spec = { ...spec, text: wrapped.join('\n') };
   ctx.fillStyle = spec.color || '#ffffff';
   // a box or a heavy outline replaces the soft shadow (cleaner over busy video)
   if (spec.bg || spec.stroke) { ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = size / 14; ctx.shadowOffsetY = size / 40; }

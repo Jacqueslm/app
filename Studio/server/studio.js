@@ -2916,15 +2916,25 @@ router.post('/render', async (req, res) => {
   const kbMove = ['auto', 'in', 'out'].includes(req.body.kenBurnsMove) ? req.body.kenBurnsMove : 'auto';
   function stillMotion(c, i) {
     const frames = Math.max(1, Math.round(c.dur * FPS));
-    const a = kbAmount.toFixed(3);
-    const top = (1 + kbAmount).toFixed(3);
+    // Respect the fit setting, exactly like a still with no motion would.
+    // The original version always cropped-to-fill before zooming, which chopped
+    // the sides off any image whose shape didn't match the frame - on a text
+    // card that meant the words themselves got cut. In 'pad' fit the whole
+    // picture is placed first (letterboxed, same as motionless renders), and
+    // the zoom is capped gently so the picture's edges never leave the frame
+    // far enough to lose text. 'crop' fit keeps the full chosen strength.
+    const amt = fit === 'crop' ? kbAmount : Math.min(kbAmount, 0.12);
+    const a = amt.toFixed(3);
+    const top = (1 + amt).toFixed(3);
     // 'auto' alternates so a long slideshow doesn't feel like one repeating move.
     const zoomIn = kbMove === 'in' || (kbMove === 'auto' && i % 2 === 0);
     const z = zoomIn
       ? `min(1+${a}*on/${frames},${top})`
       : `max(${top}-${a}*on/${frames},1)`;
-    return `fps=${FPS},scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,` +
-      `crop=${W * 2}:${H * 2},zoompan=z='${z}':d=1:` +
+    const pre = fit === 'crop'
+      ? `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,crop=${W * 2}:${H * 2}`
+      : `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=decrease,pad=${W * 2}:${H * 2}:(ow-iw)/2:(oh-ih)/2`;
+    return `fps=${FPS},${pre},zoompan=z='${z}':d=1:` +
       `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${FPS}`;
   }
   resolved.forEach((c, i) => {

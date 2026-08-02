@@ -677,9 +677,15 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     // config or a transient Anthropic outage shouldn't cost them one of their free chats.
     if (anthropicRes.ok) {
       db.incrementChatCount(req.userId, todayUTC());
+    } else {
+      // A failing key/model here degrades every chat into the client's canned
+      // fallback with no visible symptom except repetitive replies - put the
+      // real reason where Profile diagnostics can show it.
+      try { db.logError('anthropic-chat', `HTTP ${anthropicRes.status}: ${(data && data.error && data.error.message) || 'unknown error'}`); } catch (_) {}
     }
     res.status(anthropicRes.status).json(data);
   } catch (err) {
+    try { db.logError('anthropic-chat', 'Failed to reach Anthropic API', err && err.message); } catch (_) {}
     res.status(502).json({ error: 'Failed to reach Anthropic API.' });
   }
 });

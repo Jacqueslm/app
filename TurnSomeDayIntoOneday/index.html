@@ -7170,33 +7170,95 @@ const CRISIS_RE=/suicid|kill(ing)?\s+myself|self.?harm|harm(ing)?\s+myself|hurt(
 // positive costs one upsell; a false negative upsells someone who's drowning.
 const DISTRESS_RE=/\bhelp\b|struggl|crisis|slipped|relaps|\burge\b|craving|can'?t do this|give up|losing hope|hard night|about to|so close to|white.?knuckl|not okay|falling apart|can'?t stop|what'?s the point|tired of fighting|losing this|rock bottom/i;
 const DISTRESS_FOOTER="\n\nRight now, free and one tap away: the SOS button on Home has guided breathing, grounding, and \"Talk me through it\". And if this is heavier than an urge, call or text 988 — free, confidential, 24/7.";
+// One fixed paragraph per trigger reads as a bot on the second message - the
+// same words to "I'm struggling" and "I can't cope" is worse than no reply.
+// Each pattern holds several phrasings; pickReply() skips anything Friendly
+// has said recently this session. The crisis reply stays a single fixed string
+// on purpose: 988 must read identically every single time.
+const RECENT_FALLBACK_REPLIES=[];
+function pickReply(reply){
+  const list=(Array.isArray(reply)?reply:[reply]).map(r=>typeof r==='function'?r():r);
+  const fresh=list.filter(r=>!RECENT_FALLBACK_REPLIES.includes(r));
+  const pool=fresh.length?fresh:list;
+  const choice=pool[Math.floor(Math.random()*pool.length)];
+  RECENT_FALLBACK_REPLIES.push(choice);
+  if(RECENT_FALLBACK_REPLIES.length>10)RECENT_FALLBACK_REPLIES.shift();
+  return choice;
+}
 const FALLBACK_PATTERNS=[
   {test:CRISIS_RE,
    reply:`I'm really glad you told me this instead of carrying it alone. Please reach out right now to the ${CRISIS_LINE}\n\nYou matter, and this feeling can change even when it doesn't feel like it. Can you tell me if you're safe right now?`},
   {test:/relaps|slipped|used again|drank again|smoked again/i,
-   reply:`A slip doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`},
+   reply:[
+     `A slip doesn't erase your progress — it's data, not a verdict. I'm not here to judge you, I'm here to help you get back to Day One, right now if you want.\n\nCan we talk about what happened, without judgment?`,
+     `What you did next matters more than what just happened — and what you did next was come here.\n\nWhat was going on in the hour before it happened?`,
+     `Okay. First: you're still in this — a slip is a chapter, not the ending. Nothing you tell me changes that I'm in your corner.\n\nDo you want to talk through what led up to it, or what to do with tonight?`,
+   ]},
   {test:/craving|urge|want to (drink|use|smoke)|tempted/i,
-   reply:`Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`},
+   reply:[
+     `Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`,
+     `An urge is loud, but it's temporary — it rises, peaks, and falls like a wave, and you don't have to act on it while it does.\n\nWhere are you right now, and what's within reach that could carry you through the next 20 minutes?`,
+     `Right now your brain is promising relief it can't actually deliver — you've watched that promise fail before, and that's exactly why you're here instead.\n\nHow strong is it, 1 to 10? And what usually helps even a little?`,
+   ]},
   {test:/proud|good day|great day|did it|feeling good|amazing/i,
-   reply:`I'm really glad you're feeling proud — that matters, and you should let yourself feel it fully.\n\nWhat's one thing you did recently that you want to remember on harder days?`},
+   reply:[
+     `I'm really glad you're feeling proud — that matters, and you should let yourself feel it fully.\n\nWhat's one thing you did recently that you want to remember on harder days?`,
+     `That's worth stopping for — really. Hard days are easy to dwell on and wins are easy to rush past, so let this one land.\n\nWhat made today different?`,
+     `Look at that. You did that — nobody handed it to you.\n\nHow are you going to mark it? Even something small counts.`,
+   ]},
   {test:/motivat|inspir|give up|can'?t do this|losing hope|pointless/i,
-   reply:`Motivation comes and goes, and that's normal — it doesn't mean you're failing. Let's anchor to your reasons instead of waiting for motivation to show up.\n\nWhy did you decide to start this in the first place?`},
+   reply:[
+     `Motivation comes and goes, and that's normal — it doesn't mean you're failing. Let's anchor to your reasons instead of waiting for motivation to show up.\n\nWhy did you decide to start this in the first place?`,
+     `You don't need to feel motivated to take the next small step — action usually comes first and motivation follows, not the other way around.\n\nWhat's the smallest thing you could do in the next 10 minutes?`,
+     `Hope dips. That's part of the deal, not proof this isn't working.\n\nIf your reasons for starting could speak right now, what would they remind you of?`,
+   ]},
   {test:/paws|post.?acute|withdrawal/i,
-   reply:`PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`},
+   reply:[
+     `PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`,
+     `What you're describing fits PAWS — the long tail of your brain recalibrating. It's uncomfortable, it's temporary, and it's a sign of healing, not failure.\n\nWhen does it hit you hardest — mornings, nights, certain situations?`,
+   ]},
+  {test:/can'?t (cope|handle|deal)|not coping|too much for me|drowning|barely (holding|hanging) on|falling apart/i,
+   reply:[
+     `Feeling like you can't cope isn't proof that you can't — it's usually a sign you've been carrying too much for too long without putting any of it down.\n\nWhat's the piece that's heaviest right now?`,
+     `Then let's not try to cope with all of it at once. Right now, this minute, you only need to get through this minute — and you're already doing that.\n\nWhat's in front of you that feels impossible?`,
+     `There are moments it swallows you, and moments you're still standing — both are true, and the second one is why you're here talking instead of gone quiet.\n\nWhen it hits, what's the first thing that goes?`,
+   ]},
   {test:/stress(ed)?|overwhelm|too much (pressure|going on)/i,
-   reply:`Stress is one of the most common paths back to old habits — you naming it is you catching it before it catches you.\n\nWhat's the biggest source of the stress right now, and is there one piece of it you can actually put down today?`},
+   reply:[
+     `Stress is one of the most common paths back to old habits — you naming it is you catching it before it catches you.\n\nWhat's the biggest source of the stress right now, and is there one piece of it you can actually put down today?`,
+     `When everything feels urgent, recovery quietly slips down the list — so I'm glad you brought it here first.\n\nIf you wrote down everything pressing on you right now, what would be at the top?`,
+   ]},
   {test:/lonel|isolat|no one (understands|gets it)|alone in this/i,
-   reply:`Loneliness is a real, physical kind of pain — it makes sense it would push you toward old coping habits. You reaching out here is already you refusing to be fully alone with it.\n\nIs there one person you trust that you could message today, even just a small hello?`},
+   reply:[
+     `Loneliness is a real, physical kind of pain — it makes sense it would push you toward old coping habits. You reaching out here is already you refusing to be fully alone with it.\n\nIs there one person you trust that you could message today, even just a small hello?`,
+     `Feeling alone in this is one of the heaviest parts — and it lies, because it tells you no one would understand when plenty of people would.\n\nWhen did the loneliness get loud today?`,
+   ]},
   {test:/bored|nothing to do|so restless/i,
-   reply:`Boredom cravings are often really just "I need stimulation" in disguise — and that's a solvable problem.\n\nWhat's one small thing, even a 10-minute thing, you could do with your hands or body right now?`},
+   reply:[
+     `Boredom cravings are often really just "I need stimulation" in disguise — and that's a solvable problem.\n\nWhat's one small thing, even a 10-minute thing, you could do with your hands or body right now?`,
+     `Restlessness is real — your brain got used to a shortcut and now it's asking where the stimulation went.\n\nWhat did you used to enjoy, before all this, that you haven't tried in a while?`,
+   ]},
   {test:/asham|guilt|disgust(ed)? with myself|hate myself|so embarrass/i,
-   reply:`Shame convinces you that you ARE the mistake instead of someone who made one — but that's not true, and it's not a fair trade for how hard you're working.\n\nWhat would you say to a friend who told you exactly what you just told me?`},
+   reply:[
+     `Shame convinces you that you ARE the mistake instead of someone who made one — but that's not true, and it's not a fair trade for how hard you're working.\n\nWhat would you say to a friend who told you exactly what you just told me?`,
+     `Guilt says "I did something bad" and can push you forward; shame says "I am bad" and only pulls you under. What you're carrying sounds like the second one, and it isn't telling the truth.\n\nWhat's the sentence it keeps repeating at you?`,
+   ]},
   {test:/anxious|anxiety|panicking|can'?t (calm down|stop worrying)|racing thoughts/i,
-   reply:`Anxiety spikes hard and then it genuinely does come back down, even when it doesn't feel that way right now. A minute of slow, controlled breathing can take the edge off while it passes.\n\nWhat's the thought that's looping the loudest right now?`},
+   reply:[
+     `Anxiety spikes hard and then it genuinely does come back down, even when it doesn't feel that way right now. A minute of slow, controlled breathing can take the edge off while it passes.\n\nWhat's the thought that's looping the loudest right now?`,
+     `Anxiety is your alarm system firing without a fire — miserable, but not dangerous, and it does pass.\n\nTry one slow breath out, longer than the breath in. Then tell me: what is it saying is about to go wrong?`,
+   ]},
   {test:/confus(ed|ing)|don'?t know what i'?m feeling|mixed up|can'?t (figure|make sense) (it|this) out/i,
-   reply:`It's okay not to have this fully sorted out yet — a lot of recovery is sitting with confusing feelings without rushing to resolve them.\n\nCan you describe what's confusing without trying to make it neat yet? Sometimes just saying it out loud untangles part of it.`},
+   reply:[
+     `It's okay not to have this fully sorted out yet — a lot of recovery is sitting with confusing feelings without rushing to resolve them.\n\nCan you describe what's confusing without trying to make it neat yet? Sometimes just saying it out loud untangles part of it.`,
+     `Not knowing what you're feeling is itself information — usually it means several things at once, tangled together.\n\nIf you had to name just one strand of it, what would you call it?`,
+   ]},
   {test:/struggl|hard|rough|bad day|tough|heavy/i,
-   reply:`Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`},
+   reply:[
+     `Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`,
+     `I'm glad you said it instead of holding it. Heavy days don't mean it's going wrong — they're part of what recovery looks like up close.\n\nWhat's been the hardest hour of today so far?`,
+     `Okay — I'm right here, and you don't have to make it sound better than it is.\n\nWhat happened today?`,
+   ]},
 ];
 // ─── SUPPORTER GUIDED-MODE REPLIES ─────────────────────────────────────────────
 // A supporter is not the person with the addiction. The recovering library's
@@ -7225,8 +7287,12 @@ function supporterFallbackReply(userText){
   // along whenever the words get heavy.
   const footer=DISTRESS_RE.test(userText)?DISTRESS_FOOTER:'';
   const match=SUPPORTER_FALLBACKS.find(p=>p.test.test(userText));
-  if(match)return (typeof match.reply==='function'?match.reply():match.reply)+footer;
-  return `I'm listening. Whatever's happening with them, what it's doing to you matters too — and this space is for that part, not for fixing them.${footer}${guidedModeNotice()}`;
+  if(match)return pickReply(match.reply)+footer;
+  return pickReply([
+    `I'm listening. Whatever's happening with them, what it's doing to you matters too — and this space is for that part, not for fixing them.`,
+    `I'm here. You spend so much time reading them — this is the place where someone asks about you instead.\n\nHow are you doing, really?`,
+    `Tell me more — and you don't have to be fair or balanced about it here. This is your side of it, and it's allowed to just be yours.`,
+  ])+footer+guidedModeNotice();
 }
 function localFallbackReply(userText){
   // Crisis language always takes priority over everything else, including structured Pro requests below.
@@ -7252,7 +7318,7 @@ function localFallbackReply(userText){
   // never just encouragement. (The crisis branch above already leads with 988.)
   const footer=DISTRESS_RE.test(userText)?DISTRESS_FOOTER:'';
   const match=FALLBACK_PATTERNS.find(p=>p.test.test(userText));
-  if(match)return match.reply+footer;
+  if(match)return pickReply(match.reply)+footer;
   const days=getDays();
   // Never lead with "Day 0" - to someone who just started or just reset, being
   // told "Day 0 counts" reads as "you have nothing." Only name the day count
@@ -7260,7 +7326,16 @@ function localFallbackReply(userText){
   const dayLine=days>=1
     ?`Day ${days} is still a day you showed up for yourself, and that counts for something.`
     :`Showing up here, right now, is you choosing yourself — and that already counts for something.`;
-  return `I hear you. ${dayLine}${categoryFallbackNote()}${footer}${guidedModeNotice()}`;
+  // Only the first generic variant carries the day line and category note -
+  // the rest ask instead of affirm, so back-to-back unmatched messages get a
+  // conversation, not the same reassurance twice.
+  return pickReply([
+    `I hear you. ${dayLine}${categoryFallbackNote()}`,
+    `I'm listening — and you don't have to shape it into anything neat for me. Say it however it actually is.\n\nWhat's going on?`,
+    `Thank you for telling me. Take me one step deeper — what was happening right before you opened this chat?`,
+    `Okay, I'm with you. If we pull just one thread of this, which one matters most right now?`,
+    `That deserves more than a quick answer, so let me ask instead of assuming: what would feel like support right now — talking it through, a distraction, or just being heard?`,
+  ])+footer+guidedModeNotice();
 }
 
 // ─── NOVA PRO: REAL PATTERN/TREND ANALYSIS (from data the user already logged) ─

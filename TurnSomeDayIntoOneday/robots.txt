@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /server/
+Disallow: /go/
+Disallow: /unsubscribe
+
+Sitemap: https://www.turnsomedayintodayone.com/sitemap.xml

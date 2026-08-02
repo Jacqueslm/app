@@ -4,6 +4,44 @@ The only file you need. Everything else is reference.
 
 ---
 
+## THE WEEK (repeat this every week)
+
+**Daily — 20 minutes, that's the cap:**
+- Morning (10 min): open Buffer, make sure today's 3 slots are filled.
+- Evening (10 min): reply to comments in the dashboards. Close the tab.
+
+**Monday — plan (45 min):**
+1. `/admin/stats` — read Leads by source, Signups, Trials. More of what grew.
+2. Fill Buffer for the whole week: 4 videos max this week (midday HER slot
+   first), cards in the other slots. Bank the rest of your videos for next
+   week — 8 made = 2 weeks of content, don't dump them all.
+
+**Tuesday — sales (45 min):**
+Outreach block. 5 rehab emails ("your app list is outdated, none cover the
+family"). This is the sales work — it gets you in front of buyers who are
+already searching.
+
+**Wednesday — one small win (30 min):**
+One-time jobs, one per week: AlternativeTo listing, updating a bio, a
+thumbnail pass. When those run out: skip it.
+
+**Thursday — audience (30 min):**
+Deeper comment pass. Answer every "what app is this." Note which video pulled
+the most comments — that's next week's lead topic.
+
+**Friday — close the week (15 min):**
+Schedule the weekend Buffer slots. Done. No new projects on Friday.
+
+**Weekend — record only if the bank is low.**
+Under 4 unposted videos? One teleprompter sitting (2–3 scripts). Otherwise
+off. The app's testers keep testing; your only job is opening the app once
+a day like they do.
+
+**The rule that keeps you sane:** if it's not on this schedule, it waits for
+Monday. New ideas go in a note, not into today.
+
+---
+
 ## WHEN YOU SIT DOWN TO RECORD
 
 1. Open **SCRIPTS.md**, pick the next number you haven't done.

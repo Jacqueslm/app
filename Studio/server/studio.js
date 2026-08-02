@@ -2910,9 +2910,11 @@ router.post('/render', async (req, res) => {
     const frames = Math.max(1, Math.round(c.dur * FPS));
     // Alternate push-in and pull-out so a long slideshow doesn't feel like one
     // repeating move.
+    // 20% travel: subtle enough to stay cinematic, big enough that you can
+    // actually see it happening on a phone screen.
     const z = i % 2 === 0
-      ? `min(1+0.12*on/${frames},1.12)`
-      : `max(1.12-0.12*on/${frames},1)`;
+      ? `min(1+0.20*on/${frames},1.20)`
+      : `max(1.20-0.20*on/${frames},1)`;
     return `fps=${FPS},scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,` +
       `crop=${W * 2}:${H * 2},zoompan=z='${z}':d=1:` +
       `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${FPS}`;

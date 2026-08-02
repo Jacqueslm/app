@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.5.0'; // v12.5.0: user-set hours for the daily lesson reminder
+const CACHE_NAME = 'tsid-shell-v12.5.1'; // v12.5.1: slip restart opens on now, and the reset date box uses local time not UTC
 const SHELL_FILES = [
   '/',
   '/app',

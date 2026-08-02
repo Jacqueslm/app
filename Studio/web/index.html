@@ -588,6 +588,10 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="qk-import-song">🔗 Import</button>
       </div>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="qk-beat" checked> ⚡ Cut on the beat of the song</label>
+      <div style="margin-top:4px">
+        <span class="usage">🎬 Premade looks — add your pictures, tap a look, press Assemble:</span>
+        <div id="qk-premade" class="row" style="gap:6px;margin-top:4px"></div>
+      </div>
       <div class="chips" id="qk-format"></div>
       <button class="gen-btn" id="qk-assemble">3️⃣ &nbsp;Assemble my video</button>
       <div class="progress-line" id="qk-prog"><div></div></div>
@@ -7249,6 +7253,56 @@ $('#sh-render').onclick = async () => {
 };
 
 /* ---------------- Quick Video: one-click assemble ---------------- */
+// ─── PREMADE LOOKS ────────────────────────────────────────────────────────────
+// Built-in one-tap templates, CapCut-style: each stamps a rhythm (move,
+// duration, transition per slot, cycled over however many pictures are added)
+// plus beat-cutting on/off. Purely free settings - no AI, no cost.
+const QK_PREMADE = [
+  { key: 'punch', emoji: '⚡', name: 'Punch', desc: 'Fast beat cuts, hard zooms — trending-short energy',
+    beat: true, slots: [
+      { move: 'push', dur: 2, transAfter: 'cut' }, { move: 'pull', dur: 2, transAfter: 'cut' }, { move: 'push_pan', dur: 2, transAfter: 'cut' }] },
+  { key: 'hype', emoji: '🔥', name: 'Hype', desc: 'Shake + zoom, hard cuts — highest energy',
+    beat: true, slots: [
+      { move: 'shake', dur: 2, transAfter: 'cut' }, { move: 'push', dur: 2, transAfter: 'cut' }, { move: 'push_pan', dur: 2, transAfter: 'cut' }] },
+  { key: 'cinematic', emoji: '🎬', name: 'Cinematic', desc: 'Slow pushes and blends — story feel',
+    beat: false, slots: [
+      { move: 'push', dur: 5, transAfter: 'fade' }, { move: 'drift', dur: 5, transAfter: 'fade' }, { move: 'pull', dur: 5, transAfter: 'fade' }, { move: 'pan_right', dur: 5, transAfter: 'fade' }] },
+  { key: 'float', emoji: '🌊', name: 'Smooth', desc: 'Gentle floating drift — calm, emotional',
+    beat: false, slots: [
+      { move: 'drift', dur: 4, transAfter: 'fade' }, { move: 'pan_left', dur: 4, transAfter: 'fade' }, { move: 'pan_right', dur: 4, transAfter: 'fade' }] },
+  { key: 'quote', emoji: '🖼', name: 'Quote hold', desc: 'Long slow push per card — for text cards',
+    beat: false, slots: [
+      { move: 'push', dur: 8, transAfter: 'fade' }] },
+  { key: 'reveal', emoji: '📖', name: 'Reveal', desc: 'Pull back, dip to black, push in — before/after',
+    beat: false, slots: [
+      { move: 'pull', dur: 4, transAfter: 'fadeblack' }, { move: 'push', dur: 4, transAfter: 'fade' }] },
+];
+function applyQkPremade(t) {
+  if (!qk.shots.length) { $('#qk-status').textContent = 'Add your pictures first (step 1), then tap a look.'; return; }
+  qk.shots.forEach((s, i) => {
+    if (s.kind === 'video') return; // videos keep their own length
+    const slot = t.slots[i % t.slots.length];
+    s.move = slot.move; s.dur = slot.dur; s.transAfter = slot.transAfter;
+  });
+  $('#qk-beat').checked = t.beat;
+  renderQkShots();
+  $('#qk-status').textContent = `${t.emoji} ${t.name} applied — add a song if you haven't, then press Assemble.`;
+}
+function renderQkPremade() {
+  const box = $('#qk-premade');
+  if (!box) return;
+  box.innerHTML = '';
+  QK_PREMADE.forEach((t) => {
+    const b = document.createElement('button');
+    b.className = 'btn2 quiet';
+    b.style.cssText = 'flex:1;min-width:130px;padding:8px 10px;font-size:12px;text-align:left';
+    b.innerHTML = `<b>${t.emoji} ${t.name}</b><br><span style="font-size:11px;color:var(--tm)">${t.desc}</span>`;
+    b.onclick = () => applyQkPremade(t);
+    box.appendChild(b);
+  });
+}
+renderQkPremade();
+
 const QK_MOVES = [
   ['push', 'Zoom in'], ['pull', 'Zoom out'], ['pan_right', 'Slide →'], ['pan_left', 'Slide ←'],
   ['pan_up', 'Slide ↑'], ['pan_down', 'Slide ↓'], ['drift', 'Float'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],

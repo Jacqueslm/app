@@ -2439,7 +2439,16 @@ router.post('/chroma', async (req, res) => {
 });
 
 /* ---------------- output sizes ---------------- */
-const RENDER_SIZES = new Set(['1920x1080', '1080x1920', '1080x1080', '1280x720', '720x1280', '720x720']);
+const RENDER_SIZES = new Set([
+  // 16:9 / 9:16 / 1:1
+  '3840x2160', '2560x1440', '1920x1080', '1280x720',
+  '2160x3840', '1440x2560', '1080x1920', '720x1280',
+  '2160x2160', '1440x1440', '1080x1080', '720x720',
+  // 4:5 / 4:3 / 21:9
+  '2160x2700', '1440x1800', '1080x1350', '720x900',
+  '2880x2160', '1920x1440', '1440x1080', '960x720',
+  '5120x2160', '3440x1440', '2560x1080', '1680x720',
+]);
 const FPS = 30;
 
 function parseSize(size, fallback) {
@@ -2912,18 +2921,16 @@ router.post('/render', async (req, res) => {
   const kenBurns = !!req.body.kenBurns;
   // How far the camera travels, and which way - both the user's choice, not a
   // hardcoded house style. amount is a fraction (0.10 = a 10% push).
-  const kbAmount = Math.min(0.6, Math.max(0.02, Number(req.body.kenBurnsAmount) || 0.20));
+  const kbAmount = Math.min(0.8, Math.max(0.02, Number(req.body.kenBurnsAmount) || 0.20));
   const kbMove = ['auto', 'in', 'out'].includes(req.body.kenBurnsMove) ? req.body.kenBurnsMove : 'auto';
   function stillMotion(c, i) {
     const frames = Math.max(1, Math.round(c.dur * FPS));
-    // Respect the fit setting, exactly like a still with no motion would.
-    // The original version always cropped-to-fill before zooming, which chopped
-    // the sides off any image whose shape didn't match the frame - on a text
-    // card that meant the words themselves got cut. In 'pad' fit the whole
-    // picture is placed first (letterboxed, same as motionless renders), and
-    // the zoom is capped gently so the picture's edges never leave the frame
-    // far enough to lose text. 'crop' fit keeps the full chosen strength.
-    const amt = fit === 'crop' ? kbAmount : Math.min(kbAmount, 0.12);
+    // Respect the fit setting, exactly like a still with no motion would:
+    // 'pad' letterboxes the whole picture first, 'crop' fills the frame. The
+    // strength is the user's chosen amount in BOTH modes - no silent cap. A
+    // strong zoom in pad mode will push a card's outer edges off-screen at the
+    // peak; that trade-off belongs to the person picking "Dramatic", not here.
+    const amt = kbAmount;
     const a = amt.toFixed(3);
     const top = (1 + amt).toFixed(3);
     // 'auto' alternates so a long slideshow doesn't feel like one repeating move.

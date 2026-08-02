@@ -2727,7 +2727,7 @@ const ASS_SIZES = {
   medium: { font: 0.042, margin: 0.07 },
   large: { font: 0.048, margin: 0.08 }, // the original size
 };
-function buildAssFile(lines, W, H, styleKey, sizeKey) {
+function buildAssFile(lines, W, H, styleKey, sizeKey, widthPct) {
   const st = ASS_STYLES[styleKey] || ASS_STYLES.outline;
   const sz = ASS_SIZES[sizeKey] || ASS_SIZES.medium;
   const esc = (t) => String(t).replace(/\r?\n/g, '\\N').replace(/[{}]/g, '');
@@ -2741,6 +2741,10 @@ function buildAssFile(lines, W, H, styleKey, sizeKey) {
   const fontSize = Math.round(H * sz.font);
   const outline = Math.max(1, Math.round((fontSize / 16) * st.outlineMul));
   const marginV = Math.round(H * sz.margin);
+  // How much of the frame width a caption line may use before it wraps. The
+  // old fixed 40px margin let long lines run to the very edge on a phone.
+  const wf = Math.min(0.98, Math.max(0.5, Number(widthPct) || 0.86));
+  const marginH = Math.max(10, Math.round(W * (1 - wf) / 2));
   return `[Script Info]
 ScriptType: v4.00+
 PlayResX: ${W}
@@ -2749,7 +2753,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,Arial,${fontSize},${st.color},${st.color},&H00000000,${st.back},-1,0,0,0,100,100,0,0,${st.border},${outline},1,2,40,40,${marginV},1
+Style: Cap,Arial,${fontSize},${st.color},${st.color},&H00000000,${st.back},-1,0,0,0,100,100,0,0,${st.border},${outline},1,2,${marginH},${marginH},${marginV},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -2967,7 +2971,7 @@ router.post('/render', async (req, res) => {
     .sort((a, b) => a.start - b.start);
   if (capLines.length) {
     assFile = `captions-${crypto.randomBytes(5).toString('hex')}.ass`;
-    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle, captionSize));
+    fs.writeFileSync(path.join(os.tmpdir(), assFile), buildAssFile(capLines, W, H, captionStyle, captionSize, req.body.captionWidth));
     filters.push(`${current}subtitles=filename=${assFile}[vcap]`);
     current = '[vcap]';
   }

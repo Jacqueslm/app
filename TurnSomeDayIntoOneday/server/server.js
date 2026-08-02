@@ -90,6 +90,13 @@ app.get('/when-he-drinks', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
 });
 
+// Our own "best recovery apps" roundup - the standard competitor move done
+// honestly (disclosure up top, real alternatives listed). Targets the
+// "best recovery apps 2026" search and anchors the rehab outreach emails.
+app.get('/best-recovery-apps', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'best-recovery-apps.html'));
+});
+
 // Short bio links with tracking baked in, so a platform bio only ever needs
 // "/go/tiktok" - the redirect adds the UTM tags and stats attribution works
 // without anyone hand-building tagged URLs. Unknown names still land safely.

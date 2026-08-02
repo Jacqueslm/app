@@ -36,10 +36,12 @@ the person struggling (porn, alcohol, food, gambling).
 
 ## The map
 
-**Jacques only ever needs these two — keep it that way:**
-- `DO-THIS-NEXT.md` — his routine. Record → post → check stats Monday.
+**Jacques only ever needs these three — keep it that way:**
+- `DO-THIS-NEXT.md` — his routine, including the weekly schedule.
 - `SCRIPTS.md` — numbered videos. Each number = one complete video (title,
   script or AI prompts, caption). He picks a number and makes it.
+- `OUTREACH.md` — Tuesday's sales block: 30 verified rehab/media targets in
+  weekly batches of 5, with the email written.
 
 **Do NOT add more top-level files or hand him more docs.** He works best with one
 next action at a time. If something new is needed, fold it into one of those two.

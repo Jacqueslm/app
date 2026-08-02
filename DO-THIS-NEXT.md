@@ -17,9 +17,8 @@ The only file you need. Everything else is reference.
    week — 8 made = 2 weeks of content, don't dump them all.
 
 **Tuesday — sales (45 min):**
-Outreach block. 5 rehab emails ("your app list is outdated, none cover the
-family"). This is the sales work — it gets you in front of buyers who are
-already searching.
+Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. The
+email is written; you just personalize one line each. This is the sales work.
 
 **Wednesday — one small win (30 min):**
 One-time jobs, one per week: AlternativeTo listing, updating a bio, a

@@ -715,7 +715,7 @@ body.simple-only #view-simple{display:flex !important}
       <div class="trim" style="font-size:12px;margin-top:2px">
         <span>Cutdown from</span><input type="number" id="cut-start" min="0" step="0.5" value="0"><span>s, length</span>
         <select class="input" id="cut-len" style="width:auto;padding:6px 8px;font-size:12px">
-          <option value="15">15s</option><option value="30">30s</option><option value="60">60s</option>
+          <option value="15">15s</option><option value="30">30s</option><option value="45">45s</option><option value="60">60s</option>
         </select>
         <button class="btn2 quiet" id="seq-render-cut" style="padding:7px 10px;font-size:12px">Export cutdown</button>
       </div>
@@ -7225,7 +7225,7 @@ function renderQkShots() {
             ${QK_MOVES.map(([v, l]) => `<option value="${v}"${v === s.move ? ' selected' : ''}>${l}</option>`).join('')}
           </select>
           <select class="input q-dur" style="width:auto;padding:5px 8px;font-size:12px">
-            ${[2, 3, 4, 5, 6, 8].map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d}s</option>`).join('')}
+            ${[2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 45, 60].map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d >= 60 ? '1 min' : d + 's'}</option>`).join('')}
           </select>
           ${i < qk.shots.length - 1 ? `<span>then</span>
           <select class="input q-tr" style="width:auto;padding:5px 8px;font-size:12px">

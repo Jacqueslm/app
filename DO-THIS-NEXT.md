@@ -6,9 +6,11 @@ The only file you need. Everything else is reference.
 
 ## THE WEEK (repeat this every week)
 
-**Daily — 20 minutes, that's the cap:**
+**Daily — 10 minutes, that's the cap:**
 - Morning (10 min): open Buffer, make sure today's 3 slots are filled.
-- Evening (10 min): reply to comments in the dashboards. Close the tab.
+- Comments and followers are **her job now** — you don't open the dashboards
+  or the apps. If she flags a "what app is this" comment, she answers it or
+  hands you the exact text to give her. You never go looking.
 
 **Monday — plan (45 min):**
 1. `/admin/stats` — read Leads by source, Signups, Trials. More of what grew.
@@ -24,9 +26,9 @@ email is written; you just personalize one line each. This is the sales work.
 One-time jobs, one per week: AlternativeTo listing, updating a bio, a
 thumbnail pass. When those run out: skip it.
 
-**Thursday — audience (30 min):**
-Deeper comment pass. Answer every "what app is this." Note which video pulled
-the most comments — that's next week's lead topic.
+**Thursday — audience check-in (10 min):**
+Ask her: which video pulled the most comments this week? That's next week's
+lead topic. She does the comment pass — you just take the answer.
 
 **Friday — close the week (15 min):**
 Schedule the weekend Buffer slots. Done. No new projects on Friday.
@@ -90,22 +92,22 @@ Whichever platform went up → make more for it. Flat → stop bothering.
 
 ---
 
-## COMMENTS — without opening the feeds
+## COMMENTS — her department (this is her how-to)
 
-Comments are where your leads are, but the apps' feeds are not a safe place for
-you to go looking. Use the creator dashboards instead — they show your comments
-and nothing else. No recommendations, no scroll:
+Comments and followers are handled by your wife. This section is for her —
+the dashboards that show comments without the feed:
 
-- **YouTube:** studio.youtube.com → **Comments** (left menu). This is a work
-  dashboard, not a feed. Safest one.
-- **Facebook:** your Page's **Professional dashboard** → notifications.
-- **TikTok:** if it has to be the app, go straight to **Inbox**, reply, close it.
-  Never the For You page. If that's too much, skip TikTok comments entirely —
-  it's not worth a relapse.
+- **YouTube:** studio.youtube.com → **Comments** (left menu). Work dashboard,
+  not a feed.
+- **Facebook:** the Page's **Professional dashboard** → notifications.
+- **TikTok:** straight to **Inbox**, reply, close it. Never the For You page.
 
-**Time-box it.** Once a day, ten minutes, on a computer, then close the tab.
-If you ever open one of these and feel it pulling, close it. The business
-survives a missed comment. Your recovery is the whole product.
+**When someone asks "what app is this":** name it — Turn Someday Into Day One —
+and only send the link if they ask for it. The bio link is already there.
+
+**For you (Jacques):** you don't open these. If she needs an answer only you
+can give, she asks you and you tell her — she types it. The business survives
+a missed comment. Your recovery is the whole product.
 
 ---
 

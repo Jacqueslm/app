@@ -7,6 +7,17 @@ the title, what to say, and the caption. Nothing to look up anywhere else.
 
 Do them in order. Cross one off when it's posted.
 
+**Find a lane fast:**
+| Lane | Numbers |
+|---|---|
+| HER — his drinking | 1, 2, 4 |
+| HER — betrayal trauma | 11, 12 |
+| HIM — any habit | 3, 5, 7 |
+| Supporting someone | 6 |
+| ALCOHOL — the drinker | 17–22 |
+| FOOD — binge eating | 13–16 |
+| AI scenes (cost money) | 8, 9, 10 |
+
 ---
 
 ## 1. TALK — "Am I overreacting?"
@@ -170,6 +181,8 @@ Do them in order. Cross one off when it's posted.
 
 ---
 
+# ── AI SCENES ──
+
 ## 8. AI — "The door"  ⏱ 25s · ~$2.45
 
 **Title:** The moment she finds out
@@ -253,6 +266,309 @@ MOTION: `He pulls the laces tight, stands, steps out of frame`
 SAY: *"You don't beat it with a diet. You beat it by facing what it was feeding."*
 
 **Caption:** It was never the food. Link in bio.
+
+---
+
+# ── HER · betrayal trauma ──
+
+## 11. TALK — "It has a name"
+
+**Title:** Betrayal trauma: why you feel like you're losing your mind
+
+**Say this:**
+
+> What you're feeling has a name.
+>
+> The racing thoughts. The checking. The way your body reacts
+> before your brain catches up.
+>
+> That's not you being dramatic.
+> That's not you being insecure.
+>
+> It's what happens to a person
+> when the one who was supposed to be safe
+> turns out to be the thing that hurt them.
+>
+> It has a name. And that means
+> you're not the only one it's happened to.
+
+**Caption:** It has a name. Link in bio.
+
+---
+
+## 12. TALK — "You're not crazy"
+
+**Title:** Why you can't just get over what he did
+
+**Say this:**
+
+> Everybody wants to know why you can't move on.
+>
+> Why you're still asking questions.
+> Why you check.
+> Why one small thing sets you off six months later.
+>
+> Because you're not upset about one night.
+>
+> You're trying to rebuild the part of your brain
+> that used to feel safe.
+>
+> That doesn't run on anybody else's schedule.
+> Especially not his.
+
+**Caption:** You're not crazy. You're recovering too. Link in bio.
+
+---
+
+# ── FOOD · binge eating ──
+
+## 13. TALK — "The night thing"
+
+**Title:** How to stop binge eating at night
+
+**Say this:**
+
+> It's never a problem at nine in the morning.
+>
+> It's ten at night.
+> The house is quiet.
+> Everybody's asleep.
+>
+> And you're standing in front of the fridge
+> not even hungry.
+>
+> That's not a willpower problem.
+> That's the same hour every habit shows up.
+>
+> You don't fix it at ten.
+> You fix it at two in the afternoon,
+> when you decide what ten is going to look like.
+
+**Caption:** You don't quit at noon. You quit at 2am. Link in bio.
+
+---
+
+## 14. TALK — "It was never the food"
+
+**Title:** How to stop binge eating (it was never about the food)
+
+**Say this:**
+
+> I did this for years.
+>
+> Ate until it hurt, then hated myself,
+> then did it again the next night.
+>
+> Here's what took me too long to learn:
+> hunger stops. That doesn't.
+>
+> Because it was never about the food.
+> It was about the ten minutes of quiet
+> the food bought me.
+>
+> You don't beat that with a diet.
+> You beat it by facing what it was feeding.
+
+**Caption:** It was never about the food. Link in bio.
+
+---
+
+## 15. TALK — "I can't stop eating"
+
+**Title:** When you can't stop eating and you don't know why
+
+**Say this:**
+
+> "I can't stop eating."
+>
+> You've said that to yourself.
+> Maybe not out loud.
+>
+> And every answer you get is about food.
+> Meal plans. Discipline. Try harder.
+>
+> Nobody asks what happens
+> in the twenty minutes before you start.
+>
+> That's where it actually lives.
+> That's the part nobody's helping you with.
+
+**Caption:** Nobody asks about the twenty minutes before. Link in bio.
+
+---
+
+## 16. TALK — "Food addiction is real"
+
+**Title:** Food addiction: what nobody tells you
+
+**Say this:**
+
+> If it was really about willpower,
+> you'd have solved this years ago.
+>
+> You're disciplined everywhere else.
+> You show up. You do hard things.
+>
+> But this one thing,
+> you lose to it over and over,
+> and then you carry the shame of losing.
+>
+> That pattern isn't a character flaw.
+> It's the same loop as every other habit —
+> it just happens to be legal, cheap,
+> and in your kitchen.
+
+**Caption:** It's not a willpower problem. Link in bio.
+
+---
+
+# ── ALCOHOL · the person drinking ──
+
+## 17. TALK — "You quit at 2am"
+
+**Title:** How to stop drinking alcohol (when you've tried before)
+
+**Say this:**
+
+> Everybody's sober at nine in the morning.
+>
+> Nine in the morning you mean it.
+> You've got a plan. You've got reasons.
+>
+> Then it's the end of the day,
+> you're tired, you're alone,
+> and the story in your head sounds reasonable.
+>
+> You don't quit at noon.
+> You quit at 2am.
+>
+> So stop building plans for the version of you
+> that's already winning.
+
+**Caption:** You don't quit at noon. You quit at 2am. Link in bio.
+
+---
+
+## 18. TALK — "On your own"
+
+**Title:** How to quit drinking on your own
+
+**Say this:**
+
+> Not everybody's walking into a room
+> and saying their name out loud.
+>
+> Some people need to start quieter than that.
+> In their own house. Nobody knowing yet.
+>
+> That's allowed.
+>
+> But quiet doesn't mean unarmed.
+> You still need a plan for the hour it gets loud —
+> written down, before you need it.
+>
+> Willpower gets you to Tuesday.
+> A plan gets you to day ninety.
+
+**Caption:** Quiet doesn't mean unarmed. Link in bio.
+
+---
+
+## 19. TALK — "Nobody relapses in a good mood"
+
+**Title:** Why you keep drinking again after a good stretch
+
+**Say this:**
+
+> Nobody relapses in a good mood.
+>
+> It happens tired.
+> It happens alone.
+> It happens after a good week — which is exactly
+> what makes it feel safe.
+>
+> "I've been doing well. One won't hurt."
+>
+> That's not a weak thought.
+> That's a good story. Reasonable. Rehearsed for years.
+>
+> You don't beat a good story with willpower.
+> You beat it with something you decided in advance.
+
+**Caption:** Nobody relapses in a good mood. Link in bio.
+
+---
+
+## 20. TALK — "But I'm functioning"
+
+**Title:** Signs you're drinking more than you think
+
+**Say this:**
+
+> You go to work. Bills are paid. Nobody's called it a problem.
+>
+> So it's fine, right?
+>
+> Here's the only question that matters:
+> could you stop for thirty days without it costing you anything?
+>
+> Not "would you."
+> Could you.
+>
+> If the answer made your stomach drop,
+> that's your answer.
+>
+> Functioning just means it hasn't cost you enough yet.
+
+**Caption:** Functioning just means it hasn't cost enough yet. Link in bio.
+
+---
+
+## 21. TALK — "The morning after"
+
+**Title:** What to do the morning after you drank again
+
+**Say this:**
+
+> You woke up already disappointed in yourself.
+>
+> And your first instinct is to make it mean everything —
+> that you're weak, that you'll never get this,
+> that last night proved something.
+>
+> Last night proved you were tired and unprepared.
+> That's it.
+>
+> The shame spiral costs you more days than the drink did.
+>
+> So today isn't a verdict. It's just day one.
+> And you've already showed back up.
+
+**Caption:** Today isn't a verdict. Link in bio.
+
+---
+
+## 22. TALK — "Nobody claps for day four"
+
+**Title:** The hardest part of quitting drinking (it's not day one)
+
+**Say this:**
+
+> Day one's easy. Day one you're fired up.
+>
+> Day four is the one.
+>
+> Day thirty gets a milestone.
+> Day ninety gets a story.
+> Day four gets nothing —
+>
+> except it's the day most people go back.
+>
+> So this is me clapping for your day four.
+> It's the one that counts the most,
+> and nobody's watching.
+
+**Caption:** Day four counts the most. Link in bio.
 
 ---
 

@@ -717,6 +717,7 @@ body.simple-only #view-simple{display:flex !important}
           <option value="0.25" selected>Noticeable</option>
           <option value="0.40">Strong</option>
           <option value="0.55">Dramatic</option>
+          <option value="0.70">Max</option>
         </select>
         <select class="input" id="kb-dir" style="width:auto;padding:5px 8px;font-size:12px">
           <option value="auto" selected>Alternate in / out</option>
@@ -1684,9 +1685,12 @@ const SCENE_COUNTS = [
   { key: 4, label: '4 at once' },
 ];
 const SIZE_MAP = {
-  '16:9': { 1080: '1920x1080', 720: '1280x720' },
-  '9:16': { 1080: '1080x1920', 720: '720x1280' },
-  '1:1':  { 1080: '1080x1080', 720: '720x720' },
+  '16:9': { 2160: '3840x2160', 1440: '2560x1440', 1080: '1920x1080', 720: '1280x720' },
+  '9:16': { 2160: '2160x3840', 1440: '1440x2560', 1080: '1080x1920', 720: '720x1280' },
+  '1:1':  { 2160: '2160x2160', 1440: '1440x1440', 1080: '1080x1080', 720: '720x720' },
+  '4:5':  { 2160: '2160x2700', 1440: '1440x1800', 1080: '1080x1350', 720: '720x900' },
+  '4:3':  { 2160: '2880x2160', 1440: '1920x1440', 1080: '1440x1080', 720: '960x720' },
+  '21:9': { 2160: '5120x2160', 1440: '3440x1440', 1080: '2560x1080', 720: '1680x720' },
 };
 function currentSize() { return SIZE_MAP[st.seqFormat][st.seqRes]; }
 
@@ -4842,7 +4846,7 @@ function applySpec(spec) {
   st.storyboard = Array.isArray(spec.storyboard) ? spec.storyboard : [];
   if (typeof spec.storyboardStyle === 'string') $('#sb-style').value = spec.storyboardStyle;
   st.seqFormat = SIZE_MAP[spec.format] ? spec.format : '16:9';
-  st.seqRes = ['720', '1080'].includes(String(spec.res)) ? String(spec.res) : '1080';
+  st.seqRes = ['720', '1080', '1440', '2160'].includes(String(spec.res)) ? String(spec.res) : '1080';
   st.seqFit = ['crop', 'pad'].includes(spec.fit) ? spec.fit : 'crop';
   $('#fade-black-in').checked = !!spec.fadeFromBlack;
   $('#fade-black-out').checked = !!spec.fadeToBlack;
@@ -5554,9 +5558,10 @@ $('#ovl-add').onclick = () => {
 function renderOutputChips() {
   chipRow($('#seq-formats'), [
     { key: '16:9', label: 'YouTube 16:9' }, { key: '9:16', label: 'Reels 9:16' }, { key: '1:1', label: 'Square 1:1' },
+    { key: '4:5', label: 'Insta 4:5' }, { key: '4:3', label: 'Classic 4:3' }, { key: '21:9', label: 'Cinema 21:9' },
   ], st.seqFormat, (k) => { st.seqFormat = k; renderOutputChips(); renderOverlays(); persistDraft(); });
   chipRow($('#seq-res'), [
-    { key: '1080', label: '1080p' }, { key: '720', label: '720p' },
+    { key: '2160', label: '4K' }, { key: '1440', label: '1440p' }, { key: '1080', label: '1080p' }, { key: '720', label: '720p' },
   ], st.seqRes, (k) => { st.seqRes = k; renderOutputChips(); persistDraft(); });
   // Only matters when a clip's aspect differs from the output (e.g. 16:9 filming
   // exported as a 9:16 Reel): fill crops to fill the frame, letterbox pads bars.
@@ -6182,7 +6187,7 @@ $('#crew-produce').onclick = async () => {
           prompt: `${toGen[i].scene.prompt}, ${crew.plan.look.style}, ${cine.lens}`,
           characterIds: toGen[i].cast.length ? toGen[i].cast.map((c) => c.id) : [$('#scene-char').value].filter(Boolean),
           locationId: $('#scene-location').value || undefined,
-          imageSize: st.seqFormat === '16:9' ? 'landscape_16_9' : 'portrait_16_9',
+          imageSize: ['16:9', '4:3', '21:9'].includes(st.seqFormat) ? 'landscape_16_9' : st.seqFormat === '1:1' ? 'square_hd' : 'portrait_16_9',
         }),
       });
       const done = await pollJob(job.id, (j) => setProg('#crew-prog', ((i + j.progress / 100) / (toGen.length + 1)) * 50));
@@ -6716,7 +6721,7 @@ async function generateStoryboardScene(sc, card) {
       body: JSON.stringify({
         prompt: sc.prompt,
         characterId: $('#sb-char').value || null,
-        imageSize: { '16:9': 'landscape_16_9', '9:16': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9',
+        imageSize: { '16:9': 'landscape_16_9', '4:3': 'landscape_16_9', '21:9': 'landscape_16_9', '9:16': 'portrait_16_9', '4:5': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9',
       }),
     });
     const done = await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
@@ -6786,7 +6791,7 @@ $('#sb-queue-all').onclick = async () => {
   const pending = st.storyboard.filter((s) => !s.assetId && !s.queueId);
   if (!pending.length) return;
   btn.disabled = true;
-  const imageSize = { '16:9': 'landscape_16_9', '9:16': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9';
+  const imageSize = { '16:9': 'landscape_16_9', '4:3': 'landscape_16_9', '21:9': 'landscape_16_9', '9:16': 'portrait_16_9', '4:5': 'portrait_16_9', '1:1': 'square_hd' }[st.seqFormat] || 'landscape_16_9';
   try {
     const { ids } = await jfetch('/api/studio/queue/scenes', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },

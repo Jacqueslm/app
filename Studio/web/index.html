@@ -762,6 +762,16 @@ body.simple-only #view-simple{display:flex !important}
         <span class="usage">Caption size — go smaller if they cover your face:</span>
         <div class="chips" id="cap-sizes" style="margin-top:4px"></div>
       </div>
+      <div class="trim" style="font-size:12px;margin-top:6px">
+        <span class="usage">Text width — lower it if words run off the edges:</span>
+        <select class="input" id="cap-width" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="0.60">60%</option>
+          <option value="0.70">70%</option>
+          <option value="0.80" selected>80%</option>
+          <option value="0.86">86%</option>
+          <option value="0.92">92%</option>
+        </select>
+      </div>
       <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
     </div>
 
@@ -5405,7 +5415,8 @@ function drawOverlay(spec, W, H, canvas) {
   setFont();
   // shrink-to-fit: long captions scale down instead of running off the frame
   const widest = Math.max(...String(spec.text || ' ').split('\n').map((l) => ctx.measureText(l).width));
-  if (widest > W * 0.86) { size *= (W * 0.86) / widest; setFont(); }
+  const fitW = W * captionWidthPct();
+  if (widest > fitW) { size *= fitW / widest; setFont(); }
   ctx.fillStyle = spec.color || '#ffffff';
   // a box or a heavy outline replaces the soft shadow (cleaner over busy video)
   if (spec.bg || spec.stroke) { ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = size / 14; ctx.shadowOffsetY = size / 40; }
@@ -5674,6 +5685,7 @@ async function runRender(windowOpt, btnSel, opts) {
         captionLines: captionLinesPayload(),
         captionStyle: captionStyleKey(),
         captionSize: captionSizeKey(),
+        captionWidth: captionWidthPct(),
       }),
     });
     const done = await pollJob(job.id, (j) => {
@@ -6508,6 +6520,11 @@ function captionStyleKey() {
 // Size is separate from look: talking-head clips need smaller text than a music
 // video, and that's a different choice from which style you like.
 const CAPTION_SIZES = { small: 'Small', medium: 'Medium', large: 'Large' };
+function captionWidthPct() {
+  const el = document.getElementById('cap-width');
+  const v = el ? Number(el.value) : 0.80;
+  return Math.min(0.98, Math.max(0.5, v || 0.80));
+}
 function captionSizeKey() {
   const k = localStorage.getItem('tsid-caption-size') || 'medium';
   return CAPTION_SIZES[k] ? k : 'medium';
@@ -7136,6 +7153,7 @@ async function renderOneShort(s, statusEl) {
       captionLines: captionLinesPayload(),
       captionStyle: captionStyleKey(),
       captionSize: captionSizeKey(),
+      captionWidth: captionWidthPct(),
     }),
   });
   const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });

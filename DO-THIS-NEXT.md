@@ -16,28 +16,22 @@ Do 2–3 in one sitting. That's your week.
 
 ---
 
-## SCHEDULE IT (so you don't have to remember)
+## POST IT — through Buffer
 
-Studio → **Post** tab → **📅 Schedule a post**:
-pick the clip → paste the caption → tick TikTok / YouTube / Facebook → set the
-day and time → save.
+**Buffer is the way you post. Not the apps.** Those feeds are full of exactly
+what you're recovering from, and no amount of extra reach is worth walking
+through that every day. This is the rule, not a compromise.
 
-Studio tells you when it's due. Then you do the upload below.
+In Buffer: upload the clip → paste the **caption** from the script → pick
+TikTok / YouTube / Facebook → set the time → queue it.
 
-**One clip works on all three.** Same 9:16 file for TikTok, Shorts and Reels —
-make it once, post it three times.
+**One clip works on all three.** Same 9:16 file everywhere — make it once,
+schedule it three times.
 
----
+**Tick the AI label** where Buffer offers it. If it doesn't, add
+"Made with AI" as the last line of the caption — that covers you.
 
-## WHEN YOU POST ONE
-
-Upload it in the app itself (not auto-posted — native gets more reach):
-
-- **TikTok:** ＋ → Upload → paste the title as the caption → **AI-generated: ON** → Post
-- **YouTube:** Create → Upload → paste the title → **synthetic content: Yes** → Publish
-- **Facebook:** Reels → Create Reel → upload → **AI label: ON** → Share
-
-Use the **caption** from the script. Always ends with "link in bio."
+**Your 3 daily slots stay:** Morning = HIM · Midday = HER · Night = PROOF.
 
 ---
 
@@ -59,11 +53,30 @@ Whichever platform went up → make more for it. Flat → stop bothering.
 
 ---
 
+## COMMENTS — without opening the feeds
+
+Comments are where your leads are, but the apps' feeds are not a safe place for
+you to go looking. Use the creator dashboards instead — they show your comments
+and nothing else. No recommendations, no scroll:
+
+- **YouTube:** studio.youtube.com → **Comments** (left menu). This is a work
+  dashboard, not a feed. Safest one.
+- **Facebook:** your Page's **Professional dashboard** → notifications.
+- **TikTok:** if it has to be the app, go straight to **Inbox**, reply, close it.
+  Never the For You page. If that's too much, skip TikTok comments entirely —
+  it's not worth a relapse.
+
+**Time-box it.** Once a day, ten minutes, on a computer, then close the tab.
+If you ever open one of these and feel it pulling, close it. The business
+survives a missed comment. Your recovery is the whole product.
+
+---
+
 ## RULES (only 4)
 
 1. **Lead with the "her" videos.** That's your best audience.
-2. **Reply to every comment.** If they ask what the app is, tell them. Only send
-   the link if they ask for it.
+2. **When someone asks what the app is, tell them.** Only send the link if they
+   ask for it.
 3. **Never say "research shows"** or name a brain chemical. Your story only.
 4. **Nothing explicit** in the AI videos. The glow, the closed door, her face —
    never the screen.

@@ -708,6 +708,7 @@ body.simple-only #view-simple{display:flex !important}
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-in"> Fade in from black</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="fade-black-out"> Fade out to black</label>
       </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ken-burns" checked> 🎞 Still motion (slow zoom on photos — free, no AI)</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="enhance-auto" checked> ✨ Auto enhance (color pop · vignette · film grain · mastered audio)</label>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="brand-watermark" checked> 🏷 Day One watermark (small logo, top-left)</label>
       <button class="gen-btn" id="seq-render">Render full video</button>
@@ -4777,6 +4778,7 @@ function collectSpec() {
     format: st.seqFormat, res: st.seqRes, fit: st.seqFit,
     fadeFromBlack: $('#fade-black-in').checked, fadeToBlack: $('#fade-black-out').checked,
     enhance: $('#enhance-auto').checked,
+    kenBurns: $('#ken-burns') ? $('#ken-burns').checked : true,
     watermark: $('#brand-watermark').checked,
     music: {
       tracks: st.musicList,
@@ -5649,6 +5651,7 @@ async function runRender(windowOpt, btnSel, opts) {
         window: windowOpt || null,
         name: ui.name || null,
         enhance: spec.enhance,
+        kenBurns: spec.kenBurns,
         watermark: spec.watermark,
         captionLines: captionLinesPayload(),
         captionStyle: captionStyleKey(),
@@ -7108,6 +7111,7 @@ async function renderOneShort(s, statusEl) {
       loop: s.loop,
       name: s.name,
       enhance: spec.enhance,
+      kenBurns: spec.kenBurns,
       watermark: spec.watermark,
       captionLines: captionLinesPayload(),
       captionStyle: captionStyleKey(),

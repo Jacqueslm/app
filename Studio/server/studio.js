@@ -2895,9 +2895,33 @@ router.post('/render', async (req, res) => {
   const fitFilter = fit === 'crop'
     ? `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H}:(iw-${W})*${fx.toFixed(3)}:(ih-${H})/2`
     : `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2`;
+  // Ken Burns: a slow push on stills so a photo slideshow reads as a film
+  // instead of a stack of frozen pictures. Pure ffmpeg - no AI, no cost.
+  // Notes that cost an hour to learn, so they stay written down:
+  //  - fps must come BEFORE zoompan (zoompan counts input frames) and be set
+  //    again INSIDE it (zoompan re-tags output at 25 by default), or the clip
+  //    comes out the wrong length.
+  //  - d=1 because the input is already a looped frame sequence; anything
+  //    higher multiplies the frame count.
+  //  - scaling to 2x before the zoom is what stops the pixel-jitter that makes
+  //    a naive zoompan look cheap.
+  const kenBurns = !!req.body.kenBurns;
+  function stillMotion(c, i) {
+    const frames = Math.max(1, Math.round(c.dur * FPS));
+    // Alternate push-in and pull-out so a long slideshow doesn't feel like one
+    // repeating move.
+    const z = i % 2 === 0
+      ? `min(1+0.12*on/${frames},1.12)`
+      : `max(1.12-0.12*on/${frames},1)`;
+    return `fps=${FPS},scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,` +
+      `crop=${W * 2}:${H * 2},zoompan=z='${z}':d=1:` +
+      `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${FPS}`;
+  }
   resolved.forEach((c, i) => {
+    const useKB = kenBurns && c.kind === 'image';
+    const geom = useKB ? stillMotion(c, i) : `${fitFilter},setsar=1,fps=${FPS}`;
     filters.push(
-      `[${i}:v]${fitFilter},setsar=1,fps=${FPS},format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
+      `[${i}:v]${geom},setsar=1,format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
     );
   });

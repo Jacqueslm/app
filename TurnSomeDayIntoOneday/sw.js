@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.5.1'; // v12.5.1: slip restart opens on now, and the reset date box uses local time not UTC
+const CACHE_NAME = 'tsid-shell-v12.5.2'; // v12.5.2: lesson audio survives a voiceless TTS engine and says when the phone's voice is off
 const SHELL_FILES = [
   '/',
   '/app',

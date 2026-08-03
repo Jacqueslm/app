@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.5.2'; // v12.5.2: lesson audio survives a voiceless TTS engine and says when the phone's voice is off
+const CACHE_NAME = 'tsid-shell-v7.0.0'; // v7.0.0: version line renamed to 7; inclusive lessons, recorded lesson audio, full player
 const SHELL_FILES = [
   '/',
   '/app',

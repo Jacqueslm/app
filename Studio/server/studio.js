@@ -2406,7 +2406,11 @@ router.post('/transform', async (req, res) => {
     // a clip that's already cut to a song keeps its sync. The "beat" option
     // sets how often the hits land. Free, no AI.
     if (op === 'dynamics') {
-      if (src.kind !== 'video') return res.status(400).json({ error: 'Dynamics templates are for video clips (render or upload a clip first).' });
+      if (src.kind !== 'video' && src.kind !== 'image') return res.status(400).json({ error: 'Dynamics templates work on video clips and pictures.' });
+      // A picture becomes a short clip first (looped still, capped at 1920px),
+      // then goes through the exact same effect chains as a video.
+      const isImg = src.kind === 'image';
+      const secs = isImg ? ([4, 6, 8, 10, 15].includes(Number(req.body.secs)) ? Number(req.body.secs) : 8) : null;
       const b = [1, 2, 4].includes(Number(req.body.beat)) ? Number(req.body.beat) : 2;
       const c = b * 4; // Beat Mix rotates through a 4-slot cycle
       const seg = (from, to) => `enable='between(mod(t,${c}),${from * b},${to * b})'`;
@@ -2431,13 +2435,31 @@ router.post('/transform', async (req, res) => {
         mirror: { label: 'Mirror World', fc: "[0:v]crop=w='floor(iw/2)':h=ih:x=0:y=0,split[l1][l2];[l2]hflip[r];[l1][r]hstack[v]" },
         countdown: { label: '3-2-1 Opener' },
       };
+      const dur = isImg ? secs : (srcMeta.duration || await probeMediaDuration(srcPath));
+      // TIME MACHINE - first half plays as a worn old photo/film (sepia, grain,
+      // vignette, faded), a white flash hits at the middle, and the second half
+      // comes back sharper and more vibrant than the original. The switch point
+      // follows the real length, so it works on any clip or picture duration.
+      const H2 = Math.max(1, Math.round(((dur || 8) / 2) * 100) / 100);
+      DYNAMICS.timemachine = { label: 'Time Machine', vf: [
+        `colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131:0:enable='lt(t,${H2})'`,
+        `noise=alls=16:allf=t+u:enable='lt(t,${H2})'`,
+        `vignette=enable='lt(t,${H2})'`,
+        `eq=contrast=0.92:brightness=-0.04:enable='lt(t,${H2})'`,
+        `eq=contrast=1.14:saturation=1.4:enable='gte(t,${H2})'`,
+        `unsharp=5:5:0.6:5:5:0:enable='gte(t,${H2})'`,
+        `eq=brightness='if(between(t,${H2 - 0.05},${H2 + 0.12}),0.55,0)'`,
+      ].join(',') };
       const key = DYNAMICS[req.body.template] ? req.body.template : 'beatmix';
       const tpl = DYNAMICS[key];
-      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
-      const hasAudio = await probeHasAudio(srcPath);
-      const meta = { ...carry, transform: 'dynamics', template: key, beat: b };
+      const hasAudio = isImg ? false : await probeHasAudio(srcPath);
+      const meta = { ...carry, transform: 'dynamics', template: key, beat: b, ...(isImg ? { secs } : {}) };
       const label = `${src.label} · ${tpl.label}`;
       const outFile = newFilename(req.userId, '.mp4');
+      // Image path: loop the still into a clip, cap the long side at 1920px,
+      // force even dims and a real frame rate so every chain behaves like video.
+      const inArgs = isImg ? ['-loop', '1', '-t', String(secs), '-i', srcPath] : ['-i', srcPath];
+      const pre = isImg ? "scale=w='trunc(iw*min(1,1920/max(iw,ih))/2)*2':h='trunc(ih*min(1,1920/max(iw,ih))/2)*2',fps=30,format=yuv420p," : '';
 
       if (key === 'countdown') {
         // Big 3-2-1 numbers over the first three seconds, via the same ASS
@@ -2450,15 +2472,15 @@ router.post('/transform', async (req, res) => {
         const ass = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${dims.w}\nPlayResY: ${dims.h}\nWrapStyle: 0\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Num,Arial,${fontSize},&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,${outlineW},4,5,10,10,10,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${num(3, 0)}\n${num(2, 1)}\n${num(1, 2)}\n`;
         const assFile = `dyn-${req.userId}-${Date.now()}.ass`;
         fs.writeFileSync(path.join(os.tmpdir(), assFile), ass);
-        const args = ['-i', srcPath, '-vf', `subtitles=${assFile}`, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const args = [...inArgs, '-vf', `${pre}subtitles=${assFile}`, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
         const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, meta, 'video',
           { cwd: os.tmpdir(), cleanupFiles: [path.join(os.tmpdir(), assFile)] });
         return res.status(202).json({ job: jobJson(job) });
       }
 
       const args = tpl.fc
-        ? ['-i', srcPath, '-filter_complex', tpl.fc, '-map', '[v]', ...(hasAudio ? ['-map', '0:a', '-c:a', 'copy'] : ['-an']), ...enc]
-        : ['-i', srcPath, '-vf', tpl.vf, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        ? [...inArgs, '-filter_complex', tpl.fc.replace('[0:v]', '[0:v]' + pre), '-map', '[v]', ...(hasAudio ? ['-map', '0:a', '-c:a', 'copy'] : ['-an']), ...enc]
+        : [...inArgs, '-vf', pre + tpl.vf, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
       const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, meta);
       return res.status(202).json({ job: jobJson(job) });
     }

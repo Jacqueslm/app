@@ -2400,6 +2400,69 @@ router.post('/transform', async (req, res) => {
       return res.status(400).json({ error: 'Reframe works on photos and clips.' });
     }
 
+    // DYNAMICS — CapCut-style one-tap effect templates for a whole clip:
+    // beat-timed hits (B/W strobe, thermal flips, glow pulses, white flashes)
+    // built from ffmpeg timeline filters. Length and sound stay untouched, so
+    // a clip that's already cut to a song keeps its sync. The "beat" option
+    // sets how often the hits land. Free, no AI.
+    if (op === 'dynamics') {
+      if (src.kind !== 'video') return res.status(400).json({ error: 'Dynamics templates are for video clips (render or upload a clip first).' });
+      const b = [1, 2, 4].includes(Number(req.body.beat)) ? Number(req.body.beat) : 2;
+      const c = b * 4; // Beat Mix rotates through a 4-slot cycle
+      const seg = (from, to) => `enable='between(mod(t,${c}),${from * b},${to * b})'`;
+      // A short white pop at the top of every beat - the "hit" that sells the cut.
+      const flash = `eq=brightness='if(lt(mod(t,${b}),0.09),0.38,0)'`;
+      const DYNAMICS = {
+        beatmix: { label: 'Beat Mix', vf: [
+          `hue=s=0:${seg(1, 2)}`, `eq=contrast=1.25:${seg(1, 2)}`,
+          `hue=s=0:${seg(2, 3)}`, `pseudocolor=preset=inferno:${seg(2, 3)}`,
+          `gblur=sigma=8:${seg(3, 4)}`, `eq=brightness=0.05:saturation=1.3:${seg(3, 4)}`,
+          flash,
+        ].join(',') },
+        strobe: { label: 'B/W Strobe', vf: [`hue=s=0:enable='lt(mod(t,${b * 2}),${b})'`, 'eq=contrast=1.2', flash].join(',') },
+        colorflip: { label: 'Color Flip', vf: [`hue=h=270:s=2.5:enable='gte(mod(t,${b * 2}),${b})'`, `eq=contrast=1.15:enable='gte(mod(t,${b * 2}),${b})'`, flash].join(',') },
+        thermal: { label: 'Thermal', vf: 'hue=s=0,pseudocolor=preset=inferno' },
+        // gbrp round-trip: blend in YUV screens the chroma planes too and the
+        // whole clip goes magenta - blend must happen in RGB.
+        glow: { label: 'Glow Up', fc: '[0:v]format=gbrp,split[a][b];[b]gblur=sigma=18[g];[a][g]blend=all_mode=screen:all_opacity=0.5,format=yuv420p[v]' },
+        // planes=1 keeps the trail on luma only; trailing chroma burns colors out.
+        trails: { label: 'Echo Trails', vf: 'lagfun=decay=0.95:planes=1,eq=contrast=1.05' },
+        shake: { label: 'Hype Shake', vf: [`crop=w='floor(iw*0.94/2)*2':h='floor(ih*0.94/2)*2':x='(iw-ow)/2+(iw*0.02)*sin(t*19)':y='(ih-oh)/2+(ih*0.015)*cos(t*23)'`, flash].join(',') },
+        mirror: { label: 'Mirror World', fc: "[0:v]crop=w='floor(iw/2)':h=ih:x=0:y=0,split[l1][l2];[l2]hflip[r];[l1][r]hstack[v]" },
+        countdown: { label: '3-2-1 Opener' },
+      };
+      const key = DYNAMICS[req.body.template] ? req.body.template : 'beatmix';
+      const tpl = DYNAMICS[key];
+      const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+      const hasAudio = await probeHasAudio(srcPath);
+      const meta = { ...carry, transform: 'dynamics', template: key, beat: b };
+      const label = `${src.label} · ${tpl.label}`;
+      const outFile = newFilename(req.userId, '.mp4');
+
+      if (key === 'countdown') {
+        // Big 3-2-1 numbers over the first three seconds, via the same ASS
+        // subtitle path the caption renderer uses (PlayRes matches the real
+        // pixel size so the number scales with the clip).
+        const dims = (await probeDimensions(srcPath)) || { w: 1080, h: 1920 };
+        const fontSize = Math.round(Math.min(dims.w, dims.h) * 0.6);
+        const outlineW = Math.max(6, Math.round(fontSize / 26));
+        const num = (n, from) => `Dialogue: 0,0:00:0${from}.00,0:00:0${from + 1}.00,Num,,0,0,0,,{\\fad(50,150)\\t(0,200,\\fscx115\\fscy115)}${n}`;
+        const ass = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${dims.w}\nPlayResY: ${dims.h}\nWrapStyle: 0\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Num,Arial,${fontSize},&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,${outlineW},4,5,10,10,10,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n${num(3, 0)}\n${num(2, 1)}\n${num(1, 2)}\n`;
+        const assFile = `dyn-${req.userId}-${Date.now()}.ass`;
+        fs.writeFileSync(path.join(os.tmpdir(), assFile), ass);
+        const args = ['-i', srcPath, '-vf', `subtitles=${assFile}`, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, meta, 'video',
+          { cwd: os.tmpdir(), cleanupFiles: [path.join(os.tmpdir(), assFile)] });
+        return res.status(202).json({ job: jobJson(job) });
+      }
+
+      const args = tpl.fc
+        ? ['-i', srcPath, '-filter_complex', tpl.fc, '-map', '[v]', ...(hasAudio ? ['-map', '0:a', '-c:a', 'copy'] : ['-an']), ...enc]
+        : ['-i', srcPath, '-vf', tpl.vf, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+      const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, meta);
+      return res.status(202).json({ job: jobJson(job) });
+    }
+
     return res.status(400).json({ error: 'Unknown transform.' });
   } catch (err) {
     if (!res.headersSent) res.status(500).json({ error: `Transform failed: ${err.message}` });

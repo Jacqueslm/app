@@ -19,7 +19,13 @@ const SHELL_FILES = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_FILES)).then(() => self.skipWaiting())
+    // Tolerant precache: addAll is all-or-nothing, so one renamed or missing
+    // file used to fail the entire install - no registration, offline support
+    // silently gone. Each file is fetched independently instead; anything that
+    // fails here is picked up online later by the fetch handler's caching.
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(SHELL_FILES.map((f) => cache.add(f)))
+    ).then(() => self.skipWaiting())
   );
 });
 

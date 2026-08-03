@@ -10098,6 +10098,8 @@ async function hardResetApp(){
 async function loadDiagnostics(){
   const countEl=document.getElementById('diag-count');
   const listEl=document.getElementById('diag-list');
+  await appIsOwnerReady;
+  if(!appIsOwner){countEl.textContent='';listEl.innerHTML='';return;}
   try{
     const res=await fetch('/api/diagnostics');
     const data=await res.json().catch(()=>({}));
@@ -10138,8 +10140,16 @@ function toggleAutoUpdate(){
 // With automatic updates on (the default), the app quietly checks GitHub on
 // open and installs anything new by itself - no buttons to remember.
 let autoUpdateAttempted=false;
+// Owner-only surfaces (update check, diagnostics) wait for boot to learn
+// whether this account is the owner, then skip quietly for everyone else -
+// probing those endpoints put a red 403 in every regular user's console.
+let appIsOwner=false,appIsOwnerResolve;
+const appIsOwnerReady=new Promise(r=>{appIsOwnerResolve=r;});
 async function maybeAutoUpdate(){
   if(autoUpdateAttempted||S.autoUpdate===false||appUpdateRunning)return;
+  await appIsOwnerReady;
+  if(!appIsOwner)return;
+  if(autoUpdateAttempted)return;// re-check: another call may have won the await
   autoUpdateAttempted=true;
   try{
     const res=await fetch('/api/update/check');
@@ -10362,6 +10372,7 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
+      appIsOwner=!!me.isOwner;appIsOwnerResolve();
       // A pin-reset flag only counts when it's followed by a fresh credential
       // sign-in. Landing here means the old session survived (e.g. the logout
       // request failed offline) - drop the flag so it can't unlock anything.
@@ -10392,10 +10403,14 @@ async function boot(){
     // in-app guide. So enter the app on the cached identity; the next
     // successful boot reconciles with the server.
     if(S.startDate){
+      appIsOwnerResolve();
       enterApp();
       return;
     }
   }
+  // Whatever path landed here, the owner question is settled as "no" - resolve
+  // so nothing awaits it forever. (Resolving twice is a harmless no-op.)
+  appIsOwnerResolve();
   // Arriving from the check-in quiz (/?join=1): skip the welcome screen and land
   // straight on signup while the motivation is still warm.
   if(new URLSearchParams(window.location.search).get('join')){

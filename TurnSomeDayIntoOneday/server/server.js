@@ -391,7 +391,10 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
 app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  res.json({ email: user.email });
+  // isOwner lets the client skip owner-only calls (update check, diagnostics)
+  // for everyone else, instead of probing them and logging 403s in every
+  // regular user's console.
+  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL) });
 });
 
 app.get('/api/state', requireAuth, (req, res) => {

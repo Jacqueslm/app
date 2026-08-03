@@ -162,7 +162,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0803</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0804</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -4026,7 +4026,7 @@ function renderLibrary() {
     // Finish (polish / quality / audio, free)
     if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
     if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap colour themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
-    if (a.kind === 'video') { const dyb = btn('🔥 Dynamics', '', () => { st.dynTarget = st.dynTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); dyb.title = 'FREE — CapCut-style beat effects: strobe hits, thermal flips, glow, shake, 3-2-1 opener. Keeps your sound in sync.'; }
+    if (a.kind === 'video' || a.kind === 'image') { const dyb = btn('🔥 Dynamics', '', () => { st.dynTarget = st.dynTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); dyb.title = 'FREE — CapCut-style beat effects: strobe hits, thermal flips, glow, shake, Time Machine, 3-2-1 opener. A picture becomes a clip; a clip keeps its sound in sync.'; }
     if (a.kind === 'image') btn('2× sharper', '', async (e) => {
       const b = e.target; b.disabled = true; b.textContent = '…';
       try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
@@ -4505,10 +4505,16 @@ function renderLibrary() {
       const DYNS = [
         ['beatmix', '🔥 Beat Mix'], ['strobe', '⚡ B/W Strobe'], ['colorflip', '💜 Color Flip'],
         ['thermal', '🌡 Thermal'], ['glow', '✨ Glow Up'], ['trails', '👻 Echo Trails'],
-        ['shake', '📳 Hype Shake'], ['mirror', '🪞 Mirror World'], ['countdown', '🕒 3-2-1 Opener'],
+        ['shake', '📳 Hype Shake'], ['mirror', '🪞 Mirror World'], ['timemachine', '⏳ Time Machine'],
+        ['countdown', '🕒 3-2-1 Opener'],
       ];
+      const dynIsImg = a.kind === 'image';
       let dynBeat = Number(localStorage.getItem('tsid-dyn-beat')) || 2;
+      let dynSecs = Number(localStorage.getItem('tsid-dyn-secs')) || 8;
       panel.innerHTML = `
+        ${dynIsImg ? `<div class="chips dyn-secs">
+          ${[4, 6, 8, 10, 15].map((s) => `<button class="chip${dynSecs === s ? ' on' : ''}" data-secs="${s}">${s}s</button>`).join('')}
+        </div>` : ''}
         <div class="chips dyn-beats">
           <button class="chip${dynBeat === 1 ? ' on' : ''}" data-beat="1">Fast hits (1s)</button>
           <button class="chip${dynBeat === 2 ? ' on' : ''}" data-beat="2">Normal (2s)</button>
@@ -4516,7 +4522,14 @@ function renderLibrary() {
         </div>
         <div class="chips dyn-chips">${DYNS.map(([k, l]) => `<button class="chip" data-dyn="${k}">${l}</button>`).join('')}</div>
         <div class="progress-line dyn-prog"><div></div></div>
-        <span class="usage">Beat-effect templates like the CapCut edits (free, no AI). Hit speed sets how often the effects punch. Makes a new copy — the original and its sound stay untouched.</span>`;
+        <span class="usage">${dynIsImg ? 'Turns this picture into a moving clip with the effect baked in — pick how long it runs. ' : ''}Beat-effect templates like the CapCut edits (free, no AI). Hit speed sets how often the effects punch. Time Machine plays the first half as a worn old photo, flashes, and comes back new. Makes a new copy — the original${dynIsImg ? '' : ' and its sound'} stay untouched.</span>`;
+      panel.querySelectorAll('.dyn-secs .chip').forEach((sc) => {
+        sc.onclick = () => {
+          dynSecs = Number(sc.dataset.secs);
+          localStorage.setItem('tsid-dyn-secs', String(dynSecs));
+          panel.querySelectorAll('.dyn-secs .chip').forEach((x) => x.classList.toggle('on', x === sc));
+        };
+      });
       panel.querySelectorAll('.dyn-beats .chip').forEach((bc) => {
         bc.onclick = () => {
           dynBeat = Number(bc.dataset.beat);
@@ -4532,7 +4545,7 @@ function renderLibrary() {
           try {
             const { job } = await jfetch('/api/studio/transform', {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ assetId: a.id, op: 'dynamics', template: chip.dataset.dyn, beat: dynBeat }),
+              body: JSON.stringify({ assetId: a.id, op: 'dynamics', template: chip.dataset.dyn, beat: dynBeat, secs: dynSecs }),
             });
             await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
             st.dynTarget = null;

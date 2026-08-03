@@ -40,6 +40,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
+  // Cross-origin requests (the lesson-audio CDN) are left to the browser: its
+  // HTTP cache handles them, and copying multi-megabyte recordings into the
+  // shell cache would burn the storage quota for no gain.
+  if (url.origin !== location.origin) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

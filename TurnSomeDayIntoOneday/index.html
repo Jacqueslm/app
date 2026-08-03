@@ -218,8 +218,17 @@ body{display:flex;justify-content:center}
 #guide-fab i{font-size:24px}
 /* Friendly's typing bar lives exactly where the floating buttons sit - lift them
    clear of it so a tap on "send" is never stolen by the guide. */
-body.nova-open #guide-fab{bottom:164px}
-body.nova-open #guide-fab-label{bottom:172px}
+/* On the Friendly chat the floating "?" used to land right on the send button
+   (the composer sits in-flow, so its height varies with banners and history) -
+   there is no fixed offset that can never collide with it. The chat screen
+   already has its own help surface (Friendly itself), so the guide hides there
+   and stays one tap away on every other screen. */
+body.nova-open #guide-fab{display:none}
+body.nova-open #guide-fab-label{display:none}
+/* Read-along paragraphs in the full-screen lesson player: the one being
+   narrated brightens, the rest stay dimmed. */
+#la-ov-text .la-para{margin:0 0 16px;transition:color 0.3s}
+#la-ov-text .la-para.on{color:var(--tp)}
 body.nova-open #audio-pill{bottom:216px}
 body.nova-open #audio-pill-label{bottom:222px}
 #guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
@@ -409,8 +418,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="ob-label" style="text-align:left">Email</div>
   <input class="ob-input" id="gate-email" placeholder="you@example.com" type="text" autocomplete="email">
   <div id="gate-signup-extras" style="display:none">
-    <div class="ob-label" style="text-align:left">Phone number <span style="opacity:0.7">(optional)</span></div>
-    <input class="ob-input" id="gate-phone" placeholder="Helps you recover your account later" type="tel" autocomplete="tel">
     <div class="ob-label" style="text-align:left">Protect your account with</div>
     <div class="nova-modes" style="margin-bottom:12px">
       <button class="nova-mode active" id="gate-cred-pass" onclick="setGateCred('password')">Password</button>
@@ -565,7 +572,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:12px">Turn Someday Into Day One ("the app") is a recovery companion. This page explains, in plain language, what information the app collects, where it lives, and who else ever sees it.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">What we collect</h3>
-      <p style="margin-bottom:8px">When you create an account: your email address, a phone number if you choose to add one, and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
+      <p style="margin-bottom:8px">When you create an account: your email address and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
       <p style="margin-bottom:8px">As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Friendly (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Friendly respond with real context.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Where it lives</h3>
@@ -925,8 +932,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div style="font-size:19px;font-weight:650;color:var(--tp);margin-top:6px;line-height:1.35" id="lessonTitle">Loading…</div>
             <div style="display:flex;gap:8px;margin-top:12px">
               <button class="ob-btn outline" id="lessonListenBtn" style="flex:1;margin:0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleLessonAudio()"><i class="ti ti-headphones"></i> Listen to this lesson</button>
+              <button class="ob-btn outline" id="lessonPauseBtn" title="Pause / resume" style="display:none;width:auto;margin:0;padding:9px 13px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="laTogglePause()"><i class="ti ti-player-pause"></i></button>
+              <button class="ob-btn outline" id="lessonVoiceBtn" title="Narrator voice" style="width:auto;margin:0;padding:9px 12px;font-size:12.5px;color:var(--ts);border-color:var(--bdr);white-space:nowrap" onclick="cycleLessonVoice()">Warm</button>
               <button class="ob-btn outline" id="lessonSpeedBtn" title="Narrator speed" style="width:auto;margin:0;padding:9px 12px;font-size:12.5px;color:var(--ts);border-color:var(--bdr);white-space:nowrap" onclick="cycleLessonSpeed()">1× normal</button>
             </div>
+            <button class="ob-btn outline" id="lessonOpenPlayerBtn" style="display:none;margin:8px 0 0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="openLessonPlayer()"><i class="ti ti-arrows-maximize"></i> Open the player — read along big</button>
             <div id="lessonBody" style="font-size:14px;color:var(--ts);line-height:1.75;margin-top:14px;white-space:pre-wrap"></div>
             <div id="lesson-action-box" style="background:var(--acc);border-radius:12px;padding:14px 16px;margin-top:18px">
               <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-t);font-weight:700;margin-bottom:6px">✦ Today's action</div>
@@ -1756,8 +1766,36 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <!-- Discreet stop for lesson audio: the lesson keeps reading on ANY screen
        (privacy - flip to a neutral screen, the earbuds keep going), and this
        unlabeled button is how you stop it from anywhere. -->
-  <div id="audio-pill" title="Stop lesson audio" onclick="S.audioPillExplained=true;save();stopLessonAudio()" style="display:none;position:fixed;bottom:132px;right:max(12px,calc(50% - 203px));width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);color:var(--tp);align-items:center;justify-content:center;cursor:pointer;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)"><i class="ti ti-player-stop" style="font-size:16px"></i></div>
-  <div id="audio-pill-label" style="display:none;position:fixed;bottom:138px;right:calc(max(12px,calc(50% - 203px)) + 44px);background:var(--s2);border:1px solid var(--bdr);color:var(--tp);font-size:12px;padding:6px 10px;border-radius:10px;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)">Lesson is playing — tap to stop</div>
+  <div id="audio-pill" title="Open the lesson player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:132px;right:max(12px,calc(50% - 203px));width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);color:var(--tp);align-items:center;justify-content:center;cursor:pointer;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)"><i class="ti ti-headphones" style="font-size:16px"></i></div>
+  <div id="audio-pill-label" style="display:none;position:fixed;bottom:138px;right:calc(max(12px,calc(50% - 203px)) + 44px);background:var(--s2);border:1px solid var(--bdr);color:var(--tp);font-size:12px;padding:6px 10px;border-radius:10px;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)">Lesson is playing — tap to open the player</div>
+  <!-- Full-screen lesson player: big read-along text + real controls. Opens from
+       the Listen row or the floating pill; closing it never stops the audio. -->
+  <div id="lesson-player-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:600;flex-direction:column">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 8px">
+      <div style="min-width:0">
+        <div id="la-ov-meta" style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700"></div>
+        <div id="la-ov-title" style="font-size:17px;font-weight:650;color:var(--tp);line-height:1.3;margin-top:2px"></div>
+      </div>
+      <div onclick="closeLessonPlayer()" title="Back — keeps playing" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:10px;color:var(--tp)"><i class="ti ti-chevron-down"></i></div>
+    </div>
+    <div id="la-ov-text" style="flex:1;overflow-y:auto;padding:10px 18px 18px;font-size:16.5px;line-height:1.85;color:var(--tm)"></div>
+    <div style="padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px);border-top:1px solid var(--bdr);background:var(--s1)">
+      <div id="la-ov-seekrow">
+        <input type="range" id="la-ov-slider" min="0" max="1000" value="0" style="width:100%;accent-color:var(--accent)" oninput="laSliderSeek(this.value)">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-top:2px"><span id="la-ov-cur">0:00</span><span id="la-ov-dur">–:––</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:8px">
+        <button class="ob-btn outline" id="la-ov-back" style="width:auto;margin:0;padding:10px 14px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="laSeek(-15)">−15s</button>
+        <button id="la-ov-play" style="width:58px;height:58px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:24px" onclick="laTogglePause()"><i class="ti ti-player-pause"></i></button>
+        <button class="ob-btn outline" id="la-ov-fwd" style="width:auto;margin:0;padding:10px 14px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="laSeek(15)">+15s</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="ob-btn outline" id="la-ov-voice" style="flex:1;margin:0;padding:8px;font-size:12.5px;color:var(--ts);border-color:var(--bdr)" onclick="cycleLessonVoice()">Voice: Warm</button>
+        <button class="ob-btn outline" id="la-ov-speed" style="flex:1;margin:0;padding:8px;font-size:12.5px;color:var(--ts);border-color:var(--bdr)" onclick="cycleLessonSpeed()">1× normal</button>
+        <button class="ob-btn outline" title="Stop listening" style="width:auto;margin:0;padding:8px 13px;color:#E24B4A;border-color:var(--bdr)" onclick="stopLessonAudio()"><i class="ti ti-player-stop"></i></button>
+      </div>
+    </div>
+  </div>
 
   <!-- GUIDE BOT: free navigation helper, floats on every screen -->
   <div id="guide-fab" title="App guide — ask me where anything is" onclick="toggleGuideBot()"><i class="ti ti-help"></i></div>
@@ -2559,6 +2597,10 @@ const ICON_PATHS={
 'ti-medal':'<circle cx="12" cy="15" r="6"/><path d="M9 10L7 3h3l2 5"/><path d="M15 10l2-7h-3l-2 5"/><polyline points="9.5 15 11 16.5 14.5 13"/>',
 'ti-message-circle':'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>',
 'ti-microphone':'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>',
+'ti-player-play':'<path d="M7 4v16l13-8z"/>',
+'ti-player-pause':'<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+'ti-chevron-down':'<polyline points="6 9 12 15 18 9"/>',
+'ti-arrows-maximize':'<polyline points="16 4 20 4 20 8"/><line x1="14" y1="10" x2="20" y2="4"/><polyline points="8 20 4 20 4 16"/><line x1="4" y1="20" x2="10" y2="14"/>',
 'ti-moon':'<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>',
 'ti-notebook':'<path d="M4 3h12a2 2 0 0 1 2 2v14l-4-2-4 2-4-2V5a2 2 0 0 1 2-2z"/>',
 'ti-pencil':'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
@@ -2856,8 +2898,28 @@ function completeLessonForToday(){
   }else if(justFinishedProgram){
     setTimeout(()=>{openDay30Overlay();},1200);
   }else{
-    setTimeout(()=>{renderTodayLesson();},1200);
+    setTimeout(()=>{advanceAfterLessonDone();},1200);
   }
+}
+// After "Mark as done": snap back to the top and open what's next - the next
+// day here, or, when several focus areas are active, hop to the next area's
+// lesson so the day's round continues by itself.
+function advanceAfterLessonDone(){
+  const tracks=S.selectedAddictions||[];
+  if(tracks.length>1){
+    const i=tracks.indexOf(S.currentAddiction);
+    const next=tracks[(i+1)%tracks.length];
+    if(next&&next!==S.currentAddiction){
+      S.currentAddiction=next;
+      save();
+      updateProfileEditUI();
+    }
+  }
+  viewingDay=null;
+  renderTodayLesson();
+  updateLessonPromo();
+  const screensEl=document.getElementById('screens');
+  if(screensEl){screensEl.scrollTop=0;requestAnimationFrame(()=>{screensEl.scrollTop=0;});}
 }
 
 // ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
@@ -3241,6 +3303,7 @@ function renderPackLesson(){
     <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
     <div style="display:flex;gap:8px;margin-top:0;margin-bottom:14px">
       <button class="ob-btn outline" id="pack-listen-btn" style="flex:1;margin:0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="togglePackLessonAudio()"><i class="ti ti-headphones"></i> Listen to this lesson</button>
+      <button class="ob-btn outline" id="pack-pause-btn" title="Pause / resume" style="display:none;width:auto;margin:0;padding:9px 13px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="laTogglePause()"><i class="ti ti-player-pause"></i></button>
       <button class="ob-btn outline" id="pack-speed-btn" title="Narrator speed" style="width:auto;margin:0;padding:9px 12px;font-size:12.5px;color:var(--ts);border-color:var(--bdr);white-space:nowrap" onclick="cycleLessonSpeed()">1× normal</button>
     </div>
     <div id="pack-lesson-text">
@@ -6113,6 +6176,15 @@ document.addEventListener('visibilitychange',()=>{
 // as the guide, so someone cooking, driving, or working can still do their day.
 let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null,lessonAudioCurrentUtterance=null;
 let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='',lessonAudioEverSpoke=false;
+// Lessons play as real recordings when one exists for the displayed lesson +
+// chosen voice (same five voices as the SOS talk, hosted on the repo's audio
+// branch and listed in data/lesson-audio-manifest.json). A recording is a real
+// <audio> element - it survives screen-off and app-switch like a podcast, can
+// pause/resume/seek, and gets a lock-screen card. Anything without a recording
+// (older manifests, lesson packs, "Phone's own" voice) uses the TTS engine
+// below, which still gains pause/resume.
+let lessonAudioMode='tts',laAudio=null,laPausedByUser=false,lessonAudioMeta=null,lessonAudioText='',lessonAudioTtsPausedIdx=0;
+let LESSON_AUDIO_MANIFEST=null,lessonAudioManifestReq=null;
 const IS_ANDROID=/Android/i.test(navigator.userAgent||'');
 // Desktop Chrome's speech engine silently stops producing audio after ~15s of
 // continuous speaking, and the documented workaround is a periodic pause/resume
@@ -6140,7 +6212,7 @@ function lessonAudioStartWatchdog(){
   clearInterval(lessonAudioWatchdog);
   lessonAudioRetryIdx=-1;lessonAudioRetryCount=0;
   lessonAudioWatchdog=setInterval(()=>{
-    if(lessonAudioState!=='playing')return;
+    if(lessonAudioState!=='playing'||laPausedByUser)return;
     const elapsed=Date.now()-lessonAudioChunkStartedAt;
     const busy=speechSynthesis.speaking||speechSynthesis.pending;
     // Two different deaths look identical from here. Either the engine has gone
@@ -6224,7 +6296,7 @@ async function wakeLockEnsure(){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wakeLockEnsure();});
 let lessonAudioWentHidden=false;
 document.addEventListener('visibilitychange',()=>{
-  if(lessonAudioState!=='playing')return;
+  if(lessonAudioState!=='playing'||lessonAudioMode==='mp3'||laPausedByUser)return;
   if(document.hidden){lessonAudioWentHidden=true;return;}
   // The power button beats any wake lock. Coming back from a locked phone the
   // engine is often left paused; nudge it, and if the chunk is truly dead the
@@ -6254,19 +6326,33 @@ function cycleLessonSpeed(){
   S.lessonRate=next.v;
   save();
   updateSpeedBtns();
+  // A recording changes speed live; the TTS engine picks the rate up on its
+  // next chunk, same as before.
+  if(lessonAudioMode==='mp3'&&laAudio)laAudio.playbackRate=next.v;
 }
 function updateSpeedBtns(){
   const l=LESSON_SPEEDS[lessonSpeedIdx()].l;
-  ['lessonSpeedBtn','pack-speed-btn'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=l;});
+  ['lessonSpeedBtn','pack-speed-btn','la-ov-speed'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=l;});
 }
 function updateListenBtn(){
-  // The floating stop pill follows the audio, not the screen - the lesson keeps
-  // reading wherever you navigate, and this is always there to stop it quietly.
+  // The floating pill follows the audio, not the screen - the lesson keeps
+  // playing wherever you navigate, and this opens the full player from anywhere.
   const pill=document.getElementById('audio-pill');
   if(pill)pill.style.display=lessonAudioState==='playing'?'flex':'none';
   // First time the pill ever appears, say what it is; once they've used it, icon only.
   const pillLabel=document.getElementById('audio-pill-label');
   if(pillLabel)pillLabel.style.display=(lessonAudioState==='playing'&&!S.audioPillExplained)?'block':'none';
+  ['lessonPauseBtn','pack-pause-btn'].forEach(id=>{
+    const p=document.getElementById(id);
+    if(!p)return;
+    p.style.display=lessonAudioState==='playing'?'':'none';
+    p.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';
+    renderIcons(p);
+  });
+  const opb=document.getElementById('lessonOpenPlayerBtn');
+  if(opb)opb.style.display=(lessonAudioState==='playing'&&lessonAudioBtnId==='lessonListenBtn')?'':'none';
+  updateLessonVoiceBtns();
+  updateLessonPlayerUI();
   const b=lessonAudioBtnId&&document.getElementById(lessonAudioBtnId);
   if(!b)return;
   b.innerHTML=lessonAudioState==='playing'
@@ -6274,24 +6360,240 @@ function updateListenBtn(){
     :'<i class="ti ti-headphones"></i> Listen to this lesson';
   renderIcons(b);
 }
-function startLessonAudio(text,btnId){
-  if(!('speechSynthesis' in window)){appInfo('Listen',"This browser has no built-in voice, so audio isn't available here. Chrome and Edge both have one.");return;}
+function loadLessonAudioManifest(){
+  if(LESSON_AUDIO_MANIFEST)return Promise.resolve(LESSON_AUDIO_MANIFEST);
+  if(!lessonAudioManifestReq)lessonAudioManifestReq=fetch('data/lesson-audio-manifest.json')
+    .then(r=>r.ok?r.json():null).then(m=>{LESSON_AUDIO_MANIFEST=m;return m;}).catch(()=>null);
+  return lessonAudioManifestReq;
+}
+function lessonVoiceKey(){return VG_VOICES[S.lessonVoice]?S.lessonVoice:'warm';}
+function updateLessonVoiceBtns(){
+  const l=VG_VOICES[lessonVoiceKey()].label;
+  const a=document.getElementById('lessonVoiceBtn');if(a)a.textContent=l;
+  const o=document.getElementById('la-ov-voice');if(o)o.textContent='Voice: '+l;
+}
+// Mirrors applyRelationshipVariant's decision so the recording matches the
+// exact text on screen - a family-variant lesson must never play base audio.
+function lessonVariantKey(lesson){
+  if(lesson.family_variant&&usesFamilyVariant())return 'family';
+  if(lesson.single_variant&&(S.relationshipStatus==='single'||S.relationshipStatus==='complicated'))return 'single';
+  return 'base';
+}
+function startLessonAudio(text,btnId,meta,resume){
   stopLessonAudio();
-  lessonAudioQueue=splitForSpeech(text);
-  lessonAudioIdx=0;lessonAudioState='playing';lessonAudioBtnId=btnId;
+  lessonAudioText=text;lessonAudioBtnId=btnId;lessonAudioMeta=meta||null;
+  lessonAudioState='playing';laPausedByUser=!!(resume&&resume.paused);
   updateListenBtn();
   logActivity('lesson_listen',{});
+  wakeLockAcquire('lesson-audio');
+  const voice=lessonVoiceKey();
+  const key=meta&&meta.category&&meta.day?`${meta.category}|${meta.day}|${meta.variant||'base'}`:null;
+  const fallToTTS=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)startLessonTTS(text,resume);};
+  if(!key||voice==='phone'){fallToTTS();return;}
+  loadLessonAudioManifest().then(m=>{
+    if(lessonAudioState!=='playing'||lessonAudioText!==text)return;// stopped or replaced while the manifest loaded
+    const entry=m&&m.items&&m.items[key];
+    const rel=entry&&entry[voice];
+    if(rel)startLessonMp3((m.base||'')+rel,resume);
+    else fallToTTS();
+  });
+}
+function startLessonTTS(text,resume){
+  lessonAudioMode='tts';
+  if(!('speechSynthesis' in window)){stopLessonAudio();appInfo('Listen',"This browser has no built-in voice, so audio isn't available here. Chrome and Edge both have one.");return;}
+  lessonAudioQueue=splitForSpeech(text);
+  lessonAudioIdx=resume&&resume.atFraction?Math.min(lessonAudioQueue.length-1,Math.max(0,Math.floor(resume.atFraction*lessonAudioQueue.length))):0;
+  lessonAudioTtsPausedIdx=lessonAudioIdx;
+  updateListenBtn();
   lessonAudioStartKeepAlive();
   lessonAudioStartWatchdog();
   lessonAudioLastError='';lessonAudioWentHidden=false;lessonAudioEverSpoke=false;
-  wakeLockAcquire('lesson-audio');
   speechSynthesis.cancel();
+  if(laPausedByUser)return;// a voice switch made while paused stays paused
   const go=()=>lessonAudioNext();
   if(speechSynthesis.getVoices().length)go();
-  else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;go();};setTimeout(()=>{if(lessonAudioState==='playing'&&!speechSynthesis.speaking)go();},700);}
+  else{speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;go();};setTimeout(()=>{if(lessonAudioState==='playing'&&!laPausedByUser&&!speechSynthesis.speaking)go();},700);}
 }
-function lessonAudioNext(){
+function startLessonMp3(url,resume){
+  lessonAudioMode='mp3';
+  const a=new Audio(url);
+  laAudio=a;a.preload='auto';
+  a.playbackRate=S.lessonRate||0.95;
+  if(resume&&resume.atFraction)a.addEventListener('loadedmetadata',()=>{try{a.currentTime=resume.atFraction*a.duration;}catch(e){}},{once:true});
+  a.addEventListener('timeupdate',laOnTime);
+  a.addEventListener('ended',()=>{if(laAudio===a)stopLessonAudio();});
+  // A recording that can't load or play hands the lesson to the phone's own
+  // voice at the same spot, rather than going silent.
+  a.addEventListener('error',()=>{
+    if(laAudio!==a||lessonAudioState!=='playing')return;
+    const frac=a.duration?a.currentTime/a.duration:((resume&&resume.atFraction)||0);
+    laStopMp3();startLessonTTS(lessonAudioText,{atFraction:frac});
+  });
+  // Same rule as the SOS talk: everything except the user's own pause is
+  // retried, so battery savers and audio-focus grabs don't end the lesson.
+  a.addEventListener('pause',()=>{
+    if(laAudio!==a||a.ended||laPausedByUser||lessonAudioState!=='playing')return;
+    setTimeout(()=>{if(laAudio===a&&a.paused&&!a.ended&&!laPausedByUser&&lessonAudioState==='playing')a.play().catch(()=>{});},400);
+  });
+  laMediaSession();
+  updateListenBtn();
+  if(laPausedByUser)return;
+  const p=a.play();
+  if(p&&p.catch)p.catch(()=>{
+    if(laAudio!==a||lessonAudioState!=='playing')return;
+    laStopMp3();startLessonTTS(lessonAudioText,resume);
+  });
+}
+function laStopMp3(){
+  const a=laAudio;laAudio=null;
+  if(a){try{a.pause();a.removeAttribute('src');a.load();}catch(e){}}
+  laClearMediaSession();
+  lessonAudioMode='tts';
+}
+// Lock-screen "Now Playing" card so a lesson can be paused/resumed/skipped
+// from the lock screen like a podcast - the whole point of real recordings.
+function laMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    const m=lessonAudioMeta||{};
+    navigator.mediaSession.metadata=new MediaMetadata({
+      title:m.day?`Day ${m.day}: ${m.title||'Lesson'}`:(m.title||'Lesson'),
+      artist:'Day One'+(m.category?' — '+m.category:''),
+      artwork:[{src:'icons/icon-192.png',sizes:'192x192',type:'image/png'},{src:'icons/icon-512.png',sizes:'512x512',type:'image/png'}]
+    });
+    navigator.mediaSession.setActionHandler('play',()=>{if(laPausedByUser)laTogglePause();});
+    navigator.mediaSession.setActionHandler('pause',()=>{if(!laPausedByUser)laTogglePause();});
+    navigator.mediaSession.setActionHandler('stop',()=>stopLessonAudio());
+    navigator.mediaSession.setActionHandler('seekbackward',()=>laSeek(-15));
+    navigator.mediaSession.setActionHandler('seekforward',()=>laSeek(15));
+  }catch(e){}
+}
+function laClearMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  try{
+    navigator.mediaSession.metadata=null;
+    ['play','pause','stop','seekbackward','seekforward'].forEach(x=>navigator.mediaSession.setActionHandler(x,null));
+  }catch(e){}
+}
+function laTogglePause(){
   if(lessonAudioState!=='playing')return;
+  if(!laPausedByUser){
+    laPausedByUser=true;
+    if(lessonAudioMode==='mp3'){if(laAudio)laAudio.pause();}
+    else{
+      // TTS can't seek, but it can stop cleanly at a chunk and pick that chunk
+      // back up - which is what "pause" means here instead of start-over.
+      lessonAudioTtsPausedIdx=Math.max(0,lessonAudioIdx-1);
+      lessonAudioStopKeepAlive();lessonAudioStopWatchdog();
+      try{speechSynthesis.cancel();}catch(e){}
+    }
+    wakeLockRelease('lesson-audio');
+  }else{
+    laPausedByUser=false;
+    wakeLockAcquire('lesson-audio');
+    if(lessonAudioMode==='mp3'){if(laAudio)laAudio.play().catch(()=>{});}
+    else{lessonAudioIdx=lessonAudioTtsPausedIdx;lessonAudioStartKeepAlive();lessonAudioStartWatchdog();lessonAudioNext();}
+  }
+  updateListenBtn();
+}
+function laSeek(s){
+  if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration){
+    laAudio.currentTime=Math.min(Math.max(0,laAudio.duration-0.2),Math.max(0,laAudio.currentTime+s));
+    updateLessonPlayerUI();
+  }
+}
+function laSliderSeek(v){
+  if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration)laAudio.currentTime=(v/1000)*laAudio.duration;
+}
+function laProgressFraction(){
+  if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration)return laAudio.currentTime/laAudio.duration;
+  if(lessonAudioQueue.length)return Math.min(1,Math.max(0,(lessonAudioIdx-1)/lessonAudioQueue.length));
+  return 0;
+}
+function laFmt(t){t=Math.max(0,Math.floor(t||0));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');}
+let laLastUi=0;
+function laOnTime(){
+  const now=Date.now();
+  if(now-laLastUi<250)return;
+  laLastUi=now;
+  updateLessonPlayerUI();
+  if('mediaSession' in navigator&&laAudio&&laAudio.duration){
+    try{navigator.mediaSession.setPositionState({duration:laAudio.duration,position:Math.min(laAudio.currentTime,laAudio.duration),playbackRate:laAudio.playbackRate});}catch(e){}
+  }
+}
+function cycleLessonVoice(){
+  const next=VG_VOICE_ORDER[(VG_VOICE_ORDER.indexOf(lessonVoiceKey())+1)%VG_VOICE_ORDER.length];
+  S.lessonVoice=next;save();
+  updateLessonVoiceBtns();
+  if(lessonAudioState!=='playing')return;
+  // Mid-lesson switch: hold the spot as a fraction of the whole and re-enter
+  // through the normal start path, which lands on the new voice's recording
+  // (or the phone's own voice) at that same spot.
+  const frac=laProgressFraction();
+  startLessonAudio(lessonAudioText,lessonAudioBtnId,lessonAudioMeta,{atFraction:frac,paused:laPausedByUser});
+}
+// ─── FULL-SCREEN LESSON PLAYER (read along big) ─────────────────────────────
+let lessonPlayerOpen=false,laParaCum=[],laUserScrolled=false,laUserScrollT=0;
+function laEsc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function openLessonPlayer(){
+  if(lessonAudioState!=='playing')return;
+  lessonPlayerOpen=true;laUserScrolled=false;
+  const m=lessonAudioMeta||{};
+  document.getElementById('la-ov-meta').textContent=m.category?`${m.category}${m.day?' — Day '+m.day:''}`:'Now playing';
+  document.getElementById('la-ov-title').textContent=m.title||'Lesson';
+  const holder=document.getElementById('la-ov-text');
+  const paras=String(lessonAudioText||'').split(/\n\n+/).filter(p=>p.trim());
+  holder.innerHTML=paras.map(p=>`<p class="la-para">${laEsc(p)}</p>`).join('');
+  const w=paras.map(p=>p.length),total=w.reduce((a,b)=>a+b,0)||1;
+  let acc=0;laParaCum=w.map(x=>(acc+=x)/total);
+  document.getElementById('lesson-player-overlay').style.display='flex';
+  wakeLockAcquire('lesson-player');
+  updateLessonPlayerUI();
+}
+function closeLessonPlayer(){
+  if(!lessonPlayerOpen)return;
+  lessonPlayerOpen=false;
+  document.getElementById('lesson-player-overlay').style.display='none';
+  wakeLockRelease('lesson-player');
+}
+function updateLessonPlayerUI(){
+  const ovPlay=document.getElementById('la-ov-play');
+  if(ovPlay){ovPlay.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';renderIcons(ovPlay);}
+  if(!lessonPlayerOpen)return;
+  if(lessonAudioState!=='playing'){closeLessonPlayer();return;}
+  const isMp3=lessonAudioMode==='mp3';
+  // TTS can't seek, so the scrubber row and skip buttons only show on recordings.
+  const seekrow=document.getElementById('la-ov-seekrow');
+  if(seekrow)seekrow.style.display=isMp3?'':'none';
+  ['la-ov-back','la-ov-fwd'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.visibility=isMp3?'visible':'hidden';});
+  if(isMp3&&laAudio&&laAudio.duration){
+    const sl=document.getElementById('la-ov-slider');
+    if(sl&&document.activeElement!==sl)sl.value=Math.round(1000*laAudio.currentTime/laAudio.duration);
+    document.getElementById('la-ov-cur').textContent=laFmt(laAudio.currentTime);
+    document.getElementById('la-ov-dur').textContent=laFmt(laAudio.duration);
+  }
+  // Read-along: highlight the paragraph the narration is inside, estimated by
+  // progress fraction weighted by paragraph length. Approximate on purpose -
+  // close enough to follow along, with zero per-word cue data to ship.
+  const f=laProgressFraction();
+  const els=document.querySelectorAll('#la-ov-text .la-para');
+  let idx=laParaCum.findIndex(c=>f<=c);
+  if(idx<0)idx=laParaCum.length-1;
+  els.forEach((p,i)=>p.classList.toggle('on',i===idx));
+  const cur=els[idx];
+  if(cur&&!laUserScrolled)cur.scrollIntoView({behavior:'smooth',block:'center'});
+}
+// A reader who scrolled somewhere on purpose isn't yanked back mid-read;
+// auto-follow resumes after a few quiet seconds.
+(function(){
+  const t=document.getElementById('la-ov-text');
+  if(!t)return;
+  const mark=()=>{laUserScrolled=true;clearTimeout(laUserScrollT);laUserScrollT=setTimeout(()=>{laUserScrolled=false;},8000);};
+  t.addEventListener('touchstart',mark,{passive:true});
+  t.addEventListener('wheel',mark,{passive:true});
+})();
+function lessonAudioNext(){
+  if(lessonAudioState!=='playing'||laPausedByUser)return;
   if(lessonAudioIdx>=lessonAudioQueue.length){stopLessonAudio();return;}
   const u=new SpeechSynthesisUtterance(lessonAudioQueue[lessonAudioIdx++]);
   // Chrome/Android can silently garbage-collect an utterance mid-speech if
@@ -6327,30 +6629,43 @@ function lessonAudioNext(){
 function stopLessonAudio(){
   if(lessonAudioState!=='playing')return;
   lessonAudioState='idle';
-  lessonAudioStopKeepAlive();
-  lessonAudioStopWatchdog();
+  laPausedByUser=false;
+  if(laAudio)laStopMp3();
+  else{
+    lessonAudioStopKeepAlive();
+    lessonAudioStopWatchdog();
+    try{speechSynthesis.cancel();}catch(e){}
+  }
+  lessonAudioMode='tts';
   wakeLockRelease('lesson-audio');
-  try{speechSynthesis.cancel();}catch(e){}
+  closeLessonPlayer();
   updateListenBtn();
   lessonAudioBtnId=null;
   lessonAudioCurrentUtterance=null;
 }
 function toggleLessonAudio(){
   if(lessonAudioState==='playing'&&lessonAudioBtnId==='lessonListenBtn'){stopLessonAudio();return;}
+  const lesson=getLessonForDay(viewingDay||getLessonDayFor(S.currentAddiction));
   const title=document.getElementById('lessonTitle').textContent;
   const body=document.getElementById('lessonBody').textContent;
   const action=document.getElementById('lessonAction').textContent.trim();
   const reflect=document.getElementById('lessonReflection').textContent.trim();
   let text=title+'. '+body;
-  if(action)text+=" Today's action: "+action;
-  if(reflect)text+=' Something to reflect on: '+reflect;
-  startLessonAudio(text,'lessonListenBtn');
+  if(action)text+="\n\nToday's action: "+action;
+  if(reflect)text+='\n\nSomething to reflect on: '+reflect;
+  const meta=lesson
+    ?{category:S.currentAddiction,day:lesson.day,variant:lessonVariantKey(lesson),title:lesson.title}
+    :{title};
+  startLessonAudio(text,'lessonListenBtn',meta);
 }
 function togglePackLessonAudio(){
   if(lessonAudioState==='playing'&&lessonAudioBtnId==='pack-listen-btn'){stopLessonAudio();return;}
   const textEl=document.getElementById('pack-lesson-text');
   if(!textEl)return;
-  startLessonAudio(textEl.textContent.replace(/\s+/g,' ').trim(),'pack-listen-btn');
+  // Packs have no pre-made recordings (yet) - meta carries just a title so the
+  // big player and lock-screen card still say what's playing on the TTS path.
+  const hd=document.querySelector('#s-pack-lesson .sec-hd');
+  startLessonAudio(textEl.textContent.replace(/[ \t]+/g,' ').trim(),'pack-listen-btn',{title:hd?hd.textContent.trim():'Lesson pack'});
 }
 
 // ─── URGE SURFING TIMER (Pro) ─────────────────────────────────────────────────
@@ -7807,7 +8122,7 @@ function switchTo(id){
   if(id==='journal'){renderJournal();}
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
-  if(id==='lesson'){viewingDay=null;renderTodayLesson();}
+  if(id==='lesson'){viewingDay=null;renderTodayLesson();loadLessonAudioManifest();}
   if(id==='rooms'){renderRoomsList();}
   if(id==='nova'){maybeShowNovaDisclaimer();}
   if(id==='community'){renderCommunityPosts();}
@@ -9988,7 +10303,6 @@ async function submitGateAuth(){
     if(gateCred==='pin'&&!/^\d{4,6}$/.test(password)){errEl.textContent='Your PIN must be 4 to 6 digits.';return;}
     if(gateCred==='password'&&password.length<8){errEl.textContent='Password must be at least 8 characters.';return;}
   }
-  const phone=gateMode==='signup'?document.getElementById('gate-phone').value.trim():undefined;
   const submitBtn=document.getElementById('gate-submit-btn');
   const btnLabel=submitBtn?submitBtn.textContent:'';
   gateSubmitting=true;
@@ -9997,7 +10311,7 @@ async function submitGateAuth(){
   try{
     const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,password,phone,utm:tsidUtm()})
+      body:JSON.stringify({email,password,utm:tsidUtm()})
     });
     const data=await res.json();
     if(!res.ok){errEl.textContent=data.error||'Something went wrong.';releaseGate();return;}

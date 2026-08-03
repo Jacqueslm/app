@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v12.5.1'; // v12.5.1: slip restart opens on now, and the reset date box uses local time not UTC
+const CACHE_NAME = 'tsid-shell-v7.0.0'; // v7.0.0: version line renamed to 7; inclusive lessons, recorded lesson audio, full player
 const SHELL_FILES = [
   '/',
   '/app',
@@ -19,7 +19,13 @@ const SHELL_FILES = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_FILES)).then(() => self.skipWaiting())
+    // Tolerant precache: addAll is all-or-nothing, so one renamed or missing
+    // file used to fail the entire install - no registration, offline support
+    // silently gone. Each file is fetched independently instead; anything that
+    // fails here is picked up online later by the fetch handler's caching.
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(SHELL_FILES.map((f) => cache.add(f)))
+    ).then(() => self.skipWaiting())
   );
 });
 
@@ -40,6 +46,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.pathname.startsWith('/api/')) return;
+  // Cross-origin requests (the lesson-audio CDN) are left to the browser: its
+  // HTTP cache handles them, and copying multi-megabyte recordings into the
+  // shell cache would burn the storage quota for no gain.
+  if (url.origin !== location.origin) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

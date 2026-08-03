@@ -1,8 +1,10 @@
 # Handoff — Turn Someday Into Day One
 
-State as of 29 July 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **12.0.1** (`APP_VERSION` in `index.html`,
-`tsid-shell-v12.0.1` in `sw.js`).
+State as of 3 August 2026. Written so someone picking this up cold does not have
+to rediscover it. Current version: **7.0.0** (`APP_VERSION` in `index.html`,
+`tsid-shell-v7.0.0` in `sw.js` — the line was deliberately renamed from 12.x
+back to 7, the same kind of reset done once before launch; the in-app updater
+compares commit SHAs, so the number only has to change, never increase).
 
 ---
 
@@ -22,6 +24,17 @@ people supporting someone else. That split runs through the whole codebase.
   `billing.js` Stripe, `store-billing.js` Play/Apple, `email.js`.
 - `data/lessons/lesson1..13.json` → `node data/build-lessons.js` → `lessons.json`.
   **390 lessons, ~166k words. Never hand-edit `lessons.json`.**
+- Lesson audio: real recordings (five Piper voices, same as the SOS talk) live
+  on the repo's **`lesson-audio` branch** — never merged, served straight from
+  `raw.githubusercontent.com`, so they add zero weight to Railway builds and
+  home-install updates. The app ships only `data/lesson-audio-manifest.json`
+  mapping `"Category|day|variant"` → per-voice file paths. **If lesson text
+  changes**: `node data/build-lessons.js`, then
+  `python3 tools/generate-lesson-audio.py <voices> <out>` (file names are
+  content-hashed, unchanged lessons re-encode for free), commit the new files
+  to `lesson-audio` and the regenerated manifest to main in the same change.
+  No recording / no manifest entry = the app silently falls back to the
+  phone's own voice, so audio can never hard-break the lesson screen.
 - `twa/` — the Android wrapper config (see Android, below).
 - Hosted on **Railway**, auto-deploys on push. Domain `www.turnsomedayintodayone.com`.
   The apex domain without `www` serves nothing.

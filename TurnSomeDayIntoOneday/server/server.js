@@ -97,6 +97,22 @@ app.get('/best-recovery-apps', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'best-recovery-apps.html'));
 });
 
+// Per-competitor "<name> alternative" pages: same honest-comparison move,
+// one clean extension-less URL per page, all listed in sitemap.xml. A
+// whitelist, not a catch-all - unknown paths must keep 404ing normally.
+const ALT_PAGES = [
+  'i-am-sober-alternative', 'reframe-app-alternative', 'sunnyside-app-alternative',
+  'loosid-app-alternative', 'sober-time-alternative', 'quittr-app-alternative',
+  'covenant-eyes-alternative', 'brainbuddy-alternative', 'fortify-app-alternative',
+  'betblocker-alternative', 'quitnow-app-alternative', 'ever-accountable-alternative',
+  'blockerx-alternative', 'nomo-app-alternative',
+];
+ALT_PAGES.forEach((slug) => {
+  app.get('/' + slug, (req, res) => {
+    res.sendFile(path.join(__dirname, '..', slug + '.html'));
+  });
+});
+
 // Short bio links with tracking baked in, so a platform bio only ever needs
 // "/go/tiktok" - the redirect adds the UTM tags and stats attribution works
 // without anyone hand-building tagged URLs. Unknown names still land safely.
@@ -391,7 +407,10 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
 app.get('/api/auth/me', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  res.json({ email: user.email });
+  // isOwner lets the client skip owner-only calls (update check, diagnostics)
+  // for everyone else, instead of probing them and logging 403s in every
+  // regular user's console.
+  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL) });
 });
 
 app.get('/api/state', requireAuth, (req, res) => {

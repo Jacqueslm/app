@@ -51,8 +51,10 @@ VOICES = {
     'warm':   'vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx',
     'soft':   'vits-piper-en_US-amy-medium/en_US-amy-medium.onnx',
     'gentle': 'vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx',
-    'clear':  'vits-piper-en_US-lessac-high/en_US-lessac-high.onnx',
     'male':   'vits-piper-en_US-hfc_male-medium/en_US-hfc_male-medium.onnx',
+    # lessac-high synthesizes 4-8x slower than the medium models - it goes
+    # last so the four fast voices never wait behind it.
+    'clear':  'vits-piper-en_US-lessac-high/en_US-lessac-high.onnx',
 }
 LENGTH_SCALE = 1.05
 MP3_KBPS = 40  # mono speech: transparent enough, ~5KB/s

@@ -6112,7 +6112,7 @@ document.addEventListener('visibilitychange',()=>{
 // Every lesson can be listened to instead of read - same free built-in voice
 // as the guide, so someone cooking, driving, or working can still do their day.
 let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null,lessonAudioCurrentUtterance=null;
-let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='';
+let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='',lessonAudioEverSpoke=false;
 const IS_ANDROID=/Android/i.test(navigator.userAgent||'');
 // Desktop Chrome's speech engine silently stops producing audio after ~15s of
 // continuous speaking, and the documented workaround is a periodic pause/resume
@@ -6165,8 +6165,14 @@ function lessonAudioStartWatchdog(){
     if(lessonAudioRetryCount>3){
       const why=lessonAudioLastError?` (${lessonAudioLastError})`:'';
       const hidden=lessonAudioWentHidden;
+      const neverSpoke=!lessonAudioEverSpoke;
       stopLessonAudio();
-      appInfo('Audio stopped',hidden
+      // An engine that never produced a single word is a different problem from
+      // one that died part-way: the voice engine itself is off or broken, and
+      // only the phone's settings can bring it back - say exactly where.
+      appInfo('Audio stopped',neverSpoke
+        ?"Your phone's voice engine isn't responding, so the lesson can't be read aloud right now. On Android, make sure Google Text-to-speech is installed and enabled (Settings → General management → Text-to-speech output), then try again. The lesson is all here to read meanwhile."
+        :hidden
         ?"Your phone paused the app while it was in the background, which stops the voice. Keeping this screen open while you listen will hold it."
         :`Your phone's voice stopped part-way through and wouldn't restart${why}. The lesson is all here to read.`);
       return;
@@ -6277,7 +6283,7 @@ function startLessonAudio(text,btnId){
   logActivity('lesson_listen',{});
   lessonAudioStartKeepAlive();
   lessonAudioStartWatchdog();
-  lessonAudioLastError='';lessonAudioWentHidden=false;
+  lessonAudioLastError='';lessonAudioWentHidden=false;lessonAudioEverSpoke=false;
   wakeLockAcquire('lesson-audio');
   speechSynthesis.cancel();
   const go=()=>lessonAudioNext();
@@ -6299,11 +6305,22 @@ function lessonAudioNext(){
   u.rate=S.lessonRate||0.95;u.pitch=1;
   let advanced=false;
   const next=()=>{if(advanced)return;advanced=true;lessonAudioNext();};
+  u.onstart=()=>{lessonAudioEverSpoke=true;};
   u.onend=()=>{lessonAudioRetryIdx=-1;lessonAudioRetryCount=0;next();};
   // The error code is the one piece of evidence about why audio died on a real
   // device, and it was previously thrown away. Keep it for the message shown
   // if the watchdog can't recover.
-  u.onerror=(e)=>{lessonAudioLastError=(e&&e.error)||'unknown';next();};
+  // A voiceless engine (TTS disabled or broken on the phone) errors within
+  // milliseconds of speak(); advancing on that burned the whole queue in ~60ms
+  // and stopped silently, releasing the wake lock - to the listener, "the
+  // Listen button does nothing and the screen sleeps again". The voice guide
+  // already guards this race (see vgSpeakStep); same rule here: only an error
+  // after real speaking time advances, an instant one is left for the watchdog,
+  // which retries the chunk and then says plainly that the phone's voice is off.
+  u.onerror=(e)=>{
+    lessonAudioLastError=(e&&e.error)||'unknown';
+    if(Date.now()-lessonAudioChunkStartedAt>1500)next();
+  };
   lessonAudioChunkStartedAt=Date.now();
   speechSynthesis.speak(u);
 }
@@ -8817,7 +8834,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='12.5.1';
+const APP_VERSION='12.5.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

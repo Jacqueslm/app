@@ -43,8 +43,18 @@ the person struggling (porn, alcohol, food, gambling).
 - `OUTREACH.md` — Tuesday's sales block: 30 verified rehab/media targets in
   weekly batches of 5, with the email written.
 
+Plus two pitch-and-prompt files he opens only when doing that specific work:
+- `AI-SCENES.md` — the AI videos that cost money (A1–A5, full prompts).
+- `INFLUENCERS.md` — podcasts/authors pile, separate from the rehab outreach.
+
+**NEVER re-send a whole file he works out of.** He deletes scripts and ticks
+emails as he does them — sending SCRIPTS.md/OUTREACH.md back wipes his
+progress and makes him re-sort. When you add something, send ONLY the new
+piece in its own small file, and say which file it belongs in. This was a real
+complaint; do not repeat it.
+
 **Do NOT add more top-level files or hand him more docs.** He works best with one
-next action at a time. If something new is needed, fold it into one of those two.
+next action at a time. If something new is needed, fold it into an existing file.
 
 **Reference (background, for sessions — not for him):**
 - `reference/marketing-playbook.md` — full strategy, the door/positioning thinking.

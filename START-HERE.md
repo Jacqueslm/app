@@ -57,14 +57,31 @@ next action at a time. If something new is needed, fold it into one of those two
 
 ---
 
-## Where things stand (2026-07)
+## Where things stand (2026-08-03)
 
 **Done & live:** Pro chat cap set to 30/day everywhere; Pro "X of 30 left" counter;
 `/when-he-drinks` partner landing page; `/go/tiktok|youtube|facebook` tracked bio
 links (all three set in the socials); shared-device logout wipe; offline boot fix;
 guided-mode label removed; in-app updater fixed; SOS "Talk me through it" now real
 MP3 audio with a voice picker (survives screen lock); wake-lock keeps the screen
-awake during lessons.
+awake during lessons; SEO groundwork shipped (sitemap.xml, robots.txt, homepage
+footer links, /best-recovery-apps roundup, 16 competitor "-alternative" pages).
+
+**Division of labor (2026-08):** Jacques' wife runs social comments and followers
+- he never opens the feeds or dashboards; his daily is 10 min (Buffer check).
+Positioning widened by his call: post for EVERYBODY (HIM, HER, alcohol, food),
+Monday stats decide the lean - nothing says "her first" anymore.
+
+**Reality check (as of 08-03):** /admin/stats shows only Jacques' own test
+signups - normal; first outreach batch and consistent Buffer posting just
+starting. First stranger signup expected in weeks, not days. Don't let a session
+panic about flat numbers. Cleanup pending: remove test123 + test signups when he
+gives the word (keep his real owner account).
+
+**Studio (2026-08):** Dynamics templates shipped - 10 free CapCut-style one-tap
+effects (Beat Mix, B/W Strobe, Color Flip, Thermal, Glow Up, Echo Trails, Hype
+Shake, Mirror World, Time Machine old-to-new, 3-2-1 Opener) on any video OR
+picture (stills become 4-15s clips). Build stamp b0804.
 
 **Deferred (post-launch, see build list):**
 1. Lesson background audio (MP3 conversion — free method proven; ~390 files).

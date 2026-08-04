@@ -66,6 +66,8 @@ guided-mode label removed; in-app updater fixed; SOS "Talk me through it" now re
 MP3 audio with a voice picker (survives screen lock); wake-lock keeps the screen
 awake during lessons; SEO groundwork shipped (sitemap.xml, robots.txt, homepage
 footer links, /best-recovery-apps roundup, 16 competitor "-alternative" pages).
+Google Search Console is verified and the sitemap submitted (done 2026-08-03)
+- check it ~monthly for which searches show his pages; don't re-walk setup.
 
 **Lessons overhaul (2026-08-03, done in a parallel session, merged to main):**
 the app now targets EVERYONE - straight, gay, bi, gender-neutral, men and

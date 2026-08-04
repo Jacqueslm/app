@@ -67,6 +67,15 @@ MP3 audio with a voice picker (survives screen lock); wake-lock keeps the screen
 awake during lessons; SEO groundwork shipped (sitemap.xml, robots.txt, homepage
 footer links, /best-recovery-apps roundup, 16 competitor "-alternative" pages).
 
+**Lessons overhaul (2026-08-03, done in a parallel session, merged to main):**
+the app now targets EVERYONE - straight, gay, bi, gender-neutral, men and
+women; all lessons rewritten inclusive/gender-neutral and claims-audited.
+Recorded audio for all 395 lessons x 5 voices (1,975 MP3s) with a voice picker
+like SOS; pause button (no more restart-from-zero); pop-out big player with
+read-along; on completion auto-scroll + next lesson (follows multi-addiction
+tracks); audio keeps playing with the screen off. Find-anything button moved
+off the Friendly send button; phone-number option removed.
+
 **Division of labor (2026-08):** Jacques' wife runs social comments and followers
 - he never opens the feeds or dashboards; his daily is 10 min (Buffer check).
 Positioning widened by his call: post for EVERYBODY (HIM, HER, alcohol, food),
@@ -84,7 +93,7 @@ Shake, Mirror World, Time Machine old-to-new, 3-2-1 Opener) on any video OR
 picture (stills become 4-15s clips). Build stamp b0804.
 
 **Deferred (post-launch, see build list):**
-1. Lesson background audio (MP3 conversion — free method proven; ~390 files).
+1. ~~Lesson background audio~~ DONE 2026-08-03 (all 395 lessons, 5 voices, free).
 2. Wire up real Friendly AI (`ANTHROPIC_API_KEY` on the server) — also activates
    the Pro chat counter (guided replies don't consume quota, so it reads full now).
 3. Accountability partner link (`/together`) — needs Data safety update.

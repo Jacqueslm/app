@@ -19,6 +19,7 @@ Do them in order. Cross one off when it's posted.
 | FOOD — binge eating | 13–16 |
 | QUIZ hook — send them to /quiz | 23, 24 |
 | MULTI-ADDICTION — the app's edge | 25 |
+| VICTORY — fighter tone, all 13 tracks | 26–38 |
 
 ---
 
@@ -562,6 +563,314 @@ Do them in order. Cross one off when it's posted.
 > And you only need one Day One.
 
 **Caption:** 13 habit tracks, one app, one Day One. Link in bio.
+
+---
+
+## 27. TALK — "Back against the wall"
+
+**Title:** When your back is against the wall
+
+**Say this:**
+
+> Back against the wall is not the end of the story.
+>
+> It's just the part where you finally stop running
+> and turn around.
+>
+> Every person I know who got free
+> got free from exactly this spot.
+>
+> Not from a good week.
+> Not from motivation.
+>
+> From the wall.
+>
+> The wall is where it starts.
+
+**Caption:** The wall is where it starts. Link in bio.
+
+---
+
+## 28. TALK — "Thirteen doors, one fight"
+
+**Title:** Alcohol, porn, gambling, food — it's the same fight
+
+**Say this:**
+
+> Alcohol. Porn. Smoking. Pills.
+> Gambling. Scrolling. Gaming. Food.
+> Spending. Work. Anger.
+>
+> People act like those are eleven different problems.
+>
+> They're one problem wearing different clothes.
+>
+> Something hurts, you reach for the thing,
+> the thing works for ten minutes,
+> and the bill comes later.
+>
+> Different door. Same room.
+>
+> Which means whatever you're fighting —
+> you're not a special case. You're in the room with all of us.
+
+**Caption:** Different door, same room. Link in bio.
+
+---
+
+## 29. TALK — "The one nobody counts"
+
+**Title:** For the person holding somebody else together
+
+**Say this:**
+
+> This one's not for the person struggling.
+>
+> It's for whoever's holding them together.
+>
+> Husband, wife, partner, best friend, son, mother —
+> doesn't matter who you are to them.
+>
+> You've been carrying somebody
+> and nobody's ever once asked how heavy it is.
+>
+> You're in the fight too.
+> You just never got a name for your side of it.
+>
+> You're getting one now.
+
+**Caption:** You're in the fight too. Link in bio.
+
+---
+
+## 30. TALK — "It doesn't check who you are"
+
+**Title:** Addiction doesn't care who you are
+
+**Say this:**
+
+> Addiction never asked me who I was.
+>
+> Didn't ask my age. Didn't ask my color.
+> Didn't ask who I loved or how I identify.
+>
+> It just showed up and started taking.
+>
+> So when people ask who my app is for —
+> straight, gay, bi, neither, still figuring it out,
+> man, woman, or none of the above —
+>
+> the answer is you.
+>
+> It never checked who you were on the way in.
+> It doesn't get to check on the way out.
+
+**Caption:** It never asked who you were. Neither do we. Link in bio.
+
+---
+
+## 31. TALK — "Gambling"
+
+**Title:** The bet you're still trying to win back
+
+**Say this:**
+
+> Nobody gambles to win money.
+>
+> You gamble to get back
+> to the person you were before you lost it.
+>
+> That's the real bet.
+> And the house doesn't sell that.
+>
+> You're not chasing money.
+> You're chasing yourself.
+>
+> You can just go get him. Free.
+> No wager required.
+
+**Caption:** You're not chasing money. Link in bio.
+
+---
+
+## 32. TALK — "Scrolling"
+
+**Title:** Four hours gone and you couldn't name one thing you saw
+
+**Say this:**
+
+> Four hours.
+>
+> Name one thing you saw.
+>
+> You can't. Neither can I.
+>
+> That's not entertainment.
+> That's not a break.
+> That's a habit that eats your evening
+> and gives you nothing back.
+>
+> The scary part isn't the time.
+> It's that it felt like nothing while it happened.
+>
+> Count it once. Honestly.
+> Then decide if that's a trade you'd make on purpose.
+
+**Caption:** Count it once, honestly. Link in bio.
+
+---
+
+## 33. TALK — "Smoking"
+
+**Title:** You've quit smoking before — that's the good news
+
+**Say this:**
+
+> "I've quit a hundred times."
+>
+> People say that like it's a joke on themselves.
+>
+> It's not. It's proof.
+>
+> A hundred times you decided you wanted your life back.
+> A hundred times you started.
+>
+> That's not failure. That's a hundred pieces of evidence
+> that the part of you that wants out is still alive.
+>
+> Number 101 works the same way as the others.
+> It just doesn't stop.
+
+**Caption:** A hundred quits is a hundred proofs. Link in bio.
+
+---
+
+## 34. TALK — "Work"
+
+**Title:** When work is the thing you're using
+
+**Say this:**
+
+> This one gets applause. That's what makes it dangerous.
+>
+> Nobody pulls you aside about the eighty-hour weeks.
+> They promote you.
+>
+> But if you can't sit still in your own house,
+> if quiet feels like something's wrong —
+>
+> that's not ambition. That's the same escape everybody else uses,
+> just the one with a paycheck attached.
+>
+> Ask yourself what you're outrunning.
+> That question doesn't cost you your career.
+
+**Caption:** The one addiction people applaud. Link in bio.
+
+---
+
+## 35. TALK — "Anger"
+
+**Title:** When anger is the thing you can't put down
+
+**Say this:**
+
+> Anger works. That's the problem.
+>
+> It ends the conversation.
+> It moves people back.
+> It makes the helpless feeling stop for a minute.
+>
+> Same deal as a drink. Same ten minutes.
+> Same bill later — except this one gets paid
+> by the people in your house.
+>
+> You're not a bad person.
+> You're using something that works fast and costs everything.
+>
+> There's a track for this one too.
+
+**Caption:** Anger works. That's the problem. Link in bio.
+
+---
+
+## 36. TALK — "Spending"
+
+**Title:** The package doesn't fix it and you know it
+
+**Say this:**
+
+> The best part was never opening it.
+>
+> It was the twenty minutes before —
+> when it was coming, and you felt like
+> something good was on the way.
+>
+> Then it lands, and it's just a box.
+>
+> You're not buying stuff.
+> You're buying that twenty minutes.
+>
+> That feeling's real. The purchase isn't what makes it.
+> You can get it somewhere that doesn't bill you.
+
+**Caption:** You're not buying stuff. Link in bio.
+
+---
+
+## 37. TALK — "Gaming"
+
+**Title:** In there you're winning — that's why it's hard to leave
+
+**Say this:**
+
+> In there, you level up. You matter. You get better every day
+> and the game tells you so.
+>
+> Out here, nobody hands you a number that goes up.
+>
+> That's not a character flaw.
+> That's just the only place anybody's tracking your progress.
+>
+> So track it out here.
+> Day one, day two, day three — a number that goes up
+> because you showed up in real life.
+>
+> Same feeling. Your actual life.
+
+**Caption:** Give real life a scoreboard. Link in bio.
+
+---
+
+## 38. TALK — "You still have something to live for"
+
+**Title:** You still have something to live for
+
+**Say this:**
+
+> If you've lost everything — I'm not going to tell you it's fine.
+>
+> But hear this from somebody who's been in that seat:
+>
+> There are people who love you
+> whether or not you believe it today.
+>
+> You still have something left to live for
+> even if you can't name it right now.
+>
+> So lift your head up.
+> Pull yourself out of that self-pity attitude —
+> not because you don't deserve to grieve,
+> but because the fight isn't over
+> and the clock is still ticking.
+>
+> You're a fighter. You've been one this whole time.
+>
+> Day One. Today.
+>
+> If you're in real danger right now, call or text 988. Do that first.
+
+**Caption:** The fight isn't over. Link in bio. (US: 988 anytime.)
 
 ---
 

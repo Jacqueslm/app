@@ -20,8 +20,10 @@ The only file you need. Everything else is reference.
    them all.
 
 **Tuesday — sales (45 min):**
-Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. The
-email is written; you just personalize one line each. This is the sales work.
+Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. Every
+email is fully written — copy, paste, send. This is the sales work.
+Extra 15 minutes after? Open **INFLUENCERS.md** (a different pile — podcasts
+and sober authors) and send 1. No pressure, no deadline on that file.
 
 **Wednesday — one small win (30 min):**
 One-time jobs, one per week: AlternativeTo listing, updating a bio, a

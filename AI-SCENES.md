@@ -38,6 +38,13 @@ and keeps you postable everywhere.
 **How often:** about one AI video a week alongside your talking-heads. AI
 stops the scroll; your face builds the trust. You need both.
 
+**Don't buy a video subscription (checked Aug 2026).** Studio's "Standard"
+animate already IS Kling 2.5 Turbo Pro — the same engine those $32/month
+plans sell. Pay-per-use costs you about $0.44 a shot, so 5 videos a month
+runs $13–26. A Kling subscription is $32.56 every month whether you make
+anything or not. Break-even is roughly 6 minutes of animated video a month
+— you're under it. If you ever go over, say so and we'll re-run the numbers.
+
 **Where to post which:** A1 and A5 (the porn arc) carry the most suppression
 risk — put those on YouTube first. Lean TikTok and Facebook on A2, A3, A4.
 

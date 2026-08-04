@@ -1,174 +1,735 @@
 # OUTREACH — Tuesday's 45 minutes
 
-Every Tuesday: pick the next 5 unchecked sites, send the email, check them off.
-That's the whole job. From your own Gmail, one at a time, no BCC blasts.
+Every Tuesday: send the next 5 unchecked emails. Each one is finished —
+**copy the subject, copy the body, paste into Gmail, send, tick the box.**
+Nothing to fill in. Send from your own Gmail, one at a time.
 
-**The one fact powering all of it:** across all 30 of these "best recovery
-apps" articles, not a single listed app has a partner/family section. Yours
-does. You're not asking for a favor — you're handing them the update their
-article is missing.
+If someone replies, answer the same day if you can. If someone adds you to
+their article: thank them, screenshot it, and that screenshot becomes a proof
+post. Never pay for placement — if anyone asks for money, decline politely.
 
 ---
 
-## THE EMAIL (copy, personalize the [bracketed] bits, send)
+## WEEK 1
+
+### 1. Empowered Recovery Center
+- [ ] Sent
+**Where:** the form at https://www.empoweredrecoverycenter.com/admissions/contact-us/
 
 **Subject:** Your recovery apps article — the gap nobody's filled
 
-> Hi [name / team],
->
-> I came across your article "[article title]" — good list, [personal line —
-> see the note next to their entry below, e.g. "though a few of the apps on it
-> have shut down since it was written"].
->
-> Here's the bigger gap: not one app on the list has anything for the family.
-> The wife watching it happen gets meetings and books — never software.
-> Support groups for families have existed since 1951, and nobody ever built
-> them an app.
->
-> I did. I was addicted for 38 years. At 50 it was do or die, and I built the
-> thing I needed: Turn Someday Into Day One — day counter, SOS tools for the
-> 2am moment, lessons across 13 habit tracks, and a whole section for the
-> person who loves them. The core app is free.
->
-> If you're refreshing the article, I'd love for you to take a look:
-> https://www.turnsomedayintodayone.com
->
-> Happy to answer anything — I read every reply myself.
->
-> Jacques
-> Turn Someday Into Day One
+Hi team,
 
-**P.S. line (optional, use for the media sites):** I also keep an honest
-current comparison myself — competitors included where they fit better:
-turnsomedayintodayone.com/best-recovery-apps
+I came across your article on the best apps for addiction recovery — good list, and I noticed you also write for the spouse of the person struggling. That's rare, and it's exactly who the second half of my app was built for.
+
+Here's the bigger gap: not one app on any of these lists has anything for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
 
 ---
 
-## THE FOLLOW-UP (send 7–10 days after no reply, once, then let it go)
+### 2. Pura Vida Recovery
+- [ ] Sent
+**Where:** the form at https://pvrecovery.com/contact/
 
-**Subject:** Re: Your recovery apps article — the gap nobody's filled
+**Subject:** Your recovery apps article — the gap nobody's filled
 
-> Hi — floating this back up once. Short version: your recovery-apps article
-> has nothing for the family, and mine was built exactly for that — by someone
-> who lived it, free to start: turnsomedayintodayone.com
->
-> Either way, thanks for what you put out. Lists like yours are how people
-> find help.
->
-> Jacques
+Hi team,
 
----
+I came across your article on whether there's an app to help you stay sober — and you did something almost nobody does: you singled out family involvement as a strength. That's the whole reason I built my app.
 
-## WEEK 1 — warmest first (they already lean your way)
+Because here's the gap: not one app on these lists has a real section for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
 
-- [ ] **Empowered Recovery Center** — they publish spouse-facing content already
-  Article: https://www.empoweredrecoverycenter.com/blog/best-apps-for-addiction-recovery/
-  Contact: https://www.empoweredrecoverycenter.com/admissions/contact-us/
-  Personal line: "…and I noticed you also write for the spouse — that's rare and it's exactly who my app's second half is for."
-- [ ] **Pura Vida Recovery** — their article praises an app for including family
-  Article: https://pvrecovery.com/blog/is-there-an-app-to-help-you-stay-sober/
-  Contact: https://pvrecovery.com/contact/
-  Personal line: "…you singled out family involvement as a strength — that's the whole reason I built mine."
-- [ ] **Sunrise Recovery** — lists the closest thing to a family app (support-circle alerts)
-  Article: https://www.sunriserecoverycare.com/top-5-apps-for-recovery/
-  Contact: https://www.sunriserecoverycare.com/contact-sunrise-recovery-care/
-- [ ] **AddictionHelp.com** — editorial stance: "apps as a bridge to people"
-  Article: https://www.addictionhelp.com/recovery/support-apps/
-  Contact: https://www.addictionhelp.com/about-us/resources/
-- [ ] **Recovered.org** — already notes one app "can be used by those supporting a loved one"
-  Article: https://recovered.org/blog/best-apps-for-addiction-recovery
-  Contact: https://recovered.org/contact
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
 
-## WEEK 2 — stale lists (your easiest "this needs updating" pitch)
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
 
-- [ ] **Recovery Connection** — oldest list found, apps from a different era
-  Article: https://www.recoveryconnection.com/recovery-theres-an-app-for-that/
-  Contact: https://www.recoveryconnection.com/contact/
-- [ ] **Chapter 5 Recovery (Royal Life)** — their list leads with an app that no longer exists (Pear reSET)
-  Article: https://chapter5recovery.com/top-12-best-sobriety-apps/
-  Contact: https://chapter5recovery.com/ (24/7 admissions line)
-  Personal line: "…heads up that Pear reSET on your list was discontinued after Pear's bankruptcy."
-- [ ] **Castle Craig** (UK) — dated app set (iPromises, Twelve Steps Companion)
-  Article: https://www.castlecraig.co.uk/addiction-resources/12-addiction-recovery-apps/
-  Contact: https://www.castlecraig.co.uk/contact-us/
-- [ ] **Royal Life Centers** — dated, heavy on old 12-step utilities
-  Article: https://royallifecenters.com/10-good-recovery-apps-our-shortlist/
-  Contact: https://royallifecenters.com/admissions/
-- [ ] **Addiction Treatment Services** — "for 2024" is in the title
-  Article: https://www.addictiontreatmentservices.com/top-10-addiction-recovery-apps-for-2024/
-  Contact: https://www.addictiontreatmentservices.com/
+Happy to answer anything — I read every reply myself.
 
-## WEEK 3 — short lists (easiest to get added to)
-
-- [ ] **Country Road Recovery** — only 4 apps listed
-  Article: https://www.countryroadrc.com/addiction-recovery-apps-that-work/
-  Contact: form on https://www.countryroadrc.com/
-- [ ] **Woodmont Treatment Center** — 5 apps
-  Article: https://woodmonttreatment.com/5-addiction-recovery-apps/
-  Contact: https://woodmonttreatment.com/admissions-process/
-- [ ] **Skypoint Recovery** — 5 apps · direct email: admissions@skypointrecovery.com
-  Article: https://skypointrecovery.com/blog/5-best-recovery-apps-for-addiction/
-- [ ] **Northern Path Recovery** — 6 apps
-  Article: https://northernpathrecovery.com/blog/6-helpful-apps-to-use-in-recovery/
-  Contact: https://northernpathrecovery.com/about/
-- [ ] **Mainspring Recovery** — runs three separate app articles · direct email: admissions@mainspringrecovery.com
-  Article: https://www.mainspringrecovery.com/blog/addiction-recovery-apps/
-
-## WEEK 4 — active publishers (they refresh yearly — pitch for the next cycle)
-
-- [ ] **SouthLight Healthcare** — updated June 2026, counselor-sourced
-  Article: https://southlight.org/blog/addiction-recovery-apps/
-  Contact: https://southlight.org/contact-us/
-- [ ] **Holon Health** — fresh 2026 top-5, updates yearly
-  Article: https://www.holonhealth.com/top-5-addiction-recovery-apps-to-support-your-journey-in-2026/
-  Contact: https://www.holonhealth.com/contact-us/
-- [ ] **ChoosingTherapy.com** — updates annually, invites suggestions (use the P.S.)
-  Article: https://www.choosingtherapy.com/best-sobriety-apps/
-  Contact: https://www.choosingtherapy.com/contact-us/
-- [ ] **Flagler Health and Wellness** — two app roundups, active niche
-  Article: https://flaglerhealing.com/best-addiction-recovery-apps/
-  Contact: https://flaglerhealing.com/contact-us/
-- [ ] **Pinnacle Treatment Centers** — two roundups, active publisher
-  Article: https://pinnacletreatment.com/blog/recovery-apps/
-  Contact: https://pinnacletreatment.com/contact/
-
-## WEEK 5 — the rest
-
-- [ ] **Banyan Treatment Center**
-  Article: https://www.banyantreatmentcenter.com/blog/top-14-apps-for-addiction-recovery/
-  Contact: form on https://www.banyantreatmentcenter.com/
-- [ ] **Clearbrook (Banyan)** — same parent as above; mention if they replied
-  Article: https://clearbrook.banyantreatmentcenter.com/news/sobriety-apps-need-know/
-- [ ] **Compassion Recovery Centers** — telehealth-first, tech-friendly
-  Article: https://compassionrecoverycenters.com/blogs/technology-in-recovery-best-apps-and-tools-to-support-sobriety/
-  Contact: https://compassionrecoverycenters.com/contact/
-- [ ] **Great Oaks Recovery** — two roundups
-  Article: https://greatoaksrecovery.com/blog/try-these-10-helpful-recovery-apps/
-  Contact: https://greatoaksrecovery.com/contact-us/
-- [ ] **Indiana Center for Recovery** — several digital-recovery articles
-  Article: https://www.treatmentindiana.com/best-sober-apps-to-boost-your-health/
-  Contact: https://www.treatmentindiana.com/contact/
-
-## WEEK 6 — big fish (send last, once you've practiced)
-
-- [ ] **Sunrise/Asana Lodge** (UK)
-  Article: https://asanalodge.com/what-apps-can-help-you-with-addiction-recovery/
-- [ ] **American Addiction Centers** — biggest brand, hardest to land
-  Article: https://americanaddictioncenters.org/blog/addiction-recovery-sobriety-phone-apps
-  Contact: https://americanaddictioncenters.org/contact-us
-- [ ] **Rehabs.com** — high authority; use the press/biz-dev option on their form
-  Article: https://rehabs.com/treatment/smartphone-apps/
-  Contact: https://rehabs.com/contact-us/
-- [ ] **Recovery Research Institute** (Harvard-affiliated directory — expect an evidence bar; just ask what inclusion requires)
-  Article: https://www.recoveryanswers.org/resource/recovery-technology/
-- [ ] **GoodRx Health** — stale list, weak contact path; use their site footer
-  Article: https://www.goodrx.com/conditions/substance-use-disorder/mobile-apps-for-managing-substance-use
+Jacques
+Turn Someday Into Day One
 
 ---
 
-## RULES
-- 5 per Tuesday. One follow-up per site, a week later, then move on.
-- Reply fast when someone answers — same day if you can.
-- If anyone adds you: thank them, screenshot it, and that screenshot becomes
-  a proof post ("listed by …") — marketing feeding marketing.
-- Never pay for placement on these; if someone asks for money, decline politely.
+### 3. Sunrise Recovery
+- [ ] Sent
+**Where:** the form at https://www.sunriserecoverycare.com/contact-sunrise-recovery-care/
+
+**Subject:** Your recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your top-5 recovery apps article. The closest thing on it to family support is a support-circle alert — and the gap between an alert and real support for the family is exactly what I built for.
+
+Not one app on these lists gives the family their own place. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 4. AddictionHelp.com
+- [ ] Sent
+**Where:** the form at https://www.addictionhelp.com/about-us/resources/
+
+**Subject:** Your recovery support apps guide — the gap nobody's filled
+
+Hi team,
+
+I came across your guide to recovery support apps, and I like your editorial stance — that an app should be a bridge to people, not a replacement for them. Mine was built on the same idea.
+
+Here's the gap your guide could own: not one app on these lists has anything for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the guide, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+### 5. Recovered.org
+- [ ] Sent
+**Where:** https://recovered.org/contact
+
+**Subject:** Your best recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your best-apps-for-recovery article. You're one of the only lists that even mentions an app "can be used by those supporting a loved one" — that reader deserves more than a footnote, and that's exactly who I built for.
+
+Not one app on these lists gives the family their own place. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+## WEEK 2
+
+### 6. Recovery Connection
+- [ ] Sent
+**Where:** the form at https://www.recoveryconnection.com/contact/
+
+**Subject:** Your recovery apps article — a 2026 update worth making
+
+Hi team,
+
+I came across your "there's an app for that" recovery article. It's been up a while, and a few of the apps on it are from a different era of phones — which actually makes it the perfect article to refresh.
+
+Here's what a refresh could add that no other list has: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you update the piece, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 7. Chapter 5 Recovery
+- [ ] Sent
+**Where:** the contact options at https://chapter5recovery.com/
+
+**Subject:** Heads up on your sobriety apps list (one app no longer exists)
+
+Hi team,
+
+A friendly heads up on your top sobriety apps article: Pear reSET, near the top of the list, was discontinued after Pear Therapeutics went bankrupt — readers who go looking for it won't find it.
+
+If you're updating the piece anyway, here's the category no list has yet: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+Worth a look for the refresh: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 8. Castle Craig (UK)
+- [ ] Sent
+**Where:** the form at https://www.castlecraig.co.uk/contact-us/
+
+**Subject:** Your recovery apps article — a refresh worth making
+
+Hi team,
+
+I came across your roundup of addiction recovery apps. Some of the apps on it (iPromises, Twelve Steps Companion) have gone quiet since it was written — which makes it a good candidate for a refresh.
+
+Here's what a refresh could add that no other list has: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you update the piece, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 9. Royal Life Centers
+- [ ] Sent
+**Where:** https://royallifecenters.com/admissions/
+
+**Subject:** Your recovery apps shortlist — the gap nobody's filled
+
+Hi team,
+
+I came across your recovery apps shortlist. It leans on the classic 12-step utilities — solid tools, but the category has grown since, and there's one gap none of the newer lists have filled either.
+
+Nobody has an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the list, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 10. Addiction Treatment Services
+- [ ] Sent
+**Where:** the contact options at https://www.addictiontreatmentservices.com/
+
+**Subject:** Your top recovery apps for 2024 — a 2026 update worth making
+
+Hi team,
+
+I came across your top-10 recovery apps for 2024. With 2026 here, a refresh might be due — and there's a category the 2024 list couldn't have included, because it didn't exist yet.
+
+An app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you make a 2026 edition, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+## WEEK 3
+
+### 11. Country Road Recovery
+- [ ] Sent
+**Where:** the form at https://www.countryroadrc.com/
+
+**Subject:** Your recovery apps article — a fifth app worth adding
+
+Hi team,
+
+I came across your article on recovery apps that work. It's short and honest — four apps — and if you ever add a fifth, I'd like to make the case for mine, because it covers the one thing the other four don't.
+
+The family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+Worth a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 12. Woodmont Treatment Center
+- [ ] Sent
+**Where:** https://woodmonttreatment.com/admissions-process/
+
+**Subject:** Your 5 recovery apps article — a sixth worth adding
+
+Hi team,
+
+I came across your article on five addiction recovery apps. Tight list — and there's one category none of the five cover that your readers' families would thank you for.
+
+An app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 13. Skypoint Recovery
+- [ ] Sent
+**Where:** email directly to **admissions@skypointrecovery.com**
+
+**Subject:** Your 5 best recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on the five best recovery apps for addiction. Good picks — and there's one category none of them touch.
+
+An app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 14. Northern Path Recovery
+- [ ] Sent
+**Where:** https://northernpathrecovery.com/about/
+
+**Subject:** Your helpful recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on helpful apps to use in recovery. Six good picks — and one category none of them cover.
+
+An app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 15. Mainspring Recovery
+- [ ] Sent
+**Where:** email directly to **admissions@mainspringrecovery.com**
+
+**Subject:** Your recovery apps articles — the gap nobody's filled
+
+Hi team,
+
+I noticed you run several articles on addiction recovery apps — you clearly take the digital side seriously, which is why I'm writing to you.
+
+Across all the app roundups out there, not one lists an app built for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If any of your app articles get a refresh, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+## WEEK 4
+
+### 16. SouthLight Healthcare
+- [ ] Sent
+**Where:** the form at https://southlight.org/contact-us/
+
+**Subject:** Your counselor-sourced recovery apps guide — the gap nobody's filled
+
+Hi team,
+
+I came across your recovery apps guide — updated this summer and sourced from counselors, which tells me you actually maintain it. That's exactly the kind of list I'd want my app judged by.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+For your next update, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 17. Holon Health
+- [ ] Sent
+**Where:** the form at https://www.holonhealth.com/contact-us/
+
+**Subject:** Your 2026 recovery apps top-5 — for the next edition
+
+Hi team,
+
+I came across your top-5 recovery apps for 2026. Since you refresh it yearly, I want to put one on your radar for the next edition — because it covers the one thing no top-5 has.
+
+The family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+For the next edition, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 18. ChoosingTherapy.com
+- [ ] Sent
+**Where:** the form at https://www.choosingtherapy.com/contact-us/
+
+**Subject:** Suggestion for your best sobriety apps article
+
+Hi team,
+
+I came across your best sobriety apps article — I know you update it annually and take suggestions, so here's mine, and it fills a gap no app on the current list covers.
+
+The family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+For your next annual update, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+### 19. Flagler Health and Wellness
+- [ ] Sent
+**Where:** the form at https://flaglerhealing.com/contact-us/
+
+**Subject:** Your recovery apps roundups — the gap nobody's filled
+
+Hi team,
+
+I came across your best addiction recovery apps article — you run more than one app roundup, so this is clearly a topic you keep current.
+
+Here's the gap none of the roundups have filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing either article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 20. Pinnacle Treatment Centers
+- [ ] Sent
+**Where:** the form at https://pinnacletreatment.com/contact/
+
+**Subject:** Your recovery apps articles — the gap nobody's filled
+
+Hi team,
+
+I came across your recovery apps coverage — you publish on this more than once, so you clearly keep it current.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing your app coverage, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+## WEEK 5
+
+### 21. Banyan Treatment Center
+- [ ] Sent
+**Where:** the form at https://www.banyantreatmentcenter.com/
+
+**Subject:** Your top apps for addiction recovery — the gap nobody's filled
+
+Hi team,
+
+I came across your top apps for addiction recovery article — one of the bigger lists out there, which makes the missing category stand out even more.
+
+Not one app on it is built for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 22. Clearbrook (Banyan)
+- [ ] Sent
+**Where:** the contact options at https://clearbrook.banyantreatmentcenter.com/
+
+**Subject:** Your sobriety apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on sobriety apps and what to know about them. (I've also written to your sister site at Banyan — same reason, worth saying to both.)
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 23. Compassion Recovery Centers
+- [ ] Sent
+**Where:** the form at https://compassionrecoverycenters.com/contact/
+
+**Subject:** Your technology-in-recovery article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on technology in recovery — you write about tech like it's an ally, not a threat, and as a telehealth-first program you live that. That's why I'm writing to you specifically.
+
+Here's the gap the tech hasn't filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 24. Great Oaks Recovery
+- [ ] Sent
+**Where:** the form at https://greatoaksrecovery.com/contact-us/
+
+**Subject:** Your helpful recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on helpful recovery apps — you've covered this topic more than once, so you clearly keep it current.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 25. Indiana Center for Recovery
+- [ ] Sent
+**Where:** the form at https://www.treatmentindiana.com/contact/
+
+**Subject:** Your sober apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on the best sober apps — you publish steadily on digital recovery, which is why I'm writing to you.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+## WEEK 6 — the big fish (you've had 5 weeks of practice)
+
+### 26. Asana Lodge (UK)
+- [ ] Sent
+**Where:** the contact options at https://asanalodge.com/
+
+**Subject:** Your recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article on apps that can help with addiction recovery.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 27. American Addiction Centers
+- [ ] Sent
+**Where:** the form at https://americanaddictioncenters.org/contact-us
+
+**Subject:** Your sobriety apps article — the category it's missing
+
+Hi team,
+
+I came across your article on addiction recovery and sobriety phone apps. You're the biggest name that covers this — which is exactly why the missing category matters most on your list.
+
+Not one app on it is built for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+### 28. Rehabs.com
+- [ ] Sent
+**Where:** the form at https://rehabs.com/contact-us/ — pick the press / business option if it asks
+
+**Subject:** Your smartphone apps article — the category it's missing
+
+Hi team,
+
+I came across your article on smartphone apps for treatment and recovery.
+
+Here's the category it's missing — the one no list has: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+### 29. Recovery Research Institute
+- [ ] Sent
+**Where:** the contact options at https://www.recoveryanswers.org/
+
+**Subject:** What does it take to be included in your recovery technology directory?
+
+Hi team,
+
+I found your recovery technology directory and I'd like to ask directly: what does an app need to meet for inclusion?
+
+Mine fills a category the directory doesn't have yet: support for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+Whatever your bar is — evidence, review, criteria — tell me what it takes and I'll do the work: https://www.turnsomedayintodayone.com
+
+Thank you,
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 30. GoodRx Health
+- [ ] Sent
+**Where:** the contact link in the footer of https://www.goodrx.com/
+
+**Subject:** Your substance use apps article — the category it's missing
+
+Hi team,
+
+I came across your article on mobile apps for managing substance use.
+
+Here's the category it's missing — the one no list has: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+P.S. I also keep an honest, current comparison of recovery apps myself — competitors included where they fit better: turnsomedayintodayone.com/best-recovery-apps
+
+---
+
+## THE FOLLOW-UP (one week after no reply — copy and send as-is, once, then let it go)
+
+**Subject:** Re: (the same subject you sent them)
+
+Hi — floating this back up once. Short version: your recovery-apps article has nothing for the family, and mine was built exactly for that — by someone who lived it, free to start: turnsomedayintodayone.com
+
+Either way, thanks for what you put out. Lists like yours are how people find help.
+
+Jacques

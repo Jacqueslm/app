@@ -16,6 +16,8 @@ Do them in order. Cross one off when it's posted.
 | Supporting someone | 6 |
 | ALCOHOL — the drinker | 17–22 |
 | FOOD — binge eating | 13–16 |
+| QUIZ hook — send them to /quiz | 23, 24 |
+| MULTI-ADDICTION — the app's edge | 25 |
 | AI scenes (cost money) | 8, 9, 10 |
 
 ---
@@ -569,6 +571,85 @@ SAY: *"You don't beat it with a diet. You beat it by facing what it was feeding.
 > and nobody's watching.
 
 **Caption:** Day four counts the most. Link in bio.
+
+---
+
+## 23. TALK — "The 2-minute check-in"
+
+**Title:** Is it a habit or is it an addiction? Check in 2 minutes
+
+**Say this:**
+
+> You don't have to call it an addiction.
+>
+> You don't have to call it anything.
+>
+> But if you've been wondering —
+> if you keep telling yourself "I can stop whenever I want"
+> and some part of you isn't sure —
+>
+> there's a 2-minute check-in on my site.
+> No signup. No judgment. Nobody sees your answers.
+>
+> Two minutes. You'll know where you actually stand.
+>
+> That's how mine started. With one honest look.
+
+**Caption:** The 2-minute check-in: turnsomedayintodayone.com/quiz — no signup, nobody sees your answers.
+
+---
+
+## 24. TALK — "I can stop whenever I want"
+
+**Title:** "I can stop whenever I want" — so prove it to yourself
+
+**Say this:**
+
+> "I can stop whenever I want."
+>
+> I said that for 38 years.
+>
+> Here's the thing — I never actually checked.
+> Because checking meant maybe finding out.
+>
+> There's a 2-minute check-in on my site.
+> It's not a test. Nobody sees it.
+> It just asks you the questions
+> you've been avoiding asking yourself.
+>
+> If you can stop whenever you want —
+> two minutes costs you nothing.
+>
+> If you can't… two minutes is where it turns around.
+
+**Caption:** Two minutes, just you and the truth: turnsomedayintodayone.com/quiz
+
+---
+
+## 25. TALK — "Pick one addiction"
+
+**Title:** Most recovery apps make you pick ONE addiction
+
+**Say this:**
+
+> Most recovery apps make you pick one addiction.
+>
+> One. Like life works that way.
+>
+> Ask anybody who's lived it —
+> the drinking came with the gambling.
+> The porn came with the food.
+> You put one down and pick another one up.
+>
+> That's why I built mine with 13 tracks
+> that work together, not separately.
+>
+> You're not three broken people.
+> You're one person, healing.
+>
+> And you only need one Day One.
+
+**Caption:** 13 habit tracks, one app, one Day One. Link in bio.
 
 ---
 

@@ -77,6 +77,12 @@ app.get('/brainreset', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
 });
 
+// Clean URL for the 2-Minute Check-In quiz - speakable in videos
+// ("turnsomedayintodayone.com/quiz") without the .html extension.
+app.get('/quiz', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'quiz.html'));
+});
+
 // The partner-facing landing page - the day-2 trial email and the "Send this
 // page to her" button both link here.
 app.get('/for-her', (req, res) => {

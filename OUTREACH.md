@@ -10,6 +10,33 @@ post. Never pay for placement — if anyone asks for money, decline politely.
 
 ---
 
+## WHEN THERE'S NO EMAIL, JUST A CONTACT FORM
+
+Most of these sites hide the email behind a form. That's fine — forms work,
+a real person reads them.
+
+**Try this first (10 seconds):** email `info@` + their web address. For
+castlecraig.co.uk that's `info@castlecraig.co.uk`. Works maybe half the time.
+If it bounces, no harm — go use the form.
+
+**Using the form:**
+- Fill in ONLY the fields marked **(Required)**. Skip address, skip anything
+  optional. They don't need it.
+- Phone is often required. Use your number, or make a free Google Voice
+  number if you'd rather not give out your own. These are treatment centers,
+  not spammers — either is fine.
+- Put the **subject line** as the first line of the message box, then paste
+  the **body** underneath it.
+- If there's a dropdown asking why you're contacting them, pick anything like
+  "general enquiry," "media," "partnership," or "other" — never "admissions"
+  or "I need treatment."
+
+**Heads up:** these forms usually go to the admissions team, not the person
+who writes the blog. That's normal. Someone reads it and passes it along.
+Send it anyway — that's how every one of these gets reached.
+
+---
+
 ## WEEK 1
 
 ### 1. Empowered Recovery Center

@@ -96,6 +96,13 @@ app.get('/when-he-drinks', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
 });
 
+// Lowest-difficulty term in the keyword set, and the quiz already answers it -
+// so this page is a short honest bridge: it refuses to diagnose him, reframes
+// the question onto her own life, and routes to /quiz (primary) and /for-her.
+app.get('/is-my-husband-an-alcoholic', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'is-my-husband-an-alcoholic.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

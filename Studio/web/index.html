@@ -567,7 +567,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
     </div>
     <div class="card" id="pipe-card">
-      <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
+      <h3>🚀 One-Click Pipeline <span class="usage">— song in, finished video out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
       <p class="usage">Each step lights up when the one before it is done. Nothing is generated without you pressing its button — every checkpoint is yours.</p>
     </div>
@@ -778,12 +778,12 @@ body.simple-only #view-simple{display:flex !important}
           <option value="0.92">92%</option>
         </select>
       </div>
-      <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
+      <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
     </div>
 
     <div class="card" id="wm-card">
       <h3>🏷 Brand watermark <span class="usage">— your @handle on every video (free)</span></h3>
-      <label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" id="wm-on"> Add my brand to renders &amp; shorts</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" id="wm-on"> Add my brand to renders</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
         <input class="input" id="wm-text" placeholder="@yourhandle (or upload a logo →)" style="flex:1;min-width:140px" maxlength="40">
         <button class="btn2 quiet" id="wm-logo-upload">🖼 Upload logo</button>
@@ -815,75 +815,6 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="sb-queue-status" style="display:none"></p>
     </div>
 
-    <div class="card">
-      <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
-      <div class="row">
-        <label class="lbl">📱 Quick templates <span style="text-transform:none;font-weight:400">— one tap sets the length, captions &amp; loop, then builds</span></label>
-        <div class="chips" id="sh-templates"></div>
-      </div>
-      <div class="row">
-        <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
-        <div class="chips" id="hl-chips"></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <input class="input" id="hl-label" placeholder="hook / drop / chorus" style="flex:1;min-width:90px">
-          <input class="input" id="hl-time" type="number" min="0" step="0.5" placeholder="time (s)" style="width:90px">
-          <button class="btn2" id="hl-add">Mark</button>
-          <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
-        </div>
-      </div>
-      <div class="row" id="clip-picker-row">
-        <label class="lbl">Clip picker <span style="text-transform:none;font-weight:400">— pick the strongest sentences from your filmed video</span></label>
-        <div id="cp-transcript-list" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn2" id="cp-load-transcript">Load my transcript</button>
-          <button class="btn2" id="cp-add-clips" style="display:none">Add selected as clips</button>
-          <button class="btn2 quiet" id="cp-clear-sel" style="display:none">Clear selection</button>
-        </div>
-      </div>
-      <div class="trim" style="font-size:12px">
-        <span>Lengths</span>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="7">7s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="30" checked>30s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="60">60s</label>
-        <label style="display:flex;align-items:center;gap:4px;margin-left:auto"><input type="checkbox" id="sh-loop-default" checked>seamless loop</label>
-      </div>
-      <button class="btn2" id="sh-build">Build shorts list</button>
-      <div id="sh-list" class="row"></div>
-      <button class="gen-btn" id="sh-render" style="display:none">Render all shorts</button>
-      <div id="sh-results" class="row"></div>
-      <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
-    </div>
-
-    <div class="card">
-      <h3>📦 Campaign Export <span class="usage">(one video → a ready-to-post campaign)</span></h3>
-      <input class="input" id="cp-title" placeholder="Song title">
-      <input class="input" id="cp-artist" placeholder="Artist name">
-      <input class="input" id="cp-link" placeholder="Link (Spotify / YouTube / linktree…)">
-      <input class="input" id="cp-tags" placeholder="#yourhashtags #music #newmusic">
-      <div class="row">
-        <label class="lbl">Main video</label>
-        <select class="input" id="cp-main"></select>
-      </div>
-      <div class="row">
-        <label class="lbl">Shorts to include <span style="text-transform:none;font-weight:400">(tap to toggle)</span></label>
-        <div class="chips" id="cp-shorts"></div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2" id="cp-thumbs">Make thumbnails</button>
-        <button class="btn2" id="cp-captions">Write my captions</button>
-      </div>
-      <div class="char-refs" id="cp-thumb-row"></div>
-      <div id="cp-posts" class="row"></div>
-      <div class="trim" style="font-size:12px">
-        <span>Start posting on</span><input type="date" id="cp-date" class="input" style="width:auto;padding:6px 8px;font-size:12px">
-        <span>· one post per day, main video first</span>
-      </div>
-      <button class="gen-btn" id="cp-export">Export campaign (ZIP)</button>
-      <p class="usage" id="cp-status"></p>
-      <p class="usage">The ZIP contains your videos, thumbnails, a posts.csv with every caption + suggested time, and campaign.json (ready for the Buffer API hookup later). Upload to Buffer post-by-post — everything's pre-written.</p>
-    </div>
-
     <div class="card adv-card">
       <h3>🎵 Your Audience <span class="usage" id="fans-count"></span></h3>
       <p class="usage">An email signup page (<code>join.html</code>) is built in — a fan list you own, not one an algorithm controls. Right now it only works on this computer; to actually catch signups, this server needs to live at a real public address (see below).</p>
@@ -896,7 +827,7 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card adv-card">
       <h3>📖 Guide &amp; help</h3>
-      <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow. Open it any time.</p>
+      <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video flow. Open it any time.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="doc-guide">📖 Open the guide (PDF)</button>
         <button class="btn2 quiet" id="doc-pricelist">📄 Price list (PDF)</button>
@@ -1650,8 +1581,8 @@ const st = {
   keepAudioAssets: new Set(), // assetIds whose own sound (dialogue) rides in the mix
   trans: [],            // transitions between consecutive items
   overlays: [],         // text overlay specs (rendered to PNG at export time)
-  highlights: [],       // shorts generator markers [{label, time}]
-  shorts: [],           // built short specs [{name, start, len, text, loop}]
+  highlights: [],       // legacy: kept so older saved drafts load cleanly
+  shorts: [],           // legacy: kept so older saved drafts load cleanly
   musicList: [],        // playlist [{assetId, start, len}] - songs play in order
   captions: [],         // lyric captions [{text, start, end}] in timeline seconds
   storyboard: [],        // scene list [{index, lines, prompt, assetId}]
@@ -5028,12 +4959,6 @@ function renderSeqPickers() {
     ? music.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
     : '<option value="">No songs uploaded yet</option>';
 
-  const fullVids = st.assets.filter((a) => a.kind === 'video' && !a.label.startsWith('short_'));
-  $('#cp-main').innerHTML = fullVids.length
-    ? fullVids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
-    : '<option value="">Render a video first</option>';
-  renderCampaignShorts();
-
   const kbCurrent = $('#kb-image').value;
   $('#kb-image').innerHTML = '<option value="">Choose a still image…</option>' +
     imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
@@ -5827,7 +5752,6 @@ Object.entries({
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
   'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene.',
   'seq-render': 'FREE. Renders the timeline into the final MP4 with music, captions, and mastered audio.',
-  'hl-auto': 'FREE. Finds your best short-video moments: the chorus/hook if captions exist, loudest sections otherwise.',
   'loc-create': 'Save a place once (add photos after) and reuse it in any scene from the location dropdown.',
   'char-create': 'Create a star. Then upload 6–20 clear solo photos and train their face lock.',
 }).forEach(([id, tip]) => { const el = document.getElementById(id); if (el) el.title = tip; });
@@ -6222,7 +6146,7 @@ $('#crew-direct').onclick = async () => {
         if (shots.some((s) => s.scene.section === 'bridge')) tips.push('🎭 The bridge is a great <b>Live Portrait</b> moment (~10¢): film your face performing the emotion, your still delivers it.');
         return tips.length ? `<p style="font-size:12px;margin:0">💡 <b>Crew suggestions (optional, not in the budget):</b></p>` + tips.slice(0, 4).map((t) => `<p style="font-size:12px;color:var(--ts);margin:0">&nbsp;&nbsp;${t}</p>`).join('') : '';
       })()
-      + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> shorts &amp; reels cut to open right on the hook (the Shorts card's auto-detect reads your captions for the chorus), then Campaign Export packs everything with captions and a posting schedule.</p>`
+      + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> the Reframe tool in your library turns the finished video into vertical, square, or wide cuts for any platform.</p>`
       + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
         shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. This plan is free — nothing is charged until you press the Producer.</p>`;
     $('#crew-produce').style.display = 'block';
@@ -6304,7 +6228,7 @@ $('#crew-produce').onclick = async () => {
     b.innerHTML = '<span class="spinner"></span>Assembling…';
     await $('#qk-assemble').onclick();
     crew.eqByIndex = null; // grade is on the timeline now; manual assembles stay clean
-    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
+    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks).';
     crew.qcFlags = 0;
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '💼 Producer: make it';
@@ -6364,10 +6288,6 @@ function renderPipeline() {
     {
       icon: '🎥', name: 'Render', done: false, needs: st.seq.length > 0,
       hint: 'Full video with captions burned in', action: 'Render', run: () => $('#seq-render').onclick(),
-    },
-    {
-      icon: '📱', name: 'Shorts & campaign', done: false, needs: st.seq.length > 0,
-      hint: 'Hook-aware shorts, then the posting ZIP', action: 'Open', run: () => flashCard('#hl-auto'),
     },
   ];
   box.innerHTML = '';
@@ -6931,389 +6851,6 @@ async function pollQueueOnce() {
   }
 }
 
-/* ---------------- clip picker: transcript sentences -> vertical clips ------- */
-// Reads the transcript saved on the filmed video (Captions card -> 🎙️), shows
-// every line as a clickable row, and turns each contiguous selection into an
-// entry in the shorts list - cut, cropped, and captioned by the existing
-// pipeline. "One long video -> a week of clips" in a few clicks.
-const cpSel = new Set();
-
-function firstTimelineVideo() {
-  const idx = st.seq.findIndex((c) => c.kind === 'video');
-  return idx === -1 ? null : { clip: st.seq[idx], idx };
-}
-function clipPlayDur(c) {
-  return c.kind === 'image' ? (c.holdDur || 4) : Math.max(0, (c.end ?? c.duration ?? 0) - (c.start || 0));
-}
-// Where a timeline item starts in output time (transitions overlap on xfades).
-function timelineOffsetOfClip(idx) {
-  let off = 0;
-  for (let i = 0; i < idx; i++) {
-    off += clipPlayDur(st.seq[i]);
-    const t = st.trans[i];
-    if (t && t.type && t.type !== 'cut') off -= Math.min(2, Math.max(0.2, Number(t.duration) || 0.5));
-  }
-  return Math.max(0, off);
-}
-function cpTranscriptLines() {
-  const found = firstTimelineVideo();
-  if (!found) return null;
-  const asset = st.assets.find((a) => a.id === found.clip.assetId);
-  return asset?.meta?.transcript?.lines || null;
-}
-
-function renderClipPicker() {
-  const list = $('#cp-transcript-list');
-  const lines = cpTranscriptLines();
-  const has = Array.isArray(lines) && lines.length;
-  $('#cp-add-clips').style.display = has ? '' : 'none';
-  $('#cp-clear-sel').style.display = has ? '' : 'none';
-  $('#cp-load-transcript').style.display = has ? 'none' : '';
-  if (!has) {
-    list.innerHTML = '<span class="usage">No transcript yet. Add your filmed video to the timeline, then use 🎙️ Captions from my voice (Captions card) — the transcript lands here automatically.</span>';
-    return;
-  }
-  list.innerHTML = '';
-  lines.forEach((l, i) => {
-    const row = document.createElement('div');
-    const on = cpSel.has(i);
-    row.style.cssText = `padding:6px 10px;border-radius:8px;font-size:13px;line-height:1.45;cursor:pointer;border:1px solid ${on ? 'var(--acc, #7c5cff)' : 'transparent'};background:${on ? 'rgba(124,92,255,0.14)' : 'rgba(255,255,255,0.03)'}`;
-    row.innerHTML = `<span style="opacity:.5;font-size:11px;margin-right:8px">${l.start.toFixed(1)}s</span>${l.text.replace(/</g, '&lt;')}`;
-    row.onclick = () => { cpSel.has(i) ? cpSel.delete(i) : cpSel.add(i); renderClipPicker(); };
-    list.appendChild(row);
-  });
-}
-
-$('#cp-load-transcript').onclick = () => {
-  renderClipPicker();
-  if (!cpTranscriptLines()) setErr('#seq-err', 'Transcribe your video first: Captions card → 🎙️ Captions from my voice (free).');
-};
-$('#cp-clear-sel').onclick = () => { cpSel.clear(); renderClipPicker(); };
-
-$('#cp-add-clips').onclick = () => {
-  setErr('#seq-err', null);
-  const lines = cpTranscriptLines();
-  const found = firstTimelineVideo();
-  if (!lines || !found) return;
-  if (!cpSel.size) return setErr('#seq-err', 'Tap the sentences you want in the clip first.');
-  // Contiguous selected lines merge into one clip; gaps split into separate clips.
-  const idxs = [...cpSel].sort((a, b) => a - b);
-  const groups = [];
-  for (const i of idxs) {
-    const g = groups[groups.length - 1];
-    if (g && i === g[g.length - 1] + 1) g.push(i); else groups.push([i]);
-  }
-  const { clip, idx } = found;
-  const base = timelineOffsetOfClip(idx);
-  const timelineLen = clipPlayDur(clip);
-  let added = 0;
-  for (const g of groups) {
-    // transcript times are in the video file's own clock; shift into timeline time
-    const rawStart = lines[g[0]].start - (clip.start || 0) - 0.25;           // slight pre-roll
-    const rawEnd = lines[g[g.length - 1]].end - (clip.start || 0) + 0.4;    // slight post-roll
-    const start = base + Math.min(Math.max(0, rawStart), timelineLen);
-    const end = base + Math.min(Math.max(0, rawEnd), timelineLen);
-    const len = Math.round((end - start) * 10) / 10;
-    if (len < 1.5) continue;
-    const slug = slugName(lines[g[0]].text.split(/\s+/).slice(0, 4).join(' '));
-    let name = `clip_${slug}`, bump = 2;
-    while (st.shorts.some((x) => x.name === name)) name = `clip_${slug}${bump++}`;
-    st.shorts.push({ name, start: Math.round(start * 10) / 10, len: Math.min(180, len), text: '', loop: false });
-    added++;
-  }
-  cpSel.clear();
-  renderClipPicker();
-  if (!added) return setErr('#seq-err', 'Those selections were too short to make a clip (under 1.5s).');
-  renderShortsList();
-  $('#sh-list').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-};
-
-/* ---------------- shorts generator ---------------- */
-function slugName(s) {
-  return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 24) || 'short';
-}
-
-function renderHighlights() {
-  const el = $('#hl-chips');
-  el.innerHTML = st.highlights.length ? '' : '<span class="usage">No highlights marked yet.</span>';
-  st.highlights.forEach((h, i) => {
-    const b = document.createElement('button');
-    b.className = 'chip';
-    b.textContent = `${h.label} @ ${h.time.toFixed(1)}s ✕`;
-    b.onclick = () => { st.highlights.splice(i, 1); renderHighlights(); persistDraft(); };
-    el.appendChild(b);
-  });
-}
-
-$('#hl-add').onclick = () => {
-  const label = $('#hl-label').value.trim() || `mark${st.highlights.length + 1}`;
-  const time = Math.max(0, Number($('#hl-time').value) || 0);
-  const total = timelineTotal();
-  if (total && time >= total) return setErr('#seq-err', `That's past the end of the timeline (${total.toFixed(1)}s).`);
-  st.highlights.push({ label, time });
-  $('#hl-label').value = ''; $('#hl-time').value = '';
-  renderHighlights(); persistDraft();
-};
-
-// Find the loudest sustained sections of the song (drop/chorus candidates)
-// and mark them as highlights, mapped into timeline time.
-$('#hl-auto').onclick = async () => {
-  setErr('#seq-err', null);
-  const asset = firstMusicAsset();
-  if (!asset) return setErr('#seq-err', 'Add a music track first.');
-  const total = timelineTotal();
-  if (!total) return setErr('#seq-err', 'Build your timeline first.');
-  $('#hl-auto').disabled = true;
-  $('#hl-auto').textContent = 'Listening…';
-  try {
-    const buf = await (await fetch(asset.url)).arrayBuffer();
-    const ac = new (window.AudioContext || window.webkitAudioContext)();
-    const audio = await ac.decodeAudioData(buf);
-    const data = audio.getChannelData(0);
-    const win = audio.sampleRate; // 1s windows
-    const n = Math.floor(data.length / win);
-    const rms = [];
-    for (let i = 0; i < n; i++) {
-      let s = 0;
-      for (let j = i * win; j < (i + 1) * win; j += 16) s += data[j] * data[j];
-      rms.push({ t: i, v: Math.sqrt(s / (win / 16)) });
-    }
-    ac.close();
-    const musicStart = st.musicList[0]?.start || 0;
-    // Semantic pass first: if captions exist, repeated lines = the chorus.
-    // A short that OPENS on the hook beats one that opens on a loud drum
-    // fill, so chorus starts outrank raw loudness.
-    const picked = [];   // { t, label }
-    if (st.captions.length >= 4) {
-      const norm = (s) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
-      const counts = {};
-      for (const c of st.captions) { const k = norm(c.text); if (k) counts[k] = (counts[k] || 0) + 1; }
-      const repeated = new Set(Object.keys(counts).filter((k) => counts[k] >= 2));
-      st.captions.forEach((c, i) => {
-        if (!repeated.has(norm(c.text))) return;
-        const prev = st.captions[i - 1];
-        if (prev && repeated.has(norm(prev.text)) && c.start - prev.start < 12) return; // inside the same chorus block
-        const t = c.start;
-        if (t < 0 || t > total - 5) return;
-        if (picked.some((p) => Math.abs(p.t - t) < 15)) return;
-        if (picked.length < 2) picked.push({ t, label: picked.length ? 'chorus2' : 'hook' });
-      });
-    }
-    // fill remaining slots with the loudest distinct sections
-    for (const c of [...rms].sort((a, b) => b.v - a.v)) {
-      if (picked.length >= 3) break;
-      const tl = c.t - musicStart;
-      if (tl < 0 || tl > total - 5) continue;
-      if (picked.some((p) => Math.abs(p.t - tl) < 15)) continue;
-      picked.push({ t: tl, label: 'drop' });
-    }
-    if (!picked.length) return setErr('#seq-err', 'Could not find distinct loud sections inside the timeline.');
-    picked.sort((a, b) => a.t - b.t).forEach((p, i) => {
-      st.highlights.push({ label: picked.filter((x) => x.label === p.label).length > 1 ? `${p.label}${i + 1}` : p.label, time: Math.round(p.t * 10) / 10 });
-    });
-    renderHighlights(); persistDraft();
-  } catch (e) {
-    setErr('#seq-err', `Could not analyze that track: ${e.message}`);
-  } finally {
-    $('#hl-auto').disabled = false;
-    $('#hl-auto').textContent = 'Auto-detect from music';
-  }
-};
-
-// One-tap Short/Reel templates: each sets the length, caption style and loop,
-// then builds the shorts list — so making a platform-ready cut is a single tap.
-const SHORT_TEMPLATES = {
-  tiktok:    { label: '🎯 TikTok Hook',  lens: [15], caption: 'pop',     loop: true,  note: '15s, yellow-pop captions, opens on the hook, seamless loop' },
-  reel:      { label: '📸 IG Reel',      lens: [30], caption: 'outline', loop: false, note: '30s, bold-outline captions — the Instagram sweet spot' },
-  teaser:    { label: '⚡ Teaser',        lens: [15], caption: 'boxed',   loop: true,  note: '15s punchy teaser, boxed captions, loops' },
-  lyric:     { label: '🎤 Lyric Drop',   lens: [15], caption: 'pop',     loop: true,  note: '15s built around a lyric line, big yellow captions' },
-  chorus:    { label: '🔁 Full Chorus',  lens: [30], caption: 'outline', loop: true,  note: '30s on the chorus, loops clean for replays' },
-  cinematic: { label: '🎬 Cinematic',    lens: [60], caption: 'classic', loop: false, note: '60s cinematic cut, clean classic captions' },
-  triple:    { label: '📦 All 3 sizes',  lens: [15, 30, 60], caption: 'outline', loop: true, note: 'Builds 15s + 30s + 60s at once from every highlight' },
-  beatsync:  { label: '⚡ Beat-sync',    lens: [15], caption: 'pop',     loop: true,  note: '15s fast cuts, yellow-pop captions — highest energy' },
-  slideshow: { label: '🖼 Slideshow',    lens: [30], caption: 'classic', loop: false, note: '30s clean slideshow feel, classic captions' },
-  snippet:   { label: '✂️ Snippet',      lens: [7],  caption: 'boxed',   loop: true,  note: '7s quick snippet for a story/status post' },
-};
-function renderShortTemplates() {
-  const box = document.getElementById('sh-templates');
-  if (!box) return;
-  box.innerHTML = '';
-  Object.entries(SHORT_TEMPLATES).forEach(([key, t]) => {
-    const b = document.createElement('button');
-    b.className = 'chip'; b.textContent = t.label; b.title = t.note;
-    b.onclick = () => applyShortTemplate(key);
-    box.appendChild(b);
-  });
-}
-function applyShortTemplate(key) {
-  const t = SHORT_TEMPLATES[key];
-  if (!t) return;
-  if (!timelineTotal()) { setErr('#seq-err', 'Build your timeline (and render) first — shorts are cut from your finished video.'); return; }
-  document.querySelectorAll('.sh-len').forEach((el) => { el.checked = t.lens.includes(Number(el.value)); });
-  localStorage.setItem('tsid-caption-style', t.caption);
-  if (typeof renderCaptionStyles === 'function') renderCaptionStyles();
-  if (typeof renderCaptionPreview === 'function') renderCaptionPreview();
-  const loopBox = document.getElementById('sh-loop-default'); if (loopBox) loopBox.checked = t.loop;
-  document.querySelectorAll('#sh-templates .chip').forEach((c) => c.classList.toggle('on', c.textContent === t.label));
-  $('#sh-build').onclick(); // build the shorts list with these settings
-}
-renderShortTemplates();
-
-$('#sh-build').onclick = () => {
-  setErr('#seq-err', null);
-  const total = timelineTotal();
-  if (!total) return setErr('#seq-err', 'Build your timeline first.');
-  const lens = [...document.querySelectorAll('.sh-len:checked')].map((el) => Number(el.value));
-  if (!lens.length) return setErr('#seq-err', 'Pick at least one short length.');
-  const loop = $('#sh-loop-default').checked;
-  // No highlights marked? Spread starts across the video so you still get variations.
-  const marks = st.highlights.length ? st.highlights
-    : [{ label: 'open', time: 0 }, { label: 'mid', time: total / 2 }, { label: 'end', time: Math.max(0, total - 20) }];
-  st.shorts = [];
-  const seen = new Set();
-  for (const h of marks) {
-    for (const len of lens) {
-      const effLen = Math.min(len, Math.floor(total * 10) / 10);
-      // the short OPENS on the highlight - the marked moment is your scroll-stopper
-      const start = Math.round(Math.min(Math.max(0, h.time), Math.max(0, total - effLen)) * 10) / 10;
-      const key = `${start}-${effLen}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      let name = `short_${slugName(h.label)}_${len}s`;
-      let bump = 2;
-      while (st.shorts.some((x) => x.name === name)) name = `short_${slugName(h.label)}${bump++}_${len}s`;
-      st.shorts.push({ name, start, len: effLen, text: '', loop });
-    }
-  }
-  renderShortsList();
-};
-
-function renderShortsList() {
-  const list = $('#sh-list');
-  list.innerHTML = '';
-  $('#sh-render').style.display = st.shorts.length ? 'block' : 'none';
-  st.shorts.forEach((s, i) => {
-    const row = document.createElement('div');
-    row.className = 'seq-item';
-    row.style.flexDirection = 'column';
-    row.style.alignItems = 'stretch';
-    row.innerHTML = `
-      <div class="trim" style="font-size:12px">
-        <b style="color:var(--tp)">${escapeHtml(s.name)}</b>
-        <span style="margin-left:auto">from</span><input type="number" class="s-start" min="0" step="0.5" value="${s.start}">
-        <span>s · ${s.len}s</span>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="s-loop" ${s.loop ? 'checked' : ''}>loop</label>
-        <button class="s-del" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button>
-      </div>
-      <input class="input s-text" placeholder="Hook caption for this short (optional, A/B test different ones)" value="${escapeHtml(s.text)}" style="padding:8px 10px;font-size:12px">`;
-    row.querySelector('.s-start').onchange = (e) => {
-      const total = timelineTotal();
-      s.start = Math.min(Math.max(0, Number(e.target.value) || 0), Math.max(0, total - s.len));
-      e.target.value = s.start;
-    };
-    row.querySelector('.s-loop').onchange = (e) => { s.loop = e.target.checked; };
-    row.querySelector('.s-text').oninput = (e) => { s.text = e.target.value; };
-    row.querySelector('.s-del').onclick = () => { st.shorts.splice(i, 1); renderShortsList(); };
-    list.appendChild(row);
-  });
-}
-
-async function renderOneShort(s, statusEl) {
-  const overlays = [];
-  if (s.text.trim()) {
-    const canvas = drawOverlay(
-      { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: 64, color: '#ffffff', bold: true, pos: 2, },
-      1080, 1920);
-    const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
-    const asset = await uploadFile(new File([blob], `${s.name}-caption.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
-    // caption shows over the start of the short (timeline coords = window start + offset)
-    overlays.push({ assetId: asset.id, start: s.start + 0.2, end: s.start + Math.min(4.2, s.len - 0.3), fade: 0.3 });
-  }
-  const spec = collectSpec();
-  const { job } = await jfetch('/api/studio/render', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      clips: st.seq.map((c) => c.kind === 'image'
-        ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
-        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, keepAudio: st.keepAudioAssets.has(c.assetId) }),
-      transitions: st.trans,
-      music: spec.music.tracks.length ? spec.music : null,
-      overlays,
-      size: '1080x1920',
-      fit: st.seqFit,
-      window: { start: s.start, end: s.start + s.len },
-      loop: s.loop,
-      name: s.name,
-      enhance: spec.enhance,
-      kenBurns: spec.kenBurns,
-      kenBurnsAmount: spec.kenBurnsAmount,
-      kenBurnsMove: spec.kenBurnsMove,
-      watermark: spec.watermark,
-      captionLines: captionLinesPayload(),
-      captionStyle: captionStyleKey(),
-      captionSize: captionSizeKey(),
-      captionWidth: captionWidthPct(),
-    }),
-  });
-  const done = await pollJob(job.id, (j) => { statusEl.textContent = `rendering ${j.progress}%`; });
-  return done.assetId;
-}
-
-$('#sh-render').onclick = async () => {
-  if (st.busyRender) return;
-  setErr('#seq-err', null);
-  if (!st.shorts.length) return;
-  st.busyRender = true;
-  $('#sh-render').disabled = true;
-  const results = $('#sh-results');
-  results.innerHTML = '';
-  $('#sh-dl-all').style.display = 'none';
-  const rows = st.shorts.map((s) => {
-    const row = document.createElement('div');
-    row.className = 'trim';
-    row.style.fontSize = '12px';
-    row.innerHTML = `<b style="color:var(--tp)">${escapeHtml(s.name)}</b> <span class="s-status" style="margin-left:auto">queued</span>`;
-    results.appendChild(row);
-    return row;
-  });
-  const doneAssets = [];
-  // two at a time keeps the CPU sane while still finishing a batch quickly
-  let idx = 0;
-  const worker = async () => {
-    while (idx < st.shorts.length) {
-      const my = idx++;
-      const statusEl = rows[my].querySelector('.s-status');
-      try {
-        const assetId = await renderOneShort(st.shorts[my], statusEl);
-        await loadAssets();
-        const asset = st.assets.find((a) => a.id === assetId);
-        statusEl.textContent = '';
-        const dl = document.createElement('button');
-        dl.className = 'btn2';
-        dl.style.cssText = 'padding:4px 10px;font-size:11px';
-        dl.textContent = 'Download';
-        dl.onclick = () => { const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.mp4'; l.click(); };
-        rows[my].appendChild(dl);
-        doneAssets.push(asset);
-      } catch (e) {
-        statusEl.textContent = `error: ${e.message.slice(0, 80)}`;
-      }
-    }
-  };
-  await Promise.all([worker(), worker()]);
-  st.busyRender = false;
-  $('#sh-render').disabled = false;
-  if (doneAssets.length) {
-    $('#sh-dl-all').style.display = 'block';
-    $('#sh-dl-all').onclick = async () => {
-      for (const a of doneAssets) {
-        const l = document.createElement('a'); l.href = a.url; l.download = a.label + '.mp4'; l.click();
-        await sleep(400); // browsers drop rapid-fire downloads
-      }
-    };
-  }
-};
-
 /* ---------------- Quick Video: one-click assemble ---------------- */
 // ─── PREMADE LOOKS ────────────────────────────────────────────────────────────
 // Built-in one-tap templates, CapCut-style: each stamps a rhythm (move,
@@ -7373,7 +6910,7 @@ const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_p
 const qk = { shots: [], format: '9:16', busy: false };
 
 // Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
-// else — Quick Video, pipeline, storyboard, shorts, campaign — is one tap away.
+// else — Quick Video, pipeline, storyboard — is one tap away.
 function applySimpleMode() {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';
   document.querySelectorAll('#view-seq > .card').forEach((c) => {
@@ -7667,173 +7204,6 @@ $('#qk-tpl-apply').onclick = async () => {
     renderQkShots();
     $('#qk-status').textContent = 'Template applied — press Assemble!';
   } catch (e) { setErr('#seq-err', `Could not load that template: ${e.message}`); }
-};
-
-/* ---------------- campaign export ---------------- */
-const cp = { thumbs: [], posts: [], shortsSel: new Set() };
-const CP_HOOKS = ['This part 🔥', 'Turn it up 🔊', 'New one out now 🎵', 'On repeat ♾️', 'Wait for the drop 👀'];
-
-function renderCampaignShorts() {
-  const el = $('#cp-shorts');
-  if (!el) return;
-  const shorts = st.assets.filter((a) => a.kind === 'video' && a.label.startsWith('short_'));
-  // newly rendered shorts start selected
-  shorts.forEach((a) => { if (!cp.seen?.has(a.id)) cp.shortsSel.add(a.id); });
-  cp.seen = new Set(shorts.map((a) => a.id));
-  el.innerHTML = shorts.length ? '' : '<span class="usage">No shorts yet — the Shorts Generator above makes them.</span>';
-  shorts.forEach((a) => {
-    const b = document.createElement('button');
-    b.className = 'chip' + (cp.shortsSel.has(a.id) ? ' on' : '');
-    b.textContent = a.label;
-    b.onclick = () => {
-      cp.shortsSel.has(a.id) ? cp.shortsSel.delete(a.id) : cp.shortsSel.add(a.id);
-      renderCampaignShorts();
-    };
-    el.appendChild(b);
-  });
-}
-
-// A YouTube-style thumbnail: the frame + a dark scrim + your title (or a lyric
-// line) in big bold text - all composited in the browser, free.
-async function textedThumb(frameAsset, text) {
-  const img = await new Promise((ok, err) => {
-    const i = new Image(); i.onload = () => ok(i); i.onerror = err; i.src = frameAsset.url;
-  });
-  const c = document.createElement('canvas');
-  c.width = img.width; c.height = img.height;
-  const ctx = c.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  const g = ctx.createLinearGradient(0, c.height * 0.5, 0, c.height);
-  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.78)');
-  ctx.fillStyle = g; ctx.fillRect(0, c.height * 0.5, c.width, c.height * 0.5);
-  let size = c.height * 0.12;
-  ctx.font = `800 ${size}px system-ui`;
-  const widest = Math.max(...text.split('\n').map((l) => ctx.measureText(l).width));
-  if (widest > c.width * 0.9) { size *= (c.width * 0.9) / widest; ctx.font = `800 ${size}px system-ui`; }
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = size / 6; ctx.shadowOffsetY = size / 20;
-  const lines = text.split('\n');
-  let y = c.height * 0.94 - (lines.length - 1) * size * 1.15;
-  for (const line of lines) { ctx.fillText(line, c.width / 2, y); y += size * 1.15; }
-  const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
-  return uploadFile(new File([blob], 'thumb-text.png', { type: 'image/png' }), 'image', null, { overlay: '1' });
-}
-
-$('#cp-thumbs').onclick = async () => {
-  setErr('#seq-err', null);
-  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
-  if (!main) return setErr('#seq-err', 'Pick a main video first.');
-  const dur = main.meta?.duration || 30;
-  $('#cp-thumbs').disabled = true;
-  $('#cp-status').textContent = 'Grabbing your best frames…';
-  try {
-    cp.thumbs = [];
-    const title = $('#cp-title').value.trim();
-    // best lyric hook = the first caption line, if lyrics are loaded
-    const hook = st.captions.length ? st.captions[0].text : '';
-    const texts = [title, hook && title ? `${hook}\n— ${title} —` : hook || title, title];
-    let k = 0;
-    for (const frac of [0.2, 0.5, 0.8]) {
-      const { asset } = await jfetch('/api/studio/thumbnail', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: main.id, time: Math.round(dur * frac * 10) / 10 }),
-      });
-      cp.thumbs.push(texts[k] ? await textedThumb(asset, texts[k]) : asset);
-      k++;
-    }
-    $('#cp-thumb-row').innerHTML = cp.thumbs.map((t) => `<img src="${t.url}" alt="">`).join('');
-    $('#cp-status').textContent = `${cp.thumbs.length} thumbnails ready — they'll be in the ZIP.`;
-    await loadAssets();
-  } catch (e) {
-    setErr('#seq-err', e.message);
-    $('#cp-status').textContent = '';
-  } finally {
-    $('#cp-thumbs').disabled = false;
-  }
-};
-
-function cpFields() {
-  return {
-    title: $('#cp-title').value.trim() || 'New track',
-    artist: $('#cp-artist').value.trim() || '',
-    link: $('#cp-link').value.trim(),
-    tags: $('#cp-tags').value.trim(),
-  };
-}
-
-$('#cp-captions').onclick = () => {
-  setErr('#seq-err', null);
-  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
-  if (!main) return setErr('#seq-err', 'Pick a main video first.');
-  const f = cpFields();
-  const by = f.artist ? ` — ${f.artist}` : '';
-  cp.posts = [{
-    assetId: main.id, label: main.label, platform: 'YouTube',
-    caption: `${f.title}${by} (Official Video)\n\n${f.link ? f.link + '\n\n' : ''}${f.tags}`.trim(),
-  }];
-  const shorts = st.assets.filter((a) => a.kind === 'video' && cp.shortsSel.has(a.id));
-  shorts.forEach((a, i) => {
-    cp.posts.push({
-      assetId: a.id, label: a.label, platform: 'TikTok / Reels / Shorts',
-      caption: `${CP_HOOKS[i % CP_HOOKS.length]}\n${f.title}${by}, out now${f.link ? '\n' + f.link : ''}\n\n${f.tags}`.trim(),
-    });
-  });
-  renderCpPosts();
-  $('#cp-status').textContent = 'Captions written — tweak any of them, then export.';
-};
-
-function renderCpPosts() {
-  const list = $('#cp-posts');
-  list.innerHTML = '';
-  cp.posts.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'seq-item';
-    row.style.flexDirection = 'column';
-    row.style.alignItems = 'stretch';
-    row.innerHTML = `
-      <div class="trim" style="font-size:12px"><b style="color:var(--tp)">${escapeHtml(p.label)}</b>
-        <select class="input p-platform" style="width:auto;padding:5px 8px;font-size:12px;margin-left:auto">
-          ${['YouTube', 'TikTok / Reels / Shorts', 'Instagram', 'X / Twitter', 'Facebook'].map((pl) => `<option${pl === p.platform ? ' selected' : ''}>${pl}</option>`).join('')}
-        </select></div>
-      <textarea class="p-caption" style="min-height:84px;padding:8px 10px;font-size:12px">${escapeHtml(p.caption)}</textarea>`;
-    row.querySelector('.p-platform').onchange = (e) => { p.platform = e.target.value; };
-    row.querySelector('.p-caption').oninput = (e) => { p.caption = e.target.value; };
-    list.appendChild(row);
-  });
-}
-
-$('#cp-export').onclick = async () => {
-  setErr('#seq-err', null);
-  if (!cp.posts.length) $('#cp-captions').click();
-  if (!cp.posts.length) return;
-  const f = cpFields();
-  const startDate = $('#cp-date').value ? new Date($('#cp-date').value + 'T18:00:00') : new Date();
-  const btn = $('#cp-export');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Packing your campaign…';
-  try {
-    const { asset } = await jfetch('/api/studio/campaign', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: f.title,
-        posts: cp.posts.map((p, i) => ({
-          assetId: p.assetId, platform: p.platform, caption: p.caption,
-          scheduledAt: new Date(startDate.getTime() + i * 86400000).toISOString(),
-        })),
-        thumbnails: cp.thumbs.map((t) => t.id),
-        info: f,
-      }),
-    });
-    await loadAssets();
-    const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.zip'; l.click();
-    $('#cp-status').textContent = `Campaign packed: ${cp.posts.length} posts + ${cp.thumbs.length} thumbnails, one per day starting ${startDate.toDateString()}. The ZIP is downloading — open README.txt inside.`;
-  } catch (e) {
-    setErr('#seq-err', e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Export campaign (ZIP)';
-  }
 };
 
 /* ---------------- projects ---------------- */

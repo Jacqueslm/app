@@ -162,7 +162,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0804</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0805</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -4860,7 +4860,7 @@ function applySpec(spec) {
     $('#music-crossfade').checked = spec.music.crossfade !== false;
   }
   syncTrans();
-  renderSeq(); renderOverlays(); renderOutputChips(); renderHighlights(); renderMusicList(); renderLyrList(); renderStoryboard(); renderClipPicker();
+  renderSeq(); renderOverlays(); renderOutputChips(); renderMusicList(); renderLyrList(); renderStoryboard();
 }
 let draftReady = false; // blocks the initial empty render from clobbering a saved draft
 function persistDraft() {
@@ -6457,7 +6457,7 @@ $('#lyr-speech').onclick = async () => {
       && confirm('This video already has a saved transcript from the last run.\n\nOK = use it instantly (free)\nCancel = listen to the video again')) {
     st.captions = savedLines.map((l) => ({ text: l.text, start: Math.round(l.start * 10) / 10, end: Math.round(l.end * 10) / 10 }));
     $('#lyr-text').value = savedLines.map((l) => l.text).join('\n');
-    renderLyrList(); renderClipPicker(); persistDraft();
+    renderLyrList(); persistDraft();
     return;
   }
   if (st.captions.length && !confirm('Replace your current caption list with what the video says?')) return;
@@ -6489,7 +6489,7 @@ $('#lyr-speech').onclick = async () => {
     // clip picker can use it without a refetch.
     const localAsset = st.assets.find((a) => a.id === clip.assetId);
     if (localAsset) localAsset.meta = { ...(localAsset.meta || {}), transcript: { lines } };
-    renderLyrList(); renderClipPicker(); persistDraft();
+    renderLyrList(); persistDraft();
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '🎙️ Captions from my voice (free)';
 };
@@ -7230,8 +7230,6 @@ renderSceneChips();
 renderOutputChips();
 renderSeq();
 renderOverlays();
-renderHighlights();
-renderClipPicker();
 renderQkFormat();
 renderMusicList();
 renderLyrList();

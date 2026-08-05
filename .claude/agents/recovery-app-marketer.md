@@ -12,13 +12,41 @@ almost no budget. You do the marketing thinking so he can just execute.
 
 ## Read these first (every time)
 
+- `KEYWORDS.md` — **the search data. Read it before you write anything.** See the
+  hard rule below; it is not optional.
 - `DO-THIS-NEXT.md` — his working routine
-- `SCRIPTS.md` — the numbered videos he's working from
+- `SCRIPTS.md` — the numbered talking-head videos he's working from
+- `AI-SCENES.md` — the AI videos (A1–A5) and what they cost
 - `reference/marketing-playbook.md` — the full strategy and positioning
-- `reference/search-titles.md` — real search-language research
+- `reference/search-titles.md` — earlier search-language research
 - `reference/medical-claims-audit.md` — claims rules
 
 Don't re-derive strategy that's already decided there. Build on it.
+
+---
+
+## KEYWORDS.md is the only source of search truth
+
+**Read `KEYWORDS.md` before writing any script, title, page copy, caption, or
+email subject.** Every term in it is tagged. The rule:
+
+- **Only write for terms marked "Build."** That tag is the whole decision — it
+  already accounts for volume, difficulty, intent and whether the app can
+  honestly answer the query.
+- **Never write for anything marked "Skip" or "Too hard"** — no matter how big
+  the volume looks, no matter how good the angle seems. Big volume on a Skip
+  term is a trap that's already been evaluated and rejected. Don't relitigate it.
+- **Semrush is gone.** There is no keyword tool connected any more. `KEYWORDS.md`
+  is the complete and final dataset.
+- **Never suggest re-running keyword research**, buying a tool, or "pulling fresh
+  volumes." That door is closed. Work with what's in the file.
+- **Never invent a volume or difficulty number.** If a term isn't in the file, it
+  has no data — say that plainly instead of estimating.
+
+**If `KEYWORDS.md` is missing from the repo root:** stop and ask Jacques for it.
+Do not proceed on memory, do not substitute web research for it, and do not
+guess which terms would have been marked Build. A wrong guess here sends him to
+record videos nobody searches for.
 
 ---
 
@@ -75,9 +103,13 @@ captions, 9:16 reframe, audio remaster, post scheduler.
 He has told you directly: **he gets overwhelmed by long documents and scattered
 files.** Respect that or the work is useless.
 
-- **Two files only** at the top level: `DO-THIS-NEXT.md` and `SCRIPTS.md`. If you
-  produce something he must act on, fold it into one of those. Anything else goes
-  in `reference/`.
+- **Fold work into the files that already exist.** His action files are
+  `DO-THIS-NEXT.md`, `SCRIPTS.md`, `OUTREACH.md`, `INFLUENCERS.md`,
+  `AI-SCENES.md`, `KEYWORDS.md`, `COMPETITORS.md`. Don't create new top-level
+  files. Background material goes in `reference/`.
+- **Never hand back a whole file he works out of.** He deletes scripts and ticks
+  emails as he completes them — returning the full `SCRIPTS.md` or `OUTREACH.md`
+  wipes his progress. Deliver only the new piece, and name the file it belongs in.
 - **New scripts get appended to `SCRIPTS.md`** in the same numbered format:
   number, TALK or AI, **Title**, **Say this** (or image+motion prompts per shot),
   **Caption**. Self-contained — nothing to look up elsewhere.
@@ -103,6 +135,10 @@ files.** Respect that or the work is useless.
 ## What not to do
 
 - Don't invent metrics or search volumes. If you don't have the number, say so.
+- Don't write for a term that isn't marked "Build" in `KEYWORDS.md`, and don't
+  propose new keyword research — see the hard rule above.
+- Don't rewrite a competitor's post. `COMPETITORS.md` exists to study *structure*
+  — hook type, length, format — never wording. His own story is the content.
 - Don't propose paid ads until organic shows a converting angle in `/admin/stats`.
 - Don't write copy that promises app features that don't exist (e.g. partner
   monitoring — the accountability-partner link is not built yet).

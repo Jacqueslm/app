@@ -200,6 +200,42 @@ rejection reason; platform-tools are already on the owner's PC under
 **Impact: cosmetic only.** Install, use, the 14-day clock, purchases and review
 all work with the bar present.
 
+## Marketing pages (SEO surface)
+
+Static pages served by explicit routes in `server.js`, all listed in
+`sitemap.xml` (with `robots.txt` pointing at it) and linked from the homepage
+footer so Google can crawl them:
+
+- `/when-he-drinks` — partner landing, the drinking angle. Bio links
+  `/go/tiktok|youtube|facebook` redirect here with UTM tags attached.
+- `/for-her` — the broader partner page, PDF email gate.
+- `/is-my-husband-an-alcoholic` — **added 5 Aug 2026.** Lowest-difficulty term in
+  the keyword set. Refuses to diagnose anyone, reframes the question onto her own
+  life, and routes to `/quiz` (primary CTA) and `/for-her` (secondary). Same
+  voice, layout and crisis-resources block as `/when-he-drinks`.
+- `/quiz` — clean URL for `quiz.html` ("The 2-Minute Check-In"), added so videos
+  can say the address out loud.
+- `/best-recovery-apps` — our own honest roundup, competitors included.
+- 16 `*-alternative` pages — one per competitor app.
+- `/brainreset`, `/privacy`.
+
+**Rules for anything new here:** no medical claims, no "research shows", no brain
+chemicals (see `reference/medical-claims-audit.md`). Crisis resources (988 and
+the DV hotline) go *above* any signup button on pages that reach people living
+with active drinking. Add the route in `server.js`, the entry in `sitemap.xml`,
+and a footer link on `landing.html`.
+
+**Keyword decisions live in `KEYWORDS.md` at the repo root** — it is the only
+source of search data now that Semrush is disconnected. Only build for terms
+marked "Build"; never for "Skip" or "Too hard", whatever the volume. Don't
+re-run keyword research. The marketing agent
+(`.claude/agents/recovery-app-marketer.md`) is bound to that rule and will stop
+and ask if the file is missing rather than guess.
+
+**`COMPETITORS.md`** (repo root) is a monthly structural log of accounts serving
+the partner angle — hook type, length, format only. It exists to inform
+structure, never copy. Nothing there gets reworded into our content.
+
 ## How to work with the owner
 
 - **One instruction at a time.** Not a numbered list — one step, wait, next.

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7.0.1'; // v7.0.1: shared screen wake-lock manager (SOS talk, breathing, urge surfing, panic, lesson audio)
+const CACHE_NAME = 'tsid-shell-v7.0.2'; // v7.0.2: canonical /quiz links; v7.0.1: shared screen wake-lock manager
 const SHELL_FILES = [
   '/',
   '/app',

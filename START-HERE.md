@@ -59,7 +59,7 @@ next action at a time. If something new is needed, fold it into an existing file
 **Reference (background, for sessions — not for him):**
 - `reference/marketing-playbook.md` — full strategy, the door/positioning thinking.
 - `reference/search-titles.md` — search-language research + forum hooks.
-- `reference/marketing-content-pack.md`, `reference/ai-shorts-scripts.md` — the
+- `reference/marketing-content-pack.md`, `AI-SCENES.md` (formerly `reference/ai-shorts-scripts.md`) — the
   older script sets that SCRIPTS.md was built from.
 - `reference/POST-LAUNCH-BUILD-LIST.md` — deferred features, what's done.
 - `reference/medical-claims-audit.md` — claims to keep out of copy.

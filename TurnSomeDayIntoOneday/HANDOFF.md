@@ -1,8 +1,8 @@
 # Handoff — Turn Someday Into Day One
 
 State as of 3 August 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **7.0.0** (`APP_VERSION` in `index.html`,
-`tsid-shell-v7.0.0` in `sw.js` — the line was deliberately renamed from 12.x
+to rediscover it. Current version: **7.0.2** (`APP_VERSION` in `index.html`,
+`tsid-shell-v7.0.2` in `sw.js` — the line was deliberately renamed from 12.x
 back to 7, the same kind of reset done once before launch; the in-app updater
 compares commit SHAs, so the number only has to change, never increase).
 
@@ -47,7 +47,7 @@ Every commit gets pushed to `claude/app-qc-competitive-analysis-lehsn9` **and**
 Four files move together on every user-visible change: `sw.js` (`CACHE_NAME`),
 `index.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
 worker cache name must change or clients keep the old shell. The number was
-deliberately reset from 35 to 7 before launch; it is now 12.
+deliberately reset from 35 to 7 before launch; it is now 7.0.2.
 
 ### Two gates that are easy to confuse
 - `isSupporterUI()` — `S.userType === 'partner'`. About the **person**.
@@ -231,6 +231,16 @@ marked "Build"; never for "Skip" or "Too hard", whatever the volume. Don't
 re-run keyword research. The marketing agent
 (`.claude/agents/recovery-app-marketer.md`) is bound to that rule and will stop
 and ask if the file is missing rather than guess.
+
+**Repo audit, 6 Aug 2026 (full sweep, nothing deleted):** no split, duplicate,
+partial, or orphaned files anywhere — same-name files across `Studio/` and
+`TurnSomeDayIntoOneday/` are two separate apps, never to be merged. All routes,
+sitemap entries, and internal links verified against real files. Fixed then:
+three `/quiz.html` links normalized to the canonical `/quiz` route
+(`index.html`, `landing.html` ×2), and two stale references to the renamed
+`ai-shorts-scripts.md` now point at `AI-SCENES.md`. `KEYWORDS.md` was found to
+have never been committed despite this file and the marketer agent depending on
+it — being built from live Semrush data while the connector still exists.
 
 **`COMPETITORS.md`** (repo root) is a monthly structural log of accounts serving
 the partner angle — hook type, length, format only. It exists to inform

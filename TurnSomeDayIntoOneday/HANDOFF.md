@@ -240,7 +240,8 @@ three `/quiz.html` links normalized to the canonical `/quiz` route
 (`index.html`, `landing.html` ×2), and two stale references to the renamed
 `ai-shorts-scripts.md` now point at `AI-SCENES.md`. `KEYWORDS.md` was found to
 have never been committed despite this file and the marketer agent depending on
-it — being built from live Semrush data while the connector still exists.
+it — **fixed same day**: built at the repo root from a live Semrush pull
+(US, 6 Aug 2026) with every term tagged Build / Too hard / Skip.
 
 **`COMPETITORS.md`** (repo root) is a monthly structural log of accounts serving
 the partner angle — hook type, length, format only. It exists to inform

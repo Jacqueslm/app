@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7.0.2'; // v7.0.2: canonical /quiz links; v7.0.1: shared screen wake-lock manager
+const CACHE_NAME = 'tsid-shell-v7.0.3'; // v7.0.3: /partner-drinks + /partner-watches-porn supporter pages; v7.0.1: wake-lock manager
 const SHELL_FILES = [
   '/',
   '/app',

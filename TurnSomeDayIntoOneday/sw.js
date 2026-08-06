@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7.0.1'; // v7.0.1: optional phone number back on signup
+const CACHE_NAME = 'tsid-shell-v5.0.2'; // v5.0.2: optional phone number back on signup
 const SHELL_FILES = [
   '/',
   '/app',

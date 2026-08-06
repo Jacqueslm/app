@@ -124,7 +124,10 @@ body.simple-only #view-simple{display:flex !important}
 .btn2.quiet{background:transparent;border:0.5px solid var(--bdr2);color:var(--tm)}
 .btn2:disabled{opacity:.5;cursor:default}
 .lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.lib-item{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.lib-item{background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.lib-item.selected{outline:2px solid var(--accent)}
+.lib-check{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);border:2px solid #fff;z-index:2;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;cursor:pointer}
+.lib-item.selected .lib-check{background:var(--accent);border-color:var(--accent)}
 .lib-item img,.lib-item video{width:100%;aspect-ratio:1/1;object-fit:cover;background:#000}
 .li-meta{padding:8px;font-size:11px;color:var(--ts);display:flex;flex-direction:column;gap:6px}
 .li-meta p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--tp)}
@@ -134,6 +137,9 @@ body.simple-only #view-simple{display:flex !important}
 .banner{background:var(--acc);color:var(--acc-t);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5}
 .banner a{color:inherit}
 .seq-item{display:flex;gap:10px;align-items:center;background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:8px}
+.seq-item.dragging{opacity:.45}
+.seq-item.drag-over{border-color:var(--accent);border-width:1.5px}
+.mv-handle{touch-action:none;cursor:grab;font-size:16px;letter-spacing:-2px}
 .seq-item video{width:64px;height:64px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0}
 .seq-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .seq-mid p{font-size:12px;font-weight:600;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -225,6 +231,12 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <p class="usage" id="media-rec-note" style="margin:2px 0 0">Grab any clip you can play on screen — a Manus render, a reference video — straight into your library. Pick the tab/window, and it stops when you press again.</p>
       <p class="usage" id="media-folder-note" style="word-break:break-all"></p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+        <button class="btn2 quiet" id="lib-select-toggle" style="width:auto;padding:5px 10px;font-size:12px">☑ Select multiple</button>
+        <span id="lib-select-count" style="display:none;font-size:12px;color:var(--tm)"></span>
+        <button class="btn2" id="lib-select-delete" style="display:none;width:auto;padding:5px 10px;font-size:12px;background:#c0392b">🗑 Delete selected</button>
+        <button class="btn2 quiet" id="lib-select-cancel" style="display:none;width:auto;padding:5px 10px;font-size:12px">Cancel</button>
+      </div>
 
       <h3 style="margin-top:8px">📷 Pictures <span class="usage" id="media-img-count"></span></h3>
       <div class="lib-grid" id="media-images"></div>
@@ -1665,6 +1677,7 @@ const st = {
   animPrefillFor: null, // which assetId that prefill belongs to
   singTarget: null,     // assetId with the lip-sync panel open
   lookTarget: null,     // assetId with the look-theme panel open
+  dynTarget: null,      // assetId with the dynamics-template panel open
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
   cutTarget: null,      // assetId with the cut panel open
@@ -1674,6 +1687,8 @@ const st = {
   soundTarget: null,    // assetId with the sound-swap panel open
   chromaTarget: null,   // assetId (green-screen clip) with the background picker open
   reframeTarget: null,  // assetId with the reframe (aspect) panel open
+  libSelectMode: false, // My Media: multi-select mode on/off
+  libSelected: new Set(), // My Media: assetIds checked for bulk delete
   busyScene: false,
   busyRender: false,
 };
@@ -2370,10 +2385,23 @@ function renderMediaPage() {
   const thumb = (a) => {
     const el = document.createElement('div');
     el.className = 'lib-item';
-    el.innerHTML = (a.kind === 'image'
+    const selMode = st.libSelectMode;
+    if (selMode && st.libSelected.has(a.id)) el.classList.add('selected');
+    el.innerHTML = (selMode ? `<div class="lib-check">${st.libSelected.has(a.id) ? '✓' : ''}</div>` : '')
+      + (a.kind === 'image'
       ? `<img src="${a.url}" loading="lazy" alt="">`
       : `<video src="${a.url}" muted loop playsinline onmouseover="this.play().catch(()=>{})" onmouseout="this.pause()"></video>`)
       + `<div class="li-meta"><p>${escapeHtml(a.label)}</p><div class="li-actions"></div></div>`;
+    if (selMode) {
+      const toggleSel = () => {
+        if (st.libSelected.has(a.id)) st.libSelected.delete(a.id); else st.libSelected.add(a.id);
+        renderMediaPage();
+        updateLibSelectBar();
+      };
+      el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = toggleSel;
+      el.querySelector('.lib-check').onclick = toggleSel;
+      return el; // select mode: thumbnail + checkbox only, no per-item tool buttons
+    }
     el.querySelector(a.kind === 'image' ? 'img' : 'video').onclick = () => openLightbox(a.url, a.kind, a.label);
     const actions = el.querySelector('.li-actions');
     const add = document.createElement('button'); add.textContent = '➕ Add to video'; add.className = 'primary';
@@ -2438,6 +2466,7 @@ function renderMediaPage() {
     songBox.appendChild(row);
   });
   $('#media-song-count').textContent = songs.length ? `(${songs.length})` : '';
+  updateLibSelectBar();
 }
 $('#media-upload').onclick = () => pickFiles('image/*,video/*', async (files) => {
   setErr('#seq-err', null);
@@ -3950,6 +3979,50 @@ async function freeTransform(assetId, op, btnEl, oldLabel) {
     if (btnEl) { btnEl.disabled = false; btnEl.textContent = oldLabel; }
   }
 }
+function updateLibSelectBar() {
+  const n = st.libSelected.size;
+  const countEl = $('#lib-select-count');
+  const delBtn = $('#lib-select-delete');
+  countEl.style.display = st.libSelectMode ? '' : 'none';
+  countEl.textContent = st.libSelectMode ? `${n} selected` : '';
+  delBtn.style.display = st.libSelectMode && n > 0 ? '' : 'none';
+}
+$('#lib-select-toggle').onclick = () => {
+  st.libSelectMode = true;
+  st.libSelected = new Set();
+  $('#lib-select-toggle').style.display = 'none';
+  $('#lib-select-cancel').style.display = '';
+  renderMediaPage();
+  updateLibSelectBar();
+};
+$('#lib-select-cancel').onclick = () => {
+  st.libSelectMode = false;
+  st.libSelected = new Set();
+  $('#lib-select-toggle').style.display = '';
+  $('#lib-select-cancel').style.display = 'none';
+  renderMediaPage();
+  updateLibSelectBar();
+};
+$('#lib-select-delete').onclick = async () => {
+  const ids = [...st.libSelected];
+  if (!ids.length) return;
+  if (!confirm(`Delete ${ids.length} item${ids.length > 1 ? 's' : ''}? This can't be undone.`)) return;
+  const btn = $('#lib-select-delete');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  try {
+    await Promise.all(ids.map((id) => jfetch(`/api/studio/assets/${id}`, { method: 'DELETE' })));
+  } catch (e) {
+    setErr('#seq-err', e.message);
+  }
+  btn.disabled = false; btn.textContent = '🗑 Delete selected';
+  st.libSelectMode = false; st.libSelected = new Set();
+  $('#lib-select-toggle').style.display = '';
+  $('#lib-select-cancel').style.display = 'none';
+  await loadAssets();
+  if (typeof loadStorage === 'function') loadStorage();
+  updateLibSelectBar();
+};
+
 function renderLibrary() {
   const grid = $('#lib-grid');
   const items = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
@@ -4025,6 +4098,7 @@ function renderLibrary() {
     // Finish (polish / quality / audio, free)
     if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
     if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap colour themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
+    if (a.kind === 'video' || a.kind === 'image') { const dyb = btn('🔥 Dynamics', '', () => { st.dynTarget = st.dynTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); dyb.title = 'FREE — CapCut-style beat effects: strobe hits, thermal flips, glow, shake, Time Machine, 3-2-1 opener. A picture becomes a clip; a clip keeps its sound in sync.'; }
     if (a.kind === 'image') btn('2× sharper', '', async (e) => {
       const b = e.target; b.disabled = true; b.textContent = '…';
       try { await jfetch('/api/studio/upscale', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) }); await loadAssets(); }
@@ -4487,6 +4561,66 @@ function renderLibrary() {
             });
             await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
             st.lookTarget = null;
+            await loadAssets();
+          } catch (e) {
+            setErr('#scenes-err', e.message);
+            panel.querySelectorAll('.chip').forEach((x) => { x.disabled = false; });
+            prog.classList.remove('show');
+          }
+        };
+      });
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.dynTarget === a.id) {
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const DYNS = [
+        ['beatmix', '🔥 Beat Mix'], ['strobe', '⚡ B/W Strobe'], ['colorflip', '💜 Color Flip'],
+        ['thermal', '🌡 Thermal'], ['glow', '✨ Glow Up'], ['trails', '👻 Echo Trails'],
+        ['shake', '📳 Hype Shake'], ['mirror', '🪞 Mirror World'], ['timemachine', '⏳ Time Machine'],
+        ['countdown', '🕒 3-2-1 Opener'],
+      ];
+      const dynIsImg = a.kind === 'image';
+      let dynBeat = Number(localStorage.getItem('tsid-dyn-beat')) || 2;
+      let dynSecs = Number(localStorage.getItem('tsid-dyn-secs')) || 8;
+      panel.innerHTML = `
+        ${dynIsImg ? `<div class="chips dyn-secs">
+          ${[4, 6, 8, 10, 15].map((s) => `<button class="chip${dynSecs === s ? ' on' : ''}" data-secs="${s}">${s}s</button>`).join('')}
+        </div>` : ''}
+        <div class="chips dyn-beats">
+          <button class="chip${dynBeat === 1 ? ' on' : ''}" data-beat="1">Fast hits (1s)</button>
+          <button class="chip${dynBeat === 2 ? ' on' : ''}" data-beat="2">Normal (2s)</button>
+          <button class="chip${dynBeat === 4 ? ' on' : ''}" data-beat="4">Slow (4s)</button>
+        </div>
+        <div class="chips dyn-chips">${DYNS.map(([k, l]) => `<button class="chip" data-dyn="${k}">${l}</button>`).join('')}</div>
+        <div class="progress-line dyn-prog"><div></div></div>
+        <span class="usage">${dynIsImg ? 'Turns this picture into a moving clip with the effect baked in — pick how long it runs. ' : ''}Beat-effect templates like the CapCut edits (free, no AI). Hit speed sets how often the effects punch. Time Machine plays the first half as a worn old photo, flashes, and comes back new. Makes a new copy — the original${dynIsImg ? '' : ' and its sound'} stay untouched.</span>`;
+      panel.querySelectorAll('.dyn-secs .chip').forEach((sc) => {
+        sc.onclick = () => {
+          dynSecs = Number(sc.dataset.secs);
+          localStorage.setItem('tsid-dyn-secs', String(dynSecs));
+          panel.querySelectorAll('.dyn-secs .chip').forEach((x) => x.classList.toggle('on', x === sc));
+        };
+      });
+      panel.querySelectorAll('.dyn-beats .chip').forEach((bc) => {
+        bc.onclick = () => {
+          dynBeat = Number(bc.dataset.beat);
+          localStorage.setItem('tsid-dyn-beat', String(dynBeat));
+          panel.querySelectorAll('.dyn-beats .chip').forEach((x) => x.classList.toggle('on', x === bc));
+        };
+      });
+      panel.querySelectorAll('.dyn-chips .chip').forEach((chip) => {
+        chip.onclick = async () => {
+          setErr('#scenes-err', null);
+          panel.querySelectorAll('.chip').forEach((x) => { x.disabled = true; });
+          const prog = panel.querySelector('.dyn-prog'); prog.classList.add('show');
+          try {
+            const { job } = await jfetch('/api/studio/transform', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ assetId: a.id, op: 'dynamics', template: chip.dataset.dyn, beat: dynBeat, secs: dynSecs }),
+            });
+            await pollJob(job.id, (j) => { prog.firstElementChild.style.width = j.progress + '%'; });
+            st.dynTarget = null;
             await loadAssets();
           } catch (e) {
             setErr('#scenes-err', e.message);
@@ -5079,7 +5213,47 @@ async function addToSeq(asset, opts) {
   document.querySelector('#mtabs button[data-view="seq"]').click();
 }
 
-let dragIdx = null;
+// Pointer-based drag (works with touch AND mouse, unlike the old HTML5
+// draggable API which mobile Chrome/Safari never fire for a finger). One
+// active drag at a time; only the ⠿ handle starts it so normal list
+// scrolling on a phone still works everywhere else on the row.
+let seqDrag = null;
+function seqDragStart(e, i, row) {
+  e.preventDefault();
+  const handle = e.currentTarget;
+  handle.setPointerCapture(e.pointerId);
+  seqDrag = { fromIndex: i, pointerId: e.pointerId, overIndex: i };
+  row.classList.add('dragging');
+  const onMove = (ev) => {
+    if (!seqDrag || ev.pointerId !== seqDrag.pointerId) return;
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const overRow = el && el.closest && el.closest('.seq-item');
+    document.querySelectorAll('.seq-item.drag-over').forEach((x) => x.classList.remove('drag-over'));
+    if (overRow && overRow !== row) {
+      overRow.classList.add('drag-over');
+      seqDrag.overIndex = Number(overRow.dataset.idx);
+    } else {
+      seqDrag.overIndex = seqDrag.fromIndex;
+    }
+  };
+  const onUp = (ev) => {
+    if (!seqDrag || ev.pointerId !== seqDrag.pointerId) return;
+    try { handle.releasePointerCapture(ev.pointerId); } catch (_) {}
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.querySelectorAll('.seq-item.drag-over').forEach((x) => x.classList.remove('drag-over'));
+    const { fromIndex, overIndex } = seqDrag;
+    seqDrag = null;
+    if (overIndex !== fromIndex) {
+      snapSeq();
+      const [moved] = st.seq.splice(fromIndex, 1);
+      st.seq.splice(overIndex, 0, moved);
+    }
+    renderSeq();
+  };
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
 function renderSeq() {
   syncTrans();
   const list = $('#seq-list');
@@ -5118,7 +5292,7 @@ function renderSeq() {
 
     const row = document.createElement('div');
     row.className = 'seq-item';
-    row.draggable = true;
+    row.dataset.idx = i;
     const eq = item.eq || { brightness: 0, contrast: 1, saturation: 1 };
     const startsAt = cum; cum += effDur(item) - (i < st.trans.length && st.trans[i] && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0);
     row.innerHTML = `
@@ -5142,6 +5316,7 @@ function renderSeq() {
         </div>
       </div>
       <div class="seq-btns">
+        <button class="mv-handle" title="Drag to reorder">⠿</button>
         <button class="mv-up" title="Move up">↑</button>
         <button class="mv-dn" title="Move down">↓</button>
         <button class="adj-t" title="Color adjust">◑</button>
@@ -5176,17 +5351,7 @@ function renderSeq() {
     row.querySelector('.mv-up').onclick = () => { if (i > 0) { snapSeq(); [st.seq[i - 1], st.seq[i]] = [st.seq[i], st.seq[i - 1]]; renderSeq(); } };
     row.querySelector('.mv-dn').onclick = () => { if (i < st.seq.length - 1) { snapSeq(); [st.seq[i + 1], st.seq[i]] = [st.seq[i], st.seq[i + 1]]; renderSeq(); } };
     row.querySelector('.rm').onclick = () => { snapSeq(); st.seq.splice(i, 1); syncTrans(); renderSeq(); };
-    row.ondragstart = (e) => { dragIdx = i; e.dataTransfer.effectAllowed = 'move'; };
-    row.ondragover = (e) => { e.preventDefault(); row.style.borderColor = 'var(--accent)'; };
-    row.ondragleave = () => { row.style.borderColor = ''; };
-    row.ondrop = (e) => {
-      e.preventDefault(); row.style.borderColor = '';
-      if (dragIdx == null || dragIdx === i) return;
-      snapSeq();
-      const [moved] = st.seq.splice(dragIdx, 1);
-      st.seq.splice(i, 0, moved);
-      dragIdx = null; renderSeq();
-    };
+    row.querySelector('.mv-handle').onpointerdown = (e) => seqDragStart(e, i, row);
     list.appendChild(row);
   });
   persistDraft();
@@ -5420,7 +5585,7 @@ function drawOverlay(specIn, W, H, canvas) {
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, W, H);
-  let size = (spec.size || 80) * (H / 1080);
+  let size = (spec.size || 80) * (H / 1080) * captionSizeMul();
   const setFont = () => { ctx.font = `${spec.bold ? '800' : '400'} ${size}px ${spec.font || 'system-ui'}`; };
   setFont();
   // Keep text inside the frame, guaranteed. Two passes, because a single
@@ -6566,6 +6731,15 @@ function captionSizeKey() {
   const k = localStorage.getItem('tsid-caption-size') || 'medium';
   return CAPTION_SIZES[k] ? k : 'medium';
 }
+// Text OVERLAYS (title cards, Quick Video's per-picture words) are drawn on a
+// canvas here in the browser, while CAPTIONS are burned in by the server. They
+// used to obey different controls, so changing the caption size did nothing to
+// Quick Video's text. This multiplier makes the one Size control govern both;
+// each overlay keeps its own slider for relative fine-tuning.
+const CAPTION_SIZE_MUL = { small: 0.78, medium: 1, large: 1.28 };
+function captionSizeMul() {
+  return CAPTION_SIZE_MUL[captionSizeKey()] || 1;
+}
 function renderCaptionSizes() {
   const box = document.getElementById('cap-sizes');
   if (!box) return;
@@ -6575,10 +6749,21 @@ function renderCaptionSizes() {
     const b = document.createElement('button');
     b.className = 'chip' + (key === cur ? ' on' : '');
     b.textContent = label;
-    b.onclick = () => { localStorage.setItem('tsid-caption-size', key); renderCaptionSizes(); };
+    b.onclick = () => {
+      localStorage.setItem('tsid-caption-size', key);
+      renderCaptionSizes();
+      // Overlays are drawn client-side, so their previews must be redrawn for
+      // the new size to be visible before rendering.
+      if (typeof renderOverlays === 'function') renderOverlays();
+    };
     box.appendChild(b);
   });
 }
+// Width feeds the client-side overlay wrapper too, so redraw the previews when
+// it changes instead of only applying at render time.
+document.getElementById('cap-width')?.addEventListener('change', () => {
+  if (typeof renderOverlays === 'function') renderOverlays();
+});
 function renderCaptionStyles() {
   renderCaptionSizes();
   const box = document.getElementById('cap-styles');

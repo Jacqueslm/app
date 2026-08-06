@@ -3,7 +3,10 @@
 Each number below is ONE complete video. Everything you need is right there:
 the title, what to say, and the caption. Nothing to look up anywhere else.
 
-**TALK** = you on camera (free). **AI** = generated scenes (costs ~$2).
+**Every script in this file is TALK** — you on camera, free.
+The AI videos that cost money live in their own file: **AI-SCENES.md**.
+One script (39) uses your real pictures as free stills with your narration
+instead of AI-animated scenes — same $0 cost as everything else here.
 
 Do them in order. Cross one off when it's posted.
 
@@ -16,7 +19,10 @@ Do them in order. Cross one off when it's posted.
 | Supporting someone | 6 |
 | ALCOHOL — the drinker | 17–22 |
 | FOOD — binge eating | 13–16 |
-| AI scenes (cost money) | 8, 9, 10 |
+| QUIZ hook — send them to /quiz | 23, 24 |
+| MULTI-ADDICTION — the app's edge | 25 |
+| VICTORY — fighter tone, all 13 tracks | 26–38 |
+| YOUR STORY — stills + your narration | 39 |
 
 ---
 
@@ -178,94 +184,6 @@ Do them in order. Cross one off when it's posted.
 > Keep going. It counts the most.
 
 **Caption:** Day four counts the most. Link in bio.
-
----
-
-# ── AI SCENES ──
-
-## 8. AI — "The door"  ⏱ 25s · ~$2.45
-
-**Title:** The moment she finds out
-
-**Make 5 shots.** For each: paste the IMAGE prompt in AI Scenes → generate →
-Animate it 5s with the MOTION prompt → say the line over it.
-
-**Add to the end of every image prompt:**
-`cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16`
-
-**SHOT 1** — IMAGE: `A bald bearded Black man in his late 40s sitting alone at a desk in a dark home office at night, face lit only by the cold blue glow of a computer monitor, tense jaw, shoulders hunched forward, rest of the room in deep shadow`
-MOTION: `Very slow push in toward his face, subtle screen flicker, he blinks slowly`
-SAY: *"You think the worst part is the habit."*
-
-**SHOT 2** — IMAGE: `Over-the-shoulder from a dark hallway: a woman with long braids frozen in a doorway, one hand covering her mouth, eyes wide with shock, looking toward a man at a desk lit blue who hasn't noticed her, warm hallway light behind her`
-MOTION: `She takes one small step forward then stops, hand stays over her mouth, he does not turn`
-SAY: *"It's not. It's the second she sees you."*
-
-**SHOT 3** — IMAGE: `Close-up of a man's hands slamming a laptop shut in a dark room, blue light cut off mid-frame`
-MOTION: `The laptop snaps shut, the blue light vanishes, his hands stay frozen on the lid`
-SAY: *"And the face you practiced doesn't work anymore."*
-
-**SHOT 4** — IMAGE: `A man and woman sitting on opposite ends of the same bed in a dim bedroom, both facing away, a wide empty gap of rumpled sheets between them, grey morning light`
-MOTION: `Neither moves, she exhales slowly, the curtain shifts`
-SAY: *"The secret was never just yours. She's been carrying it too."*
-
-**SHOT 5** — IMAGE: `The same man alone at a kitchen table in warm morning sunlight, phone face-down, hands folded, quiet resolve in his eyes`
-MOTION: `He lifts his head toward the window, breathes in, a small nod`
-SAY: *"Day One doesn't start when you get caught. It starts when you stop hiding."*
-
-**Caption:** The secret was never just his. Link in bio.
-
----
-
-## 9. AI — "Her 2am"  ⏱ 20s · ~$2
-
-**Title:** What it's like loving someone through addiction
-
-**4 shots**, same method as #8.
-
-**SHOT 1** — IMAGE: `A woman with long braids lying awake on her side in bed at night, eyes open staring at nothing, the other half of the bed empty, a thin strip of light under the closed bedroom door`
-MOTION: `She blinks slowly, the light under the door stays constant`
-SAY: *"Everybody asks how he's doing."*
-
-**SHOT 2** — IMAGE: `The same woman sitting alone on the floor of a dark hallway, back against the wall, knees pulled up, listening toward a closed door`
-MOTION: `She tilts her head toward the door and holds still`
-SAY: *"Nobody asks how she is."*
-
-**SHOT 3** — IMAGE: `The same woman at a kitchen table at dawn, a cold untouched cup of coffee, staring past it, pale blue morning light`
-MOTION: `She blinks and looks down at her hands`
-SAY: *"She's been carrying two recoveries. Only one of them has a program."*
-
-**SHOT 4** — IMAGE: `The same woman holding a phone, soft screen light on her face in the dim kitchen, a small flicker of relief`
-MOTION: `She scrolls slowly, then stops, shoulders drop as she exhales`
-SAY: *"There's a part of this built for her. Finally."*
-
-**Caption:** There's a whole section built for you. Link in bio.
-
----
-
-## 10. AI — "The feast"  ⏱ 20s · ~$2
-
-**Title:** It was never about the food
-
-**4 shots**, same method as #8.
-
-**SHOT 1** — IMAGE: `A bald bearded Black man alone in a fast food booth surrounded by an overwhelming spread of burgers, fries, pizza and milkshakes covering the table, mid-bite, eyes empty, harsh fluorescent lighting`
-MOTION: `He chews slowly without expression, looking at nothing`
-SAY: *"This was never about being hungry."*
-
-**SHOT 2** — IMAGE: `Extreme close-up of the same man's eyes above the food, exhausted and far away`
-MOTION: `He blinks slowly, jaw moving mechanically`
-SAY: *"Hungry stops. This doesn't. Because it was never the food."*
-
-**SHOT 3** — IMAGE: `The same table covered in crumpled wrappers, the man sitting back in dim light, one hand covering his face`
-MOTION: `He drags his hand down his face and lets it fall, shoulders drop`
-SAY: *"Ten minutes of quiet. Then it's louder than before."*
-
-**SHOT 4** — IMAGE: `The same man sitting on the edge of his bed at dawn lacing running shoes, calm and deliberate, soft blue morning light`
-MOTION: `He pulls the laces tight, stands, steps out of frame`
-SAY: *"You don't beat it with a diet. You beat it by facing what it was feeding."*
-
-**Caption:** It was never the food. Link in bio.
 
 ---
 
@@ -569,6 +487,466 @@ SAY: *"You don't beat it with a diet. You beat it by facing what it was feeding.
 > and nobody's watching.
 
 **Caption:** Day four counts the most. Link in bio.
+
+---
+
+## 23. TALK — "The 2-minute check-in"
+
+**Title:** Is it a habit or is it an addiction? Check in 2 minutes
+
+**Say this:**
+
+> You don't have to call it an addiction.
+>
+> You don't have to call it anything.
+>
+> But if you've been wondering —
+> if you keep telling yourself "I can stop whenever I want"
+> and some part of you isn't sure —
+>
+> there's a 2-minute check-in on my site.
+> No signup. No judgment. Nobody sees your answers.
+>
+> Two minutes. You'll know where you actually stand.
+>
+> That's how mine started. With one honest look.
+
+**Caption:** The 2-minute check-in: turnsomedayintodayone.com/quiz — no signup, nobody sees your answers.
+
+---
+
+## 24. TALK — "I can stop whenever I want"
+
+**Title:** "I can stop whenever I want" — so prove it to yourself
+
+**Say this:**
+
+> "I can stop whenever I want."
+>
+> I said that for 38 years.
+>
+> Here's the thing — I never actually checked.
+> Because checking meant maybe finding out.
+>
+> There's a 2-minute check-in on my site.
+> It's not a test. Nobody sees it.
+> It just asks you the questions
+> you've been avoiding asking yourself.
+>
+> If you can stop whenever you want —
+> two minutes costs you nothing.
+>
+> If you can't… two minutes is where it turns around.
+
+**Caption:** Two minutes, just you and the truth: turnsomedayintodayone.com/quiz
+
+---
+
+## 25. TALK — "Pick one addiction"
+
+**Title:** Most recovery apps make you pick ONE addiction
+
+**Say this:**
+
+> Most recovery apps make you pick one addiction.
+>
+> One. Like life works that way.
+>
+> Ask anybody who's lived it —
+> the drinking came with the gambling.
+> The porn came with the food.
+> You put one down and pick another one up.
+>
+> That's why I built mine with 13 tracks
+> that work together, not separately.
+>
+> You're not three broken people.
+> You're one person, healing.
+>
+> And you only need one Day One.
+
+**Caption:** 13 habit tracks, one app, one Day One. Link in bio.
+
+---
+
+## 27. TALK — "Back against the wall"
+
+**Title:** When your back is against the wall
+
+**Say this:**
+
+> Back against the wall is not the end of the story.
+>
+> It's just the part where you finally stop running
+> and turn around.
+>
+> Every person I know who got free
+> got free from exactly this spot.
+>
+> Not from a good week.
+> Not from motivation.
+>
+> From the wall.
+>
+> The wall is where it starts.
+
+**Caption:** The wall is where it starts. Link in bio.
+
+---
+
+## 28. TALK — "Thirteen doors, one fight"
+
+**Title:** Alcohol, porn, gambling, food — it's the same fight
+
+**Say this:**
+
+> Alcohol. Porn. Smoking. Pills.
+> Gambling. Scrolling. Gaming. Food.
+> Spending. Work. Anger.
+>
+> People act like those are eleven different problems.
+>
+> They're one problem wearing different clothes.
+>
+> Something hurts, you reach for the thing,
+> the thing works for ten minutes,
+> and the bill comes later.
+>
+> Different door. Same room.
+>
+> Which means whatever you're fighting —
+> you're not a special case. You're in the room with all of us.
+
+**Caption:** Different door, same room. Link in bio.
+
+---
+
+## 29. TALK — "The one nobody counts"
+
+**Title:** For the person holding somebody else together
+
+**Say this:**
+
+> This one's not for the person struggling.
+>
+> It's for whoever's holding them together.
+>
+> Husband, wife, partner, best friend, son, mother —
+> doesn't matter who you are to them.
+>
+> You've been carrying somebody
+> and nobody's ever once asked how heavy it is.
+>
+> You're in the fight too.
+> You just never got a name for your side of it.
+>
+> You're getting one now.
+
+**Caption:** You're in the fight too. Link in bio.
+
+---
+
+## 30. TALK — "It doesn't check who you are"
+
+**Title:** Addiction doesn't care who you are
+
+**Say this:**
+
+> Addiction never asked me who I was.
+>
+> Didn't ask my age. Didn't ask my color.
+> Didn't ask who I loved or how I identify.
+>
+> It just showed up and started taking.
+>
+> So when people ask who my app is for —
+> straight, gay, bi, neither, still figuring it out,
+> man, woman, or none of the above —
+>
+> the answer is you.
+>
+> It never checked who you were on the way in.
+> It doesn't get to check on the way out.
+
+**Caption:** It never asked who you were. Neither do we. Link in bio.
+
+---
+
+## 31. TALK — "Gambling"
+
+**Title:** The bet you're still trying to win back
+
+**Say this:**
+
+> Nobody gambles to win money.
+>
+> You gamble to get back
+> to the person you were before you lost it.
+>
+> That's the real bet.
+> And the house doesn't sell that.
+>
+> You're not chasing money.
+> You're chasing yourself.
+>
+> You can just go get him. Free.
+> No wager required.
+
+**Caption:** You're not chasing money. Link in bio.
+
+---
+
+## 32. TALK — "Scrolling"
+
+**Title:** Four hours gone and you couldn't name one thing you saw
+
+**Say this:**
+
+> Four hours.
+>
+> Name one thing you saw.
+>
+> You can't. Neither can I.
+>
+> That's not entertainment.
+> That's not a break.
+> That's a habit that eats your evening
+> and gives you nothing back.
+>
+> The scary part isn't the time.
+> It's that it felt like nothing while it happened.
+>
+> Count it once. Honestly.
+> Then decide if that's a trade you'd make on purpose.
+
+**Caption:** Count it once, honestly. Link in bio.
+
+---
+
+## 33. TALK — "Smoking"
+
+**Title:** You've quit smoking before — that's the good news
+
+**Say this:**
+
+> "I've quit a hundred times."
+>
+> People say that like it's a joke on themselves.
+>
+> It's not. It's proof.
+>
+> A hundred times you decided you wanted your life back.
+> A hundred times you started.
+>
+> That's not failure. That's a hundred pieces of evidence
+> that the part of you that wants out is still alive.
+>
+> Number 101 works the same way as the others.
+> It just doesn't stop.
+
+**Caption:** A hundred quits is a hundred proofs. Link in bio.
+
+---
+
+## 34. TALK — "Work"
+
+**Title:** When work is the thing you're using
+
+**Say this:**
+
+> This one gets applause. That's what makes it dangerous.
+>
+> Nobody pulls you aside about the eighty-hour weeks.
+> They promote you.
+>
+> But if you can't sit still in your own house,
+> if quiet feels like something's wrong —
+>
+> that's not ambition. That's the same escape everybody else uses,
+> just the one with a paycheck attached.
+>
+> Ask yourself what you're outrunning.
+> That question doesn't cost you your career.
+
+**Caption:** The one addiction people applaud. Link in bio.
+
+---
+
+## 35. TALK — "Anger"
+
+**Title:** When anger is the thing you can't put down
+
+**Say this:**
+
+> Anger works. That's the problem.
+>
+> It ends the conversation.
+> It moves people back.
+> It makes the helpless feeling stop for a minute.
+>
+> Same deal as a drink. Same ten minutes.
+> Same bill later — except this one gets paid
+> by the people in your house.
+>
+> You're not a bad person.
+> You're using something that works fast and costs everything.
+>
+> There's a track for this one too.
+
+**Caption:** Anger works. That's the problem. Link in bio.
+
+---
+
+## 36. TALK — "Spending"
+
+**Title:** The package doesn't fix it and you know it
+
+**Say this:**
+
+> The best part was never opening it.
+>
+> It was the twenty minutes before —
+> when it was coming, and you felt like
+> something good was on the way.
+>
+> Then it lands, and it's just a box.
+>
+> You're not buying stuff.
+> You're buying that twenty minutes.
+>
+> That feeling's real. The purchase isn't what makes it.
+> You can get it somewhere that doesn't bill you.
+
+**Caption:** You're not buying stuff. Link in bio.
+
+---
+
+## 37. TALK — "Gaming"
+
+**Title:** In there you're winning — that's why it's hard to leave
+
+**Say this:**
+
+> In there, you level up. You matter. You get better every day
+> and the game tells you so.
+>
+> Out here, nobody hands you a number that goes up.
+>
+> That's not a character flaw.
+> That's just the only place anybody's tracking your progress.
+>
+> So track it out here.
+> Day one, day two, day three — a number that goes up
+> because you showed up in real life.
+>
+> Same feeling. Your actual life.
+
+**Caption:** Give real life a scoreboard. Link in bio.
+
+---
+
+## 38. TALK — "You still have something to live for"
+
+**Title:** You still have something to live for
+
+**Say this:**
+
+> If you've lost everything — I'm not going to tell you it's fine.
+>
+> But hear this from somebody who's been in that seat:
+>
+> There are people who love you
+> whether or not you believe it today.
+>
+> You still have something left to live for
+> even if you can't name it right now.
+>
+> So lift your head up.
+> Pull yourself out of that self-pity attitude —
+> not because you don't deserve to grieve,
+> but because the fight isn't over
+> and the clock is still ticking.
+>
+> You're a fighter. You've been one this whole time.
+>
+> Day One. Today.
+>
+> If you're in real danger right now, call or text 988. Do that first.
+
+**Caption:** The fight isn't over. Link in bio. (US: 988 anytime.)
+
+---
+
+## 39. STILLS — "She carried me"
+
+**Title:** She carried me out of places I walked into on my own
+
+**Cost: free.** Your seven pictures already exist. Ken Burns motion is free.
+Your voice is free. No AI generation at any point.
+
+**Length:** about 35 seconds.
+
+### The seven shots, in order
+
+| # | Picture | Motion | Strength | Length | After it |
+|---|---|---|---|---|---|
+| 1 | Bar — you alone, the empties | Push in | 0.15 | 5s | Fade |
+| 2 | The floor — you down, her standing over you | Pull out | 0.15 | 5s | Fade |
+| 3 | Her carrying you out | Push in | 0.12 | 5s | Dip to black |
+| 4 | The couch — her showing you the phone | Push in | 0.12 | 5s | Fade |
+| 5 | The laptop — day 150 | Push in | 0.10 | 4s | Fade |
+| 6 | The room — both of you speaking | Pull out | 0.15 | 5s | Fade |
+| 7 | The street — you walking alone | Push in | 0.12 | 6s | — |
+
+**Why those moves:** push in pulls the viewer closer on the emotional shots.
+Pull out on the floor shows how far down it was, and pull out on the room shows
+how many people are listening now. The dip to black after shot 3 is the turn —
+that half-second of nothing is where the story changes direction.
+
+**Set fit to PAD on any picture that isn't already tall**, or motion will crop
+the edges off it.
+
+### Say this — one line per shot
+
+1. *"That's not one drink after work. That's the third one I stopped counting."*
+2. *"She found me on the floor of a bar. That was thirty-eight years."*
+3. *"She carried me out of places I walked into on my own."*
+4. *"She showed me something on a phone. Not a lecture. Just somewhere to start."*
+5. *"Day one hundred and fifty. Nobody clapped. I counted anyway."*
+6. *"Now we sit in rooms and say it out loud. You can start tonight."*
+7. *"Thirty-eight years. Free at fifty. Someday was never coming — so I made it day one."*
+
+### How to record the voice
+
+1. **Post tab** → paste the seven lines → **Save script** → **▶ Open teleprompter**.
+2. **🎥 Record my webcam** — one line at a time, seven short clips. The mic
+   records with it. Nobody will ever see the picture, so don't think about your
+   face; just read it.
+3. Three takes of each line, keep the third. First is stiff, second is careful,
+   third is you.
+4. In **My Media**, on each clip: **🎙 Take the voice out.** That lifts the audio
+   off, cleans it, and files it as its own sound file.
+5. **Sequencer** → the seven pictures in order with the motion above → drop each
+   voice file under its shot → stretch the shot to fit its line.
+6. Captions: paste the lines → **Tap-to-sync** (free, exact) or **Auto-spread**
+   (instant).
+7. Render **9:16 · 1080p** → **✨ Polish my video** → download.
+
+**Delivery:** talk to one person, not an audience — one woman at 2am. Slower
+than feels right; the pictures need air. Leave the silence in after shot 2.
+
+**Caption:** She carried me. Then I stood up. Link in bio.
+
+---
+
+### Before you post it — two fixes on the pictures
+
+- **The laptop shot** shows a dashboard that isn't your app (it has Community,
+  Goals, Resources — yours doesn't). Screenshot your real app at your real day
+  count and put that on the screen instead. Your whole brand is that you don't
+  oversell; keep it true.
+- **The slide and the phone say "Turn Some Day Into Day One."** It's
+  **Someday**, one word. Regenerate those two.
 
 ---
 

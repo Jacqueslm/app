@@ -77,6 +77,12 @@ app.get('/brainreset', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'brainreset.html'));
 });
 
+// Clean URL for the 2-Minute Check-In quiz - speakable in videos
+// ("turnsomedayintodayone.com/quiz") without the .html extension.
+app.get('/quiz', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'quiz.html'));
+});
+
 // The partner-facing landing page - the day-2 trial email and the "Send this
 // page to her" button both link here.
 app.get('/for-her', (req, res) => {
@@ -88,6 +94,45 @@ app.get('/for-her', (req, res) => {
 // continues the exact sentence the post started.
 app.get('/when-he-drinks', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'when-he-drinks.html'));
+});
+
+// Lowest-difficulty term in the keyword set, and the quiz already answers it -
+// so this page is a short honest bridge: it refuses to diagnose him, reframes
+// the question onto her own life, and routes to /quiz (primary) and /for-her.
+app.get('/is-my-husband-an-alcoholic', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'is-my-husband-an-alcoholic.html'));
+});
+
+// The inclusive supporter pages (KEYWORDS.md lanes 1-2): one page per
+// addiction naming husband, wife, boyfriend, girlfriend so the whole
+// low-difficulty cluster ranks on a single URL. Both route to /quiz and
+// /for-her; crisis resources sit above every signup link.
+app.get('/partner-drinks', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'partner-drinks.html'));
+});
+
+app.get('/partner-watches-porn', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'partner-watches-porn.html'));
+});
+
+// The biggest winnable term in KEYWORDS.md (9,900/mo, KD 37): the food-track
+// page. Self-directed (not supporter), so its CTA goes straight to /app;
+// eating-disorder referral language is SAFETY class in the claims audit and
+// sits above the signup links.
+app.get('/how-to-stop-binge-eating', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
+});
+
+// Final two pages of the KEYWORDS.md plan: the moat's companion page
+// (betrayal trauma recovery, supporter side) and the one borderline
+// long-form worth attempting (how to stop drinking, self side - carries
+// the cold-turkey SAFETY warning twice, above the fold and above signup).
+app.get('/betrayal-trauma-recovery', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'betrayal-trauma-recovery.html'));
+});
+
+app.get('/how-to-stop-drinking', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-drinking.html'));
 });
 
 // Our own "best recovery apps" roundup - the standard competitor move done

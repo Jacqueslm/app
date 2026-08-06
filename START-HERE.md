@@ -81,13 +81,12 @@ reads only the older text will give him advice that's a week behind.
 - **Content: live and posting.** 17 scripts loaded into Buffer; refills happening
   6 Aug. Videos are out in the world. The bank is being worked through, not
   sitting idle.
-- **Branch drift found 6 Aug:** `HANDOFF.md` says every commit goes to BOTH
-  `claude/app-qc-competitive-analysis-lehsn9` and `claude/vibe-code-uwxxlk`.
-  The first is stranded at 7c8d3a5, three commits behind `main`. Harmless today
-  (it isn't the deploy branch) but the rule is being broken — fast-forward it
-  next time anything ships. Also: the version quadruple (`sw.js` CACHE_NAME,
-  `APP_VERSION`, both package.json files) is still 7.0.0 and did not move for
-  the wake-lock change, against the HANDOFF rule.
+- **Branch drift found 6 Aug — FIXED same day (his go-ahead):** the stranded
+  `claude/app-qc-competitive-analysis-lehsn9` branch was fast-forwarded level
+  with `main`, and the version quadruple (`sw.js` CACHE_NAME, `APP_VERSION`,
+  both package.json files) was bumped **7.0.0 → 7.0.1** for the wake-lock
+  change, per the HANDOFF rule. Keep both habits: every ship moves the
+  quadruple and lands on both branches plus `claude/vibe-code-uwxxlk` (deploy).
 - **Studio: build stamp is now `b0806`** (the 08-05 notes still said b0804 —
   it has moved). Confirmed present in `Studio/web/index.html`: templates, the
   teleprompter, and webcam recording (`getUserMedia`). This is the toolchain

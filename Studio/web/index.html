@@ -5585,7 +5585,7 @@ function drawOverlay(specIn, W, H, canvas) {
   c.width = W; c.height = H;
   const ctx = c.getContext('2d');
   ctx.clearRect(0, 0, W, H);
-  let size = (spec.size || 80) * (H / 1080);
+  let size = (spec.size || 80) * (H / 1080) * captionSizeMul();
   const setFont = () => { ctx.font = `${spec.bold ? '800' : '400'} ${size}px ${spec.font || 'system-ui'}`; };
   setFont();
   // Keep text inside the frame, guaranteed. Two passes, because a single
@@ -6731,6 +6731,15 @@ function captionSizeKey() {
   const k = localStorage.getItem('tsid-caption-size') || 'medium';
   return CAPTION_SIZES[k] ? k : 'medium';
 }
+// Text OVERLAYS (title cards, Quick Video's per-picture words) are drawn on a
+// canvas here in the browser, while CAPTIONS are burned in by the server. They
+// used to obey different controls, so changing the caption size did nothing to
+// Quick Video's text. This multiplier makes the one Size control govern both;
+// each overlay keeps its own slider for relative fine-tuning.
+const CAPTION_SIZE_MUL = { small: 0.78, medium: 1, large: 1.28 };
+function captionSizeMul() {
+  return CAPTION_SIZE_MUL[captionSizeKey()] || 1;
+}
 function renderCaptionSizes() {
   const box = document.getElementById('cap-sizes');
   if (!box) return;
@@ -6740,10 +6749,21 @@ function renderCaptionSizes() {
     const b = document.createElement('button');
     b.className = 'chip' + (key === cur ? ' on' : '');
     b.textContent = label;
-    b.onclick = () => { localStorage.setItem('tsid-caption-size', key); renderCaptionSizes(); };
+    b.onclick = () => {
+      localStorage.setItem('tsid-caption-size', key);
+      renderCaptionSizes();
+      // Overlays are drawn client-side, so their previews must be redrawn for
+      // the new size to be visible before rendering.
+      if (typeof renderOverlays === 'function') renderOverlays();
+    };
     box.appendChild(b);
   });
 }
+// Width feeds the client-side overlay wrapper too, so redraw the previews when
+// it changes instead of only applying at render time.
+document.getElementById('cap-width')?.addEventListener('change', () => {
+  if (typeof renderOverlays === 'function') renderOverlays();
+});
 function renderCaptionStyles() {
   renderCaptionSizes();
   const box = document.getElementById('cap-styles');

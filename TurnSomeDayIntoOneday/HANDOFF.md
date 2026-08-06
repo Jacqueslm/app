@@ -1,8 +1,8 @@
 # Handoff — Turn Someday Into Day One
 
 State as of 3 August 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **7.0.0** (`APP_VERSION` in `index.html`,
-`tsid-shell-v7.0.0` in `sw.js` — the line was deliberately renamed from 12.x
+to rediscover it. Current version: **5.0.1** (`APP_VERSION` in `index.html`,
+`tsid-shell-v5.0.1` in `sw.js` — the line was deliberately renamed from 12.x
 back to 7, the same kind of reset done once before launch; the in-app updater
 compares commit SHAs, so the number only has to change, never increase).
 
@@ -47,7 +47,7 @@ Every commit gets pushed to `claude/app-qc-competitive-analysis-lehsn9` **and**
 Four files move together on every user-visible change: `sw.js` (`CACHE_NAME`),
 `index.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
 worker cache name must change or clients keep the old shell. The number was
-deliberately reset from 35 to 7 before launch; it is now 12.
+deliberately reset from 35 to 7 before launch; it is now 5.0.1 (5.0.0 was a reset from 7.0.3 at the owner's request, 6 Aug 2026 — the number only has to change, never increase).
 
 ### Two gates that are easy to confuse
 - `isSupporterUI()` — `S.userType === 'partner'`. About the **person**.
@@ -199,6 +199,53 @@ rejection reason; platform-tools are already on the owner's PC under
 
 **Impact: cosmetic only.** Install, use, the 14-day clock, purchases and review
 all work with the bar present.
+
+## Marketing pages (SEO surface)
+
+Static pages served by explicit routes in `server.js`, all listed in
+`sitemap.xml` (with `robots.txt` pointing at it) and linked from the homepage
+footer so Google can crawl them:
+
+- `/when-he-drinks` — partner landing, the drinking angle. Bio links
+  `/go/tiktok|youtube|facebook` redirect here with UTM tags attached.
+- `/for-her` — the broader partner page, PDF email gate.
+- `/is-my-husband-an-alcoholic` — **added 5 Aug 2026.** Lowest-difficulty term in
+  the keyword set. Refuses to diagnose anyone, reframes the question onto her own
+  life, and routes to `/quiz` (primary CTA) and `/for-her` (secondary). Same
+  voice, layout and crisis-resources block as `/when-he-drinks`.
+- `/quiz` — clean URL for `quiz.html` ("The 2-Minute Check-In"), added so videos
+  can say the address out loud.
+- `/best-recovery-apps` — our own honest roundup, competitors included.
+- 16 `*-alternative` pages — one per competitor app.
+- `/brainreset`, `/privacy`.
+
+**Rules for anything new here:** no medical claims, no "research shows", no brain
+chemicals (see `reference/medical-claims-audit.md`). Crisis resources (988 and
+the DV hotline) go *above* any signup button on pages that reach people living
+with active drinking. Add the route in `server.js`, the entry in `sitemap.xml`,
+and a footer link on `landing.html`.
+
+**Keyword decisions live in `KEYWORDS.md` at the repo root** — it is the only
+source of search data now that Semrush is disconnected. Only build for terms
+marked "Build"; never for "Skip" or "Too hard", whatever the volume. Don't
+re-run keyword research. The marketing agent
+(`.claude/agents/recovery-app-marketer.md`) is bound to that rule and will stop
+and ask if the file is missing rather than guess.
+
+**Repo audit, 6 Aug 2026 (full sweep, nothing deleted):** no split, duplicate,
+partial, or orphaned files anywhere — same-name files across `Studio/` and
+`TurnSomeDayIntoOneday/` are two separate apps, never to be merged. All routes,
+sitemap entries, and internal links verified against real files. Fixed then:
+three `/quiz.html` links normalized to the canonical `/quiz` route
+(`index.html`, `landing.html` ×2), and two stale references to the renamed
+`ai-shorts-scripts.md` now point at `AI-SCENES.md`. `KEYWORDS.md` was found to
+have never been committed despite this file and the marketer agent depending on
+it — **fixed same day**: built at the repo root from a live Semrush pull
+(US, 6 Aug 2026) with every term tagged Build / Too hard / Skip.
+
+**`COMPETITORS.md`** (repo root) is a monthly structural log of accounts serving
+the partner angle — hook type, length, format only. It exists to inform
+structure, never copy. Nothing there gets reworded into our content.
 
 ## How to work with the owner
 

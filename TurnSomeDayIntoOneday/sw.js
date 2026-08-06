@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v5.0.3'; // v5.0.3: Reset Recovery start-over button + lesson reminders reach Pro and name a missed day
+const CACHE_NAME = 'tsid-shell-v5.1.0'; // v5.1.0: web push - reminders arrive with the app closed
 const SHELL_FILES = [
   '/',
   '/app',
@@ -34,6 +34,43 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
     ).then(() => self.clients.claim())
+  );
+});
+
+// ─── WEB PUSH ────────────────────────────────────────────────────────────────
+// This is what lets a reminder arrive with the app fully closed: the push
+// service wakes the service worker, and the worker shows the notification.
+// A push with no readable payload still shows something rather than nothing -
+// some services send an empty wake-up, and a silent no-op would look broken.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = {}; }
+  const title = data.title || 'Turn Someday Into Day One';
+  const options = {
+    body: data.body || 'Your daily lesson is ready.',
+    icon: 'icons/icon-192.png',
+    badge: 'icons/icon-192.png',
+    // A tag means a second reminder replaces the first instead of stacking up
+    // into a wall of identical notifications on a phone left untouched.
+    tag: data.tag || 'daily-lesson',
+    renotify: true,
+    data: { url: data.url || '/app' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Tapping the notification focuses the app if it is already open anywhere,
+// rather than stacking a second copy of it.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/app';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes('/app') && 'focus' in client) return client.focus();
+      }
+      return self.clients.openWindow ? self.clients.openWindow(target) : undefined;
+    })
   );
 });
 

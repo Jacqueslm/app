@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v5.0.2'; // v5.0.2: optional phone number back on signup
+const CACHE_NAME = 'tsid-shell-v5.0.3'; // v5.0.3: Reset Recovery start-over button + lesson reminders reach Pro and name a missed day
 const SHELL_FILES = [
   '/',
   '/app',

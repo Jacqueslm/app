@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v5.0.1'; // v5.0.1: /betrayal-trauma-recovery + /how-to-stop-drinking; v5.0.0 was the owner's deliberate reset from 7.0.3
+const CACHE_NAME = 'tsid-shell-v5.0.2'; // v5.0.2: optional phone number back on signup
 const SHELL_FILES = [
   '/',
   '/app',

@@ -113,6 +113,15 @@ reads only the older text will give him advice that's a week behind.
     screen-off playback is a solvable job (drive steps off audio `timeupdate`/
     `ended` + MediaSession), not an impossible one. Don't repeat the claim that
     it needs recordings he doesn't have.
+- **6 Aug: `KEYWORDS.md` created at the repo root** (two verified Semrush
+  pulls, final dataset — the marketer agent is unblocked), and the first two
+  pages of its page plan are LIVE: **/partner-drinks** and
+  **/partner-watches-porn** — the inclusive supporter pages (husband, wife,
+  boyfriend, girlfriend named on each; KD 6-25 cluster). Routes, sitemap,
+  landing-footer links, and a when-he-drinks cross-link all wired; crisis
+  resources above every signup link; server boot-tested. Version 7.0.3.
+  Remaining from the plan: binge-eating page, betrayal-trauma-recovery page,
+  long-form how-to-stop-drinking.
 - **Open from 08-05, still unresolved:** the two origin-story picture fixes
   (real app screenshot on the laptop shot; "Someday" split into two words), and
   the watermark "Patch it out" tool — it's ffmpeg `delogo` (pixel averaging), so

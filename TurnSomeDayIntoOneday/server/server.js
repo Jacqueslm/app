@@ -103,6 +103,18 @@ app.get('/is-my-husband-an-alcoholic', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'is-my-husband-an-alcoholic.html'));
 });
 
+// The inclusive supporter pages (KEYWORDS.md lanes 1-2): one page per
+// addiction naming husband, wife, boyfriend, girlfriend so the whole
+// low-difficulty cluster ranks on a single URL. Both route to /quiz and
+// /for-her; crisis resources sit above every signup link.
+app.get('/partner-drinks', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'partner-drinks.html'));
+});
+
+app.get('/partner-watches-porn', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'partner-watches-porn.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

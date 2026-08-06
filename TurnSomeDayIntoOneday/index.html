@@ -419,6 +419,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="ob-label" style="text-align:left">Email</div>
   <input class="ob-input" id="gate-email" placeholder="you@example.com" type="text" autocomplete="email">
   <div id="gate-signup-extras" style="display:none">
+    <div class="ob-label" style="text-align:left">Phone number <span style="opacity:0.7">(optional)</span></div>
+    <input class="ob-input" id="gate-phone" placeholder="Helps you recover your account later" type="tel" autocomplete="tel">
     <div class="ob-label" style="text-align:left">Protect your account with</div>
     <div class="nova-modes" style="margin-bottom:12px">
       <button class="nova-mode active" id="gate-cred-pass" onclick="setGateCred('password')">Password</button>
@@ -573,7 +575,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:12px">Turn Someday Into Day One ("the app") is a recovery companion. This page explains, in plain language, what information the app collects, where it lives, and who else ever sees it.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">What we collect</h3>
-      <p style="margin-bottom:8px">When you create an account: your email address and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
+      <p style="margin-bottom:8px">When you create an account: your email address, a phone number if you choose to add one, and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
       <p style="margin-bottom:8px">As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Friendly (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Friendly respond with real context.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Where it lives</h3>
@@ -9150,7 +9152,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.0.0';
+const APP_VERSION='7.0.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -10314,6 +10316,8 @@ async function submitGateAuth(){
     if(gateCred==='pin'&&!/^\d{4,6}$/.test(password)){errEl.textContent='Your PIN must be 4 to 6 digits.';return;}
     if(gateCred==='password'&&password.length<8){errEl.textContent='Password must be at least 8 characters.';return;}
   }
+  const phoneEl=document.getElementById('gate-phone');
+  const phone=gateMode==='signup'&&phoneEl?phoneEl.value.trim():undefined;
   const submitBtn=document.getElementById('gate-submit-btn');
   const btnLabel=submitBtn?submitBtn.textContent:'';
   gateSubmitting=true;
@@ -10322,7 +10326,7 @@ async function submitGateAuth(){
   try{
     const res=await fetch(`/api/auth/${gateMode}`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,password,utm:tsidUtm()})
+      body:JSON.stringify({email,password,phone,utm:tsidUtm()})
     });
     const data=await res.json();
     if(!res.ok){errEl.textContent=data.error||'Something went wrong.';releaseGate();return;}

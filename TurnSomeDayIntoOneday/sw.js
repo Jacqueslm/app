@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7.0.0'; // v7.0.0: version line renamed to 7; inclusive lessons, recorded lesson audio, full player
+const CACHE_NAME = 'tsid-shell-v7.0.1'; // v7.0.1: optional phone number back on signup
 const SHELL_FILES = [
   '/',
   '/app',

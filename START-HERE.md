@@ -84,6 +84,24 @@ reads only the older text will give him advice that's a week behind.
 - **Studio: changed since the last commit here.** He's made edits outside this
   repo's history — read the actual files in `Studio/`, don't trust the commit log
   or the 08-05 summary for Studio's current state.
+- **SOS + lessons screen-cutoff fix: merged to main and in this repo.** A shared
+  screen wake-lock manager (`wakeLockAcquire/Release/Ensure`, index.html ~6271)
+  now serves the SOS voice guide, breathing, urge surfing, panic mode and lesson
+  audio; re-acquires if the system revokes it; resumes on unlock. **No Play
+  impact** — the Android app is a TWA pointing at the live site, so the fix ships
+  with the server deploy: no new .aab, no version bump, no review, no reset of
+  the 14-day clock, no new permissions. Only step left is the site being deployed
+  from main. **Not yet verified on a real locked phone** — ask him.
+  - *Caveat for a future session:* the write-up that shipped it said both
+    features rely on the phone's built-in voice and that "true screen-off audio
+    would need real audio files." That's not right — SOS defaults to real MP3s
+    (`vgStartAudio`, phone TTS is only the fallback option) and all 395 lessons
+    have MP3s. The audio itself can survive a lock; what stalls is the
+    **setTimeout-driven step sequencing**, which browsers freeze on a hidden
+    page. Keeping the screen on dodges that, so his symptom is fixed — but real
+    screen-off playback is a solvable job (drive steps off audio `timeupdate`/
+    `ended` + MediaSession), not an impossible one. Don't repeat the claim that
+    it needs recordings he doesn't have.
 - **Open from 08-05, still unresolved:** the two origin-story picture fixes
   (real app screenshot on the laptop shot; "Someday" split into two words), and
   the watermark "Patch it out" tool — it's ffmpeg `delogo` (pixel averaging), so

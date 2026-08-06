@@ -10,6 +10,7 @@ const billing = require('./billing');
 const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
+const push = require('./push');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -685,6 +686,54 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
   });
 });
 
+// ─── WEB PUSH ────────────────────────────────────────────────────────────────
+// The public key is not a secret - the browser needs it to build a subscription
+// - so this is readable without a session, same as any site's push key.
+app.get('/api/push/key', (req, res) => {
+  try {
+    res.json({ key: push.publicKey() });
+  } catch (err) {
+    res.status(503).json({ error: 'Push is not available on this server.' });
+  }
+});
+
+app.post('/api/push/subscribe', requireAuth, (req, res) => {
+  const sub = req.body || {};
+  if (!sub.endpoint || !sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+    return res.status(400).json({ error: 'A complete push subscription is required.' });
+  }
+  try {
+    db.savePushSubscription(req.userId, sub);
+    res.json({ ok: true });
+  } catch (err) {
+    try { db.logError('push-subscribe', err.message, err.stack); } catch (_) {}
+    res.status(500).json({ error: 'Could not save the subscription.' });
+  }
+});
+
+app.post('/api/push/unsubscribe', requireAuth, (req, res) => {
+  const { endpoint } = req.body || {};
+  if (endpoint) db.deletePushSubscription(endpoint);
+  res.json({ ok: true });
+});
+
+// Lets someone prove to themselves that reminders will actually arrive, which
+// is the whole reason a person turns notifications on and then doubts them.
+app.post('/api/push/test', requireAuth, async (req, res) => {
+  try {
+    const sent = await push.sendToUser(req.userId, {
+      title: 'Reminders are on',
+      body: "That's what your daily lesson reminder will look like — even with the app closed.",
+      url: '/app',
+      tag: 'push-test',
+    });
+    res.json({ ok: sent > 0, sent });
+  } catch (err) {
+    try { db.logError('push-test', err.message, err.stack); } catch (_) {}
+    res.status(500).json({ error: 'Could not send a test notification.' });
+  }
+});
+
 // Today's chat usage so the client can show a live "X of N left" meter for
 // Pro (Free is counted on the client already). Cheap authed read; the count is
 // the same server-side number the cap is enforced against, so it never drifts.
@@ -777,6 +826,7 @@ process.on('unhandledRejection', (err) => {
 });
 
 emailer.startScheduler();
+push.startScheduler();
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

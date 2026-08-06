@@ -67,7 +67,31 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
-## Where things stand (2026-08-03)
+## CURRENT STATUS (2026-08-06) — read this before anything below
+
+Everything under "Where things stand" is older background. This block is the
+live picture. **Update this block at the end of every session** — a session that
+reads only the older text will give him advice that's a week behind.
+
+- **Play Store: still in CLOSED TESTING.** Not applied for production yet.
+  Testers still running the 14-day window. Don't touch billing; don't plan
+  Play-side work; don't tell him to "check production."
+- **Outreach: 10 of 30 sent** (Weeks 1 and 2 ticked in `OUTREACH.md`).
+  Week 3's five are next. He is doing the sales work — do not imply otherwise.
+- **Content: live and posting.** 17 scripts loaded into Buffer; refills happening
+  6 Aug. Videos are out in the world. The bank is being worked through, not
+  sitting idle.
+- **Studio: changed since the last commit here.** He's made edits outside this
+  repo's history — read the actual files in `Studio/`, don't trust the commit log
+  or the 08-05 summary for Studio's current state.
+- **Open from 08-05, still unresolved:** the two origin-story picture fixes
+  (real app screenshot on the laptop shot; "Someday" split into two words), and
+  the watermark "Patch it out" tool — it's ffmpeg `delogo` (pixel averaging), so
+  it smears on busy backgrounds. Real fix would be AI inpainting; not built.
+
+---
+
+## Where things stand (2026-08-03, historical)
 
 **Done & live:** Pro chat cap set to 30/day everywhere; Pro "X of 30 left" counter;
 `/when-he-drinks` partner landing page; `/go/tiktok|youtube|facebook` tracked bio
@@ -112,8 +136,8 @@ picture (stills become 4-15s clips). Build stamp b0804.
 
 **Marketing next actions:** make videos in Studio → post via Buffer 3×/day
 (Morning=HIM, Midday=HER, Night=PROOF) → reply to comments → check
-`/admin/stats` Mondays → do more of what grows. Lead with the HER/drinking lane.
-First video to make: "Am I overreacting about my husband's drinking?"
+`/admin/stats` Mondays → do more of what grows. (Superseded 08-04: post for
+EVERYBODY, the Monday numbers pick the lane — nothing leads with "her" anymore.)
 
 **Standing reminder:** a weekly Routine fires into the owning session every
 Wednesday to handle the Play-side update + offer the deferred features the moment

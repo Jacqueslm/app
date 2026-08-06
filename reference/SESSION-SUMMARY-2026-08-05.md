@@ -92,9 +92,10 @@ production status unconfirmed — check-in pending his reply.
 16. Saved this summary and closed the session at his request to start fresh.
 
 ## Carry into the next session
-- **Play Store production status still unconfirmed.** Ask directly before
-  doing any Play-side work; the weekly Routine will keep firing until it's
-  reported live.
+- **Play Store: answered 6 Aug — STILL IN CLOSED TESTING.** Not applied for
+  production. No Play-side work until he says it's live.
+- **Outreach: answered 6 Aug — 10 of 30 sent**, Weeks 1–2 now ticked in
+  `OUTREACH.md`. 17 scripts loaded into Buffer, refills 6 Aug.
 - **Two picture fixes pending** on his 7-photo origin story (script 39 /
   future A6): real app screenshot needed on the laptop-shot screen; "Someday"
   needs to be one word on the slide and phone mockup images.

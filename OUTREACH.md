@@ -40,7 +40,7 @@ Send it anyway — that's how every one of these gets reached.
 ## WEEK 1
 
 ### 1. Empowered Recovery Center
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.empoweredrecoverycenter.com/admissions/contact-us/
 
 **Subject:** Your recovery apps article — the gap nobody's filled
@@ -63,7 +63,7 @@ Turn Someday Into Day One
 ---
 
 ### 2. Pura Vida Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://pvrecovery.com/contact/
 
 **Subject:** Your recovery apps article — the gap nobody's filled
@@ -86,7 +86,7 @@ Turn Someday Into Day One
 ---
 
 ### 3. Sunrise Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.sunriserecoverycare.com/contact-sunrise-recovery-care/
 
 **Subject:** Your recovery apps article — the gap nobody's filled
@@ -109,7 +109,7 @@ Turn Someday Into Day One
 ---
 
 ### 4. AddictionHelp.com
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.addictionhelp.com/about-us/resources/
 
 **Subject:** Your recovery support apps guide — the gap nobody's filled
@@ -134,7 +134,7 @@ P.S. I also keep an honest, current comparison of recovery apps myself — compe
 ---
 
 ### 5. Recovered.org
-- [ ] Sent
+- [x] Sent
 **Where:** https://recovered.org/contact
 
 **Subject:** Your best recovery apps article — the gap nobody's filled
@@ -161,7 +161,7 @@ P.S. I also keep an honest, current comparison of recovery apps myself — compe
 ## WEEK 2
 
 ### 6. Recovery Connection
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.recoveryconnection.com/contact/
 
 **Subject:** Your recovery apps article — a 2026 update worth making
@@ -184,7 +184,7 @@ Turn Someday Into Day One
 ---
 
 ### 7. Chapter 5 Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the contact options at https://chapter5recovery.com/
 
 **Subject:** Heads up on your sobriety apps list (one app no longer exists)
@@ -207,7 +207,7 @@ Turn Someday Into Day One
 ---
 
 ### 8. Castle Craig (UK)
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.castlecraig.co.uk/contact-us/
 
 **Subject:** Your recovery apps article — a refresh worth making
@@ -230,7 +230,7 @@ Turn Someday Into Day One
 ---
 
 ### 9. Royal Life Centers
-- [ ] Sent
+- [x] Sent
 **Where:** https://royallifecenters.com/admissions/
 
 **Subject:** Your recovery apps shortlist — the gap nobody's filled
@@ -253,7 +253,7 @@ Turn Someday Into Day One
 ---
 
 ### 10. Addiction Treatment Services
-- [ ] Sent
+- [x] Sent
 **Where:** the contact options at https://www.addictiontreatmentservices.com/
 
 **Subject:** Your top recovery apps for 2024 — a 2026 update worth making

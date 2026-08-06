@@ -81,9 +81,17 @@ reads only the older text will give him advice that's a week behind.
 - **Content: live and posting.** 17 scripts loaded into Buffer; refills happening
   6 Aug. Videos are out in the world. The bank is being worked through, not
   sitting idle.
-- **Studio: changed since the last commit here.** He's made edits outside this
-  repo's history — read the actual files in `Studio/`, don't trust the commit log
-  or the 08-05 summary for Studio's current state.
+- **Branch drift found 6 Aug:** `HANDOFF.md` says every commit goes to BOTH
+  `claude/app-qc-competitive-analysis-lehsn9` and `claude/vibe-code-uwxxlk`.
+  The first is stranded at 7c8d3a5, three commits behind `main`. Harmless today
+  (it isn't the deploy branch) but the rule is being broken — fast-forward it
+  next time anything ships. Also: the version quadruple (`sw.js` CACHE_NAME,
+  `APP_VERSION`, both package.json files) is still 7.0.0 and did not move for
+  the wake-lock change, against the HANDOFF rule.
+- **Studio: build stamp is now `b0806`** (the 08-05 notes still said b0804 —
+  it has moved). Confirmed present in `Studio/web/index.html`: templates, the
+  teleprompter, and webcam recording (`getUserMedia`). This is the toolchain
+  `DO-THIS-NEXT.md` tells him to record with, so it is working end to end.
 - **SOS + lessons screen-cutoff fix: merged to main and in this repo.** A shared
   screen wake-lock manager (`wakeLockAcquire/Release/Ensure`, index.html ~6271)
   now serves the SOS voice guide, breathing, urge surfing, panic mode and lesson
@@ -91,7 +99,11 @@ reads only the older text will give him advice that's a week behind.
   impact** — the Android app is a TWA pointing at the live site, so the fix ships
   with the server deploy: no new .aab, no version bump, no review, no reset of
   the 14-day clock, no new permissions. Only step left is the site being deployed
-  from main. **Not yet verified on a real locked phone** — ask him.
+  from main. **Verified on a real phone by Jacques, 6 Aug — it works.**
+  Deploy path confirmed: Railway deploys `claude/vibe-code-uwxxlk`, which is at
+  the same commit as `main` (92165e7), so the fix is live. Service-worker cache
+  is not a blocker — `sw.js` serves pages network-first, so a new `index.html`
+  lands on the next load even though the version quadruple wasn't bumped.
   - *Caveat for a future session:* the write-up that shipped it said both
     features rely on the phone's built-in voice and that "true screen-off audio
     would need real audio files." That's not right — SOS defaults to real MP3s

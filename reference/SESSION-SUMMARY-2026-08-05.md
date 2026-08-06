@@ -57,3 +57,46 @@ What got done this session, in order.
 outreach batch (Week 1) sent, Search Console live, wife handling comments,
 one new free video (39) queued the moment he records the seven lines. Play
 production status unconfirmed — check-in pending his reply.
+
+---
+
+## Continued same day — more requests, all closed out
+
+12. **Reviewed two more of his personal photos** (him and his wife arm-in-arm
+    leaving a bar, and a solo street portrait). Revised the origin-story order:
+    it's her carrying HIM out (not the reverse) — title became "She carried
+    me out of places I walked into on my own." Street shot became the closing
+    frame. Full 7-shot arc now: bar → floor → she carries him out → couch →
+    laptop (day 150) → the room → the street.
+13. **He asked to narrate it himself over stills, not AI-animated.** Delivered
+    as **script 39** in `SCRIPTS.md` (not `AI-SCENES.md` — no AI generation,
+    $0 cost): per-shot Ken Burns motion/strength/length, all seven narration
+    lines, and the exact Studio recording method (teleprompter line-by-line →
+    🎙 Take the voice out → sync in Sequencer). The two open picture fixes
+    (fake app screenshot on the laptop shot, "Someday" split into two words)
+    are still unresolved — flag again if a future session touches those images.
+14. **Explained two things he found himself:** a donation-funded third-party
+    video site (why its "free" generations aren't really free — someone else
+    is paying fal/Replicate rates and subsidizing via tips/limits/watermarks;
+    not something to build around), and Search Atlas/OTTO SEO ($99-999/mo) —
+    verdict: skip it, it automates technical SEO that's already done by hand
+    at $0, and can't manufacture the backlinks that are the actual bottleneck.
+15. **Diagnosed the watermark "Patch it out" tool leaving a visible patch.**
+    Read `cleanmark` in `studio.js`: it's ffmpeg's `delogo` filter blending
+    surrounding pixels inward, not AI inpainting — clean on flat backgrounds,
+    leaves a soft/smeared patch on busy ones (bottles, lights, texture) because
+    it can't recreate detail, only average it away. Verified live with a test
+    render. No code change made — walked him through two existing fixes: drop
+    to the "Small" mark size, or switch method to "Zoom past it" (crops the
+    corner off — genuinely clean, no smear, small edge trade-off).
+16. Saved this summary and closed the session at his request to start fresh.
+
+## Carry into the next session
+- **Play Store production status still unconfirmed.** Ask directly before
+  doing any Play-side work; the weekly Routine will keep firing until it's
+  reported live.
+- **Two picture fixes pending** on his 7-photo origin story (script 39 /
+  future A6): real app screenshot needed on the laptop-shot screen; "Someday"
+  needs to be one word on the slide and phone mockup images.
+- Nothing else blocking — Tuesday outreach, Search Console, and the schedule
+  are all running under their own steam.

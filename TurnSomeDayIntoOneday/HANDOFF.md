@@ -1,8 +1,8 @@
 # Handoff — Turn Someday Into Day One
 
 State as of 3 August 2026. Written so someone picking this up cold does not have
-to rediscover it. Current version: **7.0.3** (`APP_VERSION` in `index.html`,
-`tsid-shell-v7.0.3` in `sw.js` — the line was deliberately renamed from 12.x
+to rediscover it. Current version: **5.0.0** (`APP_VERSION` in `index.html`,
+`tsid-shell-v5.0.0` in `sw.js` — the line was deliberately renamed from 12.x
 back to 7, the same kind of reset done once before launch; the in-app updater
 compares commit SHAs, so the number only has to change, never increase).
 
@@ -47,7 +47,7 @@ Every commit gets pushed to `claude/app-qc-competitive-analysis-lehsn9` **and**
 Four files move together on every user-visible change: `sw.js` (`CACHE_NAME`),
 `index.html` (`APP_VERSION`), `package.json`, `server/package.json`. The service
 worker cache name must change or clients keep the old shell. The number was
-deliberately reset from 35 to 7 before launch; it is now 7.0.3.
+deliberately reset from 35 to 7 before launch; it is now 5.0.0 (reset from 7.0.3 at the owner's request, 6 Aug 2026 — the number only has to change, never increase).
 
 ### Two gates that are easy to confuse
 - `isSupporterUI()` — `S.userType === 'partner'`. About the **person**.

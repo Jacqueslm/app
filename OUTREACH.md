@@ -760,3 +760,76 @@ Hi — floating this back up once. Short version: your recovery-apps article has
 Either way, thanks for what you put out. Lists like yours are how people find help.
 
 Jacques
+
+---
+
+## SCHOOLS — the extra pile (1 per week, only after the 5 rehab emails)
+
+Not the Tuesday priority — this is the same slot as INFLUENCERS.md: extra 15
+minutes, one email, no deadline. Why it's worth even that: 53% of teachers
+report burnout (RAND 2025), replacing one teacher costs a district $12-25k,
+and half of districts have added mental-health resources since 2020 — the
+benefits office is actively collecting free staff resources. You're offering
+one, not selling one. **Never mention pricing to the district, never offer a
+contract — free resource, opt-in, staff pay (or don't) as individuals like
+anyone else. The moment money enters, procurement enters, and that's a wall.**
+
+### Finding the right person (10 minutes, do this once per district)
+
+1. Google: `"[district name]" employee wellness` or `"[district name]" HR benefits staff`.
+2. District site → Departments → Human Resources → Benefits. Names and emails
+   are public. Titles to look for, best first: **Employee Wellness
+   Coordinator, Benefits Coordinator, Benefits Specialist, Director of HR.**
+3. Nothing listed? Call the HR main line and ask "who coordinates employee
+   wellness?" — they'll tell you.
+4. Start with our own county's districts. Being local is the best opener
+   there is; use it in the first line.
+
+### EMAIL 1 — the ask (to the wellness/benefits coordinator)
+
+**Subject:** A free wellbeing resource for your staff newsletter
+
+Hi,
+
+I'm a local app builder, and I'll keep this short because I know your inbox.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks (alcohol, food, gambling, social media, anger, and more), and something no other app has: a whole section for someone worried about a person they love. In any staff room, that second group is bigger than anyone says out loud.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed. That's the whole company — me.
+
+The offer: it's free for your staff to start, completely private (nobody sees anyone's data — not us, not the district, not a spouse), opt-in, and there's nothing for your office to run. If you'd consider including it in your next staff wellness newsletter or benefits-fair materials, I'll send you a ready-to-paste blurb — one paragraph, zero work on your side.
+
+That's the entire ask. Happy to answer anything: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One
+
+- [ ] Sent (district: ____________)
+
+### EMAIL 2 — the follow-up (one week, once, then let it go)
+
+**Subject:** Re: (same subject)
+
+Hi — floating this up once. One-line version: free, private wellbeing app for your staff (recovery + supporting a loved one), nothing for your office to run, and I'll write the newsletter blurb myself. Built by one local guy who lived it: turnsomedayintodayone.com
+
+Thanks either way — the fact that your district has a wellness program at all puts it ahead of most.
+
+Jacques
+
+- [ ] Sent
+
+### EMAIL 3 — when they say yes (send same day, this IS the deliverable)
+
+**Subject:** The blurb, ready to paste
+
+Thank you — genuinely. Here it is, use it as-is or cut anything:
+
+> **Turn Someday Into Day One — a private companion for hard habits.** Whether it's drinking, food, doomscrolling, or worrying about someone you love who's struggling, this app gives you a private day counter, an SOS button for the worst ten minutes, and 30-day programs — built by someone who spent 38 years addicted and got free at 50. Completely confidential: nobody sees your information, not the district, not anyone. Free to start at turnsomedayintodayone.com
+
+If a QR code is easier for a flyer, say the word and I'll send one sized to print.
+
+And if it helps even one person on your staff, I'd love to hear that someday — that's the reason it exists.
+
+Jacques
+
+- [ ] Sent · District newsletter date: ____________

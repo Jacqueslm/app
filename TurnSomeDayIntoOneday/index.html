@@ -2156,6 +2156,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)" id="reset-date-title">Reset Recovery</div>
     <div class="sos-sub">Use this to correct a setback or start date — your streak and stats recalculate from here.</div>
+    <button class="ob-btn" style="margin-top:10px" onclick="resetDateToNow()">Start over from right now</button>
+    <div class="ob-label" style="text-align:left;margin-top:10px">Or set a specific date</div>
     <div class="ob-label" style="text-align:left;margin-top:4px">Date</div>
     <input class="ob-input" id="reset-date-input" type="date" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
     <div class="ob-label" style="text-align:left">Time</div>
@@ -2471,6 +2473,7 @@ let S = {
   accountabilityRemindersEnabled:false,lastAccountabilityCheckinDate:'',
   activityLog:[],weeklyReports:[],
   lastDailyLessonReminderDate:'',
+  lastMissedLessonNoticeDate:'',
   smartReminders:{
     urgeWindow:true,relapseRisk:true,morningCheckin:true,bedtimeReflection:true,
     motivational:true,categorySpecific:true,emotionalTrend:true,lessonIntegration:true,
@@ -3870,6 +3873,8 @@ function initApp(){
   setInterval(updateStats,60000);
   maybeShowAccountabilityCheckin();
   maybeShowDailyLessonReminder();
+  maybeShowMissedLessonReminder();
+  startLessonReminderTimer();
   evaluateSmartReminders();
   maybeProactiveCheckin();
 }
@@ -7168,8 +7173,10 @@ function updateNotificationPermissionUI(){
     sub.textContent='Tap to enable your phone\'s notification sound';
   }
 }
+// Pro used to be excluded here on the assumption that smart reminders covered
+// it - they don't, none of them is the daily lesson - so paying users were the
+// only ones getting no lesson reminder at all. Everyone gets this now.
 function maybeShowDailyLessonReminder(){
-  if(S.isPro)return;
   if(S.remindersEnabled===false)return;
   // Outside the user's chosen hours, say nothing at all - and crucially, don't
   // mark today as reminded, so the nudge still lands once they're inside the
@@ -7187,6 +7194,53 @@ function maybeShowDailyLessonReminder(){
   novaNudge(reminderText);
   sendPhoneNotification("Today's lesson is ready",reminderText);
 }
+// A day that went by without its lesson used to pass in complete silence. This
+// names it once, the next day, and only to someone who was actually here to
+// miss it - never to a brand-new user, and never in a voice that scolds.
+function lessonDoneOnDate(dateStr){
+  return (S.activityLog||[]).some(a=>a.type==='lesson_completed'&&new Date(a.ts).toDateString()===dateStr);
+}
+function maybeShowMissedLessonReminder(){
+  if(S.remindersEnabled===false)return;
+  if(!withinReminderWindow())return;
+  if(!S.startDate)return;
+  const today=new Date().toDateString();
+  if(S.lastMissedLessonNoticeDate===today)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  const yesterday=y.toDateString();
+  // Day one is not a missed day, and neither is a day they already completed.
+  if(new Date(S.startDate).toDateString()===yesterday)return;
+  if(lessonDoneOnDate(yesterday))return;
+  // Only speak up to someone who has actually been doing lessons - telling a
+  // person who has never opened one that they "missed" it is just noise.
+  if(!(S.lessonsCompletedCount>0))return;
+  if(lessonDoneOnDate(today))return;
+  S.lastMissedLessonNoticeDate=today;
+  save();
+  const text=`Yesterday's lesson is still there whenever you want it — nothing expired, nothing lost. Today's is ready too, and one is plenty.`;
+  novaNudge(text);
+  sendPhoneNotification('Your lesson is waiting',text);
+}
+// The reminder used to be checked once, at app open. If the app was already
+// open before the chosen window started - or stayed open across it - the time
+// they picked came and went with nothing said. Re-checking on a timer makes the
+// nudge land inside the window they actually chose. (A phone with the app fully
+// closed still can't be woken without web push; that is a separate build.)
+let lessonReminderTimer=null;
+function startLessonReminderTimer(){
+  clearInterval(lessonReminderTimer);
+  lessonReminderTimer=setInterval(()=>{
+    maybeShowDailyLessonReminder();
+    maybeShowMissedLessonReminder();
+  },5*60*1000);
+}
+// A backgrounded phone throttles timers hard, so the interval above can be
+// minutes late coming back. Checking on return to the app closes that gap.
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||!S.startDate)return;
+  maybeShowDailyLessonReminder();
+  maybeShowMissedLessonReminder();
+});
 
 // ─── SMART REMINDERS (Pro) ──────────────────────────────────────────────────
 const TONE_CLOSERS={
@@ -8957,6 +9011,16 @@ function resetApp(fromSlip){
 function closeResetDate(){
   document.getElementById('reset-date-modal').classList.remove('open');
 }
+// "Reset Recovery" opens prefilled with the date being corrected, which is right
+// for a correction and wrong for the far more common intent: starting the count
+// over today. Saving that prefilled date changed nothing, so the screen still
+// read the old date and the reset looked broken. One tap sets it to now.
+function resetDateToNow(){
+  const now=new Date();
+  document.getElementById('reset-date-input').value=localDateValue(now);
+  document.getElementById('reset-time-input').value=localTimeValue(now);
+  document.getElementById('reset-date-error').textContent=' ';
+}
 function confirmResetDate(){
   const dateVal=document.getElementById('reset-date-input').value;
   const timeVal=document.getElementById('reset-time-input').value||'00:00';
@@ -8972,6 +9036,14 @@ function confirmResetDate(){
     errEl.textContent=dateVal===localDateValue(today)
       ? `That time hasn't happened yet today — try ${localTimeValue(today)} or earlier.`
       : "That date is in the future — pick today or a day that's already passed.";
+    return;
+  }
+  // Saving the date it already had is not a reset. Left unguarded it banked the
+  // streak again every time - inflating the lifetime total and the streak
+  // history - while the day count on screen never moved, which is exactly what
+  // "it doesn't reset" looks like from the outside.
+  if(S.startDate&&Math.abs(chosen.getTime()-new Date(S.startDate).getTime())<60000){
+    errEl.textContent='That is already your start date — nothing to reset. Use "Start over from right now" above.';
     return;
   }
   const priorStreakLength=getDays();
@@ -9152,7 +9224,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.0.2';
+const APP_VERSION='5.0.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -9364,6 +9436,7 @@ function restartOnboarding(){
     S.dailySpend=0;
     S.dailyHoursLost=0;
     S.lastDailyLessonReminderDate='';
+    S.lastMissedLessonNoticeDate='';
     save();
 
     document.getElementById('ob-name').value='';

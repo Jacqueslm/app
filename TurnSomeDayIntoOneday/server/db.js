@@ -113,6 +113,25 @@ db.exec(`
     detail TEXT,
     created_at TEXT NOT NULL
   );
+  -- Web push: one row per browser/device a user allowed notifications on.
+  -- endpoint is the unique address the push service gave that install, so the
+  -- same account on a phone and a laptop is two rows and both get reminded.
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    last_sent_date TEXT,
+    fail_count INTEGER NOT NULL DEFAULT 0
+  );
+  -- Small key/value store. Holds the VAPID keypair so push works with no
+  -- manual environment setup: generated once on first boot, reused forever.
+  CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
 `);
 
 // Nova conversations are never persisted - the client stopped syncing them,
@@ -199,6 +218,45 @@ function getUserByEmail(email) {
 
 function getUserById(id) {
   return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+}
+
+// ─── WEB PUSH ────────────────────────────────────────────────────────────────
+function getSetting(key) {
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+}
+function setSetting(key, value) {
+  db.prepare(`INSERT INTO app_settings (key, value) VALUES (?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(key, value);
+}
+// Re-subscribing with the same endpoint moves it to the current account rather
+// than erroring - a shared device that switches accounts must not keep pushing
+// the previous user's reminders.
+function savePushSubscription(userId, sub) {
+  db.prepare(`INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, created_at)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(endpoint) DO UPDATE SET user_id = excluded.user_id,
+       p256dh = excluded.p256dh, auth = excluded.auth, fail_count = 0`)
+    .run(userId, sub.endpoint, sub.keys.p256dh, sub.keys.auth, new Date().toISOString());
+}
+function deletePushSubscription(endpoint) {
+  db.prepare('DELETE FROM push_subscriptions WHERE endpoint = ?').run(endpoint);
+}
+function getPushSubscriptions(userId) {
+  return db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(userId);
+}
+function getAllPushSubscriptions() {
+  return db.prepare('SELECT * FROM push_subscriptions').all();
+}
+function markPushSent(id, dateStr) {
+  db.prepare('UPDATE push_subscriptions SET last_sent_date = ?, fail_count = 0 WHERE id = ?').run(dateStr, id);
+}
+// A push service returning 404/410 means that install is gone for good; other
+// failures are transient, so they only count toward a threshold before the row
+// is dropped rather than deleting on the first blip.
+function bumpPushFailure(id) {
+  db.prepare('UPDATE push_subscriptions SET fail_count = fail_count + 1 WHERE id = ?').run(id);
+  db.prepare('DELETE FROM push_subscriptions WHERE id = ? AND fail_count >= 8').run(id);
 }
 
 function getState(userId) {
@@ -589,6 +647,14 @@ module.exports = {
   getUserById,
   getState,
   saveState,
+  getSetting,
+  setSetting,
+  savePushSubscription,
+  deletePushSubscription,
+  getPushSubscriptions,
+  getAllPushSubscriptions,
+  markPushSent,
+  bumpPushFailure,
   deleteUser,
   getChatCount,
   incrementChatCount,

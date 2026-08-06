@@ -1608,6 +1608,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Reminder sound</p><span id="notif-sound-sub">Tap to enable your phone's notification sound</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="sendTestPush()">
+        <i class="ti ti-bell"></i>
+        <div class="setting-row-txt"><p>Send me a test reminder</p><span>Proves reminders reach this phone with the app closed</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" onclick="toggleNovaDisclaimer()">
         <i class="ti ti-alert-triangle"></i>
         <div class="setting-row-txt"><p>Friendly safety reminder</p><span>Brief disclaimer shown when opening Friendly</span></div>
@@ -2494,11 +2499,19 @@ function serializeState(){
   return JSON.stringify(rest);
 }
 function save(){
+  // The push scheduler reads the reminder hours out of this same state blob, so
+  // it needs to know which clock those hours belong to. Stamped on every save
+  // so a move across timezones corrects itself the next time anything is saved.
+  S.tzOffsetMinutes=new Date().getTimezoneOffset();
   try{localStorage.setItem('tsid_v2',serializeState())}catch(e){}
   if(S.accountEmail)pushStateToServer();
 }
 function load(){
   try{const d=localStorage.getItem('tsid_v2');if(d){const p=JSON.parse(d);Object.assign(S,p);}}catch(e){}
+  // Set here as well as in save(): the push scheduler refuses to guess a
+  // timezone, so an account that loads but never happens to save would sit
+  // silently un-remindable until it did.
+  S.tzOffsetMinutes=new Date().getTimezoneOffset();
   // Blobs written by older builds still carry a stored conversation - drop it.
   S.chatHistory=[];
   // voiceJournalActive is a runtime flag, not saved data. It gets persisted if
@@ -3819,6 +3832,10 @@ function initApp(){
   document.getElementById('applock-toggle').classList.toggle('on',!!S.pinEnabled);
   document.getElementById('discretion-toggle').classList.toggle('on',!!S.discretionMode);
   updateNotificationPermissionUI();
+  // Re-register the push subscription on every boot: browsers rotate or drop
+  // them, and a silently-dead subscription means reminders just stop arriving
+  // with nothing on screen to explain why. Cheap, and a no-op when unchanged.
+  if(typeof Notification!=='undefined'&&Notification.permission==='granted')enablePushReminders();
   updateNovaDisclaimerToggleUI();
   applyFontSize();
   updateFontSizeUI();
@@ -7155,9 +7172,70 @@ async function requestNotificationPermission(){
   const perm=await Notification.requestPermission();
   updateNotificationPermissionUI();
   if(perm==='granted'){
-    sendPhoneNotification('Notifications on','You\'ll hear your phone\'s notification sound for reminders like this one.');
+    const pushed=await enablePushReminders();
+    sendPhoneNotification('Notifications on',pushed
+      ?"Reminders will now reach you at the time you set, even with the app closed."
+      :"You'll hear your phone's notification sound for reminders like this one.");
   }else if(perm==='denied'){
     appInfo('Notifications blocked','Your phone/browser blocked notifications for this app. You can re-enable them in your device or browser site settings.');
+  }
+}
+// ─── PUSH REMINDERS (arrive with the app closed) ─────────────────────────────
+// Everything here fails soft: a browser without push, a server without keys, or
+// a refused subscription all leave the in-app reminders working exactly as they
+// did before. Nothing about the lesson screen depends on this succeeding.
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64);
+  const out=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+  return out;
+}
+async function enablePushReminders(){
+  try{
+    if(!('serviceWorker' in navigator)||!('PushManager' in window))return false;
+    if(typeof Notification==='undefined'||Notification.permission!=='granted')return false;
+    if(!S.accountEmail)return false;// push is per-account; a signed-out device has nowhere to send
+    const reg=await navigator.serviceWorker.ready;
+    const keyRes=await fetch('/api/push/key');
+    if(!keyRes.ok)return false;
+    const {key}=await keyRes.json();
+    if(!key)return false;
+    let sub=await reg.pushManager.getSubscription();
+    // A subscription made against a different key can never be delivered to, so
+    // it is replaced rather than trusted.
+    if(sub){
+      const existing=btoa(String.fromCharCode(...new Uint8Array(sub.options.applicationServerKey||new ArrayBuffer(0))))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      if(existing&&existing!==key){try{await sub.unsubscribe();}catch(e){}sub=null;}
+    }
+    if(!sub){
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(key)});
+    }
+    const res=await fetch('/api/push/subscribe',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub.toJSON())
+    });
+    S.pushRemindersEnabled=res.ok;
+    save();
+    updateNotificationPermissionUI();
+    return res.ok;
+  }catch(e){return false;}
+}
+async function sendTestPush(){
+  const ok=await enablePushReminders();
+  if(!ok){
+    appInfo('Reminders',"Turn on notifications first — tap 'Reminder sound' above, then try again.");
+    return;
+  }
+  try{
+    const res=await fetch('/api/push/test',{method:'POST'});
+    const data=await res.json().catch(()=>({}));
+    appInfo('Test sent',data.ok
+      ?'A test notification is on its way. Close the app and it should still arrive.'
+      :"The server couldn't reach this device. Check that notifications are allowed for this app in your phone settings.");
+  }catch(e){
+    appInfo('Test failed','Could not reach the server just now. Try again in a moment.');
   }
 }
 function updateNotificationPermissionUI(){
@@ -7166,7 +7244,9 @@ function updateNotificationPermissionUI(){
   if(typeof Notification==='undefined'){
     sub.textContent='Not supported in this browser';
   }else if(Notification.permission==='granted'){
-    sub.textContent='On — uses your phone\'s notification sound';
+    sub.textContent=S.pushRemindersEnabled
+      ?'On — reminders arrive even with the app closed'
+      :'On — uses your phone\'s notification sound';
   }else if(Notification.permission==='denied'){
     sub.textContent='Blocked — enable in your device settings';
   }else{
@@ -9224,7 +9304,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.0.3';
+const APP_VERSION='5.1.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

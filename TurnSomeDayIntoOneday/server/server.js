@@ -123,6 +123,18 @@ app.get('/how-to-stop-binge-eating', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
 });
 
+// Final two pages of the KEYWORDS.md plan: the moat's companion page
+// (betrayal trauma recovery, supporter side) and the one borderline
+// long-form worth attempting (how to stop drinking, self side - carries
+// the cold-turkey SAFETY warning twice, above the fold and above signup).
+app.get('/betrayal-trauma-recovery', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'betrayal-trauma-recovery.html'));
+});
+
+app.get('/how-to-stop-drinking', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-drinking.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

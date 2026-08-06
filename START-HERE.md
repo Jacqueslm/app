@@ -120,8 +120,12 @@ reads only the older text will give him advice that's a week behind.
   boyfriend, girlfriend named on each; KD 6-25 cluster). Routes, sitemap,
   landing-footer links, and a when-he-drinks cross-link all wired; crisis
   resources above every signup link; server boot-tested. Version 7.0.3.
-  Remaining from the plan: binge-eating page, betrayal-trauma-recovery page,
-  long-form how-to-stop-drinking.
+  Also live 6 Aug: **/how-to-stop-binge-eating** (the 9,900/mo anchor; CTA to
+  /app, eating-disorder referral above signup). Remaining from the plan:
+  betrayal-trauma-recovery page, long-form how-to-stop-drinking.
+- **Version reset 7.0.3 → 5.0.0 on 6 Aug at Jacques' request.** Precedented
+  (35→7, 12→7); the updater compares SHAs, the number only has to change.
+  Future bumps go 5.0.1, 5.0.2… — do not "correct" it back upward.
 - **Open from 08-05, still unresolved:** the two origin-story picture fixes
   (real app screenshot on the laptop shot; "Someday" split into two words), and
   the watermark "Patch it out" tool — it's ffmpeg `delogo` (pixel averaging), so

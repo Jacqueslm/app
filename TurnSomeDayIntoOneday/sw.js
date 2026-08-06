@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v7.0.3'; // v7.0.3: /partner-drinks + /partner-watches-porn supporter pages; v7.0.1: wake-lock manager
+const CACHE_NAME = 'tsid-shell-v5.0.0'; // v5.0.0: deliberate reset from 7.0.3 (owner's call, like 35->7 and 12->7); adds /how-to-stop-binge-eating
 const SHELL_FILES = [
   '/',
   '/app',

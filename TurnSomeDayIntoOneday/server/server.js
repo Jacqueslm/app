@@ -115,6 +115,14 @@ app.get('/partner-watches-porn', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'partner-watches-porn.html'));
 });
 
+// The biggest winnable term in KEYWORDS.md (9,900/mo, KD 37): the food-track
+// page. Self-directed (not supporter), so its CTA goes straight to /app;
+// eating-disorder referral language is SAFETY class in the claims audit and
+// sits above the signup links.
+app.get('/how-to-stop-binge-eating', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

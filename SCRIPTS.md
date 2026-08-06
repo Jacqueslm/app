@@ -5,6 +5,8 @@ the title, what to say, and the caption. Nothing to look up anywhere else.
 
 **Every script in this file is TALK** — you on camera, free.
 The AI videos that cost money live in their own file: **AI-SCENES.md**.
+One script (39) uses your real pictures as free stills with your narration
+instead of AI-animated scenes — same $0 cost as everything else here.
 
 Do them in order. Cross one off when it's posted.
 
@@ -20,6 +22,7 @@ Do them in order. Cross one off when it's posted.
 | QUIZ hook — send them to /quiz | 23, 24 |
 | MULTI-ADDICTION — the app's edge | 25 |
 | VICTORY — fighter tone, all 13 tracks | 26–38 |
+| YOUR STORY — stills + your narration | 39 |
 
 ---
 
@@ -871,6 +874,79 @@ Do them in order. Cross one off when it's posted.
 > If you're in real danger right now, call or text 988. Do that first.
 
 **Caption:** The fight isn't over. Link in bio. (US: 988 anytime.)
+
+---
+
+## 39. STILLS — "She carried me"
+
+**Title:** She carried me out of places I walked into on my own
+
+**Cost: free.** Your seven pictures already exist. Ken Burns motion is free.
+Your voice is free. No AI generation at any point.
+
+**Length:** about 35 seconds.
+
+### The seven shots, in order
+
+| # | Picture | Motion | Strength | Length | After it |
+|---|---|---|---|---|---|
+| 1 | Bar — you alone, the empties | Push in | 0.15 | 5s | Fade |
+| 2 | The floor — you down, her standing over you | Pull out | 0.15 | 5s | Fade |
+| 3 | Her carrying you out | Push in | 0.12 | 5s | Dip to black |
+| 4 | The couch — her showing you the phone | Push in | 0.12 | 5s | Fade |
+| 5 | The laptop — day 150 | Push in | 0.10 | 4s | Fade |
+| 6 | The room — both of you speaking | Pull out | 0.15 | 5s | Fade |
+| 7 | The street — you walking alone | Push in | 0.12 | 6s | — |
+
+**Why those moves:** push in pulls the viewer closer on the emotional shots.
+Pull out on the floor shows how far down it was, and pull out on the room shows
+how many people are listening now. The dip to black after shot 3 is the turn —
+that half-second of nothing is where the story changes direction.
+
+**Set fit to PAD on any picture that isn't already tall**, or motion will crop
+the edges off it.
+
+### Say this — one line per shot
+
+1. *"That's not one drink after work. That's the third one I stopped counting."*
+2. *"She found me on the floor of a bar. That was thirty-eight years."*
+3. *"She carried me out of places I walked into on my own."*
+4. *"She showed me something on a phone. Not a lecture. Just somewhere to start."*
+5. *"Day one hundred and fifty. Nobody clapped. I counted anyway."*
+6. *"Now we sit in rooms and say it out loud. You can start tonight."*
+7. *"Thirty-eight years. Free at fifty. Someday was never coming — so I made it day one."*
+
+### How to record the voice
+
+1. **Post tab** → paste the seven lines → **Save script** → **▶ Open teleprompter**.
+2. **🎥 Record my webcam** — one line at a time, seven short clips. The mic
+   records with it. Nobody will ever see the picture, so don't think about your
+   face; just read it.
+3. Three takes of each line, keep the third. First is stiff, second is careful,
+   third is you.
+4. In **My Media**, on each clip: **🎙 Take the voice out.** That lifts the audio
+   off, cleans it, and files it as its own sound file.
+5. **Sequencer** → the seven pictures in order with the motion above → drop each
+   voice file under its shot → stretch the shot to fit its line.
+6. Captions: paste the lines → **Tap-to-sync** (free, exact) or **Auto-spread**
+   (instant).
+7. Render **9:16 · 1080p** → **✨ Polish my video** → download.
+
+**Delivery:** talk to one person, not an audience — one woman at 2am. Slower
+than feels right; the pictures need air. Leave the silence in after shot 2.
+
+**Caption:** She carried me. Then I stood up. Link in bio.
+
+---
+
+### Before you post it — two fixes on the pictures
+
+- **The laptop shot** shows a dashboard that isn't your app (it has Community,
+  Goals, Resources — yours doesn't). Screenshot your real app at your real day
+  count and put that on the screen instead. Your whole brand is that you don't
+  oversell; keep it true.
+- **The slide and the phone say "Turn Some Day Into Day One."** It's
+  **Someday**, one word. Regenerate those two.
 
 ---
 

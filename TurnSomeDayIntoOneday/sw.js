@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tsid-shell-v5.0.0'; // v5.0.0: deliberate reset from 7.0.3 (owner's call, like 35->7 and 12->7); adds /how-to-stop-binge-eating
+const CACHE_NAME = 'tsid-shell-v5.0.1'; // v5.0.1: /betrayal-trauma-recovery + /how-to-stop-drinking; v5.0.0 was the owner's deliberate reset from 7.0.3
 const SHELL_FILES = [
   '/',
   '/app',

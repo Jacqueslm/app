@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0808</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0809</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -714,6 +714,7 @@ body.simple-only #view-simple{display:flex !important}
       <h3>Text &amp; titles</h3>
       <div id="ovl-list" class="row"></div>
       <button class="btn2 quiet" id="ovl-add">+ Add text</button>
+      <p class="usage">Whatever font, size, colour and position you set last is remembered — every new text starts that way. Press <b>↧ same look for all</b> on any text to push its look onto all the others. <a href="#" id="ovl-look-reset">Back to Studio's default look</a>.</p>
     </div>
 
     <div class="card adv-card">
@@ -5679,6 +5680,32 @@ function drawOverlay(specIn, W, H, canvas) {
   return c;
 }
 
+// One look for every piece of text. Each overlay used to be born from a
+// hardcoded font/size/colour, so changing one changed only that one and the
+// next one you added started over. Now the last look you set is remembered and
+// every new text uses it; "same look for all" pushes it onto existing ones too.
+const LOOK_KEYS = ['font', 'size', 'color', 'bold', 'pos'];
+function savedTextLook() {
+  try {
+    const o = JSON.parse(localStorage.getItem('tsid-text-look') || 'null');
+    return o && typeof o === 'object' ? o : null;
+  } catch (_) { return null; }
+}
+// fallback keeps each spot's own sensible starting point (a title card is
+// bigger than Quick Video's per-picture words) until you've set a look once.
+function textLook(fallback) {
+  return { ...fallback, ...(savedTextLook() || {}) };
+}
+function saveTextLook(o) {
+  const look = {};
+  LOOK_KEYS.forEach((k) => { if (o[k] !== undefined) look[k] = o[k]; });
+  localStorage.setItem('tsid-text-look', JSON.stringify(look));
+}
+function applyLookToAll(o) {
+  st.overlays.forEach((t) => { LOOK_KEYS.forEach((k) => { if (o[k] !== undefined) t[k] = o[k]; }); });
+  saveTextLook(o);
+  renderOverlays(); persistDraft();
+}
 function renderOverlays() {
   const list = $('#ovl-list');
   list.innerHTML = '';
@@ -5708,7 +5735,8 @@ function renderOverlays() {
         <span>from</span><input type="number" class="ov-start" min="0" step="0.1" value="${o.start}">
         <span>to</span><input type="number" class="ov-end" min="0" step="0.1" value="${o.end}">
         <span>s · fade</span><input type="number" class="ov-fade" min="0" max="2" step="0.1" value="${o.fade}"><span>s</span>
-        <button class="ov-del" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">✕</button>
+        <button class="ov-all" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;margin-left:auto">↧ same look for all</button>
+        <button class="ov-del" style="border:none;background:var(--s1);color:var(--tm);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button>
       </div>`;
     const preview = () => {
       const [W, H] = currentSize().split('x').map(Number);
@@ -5719,6 +5747,8 @@ function renderOverlays() {
     const bind = (sel, key, num) => {
       card.querySelector(sel).addEventListener('input', (e) => {
         o[key] = num ? Number(e.target.value) : (e.target.type === 'checkbox' ? e.target.checked : e.target.value);
+        // Adjusting a look here becomes the default every later text starts from.
+        if (LOOK_KEYS.includes(key)) saveTextLook(o);
         preview(); persistDraft();
       });
     };
@@ -5726,8 +5756,9 @@ function renderOverlays() {
     bind('.ov-color', 'color'); bind('.ov-bold', 'bold');
     bind('.ov-start', 'start', true); bind('.ov-end', 'end', true); bind('.ov-fade', 'fade', true);
     card.querySelectorAll('.ov-grid button').forEach((b) => {
-      b.onclick = () => { o.pos = Number(b.dataset.p); renderOverlays(); persistDraft(); };
+      b.onclick = () => { o.pos = Number(b.dataset.p); saveTextLook(o); renderOverlays(); persistDraft(); };
     });
+    card.querySelector('.ov-all').onclick = () => applyLookToAll(o);
     card.querySelector('.ov-del').onclick = () => { st.overlays.splice(i, 1); renderOverlays(); persistDraft(); };
     list.appendChild(card);
     preview();
@@ -5736,11 +5767,16 @@ function renderOverlays() {
 $('#ovl-add').onclick = () => {
   const total = timelineTotal();
   st.overlays.push({
-    text: 'OUT NOW', font: 'system-ui', size: 90, color: '#ffffff', bold: true,
-    pos: 5, start: 0, end: Math.max(3, Math.min(5, total || 5)), fade: 0.4,
+    ...textLook({ font: 'system-ui', size: 90, color: '#ffffff', bold: true, pos: 5 }),
+    text: 'OUT NOW', start: 0, end: Math.max(3, Math.min(5, total || 5)), fade: 0.4,
   });
   renderOverlays(); persistDraft();
 };
+document.getElementById('ovl-look-reset')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  localStorage.removeItem('tsid-text-look');
+  renderOverlays();
+});
 
 /* ---------------- output + render ---------------- */
 function renderOutputChips() {
@@ -6718,8 +6754,8 @@ $('#lyr-title').onclick = () => {
   const title = $('#cp-title').value.trim() || 'My track';
   const artist = $('#cp-artist').value.trim();
   st.overlays.push({
+    ...textLook({ font: 'system-ui', size: 96, color: '#ffffff', bold: true, pos: 5 }),
     text: artist ? `${title}\\n${artist}` : title,
-    font: 'system-ui', size: 96, color: '#ffffff', bold: true, pos: 5,
     start: 0.4, end: 3.6, fade: 0.5,
   });
   renderOverlays(); persistDraft();
@@ -7370,7 +7406,7 @@ async function renderOneShort(s, statusEl) {
   const overlays = [];
   if (s.text.trim()) {
     const canvas = drawOverlay(
-      { text: s.text.replace(/\\n/g, '\n'), font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 2, },
+      { ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 2 }), text: s.text.replace(/\\n/g, '\n') },
       1080, 1920);
     const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
     const asset = await uploadFile(new File([blob], `${s.name}-caption.png`, { type: 'image/png' }), 'image', null, { overlay: '1' });
@@ -7745,7 +7781,8 @@ $('#qk-assemble').onclick = async () => {
       const td = i < st.trans.length && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0;
       if (s.text.trim()) {
         st.overlays.push({
-          text: s.text, font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8,
+          ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }),
+          text: s.text,
           start: Math.round((cum + 0.3) * 10) / 10,
           end: Math.round((cum + Math.min(durs[i] - 0.2, 4.3)) * 10) / 10,
           fade: 0.3,

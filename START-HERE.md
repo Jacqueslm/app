@@ -114,6 +114,30 @@ older that disagrees:**
 `git fetch origin main && git merge origin/main` before editing, and always
 re-read this block rather than trusting a summary in your own context.
 
+### "Does this change affect the Play Store test?" — the standing answer
+
+He asks this on most changes. The app is a **TWA**: the `.aab` is an empty shell
+that opens `https://www.turnsomedayintodayone.com/app?src=play`. So:
+
+| Change | Play impact |
+|---|---|
+| Anything in `index.html`, `server/`, pages, lessons, audio, Studio | **None.** Ships with the Railway deploy. No .aab, no review, no clock reset. |
+| A **web API** the page calls (wake lock, push, camera, notifications) | **None for the .aab** — the browser handles it, Android sees no new permission. |
+| Anything in `TurnSomeDayIntoOneday/twa/` — package name, icon, splash, target SDK, `startUrl` | **New .aab required.** Bump `appVersionCode`, `bubblewrap build`, re-upload. |
+| Anything that **collects new user data** | **No .aab, but the Data safety form must be updated BEFORE it ships.** |
+
+**How to check, don't guess:** `git log --oneline -- TurnSomeDayIntoOneday/twa/`
+— if that path is untouched, no new build is needed. As of 2026-08-06 the shell
+is still at `appVersionCode: 1` and has not changed since it was first created.
+
+**Verified example:** the SOS/lesson wake-lock fix (PR #46, branch
+`claude/sos-talk-screen-cutoff-dfhjw4`) — web-only, TWA untouched, zero Play
+impact. Confirmed working on a real phone by Jacques.
+
+**The live exception right now:** the optional **phone number at signup** is
+back. That's the data-collection row above — Data safety must declare it before
+production. That one is real; the wake lock never was.
+
 ---
 
 ## STATUS (2026-08-06, earlier)

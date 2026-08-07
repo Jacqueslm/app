@@ -66,7 +66,10 @@ SDK): `cd twa && bubblewrap build`, after bumping `appVersionCode` in
 
 - Package `com.turnsomedayintodayone.app` — permanent, matches `assetlinks.json`.
 - Signing: `twa/android-upload.keystore`, alias `upload`. **This file is the only
-  way to ever ship an update to this listing.** It is backed up off the machine.
+  way to ever ship an update to this listing.** Correctly gitignored (a keystore
+  in git history is a public keystore), so its absence from the repo is by
+  design, not a loss. **Backup verified by Jacques 2026-08-07: it lives on his
+  computer and on a USB drive.** Don't re-flag this.
 - `?src=play` is how the client knows it is the Play build and must route
   purchases to Google rather than Stripe. Do not remove it from `startUrl`.
 - The Play-mode latch is **Android-only** as of 12.0.1. Opening `?src=play` in

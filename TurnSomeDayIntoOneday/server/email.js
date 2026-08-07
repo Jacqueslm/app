@@ -225,7 +225,7 @@ const TRIAL_DAY7_CHARGED = { subject: "You're Pro. Here's what that means.", tex
 
 Three things:
 
-Everything's unlocked. All 13 lesson packs, unlimited Friendly, the full partner section.
+Everything's unlocked. All 13 lesson packs, 30 Friendly chats a day, the full partner section.
 Cancel any time, two clicks, no phone call, no retention trap.
 Reply to this email whenever you want. I read them. It's still just me.
 

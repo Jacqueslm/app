@@ -48,6 +48,18 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+
+// HSTS: once a browser has seen this header it refuses to talk to the site over
+// plain HTTP for a year, which closes the window where a first request on a
+// hostile network could be downgraded. Railway terminates TLS in front of us
+// and every canonical URL is already https, so nothing here is reachable over
+// http anyway. Deliberately no includeSubDomains and no preload - both are
+// effectively one-way doors, and neither is needed for the apex + www we run.
+app.use((req, res, next) => {
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+  next();
+});
+
 app.use('/preview', requireAuth);
 
 // Cold marketing traffic lands here; the app itself lives at /app so a

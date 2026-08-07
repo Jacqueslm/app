@@ -83,12 +83,11 @@ older that disagrees:**
 - **Web push shipped (5.1.0):** lesson reminders now arrive with the app fully
   closed (`server/push.js`, new db tables). Also fixed: Reset Recovery keeping
   the old date, and lesson reminders never reaching Pro (5.0.3).
-- **⚠️ THE PHONE NUMBER IS BACK AT SIGNUP** (commit 6bedd08, optional field,
-  `#gate-phone`, "Helps you recover your account later"). An earlier session
-  removed it and told Jacques that was the safe direction for the Data safety
-  form. **That advice is now void.** The app collects an optional phone number
-  again, so the Play **Data safety form must declare phone number** before
-  production. Check the console against the app, don't assume.
+- **Phone number at signup is back** (commit 6bedd08, optional field,
+  `#gate-phone`). It was present when Data safety was first completed, so the
+  form still matches the app — **Jacques confirms nothing on the Play side has
+  been touched since the original submission, and nothing needs changing.**
+  Closed; don't re-raise it.
 - **Studio, this session:** multi-select delete in My Media (☑ Select multiple →
   tap thumbnails → bulk delete); **touch-drag timeline reorder** — the old
   reorder used the HTML5 `draggable` API, which mobile browsers never fire for a
@@ -132,11 +131,23 @@ is still at `appVersionCode: 1` and has not changed since it was first created.
 
 **Verified example:** the SOS/lesson wake-lock fix (PR #46, branch
 `claude/sos-talk-screen-cutoff-dfhjw4`) — web-only, TWA untouched, zero Play
-impact. Confirmed working on a real phone by Jacques.
+impact.
 
-**The live exception right now:** the optional **phone number at signup** is
-back. That's the data-collection row above — Data safety must declare it before
-production. That one is real; the wake lock never was.
+**2026-08-06 — Jacques tested the whole app on his real phone and reports
+everything working**, SOS "Talk me through it" and lesson audio included. He
+has not touched the Play Store configuration since the very first submission,
+and the `twa/` folder confirms it (`appVersionCode` still `1`, untouched since
+creation). **Nothing is outstanding on the Play side.** The only remaining
+blocker to production is the one that was always there: 12 testers opted in for
+14 continuous days.
+
+**Phone number / Data safety — resolved 2026-08-06.** The optional phone field
+was in the app when the Data safety form was originally completed; it was
+removed for a while and has since been restored, so the form still describes
+what the app actually does. **Jacques confirms he has not changed anything on
+the Play side since the first submission, and nothing needs changing.** Treat
+this as closed. (If a future session ever *adds* a genuinely new data type,
+that's when the form moves — not for a field that was always declared.)
 
 ---
 

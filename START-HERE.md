@@ -43,9 +43,16 @@ the person struggling (porn, alcohol, food, gambling).
 - `OUTREACH.md` — Tuesday's sales block: 30 verified rehab/media targets in
   weekly batches of 5, with the email written.
 
-Plus two pitch-and-prompt files he opens only when doing that specific work:
+Plus the files he opens only when doing that specific work:
 - `AI-SCENES.md` — the AI videos that cost money (A1–A5, full prompts).
 - `INFLUENCERS.md` — podcasts/authors pile, separate from the rehab outreach.
+- `KEYWORDS.md` — the final search dataset. **Only write for terms marked
+  "Build"**; never Skip/Too-hard, whatever the volume. Semrush is disconnected,
+  so this file is the only source of search truth — don't propose new research.
+- `COMPETITORS.md` — monthly structural log (hook type / length / format only,
+  never wording). Informs structure, never copy.
+- `reference/Getting-Noticed-Course.pdf` — his sales & marketing course, one
+  module a week in the Wednesday slot.
 
 **NEVER re-send a whole file he works out of.** He deletes scripts and ticks
 emails as he does them — sending SCRIPTS.md/OUTREACH.md back wipes his
@@ -67,7 +74,49 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
-## CURRENT STATUS (2026-08-06) — read this before anything below
+## CURRENT STATUS (2026-08-06, later) — read this before anything below
+
+**Latest facts, verified from the code this session — these override anything
+older that disagrees:**
+- **App version `5.1.0`** (`APP_VERSION`, `sw.js` CACHE_NAME). **Studio build
+  `b0807`.** Earlier notes saying 5.0.1 / b0804 / b0806 are stale.
+- **Web push shipped (5.1.0):** lesson reminders now arrive with the app fully
+  closed (`server/push.js`, new db tables). Also fixed: Reset Recovery keeping
+  the old date, and lesson reminders never reaching Pro (5.0.3).
+- **⚠️ THE PHONE NUMBER IS BACK AT SIGNUP** (commit 6bedd08, optional field,
+  `#gate-phone`, "Helps you recover your account later"). An earlier session
+  removed it and told Jacques that was the safe direction for the Data safety
+  form. **That advice is now void.** The app collects an optional phone number
+  again, so the Play **Data safety form must declare phone number** before
+  production. Check the console against the app, don't assume.
+- **Studio, this session:** multi-select delete in My Media (☑ Select multiple →
+  tap thumbnails → bulk delete); **touch-drag timeline reorder** — the old
+  reorder used the HTML5 `draggable` API, which mobile browsers never fire for a
+  finger, so it only ever worked with a mouse; now Pointer Events on a ⠿ handle,
+  verified with real touch input. Arrows kept as fallback.
+- **Studio caption sizing fixed (b0807):** Studio has TWO text systems —
+  server-burned ASS **captions** and client-drawn **overlays** (title cards and
+  Quick Video's per-picture words). The Size control only fed captions, and
+  Quick Video's text was hardcoded at size 64 (~40% larger than a real caption,
+  so even "Small" read big). Size now multiplies overlays too
+  (`captionSizeMul`), and auto-written text uses `AUTO_TEXT_SIZE = 0.042 * 1080`
+  — the same fraction as `ASS_SIZES.medium`. Confirmed working by Jacques.
+- **`reference/Getting-Noticed-Course.pdf` (new):** a 16-page sales/marketing
+  course written for him — 8 modules, quizzes, final exam, reasoned answer key.
+  Module 0 is how to work with Claude (repo-as-memory, "read START-HERE.md").
+  Meant for the Wednesday small-win slot, one module a week.
+- **Also landed from other sessions:** `reference/SCHOOLS-BENEFITS-PLAYBOOK-2026-08.md`
+  (the employer/school-benefits angle, with ready-to-send emails) and
+  `reference/ADS-AND-CONTENT-MISTAKES-2026-08.md` (advertising and social
+  content mistakes, with live paid-search data).
+
+**Note on rhythm:** he moves between several concurrent sessions. Always
+`git fetch origin main && git merge origin/main` before editing, and always
+re-read this block rather than trusting a summary in your own context.
+
+---
+
+## STATUS (2026-08-06, earlier)
 
 Everything under "Where things stand" is older background. This block is the
 live picture. **Update this block at the end of every session** — a session that

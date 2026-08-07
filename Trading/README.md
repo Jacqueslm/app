@@ -65,7 +65,7 @@ You get two kinds:
         ↓
   REJECT → log it, close the laptop.  TAKE/HALF → it tells you your size
         ↓
-  place the order in NinjaTrader by hand
+  place the bracket from the TradingView chart (routed to NinjaTrader)
         ↓
   manage on the 15m — T1 at 2R, stop to break-even, trail under 15m swings
         ↓
@@ -74,32 +74,85 @@ You get two kinds:
 
 ### About NinjaTrader
 
-**This system does not place trades for you, and that's deliberate at this stage.** TradingView
-alerts can't route orders to a NinjaTrader account — the analysis lives on TradingView and the
-execution lives in NinjaTrader, with you in between. Chart on one screen, DOM on the other.
+Your NinjaTrader account connects directly to TradingView, so analysis and execution live on the
+same screen: connect the broker in the **Trading Panel** at the bottom of the chart, and place the
+order from the chart itself. No second platform, no retyping levels under time pressure.
 
-Two things worth knowing:
-- NinjaTrader owns Tradovate, and Tradovate *is* one of TradingView's integrated futures brokers.
-  If you want to click trades directly from the TradingView chart, that's the route to look into —
-  check current terms with them, don't take my word for it.
-- If you later want genuine automation, the honest path is NinjaScript (C#) running inside
-  NinjaTrader itself, ported from these same rules. **Don't do that yet.** Automate a system
-  after you have a few hundred manual trades proving it works, not before. An automated bad
-  system just loses money faster and with less to learn from.
+**Place the whole bracket in one action — entry, stop and target together.** Never enter first and
+"add the stop in a second." That second is exactly when price moves against you and a 1% loss
+becomes whatever you can stomach. The grader gives you all three numbers before you click.
+
+**The connection still doesn't place trades for you, and that's deliberate.** The indicator alerts,
+the grader approves, you click. Keep it that way until the journal says the system works.
+
+If you eventually want real automation, the honest path is NinjaScript (C#) inside NinjaTrader,
+ported from these same rules. **Don't do that yet** — automate after a few hundred manual trades
+prove the edge, not before. An automated bad system just loses money faster and teaches you less.
+
+### Your costs, and why they matter here
+
+At **$0.39 per contract per side** you're paying about **$0.78 round turn**, so the backtester is
+set to $0.39 in `commission_type = cash_per_contract` (Pine charges it on entry *and* exit).
+
+One thing to check on your next statement: whether that $0.39 is the broker commission only, with
+CME exchange and NFA fees billed separately. If so, raise the backtest number to the true all-in
+figure. It sounds like pennies, but on MGC with a 3-point stop you're risking $30 a contract —
+$0.78 of friction is 2.6% of your risk on every single trade, and that comes straight out of
+expectancy. Cheap commissions are also how people talk themselves into overtrading; your daily
+stop, not your commission rate, is what protects the account.
 
 ---
 
-## Before you risk a dollar
+## What to do next — the ramp
 
-1. **Backtest.** Load `MSB-Strategy.pine` on MNQ 1H, 2 years. Look at expectancy and max
-   drawdown, not net profit. Then set commission and slippage to your real fills and look again.
-2. **Replay.** TradingView bar-replay, 50 setups, grader open, no money. You're training your
-   eye to see step ⑤ — the wait — as the entry, not step ②.
-3. **Sim.** 30 trades in NinjaTrader sim at your real size.
-4. **Live, one contract**, whatever the grader says, for 30 trades.
+Four stages. Do not skip one because the previous one looked good. You've traded two years
+discretionarily; the thing being tested here isn't whether you can read structure, it's whether
+you can follow a rule that says no when you want it to say yes.
 
-If steps 1–3 look bad, that's the system doing its job. A rule set that gets rejected on paper
-saved you the money it would have cost live.
+### Stage 1 — Backtest (this week, ~2 hours)
+
+Load `MSB-Strategy.pine` on MNQ 1H, two years of data. Then MES, then MGC with the `0800-1200`
+session. For each one write down: **expectancy in R, max drawdown, number of trades, win rate.**
+
+Look at expectancy and drawdown, never net profit. A system with 60 trades and +0.3R expectancy
+is real; one with 6 trades and a big number is noise. If a symbol shows negative expectancy across
+a decent sample, that symbol is off your list — that result just saved you a year of tuition.
+
+### Stage 2 — Bar replay (1–2 weeks, 50 setups)
+
+TradingView bar-replay, indicator on, grader open, no money. Log all 50 in the grader —
+**including every one you reject.**
+
+This stage exists for one reason: to retrain your eye so that step ⑤, the wait, feels like the
+entry instead of step ②, the break. Two years of discretionary trading has built a reflex to act
+on the break. Fifty repetitions is roughly what it takes to overwrite it.
+
+### Stage 3 — Sim (30 trades, at your real size)
+
+NinjaTrader sim, connected through TradingView exactly as you'll trade live. Real size, real
+brackets, real session hours. You are testing your execution now, not the rules.
+
+**The pass mark isn't profit — it's zero rule breaks across 30 trades.** If you took a trade the
+grader rejected, you are not ready for stage 4 regardless of what the P&L says, because that's the
+habit that will express itself at the worst possible moment.
+
+### Stage 4 — Live, one contract, 30 trades
+
+One contract. Not "one until I'm confident." Whatever the grader says, for thirty trades. Then
+review expectancy by grade and by symbol before you touch the size.
+
+**If your B-grades have negative expectancy over that sample, stop taking B-grades.** That single
+finding is worth more than any amount of tweaking the indicator.
+
+### Along the way
+
+- Set the alerts once and then leave the charts alone. Screen-watching is what produces C-grades.
+- Log the rejects. After 100 of them you'll know whether your C's genuinely lose, and that's the
+  only honest basis for ever loosening a rule.
+- Change nothing until stage 4 is done. One variable at a time, with a date written next to it.
+
+If stages 1–3 look bad, that's the system working. A rule set rejected on paper saved you exactly
+what it would have cost live.
 
 ### What the backtest will not tell you
 

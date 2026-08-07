@@ -7,7 +7,11 @@
 //  READ THIS BEFORE YOU TRUST A NUMBER IT SHOWS YOU:
 //   • Futures data on TradingView is continuous-contract stitched; rollovers
 //     create gaps that never existed in a tradeable contract.
-//   • Commission and slippage below are estimates. Set them to YOUR fills.
+//   • Commission is set to $0.39 per contract PER SIDE (= $0.78 round turn).
+//     Check your NinjaTrader statement: if that $0.39 is the broker commission
+//     only and exchange + NFA fees are billed on top, raise this to the true
+//     all-in number. On MGC with a 3-point stop, fees are a real part of your
+//     edge, not a rounding error.
 //   • Structure confirms `pvR` bars late by design, so entries here are
 //     realistic — but partial fills and fast markets are not modelled.
 //   • A backtest is for rejecting bad rules, not for predicting income.
@@ -16,7 +20,7 @@
 strategy("MSB — Backtester", "MSB-BT", overlay = true,
      default_qty_type = strategy.fixed, default_qty_value = 1,
      initial_capital = 25000, currency = currency.USD,
-     commission_type = strategy.commission.cash_per_contract, commission_value = 1.24,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 0.39,
      slippage = 2, margin_long = 0, margin_short = 0,
      max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
 

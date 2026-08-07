@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Grader — Market Structure Bridge</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232d; --line:#2a3341;
+    --ink:#e6edf3; --dim:#8b96a5; --accent:#3b82f6;
+    --good:#26a69a; --bad:#ef5350; --warn:#f0a020;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:22px;margin:0 0 4px} h2{font-size:15px;margin:0 0 12px;color:var(--dim);
+     text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+  .sub{color:var(--dim);margin:0 0 24px;font-size:14px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+  label{display:block;font-size:13px;color:var(--dim);margin:0 0 4px}
+  input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:6px;padding:9px 10px;font-size:15px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:6px;cursor:pointer;
+       border:1px solid transparent}
+  .chk:hover{background:var(--panel2)}
+  .chk input{width:18px;height:18px;flex:0 0 18px;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+  .chk span{font-size:14px}
+  .chk small{display:block;color:var(--dim);font-size:12px;margin-top:1px}
+  .hard .chk input{accent-color:var(--bad)}
+  .verdict{border-radius:10px;padding:22px;text-align:center;margin-bottom:18px;border:2px solid var(--line);
+           background:var(--panel)}
+  .verdict .big{font-size:34px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+  .verdict .why{font-size:14px;color:var(--dim)}
+  .v-take{border-color:var(--good);background:rgba(38,166,154,.10)} .v-take .big{color:var(--good)}
+  .v-half{border-color:var(--warn);background:rgba(240,160,32,.10)} .v-half .big{color:var(--warn)}
+  .v-rej {border-color:var(--bad); background:rgba(239,83,80,.10)}  .v-rej  .big{color:var(--bad)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+  .stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+  .stat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+  button{background:var(--accent);color:#fff;border:0;border-radius:6px;padding:11px 18px;
+         font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+  button:hover{filter:brightness(1.1)} button.ghost{background:transparent;border:1px solid var(--line);color:var(--dim)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;
+     letter-spacing:.06em;padding:8px 6px;border-bottom:1px solid var(--line)}
+  td{padding:8px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+  .pill{display:inline-block;padding:1px 7px;border-radius:20px;font-size:11px;font-weight:700}
+  .p-a{background:rgba(38,166,154,.2);color:var(--good)}
+  .p-b{background:rgba(240,160,32,.2);color:var(--warn)}
+  .p-c{background:rgba(239,83,80,.2);color:var(--bad)}
+  .pos{color:var(--good)} .neg{color:var(--bad)}
+  .note{font-size:12px;color:var(--dim);margin-top:10px;line-height:1.5}
+  .blockers{margin-top:12px;text-align:left;display:inline-block}
+  .blockers li{color:var(--bad);font-size:13px;margin-bottom:3px}
+  .full{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Trade Grader</h1>
+  <p class="sub">Market Structure Bridge · MNQ / MES / MGC · every setup goes through here, including the ones you skip.</p>
+
+  <div id="verdict" class="verdict"><div class="big">—</div><div class="why">Fill in the setup below.</div></div>
+
+  <div class="grid">
+    <!-- ── Hard filters ── -->
+    <div class="card hard">
+      <h2>Hard filters — any miss is a reject</h2>
+      <div id="hardList"></div>
+    </div>
+
+    <!-- ── Score points ── -->
+    <div class="card">
+      <h2>Quality points — 7 available</h2>
+      <div id="softList"></div>
+    </div>
+
+    <!-- ── Trade details ── -->
+    <div class="card">
+      <h2>The trade</h2>
+      <div class="row">
+        <div><label>Instrument</label>
+          <select id="sym">
+            <option value="MNQ">MNQ — Micro Nasdaq</option>
+            <option value="MES">MES — Micro S&amp;P</option>
+            <option value="MGC">MGC — Micro Gold</option>
+          </select></div>
+        <div><label>Direction</label>
+          <select id="dir"><option value="LONG">Long</option><option value="SHORT">Short</option></select></div>
+      </div>
+      <div class="row3">
+        <div><label>Entry</label><input id="entry" type="number" step="any" placeholder="0.00"></div>
+        <div><label>Stop</label><input id="stop" type="number" step="any" placeholder="0.00"></div>
+        <div><label>Account $</label><input id="acct" type="number" step="any" value="25000"></div>
+      </div>
+      <div class="row">
+        <div><label>Risk %</label><input id="riskPct" type="number" step="0.1" value="1"></div>
+        <div><label>Notes</label><input id="notes" type="text" placeholder="MNQ long off 20,450"></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="oStop">—</b><span>Stop (pts)</span></div>
+        <div class="stat"><b id="oQty">—</b><span>Contracts</span></div>
+        <div class="stat"><b id="oRisk">—</b><span>$ at risk</span></div>
+        <div class="stat"><b id="oT1">—</b><span>T1 (2R)</span></div>
+      </div>
+      <p class="note" id="sizeNote"></p>
+    </div>
+
+    <!-- ── Log ── -->
+    <div class="card">
+      <h2>Log it</h2>
+      <p class="note" style="margin-top:0">Log every setup — taken <em>and</em> passed. The passed ones are how you
+        find out whether your C-grades actually lose. Saved in this browser only.</p>
+      <div class="row">
+        <div><label>Outcome</label>
+          <select id="outcome">
+            <option value="none">Not taken (passed on it)</option>
+            <option value="win">Win</option><option value="loss">Loss</option>
+            <option value="be">Break-even</option>
+          </select></div>
+        <div><label>Result in R</label><input id="resR" type="number" step="0.1" placeholder="2.0 / -1.0"></div>
+      </div>
+      <div class="btns">
+        <button id="save">Save to journal</button>
+        <button id="reset" class="ghost">Clear form</button>
+      </div>
+    </div>
+
+    <!-- ── Journal ── -->
+    <div class="card full">
+      <h2>Journal</h2>
+      <div class="stats" id="jStats"></div>
+      <div style="overflow-x:auto;margin-top:16px"><table id="jTable">
+        <thead><tr><th>Date</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Score</th>
+          <th>Entry</th><th>Stop</th><th>Qty</th><th>Outcome</th><th>R</th><th></th></tr></thead>
+        <tbody></tbody></table></div>
+      <div class="btns">
+        <button id="csv" class="ghost">Export CSV</button>
+        <button id="wipe" class="ghost">Erase journal</button>
+      </div>
+      <p class="note">Expectancy = average R per trade. Positive and you have an edge; negative and you have a
+        hobby. Judge nothing before 30 trades.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Contract specs ──────────────────────────────────────────────────────────
+const SPECS = {
+  MNQ:{ perPoint:2,  tick:0.25, name:"Micro Nasdaq-100" },
+  MES:{ perPoint:5,  tick:0.25, name:"Micro S&P 500"    },
+  MGC:{ perPoint:10, tick:0.10, name:"Micro Gold"       }
+};
+
+// ── Checklists (mirror PLAYBOOK.md §6) ──────────────────────────────────────
+const HARD = [
+  ["daily",  "Daily bias agrees with the direction",     "No exceptions. A 1H setup against the Daily is not a setup."],
+  ["bridge", "4H bridge agrees — not broken against me", "The 4H is what says the pullback is finished."],
+  ["chop",   "Fewer than 2 chop measures firing",        "ER ≥ 0.30, range/ATR ≥ 3.0, ADX ≥ 18 on the 1H and 15m."],
+  ["prot",   "Protected low / high still intact",        "One close beyond it and the setup is dead, not 'deeper'."],
+  ["closed", "Trigger is a CLOSED 1H candle",            "Not a live one. Wicks and live candles lie."],
+  ["news",   "Clear of red-folder news by 10+ minutes",  "CPI, NFP, FOMC. Structure after the news, never through it."],
+  ["room",   "At least 2R of clear air to the next HTF level", "If T1 sits under a wall, there is no trade here."]
+];
+const SOFT = [
+  ["first",  "First retest of this level",        "Third touch is a magnet, not an edge."],
+  ["clean",  "Clean pullback — reclaim held",     "No repeated pokes back through the level."],
+  ["disp",   "Displacement on the trigger candle","Body ≥ 1.2× the 20-bar average. A doji is a coin flip."],
+  ["vol",    "Volume expanded on the trigger",    "Above the 20-bar average."],
+  ["sess",   "Inside the session window",         "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
+  ["conf",   "Level lines up with a Daily/4H level","Confluence, not floating in space."],
+  ["room3",  "3R+ to the next opposing level",    "Room for the runner, not just T1."]
+];
+
+const $ = id => document.getElementById(id);
+const build = (host, items, cls) => {
+  host.innerHTML = items.map(([k,t,s]) =>
+    `<label class="chk"><input type="checkbox" data-k="${k}" data-cls="${cls}">
+       <span>${t}<small>${s}</small></span></label>`).join("");
+};
+build($("hardList"), HARD, "hard");
+build($("softList"), SOFT, "soft");
+
+const boxes = () => [...document.querySelectorAll('input[type=checkbox]')];
+const checkedOf = cls => boxes().filter(b => b.dataset.cls === cls && b.checked);
+
+// ── Live evaluation ─────────────────────────────────────────────────────────
+let state = { grade:"—", score:0, qty:0, riskPts:0, riskUsd:0, t1:0 };
+
+function evaluate(){
+  const spec = SPECS[$("sym").value];
+  const entry = parseFloat($("entry").value);
+  const stop  = parseFloat($("stop").value);
+  const acct  = parseFloat($("acct").value) || 0;
+  const rpct  = parseFloat($("riskPct").value) || 0;
+  const long  = $("dir").value === "LONG";
+
+  // Position sizing
+  let riskPts = 0, qty = 0, riskUsd = 0, t1 = 0, note = "";
+  if (isFinite(entry) && isFinite(stop) && entry !== stop) {
+    riskPts = Math.abs(entry - stop);
+    const budget  = acct * rpct / 100;
+    const perCtr  = riskPts * spec.perPoint;
+    qty     = Math.floor(budget / perCtr);
+    riskUsd = qty * perCtr;
+    t1      = long ? entry + riskPts * 2 : entry - riskPts * 2;
+
+    // Direction sanity — a stop on the wrong side is a typo, and a costly one.
+    if ((long && stop >= entry) || (!long && stop <= entry))
+      note = `⚠ Your stop is on the wrong side of entry for a ${long?"long":"short"}. Check it.`;
+    else if (qty < 1)
+      note = `⚠ 0 contracts — a ${riskPts.toFixed(2)}-point stop costs $${perCtr.toFixed(2)} per contract, ` +
+             `more than your $${budget.toFixed(0)} budget. Skip the trade. Do not shrink the stop to fit.`;
+    else
+      note = `${qty} × ${spec.name} · $${perCtr.toFixed(2)} risk per contract · ` +
+             `${(riskUsd/acct*100).toFixed(2)}% of the account.`;
+  }
+  $("oStop").textContent = riskPts ? riskPts.toFixed(2) : "—";
+  $("oQty").textContent  = riskPts ? qty : "—";
+  $("oRisk").textContent = riskPts ? "$" + riskUsd.toFixed(0) : "—";
+  $("oT1").textContent   = t1 ? t1.toFixed(2) : "—";
+  $("sizeNote").textContent = note;
+
+  // Grade
+  const missed = HARD.filter(([k]) => !boxes().find(b => b.dataset.k === k && b.dataset.cls === "hard").checked);
+  const score  = checkedOf("soft").length;
+  const grade  = score >= 6 ? "A+" : score >= 4 ? "B" : "C";
+  const v = $("verdict"), big = v.querySelector(".big"), why = v.querySelector(".why");
+  v.className = "verdict";
+
+  const sizingBlocked = riskPts > 0 && qty < 1;
+  const wrongSide = riskPts > 0 && ((long && stop >= entry) || (!long && stop <= entry));
+
+  if (missed.length || sizingBlocked || wrongSide) {
+    v.classList.add("v-rej");
+    big.textContent = "REJECT";
+    const reasons = missed.map(([,t]) => `<li>${t}</li>`);
+    if (wrongSide)     reasons.push("<li>Stop is on the wrong side of entry</li>");
+    if (sizingBlocked) reasons.push("<li>Stop too wide for the account at this risk %</li>");
+    why.innerHTML = `Failed ${reasons.length} hard filter${reasons.length>1?"s":""}. ` +
+                    `A missed trade costs zero.<ul class="blockers">${reasons.join("")}</ul>`;
+  } else if (grade === "C") {
+    v.classList.add("v-rej");
+    big.textContent = "REJECT · C";
+    why.textContent = `${score}/7 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
+  } else if (grade === "B") {
+    v.classList.add("v-half");
+    big.textContent = "HALF SIZE · B";
+    why.textContent = `${score}/7 quality points. Take it at reduced size — and pass entirely if you have already ` +
+                      `taken two trades today.`;
+  } else {
+    v.classList.add("v-take");
+    big.textContent = "TAKE IT · A+";
+    why.textContent = `${score}/7 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
+  }
+  state = { grade, score, qty, riskPts, riskUsd, t1 };
+}
+
+document.addEventListener("input", evaluate);
+document.addEventListener("change", evaluate);
+
+// ── Journal ─────────────────────────────────────────────────────────────────
+const KEY = "msb-journal-v1";
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
+const save = j  => localStorage.setItem(KEY, JSON.stringify(j));
+
+function render(){
+  const j = load();
+  const tb = $("jTable").querySelector("tbody");
+  tb.innerHTML = j.slice().reverse().map((t,i) => {
+    const idx = j.length - 1 - i;
+    const cls = t.grade === "A+" ? "p-a" : t.grade === "B" ? "p-b" : "p-c";
+    const r = t.resR === "" || t.resR === null ? "—" : (+t.resR).toFixed(1);
+    const rc = t.resR > 0 ? "pos" : t.resR < 0 ? "neg" : "";
+    return `<tr><td>${t.date}</td><td>${t.sym}</td><td>${t.dir}</td>
+      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.score}/7</td>
+      <td>${t.entry ?? "—"}</td><td>${t.stop ?? "—"}</td><td>${t.qty || "—"}</td>
+      <td>${t.outcome}</td><td class="${rc}">${r}</td>
+      <td><button class="ghost" data-del="${idx}" style="padding:2px 8px;font-size:12px">×</button></td></tr>`;
+  }).join("") || `<tr><td colspan="11" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
+
+  const taken = j.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
+  const wins  = taken.filter(t => +t.resR > 0).length;
+  const sumR  = taken.reduce((a,t) => a + (+t.resR || 0), 0);
+  const exp   = taken.length ? sumR / taken.length : 0;
+  const stat  = (v,l,c="") => `<div class="stat"><b class="${c}">${v}</b><span>${l}</span></div>`;
+  $("jStats").innerHTML =
+    stat(j.length, "logged") +
+    stat(taken.length, "taken") +
+    stat(taken.length ? Math.round(wins/taken.length*100) + "%" : "—", "win rate") +
+    stat(taken.length ? (exp>=0?"+":"") + exp.toFixed(2) + "R" : "—", "expectancy", exp>0?"pos":exp<0?"neg":"");
+}
+
+$("save").onclick = () => {
+  const j = load();
+  j.push({
+    date: new Date().toISOString().slice(0,10),
+    sym: $("sym").value, dir: $("dir").value,
+    grade: state.grade, score: state.score,
+    entry: $("entry").value || null, stop: $("stop").value || null,
+    qty: state.qty, riskUsd: Math.round(state.riskUsd),
+    outcome: $("outcome").value, resR: $("resR").value,
+    notes: $("notes").value
+  });
+  save(j); render();
+};
+
+$("reset").onclick = () => {
+  boxes().forEach(b => b.checked = false);
+  ["entry","stop","resR","notes"].forEach(id => $(id).value = "");
+  evaluate();
+};
+
+$("jTable").onclick = e => {
+  const i = e.target.dataset.del;
+  if (i === undefined) return;
+  const j = load(); j.splice(+i, 1); save(j); render();
+};
+
+$("wipe").onclick = () => {
+  if (confirm("Erase the whole journal? This cannot be undone.")) { save([]); render(); }
+};
+
+$("csv").onclick = () => {
+  const j = load();
+  if (!j.length) return alert("Journal is empty.");
+  const cols = ["date","sym","dir","grade","score","entry","stop","qty","riskUsd","outcome","resR","notes"];
+  const esc = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const csv = [cols.join(","), ...j.map(t => cols.map(c => esc(t[c])).join(","))].join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+  a.download = `msb-journal-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+
+evaluate(); render();
+</script>
+</body>
+</html>

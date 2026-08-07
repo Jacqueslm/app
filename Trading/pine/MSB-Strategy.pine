@@ -1,0 +1,286 @@
+//@version=6
+// =============================================================================
+//  MARKET STRUCTURE BRIDGE — BACKTESTER
+//  Same engine as MSB-Indicator.pine, wired to strategy orders so you can see
+//  what the rules would have done. Run it on the 1H chart of MNQ1!/MES1!/MGC1!.
+//
+//  READ THIS BEFORE YOU TRUST A NUMBER IT SHOWS YOU:
+//   • Futures data on TradingView is continuous-contract stitched; rollovers
+//     create gaps that never existed in a tradeable contract.
+//   • Commission and slippage below are estimates. Set them to YOUR fills.
+//   • Structure confirms `pvR` bars late by design, so entries here are
+//     realistic — but partial fills and fast markets are not modelled.
+//   • A backtest is for rejecting bad rules, not for predicting income.
+// =============================================================================
+
+strategy("MSB — Backtester", "MSB-BT", overlay = true,
+     default_qty_type = strategy.fixed, default_qty_value = 1,
+     initial_capital = 25000, currency = currency.USD,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 1.24,
+     slippage = 2, margin_long = 0, margin_short = 0,
+     max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
+
+// ─── Inputs ──────────────────────────────────────────────────────────────────
+grpS = "Structure"
+pvL      = input.int(3, "Swing strength (left)",  minval = 1, maxval = 20, group = grpS)
+pvR      = input.int(3, "Swing strength (right)", minval = 1, maxval = 20, group = grpS)
+biasTF   = input.timeframe("D",   "Bias timeframe",    group = grpS)
+bridgeTF = input.timeframe("240", "Bridge timeframe",  group = grpS)
+monTF    = input.timeframe("15",  "Monitor timeframe", group = grpS)
+
+grpC = "Consolidation filter"
+erLen   = input.int(20,     "Efficiency ratio length", minval = 5,   group = grpC)
+erMin   = input.float(0.30, "Chop if ER below",        minval = 0.0, maxval = 1.0, step = 0.01, group = grpC)
+rngLen  = input.int(20,     "Range length",            minval = 5,   group = grpC)
+rngMin  = input.float(3.0,  "Chop if range/ATR below", minval = 0.5, step = 0.1, group = grpC)
+adxMin  = input.float(18.0, "Chop if ADX below",       minval = 5.0, step = 0.5, group = grpC)
+maxChop = input.int(1, "Max chop measures allowed", minval = 0, maxval = 3, group = grpC)
+
+grpT = "Trigger & grading"
+dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
+setupTO  = input.int(40,   "Setup expires after N bars", minval = 5, group = grpT)
+minScore = input.int(4,    "Minimum grade score (4 = B, 6 = A+)", minval = 0, maxval = 7, group = grpT)
+stopBuf  = input.float(0.15, "Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
+
+grpM = "Management"
+t1R      = input.float(2.0, "T1 at R multiple", minval = 0.5, step = 0.5, group = grpM)
+t2R      = input.float(3.0, "T2 at R multiple", minval = 0.5, step = 0.5, group = grpM)
+t1Pct    = input.int(50,  "% off at T1", minval = 0, maxval = 100, group = grpM)
+beAtT1   = input.bool(true, "Move stop to break-even at T1", group = grpM)
+maxLoss  = input.int(2, "Stop trading after N losses per day", minval = 1, maxval = 10, group = grpM)
+
+grpX = "Session"
+useSess = input.bool(true, "Only trade inside session", group = grpX)
+sessStr = input.session("0930-1130", "Session window", group = grpX)
+sessTZ  = input.string("America/New_York", "Timezone", group = grpX)
+flatEOD = input.bool(true, "Flatten at session end", group = grpX)
+
+grpD = "Backtest window"
+useDates = input.bool(false, "Limit date range", group = grpD)
+dFrom = input.time(timestamp("01 Jan 2023 00:00 +0000"), "From", group = grpD)
+dTo   = input.time(timestamp("01 Jan 2030 00:00 +0000"), "To",   group = grpD)
+
+// ─── Structure engine (identical to the indicator) ───────────────────────────
+f_structure() =>
+    var float swingHi  = na
+    var float swingLo  = na
+    var float brokenHi = na
+    var float brokenLo = na
+    var float protLo   = na
+    var float protHi   = na
+    var int   trend    = 0
+
+    ph = ta.pivothigh(high, pvL, pvR)
+    pl = ta.pivotlow(low,  pvL, pvR)
+    if not na(ph)
+        swingHi := ph
+    if not na(pl)
+        swingLo := pl
+
+    bUp = not na(swingHi) and close > swingHi
+    bDn = not na(swingLo) and close < swingLo
+    if bUp and bDn
+        if close >= open
+            bDn := false
+        else
+            bUp := false
+
+    if bUp
+        brokenHi := swingHi
+        protLo   := swingLo
+        trend    := 1
+        swingHi  := na
+    else if bDn
+        brokenLo := swingLo
+        protHi   := swingHi
+        trend    := -1
+        swingLo  := na
+
+    [trend, brokenHi, brokenLo, protLo, protHi, bUp, bDn]
+
+f_trend() =>
+    [t, _bh, _bl, _pl, _ph, _bu, _bd] = f_structure()
+    t
+
+[xTrend, xBrokenHi, xBrokenLo, xProtLo, xProtHi, xBosUp, xBosDn] = f_structure()
+biasTrend   = request.security(syminfo.tickerid, biasTF,   f_trend(), lookahead = barmerge.lookahead_off)
+bridgeTrend = request.security(syminfo.tickerid, bridgeTF, f_trend(), lookahead = barmerge.lookahead_off)
+
+// ─── Consolidation filter ────────────────────────────────────────────────────
+f_chop() =>
+    atr14  = ta.atr(14)
+    move   = math.abs(close - close[erLen])
+    path   = math.sum(math.abs(close - close[1]), erLen)
+    er     = path > 0 ? move / path : 0.0
+    rng    = ta.highest(high, rngLen) - ta.lowest(low, rngLen)
+    rngAtr = atr14 > 0 ? rng / atr14 : 0.0
+    [_dip, _dim, adxv] = ta.dmi(14, 14)
+    (er < erMin ? 1 : 0) + (rngAtr < rngMin ? 1 : 0) + (adxv < adxMin ? 1 : 0)
+
+chopN    = f_chop()
+monChopN = request.security(syminfo.tickerid, monTF, f_chop(), lookahead = barmerge.lookahead_off)
+chopOK   = chopN <= maxChop and monChopN <= maxChop
+
+// ─── Shared series ───────────────────────────────────────────────────────────
+inSess  = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+inDates = not useDates or (time >= dFrom and time <= dTo)
+atr     = ta.atr(14)
+avgBody = ta.sma(math.abs(close - open), 20)
+disp    = math.abs(close - open) >= avgBody * dispMult
+volOK   = na(volume) or volume > ta.sma(volume, 20)
+
+// ─── Daily loss limit ────────────────────────────────────────────────────────
+var int lossesToday = 0
+var int lastDay     = na
+// na(lastDay) first — `dayofmonth != na` evaluates to na, never true, so without
+// this the counter would never reset and the daily limit would become a lifetime one.
+if na(lastDay) or dayofmonth != lastDay
+    lossesToday := 0
+    lastDay     := dayofmonth
+if strategy.closedtrades > strategy.closedtrades[1]
+    if strategy.closedtrades.profit(strategy.closedtrades - 1) < 0
+        lossesToday += 1
+dayOK = lossesToday < maxLoss
+
+// ─── Setup state machine ─────────────────────────────────────────────────────
+var int   st      = 0
+var int   stDir   = 0
+var float zone    = na
+var float prot    = na
+var int   stBars  = 0
+var int   touches = 0
+var bool  cleanRt = true
+var float pullExt = na
+var float trigLvl = na
+
+armLong  = xBosUp and biasTrend ==  1
+armShort = xBosDn and biasTrend == -1
+armedNow = armLong or armShort
+
+if armLong
+    st      := 1
+    stDir   := 1
+    zone    := xBrokenHi
+    prot    := na(xProtLo) ? low : xProtLo
+    stBars  := 0
+    touches := 0
+    cleanRt := true
+    pullExt := low
+    trigLvl := na
+else if armShort
+    st      := 1
+    stDir   := -1
+    zone    := xBrokenLo
+    prot    := na(xProtHi) ? high : xProtHi
+    stBars  := 0
+    touches := 0
+    cleanRt := true
+    pullExt := high
+    trigLvl := na
+else if st > 0
+    stBars += 1
+
+// `not armedNow` — the breakout candle's own low sits below the level it just broke.
+if st > 0 and stDir == 1 and not armedNow
+    pullExt := math.min(pullExt, low)
+    if st == 1 and low < zone
+        st := 2
+    else if st == 2 and close > zone
+        st      := 3
+        touches := touches + 1
+        trigLvl := high
+    else if st == 3 and close < zone
+        st      := 2
+        cleanRt := false
+
+if st > 0 and stDir == -1 and not armedNow
+    pullExt := math.max(pullExt, high)
+    if st == 1 and high > zone
+        st := 2
+    else if st == 2 and close < zone
+        st      := 3
+        touches := touches + 1
+        trigLvl := low
+    else if st == 3 and close > zone
+        st      := 2
+        cleanRt := false
+
+invalid = st > 0 and (
+     (stDir ==  1 and ((not na(prot) and close < prot) or biasTrend == -1)) or
+     (stDir == -1 and ((not na(prot) and close > prot) or biasTrend ==  1)) or
+     stBars > setupTO)
+if invalid
+    st      := 0
+    stDir   := 0
+    zone    := na
+    prot    := na
+    trigLvl := na
+
+// ─── Trigger & grade ─────────────────────────────────────────────────────────
+trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and close > trigLvl and disp and chopOK
+trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and close < trigLvl and disp and chopOK
+
+entry   = close
+stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
+          trigShort ? math.max(nz(pullExt, high), nz(zone, high)) + atr * stopBuf : na
+riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
+// Hoisted out of the ternary — ta.* must be called on every bar, not conditionally.
+hi100   = ta.highest(high, 100)[1]
+lo100   = ta.lowest(low, 100)[1]
+oppLvl  = trigLong ? hi100 : lo100
+roomR   = not na(riskPts) and riskPts > 0 ? math.abs(oppLvl - entry) / riskPts : 0.0
+
+score = (touches <= 1 ? 1 : 0) + (cleanRt ? 1 : 0) + (disp ? 1 : 0) + (volOK ? 1 : 0) +
+     (inSess ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0)
+
+okToTrade = score >= minScore and roomR >= 2.0 and inSess and inDates and dayOK and
+     riskPts > 0 and strategy.position_size == 0
+
+// ─── Orders ──────────────────────────────────────────────────────────────────
+var float pStop = na
+var float pT1   = na
+var float pT2   = na
+var bool  t1Hit = false
+
+if trigLong and okToTrade
+    pStop := stopRaw
+    pT1   := entry + riskPts * t1R
+    pT2   := entry + riskPts * t2R
+    t1Hit := false
+    strategy.entry("L", strategy.long, comment = score >= 6 ? "A+" : "B")
+
+if trigShort and okToTrade
+    pStop := stopRaw
+    pT1   := entry - riskPts * t1R
+    pT2   := entry - riskPts * t2R
+    t1Hit := false
+    strategy.entry("S", strategy.short, comment = score >= 6 ? "A+" : "B")
+
+// Break-even after T1 fills
+if strategy.position_size > 0 and not t1Hit and high >= pT1
+    t1Hit := true
+    if beAtT1
+        pStop := math.max(pStop, strategy.position_avg_price)
+if strategy.position_size < 0 and not t1Hit and low <= pT1
+    t1Hit := true
+    if beAtT1
+        pStop := math.min(pStop, strategy.position_avg_price)
+
+if strategy.position_size > 0
+    strategy.exit("L-T1", "L", qty_percent = t1Pct, limit = pT1, stop = pStop)
+    strategy.exit("L-T2", "L", limit = pT2, stop = pStop)
+if strategy.position_size < 0
+    strategy.exit("S-T1", "S", qty_percent = t1Pct, limit = pT1, stop = pStop)
+    strategy.exit("S-T2", "S", limit = pT2, stop = pStop)
+
+// Flatten at session end — no overnight risk on a day-trading system.
+if flatEOD and useSess and not inSess and inSess[1] and strategy.position_size != 0
+    strategy.close_all("EOD")
+
+// ─── Visuals ─────────────────────────────────────────────────────────────────
+plotshape(trigLong  and okToTrade, "Long",  shape.triangleup,   location.belowbar, color.new(#26a69a, 0), size = size.small)
+plotshape(trigShort and okToTrade, "Short", shape.triangledown, location.abovebar, color.new(#ef5350, 0), size = size.small)
+plot(strategy.position_size != 0 ? pStop : na, "Stop", color.new(#ef5350, 0), style = plot.style_linebr)
+plot(strategy.position_size != 0 ? pT1   : na, "T1",   color.new(#26a69a, 0), style = plot.style_linebr)
+plot(strategy.position_size != 0 ? pT2   : na, "T2",   color.new(#26a69a, 50), style = plot.style_linebr)
+bgcolor(chopOK ? na : color.new(color.orange, 92), title = "Chop (no-trade)")

@@ -4,8 +4,11 @@ Daily bias → 4H bridge → 1H execution → 15m management. MNQ, MES, MGC.
 
 Four pieces. Read them in this order.
 
+**New here? → [GETTING-STARTED.md](GETTING-STARTED.md) is the click-by-click walkthrough.**
+
 | File | What it is |
 |---|---|
+| **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |

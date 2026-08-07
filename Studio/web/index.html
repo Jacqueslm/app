@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0807</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0808</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -365,7 +365,7 @@ body.simple-only #view-simple{display:flex !important}
 
   <div class="view" id="view-scenes">
     <div class="card" id="falkey-card" style="display:none">
-      <h3>🔑 Turn on AI <span class="usage">(one-time setup)</span></h3>
+      <h3 id="falkey-title">🔑 Turn on AI <span class="usage">(one-time setup)</span></h3>
       <p class="usage" id="falkey-hint">Create a free account at <b>fal.ai</b>, add some credit, copy your API key, and paste it here. That's the whole setup — AI Scenes, Sing, and Dance Transfer light up instantly.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="input" id="falkey-input" placeholder="Paste your fal.ai key" style="flex:1;min-width:140px" autocomplete="off">
@@ -926,7 +926,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <p class="usage" id="stor-folder-path" style="word-break:break-all"></p>
       <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
-      <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-remove">Remove it</a>.</p>
+      <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-change">Change it</a> · <a href="#" id="falkey-remove">Remove it</a>.</p>
     </div>
 
     <div class="card adv-card" id="recover-card">
@@ -1805,10 +1805,7 @@ function pickFiles(accept, cb) {
       } catch (_) { /* offline or GitHub unreachable - stay quiet */ }
     })();
     document.getElementById('set-backup') && (document.getElementById('set-backup').onclick = () => go('stor-backup'));
-    document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => {
-      document.querySelector('#mtabs button[data-view="scenes"]')?.click();
-      setTimeout(() => document.getElementById('falkey-input')?.focus(), 200);
-    });
+    document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => showFalKeyCard());
   };
   wire();
 })();
@@ -3400,6 +3397,28 @@ $('#scene-gen').onclick = async () => {
 };
 
 /* ---------------- AI key setup + storage & backup ---------------- */
+// Once a key is saved the setup card hides itself, so there was no way to
+// *replace* a key without removing it first. This reopens the same card in
+// "change" wording from anywhere (Settings button, Storage link).
+function showFalKeyCard() {
+  document.querySelector('#mtabs button[data-view="scenes"]')?.click();
+  const card = $('#falkey-card');
+  if (!card) return;
+  card.style.display = 'flex';
+  if (st.cfg?.falAvailable) {
+    $('#falkey-title').innerHTML = '🔑 Change your AI key <span class="usage">(replaces the one saved now)</span>';
+    $('#falkey-hint').innerHTML = 'Make the new key at <b>fal.ai → Keys</b>, paste it here, press Save. It replaces the old one right away — then delete the old key on fal.ai so nobody can spend on it.';
+    $('#falkey-input').placeholder = 'Paste your new fal.ai key';
+  }
+  setTimeout(() => {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    $('#falkey-input').focus();
+  }, 200);
+}
+document.getElementById('falkey-change') && (document.getElementById('falkey-change').onclick = (e) => {
+  e.preventDefault();
+  showFalKeyCard();
+});
 $('#falkey-save').onclick = async () => {
   setErr('#scenes-err', null);
   const key = $('#falkey-input').value.trim();

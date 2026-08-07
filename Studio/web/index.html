@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0809</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0810</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -5766,9 +5766,13 @@ function renderOverlays() {
 }
 $('#ovl-add').onclick = () => {
   const total = timelineTotal();
+  // New text starts at 0, so it should hold for as long as the clip that's on
+  // screen at 0 - not a fixed 5s that dies halfway through an 8 or 10s scene.
+  const firstLen = st.seq.length ? effDur(st.seq[0]) : 0;
+  const end = Math.round(Math.max(1.5, Math.min(total || 5, firstLen || 5) - 0.2) * 10) / 10;
   st.overlays.push({
     ...textLook({ font: 'system-ui', size: 90, color: '#ffffff', bold: true, pos: 5 }),
-    text: 'OUT NOW', start: 0, end: Math.max(3, Math.min(5, total || 5)), fade: 0.4,
+    text: 'OUT NOW', start: 0, end, fade: 0.4,
   });
   renderOverlays(); persistDraft();
 };
@@ -7780,11 +7784,16 @@ $('#qk-assemble').onclick = async () => {
     qk.shots.forEach((s, i) => {
       const td = i < st.trans.length && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0;
       if (s.text.trim()) {
+        // Words hold for the whole picture. This used to stop at 4.3s, so an 8s
+        // or 15s shot ran silent for the rest of it. The tail clears the blend
+        // into the next picture so text never bleeds across the change.
+        const startAt = cum + 0.3;
+        const endAt = Math.max(startAt + 0.5, cum + durs[i] - Math.max(0.2, td));
         st.overlays.push({
           ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }),
           text: s.text,
-          start: Math.round((cum + 0.3) * 10) / 10,
-          end: Math.round((cum + Math.min(durs[i] - 0.2, 4.3)) * 10) / 10,
+          start: Math.round(startAt * 10) / 10,
+          end: Math.round(endAt * 10) / 10,
           fade: 0.3,
         });
       }

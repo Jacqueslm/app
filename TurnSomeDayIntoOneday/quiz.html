@@ -133,6 +133,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
     <div class="fine">Free to start · 7-day free trial on Pro · cancel in two taps.<br>Your journal is nobody's business — private by design, never sold to advertisers.</div>
     <div class="crisis">Not a medical assessment. In crisis? Call or text <strong>988</strong> — free, confidential, 24/7.</div>
+    <!-- Sits inside the result step, so it only appears once someone has finished
+         and never competes with the button above. It is still in the page source,
+         which is what a crawler reads - this page had no outbound links at all. -->
+    <nav class="more" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--bdr);font-size:12.5px;line-height:2;text-align:center;color:var(--tm)">
+      Keep reading:
+      <a href="/how-to-stop-drinking" style="color:var(--green);text-decoration:none">How to stop drinking</a> &middot;
+      <a href="/how-to-stop-binge-eating" style="color:var(--green);text-decoration:none">How to stop binge eating</a> &middot;
+      <a href="/brainreset" style="color:var(--green);text-decoration:none">The 90-day brain reset</a> &middot;
+      <a href="/best-recovery-apps" style="color:var(--green);text-decoration:none">The best recovery apps, compared</a> &middot;
+      <a href="/for-her" style="color:var(--green);text-decoration:none">For the partner</a>
+    </nav>
   </div>
 </div>
 

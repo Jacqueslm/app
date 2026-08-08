@@ -324,7 +324,7 @@ Turn Someday Into Day One
 ---
 
 ### 13. Skypoint Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** email directly to **admissions@skypointrecovery.com**
 
 **Subject:** Your 5 best recovery apps article — the gap nobody's filled
@@ -370,7 +370,7 @@ Turn Someday Into Day One
 ---
 
 ### 15. Mainspring Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** email directly to **admissions@mainspringrecovery.com**
 
 **Subject:** Your recovery apps articles — the gap nobody's filled

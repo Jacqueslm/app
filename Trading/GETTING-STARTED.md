@@ -152,6 +152,36 @@ Strategy Tester only measures what's loaded on the chart.
 > get 6–12 months, that's workable — just note the shorter sample and hold your conclusions more
 > loosely. Fewer than ~40 trades tells you almost nothing.
 
+### First: does the context layer actually help?
+
+Before anything else, settle this — it's the most valuable two minutes of the whole backtest.
+
+1. Open the strategy's **settings gear** → **Institutional context** group.
+2. Untick **Apply context layer (master switch)**. Note the numbers.
+3. Tick it back on. Note the numbers again.
+
+| | Trades | Win rate | Profit factor | Max drawdown |
+|---|---|---|---|---|
+| Context **OFF** (structure only) | | | | |
+| Context **ON** | | | | |
+
+Expect the context layer to take **fewer trades** — that's the point of a filter. What you want to
+see is better *expectancy per trade* and a smaller drawdown. If it takes half the trades and
+produces a materially better profit factor, it earns its place. If it barely changes anything,
+turn it off and keep the system simpler.
+
+I've told you this layer helps. Don't take my word for it — this is the test that settles it on
+your data, and the answer might be no.
+
+### Set the correlated symbol per instrument
+
+In the same settings group, **Correlated symbol** defaults to `CME_MINI:MES1!`.
+
+- Trading **MNQ** → leave it (MES is the right partner).
+- Trading **MES** → change it to `CME_MINI:MNQ1!`.
+- Trading **MGC** → either point it at `COMEX:SI1!` (silver) or untick **Correlated instrument
+  agrees**. Comparing gold to the S&P is meaningless and will just cost you a point at random.
+
 ### Record the numbers
 
 In the **Performance Summary** tab, write these down for each symbol:

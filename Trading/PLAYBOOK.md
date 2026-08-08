@@ -55,7 +55,7 @@ Bullish version. Bearish is the exact mirror.
    ②  1H closes ABOVE a swing high        ── BOS ──►  ← the HH break. Mark the level.
    ③  Price trades back BELOW that level              ← the "break back below"
    ④  Price returns UP to the level and closes above  ← the reclaim
-   ⑤  WAIT. Do nothing here.                          ← this step is the edge
+   ⑤  WAIT — it must HOLD for 2+ closes             ← acceptance. This step is the edge.
    ⑥  Check the 4H: still bullish, pullback done?     ← the bridge
    ⑦  1H prints a fresh bullish BOS off the level     ← the trigger. ENTER.
    ⑧  Manage on the 15m                               ← trail, partials, exit
@@ -64,6 +64,17 @@ Bullish version. Bearish is the exact mirror.
 **Step ⑤ is the whole system.** Everybody can see step ②. Most people enter at ④ and get
 stopped by the second dip. You are paid for waiting from ④ to ⑦ — that's the difference
 between "price touched my level" and "price *reacted* to my level."
+
+And there's a concrete reason the wait works, not just a disciplinary one. A touch of a level is
+a **question**; the market answering it takes time. Price holding above the level for two closes
+is **acceptance** — the market agreeing the level is support. Price closing back through it is
+**rejection**. At step ④ that information does not exist yet. You are not waiting to be patient.
+You are waiting for data. (See [INSTITUTIONAL.md §3](INSTITUTIONAL.md).)
+
+Watch for one thing during step ③: if the pullback **dips below the recent low and snaps back
+above it**, that's a liquidity sweep — stops were triggered and something absorbed all of them.
+Supply is cleared. That version of the pullback is worth far more than a quiet drift down to the
+level, and the system scores it accordingly.
 
 ### What the trigger at ⑦ must look like
 
@@ -101,6 +112,10 @@ Two more chop rules that are yours to hold, not the software's:
 
 ## 6. Grading — how a setup becomes A+, B, or a pass
 
+Structure decides **where**. Context decides **whether anyone is there**. Both must pass.
+The reasoning behind every context item is in **[INSTITUTIONAL.md](INSTITUTIONAL.md)** — read it
+once and these stop feeling like arbitrary boxes.
+
 ### Hard filters (any failure = REJECT, no score, no discussion)
 
 - [ ] Daily bias agrees with the trade direction
@@ -108,25 +123,37 @@ Two more chop rules that are yours to hold, not the software's:
 - [ ] Consolidation filter clear (fewer than 2 chop measures firing)
 - [ ] Protected low/high intact
 - [ ] Trigger is a **closed** 1H candle, not a live one
+- [ ] **On the correct side of VWAP** — long above, short below
+- [ ] **Not stretched beyond the 2σ VWAP band** — that's where benchmark algos become sellers
 - [ ] Stop distance ≤ your max ($ risk still within 1% at 1 contract)
 - [ ] Not inside the last 10 minutes before a red-folder news release
 - [ ] Room to run: ≥ 2R of clear air before the next opposing HTF level
 
-### Score points (one each, 7 available)
+### Score points (one each, 10 available)
 
+**Structure**
 1. **First retest** of the level — not the third
-2. **Clean pullback** — the reclaim held, no repeated pokes through the level
+2. **Acceptance** — price held above/below the level for 2+ closes after the reclaim
 3. **Displacement** on the trigger candle (body ≥ 1.2× avg)
-4. **Volume expansion** on the trigger (above 20-bar average)
-5. **In the session window** (see §8)
-6. **HTF confluence** — level lines up with a Daily or 4H level, not floating in space
-7. **≥ 3R** to the next opposing HTF level, not just 2R
+4. **≥ 3R** to the next opposing level, not just 2R
+
+**Context**
+5. **RVOL ≥ 1.2** for this hour of day — is anyone actually there
+6. **Liquidity sweep** on the pullback — took out the recent low and reclaimed it
+7. **Reference-level confluence** — prior day H/L, settlement, overnight H/L, or initial balance
+8. **Correlated instrument agrees** — MNQ ↔ MES
+9. **In the session window** (see §8)
+10. **Zero chop measures firing** — not merely under the limit
 
 | Score | Grade | Action |
 |---|---|---|
-| 6–7 | **A+** | Full size |
-| 4–5 | **B** | Half size, or pass if you've already taken 2 trades today |
-| 0–3 | **C** | **No trade.** Log it, screenshot it, move on. |
+| 8–10 | **A+** | Full size |
+| 6–7 | **B** | Half size, or pass if you've already taken 2 trades today |
+| 0–5 | **C** | **No trade.** Log it, screenshot it, move on. |
+
+**Every context filter is a switch in the indicator.** That's deliberate — nobody, including me,
+gets to assert that a filter helps. Backtest with the context layer off, then on, and keep what
+your own data supports.
 
 The C-grade log is not busywork. After 100 of them you'll know whether your C's actually
 lose — and that's the only honest way to ever loosen a rule.

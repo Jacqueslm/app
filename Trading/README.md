@@ -2,7 +2,7 @@
 
 Daily bias → 4H bridge → 1H execution → 15m management. MNQ, MES, MGC.
 
-Four pieces. Read them in this order.
+Read them in this order.
 
 **New here? → [GETTING-STARTED.md](GETTING-STARTED.md) is the click-by-click walkthrough.**
 
@@ -10,6 +10,7 @@ Four pieces. Read them in this order.
 |---|---|
 | **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
+| **[INSTITUTIONAL.md](INSTITUTIONAL.md)** | How large participants actually trade — and why the setup works. Read it second. |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |
 | **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |
@@ -165,6 +166,26 @@ confirms a few bars late by design, which is realistic — but treat backtest nu
 *reject* bad rules, never as a forecast of income.
 
 ---
+
+## Structure alone is not enough
+
+An indicator that only reads structure tells you **where**. It cannot tell you **whether anyone
+is there** — and a textbook retest with nobody behind it is how you get chopped up.
+
+So there's a second layer on top of the structure engine:
+
+| Check | What it answers |
+|---|---|
+| **VWAP + 2σ bands** *(hard gate)* | Which side of the session's auction are you on, and are you already stretched? |
+| **RVOL by hour of day** | Is participation unusual for *this hour*, or is nobody home? |
+| **Liquidity sweep** | Did the pullback take out stops and reclaim — absorption you can actually see? |
+| **Reference levels** | Prior day H/L, settlement, overnight H/L, initial balance — is the whole market watching this price? |
+| **Acceptance** | Did the reclaim *hold* for 2+ closes, or was it rejection in disguise? |
+| **Correlation** | Does MES agree with MNQ, or is this one chart's noise? |
+
+**All of it is switchable**, and the backtester has a master toggle. I'm claiming this layer
+improves your results; you should make it prove that on your own data before believing it.
+[INSTITUTIONAL.md](INSTITUTIONAL.md) explains the mechanism behind each one.
 
 ## The honest limitations
 

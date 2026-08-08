@@ -81,7 +81,7 @@
 
     <!-- ── Score points ── -->
     <div class="card">
-      <h2>Quality points — 7 available</h2>
+      <h2>Quality points — 10 available</h2>
       <div id="softList"></div>
     </div>
 
@@ -169,17 +169,22 @@ const HARD = [
   ["chop",   "Fewer than 2 chop measures firing",        "ER ≥ 0.30, range/ATR ≥ 3.0, ADX ≥ 18 on the 1H and 15m."],
   ["prot",   "Protected low / high still intact",        "One close beyond it and the setup is dead, not 'deeper'."],
   ["closed", "Trigger is a CLOSED 1H candle",            "Not a live one. Wicks and live candles lie."],
+  ["vwap",   "On the correct side of VWAP",              "Long above, short below. Otherwise you're fighting the session's control."],
+  ["ext",    "NOT stretched past the 2σ VWAP band",      "That's where benchmark algos turn into sellers. Don't buy their exit."],
   ["news",   "Clear of red-folder news by 10+ minutes",  "CPI, NFP, FOMC. Structure after the news, never through it."],
   ["room",   "At least 2R of clear air to the next HTF level", "If T1 sits under a wall, there is no trade here."]
 ];
 const SOFT = [
-  ["first",  "First retest of this level",        "Third touch is a magnet, not an edge."],
-  ["clean",  "Clean pullback — reclaim held",     "No repeated pokes back through the level."],
-  ["disp",   "Displacement on the trigger candle","Body ≥ 1.2× the 20-bar average. A doji is a coin flip."],
-  ["vol",    "Volume expanded on the trigger",    "Above the 20-bar average."],
-  ["sess",   "Inside the session window",         "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
-  ["conf",   "Level lines up with a Daily/4H level","Confluence, not floating in space."],
-  ["room3",  "3R+ to the next opposing level",    "Room for the runner, not just T1."]
+  ["first",  "First retest of this level",         "Third touch is a magnet, not an edge."],
+  ["hold",   "Acceptance — held 2+ bars after the reclaim", "The information you waited for. One close back through = rejection."],
+  ["disp",   "Displacement on the trigger candle", "Body ≥ 1.2× the 20-bar average. A doji is a coin flip."],
+  ["rvol",   "RVOL ≥ 1.2 for this hour of day",    "Is anyone actually there? Below 0.8 is noise, not flow."],
+  ["sweep",  "Pullback swept liquidity and reclaimed", "Dipped under the recent low, closed back above. Supply absorbed."],
+  ["ref",    "Level sits on a reference level",    "Prior day H/L, settlement, overnight H/L, or initial balance."],
+  ["corr",   "Correlated instrument agrees",       "MNQ ↔ MES. Disagreement means one chart's noise, not market flow."],
+  ["sess",   "Inside the session window",          "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
+  ["chop0",  "Zero chop measures firing",          "Not just under the limit — actually clean."],
+  ["room3",  "3R+ to the next opposing level",     "Room for the runner, not just T1."]
 ];
 
 const $ = id => document.getElementById(id);
@@ -234,7 +239,7 @@ function evaluate(){
   // Grade
   const missed = HARD.filter(([k]) => !boxes().find(b => b.dataset.k === k && b.dataset.cls === "hard").checked);
   const score  = checkedOf("soft").length;
-  const grade  = score >= 6 ? "A+" : score >= 4 ? "B" : "C";
+  const grade  = score >= 8 ? "A+" : score >= 6 ? "B" : "C";
   const v = $("verdict"), big = v.querySelector(".big"), why = v.querySelector(".why");
   v.className = "verdict";
 
@@ -252,16 +257,16 @@ function evaluate(){
   } else if (grade === "C") {
     v.classList.add("v-rej");
     big.textContent = "REJECT · C";
-    why.textContent = `${score}/7 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
+    why.textContent = `${score}/10 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
   } else if (grade === "B") {
     v.classList.add("v-half");
     big.textContent = "HALF SIZE · B";
-    why.textContent = `${score}/7 quality points. Take it at reduced size — and pass entirely if you have already ` +
+    why.textContent = `${score}/10 quality points. Take it at reduced size — and pass entirely if you have already ` +
                       `taken two trades today.`;
   } else {
     v.classList.add("v-take");
     big.textContent = "TAKE IT · A+";
-    why.textContent = `${score}/7 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
+    why.textContent = `${score}/10 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
   }
   state = { grade, score, qty, riskPts, riskUsd, t1 };
 }
@@ -283,7 +288,7 @@ function render(){
     const r = t.resR === "" || t.resR === null ? "—" : (+t.resR).toFixed(1);
     const rc = t.resR > 0 ? "pos" : t.resR < 0 ? "neg" : "";
     return `<tr><td>${t.date}</td><td>${t.sym}</td><td>${t.dir}</td>
-      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.score}/7</td>
+      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.score}/10</td>
       <td>${t.entry ?? "—"}</td><td>${t.stop ?? "—"}</td><td>${t.qty || "—"}</td>
       <td>${t.outcome}</td><td class="${rc}">${r}</td>
       <td><button class="ghost" data-del="${idx}" style="padding:2px 8px;font-size:12px">×</button></td></tr>`;

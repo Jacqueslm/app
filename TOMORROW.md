@@ -1,0 +1,135 @@
+# Tomorrow — 9 Aug 2026
+
+Everything from today's session. Top section is what to actually do; the rest
+is what changed, so nothing gets lost.
+
+---
+
+## DO THESE, IN THIS ORDER
+
+### 1. Update Studio (2 minutes, do this first)
+
+Settings → **Update my app** → close the black window → double-click **Start
+Studio** → **Ctrl+Shift+R** in the browser. The build stamp top-left should
+read **b0819**.
+
+This update installs a speech add-on, so it will take longer than usual. That
+is normal.
+
+### 2. Play Store listing (yours — I can't reach Play Console)
+
+Five files are already written and character-counted in
+`TurnSomeDayIntoOneday/store-listing/`. Copy each into Play Console:
+
+| File | Where it goes |
+|---|---|
+| `01-title-and-short-description.md` | Main store listing → App name + Short description |
+| `02-full-description.md` | Main store listing → Full description |
+| `03-data-safety-answers.md` | App content → Data safety |
+| `04-health-declaration.md` | App content → Health apps declaration |
+| `05-graphics.md` | Main store listing → Graphics (screenshots are in `store-listing/screenshots/`) |
+
+**The first paragraph of the full description must not be moved or softened.**
+Play rejects health-adjacent apps that bury it.
+
+### 3. Production access (around 14 Aug)
+
+Due when the 14-day closed test window completes. Say the word and I'll draft
+the answers.
+
+### 4. Tell me about the two voices
+
+Still unanswered from today. You asked for an African American woman's and
+man's voice in Studio. I can't pick a voice by race from these free models —
+none of them say who the speaker is, and guessing from the sound isn't
+something I'll do and call it your answer. Two real routes:
+
+- **Record a real person, 15 seconds.** Anyone who agrees — Studio already
+  clones any voice from an audio clip. I'd add a "save this as a narrator"
+  button so it becomes a permanent chip with a name you choose. Cloned voices
+  cost the fal rate, not free.
+- **A paid voice library** (ElevenLabs through fal), where the voice actors
+  describe themselves — so you're picking from what people say about their own
+  voice, not from my guess. Costs per use.
+
+---
+
+## WHAT SHIPPED TODAY
+
+### Studio (b0819)
+
+**Free narrators.** The Voice card's six narrators now speak on your own
+computer. No fal key, no cost, under a second per take. Was ~5c per 1,000
+characters. First press on each voice downloads it (~60MB, once). There's a
+**▶ Hear this narrator** button — pressing it costs nothing.
+
+Moods (Happy / Sad / Angry) still cost money — the free engine reads plainly.
+The card says so the moment you tap a mood.
+
+**Nine new camera moves**, in the Ken Burns picker and Quick Video:
+
+- Hover above — parked above, holds, never travels
+- Drone — rises and widens with a little sideways flight
+- Looking up / Looking down — low and high angles
+- Crane up / Crane down — lifts off wide, or drops in tight
+- Orbit left / right — arcs around the subject
+- Dutch tilt — horizon off level
+
+**Velocity curves.** New **Speed** dropdown: eases in and out (now the
+default), creeps then goes, leaves fast and coasts, snaps away and settles, or
+dead even. Note this changes your *existing* moves too — a plain zoom-in looks
+different from yesterday. Pick "dead even" for the old flat motion.
+
+**Parallax (3D depth).** Four directions. Splits a photo into near, middle and
+far and moves them at different speeds. Depth is worked out on your machine,
+free. Best on photos with a clear subject in front of a background; least
+useful on flat graphics and text cards.
+
+### Recovery app
+
+**SOS voices rebuilt twice.** Gentle, Clear and Calm male are slower and
+softer, Calm male is a different voice (John). All five are now public domain
+or CC0 — see below. Testers get the new audio automatically; the cache version
+was bumped so nobody keeps the old files.
+
+---
+
+## THE LICENSING THING — READ THIS ONCE
+
+Two of the five SOS voices were licensed **non-commercial**, and a third was
+research-only. Your app charges money, so those three weren't allowed. I
+picked them originally for how they sounded and never opened the licence file.
+That was my miss.
+
+All five are now **public domain or CC0** — nobody owns them, no conditions,
+free to use in something you sell.
+
+**I audited everything else third-party in both products.** Full write-up in
+`reference/asset-licenses-2026-08-08.md`. Clean: fonts (none bundled), external
+scripts (none), images (all yours), recovery-programme text (nothing copied —
+the Twelve Steps and Serenity Prayer belong to AA World Services and apps get
+pulled for reprinting them; you have none of it), and 280 npm packages.
+
+Two notes, neither urgent:
+
+- **ffmpeg is GPL.** Only matters if you *give Studio to someone*. It runs on
+  your machine only, so nothing is triggered — and the videos it makes were
+  never covered. They're yours.
+- **Suno** — you're on a paid plan, so songs made while subscribed are cleared
+  for monetised video. Anything made *before* you subscribed isn't covered
+  retroactively. Worth knowing which is which.
+
+**Rule going forward:** before any third-party thing goes into either product
+— a voice, a font, an image, a music track — find its licence. "Non-commercial",
+"research only", or can't find one at all = no.
+
+---
+
+## STILL OPEN (not today's work)
+
+- Outreach follow-ups — 15th to 18th, `OUTREACH.md`
+- Play Store developer verification (the signing key) — before 30 Sep
+- Studio's Buffer send — built, you haven't tested it yet
+- Script 39 narration
+- Origin-story photo fixes: real app screenshot on the laptop shot,
+  "Someday" as one word

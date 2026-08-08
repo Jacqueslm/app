@@ -818,28 +818,63 @@ function gqlTypeName(t) {
   return t.name || t.kind;
 }
 
+// `channels` needs the organization the key belongs to. Buffer doesn't hand
+// that over in the key itself, so it has to be looked up first. The shape of
+// that lookup isn't something to guess at: try the plausible spellings, and if
+// none of them exist, ask the schema what the root query actually offers and
+// report that instead of failing blind.
+const ORG_QUERIES = [
+  `query { account { currentOrganization { id name } } }`,
+  `query { account { organizations { id name } } }`,
+  `query { organizations { id name } }`,
+];
+function firstOrgId(data) {
+  const seen = [];
+  (function walk(v, depth) {
+    if (!v || typeof v !== 'object' || depth > 4) return;
+    if (Array.isArray(v)) return v.forEach((x) => walk(x, depth + 1));
+    if (typeof v.id === 'string') seen.push({ id: v.id, name: v.name });
+    Object.values(v).forEach((x) => walk(x, depth + 1));
+  })(data, 0);
+  return seen[0] || null;
+}
+async function bufferOrganization() {
+  let last = null;
+  for (const q of ORG_QUERIES) {
+    try {
+      const org = firstOrgId(await bufferGraphQL(q));
+      if (org) return org;
+    } catch (err) { last = err; }
+  }
+  if (last) last.orgLookupFailed = true;
+  throw last || Object.assign(new Error('Could not find your Buffer organization.'), { orgLookupFailed: true });
+}
+
 // Proves the key, the endpoint and the schema all work before anything is
 // built on top. Returns the channels this account can post to.
-//
-// `channels` takes a required ChannelsInput. An empty object is sent because
-// every filter inside it is expected to be optional - and if it isn't, the
-// catch below asks Buffer to describe the type rather than leaving us to guess
-// the field names a second time.
 const BUFFER_CHANNELS_Q = `query($input: ChannelsInput!) { channels(input: $input) { id name service } }`;
 router.get('/buffer/channels', async (req, res) => {
   if (!BUFFER_KEY) return res.status(400).json({ error: 'No Buffer key saved yet.' });
   try {
-    const data = await bufferGraphQL(BUFFER_CHANNELS_Q, { input: {} });
+    const org = await bufferOrganization();
+    const data = await bufferGraphQL(BUFFER_CHANNELS_Q, { input: { organizationId: org.id } });
     const channels = (data?.channels || []).map((c) => ({ id: c.id, name: c.name, service: c.service }));
-    res.json({ channels });
+    res.json({ channels, organization: org });
   } catch (err) {
     let needs = null;
     if (err.status !== 401 && err.status !== 403) {
       try {
-        const t = await bufferGraphQL(
-          `query { __type(name: "ChannelsInput") { inputFields { name type { kind name ofType { kind name ofType { kind name } } } } } }`);
-        const fields = t?.__type?.inputFields;
-        if (fields?.length) needs = fields.map((f) => `${f.name}: ${gqlTypeName(f.type)}`);
+        if (err.orgLookupFailed) {
+          // Which root fields exist at all? That names the way in.
+          const s = await bufferGraphQL(`query { __schema { queryType { fields { name } } } }`);
+          const names = (s?.__schema?.queryType?.fields || []).map((f) => f.name);
+          if (names.length) needs = ['root query fields: ' + names.join(', ')];
+        } else {
+          const t = await bufferGraphQL(
+            `query { __type(name: "ChannelsInput") { inputFields { name type { kind name ofType { kind name ofType { kind name } } } } } }`);
+          const fields = t?.__type?.inputFields;
+          if (fields?.length) needs = fields.map((f) => `${f.name}: ${gqlTypeName(f.type)}`);
+        }
       } catch (_) { /* introspection may be disabled; the raw error still goes back */ }
     }
     res.status(err.status === 401 || err.status === 403 ? 401 : 502)

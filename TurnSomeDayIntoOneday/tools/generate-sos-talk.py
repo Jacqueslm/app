@@ -22,17 +22,21 @@ It writes audio/sos-talk-{warm,soft,clear}.mp3 and prints the VG_VOICES cue
 lines. If STEPS below ever changes, VG_STEPS and VG_VOICES in index.html MUST
 be updated in the same commit - captions are synced to these exact timings.
 
-REQUIRED LAST STEP - match the loudness. The models come out up to 6dB apart,
-which means switching voice in the app means reaching for the volume button
-mid-crisis. Run this over each file afterwards (two-pass, so it's a straight
-gain change and never pumps):
+REQUIRED LAST STEP - soften, then match the loudness. The models come out up
+to 6dB apart, which means switching voice in the app means reaching for the
+volume button mid-crisis. The three voices in SOFTENED also get an EQ that
+rolls off the sharp top end and eases the sibilance - that, plus their slower
+length_scale, is what makes them calmer to listen to. Run this over each file
+afterwards (two-pass, so the level change is straight gain and never pumps):
 
+    SOFTEN='treble=g=-5:f=3800,equalizer=f=6500:t=q:w=1.4:g=-4,lowpass=f=8500,'
     for v in warm soft gentle clear male; do
+      case $v in gentle|clear|male) S=$SOFTEN;; *) S='';; esac
       f=audio/sos-talk-$v.mp3
       m=$(ffmpeg -v info -i $f -af loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 \
           | python3 -c "import sys,json,re;t=sys.stdin.read();j=json.loads(t[t.rfind('{'):t.rfind('}')+1]);print(j['input_i'],j['input_tp'],j['input_lra'],j['input_thresh'])")
       set -- $m
-      ffmpeg -y -v error -i $f -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$1:measured_TP=$2:measured_LRA=$3:measured_thresh=$4:linear=true,aresample=22050" -ac 1 -b:a 64k /tmp/$v.mp3
+      ffmpeg -y -v error -i $f -af "${S}loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$1:measured_TP=$2:measured_LRA=$3:measured_thresh=$4:linear=true,aresample=22050" -ac 1 -b:a 64k /tmp/$v.mp3
       mv /tmp/$v.mp3 $f
     done
 
@@ -78,13 +82,22 @@ COUNT_PAUSE_S = 0.55 # breathing-count pause where the script writes "..."
 # voices in the Piper catalogue - hfc_female, hfc_male, ryan, lessac - are all
 # non-commercial or research-only licences. The first version of this script
 # used two of them, which took a year of shipping to notice. Read the card.
+#
+# The catalogue holds exactly THREE licence-clean American women's voices -
+# kristin, kathleen and ljspeech - and they are all already in use here. So
+# when a voice needs to be calmer, it cannot come from picking a different
+# model; it comes from the slower length_scale below plus the softening EQ in
+# the post step. Everything softer than this is British and needs a credit
+# line, which we chose not to take on.
 VOICES = {
     'warm':   ('vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx', 1.12),   # public domain
     'soft':   ('vits-piper-en_GB-cori-medium/en_GB-cori-medium.onnx', 1.12),         # public domain (LibriVox)
-    'gentle': ('vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx', 1.18),       # CC0
-    'clear':  ('vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx', 1.12),     # public domain
-    'male':   ('vits-piper-en_US-norman-medium/en_US-norman-medium.onnx', 1.18),     # public domain
+    'gentle': ('vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx', 1.38),       # CC0
+    'clear':  ('vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx', 1.34),     # public domain
+    'male':   ('vits-piper-en_US-john-medium/en_US-john-medium.onnx', 1.38),         # public domain
 }
+# Voices that get the softening EQ as well as the slower pace.
+SOFTENED = {'gentle', 'clear', 'male'}
 
 if len(sys.argv) != 2:
     sys.exit("usage: python3 tools/generate-sos-talk.py path/to/folder-with-voice-folders")

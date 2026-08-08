@@ -207,7 +207,10 @@ fs.mkdirSync(MEDIA_DIR, { recursive: true });
 const EXT_BY_KIND = {
   image: new Set(['.png', '.jpg', '.jpeg', '.webp']),
   video: new Set(['.mp4', '.webm', '.mov', '.m4v']),
-  audio: new Set(['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac']),
+  // .webm is here for browser voice recordings: MediaRecorder gives opus in a
+  // webm container and nothing else, so refusing it would mean "record your
+  // own voice" could never file what it just recorded.
+  audio: new Set(['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac', '.webm']),
   project: new Set(['.json']),
   archive: new Set(['.zip']),
 };
@@ -1216,9 +1219,13 @@ router.get('/assets/:id/file', (req, res) => {
   const row = db.getAsset(req.userId, Number(req.params.id));
   if (!row) return res.status(404).json({ error: 'Asset not found.' });
   const ext = path.extname(row.filename).toLowerCase();
-  res.sendFile(mediaPath(row.filename), {
-    headers: { 'Content-Type': CONTENT_TYPES[ext] || 'application/octet-stream' },
-  });
+  // .webm is both a video and an audio container, and the extension alone
+  // can't tell you which. A voice recording sent as video/webm makes an
+  // <audio> element refuse to play it, so the asset's own kind decides.
+  const type = (ext === '.webm' && row.kind === 'audio')
+    ? 'audio/webm'
+    : (CONTENT_TYPES[ext] || 'application/octet-stream');
+  res.sendFile(mediaPath(row.filename), { headers: { 'Content-Type': type } });
 });
 
 // Remove an image from a character's reference set without deleting it from

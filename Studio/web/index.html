@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0811</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0812</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -1000,7 +1000,7 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2 quiet" id="buffer-test" style="display:none">🔌 Test the connection</button>
       <div id="buffer-result" class="usage" style="display:none"></div>
       <p class="usage" id="buffer-manage" style="display:none">Key saved on this computer. <a href="#" id="buffer-change">Change it</a> · <a href="#" id="buffer-remove">Remove it</a>.</p>
-      <div class="err" id="buffer-err" style="display:none"></div>
+      <div class="err" id="buffer-err" style="display:none;white-space:pre-wrap"></div>
     </div>
 
     <div class="card">
@@ -1733,7 +1733,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function jfetch(url, opts) {
   const res = await fetch(url, opts);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) { const e = new Error(data.error || `Request failed (${res.status})`); e.status = res.status; throw e; }
+  // Carry the whole body on the error too: some endpoints return diagnostic
+  // fields alongside `error` (e.g. Buffer's schema hint) that are lost if only
+  // the message survives. Purely additive - existing callers read e.message.
+  if (!res.ok) { const e = new Error(data.error || `Request failed (${res.status})`); e.status = res.status; e.body = data; throw e; }
   return data;
 }
 
@@ -3511,7 +3514,11 @@ $('#buffer-test').onclick = async () => {
       d.channels.map((c) => `• ${escapeHtml(c.name || '(unnamed)')} <span style="color:var(--tm)">${escapeHtml(c.service || '')}</span>`).join('<br>');
   } catch (e) {
     out.style.display = 'none';
-    setBufferErr(e.message);
+    // jfetch surfaces the server's message; the schema hint rides on the body.
+    const needs = e.body?.needs;
+    setBufferErr(e.message + (needs?.length
+      ? `\n\nBuffer says ChannelsInput accepts: ${needs.join(', ')} — send me this line and I'll finish it.`
+      : ''));
   }
 };
 document.getElementById('buffer-change') && (document.getElementById('buffer-change').onclick = (e) => {

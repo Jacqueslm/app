@@ -41,6 +41,20 @@ the person struggling (porn, alcohol, food, gambling).
 - **Email lives on this domain** — IONOS mailboxes (mx00/mx01) and **Resend**
   (`send` MX + `resend._domainkey` TXT + SPF), which is what actually delivers
   the app's trial sequence. Those records are in Cloudflare now. Don't drop them.
+- **Site Audit is at 0 errors, 96% health (8 Aug 2026)** — above Semrush's
+  top-10% benchmark of 92%. **The 9 remaining warnings are deliberate. Do not
+  "fix" them:**
+  - *Low text-to-HTML ratio · low word count · duplicate h1-and-title* land on
+    `/app` and `/app?join=1`, which are the application shell, not documents.
+    That page already canonicalises to `/`, so it isn't competing for anything.
+    Rewriting its headings for a crawler risks a visual regression in an app
+    under Play Store testing, for no ranking gain.
+  - *Low word count* also flags `/quiz` and `/for-her`. They are short because
+    short converts. Padding them makes them worse at the one job they have.
+  - **Cloudflare's "Block AI training bots" must stay OFF.** On by default for
+    new zones, it serves a managed robots.txt that (a) Semrush rejects as
+    invalid, (b) drops the Sitemap line, and (c) blocked Google-Extended on 35
+    pages — the opposite of what `llms.txt` is there to do.
 - **Working branch:** `claude/vibe-code-uwxxlk` (kept in sync with `main`).
 - The app also has an in-app "Update my app" button (pulls the GitHub tarball) as
   a backup update path — fixed to use tarball+tar (no `unzip` needed).
@@ -70,8 +84,11 @@ Plus the files he opens only when doing that specific work:
 - `AI-SCENES.md` — the AI videos that cost money (A1–A5, full prompts).
 - `INFLUENCERS.md` — podcasts/authors pile, separate from the rehab outreach.
 - `KEYWORDS.md` — the final search dataset. **Only write for terms marked
-  "Build"**; never Skip/Too-hard, whatever the volume. Semrush is disconnected,
-  so this file is the only source of search truth — don't propose new research.
+  "Build"**; never Skip/Too-hard, whatever the volume. Still the source of
+  search truth: its numbers were verified against two live pulls, so quote them
+  rather than re-estimating. (A fresh Semrush account was connected 8 Aug 2026 —
+  the connector reads reports but cannot write, so it can't add tracked keywords
+  or start a crawl. Those are clicks only he can do.)
 - `COMPETITORS.md` — monthly structural log (hook type / length / format only,
   never wording). Informs structure, never copy.
 - `reference/Getting-Noticed-Course.pdf` — his sales & marketing course, one

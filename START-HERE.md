@@ -24,6 +24,23 @@ the person struggling (porn, alcohol, food, gambling).
 ## Deploy & branches
 
 - **Host:** Railway, auto-deploys the site from the deploy branch on push.
+- **DNS: Cloudflare, not IONOS** (moved 8 Aug 2026). The domain is still bought
+  from IONOS, but its nameservers point at Cloudflare — `adi` and `glen`
+  `.ns.cloudflare.com`. **Change DNS records in Cloudflare. IONOS DNS is dead.**
+  Why it moved: Railway needs a CNAME at the apex, and IONOS refuses one at the
+  root ("A CNAME record can only be set for a subdomain") — it only offered its
+  own redirect service, which had no SSL certificate, so `https://` on the bare
+  domain returned nothing. That was four of the five site-audit errors. Cloudflare
+  does CNAME flattening at the root, which is the whole reason for the move.
+- **The bare domain is handled by Cloudflare, not Railway.** Railway's plan is at
+  its custom-domain limit, so the apex is a Cloudflare **Redirect Rule**
+  (`https://turnsomedayintodayone.com/*` → `https://www.turnsomedayintodayone.com/${1}`,
+  301, query string preserved) with the apex DNS record **proxied**. Everything
+  else is DNS-only. `server.js` also 301s the apex to www as a backstop if the
+  domain is ever pointed straight at Railway.
+- **Email lives on this domain** — IONOS mailboxes (mx00/mx01) and **Resend**
+  (`send` MX + `resend._domainkey` TXT + SPF), which is what actually delivers
+  the app's trial sequence. Those records are in Cloudflare now. Don't drop them.
 - **Working branch:** `claude/vibe-code-uwxxlk` (kept in sync with `main`).
 - The app also has an in-app "Update my app" button (pulls the GitHub tarball) as
   a backup update path — fixed to use tarball+tar (no `unzip` needed).

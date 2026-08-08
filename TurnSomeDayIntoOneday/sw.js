@@ -1,8 +1,8 @@
-// v5.1.1: the five SOS recordings were rebuilt with different voices. The
-// filenames didn't change, so without a new cache name every existing install
-// would keep the old audio and pair it with the new caption timings - the
-// captions would drift further out of sync with every step.
-const CACHE_NAME = 'tsid-shell-v5.1.1';
+// v5.1.2: SOS recordings rebuilt again - Gentle, Clear and Calm male are now
+// slower and softer. The filenames never change, so every audio rebuild needs
+// a new cache name here or existing installs keep the old audio and pair it
+// with the new caption timings, drifting further out with every step.
+const CACHE_NAME = 'tsid-shell-v5.1.2';
 const SHELL_FILES = [
   '/',
   '/app',

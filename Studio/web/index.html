@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0819</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0820</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -594,6 +594,13 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
+      <details id="qk-paste-wrap" style="margin-top:6px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--ts)">📋 Paste a shot list (from a plan you wrote elsewhere)</summary>
+        <p class="usage" style="margin:6px 0 4px">One line per shot, in order. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
+        <textarea id="qk-paste" placeholder="1. 01_indulgence   Zoom in   10s  cut    I wasn't hungry. I was filling a hole&#10;2. 02_aftermath    Zoom out  10s  blend  Then the room got quiet&#10;3. 03_realization  Float      5s  blend  Wasn't there" style="min-height:96px;font-size:12px"></textarea>
+        <button class="btn2" id="qk-paste-go" style="width:100%;margin-top:6px">Fill the shots from this</button>
+        <p class="usage" id="qk-paste-note" style="margin:4px 0 0"></p>
+      </details>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn2" id="qk-add-music">2️⃣ &nbsp;Add your song</button>
         <span class="usage" id="qk-music-label">no song yet (that's ok too)</span>
@@ -7937,6 +7944,98 @@ function renderQkFormat() {
   ], qk.format, (k) => { qk.format = k; renderQkFormat(); });
 }
 
+/* ---------------- paste a shot list ----------------
+   A plan written somewhere else - by hand, or by another tool - arrives as
+   loose text, and typing nine rows back in by hand is the whole reason people
+   don't bother planning. This reads a line however it's written: the move, the
+   seconds, cut or blend, and the words on screen, in any order, with leading
+   numbering and scene names ignored. Anything it can't find on a line is left
+   as whatever that shot already had, rather than guessed. */
+const PASTE_MOVES = [
+  // longest phrasings first so "zoom out" never matches as "zoom"
+  ['parallax right', 'parallax_right'], ['parallax left', 'parallax_left'],
+  ['parallax up', 'parallax_up'], ['parallax down', 'parallax_down'],
+  ['3d depth', 'parallax_right'], ['parallax', 'parallax_right'],
+  ['zoom + slide', 'push_pan'], ['zoom and slide', 'push_pan'], ['push pan', 'push_pan'],
+  ['zoom in', 'push'], ['zoom out', 'pull'], ['push in', 'push'], ['pull back', 'pull'],
+  ['slide left', 'pan_left'], ['slide right', 'pan_right'], ['slide up', 'pan_up'], ['slide down', 'pan_down'],
+  ['pan left', 'pan_left'], ['pan right', 'pan_right'], ['pan up', 'pan_up'], ['pan down', 'pan_down'],
+  ['slide ←', 'pan_left'], ['slide →', 'pan_right'], ['slide ↑', 'pan_up'], ['slide ↓', 'pan_down'],
+  ['looking up', 'low_angle'], ['looking down', 'high_angle'],
+  ['low angle', 'low_angle'], ['high angle', 'high_angle'],
+  ['crane up', 'crane_up'], ['crane down', 'crane_down'],
+  ['orbit left', 'orbit_left'], ['orbit right', 'orbit_right'], ['orbit ←', 'orbit_left'], ['orbit →', 'orbit_right'],
+  ['dutch tilt', 'dutch'], ['dutch', 'dutch'],
+  ['hover above', 'hover'], ['hover', 'hover'], ['drone up', 'drone'], ['drone', 'drone'],
+  ['handheld', 'shake'], ['shake', 'shake'], ['float', 'drift'], ['drift', 'drift'],
+  ['push', 'push'], ['pull', 'pull'],
+];
+const PASTE_TRANS = [
+  ['fade to black', 'fadeblack'], ['fadeblack', 'fadeblack'], ['to black', 'fadeblack'], ['black', 'fadeblack'],
+  ['blend', 'fade'], ['dissolve', 'fade'], ['crossfade', 'fade'], ['fade', 'fade'],
+  ['cut', 'cut'], ['hard cut', 'cut'],
+];
+
+function parseShotLine(line) {
+  let s = ` ${line} `;
+  const out = {};
+  const take = (re) => {
+    const m = s.match(re);
+    if (!m) return null;
+    s = s.slice(0, m.index) + ' ' + s.slice(m.index + m[0].length);
+    return m;
+  };
+  // leading "1." / "1)" / "-" / "•" numbering
+  take(/^\s*[-•*]?\s*\d{1,3}\s*[.)]\s*/);
+  // duration: "10s" or "10 sec" wins; a bare number only if it's standalone
+  const d = take(/\b(\d{1,3})\s*(?:s|sec|secs|seconds)\b/i) || take(/(?:^|\s)(\d{1,3})(?=\s)/);
+  if (d) out.dur = Math.min(60, Math.max(1, Number(d[1])));
+  // A plan separates its columns with whatever it likes - spaces, commas,
+  // pipes, dashes - so "hover above," has to match as fully as "hover above ".
+  // Boundaries that only accept whitespace matched "hover" and left "above,"
+  // sitting in the caption.
+  const EDGE = '[\\s,;:|/·–—-]';
+  const bounded = (word) =>
+    new RegExp(`(?:^|${EDGE})${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=${EDGE}|$)`, 'i');
+  // move, longest phrasing first
+  for (const [word, key] of PASTE_MOVES) {
+    const m = take(bounded(word));
+    if (m) { out.move = key; break; }
+  }
+  // transition
+  for (const [word, key] of PASTE_TRANS) {
+    const m = take(bounded(word));
+    if (m) { out.transAfter = key; break; }
+  }
+  // a scene/file name token like 01_indulgence or shot-3.png - useful for
+  // matching a picture in the library, never wanted as on-screen words
+  const n = take(/(?:^|\s)([A-Za-z0-9]+[_-][A-Za-z0-9_-]+(?:\.(?:png|jpg|jpeg|webp))?)(?=\s|$)/);
+  if (n) out.name = n[1];
+  // Whatever survives is the caption - but pulling four columns out of a line
+  // leaves their separators behind ("Scene 2 — — — — the door"), so orphaned
+  // runs of punctuation collapse before the text is trusted.
+  out.text = s
+    .replace(/\s+/g, ' ')
+    .replace(/(?:^|\s)[|,;:·–—-]+(?=\s|$)/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/^[\s|,;:·–—-]+|[\s|,;:·–—-]+$/g, '')
+    .trim();
+  return out;
+}
+
+function parseShotList(text) {
+  return String(text || '')
+    .split('\n')
+    .map((l) => l.trim())
+    // Drop a pasted table's scaffolding: the |---|---| rule, and the header
+    // row above it - a row of pipes with no number in it is column names, not
+    // a shot.
+    .filter((l) => l && !/^[-=_|+\s]+$/.test(l))
+    .filter((l) => !((l.match(/\|/g) || []).length >= 2 && !/\d/.test(l)))
+    .map(parseShotLine)
+    .filter((r) => r.move || r.dur || r.transAfter || r.text);
+}
+
 function renderQkShots() {
   const list = $('#qk-shots');
   list.innerHTML = '';
@@ -7976,6 +8075,59 @@ function renderQkShots() {
     list.appendChild(row);
   });
 }
+
+if (document.getElementById('qk-paste-go')) $('#qk-paste-go').onclick = () => {
+  const note = $('#qk-paste-note');
+  const rows = parseShotList($('#qk-paste').value);
+  if (!rows.length) { note.textContent = 'Nothing readable in there — one line per shot.'; return; }
+
+  // No pictures added yet: try to find each line's scene name in the library.
+  // A plan usually names its panels, and matching them saves picking nine
+  // pictures by hand in the right order.
+  let matched = 0;
+  if (!qk.shots.length) {
+    const imgs = st.assets.filter((a) => a.kind === 'image');
+    const norm = (v) => String(v || '').toLowerCase().replace(/\.[a-z]+$/, '').replace(/[^a-z0-9]/g, '');
+    rows.forEach((r) => {
+      if (!r.name) return;
+      const key = norm(r.name);
+      const hit = imgs.find((a) => norm(a.label) === key)
+        || imgs.find((a) => norm(a.label).includes(key) || key.includes(norm(a.label)));
+      if (!hit) return;
+      matched++;
+      qk.shots.push({
+        assetId: hit.id, url: hit.url, label: hit.label,
+        move: 'push', dur: 4, text: '', transAfter: 'fade',
+      });
+    });
+  }
+
+  if (!qk.shots.length) {
+    note.textContent = `Read ${rows.length} shot${rows.length > 1 ? 's' : ''}, but there are no pictures to put them on yet. Add your pictures first, then paste this again.`;
+    return;
+  }
+
+  const n = Math.min(rows.length, qk.shots.length);
+  for (let i = 0; i < n; i++) {
+    const r = rows[i], s = qk.shots[i];
+    // Only overwrite what the line actually said. A plan that lists moves but
+    // no durations shouldn't quietly reset every duration to a default.
+    if (r.move) s.move = r.move;
+    if (r.dur) s.dur = r.dur;
+    if (r.transAfter) s.transAfter = r.transAfter;
+    if (r.text) s.text = r.text;
+  }
+  renderQkShots();
+  persistDraft();
+
+  const total = qk.shots.reduce((t, s) => t + (Number(s.dur) || 0), 0);
+  const bits = [`Filled ${n} shot${n > 1 ? 's' : ''}`];
+  if (matched) bits.push(`matched ${matched} picture${matched > 1 ? 's' : ''} by name`);
+  if (rows.length > qk.shots.length) bits.push(`${rows.length - qk.shots.length} line${rows.length - qk.shots.length > 1 ? 's' : ''} had no picture to go on`);
+  if (qk.shots.length > rows.length) bits.push(`${qk.shots.length - rows.length} shot${qk.shots.length - rows.length > 1 ? 's' : ''} left as they were`);
+  bits.push(`${Math.round(total)}s total`);
+  note.textContent = bits.join(' · ') + '.';
+};
 
 $('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
   setErr('#seq-err', null);

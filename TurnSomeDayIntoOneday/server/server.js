@@ -60,6 +60,26 @@ app.use((req, res, next) => {
   next();
 });
 
+// One canonical host. Every canonical tag, the sitemap and robots.txt all say
+// www, so the bare domain must send people there rather than serve a second
+// copy of the site for Google to choose between.
+//
+// This only matters once the apex points at Railway. Until then IONOS answers
+// it with a 302 on http and nothing at all on https - which is what put four
+// "page couldn't be crawled" errors in the site audit.
+//
+// 301, not 302: permanent is what transfers ranking to the www version.
+// Anything that isn't exactly the bare domain falls through untouched, so
+// localhost, Railway's own *.up.railway.app health checks and the www host
+// itself are unaffected.
+const CANONICAL_HOST = process.env.CANONICAL_HOST || 'www.turnsomedayintodayone.com';
+const APEX_HOST = CANONICAL_HOST.replace(/^www\./, '');
+app.use((req, res, next) => {
+  const host = String(req.headers.host || '').toLowerCase().split(':')[0];
+  if (host !== APEX_HOST) return next();
+  res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+});
+
 app.use('/preview', requireAuth);
 
 // Cold marketing traffic lands here; the app itself lives at /app so a

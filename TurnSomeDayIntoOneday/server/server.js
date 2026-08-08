@@ -168,6 +168,13 @@ app.get('/how-to-stop-drinking', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'how-to-stop-drinking.html'));
 });
 
+// The morning-after anxiety. 12,100 searches a month at difficulty 33 - the
+// biggest winnable term on the site, and the doorway most people come through
+// long before they'd call it a problem.
+app.get('/hangxiety', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'hangxiety.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

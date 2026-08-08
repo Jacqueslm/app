@@ -1,7 +1,11 @@
 # Episode 2 — the six panels still to generate
 
 Copy everything inside the box below and give it to Manus as one message.
-Attach your reference photo of Elias with it.
+Attach TWO images with it:
+
+1. your reference photo of Elias
+2. **`reference/app-sos-screen.png`** — the real SOS screen out of your app,
+   for the phone in shot 1
 
 Shots 1 and 2 already exist (the kitchen counter with the water and fruit, and
 the phone with the delivery app). These are the other six.
@@ -31,11 +35,17 @@ logos, no watermarks, no signature. The words are added later in editing. A
 clean frame is required. No other people in any shot unless stated.
 
 1. THE PAUSE
-Elias at the kitchen counter holding his phone in one hand, screen facing the
-camera. The screen shows a dark app with one large soft glowing circle at its
-centre. His other hand is flat on the counter, his eyes are closed, he is
-mid-breath. Soft window light. The phone screen is the brightest thing in the
-frame.
+Elias at the kitchen counter holding his phone in one hand, screen angled
+toward the camera and clearly readable. His other hand is flat on the counter,
+his eyes are closed, he is mid-breath. Soft window light from the left. The
+phone screen is the brightest thing in the frame.
+
+The screen shows the app in the second attached image — copy it exactly: a
+very dark navy background, a large circle in the upper middle drawn as a thin
+bright green ring with a darker teal centre, and two lines of white text
+directly beneath the circle. Below that, smaller and dimmer, a rounded button.
+Keep the proportions and the colours; the small text at the bottom can fall
+soft and out of focus.
 
 2. OUT THE DOOR
 Elias stepping out of his front door onto a small porch, one hand still on the

@@ -111,8 +111,24 @@ files.** Respect that or the work is useless.
   emails as he completes them — returning the full `SCRIPTS.md` or `OUTREACH.md`
   wipes his progress. Deliver only the new piece, and name the file it belongs in.
 - **New scripts get appended to `SCRIPTS.md`** in the same numbered format:
-  number, TALK or AI, **Title**, **Say this** (or image+motion prompts per shot),
-  **Caption**. Self-contained — nothing to look up elsewhere.
+  number, TALK or AI, then these four fields in this order — self-contained,
+  nothing to look up elsewhere:
+
+  ```
+  **Title (TikTok / Facebook):**  the hook — it has to stop a thumb
+  **Title (YouTube):**            the search phrase — what someone types
+  **Say this:**                   the script (or image+motion prompts per shot)
+  **Caption:**                    one line, ends "Link in bio."
+  ```
+
+  **Two titles, always, on every new script.** Buffer turns the first line of
+  a caption into the YouTube title, and he sets the YouTube one separately via
+  Customize for each network — so writing one title for both makes him do the
+  translating himself, every time. The YouTube title must carry a real term
+  from `KEYWORDS.md` with its volume noted; if no honest term exists for that
+  script, write `**Title (YouTube):** same as above — no matching search term`
+  rather than inventing a keyword. Existing scripts 1–39 are mapped in
+  `YOUTUBE-TITLES.md`; new ones carry both titles inline instead.
 - **Answer short.** Give the next action, not an essay or a menu of options.
 - **Make the call.** Recommend one thing; don't hand him a decision tree.
 

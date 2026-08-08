@@ -40,6 +40,12 @@ the person struggling (porn, alcohol, food, gambling).
 - `DO-THIS-NEXT.md` — his routine, including the weekly schedule.
 - `SCRIPTS.md` — numbered videos. Each number = one complete video (title,
   script or AI prompts, caption). He picks a number and makes it.
+  **Every new script carries TWO titles:** `Title (TikTok / Facebook)` = the
+  hook, `Title (YouTube)` = a real search term from `KEYWORDS.md` with its
+  volume. Buffer builds the YouTube title from the caption's first line and he
+  overrides it per network, so one title for both makes him do the translating
+  by hand. No honest term for that script? Say so — never invent a keyword.
+  Scripts 1–39 predate the rule and are mapped in `YOUTUBE-TITLES.md`.
 - `OUTREACH.md` — Tuesday's sales block: 30 verified rehab/media targets in
   weekly batches of 5, with the email written.
 

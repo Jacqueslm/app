@@ -125,6 +125,72 @@ Two notes, neither urgent:
 
 ---
 
+## EPISODE 2 — "The First Step" (Manus storyboard, ready to build)
+
+Nine panels. Download them from the Manus links, add them to Quick Video in
+order, then open **📋 Paste a shot list** and paste this:
+
+```
+1. 01_morning     Zoom in      6s  blend  Morning doesn't fix things. It just makes them visible
+2. 02_trigger     Zoom in      5s  blend  Habit isn't a choice anymore. It's gravity
+3. 03_pause       Hover above  7s  blend  You don't fight the wave. You let it break over you
+4. 04_outside     3D depth →   8s  blend  The outside world doesn't know you're fighting
+5. 05_walk        Slide →      8s  blend  Movement becomes the antidote to standing still
+6. 06_store       Looking up   6s  cut    Every corner is a reminder of where you used to hide
+7. 07_return      Zoom out     7s  blend  You come back to the same four walls. The room feels different
+8. 08_daytwo      Zoom in     10s  cut    Day one was surviving the night. Day two is surviving the afternoon
+9. 09_horizon     Crane up    10s  cut    It doesn't get easier. You get stronger
+```
+
+Checked: nine shots, 67 seconds, every row fills in.
+
+**The camera moves are Manus's own directions, translated.** "Slow push-in" is
+Zoom in. "Static extreme close-up" became Hover on the breathing shot — it
+holds instead of drifting, which is what that beat wants. "Wide tracking from
+the doorway" is 3D depth, so stepping outside actually opens up. "Camera
+glides alongside him" is Slide. "Every corner is a reminder" is Looking up, so
+the store is bigger than he is. The last shot is Crane up — it lifts off and
+ends wide, which is what an epilogue is for.
+
+**The on-screen words are Manus's VOICEOVER lines, not its captions.** Its
+captions are labels — "The harsh light of day", "The familiar pull". Episode 1
+worked because the words on screen were somebody talking: *"I wasn't hungry. I
+was filling a hole."* The voiceover lines are the ones that sound like a
+person, so those go on screen. Swap them back if you'd rather.
+
+### Three things worth deciding before you build it
+
+1. **67 seconds vs Episode 1's 28.** More than twice as long. The middle —
+   outside, walk, store — is 22 seconds of a man walking, and that's where a
+   thumb moves. Cutting those three to 5s each brings it to 58 and loses
+   nothing. Your call.
+2. **Both episodes end on the same picture.** Episode 1's epilogue is Elias at
+   the kitchen window with a glass of water in morning light. Episode 2's
+   epilogue is Elias at the living room window with a glass of water in
+   morning light. Two of the panels sent through are exactly that shot in two
+   rooms. If Episode 2 ends the way Episode 1 ended, the series stops feeling
+   like it's going anywhere. The notebook — *"Day 2"* in his own handwriting —
+   is the ending nobody's seen before. Consider finishing there.
+3. **"It doesn't get easier. You get stronger"** is a very well-worn line —
+   it's on a million gym posters. Everything else in this script sounds like
+   you. That one sounds like everybody. Something plainer in the same place,
+   your own words, would land harder.
+
+### Two corrections to things I said earlier
+
+**The scene numbers are fine.** I flagged the jump from Scene 4 to Scene 8 as
+possible missing scenes. It isn't — Episode 1's storyboard has the identical
+jump (1, 2, 3A–3D, 4, 8, Epilogue). It's just how Manus numbers. Nothing lost.
+
+**Five of the nine panels are in hand**, not all nine: Scene 1 (counter, water
+and fruit), Scene 2 (the phone), Scene 3A (eyes closed, breathing), and two
+window shots for the epilogue. Still to generate: 3B stepping outside, 3C the
+walk, 3D the corner store, 4 the return, and 8 the notebook.
+
+**One more thing worth having:** the character has a name in Manus's files —
+**Elias**. Using it in every prompt is part of what's keeping the same face
+across both episodes.
+
 ## STILL OPEN (not today's work)
 
 - Outreach follow-ups — 15th to 18th, `OUTREACH.md`

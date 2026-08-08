@@ -809,17 +809,41 @@ async function bufferGraphQL(query, variables) {
   return body?.data;
 }
 
+// Renders a GraphQL type ref (which nests through NON_NULL/LIST wrappers) as
+// something readable, e.g. "String!" or "[ChannelFilter!]".
+function gqlTypeName(t) {
+  if (!t) return '?';
+  if (t.kind === 'NON_NULL') return gqlTypeName(t.ofType) + '!';
+  if (t.kind === 'LIST') return '[' + gqlTypeName(t.ofType) + ']';
+  return t.name || t.kind;
+}
+
 // Proves the key, the endpoint and the schema all work before anything is
 // built on top. Returns the channels this account can post to.
+//
+// `channels` takes a required ChannelsInput. An empty object is sent because
+// every filter inside it is expected to be optional - and if it isn't, the
+// catch below asks Buffer to describe the type rather than leaving us to guess
+// the field names a second time.
+const BUFFER_CHANNELS_Q = `query($input: ChannelsInput!) { channels(input: $input) { id name service } }`;
 router.get('/buffer/channels', async (req, res) => {
   if (!BUFFER_KEY) return res.status(400).json({ error: 'No Buffer key saved yet.' });
   try {
-    const data = await bufferGraphQL(`query { channels { id name service } }`);
+    const data = await bufferGraphQL(BUFFER_CHANNELS_Q, { input: {} });
     const channels = (data?.channels || []).map((c) => ({ id: c.id, name: c.name, service: c.service }));
     res.json({ channels });
   } catch (err) {
+    let needs = null;
+    if (err.status !== 401 && err.status !== 403) {
+      try {
+        const t = await bufferGraphQL(
+          `query { __type(name: "ChannelsInput") { inputFields { name type { kind name ofType { kind name ofType { kind name } } } } } }`);
+        const fields = t?.__type?.inputFields;
+        if (fields?.length) needs = fields.map((f) => `${f.name}: ${gqlTypeName(f.type)}`);
+      } catch (_) { /* introspection may be disabled; the raw error still goes back */ }
+    }
     res.status(err.status === 401 || err.status === 403 ? 401 : 502)
-      .json({ error: err.message, hint: 'Buffer answered this verbatim. A 401 means the key is wrong or expired.' });
+      .json({ error: err.message, needs, hint: 'Buffer answered this verbatim. A 401 means the key is wrong or expired.' });
   }
 });
 

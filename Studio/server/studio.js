@@ -16,6 +16,7 @@ const { requireAuth } = require('./auth');
 
 let FAL_KEY = process.env.FAL_KEY; // mutable: can be set from the app's Settings without a restart
 let PEXELS_KEY = process.env.PEXELS_KEY; // free stock b-roll key, also settable from the app
+let BUFFER_KEY = process.env.BUFFER_KEY; // Buffer personal API key, settable from the Post tab
 const FAL_QUEUE_BASE = process.env.FAL_QUEUE_BASE || 'https://queue.fal.run'; // overridable for tests
 const PEXELS_BASE = process.env.PEXELS_BASE || 'https://api.pexels.com'; // overridable for tests
 const ENV_PATH = path.join(__dirname, '.env');
@@ -677,6 +678,7 @@ router.get('/config', (req, res) => {
   res.json({
     falAvailable: Boolean(FAL_KEY),
     stockAvailable: Boolean(PEXELS_KEY),
+    bufferAvailable: Boolean(BUFFER_KEY),
     chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
@@ -761,6 +763,63 @@ router.post('/settings/spendcap', (req, res) => {
     res.json({ cap: DAILY_USD_CAP, spentToday: Number(todaySpendUSD(req.userId).toFixed(2)) });
   } catch (err) {
     res.status(500).json({ error: `Could not save the cap: ${err.message}` });
+  }
+});
+
+/* ---------------- Buffer (scheduling) ---------------- */
+// A personal API key from publish.buffer.com/settings/api. Buffer's API cannot
+// accept a file upload - a post's media has to be a public URL that stays
+// reachable until the post publishes - so the posting step (not built yet)
+// will push the render to fal storage first and hand Buffer that link.
+const BUFFER_API_URL = process.env.BUFFER_API_URL || 'https://api.buffer.com';
+
+router.post('/settings/bufferkey', (req, res) => {
+  const { key } = req.body || {};
+  const clean = typeof key === 'string' ? key.trim() : '';
+  if (clean && (clean.length < 10 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a Buffer key. Copy it from publish.buffer.com/settings/api." });
+  }
+  try {
+    persistEnvKey('BUFFER_KEY', clean || null);
+    BUFFER_KEY = clean || undefined;
+    res.json({ bufferAvailable: Boolean(BUFFER_KEY) });
+  } catch (err) {
+    res.status(500).json({ error: `Could not save the key: ${err.message}` });
+  }
+});
+
+async function bufferGraphQL(query, variables) {
+  const r = await fetch(BUFFER_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${BUFFER_KEY}` },
+    body: JSON.stringify({ query, variables: variables || {} }),
+  });
+  const text = await r.text();
+  let body;
+  try { body = JSON.parse(text); } catch (_) { body = null; }
+  if (!r.ok) {
+    const msg = body?.errors?.[0]?.message || text.slice(0, 300) || `HTTP ${r.status}`;
+    const err = new Error(msg); err.status = r.status; throw err;
+  }
+  if (body?.errors?.length) {
+    // Surfaced verbatim on purpose: if a field name in this file is wrong,
+    // Buffer's own message names it, which is the fastest way to fix it.
+    const err = new Error(body.errors.map((e) => e.message).join(' | ')); err.status = 400; throw err;
+  }
+  return body?.data;
+}
+
+// Proves the key, the endpoint and the schema all work before anything is
+// built on top. Returns the channels this account can post to.
+router.get('/buffer/channels', async (req, res) => {
+  if (!BUFFER_KEY) return res.status(400).json({ error: 'No Buffer key saved yet.' });
+  try {
+    const data = await bufferGraphQL(`query { channels { id name service } }`);
+    const channels = (data?.channels || []).map((c) => ({ id: c.id, name: c.name, service: c.service }));
+    res.json({ channels });
+  } catch (err) {
+    res.status(err.status === 401 || err.status === 403 ? 401 : 502)
+      .json({ error: err.message, hint: 'Buffer answered this verbatim. A 401 means the key is wrong or expired.' });
   }
 });
 

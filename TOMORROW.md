@@ -142,6 +142,29 @@ circle, mid-craving, doing its job.
 The paste block at the bottom of that file drops straight into Quick Video.
 Checked: eight shots, 46 seconds, every row fills in.
 
+## EPISODE 3 — "That Was Me"
+
+**`EPISODE-3.md`.** Eight shots, 49 seconds. Shots 1–7 go to Manus. **Shot 8
+is not generated — it's you, on your own phone, in your own room.**
+
+The arc: twelve days in, the old life calls, he goes to the restaurant anyway,
+it nearly goes wrong, he steps outside for four minutes, he goes home and
+writes the number. Then the picture stops being beautiful and it's you saying
+it was never a story. Thirty-eight years. Free at fifty.
+
+You asked for spectacular. Drone shots and swelling music would undo
+everything the first two episodes earned — that's the ending of a supplement
+advert. This is the floor going out instead: three episodes of a man they
+assume is an actor, and then he isn't.
+
+Costs nothing. Seven panels and one video of you talking.
+
+**There's a fallback ending in the file if you don't want to be on camera** —
+a stack of filled notebooks and "Day 400". It's good. It just isn't the one
+nobody else can make.
+
+Paste block checked: eight shots, 49 seconds.
+
 ## STILL OPEN (not today's work)
 
 - Outreach follow-ups — 15th to 18th, `OUTREACH.md`

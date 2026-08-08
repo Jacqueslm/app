@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0813</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0814</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -1001,6 +1001,31 @@ body.simple-only #view-simple{display:flex !important}
       <div id="buffer-result" class="usage" style="display:none"></div>
       <p class="usage" id="buffer-manage" style="display:none">Key saved on this computer. <a href="#" id="buffer-change">Change it</a> · <a href="#" id="buffer-remove">Remove it</a>.</p>
       <div class="err" id="buffer-err" style="display:none;white-space:pre-wrap"></div>
+    </div>
+
+    <div class="card" id="send-card" style="display:none">
+      <h3>🚀 Send to Buffer</h3>
+      <p class="usage" style="margin:0">Goes straight into your queue — Buffer drops it on the next open slot (8am, 12pm, 7pm). You never pick a time.</p>
+
+      <div class="ob-label" style="margin-top:10px">What is this?</div>
+      <div class="chips" id="send-types"></div>
+      <p class="usage" id="send-type-note" style="margin:2px 0 0"></p>
+
+      <div class="ob-label" style="margin-top:10px">Post it to</div>
+      <div id="send-channels" style="display:flex;flex-direction:column;gap:6px"></div>
+      <p class="usage" style="margin:2px 0 0">Ticking a box here remembers it for this kind of post.</p>
+
+      <div class="ob-label" style="margin-top:10px">Which video</div>
+      <select class="input" id="send-asset"></select>
+
+      <div class="ob-label" style="margin-top:10px">Caption</div>
+      <textarea class="input" id="send-caption" style="min-height:90px;resize:vertical;line-height:1.5" placeholder="Paste the caption from your script."></textarea>
+      <p class="usage" id="send-ai-note" style="margin:2px 0 0"></p>
+
+      <button class="gen-btn" id="send-go" style="margin-top:10px">🚀 Send to my Buffer queue</button>
+      <div class="progress-line" id="send-prog"><div></div></div>
+      <div id="send-result" class="usage" style="display:none"></div>
+      <div class="err" id="send-err" style="display:none;white-space:pre-wrap"></div>
     </div>
 
     <div class="card">
@@ -2020,6 +2045,14 @@ async function bootStudio() {
   loadScripts();
   renderStockCard();
   renderBufferCard();
+  renderSendCard();
+  // A connected key means the channel list can be fetched now, so the send
+  // card is usable without pressing Test first.
+  if (st.cfg?.bufferAvailable) {
+    jfetch('/api/studio/buffer/channels')
+      .then((d) => { st.bufferChannels = d.channels || []; renderSendCard(); })
+      .catch(() => { /* the Test button reports the reason */ });
+  }
   renderCrewRoom();
   renderVoiceCard();
   renderCaptionStyles();
@@ -3506,6 +3539,8 @@ $('#buffer-test').onclick = async () => {
   out.textContent = 'Asking Buffer…';
   try {
     const d = await jfetch('/api/studio/buffer/channels');
+    st.bufferChannels = d.channels || [];
+    renderSendCard();
     if (!d.channels?.length) {
       out.innerHTML = '<b>Connected</b>, but Buffer reports no channels on this account. Add a social account in Buffer first.';
       return;
@@ -3539,6 +3574,114 @@ document.getElementById('buffer-remove') && (document.getElementById('buffer-rem
     $('#buffer-result').style.display = 'none';
     renderBufferCard();
   } catch (err) { setBufferErr(err.message); }
+});
+
+/* ---------------- send a finished render to Buffer ---------------- */
+// Three kinds of post, three different homes. The AI-music cards deliberately
+// skip YouTube. Defaults only - every tick is editable and remembered per kind.
+const POST_TYPES = {
+  realme:     { label: '🎥 Real me',      services: ['tiktok', 'youtube', 'facebook'], aiLabel: false,
+                note: 'You on camera. Goes everywhere, no AI label.' },
+  cards:      { label: '🃏 Card + AI music', services: ['tiktok', 'facebook'],          aiLabel: true,
+                note: 'Text cards over AI music — YouTube is left off these.' },
+  storyboard: { label: '🎬 AI storyboard', services: ['tiktok', 'youtube', 'facebook'], aiLabel: true,
+                note: 'AI-generated scenes. Goes everywhere, labelled as AI.' },
+};
+function postTypePrefs() {
+  try { return JSON.parse(localStorage.getItem('tsid-buffer-types') || '{}') || {}; } catch (_) { return {}; }
+}
+function postTypeConf(key) {
+  const base = POST_TYPES[key] || POST_TYPES.realme;
+  const saved = postTypePrefs()[key] || {};
+  return { ...base, ...saved };
+}
+function savePostType(key, patch) {
+  const all = postTypePrefs();
+  all[key] = { ...(all[key] || {}), ...patch };
+  localStorage.setItem('tsid-buffer-types', JSON.stringify(all));
+}
+let sendType = 'realme';
+
+function renderSendCard() {
+  const card = document.getElementById('send-card');
+  if (!card) return;
+  card.style.display = st.cfg?.bufferAvailable ? 'flex' : 'none';
+  if (!st.cfg?.bufferAvailable) return;
+
+  chipRow($('#send-types'), Object.entries(POST_TYPES).map(([k, v]) => ({ key: k, label: v.label })),
+    sendType, (k) => { sendType = k; renderSendCard(); });
+
+  const conf = postTypeConf(sendType);
+  $('#send-type-note').textContent = POST_TYPES[sendType].note;
+  $('#send-ai-note').innerHTML = conf.aiLabel
+    ? '“Made with AI” is added to the end of this caption automatically.'
+    : 'No AI label on this kind — it is really you.';
+
+  // channels come from Buffer itself, so the tick boxes are the real accounts
+  const box = $('#send-channels');
+  const chans = st.bufferChannels || [];
+  if (!chans.length) {
+    box.innerHTML = '<span class="usage">Press “Test the connection” above to load your channels.</span>';
+  } else {
+    box.innerHTML = '';
+    chans.forEach((c) => {
+      const on = (conf.services || []).includes(c.service);
+      const row = document.createElement('label');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer';
+      row.innerHTML = `<input type="checkbox" ${on ? 'checked' : ''}> ${escapeHtml(c.name || c.service)} <span style="color:var(--tm)">${escapeHtml(c.service || '')}</span>`;
+      row.querySelector('input').onchange = (e) => {
+        const svcs = new Set(postTypeConf(sendType).services || []);
+        e.target.checked ? svcs.add(c.service) : svcs.delete(c.service);
+        savePostType(sendType, { services: [...svcs] });
+      };
+      box.appendChild(row);
+    });
+  }
+
+  const sel = $('#send-asset');
+  const vids = (st.assets || []).filter((a) => a.kind === 'video');
+  const keep = sel.value;
+  sel.innerHTML = vids.length
+    ? vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label || 'clip')}</option>`).join('')
+    : '<option value="">Nothing finished yet</option>';
+  if (keep) sel.value = keep;
+}
+
+$('#send-go') && ($('#send-go').onclick = async () => {
+  $('#send-err').style.display = 'none';
+  $('#send-result').style.display = 'none';
+  const conf = postTypeConf(sendType);
+  const chans = (st.bufferChannels || []).filter((c) => (conf.services || []).includes(c.service));
+  const assetId = $('#send-asset').value;
+  const caption = $('#send-caption').value.trim();
+  const fail = (m) => { $('#send-err').style.display = 'block'; $('#send-err').textContent = m; };
+  if (!chans.length) return fail('No channels ticked for this kind of post.');
+  if (!assetId) return fail('Pick a video.');
+  if (!caption) return fail('Write a caption.');
+
+  // It goes live, so say out loud what is about to happen before it does.
+  const where = chans.map((c) => c.name || c.service).join(', ');
+  if (!confirm(`Queue this to ${where}?\n\nIt goes straight into your Buffer queue and will publish on the next open slot.`)) return;
+
+  $('#send-go').disabled = true;
+  setProg('#send-prog', 30);
+  try {
+    const d = await jfetch('/api/studio/buffer/post', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assetId, caption, aiLabel: !!conf.aiLabel, channelIds: chans.map((c) => c.id) }),
+    });
+    setProg('#send-prog', 100);
+    const name = (id) => (st.bufferChannels.find((c) => c.id === id) || {}).name || id;
+    const lines = d.results.map((r) => r.ok ? `✅ queued on ${escapeHtml(name(r.channelId))}` : `❌ ${escapeHtml(name(r.channelId))} — ${escapeHtml(r.error)}`);
+    $('#send-result').style.display = 'block';
+    $('#send-result').innerHTML = lines.join('<br>');
+  } catch (e) {
+    const needs = e.body?.needs;
+    fail(e.message + (needs?.length ? `\n\nBuffer describes: ${needs.join(' | ')} — send me this and I'll finish it.` : ''));
+  } finally {
+    $('#send-go').disabled = false;
+    setTimeout(() => setProg('#send-prog', null), 1200);
+  }
 });
 
 /* ---------------- free stock b-roll (Pexels) ---------------- */

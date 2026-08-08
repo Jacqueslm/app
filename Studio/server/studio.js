@@ -462,7 +462,11 @@ function scaledRefDataUri(filename) {
 // Two-step flow: short-lived token from the auth endpoint, then the bytes to
 // the returned base_url. (Data-URI inlining is the fallback - training zips
 // are too big for that to be the primary path.)
-async function falUploadFile(buf, filename, contentType) {
+// opts.permanent asks fal never to expire the object. Everything else here
+// uploads a throwaway input for one job, but a file handed to Buffer has to
+// still be there when the post publishes days later - an expired link would
+// mean a post that silently goes out broken.
+async function falUploadFile(buf, filename, contentType, opts) {
   const tokRes = await fetch(FAL_STORAGE_AUTH_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Key ${FAL_KEY}` },
@@ -478,6 +482,9 @@ async function falUploadFile(buf, filename, contentType) {
       Authorization: `${tok.token_type || 'Bearer'} ${tok.token}`,
       'Content-Type': contentType,
       'X-Fal-File-Name': filename,
+      ...(opts?.permanent
+        ? { 'X-Fal-Object-Lifecycle-Preference': JSON.stringify({ expiration_duration_seconds: null }) }
+        : {}),
     },
     body: buf,
   });
@@ -880,6 +887,85 @@ router.get('/buffer/channels', async (req, res) => {
     res.status(err.status === 401 || err.status === 403 ? 401 : 502)
       .json({ error: err.message, needs, hint: 'Buffer answered this verbatim. A 401 means the key is wrong or expired.' });
   }
+});
+
+// Ask Buffer to describe an input type. Used when a mutation is rejected, so
+// the fix comes from the schema instead of another guess.
+async function bufferDescribe(name) {
+  try {
+    const t = await bufferGraphQL(
+      `query { __type(name: "${name}") { inputFields { name type { kind name ofType { kind name ofType { kind name } } } } } }`);
+    const f = t?.__type?.inputFields;
+    return f?.length ? f.map((x) => `${x.name}: ${gqlTypeName(x.type)}`) : null;
+  } catch (_) { return null; }
+}
+
+const BUFFER_CREATE_Q = `mutation($input: PostCreateInput!) {
+  createPost(input: $input) { ... on PostActionSuccess { post { id } } ... on MutationError { message } }
+}`;
+
+// Queue one finished render onto one channel. Buffer has no file upload, so
+// the file goes to fal storage (permanently, see falUploadFile) and Buffer is
+// handed that link. mode addToQueue means Buffer uses the posting schedule
+// already set on the channel - 8am/12pm/7pm - rather than us inventing a time.
+router.post('/buffer/post', async (req, res) => {
+  if (!BUFFER_KEY) return res.status(400).json({ error: 'Connect Buffer first (Post tab).' });
+  if (!FAL_KEY) return res.status(400).json({ error: 'Turn on AI first - the fal key is what gives Buffer a link to fetch the video from.' });
+
+  const { assetId, channelIds, aiLabel } = req.body || {};
+  let caption = typeof req.body?.caption === 'string' ? req.body.caption.trim() : '';
+  if (!assetId) return res.status(400).json({ error: 'Pick a video first.' });
+  if (!Array.isArray(channelIds) || !channelIds.length) return res.status(400).json({ error: 'Pick at least one channel.' });
+  if (!caption) return res.status(400).json({ error: 'Write a caption first.' });
+
+  // The AI disclosure is added here, not only in the browser, so it cannot be
+  // lost by an edit on the way out.
+  if (aiLabel && !/made with ai/i.test(caption)) caption = `${caption}\n\nMade with AI`;
+
+  const asset = db.getAsset(req.userId, assetId);
+  if (!asset) return res.status(404).json({ error: 'That video is not in your library any more.' });
+
+  let mediaUrl;
+  try {
+    const buf = fs.readFileSync(mediaPath(asset.filename));
+    const ext = path.extname(asset.filename).toLowerCase();
+    const ctype = ext === '.mp4' ? 'video/mp4' : ext === '.webm' ? 'video/webm'
+      : ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'application/octet-stream';
+    mediaUrl = await falUploadFile(buf, path.basename(asset.filename), ctype, { permanent: true });
+  } catch (err) {
+    return res.status(502).json({ error: `Could not publish the video to a link Buffer can reach: ${err.message}` });
+  }
+
+  const isVideo = /^video\//.test(mediaUrl) || /\.(mp4|webm|mov)$/i.test(mediaUrl) || asset.kind === 'video';
+  const results = [];
+  let needs = null;
+  for (const channelId of channelIds) {
+    const input = {
+      text: caption,
+      channelId,
+      schedulingType: 'automatic',
+      mode: 'addToQueue',
+      assets: [isVideo ? { video: { url: mediaUrl } } : { image: { url: mediaUrl } }],
+    };
+    try {
+      const d = await bufferGraphQL(BUFFER_CREATE_Q, { input });
+      const r = d?.createPost;
+      if (r?.message) results.push({ channelId, ok: false, error: r.message });
+      else results.push({ channelId, ok: true, postId: r?.post?.id || null });
+    } catch (err) {
+      results.push({ channelId, ok: false, error: err.message });
+      if (!needs) {
+        needs = [];
+        for (const t of ['PostCreateInput', 'PostAssetInput', 'AssetInput']) {
+          const f = await bufferDescribe(t);
+          if (f) needs.push(`${t}: ${f.join(', ')}`);
+        }
+        if (!needs.length) needs = null;
+      }
+    }
+  }
+  const anyOk = results.some((r) => r.ok);
+  res.status(anyOk ? 200 : 502).json({ results, mediaUrl, caption, needs });
 });
 
 /* ---------------- free stock b-roll (Pexels) ---------------- */

@@ -168,6 +168,43 @@ closer to.
 
 ---
 
+## Suno prompt — instrumental, like Episode 1
+
+Turn the **Instrumental** switch on so it can't sing over the voiceover.
+
+```
+Slow sparse instrumental score. Felt piano, single notes with silence between
+them, never hurrying toward a melody. One low sustained cello underneath that
+never quite resolves. Faint tape hiss and room tone left in. 62 bpm, minor,
+unhurried. No drums for the first half; from the midpoint a soft heartbeat
+pulse felt more than heard, and a high sustained string that rises and never
+arrives anywhere. No swell, no drop, no climax. It should end more settled
+than it started, not more triumphant. Lots of empty space in the mix for
+speech and room sound to sit in. Restrained, patient, documentary.
+```
+
+**Why it's built like that.** Every sound cue in this episode is small and
+specific — one breath, a neon hum, a pen on paper, a fridge two rooms away. A
+score with a big middle would bury all of it. And the episode isn't a victory,
+it's an ordinary Tuesday survived, so a track that climaxes would be telling
+the viewer something the pictures aren't.
+
+**Using it:** take the quietest 46 seconds of whatever Suno returns, not the
+first 46. Under **Shot 7, three o'clock, fade the music out entirely** and let
+the fridge hum carry it. That silence is the loudest moment in the episode and
+music will soften it.
+
+### Two other directions if that one comes back wrong
+
+- **Colder:** `Warm analogue synth drone, no percussion at all, slowly shifting
+  chords, tape saturation, one note held far too long. Ambient, isolating,
+  patient. No melody.` — makes the afternoon lonelier and the room bigger.
+- **More human:** `Fingerpicked acoustic guitar, close-mic'd with string
+  noise and breath audible, one repeating figure that never develops, no
+  percussion, no build.` — warmer, closer to a person, less like a film score.
+
+---
+
 ## Titles
 
 **YouTube:** Day 2 of quitting — nobody warns you about the afternoon

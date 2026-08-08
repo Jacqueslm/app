@@ -2124,8 +2124,12 @@ router.post('/animate', async (req, res) => {
 /* ---------------- ffmpeg job runner ---------------- */
 // Spawn ffmpeg with the given args, track progress against expectedDur, and
 // register the output as a video asset when it succeeds.
+// opts.job lets a caller that had async work to do first (parallax has to
+// build a depth map) create the job up front, answer the request, and then
+// hand the same job here rather than opening a second one the client
+// isn't watching.
 function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 'video', opts) {
-  const job = createJob(userId, 'render', {});
+  const job = (opts && opts.job) || createJob(userId, 'render', {});
   const outPath = mediaPath(outFile);
   const cleanup = () => {
     for (const f of (opts && opts.cleanupFiles) || []) { try { fs.unlinkSync(f); } catch (_) {} }
@@ -2890,6 +2894,54 @@ function kenBurnsExprs(move, intensity, fx, fy, easing) {
   }
 }
 
+/* ---------------- parallax: a flat photo pulled into depth layers ---------------- */
+const parallax = require('./parallax');
+
+// move is 'parallax_right' | 'parallax_left' | 'parallax_up' | 'parallax_down'
+function startParallax(req, res, { still, dur, intensity, size, move }) {
+  const dir = (String(move).split('_')[1] || 'right');
+  const { W, H } = parseSize(size, '1920x1080');
+  const job = createJob(req.userId, 'render', {});
+  res.status(202).json({ job: jobJson(job) });
+
+  (async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-plx-'));
+    const depthFile = path.join(tmpDir, 'depth.png');
+    const src = mediaPath(still.filename);
+    try {
+      // 0-45% is the one-off model download; after that depth takes a second.
+      let depth = await parallax.depthMap(src, depthFile, (pct) => {
+        job.progress = Math.min(45, Math.round(pct * 0.45));
+      });
+      let guessed = false;
+      if (!depth) {
+        // No depth model on this machine. Assume the ground is nearer than the
+        // sky - true of most shots taken standing up - rather than refusing.
+        guessed = true;
+        depth = await parallax.gradientDepth(ffmpegBin(), W, H, depthFile);
+      }
+      if (!depth) throw new Error('Could not work out the depth of that picture.');
+      job.progress = 50;
+
+      const chain = parallax.buildChain({ W, H, dur, fps: FPS, dir, strength: intensity });
+      const args = [
+        '-loop', '1', '-t', String(dur), '-i', src,
+        '-loop', '1', '-t', String(dur), '-i', depthFile,
+        '-filter_complex', chain, '-map', '[v]', '-t', String(dur),
+        '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-movflags', '+faststart',
+      ];
+      spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.mp4'), dur,
+        `${still.label} · parallax ${dir}`,
+        { source: 'parallax', move, dir, fromAssetId: still.id, depthGuessed: guessed },
+        'video',
+        { job, cleanupFiles: [depthFile] });
+    } catch (err) {
+      job.status = 'error';
+      job.error = err.message || 'Parallax failed.';
+    }
+  })();
+}
+
 router.post('/kenburns', (req, res) => {
   const { assetId, move, duration, intensity, focalX, focalY, size, easing } = req.body || {};
   const still = db.getAsset(req.userId, Number(assetId));
@@ -2899,6 +2951,13 @@ router.post('/kenburns', (req, res) => {
   const dur = Math.min(30, Math.max(1, Number(duration) || 5));
   const fx = Math.min(1, Math.max(0, Number(focalX) || 0.5));
   const fy = Math.min(1, Math.max(0, Number(focalY) || 0.5));
+
+  // Parallax is a different animal: it needs a depth map and composites three
+  // layers, so it gets its own renderer rather than a zoompan expression.
+  if (String(move).startsWith('parallax')) {
+    return startParallax(req, res, { still, dur, intensity, size, move });
+  }
+
   const ease = EASINGS[easing] ? easing : DEFAULT_EASING;
   const exprs = kenBurnsExprs(move, intensity, fx.toFixed(3), fy.toFixed(3), ease);
   if (!exprs) return res.status(400).json({ error: `Unknown camera move: ${move}` });

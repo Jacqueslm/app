@@ -63,16 +63,24 @@ setupTO  = input.int(40, "Setup expires after N bars", minval = 5, group = grpT)
 minScore = input.int(6,  "Minimum grade score (6 = B, 8 = A+)", minval = 0, maxval = 10, group = grpT)
 stopBuf  = input.float(0.15, "Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
 
-grpM = "Management"
-t1R     = input.float(2.0, "T1 at R multiple", minval = 0.5, step = 0.5, group = grpM)
-t2R     = input.float(3.0, "T2 at R multiple", minval = 0.5, step = 0.5, group = grpM)
+grpM = "Management — the 1R partial model"
+partialR = input.float(1.0, "T1 at R multiple (take half here)", minval = 0.5, step = 0.5, group = grpM,
+     tooltip = "Where you get to be right, in cash, early. T2 is the HTF level, not a fixed multiple.")
 t1Pct   = input.int(50, "% off at T1", minval = 0, maxval = 100, group = grpM)
 beAtT1  = input.bool(true, "Move stop to break-even at T1", group = grpM)
 maxLoss = input.int(2, "Stop trading after N losses per day", minval = 1, maxval = 10, group = grpM)
 
-grpX = "Session"
-useSess = input.bool(true, "Only trade inside session", group = grpX)
-sessStr = input.session("0930-1130", "Session window", group = grpX)
+grpR = "Your rules"
+maxPerDay = input.int(1, "Max trades per day", minval = 1, maxval = 5, group = grpR,
+     tooltip = "One bullet. Set to 5 to see what unrestricted trading would have done — the comparison is the point.")
+scalpMax = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step = 0.5, group = grpR)
+holdMin  = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
+minRoom  = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR)
+
+grpX = "Session — New York only"
+useSess = input.bool(true, "Only trade inside the tradeable window", group = grpX)
+sessStr = input.session("0930-1500", "Tradeable window", group = grpX)
+primeStr = input.session("0930-1130", "Prime hours (earns a quality point)", group = grpX)
 rthStr  = input.session("0930-1600", "Regular hours (for IB / overnight)", group = grpX)
 sessTZ  = input.string("America/New_York", "Timezone", group = grpX)
 flatEOD = input.bool(true, "Flatten at session end", group = grpX)
@@ -191,11 +199,39 @@ corrChg   = corrClose - corrClose[corrLen]
 ownChg    = close - close[corrLen]
 corrAgree = not useCtx or not useCorr or (not na(corrChg) and math.sign(corrChg) == math.sign(ownChg))
 
+// ─── Higher-timeframe swing levels (what a HOLD is aiming at) ────────────────
+f_lastPivotHi() =>
+    var float p = na
+    v = ta.pivothigh(high, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+f_lastPivotLo() =>
+    var float p = na
+    v = ta.pivotlow(low, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+
+h4Hi = request.security(syminfo.tickerid, bridgeTF, f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+h4Lo = request.security(syminfo.tickerid, bridgeTF, f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+dHi  = request.security(syminfo.tickerid, biasTF,   f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+dLo  = request.security(syminfo.tickerid, biasTF,   f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+
+f_pickAbove(float cur, float lvl, float px) =>
+    not na(lvl) and lvl > px ? (na(cur) ? lvl : math.min(cur, lvl)) : cur
+f_pickBelow(float cur, float lvl, float px) =>
+    not na(lvl) and lvl < px ? (na(cur) ? lvl : math.max(cur, lvl)) : cur
+
 // ─── Shared series ───────────────────────────────────────────────────────────
 inSess  = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+inPrime = not na(time(timeframe.period, primeStr, sessTZ))
 inDates = not useDates or (time >= dFrom and time <= dTo)
 avgBody = ta.sma(math.abs(close - open), 20)
 disp    = math.abs(close - open) >= avgBody * dispMult
+// The gate requires displacement, so rewarding the same threshold would score on every
+// trigger and discriminate nothing. The POINT needs a genuinely stronger candle.
+dispStrong = math.abs(close - open) >= avgBody * dispMult * 1.5
 hi100   = ta.highest(high, 100)[1]
 lo100   = ta.lowest(low, 100)[1]
 
@@ -330,16 +366,37 @@ entry   = close
 stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
           trigShort ? math.max(nz(pullExt, high), nz(zone, high)) + atr * stopBuf : na
 riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
-oppLvl  = trigLong ? hi100 : lo100
-roomR   = not na(riskPts) and riskPts > 0 ? math.abs(oppLvl - entry) / riskPts : 0.0
+
+// Nearest opposing HTF level = the realistic target; the distance decides scalp vs hold.
+tgtUp = f_pickAbove(float(na), h4Hi, entry)
+tgtUp := f_pickAbove(tgtUp, dHi, entry)
+tgtUp := f_pickAbove(tgtUp, pdh, entry)
+tgtUp := f_pickAbove(tgtUp, onH, entry)
+tgtDn = f_pickBelow(float(na), h4Lo, entry)
+tgtDn := f_pickBelow(tgtDn, dLo, entry)
+tgtDn := f_pickBelow(tgtDn, pdl, entry)
+tgtDn := f_pickBelow(tgtDn, onL, entry)
+
+htfTgt = trigLong ? nz(tgtUp, hi100) : nz(tgtDn, lo100)
+roomR  = not na(riskPts) and riskPts > 0 ? math.abs(htfTgt - entry) / riskPts : 0.0
+plan   = roomR < minRoom  ? "NO TRADE" :
+         roomR < scalpMax ? "SCALP"    :
+         roomR < holdMin  ? "STANDARD" : "HOLD"
 
 pSweep = not useCtx or not useSweep or swept
 score  = (touches <= 1 ? 1 : 0) + (cleanRt and heldBars >= holdBars ? 1 : 0) +
-     (disp ? 1 : 0) + (rvolOK ? 1 : 0) + (pSweep ? 1 : 0) + (refOK ? 1 : 0) +
-     (corrAgree ? 1 : 0) + (inSess ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0)
+     (dispStrong ? 1 : 0) + (rvolOK ? 1 : 0) + (pSweep ? 1 : 0) + (refOK ? 1 : 0) +
+     (corrAgree ? 1 : 0) + (inPrime ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0)
 
-okToTrade = score >= minScore and roomR >= 2.0 and inSess and inDates and dayOK and
-     riskPts > 0 and strategy.position_size == 0
+// One bullet a day. na(lastEntryDay) first — `dayofmonth != na` is never true.
+var int tookToday    = 0
+var int lastEntryDay = na
+if na(lastEntryDay) or dayofmonth != lastEntryDay
+    tookToday    := 0
+    lastEntryDay := dayofmonth
+
+okToTrade = score >= minScore and plan != "NO TRADE" and inSess and inDates and dayOK and
+     tookToday < maxPerDay and riskPts > 0 and strategy.position_size == 0
 
 // ─── Orders ──────────────────────────────────────────────────────────────────
 var float pStop = na
@@ -347,19 +404,22 @@ var float pT1   = na
 var float pT2   = na
 var bool  t1Hit = false
 
+// T1 is the 1R partial. T2 is the HTF level — except on a SCALP, where T1 is the whole trade.
 if trigLong and okToTrade
     pStop := stopRaw
-    pT1   := entry + riskPts * t1R
-    pT2   := entry + riskPts * t2R
+    pT1   := entry + riskPts * partialR
+    pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
-    strategy.entry("L", strategy.long, comment = score >= 8 ? "A+" : "B")
+    tookToday += 1
+    strategy.entry("L", strategy.long, comment = plan + " " + (score >= 8 ? "A+" : "B"))
 
 if trigShort and okToTrade
     pStop := stopRaw
-    pT1   := entry - riskPts * t1R
-    pT2   := entry - riskPts * t2R
+    pT1   := entry - riskPts * partialR
+    pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
-    strategy.entry("S", strategy.short, comment = score >= 8 ? "A+" : "B")
+    tookToday += 1
+    strategy.entry("S", strategy.short, comment = plan + " " + (score >= 8 ? "A+" : "B"))
 
 if strategy.position_size > 0 and not t1Hit and high >= pT1
     t1Hit := true

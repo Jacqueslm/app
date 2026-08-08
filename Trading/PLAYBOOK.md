@@ -163,11 +163,12 @@ lose — and that's the only honest way to ever loosen a rule.
 ## 7. Risk and position sizing
 
 - **Risk per trade: 1% of account.** Not 1% "unless it's a really good one."
-- **Daily stop: 2 losses or −2R, whichever comes first.** Then you're done. Close the platform.
-- **Weekly stop: −5R.** Done for the week. This is the rule that keeps you in the game
-  through the bad stretch that is coming whether you plan for it or not.
-- **Max 2 positions at once, and never MNQ + MES together** — they are the same trade
-  wearing different hats. You'd be taking 2% risk on one idea.
+- **One trade per day.** Win or lose. When it's done, close the platform. Zero-trade days are
+  correct outcomes — "if an entry shows itself" means sometimes it doesn't.
+- **Weekly stop: −3R.** Done for the week. This is the rule that keeps you in the game through
+  the bad stretch that is coming whether you plan for it or not.
+- **Never MNQ + MES together** — they are the same trade wearing different hats. You'd be taking
+  2% risk on one idea while believing you took 1%.
 
 ### Contract specs
 
@@ -187,11 +188,32 @@ Example: $25,000 account, 1% = $250 risk. MNQ setup with a 40-point stop.
 If the answer is 0 contracts, the stop is too wide for the account. **Skip the trade.**
 Do not shrink the stop to fit the size — that's how a good setup becomes a bad loss.
 
-### Targets
+### Targets — the 1R partial model
 
-- **T1 at 2R** — take half off, move stop to break-even.
-- **T2 at 3R or the next opposing HTF swing**, whichever is closer.
-- Runner (if you take one): trail under 15m swing lows. Never move a stop backwards.
+Full reasoning in **[YOUR-RULES.md](YOUR-RULES.md)**. The short version: risking 3 to make 1
+needs a 75% win rate to break even, which is why two years of good chart reading produced a flat
+account. This structure fixes the ratio without asking you to stop wanting to be right.
+
+- **T1 at 1R — take half off, move the stop to break-even.**
+  You were right, the money is real, and the trade can no longer lose. That is the whole point:
+  it feeds the need that has been costing you money instead of pretending you shouldn't have it.
+- **T2 = the next opposing HTF level** — not a fixed multiple. The system measures it for you.
+- **Runner** on a HOLD: trail under 15m swing lows.
+
+**The stop and both targets go in at entry, as one bracket.** Then you don't touch them. Every
+loss bigger than −1R in your journal is a stop you moved, and that single habit is what turns a
+winning chart read into a break-even account.
+
+### Which plan — scalp or hold?
+
+Measured at the trigger as **room** = distance to the next opposing HTF level ÷ your risk.
+
+| Room | Plan | What you do |
+|---|---|---|
+| **< 1R** | **NO TRADE** | Entering into a wall. Looks identical to a good setup; there's no money in it. |
+| **1–2R** | **SCALP** | Single target at 1R, full exit, done for the day. |
+| **2–3.5R** | **STANDARD** | Half at 1R, stop to BE, rest at the HTF level. |
+| **> 3.5R** | **HOLD** | Half at 1R, stop to BE, trail the rest on the 15m to the HTF high/low. |
 
 ---
 

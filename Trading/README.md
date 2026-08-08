@@ -11,6 +11,7 @@ Read them in this order.
 | **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
 | **[INSTITUTIONAL.md](INSTITUTIONAL.md)** | How large participants actually trade — and why the setup works. Read it second. |
+| **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |
 | **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |
@@ -37,10 +38,10 @@ which step of the sequence price is currently on.
 Everything is adjustable in the indicator's settings gear. The only thing you must change
 between instruments is the session:
 
-| | Session window | Notes |
+| | Tradeable window | Prime hours (scores a point) |
 |---|---|---|
-| MNQ / MES | `0930-1130` | Second window `1400-1530`, A+ only |
-| MGC | `0800-1200` | London/NY overlap |
+| MNQ / MES | `0930-1500` | `0930-1130` |
+| MGC | `0800-1300` | `0800-1200` |
 
 Leave the rest at defaults until you've got 30 logged trades. Changing four settings at once
 and then judging the result teaches you nothing.
@@ -52,7 +53,7 @@ function call** → set it to **Once per bar close** → Notify on your phone/em
 
 You get two kinds:
 - *"Level reclaimed — waiting on the trigger"* — go look at the chart, get ready.
-- The full setup alert with grade, entry, stop, T1, and risk in points — this is the one you act on.
+- The full setup alert — grade, SCALP/STANDARD/HOLD, entry, stop, T1, T2, room. This is the one you act on.
 
 **The alert is not permission to click buy.** It's permission to open the grader.
 
@@ -71,7 +72,7 @@ You get two kinds:
         ↓
   place the bracket from the TradingView chart (routed to NinjaTrader)
         ↓
-  manage on the 15m — T1 at 2R, stop to break-even, trail under 15m swings
+  manage on the 15m — half at 1R, stop to break-even, runner to the HTF level
         ↓
   log the outcome in the grader
 ```
@@ -186,6 +187,21 @@ So there's a second layer on top of the structure engine:
 **All of it is switchable**, and the backtester has a master toggle. I'm claiming this layer
 improves your results; you should make it prove that on your own data before believing it.
 [INSTITUTIONAL.md](INSTITUTIONAL.md) explains the mechanism behind each one.
+
+## Built around you, not a hypothetical trader
+
+| What you said | What the system does |
+|---|---|
+| "I'm impulsive" | **One trade per day**, enforced — the alert goes quiet after it fires |
+| "New York intraday only" | Session-locked; nothing fires outside 09:30–15:00 ET |
+| "I like to be right" | **First target at 1R**, hit often — you get to be right, early, in cash |
+| "Emotionally tied to money" | Stop to break-even after 1R. The trade can no longer lose. |
+| "Risking 3 to make 1" | Bracket placed at entry — stop and both targets, one action, never touched |
+| "Scalp or hold?" | Measured at the trigger: room to the next HTF level decides, and the alert says which |
+
+Risking 3 to make 1 needs a **75% win rate** just to break even. That — not your chart reading —
+is what two years of flat performance is made of. [YOUR-RULES.md](YOUR-RULES.md) has the full
+arithmetic and the fix.
 
 ## The honest limitations
 

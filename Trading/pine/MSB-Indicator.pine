@@ -66,15 +66,26 @@ grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40,    "Setup expires after N bars", minval = 5, group = grpT)
 minGrade = input.string("B", "Alert on grade", options = ["A+", "B"], group = grpT)
-rrTarget = input.float(2.0, "R multiple for T1",  minval = 1.0, step = 0.5,  group = grpT)
 stopBuf  = input.float(0.15,"Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
 
-grpX = "Session"
-useSess = input.bool(true, "Only alert inside session", group = grpX)
-sessStr = input.session("0930-1130", "Session window", group = grpX,
-     tooltip = "MNQ/MES: 0930-1130. MGC: 0800-1200.")
+grpX = "Session — New York only"
+useSess = input.bool(true, "Only alert inside the tradeable window", group = grpX)
+sessStr = input.session("0930-1500", "Tradeable window", group = grpX,
+     tooltip = "MNQ/MES: 0930-1500. MGC: 0800-1300. Nothing fires outside this.")
+primeStr = input.session("0930-1130", "Prime hours (earns a quality point)", group = grpX,
+     tooltip = "MNQ/MES: 0930-1130. MGC: 0800-1200. Where most A+ setups live.")
 rthStr  = input.session("0930-1600", "Regular hours (for IB / overnight)", group = grpX)
 sessTZ  = input.string("America/New_York", "Timezone", group = grpX)
+
+grpR = "Your rules — protect me from myself"
+maxPerDay = input.int(1, "Max alerts per day", minval = 1, maxval = 5, group = grpR,
+     tooltip = "One bullet. After it fires the system goes quiet until tomorrow. Zero-trade days are correct outcomes.")
+partialR  = input.float(1.0, "First target (R) — take half here", minval = 0.5, step = 0.5, group = grpR,
+     tooltip = "You like being right. This is where you get to be, in cash, early — without cutting the runner.")
+scalpMax  = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step = 0.5, group = grpR)
+holdMin   = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
+minRoom   = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR,
+     tooltip = "Entering into a wall. Looks identical to a good setup; there is just no money in it.")
 
 grpV = "Display"
 showZone = input.bool(true,  "Show retest zone",     group = grpV)
@@ -212,12 +223,42 @@ corrChg   = corrClose - corrClose[corrLen]
 ownChg    = close - close[corrLen]
 corrAgree = not useCtx or not useCorr or (not na(corrChg) and math.sign(corrChg) == math.sign(ownChg))
 
+// ─── Higher-timeframe swing levels (what a HOLD is aiming at) ────────────────
+f_lastPivotHi() =>
+    var float p = na
+    v = ta.pivothigh(high, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+f_lastPivotLo() =>
+    var float p = na
+    v = ta.pivotlow(low, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+
+h4Hi = request.security(syminfo.tickerid, bridgeTF, f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+h4Lo = request.security(syminfo.tickerid, bridgeTF, f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+dHi  = request.security(syminfo.tickerid, biasTF,   f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+dLo  = request.security(syminfo.tickerid, biasTF,   f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+
+// Keep the NEAREST level on the far side of the trade — that's the realistic target,
+// and the distance to it is what decides scalp vs hold.
+f_pickAbove(float cur, float lvl, float px) =>
+    not na(lvl) and lvl > px ? (na(cur) ? lvl : math.min(cur, lvl)) : cur
+f_pickBelow(float cur, float lvl, float px) =>
+    not na(lvl) and lvl < px ? (na(cur) ? lvl : math.max(cur, lvl)) : cur
+
 // ─── Session ─────────────────────────────────────────────────────────────────
-inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+inSess  = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+inPrime = not na(time(timeframe.period, primeStr, sessTZ))
 
 // ─── Shared series (never call ta.* conditionally) ───────────────────────────
 avgBody = ta.sma(math.abs(close - open), 20)
 disp    = math.abs(close - open) >= avgBody * dispMult
+// The gate requires displacement, so rewarding the same threshold would score on every
+// trigger and discriminate nothing. The POINT needs a genuinely stronger candle.
+dispStrong = math.abs(close - open) >= avgBody * dispMult * 1.5
 phG     = ta.pivothigh(high, pvL, pvR)
 plG     = ta.pivotlow(low,  pvL, pvR)
 hi100   = ta.highest(high, 100)[1]
@@ -352,19 +393,37 @@ entry   = close
 stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
           trigShort ? math.max(nz(pullExt, high), nz(zone, high)) + atr * stopBuf : na
 riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
-t1      = na(riskPts) ? na : trigLong ? entry + riskPts * rrTarget : entry - riskPts * rrTarget
-oppLvl  = trigLong ? hi100 : lo100
-roomR   = not na(riskPts) and riskPts > 0 ? math.abs(oppLvl - entry) / riskPts : 0.0
+
+// The nearest opposing HTF level is the realistic target, and the distance to it in R
+// is what decides scalp vs hold. hi100/lo100 is only a fallback if nothing is in the way.
+tgtUp = f_pickAbove(float(na), h4Hi, entry)
+tgtUp := f_pickAbove(tgtUp, dHi, entry)
+tgtUp := f_pickAbove(tgtUp, pdh, entry)
+tgtUp := f_pickAbove(tgtUp, onH, entry)
+tgtDn = f_pickBelow(float(na), h4Lo, entry)
+tgtDn := f_pickBelow(tgtDn, dLo, entry)
+tgtDn := f_pickBelow(tgtDn, pdl, entry)
+tgtDn := f_pickBelow(tgtDn, onL, entry)
+
+htfTgt = trigLong ? nz(tgtUp, hi100) : nz(tgtDn, lo100)
+roomR  = not na(riskPts) and riskPts > 0 ? math.abs(htfTgt - entry) / riskPts : 0.0
+
+// T1 is where you get to be right, in cash. T2 is what pays for the losers.
+t1   = na(riskPts) ? na : trigLong ? entry + riskPts * partialR : entry - riskPts * partialR
+plan = roomR < minRoom  ? "NO TRADE" :
+       roomR < scalpMax ? "SCALP"    :
+       roomR < holdMin  ? "STANDARD" : "HOLD"
+t2   = plan == "SCALP" ? t1 : htfTgt
 
 // ─── Grading — 10 points ─────────────────────────────────────────────────────
 pFirst = touches <= 1                       // first retest, not the third
 pHold  = cleanRt and heldBars >= holdBars   // ACCEPTANCE — the reason you wait
-pDisp  = disp                               // aggression on the trigger
+pDisp  = dispStrong                         // a genuinely strong candle, not just past the gate
 pRvol  = rvolOK                             // participation — is anyone actually there
 pSweep = not useCtx or not useSweep or swept // absorption you can see
 pRef   = refOK                              // the whole market is watching this level
 pCorr  = corrAgree                          // market flow, not one chart's noise
-pSess  = inSess
+pSess  = inPrime                            // prime hours, not merely open
 pChop  = chopN == 0
 pRoom  = roomR >= 3.0
 
@@ -374,7 +433,21 @@ score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
 
 grade   = score >= 8 ? "A+" : score >= 6 ? "B" : "C"
 gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
-fire    = anyTrig and gradeOK and roomR >= 2.0 and inSess and barstate.isconfirmed
+
+// ─── One bullet a day ────────────────────────────────────────────────────────
+// na(lastAlertDay) first — `dayofmonth != na` is na, never true, so without it the
+// counter would never reset and one trade per day would become one per lifetime.
+var int firedToday   = 0
+var int lastAlertDay = na
+if na(lastAlertDay) or dayofmonth != lastAlertDay
+    firedToday   := 0
+    lastAlertDay := dayofmonth
+bulletsLeft = maxPerDay - firedToday
+
+fire = anyTrig and gradeOK and plan != "NO TRADE" and inSess and
+     bulletsLeft > 0 and barstate.isconfirmed
+if fire
+    firedToday += 1
 
 // ─── Drawing ─────────────────────────────────────────────────────────────────
 plot(showVwap ? vwapV  : na, "VWAP",    color.new(color.orange, 0),  1)
@@ -412,12 +485,14 @@ plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belo
 
 if fire
     label.new(bar_index, trigLong ? low - atr : high + atr,
-         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/10",
+         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/10\n" +
+              plan + "  " + str.tostring(roomR, "#.0") + "R room",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
     line.new(bar_index, entry,   bar_index + 12, entry,   color = color.blue, width = 1)
     line.new(bar_index, stopRaw, bar_index + 12, stopRaw, color = cBear, width = 1, style = line.style_dashed)
     line.new(bar_index, t1,      bar_index + 12, t1,      color = cBull, width = 1, style = line.style_dashed)
+    line.new(bar_index, t2,      bar_index + 12, t2,      color = color.new(cBull, 45), width = 1, style = line.style_dotted)
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 f_txt(int t) => t == 1 ? "BULL" : t == -1 ? "BEAR" : "—"
@@ -425,7 +500,7 @@ f_col(int t) => t == 1 ? cBull  : t == -1 ? cBear  : color.gray
 f_yn(bool b)  => b ? "✓" : "✗"
 f_ync(bool b) => b ? cBull : cBear
 
-var table dash = table.new(position.top_right, 2, 12,
+var table dash = table.new(position.top_right, 2, 13,
      border_width = 1, border_color = color.new(color.gray, 60))
 if showDash and barstate.islast
     stName = st == 0 ? "IDLE" : st == 1 ? "① BOS — armed" : st == 2 ? "② back through" :
@@ -457,20 +532,28 @@ if showDash and barstate.islast
     table.cell(dash, 0, 10, "Setup", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 10, stName, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
     table.cell(dash, 0, 11, "Session", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 11, inSess ? "OPEN" : "closed", text_color = inSess ? cBull : color.gray, text_size = size.small)
+    table.cell(dash, 1, 11, inSess ? (inPrime ? "PRIME" : "open") : "closed",
+         text_color = inPrime ? cBull : inSess ? color.silver : color.gray, text_size = size.small)
+    table.cell(dash, 0, 12, "Bullets left", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 12, str.tostring(bulletsLeft) + " / " + str.tostring(maxPerDay),
+         text_color = bulletsLeft > 0 ? cBull : cBear, text_size = size.small)
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────
 if fire
+    exitPlan = plan == "SCALP"    ? "Single target at T1. Full exit. Done for the day." :
+               plan == "STANDARD" ? "Half at T1, stop to break-even, rest at T2." :
+                                    "Half at T1, stop to break-even, TRAIL the rest on the 15m to T2."
     alert(syminfo.ticker + " " + (trigLong ? "LONG" : "SHORT") + " " + grade +
-         " (" + str.tostring(score) + "/10)" +
-         " | entry " + str.tostring(entry,   format.mintick) +
-         " | stop "  + str.tostring(stopRaw, format.mintick) +
-         " | T1 "    + str.tostring(t1,      format.mintick) +
-         " | risk "  + str.tostring(riskPts, format.mintick) + " pts" +
-         " | RVOL "  + str.tostring(rvol, "#.0") +
-         " | room "  + str.tostring(roomR, "#.0") + "R" +
-         (swept ? " | swept" : "") +
-         " — size it in the grader before you click buy.",
+         " (" + str.tostring(score) + "/10) — " + plan +
+         "\nentry " + str.tostring(entry,   format.mintick) +
+         " | stop " + str.tostring(stopRaw, format.mintick) +
+         " | risk " + str.tostring(riskPts, format.mintick) + " pts" +
+         "\nT1 "    + str.tostring(t1, format.mintick) + " (" + str.tostring(partialR, "#.#") + "R)" +
+         " | T2 "   + str.tostring(t2, format.mintick) +
+         " | room " + str.tostring(roomR, "#.0") + "R" +
+         " | RVOL " + str.tostring(rvol, "#.0") + (swept ? " | swept" : "") +
+         "\n" + exitPlan +
+         "\nBracket goes in as ONE action. That is your last bullet today.",
          alert.freq_once_per_bar_close)
 
 alertcondition(st == 3 and st[1] != 3, "Level reclaimed — watch for the trigger",

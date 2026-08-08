@@ -63,6 +63,15 @@
   .blockers{margin-top:12px;text-align:left;display:inline-block}
   .blockers li{color:var(--bad);font-size:13px;margin-bottom:3px}
   .full{grid-column:1/-1}
+  .plan{margin:14px 0 0;padding:12px;border-radius:8px;text-align:center;font-size:14px;
+        background:var(--panel2);border:1px solid var(--line);color:var(--dim)}
+  .plan b{display:block;font-size:17px;margin-bottom:3px}
+  .plan-scalp{border-color:var(--warn)} .plan-scalp b{color:var(--warn)}
+  .plan-std{border-color:var(--accent)} .plan-std b{color:var(--accent)}
+  .plan-hold{border-color:var(--good)} .plan-hold b{color:var(--good)}
+  .plan-no{border-color:var(--bad)}    .plan-no b{color:var(--bad)}
+  .warn{margin:0 0 18px;padding:12px;border-radius:8px;background:rgba(240,160,32,.12);
+        border:1px solid var(--warn);color:var(--warn);font-size:14px;text-align:center}
 </style>
 </head>
 <body>
@@ -70,6 +79,7 @@
   <h1>Trade Grader</h1>
   <p class="sub">Market Structure Bridge · MNQ / MES / MGC · every setup goes through here, including the ones you skip.</p>
 
+  <div id="bullet"></div>
   <div id="verdict" class="verdict"><div class="big">—</div><div class="why">Fill in the setup below.</div></div>
 
   <div class="grid">
@@ -103,15 +113,17 @@
         <div><label>Stop</label><input id="stop" type="number" step="any" placeholder="0.00"></div>
         <div><label>Account $</label><input id="acct" type="number" step="any" value="25000"></div>
       </div>
-      <div class="row">
+      <div class="row3">
         <div><label>Risk %</label><input id="riskPct" type="number" step="0.1" value="1"></div>
+        <div><label>Next HTF level</label><input id="htf" type="number" step="any" placeholder="price"></div>
         <div><label>Notes</label><input id="notes" type="text" placeholder="MNQ long off 20,450"></div>
       </div>
+      <div id="planBanner" class="plan">Enter entry, stop and the next HTF level.</div>
       <div class="stats">
         <div class="stat"><b id="oStop">—</b><span>Stop (pts)</span></div>
         <div class="stat"><b id="oQty">—</b><span>Contracts</span></div>
         <div class="stat"><b id="oRisk">—</b><span>$ at risk</span></div>
-        <div class="stat"><b id="oT1">—</b><span>T1 (2R)</span></div>
+        <div class="stat"><b id="oT1">—</b><span>T1 (1R)</span></div>
       </div>
       <p class="note" id="sizeNote"></p>
     </div>
@@ -128,7 +140,7 @@
             <option value="win">Win</option><option value="loss">Loss</option>
             <option value="be">Break-even</option>
           </select></div>
-        <div><label>Result in R</label><input id="resR" type="number" step="0.1" placeholder="2.0 / -1.0"></div>
+        <div><label>Actual result in R</label><input id="resR" type="number" step="0.1" placeholder="1.5 / -1.0"></div>
       </div>
       <div class="btns">
         <button id="save">Save to journal</button>
@@ -141,8 +153,8 @@
       <h2>Journal</h2>
       <div class="stats" id="jStats"></div>
       <div style="overflow-x:auto;margin-top:16px"><table id="jTable">
-        <thead><tr><th>Date</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Score</th>
-          <th>Entry</th><th>Stop</th><th>Qty</th><th>Outcome</th><th>R</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Plan</th>
+          <th>Qty</th><th>Outcome</th><th>Planned R</th><th>Actual R</th><th></th></tr></thead>
         <tbody></tbody></table></div>
       <div class="btns">
         <button id="csv" class="ghost">Export CSV</button>
@@ -218,7 +230,7 @@ function evaluate(){
     const perCtr  = riskPts * spec.perPoint;
     qty     = Math.floor(budget / perCtr);
     riskUsd = qty * perCtr;
-    t1      = long ? entry + riskPts * 2 : entry - riskPts * 2;
+    t1      = long ? entry + riskPts : entry - riskPts;   // 1R partial
 
     // Direction sanity — a stop on the wrong side is a typo, and a costly one.
     if ((long && stop >= entry) || (!long && stop <= entry))
@@ -230,6 +242,25 @@ function evaluate(){
       note = `${qty} × ${spec.name} · $${perCtr.toFixed(2)} risk per contract · ` +
              `${(riskUsd/acct*100).toFixed(2)}% of the account.`;
   }
+  // Room to the next HTF level, in R — this is what decides scalp vs hold.
+  const htf = parseFloat($("htf").value);
+  let room = 0, plan = null, t2 = 0;
+  if (riskPts > 0 && isFinite(htf)) {
+    const towardTarget = long ? htf - entry : entry - htf;
+    room = towardTarget / riskPts;
+    if (room < 1)        plan = { key:"no",    name:"NO TRADE",  how:"The next HTF level is under 1R away. You would be entering into a wall — it looks identical to a good setup, there is just no money in it." };
+    else if (room < 2)   plan = { key:"scalp", name:"SCALP",     how:"Single target at 1R. Full exit. Take it and be done for the day." };
+    else if (room < 3.5) plan = { key:"std",   name:"STANDARD",  how:"Half at 1R, stop to break-even, rest at the HTF level." };
+    else                 plan = { key:"hold",  name:"HOLD",      how:"Half at 1R, stop to break-even, then trail the rest on the 15m toward the HTF level." };
+    t2 = plan.key === "scalp" ? t1 : htf;
+  }
+  const pb = $("planBanner");
+  pb.className = "plan" + (plan ? " plan-" + plan.key : "");
+  pb.innerHTML = plan
+    ? `<b>${plan.name} &middot; ${room.toFixed(1)}R room</b>${plan.how}` +
+      (plan.key === "no" ? "" : `<br><small style="color:var(--dim)">T1 ${t1.toFixed(2)} &nbsp;·&nbsp; T2 ${t2.toFixed(2)} &nbsp;·&nbsp; both go in with the stop, as one bracket.</small>`)
+    : "Enter entry, stop and the next HTF level.";
+
   $("oStop").textContent = riskPts ? riskPts.toFixed(2) : "—";
   $("oQty").textContent  = riskPts ? qty : "—";
   $("oRisk").textContent = riskPts ? "$" + riskUsd.toFixed(0) : "—";
@@ -245,13 +276,15 @@ function evaluate(){
 
   const sizingBlocked = riskPts > 0 && qty < 1;
   const wrongSide = riskPts > 0 && ((long && stop >= entry) || (!long && stop <= entry));
+  const noRoom = plan && plan.key === "no";
 
-  if (missed.length || sizingBlocked || wrongSide) {
+  if (missed.length || sizingBlocked || wrongSide || noRoom) {
     v.classList.add("v-rej");
     big.textContent = "REJECT";
     const reasons = missed.map(([,t]) => `<li>${t}</li>`);
     if (wrongSide)     reasons.push("<li>Stop is on the wrong side of entry</li>");
     if (sizingBlocked) reasons.push("<li>Stop too wide for the account at this risk %</li>");
+    if (noRoom)        reasons.push(`<li>Only ${room.toFixed(1)}R of room to the next HTF level</li>`);
     why.innerHTML = `Failed ${reasons.length} hard filter${reasons.length>1?"s":""}. ` +
                     `A missed trade costs zero.<ul class="blockers">${reasons.join("")}</ul>`;
   } else if (grade === "C") {
@@ -268,7 +301,11 @@ function evaluate(){
     big.textContent = "TAKE IT · A+";
     why.textContent = `${score}/10 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
   }
-  state = { grade, score, qty, riskPts, riskUsd, t1 };
+  // Planned R: what this trade returns if you follow the plan. Logged so the journal can
+  // show the gap between what you planned and what you actually took.
+  const plannedR = !plan || plan.key === "no" ? 0 : plan.key === "scalp" ? 1 : 0.5 * 1 + 0.5 * room;
+  state = { grade, score, qty, riskPts, riskUsd, t1, t2,
+            plan: plan ? plan.name : "—", room, plannedR };
 }
 
 document.addEventListener("input", evaluate);
@@ -279,6 +316,18 @@ const KEY = "msb-journal-v1";
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
 const save = j  => localStorage.setItem(KEY, JSON.stringify(j));
 
+// One bullet a day. The grader can't stop you clicking buy — it can make sure you
+// know you're spending a bullet you already spent.
+function renderBullet(){
+  const today = new Date().toISOString().slice(0,10);
+  const takenToday = load().filter(t => t.date === today && t.outcome !== "none");
+  const el = $("bullet");
+  if (!takenToday.length) { el.className = ""; el.innerHTML = ""; return; }
+  el.className = "warn";
+  el.innerHTML = `<b>You have already taken ${takenToday.length} trade${takenToday.length>1?"s":""} today.</b><br>` +
+    `Your rule is one per day, win or lose. Whatever this setup looks like, it is tomorrow's.`;
+}
+
 function render(){
   const j = load();
   const tb = $("jTable").querySelector("tbody");
@@ -287,23 +336,32 @@ function render(){
     const cls = t.grade === "A+" ? "p-a" : t.grade === "B" ? "p-b" : "p-c";
     const r = t.resR === "" || t.resR === null ? "—" : (+t.resR).toFixed(1);
     const rc = t.resR > 0 ? "pos" : t.resR < 0 ? "neg" : "";
+    const pr = t.plannedR ? (+t.plannedR).toFixed(1) : "—";
     return `<tr><td>${t.date}</td><td>${t.sym}</td><td>${t.dir}</td>
-      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.score}/10</td>
-      <td>${t.entry ?? "—"}</td><td>${t.stop ?? "—"}</td><td>${t.qty || "—"}</td>
-      <td>${t.outcome}</td><td class="${rc}">${r}</td>
+      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.plan ?? "—"}</td>
+      <td>${t.qty || "—"}</td><td>${t.outcome}</td><td>${pr}</td><td class="${rc}">${r}</td>
       <td><button class="ghost" data-del="${idx}" style="padding:2px 8px;font-size:12px">×</button></td></tr>`;
-  }).join("") || `<tr><td colspan="11" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="10" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
 
   const taken = j.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
   const wins  = taken.filter(t => +t.resR > 0).length;
   const sumR  = taken.reduce((a,t) => a + (+t.resR || 0), 0);
   const exp   = taken.length ? sumR / taken.length : 0;
   const stat  = (v,l,c="") => `<div class="stat"><b class="${c}">${v}</b><span>${l}</span></div>`;
+
+  // The two numbers that measure the actual problem, not the strategy.
+  const cutEarly  = taken.filter(t => +t.resR > 0 && t.plannedR && +t.resR < +t.plannedR * 0.8).length;
+  const stopMoved = taken.filter(t => +t.resR < -1.05).length;
+
   $("jStats").innerHTML =
     stat(j.length, "logged") +
     stat(taken.length, "taken") +
     stat(taken.length ? Math.round(wins/taken.length*100) + "%" : "—", "win rate") +
-    stat(taken.length ? (exp>=0?"+":"") + exp.toFixed(2) + "R" : "—", "expectancy", exp>0?"pos":exp<0?"neg":"");
+    stat(taken.length ? (exp>=0?"+":"") + exp.toFixed(2) + "R" : "—", "expectancy", exp>0?"pos":exp<0?"neg":"") +
+    stat(cutEarly,  "cut early",  cutEarly  ? "neg" : "pos") +
+    stat(stopMoved, "stop moved", stopMoved ? "neg" : "pos") +
+    stat(taken.length ? (taken.reduce((a,t)=>a+(+t.plannedR||0),0)/taken.length).toFixed(2)+"R" : "—", "avg planned") +
+    stat(taken.length ? (sumR/taken.length).toFixed(2)+"R" : "—", "avg actual");
 }
 
 $("save").onclick = () => {
@@ -312,34 +370,35 @@ $("save").onclick = () => {
     date: new Date().toISOString().slice(0,10),
     sym: $("sym").value, dir: $("dir").value,
     grade: state.grade, score: state.score,
+    plan: state.plan, room: +state.room.toFixed(2), plannedR: +state.plannedR.toFixed(2),
     entry: $("entry").value || null, stop: $("stop").value || null,
     qty: state.qty, riskUsd: Math.round(state.riskUsd),
     outcome: $("outcome").value, resR: $("resR").value,
     notes: $("notes").value
   });
-  save(j); render();
+  save(j); render(); renderBullet();
 };
 
 $("reset").onclick = () => {
   boxes().forEach(b => b.checked = false);
-  ["entry","stop","resR","notes"].forEach(id => $(id).value = "");
+  ["entry","stop","resR","notes","htf"].forEach(id => $(id).value = "");
   evaluate();
 };
 
 $("jTable").onclick = e => {
   const i = e.target.dataset.del;
   if (i === undefined) return;
-  const j = load(); j.splice(+i, 1); save(j); render();
+  const j = load(); j.splice(+i, 1); save(j); render(); renderBullet();
 };
 
 $("wipe").onclick = () => {
-  if (confirm("Erase the whole journal? This cannot be undone.")) { save([]); render(); }
+  if (confirm("Erase the whole journal? This cannot be undone.")) { save([]); render(); renderBullet(); }
 };
 
 $("csv").onclick = () => {
   const j = load();
   if (!j.length) return alert("Journal is empty.");
-  const cols = ["date","sym","dir","grade","score","entry","stop","qty","riskUsd","outcome","resR","notes"];
+  const cols = ["date","sym","dir","grade","score","plan","room","plannedR","entry","stop","qty","riskUsd","outcome","resR","notes"];
   const esc = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const csv = [cols.join(","), ...j.map(t => cols.map(c => esc(t[c])).join(","))].join("\n");
   const a = document.createElement("a");
@@ -348,7 +407,7 @@ $("csv").onclick = () => {
   a.click(); URL.revokeObjectURL(a.href);
 };
 
-evaluate(); render();
+evaluate(); render(); renderBullet();
 </script>
 </body>
 </html>

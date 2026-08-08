@@ -9,68 +9,104 @@ the phone with the delivery app). These are the other six.
 ---
 
 ```
-Generate six vertical 9:16 images for episode 2 of a documentary-realism short
-film. Every image is the same man in the same clothes: Elias, a bald Black man
-in his forties with a full dark beard, wearing a plain black t-shirt. Keep his
-face, build and clothing identical across all six — match the reference photo.
+Six vertical 9:16 images, 1080x1920, for episode 2 of a documentary-realism
+short film. Generate them ONE AT A TIME, checking each against the reference
+photo before starting the next.
 
-Same apartment throughout: a plain modern flat with a stone kitchen counter,
-white blinds, and a living room with a sofa and wooden floor.
+THE MAN — identical in every image: Elias, a bald Black man in his forties
+with a full dark beard, wearing a plain black t-shirt. Same face, same build,
+same clothes throughout. Match the attached reference photo.
 
-End every image in this style: cinematic photograph, shot on 35mm, shallow
-depth of field, moody realistic lighting, muted color grade, documentary
-realism, vertical 9:16 composition.
+THE PLACE — one flat, seen across several shots: a stone kitchen counter with
+white blinds above it, and a living room with a pale sofa and a wooden floor.
+Images 4 and 5 are the SAME living room from different positions and must
+match each other. Image 1 is the same kitchen as the reference photo.
+
+STYLE — apply to all six: cinematic photograph, shot on 35mm, shallow depth of
+field, moody realistic lighting, muted colour grade, documentary realism,
+vertical 9:16 composition.
+
+DO NOT PUT ANY TEXT IN THE IMAGES. No captions, no subtitles, no titles, no
+logos, no watermarks, no signature. The words are added later in editing. A
+clean frame is required. No other people in any shot unless stated.
 
 1. THE PAUSE
-Elias holding his phone in one hand at the kitchen counter. The screen shows a
-dark app with one large soft glowing circle at its centre and a short line of
-white text beneath it. His other hand is flat on the counter, his eyes are
-closed, he is mid-breath. Soft window light. The phone screen is the brightest
-thing in the frame.
+Elias at the kitchen counter holding his phone in one hand, screen facing the
+camera. The screen shows a dark app with one large soft glowing circle at its
+centre. His other hand is flat on the counter, his eyes are closed, he is
+mid-breath. Soft window light. The phone screen is the brightest thing in the
+frame.
 
 2. OUT THE DOOR
 Elias stepping out of his front door onto a small porch, one hand still on the
-door frame. A quiet residential street beyond him, crisp morning light and low
-mist. Shot from inside the doorway looking out.
+door frame. A quiet residential street beyond him, crisp morning light, low
+mist. Shot from inside the doorway looking out, so the doorway frames him.
 
 3. THE CORNER STORE
-Elias walking past the lit window of a small corner shop. Shelves of snacks
-and a neon sign visible through the glass, his reflection faint on the
-surface. His head is turned slightly toward it but he has not stopped walking.
+Elias on the pavement walking past the lit window of a small corner shop.
+Shelves of snacks and a neon sign glowing behind the glass. His head is turned
+slightly toward the window but he has not stopped walking. Show only Elias —
+no reflected second figure.
 
 4. THE RETURN
-Elias setting a set of keys down on a table just inside his front door, seen
-from across the living room. Afternoon light lying in long shapes across the
-floor. His shoulders are lower than when he left.
+Elias setting keys down on a small table just inside his front door, seen from
+across the living room. Late afternoon light lying in long shapes across the
+wooden floor. His shoulders are low. Pale sofa visible behind him.
 
 5. THREE O'CLOCK
-Elias standing alone in the middle of his living room in flat grey
-mid-afternoon light. Nothing in his hands. The television is off and black.
-The room is tidy and completely still. A clock on the wall reads just past
-three. Wide shot with a lot of empty space around him.
+The same living room as image 4, from further back. Elias standing alone in
+the middle of it, nothing in his hands, arms at his sides. Flat grey
+mid-afternoon light, no lamps on, no sunlight. The television is off and
+black. The room is tidy and completely still. Wide shot with a lot of empty
+space above and around him. It should feel too quiet and slightly
+uncomfortable.
 
 6. DAY TWO
-Close-up of Elias's hand writing the words "Day 2" in pen in a small plain
-notebook on a wooden table. Warm late-afternoon light across the page. His
-forearm is steady. The rest of the frame is soft and out of focus.
+Close-up of Elias's hand writing in a small plain notebook on a wooden table,
+pen mid-stroke. The handwritten words "Day 2" are large, clear and fully
+legible on the page — this text is part of the scene, not an overlay. Warm
+late-afternoon light across the paper. His forearm is steady. The rest of the
+frame is soft and out of focus.
 ```
 
 ---
 
-## Notes for you, not for Manus
+## What changed from the first version, and why
 
-**Panel 1 is the one to check carefully.** That's your app on the screen — the
-SOS breathing circle. If what comes back doesn't look like your actual app,
-take a screenshot of the real SOS screen on your phone and tell Manus to use
-it as a reference for the phone display. A wrong-looking app screen is worse
-than no app screen.
+**No text in the images.** The single most important line in there. Episode 1's
+panels came back with captions and a watermark burned in. Your captions now
+come from the paste block in Quick Video, so anything Manus writes onto the
+picture ends up as a second set of words over the first.
 
-**Panel 5 is the most important shot in the episode** and the easiest to get
-wrong. It needs to feel too empty and slightly uncomfortable. If it comes back
-warm and cosy, ask again for flat grey light, no lamps on, and more space
-around him.
+**The clock is gone.** Image generators draw clock faces at ten past ten
+almost every time, whatever you ask for. Shot 5 doesn't need a clock — flat
+grey light, no lamps and a dead television say "afternoon" on their own. Never
+hang a shot on a detail the generator reliably gets wrong.
 
-**Panel 6 must show "Day 2" legibly.** AI is unreliable with handwriting. If
-the words come out as scribble, ask for it again with the words larger and the
-pen mid-stroke — or write it yourself on paper, photograph it, and use that.
-It's the last shot of the episode, so it has to read.
+**Which rooms match which.** "Same apartment throughout" is too loose. Shots 4
+and 5 are the same living room from two positions and have to agree with each
+other, so now it says so.
+
+**One at a time.** Six in one go is where an agent starts drifting — by image
+five the beard is different. Asking it to check each against the reference
+before starting the next costs nothing.
+
+**No reflection in shot 3.** "His reflection faint on the glass" invites a
+second figure in the frame, which is a classic way to get two Eliases.
+
+**"Day 2" is described as part of the scene, not an overlay** — otherwise the
+no-text rule above and this shot contradict each other.
+
+## Still check these three when they come back
+
+**Image 1 is your app on the screen.** If it doesn't look like the real SOS
+screen, screenshot the real one on your phone and give it to Manus as a
+reference for the phone display. An app screen that looks wrong is worse than
+no app screen.
+
+**Image 5 has to come back uncomfortable.** If it arrives warm and cosy, ask
+again: flat grey light, no lamps, more empty space above his head.
+
+**Image 6 has to say "Day 2" legibly.** AI handwriting usually doesn't. If it
+comes back as scribble, write it on paper yourself, photograph it, and use
+that instead. It's the last frame of the episode.

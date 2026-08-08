@@ -73,7 +73,11 @@ schedule it three times.
 **Tick the AI label** where Buffer offers it. If it doesn't, add
 "Made with AI" as the last line of the caption — that covers you.
 
-**Your 3 daily slots stay:** Morning = HIM · Midday = HER · Night = PROOF.
+**Your 3 daily slots stay:** 8am = HIM · 12pm = HER · 7pm = PROOF.
+
+Those three times are set as the posting schedule inside Buffer, on each
+channel. That means you never pick a time when you queue something — Buffer
+drops it into the next open slot itself.
 
 ---
 

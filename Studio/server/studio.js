@@ -686,6 +686,10 @@ router.get('/config', (req, res) => {
     falAvailable: Boolean(FAL_KEY),
     stockAvailable: Boolean(PEXELS_KEY),
     bufferAvailable: Boolean(BUFFER_KEY),
+    // Only offer a narrator the install actually has the file for.
+    voices: Object.entries(PRESET_VOICES)
+      .filter(([, v]) => fs.existsSync(path.join(VOICE_DIR, v.file)))
+      .map(([key, v]) => ({ key, label: v.label, note: v.note })),
     chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
@@ -3481,6 +3485,20 @@ const VOICE_MAX_CHARS = 2000;
 // chars ≈ 1 min of speech, so the per-1k estimate is ~$0.12.
 const MODEL_VOICE_EMO = process.env.FAL_MODEL_VOICE_EMO || 'fal-ai/index-tts-2/text-to-speech';
 const VOICE_EMO_RATE = Number(process.env.STUDIO_RATE_VOICE_EMO || 0.12); // per ~1,000 characters (estimate)
+// Built-in narrators. Until now the only way to get a voice out of Studio was
+// to upload your own reference clip, which is why there was no list to pick
+// from. These five are the same voices the recovery app uses for its lesson
+// audio, generated with Piper (free, offline) and trimmed to a 13-second
+// reference - F5-TTS clones better from a short clean sample than a long one.
+const VOICE_DIR = path.join(__dirname, 'voices');
+const PRESET_VOICES = {
+  warm:   { label: 'Warm',       file: 'warm.mp3',   note: 'female, easy and unhurried' },
+  soft:   { label: 'Soft',       file: 'soft.mp3',   note: 'female, quiet and close' },
+  gentle: { label: 'Gentle',     file: 'gentle.mp3', note: 'female, slow and kind' },
+  clear:  { label: 'Clear',      file: 'clear.mp3',  note: 'female, plain and steady' },
+  male:   { label: 'Calm male',  file: 'male.mp3',   note: 'male, low and level' },
+};
+
 const VOICE_MOODS = {
   neutral: '',
   happy: 'happy, warm and upbeat',
@@ -3533,8 +3551,18 @@ router.post('/voice-clone', async (req, res) => {
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
   }
-  const ref = db.getAsset(req.userId, Number(req.body?.refAssetId));
-  if (!ref || ref.kind !== 'audio') return res.status(404).json({ error: 'Pick a reference voice clip (an audio file — e.g. a vocal stem) first.' });
+  // Either a built-in narrator, or your own uploaded clip. Presets win if both
+  // are sent, so switching to a narrator doesn't silently keep using an old
+  // reference that happens to still be selected in the dropdown.
+  const presetKey = typeof req.body?.voice === 'string' ? req.body.voice : '';
+  const preset = PRESET_VOICES[presetKey];
+  let ref = null;
+  if (!preset) {
+    ref = db.getAsset(req.userId, Number(req.body?.refAssetId));
+    if (!ref || ref.kind !== 'audio') {
+      return res.status(404).json({ error: 'Pick a narrator, or a reference voice clip of your own (an audio file — e.g. a vocal stem).' });
+    }
+  }
   const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
   if (!text) return res.status(400).json({ error: 'Type the words you want spoken.' });
   if (text.length > VOICE_MAX_CHARS) return res.status(400).json({ error: `Keep it under ${VOICE_MAX_CHARS} characters per take (about ${Math.round(VOICE_MAX_CHARS / 1000)} minutes). Split longer narration into a few takes.` });
@@ -3544,10 +3572,14 @@ router.post('/voice-clone', async (req, res) => {
     if (capMsg) return res.status(429).json({ error: capMsg });
   }
   try {
-    const buf = fs.readFileSync(mediaPath(ref.filename));
+    const srcPath = preset ? path.join(VOICE_DIR, preset.file) : mediaPath(ref.filename);
+    if (preset && !fs.existsSync(srcPath)) {
+      return res.status(500).json({ error: `The ${preset.label} narrator file is missing from this install. Run "Update my app" in Settings, or upload your own reference clip instead.` });
+    }
+    const buf = fs.readFileSync(srcPath);
     let refUrl;
     try {
-      refUrl = await falUploadFile(buf, path.basename(ref.filename), 'audio/mpeg');
+      refUrl = await falUploadFile(buf, path.basename(srcPath), 'audio/mpeg');
     } catch (_) {
       if (buf.length > 9_000_000) throw new Error('could not upload the reference clip to fal and it is too large to send inline — trim it to ~20 seconds first');
       refUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
@@ -3569,7 +3601,7 @@ router.post('/voice-clone', async (req, res) => {
         statusUrl: submitted.status_url,
         responseUrl: submitted.response_url,
         expect: 'audio',
-        label: `${ref.label}${mood !== 'neutral' ? ` (${mood})` : ''} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`,
+        label: `${preset ? preset.label : ref.label}${mood !== 'neutral' ? ` (${mood})` : ''} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`,
       },
     });
     res.status(202).json({ job: jobJson(job) });

@@ -1,4 +1,8 @@
-const CACHE_NAME = 'tsid-shell-v5.1.0'; // v5.1.0: web push - reminders arrive with the app closed
+// v5.1.1: the five SOS recordings were rebuilt with different voices. The
+// filenames didn't change, so without a new cache name every existing install
+// would keep the old audio and pair it with the new caption timings - the
+// captions would drift further out of sync with every step.
+const CACHE_NAME = 'tsid-shell-v5.1.1';
 const SHELL_FILES = [
   '/',
   '/app',

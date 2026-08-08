@@ -88,19 +88,18 @@ the account that generated it. His to use and sell.
 
 ---
 
-## The one open question — Suno
+## Music — settled, 8 Aug
 
 Studio imports songs from Suno links, and those songs go into monetised
-YouTube videos.
+YouTube videos, so the question was whether they were cleared for commercial
+use.
 
-**Suno's free tier is non-commercial.** Songs made on a free account cannot be
-used in anything that earns money — including a monetised YouTube channel.
-Paid plans (Pro and Premier) grant commercial use of songs made **while
-subscribed**, and that grant does not retroactively cover tracks made earlier
-on the free plan.
+**Jacques confirmed he has permission for every track he uses**, and that he's
+on a paid Suno plan. Closed — don't raise it at him again.
 
-This one can't be settled from the code — it depends on which plan the songs
-were made on and when. Worth checking before the next monetised upload.
+For reference if the situation ever changes: Suno's free tier is
+non-commercial, and a paid plan clears songs made **while subscribed** without
+retroactively covering anything made earlier on the free plan.
 
 ---
 

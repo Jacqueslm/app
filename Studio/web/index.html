@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0820</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0822</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -564,6 +564,7 @@ body.simple-only #view-simple{display:flex !important}
         <div class="chips" id="voice-presets" style="margin-bottom:4px"></div>
         <p class="usage" id="voice-preset-note" style="margin:0 0 6px"></p>
         <button class="btn2" id="voice-hear" style="margin-bottom:6px;display:none">▶ Hear this narrator</button>
+        <button class="btn2" id="voice-rec" style="margin-bottom:6px;display:none">🎙 Record my voice — free</button>
         <select class="input" id="voice-ref" style="margin-bottom:6px;display:none"></select>
         <textarea id="voice-text" placeholder="Type what they should say… e.g. This is the story of Saving Queens." style="min-height:70px"></textarea>
         <div class="chips" id="voice-moods" style="margin-top:6px">
@@ -3895,12 +3896,12 @@ let voicePreset = 'warm';
 function renderVoiceCard() {
   if (!document.getElementById('voice-card')) return;
   const voices = st.cfg?.voices || [];
-  // The card is useful with EITHER free local narrators or a fal key. It only
-  // disappears when there is no way to make a voice at all.
-  const on = voices.length || st.cfg?.falAvailable;
-  $('#voice-off').style.display = on ? 'none' : 'block';
-  $('#voice-on').style.display = on ? 'block' : 'none';
-  if (!on) return;
+  // The card is always useful now: even with no narrators installed and no fal
+  // key, you can still record your own voice into the library, which needs
+  // nothing but a microphone.
+  $('#voice-off').style.display = 'none';
+  $('#voice-on').style.display = 'block';
+  const canGenerate = voices.length || st.cfg?.falAvailable;
 
   // No narrators installed (the speech add-on didn't install) - fall back to
   // the old clone-my-own-clip behaviour rather than showing an empty row.
@@ -3917,10 +3918,22 @@ function renderVoiceCard() {
     box.appendChild(b);
   });
   const chosen = [...voices, own].find((v) => v.key === voicePreset);
-  $('#voice-preset-note').textContent = chosen ? chosen.note : '';
+  $('#voice-preset-note').textContent = canGenerate
+    ? (chosen ? chosen.note : '')
+    : 'No narrators on this computer yet and no AI key — but recording your own voice still works, and always costs nothing.';
+  // Nothing to generate with: hide the parts that would only fail.
+  ['#voice-text', '#voice-moods', '#voice-go', '#voice-hear'].forEach((sel) => {
+    const el = $(sel);
+    if (el) el.style.display = canGenerate ? '' : 'none';
+  });
 
   // Hearing a narrator is free, so the button is always there for one - but
   // there is nothing to preview for a clip you uploaded yourself.
+  // Recording is useful whichever narrator is selected - it's how you get your
+  // own voice in at all - so it stays visible, and doesn't need a fal key.
+  const rec = $('#voice-rec');
+  if (rec && !(voiceRec.mr && voiceRec.mr.state === 'recording')) rec.style.display = 'block';
+
   const hear = $('#voice-hear');
   hear.style.display = voicePreset === 'own' ? 'none' : 'block';
   hear.disabled = false;
@@ -3952,6 +3965,76 @@ if (document.getElementById('voice-moods')) $('#voice-moods').querySelectorAll('
   }
   updateVoicePrice();
 });
+
+/* Record your own voice, straight into the library. This is the answer to
+   "why can't I use my own voice for free" - you always could, but only by
+   filming yourself and lifting the audio off the clip afterwards. Nothing
+   here is generated, so nothing here costs anything: it's a microphone and a
+   file, the same as uploading a song. */
+const voiceRec = { mr: null, chunks: [], stream: null, timer: null, t0: 0 };
+function stopVoiceRec() { if (voiceRec.mr && voiceRec.mr.state !== 'inactive') voiceRec.mr.stop(); }
+
+if (document.getElementById('voice-rec')) $('#voice-rec').onclick = async () => {
+  const b = $('#voice-rec');
+  const note = $('#voice-note');
+  if (voiceRec.mr && voiceRec.mr.state === 'recording') { stopVoiceRec(); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+    note.textContent = 'This browser can’t record audio. Use Chrome or Edge, or upload a recording instead.';
+    return;
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    });
+  } catch (err) {
+    note.textContent = 'Couldn’t reach your microphone. Allow microphone access for this page and try again.';
+    return;
+  }
+  // Opus in a webm container is the only thing browsers record to; the server
+  // takes it as audio and serves it back with an audio content type.
+  const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']
+    .find((t) => MediaRecorder.isTypeSupported(t)) || '';
+  const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+  voiceRec.mr = mr; voiceRec.stream = stream; voiceRec.chunks = []; voiceRec.t0 = Date.now();
+  mr.ondataavailable = (ev) => { if (ev.data && ev.data.size) voiceRec.chunks.push(ev.data); };
+  mr.onstop = async () => {
+    clearInterval(voiceRec.timer);
+    stream.getTracks().forEach((t) => t.stop());
+    b.disabled = true;
+    b.innerHTML = '<span class="spinner"></span>Saving…';
+    try {
+      const ext = (mime.includes('ogg')) ? '.ogg' : '.webm';
+      const blob = new Blob(voiceRec.chunks, { type: mime || 'audio/webm' });
+      const secs = Math.max(1, Math.round((Date.now() - voiceRec.t0) / 1000));
+      const stamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const file = new File([blob], `my-voice-${stamp.replace(/\D/g, '')}${ext}`, { type: blob.type });
+      const asset = await uploadFile(file, 'audio');
+      await loadAssets();
+      // Point the card straight at what was just recorded, so it's usable
+      // without going to hunt for it in My Media.
+      voicePreset = 'own';
+      renderVoiceCard();
+      const sel = $('#voice-ref');
+      if (sel) sel.value = String(asset.id);
+      const au = $('#voice-audio');
+      au.src = asset.url; au.style.display = 'block';
+      note.textContent = `Saved — ${secs}s in your Songs. Use it as narration, or clone it above.`;
+    } catch (err) {
+      note.textContent = `Couldn't save that recording: ${err.message}`;
+    }
+    voiceRec.mr = null;
+    b.disabled = false;
+    b.textContent = '🎙 Record my voice — free';
+  };
+  mr.start();
+  note.textContent = 'Recording. Press again to stop.';
+  b.textContent = '⏹ Stop (0:00)';
+  voiceRec.timer = setInterval(() => {
+    const s = Math.round((Date.now() - voiceRec.t0) / 1000);
+    b.textContent = `⏹ Stop (${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')})`;
+  }, 500);
+};
 
 // Preview: free, local, and instant after the first play of each narrator.
 if (document.getElementById('voice-hear')) $('#voice-hear').onclick = async () => {
@@ -7955,6 +8038,12 @@ const PASTE_MOVES = [
   // longest phrasings first so "zoom out" never matches as "zoom"
   ['parallax right', 'parallax_right'], ['parallax left', 'parallax_left'],
   ['parallax up', 'parallax_up'], ['parallax down', 'parallax_down'],
+  // The arrow forms are what the app's own menu shows, so a list copied out of
+  // Quick Video has to come back in meaning the same thing. Without these,
+  // "3D depth ←" matched the bare "3d depth" and silently rendered rightwards.
+  ['3d depth →', 'parallax_right'], ['3d depth ←', 'parallax_left'],
+  ['3d depth ↑', 'parallax_up'], ['3d depth ↓', 'parallax_down'],
+  ['parallax →', 'parallax_right'], ['parallax ←', 'parallax_left'],
   ['3d depth', 'parallax_right'], ['parallax', 'parallax_right'],
   ['zoom + slide', 'push_pan'], ['zoom and slide', 'push_pan'], ['push pan', 'push_pan'],
   ['zoom in', 'push'], ['zoom out', 'pull'], ['push in', 'push'], ['pull back', 'pull'],
@@ -7994,19 +8083,29 @@ function parseShotLine(line) {
   // pipes, dashes - so "hover above," has to match as fully as "hover above ".
   // Boundaries that only accept whitespace matched "hover" and left "above,"
   // sitting in the caption.
-  const EDGE = '[\\s,;:|/·–—-]';
+  const EDGE = '[\\s,;:|/·–—→←↑↓-]';
   const bounded = (word) =>
     new RegExp(`(?:^|${EDGE})${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=${EDGE}|$)`, 'i');
-  // move, longest phrasing first
-  for (const [word, key] of PASTE_MOVES) {
-    const m = take(bounded(word));
-    if (m) { out.move = key; break; }
-  }
-  // transition
-  for (const [word, key] of PASTE_TRANS) {
-    const m = take(bounded(word));
-    if (m) { out.transAfter = key; break; }
-  }
+  // Take the EARLIEST match on the line, not the first pattern in the list.
+  // The columns come before the caption, and captions contain these words all
+  // the time - "Cut the light off. Didn't cut the feeling off" would otherwise
+  // have its own words eaten as the transition column. Ties go to the longer
+  // phrase so "Slide ←" wins over a bare "slide".
+  const earliest = (table) => {
+    let best = null;
+    for (const [word, key] of table) {
+      const m = s.match(bounded(word));
+      if (!m) continue;
+      if (!best || m.index < best.m.index || (m.index === best.m.index && m[0].length > best.m[0].length)) {
+        best = { m, key, word };
+      }
+    }
+    if (!best) return null;
+    s = s.slice(0, best.m.index) + ' ' + s.slice(best.m.index + best.m[0].length);
+    return best.key;
+  };
+  out.move = earliest(PASTE_MOVES) || undefined;
+  out.transAfter = earliest(PASTE_TRANS) || undefined;
   // a scene/file name token like 01_indulgence or shot-3.png - useful for
   // matching a picture in the library, never wanted as on-screen words
   const n = take(/(?:^|\s)([A-Za-z0-9]+[_-][A-Za-z0-9_-]+(?:\.(?:png|jpg|jpeg|webp))?)(?=\s|$)/);
@@ -8016,9 +8115,9 @@ function parseShotLine(line) {
   // runs of punctuation collapse before the text is trusted.
   out.text = s
     .replace(/\s+/g, ' ')
-    .replace(/(?:^|\s)[|,;:·–—-]+(?=\s|$)/g, ' ')
+    .replace(/(?:^|\s)[|,;:·–—→←↑↓-]+(?=\s|$)/g, ' ')
     .replace(/\s+/g, ' ')
-    .replace(/^[\s|,;:·–—-]+|[\s|,;:·–—-]+$/g, '')
+    .replace(/^[\s|,;:·–—→←↑↓-]+|[\s|,;:·–—→←↑↓-]+$/g, '')
     .trim();
   return out;
 }

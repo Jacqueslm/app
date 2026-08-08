@@ -187,3 +187,152 @@ MOTION: `The smile fades, he holds the direct look at camera, one slow blink`
 SAY: *"The day you stop performing is the day it changes."*
 
 **Caption:** Stop performing. Link in bio.
+
+---
+
+# MANUS-ERA SCRIPTS (A6+) — pictures and captions come free
+
+**Why these look different.** A1–A5 assume you generate every still and every
+animation on your fal key, which is why they count the cost. From A6 the
+pictures and the on-screen captions come out of Manus off one reference photo,
+free while the credits last — so what you need from here is the *shot list and
+the words*, not a budget.
+
+**Each one gives you three things:**
+1. **Image prompts** — paste into Manus, one per shot.
+2. **On-screen captions** — the words that sit on the picture.
+3. **A paste block** — drop it straight into Quick Video's *📋 Paste a shot
+   list* box and every shot fills in: move, seconds, cut or blend, caption.
+
+**Two titles every time.** The YouTube one carries a term people actually
+search. The TikTok/Facebook one is a hook. Never swap them.
+
+**Paste this at the end of every image prompt** so the look holds across shots:
+
+> cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16 composition
+
+---
+
+## A6 — "4am" · 7 shots · 40s
+
+**The gap this fills:** hangxiety is **28,200** in AI demand — the single
+biggest content opening in `reference/ai-demand-2026-08-08.md`, ad-safe, not
+medical, and the most common doorway into *maybe I should stop*. The
+`/hangxiety` page went live today. This is the video that feeds it.
+
+**YouTube title:** Hangxiety — why you wake up at 4am terrified
+**TikTok / Facebook:** It's 4am and my heart won't slow down
+
+**SHOT 1** — `A bald bearded Black man lying awake on his back in a dark bedroom, eyes open, phone face-up beside him glowing 4:12 AM, blue light on the ceiling`
+CAPTION: *"It's 4am and my heart won't slow down"*
+
+**SHOT 2** — `The same man sitting on the edge of the bed in the dark, elbows on knees, head down, one hand on the back of his neck`
+CAPTION: *"I wasn't hungover. I was scared"*
+
+**SHOT 3** — `Close-up of the same man's hands holding a glass of water at a kitchen counter before sunrise, a faint tremor in the fingers`
+CAPTION: *"Nothing bad had happened. It felt like something did"*
+
+**SHOT 4** — `The same man scrolling his phone in the dark, face lit from below, reading back messages, jaw tight`
+CAPTION: *"Reading back what I sent"*
+
+**SHOT 5** — `The same man standing at a window in grey early light, curtains half open, city outside still dark`
+CAPTION: *"The drink quiets it for a few hours"*
+
+**SHOT 6** — `Empty bottles lined up on a kitchen counter in hard morning light, the man out of focus behind them`
+CAPTION: *"Then it comes back louder than it started"*
+
+**SHOT 7** — `The same man at the same window, full daylight now, holding a glass of water, looking out, calm`
+CAPTION: *"Day one wasn't brave. I was just tired of 4am"*
+
+**Paste block:**
+```
+1. 01_awake      Hover above   6s  blend  It's 4am and my heart won't slow down
+2. 02_bedside    Zoom in       6s  blend  I wasn't hungover. I was scared
+3. 03_water      Zoom in       5s  cut    Nothing bad had happened. It felt like something did
+4. 04_phone      Looking down  5s  blend  Reading back what I sent
+5. 05_window     Float         6s  blend  The drink quiets it for a few hours
+6. 06_bottles    Zoom out      5s  cut    Then it comes back louder than it started
+7. 07_daylight   3D depth →    7s  cut    Day one wasn't brave. I was just tired of 4am
+```
+
+**Buffer caption:** Hangxiety is the part nobody warns you about. Link in bio.
+
+---
+
+## A7 — "I meant it every time" · 6 shots · 35s
+
+**YouTube title:** How to stop drinking when you've promised before
+*(carries **how to stop drinking** · 4,400 · KD 44)*
+**TikTok / Facebook:** I meant it every time
+
+**SHOT 1** — `A bald bearded Black man pouring a bottle down a kitchen sink, jaw set, determined, hard overhead light`
+CAPTION: *"I meant it every time"*
+
+**SHOT 2** — `Close-up of a wall calendar with a Monday circled in pen, kitchen out of focus behind it`
+CAPTION: *"Monday. That was always the plan"*
+
+**SHOT 3** — `The same man standing in front of a lit shop fridge at night, hand resting on the door handle, not opening it yet`
+CAPTION: *"Monday lasted until Tuesday"*
+
+**SHOT 4** — `Bottles standing next to a kitchen bin in grey morning light, the man's back turned in the doorway behind`
+CAPTION: *"I wasn't lying to anybody but me"*
+
+**SHOT 5** — `The same man sitting alone at a kitchen table, still, hands flat on the wood, nothing in front of him`
+CAPTION: *"The promise got easier to make every time I broke it"*
+
+**SHOT 6** — `The same man filling a glass of water at the sink in warm morning light, unhurried, no bottle anywhere in frame`
+CAPTION: *"Day one is the one you don't announce"*
+
+**Paste block:**
+```
+1. 01_pour       Zoom in     6s  cut    I meant it every time
+2. 02_calendar   Zoom in     5s  blend  Monday. That was always the plan
+3. 03_fridge     Looking up  6s  blend  Monday lasted until Tuesday
+4. 04_bottles    Float       5s  blend  I wasn't lying to anybody but me
+5. 05_table      Hover above 6s  blend  The promise got easier to make every time I broke it
+6. 06_water      3D depth →  7s  cut    Day one is the one you don't announce
+```
+
+**Buffer caption:** If you've promised before, you're not the problem. The plan was. Link in bio.
+
+---
+
+## A8 — "I started counting" · 6 shots · 35s
+
+The partner's side. Living with someone who drinks is **21,500** in AI demand
+and it is the moat — nobody else is making content for the person watching it
+happen. Written partner-neutral on screen; the search term lives in the
+YouTube title only.
+
+**YouTube title:** Living with an alcoholic husband — you're not overreacting
+**TikTok / Facebook:** I stopped asking what time he'd be home
+
+**SHOT 1** — `A woman lying awake on one side of a bed at night, the other half empty and undisturbed, hallway light under the door`
+CAPTION: *"I stopped asking what time he'd be home"*
+
+**SHOT 2** — `Close-up of a woman's hands sorting bottles into a recycling bin in a dim garage, counting`
+CAPTION: *"I started counting instead"*
+
+**SHOT 3** — `A woman standing at a bathroom mirror, mouth slightly open mid-sentence, rehearsing something to her own reflection`
+CAPTION: *"I practised how to say it so it wouldn't turn into a fight"*
+
+**SHOT 4** — `A woman at a kitchen table with a phone face-down in front of her, coffee gone cold, staring past it`
+CAPTION: *"Everyone kept telling me I was overreacting"*
+
+**SHOT 5** — `The same woman at a window in early morning light, arms folded, calm and clear-eyed`
+CAPTION: *"I wasn't. I was the only one keeping track"*
+
+**SHOT 6** — `The same woman writing in a notebook at the kitchen table, morning light, unhurried`
+CAPTION: *"That exhaustion has a name. It isn't nagging"*
+
+**Paste block:**
+```
+1. 01_awake      Hover above  6s  blend  I stopped asking what time he'd be home
+2. 02_counting   Zoom in      5s  cut    I started counting instead
+3. 03_mirror     Zoom in      6s  blend  I practised how to say it so it wouldn't turn into a fight
+4. 04_table      Looking down 6s  blend  Everyone kept telling me I was overreacting
+5. 05_window     3D depth →   6s  blend  I wasn't. I was the only one keeping track
+6. 06_writing    Float        6s  cut    That exhaustion has a name. It isn't nagging
+```
+
+**Buffer caption:** You're not overreacting. You're just the only one keeping track. Link in bio.

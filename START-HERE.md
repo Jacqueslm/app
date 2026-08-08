@@ -316,6 +316,12 @@ the app is live in the Play Store.
 
 ## Rules of the house
 - Story, not statistics (see medical-claims-audit.md).
+- **Never default to R&B, hip-hop or soul when writing a song prompt.** Jacques
+  listens to everything and has had to say so more than once, because tools
+  keep guessing that lane for him. Ask which sound he wants, or offer a spread
+  across genres — folk, rock, country, cinematic pop, electronic — and let him
+  pick. The same goes for any other assumption about his taste: offer the
+  range, don't choose for him.
 - Privacy is the product: never expose one user's data to another; "he doesn't
   see what you write" must stay true.
 - Anything worth remembering across sessions goes in a file — chat doesn't persist.

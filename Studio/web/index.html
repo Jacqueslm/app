@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0817</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0818</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -645,6 +645,20 @@ body.simple-only #view-simple{display:flex !important}
         <option value="hover">Hover above (holds high, barely moves)</option>
         <option value="drone">Drone (rises and widens out)</option>
         <option value="shake">Handheld shake (energy)</option>
+        <option value="low_angle">Low angle (looking up — makes it bigger)</option>
+        <option value="high_angle">High angle (looking down — makes it smaller)</option>
+        <option value="crane_up">Crane up (lifts off, ends wide)</option>
+        <option value="crane_down">Crane down (drops in, ends tight)</option>
+        <option value="orbit_left">Orbit left (arcs around it)</option>
+        <option value="orbit_right">Orbit right (arcs around it)</option>
+        <option value="dutch">Dutch tilt (off level — something's wrong)</option>
+      </select>
+      <select class="input" id="kb-ease" style="margin-top:6px">
+        <option value="smooth">Speed: eases in and out (film-like)</option>
+        <option value="in">Speed: creeps, then goes</option>
+        <option value="out">Speed: leaves fast, coasts to a stop</option>
+        <option value="settle">Speed: snaps away, settles slowly</option>
+        <option value="steady">Speed: dead even (no easing)</option>
       </select>
       <div class="trim" style="font-size:12px">
         <span>Intensity</span><input type="range" id="kb-intensity" min="1" max="3" step="1" value="2" style="flex:1">
@@ -5522,6 +5536,7 @@ $('#kb-create').onclick = async () => {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         assetId, move: $('#kb-move').value,
+        easing: $('#kb-ease') ? $('#kb-ease').value : 'smooth',
         duration: Number($('#kb-duration').value) || 5,
         intensity: Number($('#kb-intensity').value) || 2,
         focalX: st.kb.fx, focalY: st.kb.fy,
@@ -7884,7 +7899,9 @@ renderQkPremade();
 const QK_MOVES = [
   ['push', 'Zoom in'], ['pull', 'Zoom out'], ['pan_right', 'Slide →'], ['pan_left', 'Slide ←'],
   ['pan_up', 'Slide ↑'], ['pan_down', 'Slide ↓'], ['drift', 'Float'], ['hover', 'Hover above'],
-  ['drone', 'Drone up'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
+  ['drone', 'Drone up'], ['low_angle', 'Looking up'], ['high_angle', 'Looking down'],
+  ['crane_up', 'Crane up'], ['crane_down', 'Crane down'], ['orbit_left', 'Orbit ←'],
+  ['orbit_right', 'Orbit →'], ['dutch', 'Dutch tilt'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
 ];
 const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
 const qk = { shots: [], format: '9:16', busy: false };

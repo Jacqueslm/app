@@ -2752,9 +2752,29 @@ function parseSize(size, fallback) {
 }
 
 /* ---------------- Ken Burns: stills to motion clips ---------------- */
+// Velocity curves. A real camera move never runs at one speed - it takes a
+// moment to get going and settles rather than stopping dead. Straight-line
+// progress is the single biggest reason a zoompan looks cheap, so 'smooth' is
+// the default and 'steady' is there for when you genuinely want machine-even
+// motion (a scrolling background, a locked-off pan behind text).
+//
+// Each one rewrites progress p (0..1) into eased progress. They only ever get
+// applied to travel; the oscillating moves keep raw p inside their sines, or
+// easing would bend the wobble out of shape.
+const EASINGS = {
+  steady: (p) => p,
+  smooth: (p) => `(${p}*${p}*(3-2*${p}))`,              // slow out of the gate, slow into the stop
+  in: (p) => `(${p}*${p})`,                             // creeps, then goes
+  out: (p) => `(1-(1-${p})*(1-${p}))`,                  // leaves fast, coasts to a halt
+  settle: (p) => `(1-pow(1-${p},3))`,                   // snaps away and takes its time landing
+};
+const DEFAULT_EASING = 'smooth';
+
 // Every move is a zoompan expression over p = on/(d-1) (progress 0..1).
-// Intensity 1..3 scales how far the camera travels.
-function kenBurnsExprs(move, intensity, fx, fy) {
+// Intensity 1..3 scales how far the camera travels. Some moves also return a
+// `rot` expression in radians over t (seconds) - the route adds a rotate stage
+// for those, since zoompan cannot turn the frame itself.
+function kenBurnsExprs(move, intensity, fx, fy, easing) {
   const i = Math.min(3, Math.max(1, Math.round(intensity || 2)));
   const zoomAmt = [0.12, 0.25, 0.45][i - 1];   // how far push/pull travels
   const panZoom = [1.12, 1.22, 1.4][i - 1];    // fixed zoom that gives pans room to move
@@ -2763,8 +2783,14 @@ function kenBurnsExprs(move, intensity, fx, fy) {
   const hoverBob = [0.03, 0.05, 0.08][i - 1];  // how much a held-above shot breathes
   const droneRise = [0.22, 0.34, 0.45][i - 1]; // how far a drone climbs while it widens (0.5 would hit the top edge)
   const droneSide = [0.08, 0.14, 0.22][i - 1]; // a little sideways flight, so it isn't just a lift
-  const p = 'on/(duration-1)'; // zoompan calls the total frame count "duration"
+  const tiltDeg = [1.4, 2.4, 3.6][i - 1];      // how far a dutch angle leans
+  const orbitDeg = [1.6, 2.8, 4.2][i - 1];     // counter-roll that sells an arc
+  const craneAmt = [0.3, 0.45, 0.62][i - 1];   // vertical travel on a crane
+  const raw = 'on/(duration-1)';               // zoompan calls the total frame count "duration"
+  const ease = EASINGS[easing] || EASINGS[DEFAULT_EASING];
+  const p = ease(raw);                         // eased progress - use this for travel
   const cx = '(iw-iw/zoom)/2', cy = '(ih-ih/zoom)/2';
+  const rad = (deg) => (deg * Math.PI / 180).toFixed(5);
   switch (move) {
     case 'push':      return { z: `1+${zoomAmt}*${p}`, x: cx, y: cy };
     case 'pull':      return { z: `${1 + zoomAmt}-${zoomAmt}*${p}`, x: cx, y: cy };
@@ -2778,10 +2804,12 @@ function kenBurnsExprs(move, intensity, fx, fy) {
       x: `${cx}+iw*${shakeAmp}*(sin(on/2.1)+0.7*sin(on/0.9))`,
       y: `${cy}+ih*${shakeAmp}*(cos(on/1.7)+0.7*sin(on/1.3))`,
     };
+    // The oscillating moves keep RAW progress inside their sines. Easing a
+    // wobble doesn't make it smoother, it makes it lopsided.
     case 'drift':     return {
-      z: `${panZoom - 0.04}+0.02*sin(3.14159*${p})`,
-      x: `(iw-iw/zoom)*(0.5+${driftAmt / 2}*sin(3.14159*${p}))`,
-      y: `(ih-ih/zoom)*(0.5-${driftAmt / 3}*sin(3.14159*${p}))`,
+      z: `${panZoom - 0.04}+0.02*sin(3.14159*${raw})`,
+      x: `(iw-iw/zoom)*(0.5+${driftAmt / 2}*sin(3.14159*${raw}))`,
+      y: `(ih-ih/zoom)*(0.5-${driftAmt / 3}*sin(3.14159*${raw}))`,
     };
     case 'push_pan':  return { z: `1+${zoomAmt}*${p}`, x: `(iw-iw/zoom)*${p}`, y: cy };
     // Hover: the camera is parked above the subject and holding. It sits high
@@ -2789,9 +2817,9 @@ function kenBurnsExprs(move, intensity, fx, fy) {
     // journey. This is the shot you use under a line you want people to sit
     // with; anything that travels pulls the eye off the words.
     case 'hover':     return {
-      z: `${(panZoom - 0.02).toFixed(3)}+${(hoverBob / 4).toFixed(4)}*sin(6.28318*${p})`,
-      x: `${cx}+iw*${(hoverBob / 12).toFixed(4)}*sin(6.28318*${p})`,
-      y: `(ih-ih/zoom)*(0.20+${(hoverBob).toFixed(3)}*sin(6.28318*${p}+1.2))`,
+      z: `${(panZoom - 0.02).toFixed(3)}+${(hoverBob / 4).toFixed(4)}*sin(6.28318*${raw})`,
+      x: `${cx}+iw*${(hoverBob / 12).toFixed(4)}*sin(6.28318*${raw})`,
+      y: `(ih-ih/zoom)*(0.20+${(hoverBob).toFixed(3)}*sin(6.28318*${raw}+1.2))`,
     };
     // Drone: rises and widens at the same time, drifting slightly sideways so
     // it reads as flight rather than a lift. A still can't change its angle,
@@ -2801,12 +2829,69 @@ function kenBurnsExprs(move, intensity, fx, fy) {
       x: `(iw-iw/zoom)*(0.5+${droneSide}*(${p}-0.5))`,
       y: `(ih-ih/zoom)*(0.5-${droneRise}*${p})`,
     };
+    // ---- angles. A still can't be re-shot from somewhere else, so an angle
+    // here means framing and movement that read as one: where in the picture
+    // the camera sits, which way it travels, and whether the horizon is level.
+    //
+    // Low angle: sits near the bottom of the frame and pushes upward. Looking
+    // up at something is what makes it feel bigger than you.
+    case 'low_angle':  return {
+      z: `${(1 + zoomAmt * 0.7).toFixed(3)}+${(zoomAmt * 0.5).toFixed(3)}*${p}`,
+      x: cx,
+      y: `(ih-ih/zoom)*(0.82-0.34*${p})`,
+    };
+    // High angle: sits near the top and presses down. Looking down at
+    // something makes it smaller, and the viewer steadier than it.
+    case 'high_angle': return {
+      z: `${(1 + zoomAmt * 0.7).toFixed(3)}+${(zoomAmt * 0.5).toFixed(3)}*${p}`,
+      x: cx,
+      y: `(ih-ih/zoom)*(0.18+0.34*${p})`,
+    };
+    // Crane up: rises through the frame while easing wider, the way a jib
+    // lifts off a subject at the end of a scene. Drone flies; a crane is
+    // anchored, so there's no sideways drift in this one.
+    case 'crane_up':   return {
+      z: `${(panZoom + 0.08).toFixed(3)}-${(0.13).toFixed(3)}*${p}`,
+      x: cx,
+      y: `(ih-ih/zoom)*(${(0.5 + craneAmt / 2).toFixed(3)}-${craneAmt}*${p})`,
+    };
+    // Crane down: descends into the shot and tightens - the opening move.
+    case 'crane_down': return {
+      z: `${(panZoom - 0.05).toFixed(3)}+${(0.13).toFixed(3)}*${p}`,
+      x: cx,
+      y: `(ih-ih/zoom)*(${(0.5 - craneAmt / 2).toFixed(3)}+${craneAmt}*${p})`,
+    };
+    // Dutch: the horizon deliberately off level, leaning a little further as
+    // the shot runs. Use it where something is wrong and you don't want to say
+    // so out loud. Rotation can't come from zoompan, so `rot` is handled by
+    // the caller as a separate stage.
+    case 'dutch':      return {
+      z: `${(panZoom - 0.02).toFixed(3)}+${(zoomAmt * 0.35).toFixed(3)}*${p}`,
+      x: cx,
+      y: cy,
+      rot: `${rad(tiltDeg * 0.55)}+${rad(tiltDeg * 0.45)}*t/max(0.001,DUR)`,
+    };
+    // Orbit: travels sideways while the frame counter-rolls, which is what
+    // arcing around a subject actually looks like. On a flat picture the roll
+    // is doing most of the work, so it stays small.
+    case 'orbit_right': return {
+      z: `${(panZoom + 0.06).toFixed(3)}-${(0.05).toFixed(3)}*sin(3.14159*${raw})`,
+      x: `(iw-iw/zoom)*(0.5+${(0.34).toFixed(2)}*(${p}-0.5))`,
+      y: cy,
+      rot: `${rad(orbitDeg / 2)}-${rad(orbitDeg)}*t/max(0.001,DUR)`,
+    };
+    case 'orbit_left':  return {
+      z: `${(panZoom + 0.06).toFixed(3)}-${(0.05).toFixed(3)}*sin(3.14159*${raw})`,
+      x: `(iw-iw/zoom)*(0.5-${(0.34).toFixed(2)}*(${p}-0.5))`,
+      y: cy,
+      rot: `${rad(-orbitDeg / 2)}+${rad(orbitDeg)}*t/max(0.001,DUR)`,
+    };
     default: return null;
   }
 }
 
 router.post('/kenburns', (req, res) => {
-  const { assetId, move, duration, intensity, focalX, focalY, size } = req.body || {};
+  const { assetId, move, duration, intensity, focalX, focalY, size, easing } = req.body || {};
   const still = db.getAsset(req.userId, Number(assetId));
   if (!still || still.kind !== 'image') {
     return res.status(404).json({ error: 'Pick an image from your library first.' });
@@ -2814,16 +2899,30 @@ router.post('/kenburns', (req, res) => {
   const dur = Math.min(30, Math.max(1, Number(duration) || 5));
   const fx = Math.min(1, Math.max(0, Number(focalX) || 0.5));
   const fy = Math.min(1, Math.max(0, Number(focalY) || 0.5));
-  const exprs = kenBurnsExprs(move, intensity, fx.toFixed(3), fy.toFixed(3));
+  const ease = EASINGS[easing] ? easing : DEFAULT_EASING;
+  const exprs = kenBurnsExprs(move, intensity, fx.toFixed(3), fy.toFixed(3), ease);
   if (!exprs) return res.status(400).json({ error: `Unknown camera move: ${move}` });
   const { W, H } = parseSize(size, '1920x1080');
   const frames = Math.round(dur * FPS);
 
   // Upscale + crop to the target aspect first so zoompan never distorts, and
   // has 2x headroom for smooth sub-pixel motion.
-  const chain =
-    `[0:v]scale=${2 * W}:${2 * H}:force_original_aspect_ratio=increase,crop=${2 * W}:${2 * H},` +
-    `zoompan=z='${exprs.z}':x='${exprs.x}':y='${exprs.y}':d=${frames}:s=${W}x${H}:fps=${FPS},format=yuv420p[v]`;
+  //
+  // A rotating move (dutch, orbit) has to turn AFTER zoompan, not before: the
+  // input is one still frame, so at that point t is always 0 and a
+  // time-varying angle would come out frozen. zoompan therefore renders
+  // oversized, rotate turns those frames, and the crop takes the middle back -
+  // which is also what keeps the corners from going black. 12% spare covers
+  // every angle these moves reach.
+  const even = (n) => 2 * Math.round(n / 2);
+  const ow = even(W * 1.12), oh = even(H * 1.12);
+  const chain = exprs.rot
+    ? `[0:v]scale=${2 * W}:${2 * H}:force_original_aspect_ratio=increase,crop=${2 * W}:${2 * H},` +
+      `zoompan=z='${exprs.z}':x='${exprs.x}':y='${exprs.y}':d=${frames}:s=${ow}x${oh}:fps=${FPS},` +
+      `rotate='${exprs.rot.replace(/DUR/g, String(dur))}':c=none:ow=iw:oh=ih,` +
+      `crop=${W}:${H},format=yuv420p[v]`
+    : `[0:v]scale=${2 * W}:${2 * H}:force_original_aspect_ratio=increase,crop=${2 * W}:${2 * H},` +
+      `zoompan=z='${exprs.z}':x='${exprs.x}':y='${exprs.y}':d=${frames}:s=${W}x${H}:fps=${FPS},format=yuv420p[v]`;
   const args = [
     '-i', mediaPath(still.filename),
     '-filter_complex', chain, '-map', '[v]',

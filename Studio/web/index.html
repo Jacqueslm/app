@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0818</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0819</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -652,6 +652,10 @@ body.simple-only #view-simple{display:flex !important}
         <option value="orbit_left">Orbit left (arcs around it)</option>
         <option value="orbit_right">Orbit right (arcs around it)</option>
         <option value="dutch">Dutch tilt (off level — something's wrong)</option>
+        <option value="parallax_right">Parallax → (3D depth — near moves, far doesn't)</option>
+        <option value="parallax_left">Parallax ← (3D depth)</option>
+        <option value="parallax_up">Parallax ↑ (3D depth)</option>
+        <option value="parallax_down">Parallax ↓ (3D depth)</option>
       </select>
       <select class="input" id="kb-ease" style="margin-top:6px">
         <option value="smooth">Speed: eases in and out (film-like)</option>
@@ -7901,7 +7905,8 @@ const QK_MOVES = [
   ['pan_up', 'Slide ↑'], ['pan_down', 'Slide ↓'], ['drift', 'Float'], ['hover', 'Hover above'],
   ['drone', 'Drone up'], ['low_angle', 'Looking up'], ['high_angle', 'Looking down'],
   ['crane_up', 'Crane up'], ['crane_down', 'Crane down'], ['orbit_left', 'Orbit ←'],
-  ['orbit_right', 'Orbit →'], ['dutch', 'Dutch tilt'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
+  ['orbit_right', 'Orbit →'], ['dutch', 'Dutch tilt'], ['parallax_right', '3D depth →'],
+  ['parallax_left', '3D depth ←'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
 ];
 const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
 const qk = { shots: [], format: '9:16', busy: false };

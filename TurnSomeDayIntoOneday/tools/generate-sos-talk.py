@@ -10,7 +10,7 @@ One-time setup (all free):
     pip install piper-tts lameenc numpy
     # Piper's own voice host is huggingface; the same files are mirrored in
     # sherpa-onnx's GitHub releases, which is what this uses:
-    for v in vits-piper-en_US-hfc_female-medium vits-piper-en_US-amy-medium vits-piper-en_US-kristin-medium vits-piper-en_US-lessac-high vits-piper-en_US-hfc_male-medium; do
+    for v in vits-piper-en_US-kristin-medium vits-piper-en_GB-cori-medium vits-piper-en_US-kathleen-low vits-piper-en_US-ljspeech-high vits-piper-en_US-norman-medium; do
         curl -L -o $v.tar.bz2 https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/$v.tar.bz2
         tar xjf $v.tar.bz2
     done
@@ -21,6 +21,23 @@ Run from the TurnSomeDayIntoOneday directory:
 It writes audio/sos-talk-{warm,soft,clear}.mp3 and prints the VG_VOICES cue
 lines. If STEPS below ever changes, VG_STEPS and VG_VOICES in index.html MUST
 be updated in the same commit - captions are synced to these exact timings.
+
+REQUIRED LAST STEP - match the loudness. The models come out up to 6dB apart,
+which means switching voice in the app means reaching for the volume button
+mid-crisis. Run this over each file afterwards (two-pass, so it's a straight
+gain change and never pumps):
+
+    for v in warm soft gentle clear male; do
+      f=audio/sos-talk-$v.mp3
+      m=$(ffmpeg -v info -i $f -af loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json -f null - 2>&1 \
+          | python3 -c "import sys,json,re;t=sys.stdin.read();j=json.loads(t[t.rfind('{'):t.rfind('}')+1]);print(j['input_i'],j['input_tp'],j['input_lra'],j['input_thresh'])")
+      set -- $m
+      ffmpeg -y -v error -i $f -af "loudnorm=I=-16:TP=-1.5:LRA=11:measured_I=$1:measured_TP=$2:measured_LRA=$3:measured_thresh=$4:linear=true,aresample=22050" -ac 1 -b:a 64k /tmp/$v.mp3
+      mv /tmp/$v.mp3 $f
+    done
+
+Loudness normalising does not change the sample count, so the cues printed by
+this script stay correct.
 """
 import json, os, sys
 import numpy as np
@@ -55,12 +72,18 @@ COUNT_PAUSE_S = 0.55 # breathing-count pause where the script writes "..."
 # App voice key -> (Piper model relative to the folder passed on the command
 # line, length_scale). Higher length_scale = slower delivery; the two
 # soft-spoken voices are paced slower than the rest by design.
+#
+# EVERY VOICE HERE MUST BE PUBLIC DOMAIN OR CC0, and the MODEL_CARD inside each
+# download is where you check. This app charges money, and the best-sounding
+# voices in the Piper catalogue - hfc_female, hfc_male, ryan, lessac - are all
+# non-commercial or research-only licences. The first version of this script
+# used two of them, which took a year of shipping to notice. Read the card.
 VOICES = {
-    'warm':   ('vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx', 1.12),
-    'soft':   ('vits-piper-en_US-amy-medium/en_US-amy-medium.onnx', 1.12),
-    'gentle': ('vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx', 1.18),
-    'clear':  ('vits-piper-en_US-lessac-high/en_US-lessac-high.onnx', 1.12),
-    'male':   ('vits-piper-en_US-hfc_male-medium/en_US-hfc_male-medium.onnx', 1.18),
+    'warm':   ('vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx', 1.12),   # public domain
+    'soft':   ('vits-piper-en_GB-cori-medium/en_GB-cori-medium.onnx', 1.12),         # public domain (LibriVox)
+    'gentle': ('vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx', 1.18),       # CC0
+    'clear':  ('vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx', 1.12),     # public domain
+    'male':   ('vits-piper-en_US-norman-medium/en_US-norman-medium.onnx', 1.18),     # public domain
 }
 
 if len(sys.argv) != 2:

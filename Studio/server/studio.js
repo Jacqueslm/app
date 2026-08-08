@@ -2760,6 +2760,9 @@ function kenBurnsExprs(move, intensity, fx, fy) {
   const panZoom = [1.12, 1.22, 1.4][i - 1];    // fixed zoom that gives pans room to move
   const shakeAmp = [0.0025, 0.005, 0.009][i - 1];
   const driftAmt = [0.18, 0.3, 0.42][i - 1];
+  const hoverBob = [0.03, 0.05, 0.08][i - 1];  // how much a held-above shot breathes
+  const droneRise = [0.22, 0.34, 0.45][i - 1]; // how far a drone climbs while it widens (0.5 would hit the top edge)
+  const droneSide = [0.08, 0.14, 0.22][i - 1]; // a little sideways flight, so it isn't just a lift
   const p = 'on/(duration-1)'; // zoompan calls the total frame count "duration"
   const cx = '(iw-iw/zoom)/2', cy = '(ih-ih/zoom)/2';
   switch (move) {
@@ -2781,6 +2784,23 @@ function kenBurnsExprs(move, intensity, fx, fy) {
       y: `(ih-ih/zoom)*(0.5-${driftAmt / 3}*sin(3.14159*${p}))`,
     };
     case 'push_pan':  return { z: `1+${zoomAmt}*${p}`, x: `(iw-iw/zoom)*${p}`, y: cy };
+    // Hover: the camera is parked above the subject and holding. It sits high
+    // in the frame and breathes - one slow cycle over the clip, never a
+    // journey. This is the shot you use under a line you want people to sit
+    // with; anything that travels pulls the eye off the words.
+    case 'hover':     return {
+      z: `${(panZoom - 0.02).toFixed(3)}+${(hoverBob / 4).toFixed(4)}*sin(6.28318*${p})`,
+      x: `${cx}+iw*${(hoverBob / 12).toFixed(4)}*sin(6.28318*${p})`,
+      y: `(ih-ih/zoom)*(0.20+${(hoverBob).toFixed(3)}*sin(6.28318*${p}+1.2))`,
+    };
+    // Drone: rises and widens at the same time, drifting slightly sideways so
+    // it reads as flight rather than a lift. A still can't change its angle,
+    // so the reveal - more of the picture, from higher up - is what sells it.
+    case 'drone':     return {
+      z: `${(1 + zoomAmt).toFixed(3)}-${zoomAmt}*${p}`,
+      x: `(iw-iw/zoom)*(0.5+${droneSide}*(${p}-0.5))`,
+      y: `(ih-ih/zoom)*(0.5-${droneRise}*${p})`,
+    };
     default: return null;
   }
 }

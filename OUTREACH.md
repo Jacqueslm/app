@@ -278,7 +278,7 @@ Turn Someday Into Day One
 ## WEEK 3
 
 ### 11. Country Road Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.countryroadrc.com/
 
 **Subject:** Your recovery apps article — a fifth app worth adding
@@ -301,7 +301,7 @@ Turn Someday Into Day One
 ---
 
 ### 12. Woodmont Treatment Center
-- [ ] Sent
+- [x] Sent
 **Where:** https://woodmonttreatment.com/admissions-process/
 
 **Subject:** Your 5 recovery apps article — a sixth worth adding
@@ -347,7 +347,7 @@ Turn Someday Into Day One
 ---
 
 ### 14. Northern Path Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** https://northernpathrecovery.com/about/
 
 **Subject:** Your helpful recovery apps article — the gap nobody's filled
@@ -395,7 +395,7 @@ Turn Someday Into Day One
 ## WEEK 4
 
 ### 16. SouthLight Healthcare
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://southlight.org/contact-us/
 
 **Subject:** Your counselor-sourced recovery apps guide — the gap nobody's filled
@@ -418,7 +418,7 @@ Turn Someday Into Day One
 ---
 
 ### 17. Holon Health
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.holonhealth.com/contact-us/
 
 **Subject:** Your 2026 recovery apps top-5 — for the next edition
@@ -441,7 +441,7 @@ Turn Someday Into Day One
 ---
 
 ### 18. ChoosingTherapy.com
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.choosingtherapy.com/contact-us/
 
 **Subject:** Suggestion for your best sobriety apps article
@@ -466,7 +466,7 @@ P.S. I also keep an honest, current comparison of recovery apps myself — compe
 ---
 
 ### 19. Flagler Health and Wellness
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://flaglerhealing.com/contact-us/
 
 **Subject:** Your recovery apps roundups — the gap nobody's filled
@@ -489,7 +489,7 @@ Turn Someday Into Day One
 ---
 
 ### 20. Pinnacle Treatment Centers
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://pinnacletreatment.com/contact/
 
 **Subject:** Your recovery apps articles — the gap nobody's filled
@@ -564,7 +564,7 @@ Turn Someday Into Day One
 ---
 
 ### 23. Compassion Recovery Centers
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://compassionrecoverycenters.com/contact/
 
 **Subject:** Your technology-in-recovery article — the gap nobody's filled
@@ -587,7 +587,7 @@ Turn Someday Into Day One
 ---
 
 ### 24. Great Oaks Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://greatoaksrecovery.com/contact-us/
 
 **Subject:** Your helpful recovery apps article — the gap nobody's filled
@@ -610,7 +610,7 @@ Turn Someday Into Day One
 ---
 
 ### 25. Indiana Center for Recovery
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://www.treatmentindiana.com/contact/
 
 **Subject:** Your sober apps article — the gap nobody's filled
@@ -635,7 +635,7 @@ Turn Someday Into Day One
 ## WEEK 6 — the big fish (you've had 5 weeks of practice)
 
 ### 26. Asana Lodge (UK)
-- [ ] Sent
+- [x] Sent
 **Where:** the contact options at https://asanalodge.com/
 
 **Subject:** Your recovery apps article — the gap nobody's filled
@@ -658,7 +658,7 @@ Turn Someday Into Day One
 ---
 
 ### 27. American Addiction Centers
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://americanaddictioncenters.org/contact-us
 
 **Subject:** Your sobriety apps article — the category it's missing
@@ -683,7 +683,7 @@ P.S. I also keep an honest, current comparison of recovery apps myself — compe
 ---
 
 ### 28. Rehabs.com
-- [ ] Sent
+- [x] Sent
 **Where:** the form at https://rehabs.com/contact-us/ — pick the press / business option if it asks
 
 **Subject:** Your smartphone apps article — the category it's missing
@@ -708,7 +708,7 @@ P.S. I also keep an honest, current comparison of recovery apps myself — compe
 ---
 
 ### 29. Recovery Research Institute
-- [ ] Sent
+- [x] Sent
 **Where:** the contact options at https://www.recoveryanswers.org/
 
 **Subject:** What does it take to be included in your recovery technology directory?
@@ -731,7 +731,7 @@ Turn Someday Into Day One
 ---
 
 ### 30. GoodRx Health
-- [ ] Sent
+- [x] Sent
 **Where:** the contact link in the footer of https://www.goodrx.com/
 
 **Subject:** Your substance use apps article — the category it's missing

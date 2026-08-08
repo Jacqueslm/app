@@ -514,7 +514,9 @@ Turn Someday Into Day One
 ## WEEK 5
 
 ### 21. Banyan Treatment Center
-- [ ] Sent
+- [x] NO ROUTE — checked 8 Aug 2026: no contact form and no published
+  address on the site. Banyan and Clearbrook are one company and neither has a way in,
+  so this is not a case of trying the other. Not sent, not sendable.
 **Where:** the form at https://www.banyantreatmentcenter.com/
 
 **Subject:** Your top apps for addiction recovery — the gap nobody's filled
@@ -537,7 +539,9 @@ Turn Someday Into Day One
 ---
 
 ### 22. Clearbrook (Banyan)
-- [ ] Sent
+- [x] NO ROUTE — checked 8 Aug 2026: no contact form and no published
+  address on the site. Banyan and Clearbrook are one company and neither has a way in,
+  so this is not a case of trying the other. Not sent, not sendable.
 **Where:** the contact options at https://clearbrook.banyantreatmentcenter.com/
 
 **Subject:** Your sobriety apps article — the gap nobody's filled

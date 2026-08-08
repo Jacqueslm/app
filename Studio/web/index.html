@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0810</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0811</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -989,6 +989,20 @@ body.simple-only #view-simple{display:flex !important}
 
   <div class="view" id="view-social">
     <div class="banner" id="social-due-banner" style="display:none"></div>
+
+    <div class="card" id="buffer-card">
+      <h3>📅 Connect Buffer <span class="usage" id="buffer-state"></span></h3>
+      <p class="usage" id="buffer-hint">Buffer is where your posts get queued. Make a key at <b>publish.buffer.com/settings/api</b> (Settings → API — it's free on every plan, and you need to be the account owner), then paste it here. Connecting only reads which channels you have; nothing gets posted.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="buffer-key-row">
+        <input class="input" id="buffer-input" placeholder="Paste your Buffer API key" style="flex:1;min-width:140px" autocomplete="off">
+        <button class="btn2" id="buffer-save">Save</button>
+      </div>
+      <button class="btn2 quiet" id="buffer-test" style="display:none">🔌 Test the connection</button>
+      <div id="buffer-result" class="usage" style="display:none"></div>
+      <p class="usage" id="buffer-manage" style="display:none">Key saved on this computer. <a href="#" id="buffer-change">Change it</a> · <a href="#" id="buffer-remove">Remove it</a>.</p>
+      <div class="err" id="buffer-err" style="display:none"></div>
+    </div>
+
     <div class="card">
       <h3>🎤 Teleprompter</h3>
       <p class="usage" style="margin:0">Write it once, read it steady. Put this screen right behind your camera so your eyes stay on the lens — slow speed, short lines, and it still sounds like you.</p>
@@ -2002,6 +2016,7 @@ async function bootStudio() {
   renderLanAddresses();
   loadScripts();
   renderStockCard();
+  renderBufferCard();
   renderCrewRoom();
   renderVoiceCard();
   renderCaptionStyles();
@@ -3446,6 +3461,77 @@ $('#falkey-remove').onclick = async (e) => {
     location.reload();
   } catch (err) { setErr('#seq-err', err.message); }
 };
+
+/* ---------------- Buffer connection ---------------- */
+function renderBufferCard() {
+  if (!document.getElementById('buffer-card')) return;
+  const on = !!st.cfg?.bufferAvailable;
+  $('#buffer-state').textContent = on ? '— connected' : '— not connected yet';
+  $('#buffer-key-row').style.display = on ? 'none' : 'flex';
+  $('#buffer-hint').style.display = on ? 'none' : 'block';
+  $('#buffer-test').style.display = on ? 'block' : 'none';
+  $('#buffer-manage').style.display = on ? 'block' : 'none';
+}
+function setBufferErr(msg) {
+  const el = $('#buffer-err');
+  el.style.display = msg ? 'block' : 'none';
+  el.textContent = msg || '';
+}
+$('#buffer-save').onclick = async () => {
+  setBufferErr(null);
+  const key = $('#buffer-input').value.trim();
+  if (!key) return setBufferErr('Paste your Buffer key first.');
+  $('#buffer-save').disabled = true;
+  try {
+    await jfetch('/api/studio/settings/bufferkey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }),
+    });
+    $('#buffer-input').value = '';
+    st.cfg = await jfetch('/api/studio/config');
+    renderBufferCard();
+    $('#buffer-test').click(); // saving without proving it works is how silent breakage starts
+  } catch (e) {
+    setBufferErr(e.message);
+  } finally {
+    $('#buffer-save').disabled = false;
+  }
+};
+$('#buffer-test').onclick = async () => {
+  setBufferErr(null);
+  const out = $('#buffer-result');
+  out.style.display = 'block';
+  out.textContent = 'Asking Buffer…';
+  try {
+    const d = await jfetch('/api/studio/buffer/channels');
+    if (!d.channels?.length) {
+      out.innerHTML = '<b>Connected</b>, but Buffer reports no channels on this account. Add a social account in Buffer first.';
+      return;
+    }
+    out.innerHTML = '<b>Connected.</b> Buffer says you can post to:<br>' +
+      d.channels.map((c) => `• ${escapeHtml(c.name || '(unnamed)')} <span style="color:var(--tm)">${escapeHtml(c.service || '')}</span>`).join('<br>');
+  } catch (e) {
+    out.style.display = 'none';
+    setBufferErr(e.message);
+  }
+};
+document.getElementById('buffer-change') && (document.getElementById('buffer-change').onclick = (e) => {
+  e.preventDefault();
+  $('#buffer-key-row').style.display = 'flex';
+  $('#buffer-hint').style.display = 'block';
+  setTimeout(() => $('#buffer-input').focus(), 100);
+});
+document.getElementById('buffer-remove') && (document.getElementById('buffer-remove').onclick = async (e) => {
+  e.preventDefault();
+  if (!confirm('Remove the Buffer key from this computer? Your Buffer account and queue are untouched.')) return;
+  try {
+    await jfetch('/api/studio/settings/bufferkey', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: '' }),
+    });
+    st.cfg = await jfetch('/api/studio/config');
+    $('#buffer-result').style.display = 'none';
+    renderBufferCard();
+  } catch (err) { setBufferErr(err.message); }
+});
 
 /* ---------------- free stock b-roll (Pexels) ---------------- */
 let stockType = 'videos';

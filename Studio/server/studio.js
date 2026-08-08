@@ -686,10 +686,11 @@ router.get('/config', (req, res) => {
     falAvailable: Boolean(FAL_KEY),
     stockAvailable: Boolean(PEXELS_KEY),
     bufferAvailable: Boolean(BUFFER_KEY),
-    // Only offer a narrator the install actually has the file for.
-    voices: Object.entries(PRESET_VOICES)
-      .filter(([, v]) => fs.existsSync(path.join(VOICE_DIR, v.file)))
-      .map(([key, v]) => ({ key, label: v.label, note: v.note })),
+    // Narrators run on this computer - free, offline, nothing per word. The
+    // list is empty when local speech didn't install, and the Voice card says
+    // so instead of silently offering voices that can't speak.
+    voices: localTts.available() ? localTts.list() : [],
+    localVoice: localTts.available(),
     chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
@@ -3485,19 +3486,29 @@ const VOICE_MAX_CHARS = 2000;
 // chars ≈ 1 min of speech, so the per-1k estimate is ~$0.12.
 const MODEL_VOICE_EMO = process.env.FAL_MODEL_VOICE_EMO || 'fal-ai/index-tts-2/text-to-speech';
 const VOICE_EMO_RATE = Number(process.env.STUDIO_RATE_VOICE_EMO || 0.12); // per ~1,000 characters (estimate)
-// Built-in narrators. Until now the only way to get a voice out of Studio was
-// to upload your own reference clip, which is why there was no list to pick
-// from. These five are the same voices the recovery app uses for its lesson
-// audio, generated with Piper (free, offline) and trimmed to a 13-second
-// reference - F5-TTS clones better from a short clean sample than a long one.
-const VOICE_DIR = path.join(__dirname, 'voices');
-const PRESET_VOICES = {
-  warm:   { label: 'Warm',       file: 'warm.mp3',   note: 'female, easy and unhurried' },
-  soft:   { label: 'Soft',       file: 'soft.mp3',   note: 'female, quiet and close' },
-  gentle: { label: 'Gentle',     file: 'gentle.mp3', note: 'female, slow and kind' },
-  clear:  { label: 'Clear',      file: 'clear.mp3',  note: 'female, plain and steady' },
-  male:   { label: 'Calm male',  file: 'male.mp3',   note: 'male, low and level' },
-};
+// Built-in narrators speak on this computer, for free - see speak.js. The
+// previous build shipped 13-second reference clips and paid fal to clone them
+// on every take; the same Piper voices running locally cost nothing and come
+// back in under a second, so the clips are gone and fal is only used now for
+// cloning YOUR voice, or for emotional delivery.
+const localTts = require('./speak');
+const VOICE_REF_DIR = path.join(__dirname, 'model-cache', 'voices', 'refs');
+// Emotion needs fal (index-tts-2), and fal needs a reference clip to clone.
+// Rather than ship one, we have the local narrator read a fixed passage once
+// and keep that as the reference - same voice, no bundled audio, no licence to
+// worry about.
+const VOICE_REF_TEXT =
+  'This is how I sound when I read something out loud. I keep an even pace, ' +
+  'and I let the important words land instead of rushing past them. ' +
+  'Nothing fancy, just clear and steady.';
+async function localVoiceReference(key) {
+  const k = localTts.resolveKey(key);
+  if (!k) throw new Error('Pick a narrator first.');
+  fs.mkdirSync(VOICE_REF_DIR, { recursive: true });
+  const out = path.join(VOICE_REF_DIR, `${k}.wav`);
+  if (!fs.existsSync(out)) await localTts.speak({ voice: k, text: VOICE_REF_TEXT, outPath: out });
+  return out;
+}
 
 const VOICE_MOODS = {
   neutral: '',
@@ -3548,41 +3559,83 @@ router.post('/transcribe', async (req, res) => {
 
 /* ---------------- voice clone: narrate in a character's voice (F5-TTS) ---------------- */
 router.post('/voice-clone', async (req, res) => {
-  if (!FAL_KEY) {
-    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
-  }
-  // Either a built-in narrator, or your own uploaded clip. Presets win if both
-  // are sent, so switching to a narrator doesn't silently keep using an old
+  // Either a built-in narrator, or your own uploaded clip. Narrators win if
+  // both are sent, so switching to one doesn't silently keep using an old
   // reference that happens to still be selected in the dropdown.
-  const presetKey = typeof req.body?.voice === 'string' ? req.body.voice : '';
-  const preset = PRESET_VOICES[presetKey];
+  const presetKey = localTts.resolveKey(req.body?.voice);
+  const preset = presetKey ? localTts.VOICES[presetKey] : null;
   let ref = null;
   if (!preset) {
     ref = db.getAsset(req.userId, Number(req.body?.refAssetId));
     if (!ref || ref.kind !== 'audio') {
-      return res.status(404).json({ error: 'Pick a narrator, or a reference voice clip of your own (an audio file — e.g. a vocal stem).' });
+      return res.status(404).json({
+        error: localTts.available()
+          ? 'Pick a narrator, or a reference voice clip of your own (an audio file — e.g. a vocal stem).'
+          : 'Narrators need the free speech add-on, which is not installed on this computer. Run "Update my app" in Settings, or upload your own reference clip instead.',
+      });
     }
+  }
+  if (preset && !localTts.available()) {
+    return res.status(503).json({ error: 'The free narrators need the speech add-on, which is not installed on this computer. Run "Update my app" in Settings — it installs it — or upload your own reference clip instead.' });
   }
   const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
   if (!text) return res.status(400).json({ error: 'Type the words you want spoken.' });
   if (text.length > VOICE_MAX_CHARS) return res.status(400).json({ error: `Keep it under ${VOICE_MAX_CHARS} characters per take (about ${Math.round(VOICE_MAX_CHARS / 1000)} minutes). Split longer narration into a few takes.` });
+  const wantsMood = typeof req.body?.mood === 'string' && req.body.mood !== 'neutral' && Boolean(VOICE_MOODS[req.body.mood]);
+
+  /* ---- free path: a built-in narrator, plainly read, on this computer ---- */
+  if (preset && !wantsMood) {
+    const job = createJob(req.userId, 'voice', {});
+    res.status(202).json({ job: jobJson(job) });
+    (async () => {
+      try {
+        const filename = newFilename(req.userId, '.wav');
+        // 0-70% is the one-off voice download; after that a take is so fast
+        // there is nothing left to report.
+        await localTts.speak({
+          voice: presetKey,
+          text,
+          outPath: mediaPath(filename),
+          onPct: (p) => { job.progress = Math.min(70, Math.round(p * 0.7)); },
+        });
+        job.progress = 92;
+        const label = `${preset.label} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`;
+        job.assetId = db.createAsset(req.userId, 'audio', label, filename, null, {
+          source: 'voice', voice: presetKey, free: true,
+          duration: await probeMediaDuration(mediaPath(filename)),
+        });
+        job.progress = 100;
+        job.status = 'done';
+      } catch (err) {
+        job.error = `${err.message || 'Narration failed.'} You can still use your own voice clip.`;
+        job.status = 'error';
+      }
+    })();
+    return;
+  }
+
+  /* ---- paid path: your own voice, or a narrator with a mood on it ---- */
+  if (!FAL_KEY) {
+    return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  }
   {
-    const emo = typeof req.body?.mood === 'string' && req.body.mood !== 'neutral' && VOICE_MOODS[req.body.mood];
-    const capMsg = overDailyCap(req.userId, estActionCost('voice', { emotion: !!emo, chars: text.length }));
+    const capMsg = overDailyCap(req.userId, estActionCost('voice', { emotion: wantsMood, chars: text.length }));
     if (capMsg) return res.status(429).json({ error: capMsg });
   }
   try {
-    const srcPath = preset ? path.join(VOICE_DIR, preset.file) : mediaPath(ref.filename);
-    if (preset && !fs.existsSync(srcPath)) {
-      return res.status(500).json({ error: `The ${preset.label} narrator file is missing from this install. Run "Update my app" in Settings, or upload your own reference clip instead.` });
-    }
+    // A mood on a built-in narrator: have that narrator read a fixed passage
+    // once, locally and for free, and clone the mood from it.
+    const srcPath = preset ? await localVoiceReference(presetKey) : mediaPath(ref.filename);
     const buf = fs.readFileSync(srcPath);
+    // Locally-read references come back as .wav; an uploaded clip is usually
+    // .mp3. Send the right type either way or fal rejects the upload.
+    const refMime = /\.wav$/i.test(srcPath) ? 'audio/wav' : 'audio/mpeg';
     let refUrl;
     try {
-      refUrl = await falUploadFile(buf, path.basename(srcPath), 'audio/mpeg');
+      refUrl = await falUploadFile(buf, path.basename(srcPath), refMime);
     } catch (_) {
       if (buf.length > 9_000_000) throw new Error('could not upload the reference clip to fal and it is too large to send inline — trim it to ~20 seconds first');
-      refUrl = `data:audio/mpeg;base64,${buf.toString('base64')}`;
+      refUrl = `data:${refMime};base64,${buf.toString('base64')}`;
     }
     const mood = typeof req.body?.mood === 'string' && VOICE_MOODS[req.body.mood] !== undefined ? req.body.mood : 'neutral';
     const emoPrompt = VOICE_MOODS[mood];
@@ -3607,6 +3660,32 @@ router.post('/voice-clone', async (req, res) => {
     res.status(202).json({ job: jobJson(job) });
   } catch (err) {
     res.status(502).json({ error: err.message });
+  }
+});
+
+// Hear a narrator before committing a script to it. Free and local, so this
+// can be pressed as many times as you like - but the FIRST press on a voice
+// downloads it (~60MB), which is why the button says so while it works.
+const VOICE_SAMPLE_TEXT = 'Day one is not a date. It is a decision. And you already made it.';
+router.post('/voice-preview', async (req, res) => {
+  if (!localTts.available()) {
+    return res.status(503).json({ error: 'The free narrators need the speech add-on, which is not installed on this computer. Run "Update my app" in Settings.' });
+  }
+  const key = localTts.resolveKey(req.body?.voice);
+  if (!key) return res.status(404).json({ error: 'Unknown narrator.' });
+  const out = path.join(os.tmpdir(), `tsid-preview-${crypto.randomBytes(5).toString('hex')}.wav`);
+  try {
+    const text = typeof req.body?.text === 'string' && req.body.text.trim()
+      ? req.body.text.trim().slice(0, 300)
+      : VOICE_SAMPLE_TEXT;
+    await localTts.speak({ voice: key, text, outPath: out });
+    res.setHeader('Content-Type', 'audio/wav');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(fs.readFileSync(out));
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Could not play that narrator.' });
+  } finally {
+    try { fs.unlinkSync(out); } catch (_) {}
   }
 });
 

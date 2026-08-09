@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0832</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0833</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -597,6 +597,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
+      <p class="usage" id="qk-total" style="margin:6px 0 0;display:none"></p>
       <details id="qk-paste-wrap" style="margin-top:6px">
         <summary style="cursor:pointer;font-size:13px;color:var(--ts)">📋 Paste a shot list (from a plan you wrote elsewhere)</summary>
         <p class="usage" style="margin:6px 0 4px">One line per shot, in order. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
@@ -8176,6 +8177,10 @@ function parseShotList(text) {
 // 7s set the shot correctly and then showed the wrong number — and one touch of
 // the dropdown silently changed it. A pasted plan may ask for any whole number
 // of seconds, so whatever this shot is actually set to always appears here.
+// How long a blend takes. Used both to build the timeline and to work out the
+// finished length shown on screen — one constant, so the number you read can't
+// drift away from the video you get.
+const TRANS_DUR = 0.5;
 const QK_DURS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 45, 60];
 function qkDurations(cur) {
   const n = Number(cur);
@@ -8230,6 +8235,37 @@ function renderQkShots() {
     row.querySelector('.q-rm').onclick = () => { qk.shots.splice(i, 1); renderQkShots(); };
     list.appendChild(row);
   });
+  renderQkTotal();
+}
+
+// The finished length, using the same arithmetic the assembler uses. Adding the
+// seconds up gives the wrong answer and always has: a blend overlaps the two
+// shots it joins by half a second, so nine shots totalling 49s render at 46.5.
+// That gap was only ever visible for a moment in the paste note, which meant
+// planning a 60-second cut was guesswork.
+function qkTotalSeconds() {
+  let t = 0;
+  qk.shots.forEach((s, i) => {
+    t += Number(s.dur) || 0;
+    // the transition after this shot; the last shot has none
+    if (i < qk.shots.length - 1 && s.transAfter !== 'cut') t -= TRANS_DUR;
+  });
+  return Math.max(0, t);
+}
+
+function renderQkTotal() {
+  const el = $('#qk-total');
+  if (!el) return;
+  if (!qk.shots.length) { el.style.display = 'none'; return; }
+  const t = qkTotalSeconds();
+  const raw = qk.shots.reduce((a, s) => a + (Number(s.dur) || 0), 0);
+  const mins = Math.floor(t / 60);
+  const secs = t - mins * 60;
+  const shown = mins ? `${mins}m ${secs.toFixed(1).replace(/\.0$/, '')}s` : `${secs.toFixed(1).replace(/\.0$/, '')}s`;
+  const lost = raw - t;
+  el.style.display = '';
+  el.textContent = `⏱ Finished length: ${shown}` +
+    (lost > 0.01 ? `  —  ${qk.shots.length} shots adding up to ${raw}s, minus ${lost.toFixed(1)}s where the blends overlap` : `  —  ${qk.shots.length} shots, all hard cuts`);
 }
 
 if (document.getElementById('qk-paste-go')) $('#qk-paste-go').onclick = () => {
@@ -8466,7 +8502,7 @@ $('#qk-assemble').onclick = async () => {
     // Pictures turned into clips by Ken Burns have no audio track at all, so
     // only your own footage goes in; the server re-checks each file anyway.
     st.keepAudioAssets = new Set(ownFootage);
-    st.trans = qk.shots.slice(0, -1).map((s) => ({ type: s.transAfter, duration: 0.5 }));
+    st.trans = qk.shots.slice(0, -1).map((s) => ({ type: s.transAfter, duration: TRANS_DUR }));
     // words on screen, timed to each picture
     st.overlays = [];
     let cum = 0;

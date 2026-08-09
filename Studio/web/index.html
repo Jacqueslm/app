@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0824</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0825</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -371,6 +371,8 @@ body.simple-only #view-simple{display:flex !important}
         <input class="input" id="falkey-input" placeholder="Paste your fal.ai key" style="flex:1;min-width:140px" autocomplete="off">
         <button class="btn2" id="falkey-save">Save</button>
       </div>
+      <button class="btn2 quiet" id="falkey-test" style="margin-top:6px">🔌 Is my key still working?</button>
+      <p class="usage" id="falkey-note" style="margin:4px 0 0"></p>
     </div>
     <div class="banner" id="scenes-banner" style="display:none"></div>
     <div class="card" id="scenes-form" style="display:none">
@@ -3498,6 +3500,16 @@ function showFalKeyCard() {
     $('#falkey-input').focus();
   }, 200);
 }
+if (document.getElementById('falkey-test')) $('#falkey-test').onclick = async () => {
+  const b = $('#falkey-test'); const note = $('#falkey-note');
+  b.disabled = true; const old = b.textContent;
+  b.innerHTML = '<span class="spinner"></span>Asking fal.ai…';
+  try {
+    const r = await jfetch('/api/studio/settings/falkey/test', { method: 'POST' });
+    note.textContent = (r.verified === true ? '✅ ' : r.verified === false ? '⚠ ' : '') + (r.note || '');
+  } catch (e) { note.textContent = e.message; }
+  b.disabled = false; b.textContent = old;
+};
 document.getElementById('falkey-change') && (document.getElementById('falkey-change').onclick = (e) => {
   e.preventDefault();
   showFalKeyCard();
@@ -3508,10 +3520,19 @@ $('#falkey-save').onclick = async () => {
   if (!key) return setErr('#scenes-err', 'Paste your fal.ai key first.');
   $('#falkey-save').disabled = true;
   try {
-    await jfetch('/api/studio/settings/falkey', {
+    const r = await jfetch('/api/studio/settings/falkey', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key }),
     });
     $('#falkey-input').value = '';
+    // A rejected key used to save silently and then fail hours later, in the
+    // middle of something else, as a bare 403. Say it now, at the moment the
+    // key is pasted, and don't reload past the message.
+    if (r.verified === false) {
+      $('#falkey-note').textContent = `⚠ Saved, but ${r.note}`;
+      $('#falkey-save').disabled = false;
+      return;
+    }
+    if (r.verified === null) $('#falkey-note').textContent = r.note || '';
     location.reload(); // simplest way to light everything up
   } catch (e) {
     setErr('#scenes-err', e.message);

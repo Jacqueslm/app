@@ -32,7 +32,9 @@ the person struggling (porn, alcohol, food, gambling).
   never move, because the fix was on the wrong branch and the updater was
   working perfectly.
   Everything that is not Studio — the recovery app, outreach, episodes,
-  reference — goes to the session branch as normal.
+  reference — goes to **`main`**, decided 9 Aug 2026. Do not open a session
+  branch for this project. Today's work sat on one for a day and none of it
+  appeared where Jacques actually looks, which is the repo's front page.
 - **Host:** Railway, auto-deploys the site from the deploy branch on push.
 - **DNS: Cloudflare, not IONOS** (moved 8 Aug 2026). The domain is still bought
   from IONOS, but its nameservers point at Cloudflare — `adi` and `glen`

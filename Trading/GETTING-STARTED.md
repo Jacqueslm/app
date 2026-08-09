@@ -1,5 +1,12 @@
 # Getting started — step by step
 
+**First, what this is:** an indicator plus a decision system — **not a bot.** It never places a
+trade. The indicator watches the charts and alerts you when your full sequence appears; the
+grader sizes the trade and gives the verdict; **you** click the button in the trading panel.
+That's deliberate. The discipline layer — one trade a day, the bracket placed at entry — is the
+part that fixes a break-even account, and an auto-bot would bypass exactly that part. Automation
+is a later conversation, after a few hundred logged trades prove the edge.
+
 Every click, in order. Set aside about 90 minutes for Part 1 and Part 2. Do them once and
 you're set up for good.
 
@@ -37,18 +44,23 @@ the names are usually still close. Jump to [Troubleshooting](#troubleshooting) a
 5. Click **Save** (or Ctrl+S). Name it **Market Structure Bridge**. Press Save.
 6. Click **Add to chart**.
 
-**Check:** you should now see a small table in the top-right of the chart showing `Bias D`,
-`Bridge 240`, `Exec 60`, `Chop 1H/15m`, `Setup`, and `Session`. Little `H` and `L` labels appear
-on the swings, and triangles mark the breaks of structure.
+**Check:** you should now see a table in the top-right of the chart showing `Bias D`,
+`Bridge 240`, `Exec 60`, `Chop`, `VWAP`, `RVOL`, `Day type`, `Range budget`, `Vol regime`,
+`Setup`, `Session`, and `Bullets left`. Little `H` and `L` labels appear on the swings, triangles
+mark breaks of structure, the orange line is VWAP, and the dotted aqua lines are yesterday's
+value area. If the table shows `—` in places, scroll left to load more history.
 
 If you got a red error instead, see [Troubleshooting](#troubleshooting).
 
-### Step 4. Set the session for this symbol
+### Step 4. Set the per-symbol settings
 
 1. Hover the indicator name at the top-left of the chart → click the **gear** (Settings).
-2. Scroll to the **Session** group.
-3. For MNQ and MES leave it at **`0930-1130`**. For MGC change it to **`0800-1200`**.
-4. Click **OK**.
+2. In **Session — New York only**: MNQ and MES are already right (tradeable `0930-1500`,
+   prime `0930-1130`). For MGC change them to tradeable **`0800-1300`**, prime **`0800-1200`**.
+3. In **Institutional context → Correlated symbol**: trading MNQ, leave it (`CME_MINI:MES1!`).
+   Trading MES, change it to `CME_MINI:MNQ1!`. Trading MGC, either set `COMEX:SI1!` or untick
+   **Correlated instrument must agree**.
+4. Click **OK**. Leave everything else at defaults — they encode the playbook.
 
 ### Step 5. Repeat for your other two symbols
 
@@ -81,8 +93,9 @@ Do this on each of the three charts.
 
 - **"Level reclaimed — waiting on the trigger"** → the setup is at step ④. Go look, get ready.
   Do **not** enter on this one.
-- **The full alert with grade, entry, stop, T1** → this is the actionable one. It still isn't
-  permission to buy. It's permission to open the grader.
+- **The full alert** — grade, **SCALP / STANDARD / HOLD**, day type, budget used, entry, stop,
+  T1, T2 → this is the actionable one. It still isn't permission to buy. It's permission to open
+  the grader. And it's your one bullet: after it fires, the system goes quiet until tomorrow.
 
 > On the free TradingView plan you may be limited in how many alerts you can have active at once.
 > If you hit that, keep MNQ and drop the others until you upgrade.
@@ -99,9 +112,9 @@ Do this on each of the three charts.
 **Check:** you see "Trade Grader" with a big red **REJECT** at the top and two checklists. Red is
 correct — an empty form should always be a reject.
 
-Try it: pick MNQ, type entry `20450`, stop `20410`, and it should show **3 contracts, $240 risk**
-on a $25,000 account. Now tick all seven hard filters and five quality points — it turns amber,
-**HALF SIZE · B**. Tick a sixth and it goes green, **TAKE IT · A+**.
+Try it: pick MNQ, type entry `20450`, stop `20410`, next HTF level `20650`, and it should show
+**3 contracts, $240 risk** and a **HOLD · 5.0R room** plan banner. Tick all ten hard filters and
+seven quality points — amber, **HALF SIZE · B**. Two more and it goes green, **TAKE IT · A+**.
 
 > Your journal is saved inside that browser on that computer only. Don't clear your browser data
 > without hitting **Export CSV** first. Do the export weekly regardless.
@@ -156,14 +169,17 @@ Strategy Tester only measures what's loaded on the chart.
 
 Before anything else, settle this — it's the most valuable two minutes of the whole backtest.
 
-1. Open the strategy's **settings gear** → **Institutional context** group.
-2. Untick **Apply context layer (master switch)**. Note the numbers.
-3. Tick it back on. Note the numbers again.
+1. Open the strategy's **settings gear**.
+2. Run it three ways, writing the numbers down each time:
+   - **Structure only** — untick **Apply context layer** (this also disables the day read)
+   - **+ Context** — tick it back on, but untick the three toggles in **Professional read**
+   - **+ Day read** — everything on (the default)
 
 | | Trades | Win rate | Profit factor | Max drawdown |
 |---|---|---|---|---|
-| Context **OFF** (structure only) | | | | |
-| Context **ON** | | | | |
+| Structure only | | | | |
+| + Context (VWAP, RVOL, sweeps…) | | | | |
+| + Day read (day type, value, budget) | | | | |
 
 Expect the context layer to take **fewer trades** — that's the point of a filter. What you want to
 see is better *expectancy per trade* and a smaller drawdown. If it takes half the trades and
@@ -190,7 +206,7 @@ In the **Performance Summary** tab, write these down for each symbol:
 |---|---|---|---|---|---|
 | MNQ | | | | | |
 | MES | | | | | |
-| MGC *(set session `0800-1200`)* | | | | | |
+| MGC *(sessions `0800-1300` / `0800-1200`)* | | | | | |
 
 **How to read it:**
 
@@ -206,7 +222,7 @@ In the **Performance Summary** tab, write these down for each symbol:
 Change **one** setting, re-read the summary, change it back:
 
 - Swing strength 3 → 4
-- Minimum grade score 4 → 6 (A+ only)
+- Minimum grade score 7 → 9 (A+ only)
 - Chop: max chop measures 1 → 0 (strictest)
 
 A system that stays roughly profitable across all of those is robust. A system that only works at
@@ -261,7 +277,7 @@ deliberately stays quiet.
 
 **Strategy Tester shows very few trades**
 Expected — this system is designed to reject far more than it takes. If it's under ~20 over two
-years, loosen in this order: minimum grade score to 4, then max chop measures to 2. Change one at
+years, loosen in this order: minimum grade score to 6, then the range-budget gate off, then max chop measures to 2. Change one at
 a time and re-read the numbers.
 
 **Grader shows 0 contracts**

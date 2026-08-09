@@ -1,12 +1,32 @@
 # Graphics — what to upload where
 
-All files are in `store-listing/screenshots/`.
-
 | Play Console field | File | Size |
 |---|---|---|
 | App icon | `icons/icon-512.png` | 512 x 512 |
-| Feature graphic | `feature-graphic-1024x500.png` | 1024 x 500 |
-| Phone screenshots (min 2, max 8) | `01-home` ... `06-sos` | 1080 x 1920 |
+| Feature graphic | `screenshots/feature-graphic-1024x500.png` | 1024 x 500 |
+| Phone screenshots (min 2, max 8) | `screenshots-captioned/01` ... `06` | 1080 x 1920 |
+
+## Upload the captioned set, in this order
+
+The tester report (9 Aug 2026) said the listing used plain screenshots that
+don't say what any screen does, and asked for captions. `screenshots-captioned/`
+is that: the same real screens with a headline band above each one.
+
+| # | File | Caption |
+|---|---|---|
+| 1 | `01-home.png` | Every sober day, counted |
+| 2 | `02-sos.png` | One tap when the craving hits |
+| 3 | `03-chat.png` | Someone to talk to at 3am |
+| 4 | `04-lessons.png` | A new lesson every day |
+| 5 | `05-journal.png` | Write it down, see the pattern |
+| 6 | `06-progress.png` | Progress that never resets |
+
+Order matters. Play shows the first two or three before anyone scrolls, so the
+day counter leads and the craving button follows. The old upload led with the
+988 crisis screen — a heavy first impression for someone still deciding.
+
+To change any caption, edit `PANELS` in `make-captioned-screenshots.py` and
+re-run it. The raw screenshots are never touched.
 
 ## The screenshots
 

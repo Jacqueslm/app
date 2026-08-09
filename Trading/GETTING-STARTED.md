@@ -143,6 +143,31 @@ memory.
 
 ---
 
+## Part 4½ — The Scout: your 5m/15m scalping companion (10 min, optional)
+
+The Scout (`Trading/pine/MSB-Scout.pine`) is the same system one rung down the ladder:
+**4H is the anchor, 1H is the bridge, the 5m or 15m chart is execution.** Same sequence, same
+gates, compressed clock. Its alert is always a SCALP — one target at 1R, full exit, done.
+
+Setup is identical to Part 1: open a **15-minute** chart of the same symbol, paste
+`MSB-Scout.pine` as a new indicator, add the same *Any alert() function call / Once Per Bar
+Close* alert. Set the MGC window to `0800-1200` if you trade gold. **Start on the 15m, not the
+5m** — earn your way down.
+
+Three things about the Scout that are different on purpose:
+
+- **It only alerts on A+.** The low timeframe makes far more offers than the 1H; you take fewer
+  of them, not more. Don't change this setting until 30 logged scalps say otherwise.
+- **Prime hours only.** Low-timeframe structure outside 09:30–11:30 is mostly noise in a costume.
+- **The one-bullet rule is one trade TOTAL per day, across both systems.** TradingView scripts
+  can't see each other, so this rule lives with you: if the 1H system fired today, the Scout's
+  alert is tomorrow's — and the other way round. The Scout's alert text reminds you every time.
+
+When both fire on the same morning, the 1H setup wins — it's the bigger, better-tested trade.
+The Scout earns its place on days the 1H system is quiet but the 4H is trending.
+
+---
+
 ## Part 5 — Stage 1: the backtest (about 2 hours)
 
 This is your actual next task. You are trying to find out whether these rules have an edge

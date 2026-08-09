@@ -1,0 +1,516 @@
+//@version=6
+// =============================================================================
+//  MSB SCOUT — the 5m/15m scalping companion
+//  Apply this to a 5-minute or 15-minute chart. MNQ, MES, MGC.
+//
+//  Same system, one rung down the ladder:
+//      1H system:   Daily bias → 4H bridge → 1H execution
+//      Scout:       4H bias   → 1H bridge → 5m/15m execution
+//
+//  The 4H is the anchor — a hard gate, never a suggestion. The scout hunts the
+//  same sequence (break → back through → reclaim → hold → go) on the low
+//  timeframe, in the direction the 4H already agreed to.
+//
+//  Every scalp is a SCALP plan: single target at 1R, full exit, done.
+//
+//  BE HONEST WITH YOURSELF ABOUT THIS TOOL. A 5-minute chart produces far more
+//  signals than a 1-hour chart, and more signals is the dangerous direction for
+//  an impulsive trader. That is why the scout defaults to:
+//    · A+ grade only (the 1H system alerts on B; the scout does not)
+//    · prime hours only
+//    · one alert per day
+//  The one-bullet rule is ONE TRADE TOTAL per day across BOTH systems.
+//  TradingView scripts cannot see each other, so that rule lives with you.
+//  If the 1H system already fired today, the scout's alert is tomorrow's.
+// =============================================================================
+
+indicator("MSB Scout — 5m/15m scalper", "MSB-Scout", overlay = true,
+     max_lines_count = 500, max_labels_count = 500, max_boxes_count = 500)
+
+// ─── Inputs ──────────────────────────────────────────────────────────────────
+grpS = "Structure — the ladder, one rung down"
+pvL      = input.int(3,     "Swing strength (left)",  minval = 1, maxval = 20, group = grpS)
+pvR      = input.int(3,     "Swing strength (right)", minval = 1, maxval = 20, group = grpS)
+biasTF   = input.timeframe("240", "Bias timeframe (the anchor)", group = grpS,
+     tooltip = "The 4H. Every scalp goes WITH this or it doesn't exist.")
+bridgeTF = input.timeframe("60",  "Bridge timeframe", group = grpS)
+
+grpC = "Consolidation filter"
+erLen    = input.int(20,     "Efficiency ratio length",   minval = 5,   group = grpC)
+erMin    = input.float(0.30, "Chop if ER below",          minval = 0.0, maxval = 1.0, step = 0.01, group = grpC)
+rngLen   = input.int(20,     "Range length",              minval = 5,   group = grpC)
+rngMin   = input.float(3.0,  "Chop if range/ATR below",   minval = 0.5, step = 0.1, group = grpC)
+adxMin   = input.float(18.0, "Chop if ADX below",         minval = 5.0, step = 0.5, group = grpC)
+maxChop  = input.int(1,      "Max chop measures allowed", minval = 0, maxval = 3,   group = grpC)
+
+grpI = "Context (same rules as the 1H system)"
+useCtx   = input.bool(true,  "Apply context layer (master switch)", group = grpI)
+useVwap  = input.bool(true,  "Gate: right side of VWAP",  group = grpI)
+useExt   = input.bool(true,  "Gate: not past the 2σ band", group = grpI)
+vwapDev  = input.float(2.0,  "VWAP band (std dev)", minval = 0.5, step = 0.5, group = grpI)
+rvolMin  = input.float(1.2,  "Point: RVOL at or above", minval = 0.1, step = 0.1, group = grpI)
+holdBars = input.int(2,      "Bars price must hold the reclaim", minval = 1, maxval = 10, group = grpI,
+     tooltip = "On a 5m chart this is 10 minutes of acceptance. Same principle, compressed clock.")
+reqHold  = input.bool(true,  "Gate: require acceptance before triggering", group = grpI)
+useSweep = input.bool(true,  "Point: reward a liquidity sweep", group = grpI)
+useRef   = input.bool(true,  "Point: reward reference-level confluence", group = grpI)
+refTolA  = input.float(0.5,  "Reference tolerance (× ATR)", minval = 0.1, step = 0.1, group = grpI)
+useCorr  = input.bool(true,  "Point: correlated instrument agrees", group = grpI)
+corrSym  = input.symbol("CME_MINI:MES1!", "Correlated symbol", group = grpI)
+corrLen  = input.int(6, "Correlation lookback (bars)", minval = 2, group = grpI)
+
+grpP = "Professional read"
+useBudget = input.bool(true, "Gate: reject when the range budget is spent", group = grpP)
+budgetMax = input.float(0.85, "Budget spent at (× daily ATR)", minval = 0.3, maxval = 2.0, step = 0.05, group = grpP)
+useDayTp  = input.bool(true, "Point: day type agrees (not a balance day)", group = grpP)
+useVA     = input.bool(true, "Point: trading beyond yesterday's value", group = grpP)
+vaAccept  = input.int(2, "Closes beyond value = acceptance", minval = 1, maxval = 6, group = grpP)
+
+grpT = "Trigger & grading"
+dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
+setupTO  = input.int(36,    "Setup expires after N bars", minval = 5, group = grpT,
+     tooltip = "36 bars = 3 hours on the 5m. A scalp setup that takes longer than that isn't a scalp.")
+minGrade = input.string("A+", "Alert on grade", options = ["A+", "B"], group = grpT,
+     tooltip = "A+ ONLY is the default, on purpose. The low timeframe makes more offers; you take fewer of them.")
+stopBuf  = input.float(0.15, "Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
+
+grpX = "Session — prime hours only"
+useSess = input.bool(true, "Only alert inside the window", group = grpX)
+sessStr = input.session("0930-1130", "Scalping window", group = grpX,
+     tooltip = "Prime hours ONLY for scalps — MNQ/MES 0930-1130, MGC 0800-1200. Low-timeframe structure outside prime hours is mostly noise wearing a costume.")
+rthStr  = input.session("0930-1600", "Regular hours (for IB / overnight)", group = grpX)
+sessTZ  = input.string("America/New_York", "Timezone", group = grpX)
+
+grpR = "Your rules"
+maxPerDay = input.int(1, "Max alerts per day", minval = 1, maxval = 5, group = grpR,
+     tooltip = "ONE TRADE TOTAL PER DAY ACROSS BOTH SYSTEMS. Scripts can't see each other — this rule lives with you. If the 1H fired today, this alert is tomorrow's.")
+scalpR   = input.float(1.0, "Target (R) — full exit", minval = 0.5, maxval = 2.0, step = 0.25, group = grpR,
+     tooltip = "A scalp has ONE target. In, paid, out, done. The runner game belongs to the 1H system.")
+minRoom  = input.float(1.5, "Reject if room below this (R)", minval = 1.0, step = 0.25, group = grpR,
+     tooltip = "Room to the nearest opposing 1H/4H level. A 1R scalp needs 1.5R of clear air — the target shouldn't sit ON the wall.")
+
+grpV = "Display"
+showSwg  = input.bool(true,  "Show swing labels", group = grpV)
+showDash = input.bool(true,  "Show dashboard",    group = grpV)
+showVwap = input.bool(true,  "Show VWAP + bands", group = grpV)
+showVA   = input.bool(true,  "Show yesterday's value area", group = grpV)
+cBull    = input.color(#26a69a, "Bullish", group = grpV, inline = "c")
+cBear    = input.color(#ef5350, "Bearish", group = grpV, inline = "c")
+
+// ─── Structure engine (identical to the 1H system) ───────────────────────────
+f_structure() =>
+    var float swingHi  = na
+    var float swingLo  = na
+    var float brokenHi = na
+    var float brokenLo = na
+    var float protLo   = na
+    var float protHi   = na
+    var int   trend    = 0
+
+    ph = ta.pivothigh(high, pvL, pvR)
+    pl = ta.pivotlow(low,  pvL, pvR)
+    if not na(ph)
+        swingHi := ph
+    if not na(pl)
+        swingLo := pl
+
+    bUp = not na(swingHi) and close > swingHi
+    bDn = not na(swingLo) and close < swingLo
+    if bUp and bDn
+        if close >= open
+            bDn := false
+        else
+            bUp := false
+
+    if bUp
+        brokenHi := swingHi
+        protLo   := swingLo
+        trend    := 1
+        swingHi  := na
+    else if bDn
+        brokenLo := swingLo
+        protHi   := swingHi
+        trend    := -1
+        swingLo  := na
+
+    [trend, brokenHi, brokenLo, protLo, protHi, bUp, bDn]
+
+f_trend() =>
+    [t, _bh, _bl, _pl, _ph, _bu, _bd] = f_structure()
+    t
+
+[xTrend, xBrokenHi, xBrokenLo, xProtLo, xProtHi, xBosUp, xBosDn] = f_structure()
+biasTrend   = request.security(syminfo.tickerid, biasTF,   f_trend(), lookahead = barmerge.lookahead_off)
+bridgeTrend = request.security(syminfo.tickerid, bridgeTF, f_trend(), lookahead = barmerge.lookahead_off)
+
+// ─── Consolidation filter (chart TF only — this IS the lowest timeframe) ─────
+f_chop() =>
+    atr14  = ta.atr(14)
+    move   = math.abs(close - close[erLen])
+    path   = math.sum(math.abs(close - close[1]), erLen)
+    er     = path > 0 ? move / path : 0.0
+    rng    = ta.highest(high, rngLen) - ta.lowest(low, rngLen)
+    rngAtr = atr14 > 0 ? rng / atr14 : 0.0
+    [_dip, _dim, adxv] = ta.dmi(14, 14)
+    (er < erMin ? 1 : 0) + (rngAtr < rngMin ? 1 : 0) + (adxv < adxMin ? 1 : 0)
+
+chopN  = f_chop()
+chopOK = chopN <= maxChop
+
+// ─── Context: VWAP, RVOL, reference levels, correlation ──────────────────────
+newDay = timeframe.change("D")
+[vwapV, vwapUp, vwapDn] = ta.vwap(hlc3, newDay, vwapDev)
+vwapSideL = not useCtx or not useVwap or (not na(vwapV) and close > vwapV)
+vwapSideS = not useCtx or not useVwap or (not na(vwapV) and close < vwapV)
+notExtL   = not useCtx or not useExt  or (na(vwapUp) or close < vwapUp)
+notExtS   = not useCtx or not useExt  or (na(vwapDn) or close > vwapDn)
+
+// RVOL by hour of day — read before updating, no lookahead. Hour buckets still
+// separate the open from lunch, which is the distinction that matters.
+var array<float> hvSum = array.new_float(24, 0.0)
+var array<int>   hvCnt = array.new_int(24, 0)
+hrIdx  = hour(time, sessTZ)
+hvN    = array.get(hvCnt, hrIdx)
+hvMean = hvN > 0 ? array.get(hvSum, hrIdx) / hvN : na
+rvol   = not na(hvMean) and hvMean > 0 and not na(volume) ? volume / hvMean : 1.0
+if barstate.isconfirmed and not na(volume)
+    array.set(hvSum, hrIdx, array.get(hvSum, hrIdx) + volume)
+    array.set(hvCnt, hrIdx, hvN + 1)
+rvolOK = not useCtx or rvol >= rvolMin
+
+pdh = request.security(syminfo.tickerid, "D", high[1],  lookahead = barmerge.lookahead_on)
+pdl = request.security(syminfo.tickerid, "D", low[1],   lookahead = barmerge.lookahead_on)
+pdc = request.security(syminfo.tickerid, "D", close[1], lookahead = barmerge.lookahead_on)
+
+inRth = not na(time(timeframe.period, rthStr, sessTZ))
+var float ibH = na
+var float ibL = na
+var float onH = na
+var float onL = na
+if inRth and not inRth[1]
+    ibH := high
+    ibL := low
+if not inRth
+    if inRth[1]
+        onH := high
+        onL := low
+    else
+        onH := math.max(nz(onH, high), high)
+        onL := math.min(nz(onL, low),  low)
+
+atr = ta.atr(14)
+f_near(float lvl, float ref, float tol) => not na(lvl) and not na(ref) and math.abs(lvl - ref) <= tol
+
+corrClose = request.security(corrSym, timeframe.period, close, lookahead = barmerge.lookahead_off)
+corrChg   = corrClose - corrClose[corrLen]
+ownChg    = close - close[corrLen]
+corrAgree = not useCtx or not useCorr or (not na(corrChg) and math.sign(corrChg) == math.sign(ownChg))
+
+// ─── The professional read: value, day type, range budget ────────────────────
+[vaMid, vaHiRun, vaLoRun] = ta.vwap(hlc3, newDay, 1.0)
+var float pPoc = na
+var float pVah = na
+var float pVal = na
+if newDay
+    pPoc := vaMid[1]
+    pVah := vaHiRun[1]
+    pVal := vaLoRun[1]
+
+var int vaAboveCnt = 0
+var int vaBelowCnt = 0
+vaAboveCnt := not na(pVah) and close > pVah ? vaAboveCnt + 1 : 0
+vaBelowCnt := not na(pVal) and close < pVal ? vaBelowCnt + 1 : 0
+dayType = vaAboveCnt >= vaAccept ? 1 : vaBelowCnt >= vaAccept ? -1 : 0
+
+dAtr = request.security(syminfo.tickerid, "D", ta.atr(14)[1], lookahead = barmerge.lookahead_on)
+var float tdHi = na
+var float tdLo = na
+if newDay
+    tdHi := high
+    tdLo := low
+else
+    tdHi := math.max(nz(tdHi, high), high)
+    tdLo := math.min(nz(tdLo, low),  low)
+usedUpLong  = not na(dAtr) and dAtr > 0 ? (close - tdLo) / dAtr : 0.0
+usedUpShort = not na(dAtr) and dAtr > 0 ? (tdHi - close) / dAtr : 0.0
+budgetOKL = not useCtx or not useBudget or usedUpLong  <= budgetMax
+budgetOKS = not useCtx or not useBudget or usedUpShort <= budgetMax
+
+// ─── The walls a scalp must clear: nearest opposing 1H / 4H swing ────────────
+f_lastPivotHi() =>
+    var float p = na
+    v = ta.pivothigh(high, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+f_lastPivotLo() =>
+    var float p = na
+    v = ta.pivotlow(low, pvL, pvR)
+    if not na(v)
+        p := v
+    p
+
+h1Hi = request.security(syminfo.tickerid, bridgeTF, f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+h1Lo = request.security(syminfo.tickerid, bridgeTF, f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+h4Hi = request.security(syminfo.tickerid, biasTF,   f_lastPivotHi(), lookahead = barmerge.lookahead_off)
+h4Lo = request.security(syminfo.tickerid, biasTF,   f_lastPivotLo(), lookahead = barmerge.lookahead_off)
+
+f_pickAbove(float cur, float lvl, float px) =>
+    not na(lvl) and lvl > px ? (na(cur) ? lvl : math.min(cur, lvl)) : cur
+f_pickBelow(float cur, float lvl, float px) =>
+    not na(lvl) and lvl < px ? (na(cur) ? lvl : math.max(cur, lvl)) : cur
+
+// ─── Session ─────────────────────────────────────────────────────────────────
+inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+
+// ─── Shared series ───────────────────────────────────────────────────────────
+avgBody = ta.sma(math.abs(close - open), 20)
+disp    = math.abs(close - open) >= avgBody * dispMult
+dispStrong = math.abs(close - open) >= avgBody * dispMult * 1.5
+phG     = ta.pivothigh(high, pvL, pvR)
+plG     = ta.pivotlow(low,  pvL, pvR)
+hi100   = ta.highest(high, 100)[1]
+lo100   = ta.lowest(low, 100)[1]
+
+// ─── Setup state machine (identical sequence, compressed clock) ──────────────
+var int   st       = 0
+var int   stDir    = 0
+var float zone     = na
+var float prot     = na
+var int   stBars   = 0
+var int   touches  = 0
+var bool  cleanRt  = true
+var float pullExt  = na
+var float trigLvl  = na
+var bool  swept    = false
+var int   heldBars = 0
+
+// The anchor: a low-timeframe BOS only arms WITH the 4H. This is the whole point.
+armLong  = xBosUp and biasTrend ==  1
+armShort = xBosDn and biasTrend == -1
+armedNow = armLong or armShort
+
+if armLong
+    st       := 1
+    stDir    := 1
+    zone     := xBrokenHi
+    prot     := na(xProtLo) ? low : xProtLo
+    stBars   := 0
+    touches  := 0
+    cleanRt  := true
+    pullExt  := low
+    trigLvl  := na
+    swept    := false
+    heldBars := 0
+else if armShort
+    st       := 1
+    stDir    := -1
+    zone     := xBrokenLo
+    prot     := na(xProtHi) ? high : xProtHi
+    stBars   := 0
+    touches  := 0
+    cleanRt  := true
+    pullExt  := high
+    trigLvl  := na
+    swept    := false
+    heldBars := 0
+else if st > 0
+    stBars += 1
+
+// `not armedNow` — the breakout candle's own extreme sits beyond the level it broke.
+if st > 0 and stDir == 1 and not armedNow
+    prevExt = pullExt
+    pullExt := math.min(pullExt, low)
+    if st == 2 and not na(prevExt) and low < prevExt and close > prevExt and close > (high + low) / 2
+        swept := true
+    if st == 1 and low < zone
+        st := 2
+    else if st == 2 and close > zone
+        st       := 3
+        touches  := touches + 1
+        trigLvl  := high
+        heldBars := 0
+    else if st == 3
+        if close < zone
+            st       := 2
+            cleanRt  := false
+            heldBars := 0
+        else
+            heldBars += 1
+
+if st > 0 and stDir == -1 and not armedNow
+    prevExt = pullExt
+    pullExt := math.max(pullExt, high)
+    if st == 2 and not na(prevExt) and high > prevExt and close < prevExt and close < (high + low) / 2
+        swept := true
+    if st == 1 and high > zone
+        st := 2
+    else if st == 2 and close < zone
+        st       := 3
+        touches  := touches + 1
+        trigLvl  := low
+        heldBars := 0
+    else if st == 3
+        if close > zone
+            st       := 2
+            cleanRt  := false
+            heldBars := 0
+        else
+            heldBars += 1
+
+invalid = st > 0 and (
+     (stDir ==  1 and ((not na(prot) and close < prot) or biasTrend == -1)) or
+     (stDir == -1 and ((not na(prot) and close > prot) or biasTrend ==  1)) or
+     stBars > setupTO)
+if invalid
+    st      := 0
+    stDir   := 0
+    zone    := na
+    prot    := na
+    trigLvl := na
+
+refTol = atr * refTolA
+refHit = f_near(zone, pdh, refTol) or f_near(zone, pdl, refTol) or f_near(zone, pdc, refTol) or
+     f_near(zone, onH, refTol) or f_near(zone, onL, refTol) or
+     f_near(zone, ibH, refTol) or f_near(zone, ibL, refTol) or
+     f_near(zone, h1Hi, refTol) or f_near(zone, h1Lo, refTol)
+refOK = not useCtx or not useRef or refHit
+
+// ─── Trigger ─────────────────────────────────────────────────────────────────
+acceptOK  = not reqHold or heldBars >= holdBars
+trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and
+     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL
+trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and
+     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS
+anyTrig = trigLong or trigShort
+
+// ─── Trade levels — a scalp has ONE target ───────────────────────────────────
+entry   = close
+stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
+          trigShort ? math.max(nz(pullExt, high), nz(zone, high)) + atr * stopBuf : na
+riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
+t1      = na(riskPts) ? na : trigLong ? entry + riskPts * scalpR : entry - riskPts * scalpR
+
+// Room to the nearest opposing 1H/4H wall — the target must not sit ON it.
+wallUp = f_pickAbove(float(na), h1Hi, entry)
+wallUp := f_pickAbove(wallUp, h4Hi, entry)
+wallUp := f_pickAbove(wallUp, pdh, entry)
+wallDn = f_pickBelow(float(na), h1Lo, entry)
+wallDn := f_pickBelow(wallDn, h4Lo, entry)
+wallDn := f_pickBelow(wallDn, pdl, entry)
+wall   = trigLong ? nz(wallUp, hi100) : nz(wallDn, lo100)
+roomR  = not na(riskPts) and riskPts > 0 ? math.abs(wall - entry) / riskPts : 0.0
+roomOK = roomR >= minRoom
+
+// ─── Grading — 10 points, and the bar is higher: A+ needs 8 ──────────────────
+pFirst = touches <= 1
+pHold  = cleanRt and heldBars >= holdBars
+pDisp  = dispStrong
+pRvol  = rvolOK
+pSweep = not useCtx or not useSweep or swept
+pRef   = refOK
+pCorr  = corrAgree
+pChop  = chopN == 0
+pDayTp = not useCtx or not useDayTp or (trigLong ? dayType == 1 : trigShort ? dayType == -1 : false)
+pVAout = not useCtx or not useVA or (trigLong ? (not na(pVah) and close > pVah) :
+     trigShort ? (not na(pVal) and close < pVal) : false)
+
+score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
+     (pSweep ? 1 : 0) + (pRef ? 1 : 0) + (pCorr ? 1 : 0) + (pChop ? 1 : 0) +
+     (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
+
+grade   = score >= 8 ? "A+" : score >= 6 ? "B" : "C"
+gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
+
+// ─── One bullet a day (shared with the 1H system — by YOUR hand, not code) ───
+var int firedToday   = 0
+var int lastAlertDay = na
+if na(lastAlertDay) or dayofmonth != lastAlertDay
+    firedToday   := 0
+    lastAlertDay := dayofmonth
+bulletsLeft = maxPerDay - firedToday
+
+fire = anyTrig and gradeOK and roomOK and inSess and bulletsLeft > 0 and barstate.isconfirmed
+if fire
+    firedToday += 1
+
+// ─── Drawing ─────────────────────────────────────────────────────────────────
+plot(showVwap ? vwapV  : na, "VWAP",    color.new(color.orange, 0),  1)
+plot(showVwap ? vwapUp : na, "VWAP +σ", color.new(color.orange, 65), 1)
+plot(showVwap ? vwapDn : na, "VWAP −σ", color.new(color.orange, 65), 1)
+plot(showVA ? pVah : na, "Yesterday VAH", color.new(color.aqua, 55), 1, plot.style_circles)
+plot(showVA ? pPoc : na, "Yesterday POC", color.new(color.aqua, 30), 1, plot.style_circles)
+plot(showVA ? pVal : na, "Yesterday VAL", color.new(color.aqua, 55), 1, plot.style_circles)
+
+if showSwg and not na(phG)
+    label.new(bar_index - pvR, high[pvR], "H", style = label.style_label_down,
+         color = color.new(cBear, 70), textcolor = color.white, size = size.tiny)
+if showSwg and not na(plG)
+    label.new(bar_index - pvR, low[pvR], "L", style = label.style_label_up,
+         color = color.new(cBull, 70), textcolor = color.white, size = size.tiny)
+
+plotshape(xBosUp, "BOS up",   shape.triangleup,   location.belowbar, cBull, size = size.tiny)
+plotshape(xBosDn, "BOS down", shape.triangledown, location.abovebar, cBear, size = size.tiny)
+plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belowbar,
+     color.new(color.yellow, 0), size = size.tiny)
+
+if fire
+    label.new(bar_index, trigLong ? low - atr : high + atr,
+         (trigLong ? "▲ SCALP LONG " : "▼ SCALP SHORT ") + grade + "  " + str.tostring(score) + "/10",
+         style = trigLong ? label.style_label_up : label.style_label_down,
+         color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
+    line.new(bar_index, entry,   bar_index + 12, entry,   color = color.blue, width = 1)
+    line.new(bar_index, stopRaw, bar_index + 12, stopRaw, color = cBear, width = 1, style = line.style_dashed)
+    line.new(bar_index, t1,      bar_index + 12, t1,      color = cBull, width = 1, style = line.style_dashed)
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+f_txt(int t) => t == 1 ? "BULL" : t == -1 ? "BEAR" : "—"
+f_col(int t) => t == 1 ? cBull  : t == -1 ? cBear  : color.gray
+
+var table dash = table.new(position.top_right, 2, 10,
+     border_width = 1, border_color = color.new(color.gray, 60))
+if showDash and barstate.islast
+    stName = st == 0 ? "IDLE" : st == 1 ? "① BOS — armed" : st == 2 ? "② back through" :
+         "③ held " + str.tostring(heldBars) + "/" + str.tostring(holdBars)
+    dtTxt = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE"
+    table.cell(dash, 0, 0, "SCOUT", text_color = color.white, bgcolor = color.new(color.purple, 25), text_size = size.small)
+    table.cell(dash, 1, 0, syminfo.ticker + " " + timeframe.period + "m", text_color = color.white,
+         bgcolor = color.new(color.purple, 25), text_size = size.small)
+    table.cell(dash, 0, 1, "Anchor " + biasTF, text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 1, f_txt(biasTrend), text_color = f_col(biasTrend), text_size = size.small)
+    table.cell(dash, 0, 2, "Bridge " + bridgeTF, text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 2, f_txt(bridgeTrend), text_color = f_col(bridgeTrend), text_size = size.small)
+    table.cell(dash, 0, 3, "Chop", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 3, str.tostring(chopN) + "/3", text_color = chopOK ? cBull : cBear, text_size = size.small)
+    table.cell(dash, 0, 4, "RVOL (this hr)", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 4, str.tostring(rvol, "#.00"),
+         text_color = rvol >= rvolMin ? cBull : rvol < 0.8 ? cBear : color.silver, text_size = size.small)
+    table.cell(dash, 0, 5, "Day type", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 5, dtTxt, text_color = f_col(dayType), text_size = size.small)
+    table.cell(dash, 0, 6, "Range budget", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 6, str.tostring(math.max(usedUpLong, usedUpShort) * 100, "#") + "%",
+         text_color = math.max(usedUpLong, usedUpShort) > budgetMax ? cBear : color.silver, text_size = size.small)
+    table.cell(dash, 0, 7, "Setup", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 7, stName, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 8, "Window", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 8, inSess ? "OPEN" : "closed", text_color = inSess ? cBull : color.gray, text_size = size.small)
+    table.cell(dash, 0, 9, "Bullets left", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 9, str.tostring(bulletsLeft) + " / " + str.tostring(maxPerDay) + " (shared!)",
+         text_color = bulletsLeft > 0 ? cBull : cBear, text_size = size.small)
+
+// ─── Alerts ──────────────────────────────────────────────────────────────────
+if fire
+    alert(syminfo.ticker + " SCALP " + (trigLong ? "LONG" : "SHORT") + " " + grade +
+         " (" + str.tostring(score) + "/10) — " + timeframe.period + "m off the " + biasTF + " anchor" +
+         "\nentry " + str.tostring(entry,   format.mintick) +
+         " | stop " + str.tostring(stopRaw, format.mintick) +
+         " | target " + str.tostring(t1,    format.mintick) + " (" + str.tostring(scalpR, "#.##") + "R, FULL exit)" +
+         " | risk " + str.tostring(riskPts, format.mintick) + " pts" +
+         "\nroom " + str.tostring(roomR, "#.0") + "R to the next 1H/4H wall | RVOL " +
+         str.tostring(rvol, "#.0") + (swept ? " | swept" : "") +
+         "\nOne target. In, paid, out, done for the day." +
+         "\nIf the 1H system already fired today, this one is TOMORROW'S.",
+         alert.freq_once_per_bar_close)
+
+alertcondition(st == 3 and st[1] != 3, "Scout: level reclaimed",
+     "MSB Scout: level reclaimed on the low timeframe. Waiting for it to hold.")

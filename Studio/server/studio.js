@@ -948,6 +948,43 @@ const BUFFER_CREATE_Q = `mutation($input: PostCreateInput!) {
   createPost(input: $input) { ... on PostActionSuccess { post { id } } ... on MutationError { message } }
 }`;
 
+// What Buffer's video/image asset inputs actually look like, asked of Buffer
+// itself and cached for the server's lifetime. Guessing at this API's shapes
+// is how every previous round of this feature failed (channels needed input,
+// then organizationId), so the shape now comes from the source before we send.
+let bufferAssetShapeCache = null;
+async function bufferAssetShapes() {
+  if (bufferAssetShapeCache) return bufferAssetShapeCache;
+  const shapes = {};
+  for (const t of ['VideoAssetInput', 'ImageAssetInput']) {
+    try {
+      const d = await bufferGraphQL(
+        `query { __type(name: "${t}") { inputFields { name type { kind name ofType { kind name } } } } }`);
+      const fields = d?.__type?.inputFields;
+      if (fields?.length) shapes[t] = fields.map((f) => ({ name: f.name, required: f.type?.kind === 'NON_NULL' }));
+    } catch (_) { /* introspection off? fall back to the documented shape */ }
+  }
+  if (Object.keys(shapes).length) bufferAssetShapeCache = shapes;
+  return shapes;
+}
+
+// First frame of a video as a hosted jpg - Buffer's video asset takes (and on
+// some channels expects) a thumbnail, and the file itself lives on this
+// computer where Buffer can't see it.
+async function makeVideoThumbUrl(filename) {
+  const out = path.join(os.tmpdir(), `thumb-${crypto.randomBytes(5).toString('hex')}.jpg`);
+  await new Promise((resolve, reject) => {
+    const proc = spawn(ffmpegBin(), ['-y', '-ss', '0.5', '-i', mediaPath(filename), '-frames:v', '1', '-q:v', '3', out]);
+    proc.on('error', reject);
+    proc.on('close', (code) => (code === 0 && fs.existsSync(out) ? resolve() : reject(new Error(`thumbnail failed (${code})`))));
+  });
+  try {
+    return await falUploadFile(fs.readFileSync(out), 'thumb.jpg', 'image/jpeg', { permanent: true });
+  } finally {
+    try { fs.unlinkSync(out); } catch (_) {}
+  }
+}
+
 // Queue one finished render onto one channel. Buffer has no file upload, so
 // the file goes to fal storage (permanently, see falUploadFile) and Buffer is
 // handed that link. mode addToQueue means Buffer uses the posting schedule
@@ -981,6 +1018,36 @@ router.post('/buffer/post', async (req, res) => {
   }
 
   const isVideo = /^video\//.test(mediaUrl) || /\.(mp4|webm|mov)$/i.test(mediaUrl) || asset.kind === 'video';
+
+  // Build the asset object to match Buffer's OWN description of it, not our
+  // memory of the docs. Unknown shape (introspection off) falls back to the
+  // documented { url } and lets Buffer's error say the rest.
+  let assetObj;
+  if (!isVideo) {
+    assetObj = { image: { url: mediaUrl } };
+  } else {
+    const shape = (await bufferAssetShapes()).VideoAssetInput || null;
+    const v = {};
+    const urlField = shape?.find((f) => f.name === 'url')
+      || shape?.find((f) => /url/i.test(f.name) && !/thumb/i.test(f.name));
+    v[urlField ? urlField.name : 'url'] = mediaUrl;
+    const thumbField = shape?.find((f) => /thumb/i.test(f.name));
+    if (thumbField) {
+      const thumbUrl = await makeVideoThumbUrl(asset.filename).catch(() => null);
+      if (thumbUrl) v[thumbField.name] = thumbUrl;
+      else if (thumbField.required) {
+        return res.status(502).json({ error: `Buffer requires a video thumbnail (${thumbField.name}) and one could not be made from this clip.` });
+      }
+    }
+    // A required field we have nothing for: name it now, once, instead of
+    // failing identically on every channel.
+    const missing = (shape || []).filter((f) => f.required && v[f.name] === undefined).map((f) => f.name);
+    if (missing.length) {
+      return res.status(502).json({ error: `Buffer's video input also needs: ${missing.join(', ')}. Tell Claude — that's one line to add.` });
+    }
+    assetObj = { video: v };
+  }
+
   const results = [];
   let needs = null;
   for (const channelId of channelIds) {
@@ -989,7 +1056,7 @@ router.post('/buffer/post', async (req, res) => {
       channelId,
       schedulingType: 'automatic',
       mode: 'addToQueue',
-      assets: [isVideo ? { video: { url: mediaUrl } } : { image: { url: mediaUrl } }],
+      assets: [assetObj],
     };
     try {
       const d = await bufferGraphQL(BUFFER_CREATE_Q, { input });
@@ -1000,7 +1067,7 @@ router.post('/buffer/post', async (req, res) => {
       results.push({ channelId, ok: false, error: err.message });
       if (!needs) {
         needs = [];
-        for (const t of ['PostCreateInput', 'PostAssetInput', 'AssetInput']) {
+        for (const t of ['PostCreateInput', 'AssetInput', 'VideoAssetInput', 'ImageAssetInput']) {
           const f = await bufferDescribe(t);
           if (f) needs.push(`${t}: ${f.join(', ')}`);
         }
@@ -1009,7 +1076,14 @@ router.post('/buffer/post', async (req, res) => {
     }
   }
   const anyOk = results.some((r) => r.ok);
-  res.status(anyOk ? 200 : 502).json({ results, mediaUrl, caption, needs });
+  // Lead with Buffer's own words. The first version of this response had no
+  // `error` field at all, so the browser showed "Request failed (502)" and
+  // threw away the one string that said what was actually wrong.
+  const said = [...new Set(results.filter((r) => !r.ok && r.error).map((r) => r.error))];
+  res.status(anyOk ? 200 : 502).json({
+    ...(anyOk ? {} : { error: said.length ? `Buffer said: ${said.join(' · ')}` : 'Buffer refused the post without an explanation.' }),
+    results, mediaUrl, caption, needs,
+  });
 });
 
 /* ---------------- free stock b-roll (Pexels) ---------------- */

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0827</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0828</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -3728,8 +3728,16 @@ $('#send-go') && ($('#send-go').onclick = async () => {
     $('#send-result').style.display = 'block';
     $('#send-result').innerHTML = lines.join('<br>');
   } catch (e) {
+    // e.message now carries Buffer's own words (the server leads with them).
+    // The per-channel breakdown only earns its space when channels disagree.
+    const name = (id) => (st.bufferChannels.find((c) => c.id === id) || {}).name || id;
+    const perChan = (e.body?.results || []).filter((r) => !r.ok && r.error).map((r) => `${name(r.channelId)}: ${r.error}`);
     const needs = e.body?.needs;
-    fail(e.message + (needs?.length ? `\n\nBuffer describes: ${needs.join(' | ')} — send me this and I'll finish it.` : ''));
+    fail([
+      e.message,
+      perChan.length > 1 ? perChan.join('\n') : '',
+      needs?.length ? `Buffer's own description of its inputs — ${needs.join(' | ')} — copy this to Claude if the message above doesn't explain it.` : '',
+    ].filter(Boolean).join('\n\n'));
   } finally {
     $('#send-go').disabled = false;
     setTimeout(() => setProg('#send-prog', null), 1200);

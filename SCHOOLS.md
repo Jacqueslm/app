@@ -36,10 +36,12 @@ Every entry now says which kind of address it is:
 If one bounces, don't retype anything — the fallback is written underneath, and
 the page URL is there too. Fix the line here afterwards so it's right next time.
 
-**All twelve of Batch 1 were sent on 9 Aug 2026.** All ten of Batch 2 are
-drafted in Gmail the same day — the five that said "find the address on their
-website" were found by search instead, so none of this pile needs a phone call
-any more.
+**All 22 districts were emailed on 9 Aug 2026** — twelve in St. Louis, ten out
+of state. The pile is empty. Nothing here needs a phone call any more.
+
+**Follow-up: 16 Aug.** One follow-up each, once, then let it go — EMAIL 2 below.
+Only chase the ones that didn't reply at all; a "no" is a finished conversation
+and chasing it costs you the next district's goodwill.
 
 ---
 
@@ -391,33 +393,33 @@ bottom of this file.
 surfaced, not strategy.
 
 ### 1. Osceola County Schools — Florida
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** wellness@osceolaschools.net · page: https://www.osceolaschools.net/46370_4
 **Note:** they also publish a wellness phone line, 407-870-4840. Big district,
 dedicated wellness program. Best single target in this batch.
 
 ### 2. New Canaan Public Schools — Connecticut
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** BeWell@ncps-k12.org · page: https://www.ncps-k12.org/page/employee-wellness
 **Note:** "Be Well" is a staff committee, and the inbox was set up by that
 committee — so a real group of people read it, not an admin queue.
 
 ### 3. Middleton-Cross Plains Area School District — Wisconsin
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** wellness@mcpasd.k12.wi.us · page: https://www.mcpasd.k12.wi.us/page/wellness
 
 ### 4. Brookings School District 05-1 — South Dakota
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** Andrea Fish, Staff Wellness Coordinator · Andrea.Fish@k12.sd.us
 page: https://www.brookings.k12.sd.us/page/staff-wellness
 **Note:** the only one here with a name attached. Open with "Hi Andrea".
 
 ### 5. Dry Creek Joint Elementary School District — California
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** drycreekwellness@dcjesd.us · page: https://www.drycreek.k12.ca.us/staff/employee-wellness
 
 ### 6. Sun Prairie Area School District — Wisconsin
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** Klrichm@sunprairieschools.org — Staff Wellness Coordinator ·
 (608) 834-7224 · *address confirmed in search*
 **Note:** they have a dedicated coordinator whose stated job is finding
@@ -425,7 +427,7 @@ wellness opportunities for staff and their families. That's this email's job
 description. The "and their families" part is your supporter section.
 
 ### 7. Verona Area School District — Wisconsin
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** payrollbenefits@verona.k12.wi.us · (608) 845-4390 · *address
 confirmed in search*
 **Note:** the coordinator is **Sidney Peach**, Staff Wellness and Community
@@ -434,21 +436,21 @@ email asks them to pass it to her, and their wellness committee includes HR
 anyway, so this lands on the right desk either way.
 
 ### 8. Campbell County School District — Wyoming
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** lchristenson@ccsd.k12.wy.us — **Laurie Christenson**, employee
 wellness · (307) 687-4516 · *address confirmed in search*
 **Note:** they run wellness challenges, which the email mentions — a challenge
 is a natural slot for a free app.
 
 ### 9. Sheboygan Area School District — Wisconsin
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** human-resources@sasd.net · (920) 459-3500 · *address confirmed in
 search*
 **Note:** the mailbox is on `sasd.net`, not the `sheboygan.k12.wi.us` domain
 their website uses. That is their real HR address, not a typo.
 
 ### 10. Capital School District — Delaware
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Where:** brittany.hazzard@capital.k12.de.us — **Dr. Brittany Hazzard**,
 Instruction, Culture and Wellness · *address confirmed in search*
 **Note:** wellness is in her portfolio by title, so she is the decision-maker
@@ -513,9 +515,34 @@ Jacques
 
 | District | Sent | Replied | Newsletter date |
 |---|---|---|---|
-| | | | |
+| Parkway | 9 Aug | | |
+| Lindbergh | 9 Aug | | |
+| Webster Groves | 9 Aug | | |
+| Ferguson-Florissant | 9 Aug | | |
+| Rockwood | 9 Aug | | |
+| Ladue | 9 Aug | | |
+| Mehlville | 9 Aug | | |
+| Kirkwood | 9 Aug | | |
+| Pattonville | 9 Aug | | |
+| Ritenour | 9 Aug | | |
+| Francis Howell | 9 Aug | | |
+| St. Louis Public Schools | 9 Aug | | |
+| Osceola County FL | 9 Aug | | |
+| New Canaan CT | 9 Aug | | |
+| Middleton-Cross Plains WI | 9 Aug | | |
+| Brookings SD | 9 Aug | | |
+| Dry Creek CA | 9 Aug | | |
+| Sun Prairie WI | 9 Aug | | |
+| Verona Area WI | 9 Aug | | |
+| Campbell County WY | 9 Aug | | |
+| Sheboygan Area WI | 9 Aug | | |
+| Capital DE | 9 Aug | | |
 
-Fill this in as you go. One "yes" here is worth more than ten rehab listings —
+**Watch for bounces.** Ladue and Mehlville were addressed from the district's
+email pattern rather than a published address; each has a named fallback in its
+entry above. A bounce is not a no — it is a typo, and it is worth thirty seconds.
+
+Fill the rest in as you go. One "yes" here is worth more than ten rehab listings —
 it's a name you can drop with every neighbouring district after it.
 
 **Sources for Batch 1:**

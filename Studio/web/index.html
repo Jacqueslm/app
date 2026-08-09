@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0831</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0832</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -8172,6 +8172,17 @@ function parseShotList(text) {
     .filter((r) => r.move || r.dur || r.transAfter || r.text);
 }
 
+// The menu used to be a fixed list with no 7 in it, so a shot list asking for
+// 7s set the shot correctly and then showed the wrong number — and one touch of
+// the dropdown silently changed it. A pasted plan may ask for any whole number
+// of seconds, so whatever this shot is actually set to always appears here.
+const QK_DURS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 45, 60];
+function qkDurations(cur) {
+  const n = Number(cur);
+  const all = Number.isFinite(n) && n > 0 && !QK_DURS.includes(n) ? [...QK_DURS, n] : QK_DURS;
+  return [...all].sort((a, b) => a - b);
+}
+
 function renderQkShots() {
   const list = $('#qk-shots');
   list.innerHTML = '';
@@ -8194,7 +8205,7 @@ function renderQkShots() {
             ${QK_MOVES.map(([v, l]) => `<option value="${v}"${v === s.move ? ' selected' : ''}>${l}</option>`).join('')}
           </select>`}
           <select class="input q-dur" style="width:auto;padding:5px 8px;font-size:12px">
-            ${[2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 45, 60].map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d >= 60 ? '1 min' : d + 's'}</option>`).join('')}
+            ${qkDurations(s.dur).map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d >= 60 ? '1 min' : d + 's'}</option>`).join('')}
           </select>
           ${i < qk.shots.length - 1 ? `<span>then</span>
           <select class="input q-tr" style="width:auto;padding:5px 8px;font-size:12px">

@@ -953,6 +953,22 @@ async function bufferDescribe(name) {
 // its success and error members. Discovered once, cached for the process.
 const nameOf = (t) => { let cur = t; while (cur && !cur.name) cur = cur.ofType; return cur?.name || null; };
 
+// Enum values, asked of Buffer and cached. Sending a string an enum doesn't
+// declare is a validation error, and every value below started life as our
+// guess at their spelling.
+const bufferEnumCache = new Map();
+async function bufferEnumValues(typeName) {
+  if (bufferEnumCache.has(typeName)) return bufferEnumCache.get(typeName);
+  let vals = null;
+  try {
+    const d = await bufferGraphQL(`query { __type(name: "${typeName}") { enumValues { name } } }`);
+    const list = d?.__type?.enumValues;
+    if (list?.length) vals = list.map((v) => v.name);
+  } catch (_) { /* introspection closed - send ours and let Buffer object */ }
+  bufferEnumCache.set(typeName, vals);
+  return vals;
+}
+
 let bufferCreateCache = null;
 async function bufferCreateShape() {
   if (bufferCreateCache) return bufferCreateCache;
@@ -972,7 +988,13 @@ async function bufferCreateShape() {
   let inputFields = [];
   try {
     const t = await bufferGraphQL(`query { __type(name: "${inputType}") { inputFields { name type { kind name ofType { kind name } } } } }`);
-    inputFields = (t?.__type?.inputFields || []).map((x) => ({ name: x.name, required: x.type?.kind === 'NON_NULL' }));
+    inputFields = (t?.__type?.inputFields || []).map((x) => ({
+      name: x.name,
+      required: x.type?.kind === 'NON_NULL',
+      // Enum-typed fields matter: sending a string an enum doesn't declare is
+      // a validation error, and "addToQueue" is our guess at their spelling.
+      enumType: (x.type?.kind === 'ENUM' && x.type.name) || (x.type?.ofType?.kind === 'ENUM' && x.type.ofType.name) || null,
+    }));
   } catch (_) { /* introspection closed: send our best guess and let Buffer object */ }
 
   // And what to ask for back. A union needs inline fragments naming real
@@ -1130,6 +1152,14 @@ router.post('/buffer/post', async (req, res) => {
       channelId,
       schedulingType: 'automatic',
       mode: 'addToQueue',
+      // Required by Buffer's CreatePostInput. False means it goes straight to
+      // the queue instead of parking in an approval list nobody will look at -
+      // this is a one-person account, he IS the approver.
+      needsApproval: false,
+      // Buffer's own AI-disclosure flag. The caption still carries the visible
+      // "Made with AI" line, because that is what a viewer actually reads;
+      // this tells Buffer so it can do whatever each platform now requires.
+      aiAssisted: !!aiLabel,
       assets: [assetObj],
     };
     // Send only what this input actually declares. A field Buffer doesn't
@@ -1140,6 +1170,25 @@ router.post('/buffer/post', async (req, res) => {
       const allowed = new Set(shape.inputFields.map((f) => f.name));
       input = Object.fromEntries(Object.entries(wanted).filter(([k]) => allowed.has(k)));
       dropped = Object.keys(wanted).filter((k) => !allowed.has(k));
+      // Check our enum guesses against what Buffer declares, and say what it
+      // allows rather than sending a word it has never heard of.
+      for (const f of shape.inputFields) {
+        if (!f.enumType || input[f.name] === undefined) continue;
+        const allowedVals = await bufferEnumValues(f.enumType);
+        if (!allowedVals || allowedVals.includes(input[f.name])) continue;
+        // Our spelling isn't declared. Try the same word in the other casings
+        // an API might use and take whichever one the enum actually lists —
+        // that's a verified match, not another guess. ADD_TO_QUEUE and
+        // addToQueue are the same instruction.
+        const word = String(input[f.name]);
+        const snake = word.replace(/([a-z0-9])([A-Z])/g, '$1_$2');
+        const variants = [snake.toUpperCase(), snake.toLowerCase(), word.toUpperCase(), word.toLowerCase()];
+        const hit = variants.find((v) => allowedVals.includes(v));
+        if (hit) { input[f.name] = hit; continue; }
+        return res.status(502).json({
+          error: `Buffer's ${f.name} does not accept "${word}". It allows: ${allowedVals.join(', ')}. Tell Claude — that's one word to change.`,
+        });
+      }
       const missing = shape.inputFields.filter((f) => f.required && input[f.name] === undefined).map((f) => f.name);
       if (missing.length) {
         return res.status(502).json({

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0830</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0831</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -643,7 +643,10 @@ body.simple-only #view-simple{display:flex !important}
       </div>
       <p class="usage" id="kb-focal-hint" style="display:none">Tap the image to choose the focal point the camera pushes toward.</p>
       <select class="input" id="kb-move">
-        <option value="push">Slow push-in (zoom to center)</option>
+        <option value="still">Still (no movement — for title and end cards)</option>
+        <!-- push stays the default; Still sits first so it's findable, not so
+             it's what everyone gets. -->
+        <option value="push" selected>Slow push-in (zoom to center)</option>
         <option value="pull">Pull-back (zoom out to reveal)</option>
         <option value="focal">Push-in to focal point (tap image)</option>
         <option value="pan_left">Pan left</option>
@@ -8020,6 +8023,7 @@ function renderQkPremade() {
 renderQkPremade();
 
 const QK_MOVES = [
+  ['still', 'Still'],
   ['push', 'Zoom in'], ['pull', 'Zoom out'], ['pan_right', 'Slide →'], ['pan_left', 'Slide ←'],
   ['pan_up', 'Slide ↑'], ['pan_down', 'Slide ↓'], ['drift', 'Float'], ['hover', 'Hover above'],
   ['drone', 'Drone up'], ['low_angle', 'Looking up'], ['high_angle', 'Looking down'],
@@ -8086,6 +8090,10 @@ const PASTE_MOVES = [
   ['dutch tilt', 'dutch'], ['dutch', 'dutch'],
   ['hover above', 'hover'], ['hover', 'hover'], ['drone up', 'drone'], ['drone', 'drone'],
   ['handheld', 'shake'], ['shake', 'shake'], ['float', 'drift'], ['drift', 'drift'],
+  // A shot list written by hand says "still" or "none" or "hold" for a card.
+  // All three have to land somewhere or the row silently gets a zoom.
+  ['no movement', 'still'], ['no move', 'still'], ['none', 'still'],
+  ['static', 'still'], ['still', 'still'], ['hold', 'still'], ['locked off', 'still'],
   ['push', 'push'], ['pull', 'pull'],
 ];
 const PASTE_TRANS = [
@@ -8409,6 +8417,7 @@ $('#qk-assemble').onclick = async () => {
 
     // step 2: give every picture its camera move
     const clipAssets = [];
+    const ownFootage = []; // clips you filmed — their own sound has to survive
     for (let i = 0; i < qk.shots.length; i++) {
       const s = qk.shots[i];
       // your own video clips play as-is — no Ken Burns, just drop them on the timeline
@@ -8418,6 +8427,7 @@ $('#qk-assemble').onclick = async () => {
         btn.innerHTML = `<span class="spinner"></span>Clip ${i + 1} of ${qk.shots.length}…`;
         setProg('#qk-prog', ((i + 1) / qk.shots.length) * 100);
         clipAssets.push(s.assetId);
+        ownFootage.push(s.assetId);
         continue;
       }
       $('#qk-status').textContent = `Making picture ${i + 1} of ${qk.shots.length} move…`;
@@ -8438,6 +8448,13 @@ $('#qk-assemble').onclick = async () => {
       // when the Producer drives this assembler; empty for manual Quick Video
       return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: (crew.eqByIndex && crew.eqByIndex[ci]) || null };
     });
+    // A clip you filmed arrives with its own sound. Quick Video rebuilds st.seq
+    // from scratch every assemble and nothing repopulated this, so a finished
+    // video dropped in here came out silent — the picture survived the trip and
+    // the music didn't. Rebuild it to match the timeline we just built.
+    // Pictures turned into clips by Ken Burns have no audio track at all, so
+    // only your own footage goes in; the server re-checks each file anyway.
+    st.keepAudioAssets = new Set(ownFootage);
     st.trans = qk.shots.slice(0, -1).map((s) => ({ type: s.transAfter, duration: 0.5 }));
     // words on screen, timed to each picture
     st.overlays = [];

@@ -26,29 +26,34 @@ which is not where any documentation says to look.
 
 ## Open
 
-### 1. Data safety says 8 data types. The audit says 9.
+### 1. Data safety — CHECKED 9 Aug, nothing missing
 
-`03-data-safety-answers.md` was written **30 July** — two days *after* the form
-was filled in. So the console holds whatever was decided on the 28th, not what
-the audit later worked out.
+The form was walked through in the console. Twelve data types are selected and
+every category that should be empty is empty:
 
-The console summary reads *"8 data types collected or shared"*. Counting the
-audit's list of collected types — Name, Email, Phone number, User IDs, Health
-info, Photos, App interactions, Crash logs, Purchase history — gives nine. One
-of them is missing and the summary doesn't say which.
+| Category | Selected | Expected |
+|---|---|---|
+| Location | 0 / 2 | 0 |
+| Personal info | 4 / 9 | Name, Email, Phone number, User IDs |
+| Financial info | 1 / 4 | Purchase history |
+| Health and fitness | 1 / 2 | Health info |
+| Messages | 1 / 3 | Other in-app messages (ephemeral) |
+| Photos and videos | 1 / 2 | Photos |
+| Audio files | 1 / 3 | Voice or sound recordings (ephemeral) |
+| Files and docs, Calendar, Contacts, Web browsing, Device IDs | 0 | 0 |
+| App activity | 1 / 5 | App interactions |
+| App info and performance | **2 / 3** | Crash logs — see below |
 
-The three worth checking specifically, because they are the ones that draw
-enforcement and the ones most likely to have been skipped:
+**The "8 data types collected or shared" line on the summary page is not a
+count of ticks.** It counts a narrower thing — data processed ephemerally is
+not "collected" in Play's sense. Twelve ticked, eight counted. Reading that 8
+as a tick count is what raised a false alarm here on 9 Aug; do not repeat it.
 
-- **Health info** — the day counter, moods, journal text
-- **Photos** — the profile picture, which does reach the server
-- **Voice or sound recordings** — voice journaling, ticked as processed ephemerally
-
-To check: App content → Data safety → **Manage**, and step through without
-saving until the data-types checklist appears.
-
-**Not urgent, but do it before production goes live.** Under-declaring here is
-an enforcement action after launch, not a rejection now.
+**Open, and trivial:** App info and performance shows 2 of 3 where only Crash
+logs should be ticked. The second is almost certainly Diagnostics — load time,
+latency, framerate, battery — none of which is recorded. That is
+*over*-declaring, which carries no enforcement risk and only adds a line to the
+store listing. Tidy it whenever, or never.
 
 ### 2. Health apps declaration — RESOLVED 9 Aug
 

@@ -23,6 +23,8 @@ const {
 } = require('./auth');
 
 const app = express();
+// Don't advertise the framework in every response header.
+app.disable('x-powered-by');
 // Hosted deployments sit behind the platform's HTTPS proxy - trust its
 // forwarded headers so secure cookies and per-IP rate limits work correctly.
 app.set('trust proxy', 1);
@@ -802,7 +804,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   const isPro = user && billing.getBillingStatus(user).isPro;
   const used = db.getChatCount(req.userId, todayUTC());
   if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: `Daily Nova AI chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
+    return res.status(429).json({ error: `Daily Friendly chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
   }
   if (isPro && used >= PRO_CHAT_LIMIT) {
     return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });

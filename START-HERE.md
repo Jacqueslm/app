@@ -23,6 +23,16 @@ the person struggling (porn, alcohol, food, gambling).
 
 ## Deploy & branches
 
+- **STUDIO LIVES ON ONE BRANCH: `claude/vibe-code-uwxxlk`.** Studio's in-app
+  "Update my app" downloads that branch and nothing else (`UPDATE_BRANCH` in
+  `Studio/server/studio.js`). **Commit every change under `Studio/` to that
+  branch**, whatever branch the session was assigned for everything else. A
+  Studio fix sitting on a session branch does not exist as far as Jacques's
+  machine is concerned — on 9 Aug an hour went on a build stamp that would
+  never move, because the fix was on the wrong branch and the updater was
+  working perfectly.
+  Everything that is not Studio — the recovery app, outreach, episodes,
+  reference — goes to the session branch as normal.
 - **Host:** Railway, auto-deploys the site from the deploy branch on push.
 - **DNS: Cloudflare, not IONOS** (moved 8 Aug 2026). The domain is still bought
   from IONOS, but its nameservers point at Cloudflare — `adi` and `glen`

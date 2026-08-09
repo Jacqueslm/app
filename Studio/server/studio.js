@@ -944,9 +944,75 @@ async function bufferDescribe(name) {
   } catch (_) { return null; }
 }
 
-const BUFFER_CREATE_Q = `mutation($input: PostCreateInput!) {
-  createPost(input: $input) { ... on PostActionSuccess { post { id } } ... on MutationError { message } }
-}`;
+// Nothing about createPost is hardcoded any more. Every previous failure of
+// this feature was a guessed name: channels needed `input`, then
+// `organizationId`, then the mutation variable turned out not to be
+// `PostCreateInput` at all ("Unknown type" — Buffer's own reply listed the
+// alternatives). So the whole mutation is now read off Buffer's schema: the
+// argument's name, its input type, and what the result union actually calls
+// its success and error members. Discovered once, cached for the process.
+const nameOf = (t) => { let cur = t; while (cur && !cur.name) cur = cur.ofType; return cur?.name || null; };
+
+let bufferCreateCache = null;
+async function bufferCreateShape() {
+  if (bufferCreateCache) return bufferCreateCache;
+  const d = await bufferGraphQL(`query { __schema { mutationType { fields { name
+      args { name type { kind name ofType { kind name ofType { kind name } } } }
+      type { kind name ofType { kind name } } } } } }`);
+  const f = (d?.__schema?.mutationType?.fields || []).find((x) => x.name === 'createPost');
+  if (!f || !f.args?.length) throw new Error('Buffer has no createPost mutation on this key.');
+
+  // The post payload is whichever argument takes an input object.
+  const arg = f.args.find((a) => nameOf(a.type) && /input/i.test(nameOf(a.type))) || f.args[0];
+  const inputType = nameOf(arg.type);
+  if (!inputType) throw new Error('Could not read what createPost accepts.');
+  const bang = arg.type?.kind === 'NON_NULL' ? '!' : '';
+
+  // Which fields that input actually has, so we send those and no others.
+  let inputFields = [];
+  try {
+    const t = await bufferGraphQL(`query { __type(name: "${inputType}") { inputFields { name type { kind name ofType { kind name } } } } }`);
+    inputFields = (t?.__type?.inputFields || []).map((x) => ({ name: x.name, required: x.type?.kind === 'NON_NULL' }));
+  } catch (_) { /* introspection closed: send our best guess and let Buffer object */ }
+
+  // And what to ask for back. A union needs inline fragments naming real
+  // members; an object is selected directly.
+  let selection = '{ __typename }';
+  const retName = nameOf(f.type);
+  if (retName) {
+    try {
+      const t = await bufferGraphQL(`query { __type(name: "${retName}") { kind fields { name } possibleTypes { name fields { name } } } }`);
+      const ty = t?.__type;
+      const pick = (fields, on) => {
+        const has = (n) => (fields || []).some((x) => x.name === n);
+        if (has('post')) return on ? `... on ${on} { post { id } }` : 'post { id }';
+        if (has('message')) return on ? `... on ${on} { message }` : 'message';
+        return null;
+      };
+      if (ty?.kind === 'UNION' || ty?.kind === 'INTERFACE') {
+        const parts = ['__typename'];
+        for (const pt of ty.possibleTypes || []) {
+          const p = pick(pt.fields, pt.name);
+          if (p) parts.push(p);
+        }
+        if (parts.length > 1) selection = `{ ${parts.join(' ')} }`;
+      } else if (ty?.kind === 'OBJECT') {
+        const parts = ['__typename'];
+        const p = pick(ty.fields, null);
+        if (p) parts.push(p);
+        if ((ty.fields || []).some((x) => x.name === 'message') && !parts.includes('message')) parts.push('message');
+        if (parts.length > 1) selection = `{ ${parts.join(' ')} }`;
+      }
+    } catch (_) { /* keep __typename only */ }
+  }
+
+  bufferCreateCache = {
+    query: `mutation($input: ${inputType}${bang}) { createPost(${arg.name}: $input) ${selection} }`,
+    inputType,
+    inputFields,
+  };
+  return bufferCreateCache;
+}
 
 // What Buffer's video/image asset inputs actually look like, asked of Buffer
 // itself and cached for the server's lifetime. Guessing at this API's shapes
@@ -1048,33 +1114,62 @@ router.post('/buffer/post', async (req, res) => {
     assetObj = { video: v };
   }
 
+  let shape;
+  try {
+    shape = await bufferCreateShape();
+  } catch (err) {
+    return res.status(502).json({ error: `Could not read Buffer's posting format: ${err.message}` });
+  }
+
   const results = [];
   let needs = null;
+  let dropped = [];
   for (const channelId of channelIds) {
-    const input = {
+    const wanted = {
       text: caption,
       channelId,
       schedulingType: 'automatic',
       mode: 'addToQueue',
       assets: [assetObj],
     };
+    // Send only what this input actually declares. A field Buffer doesn't
+    // know is a hard validation error that kills the whole post, and their
+    // schema has already been renamed under us once.
+    let input = wanted;
+    if (shape.inputFields.length) {
+      const allowed = new Set(shape.inputFields.map((f) => f.name));
+      input = Object.fromEntries(Object.entries(wanted).filter(([k]) => allowed.has(k)));
+      dropped = Object.keys(wanted).filter((k) => !allowed.has(k));
+      const missing = shape.inputFields.filter((f) => f.required && input[f.name] === undefined).map((f) => f.name);
+      if (missing.length) {
+        return res.status(502).json({
+          error: `Buffer's ${shape.inputType} also requires: ${missing.join(', ')}. Tell Claude — that's one line to add.`,
+          needs: [`${shape.inputType}: ${shape.inputFields.map((f) => f.name + (f.required ? '!' : '')).join(', ')}`],
+        });
+      }
+    }
     try {
-      const d = await bufferGraphQL(BUFFER_CREATE_Q, { input });
+      const d = await bufferGraphQL(shape.query, { input });
       const r = d?.createPost;
-      if (r?.message) results.push({ channelId, ok: false, error: r.message });
-      else results.push({ channelId, ok: true, postId: r?.post?.id || null });
+      // No result object at all is a failure, not a success. Reporting
+      // "queued" for an empty response is the one wrong answer here: it would
+      // have Jacques believe a video is scheduled when nothing was created.
+      if (!r) results.push({ channelId, ok: false, error: 'Buffer accepted the request but returned nothing — the post was not created.' });
+      else if (r.message) results.push({ channelId, ok: false, error: r.message });
+      else if (r.post?.id) results.push({ channelId, ok: true, postId: r.post.id });
+      else results.push({ channelId, ok: false, error: `Buffer returned ${r.__typename || 'an unrecognised result'} with no post id.` });
     } catch (err) {
       results.push({ channelId, ok: false, error: err.message });
       if (!needs) {
-        needs = [];
-        for (const t of ['PostCreateInput', 'AssetInput', 'VideoAssetInput', 'ImageAssetInput']) {
+        needs = [`${shape.inputType}: ${shape.inputFields.map((f) => f.name + (f.required ? '!' : '')).join(', ') || '(introspection closed)'}`];
+        for (const t of ['AssetInput', 'VideoAssetInput', 'ImageAssetInput']) {
           const f = await bufferDescribe(t);
           if (f) needs.push(`${t}: ${f.join(', ')}`);
         }
-        if (!needs.length) needs = null;
       }
     }
   }
+  if (dropped.length) { try { db.logError('buffer', `dropped unknown post fields: ${dropped.join(', ')}`); } catch (_) {} }
   const anyOk = results.some((r) => r.ok);
   // Lead with Buffer's own words. The first version of this response had no
   // `error` field at all, so the browser showed "Request failed (502)" and

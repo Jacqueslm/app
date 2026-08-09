@@ -11,7 +11,7 @@ is what changed, so nothing gets lost.
 
 Settings → **Update my app** → close the black window → double-click **Start
 Studio** → **Ctrl+Shift+R** in the browser. The build stamp top-left should
-read **b0819**.
+read **b0830**.
 
 This update installs a speech add-on, so it will take longer than usual. That
 is normal.
@@ -56,7 +56,7 @@ something I'll do and call it your answer. Two real routes:
 
 ## WHAT SHIPPED TODAY
 
-### Studio (b0819)
+### Studio (now b0830)
 
 **Free narrators.** The Voice card's six narrators now speak on your own
 computer. No fal key, no cost, under a second per take. Was ~5c per 1,000
@@ -168,8 +168,13 @@ Paste block checked: eight shots, 49 seconds.
 ## STILL OPEN (not today's work)
 
 - Outreach follow-ups — 15th to 18th, `OUTREACH.md`
-- Play Store developer verification (the signing key) — before 30 Sep
-- Studio's Buffer send — built, you haven't tested it yet
+- Studio's Buffer send — **parked at Jacques' request.** It gets as far as
+  Buffer's own validation; the last blocker is that Buffer rejects custom video
+  thumbnails outright, so the thumbnail Studio attaches has to come back out
+  (one deletion, in `buffer/post`). Manual posting works today: render →
+  Download my video → upload to each platform.
+- Play Store **developer verification: DONE** — the console confirms all apps
+  are registered ahead of the Sep 30 deadline. Nothing further needed.
 - Script 39 narration
 - Origin-story photo fixes: real app screenshot on the laptop shot,
   "Someday" as one word

@@ -767,7 +767,11 @@ async function falKeyCheck(key) {
   }
   if (r.ok) return { ok: true, why: 'Key works.' };
   if (r.status === 401 || r.status === 403) {
-    return { ok: false, why: `fal.ai rejected this key (${r.status}). If you made a new key recently, the old one is still saved here — paste the current one. Check it at fal.ai → Keys.` };
+    // Careful with this one. It only proves fal's FILE-UPLOAD host refused the
+    // key. Generation goes to a different host entirely (queue.fal.run), so a
+    // key can be perfectly good for making pictures and still fail here.
+    // Don't send anyone to rotate a key on this evidence alone.
+    return { ok: false, why: `fal.ai's file-upload service refused this key (${r.status}). That does NOT necessarily mean the key is bad — generating pictures uses a different fal service. Try generating one cheap scene: if that works, the key is fine and the upload side is the problem (tell Claude). If that fails too, then it is the key or the account balance.` };
   }
   return { ok: null, why: `fal.ai answered ${r.status}. That's not a key problem — probably a hiccup on their side. Try again in a minute.` };
 }

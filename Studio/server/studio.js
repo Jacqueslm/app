@@ -749,7 +749,30 @@ router.get('/fans.csv', (req, res) => {
 });
 
 /* ---------------- settings: AI key from the app ---------------- */
-router.post('/settings/falkey', (req, res) => {
+// Ask fal whether a key is actually good. Storage auth is the cheapest thing
+// that requires a valid key - it generates nothing and bills nothing - so it's
+// what a "does this work" check should use. Returns plain English, never
+// throws: a key that can't be checked is not the same as a key that's wrong.
+async function falKeyCheck(key) {
+  if (!key) return { ok: false, why: 'No key saved.' };
+  let r;
+  try {
+    r = await fetch(FAL_STORAGE_AUTH_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Key ${key}` },
+      body: '{}',
+    });
+  } catch (err) {
+    return { ok: null, why: `Couldn't reach fal.ai to check (${err.message}). Your key may still be fine.` };
+  }
+  if (r.ok) return { ok: true, why: 'Key works.' };
+  if (r.status === 401 || r.status === 403) {
+    return { ok: false, why: `fal.ai rejected this key (${r.status}). If you made a new key recently, the old one is still saved here — paste the current one. Check it at fal.ai → Keys.` };
+  }
+  return { ok: null, why: `fal.ai answered ${r.status}. That's not a key problem — probably a hiccup on their side. Try again in a minute.` };
+}
+
+router.post('/settings/falkey', async (req, res) => {
   const { key } = req.body || {};
   const clean = typeof key === 'string' ? key.trim() : '';
   if (clean && (clean.length < 10 || /\s/.test(clean))) {
@@ -758,10 +781,19 @@ router.post('/settings/falkey', (req, res) => {
   try {
     persistFalKey(clean || null);
     FAL_KEY = clean || undefined;
-    res.json({ falAvailable: Boolean(FAL_KEY) });
+    // Save first, then check. A key is saved even if fal is unreachable -
+    // refusing to save because their API blinked would be worse than useless.
+    const check = clean ? await falKeyCheck(clean) : { ok: false, why: 'Key removed.' };
+    res.json({ falAvailable: Boolean(FAL_KEY), verified: check.ok, note: check.why });
   } catch (err) {
     res.status(500).json({ error: `Could not save the key: ${err.message}` });
   }
+});
+
+// "Is my key still good?" - same check, without re-pasting anything.
+router.post('/settings/falkey/test', async (req, res) => {
+  const check = await falKeyCheck(FAL_KEY);
+  res.json({ verified: check.ok, note: check.why });
 });
 
 /* ---------------- settings: daily spend cap ---------------- */

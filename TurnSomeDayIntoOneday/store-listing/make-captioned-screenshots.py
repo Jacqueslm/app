@@ -37,9 +37,9 @@ REG = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
 PANELS = [
     ("01-home.png",     "Every sober day, counted",       "Days, hours and money back — on one screen"),
     ("06-sos.png",      "One tap when the craving hits",  "Breathe, talk it through, or reach 988 — instantly"),
-    ("05-chat.png",     "Someone to talk to at 3am",      "Friendly listens. No judgment, any hour."),
+    ("05-chat.png",     "An AI companion at 3am",         "Friendly listens. No judgment, any hour."),
     ("02-lessons.png",  "A new lesson every day",         "Read it, or listen hands-free"),
-    ("03-journal.png",  "Write it down, see the pattern", "Daily entries and mood, private to you"),
+    ("03-journal.png",  "Write it down, keep it private", "A daily entry and a mood, in your account"),
     ("04-progress.png", "Progress that never resets",     "A setback doesn't erase what you've already done"),
 ]
 

@@ -16,9 +16,9 @@ is that: the same real screens with a headline band above each one.
 |---|---|---|
 | 1 | `01-home.png` | Every sober day, counted |
 | 2 | `02-sos.png` | One tap when the craving hits |
-| 3 | `03-chat.png` | Someone to talk to at 3am |
+| 3 | `03-chat.png` | An AI companion at 3am |
 | 4 | `04-lessons.png` | A new lesson every day |
-| 5 | `05-journal.png` | Write it down, see the pattern |
+| 5 | `05-journal.png` | Write it down, keep it private |
 | 6 | `06-progress.png` | Progress that never resets |
 
 Order matters. Play shows the first two or three before anyone scrolls, so the
@@ -27,6 +27,11 @@ day counter leads and the craving button follows. The old upload led with the
 
 To change any caption, edit `PANELS` in `make-captioned-screenshots.py` and
 re-run it. The raw screenshots are never touched.
+
+Two rules the captions are written to: **no outcome claims** ("helps you quit",
+"reduces cravings") anywhere in a screenshot, and the companion is named as an
+AI rather than as a person. Both come from the health-apps declaration in
+`04-health-declaration.md`, and both are things listings get rejected over.
 
 ## The screenshots
 

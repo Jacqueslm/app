@@ -22,8 +22,10 @@ The only file you need. Everything else is reference.
 **Tuesday — sales (45 min):**
 Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. Every
 email is fully written — copy, paste, send. This is the sales work.
-Extra 15 minutes after? Open **INFLUENCERS.md** (a different pile — podcasts
-and sober authors) and send 1. No pressure, no deadline on that file.
+Extra 15 minutes after? Two other piles, both fully written, both waiting:
+**INFLUENCERS.md** (10 podcasts and sober authors — none sent yet) and
+**SCHOOLS.md** (10 school districts' staff-wellness coordinators). Send 1 from
+either. No pressure, no deadline on those files.
 
 **Wednesday — one small win (30 min):**
 One-time jobs, one per week: AlternativeTo listing, updating a bio, a

@@ -4,6 +4,10 @@
 //  Same engine as MSB-Indicator.pine, wired to strategy orders. Run it on the
 //  1H chart of MNQ1! / MES1! / MGC1!.
 //
+//  Grading is 12 points (9+ = A+, 7-8 = B) behind the same hard gates as the
+//  indicator, now including the range-budget gate and day-type read from
+//  PRO-ANALYSIS.md.
+//
 //  THE POINT OF THIS FILE is the "Apply context layer" switch. Run the backtest
 //  with it OFF, write the numbers down, run it again with it ON, and compare.
 //  That tells you whether the institutional layer earns its place on YOUR data.
@@ -57,10 +61,17 @@ useCorr  = input.bool(true, "Point: correlated instrument agrees", group = grpI)
 corrSym  = input.symbol("CME_MINI:MES1!", "Correlated symbol", group = grpI)
 corrLen  = input.int(5, "Correlation lookback (bars)", minval = 2, group = grpI)
 
+grpP = "Professional read — the day, top down"
+useBudget = input.bool(true, "Gate: reject when the range budget is spent", group = grpP)
+budgetMax = input.float(0.85, "Budget spent at (× daily ATR)", minval = 0.3, maxval = 2.0, step = 0.05, group = grpP)
+useDayTp  = input.bool(true, "Point: day type agrees (not a balance day)", group = grpP)
+useVA     = input.bool(true, "Point: trading beyond yesterday's value", group = grpP)
+vaAccept  = input.int(2, "Closes beyond value = acceptance", minval = 1, maxval = 6, group = grpP)
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40, "Setup expires after N bars", minval = 5, group = grpT)
-minScore = input.int(6,  "Minimum grade score (6 = B, 8 = A+)", minval = 0, maxval = 10, group = grpT)
+minScore = input.int(7,  "Minimum grade score (7 = B, 9 = A+)", minval = 0, maxval = 12, group = grpT)
 stopBuf  = input.float(0.15, "Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
 
 grpM = "Management — the 1R partial model"
@@ -193,6 +204,37 @@ if not inRth
 
 atr = ta.atr(14)
 f_near(float lvl, float ref, float tol) => not na(lvl) and not na(ref) and math.abs(lvl - ref) <= tol
+
+// ─── The professional read: value, day type, range budget (PRO-ANALYSIS.md) ──
+// Yesterday's value area ≈ prior day's final VWAP ± 1σ.
+[vaMid, vaHiRun, vaLoRun] = ta.vwap(hlc3, newDay, 1.0)
+var float pPoc = na
+var float pVah = na
+var float pVal = na
+if newDay
+    pPoc := vaMid[1]
+    pVah := vaHiRun[1]
+    pVal := vaLoRun[1]
+
+var int vaAboveCnt = 0
+var int vaBelowCnt = 0
+vaAboveCnt := not na(pVah) and close > pVah ? vaAboveCnt + 1 : 0
+vaBelowCnt := not na(pVal) and close < pVal ? vaBelowCnt + 1 : 0
+dayType = vaAboveCnt >= vaAccept ? 1 : vaBelowCnt >= vaAccept ? -1 : 0
+
+dAtr = request.security(syminfo.tickerid, "D", ta.atr(14)[1], lookahead = barmerge.lookahead_on)
+var float tdHi = na
+var float tdLo = na
+if newDay
+    tdHi := high
+    tdLo := low
+else
+    tdHi := math.max(nz(tdHi, high), high)
+    tdLo := math.min(nz(tdLo, low),  low)
+usedUpLong  = not na(dAtr) and dAtr > 0 ? (close - tdLo) / dAtr : 0.0
+usedUpShort = not na(dAtr) and dAtr > 0 ? (tdHi - close) / dAtr : 0.0
+budgetOKL = not useCtx or not useBudget or usedUpLong  <= budgetMax
+budgetOKS = not useCtx or not useBudget or usedUpShort <= budgetMax
 
 corrClose = request.security(corrSym, timeframe.period, close, lookahead = barmerge.lookahead_off)
 corrChg   = corrClose - corrClose[corrLen]
@@ -358,9 +400,9 @@ acceptOK = not reqHold or heldBars >= holdBars
 
 // ─── Trigger & grade ─────────────────────────────────────────────────────────
 trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and
-     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK
+     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL
 trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and
-     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK
+     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS
 
 entry   = close
 stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
@@ -384,9 +426,13 @@ plan   = roomR < minRoom  ? "NO TRADE" :
          roomR < holdMin  ? "STANDARD" : "HOLD"
 
 pSweep = not useCtx or not useSweep or swept
+pDayTp = not useCtx or not useDayTp or (trigLong ? dayType == 1 : trigShort ? dayType == -1 : false)
+pVAout = not useCtx or not useVA or (trigLong ? (not na(pVah) and close > pVah) :
+     trigShort ? (not na(pVal) and close < pVal) : false)
 score  = (touches <= 1 ? 1 : 0) + (cleanRt and heldBars >= holdBars ? 1 : 0) +
      (dispStrong ? 1 : 0) + (rvolOK ? 1 : 0) + (pSweep ? 1 : 0) + (refOK ? 1 : 0) +
-     (corrAgree ? 1 : 0) + (inPrime ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0)
+     (corrAgree ? 1 : 0) + (inPrime ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0) +
+     (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
 
 // One bullet a day. na(lastEntryDay) first — `dayofmonth != na` is never true.
 var int tookToday    = 0
@@ -411,7 +457,7 @@ if trigLong and okToTrade
     pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
     tookToday += 1
-    strategy.entry("L", strategy.long, comment = plan + " " + (score >= 8 ? "A+" : "B"))
+    strategy.entry("L", strategy.long, comment = plan + " " + (score >= 9 ? "A+" : "B"))
 
 if trigShort and okToTrade
     pStop := stopRaw
@@ -419,7 +465,7 @@ if trigShort and okToTrade
     pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
     tookToday += 1
-    strategy.entry("S", strategy.short, comment = plan + " " + (score >= 8 ? "A+" : "B"))
+    strategy.entry("S", strategy.short, comment = plan + " " + (score >= 9 ? "A+" : "B"))
 
 if strategy.position_size > 0 and not t1Hit and high >= pT1
     t1Hit := true

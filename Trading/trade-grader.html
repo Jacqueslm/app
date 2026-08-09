@@ -91,7 +91,7 @@
 
     <!-- ── Score points ── -->
     <div class="card">
-      <h2>Quality points — 10 available</h2>
+      <h2>Quality points — 12 available</h2>
       <div id="softList"></div>
     </div>
 
@@ -183,6 +183,7 @@ const HARD = [
   ["closed", "Trigger is a CLOSED 1H candle",            "Not a live one. Wicks and live candles lie."],
   ["vwap",   "On the correct side of VWAP",              "Long above, short below. Otherwise you're fighting the session's control."],
   ["ext",    "NOT stretched past the 2σ VWAP band",      "That's where benchmark algos turn into sellers. Don't buy their exit."],
+  ["budget", "Day's range budget not spent",             "Price hasn't already travelled 85%+ of the daily ATR in my direction. The perfect setup at 1:30pm fails here."],
   ["news",   "Clear of red-folder news by 10+ minutes",  "CPI, NFP, FOMC. Structure after the news, never through it."],
   ["room",   "At least 2R of clear air to the next HTF level", "If T1 sits under a wall, there is no trade here."]
 ];
@@ -196,7 +197,9 @@ const SOFT = [
   ["corr",   "Correlated instrument agrees",       "MNQ ↔ MES. Disagreement means one chart's noise, not market flow."],
   ["sess",   "Inside the session window",          "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
   ["chop0",  "Zero chop measures firing",          "Not just under the limit — actually clean."],
-  ["room3",  "3R+ to the next opposing level",     "Room for the runner, not just T1."]
+  ["room3",  "3R+ to the next opposing level",     "Room for the runner, not just T1."],
+  ["daytype","Day type agrees — not a balance day", "2+ closes accepted beyond yesterday's value in my direction. A continuation setup on a balance day is the losing pattern in the winning one's clothes."],
+  ["value",  "Trading beyond yesterday's value",   "Initiative territory. The middle of yesterday's value is 'fair' — fair means no edge."]
 ];
 
 const $ = id => document.getElementById(id);
@@ -270,7 +273,7 @@ function evaluate(){
   // Grade
   const missed = HARD.filter(([k]) => !boxes().find(b => b.dataset.k === k && b.dataset.cls === "hard").checked);
   const score  = checkedOf("soft").length;
-  const grade  = score >= 8 ? "A+" : score >= 6 ? "B" : "C";
+  const grade  = score >= 9 ? "A+" : score >= 7 ? "B" : "C";
   const v = $("verdict"), big = v.querySelector(".big"), why = v.querySelector(".why");
   v.className = "verdict";
 
@@ -290,16 +293,16 @@ function evaluate(){
   } else if (grade === "C") {
     v.classList.add("v-rej");
     big.textContent = "REJECT · C";
-    why.textContent = `${score}/10 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
+    why.textContent = `${score}/12 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
   } else if (grade === "B") {
     v.classList.add("v-half");
     big.textContent = "HALF SIZE · B";
-    why.textContent = `${score}/10 quality points. Take it at reduced size — and pass entirely if you have already ` +
+    why.textContent = `${score}/12 quality points. Take it at reduced size — and pass entirely if you have already ` +
                       `taken two trades today.`;
   } else {
     v.classList.add("v-take");
     big.textContent = "TAKE IT · A+";
-    why.textContent = `${score}/10 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
+    why.textContent = `${score}/12 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
   }
   // Planned R: what this trade returns if you follow the plan. Logged so the journal can
   // show the gap between what you planned and what you actually took.

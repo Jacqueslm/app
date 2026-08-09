@@ -17,7 +17,12 @@
 //
 //  Hard gates: Daily bias · 4H bridge · not chopping · protected level intact ·
 //              acceptance held · right side of VWAP · not past the 2σ band.
-//  Quality:    10 points. 8+ = A+, 6-7 = B, below = no trade.
+//  Quality:    12 points. 9+ = A+, 7-8 = B, below = no trade.
+//
+//  On top sits the professional read (PRO-ANALYSIS.md): yesterday's value area,
+//  live day-type classification (trend vs balance), a daily range budget that
+//  rejects late chases, and the volatility regime. Amateurs start with the
+//  setup; this script starts with the day.
 //
 //  Every context filter is a toggle so you can backtest with and without them.
 //  Do not take my word that they help. Measure it.
@@ -62,6 +67,16 @@ useCorr  = input.bool(true,  "Point: correlated instrument must agree", group = 
 corrSym  = input.symbol("CME_MINI:MES1!", "Correlated symbol", group = grpI)
 corrLen  = input.int(5, "Correlation lookback (bars)", minval = 2, group = grpI)
 
+grpP = "Professional read — the day, top down"
+useBudget = input.bool(true, "Gate: reject when the range budget is spent", group = grpP,
+     tooltip = "Kills the perfect-looking setup at 1:30pm, 240 points into a 250-point day. Nothing on the chart makes that trade look wrong — only the budget does.")
+budgetMax = input.float(0.85, "Budget spent at (× daily ATR)", minval = 0.3, maxval = 2.0, step = 0.05, group = grpP)
+useDayTp  = input.bool(true, "Point: day type agrees (not a balance day)", group = grpP,
+     tooltip = "Your setup describes trend-day behaviour. On balance days the identical setup is the losing pattern.")
+useVA     = input.bool(true, "Point: trading beyond yesterday's value", group = grpP,
+     tooltip = "Initiative territory. The middle of yesterday's value is the market's definition of fair — fair means no edge.")
+vaAccept  = input.int(2, "Closes beyond value = acceptance", minval = 1, maxval = 6, group = grpP)
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40,    "Setup expires after N bars", minval = 5, group = grpT)
@@ -93,6 +108,7 @@ showSwg  = input.bool(true,  "Show swing labels",    group = grpV)
 showDash = input.bool(true,  "Show dashboard",       group = grpV)
 showVwap = input.bool(true,  "Show VWAP + bands",    group = grpV)
 showRef  = input.bool(false, "Show reference levels",group = grpV)
+showVA   = input.bool(true,  "Show yesterday's value area", group = grpV)
 cBull    = input.color(#26a69a, "Bullish", group = grpV, inline = "c")
 cBear    = input.color(#ef5350, "Bearish", group = grpV, inline = "c")
 
@@ -216,6 +232,49 @@ if not inRth
 
 atr = ta.atr(14)
 f_near(float lvl, float ref, float tol) => not na(lvl) and not na(ref) and math.abs(lvl - ref) <= tol
+
+// ─── The professional read: value, day type, range budget, regime ────────────
+// Yesterday's value area ≈ prior day's final VWAP ± 1σ (captures ~70% of the
+// activity, same as a Market Profile value area — an approximation, a sound one).
+[vaMid, vaHiRun, vaLoRun] = ta.vwap(hlc3, newDay, 1.0)
+var float pPoc = na
+var float pVah = na
+var float pVal = na
+var float dayOpenPx = na
+if newDay
+    pPoc      := vaMid[1]
+    pVah      := vaHiRun[1]
+    pVal      := vaLoRun[1]
+    dayOpenPx := open
+
+// Day type by ACCEPTANCE beyond value — closes, not pokes. Late by design: it will
+// miss the first hour of some trend days, and not be fooled on the many balance days.
+var int vaAboveCnt = 0
+var int vaBelowCnt = 0
+vaAboveCnt := not na(pVah) and close > pVah ? vaAboveCnt + 1 : 0
+vaBelowCnt := not na(pVal) and close < pVal ? vaBelowCnt + 1 : 0
+dayType = vaAboveCnt >= vaAccept ? 1 : vaBelowCnt >= vaAccept ? -1 : 0
+
+// Range budget: how much of a normal day's travel is already spent in each direction.
+// Yesterday's daily ATR via [1] + lookahead_on — the non-repainting idiom.
+dAtr = request.security(syminfo.tickerid, "D", ta.atr(14)[1], lookahead = barmerge.lookahead_on)
+var float tdHi = na
+var float tdLo = na
+if newDay
+    tdHi := high
+    tdLo := low
+else
+    tdHi := math.max(nz(tdHi, high), high)
+    tdLo := math.min(nz(tdLo, low),  low)
+usedUpLong  = not na(dAtr) and dAtr > 0 ? (close - tdLo) / dAtr : 0.0   // spent off the low
+usedUpShort = not na(dAtr) and dAtr > 0 ? (tdHi - close) / dAtr : 0.0   // spent off the high
+budgetOKL = not useCtx or not useBudget or usedUpLong  <= budgetMax
+budgetOKS = not useCtx or not useBudget or usedUpShort <= budgetMax
+
+// Volatility regime — the weather report. Display and expectations, not a gate:
+// sizing and the chop filter already act on it mechanically.
+atrBase  = ta.sma(atr, 100)
+volRegime = na(atrBase) or atrBase == 0 ? "—" : atr > atrBase * 1.3 ? "HIGH" : atr < atrBase * 0.7 ? "LOW" : "NORMAL"
 
 // ─── Correlated instrument ───────────────────────────────────────────────────
 corrClose = request.security(corrSym, timeframe.period, close, lookahead = barmerge.lookahead_off)
@@ -383,9 +442,9 @@ acceptOK = not reqHold or heldBars >= holdBars
 // ─── Trigger ─────────────────────────────────────────────────────────────────
 // ⑥ close through the reclaim candle, with body, bridge agreeing, context clear.
 trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and
-     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK
+     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL
 trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and
-     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK
+     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS
 anyTrig = trigLong or trigShort
 
 // ─── Trade levels ────────────────────────────────────────────────────────────
@@ -415,7 +474,7 @@ plan = roomR < minRoom  ? "NO TRADE" :
        roomR < holdMin  ? "STANDARD" : "HOLD"
 t2   = plan == "SCALP" ? t1 : htfTgt
 
-// ─── Grading — 10 points ─────────────────────────────────────────────────────
+// ─── Grading — 12 points ─────────────────────────────────────────────────────
 pFirst = touches <= 1                       // first retest, not the third
 pHold  = cleanRt and heldBars >= holdBars   // ACCEPTANCE — the reason you wait
 pDisp  = dispStrong                         // a genuinely strong candle, not just past the gate
@@ -426,12 +485,17 @@ pCorr  = corrAgree                          // market flow, not one chart's nois
 pSess  = inPrime                            // prime hours, not merely open
 pChop  = chopN == 0
 pRoom  = roomR >= 3.0
+// A continuation setup on a balance day is the losing pattern wearing the winning one's clothes.
+pDayTp = not useCtx or not useDayTp or (trigLong ? dayType == 1 : trigShort ? dayType == -1 : false)
+// Beyond yesterday's value = initiative territory. The middle of value is "fair" — no edge.
+pVAout = not useCtx or not useVA or (trigLong ? (not na(pVah) and close > pVah) :
+     trigShort ? (not na(pVal) and close < pVal) : false)
 
 score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
      (pSweep ? 1 : 0) + (pRef ? 1 : 0) + (pCorr ? 1 : 0) + (pSess ? 1 : 0) +
-     (pChop ? 1 : 0) + (pRoom ? 1 : 0)
+     (pChop ? 1 : 0) + (pRoom ? 1 : 0) + (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
 
-grade   = score >= 8 ? "A+" : score >= 6 ? "B" : "C"
+grade   = score >= 9 ? "A+" : score >= 7 ? "B" : "C"
 gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
 
 // ─── One bullet a day ────────────────────────────────────────────────────────
@@ -453,6 +517,9 @@ if fire
 plot(showVwap ? vwapV  : na, "VWAP",    color.new(color.orange, 0),  1)
 plot(showVwap ? vwapUp : na, "VWAP +σ", color.new(color.orange, 65), 1)
 plot(showVwap ? vwapDn : na, "VWAP −σ", color.new(color.orange, 65), 1)
+plot(showVA ? pVah : na, "Yesterday VAH", color.new(color.aqua, 55), 1, plot.style_circles)
+plot(showVA ? pPoc : na, "Yesterday POC", color.new(color.aqua, 30), 1, plot.style_circles)
+plot(showVA ? pVal : na, "Yesterday VAL", color.new(color.aqua, 55), 1, plot.style_circles)
 plot(showRef ? pdh : na, "Prior day high", color.new(color.purple, 40), 1, plot.style_circles)
 plot(showRef ? pdl : na, "Prior day low",  color.new(color.purple, 40), 1, plot.style_circles)
 plot(showRef ? onH : na, "Overnight high", color.new(color.teal, 50),   1, plot.style_circles)
@@ -485,7 +552,7 @@ plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belo
 
 if fire
     label.new(bar_index, trigLong ? low - atr : high + atr,
-         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/10\n" +
+         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/12\n" +
               plan + "  " + str.tostring(roomR, "#.0") + "R room",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
@@ -500,12 +567,20 @@ f_col(int t) => t == 1 ? cBull  : t == -1 ? cBear  : color.gray
 f_yn(bool b)  => b ? "✓" : "✗"
 f_ync(bool b) => b ? cBull : cBear
 
-var table dash = table.new(position.top_right, 2, 13,
+var table dash = table.new(position.top_right, 2, 17,
      border_width = 1, border_color = color.new(color.gray, 60))
 if showDash and barstate.islast
     stName = st == 0 ? "IDLE" : st == 1 ? "① BOS — armed" : st == 2 ? "② back through" :
          "③ held " + str.tostring(heldBars) + "/" + str.tostring(holdBars)
     vwSide = na(vwapV) ? "—" : close > vwapV ? "above" : "below"
+    dtTxt  = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE"
+    vaTxt  = na(pVah) or na(pVal) ? "—" : close > pVah ? "above value" : close < pVal ? "below value" : "inside value"
+    // Show the budget for the direction the day is leaning; both if undecided.
+    budTxt = na(dAtr) or dAtr == 0 ? "—" :
+         dayType == -1 ? str.tostring(usedUpShort * 100, "#") + "% ↓" :
+         dayType == 1  ? str.tostring(usedUpLong * 100, "#") + "% ↑" :
+         str.tostring(usedUpLong * 100, "#") + "%↑ " + str.tostring(usedUpShort * 100, "#") + "%↓"
+    budHot = math.max(usedUpLong, usedUpShort) > budgetMax
     table.cell(dash, 0, 0, "MSB", text_color = color.white, bgcolor = color.new(color.blue, 30), text_size = size.small)
     table.cell(dash, 1, 0, syminfo.ticker + (useCtx ? " +ctx" : ""), text_color = color.white,
          bgcolor = color.new(color.blue, 30), text_size = size.small)
@@ -529,13 +604,22 @@ if showDash and barstate.islast
     table.cell(dash, 1, 8, f_yn(refHit), text_color = f_ync(refHit), text_size = size.small)
     table.cell(dash, 0, 9, "Correlation", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 9, f_yn(corrAgree), text_color = f_ync(corrAgree), text_size = size.small)
-    table.cell(dash, 0, 10, "Setup", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 10, stName, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 11, "Session", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 11, inSess ? (inPrime ? "PRIME" : "open") : "closed",
+    table.cell(dash, 0, 10, "Day type", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 10, dtTxt, text_color = f_col(dayType), text_size = size.small)
+    table.cell(dash, 0, 11, "Vs yest. value", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 11, vaTxt, text_color = color.silver, text_size = size.small)
+    table.cell(dash, 0, 12, "Range budget", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 12, budTxt, text_color = budHot ? cBear : color.silver, text_size = size.small)
+    table.cell(dash, 0, 13, "Vol regime", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 13, volRegime, text_color = volRegime == "HIGH" ? color.orange :
+         volRegime == "LOW" ? color.gray : color.silver, text_size = size.small)
+    table.cell(dash, 0, 14, "Setup", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 14, stName, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 15, "Session", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 15, inSess ? (inPrime ? "PRIME" : "open") : "closed",
          text_color = inPrime ? cBull : inSess ? color.silver : color.gray, text_size = size.small)
-    table.cell(dash, 0, 12, "Bullets left", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 12, str.tostring(bulletsLeft) + " / " + str.tostring(maxPerDay),
+    table.cell(dash, 0, 16, "Bullets left", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 16, str.tostring(bulletsLeft) + " / " + str.tostring(maxPerDay),
          text_color = bulletsLeft > 0 ? cBull : cBear, text_size = size.small)
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────
@@ -543,8 +627,11 @@ if fire
     exitPlan = plan == "SCALP"    ? "Single target at T1. Full exit. Done for the day." :
                plan == "STANDARD" ? "Half at T1, stop to break-even, rest at T2." :
                                     "Half at T1, stop to break-even, TRAIL the rest on the 15m to T2."
+    dtA  = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE day"
+    budA = str.tostring((trigLong ? usedUpLong : usedUpShort) * 100, "#") + "% of range budget used"
     alert(syminfo.ticker + " " + (trigLong ? "LONG" : "SHORT") + " " + grade +
-         " (" + str.tostring(score) + "/10) — " + plan +
+         " (" + str.tostring(score) + "/12) — " + plan +
+         "\n" + dtA + " | " + budA + " | vol " + volRegime +
          "\nentry " + str.tostring(entry,   format.mintick) +
          " | stop " + str.tostring(stopRaw, format.mintick) +
          " | risk " + str.tostring(riskPts, format.mintick) + " pts" +

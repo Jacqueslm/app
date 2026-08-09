@@ -125,11 +125,13 @@ once and these stop feeling like arbitrary boxes.
 - [ ] Trigger is a **closed** 1H candle, not a live one
 - [ ] **On the correct side of VWAP** — long above, short below
 - [ ] **Not stretched beyond the 2σ VWAP band** — that's where benchmark algos become sellers
+- [ ] **The day's range budget isn't spent** — price hasn't already travelled ≥85% of the daily
+      ATR in your direction ([PRO-ANALYSIS.md §4](PRO-ANALYSIS.md))
 - [ ] Stop distance ≤ your max ($ risk still within 1% at 1 contract)
 - [ ] Not inside the last 10 minutes before a red-folder news release
 - [ ] Room to run: ≥ 2R of clear air before the next opposing HTF level
 
-### Score points (one each, 10 available)
+### Score points (one each, 12 available)
 
 **Structure**
 1. **First retest** of the level — not the third
@@ -142,14 +144,19 @@ once and these stop feeling like arbitrary boxes.
 6. **Liquidity sweep** on the pullback — took out the recent low and reclaimed it
 7. **Reference-level confluence** — prior day H/L, settlement, overnight H/L, or initial balance
 8. **Correlated instrument agrees** — MNQ ↔ MES
-9. **In the session window** (see §8)
+9. **In the prime hours** (see §8)
 10. **Zero chop measures firing** — not merely under the limit
+
+**The day** ([PRO-ANALYSIS.md](PRO-ANALYSIS.md))
+11. **Day type agrees** — 2+ closes accepted beyond yesterday's value in your direction.
+    A continuation setup on a balance day is the losing pattern in the winning one's clothes.
+12. **Beyond yesterday's value** — initiative territory, not the fair-price middle.
 
 | Score | Grade | Action |
 |---|---|---|
-| 8–10 | **A+** | Full size |
-| 6–7 | **B** | Half size, or pass if you've already taken 2 trades today |
-| 0–5 | **C** | **No trade.** Log it, screenshot it, move on. |
+| 9–12 | **A+** | Full size |
+| 7–8 | **B** | Half size — and with one bullet a day, strongly consider passing |
+| 0–6 | **C** | **No trade.** Log it, screenshot it, move on. |
 
 **Every context filter is a switch in the indicator.** That's deliberate — nobody, including me,
 gets to assert that a filter helps. Backtest with the context layer off, then on, and keep what

@@ -12,6 +12,7 @@ Read them in this order.
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
 | **[INSTITUTIONAL.md](INSTITUTIONAL.md)** | How large participants actually trade — and why the setup works. Read it second. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
+| **[PRO-ANALYSIS.md](PRO-ANALYSIS.md)** | Reading the day top-down like a desk: value, day type, range budget. Includes the pre-market prep sheet. |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |
 | **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |

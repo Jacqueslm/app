@@ -152,11 +152,19 @@ once and these stop feeling like arbitrary boxes.
     A continuation setup on a balance day is the losing pattern in the winning one's clothes.
 12. **Beyond yesterday's value** — initiative territory, not the fair-price middle.
 
-| Score | Grade | Action |
-|---|---|---|
-| 9–12 | **A+** | Full size |
-| 7–8 | **B** | Half size — and with one bullet a day, strongly consider passing |
-| 0–6 | **C** | **No trade.** Log it, screenshot it, move on. |
+| Score | Grade | Quality | Action |
+|---|---|---|---|
+| 9–12 | **A+** | 75–100% | Full size |
+| 7–8 | **B** | 58–67% | Half size — and with one bullet a day, strongly consider passing |
+| 0–6 | **C** | ≤ 50% | **No trade.** Log it, screenshot it, move on. |
+
+**On percentages, so it's written down:** the quality % is confluence — how many boxes the setup
+ticks — and it is **not** a win probability. No indicator can print a real win probability; any
+tool that claims "90% win rate" on a signal is inventing the number. The only honest probability
+is your own record: the grader computes your **actual win rate per grade** from the journal and
+shows it next to the verdict once you have 10+ logged trades at that grade. That number is real,
+it's yours, and it sharpens every week you log. Trust it over any percentage a chart gives you —
+including this system's.
 
 **Every context filter is a switch in the indicator.** That's deliberate — nobody, including me,
 gets to assert that a filter helps. Backtest with the context layer off, then on, and keep what

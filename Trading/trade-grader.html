@@ -290,19 +290,27 @@ function evaluate(){
     if (noRoom)        reasons.push(`<li>Only ${room.toFixed(1)}R of room to the next HTF level</li>`);
     why.innerHTML = `Failed ${reasons.length} hard filter${reasons.length>1?"s":""}. ` +
                     `A missed trade costs zero.<ul class="blockers">${reasons.join("")}</ul>`;
-  } else if (grade === "C") {
-    v.classList.add("v-rej");
-    big.textContent = "REJECT · C";
-    why.textContent = `${score}/12 quality points. Hard filters passed but the setup is thin. Log it and wait.`;
-  } else if (grade === "B") {
-    v.classList.add("v-half");
-    big.textContent = "HALF SIZE · B";
-    why.textContent = `${score}/12 quality points. Take it at reduced size — and pass entirely if you have already ` +
-                      `taken two trades today.`;
   } else {
-    v.classList.add("v-take");
-    big.textContent = "TAKE IT · A+";
-    why.textContent = `${score}/12 quality points, all hard filters clear. Full size. Now go and manage it on the 15m.`;
+    const qualPct = Math.round(score / 12 * 100);
+    // Quality % is confluence, not a win probability. The real probability is below,
+    // computed from this trader's own logged results at this grade — once there's a sample.
+    const wr = gradeWinRate(grade);
+    const wrTxt = wr && wr.n >= 10 ? ` Your actual ${grade} win rate: ${wr.pct}% over ${wr.n} trades.` :
+                  wr ? ` (${wr.n} ${grade} trades logged — win rate shown at 10+.)` :
+                  ` (No ${grade} trades logged yet — your real win rate appears here once you have 10+.)`;
+    if (grade === "C") {
+      v.classList.add("v-rej");
+      big.textContent = "REJECT · C";
+      why.textContent = `${score}/12 points · ${qualPct}% quality. Hard filters passed but the setup is thin. Log it and wait.`;
+    } else if (grade === "B") {
+      v.classList.add("v-half");
+      big.textContent = "HALF SIZE · B";
+      why.textContent = `${score}/12 points · ${qualPct}% quality. Reduced size — and with one bullet a day, consider passing.` + wrTxt;
+    } else {
+      v.classList.add("v-take");
+      big.textContent = "TAKE IT · A+";
+      why.textContent = `${score}/12 points · ${qualPct}% quality, all hard filters clear. Full size.` + wrTxt;
+    }
   }
   // Planned R: what this trade returns if you follow the plan. Logged so the journal can
   // show the gap between what you planned and what you actually took.
@@ -316,6 +324,12 @@ document.addEventListener("change", evaluate);
 
 // ── Journal ─────────────────────────────────────────────────────────────────
 const KEY = "msb-journal-v1";
+// The only honest win probability: YOUR results at this grade. Needs a sample.
+function gradeWinRate(grade){
+  const t = load().filter(x => x.grade === grade && x.outcome !== "none" && x.resR !== "" && x.resR !== null);
+  if (!t.length) return null;
+  return { n: t.length, pct: Math.round(t.filter(x => +x.resR > 0).length / t.length * 100) };
+}
 const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch { return []; } };
 const save = j  => localStorage.setItem(KEY, JSON.stringify(j));
 
@@ -363,6 +377,8 @@ function render(){
     stat(taken.length ? (exp>=0?"+":"") + exp.toFixed(2) + "R" : "—", "expectancy", exp>0?"pos":exp<0?"neg":"") +
     stat(cutEarly,  "cut early",  cutEarly  ? "neg" : "pos") +
     stat(stopMoved, "stop moved", stopMoved ? "neg" : "pos") +
+    (() => { const w = gradeWinRate("A+"); return stat(w && w.n >= 5 ? w.pct + "%" : "—", "A+ win rate" + (w ? ` (${w.n})` : "")); })() +
+    (() => { const w = gradeWinRate("B");  return stat(w && w.n >= 5 ? w.pct + "%" : "—", "B win rate"  + (w ? ` (${w.n})` : "")); })() +
     stat(taken.length ? (taken.reduce((a,t)=>a+(+t.plannedR||0),0)/taken.length).toFixed(2)+"R" : "—", "avg planned") +
     stat(taken.length ? (sumR/taken.length).toFixed(2)+"R" : "—", "avg actual");
 }

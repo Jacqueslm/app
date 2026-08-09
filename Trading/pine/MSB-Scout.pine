@@ -420,6 +420,7 @@ score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
      (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
 
 grade   = score >= 8 ? "A+" : score >= 6 ? "B" : "C"
+qualPct = math.round(score / 10.0 * 100)   // confluence, not win probability
 gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
 
 // ─── One bullet a day (shared with the 1H system — by YOUR hand, not code) ───
@@ -456,7 +457,7 @@ plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belo
 
 if fire
     label.new(bar_index, trigLong ? low - atr : high + atr,
-         (trigLong ? "▲ SCALP LONG " : "▼ SCALP SHORT ") + grade + "  " + str.tostring(score) + "/10",
+         (trigLong ? "▲ SCALP LONG " : "▼ SCALP SHORT ") + grade + "  " + str.tostring(score) + "/10 · " + str.tostring(qualPct) + "%",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
     line.new(bar_index, entry,   bar_index + 12, entry,   color = color.blue, width = 1)
@@ -501,7 +502,7 @@ if showDash and barstate.islast
 // ─── Alerts ──────────────────────────────────────────────────────────────────
 if fire
     alert(syminfo.ticker + " SCALP " + (trigLong ? "LONG" : "SHORT") + " " + grade +
-         " (" + str.tostring(score) + "/10) — " + timeframe.period + "m off the " + biasTF + " anchor" +
+         " (" + str.tostring(score) + "/10 · " + str.tostring(qualPct) + "% quality) — " + timeframe.period + "m off the " + biasTF + " anchor" +
          "\nentry " + str.tostring(entry,   format.mintick) +
          " | stop " + str.tostring(stopRaw, format.mintick) +
          " | target " + str.tostring(t1,    format.mintick) + " (" + str.tostring(scalpR, "#.##") + "R, FULL exit)" +

@@ -496,6 +496,9 @@ score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
      (pChop ? 1 : 0) + (pRoom ? 1 : 0) + (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
 
 grade   = score >= 9 ? "A+" : score >= 7 ? "B" : "C"
+// Quality percent = confluence, NOT win probability. Nobody can print a real win
+// probability from a chart — your journal computes the real one from your trades.
+qualPct = math.round(score / 12.0 * 100)
 gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
 
 // ─── One bullet a day ────────────────────────────────────────────────────────
@@ -552,7 +555,7 @@ plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belo
 
 if fire
     label.new(bar_index, trigLong ? low - atr : high + atr,
-         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/12\n" +
+         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/12 · " + str.tostring(qualPct) + "%\n" +
               plan + "  " + str.tostring(roomR, "#.0") + "R room",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
@@ -630,7 +633,7 @@ if fire
     dtA  = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE day"
     budA = str.tostring((trigLong ? usedUpLong : usedUpShort) * 100, "#") + "% of range budget used"
     alert(syminfo.ticker + " " + (trigLong ? "LONG" : "SHORT") + " " + grade +
-         " (" + str.tostring(score) + "/12) — " + plan +
+         " (" + str.tostring(score) + "/12 · " + str.tostring(qualPct) + "% quality) — " + plan +
          "\n" + dtA + " | " + budA + " | vol " + volRegime +
          "\nentry " + str.tostring(entry,   format.mintick) +
          " | stop " + str.tostring(stopRaw, format.mintick) +

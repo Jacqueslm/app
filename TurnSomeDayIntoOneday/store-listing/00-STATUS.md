@@ -15,7 +15,8 @@ Last checked in the console: **9 Aug 2026**
 | Main store listing — title, short and full description | 28 Jul | |
 | All 10 App content declarations | 28 Jul | Financial features, Health apps, Government apps, Advertising ID, Data safety, Target audience, Content ratings, Ads, Sign in details, Privacy policy |
 | Android developer verification | — | Console confirms all apps registered ahead of the 30 Sep deadline |
-| Screenshots replaced with the captioned set | **9 Aug** | Submitted, status *In review* |
+| Screenshots replaced with the captioned set | **9 Aug** | **Published** — console confirms last published 9 Aug |
+| Data safety: Diagnostics unticked | **9 Aug** | Submitted for review |
 
 The App content declarations were **already complete on 28 July**. Do not send
 anyone back through that wizard looking for them — they live under
@@ -49,11 +50,11 @@ count of ticks.** It counts a narrower thing — data processed ephemerally is
 not "collected" in Play's sense. Twelve ticked, eight counted. Reading that 8
 as a tick count is what raised a false alarm here on 9 Aug; do not repeat it.
 
-**Open, and trivial:** App info and performance shows 2 of 3 where only Crash
-logs should be ticked. The second is almost certainly Diagnostics — load time,
-latency, framerate, battery — none of which is recorded. That is
-*over*-declaring, which carries no enforcement risk and only adds a line to the
-store listing. Tidy it whenever, or never.
+**Tidied 9 Aug.** App info and performance had both Crash logs and Diagnostics
+ticked. Diagnostics means battery life, loading time, latency and framerate,
+none of which is recorded anywhere — `error_log` holds server errors, which is
+crash logs. Diagnostics unticked and the change submitted for review. The
+category now reads 1 of 3.
 
 ### 2. Health apps declaration — RESOLVED 9 Aug
 

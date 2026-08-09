@@ -18,56 +18,359 @@ Full strategy and the numbers behind it: `reference/SCHOOLS-BENEFITS-PLAYBOOK-20
 
 ---
 
-## BEFORE YOU SEND — the 10-second check
+## One thing to know about the addresses
 
-I could not open any of these district sites from my machine — the network
-here blocks them. Every address below came off the district's own published
-wellness page via search, but **I have not seen the page myself.** So:
+I can't open district websites from my machine — the network here blocks every
+one of them. Every name, email and phone number below came off the district's
+own published pages through search, so they're real, but **I haven't laid eyes
+on those pages myself.**
 
-1. Open the URL. Confirm the page is still there.
-2. Confirm the email on the page matches what I've written.
-3. If there's a name on the page and I haven't got one, use it — "Hi Andrea"
-   beats "Hi" every time.
-4. If the address has changed, use the one on the page and correct the line
-   here so it's right next time.
-
-Ten seconds each. Worth it — a bounced email is a wasted week on this pile.
+What that means in practice: if one bounces, don't retype the whole thing —
+the page URL is under every entry, take the current address off it and fix the
+line here so it's right next time.
 
 ---
 
-## YOUR OWN COUNTY FIRST — the strongest opener you have
+## BATCH 1 — SAINT LOUIS. Send these first.
 
-**This section is empty because I don't know where you live.**
+Twelve districts in your own back yard. Every one has its own finished email
+below — **nothing to fill in, nothing to look up.** Copy the subject, copy the
+body, send, tick the box.
 
-Being local beats everything else in this pitch. "I'm a local app builder"
-in the first line changes how the whole email reads — you stop being a vendor
-and become a neighbour. A district three states away has no reason to care
-that you're one person; the one down the road does.
+Being local is the strongest card in this whole pitch, and it's in the first
+line of every one of these. A district in Wisconsin has no reason to care that
+you're one guy. Rockwood does.
 
-**Tell me your county and state and I'll fill this in with your own districts,
-their wellness pages, and the names of the people who run them.** Those go
-first, ahead of everything in Batch 1.
-
-The recipe if you'd rather do it yourself:
-
-1. Google `"[district name]" employee wellness` or `"[district name]" HR benefits staff`
-2. District site → Departments → Human Resources → Benefits
-3. Titles, best first: **Employee Wellness Coordinator**, **Benefits
-   Coordinator**, **Benefits Specialist**, **Director of Human Resources**
-4. Nothing listed? Ring the HR main line: "Who coordinates employee wellness?"
-   Receptionists route this happily.
+**Four of them have a direct email — send those first (1 to 4).** The rest need
+one phone call to get the address, and the exact sentence to say is written
+under each one. That call takes ninety seconds and receptionists route it
+happily; asking "who coordinates employee wellness?" is a question they get.
 
 ---
 
-## BATCH 1 — districts that publish a wellness contact
+### 1. Parkway School District — Chesterfield
+- [ ] Sent
+**Send to:** hr@parkwayschools.net · (314) 415-8018
+**Why them first:** Parkway already runs a voluntary employee wellness program,
+so you're not proposing an idea — you're adding an item to something that
+already exists. Easiest yes on the list.
 
-These all run a named staff-wellness program with a published inbox, which is
-the rarest and best version of this target: no form, no switchboard, straight
-to the person whose job this is.
+**Subject:** A free wellbeing resource for Parkway staff
 
-**Heads up on the mix:** six of these are Wisconsin or upper-Midwest. That's
-not strategy, it's what surfaced — those states publish staff-wellness pages
-more openly than most. Your own county's districts should still go first.
+Hi,
+
+I'm a St. Louis app builder, and I'll keep this short because I know your inbox.
+
+I saw Parkway already runs a voluntary employee wellness program, which is why I'm writing to you and not somebody else — I'm not asking you to start anything, just to consider one more free item for it.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One. Day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks — alcohol, food, gambling, social media, anger and more — and something no other app has: a whole section for someone worried about a person they love. In any staff room that second group is bigger than anyone says out loud.
+
+I was addicted for 38 years. At 50 I got free, and I built the thing I'd needed the whole time. That's the whole company — me, here in St. Louis.
+
+The offer: free for your staff to start, completely private (nobody sees anyone's data — not us, not the district, not a spouse), opt-in, and nothing for your office to run. If you'd consider it for a staff wellness email or the benefits fair, I'll write the blurb myself — one paragraph, zero work on your side.
+
+That's the entire ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 2. Lindbergh Schools — Sunset Hills
+- [ ] Sent
+**Send to:** humanresources@lindberghschools.ws
+
+**Subject:** A free wellbeing resource for Lindbergh staff
+
+Hi,
+
+I'm a St. Louis app builder and this will be short.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks (alcohol, food, gambling, social media, anger and more), and a whole section for the person worried about someone they love. That second part doesn't exist anywhere else, and in any staff room it's the bigger group.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed. One person, not a company.
+
+The offer: free to start, completely private — nobody sees anyone's data, not us, not the district, not a spouse — opt-in, and nothing for your office to run. If you'd consider including it in a staff wellness email or your benefits materials, I'll write the paragraph for you.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 3. Webster Groves School District
+- [ ] Sent
+**Send to:** wiley.sandy@wgmail.org — **Dr. Sandy Wiley Skinner**, Assistant
+Superintendent of Human Resources
+
+**Subject:** A free wellbeing resource for Webster Groves staff
+
+Dr. Wiley Skinner,
+
+I'm a St. Louis app builder, and I'll be brief.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the hard ten minutes, 30-day programs across 13 habit tracks, and a section built for the person worried about someone they love. That last part is the piece nobody else has built, and it's the one that tends to matter most in a staff room.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed. That's the whole company — me.
+
+The offer is free for your staff to start, completely private (nobody sees anyone's information — not us, not the district, not a spouse), opt-in, and there's nothing for your office to administer. If you'd consider it for a staff wellness communication, I'll write the paragraph myself so it costs you nothing but a paste.
+
+Happy to answer anything: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 4. Ferguson-Florissant School District
+- [ ] Sent
+**Send to:** tcampball@fergflor.org — **Tamara Campbell**, Manager of Benefits
+and Employee Services
+**If it bounces:** try `tcampbell@fergflor.org`. The published spelling has an
+extra "a" and that may be a typo on their page rather than her real address.
+
+**Subject:** A free wellbeing resource for FFSD staff
+
+Ms. Campbell,
+
+I'm a St. Louis app builder and I'll keep this short.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the worst ten minutes, 30-day programs across 13 tracks (alcohol, food, gambling, social media, anger and others), and a whole section for the person worried about someone they love. Nobody else has built that second part, and in any staff room it's the larger group.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed the whole time. One person, here in St. Louis.
+
+It's free for staff to start, completely private — nobody sees anyone's data, not us, not the district, not a spouse — opt-in, and nothing for your office to run. If it fits a staff wellness email or your benefits materials, I'll write the paragraph for you.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 5. Rockwood School District — Eureka
+- [ ] Sent
+**Who:** **Britney Halpin** and **Brenda Tinsley**, Coordinators of Benefits ·
+**Dr. Jennifer Martin**, Director of Human Resources
+**Get the address:** staff directory at
+https://www.rsdmo.org/find-help/contact-us/staff-directory — search "Halpin"
+or "Tinsley". Or ring HR and say: *"Could I get the email address for Britney
+Halpin in benefits?"*
+**Why them:** Rockwood is one of the largest districts in the region and has
+two dedicated benefits coordinators — the exact job title this pitch is for.
+
+**Subject:** A free wellbeing resource for Rockwood staff
+
+Hi Britney,
+
+I'm a St. Louis app builder and I'll keep this to a paragraph or two.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the hard ten minutes, 30-day programs across 13 habit tracks, and a whole section for someone worried about a person they love. That second part doesn't exist in any other app, and in a district your size there are hundreds of people it fits.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed. That's the entire company — me.
+
+Free for staff to start, completely private (nobody sees anyone's data — not us, not the district, not a spouse), opt-in, nothing for your office to run. If you'd consider it for a staff wellness email or the benefits fair, I'll write the paragraph so it's a paste and nothing more.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 6. Ladue School District
+- [ ] Sent
+**Who:** **Julie Ellis**, Human Resources Specialist · (314) 983-5310 ·
+**Dr. Julie Helm**, Assistant Superintendent for HR · (314) 994-7080
+**Get the address:** ring (314) 983-5310 and say: *"Hi — could I get the best
+email for staff wellness or benefits? I've got a free resource I'd like to
+send over, no sales pitch."*
+**Page:** https://www.ladueschools.net/departments/human-resources
+
+**Subject:** A free wellbeing resource for Ladue staff
+
+Hi Julie,
+
+I'm a St. Louis app builder, and this is short.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks, and a section for the person worried about someone they love. That last one is the piece nobody else has made, and it's usually the bigger group in any staff room.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed. One person, not a company.
+
+Free to start, completely private — nobody sees anyone's information, not us, not the district, not a spouse — opt-in, and nothing for your office to administer. If you'd consider it for a staff wellness email, I'll write the paragraph myself.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 7. Mehlville School District — Oakville
+- [ ] Sent
+**Who:** **Sherri Cox**, Human Resources Specialist · (314) 467-5101 ·
+**Dr. Shannon Pike**, Assistant Superintendent of HR · (314) 467-5105
+**Get the address:** ring (314) 467-5101 and ask for the best email for staff
+wellness or benefits.
+**Page:** https://www.mehlvilleschooldistrict.com/departments/human-resources
+
+**Subject:** A free wellbeing resource for Mehlville staff
+
+Hi Sherri,
+
+I'm a St. Louis app builder and I'll be quick.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the worst ten minutes, 30-day programs across 13 habit tracks, and a whole section for the person worried about someone they love. That second part is the one nobody else builds.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed the whole time. That's the whole company — me, in St. Louis.
+
+Free for staff to start, completely private (nobody sees anyone's data), opt-in, and nothing for your office to run. If you'd consider it for a staff wellness email or benefits materials, I'll write the paragraph for you.
+
+That's the entire ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 8. Kirkwood School District
+- [ ] Sent
+**Get the address:** HR team page at
+https://www.kirkwoodschools.org/human-resources-team — names and roles are
+listed there; take whoever holds benefits. Or ring (314) 213-6100 and ask who
+coordinates employee wellness.
+**Benefits page:** https://www.kirkwoodschools.org/staff/human-resources/employee-resources/employee-benefits
+
+**Subject:** A free wellbeing resource for Kirkwood staff
+
+Hi,
+
+I'm a St. Louis app builder, and I'll keep this short.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks (alcohol, food, gambling, social media, anger and more), and a whole section for someone worried about a person they love. That second part doesn't exist in any other app, and in a staff room it's usually the bigger group.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed. One person, not a company.
+
+Free to start, completely private — nobody sees anyone's data, not us, not the district, not a spouse — opt-in, and nothing for your office to run. If you'd consider it for a staff wellness email or the benefits fair, I'll write the paragraph myself.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 9. Pattonville School District — Maryland Heights
+- [ ] Sent
+**Get the address:** https://www.psdr3.org/departments/human-resources — take
+the benefits contact listed, or ring the HR line and ask who coordinates
+employee wellness.
+
+**Subject:** A free wellbeing resource for Pattonville staff
+
+Hi,
+
+I'm a St. Louis app builder and this will take you thirty seconds to read.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the hard ten minutes, 30-day programs across 13 habit tracks, and a whole section for the person worried about someone they love. Nobody else has built that second part.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed. That's the whole company — me.
+
+Free for staff to start, completely private (nobody sees anyone's information), opt-in, nothing for your office to administer. If you'd consider it for a staff wellness email, I'll write the paragraph so all you do is paste it.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 10. Ritenour School District — Overland
+- [ ] Sent
+**Get the address:** (314) 493-6061 · page at
+https://www.ritenourschools.org/departments/human-resources
+
+**Subject:** A free wellbeing resource for Ritenour staff
+
+Hi,
+
+I'm a St. Louis app builder, and I'll be brief.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the worst ten minutes, 30-day programs across 13 tracks, and a whole section for someone worried about a person they love. That last part is the piece no other app has.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed the whole time. One person, right here.
+
+Free to start, completely private — nobody sees anyone's data, not us, not the district, not a spouse — opt-in, and nothing for your office to run. If you'd consider it for a staff wellness email or benefits materials, I'll write the paragraph for you.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 11. Francis Howell School District — O'Fallon
+- [ ] Sent
+**Get the address:** staff directory at
+https://www.fhsdschools.org/staff-directory1 — search "benefits". Main line
+(636) 851-4000.
+**Benefits page:** http://fhsd.sharpschool.net/human_resources/benefits
+
+**Subject:** A free wellbeing resource for FHSD staff
+
+Hi,
+
+I'm an app builder over in St. Louis, and I'll keep this short.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — day counter, SOS tools for the hard ten minutes, 30-day programs across 13 habit tracks, and a whole section for the person worried about someone they love. That second part doesn't exist anywhere else, and it's usually the larger group in any staff room.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed. That's the entire company — me.
+
+Free for staff to start, completely private (nobody sees anyone's data), opt-in, and nothing for your office to run. If you'd consider it for a staff wellness email or the benefits fair, I'll write the paragraph myself.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+### 12. St. Louis Public Schools
+- [ ] Sent
+**Get the address:** HR at https://staff.slps.org/human-resources ·
+(314) 345-2379 — ask who handles employee benefits and wellness.
+**Why them last of the twelve:** biggest district in the city and the slowest
+to move, but one yes here is the largest single staff audience on this list.
+
+**Subject:** A free wellbeing resource for SLPS staff
+
+Hi,
+
+I'm a St. Louis app builder, and I'll keep this to a minute.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One — a day counter, SOS tools for the hard ten minutes, 30-day programs across 13 tracks (alcohol, food, gambling, social media, anger and more), and a whole section for the person worried about somebody they love. Nobody else has built that second part, and in a district this size it's thousands of people.
+
+I was addicted for 38 years. At 50 I got free and built what I'd needed. That's the whole company — one guy from here.
+
+Free for staff to start, completely private — nobody sees anyone's information, not us, not the district, not a spouse — opt-in, and nothing for your office to administer. If you'd consider it for a staff wellness communication, I'll write the paragraph so it's a paste and nothing more.
+
+That's the entire ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+## BATCH 2 — out-of-state, only after St. Louis
+
+These publish a dedicated wellness inbox, which is rare and good — but you
+lose "I'm local", which is the strongest line you have. If you send these,
+swap that opener for "one person, not a company". Use the master email at the
+bottom of this file.
+
+**Heads up on the mix:** six are Wisconsin or upper-Midwest. That's what
+surfaced, not strategy.
 
 ### 1. Osceola County Schools — Florida
 - [ ] Sent

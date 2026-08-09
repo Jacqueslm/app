@@ -3703,14 +3703,22 @@ router.post('/render', async (req, res) => {
   let current = '[v0]';
   let joined = resolved[0].dur;
   trans.forEach((t, i) => {
-    const next = `[v${i + 1}]`, out = `[j${i}]`;
+    const next = `[v${i + 1}]`, raw = `[jr${i}]`, out = `[j${i}]`;
     if (t.type === 'cut') {
-      filters.push(`${current}${next}concat=n=2:v=1:a=0${out}`);
+      filters.push(`${current}${next}concat=n=2:v=1:a=0${raw}`);
       joined += resolved[i + 1].dur;
     } else {
-      filters.push(`${current}${next}xfade=transition=${TRANSITIONS[t.type]}:duration=${t.td.toFixed(3)}:offset=${(joined - t.td).toFixed(3)}${out}`);
+      filters.push(`${current}${next}xfade=transition=${TRANSITIONS[t.type]}:duration=${t.td.toFixed(3)}:offset=${(joined - t.td).toFixed(3)}${raw}`);
       joined += resolved[i + 1].dur - t.td;
     }
+    // Re-stamp the timebase after EVERY join. concat and xfade each hand on a
+    // timebase of their own choosing — concat emits 1/fps where a fresh clip
+    // carries AVTB — and xfade refuses two inputs whose timebases disagree.
+    // A timeline of all blends never hit it, and neither did all cuts. A cut
+    // followed by a blend died with "First input link main timebase (1/1000000)
+    // do not match the corresponding second input link xfade timebase (1/30)"
+    // and nothing was written at all.
+    filters.push(`${raw}settb=AVTB,fps=${FPS}${out}`);
     current = out;
   });
 

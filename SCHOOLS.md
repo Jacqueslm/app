@@ -36,8 +36,10 @@ Every entry now says which kind of address it is:
 If one bounces, don't retype anything — the fallback is written underneath, and
 the page URL is there too. Fix the line here afterwards so it's right next time.
 
-**All twelve are drafted in Gmail as of 9 Aug 2026.** Numbers 1–4 have been
-sent.
+**All twelve of Batch 1 were sent on 9 Aug 2026.** All ten of Batch 2 are
+drafted in Gmail the same day — the five that said "find the address on their
+website" were found by search instead, so none of this pile needs a phone call
+any more.
 
 ---
 
@@ -160,7 +162,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 5. Rockwood School District — Eureka
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** rebouletkatie@rsdmo.org — **Dr. Katie Reboulet**, Assistant
 Superintendent for Human Resources · (636) 733-2034 · *found in search, address
 confirmed*
@@ -191,7 +193,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 6. Ladue School District
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** nedwards@ladueschools.net — **Nancy Edwards**, Benefits
 Specialist · (314) 983-5324 · **address worked out from the format, not seen**
 Ladue uses first-initial-plus-surname (`cbrown@`, `kbolfing@`). If it bounces,
@@ -218,7 +220,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 7. Mehlville School District — Oakville
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** sherri.cox@mehlvilleschooldistrict.com — **Sherri Cox**, Human
 Resources Specialist · (314) 467-5101 · **worked out from the format, not seen**
 Mehlville is `first.last@` on about 70% of addresses, but a minority use
@@ -246,7 +248,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 8. Kirkwood School District
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** kathy.monahan@kirkwoodschools.org — benefits contact, *address
 confirmed in search*
 **Why them:** Kirkwood publishes a page titled "Behavioral Health Benefits and
@@ -277,7 +279,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 9. Pattonville School District — Maryland Heights
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** benefits@psdr3.org · *address confirmed in search*
 A dedicated benefits mailbox, which is the best kind — no wrong person to
 guess at. Backups if it bounces: hr@psdr3.org, or David Besgrove, Chief Human
@@ -303,7 +305,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 10. Ritenour School District — Overland
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** lachancem@ritenourschools.org — **Mike LaChance**, Assistant
 Superintendent for Human Resources · *address confirmed in search*
 Main line (314) 493-6062.
@@ -328,7 +330,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 11. Francis Howell School District — O'Fallon
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** benefits@fhsdschools.org · *address confirmed in search*
 Dedicated benefits mailbox · (636) 851-6099. Main line (636) 851-4000.
 **Benefits page:** http://fhsd.sharpschool.net/human_resources/benefits
@@ -353,7 +355,7 @@ Turn Someday Into Day One · St. Louis
 ---
 
 ### 12. St. Louis Public Schools
-- [ ] Sent
+- [x] Sent — 9 Aug 2026
 **Send to:** rebecca.anderson@slps.org — **Rebecca Anderson**, Benefits
 Coordinator · (314) 345-2282 · *address confirmed in search*
 **Why them last of the twelve:** biggest district in the city and the slowest
@@ -416,30 +418,42 @@ page: https://www.brookings.k12.sd.us/page/staff-wellness
 
 ### 6. Sun Prairie Area School District — Wisconsin
 - [ ] Sent
-**Where:** the wellness coordinator's email is on https://www.sunprairieschools.org/departments/staff-wellness
+**Where:** Klrichm@sunprairieschools.org — Staff Wellness Coordinator ·
+(608) 834-7224 · *address confirmed in search*
 **Note:** they have a dedicated coordinator whose stated job is finding
 wellness opportunities for staff and their families. That's this email's job
 description. The "and their families" part is your supporter section.
 
 ### 7. Verona Area School District — Wisconsin
 - [ ] Sent
-**Where:** https://www.verona.k12.wi.us/departments/humanresources/employee-benefits/additional-benefits
-**Note:** title to look for is **Staff Wellness and Community Programming
-Coordinator**, and their wellness committee includes HR.
+**Where:** payrollbenefits@verona.k12.wi.us · (608) 845-4390 · *address
+confirmed in search*
+**Note:** the coordinator is **Sidney Peach**, Staff Wellness and Community
+Programming Coordinator, but her address is masked everywhere it appears. The
+email asks them to pass it to her, and their wellness committee includes HR
+anyway, so this lands on the right desk either way.
 
 ### 8. Campbell County School District — Wyoming
 - [ ] Sent
-**Where:** https://www.ccsd.k12.wy.us/staff/employee-wellness
+**Where:** lchristenson@ccsd.k12.wy.us — **Laurie Christenson**, employee
+wellness · (307) 687-4516 · *address confirmed in search*
+**Note:** they run wellness challenges, which the email mentions — a challenge
+is a natural slot for a free app.
 
 ### 9. Sheboygan Area School District — Wisconsin
 - [ ] Sent
-**Where:** https://www.sheboygan.k12.wi.us/staff-wellness
+**Where:** human-resources@sasd.net · (920) 459-3500 · *address confirmed in
+search*
+**Note:** the mailbox is on `sasd.net`, not the `sheboygan.k12.wi.us` domain
+their website uses. That is their real HR address, not a typo.
 
 ### 10. Capital School District — Delaware
 - [ ] Sent
-**Where:** https://www.capital.k12.de.us/departments/human_resources/wellness
-**Note:** wellness sits directly under Human Resources here, so whoever
-answers is the decision-maker for a free resource.
+**Where:** brittany.hazzard@capital.k12.de.us — **Dr. Brittany Hazzard**,
+Instruction, Culture and Wellness · *address confirmed in search*
+**Note:** wellness is in her portfolio by title, so she is the decision-maker
+for a free resource rather than a gatekeeper. Backups in HR:
+sherri.hollis@capital.k12.de.us, yvonne.howard@capital.k12.de.us.
 
 ---
 

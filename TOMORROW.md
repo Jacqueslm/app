@@ -1,180 +1,156 @@
-# Tomorrow — 9 Aug 2026
+# Tomorrow — 10 Aug 2026
 
-Everything from today's session. Top section is what to actually do; the rest
-is what changed, so nothing gets lost.
+Where everything stands at the end of 9 Aug. Top section is what to actually
+do; the rest is what changed, so nothing has to be re-derived.
+
+**Two live files hold state and are worth trusting over memory:**
+`TurnSomeDayIntoOneday/store-listing/00-STATUS.md` for the Play Store, and
+`SCHOOLS.md` for outreach.
 
 ---
 
 ## DO THESE, IN THIS ORDER
 
-### 1. Update Studio (2 minutes, do this first)
+### 1. Update Studio (2 minutes)
 
-Settings → **Update my app** → close the black window → double-click **Start
-Studio** → **Ctrl+Shift+R** in the browser. The build stamp top-left should
-read **b0830**.
+Settings → **Update my app** → close the black window → **Start Studio** →
+**Ctrl+Shift+R**. Stamp top-left must read **b0831**.
 
-This update installs a speech add-on, so it will take longer than usual. That
-is normal.
+**If the stamp won't move, it's a branch problem, not a cache problem.** Studio
+updates itself from `claude/vibe-code-uwxxlk`. Session work goes to whatever
+branch that session was assigned. Any Studio change has to be cherry-picked
+across or it never reaches the machine. This cost an hour on 9 Aug.
 
-### 2. Play Store listing (yours — I can't reach Play Console)
+### 2. Render Episode 2
 
-Five files are already written and character-counted in
-`TurnSomeDayIntoOneday/store-listing/`. Copy each into Play Console:
+All eight panels are chosen (see below). Rename, paste the shot list from
+`EPISODE-2.md`, add the end card as shot 9 — **Still, 3s, fade to black, no
+words** — and render. 49 seconds.
 
-| File | Where it goes |
-|---|---|
-| `01-title-and-short-description.md` | Main store listing → App name + Short description |
-| `02-full-description.md` | Main store listing → Full description |
-| `03-data-safety-answers.md` | App content → Data safety |
-| `04-health-declaration.md` | App content → Health apps declaration |
-| `05-graphics.md` | Main store listing → Graphics (screenshots are in `store-listing/screenshots/`) |
+### 3. Add the end card to Episode 1
 
-**The first paragraph of the full description must not be moved or softened.**
-Play rejects health-adjacent apps that bury it.
+Episode 1 is finished, so it doesn't get rebuilt. Load the MP4 into Quick Video
+as shot 1 with **then: fade to black**, add `02-ep1-next-2x.png` as shot 2
+(**Still, 3s, no words**), **no song**, **untick "Cut on the beat"**. Out at
+1:21 with the original music intact.
 
-### 3. Production access (around 14 Aug)
+### 4. Start the partner cards — one a day
 
-Due when the 14-day closed test window completes. Say the word and I'll draft
-the answers.
+Twelve cards in `reference/partner-cards/`, captions and hashtags in
+`reference/PARTNER-CARDS.md`. **One a day for twelve days.** Card 12 goes last.
 
-### 4. Tell me about the two voices
+### 5. Episode 3 into Manus
 
-Still unanswered from today. You asked for an African American woman's and
-man's voice in Studio. I can't pick a voice by race from these free models —
-none of them say who the speaker is, and guessing from the sound isn't
-something I'll do and call it your answer. Two real routes:
+`EPISODE-3-PROMPTS.md`. Manus gets four panels. **Three are notebook shots you
+photograph yourself** — ten minutes, a real pen, one lamp. Shot 8 is you on
+camera.
 
-- **Record a real person, 15 seconds.** Anyone who agrees — Studio already
-  clones any voice from an audio clip. I'd add a "save this as a narrator"
-  button so it becomes a permanent chip with a name you choose. Cloned voices
-  cost the fal rate, not free.
-- **A paid voice library** (ElevenLabs through fal), where the voice actors
-  describe themselves — so you're picking from what people say about their own
-  voice, not from my guess. Costs per use.
+### 6. Production access — around 13 Aug
+
+Answers ready with a copy button on each:
+**https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9**
+
+Do not use the sheet the testing provider sent — two of its answers describe
+work that doesn't exist.
+
+---
+
+## STILL OPEN
+
+- **Facebook:** pin a post in the Featured slot (it's empty and it's the first
+  thing a visitor sees), add `turnsomedayintodayone@gmail.com` under About, and
+  put both links in **About → Links** — they didn't fit in the 255-character
+  bio. Skip address and phone.
+- **The Shorts recut.** Offered, not done. Same footage reordered so the best
+  line is frame one instead of forty seconds in. Say the word.
+- **The two voices.** Still unanswered since 7 Aug: an African American woman's
+  and man's voice in Studio. I can't pick a voice by race from the free models —
+  none of them say who the speaker is. Two real routes: record a real person for
+  15 seconds (Studio clones from a clip; I'd add a save-as-narrator button), or
+  a paid library where the actors describe themselves.
+- **Buffer send** — parked. Manual posting works.
+- Script 39 narration; origin-story photo fixes.
 
 ---
 
 ## WHAT SHIPPED TODAY
 
-### Studio (now b0830)
+### Play Store — finished except the 13th
 
-**Free narrators.** The Voice card's six narrators now speak on your own
-computer. No fal key, no cost, under a second per take. Was ~5c per 1,000
-characters. First press on each voice downloads it (~60MB, once). There's a
-**▶ Hear this narrator** button — pressing it costs nothing.
+Captioned screenshots **published**. All ten App content declarations were
+already done on 28 July — that got hunted for from scratch today through three
+wrong menu sections before turning up under **Monitor and improve → Policy and
+programs → App content → Actioned**. Data safety verified line by line: twelve
+data types ticked, nothing under-declared. Diagnostics unticked (it means load
+time and battery, none of which is recorded). Health category confirmed clear of
+the Medical group, so the Personal account stands.
 
-Moods (Happy / Sad / Angry) still cost money — the free engine reads plainly.
-The card says so the moment you tap a mood.
+**The "8 data types collected or shared" line on the summary page is not a count
+of ticks** — Play excludes ephemerally processed data. Reading it as a tick
+count started a false alarm. Don't repeat it.
 
-**Nine new camera moves**, in the Ken Burns picker and Quick Video:
+### Studio b0831
 
-- Hover above — parked above, holds, never travels
-- Drone — rises and widens with a little sideways flight
-- Looking up / Looking down — low and high angles
-- Crane up / Crane down — lifts off wide, or drops in tight
-- Orbit left / right — arcs around the subject
-- Dutch tilt — horizon off level
+**Quick Video was silencing your own footage.** Drop a finished video in and it
+came out with no sound. The renderer could always keep a clip's audio; Quick
+Video rebuilds the timeline every assemble and nothing repopulated the flag. So
+the picture survived and the music didn't. Fixed.
 
-**Velocity curves.** New **Speed** dropdown: eases in and out (now the
-default), creeps then goes, leaves fast and coasts, snaps away and settles, or
-dead even. Note this changes your *existing* moves too — a plain zoom-in looks
-different from yesterday. Pick "dead even" for the old flat motion.
+**A Still move**, in the Ken Burns picker and Quick Video. Every other move
+resamples the frame each frame, which softens flat type, so a title or end card
+had nothing right to pick. Zoom in stays the default. A pasted shot list now
+understands still, none, static, hold, no movement and locked off.
 
-**Parallax (3D depth).** Four directions. Splits a photo into near, middle and
-far and moves them at different speeds. Depth is worked out on your machine,
-free. Best on photos with a clear subject in front of a background; least
-useful on flat graphics and text cards.
+Kept clip audio no longer gets a blanket 1.5x lift when there's no song to sit
+under. Measured first — it doesn't clip or pump, it was just louder than you
+made it.
 
-### Recovery app
+### Outreach — the whole schools pile has addresses now
 
-**SOS voices rebuilt twice.** Gentle, Clear and Calm male are slower and
-softer, Calm male is a different voice (John). All five are now public domain
-or CC0 — see below. Testers get the new audio automatically; the cache version
-was bumped so nobody keeps the old files.
+**All twelve St. Louis districts sent.** Ten more out-of-state districts drafted
+in Gmail. Eight of the twenty-two said "ring them for the address"; search found
+every one, so there are no phone calls left in this pile.
+
+Two addresses are built from a district's published email pattern rather than
+seen — **Ladue and Mehlville** — and both carry a named fallback in `SCHOOLS.md`.
+Everything else appeared verbatim in search results.
+
+### The episodes
+
+**Episode 2 panels are picked.** Shot 3 came back with your actual app copy on
+the phone screen — "This craving is a wave" — which is better than the brief
+asked for. Use the misty porch version for shot 4, the dusk store not the night
+one, and **the original Day 2 notebook, not the second version, where the writing
+is upside down.**
+
+**Episode 3 hand-over written.** Four panels to Manus, three notebook shots you
+shoot yourself, shot 8 is you. Handwriting is what generators get wrong — "Day 2"
+is two characters and one version still came back inverted.
+
+**End cards made.** `reference/end-cards/`, two sizes each. Episode 1's names
+Episode Two by title; Episode 2's says EPISODE THREE and stops, because "That
+Was Me" is the reveal and printing it early gives the ending away.
+
+### Social — what the numbers actually say
+
+Three platforms, one story, and it isn't suppression.
+
+- **YouTube:** 2,271 views in 28 days, 4.3 hours watch time — about **7 seconds
+  a view** — and zero net subscribers. Reach happened. Nobody stayed.
+- **Facebook:** 3,780 views, 46 engagements, 8 followers. Same shape.
+- **TikTok:** the opposite — 26 to 128 views a post, but **89 likes**, which is a
+  high rate. There the content lands and distribution never starts.
+
+The channel is also mostly Shorts, which is why a TV shows fewer videos than a
+computer: TVs split Videos, Shorts and Live into separate tabs.
+
+Names now match across the app, Facebook and TikTok — they were spelled "Turn
+Some Day" in two places. Bios rewritten on both.
 
 ---
 
-## THE LICENSING THING — READ THIS ONCE
+## THE RULE THAT KEEPS GETTING RELEARNED
 
-Two of the five SOS voices were licensed **non-commercial**, and a third was
-research-only. Your app charges money, so those three weren't allowed. I
-picked them originally for how they sounded and never opened the licence file.
-That was my miss.
-
-All five are now **public domain or CC0** — nobody owns them, no conditions,
-free to use in something you sell.
-
-**I audited everything else third-party in both products.** Full write-up in
-`reference/asset-licenses-2026-08-08.md`. Clean: fonts (none bundled), external
-scripts (none), images (all yours), recovery-programme text (nothing copied —
-the Twelve Steps and Serenity Prayer belong to AA World Services and apps get
-pulled for reprinting them; you have none of it), and 280 npm packages.
-
-Two notes, neither urgent:
-
-- **ffmpeg is GPL.** Only matters if you *give Studio to someone*. It runs on
-  your machine only, so nothing is triggered — and the videos it makes were
-  never covered. They're yours.
-- **Suno** — you're on a paid plan, so songs made while subscribed are cleared
-  for monetised video. Anything made *before* you subscribed isn't covered
-  retroactively. Worth knowing which is which.
-
-**Rule going forward:** before any third-party thing goes into either product
-— a voice, a font, an image, a music track — find its licence. "Non-commercial",
-"research only", or can't find one at all = no.
-
----
-
-## EPISODE 2 — rewritten, ready for Manus
-
-Everything is in **`EPISODE-2.md`** — hand that whole file to Manus and it has
-the style, the character, and all eight image prompts.
-
-Retitled **"The Afternoon"**, cut from 67 seconds to 46, eight shots instead of
-nine. It ends on the notebook rather than a second window shot, the walking
-middle is gone, and there's a new three-o'clock shot — the hour the episode is
-named for and that every draft skipped.
-
-Two panels already exist (the counter, the phone). Six need generating,
-including a new Shot 3 where the phone shows **your app** — the SOS breathing
-circle, mid-craving, doing its job.
-
-The paste block at the bottom of that file drops straight into Quick Video.
-Checked: eight shots, 46 seconds, every row fills in.
-
-## EPISODE 3 — "That Was Me"
-
-**`EPISODE-3.md`.** Eight shots, 49 seconds. Shots 1–7 go to Manus. **Shot 8
-is not generated — it's you, on your own phone, in your own room.**
-
-The arc: twelve days in, the old life calls, he goes to the restaurant anyway,
-it nearly goes wrong, he steps outside for four minutes, he goes home and
-writes the number. Then the picture stops being beautiful and it's you saying
-it was never a story. Thirty-eight years. Free at fifty.
-
-You asked for spectacular. Drone shots and swelling music would undo
-everything the first two episodes earned — that's the ending of a supplement
-advert. This is the floor going out instead: three episodes of a man they
-assume is an actor, and then he isn't.
-
-Costs nothing. Seven panels and one video of you talking.
-
-**There's a fallback ending in the file if you don't want to be on camera** —
-a stack of filled notebooks and "Day 400". It's good. It just isn't the one
-nobody else can make.
-
-Paste block checked: eight shots, 49 seconds.
-
-## STILL OPEN (not today's work)
-
-- Outreach follow-ups — 15th to 18th, `OUTREACH.md`
-- Studio's Buffer send — **parked at Jacques' request.** It gets as far as
-  Buffer's own validation; the last blocker is that Buffer rejects custom video
-  thumbnails outright, so the thumbnail Studio attaches has to come back out
-  (one deletion, in `buffer/post`). Manual posting works today: render →
-  Download my video → upload to each platform.
-- Play Store **developer verification: DONE** — the console confirms all apps
-  are registered ahead of the Sep 30 deadline. Nothing further needed.
-- Script 39 narration
-- Origin-story photo fixes: real app screenshot on the laptop shot,
-  "Someday" as one word
+Anything worked out in a conversation is gone by the next one. If it matters,
+it goes in a file — `00-STATUS.md`, `SCHOOLS.md`, or here. On 9 Aug the same
+finished work was re-done twice because it only existed in chat.

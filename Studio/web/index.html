@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0822</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0824</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -487,7 +487,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" style="margin:8px 0 0"><b>3. Your pictures &amp; video clips</b> <span class="usage">(optional — the crew generates the rest)</span></p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="crew-drop" style="flex:1">🎞 Drop images or clips from this device</button>
-        <button class="btn2" id="crew-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
+        <button class="btn2" id="crew-pick-studio" style="flex:1">🖼 Use what’s in my library</button>
       </div>
       <div id="crew-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
@@ -590,7 +590,7 @@ body.simple-only #view-simple{display:flex !important}
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2" id="qk-add-imgs" style="flex:1">1️⃣ &nbsp;Add pictures from this device</button>
+        <button class="btn2" id="qk-add-imgs" style="flex:1">1️⃣ &nbsp;Add pictures or videos from this device</button>
         <button class="btn2" id="qk-pick-studio" style="flex:1">🖼 Use pictures made in Studio</button>
       </div>
       <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
@@ -8141,13 +8141,21 @@ function renderQkShots() {
   qk.shots.forEach((s, i) => {
     const row = document.createElement('div');
     row.className = 'seq-item';
+    // A clip you filmed already moves. There is nothing for a camera move to do
+    // to it, so that dropdown is replaced by a plain label rather than left
+    // there looking like a setting that does something.
+    const isVid = s.kind === 'video';
     row.innerHTML = `
-      <img src="${s.url}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0" alt="">
+      ${isVid
+        ? `<video src="${s.url}#t=0.1" preload="metadata" muted style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0"></video>`
+        : `<img src="${s.url}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;background:#000;flex-shrink:0" alt="">`}
       <div class="seq-mid">
         <div class="trim" style="font-size:12px">
-          <select class="input q-move" style="width:auto;padding:5px 8px;font-size:12px">
+          ${isVid
+            ? '<span style="font-size:12px;color:var(--tm)">🎬 your clip — plays as filmed</span>'
+            : `<select class="input q-move" style="width:auto;padding:5px 8px;font-size:12px">
             ${QK_MOVES.map(([v, l]) => `<option value="${v}"${v === s.move ? ' selected' : ''}>${l}</option>`).join('')}
-          </select>
+          </select>`}
           <select class="input q-dur" style="width:auto;padding:5px 8px;font-size:12px">
             ${[2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 45, 60].map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d >= 60 ? '1 min' : d + 's'}</option>`).join('')}
           </select>
@@ -8163,7 +8171,8 @@ function renderQkShots() {
       <div class="seq-btns">
         <button class="q-up">↑</button><button class="q-dn">↓</button><button class="q-rm">✕</button>
       </div>`;
-    row.querySelector('.q-move').onchange = (e) => { s.move = e.target.value; };
+    const mv = row.querySelector('.q-move');           // absent on a video row
+    if (mv) mv.onchange = (e) => { s.move = e.target.value; };
     row.querySelector('.q-dur').onchange = (e) => { s.dur = Number(e.target.value); };
     const tr = row.querySelector('.q-tr');
     if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; };
@@ -8228,21 +8237,39 @@ if (document.getElementById('qk-paste-go')) $('#qk-paste-go').onclick = () => {
   note.textContent = bits.join(' · ') + '.';
 };
 
-$('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
+// Builds the shot a picture OR a clip you filmed becomes. A video keeps its
+// own length and gets no camera move — it already moves. The assembler has
+// always known what to do with a video shot; until now there was simply no way
+// to put one in.
+async function qkShotFromAsset(asset, kind) {
+  if (kind === 'video') {
+    let dur = Number(asset.meta?.duration) || null;
+    if (!dur) { try { dur = await probeDuration(asset.url); } catch (_) {} }
+    return {
+      assetId: asset.id, url: asset.url, label: asset.label, kind: 'video',
+      move: 'push', dur: Math.max(1, Math.round((dur || 4) * 10) / 10),
+      text: '', transAfter: 'fade',
+    };
+  }
+  return {
+    assetId: asset.id, url: asset.url, label: asset.label,
+    move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
+    dur: 4, text: '', transAfter: 'fade',
+  };
+}
+
+$('#qk-add-imgs').onclick = () => pickFiles('image/*,video/*', async (files) => {
   setErr('#seq-err', null);
-  $('#qk-status').textContent = 'Adding your pictures…';
+  $('#qk-status').textContent = 'Adding…';
   try {
     for (const file of files) {
-      const asset = await uploadFile(file, 'image');
-      qk.shots.push({
-        assetId: asset.id, url: asset.url, label: asset.label,
-        move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
-        dur: 4, text: '', transAfter: 'fade',
-      });
+      const kind = (file.type || '').startsWith('video') ? 'video' : 'image';
+      const asset = await uploadFile(file, kind);
+      qk.shots.push(await qkShotFromAsset(asset, kind));
     }
     await loadAssets();
     renderQkShots();
-    $('#qk-status').textContent = `${qk.shots.length} picture${qk.shots.length > 1 ? 's' : ''} ready. Add your song, then press Assemble!`;
+    $('#qk-status').textContent = `${qk.shots.length} shot${qk.shots.length > 1 ? 's' : ''} ready. Add your song, then press Assemble!`;
   } catch (e) {
     $('#qk-status').textContent = '';
     setErr('#seq-err', e.message);
@@ -8256,26 +8283,29 @@ $('#qk-add-imgs').onclick = () => pickFiles('image/*', async (files) => {
 function renderQkStudioGrid() {
   const grid = $('#qk-studio-grid');
   const chosen = new Set(qk.shots.map((s) => s.assetId));
-  const imgs = st.assets.filter((a) => a.kind === 'image' && !a.meta?.overlay);
-  if (!imgs.length) {
-    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">No pictures made in Studio yet — generate some in AI Scenes or Storyboard first.</p>';
+  // Videos belong here too: anything you filmed, screen-recorded, or uploaded
+  // from your computer is in the same library and can sit in the same edit.
+  const items = st.assets.filter((a) => (a.kind === 'image' || a.kind === 'video') && !a.meta?.overlay);
+  if (!items.length) {
+    grid.innerHTML = '<p class="usage" style="grid-column:1/-1;margin:0">Nothing in your library yet — generate pictures in AI Scenes, or upload from My Media.</p>';
     return;
   }
   grid.innerHTML = '';
-  imgs.forEach((a) => {
+  items.forEach((a) => {
+    const isVid = a.kind === 'video';
     const cell = document.createElement('div');
     const already = chosen.has(a.id);
     cell.style.cssText = `position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#000;cursor:pointer;border:1.5px solid ${already ? 'var(--green)' : 'transparent'}`;
     cell.title = already ? `Already added: ${a.label}` : `Tap to add: ${a.label}`;
-    cell.innerHTML = `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`;
-    cell.onclick = () => {
-      qk.shots.push({
-        assetId: a.id, url: a.url, label: a.label,
-        move: QK_MOVE_CYCLE[qk.shots.length % QK_MOVE_CYCLE.length],
-        dur: 4, text: '', transAfter: 'fade',
-      });
+    cell.innerHTML = isVid
+      // #t=0.1 makes the browser show a real frame instead of a black poster
+      ? `<video src="${a.url}#t=0.1" preload="metadata" muted style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}"></video>
+         <span style="position:absolute;left:4px;bottom:3px;font-size:11px;text-shadow:0 1px 3px #000">🎬</span>`
+      : `<img src="${a.url}" loading="lazy" style="width:100%;height:100%;object-fit:cover${already ? ';opacity:.55' : ''}" alt="">`;
+    cell.onclick = async () => {
+      qk.shots.push(await qkShotFromAsset(a, a.kind));
       renderQkShots(); renderQkStudioGrid();
-      $('#qk-status').textContent = `${qk.shots.length} picture${qk.shots.length > 1 ? 's' : ''} ready. Add your song or voice, then press Assemble!`;
+      $('#qk-status').textContent = `${qk.shots.length} shot${qk.shots.length > 1 ? 's' : ''} ready. Add your song or voice, then press Assemble!`;
     };
     grid.appendChild(cell);
   });
@@ -8284,7 +8314,7 @@ $('#qk-pick-studio').onclick = () => {
   const grid = $('#qk-studio-grid');
   const show = grid.style.display === 'none';
   grid.style.display = show ? 'grid' : 'none';
-  $('#qk-pick-studio').textContent = show ? '🖼 Hide Studio pictures' : '🖼 Use pictures made in Studio';
+  $('#qk-pick-studio').textContent = show ? '🖼 Hide my library' : '🖼 Use what’s in my library';
   if (show) renderQkStudioGrid();
 };
 
@@ -8320,7 +8350,7 @@ $('#qk-import-song').onclick = async () => {
 $('#qk-assemble').onclick = async () => {
   if (qk.busy || st.busyRender) return;
   setErr('#seq-err', null);
-  if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures first (button 1).');
+  if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures or clips first (button 1).');
   qk.busy = true;
   const btn = $('#qk-assemble');
   btn.disabled = true;

@@ -2169,7 +2169,11 @@ function spawnFfmpegJob(userId, args, outFile, expectedDur, label, meta, kind = 
     } else {
       try { fs.unlinkSync(outPath); } catch (_) {}
       job.status = 'error';
-      job.error = `ffmpeg exited with code ${code}: …${stderrTail.slice(-500)}`;
+      // The last 500 characters are usually the encoder giving up, not the
+      // reason. Lead with the first real error line in the tail — that's the
+      // one that says what ffmpeg actually objected to.
+      const firstErr = (stderrTail.match(/^.*(?:Error|Invalid|No such|Failed|Cannot|Unable).*$/mi) || [])[0];
+      job.error = `ffmpeg exited with code ${code}: ${firstErr ? firstErr.trim() + ' … ' : ''}${stderrTail.slice(-700)}`;
     }
   });
   return job;
@@ -3426,9 +3430,15 @@ router.post('/render', async (req, res) => {
   resolved.forEach((c, i) => {
     const useKB = kenBurns && c.kind === 'image';
     const geom = useKB ? stillMotion(c, i) : `${fitFilter},setsar=1,fps=${FPS}`;
+    // fps goes LAST, after settb/setpts. Those two rewrite the timebase and
+    // timestamps, which leaves the stream's frame rate reported as 1/0 —
+    // undefined — and xfade refuses any input that isn't a constant frame
+    // rate. An all-stills edit never hit it because zoompan re-tags fps on
+    // its way out; the moment a filmed clip joined the timeline, every
+    // dissolve in the render died with "current rate of 1/0 is invalid".
     filters.push(
       `[${i}:v]${geom},setsar=1,format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
-      `settb=AVTB,setpts=PTS-STARTPTS[v${i}]`
+      `settb=AVTB,setpts=PTS-STARTPTS,fps=${FPS}[v${i}]`
     );
   });
 

@@ -16,6 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "end-cards")
 
 W, H = 1080, 1920
+SCALES = [1, 2]        # 1080x1920 and 2160x3840 — match whatever the episode was rendered at
 INK = (232, 228, 220)          # warm off-white, not pure white
 DIM = (128, 122, 112)
 BG = (10, 10, 10)              # near-black, never #000
@@ -40,20 +41,20 @@ def tracked(draw, text, font, tracking, cx, y, fill):
     return total
 
 
-def build(name, line1, line2):
-    im = Image.new("RGB", (W, H), BG)
+def build(name, line1, line2, k=1):
+    im = Image.new("RGB", (W * k, H * k), BG)
     d = ImageDraw.Draw(im)
 
-    f1 = ImageFont.truetype(REG, 46)
-    f2 = ImageFont.truetype(REG, 28)
+    f1 = ImageFont.truetype(REG, 46 * k)
+    f2 = ImageFont.truetype(REG, 28 * k)
 
     # Sits just above centre. Dead centre reads as a title card; a little high
     # reads as an ending.
-    y = H * 0.46
-    tracked(d, line1, f1, 14, W / 2, y, INK)
+    y = H * k * 0.46
+    tracked(d, line1, f1, 14 * k, W * k / 2, y, INK)
 
     if line2:
-        tracked(d, line2, f2, 8, W / 2, y + 104, DIM)
+        tracked(d, line2, f2, 8 * k, W * k / 2, y + 104 * k, DIM)
 
     im.save(os.path.join(OUT, name), "PNG", optimize=True)
     return name
@@ -61,10 +62,14 @@ def build(name, line1, line2):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    n = 0
     for name, l1, l2 in CARDS:
-        build(name, l1, l2)
-        print(" ", name, "—", l1, ("/ " + l2) if l2 else "")
-    print("\nWrote %d cards to %s" % (len(CARDS), OUT))
+        for k in SCALES:
+            out = name if k == 1 else name.replace(".png", "-2x.png")
+            build(out, l1, l2, k)
+            print(" ", out, "—", l1, ("/ " + l2) if l2 else "")
+            n += 1
+    print("\nWrote %d cards to %s" % (n, OUT))
 
 
 if __name__ == "__main__":

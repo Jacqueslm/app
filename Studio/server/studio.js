@@ -3061,6 +3061,9 @@ function kenBurnsExprs(move, intensity, fx, fy, easing) {
   const cx = '(iw-iw/zoom)/2', cy = '(ih-ih/zoom)/2';
   const rad = (deg) => (deg * Math.PI / 180).toFixed(5);
   switch (move) {
+    // Dead still. Any movement at all resamples the frame every frame, which
+    // softens flat type — so a title or end card wants this and nothing else.
+    case 'still':     return { z: '1', x: cx, y: cy };
     case 'push':      return { z: `1+${zoomAmt}*${p}`, x: cx, y: cy };
     case 'pull':      return { z: `${1 + zoomAmt}-${zoomAmt}*${p}`, x: cx, y: cy };
     case 'pan_right': return { z: `${panZoom}`, x: `(iw-iw/zoom)*${p}`, y: cy };
@@ -3700,14 +3703,22 @@ router.post('/render', async (req, res) => {
   let current = '[v0]';
   let joined = resolved[0].dur;
   trans.forEach((t, i) => {
-    const next = `[v${i + 1}]`, out = `[j${i}]`;
+    const next = `[v${i + 1}]`, raw = `[jr${i}]`, out = `[j${i}]`;
     if (t.type === 'cut') {
-      filters.push(`${current}${next}concat=n=2:v=1:a=0${out}`);
+      filters.push(`${current}${next}concat=n=2:v=1:a=0${raw}`);
       joined += resolved[i + 1].dur;
     } else {
-      filters.push(`${current}${next}xfade=transition=${TRANSITIONS[t.type]}:duration=${t.td.toFixed(3)}:offset=${(joined - t.td).toFixed(3)}${out}`);
+      filters.push(`${current}${next}xfade=transition=${TRANSITIONS[t.type]}:duration=${t.td.toFixed(3)}:offset=${(joined - t.td).toFixed(3)}${raw}`);
       joined += resolved[i + 1].dur - t.td;
     }
+    // Re-stamp the timebase after EVERY join. concat and xfade each hand on a
+    // timebase of their own choosing — concat emits 1/fps where a fresh clip
+    // carries AVTB — and xfade refuses two inputs whose timebases disagree.
+    // A timeline of all blends never hit it, and neither did all cuts. A cut
+    // followed by a blend died with "First input link main timebase (1/1000000)
+    // do not match the corresponding second input link xfade timebase (1/30)"
+    // and nothing was written at all.
+    filters.push(`${raw}settb=AVTB,fps=${FPS}${out}`);
     current = out;
   });
 
@@ -3777,8 +3788,14 @@ router.post('/render', async (req, res) => {
     const audible = Math.min(c.dur - skip, outDur - Math.max(0, s));
     if (audible <= 0.05) return;
     const delayMs = Math.max(0, Math.round(s * 1000));
+    // The 1.5 exists to push dialogue up over a song. With no song there is
+    // nothing to push over, and a finished video dropped in whole already
+    // carries its own mix — raising it 3.5dB just makes it louder than its
+    // maker chose. (Measured: it does not clip or pump, the limiter absorbs
+    // it. This is a correctness fix, not a rescue.)
+    const lift = musicIn ? 1.5 : 1.0;
     filters.push(`[${i}:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo,` +
-      `atrim=${skip.toFixed(3)}:${(skip + audible).toFixed(3)},asetpts=PTS-STARTPTS,volume=1.5` +
+      `atrim=${skip.toFixed(3)}:${(skip + audible).toFixed(3)},asetpts=PTS-STARTPTS,volume=${lift.toFixed(2)}` +
       `${delayMs > 0 ? `,adelay=${delayMs}|${delayMs}` : ''}[cv${i}]`);
     voiceLabels.push(`[cv${i}]`);
     voiceWindows.push({ s: Math.max(0, s), e: Math.min(outDur, s + c.dur) });

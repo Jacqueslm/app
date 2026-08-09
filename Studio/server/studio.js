@@ -767,11 +767,11 @@ async function falKeyCheck(key) {
   }
   if (r.ok) return { ok: true, why: 'Key works.' };
   if (r.status === 401 || r.status === 403) {
-    // Careful with this one. It only proves fal's FILE-UPLOAD host refused the
-    // key. Generation goes to a different host entirely (queue.fal.run), so a
-    // key can be perfectly good for making pictures and still fail here.
-    // Don't send anyone to rotate a key on this evidence alone.
-    return { ok: false, why: `fal.ai's file-upload service refused this key (${r.status}). That does NOT necessarily mean the key is bad — generating pictures uses a different fal service. Try generating one cheap scene: if that works, the key is fine and the upload side is the problem (tell Claude). If that fails too, then it is the key or the account balance.` };
+    // fal answers 403 for an EMPTY BALANCE as well as for a bad key — same
+    // status, no distinguishing message. That cost a needless key rotation
+    // once, so balance is named first here: it's the likelier of the two,
+    // because a key you just created and pasted is rarely the broken thing.
+    return { ok: false, why: `fal.ai refused this (${r.status}). Two things cause that, and balance is the common one: 1) your fal.ai credit is empty — check the balance on your fal dashboard and top it up; 2) the key is wrong — make a fresh one at fal.ai → Keys and paste it. Making pictures uses a different fal service, so it can still work while this doesn't.` };
   }
   return { ok: null, why: `fal.ai answered ${r.status}. That's not a key problem — probably a hiccup on their side. Try again in a minute.` };
 }

@@ -50,19 +50,15 @@ saving until the data-types checklist appears.
 **Not urgent, but do it before production goes live.** Under-declaring here is
 an enforcement action after launch, not a rejection now.
 
-### 2. Health apps declaration — which category was picked
+### 2. Health apps declaration — RESOLVED 9 Aug
 
-The console only says *"You told us about the health features in your app"*. It
-does not show which category, and the category is the part that matters:
+Nothing in the **Medical** group is ticked — confirmed by Jacques in the
+console. So the declaration sits in the wellness group, no regulatory
+expectations are triggered, and the **Personal account** stands. Nothing to do.
 
-- **"Stress management, relaxation, mental acuity"** — correct, wellness group
-- **"Mental and behavioural health"** — wrong, sits under **Medical**, which
-  carries regulatory expectations and can require an **Organization account**.
-  This account is a **Personal account** (confirmed on the console home page).
-
-To check: App content → Health apps → **Manage**.
-
-If it reads Mental and behavioural health, stop and say so — it changes the plan.
+The disclaimer still has to stay as the first paragraph of the full
+description, because there is no regulatory clearance. See
+`04-health-declaration.md`.
 
 ### 3. Production access — around 13 Aug
 

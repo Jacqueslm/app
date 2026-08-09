@@ -24,7 +24,7 @@ Open **OUTREACH.md**. Send the next 5 unchecked emails, tick them off. Every
 email is fully written — copy, paste, send. This is the sales work.
 Extra 15 minutes after? Two other piles, both fully written, both waiting:
 **INFLUENCERS.md** (10 podcasts and sober authors — none sent yet) and
-**SCHOOLS.md** (10 school districts' staff-wellness coordinators). Send 1 from
+**SCHOOLS.md** (12 St. Louis districts first, then 10 out of state). Send 1 from
 either. No pressure, no deadline on those files.
 
 **Wednesday — one small win (30 min):**

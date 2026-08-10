@@ -798,9 +798,11 @@ if showDash and barstate.islast
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────
 if fire
-    exitPlan = plan == "SCALP"    ? "Single target at T1. Full exit. Done for the day." :
-               plan == "STANDARD" ? "Half at T1, stop to break-even, rest at T2." :
-                                    "Half at T1, stop to break-even, TRAIL the rest on the 15m to T2."
+    string exitPlan = "Half at T1, stop to break-even, TRAIL the rest on the 15m to T2."
+    if plan == "SCALP"
+        exitPlan := "Single target at T1. Full exit. Done for the day."
+    if plan == "STANDARD"
+        exitPlan := "Half at T1, stop to break-even, rest at T2."
     dtA  = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE day"
     budA = str.tostring((trigLong ? usedUpLong : usedUpShort) * 100, "#") + "% of range budget used"
     alert(syminfo.ticker + " " + (trigLong ? "LONG" : "SHORT") + " " + grade +

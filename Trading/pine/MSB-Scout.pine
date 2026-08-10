@@ -509,7 +509,12 @@ wallUp := f_pickAbove(wallUp, pdh, tgtFloorUp)
 wallDn = f_pickBelow(float(na), h1Lo, tgtFloorDn)
 wallDn := f_pickBelow(wallDn, h4Lo, tgtFloorDn)
 wallDn := f_pickBelow(wallDn, pdl, tgtFloorDn)
-wall   = trigLong ? nz(wallUp, entry + atr * tgtProj) : nz(wallDn, entry - atr * tgtProj)
+// No named level qualifies. The 100-bar extreme is still a real wall when it sits
+// AHEAD of price; the old code used it even when it sat behind, which is what scored
+// open-air breakouts as having no room. Use it when it leads, project when it doesn't.
+fallUp = not na(hi100) and hi100 > tgtFloorUp ? hi100 : entry + atr * tgtProj
+fallDn = not na(lo100) and lo100 < tgtFloorDn ? lo100 : entry - atr * tgtProj
+wall   = trigLong ? nz(wallUp, fallUp) : nz(wallDn, fallDn)
 roomR  = not na(riskPts) and riskPts > 0 ? math.abs(wall - entry) / riskPts : 0.0
 roomOK = roomR >= minRoom
 

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0834</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0835</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -8115,7 +8115,12 @@ function parseShotLine(line) {
   // leading "1." / "1)" / "-" / "•" numbering
   take(/^\s*[-•*]?\s*\d{1,3}\s*[.)]\s*/);
   // duration: "10s" or "10 sec" wins; a bare number only if it's standalone
-  const d = take(/\b(\d{1,3})\s*(?:s|sec|secs|seconds)\b/i) || take(/(?:^|\s)(\d{1,3})(?=\s)/);
+  // A number with "s" on it is unambiguous. A bare number is a guess, and it
+  // was wrong on any caption containing one: paste "Day 400" on its own and the
+  // 400 was taken as a length, clamped to 60, and the caption came out as
+  // "Day". A shot is never longer than 60 seconds, so a bare number above that
+  // was never a duration and belongs to the sentence.
+  const d = take(/\b(\d{1,3})\s*(?:s|sec|secs|seconds)\b/i) || take(/(?:^|\s)([1-9]\d?|60)(?=\s)/);
   if (d) out.dur = Math.min(60, Math.max(1, Number(d[1])));
   // A plan separates its columns with whatever it likes - spaces, commas,
   // pipes, dashes - so "hover above," has to match as fully as "hover above ".

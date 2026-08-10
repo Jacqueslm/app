@@ -49,6 +49,52 @@ happened — a close, a hold, a sweep, a reclaim — you have a guess, not a tra
 
 ---
 
+## 1¾. How the system adapts — and how it deliberately doesn't
+
+Every day the market is different. The system handles that in a specific way: **the principles
+never change, but the measurements are taken fresh every single day.** Almost nothing in this
+system is a fixed number.
+
+| What changes daily | How the system re-measures it |
+|---|---|
+| Volatility | Everything is scaled by ATR — stops, buffers, displacement, tolerances. A 40-point day and a 400-point day get proportionally identical rules, automatically. |
+| What "normal volume" means | RVOL compares each hour to *that hour's own history* — a baseline that updates itself every day it runs. |
+| The map | Yesterday's value area, the day's open location, reference levels — redrawn from scratch each morning. Zones delete themselves when broken. |
+| The day's character | The day-type classifier reads trend vs balance *live*, and a different rule set applies to each: balance day → breakout entries banned, continuation penalised; trend day → continuation allowed. That IS "same market, different environment, different rules." |
+| The bridge's character | Ranging 4H → range-trap rules active, edges treated as raids-in-waiting. Trending 4H → breaks trusted normally. |
+| The day's fuel | Range budget recomputed from the daily ATR every session. |
+| Each trade's plan | Scalp / standard / hold decided per trade from measured room — not one exit rule for all conditions. |
+| What actually works for YOU | The grader's win-rate-per-grade is computed from your own journal and sharpens every week. |
+
+So the system doesn't "think" the market is trending — it counts the closes beyond value and
+reports what it counted. It doesn't "think" volume is high — it divides today's 10am by every
+previous 10am. **Knowing what is actually going on, instead of what it thinks, is precisely what
+"measured, not assumed" means — and every gate in this playbook is a measurement.**
+
+### The one way it refuses to adapt — on purpose
+
+The system will not rewrite its own rules on the fly, and this is a feature, not a gap.
+Systems that continuously re-fit themselves to the last few weeks of data die a specific death:
+they finish adapting to a regime at the exact moment the regime ends, forever one lesson behind.
+"Adaptive" systems are the best-dressed way ever invented to curve-fit in real time.
+
+What actually changes slowly enough to be worth adapting to — whether a filter earns its place,
+whether B-grades make money, whether an instrument suits you — is handled by the only adaptation
+loop with a real track record: **journal → 30-trade review → change ONE rule, with a date
+written next to it.** That's the deep study. It's slow because the truth arrives slowly, and a
+rule changed faster than the evidence isn't adaptation, it's mood.
+
+### Why it stays simple
+
+Underneath everything, this is **one idea**: *trade only where what the market just said agrees
+with where the bigger picture says it's trying to go — and measure both instead of assuming
+either.* Every gate is that idea pointed at a different lie the market can tell. And every gate
+is a toggle, so the backtest can fire any layer that doesn't earn its keep. The system is
+allowed to get simpler; it earns its way to complexity, never the reverse. Simplicity wins —
+but only *measured* simplicity. Simple and unmeasured is just a hunch with confidence.
+
+---
+
 ## 2. Timeframe roles — each one has exactly one job
 
 | TF | Role | Question it answers | It does NOT |

@@ -132,8 +132,10 @@
     <div class="card">
       <h2>Log it</h2>
       <p class="note" style="margin-top:0">Log every setup — taken <em>and</em> passed. The passed ones are how you
-        find out whether your C-grades actually lose. Saved in this browser only.</p>
-      <div class="row">
+        find out whether your C-grades actually lose. Replay and sim trades belong here (tagged); the automated
+        backtest does <b>not</b> — those are the machine's trades, not yours. When you go live, export the CSV,
+        erase, and start the live record clean. Saved in this browser only.</p>
+      <div class="row3">
         <div><label>Outcome</label>
           <select id="outcome">
             <option value="none">Not taken (passed on it)</option>
@@ -141,6 +143,12 @@
             <option value="be">Break-even</option>
           </select></div>
         <div><label>Actual result in R</label><input id="resR" type="number" step="0.1" placeholder="1.5 / -1.0"></div>
+        <div><label>Stage</label>
+          <select id="stage">
+            <option value="replay">Bar replay</option>
+            <option value="sim">Sim</option>
+            <option value="live">LIVE</option>
+          </select></div>
       </div>
       <div class="btns">
         <button id="save">Save to journal</button>
@@ -165,7 +173,7 @@
       <h2>Journal</h2>
       <div class="stats" id="jStats"></div>
       <div style="overflow-x:auto;margin-top:16px"><table id="jTable">
-        <thead><tr><th>Date</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Plan</th>
+        <thead><tr><th>Date</th><th>Stage</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Plan</th>
           <th>Qty</th><th>Outcome</th><th>Planned R</th><th>Actual R</th><th></th></tr></thead>
         <tbody></tbody></table></div>
       <div class="btns">
@@ -399,11 +407,12 @@ function render(){
     const r = t.resR === "" || t.resR === null ? "—" : (+t.resR).toFixed(1);
     const rc = t.resR > 0 ? "pos" : t.resR < 0 ? "neg" : "";
     const pr = t.plannedR ? (+t.plannedR).toFixed(1) : "—";
-    return `<tr><td>${t.date}</td><td>${t.sym}</td><td>${t.dir}</td>
+    const stg = t.stage === "live" ? '<b class="pos">LIVE</b>' : (t.stage ?? "—");
+    return `<tr><td>${t.date}</td><td>${stg}</td><td>${t.sym}</td><td>${t.dir}</td>
       <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.plan ?? "—"}</td>
       <td>${t.qty || "—"}</td><td>${t.outcome}</td><td>${pr}</td><td class="${rc}">${r}</td>
       <td><button class="ghost" data-del="${idx}" style="padding:2px 8px;font-size:12px">×</button></td></tr>`;
-  }).join("") || `<tr><td colspan="10" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="11" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
 
   const taken = j.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
   const wins  = taken.filter(t => +t.resR > 0).length;
@@ -437,7 +446,7 @@ $("save").onclick = () => {
     plan: state.plan, room: +state.room.toFixed(2), plannedR: +state.plannedR.toFixed(2),
     entry: $("entry").value || null, stop: $("stop").value || null,
     qty: state.qty, riskUsd: Math.round(state.riskUsd),
-    outcome: $("outcome").value, resR: $("resR").value,
+    outcome: $("outcome").value, resR: $("resR").value, stage: $("stage").value,
     notes: $("notes").value
   });
   save(j); render(); renderBullet();
@@ -462,7 +471,7 @@ $("wipe").onclick = () => {
 $("csv").onclick = () => {
   const j = load();
   if (!j.length) return alert("Journal is empty.");
-  const cols = ["date","sym","dir","grade","score","plan","room","plannedR","entry","stop","qty","riskUsd","outcome","resR","notes"];
+  const cols = ["date","stage","sym","dir","grade","score","plan","room","plannedR","entry","stop","qty","riskUsd","outcome","resR","notes"];
   const esc = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const csv = [cols.join(","), ...j.map(t => cols.map(c => esc(t[c])).join(","))].join("\n");
   const a = document.createElement("a");

@@ -98,6 +98,13 @@
     <!-- ── Trade details ── -->
     <div class="card">
       <h2>The trade</h2>
+      <div style="margin-bottom:12px">
+        <label>Paste the alert — fills the numbers for you</label>
+        <textarea id="alertPaste" rows="2" placeholder="Copy the TradingView alert text and paste it here"
+          style="width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+                 border-radius:6px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+        <p class="note" id="pasteNote" style="margin-top:4px">The checklist stays yours to tick — reading each line is the pause that protects you. Only the typing is automated.</p>
+      </div>
       <div class="row">
         <div><label>Instrument</label>
           <select id="sym">
@@ -454,7 +461,7 @@ $("save").onclick = () => {
 
 $("reset").onclick = () => {
   boxes().forEach(b => b.checked = false);
-  ["entry","stop","resR","notes","htf"].forEach(id => $(id).value = "");
+  ["entry","stop","resR","notes","htf","alertPaste"].forEach(id => $(id).value = "");
   evaluate();
 };
 
@@ -479,6 +486,46 @@ $("csv").onclick = () => {
   a.download = `msb-journal-${new Date().toISOString().slice(0,10)}.csv`;
   a.click(); URL.revokeObjectURL(a.href);
 };
+
+// ── Fill the form from a pasted alert ──────────────────────────────────────
+// Both alert formats carry everything: "MNQ1! LONG A+ (11/13 · 85% quality) — HOLD
+// \nentry 20450.00 | stop 20410.00 | risk 40.00 pts\nT1 ... | T2 ... | room 5.0R ..."
+function parseAlert(text){
+  const t = text.replace(/\s+/g, " ").trim();
+  const num = re => { const m = t.match(re); return m ? parseFloat(m[1]) : null; };
+  const sym = (t.match(/\b(MNQ|MES|MGC)/) || [])[1] || null;
+  const dir = (t.match(/\b(LONG|SHORT)\b/) || [])[1] || null;
+  const entry = num(/entry\s+([\d.]+)/i);
+  const stop  = num(/stop\s+([\d.]+)/i);
+  const risk  = num(/risk\s+([\d.]+)\s*pts/i);
+  const room  = num(/room\s+([\d.]+)\s*R/i);
+  const t2    = num(/T2\s+([\d.]+)/);
+  if (!entry || !stop || !dir) return null;
+  // The wall: rebuild from room × risk (exact — it's how the indicator computed it),
+  // falling back to T2 for STANDARD/HOLD alerts.
+  let htf = null;
+  if (risk && room) htf = dir === "LONG" ? entry + risk * room : entry - risk * room;
+  else if (t2) htf = t2;
+  return { sym, dir, entry, stop, htf };
+}
+
+$("alertPaste").addEventListener("input", () => {
+  const a = parseAlert($("alertPaste").value);
+  const note = $("pasteNote");
+  if (!a) {
+    if ($("alertPaste").value.trim())
+      note.innerHTML = '<span class="neg">Could not read that — paste the whole alert message, including the entry/stop line.</span>';
+    return;
+  }
+  if (a.sym) $("sym").value = a.sym;
+  $("dir").value = a.dir;
+  $("entry").value = a.entry;
+  $("stop").value = a.stop;
+  if (a.htf) $("htf").value = +a.htf.toFixed(2);
+  note.innerHTML = `<span class="pos">Filled: ${a.sym ?? "?"} ${a.dir} · entry ${a.entry} · stop ${a.stop}` +
+    (a.htf ? ` · HTF ${(+a.htf.toFixed(2))}` : "") + `.</span> Now tick the checklist yourself — that part is the point.`;
+  evaluate();
+});
 
 // prop settings persist per browser
 const PKEY = "msb-prop-v1";

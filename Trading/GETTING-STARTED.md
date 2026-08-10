@@ -112,6 +112,11 @@ Do this on each of the three charts.
 **Check:** you see "Trade Grader" with a big red **REJECT** at the top and two checklists. Red is
 correct — an empty form should always be a reject.
 
+**The paste shortcut:** when a real alert fires, don't retype the numbers — copy the whole alert
+message and paste it into the **"Paste the alert"** box at the top of The Trade card. It fills
+symbol, direction, entry, stop and the HTF level by itself. The checklist stays yours to tick —
+reading each line is the pause that protects you; only the typing is automated.
+
 Try it: pick MNQ, type entry `20450`, stop `20410`, next HTF level `20650`, and it should show
 **3 contracts, $240 risk** and a **HOLD · 5.0R room** plan banner. Tick all twelve hard filters and
 eight quality points — amber, **HALF SIZE · B**. Two more and it goes green, **TAKE IT · A+**.

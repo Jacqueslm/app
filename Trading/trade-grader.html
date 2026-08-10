@@ -213,7 +213,7 @@ const HARD = [
   ["ext",    "NOT stretched past the 2σ VWAP band",      "That's where benchmark algos turn into sellers. Don't buy their exit."],
   ["budget", "Day's range budget not spent",             "Price hasn't already travelled 85%+ of the daily ATR in my direction. The perfect setup at 1:30pm fails here."],
   ["trap",   "Not buying a breakout of a ranging 4H",    "If the 4H is in balance and price is beyond its range edge without 3+ closes of acceptance, that break is suspected — most fake-outs live exactly there."],
-  ["news",   "Clear of red-folder news by 10+ minutes",  "CPI, NFP, FOMC. Structure after the news, never through it."],
+  ["news",   "NEWS — clear of red-folder reports",  "CPI, NFP, FOMC. Structure after the news, never through it. The indicator blocks your Thu/Fri 7:30 window on its own; FOMC days use its toggle."],
   ["room",   "At least 2R of clear air to the next HTF level", "If T1 sits under a wall, there is no trade here."]
 ];
 const SOFT = [
@@ -375,7 +375,7 @@ function evaluate(){
     } else {
       v.classList.add("v-take");
       big.textContent = "TAKE IT · A+";
-      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + (machineInfo ? " — scored by the indicator at fire time. News confirmed by you." : ", all hard filters clear.") + ` Full size.` + wrTxt;
+      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + (machineInfo ? " — scored by the indicator at fire time, news gate included." : ", all hard filters clear.") + ` Full size.` + wrTxt;
     }
   }
   // Planned R: what this trade returns if you follow the plan. Logged so the journal can
@@ -518,7 +518,9 @@ function parseAlert(text){
   if (!machine && ms) {
     const sc = +ms[1], dn = +ms[2];
     const gr = dn === 11 ? (sc >= 9 ? "A+" : sc >= 7 ? "B" : "C") : (sc >= 10 ? "A+" : sc >= 8 ? "B" : "C");
-    machine = { grade: gr, score: sc, denom: dn, newsClear: false };
+    // The indicator only fires when its news gate is clear, so the alert's
+    // existence IS the news check. FOMC days still rely on the indicator toggle.
+    machine = { grade: gr, score: sc, denom: dn, newsClear: true };
   }
   if (!entry || !stop || !dir) return null;
   // The wall: rebuild from room × risk (exact — it's how the indicator computed it),
@@ -536,7 +538,8 @@ $("alertPaste").addEventListener("input", () => {
   machineInfo = a ? a.machine : null;
   if (machineInfo) {
     // The indicator verified every gate before it fired — re-ticking them is busywork.
-    // NEWS stays unticked: the one thing the machine cannot know is the calendar.
+    // That includes news: the Thu/Fri blackout runs on the clock inside the indicator,
+    // and it refuses to fire during the window. FOMC days rely on its toggle.
     boxes().forEach(b => {
       if (b.dataset.cls !== "hard") return;
       if (b.dataset.k === "news") { if (machineInfo.newsClear) b.checked = true; return; }

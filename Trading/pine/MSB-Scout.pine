@@ -95,6 +95,14 @@ propMode   = input.bool(false, "Prop evaluation mode — A+ only + risk cap", gr
 propDDLeft = input.float(2500, "Distance to drawdown limit ($) — update it daily", minval = 100, step = 50, group = grpF)
 propStreak = input.int(8, "Must survive N straight losses", minval = 4, maxval = 20, group = grpF)
 
+grpN = "News blackout — your rule, on the clock"
+useNews = input.bool(true, "Gate: weekly report blackout (Thu/Fri 08:30 ET)", group = grpN,
+     tooltip = "The 7:30am Central weekly reports = 08:30 Eastern. No alerts in the window around them on Thu/Fri.")
+newsSess = input.session("0800-0900:56", "Blackout window (:56 = Thu+Fri)", group = grpN,
+     tooltip = "Times are Eastern. 0800-0900 covers the 08:30 release with 30 min either side.")
+fomcDay = input.bool(false, "FOMC today — block the whole day (manual)", group = grpN,
+     tooltip = "Pine cannot see the Fed calendar. Tick this on the ~8 FOMC Wednesdays a year (and untick after). The one news box only you can hold.")
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(36,    "Setup expires after N bars", minval = 5, group = grpT,
@@ -352,6 +360,8 @@ f_pickBelow(float cur, float lvl, float px) =>
 
 // ─── Session ─────────────────────────────────────────────────────────────────
 inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+// Your news rule, mechanical: outside the Thu/Fri report window, and not an FOMC day.
+newsOK = not useNews or (na(time(timeframe.period, newsSess, sessTZ)) and not fomcDay)
 
 // ─── Shared series ───────────────────────────────────────────────────────────
 avgBody = ta.sma(math.abs(close - open), 20)
@@ -532,7 +542,7 @@ if na(lastAlertDay) or dayofmonth != lastAlertDay
     lastAlertDay := dayofmonth
 bulletsLeft = maxPerDay - firedToday
 
-fire = anyTrig and gradeOK and roomOK and inSess and propOK and bulletsLeft > 0 and barstate.isconfirmed
+fire = anyTrig and gradeOK and roomOK and inSess and newsOK and propOK and bulletsLeft > 0 and barstate.isconfirmed
 if fire
     firedToday += 1
 
@@ -655,7 +665,7 @@ if fire
          " | target " + str.tostring(t1,    format.mintick) + " (" + str.tostring(scalpR, "#.##") + "R, FULL exit)" +
          " | risk " + str.tostring(riskPts, format.mintick) + " pts" +
          "\nroom " + str.tostring(roomR, "#.0") + "R to the next 1H/4H wall | RVOL " +
-         str.tostring(rvol, "#.0") + (swept ? " | swept" : "") + ((trigLong ? fuelLong : fuelShort) ? " | fuel: far edge raided" : "") +
+         str.tostring(rvol, "#.0") + (swept ? " | swept" : "") + ((trigLong ? fuelLong : fuelShort) ? " | fuel: far edge raided" : "") + (useNews ? " | news ✓" : "") +
          (propMode ? "\nPROP: cap " + str.tostring(propQty) + " contracts ($" + str.tostring(propCap, "#") + " max risk, survives " + str.tostring(propStreak) + " straight losses)" : "") +
          "\nOne target. In, paid, out, done for the day." +
          "\nIf the 1H system already fired today, this one is TOMORROW'S.",

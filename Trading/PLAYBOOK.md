@@ -214,7 +214,9 @@ once and these stop feeling like arbitrary boxes.
       its range edge without 3+ closes of acceptance, that break is the trap, not the move
       ([INSTITUTIONAL.md — the range trap](INSTITUTIONAL.md))
 - [ ] Stop distance ≤ your max ($ risk still within 1% at 1 contract)
-- [ ] Not inside the last 10 minutes before a red-folder news release
+- [ ] Clear of news — **machine-gated on your schedule**: the indicator blocks Thu/Fri
+      08:00–09:00 ET (the 7:30am Central weekly reports) automatically. FOMC days are the one
+      manual piece: tick "FOMC today" in the indicator settings on the ~8 Fed Wednesdays a year.
 - [ ] Room to run: ≥ 2R of clear air before the next opposing HTF level
 
 ### Score points (one each, 13 available)

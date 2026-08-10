@@ -103,6 +103,14 @@ zoneImp  = input.float(2.0, "Zone impulse (body vs 20-bar avg)", minval = 1.2, s
 cDem     = input.color(#2ecc71, "Demand", group = grpZ, inline = "z")
 cSup     = input.color(#e74c3c, "Supply", group = grpZ, inline = "z")
 
+grpN = "News blackout — your rule, on the clock"
+useNews = input.bool(true, "Gate: weekly report blackout (Thu/Fri 08:30 ET)", group = grpN,
+     tooltip = "The 7:30am Central weekly reports = 08:30 Eastern. No alerts in the window around them on Thu/Fri.")
+newsSess = input.session("0800-0900:56", "Blackout window (:56 = Thu+Fri)", group = grpN,
+     tooltip = "Times are Eastern. 0800-0900 covers the 08:30 release with 30 min either side.")
+fomcDay = input.bool(false, "FOMC today — block the whole day (manual)", group = grpN,
+     tooltip = "Pine cannot see the Fed calendar. Tick this on the ~8 FOMC Wednesdays a year (and untick after). The one news box only you can hold.")
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40,    "Setup expires after N bars", minval = 5, group = grpT)
@@ -413,6 +421,8 @@ f_pickBelow(float cur, float lvl, float px) =>
 
 // ─── Session ─────────────────────────────────────────────────────────────────
 inSess  = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+// Your news rule, mechanical: outside the Thu/Fri report window, and not an FOMC day.
+newsOK = not useNews or (na(time(timeframe.period, newsSess, sessTZ)) and not fomcDay)
 inPrime = not na(time(timeframe.period, primeStr, sessTZ))
 
 // ─── Shared series (never call ta.* conditionally) ───────────────────────────
@@ -626,7 +636,7 @@ if na(lastAlertDay) or dayofmonth != lastAlertDay
     lastAlertDay := dayofmonth
 bulletsLeft = maxPerDay - firedToday
 
-fire = anyTrig and gradeOK and plan != "NO TRADE" and inSess and propOK and
+fire = anyTrig and gradeOK and plan != "NO TRADE" and inSess and newsOK and propOK and
      bulletsLeft > 0 and barstate.isconfirmed
 if fire
     firedToday += 1
@@ -802,7 +812,7 @@ if fire
          "\nT1 "    + str.tostring(t1, format.mintick) + " (" + str.tostring(partialR, "#.#") + "R)" +
          " | T2 "   + str.tostring(t2, format.mintick) +
          " | room " + str.tostring(roomR, "#.0") + "R" +
-         " | RVOL " + str.tostring(rvol, "#.0") + (swept ? " | swept" : "") + ((trigLong ? fuelLong : fuelShort) ? " | fuel: far edge raided" : "") +
+         " | RVOL " + str.tostring(rvol, "#.0") + (swept ? " | swept" : "") + ((trigLong ? fuelLong : fuelShort) ? " | fuel: far edge raided" : "") + (useNews ? " | news ✓" : "") +
          "\n" + exitPlan +
          (propMode ? "\nPROP: cap " + str.tostring(propQty) + " contracts ($" + str.tostring(propCap, "#") + " max risk, survives " + str.tostring(propStreak) + " straight losses)" : "") +
          "\nBracket goes in as ONE action. That is your last bullet today.",

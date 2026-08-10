@@ -510,7 +510,7 @@ function parseAlert(text){
   // A real MSB alert carries the machine's verdict: "A+ (11/13 · 85% quality)".
   // Test/manual alerts don't — those stay fully manual.
   const mg = t.match(/\b(A\+|B)\s*\((\d+)\/(\d+)/);
-  const machine = mg ? { grade: mg[1], score: +mg[2], denom: +mg[3] } : null;
+  const machine = mg ? { grade: mg[1], score: +mg[2], denom: +mg[3], newsClear: /news ✓/.test(t) } : null;
   if (!entry || !stop || !dir) return null;
   // The wall: rebuild from room × risk (exact — it's how the indicator computed it),
   // falling back to T2 for STANDARD/HOLD alerts.
@@ -528,7 +528,11 @@ $("alertPaste").addEventListener("input", () => {
   if (machineInfo) {
     // The indicator verified every gate before it fired — re-ticking them is busywork.
     // NEWS stays unticked: the one thing the machine cannot know is the calendar.
-    boxes().forEach(b => { if (b.dataset.cls === "hard" && b.dataset.k !== "news") b.checked = true; });
+    boxes().forEach(b => {
+      if (b.dataset.cls !== "hard") return;
+      if (b.dataset.k === "news") { if (machineInfo.newsClear) b.checked = true; return; }
+      b.checked = true;
+    });
   }
   if (!a) {
     if ($("alertPaste").value.trim())
@@ -542,7 +546,9 @@ $("alertPaste").addEventListener("input", () => {
   if (a.htf) $("htf").value = +a.htf.toFixed(2);
   note.innerHTML = machineInfo
     ? `<span class="pos"><b>Machine-verified ${machineInfo.grade} · ${machineInfo.score}/${machineInfo.denom}.</b></span> ` +
-      `The indicator checked every gate before firing. Your two jobs: tick the NEWS box (only you can see the calendar) and look at the chart.`
+      (machineInfo.newsClear
+        ? `Every gate checked, including your Thu/Fri report blackout. Look at the chart, read the verdict, decide. (FOMC days rely on the toggle in the indicator — that one is on you.)`
+        : `The indicator checked every gate before firing. Your two jobs: tick the NEWS box (only you can see the calendar) and look at the chart.`)
     : `<span class="pos">Filled: ${a.sym ?? "?"} ${a.dir} · entry ${a.entry} · stop ${a.stop}` +
       (a.htf ? ` · HTF ${(+a.htf.toFixed(2))}` : "") + `.</span> Now tick the checklist yourself — that part is the point.`;
   evaluate();

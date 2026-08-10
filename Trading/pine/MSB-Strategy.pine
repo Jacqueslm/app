@@ -80,6 +80,14 @@ grpZ = "Your zones & alignment"
 useAlign = input.bool(true, "Gate: all four timeframes must align (D · 4H · 1H · 15m)", group = grpZ)
 zoneImp  = input.float(2.0, "Zone impulse (body vs 20-bar avg)", minval = 1.2, step = 0.1, group = grpZ)
 
+grpN = "News blackout — your rule, on the clock"
+useNews = input.bool(true, "Gate: weekly report blackout (Thu/Fri 08:30 ET)", group = grpN,
+     tooltip = "The 7:30am Central weekly reports = 08:30 Eastern. No alerts in the window around them on Thu/Fri.")
+newsSess = input.session("0800-0900:56", "Blackout window (:56 = Thu+Fri)", group = grpN,
+     tooltip = "Times are Eastern. 0800-0900 covers the 08:30 release with 30 min either side.")
+fomcDay = input.bool(false, "FOMC today — block the whole day (manual)", group = grpN,
+     tooltip = "Pine cannot see the Fed calendar. Tick this on the ~8 FOMC Wednesdays a year (and untick after). The one news box only you can hold.")
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40, "Setup expires after N bars", minval = 5, group = grpT)
@@ -336,6 +344,8 @@ f_pickBelow(float cur, float lvl, float px) =>
 
 // ─── Shared series ───────────────────────────────────────────────────────────
 inSess  = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+// Your news rule, mechanical: outside the Thu/Fri report window, and not an FOMC day.
+newsOK = not useNews or (na(time(timeframe.period, newsSess, sessTZ)) and not fomcDay)
 inPrime = not na(time(timeframe.period, primeStr, sessTZ))
 inDates = not useDates or (time >= dFrom and time <= dTo)
 avgBody = ta.sma(math.abs(close - open), 20)
@@ -515,7 +525,7 @@ if na(lastEntryDay) or dayofmonth != lastEntryDay
     tookToday    := 0
     lastEntryDay := dayofmonth
 
-okToTrade = score >= minScore and plan != "NO TRADE" and inSess and inDates and dayOK and
+okToTrade = score >= minScore and plan != "NO TRADE" and inSess and newsOK and inDates and dayOK and
      tookToday < maxPerDay and riskPts > 0 and strategy.position_size == 0
 
 // ─── Orders ──────────────────────────────────────────────────────────────────

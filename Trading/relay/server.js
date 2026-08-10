@@ -49,7 +49,12 @@ const server = http.createServer((req, res) => {
         res.end("Could not find trade-grader.html one folder up from relay/. Keep the Trading folder together.");
         return;
       }
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      // no-store: the grader gets updated in place, and a browser holding a
+      // stale copy looks exactly like a broken system. Always serve fresh.
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store, must-revalidate",
+      });
       res.end(html);
     });
     return;

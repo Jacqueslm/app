@@ -1,73 +1,82 @@
-# Tomorrow — 10 Aug 2026
+# Tomorrow — 11 Aug 2026
 
-Where everything stands at the end of 9 Aug. Top section is what to actually
-do; the rest is what changed, so nothing has to be re-derived.
+Where things stand at the end of 10 Aug. Top section is what to do; below it is
+what changed, so nothing has to be worked out twice.
 
-**Two live files hold state and are worth trusting over memory:**
-`TurnSomeDayIntoOneday/store-listing/00-STATUS.md` for the Play Store, and
-`SCHOOLS.md` for outreach.
+**Files that hold state, trust these over anyone's memory:**
+`TurnSomeDayIntoOneday/store-listing/00-STATUS.md` (Play Store),
+`SCHOOLS.md` and `INFLUENCERS.md` (outreach), `KEYWORDS.md` (search).
 
 ---
 
 ## DO THESE, IN THIS ORDER
 
-### 1. Update Studio (2 minutes)
+### 1. Finish Episode 3 — one panel to redo
 
-Settings → **Update my app** → close the black window → **Start Studio** →
-**Ctrl+Shift+R**. Stamp top-left must read **b0831**.
+`06_home` came back with **a glass of whisky on the desk**, in the shot where he
+comes home sober and writes the number. Ask Manus again: no alcohol anywhere in
+frame, no tumbler, no amber liquid, no bottle. Water or nothing.
 
-**If the stamp won't move, it's a branch problem, not a cache problem.** Studio
-updates itself from `claude/vibe-code-uwxxlk`. Session work goes to whatever
-branch that session was assigned. Any Studio change has to be cherry-picked
-across or it never reaches the machine. This cost an hour on 9 Aug.
+The other seven are done. Then: eight files into Quick Video, apply the
+**Episode format** template, paste the seven captions, check the total reads
+**41s**, add the song from `EPISODE-3.md`, render.
 
-### 2. Render Episode 2
+### 2. Production access — around 13 Aug
 
-All eight panels are chosen (see below). Rename, paste the shot list from
-`EPISODE-2.md`, add the end card as shot 9 — **Still, 3s, fade to black, no
-words** — and render. 49 seconds.
-
-### 3. Add the end card to Episode 1
-
-Episode 1 is finished, so it doesn't get rebuilt. Load the MP4 into Quick Video
-as shot 1 with **then: fade to black**, add `02-ep1-next-2x.png` as shot 2
-(**Still, 3s, no words**), **no song**, **untick "Cut on the beat"**. Out at
-1:21 with the original music intact.
-
-### 4. Start the partner cards — one a day
-
-Twelve cards in `reference/partner-cards/`, captions and hashtags in
-`reference/PARTNER-CARDS.md`. **One a day for twelve days.** Card 12 goes last.
-
-### 5. Episode 3 into Manus
-
-`EPISODE-3-PROMPTS.md`. Manus gets four panels. **Three are notebook shots you
-photograph yourself** — ten minutes, a real pen, one lamp. Shot 8 is you on
-camera.
-
-### 6. Production access — around 13 Aug
-
-Answers ready with a copy button on each:
+The form. Answers ready with a copy button on each:
 **https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9**
 
 Do not use the sheet the testing provider sent — two of its answers describe
-work that doesn't exist.
+work that does not exist.
+
+### 3. Start the partner cards — one a day
+
+Twelve in `reference/partner-cards/`, captions and hashtags in
+`reference/PARTNER-CARDS.md`. Card 12 goes last. **Watch saves and shares, not
+likes** — shares are currently zero across every platform, and that is the
+number that grows a small account.
+
+### 4. Facebook — three small things
+
+Pin a post in the empty Featured slot, add `turnsomedayintodayone@gmail.com`
+under About, and put both links in **About → Links** (they did not fit in the
+255-character bio). Skip address and phone.
+
+### 5. Influencers — after the episodes are out, not before
+
+Ten finished pitches in `INFLUENCERS.md`, none sent. **Send them once all three
+episodes are published**: right now it is a pitch, afterwards it is a pitch plus
+a body of work, and that is a different email to receive. Send one or two, not
+ten. This Naked Mind last.
+
+They are all "contact page" rather than email addresses, which is friction that
+stops piles getting sent. Ask me to find direct emails, the same way the schools
+got done.
+
+### 6. Schools follow-up — 16 Aug
+
+One each, once, then let it go. Only the ones that never replied. Text is in
+`SCHOOLS.md`. **Watch for bounces on Ladue and Mehlville** — those two addresses
+were built from each district's email pattern, not seen published. A bounce
+there is a typo, not a refusal.
 
 ---
 
-## STILL OPEN
+## STILL OPEN, NO DEADLINE
 
-- **Facebook:** pin a post in the Featured slot (it's empty and it's the first
-  thing a visitor sees), add `turnsomedayintodayone@gmail.com` under About, and
-  put both links in **About → Links** — they didn't fit in the 255-character
-  bio. Skip address and phone.
-- **The Shorts recut.** Offered, not done. Same footage reordered so the best
-  line is frame one instead of forty seconds in. Say the word.
-- **The two voices.** Still unanswered since 7 Aug: an African American woman's
-  and man's voice in Studio. I can't pick a voice by race from the free models —
-  none of them say who the speaker is. Two real routes: record a real person for
-  15 seconds (Studio clones from a clip; I'd add a save-as-narrator button), or
-  a paid library where the actors describe themselves.
+- **The Shorts recut.** Offered, not built. Same footage reordered so the best
+  line is frame one instead of forty seconds in. That is the seven-second
+  problem — 2,271 YouTube views in 28 days and an average view of about seven
+  seconds.
+- **The two voices.** Open since 7 Aug. An African American woman's and man's
+  voice in Studio. I will not pick a voice by race from free models that say
+  nothing about who is speaking. Two real routes: record a real person for
+  fifteen seconds (Studio clones from a clip; I would add a save-as-narrator
+  button), or a paid library where the actors describe themselves.
+- **Back up Studio's work.** `Studio/server/media/` and its `data.sqlite` are
+  deliberately not in git — that is what makes "Update my app" safe. It also
+  means every video, project and template exists on one computer only. The code
+  would survive that machine dying. The work would not.
 - **Buffer send** — parked. Manual posting works.
 - Script 39 narration; origin-story photo fixes.
 

@@ -822,3 +822,17 @@ if fire
 
 alertcondition(st == 3 and st[1] != 3, "Level reclaimed — watch for the trigger",
      "MSB: level reclaimed. Now waiting to see if it HOLDS.")
+
+// ─── Fallback full-signal alert (for alert dialogs without "Any alert() function call") ──
+// Hidden plots carry the live numbers; the alertcondition message reads them via
+// {{plot()}} placeholders. Same gates, same one-bullet counter, same content.
+plot(fire ? (trigLong ? 1 : -1) : na, "aDir",   display = display.none, editable = false)
+plot(fire ? entry   : na,             "aEntry", display = display.none, editable = false)
+plot(fire ? stopRaw : na,             "aStop",  display = display.none, editable = false)
+plot(fire ? riskPts : na,             "aRisk",  display = display.none, editable = false)
+plot(fire ? t1      : na,             "aT1",    display = display.none, editable = false)
+plot(fire ? t2      : na,             "aT2",    display = display.none, editable = false)
+plot(fire ? roomR   : na,             "aRoom",  display = display.none, editable = false)
+plot(fire ? score   : na,             "aScore", display = display.none, editable = false)
+alertcondition(fire, "TRADE SIGNAL — the full alert",
+     "{{ticker}} MSB dir {{plot(\"aDir\")}} | score {{plot(\"aScore\")}}/13 | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R")

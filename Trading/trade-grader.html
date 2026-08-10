@@ -501,7 +501,8 @@ function parseAlert(text){
   const t = text.replace(/\s+/g, " ").trim();
   const num = re => { const m = t.match(re); return m ? parseFloat(m[1]) : null; };
   const sym = (t.match(/\b(MNQ|MES|MGC)/) || [])[1] || null;
-  const dir = (t.match(/\b(LONG|SHORT)\b/) || [])[1] || null;
+  let dir = (t.match(/\b(LONG|SHORT)\b/) || [])[1] || null;
+  if (!dir) { const dm = t.match(/\bdir\s+(-?1)(?:\.0+)?\b/); if (dm) dir = dm[1] === "-1" ? "SHORT" : "LONG"; }
   const entry = num(/entry\s+([\d.]+)/i);
   const stop  = num(/stop\s+([\d.]+)/i);
   const risk  = num(/risk\s+([\d.]+)\s*pts/i);
@@ -509,8 +510,16 @@ function parseAlert(text){
   const t2    = num(/T2\s+([\d.]+)/);
   // A real MSB alert carries the machine's verdict: "A+ (11/13 · 85% quality)".
   // Test/manual alerts don't — those stay fully manual.
+  let machine = null;
   const mg = t.match(/\b(A\+|B)\s*\((\d+)\/(\d+)/);
-  const machine = mg ? { grade: mg[1], score: +mg[2], denom: +mg[3], newsClear: /news ✓/.test(t) } : null;
+  if (mg) machine = { grade: mg[1], score: +mg[2], denom: +mg[3], newsClear: /news ✓/.test(t) };
+  // Placeholder-format alerts ("MSB dir 1 | score 11/13 | ..."): grade derived from score.
+  const ms = t.match(/score\s+(\d+)(?:\.0+)?\/(\d+)/i);
+  if (!machine && ms) {
+    const sc = +ms[1], dn = +ms[2];
+    const gr = dn === 11 ? (sc >= 9 ? "A+" : sc >= 7 ? "B" : "C") : (sc >= 10 ? "A+" : sc >= 8 ? "B" : "C");
+    machine = { grade: gr, score: sc, denom: dn, newsClear: false };
+  }
   if (!entry || !stop || !dir) return null;
   // The wall: rebuild from room × risk (exact — it's how the indicator computed it),
   // falling back to T2 for STANDARD/HOLD alerts.

@@ -96,8 +96,8 @@ maxPerDay = input.int(1, "Max trades per day", minval = 1, maxval = 5, group = g
 scalpMax = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step = 0.5, group = grpR)
 holdMin  = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
 minRoom  = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR)
-tgtMinR  = input.float(0.5, "Ignore walls closer than this (R)", minval = 0.0, step = 0.1, group = grpR,
-     tooltip = "A level a fraction of a stop away is noise, not a target. Measured: with every prior-day, overnight, 4H and Daily level treated as a wall, one is nearly always within a fraction of the stop, and the trade was rejected for no room. Look past those.")
+tgtMinR  = input.float(0.0, "Ignore walls closer than this (R)", minval = 0.0, step = 0.1, group = grpR,
+     tooltip = "Looking past near walls sounds right and MEASURED WORSE: at 0.5 it added 7 trades over 3.5 years and every one of them was a net loser (5 trades at PF 3.19 became 12 at PF 0.76). Default 0 = off. The near wall was real. Raise it only if your own data says otherwise.")
 tgtProj  = input.float(4.0, "Open-air target (ATR) when no wall exists", minval = 1.0, step = 0.5, group = grpR,
      tooltip = "When nothing stands above (a long) or below (a short), price is in open air - the cleanest case. The old fallback reached back to a 100-bar extreme sitting BEHIND price and scored it as no room, rejecting exactly those trades.")
 

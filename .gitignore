@@ -21,3 +21,4 @@ TurnSomeDayIntoOneday/twa/*.idsig
 # Trade grader alert relay - private webhook token and local alert history
 Trading/relay/secret.txt
 Trading/relay/alerts.log
+Trading/relay/autotrade.json

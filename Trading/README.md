@@ -15,6 +15,7 @@ Read them in this order.
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
 | **[PRO-ANALYSIS.md](PRO-ANALYSIS.md)** | Reading the day top-down like a desk: value, day type, range budget. Includes the pre-market prep sheet. |
 | **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
+| **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | Structure only — no VWAP, no RVOL, no ADX, no scoring. The sequence and the higher timeframes, nothing else. |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Scout.pine](pine/MSB-Scout.pine)** | The 5m/15m scalping companion — same sequence, anchored to the 4H. A+ only. |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |

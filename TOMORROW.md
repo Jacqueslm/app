@@ -11,15 +11,12 @@ what changed, so nothing has to be worked out twice.
 
 ## DO THESE, IN THIS ORDER
 
-### 1. Finish Episode 3 — one panel to redo
+### 1. Episode 3 — DONE. The series is finished.
 
-`06_home` came back with **a glass of whisky on the desk**, in the shot where he
-comes home sober and writes the number. Ask Manus again: no alcohol anywhere in
-frame, no tumbler, no amber liquid, no bottle. Water or nothing.
+All three episodes complete as of 10 Aug 2026. Nothing left to make.
 
-The other seven are done. Then: eight files into Quick Video, apply the
-**Episode format** template, paste the seven captions, check the total reads
-**41s**, add the song from `EPISODE-3.md`, render.
+**What that changes:** the influencer pitches in `INFLUENCERS.md` were written
+to be sent once there was a body of work behind them. There is now.
 
 ### 2. Production access — around 13 Aug
 
@@ -42,11 +39,11 @@ Pin a post in the empty Featured slot, add `turnsomedayintodayone@gmail.com`
 under About, and put both links in **About → Links** (they did not fit in the
 255-character bio). Skip address and phone.
 
-### 5. Influencers — after the episodes are out, not before
+### 5. Influencers — the gate is open
 
-Ten finished pitches in `INFLUENCERS.md`, none sent. **Send them once all three
-episodes are published**: right now it is a pitch, afterwards it is a pitch plus
-a body of work, and that is a different email to receive. Send one or two, not
+Ten finished pitches in `INFLUENCERS.md`, none sent. The reason to wait has
+gone: three finished episodes exist, so this is no longer a man with an idea
+writing to a podcast, it is a man with a body of work. Send one or two, not
 ten. This Naked Mind last.
 
 They are all "contact page" rather than email addresses, which is friction that

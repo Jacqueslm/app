@@ -11,6 +11,11 @@
 //  same sequence (break → back through → reclaim → hold → go) on the low
 //  timeframe, in the direction the 4H already agreed to.
 //
+//  Like the 1H system, this predicts nothing. The 4H says where the market is
+//  trying to go; the 5m/15m says what it is saying right now; a scalp exists
+//  only where the two agree. Every input is a closed candle — something the
+//  market already said, never a guess about what it will say. PLAYBOOK.md §1½.
+//
 //  Every scalp is a SCALP plan: single target at 1R, full exit, done.
 //
 //  BE HONEST WITH YOURSELF ABOUT THIS TOOL. A 5-minute chart produces far more

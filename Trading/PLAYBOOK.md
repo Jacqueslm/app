@@ -14,6 +14,41 @@ only when the 4H agrees and nothing in the 1H-or-lower is in a range.**
 
 ---
 
+## 1½. The stance — listen, don't predict
+
+Neither this system nor the Scout predicts the market. Nothing here forecasts a price. Both do
+something different: **they listen to what the market is saying, and read where it is trying to
+go, from the bigger context down.**
+
+The two are separate questions, and every rule in this playbook belongs to one of them:
+
+- **Where is it trying to go?** — the bigger context. Daily and 4H structure, yesterday's value,
+  the day type. This is the market's *intent*, already visible in what it has done. Higher
+  highs on the Daily aren't a prediction that price rises — they're the record that buyers have
+  been in control and haven't stopped. You don't guess intent; you read it.
+- **What is it saying right now?** — the evidence. Acceptance or rejection at the level, RVOL,
+  the sweep, displacement. A touch of your level is a question; the market's answer arrives in
+  the bars that follow. You don't assume the answer; you wait for it.
+
+**The trigger is nothing more than the moment those two agree** — what the market is saying
+right now lines up with where the bigger context says it's trying to go. That's the whole
+system. No step in the sequence ever claims to know the future; every step is the market having
+*already said* something, on record, in a closed candle.
+
+This is also why the entries are "late" by design — the swing that confirms 3 bars after the
+fact, the 2-close acceptance wait, the day type that misses the first hour of some trends.
+A predictor gets the better price and pays for it at the stop when the guess is wrong. A
+listener pays a worse price for the certainty of evidence — and gets to be wrong far less
+often. You are always paying one of those two prices. This system chooses the second one,
+every time, on purpose.
+
+When you're unsure about a trade, the question is never *"where do I think it's going?"* —
+that's the prediction habit sneaking back in. The question is: **"what has it actually said,
+and does that agree with the bigger picture?"** If you can't answer with things that already
+happened — a close, a hold, a sweep, a reclaim — you have a guess, not a trade.
+
+---
+
 ## 2. Timeframe roles — each one has exactly one job
 
 | TF | Role | Question it answers | It does NOT |

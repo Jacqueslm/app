@@ -3,6 +3,11 @@
 //  MARKET STRUCTURE BRIDGE  —  Daily bias / 4H bridge / 1H execution
 //  Apply this to a 1H chart. MNQ, MES, MGC.
 //
+//  THIS SCRIPT PREDICTS NOTHING. It listens: the Daily/4H say where the market
+//  is trying to go (intent, already on record), the level says what it is
+//  saying right now (acceptance or rejection, in closed candles). The trigger
+//  is the moment the two agree — never a forecast. PLAYBOOK.md §1½.
+//
 //  STRUCTURE tells you WHERE. CONTEXT tells you WHETHER ANYONE IS THERE.
 //  This script needs both to agree before it says a word. See INSTITUTIONAL.md.
 //

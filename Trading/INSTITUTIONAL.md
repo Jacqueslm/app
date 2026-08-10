@@ -134,6 +134,43 @@ them apart. The system now detects this and scores it.
 This is precisely why your step ⑤ — the wait — is the edge. You're waiting to see which of the
 two you got.
 
+### 2.4½ The range trap — where fake-outs actually live
+
+Here is the honest version of "the market is manipulating price," and it's the most useful
+paragraph in this file.
+
+Most fake-outs are not random, and they are not aimed at you. They cluster in one place: **the
+edges of a higher-timeframe range.** The mechanism follows directly from §1:
+
+1. When the 4H is in balance, both edges of that range accumulate orders — stops from people
+   positioned inside it, and breakout orders from people waiting for the move.
+2. A participant who needs size cannot fill inside a quiet range. The edges are where the
+   resting orders are — **the range is a liquidity reservoir, and its edges are the taps.**
+3. So a balanced market gets *raided*: price pushes through an edge, the stops and breakout
+   orders there trade, and — if no real repricing is behind it — price falls straight back
+   inside. Everyone who chased the break is now trapped, and their exits become fuel.
+4. Often both edges get raided, one after the other, before the genuine move leaves. That is
+   what "gathering liquidity for the next big move" looks like mechanically: the tank is being
+   filled from both sides while the range holds.
+
+Two practical consequences, and both are now in the code:
+
+- **A breakout of a *ranging* higher timeframe is suspected until it earns acceptance.** The
+  same close-through that is a real BOS in a trending 4H is, in a balanced 4H, most often the
+  raid. The system now refuses breakout entries while the bridge timeframe is in balance unless
+  price holds beyond the edge for 3+ closes — acceptance, the only thing that separates a break
+  from a raid, and it only exists in hindsight of a few candles. That delay is the price of not
+  being the liquidity.
+- **A *failed* raid on the far edge is information in your favour.** If you're long and the
+  range low was just swept and reclaimed, the sell-stops below are spent — collected by someone
+  who was buying. The fuel for the up-move is on board. The system scores this.
+
+Note what this is NOT: it is not "smart money is hunting me." §1 already killed that. The edges
+get hit because that's where the orders are — the same reason banks get robbed and not empty
+fields. Your defence isn't to outsmart anyone; it's to refuse to stand where the raid happens
+(no breakout entries in HTF balance) and to recognise when a raid has already happened in your
+favour (the fuel point).
+
 ### 2.5 Correlation — is it the market, or just this chart?
 
 MNQ and MES are driven by the same macro flow. When they move together, that's the market. When

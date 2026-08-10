@@ -22,7 +22,7 @@
 //
 //  Hard gates: Daily bias · 4H bridge · not chopping · protected level intact ·
 //              acceptance held · right side of VWAP · not past the 2σ band.
-//  Quality:    12 points. 9+ = A+, 7-8 = B, below = no trade.
+//  Quality:    13 points. 10+ = A+, 8-9 = B, below = no trade.
 //
 //  On top sits the professional read (PRO-ANALYSIS.md): yesterday's value area,
 //  live day-type classification (trend vs balance), a daily range budget that
@@ -82,6 +82,27 @@ useVA     = input.bool(true, "Point: trading beyond yesterday's value", group = 
      tooltip = "Initiative territory. The middle of yesterday's value is the market's definition of fair — fair means no edge.")
 vaAccept  = input.int(2, "Closes beyond value = acceptance", minval = 1, maxval = 6, group = grpP)
 
+grpM2 = "Manipulation guard — the range trap"
+useTrap   = input.bool(true, "Gate: no breakout entries while the 4H is ranging", group = grpM2,
+     tooltip = "A balanced HTF raids its own edges for stops before it trends. A breakout of a ranging 4H without acceptance is the trap, not the move.")
+trapAccept = input.int(3, "Closes beyond the edge = real break", minval = 1, maxval = 10, group = grpM2,
+     tooltip = "How many 1H closes beyond the 4H range edge before a break is trusted instead of suspected.")
+trapBars  = input.int(6, "Snap back within N bars = fake-out", minval = 2, maxval = 20, group = grpM2)
+useFuel   = input.bool(true, "Point: opposite edge was swept (fuel)", group = grpM2,
+     tooltip = "A failed raid on the FAR edge means stops there were collected — fuel for the move toward you.")
+fuelLook  = input.int(30, "Fuel counts for N bars", minval = 5, group = grpM2)
+htfRngLen = input.int(20, "HTF range length (bars)", minval = 5, group = grpM2)
+showTrap  = input.bool(true, "Mark fake-outs and range edges", group = grpM2)
+
+grpZ = "Your zones & alignment"
+useAlign = input.bool(true, "Gate: all four timeframes must align (D · 4H · 1H · 15m)", group = grpZ,
+     tooltip = "Alignment is the thing that makes this strategy a go. If the four timeframes don't agree, executing is off the table — no score can override this.")
+showZones = input.bool(true, "Show Daily + 4H supply/demand zones", group = grpZ)
+zoneImp  = input.float(2.0, "Zone impulse (body vs 20-bar avg)", minval = 1.2, step = 0.1, group = grpZ,
+     tooltip = "How explosive the move away must be for the base before it to count as a zone.")
+cDem     = input.color(#2ecc71, "Demand", group = grpZ, inline = "z")
+cSup     = input.color(#e74c3c, "Supply", group = grpZ, inline = "z")
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40,    "Setup expires after N bars", minval = 5, group = grpT)
@@ -106,6 +127,12 @@ scalpMax  = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step 
 holdMin   = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
 minRoom   = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR,
      tooltip = "Entering into a wall. Looks identical to a good setup; there is just no money in it.")
+
+grpF = "Prop firm guard"
+propMode   = input.bool(false, "Prop evaluation mode — A+ only + risk cap", group = grpF,
+     tooltip = "The eval trap is oversizing and overtrading to pass fast. This forces A+ only and caps risk so the trailing drawdown survives a real losing streak. See PROP-FIRMS.md.")
+propDDLeft = input.float(2500, "Distance to drawdown limit ($) — update it daily", minval = 100, step = 50, group = grpF)
+propStreak = input.int(8, "Must survive N straight losses", minval = 4, maxval = 20, group = grpF)
 
 grpV = "Display"
 showZone = input.bool(true,  "Show retest zone",     group = grpV)
@@ -160,9 +187,46 @@ f_trend() =>
     [t, _bh, _bl, _pl, _ph, _bu, _bd] = f_structure()
     t
 
+// Supply/demand zones: the base candle before an explosive departure. Demand = the
+// last down-candle before a strong rally; supply = the last up-candle before a strong
+// drop. A zone dies the moment price CLOSES through its far side — a broken zone is
+// not "still kind of there," it's gone.
+f_zone() =>
+    var float demTop = na
+    var float demBot = na
+    var float supTop = na
+    var float supBot = na
+    avgB  = ta.sma(math.abs(close - open), 20)
+    upImp = close > open and (close - open) > avgB * zoneImp
+    dnImp = open > close and (open - close) > avgB * zoneImp
+    if upImp and close[1] < open[1]
+        demTop := math.max(open[1], close[1])
+        demBot := low[1]
+    if dnImp and close[1] > open[1]
+        supBot := math.min(open[1], close[1])
+        supTop := high[1]
+    if not na(demBot) and close < demBot
+        demTop := na
+        demBot := na
+    if not na(supTop) and close > supTop
+        supTop := na
+        supBot := na
+    [demTop, demBot, supTop, supBot]
+
 [xTrend, xBrokenHi, xBrokenLo, xProtLo, xProtHi, xBosUp, xBosDn] = f_structure()
 biasTrend   = request.security(syminfo.tickerid, biasTF,   f_trend(), lookahead = barmerge.lookahead_off)
 bridgeTrend = request.security(syminfo.tickerid, bridgeTF, f_trend(), lookahead = barmerge.lookahead_off)
+m15Trend    = request.security(syminfo.tickerid, monTF,    f_trend(), lookahead = barmerge.lookahead_off)
+
+// Your zones, from the two intent timeframes.
+[dDemT, dDemB, dSupT, dSupB] = request.security(syminfo.tickerid, biasTF,   f_zone(), lookahead = barmerge.lookahead_off)
+[hDemT, hDemB, hSupT, hSupB] = request.security(syminfo.tickerid, bridgeTF, f_zone(), lookahead = barmerge.lookahead_off)
+
+// The alignment gate: D · 4H · 1H · 15m all pointing the same way, or no execution.
+alignL = not useAlign or (biasTrend ==  1 and bridgeTrend ==  1 and xTrend ==  1 and m15Trend ==  1)
+alignS = not useAlign or (biasTrend == -1 and bridgeTrend == -1 and xTrend == -1 and m15Trend == -1)
+fullAlign = (biasTrend == 1 and bridgeTrend == 1 and xTrend == 1 and m15Trend == 1) or
+     (biasTrend == -1 and bridgeTrend == -1 and xTrend == -1 and m15Trend == -1)
 
 // ─── Consolidation filter ────────────────────────────────────────────────────
 f_chop() =>
@@ -280,6 +344,40 @@ budgetOKS = not useCtx or not useBudget or usedUpShort <= budgetMax
 // sizing and the chop filter already act on it mechanically.
 atrBase  = ta.sma(atr, 100)
 volRegime = na(atrBase) or atrBase == 0 ? "—" : atr > atrBase * 1.3 ? "HIGH" : atr < atrBase * 0.7 ? "LOW" : "NORMAL"
+
+// ─── Manipulation guard: the range trap ──────────────────────────────────────
+// Balance one rung up = the bridge TF chopping. Its edges hold the resting stops,
+// and a balanced market raids BOTH edges for fuel before it trends. A break of a
+// ranging 4H is suspected until it earns acceptance; a failed raid on the far
+// edge is collected fuel for the move toward you. See INSTITUTIONAL.md.
+htfChopN = request.security(syminfo.tickerid, bridgeTF, f_chopN(), lookahead = barmerge.lookahead_off)
+htfRngHi = request.security(syminfo.tickerid, bridgeTF, ta.highest(high, htfRngLen)[1], lookahead = barmerge.lookahead_off)
+htfRngLo = request.security(syminfo.tickerid, bridgeTF, ta.lowest(low,  htfRngLen)[1],  lookahead = barmerge.lookahead_off)
+htfRanging = htfChopN >= 2
+
+// Acceptance beyond the edge, counted in execution-TF closes.
+var int edgeUpCnt = 0
+var int edgeDnCnt = 0
+edgeUpCnt := not na(htfRngHi) and close > htfRngHi ? edgeUpCnt + 1 : 0
+edgeDnCnt := not na(htfRngLo) and close < htfRngLo ? edgeDnCnt + 1 : 0
+
+// A fake-out completes when the count resets: it poked beyond, stayed briefly, closed back inside.
+trapUp = htfRanging and edgeUpCnt == 0 and edgeUpCnt[1] > 0 and edgeUpCnt[1] <= trapBars
+trapDn = htfRanging and edgeDnCnt == 0 and edgeDnCnt[1] > 0 and edgeDnCnt[1] <= trapBars
+
+var int lastTrapUpBar = na
+var int lastTrapDnBar = na
+if trapUp
+    lastTrapUpBar := bar_index
+if trapDn
+    lastTrapDnBar := bar_index
+// Fuel for a LONG = the LOW edge was raided and failed: sell-stops collected below.
+fuelLong  = not na(lastTrapDnBar) and bar_index - lastTrapDnBar <= fuelLook
+fuelShort = not na(lastTrapUpBar) and bar_index - lastTrapUpBar <= fuelLook
+
+// The gate: while the 4H ranges, a trigger BEYOND its edge needs acceptance first.
+trapGateL = not useCtx or not useTrap or not htfRanging or not (not na(htfRngHi) and close > htfRngHi) or edgeUpCnt >= trapAccept
+trapGateS = not useCtx or not useTrap or not htfRanging or not (not na(htfRngLo) and close < htfRngLo) or edgeDnCnt >= trapAccept
 
 // ─── Correlated instrument ───────────────────────────────────────────────────
 corrClose = request.security(corrSym, timeframe.period, close, lookahead = barmerge.lookahead_off)
@@ -436,9 +534,13 @@ if invalid
 
 // ─── Reference-level confluence for the active zone ──────────────────────────
 refTol = atr * refTolA
+f_inZone(float lvl, float top, float bot, float tol) =>
+    not na(lvl) and not na(top) and not na(bot) and lvl >= bot - tol and lvl <= top + tol
 refHit = f_near(zone, pdh, refTol) or f_near(zone, pdl, refTol) or f_near(zone, pdc, refTol) or
      f_near(zone, onH, refTol) or f_near(zone, onL, refTol) or
-     f_near(zone, ibH, refTol) or f_near(zone, ibL, refTol)
+     f_near(zone, ibH, refTol) or f_near(zone, ibL, refTol) or
+     f_inZone(zone, dDemT, dDemB, refTol) or f_inZone(zone, dSupT, dSupB, refTol) or
+     f_inZone(zone, hDemT, hDemB, refTol) or f_inZone(zone, hSupT, hSupB, refTol)
 refOK = not useCtx or not useRef or refHit
 
 // Acceptance gate — step ⑤. The market answering the question the touch asked.
@@ -447,9 +549,9 @@ acceptOK = not reqHold or heldBars >= holdBars
 // ─── Trigger ─────────────────────────────────────────────────────────────────
 // ⑥ close through the reclaim candle, with body, bridge agreeing, context clear.
 trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and
-     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL
+     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL and trapGateL and alignL
 trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and
-     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS
+     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS and trapGateS and alignS
 anyTrig = trigLong or trigShort
 
 // ─── Trade levels ────────────────────────────────────────────────────────────
@@ -495,16 +597,24 @@ pDayTp = not useCtx or not useDayTp or (trigLong ? dayType == 1 : trigShort ? da
 // Beyond yesterday's value = initiative territory. The middle of value is "fair" — no edge.
 pVAout = not useCtx or not useVA or (trigLong ? (not na(pVah) and close > pVah) :
      trigShort ? (not na(pVal) and close < pVal) : false)
+// Liquidity fuel: the far edge of the HTF range was raided and failed — stops collected.
+pFuel  = not useCtx or not useFuel or (trigLong ? fuelLong : trigShort ? fuelShort : false)
 
 score = (pFirst ? 1 : 0) + (pHold ? 1 : 0) + (pDisp ? 1 : 0) + (pRvol ? 1 : 0) +
      (pSweep ? 1 : 0) + (pRef ? 1 : 0) + (pCorr ? 1 : 0) + (pSess ? 1 : 0) +
-     (pChop ? 1 : 0) + (pRoom ? 1 : 0) + (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
+     (pChop ? 1 : 0) + (pRoom ? 1 : 0) + (pDayTp ? 1 : 0) + (pVAout ? 1 : 0) +
+     (pFuel ? 1 : 0)
 
-grade   = score >= 9 ? "A+" : score >= 7 ? "B" : "C"
+grade   = score >= 10 ? "A+" : score >= 8 ? "B" : "C"
+// Prop guard: risk capped so the drawdown survives a real losing streak, A+ only.
+propCap = propDDLeft / propStreak
+propR1  = not na(riskPts) ? riskPts * syminfo.pointvalue : na
+propQty = propMode and not na(propR1) and propR1 > 0 ? math.floor(propCap / propR1) : na
+propOK  = not propMode or (not na(propQty) and propQty >= 1)
 // Quality percent = confluence, NOT win probability. Nobody can print a real win
 // probability from a chart — your journal computes the real one from your trades.
-qualPct = math.round(score / 12.0 * 100)
-gradeOK = grade == "A+" or (minGrade == "B" and grade == "B")
+qualPct = math.round(score / 13.0 * 100)
+gradeOK = grade == "A+" or (not propMode and minGrade == "B" and grade == "B")
 
 // ─── One bullet a day ────────────────────────────────────────────────────────
 // na(lastAlertDay) first — `dayofmonth != na` is na, never true, so without it the
@@ -516,7 +626,7 @@ if na(lastAlertDay) or dayofmonth != lastAlertDay
     lastAlertDay := dayofmonth
 bulletsLeft = maxPerDay - firedToday
 
-fire = anyTrig and gradeOK and plan != "NO TRADE" and inSess and
+fire = anyTrig and gradeOK and plan != "NO TRADE" and inSess and propOK and
      bulletsLeft > 0 and barstate.isconfirmed
 if fire
     firedToday += 1
@@ -532,6 +642,13 @@ plot(showRef ? pdh : na, "Prior day high", color.new(color.purple, 40), 1, plot.
 plot(showRef ? pdl : na, "Prior day low",  color.new(color.purple, 40), 1, plot.style_circles)
 plot(showRef ? onH : na, "Overnight high", color.new(color.teal, 50),   1, plot.style_circles)
 plot(showRef ? onL : na, "Overnight low",  color.new(color.teal, 50),   1, plot.style_circles)
+
+plot(showTrap and htfRanging ? htfRngHi : na, "4H range high (stops above)", color.new(color.red, 45), 1, plot.style_circles)
+plot(showTrap and htfRanging ? htfRngLo : na, "4H range low (stops below)",  color.new(color.red, 45), 1, plot.style_circles)
+plotshape(showTrap and trapUp, "Fake-out high", shape.diamond, location.abovebar, color.new(color.red, 0), size = size.tiny,
+     text = "TRAP", textcolor = color.new(color.red, 20))
+plotshape(showTrap and trapDn, "Fake-out low",  shape.diamond, location.belowbar, color.new(color.red, 0), size = size.tiny,
+     text = "TRAP", textcolor = color.new(color.red, 20))
 
 var box zoneBox = na
 if showZone and st > 0 and not na(zone)
@@ -560,7 +677,7 @@ plotshape(swept and not swept[1], "Liquidity sweep", shape.xcross, location.belo
 
 if fire
     label.new(bar_index, trigLong ? low - atr : high + atr,
-         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/12 · " + str.tostring(qualPct) + "%\n" +
+         (trigLong ? "▲ LONG " : "▼ SHORT ") + grade + "  " + str.tostring(score) + "/13 · " + str.tostring(qualPct) + "%\n" +
               plan + "  " + str.tostring(roomR, "#.0") + "R room",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? cBull : cBear, textcolor = color.white, size = size.small)
@@ -569,13 +686,43 @@ if fire
     line.new(bar_index, t1,      bar_index + 12, t1,      color = cBull, width = 1, style = line.style_dashed)
     line.new(bar_index, t2,      bar_index + 12, t2,      color = color.new(cBull, 45), width = 1, style = line.style_dotted)
 
+// ─── Your zones: green demand, red supply, Daily + 4H ────────────────────────
+f_zoneBox(box b, float top, float bot, color zc, string txt) =>
+    box r = b
+    if na(top) or na(bot)
+        if not na(r)
+            box.delete(r)
+            r := na
+        r
+    else
+        if na(r)
+            r := box.new(bar_index - 60, top, bar_index + 15, bot,
+                 border_color = color.new(zc, 45), bgcolor = color.new(zc, 86),
+                 text = txt, text_color = color.new(zc, 15), text_size = size.tiny,
+                 text_halign = text.align_right)
+        box.set_lefttop(r, bar_index - 60, top)
+        box.set_rightbottom(r, bar_index + 15, bot)
+        box.set_text(r, txt)
+        r
+
+var box bDDem = na
+var box bDSup = na
+var box bHDem = na
+var box bHSup = na
+if barstate.islast
+    bDDem := f_zoneBox(bDDem, showZones ? dDemT : na, showZones ? dDemB : na, cDem, "D demand")
+    bDSup := f_zoneBox(bDSup, showZones ? dSupT : na, showZones ? dSupB : na, cSup, "D supply")
+    bHDem := f_zoneBox(bHDem, showZones ? hDemT : na, showZones ? hDemB : na, cDem, "4H demand")
+    bHSup := f_zoneBox(bHSup, showZones ? hSupT : na, showZones ? hSupB : na, cSup, "4H supply")
+
 // ─── Dashboard ───────────────────────────────────────────────────────────────
 f_txt(int t) => t == 1 ? "BULL" : t == -1 ? "BEAR" : "—"
 f_col(int t) => t == 1 ? cBull  : t == -1 ? cBear  : color.gray
 f_yn(bool b)  => b ? "✓" : "✗"
+f_alChr(int t) => t == 1 ? "▲" : t == -1 ? "▼" : "·"
 f_ync(bool b) => b ? cBull : cBear
 
-var table dash = table.new(position.top_right, 2, 17,
+var table dash = table.new(position.top_right, 2, 20,
      border_width = 1, border_color = color.new(color.gray, 60))
 if showDash and barstate.islast
     stName = st == 0 ? "IDLE" : st == 1 ? "① BOS — armed" : st == 2 ? "② back through" :
@@ -618,8 +765,14 @@ if showDash and barstate.islast
     table.cell(dash, 1, 11, vaTxt, text_color = color.silver, text_size = size.small)
     table.cell(dash, 0, 12, "Range budget", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 12, budTxt, text_color = budHot ? cBear : color.silver, text_size = size.small)
-    table.cell(dash, 0, 13, "Vol regime", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 13, volRegime, text_color = volRegime == "HIGH" ? color.orange :
+    table.cell(dash, 0, 13, "Bridge range", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 13, htfRanging ? "BALANCE — edges hot" : "trending",
+         text_color = htfRanging ? color.orange : cBull, text_size = size.small)
+    table.cell(dash, 0, 17, "Align D·4H·1H·15m", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 17, f_alChr(biasTrend) + " " + f_alChr(bridgeTrend) + " " + f_alChr(xTrend) + " " + f_alChr(m15Trend),
+         text_color = fullAlign ? cBull : cBear, text_size = size.small)
+    table.cell(dash, 0, 18, "Vol regime", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 18, volRegime, text_color = volRegime == "HIGH" ? color.orange :
          volRegime == "LOW" ? color.gray : color.silver, text_size = size.small)
     table.cell(dash, 0, 14, "Setup", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 14, stName, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
@@ -629,6 +782,9 @@ if showDash and barstate.islast
     table.cell(dash, 0, 16, "Bullets left", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 16, str.tostring(bulletsLeft) + " / " + str.tostring(maxPerDay),
          text_color = bulletsLeft > 0 ? cBull : cBear, text_size = size.small)
+    table.cell(dash, 0, 19, "Prop guard", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 19, propMode ? "$" + str.tostring(propDDLeft, "#") + " → cap $" + str.tostring(propCap, "#") + "/trade" : "off",
+         text_color = propMode ? color.orange : color.gray, text_size = size.small)
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────
 if fire
@@ -638,7 +794,7 @@ if fire
     dtA  = dayType == 1 ? "TREND ↑" : dayType == -1 ? "TREND ↓" : "BALANCE day"
     budA = str.tostring((trigLong ? usedUpLong : usedUpShort) * 100, "#") + "% of range budget used"
     alert(syminfo.ticker + " " + (trigLong ? "LONG" : "SHORT") + " " + grade +
-         " (" + str.tostring(score) + "/12 · " + str.tostring(qualPct) + "% quality) — " + plan +
+         " (" + str.tostring(score) + "/13 · " + str.tostring(qualPct) + "% quality) — " + plan +
          "\n" + dtA + " | " + budA + " | vol " + volRegime +
          "\nentry " + str.tostring(entry,   format.mintick) +
          " | stop " + str.tostring(stopRaw, format.mintick) +
@@ -646,8 +802,9 @@ if fire
          "\nT1 "    + str.tostring(t1, format.mintick) + " (" + str.tostring(partialR, "#.#") + "R)" +
          " | T2 "   + str.tostring(t2, format.mintick) +
          " | room " + str.tostring(roomR, "#.0") + "R" +
-         " | RVOL " + str.tostring(rvol, "#.0") + (swept ? " | swept" : "") +
+         " | RVOL " + str.tostring(rvol, "#.0") + (swept ? " | swept" : "") + ((trigLong ? fuelLong : fuelShort) ? " | fuel: far edge raided" : "") +
          "\n" + exitPlan +
+         (propMode ? "\nPROP: cap " + str.tostring(propQty) + " contracts ($" + str.tostring(propCap, "#") + " max risk, survives " + str.tostring(propStreak) + " straight losses)" : "") +
          "\nBracket goes in as ONE action. That is your last bullet today.",
          alert.freq_once_per_bar_close)
 

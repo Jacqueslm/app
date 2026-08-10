@@ -4,7 +4,7 @@
 //  Same engine as MSB-Indicator.pine, wired to strategy orders. Run it on the
 //  1H chart of MNQ1! / MES1! / MGC1!.
 //
-//  Grading is 12 points (9+ = A+, 7-8 = B) behind the same hard gates as the
+//  Grading is 13 points (10+ = A+, 8-9 = B) behind the same hard gates as the
 //  indicator, now including the range-budget gate and day-type read from
 //  PRO-ANALYSIS.md.
 //
@@ -68,10 +68,22 @@ useDayTp  = input.bool(true, "Point: day type agrees (not a balance day)", group
 useVA     = input.bool(true, "Point: trading beyond yesterday's value", group = grpP)
 vaAccept  = input.int(2, "Closes beyond value = acceptance", minval = 1, maxval = 6, group = grpP)
 
+grpM2 = "Manipulation guard — the range trap"
+useTrap   = input.bool(true, "Gate: no breakout entries while the 4H is ranging", group = grpM2)
+trapAccept = input.int(3, "Closes beyond the edge = real break", minval = 1, maxval = 10, group = grpM2)
+trapBars  = input.int(6, "Snap back within N bars = fake-out", minval = 2, maxval = 20, group = grpM2)
+useFuel   = input.bool(true, "Point: opposite edge was swept (fuel)", group = grpM2)
+fuelLook  = input.int(30, "Fuel counts for N bars", minval = 5, group = grpM2)
+htfRngLen = input.int(20, "HTF range length (bars)", minval = 5, group = grpM2)
+
+grpZ = "Your zones & alignment"
+useAlign = input.bool(true, "Gate: all four timeframes must align (D · 4H · 1H · 15m)", group = grpZ)
+zoneImp  = input.float(2.0, "Zone impulse (body vs 20-bar avg)", minval = 1.2, step = 0.1, group = grpZ)
+
 grpT = "Trigger & grading"
 dispMult = input.float(1.2, "Displacement (body vs 20-bar avg)", minval = 1.0, step = 0.1, group = grpT)
 setupTO  = input.int(40, "Setup expires after N bars", minval = 5, group = grpT)
-minScore = input.int(7,  "Minimum grade score (7 = B, 9 = A+)", minval = 0, maxval = 12, group = grpT)
+minScore = input.int(8,  "Minimum grade score (8 = B, 10 = A+)", minval = 0, maxval = 13, group = grpT)
 stopBuf  = input.float(0.15, "Stop buffer (× ATR)", minval = 0.0, step = 0.05, group = grpT)
 
 grpM = "Management — the 1R partial model"
@@ -143,9 +155,40 @@ f_trend() =>
     [t, _bh, _bl, _pl, _ph, _bu, _bd] = f_structure()
     t
 
+// Supply/demand zones: the base candle before an explosive departure. A zone dies
+// the moment price CLOSES through its far side.
+f_zone() =>
+    var float demTop = na
+    var float demBot = na
+    var float supTop = na
+    var float supBot = na
+    avgB  = ta.sma(math.abs(close - open), 20)
+    upImp = close > open and (close - open) > avgB * zoneImp
+    dnImp = open > close and (open - close) > avgB * zoneImp
+    if upImp and close[1] < open[1]
+        demTop := math.max(open[1], close[1])
+        demBot := low[1]
+    if dnImp and close[1] > open[1]
+        supBot := math.min(open[1], close[1])
+        supTop := high[1]
+    if not na(demBot) and close < demBot
+        demTop := na
+        demBot := na
+    if not na(supTop) and close > supTop
+        supTop := na
+        supBot := na
+    [demTop, demBot, supTop, supBot]
+
 [xTrend, xBrokenHi, xBrokenLo, xProtLo, xProtHi, xBosUp, xBosDn] = f_structure()
 biasTrend   = request.security(syminfo.tickerid, biasTF,   f_trend(), lookahead = barmerge.lookahead_off)
 bridgeTrend = request.security(syminfo.tickerid, bridgeTF, f_trend(), lookahead = barmerge.lookahead_off)
+m15Trend    = request.security(syminfo.tickerid, monTF,    f_trend(), lookahead = barmerge.lookahead_off)
+
+[dDemT, dDemB, dSupT, dSupB] = request.security(syminfo.tickerid, biasTF,   f_zone(), lookahead = barmerge.lookahead_off)
+[hDemT, hDemB, hSupT, hSupB] = request.security(syminfo.tickerid, bridgeTF, f_zone(), lookahead = barmerge.lookahead_off)
+
+alignL = not useAlign or (biasTrend ==  1 and bridgeTrend ==  1 and xTrend ==  1 and m15Trend ==  1)
+alignS = not useAlign or (biasTrend == -1 and bridgeTrend == -1 and xTrend == -1 and m15Trend == -1)
 
 // ─── Consolidation filter ────────────────────────────────────────────────────
 f_chop() =>
@@ -235,6 +278,32 @@ usedUpLong  = not na(dAtr) and dAtr > 0 ? (close - tdLo) / dAtr : 0.0
 usedUpShort = not na(dAtr) and dAtr > 0 ? (tdHi - close) / dAtr : 0.0
 budgetOKL = not useCtx or not useBudget or usedUpLong  <= budgetMax
 budgetOKS = not useCtx or not useBudget or usedUpShort <= budgetMax
+
+// ─── Manipulation guard: the range trap (see the indicator for the reasoning) ─
+htfChopN = request.security(syminfo.tickerid, bridgeTF, f_chop(), lookahead = barmerge.lookahead_off)
+htfRngHi = request.security(syminfo.tickerid, bridgeTF, ta.highest(high, htfRngLen)[1], lookahead = barmerge.lookahead_off)
+htfRngLo = request.security(syminfo.tickerid, bridgeTF, ta.lowest(low,  htfRngLen)[1],  lookahead = barmerge.lookahead_off)
+htfRanging = htfChopN >= 2
+
+var int edgeUpCnt = 0
+var int edgeDnCnt = 0
+edgeUpCnt := not na(htfRngHi) and close > htfRngHi ? edgeUpCnt + 1 : 0
+edgeDnCnt := not na(htfRngLo) and close < htfRngLo ? edgeDnCnt + 1 : 0
+
+trapUp = htfRanging and edgeUpCnt == 0 and edgeUpCnt[1] > 0 and edgeUpCnt[1] <= trapBars
+trapDn = htfRanging and edgeDnCnt == 0 and edgeDnCnt[1] > 0 and edgeDnCnt[1] <= trapBars
+
+var int lastTrapUpBar = na
+var int lastTrapDnBar = na
+if trapUp
+    lastTrapUpBar := bar_index
+if trapDn
+    lastTrapDnBar := bar_index
+fuelLong  = not na(lastTrapDnBar) and bar_index - lastTrapDnBar <= fuelLook
+fuelShort = not na(lastTrapUpBar) and bar_index - lastTrapUpBar <= fuelLook
+
+trapGateL = not useCtx or not useTrap or not htfRanging or not (not na(htfRngHi) and close > htfRngHi) or edgeUpCnt >= trapAccept
+trapGateS = not useCtx or not useTrap or not htfRanging or not (not na(htfRngLo) and close < htfRngLo) or edgeDnCnt >= trapAccept
 
 corrClose = request.security(corrSym, timeframe.period, close, lookahead = barmerge.lookahead_off)
 corrChg   = corrClose - corrClose[corrLen]
@@ -390,9 +459,13 @@ if invalid
     trigLvl := na
 
 refTol = atr * refTolA
+f_inZone(float lvl, float top, float bot, float tol) =>
+    not na(lvl) and not na(top) and not na(bot) and lvl >= bot - tol and lvl <= top + tol
 refHit = f_near(zone, pdh, refTol) or f_near(zone, pdl, refTol) or f_near(zone, pdc, refTol) or
      f_near(zone, onH, refTol) or f_near(zone, onL, refTol) or
-     f_near(zone, ibH, refTol) or f_near(zone, ibL, refTol)
+     f_near(zone, ibH, refTol) or f_near(zone, ibL, refTol) or
+     f_inZone(zone, dDemT, dDemB, refTol) or f_inZone(zone, dSupT, dSupB, refTol) or
+     f_inZone(zone, hDemT, hDemB, refTol) or f_inZone(zone, hSupT, hSupB, refTol)
 refOK = not useCtx or not useRef or refHit
 
 // Acceptance gate — step ⑤. The market answering the question the touch asked.
@@ -400,9 +473,9 @@ acceptOK = not reqHold or heldBars >= holdBars
 
 // ─── Trigger & grade ─────────────────────────────────────────────────────────
 trigLong  = st == 3 and stDir ==  1 and bridgeTrend ==  1 and not na(trigLvl) and
-     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL
+     close > trigLvl and disp and chopOK and vwapSideL and notExtL and acceptOK and budgetOKL and trapGateL and alignL
 trigShort = st == 3 and stDir == -1 and bridgeTrend == -1 and not na(trigLvl) and
-     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS
+     close < trigLvl and disp and chopOK and vwapSideS and notExtS and acceptOK and budgetOKS and trapGateS and alignS
 
 entry   = close
 stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf :
@@ -429,10 +502,11 @@ pSweep = not useCtx or not useSweep or swept
 pDayTp = not useCtx or not useDayTp or (trigLong ? dayType == 1 : trigShort ? dayType == -1 : false)
 pVAout = not useCtx or not useVA or (trigLong ? (not na(pVah) and close > pVah) :
      trigShort ? (not na(pVal) and close < pVal) : false)
+pFuel  = not useCtx or not useFuel or (trigLong ? fuelLong : trigShort ? fuelShort : false)
 score  = (touches <= 1 ? 1 : 0) + (cleanRt and heldBars >= holdBars ? 1 : 0) +
      (dispStrong ? 1 : 0) + (rvolOK ? 1 : 0) + (pSweep ? 1 : 0) + (refOK ? 1 : 0) +
      (corrAgree ? 1 : 0) + (inPrime ? 1 : 0) + (chopN == 0 ? 1 : 0) + (roomR >= 3.0 ? 1 : 0) +
-     (pDayTp ? 1 : 0) + (pVAout ? 1 : 0)
+     (pDayTp ? 1 : 0) + (pVAout ? 1 : 0) + (pFuel ? 1 : 0)
 
 // One bullet a day. na(lastEntryDay) first — `dayofmonth != na` is never true.
 var int tookToday    = 0
@@ -457,7 +531,7 @@ if trigLong and okToTrade
     pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
     tookToday += 1
-    strategy.entry("L", strategy.long, comment = plan + " " + (score >= 9 ? "A+" : "B"))
+    strategy.entry("L", strategy.long, comment = plan + " " + (score >= 10 ? "A+" : "B"))
 
 if trigShort and okToTrade
     pStop := stopRaw
@@ -465,7 +539,7 @@ if trigShort and okToTrade
     pT2   := plan == "SCALP" ? pT1 : htfTgt
     t1Hit := false
     tookToday += 1
-    strategy.entry("S", strategy.short, comment = plan + " " + (score >= 9 ? "A+" : "B"))
+    strategy.entry("S", strategy.short, comment = plan + " " + (score >= 10 ? "A+" : "B"))
 
 if strategy.position_size > 0 and not t1Hit and high >= pT1
     t1Hit := true

@@ -40,7 +40,7 @@ exactly the trade that has cost them two years.
    §7 (risk), §8 (sessions).
 2. Walk the **hard filters** first (§6). Any single failure ends the analysis: the answer is
    REJECT. Do not soften this into "it's marginal but maybe." A hard filter is binary.
-3. If all hard filters pass, count the **12 quality points** and assign A+ (9+) / B (7-8) / C.
+3. If all hard filters pass, count the **13 quality points** and assign A+ (10+) / B (8-9) / C.
 4. Compute position size using the specs in §7. Show the arithmetic — stop in points, dollars
    per contract, contracts, actual dollar risk. If the answer is 0 contracts, the trade is a
    skip; never suggest tightening the stop to make the size work.
@@ -48,7 +48,7 @@ exactly the trade that has cost them two years.
 
 ```
 VERDICT: REJECT / HALF SIZE (B) / TAKE (A+)
-Score:   n/12
+Score:   n/13
 Plan:    SCALP / STANDARD / HOLD  ·  n.nR room to the next HTF level
 Blockers: <each failed hard filter, one line each — or "none">
 Size:    n contracts · $x risk · stop y pts
@@ -87,6 +87,23 @@ Do **not** silently assume the rest is fine. List every hard filter you could no
 a passed one.
 
 Ask at most three questions at a time, and make them the three that would most change the answer.
+
+**Check alignment first, before anything else.** The trader's own rule: Daily, 4H, 1H and 15m
+must all agree, or executing is off the table — it is the first hard filter and nothing
+overrides it. Their charts carry supply/demand zones (green demand, red supply, Daily and 4H);
+a level inside the right zone for the direction counts for the reference-confluence point.
+
+**If they mention being in a prop evaluation**, read `Trading/PROP-FIRMS.md` and apply prop
+mode: risk capped at (distance to drawdown limit ÷ 8), A+ only, and remind them of the honest
+timeline — a typical target is ~35 one-a-day trades. If their proposed risk exceeds the cap,
+that is a hard REJECT: the trade does not exist at their cushion. Never help them "pass faster"
+by sizing up — the reset fee is the product the firm is selling, and urgency is how it's bought.
+
+Always check the range-trap rule (PLAYBOOK.md §6, INSTITUTIONAL.md): if the bridge timeframe
+(4H for the 1H system, 1H for scalps) is in balance and the entry is a breakout beyond its range
+edge without 3+ closes of acceptance, that is a hard-filter REJECT — most fake-outs live exactly
+there, because the edges of a balanced range are where the resting orders are. The mirror is a
+scoring plus: a failed raid on the far edge means the stops there are collected — fuel.
 
 Two of the most decision-changing questions are usually about the day, not the setup — pros read
 the day first (`Trading/PRO-ANALYSIS.md`): *"Is the day trending or balancing — has price accepted

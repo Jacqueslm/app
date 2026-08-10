@@ -113,8 +113,8 @@ Do this on each of the three charts.
 correct — an empty form should always be a reject.
 
 Try it: pick MNQ, type entry `20450`, stop `20410`, next HTF level `20650`, and it should show
-**3 contracts, $240 risk** and a **HOLD · 5.0R room** plan banner. Tick all ten hard filters and
-seven quality points — amber, **HALF SIZE · B**. Two more and it goes green, **TAKE IT · A+**.
+**3 contracts, $240 risk** and a **HOLD · 5.0R room** plan banner. Tick all twelve hard filters and
+eight quality points — amber, **HALF SIZE · B**. Two more and it goes green, **TAKE IT · A+**.
 
 > Your journal is saved inside that browser on that computer only. Don't clear your browser data
 > without hitting **Export CSV** first. Do the export weekly regardless.
@@ -247,7 +247,7 @@ In the **Performance Summary** tab, write these down for each symbol:
 Change **one** setting, re-read the summary, change it back:
 
 - Swing strength 3 → 4
-- Minimum grade score 7 → 9 (A+ only)
+- Minimum grade score 8 → 10 (A+ only)
 - Chop: max chop measures 1 → 0 (strictest)
 
 A system that stays roughly profitable across all of those is robust. A system that only works at
@@ -302,7 +302,7 @@ deliberately stays quiet.
 
 **Strategy Tester shows very few trades**
 Expected — this system is designed to reject far more than it takes. If it's under ~20 over two
-years, loosen in this order: minimum grade score to 6, then the range-budget gate off, then max chop measures to 2. Change one at
+years, loosen in this order: minimum grade score to 7, then the range-trap gate off, then the range-budget gate off, then max chop measures to 2. Change one at
 a time and re-read the numbers.
 
 **Grader shows 0 contracts**

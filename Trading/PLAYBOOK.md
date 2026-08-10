@@ -153,6 +153,8 @@ once and these stop feeling like arbitrary boxes.
 
 ### Hard filters (any failure = REJECT, no score, no discussion)
 
+- [ ] **All four timeframes aligned — Daily · 4H · 1H · 15m.** The thing that makes this
+      strategy a go. If the four don't agree, executing is off the table; no score overrides it.
 - [ ] Daily bias agrees with the trade direction
 - [ ] 4H bridge agrees — 4H structure not broken against you
 - [ ] Consolidation filter clear (fewer than 2 chop measures firing)
@@ -162,11 +164,14 @@ once and these stop feeling like arbitrary boxes.
 - [ ] **Not stretched beyond the 2σ VWAP band** — that's where benchmark algos become sellers
 - [ ] **The day's range budget isn't spent** — price hasn't already travelled ≥85% of the daily
       ATR in your direction ([PRO-ANALYSIS.md §4](PRO-ANALYSIS.md))
+- [ ] **Not buying a breakout of a ranging 4H** — if the 4H is in balance and price is beyond
+      its range edge without 3+ closes of acceptance, that break is the trap, not the move
+      ([INSTITUTIONAL.md — the range trap](INSTITUTIONAL.md))
 - [ ] Stop distance ≤ your max ($ risk still within 1% at 1 contract)
 - [ ] Not inside the last 10 minutes before a red-folder news release
 - [ ] Room to run: ≥ 2R of clear air before the next opposing HTF level
 
-### Score points (one each, 12 available)
+### Score points (one each, 13 available)
 
 **Structure**
 1. **First retest** of the level — not the third
@@ -177,7 +182,7 @@ once and these stop feeling like arbitrary boxes.
 **Context**
 5. **RVOL ≥ 1.2** for this hour of day — is anyone actually there
 6. **Liquidity sweep** on the pullback — took out the recent low and reclaimed it
-7. **Reference-level confluence** — prior day H/L, settlement, overnight H/L, or initial balance
+7. **Reference-level confluence** — prior day H/L, settlement, overnight H/L, initial balance, **or one of your Daily/4H supply-demand zones** (drawn on the chart: green demand, red supply)
 8. **Correlated instrument agrees** — MNQ ↔ MES
 9. **In the prime hours** (see §8)
 10. **Zero chop measures firing** — not merely under the limit
@@ -186,12 +191,14 @@ once and these stop feeling like arbitrary boxes.
 11. **Day type agrees** — 2+ closes accepted beyond yesterday's value in your direction.
     A continuation setup on a balance day is the losing pattern in the winning one's clothes.
 12. **Beyond yesterday's value** — initiative territory, not the fair-price middle.
+13. **Liquidity fuel** — the far edge of the 4H range was raided and failed. Those stops are
+    collected; the tank is fuller in your direction.
 
 | Score | Grade | Quality | Action |
 |---|---|---|---|
-| 9–12 | **A+** | 75–100% | Full size |
-| 7–8 | **B** | 58–67% | Half size — and with one bullet a day, strongly consider passing |
-| 0–6 | **C** | ≤ 50% | **No trade.** Log it, screenshot it, move on. |
+| 10–13 | **A+** | 77–100% | Full size |
+| 8–9 | **B** | 62–69% | Half size — and with one bullet a day, strongly consider passing |
+| 0–7 | **C** | ≤ 54% | **No trade.** Log it, screenshot it, move on. |
 
 **On percentages, so it's written down:** the quality % is confluence — how many boxes the setup
 ticks — and it is **not** a win probability. No indicator can print a real win probability; any
@@ -213,6 +220,8 @@ lose — and that's the only honest way to ever loosen a rule.
 ## 7. Risk and position sizing
 
 - **Risk per trade: 1% of account.** Not 1% "unless it's a really good one."
+- **In a prop evaluation: cushion ÷ 8 caps every trade**, and A+ only. The eval trap and the
+  full math are in [PROP-FIRMS.md](PROP-FIRMS.md) — read it before paying any firm a fee.
 - **One trade per day.** Win or lose. When it's done, close the platform. Zero-trade days are
   correct outcomes — "if an entry shows itself" means sometimes it doesn't.
 - **Weekly stop: −3R.** Done for the week. This is the rule that keeps you in the game through

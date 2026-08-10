@@ -171,6 +171,56 @@ the clip already is and only takes the 10 seconds and the cut.)
 
 ---
 
+## Suno prompt — instrumental, and NOT the same piece as Episode 2
+
+Turn the **Instrumental** switch on. You need **41 seconds** out of whatever
+Suno returns — take the quietest stretch, never the opening.
+
+```
+Slow sparse instrumental score, documentary, patient. Felt piano playing single
+notes with long silence between them. A low cello underneath, held, never
+resolving. Faint tape hiss and room tone left in. 60 bpm, minor, unhurried.
+
+It begins almost empty, and thins out further about a third of the way in —
+down to one held low note and nothing else — so a room full of other people's
+conversation can sit on top of it.
+
+Then a single point of tension: one dissonant note that arrives and does not
+leave, holding under everything for several seconds, uncomfortable but quiet.
+No percussion, no swell, no drums, no build.
+
+After that it settles. The piano returns, slower and a little warmer, and the
+dissonance resolves down rather than up. It should end steadier than it
+started, not happier, not triumphant. No climax anywhere.
+
+Leave a lot of empty space in the mix. Nothing should ever be loud.
+```
+
+**Where it goes, because this one has a shape.** The dissonant note lands on
+**shot 4, the hand on the table** — the near-miss, and the only place in three
+episodes where the music does anything at all. **Then cut it dead on shot 5**,
+when he steps outside: silence and room tone only. That gap is the four minutes
+he took, and nothing plays it better than nothing. Bring it back under shot 6
+and let it run out under the stack. **No music at all under the icon card.**
+
+**Two alternates if it comes back wrong.**
+
+Colder, more isolating:
+
+```
+Warm analogue synth drone, no percussion, slowly shifting chords, tape
+saturation, one note held far too long. Ambient, patient, no melody.
+```
+
+Warmer, closer to a person:
+
+```
+Fingerpicked acoustic guitar, close-mic'd with string noise and breath audible,
+one repeating figure that never develops, no percussion, no build.
+```
+
+---
+
 ## Titles
 
 **YouTube:** I was addicted 38 years — this is what day one actually looked like

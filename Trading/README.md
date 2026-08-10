@@ -17,6 +17,7 @@ Read them in this order.
 | **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
 | **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Structure only. Backtests in one click. |
 | **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | Structure only — no VWAP, no RVOL, no ADX, no scoring. The sequence and the higher timeframes, nothing else. |
+| **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Same pure logic as an indicator: dashboard, chart labels, and the alert that fires the trade plan. |
 | **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
 | **[pine/MSB-Scout.pine](pine/MSB-Scout.pine)** | The 5m/15m scalping companion — same sequence, anchored to the 4H. A+ only. |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |

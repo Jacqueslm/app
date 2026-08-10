@@ -18,6 +18,7 @@ Read them in this order.
 | **[pine/MSB-Scout.pine](pine/MSB-Scout.pine)** | The 5m/15m scalping companion — same sequence, anchored to the 4H. A+ only. |
 | **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |
 | **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |
+| **[Start Trade Grader.bat](Start%20Trade%20Grader.bat)** + `relay/` | Hands-free mode: TradingView webhooks fill the grader automatically (paid TV plan + ngrok) |
 
 Plus a **`trade-checker` agent** — in this project, ask Claude *"grade this MNQ long, entry 20,450,
 stop 20,410, daily's bullish"* and it reads the playbook and gives you a verdict. It will not

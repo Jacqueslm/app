@@ -527,6 +527,35 @@ $("alertPaste").addEventListener("input", () => {
   evaluate();
 });
 
+// ── Hands-free fill: poll the relay when served over http ──────────────────
+// Double-clicking the file (file://) works as always — paste by hand.
+// Opened through "Start Trade Grader.bat" (http://localhost:4410), the page
+// polls the relay and fills itself the moment a TradingView webhook lands.
+if (location.protocol.startsWith("http")) {
+  let lastSeen = null;
+  const poll = async () => {
+    try {
+      const r = await fetch("/alerts.json");
+      const d = await r.json();
+      const maxId = d.alerts.length ? Math.max(...d.alerts.map(a => a.id)) : 0;
+      if (lastSeen === null) { lastSeen = maxId; return; }   // ignore stale alerts on page load
+      if (maxId <= lastSeen) return;
+      const a = d.alerts.filter(x => x.id > lastSeen).pop();
+      lastSeen = maxId;
+      $("alertPaste").value = a.text;
+      $("alertPaste").dispatchEvent(new Event("input"));
+      const when = new Date(a.t).toLocaleTimeString();
+      $("pasteNote").innerHTML = `<span class="pos"><b>⚡ Alert ${when} — filled automatically.</b></span> ` +
+        $("pasteNote").textContent.replace(/^Filled[^.]*\./, "") +
+        " Now tick the checklist yourself — that part is the point.";
+      document.title = "⚡ ALERT — Trade Grader";
+      setTimeout(() => document.title = "Trade Grader — Market Structure Bridge", 60000);
+    } catch {}
+  };
+  poll();
+  setInterval(poll, 3000);
+}
+
 // prop settings persist per browser
 const PKEY = "msb-prop-v1";
 try { const ps = JSON.parse(localStorage.getItem(PKEY)) || {};

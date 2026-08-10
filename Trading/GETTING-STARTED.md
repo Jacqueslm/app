@@ -117,6 +117,38 @@ message and paste it into the **"Paste the alert"** box at the top of The Trade 
 symbol, direction, entry, stop and the HTF level by itself. The checklist stays yours to tick —
 reading each line is the pause that protects you; only the typing is automated.
 
+### Part 3¾ — Hands-free fill (you pay for TradingView, so use it)
+
+Paid TradingView plans include **webhook alerts** — the alert can be *delivered* to your PC, and
+the grader fills itself with zero copy-paste. One-time setup, ~15 minutes:
+
+1. **Start the relay.** In the `Trading` folder, double-click **`Start Trade Grader.bat`**.
+   Two things open: a black relay window (leave it running) and the grader at
+   `http://localhost:4410`. The relay window shows your private webhook path, like
+   `/hook/a1b2c3d4e5f6a7b8` — you'll need it in step 3.
+2. **Set up the tunnel** (TradingView's servers live on the internet and can't see your PC, so a
+   tunnel gives your relay a public address):
+   - Sign up free at **ngrok.com** → follow their Windows setup (download, run the
+     `ngrok config add-authtoken ...` command they show you)
+   - On your ngrok dashboard, claim your **free static domain** (looks like
+     `something-something.ngrok-free.app`)
+   - Open a command window and run: `ngrok http --domain=YOUR-STATIC-DOMAIN 4410`
+   - Leave that window running too.
+3. **Point the alerts at it.** Edit each TradingView alert → **Notifications** tab → tick
+   **Webhook URL** → enter `https://YOUR-STATIC-DOMAIN/hook/YOUR-SECRET` (the exact URL the
+   relay window printed, with your domain in front). Save.
+4. **Test it:** fire any alert (or wait for one). Within ~3 seconds the grader tab flashes
+   **⚡ ALERT** and the numbers are filled.
+
+Daily use after setup: double-click the bat, start the tunnel, done — the grader fills itself
+all session. The checklist still waits for your hands, on purpose.
+
+Notes: keep the webhook URL private (it's the key to your grader); the static domain means you
+never have to edit the alerts again; and the grader still works the old double-click way when
+the relay isn't running — paste by hand. One quirk: the `localhost:4410` page keeps its own
+journal, separate from the double-clicked file's journal — pick one as home (the relay page,
+once this is set up) and stay there.
+
 Try it: pick MNQ, type entry `20450`, stop `20410`, next HTF level `20650`, and it should show
 **3 contracts, $240 risk** and a **HOLD · 5.0R room** plan banner. Tick all twelve hard filters and
 eight quality points — amber, **HALF SIZE · B**. Two more and it goes green, **TAKE IT · A+**.

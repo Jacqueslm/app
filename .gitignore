@@ -17,3 +17,7 @@ TurnSomeDayIntoOneday/twa/.gradle/
 TurnSomeDayIntoOneday/twa/*.aab
 TurnSomeDayIntoOneday/twa/*.apk
 TurnSomeDayIntoOneday/twa/*.idsig
+
+# Trade grader alert relay - private webhook token and local alert history
+Trading/relay/secret.txt
+Trading/relay/alerts.log

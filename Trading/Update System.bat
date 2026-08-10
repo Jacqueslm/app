@@ -7,6 +7,9 @@ echo.
 echo   Updating the MSB trading system in this folder...
 echo.
 
+if not exist "pine" mkdir "pine"
+if not exist "relay" mkdir "relay"
+
 curl -s -o "trade-grader.html"        "%BASE%/trade-grader.html"        && echo   [ok] trade grader
 curl -s -o "DAILY-USE.md"             "%BASE%/DAILY-USE.md"             && echo   [ok] daily-use guide
 curl -s -o "PLAYBOOK.md"              "%BASE%/PLAYBOOK.md"              && echo   [ok] playbook

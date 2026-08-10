@@ -9,6 +9,7 @@ Read them in this order.
 | File | What it is |
 |---|---|
 | **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
+| **[DAILY-USE.md](DAILY-USE.md)** | Already set up? The morning routine, what to do when an alert fires, and the phone workflow |
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
 | **[INSTITUTIONAL.md](INSTITUTIONAL.md)** | How large participants actually trade — and why the setup works. Read it second. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |

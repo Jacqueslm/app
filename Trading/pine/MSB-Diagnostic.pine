@@ -96,6 +96,10 @@ maxPerDay = input.int(1, "Max trades per day", minval = 1, maxval = 5, group = g
 scalpMax = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step = 0.5, group = grpR)
 holdMin  = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
 minRoom  = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR)
+tgtMinR  = input.float(0.5, "Ignore walls closer than this (R)", minval = 0.0, step = 0.1, group = grpR,
+     tooltip = "A level a fraction of a stop away is noise, not a target. Measured: with every prior-day, overnight, 4H and Daily level treated as a wall, one is nearly always within a fraction of the stop, and the trade was rejected for no room. Look past those.")
+tgtProj  = input.float(4.0, "Open-air target (ATR) when no wall exists", minval = 1.0, step = 0.5, group = grpR,
+     tooltip = "When nothing stands above (a long) or below (a short), price is in open air - the cleanest case. The old fallback reached back to a 100-bar extreme sitting BEHIND price and scored it as no room, rejecting exactly those trades.")
 
 grpX = "Session — New York only"
 useSess = input.bool(true, "Only trade inside the tradeable window", group = grpX)
@@ -483,16 +487,19 @@ stopRaw = rawLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - atr * stopBuf
 riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
 
 // Nearest opposing HTF level = the realistic target; the distance decides scalp vs hold.
-tgtUp = f_pickAbove(float(na), h4Hi, entry)
-tgtUp := f_pickAbove(tgtUp, dHi, entry)
-tgtUp := f_pickAbove(tgtUp, pdh, entry)
-tgtUp := f_pickAbove(tgtUp, onH, entry)
-tgtDn = f_pickBelow(float(na), h4Lo, entry)
-tgtDn := f_pickBelow(tgtDn, dLo, entry)
-tgtDn := f_pickBelow(tgtDn, pdl, entry)
-tgtDn := f_pickBelow(tgtDn, onL, entry)
+// A wall closer than a fraction of the stop is not a target, it is noise on the way.
+tgtFloorUp = entry + nz(riskPts, 0) * tgtMinR
+tgtFloorDn = entry - nz(riskPts, 0) * tgtMinR
+tgtUp = f_pickAbove(float(na), h4Hi, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, dHi, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, pdh, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, onH, tgtFloorUp)
+tgtDn = f_pickBelow(float(na), h4Lo, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, dLo, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, pdl, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, onL, tgtFloorDn)
 
-htfTgt = rawLong ? nz(tgtUp, hi100) : nz(tgtDn, lo100)
+htfTgt = rawLong ? nz(tgtUp, entry + atr * tgtProj) : nz(tgtDn, entry - atr * tgtProj)
 roomR  = not na(riskPts) and riskPts > 0 ? math.abs(htfTgt - entry) / riskPts : 0.0
 plan   = roomR < minRoom  ? "NO TRADE" :
          roomR < scalpMax ? "SCALP"    :
@@ -575,9 +582,6 @@ if raw
     kScore  += f_hit(not gScore)
     kDaily  += f_hit(not gDaily)
     nPass   += f_hit(allPass)
-    // spend the day's bullet, so the one-trade-a-day cap is counted honestly
-    if allPass
-        tookToday += 1
 
 // ─── The table ───────────────────────────────────────────────────────────────
 var table dg = table.new(position.bottom_right, 2, 19,

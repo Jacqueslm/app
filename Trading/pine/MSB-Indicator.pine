@@ -135,6 +135,10 @@ scalpMax  = input.float(2.0, "SCALP if room below this (R)", minval = 1.0, step 
 holdMin   = input.float(3.5, "HOLD if room above this (R)",  minval = 2.0, step = 0.5, group = grpR)
 minRoom   = input.float(1.0, "Reject if room below this (R)", minval = 0.5, step = 0.5, group = grpR,
      tooltip = "Entering into a wall. Looks identical to a good setup; there is just no money in it.")
+tgtMinR  = input.float(0.5, "Ignore walls closer than this (R)", minval = 0.0, step = 0.1, group = grpR,
+     tooltip = "A level a fraction of a stop away is noise, not a target. Measured: with every prior-day, overnight, 4H and Daily level treated as a wall, one is nearly always within a fraction of the stop, and the trade was rejected for no room. Look past those.")
+tgtProj  = input.float(4.0, "Open-air target (ATR) when no wall exists", minval = 1.0, step = 0.5, group = grpR,
+     tooltip = "When nothing stands above (a long) or below (a short), price is in open air - the cleanest case. The old fallback reached back to a 100-bar extreme sitting BEHIND price and scored it as no room, rejecting exactly those trades.")
 
 grpF = "Prop firm guard"
 propMode   = input.bool(false, "Prop evaluation mode — A+ only + risk cap", group = grpF,
@@ -572,16 +576,19 @@ riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
 
 // The nearest opposing HTF level is the realistic target, and the distance to it in R
 // is what decides scalp vs hold. hi100/lo100 is only a fallback if nothing is in the way.
-tgtUp = f_pickAbove(float(na), h4Hi, entry)
-tgtUp := f_pickAbove(tgtUp, dHi, entry)
-tgtUp := f_pickAbove(tgtUp, pdh, entry)
-tgtUp := f_pickAbove(tgtUp, onH, entry)
-tgtDn = f_pickBelow(float(na), h4Lo, entry)
-tgtDn := f_pickBelow(tgtDn, dLo, entry)
-tgtDn := f_pickBelow(tgtDn, pdl, entry)
-tgtDn := f_pickBelow(tgtDn, onL, entry)
+// A wall closer than a fraction of the stop is not a target, it is noise on the way.
+tgtFloorUp = entry + nz(riskPts, 0) * tgtMinR
+tgtFloorDn = entry - nz(riskPts, 0) * tgtMinR
+tgtUp = f_pickAbove(float(na), h4Hi, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, dHi, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, pdh, tgtFloorUp)
+tgtUp := f_pickAbove(tgtUp, onH, tgtFloorUp)
+tgtDn = f_pickBelow(float(na), h4Lo, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, dLo, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, pdl, tgtFloorDn)
+tgtDn := f_pickBelow(tgtDn, onL, tgtFloorDn)
 
-htfTgt = trigLong ? nz(tgtUp, hi100) : nz(tgtDn, lo100)
+htfTgt = trigLong ? nz(tgtUp, entry + atr * tgtProj) : nz(tgtDn, entry - atr * tgtProj)
 roomR  = not na(riskPts) and riskPts > 0 ? math.abs(htfTgt - entry) / riskPts : 0.0
 
 // T1 is where you get to be right, in cash. T2 is what pays for the losers.

@@ -125,6 +125,10 @@ scalpR   = input.float(1.0, "Target (R) — full exit", minval = 0.5, maxval = 2
      tooltip = "A scalp has ONE target. In, paid, out, done. The runner game belongs to the 1H system.")
 minRoom  = input.float(1.5, "Reject if room below this (R)", minval = 1.0, step = 0.25, group = grpR,
      tooltip = "Room to the nearest opposing 1H/4H level. A 1R scalp needs 1.5R of clear air — the target shouldn't sit ON the wall.")
+tgtMinR  = input.float(0.5, "Ignore walls closer than this (R)", minval = 0.0, step = 0.1, group = grpR,
+     tooltip = "A level a fraction of a stop away is noise, not a target. Measured: with every prior-day, overnight, 4H and Daily level treated as a wall, one is nearly always within a fraction of the stop, and the trade was rejected for no room. Look past those.")
+tgtProj  = input.float(4.0, "Open-air target (ATR) when no wall exists", minval = 1.0, step = 0.5, group = grpR,
+     tooltip = "When nothing stands above (a long) or below (a short), price is in open air - the cleanest case. The old fallback reached back to a 100-bar extreme sitting BEHIND price and scored it as no room, rejecting exactly those trades.")
 
 grpV = "Display"
 showSwg  = input.bool(true,  "Show swing labels", group = grpV)
@@ -496,13 +500,16 @@ riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
 t1      = na(riskPts) ? na : trigLong ? entry + riskPts * scalpR : entry - riskPts * scalpR
 
 // Room to the nearest opposing 1H/4H wall — the target must not sit ON it.
-wallUp = f_pickAbove(float(na), h1Hi, entry)
-wallUp := f_pickAbove(wallUp, h4Hi, entry)
-wallUp := f_pickAbove(wallUp, pdh, entry)
-wallDn = f_pickBelow(float(na), h1Lo, entry)
-wallDn := f_pickBelow(wallDn, h4Lo, entry)
-wallDn := f_pickBelow(wallDn, pdl, entry)
-wall   = trigLong ? nz(wallUp, hi100) : nz(wallDn, lo100)
+// A wall closer than a fraction of the stop is not a target, it is noise on the way.
+tgtFloorUp = entry + nz(riskPts, 0) * tgtMinR
+tgtFloorDn = entry - nz(riskPts, 0) * tgtMinR
+wallUp = f_pickAbove(float(na), h1Hi, tgtFloorUp)
+wallUp := f_pickAbove(wallUp, h4Hi, tgtFloorUp)
+wallUp := f_pickAbove(wallUp, pdh, tgtFloorUp)
+wallDn = f_pickBelow(float(na), h1Lo, tgtFloorDn)
+wallDn := f_pickBelow(wallDn, h4Lo, tgtFloorDn)
+wallDn := f_pickBelow(wallDn, pdl, tgtFloorDn)
+wall   = trigLong ? nz(wallUp, entry + atr * tgtProj) : nz(wallDn, entry - atr * tgtProj)
 roomR  = not na(riskPts) and riskPts > 0 ? math.abs(wall - entry) / riskPts : 0.0
 roomOK = roomR >= minRoom
 

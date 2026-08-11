@@ -17,6 +17,38 @@ the first spoken line lands inside three seconds.
 
 ---
 
+## THE COPY RULE — applies to every script on this page
+
+**The app is for every kind of couple.** Straight, gay, bi, gender-nonconforming,
+every gender. The supporter is not always a wife and the person drinking is not
+always a man. `KEYWORDS.md` has said this since it was written; these scripts
+didn't follow it until 11 Aug, and they do now.
+
+There are two different things here and mixing them up is what went wrong:
+
+**The title is whatever somebody typed into a search box.** "Is my husband an
+alcoholic" gets 260 searches a month because that is the phrase people type. It
+stays verbatim or the video doesn't get found. That isn't a statement about who
+the app is for — it's a record of what was searched.
+
+**The spoken words never assume.** They/them, "the person you love", "them" not
+"him". The one exception: if the title already named a role, the body may match
+it — a video titled *my boyfriend is an alcoholic* can say "him", because the
+person watching already said so.
+
+**And across the batch, every role gets named out loud.** Husband, wife,
+boyfriend, girlfriend, partner — each one has its own script below, not a
+mention buried in someone else's.
+
+**This is also free traffic, not only the right thing.** The two easiest terms
+in the entire keyword file are **"my boyfriend is addicted to porn" (difficulty
+6)** and **"wife addicted to porn" (difficulty 7)** — easier than anything in
+the straight-couple lane, because every competitor assumes a man with a problem
+and a wife who found out. Nobody is writing the other versions. That's lane #2
+of the moat and it's sitting there.
+
+---
+
 ## The five things, and where each one goes
 
 You said what, who, why, how and where — in fifteen seconds. That's only
@@ -77,7 +109,7 @@ Numbers are US searches a month and difficulty, from `KEYWORDS.md`.
 
 > You're not asking because you're dramatic. You're asking because you already
 > know. Nobody says it out loud, so you google it at midnight. I was that
-> husband, 38 years. I built a free app — and part of it is for you, not him.
+> husband, 38 years. I built a free app — and part of it is for you, not them.
 
 *43 words · ~14s.* **Post this one first.** Difficulty 8 and the page is live —
 it's the cheapest win in the whole file.
@@ -126,8 +158,8 @@ it's the cheapest win in the whole file.
 **On screen:** WHEN TO GIVE UP ON AN ALCOHOLIC HUSBAND
 
 > I can't tell you when to leave. Nobody can. But the day you stop keeping score
-> of his days and start keeping your own — something changes. Free app. Your
-> counter, not his.
+> of their days and start keeping your own — something changes. Free app. Your
+> counter, not theirs.
 
 *36 words · ~12s.* The most-clicked title in this file. Handle it straight —
 never answer the question, and never imply staying is weakness.
@@ -175,7 +207,7 @@ this one, which is exactly why it's free traffic.
 
 **On screen:** BETRAYAL TRAUMA
 
-> Betrayal trauma is why you check his phone and hate yourself for it. That's
+> Betrayal trauma is why you check their phone and hate yourself for it. That's
 > not jealousy. That's your body remembering it was right last time. There's a
 > free quiz and a free app, and neither one blames you.
 
@@ -322,6 +354,66 @@ most important finding in the AI file and it needs a decision from you first.
 
 ---
 
+---
+
+# The lane nobody else writes — 19 to 22
+
+These are not a diversity gesture bolted on the end. **They are the four
+cheapest terms in the file.** Every competitor writes for a man with a problem
+and a wife who found out, so every other version of the sentence is unclaimed —
+which is why the difficulty scores here are the lowest anywhere in
+`KEYWORDS.md`.
+
+---
+
+### 19. "My boyfriend is addicted to porn" — 110/mo · KD **6** — *easiest term in the entire file*
+
+**On screen:** MY BOYFRIEND IS ADDICTED TO PORN
+
+> You've read a hundred articles about wives. You're not a wife. That doesn't
+> make it hurt less and it doesn't make you dramatic. I was the one with the
+> problem, 38 years. Free app — part of it is for you.
+
+*44 words · ~15s.* Difficulty 6. Nothing else you can make is this cheap.
+
+---
+
+### 20. "Wife addicted to porn" — 70/mo · KD **7**
+
+**On screen:** WIFE ADDICTED TO PORN
+
+> Everyone assumes it's the man. So when it's her, there's nobody to tell —
+> they'd laugh, or they wouldn't believe you. It's the same thing and it hurts
+> the same. Free app. It doesn't assume.
+
+*39 words · ~13s.* Flips the framing every competitor is stuck in.
+
+---
+
+### 21. "My girlfriend watches porn" — 50/mo · KD 16
+
+**Same take as #20, different title on screen.** Shoot it once, export twice,
+change the burned-in title and the caption. Two searches, one hour. `KEYWORDS.md`
+has these on the same page for the same reason.
+
+---
+
+### 22. "My partner drinks too much" — 70/mo · KD 19 — **the flagship**
+
+**On screen:** MY PARTNER DRINKS TOO MUCH
+
+> Husband, wife, boyfriend, girlfriend — it doesn't matter which one you are.
+> The counting is the same. The lying awake is the same. I was addicted 38
+> years, and the free app I built doesn't ask which.
+
+*41 words · ~14s.*
+
+**This is the one that says the rule out loud**, and it's the only script where
+naming all four roles is the point rather than a fix. If you only shoot one from
+this block, shoot this.
+
+---
+
 ### The one NOT to make
 
 **Alcohol withdrawal — 674,800 AI demand, the biggest number in the file.**
@@ -406,13 +498,18 @@ not a free one.
 
 ## Posting order
 
-**1, 3, 14, 12, 11** first — the two easiest partner terms, **hangxiety**, the
-biggest winnable Google term, and the one where you tell your own story. Five
-videos, an hour to shoot, one a day to post.
+**1, 3, 22, 14, 12, 11** — six, not five. An hour to shoot, one a day to post.
 
-*(Hangxiety replaced #9 in that first five once the AI data came in: 28,200 in
-demand, the page is already live, it's ad-safe, and it's the doorway question —
-the one people ask before they've admitted anything to themselves.)*
+- **1 and 3** — the two easiest partner terms, difficulty 8 and 5, page live.
+- **22** — the one that names husband, wife, boyfriend and girlfriend out loud.
+  It's third because the rule shouldn't turn up sixth.
+- **14** — hangxiety. 28,200 in AI demand, page live, ad-safe, and it's the
+  doorway question people ask before they've admitted anything to themselves.
+- **12** — biggest winnable Google term you own.
+- **11** — the one where you tell your own story.
+
+Then **19** as soon as those are out. Difficulty 6 is the cheapest thing in the
+file and it's been sitting there unclaimed the whole time.
 
 Then the rest in any order. **5 and 10 are the two most likely to travel** and
 also the two most likely to draw a nasty comment; post them once the first five

@@ -24,7 +24,7 @@ If someone says yes to an interview, tell me — I'll help you prep.
 ## BATCH 1 — podcasts (best fit for your story)
 
 ### 1. Recovery Elevator — Paul Churchill
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** info@recoveryelevator.com · *address confirmed in search* ·
 backups kate@recoveryelevator.com, kmac@recoveryelevator.com
 
@@ -47,7 +47,7 @@ Jacques
 ---
 
 ### 2. Sober Powered — Gill Tietz
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** gill@soberpowered.com · *address confirmed in search* — this one
 goes straight to Gill, not a team inbox
 
@@ -70,7 +70,7 @@ Jacques
 ---
 
 ### 3. Recovery Happy Hour — Tricia Lewis
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** recoveryhappyhour@gmail.com — **but the show has ended.** Search
 says the final episode has aired and interview requests are closed. Skip it, or
 send the Batch 2 version instead: Tricia still has the audience, just not the
@@ -96,7 +96,7 @@ Jacques
 ---
 
 ### 4. The Sober Curator
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** thesobercurator@gmail.com · *address confirmed in search* ·
 Alysse Bryson (CEO) is alysse.bryson@thesobercurator.com if it bounces.
 They run a "Sober Spotlight" for people in recovery building sober businesses.
@@ -119,7 +119,7 @@ Turn Someday Into Day One
 ---
 
 ### 5. Soberful — Veronica Valli
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** info@soberful.com · *address confirmed in search*
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
@@ -143,7 +143,7 @@ Jacques
 ## BATCH 2 — authors & advocates (they write; your gap is their story idea)
 
 ### 6. Laura McKowen — author, "We Are The Luckiest"
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Where:** the contact page at https://lauramckowen.com/ — **no direct email
 found.** Searched and came up empty; she is an author with a publicist wall,
 which is normal. This one stays a web form, or goes last and by hand.
@@ -165,7 +165,7 @@ Jacques
 ---
 
 ### 7. Kelly Fitzgerald Junco — The Sober Señorita
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** kelly@sobersenorita.com · *address confirmed in search*
 
 **Subject:** The recovery story nobody writes: the person watching it happen
@@ -185,7 +185,7 @@ Jacques
 ---
 
 ### 8. Reach Out Recovery
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** reachoutrecoverymedia@gmail.com · *address confirmed in search* —
 the media address, which is the right desk. They write for FAMILIES of addicts,
 which is your exact lane.
@@ -208,7 +208,7 @@ Turn Someday Into Day One
 ---
 
 ### 9. Carly Benson — Miracles Are Brewing
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** info@MiraclesAreBrewing.com · *address confirmed in search*
 
 **Subject:** The recovery story nobody writes: the person watching it happen
@@ -228,7 +228,7 @@ Jacques
 ---
 
 ### 10. This Naked Mind — Annie Grace (big fish — send last)
-- [ ] Sent
+- [x] Sent — 11 Aug 2026
 **Send to:** hello@thisnakedmind.com · *address confirmed in search*
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed

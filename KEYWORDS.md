@@ -21,6 +21,42 @@ site). Blank KD = Semrush had no score (usually tiny volume).
 
 ---
 
+## THE SEVEN TRACKED IN SEMRUSH (set 10 Aug 2026)
+
+Position Tracking is capped at seven keywords on the free plan, so these seven
+are the whole search scoreboard. They are all Lane 1, all difficulty **27 or
+under**, and together they are about **1,420 searches a month**.
+
+| Keyword | Vol | KD |
+|---|---|---|
+| loving an alcoholic | 170 | **5** |
+| is my husband an alcoholic | 260 | **8** |
+| how to help an alcoholic spouse | 260 | 20 |
+| my husband drinks too much | 90 | 20 |
+| my boyfriend is an alcoholic | 110 | 22 |
+| how to help an alcoholic husband | 210 | 23 |
+| living with an alcoholic husband | 320 | 27 |
+
+**Why these and not the obvious ones.** The first tracking run, set 8 Aug, used
+broad terms and returned zero across the board — with samhsa.gov, Wikipedia and
+drugs.com holding the top of every SERP. Those results are not hard, they are
+closed: Google fills health queries with institutional sources, and a
+one-person site does not displace a government agency. Two of the seven slots
+were so broad they were pulling Shutterstock and Pornhub as "competitors",
+which is a tracking slot doing nothing at all.
+
+Nobody institutional writes for the person who *loves* an addict. That is why
+Lane 1 is winnable and the head terms are not, and it is the same audience
+outperforming everything else on TikTok and Facebook.
+
+**Watch `is my husband an alcoholic` first** — difficulty 8 and the page is
+already live.
+
+**Do not check this weekly.** Search moves over six to twelve months. Set it,
+record it here, and look again in the winter.
+
+---
+
 ## THE COPY RULE (site-wide, every page, every video)
 
 The app is for **everyone — straight, gay, bi, gender-nonconforming, every

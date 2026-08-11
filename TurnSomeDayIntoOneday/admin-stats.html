@@ -67,7 +67,17 @@ fetch('/api/admin/stats').then(async r=>{
     paid:sum(d.by_week,'paid'),leads:sum(d.by_week,'leads')});
   h+='<div class="note">Week starts Monday. Trials bucket by when the trial began, not when the account was created.</div>';
 
-  h+='<h2>Nova usage (free tier)</h2><div class="cards">'+
+  // Which page produced each lead. A UTM tells you where they came FROM; this
+  // tells you what they actually filled in — the quiz, the free guide, or the
+  // partner page — which is the thing worth knowing when the campaign column
+  // says (direct) for everybody.
+  if (d.leads_by_page && d.leads_by_page.length) {
+    const lpCols=[{key:'page',label:'Where they signed up'},{key:'leads',label:'Leads',n:1}];
+    h+='<h2>Leads by page</h2>'+table(lpCols,d.leads_by_page,{page:'TOTAL',leads:sum(d.leads_by_page,'leads')});
+    h+='<div class="note">quiz = finished the quiz and asked for the result. brainreset = asked for the free 90-day guide. for-her = the partner page.</div>';
+  }
+
+  h+='<h2>Friendly usage (free tier)</h2><div class="cards">'+
     [['Avg chats / active free user / day',u.avg_chats_per_active_free_user_per_day],
      ['Free users hitting the daily cap',u.users_hitting_daily_cap],
      ['Active free user-days',u.active_free_user_days]]

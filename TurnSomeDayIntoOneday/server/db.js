@@ -566,6 +566,13 @@ function getAdminStats(opts) {
     paid: db.prepare(`SELECT COUNT(*) n FROM users WHERE ${PAID_SQL}`).get().n,
     trialing: db.prepare(`SELECT COUNT(*) n FROM users WHERE ${TRIALING_SQL}`).get().n,
     leads: db.prepare('SELECT COUNT(*) n FROM leads').get().n,
+    // Which page each lead came in through. utm_source answers "which campaign";
+    // this answers "which page", and with no campaigns running yet it is the only
+    // one of the two that says anything.
+    leads_by_page: db.prepare(`
+      SELECT COALESCE(NULLIF(source,''), '(unknown)') AS page, COUNT(*) AS leads
+      FROM leads GROUP BY 1 ORDER BY leads DESC
+    `).all(),
   };
 
   const bySourceRows = db.prepare(`

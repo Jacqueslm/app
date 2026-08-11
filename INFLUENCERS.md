@@ -8,8 +8,13 @@ your story. A podcast interview is recorded from home over video call — email
 to set up, no feeds involved. One good interview reaches thousands of exactly
 the right people.
 
-**When:** only after Tuesday's 5 OUTREACH emails are done and you have 15
-minutes left. Send 1 or 2. No rush — this pile has no deadline.
+**When:** the gate is open — all three episodes are finished as of 10 Aug, so
+this is no longer a man with an idea writing to a podcast. Send 1 or 2 at a
+time, not ten. This Naked Mind last.
+
+**Eight are drafted in Gmail (10 Aug)** with a line added about the film series,
+since that is the new reason to send. Two are not: Laura McKowen has no findable
+email, and Recovery Happy Hour has ended.
 
 **Same rules:** copy, paste, send, tick the box. Never pay for placement.
 If someone says yes to an interview, tell me — I'll help you prep.
@@ -20,7 +25,8 @@ If someone says yes to an interview, tell me — I'll help you prep.
 
 ### 1. Recovery Elevator — Paul Churchill
 - [ ] Sent
-**Where:** the contact page at https://www.recoveryelevator.com/
+**Send to:** info@recoveryelevator.com · *address confirmed in search* ·
+backups kate@recoveryelevator.com, kmac@recoveryelevator.com
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
 
@@ -42,7 +48,8 @@ Jacques
 
 ### 2. Sober Powered — Gill Tietz
 - [ ] Sent
-**Where:** the contact page at https://www.soberpowered.com/
+**Send to:** gill@soberpowered.com · *address confirmed in search* — this one
+goes straight to Gill, not a team inbox
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
 
@@ -64,7 +71,11 @@ Jacques
 
 ### 3. Recovery Happy Hour — Tricia Lewis
 - [ ] Sent
-**Where:** the contact page at https://www.recoveryhappyhour.com/
+**Send to:** recoveryhappyhour@gmail.com — **but the show has ended.** Search
+says the final episode has aired and interview requests are closed. Skip it, or
+send the Batch 2 version instead: Tricia still has the audience, just not the
+microphone. Do not pitch a guest spot on a podcast that isn't running — it is
+the one thing that says you didn't look.
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
 
@@ -86,7 +97,9 @@ Jacques
 
 ### 4. The Sober Curator
 - [ ] Sent
-**Where:** the contact/submission page at https://thesobercurator.com/ — they run a "Sober Spotlight" for people in recovery building sober businesses
+**Send to:** thesobercurator@gmail.com · *address confirmed in search* ·
+Alysse Bryson (CEO) is alysse.bryson@thesobercurator.com if it bounces.
+They run a "Sober Spotlight" for people in recovery building sober businesses.
 
 **Subject:** Sober Spotlight submission: 38 years addicted, free at 50, built the app I needed
 
@@ -107,7 +120,7 @@ Turn Someday Into Day One
 
 ### 5. Soberful — Veronica Valli
 - [ ] Sent
-**Where:** the contact page at https://soberful.com/
+**Send to:** info@soberful.com · *address confirmed in search*
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
 
@@ -131,7 +144,9 @@ Jacques
 
 ### 6. Laura McKowen — author, "We Are The Luckiest"
 - [ ] Sent
-**Where:** the contact page at https://lauramckowen.com/
+**Where:** the contact page at https://lauramckowen.com/ — **no direct email
+found.** Searched and came up empty; she is an author with a publicist wall,
+which is normal. This one stays a web form, or goes last and by hand.
 
 **Subject:** The recovery story nobody writes: the person watching it happen
 
@@ -151,7 +166,7 @@ Jacques
 
 ### 7. Kelly Fitzgerald Junco — The Sober Señorita
 - [ ] Sent
-**Where:** the contact page at https://kellyfitzgeraldjunco.com/
+**Send to:** kelly@sobersenorita.com · *address confirmed in search*
 
 **Subject:** The recovery story nobody writes: the person watching it happen
 
@@ -171,7 +186,9 @@ Jacques
 
 ### 8. Reach Out Recovery
 - [ ] Sent
-**Where:** the contact page at https://reachoutrecovery.com/ — they write for FAMILIES of addicts, your exact lane
+**Send to:** reachoutrecoverymedia@gmail.com · *address confirmed in search* —
+the media address, which is the right desk. They write for FAMILIES of addicts,
+which is your exact lane.
 
 **Subject:** An app built for your exact reader — the family of the addict
 
@@ -192,7 +209,7 @@ Turn Someday Into Day One
 
 ### 9. Carly Benson — Miracles Are Brewing
 - [ ] Sent
-**Where:** the contact page at https://miraclesarebrewing.com/
+**Send to:** info@MiraclesAreBrewing.com · *address confirmed in search*
 
 **Subject:** The recovery story nobody writes: the person watching it happen
 
@@ -212,7 +229,7 @@ Jacques
 
 ### 10. This Naked Mind — Annie Grace (big fish — send last)
 - [ ] Sent
-**Where:** the contact page at https://thisnakedmind.com/
+**Send to:** hello@thisnakedmind.com · *address confirmed in search*
 
 **Subject:** Guest idea: 38 years addicted, free at 50 — then I built the app I needed
 

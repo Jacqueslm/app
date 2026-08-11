@@ -112,6 +112,26 @@ async function transcribeLocal(ffmpeg, inputPath, onPhase, onNote) {
       // fails exactly the same way with the internet working fine. Say what
       // actually happened and what to do about it.
       const why = String((e2 && e2.message) || e2 || '').slice(0, 200);
+
+      // Windows error 193 ("The operating system cannot run %1") on the
+      // onnxruntime .node binary is NOT a download failure - the model may be
+      // fully present. It means Windows could not load a native library,
+      // and the reason is nearly always that the install lives inside a
+      // cloud-synced folder which turned that binary into an online-only
+      // placeholder. Sending someone to delete the model cache here wastes
+      // their afternoon on the wrong folder.
+      const nativeLoadFailed = /cannot run %1|not a valid Win32|ERR_DLOPEN_FAILED|onnxruntime|\.node['"]?$|\.node[\s'"]/i.test(why);
+      const inCloudFolder = /[\\/](OneDrive|Dropbox|Google Drive|iCloudDrive)[\\/]/i.test(__dirname);
+      if (nativeLoadFailed) {
+        throw new Error(
+          'The speech engine could not start. This is not a download problem - Windows could not load one of Studio\'s built-in program files.' +
+          (inCloudFolder
+            ? `\n\nStudio is installed inside a cloud-synced folder (${__dirname}). Cloud sync turns files it thinks are idle into online-only placeholders, and Windows cannot run a placeholder. This is also why media files go missing.\n\nThe real fix: move the whole Studio folder somewhere outside OneDrive - C:\\Studio works - and start it from there. Failing that, right-click the Studio folder, choose "Always keep on this device", and wait for it to finish downloading.`
+            : '\n\nRe-install Studio\'s program files: delete Studio\\server\\node_modules\\onnxruntime-node and run npm install in Studio\\server.') +
+          `\n\nWhat Windows said: ${why}`
+        );
+      }
+
       let cached = false;
       try { cached = fs.existsSync(CACHE_DIR) && fs.readdirSync(CACHE_DIR).length > 0; } catch (_) {}
       const hint = cached

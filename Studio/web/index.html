@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0841</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0842</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -790,6 +790,27 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="seq-render-cut" style="padding:7px 10px;font-size:12px">Export cutdown</button>
       </div>
       <div class="progress-line" id="seq-prog"><div></div></div>
+    </div>
+
+    <div class="card" id="one-tap-card">
+      <h3>⚡ One-tap short <span class="usage">— clip in, captioned video out</span></h3>
+      <p class="usage" style="margin:0 0 8px">For a piece to camera you already scripted. Pick the clip, paste what you said, press the button. No timing, no tapping, no speech model — it spaces the lines by how long each one takes to say.</p>
+      <select class="input" id="ot-clip" style="margin-bottom:8px"></select>
+      <textarea id="ot-text" placeholder="Paste your script — one line per caption.&#10;&#10;You're not asking because you're dramatic. You're asking because you already know.&#10;Nobody says it out loud, so you google it at midnight.&#10;I was that husband, 38 years. I built a free app - and part of it is for you, not them." style="min-height:104px"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <select class="input" id="ot-fx" style="width:auto;padding:6px 10px;font-size:13px"></select>
+        <select class="input" id="ot-style" style="width:auto;padding:6px 10px;font-size:13px">
+          <option value="pop">Caption: Pop</option>
+          <option value="boxed">Caption: Boxed</option>
+          <option value="outline" selected>Caption: Outline</option>
+          <option value="classic">Caption: Classic</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ot-endcard"> add end card</label>
+      </div>
+      <button class="gen-btn" id="ot-go" style="width:100%;margin-top:10px">⚡ Make my short</button>
+      <div class="progress-line" id="ot-prog"><div></div></div>
+      <p class="usage" id="ot-status" style="margin-top:6px"></p>
+      <div class="err" id="ot-err"></div>
     </div>
 
     <div class="card">
@@ -2106,6 +2127,7 @@ async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
   renderSocialAssetPicker();
+  renderOneTapPickers();
   reportMissingFiles();
 }
 
@@ -7122,6 +7144,8 @@ function renderLyrList() {
   });
 }
 
+$('#ot-go').onclick = makeOneTapShort;
+
 $('#lyr-spread').onclick = () => {
   setErr('#seq-err', null);
   const lines = lyrLines();
@@ -8312,6 +8336,126 @@ function renderQkShots() {
     list.appendChild(row);
   });
   renderQkTotal();
+}
+
+/* ---------------- One-tap short ----------------
+   The whole point: a clip you filmed and a script you already wrote should be
+   one button, not a timeline. No speech model (you know what you said), no
+   tapping, no per-shot decisions.
+
+   The timing is the only clever part. Spreading lines evenly is what every
+   free tool does and it is wrong - "So do you." and a 20-word sentence get the
+   same 4 seconds, so one hangs there and the other flies past. These are timed
+   by how long each line actually takes to say, then the gaps are shared out
+   proportionally too. */
+
+// Roughly how long a line takes to read aloud. 2.6 words/sec is unhurried
+// speech - these scripts are meant to land, not be raced. Punctuation buys a
+// beat, because you pause at a full stop whether you mean to or not.
+function speakSeconds(line) {
+  const words = line.trim().split(/\s+/).filter(Boolean).length;
+  const stops = (line.match(/[.!?,;:—-]/g) || []).length;
+  return Math.max(0.7, words / 2.6 + stops * 0.16);
+}
+
+// text + clip length -> [{text, start, end}] filling the clip end to end.
+function captionPlan(text, duration) {
+  const lines = String(text).split(/\n+/).map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return [];
+  const weights = lines.map(speakSeconds);
+  const total = weights.reduce((a, b) => a + b, 0);
+  // Leave a breath at the top and tail so the first line isn't already on
+  // screen at frame one, and the last doesn't collide with the cut.
+  const lead = Math.min(0.35, duration * 0.04);
+  const tail = Math.min(0.5, duration * 0.05);
+  const usable = Math.max(1, duration - lead - tail);
+  let at = lead;
+  return lines.map((text, i) => {
+    const span = (weights[i] / total) * usable;
+    const start = at;
+    at += span;
+    // A caption that ends exactly when the next begins reads as one moving
+    // block; a 0.08s gap makes each line land as its own thought.
+    return {
+      text,
+      start: Math.round(start * 100) / 100,
+      end: Math.round((at - (i < lines.length - 1 ? 0.08 : 0)) * 100) / 100,
+    };
+  });
+}
+
+function renderOneTapPickers() {
+  const sel = $('#ot-clip');
+  if (!sel) return;
+  const vids = (st.assets || []).filter((a) => a.kind === 'video' && !a.missing);
+  const keep = sel.value;
+  sel.innerHTML = vids.length
+    ? vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}${a.meta?.duration ? ` · ${a.meta.duration.toFixed(1)}s` : ''}</option>`).join('')
+    : '<option value="">No clips yet — film one and add it to My Media</option>';
+  // Default to the newest clip, which is almost always the one just filmed.
+  if (keep && vids.some((a) => String(a.id) === keep)) sel.value = keep;
+  const fxSel = $('#ot-fx');
+  if (fxSel && !fxSel.options.length) {
+    fxSel.innerHTML = QK_FX.map(([v, l]) => `<option value="${v}"${v === 'cinematic' ? ' selected' : ''}>${l}</option>`).join('');
+  }
+}
+
+async function makeOneTapShort() {
+  const btn = $('#ot-go');
+  setErr('#ot-err', null);
+  const assetId = Number($('#ot-clip').value);
+  const asset = st.assets.find((a) => a.id === assetId);
+  if (!asset) return setErr('#ot-err', 'Pick a clip first — film one and add it to My Media.');
+  const text = $('#ot-text').value.trim();
+  if (!text) return setErr('#ot-err', 'Paste the lines you said. One line per caption.');
+
+  let dur = asset.meta?.duration;
+  if (!dur || dur <= 0) return setErr('#ot-err', "Studio couldn't read that clip's length. Re-add it to My Media.");
+
+  const captionLines = captionPlan(text, dur);
+  const clips = [{ assetId, start: 0, end: dur, eq: null, fx: $('#ot-fx').value, keepAudio: true }];
+  const transitions = [];
+
+  // The end card is a still, so it needs a clip of its own on the tail.
+  if ($('#ot-endcard').checked) {
+    const card = (st.assets || []).find((a) => a.kind === 'image' && /free.?end|end.?card/i.test(a.label));
+    if (card) {
+      clips.push({ assetId: card.id, duration: 2.5, eq: null, fx: 'none' });
+      transitions.push({ type: 'cut', duration: 0 });
+    } else {
+      setErr('#ot-err', 'No end card in My Media yet — add 99-free-end.png and tick this again. Making the short without it.');
+    }
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Making your short…';
+  $('#ot-status').textContent = `${captionLines.length} caption${captionLines.length > 1 ? 's' : ''} across ${dur.toFixed(1)}s…`;
+  try {
+    const { job } = await jfetch('/api/studio/render', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        clips, transitions,
+        captionLines,
+        captionStyle: $('#ot-style').value,
+        captionSize: 'big',
+        size: currentSize(),
+        fadeToBlack: false,
+        name: (text.split('\n')[0] || 'short').slice(0, 40),
+      }),
+    });
+    const done = await pollJob(job.id, (j) => setProg('#ot-prog', j.progress));
+    setProg('#ot-prog', 100);
+    await loadAssets();
+    const made = st.assets.find((a) => a.id === done.assetId);
+    $('#ot-status').textContent = 'Done — it is in My Media, ready to post.';
+    if (made) openLightbox(made.url, 'video', made.label);
+  } catch (e) {
+    setErr('#ot-err', e.message || 'Could not make the short.');
+    $('#ot-status').textContent = '';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Make my short';
+  }
 }
 
 // The finished length, using the same arithmetic the assembler uses. Adding the

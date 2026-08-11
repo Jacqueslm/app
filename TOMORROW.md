@@ -53,6 +53,13 @@ after the first twelve. Card 12 goes last. **Watch saves and shares, not
 likes** — shares are currently zero across every platform, and that is the
 number that grows a small account.
 
+### 3a. The launch talking heads — `LAUNCH-SCRIPTS.md`
+
+Thirteen scripts, 7-15 seconds, every title a verbatim search phrase with real
+volume beside it. Shoot five in an hour: **1, 3, 12, 9, 11.** Word counts are on
+each one — 45 words is 15 seconds, don't go over. Never say "link in bio" out
+loud; the end card does it.
+
 ### 3b. Employers — four drafts are in Gmail
 
 `COMPANIES.md`. The RFW Institute one is the big lever: 1,500+ employers in

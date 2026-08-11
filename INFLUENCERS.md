@@ -51,9 +51,8 @@ Jacques
 - **REPLIED 11 Aug — a warm no.** "Sober Powered is a solo show and Gill
   doesn't interview guests but we wish you all the best." **This is a no about
   the format, not about you** — she has never had a guest on, so nobody was
-  ever getting that yes. **Replied same day** with a much smaller ask: mention a
-  free resource, no interview needed. That ask fits a solo show; the first one
-  didn't. Nothing further owed here — if she uses it, she uses it.
+  ever getting that yes. **No reply sent, and none is owed** — a decline that
+  gracious doesn't need answering. Closed.
 - **The lesson, checked against the rest of the pile:** an interview pitch to a
   show that doesn't do interviews reads as not having listened. Recovery
   Elevator and Soberful were both verified as interview shows on 11 Aug, so

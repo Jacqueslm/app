@@ -274,6 +274,12 @@ var float pT1   = na
 var float pT2   = na
 var bool  t1Hit = false
 
+// The exits go in WITH the entry — the bracket exists from the first bar of
+// the position, exactly like the bot places it. (They used to be submitted a
+// bar late from the position_size block below, so a T1 touch or a stop-out on
+// the entry bar itself could never fill and the backtest flattered the rules.)
+// And the trade consumes the sequence — same as the bot — or the day counter
+// resets overnight and the SAME stale setup re-fires tomorrow.
 if trigLong and okToTrade
     pStop := stopRaw
     pT1   := entry + riskPts * partialR
@@ -281,6 +287,15 @@ if trigLong and okToTrade
     t1Hit := false
     tookToday += 1
     strategy.entry("L", strategy.long)
+    strategy.exit("L-T1", "L", qty_percent = t1Pct, limit = pT1, stop = pStop)
+    strategy.exit("L-T2", "L", limit = pT2, stop = pStop)
+    st       := 0
+    stDir    := 0
+    zone     := na
+    prot     := na
+    trigLvl  := na
+    heldBars := 0
+    stBars   := 0
 
 if trigShort and okToTrade
     pStop := stopRaw
@@ -289,6 +304,15 @@ if trigShort and okToTrade
     t1Hit := false
     tookToday += 1
     strategy.entry("S", strategy.short)
+    strategy.exit("S-T1", "S", qty_percent = t1Pct, limit = pT1, stop = pStop)
+    strategy.exit("S-T2", "S", limit = pT2, stop = pStop)
+    st       := 0
+    stDir    := 0
+    zone     := na
+    prot     := na
+    trigLvl  := na
+    heldBars := 0
+    stBars   := 0
 
 if strategy.position_size > 0 and not t1Hit and high >= pT1
     t1Hit := true

@@ -267,6 +267,16 @@ okToTrade = roomR >= minRoom and inSess and tookToday < maxPerDay and
 fire = (trigLong or trigShort) and okToTrade
 if fire
     tookToday += 1
+    // The trade consumes the sequence — same as the bot. Without this, the
+    // day counter resets overnight and the SAME stale setup fires again
+    // tomorrow at whatever price the open happens to be.
+    st       := 0
+    stDir    := 0
+    zone     := na
+    prot     := na
+    trigLvl  := na
+    heldBars := 0
+    stBars   := 0
 
 t1 = na(riskPts) ? na : trigLong ? entry + riskPts * partialR : entry - riskPts * partialR
 t2 = target

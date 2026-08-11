@@ -64,6 +64,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         private DateTime lastDay = DateTime.MinValue;
         private bool     beMoved;
         private double   plannedStop, plannedT1, plannedT2;
+        private int      qtyRest;    // the runner's size, fixed at entry
 
         protected override void OnStateChange()
         {
@@ -147,11 +148,24 @@ namespace NinjaTrader.NinjaScript.Strategies
             }
 
             // Half off at 1R -> the rest rides with the stop at break-even.
-            if (Position.MarketPosition != MarketPosition.Flat && !beMoved && Position.Quantity <= Contracts / 2)
+            // Two ways to know 1R happened: the T1 half actually filled (the
+            // quantity dropped to the runner's size), or — trading a single
+            // contract, where there is no half to come off — a close through
+            // the T1 price. Comparing against Contracts / 2 here was the old
+            // bug: with 3 contracts the runner is 2, 2 <= 1 is never true, and
+            // the stop never moved.
+            if (Position.MarketPosition != MarketPosition.Flat && !beMoved)
             {
-                string runner = Position.MarketPosition == MarketPosition.Long ? "L2" : "S2";
-                SetStopLoss(runner, CalculationMode.Price, Position.AveragePrice, false);
-                beMoved = true;
+                bool isLong    = Position.MarketPosition == MarketPosition.Long;
+                bool t1Filled  = qtyRest > 0 && Position.Quantity <= qtyRest && Position.Quantity < Contracts;
+                bool t1Crossed = Contracts == 1 &&
+                    (isLong ? Closes[Exec][0] >= plannedT1 : Closes[Exec][0] <= plannedT1);
+                if (t1Filled || t1Crossed)
+                {
+                    string runner = isLong ? "L2" : "S2";
+                    SetStopLoss(runner, CalculationMode.Price, Position.AveragePrice, false);
+                    beMoved = true;
+                }
             }
 
             TrackSwings();
@@ -220,8 +234,13 @@ namespace NinjaTrader.NinjaScript.Strategies
             if (roomR < MinRoomR)
                 return;
 
-            int half = Math.Max(1, Contracts / 2);
-            int rest = Math.Max(1, Contracts - half);
+            // With one contract there is no half to take off — the whole unit
+            // rides to T2 and the stop still goes to break-even at 1R. The old
+            // Math.Max(1, ...) on both halves quietly turned Contracts = 1
+            // into a 2-lot.
+            int half = Contracts / 2;
+            int rest = Contracts - half;
+            qtyRest  = rest;
 
             plannedStop = stop;
             plannedT1   = isLong ? entry + risk : entry - risk;   // 1R
@@ -231,19 +250,22 @@ namespace NinjaTrader.NinjaScript.Strategies
             string s1 = isLong ? "L1" : "S1";
             string s2 = isLong ? "L2" : "S2";
 
-            SetStopLoss(s1, CalculationMode.Price, plannedStop, false);
-            SetProfitTarget(s1, CalculationMode.Price, plannedT1);
+            if (half > 0)
+            {
+                SetStopLoss(s1, CalculationMode.Price, plannedStop, false);
+                SetProfitTarget(s1, CalculationMode.Price, plannedT1);
+            }
             SetStopLoss(s2, CalculationMode.Price, plannedStop, false);
             SetProfitTarget(s2, CalculationMode.Price, plannedT2);
 
             if (isLong)
             {
-                EnterLong(half, s1);
+                if (half > 0) EnterLong(half, s1);
                 EnterLong(rest, s2);
             }
             else
             {
-                EnterShort(half, s1);
+                if (half > 0) EnterShort(half, s1);
                 EnterShort(rest, s2);
             }
 
@@ -475,7 +497,7 @@ namespace NinjaTrader.NinjaScript.Strategies
         public bool UseMeasuredMove { get; set; }
 
         [NinjaScriptProperty, Range(1, 100)]
-        [Display(Name = "Contracts (even number: half comes off at 1R)", Order = 4, GroupName = "Risk")]
+        [Display(Name = "Contracts (even: half off at 1R · 1: all rides to T2, stop to BE at 1R)", Order = 4, GroupName = "Risk")]
         public int Contracts { get; set; }
 
         [NinjaScriptProperty, Range(1, 20)]

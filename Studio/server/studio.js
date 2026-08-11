@@ -1517,8 +1517,22 @@ router.get('/assets/missing', (req, res) => {
       ? 'Every file in your library is present.'
       : inCloudFolder
         ? 'Studio is installed inside a cloud-synced folder. Cloud sync can turn files into online-only placeholders or move them, and Studio\'s media folder is not in git, so nothing puts them back. Right-click the media folder, choose "Always keep on this device", and keep a backup with the Backup button.'
-        : 'These files were removed or moved outside Studio. Restore them from a backup, or delete the library entries to clear the errors.',
+        : 'These files were removed or moved outside Studio. Restore them from a backup, or press Clear to drop the dead entries.',
   });
+});
+
+// Drop the library rows whose files are gone. Without this the only way to
+// stop a dead entry re-requesting itself forever was to hunt it down and
+// delete it by hand, one at a time, which is why the same three filenames
+// filled the diagnostics log all day.
+router.post('/assets/clear-missing', (req, res) => {
+  let removed = 0;
+  for (const row of db.getAssets(req.userId, null)) {
+    if (fs.existsSync(mediaPath(row.filename))) continue;
+    db.deleteAsset(req.userId, row.id);
+    removed++;
+  }
+  res.json({ ok: true, removed });
 });
 
 // Remove an image from a character's reference set without deleting it from
@@ -3486,6 +3500,52 @@ router.post('/liveportrait', async (req, res) => {
 /* ---------------- Sequencer render ---------------- */
 const TRANSITIONS = { cut: null, fade: 'fade', fadeblack: 'fadeblack' };
 
+// One-tap looks, the CapCut effects tab equivalent. Every one is pure ffmpeg -
+// free, offline, no AI, no per-use cost. Each entry is a filter chain appended
+// to a clip after it has been scaled to WxH.
+//
+// Every string here was run through ffmpeg before it shipped. Three notes that
+// cost an hour:
+//  - a comma inside an expression ends the filter, so no max(a,b) anywhere;
+//    use `enable=` to switch an effect on and off over time instead.
+//  - rgbashift/gblur take numbers, not expressions - only `enable` is dynamic.
+//  - a time-varying crop feeding a fixed scale dies, because scale cannot
+//    reconfigure mid-stream. Zooms therefore go through zoompan.
+const CLIP_EFFECTS = {
+  none:      () => '',
+  // --- colour, instant
+  bw:        () => 'hue=s=0,eq=contrast=1.14:brightness=0.01',
+  noir:      () => 'hue=s=0,eq=contrast=1.35:brightness=-0.03,vignette=PI/4.5',
+  warm:      () => 'eq=contrast=1.05:saturation=1.12,colortemperature=temperature=4600',
+  cool:      () => 'eq=contrast=1.07:saturation=1.05,colortemperature=temperature=8200',
+  cinematic: () => "curves=r='0/0.03 0.5/0.5 1/0.97':b='0/0.05 0.5/0.5 1/0.95',eq=contrast=1.1:saturation=1.04",
+  faded:     () => "curves=all='0/0.09 0.5/0.52 1/0.93',eq=saturation=0.82:contrast=0.96",
+  vibrant:   () => 'eq=contrast=1.14:saturation=1.45,unsharp=5:5:0.6:5:5:0',
+  // --- texture
+  grain:     () => 'noise=alls=11:allf=t+u,eq=contrast=1.04',
+  vhs:       () => 'rgbashift=rh=3:bh=-3,noise=alls=16:allf=t,eq=saturation=1.2:contrast=1.05',
+  vignette:  () => 'vignette=PI/4',
+  dream:     () => 'split[fxa][fxb];[fxb]gblur=sigma=18[fxg];[fxa][fxg]blend=all_mode=screen:all_opacity=0.35',
+  bloom:     () => "split[fxa][fxb];[fxb]curves=all='0/0 0.6/0.75 1/1',gblur=sigma=22[fxg];[fxa][fxg]blend=all_mode=screen:all_opacity=0.28",
+  // --- energy
+  rgb:       () => 'rgbashift=rh=4:bh=-4',
+  glitch:    () => "rgbashift=rh=6:bh=-6:enable='lt(mod(t\\,0.6)\\,0.1)'",
+  flash:     () => "eq=brightness='if(lt(t\\,0.07)\\,0.55\\,0)'",
+  strobe:    () => "eq=brightness='0.13*sin(t*22)'",
+  whip:      () => "boxblur=luma_radius=12:luma_power=1:enable='lt(t\\,0.25)'",
+  // --- motion. zoompan, because a moving crop into a fixed scale won't run.
+  punch:     (W, H, fps) => `zoompan=z='1+0.16*exp(-4*(on/${fps}))':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${fps}`,
+  pulse:     (W, H, fps) => `zoompan=z='1.05+0.045*sin((on/${fps})*3.1)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${fps}`,
+  shake:     (W, H) => `crop=w='2*trunc((iw-20)/2)':h='2*trunc((ih-20)/2)':x='10+6*sin(t*13)':y='10+6*cos(t*11)',scale=${W}:${H}`,
+};
+
+function effectFilter(name, W, H, fps) {
+  const fn = CLIP_EFFECTS[String(name || 'none')];
+  if (!fn) return '';
+  const s = fn(W, H, fps);
+  return s ? `,${s}` : '';
+}
+
 function eqFilter(eq) {
   if (!eq) return '';
   const b = Math.min(0.3, Math.max(-0.3, Number(eq.brightness) || 0));
@@ -3566,7 +3626,7 @@ router.post('/render', async (req, res) => {
     const file = mediaPath(row.filename);
     if (row.kind === 'image') {
       const dur = Math.min(60, Math.max(0.4, Number(c.duration) || 4));
-      resolved.push({ kind: 'image', file, dur, eq: c.eq, label: row.label });
+      resolved.push({ kind: 'image', file, dur, eq: c.eq, fx: c.fx, label: row.label });
     } else {
       const start = Math.max(0, Number(c.start) || 0);
       let end = Number(c.end);
@@ -3580,7 +3640,7 @@ router.post('/render', async (req, res) => {
       // keepAudio: preserve this clip's own sound (e.g. dialogue) in the mix.
       // Only honour it if the clip actually has an audio stream.
       const keepAudio = !!c.keepAudio && await probeHasAudio(file);
-      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, label: row.label, keepAudio });
+      resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, fx: c.fx, label: row.label, keepAudio });
     }
   }
 
@@ -3733,7 +3793,7 @@ router.post('/render', async (req, res) => {
     // its way out; the moment a filmed clip joined the timeline, every
     // dissolve in the render died with "current rate of 1/0 is invalid".
     filters.push(
-      `[${i}:v]${geom},setsar=1,format=yuv420p${eqFilter(c.eq)}${enhanceClip},` +
+      `[${i}:v]${geom},setsar=1,format=yuv420p${eqFilter(c.eq)}${effectFilter(c.fx, W, H, FPS)}${enhanceClip},` +
       `settb=AVTB,setpts=PTS-STARTPTS,fps=${FPS}[v${i}]`
     );
   });

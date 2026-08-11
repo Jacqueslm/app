@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0840</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0841</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -2118,10 +2118,29 @@ async function reportMissingFiles() {
   const gone = (st.assets || []).filter((a) => a.missing);
   if (!gone.length || missingShown) return;
   missingShown = true;
-  let advice = '';
-  try { advice = (await jfetch('/api/studio/assets/missing')).advice || ''; } catch (_) {}
   const names = gone.slice(0, 4).map((a) => a.label).join(', ');
-  showError(`${gone.length} file${gone.length > 1 ? 's are' : ' is'} missing from your media folder (${names}${gone.length > 4 ? `, +${gone.length - 4} more` : ''}). ${advice}`);
+  const el = $('#err');
+  el.innerHTML = '';
+  const p = document.createElement('div');
+  p.textContent = `${gone.length} file${gone.length > 1 ? 's are' : ' is'} missing from your media folder (${names}${gone.length > 4 ? `, +${gone.length - 4} more` : ''}). Their library entries keep asking for them, which is what fills the log below.`;
+  const btn = document.createElement('button');
+  btn.className = 'btn2';
+  btn.style.marginTop = '8px';
+  btn.textContent = `Clear ${gone.length} dead entr${gone.length > 1 ? 'ies' : 'y'}`;
+  btn.onclick = async () => {
+    btn.disabled = true; btn.textContent = 'Clearing…';
+    try {
+      const r = await jfetch('/api/studio/assets/clear-missing', { method: 'POST' });
+      missingShown = false;
+      await loadAssets();
+      clearError();
+      if (typeof loadStorage === 'function') loadStorage();
+      showError(`Cleared ${r.removed} dead entr${r.removed === 1 ? 'y' : 'ies'}. The errors stop now.`);
+      setTimeout(clearError, 6000);
+    } catch (e) { btn.disabled = false; btn.textContent = 'Try again'; }
+  };
+  el.appendChild(p); el.appendChild(btn);
+  el.classList.add('show');
 }
 
 /* ---------------- Teleprompter ----------------
@@ -5436,7 +5455,7 @@ function syncTrans() {
 function collectSpec() {
   return {
     v: 2,
-    seq: st.seq.map((c) => ({ assetId: c.assetId, kind: c.kind, start: c.start, end: c.end, holdDur: c.holdDur, eq: c.eq })),
+    seq: st.seq.map((c) => ({ assetId: c.assetId, kind: c.kind, start: c.start, end: c.end, holdDur: c.holdDur, eq: c.eq, fx: c.fx })),
     keepAudio: [...st.keepAudioAssets],
     trans: st.trans,
     overlays: st.overlays,
@@ -5821,6 +5840,12 @@ function renderSeq() {
               <span>to</span><input type="number" min="0" step="0.1" value="${item.end ?? ''}" class="t-end">
               <span>s${item.duration ? ' · clip ' + item.duration.toFixed(1) + 's' : ''}</span>
             </div>`}
+        <div class="trim" style="margin-top:4px">
+          <span style="font-size:11px;color:var(--tm)">effect</span>
+          <select class="input s-fx" style="width:auto;padding:5px 8px;font-size:12px">
+            ${QK_FX.map(([v, l]) => `<option value="${v}"${v === (item.fx || 'none') ? ' selected' : ''}>${l}</option>`).join('')}
+          </select>
+        </div>
         <div class="trim adj" style="display:${item._adj ? 'flex' : 'none'}">
           <span>☀</span><input type="range" class="a-b" min="-25" max="25" value="${Math.round((eq.brightness || 0) * 100)}" style="width:52px">
           <span>◐</span><input type="range" class="a-c" min="60" max="160" value="${Math.round((eq.contrast || 1) * 100)}" style="width:52px">
@@ -5858,6 +5883,7 @@ function renderSeq() {
       };
       persistDraft();
     };
+    row.querySelector('.s-fx').onchange = (e) => { snapSeq(); item.fx = e.target.value; persistDraft(); };
     row.querySelectorAll('.a-b,.a-c,.a-s').forEach((el) => (el.onchange = setEq));
     row.querySelector('.a-reset').onclick = () => { snapSeq(); item.eq = null; upd(); };
     row.querySelector('.adj-t').onclick = () => { item._adj = !item._adj; renderSeq(); };
@@ -6420,8 +6446,8 @@ async function runRender(windowOpt, btnSel, opts) {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         clips: st.seq.map((c) => c.kind === 'image'
-          ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
-          : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, keepAudio: st.keepAudioAssets.has(c.assetId) }),
+          ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq, fx: c.fx }
+          : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, fx: c.fx, keepAudio: st.keepAudioAssets.has(c.assetId) }),
         transitions: st.trans,
         music: spec.music.tracks.length ? spec.music : null,
         overlays,
@@ -7920,8 +7946,8 @@ async function renderOneShort(s, statusEl) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       clips: st.seq.map((c) => c.kind === 'image'
-        ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq }
-        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, keepAudio: st.keepAudioAssets.has(c.assetId) }),
+        ? { assetId: c.assetId, duration: c.holdDur, eq: c.eq, fx: c.fx }
+        : { assetId: c.assetId, start: c.start, end: c.end, eq: c.eq, fx: c.fx, keepAudio: st.keepAudioAssets.has(c.assetId) }),
       transitions: st.trans,
       music: spec.music.tracks.length ? spec.music : null,
       overlays,
@@ -8061,6 +8087,19 @@ const QK_MOVES = [
   ['parallax_left', '3D depth ←'], ['shake', 'Shake'], ['push_pan', 'Zoom + slide'],
 ];
 const QK_MOVE_CYCLE = ['push', 'pan_right', 'drift', 'pull', 'pan_left', 'push_pan']; // variety by default
+// One-tap looks. All free, all pure ffmpeg — nothing here calls out to AI or
+// costs anything. Grouped the way you'd reach for them, not alphabetically.
+const QK_FX = [
+  ['none', 'No effect'],
+  ['cinematic', '🎞 Cinematic'], ['warm', '🔆 Warm'], ['cool', '❄ Cool'],
+  ['vibrant', '🌈 Vibrant'], ['faded', '📼 Faded film'], ['bw', '⬛ Black & white'],
+  ['noir', '🕶 Noir'],
+  ['grain', '🎬 Film grain'], ['vhs', '📺 VHS'], ['vignette', '🔲 Vignette'],
+  ['dream', '💭 Dream glow'], ['bloom', '✨ Bloom'],
+  ['punch', '👊 Zoom punch'], ['pulse', '💓 Pulse'], ['shake', '📳 Shake'],
+  ['whip', '💨 Whip in'], ['flash', '⚡ Flash'], ['glitch', '📶 Glitch'],
+  ['rgb', '🔴 RGB split'], ['strobe', '🔦 Strobe'],
+];
 const qk = { shots: [], format: '9:16', busy: false };
 
 // Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
@@ -8242,6 +8281,9 @@ function renderQkShots() {
             : `<select class="input q-move" style="width:auto;padding:5px 8px;font-size:12px">
             ${QK_MOVES.map(([v, l]) => `<option value="${v}"${v === s.move ? ' selected' : ''}>${l}</option>`).join('')}
           </select>`}
+          <select class="input q-fx" style="width:auto;padding:5px 8px;font-size:12px" title="Free effect — burned in at render">
+            ${QK_FX.map(([v, l]) => `<option value="${v}"${v === (s.fx || 'none') ? ' selected' : ''}>${l}</option>`).join('')}
+          </select>
           <select class="input q-dur" style="width:auto;padding:5px 8px;font-size:12px">
             ${qkDurations(s.dur).map((d) => `<option value="${d}"${d === s.dur ? ' selected' : ''}>${d >= 60 ? '1 min' : d + 's'}</option>`).join('')}
           </select>
@@ -8259,6 +8301,7 @@ function renderQkShots() {
       </div>`;
     const mv = row.querySelector('.q-move');           // absent on a video row
     if (mv) mv.onchange = (e) => { s.move = e.target.value; };
+    row.querySelector('.q-fx').onchange = (e) => { s.fx = e.target.value; };
     row.querySelector('.q-dur').onchange = (e) => { s.dur = Number(e.target.value); };
     const tr = row.querySelector('.q-tr');
     if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; };
@@ -8526,7 +8569,10 @@ $('#qk-assemble').onclick = async () => {
       const a = st.assets.find((x) => x.id === id);
       // crew.eqByIndex: the Cinematographer's per-section color grade, set
       // when the Producer drives this assembler; empty for manual Quick Video
-      return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: (crew.eqByIndex && crew.eqByIndex[ci]) || null };
+      // carry each shot's chosen effect through to the render — the Ken Burns
+      // step above only handles camera movement, the look is burned in later
+      const shot = qk.shots[ci];
+      return { assetId: a.id, kind: 'video', label: a.label, url: a.url, duration: a.meta?.duration || null, start: 0, end: a.meta?.duration || null, eq: (crew.eqByIndex && crew.eqByIndex[ci]) || null, fx: (shot && shot.fx) || 'none' };
     });
     // A clip you filmed arrives with its own sound. Quick Video rebuilds st.seq
     // from scratch every assemble and nothing repopulated this, so a finished

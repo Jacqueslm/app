@@ -5,7 +5,25 @@ what changed, so nothing has to be worked out twice.
 
 **Files that hold state, trust these over anyone's memory:**
 `TurnSomeDayIntoOneday/store-listing/00-STATUS.md` (Play Store),
-`SCHOOLS.md` and `INFLUENCERS.md` (outreach), `KEYWORDS.md` (search).
+`SCHOOLS.md`, `COMPANIES.md` and `INFLUENCERS.md` (outreach),
+`KEYWORDS.md` (search).
+
+---
+
+## THE DIRECTION, DECIDED 11 AUG
+
+Three decisions, and everything below bends to them:
+
+1. **Shorts only, 7 to 15 seconds. No more long-form video.**
+2. **The app is advertised as free, with a paid upgrade.** Free is the door;
+   the upgrade is extra. Every card, every email and the store listing say so.
+3. **Employers are a target** — via the lists employers already read, not by
+   cold-emailing HR. See `COMPANIES.md`.
+
+**The three Elias episodes are finished and are 41 to 49 seconds each.** They
+were made before this decision. They are not wasted — post them as they are on
+YouTube and Facebook where longer still works, and cut the strongest 12 seconds
+of each for TikTok. Don't make a fourth.
 
 ---
 
@@ -26,12 +44,20 @@ The form. Answers ready with a copy button on each:
 Do not use the sheet the testing provider sent — two of its answers describe
 work that does not exist.
 
-### 3. Start the partner cards — one a day
+### 3. Start the cards — one a day
 
-Twelve in `reference/partner-cards/`, captions and hashtags in
-`reference/PARTNER-CARDS.md`. Card 12 goes last. **Watch saves and shares, not
+**Sixteen now, and each one is two frames plus a shared end frame** —
+a 13-second short, not a still. `reference/partner-cards/`, how-to and captions
+in `reference/PARTNER-CARDS.md`. Cards 13-16 say "free" out loud; post them
+after the first twelve. Card 12 goes last. **Watch saves and shares, not
 likes** — shares are currently zero across every platform, and that is the
 number that grows a small account.
+
+### 3b. Employers — four drafts are in Gmail
+
+`COMPANIES.md`. The RFW Institute one is the big lever: 1,500+ employers in
+35+ states, and one listing beats fifty cold emails to HR. Three more are
+contact forms, five minutes each.
 
 ### 4. Facebook — three small things
 

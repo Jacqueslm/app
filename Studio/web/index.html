@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0836</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0837</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -828,7 +828,7 @@ body.simple-only #view-simple{display:flex !important}
           <option value="0.92">92%</option>
         </select>
       </div>
-      <p class="usage">Captions burn in at the bottom of the video, timed to your song — they're included in full renders and shorts automatically. Auto-spread is instant; Tap-to-sync is exact (song plays, tap once per line).</p>
+      <p class="usage">Captions burn in at the bottom of the video and are included in full renders and shorts automatically. <b>Talking head?</b> Paste the lines you actually said — you don't need the speech model for words you already wrote. Auto-spread is instant; Tap-to-sync is exact (your song <em>or your own clip</em> plays, tap once per line).</p>
     </div>
 
     <div class="card" id="wm-card">
@@ -5463,6 +5463,15 @@ function collectSpec() {
 function firstMusicAsset() {
   return st.musicList.length ? st.assets.find((a) => a.id === st.musicList[0].assetId) : null;
 }
+// The first video clip on the timeline — for a piece to camera this is where
+// the voice actually lives, so it's what you tap along to when there's no song.
+function firstSpokenClip() {
+  for (const c of st.seq) {
+    const a = st.assets.find((x) => x.id === c.assetId);
+    if (a && a.kind === 'video' && !a.missing) return a;
+  }
+  return null;
+}
 function applySpec(spec) {
   if (!spec || !Array.isArray(spec.seq)) return;
   st.seq = spec.seq.map((c) => {
@@ -6468,7 +6477,7 @@ Object.entries({
   'lyr-auto': 'AI listens to your song and writes every caption line with its exact timing (~35¢). Free instead: paste your lyrics, then Auto-spread or Tap-to-sync. Check the words after.',
   'lyr-speech': 'Listening is FREE (on this computer; first use downloads the model once). It then ASKS before the optional AI word-polish (~3¢) - Cancel keeps the free raw transcript. Nothing is spent without your OK.',
   'lyr-srt': 'FREE. Downloads your captions as a standard .srt subtitle file - upload it with your video on YouTube/Facebook instead of burning captions in.',
-  'lyr-tap': 'FREE perfect sync: the song plays and you tap once when each line starts.',
+  'lyr-tap': 'FREE perfect sync: your song — or your own talking-head clip — plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
   'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene.',
@@ -7101,12 +7110,15 @@ $('#lyr-tap').onclick = () => {
   setErr('#seq-err', null);
   const lines = lyrLines();
   if (!lines.length) return setErr('#seq-err', 'Paste your lyrics first.');
-  const song = firstMusicAsset();
-  if (!song) return setErr('#seq-err', 'Tap-to-sync needs audio playing to tap along to. Add your song or voice-over first — or press Auto-spread to place these lines evenly across the video with no audio at all.');
+  // A talking head has no song — the voice you'd tap along to is inside the
+  // first clip. Falling back to it means captioning a piece to camera doesn't
+  // need a music track, or the speech model, or anything downloaded at all.
+  const song = firstMusicAsset() || firstSpokenClip();
+  if (!song) return setErr('#seq-err', 'Tap-to-sync needs audio to tap along to — a song, a voice-over, or a clip with your voice in it on the timeline. Or press Auto-spread to place these lines evenly with no audio at all.');
   lyr.lines = lines; lyr.idx = 0;
   st.captions = [];
   lyr.audio = new Audio(song.url);
-  const trackStart = st.musicList[0]?.start || 0;
+  const trackStart = firstMusicAsset() ? (st.musicList[0]?.start || 0) : 0;
   if (trackStart) lyr.audio.currentTime = trackStart;
   lyr.audio.play().catch(() => setErr('#seq-err', 'Could not play the song in this browser.'));
   $('#lyr-tap-ui').style.display = 'flex';

@@ -31,9 +31,18 @@ the person struggling (porn, alcohol, food, gambling).
   machine is concerned — on 9 Aug an hour went on a build stamp that would
   never move, because the fix was on the wrong branch and the updater was
   working perfectly.
-  Everything that is not Studio — the recovery app, outreach, episodes,
-  reference — goes to the session branch as normal.
-- **Host:** Railway, auto-deploys the site from the deploy branch on push.
+  Everything else goes to **`main`** — outreach, episodes, reference, docs.
+  Decided 9 Aug 2026. Do not open a session branch for this project; work that
+  sits on one never appears where Jacques looks, which is the repo's front page.
+- **THE SITE ALSO DEPLOYS FROM `claude/vibe-code-uwxxlk`, NOT FROM `main`.**
+  So a change under `TurnSomeDayIntoOneday/` has to reach that branch too or it
+  never goes live. Merge `main` into it and push. Learned twice on 11 Aug: first
+  with a Studio build stamp that would not move, then again with an admin page
+  still showing an old product name after it had been "fixed" on main.
+  **Rule of thumb: `main` is the record, `claude/vibe-code-uwxxlk` is what runs.**
+  Anything that has to actually work for Jacques — the site or Studio — belongs
+  on both.
+- **Host:** Railway, auto-deploys the site from `claude/vibe-code-uwxxlk` on push.
 - **DNS: Cloudflare, not IONOS** (moved 8 Aug 2026). The domain is still bought
   from IONOS, but its nameservers point at Cloudflare — `adi` and `glen`
   `.ns.cloudflare.com`. **Change DNS records in Cloudflare. IONOS DNS is dead.**
@@ -65,7 +74,8 @@ the person struggling (porn, alcohol, food, gambling).
     new zones, it serves a managed robots.txt that (a) Semrush rejects as
     invalid, (b) drops the Sitemap line, and (c) blocked Google-Extended on 35
     pages — the opposite of what `llms.txt` is there to do.
-- **Working branch:** `claude/vibe-code-uwxxlk` (kept in sync with `main`).
+- **Working branch:** `claude/vibe-code-uwxxlk` — this is the one that deploys.
+  Keep it in sync with `main` after every app change.
 - The app also has an in-app "Update my app" button (pulls the GitHub tarball) as
   a backup update path — fixed to use tarball+tar (no `unzip` needed).
 - **Play Store:** app is in the 12-tester / 14-day closed-testing window. Do NOT
@@ -325,6 +335,20 @@ the app is live in the Play Store.
 ---
 
 ## Rules of the house
+
+- **Every email drafted into Gmail is written as HTML with a real link, never
+  as a bare URL in plain text.** Gmail rewrites every link it sends through
+  `google.com/url?q=…&source=gmail&ust=…` — that happens to everyone, on every
+  message, whether the link was typed by hand or inserted through the API, and
+  it cannot be turned off. What it *can* be stopped from doing is making that
+  string the text the reader sees. Write
+  `<a href="https://www.turnsomedayintodayone.com">www.turnsomedayintodayone.com</a>`
+  and the recipient reads the address; the redirect stays in the invisible href
+  where it belongs. Write the bare URL and the reader gets a wall of
+  `google.com/url?q=` in the middle of a cold pitch, which reads like tracking.
+  Learned 11 Aug 2026, after 22 school emails and two podcast pitches had
+  already gone out the wrong way.
+
 - Story, not statistics (see medical-claims-audit.md).
 - **Never default to R&B, hip-hop or soul when writing a song prompt.** Jacques
   listens to everything and has had to say so more than once, because tools

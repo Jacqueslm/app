@@ -93,9 +93,13 @@ you can defend the answer if Play ever asks.
 
 | Data type | Collected | Shared | Purpose |
 |---|---|---|---|
-| **Crash logs / diagnostics** | Yes | No | App functionality |
+| **Crash logs** | Yes | No | App functionality |
+| **Diagnostics** | **No** | — | — |
 
-> The `error_log` table holds recent server-side errors, capped at 200 rows.
+> The `error_log` table holds recent server-side errors, capped at 200 rows —
+> that is crash logs. **Diagnostics is a separate tick and the answer is no:**
+> Play means performance data (load time, latency, framerate, battery), and
+> none of that is recorded anywhere.
 
 ### Financial info
 
@@ -116,9 +120,14 @@ you can defend the answer if Play ever asks.
 
 ### Everything else — declare NO
 
-Location, contacts, calendar, photos/videos, audio, files, web browsing history,
-device IDs, and advertising data are **not** collected. There are no ads, no
+Location, contacts, calendar, files and docs, web browsing history, device or
+other IDs, and advertising data are **not** collected. There are no ads, no
 third-party analytics SDKs, and no trackers.
+
+**Videos: no. Music and other audio: no.** Only the two things named above are
+ticked in those two categories — the profile **photo**, and **voice or sound
+recordings** for voice journaling. Everything else in Photos and videos, and in
+Audio files, stays unticked.
 
 ---
 

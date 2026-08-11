@@ -39,19 +39,25 @@ function resolveKey(key) {
   return '';
 }
 
-// sherpa-onnx ships a prebuilt native binary per platform as an optional
-// dependency. If it didn't install (unsupported platform, blocked download),
-// every caller falls back to the paid cloud path instead of breaking.
-let sherpaCache;
-function sherpa() {
-  if (sherpaCache === undefined) {
-    try { sherpaCache = require('sherpa-onnx-node'); }
-    catch (_) { sherpaCache = null; }
+// sherpa-onnx must NEVER be require()d in this process. It bundles its own
+// copy of the ONNX runtime, the caption engine (onnxruntime-node) bundles a
+// different version, and Windows only loads one library of a given name per
+// process - whichever comes second dies with "The operating system cannot run
+// %1". The boot config calls available(), so an in-process require here loaded
+// sherpa at page-open and silently broke auto-captions for the whole session.
+// Every sherpa call now happens inside a short-lived child (speak-worker.js);
+// availability is probed the same way.
+const { spawnSync } = require('child_process');
+let availCache;
+function available() {
+  if (availCache === undefined) {
+    const r = spawnSync(process.execPath, ['-e', "require('sherpa-onnx-node')"], {
+      cwd: __dirname, timeout: 20000, stdio: 'ignore',
+    });
+    availCache = r.status === 0;
   }
-  return sherpaCache;
+  return availCache;
 }
-
-function available() { return Boolean(sherpa()); }
 
 function isInstalled(key) {
   const v = VOICES[resolveKey(key)];
@@ -126,27 +132,28 @@ async function ensureModel(key, onPct) {
   }
 }
 
-// One loaded model per voice. Loading takes ~1s; speaking after that is fast
-// enough (a few hundred ms for a sentence) that nothing needs a spinner.
-const engines = new Map();
-function engineFor(k) {
-  if (!engines.has(k)) {
-    const v = VOICES[k];
-    const dir = path.join(MODELS_DIR, v.dir);
-    engines.set(k, new (sherpa().OfflineTts)({
-      model: {
-        vits: {
-          model: path.join(dir, v.onnx),
-          tokens: path.join(dir, 'tokens.txt'),
-          dataDir: ESPEAK_DIR,
-        },
-        numThreads: Math.max(1, Math.min(4, os.cpus().length - 1)),
-        debug: false,
-      },
-      maxNumSentences: 1,
-    }));
-  }
-  return engines.get(k);
+// Each take runs in a fresh worker process (see the note on available()).
+// That re-loads the model every time, which costs about a second per take -
+// the price of narration and captions coexisting on Windows, and well under
+// what anyone notices next to the render itself.
+function speakInWorker(job) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(process.execPath, [path.join(__dirname, 'speak-worker.js')], {
+      cwd: __dirname, stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    let out = '';
+    let err = '';
+    const timer = setTimeout(() => { try { proc.kill(); } catch (_) {} reject(new Error('narration timed out')); }, 120000);
+    proc.stdout.on('data', (c) => { out += c; });
+    proc.stderr.on('data', (c) => { err = (err + c).slice(-500); });
+    proc.on('error', (e) => { clearTimeout(timer); reject(e); });
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      if (code !== 0) return reject(new Error(err || `narration worker exited ${code}`));
+      try { resolve(JSON.parse(out)); } catch (_) { reject(new Error('narration worker gave no answer')); }
+    });
+    proc.stdin.end(JSON.stringify(job));
+  });
 }
 
 // Piper reads punctuation, not markup. Em dashes become commas (an em dash is
@@ -170,13 +177,17 @@ async function speak({ voice, text, speed, outPath, onPct }) {
   if (!words) throw new Error('Type the words you want spoken.');
 
   await ensureModel(k, onPct);
-  const audio = engineFor(k).generate({
+  const dir = path.join(MODELS_DIR, VOICES[k].dir);
+  const { seconds } = await speakInWorker({
+    model: path.join(dir, VOICES[k].onnx),
+    tokens: path.join(dir, 'tokens.txt'),
+    dataDir: ESPEAK_DIR,
+    outPath,
     text: words,
-    sid: 0,
     speed: Number(speed) > 0 ? Number(speed) : VOICES[k].speed,
+    numThreads: Math.max(1, Math.min(4, os.cpus().length - 1)),
   });
-  sherpa().writeWave(outPath, { samples: audio.samples, sampleRate: audio.sampleRate });
-  return { file: outPath, seconds: audio.samples.length / audio.sampleRate };
+  return { file: outPath, seconds };
 }
 
 module.exports = { VOICES, available, list, isInstalled, resolveKey, ensureModel, speak, speakable };

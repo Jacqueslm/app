@@ -49,7 +49,7 @@ function onnxDiagnosis() {
   } else if (size < 50000) {
     lines.push(`The ${arch} file is only ${size} bytes, far too small — the install did not finish. Delete Studio\\server\\node_modules\\onnxruntime-node and run: npm install`);
   } else {
-    lines.push(`The ${arch} file looks intact (${size} bytes), so something outside Studio is blocking it — usually antivirus, or a folder the computer is not allowed to run programs from. Try moving Studio to a plain folder like C:\\Studio.`);
+    lines.push(`The ${arch} file looks intact (${size} bytes). Before b0840 the usual cause was Studio's own narration engine loading a rival copy of the runtime first — update and restart Studio. If it still happens, something outside Studio is blocking it, usually antivirus.`);
   }
   return lines.join('\n');
 }

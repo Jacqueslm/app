@@ -177,8 +177,18 @@
 
     <!-- ── Journal ── -->
     <div class="card full">
-      <h2>Journal</h2>
-      <div class="stats" id="jStats"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2 style="margin:0">Journal</h2>
+        <select id="stageFilter" style="width:auto;padding:6px 10px;font-size:13px">
+          <option value="all">All stages</option>
+          <option value="replay">Bar replay only</option>
+          <option value="sim">Sim only</option>
+          <option value="live">LIVE only</option>
+        </select>
+      </div>
+      <div class="stats" id="jStats" style="margin-top:14px"></div>
+      <div id="equity" style="position:relative;margin-top:16px"></div>
+      <div id="breakdown" style="margin-top:16px"></div>
       <div style="overflow-x:auto;margin-top:16px"><table id="jTable">
         <thead><tr><th>Date</th><th>Stage</th><th>Sym</th><th>Dir</th><th>Grade</th><th>Plan</th>
           <th>Qty</th><th>Outcome</th><th>Planned R</th><th>Actual R</th><th></th></tr></thead>
@@ -381,8 +391,12 @@ function evaluate(){
   // Planned R: what this trade returns if you follow the plan. Logged so the journal can
   // show the gap between what you planned and what you actually took.
   const plannedR = !plan || plan.key === "no" ? 0 : plan.key === "scalp" ? 1 : 0.5 * 1 + 0.5 * room;
+  // The verdict travels into the journal: a filled trade on a REJECT is a rule
+  // break, and counting those is the whole point of logging honestly.
+  const verdict = (missed.length || sizingBlocked || wrongSide || noRoom || propBlocked || grade === "C")
+    ? "REJECT" : grade === "B" ? "HALF" : "TAKE";
   state = { grade, score, denom, qty, riskPts, riskUsd, t1, t2,
-            plan: plan ? plan.name : "—", room, plannedR };
+            plan: plan ? plan.name : "—", room, plannedR, verdict };
 }
 
 document.addEventListener("input", evaluate);
@@ -413,41 +427,137 @@ function renderBullet(){
 
 function render(){
   const j = load();
+  const stg = $("stageFilter").value;
+  const rows = j.map((t, idx) => ({ t, idx })).filter(x => stg === "all" || x.t.stage === stg);
+  const jf = rows.map(x => x.t);
+
   const tb = $("jTable").querySelector("tbody");
-  tb.innerHTML = j.slice().reverse().map((t,i) => {
-    const idx = j.length - 1 - i;
+  tb.innerHTML = rows.slice().reverse().map(({t, idx}) => {
     const cls = t.grade === "A+" ? "p-a" : t.grade === "B" ? "p-b" : "p-c";
     const r = t.resR === "" || t.resR === null ? "—" : (+t.resR).toFixed(1);
     const rc = t.resR > 0 ? "pos" : t.resR < 0 ? "neg" : "";
     const pr = t.plannedR ? (+t.plannedR).toFixed(1) : "—";
-    const stg = t.stage === "live" ? '<b class="pos">LIVE</b>' : (t.stage ?? "—");
-    return `<tr><td>${t.date}</td><td>${stg}</td><td>${t.sym}</td><td>${t.dir}</td>
-      <td><span class="pill ${cls}">${t.grade}</span></td><td>${t.plan ?? "—"}</td>
+    const stgTxt = t.stage === "live" ? '<b class="pos">LIVE</b>' : (t.stage ?? "—");
+    const rb = t.outcome !== "none" && t.verdict === "REJECT"
+      ? ' <span class="pill p-c" title="Taken on a REJECT verdict — a rule break">✗</span>' : "";
+    return `<tr><td>${t.date}</td><td>${stgTxt}</td><td>${t.sym}</td><td>${t.dir}</td>
+      <td><span class="pill ${cls}">${t.grade}</span>${rb}</td><td>${t.plan ?? "—"}</td>
       <td>${t.qty || "—"}</td><td>${t.outcome}</td><td>${pr}</td><td class="${rc}">${r}</td>
       <td><button class="ghost" data-del="${idx}" style="padding:2px 8px;font-size:12px">×</button></td></tr>`;
-  }).join("") || `<tr><td colspan="11" style="color:var(--dim);padding:18px">Nothing logged yet.</td></tr>`;
+  }).join("") || `<tr><td colspan="11" style="color:var(--dim);padding:18px">Nothing logged${stg==="all"?"":" at this stage"} yet.</td></tr>`;
 
-  const taken = j.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
+  const taken = jf.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
   const wins  = taken.filter(t => +t.resR > 0).length;
   const sumR  = taken.reduce((a,t) => a + (+t.resR || 0), 0);
   const exp   = taken.length ? sumR / taken.length : 0;
   const stat  = (v,l,c="") => `<div class="stat"><b class="${c}">${v}</b><span>${l}</span></div>`;
 
-  // The two numbers that measure the actual problem, not the strategy.
+  // The numbers that measure the actual problem, not the strategy.
   const cutEarly  = taken.filter(t => +t.resR > 0 && t.plannedR && +t.resR < +t.plannedR * 0.8).length;
   const stopMoved = taken.filter(t => +t.resR < -1.05).length;
+  // The one that measures discipline itself: filled trades the grader said no to.
+  const ruleBreaks = taken.filter(t => t.verdict === "REJECT").length;
+
+  const wrOf = list => { const k = list.filter(t => t.outcome !== "none" && t.resR !== "" && t.resR !== null);
+    return k.length ? { n: k.length, pct: Math.round(k.filter(t=>+t.resR>0).length/k.length*100) } : null; };
 
   $("jStats").innerHTML =
-    stat(j.length, "logged") +
+    stat(jf.length, "logged") +
     stat(taken.length, "taken") +
     stat(taken.length ? Math.round(wins/taken.length*100) + "%" : "—", "win rate") +
     stat(taken.length ? (exp>=0?"+":"") + exp.toFixed(2) + "R" : "—", "expectancy", exp>0?"pos":exp<0?"neg":"") +
+    stat((sumR>=0?"+":"") + sumR.toFixed(1) + "R", "total R", sumR>0?"pos":sumR<0?"neg":"") +
+    stat(ruleBreaks, "rule breaks", ruleBreaks ? "neg" : "pos") +
     stat(cutEarly,  "cut early",  cutEarly  ? "neg" : "pos") +
     stat(stopMoved, "stop moved", stopMoved ? "neg" : "pos") +
-    (() => { const w = gradeWinRate("A+"); return stat(w && w.n >= 5 ? w.pct + "%" : "—", "A+ win rate" + (w ? ` (${w.n})` : "")); })() +
-    (() => { const w = gradeWinRate("B");  return stat(w && w.n >= 5 ? w.pct + "%" : "—", "B win rate"  + (w ? ` (${w.n})` : "")); })() +
+    (() => { const w = wrOf(jf.filter(t=>t.grade==="A+")); return stat(w && w.n >= 5 ? w.pct + "%" : "—", "A+ win rate" + (w ? ` (${w.n})` : "")); })() +
+    (() => { const w = wrOf(jf.filter(t=>t.grade==="B"));  return stat(w && w.n >= 5 ? w.pct + "%" : "—", "B win rate"  + (w ? ` (${w.n})` : "")); })() +
     stat(taken.length ? (taken.reduce((a,t)=>a+(+t.plannedR||0),0)/taken.length).toFixed(2)+"R" : "—", "avg planned") +
     stat(taken.length ? (sumR/taken.length).toFixed(2)+"R" : "—", "avg actual");
+
+  renderEquity(taken);
+  renderBreakdown(taken);
+}
+
+// ── Equity curve: cumulative R, trade by trade ──────────────────────────────
+let eqPts = [];
+function renderEquity(taken){
+  const host = $("equity");
+  if (taken.length < 2) { host.innerHTML = ""; return; }
+  let cum = 0;
+  eqPts = taken.map((t, i) => ({ i, cum: +(cum += (+t.resR || 0)).toFixed(2), date: t.date, sym: t.sym, r: +t.resR }));
+  const W = 800, H = 140, PAD = 8, PadR = 56;
+  const lo = Math.min(0, ...eqPts.map(p => p.cum)), hi = Math.max(0, ...eqPts.map(p => p.cum));
+  const span = (hi - lo) || 1;
+  const X = i => PAD + i / (eqPts.length - 1) * (W - PAD - PadR);
+  const Y = v => PAD + (hi - v) / span * (H - 2 * PAD);
+  const d = eqPts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(p.cum).toFixed(1)).join(" ");
+  const last = eqPts[eqPts.length - 1];
+  const endCol = last.cum >= 0 ? "var(--good)" : "var(--bad)";
+  host.innerHTML =
+    `<svg id="eqSvg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img"
+       aria-label="Cumulative R across ${eqPts.length} taken trades, ending at ${last.cum}R">
+      <line x1="${PAD}" y1="${Y(0)}" x2="${W - PadR}" y2="${Y(0)}" stroke="var(--line)" stroke-dasharray="4 4"/>
+      <path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>
+      <circle id="eqDot" r="4" fill="var(--accent)" stroke="var(--bg)" stroke-width="2" style="display:none"/>
+      <circle cx="${X(eqPts.length-1)}" cy="${Y(last.cum)}" r="3.5" fill="${endCol}" stroke="var(--bg)" stroke-width="2"/>
+      <text x="${X(eqPts.length-1) + 8}" y="${Y(last.cum) + 4}" fill="${endCol}"
+        font-size="13" font-weight="700">${(last.cum>=0?"+":"") + last.cum}R</text>
+    </svg>
+    <div id="eqTip" style="display:none;position:absolute;pointer-events:none;background:var(--panel2);
+      border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:12px;white-space:nowrap"></div>
+    <p class="note" style="margin-top:4px">Cumulative R, in the order the trades were logged. The slope is the system; the dips are where you find the lessons.</p>`;
+  const svg = $("eqSvg"), tip = $("eqTip"), dot = $("eqDot");
+  svg.addEventListener("mousemove", e => {
+    const box = svg.getBoundingClientRect();
+    const fx = (e.clientX - box.left) / box.width * W;
+    const i = Math.max(0, Math.min(eqPts.length - 1, Math.round((fx - PAD) / (W - PAD - PadR) * (eqPts.length - 1))));
+    const p = eqPts[i];
+    dot.style.display = "";
+    dot.setAttribute("cx", X(i)); dot.setAttribute("cy", Y(p.cum));
+    tip.style.display = "block";
+    tip.innerHTML = `<b>${p.date}</b> · ${p.sym} · trade ${i + 1}<br>` +
+      `${p.r >= 0 ? "+" : ""}${p.r}R this trade · <b class="${p.cum >= 0 ? "pos" : "neg"}">${p.cum >= 0 ? "+" : ""}${p.cum}R total</b>`;
+    const tx = X(i) / W * box.width, ty = Y(p.cum) / H * box.height;
+    tip.style.left = Math.min(tx + 12, box.width - tip.offsetWidth - 4) + "px";
+    tip.style.top = Math.max(0, ty - tip.offsetHeight - 10) + "px";
+  });
+  svg.addEventListener("mouseleave", () => { tip.style.display = "none"; dot.style.display = "none"; });
+}
+
+// ── Expectancy by grade and by symbol — the stage-4 review, always on ───────
+function renderBreakdown(taken){
+  const host = $("breakdown");
+  if (!taken.length) { host.innerHTML = ""; return; }
+  const row = (label, list) => {
+    if (!list.length) return "";
+    const w = list.filter(t => +t.resR > 0).length;
+    const sum = list.reduce((a,t) => a + (+t.resR || 0), 0);
+    const e = sum / list.length;
+    const cls = e > 0 ? "pos" : e < 0 ? "neg" : "";
+    const thin = list.length < 10 ? ` <span style="color:var(--dim)">· thin sample</span>` : "";
+    return `<tr><td>${label}</td><td>${list.length}</td><td>${Math.round(w/list.length*100)}%</td>
+      <td class="${cls}">${(sum>=0?"+":"")+sum.toFixed(1)}R</td>
+      <td class="${cls}"><b>${(e>=0?"+":"")+e.toFixed(2)}R</b>${thin}</td></tr>`;
+  };
+  const grades = ["A+","B","C"].map(g => row(`<span class="pill ${g==="A+"?"p-a":g==="B"?"p-b":"p-c"}">${g}</span>`, taken.filter(t => t.grade === g))).join("");
+  const syms = ["MNQ","MES","MGC"].map(s => row(s, taken.filter(t => t.sym === s))).join("");
+  // The findings the ramp says to act on — computed, not remembered.
+  const insights = [];
+  const b = taken.filter(t => t.grade === "B");
+  if (b.length >= 10) {
+    const be = b.reduce((a,t)=>a+(+t.resR||0),0) / b.length;
+    if (be < 0) insights.push(`Your B-grades are losing money: ${be.toFixed(2)}R average over ${b.length}. The playbook's answer is simple — stop taking B's.`);
+  }
+  for (const s of ["MNQ","MES","MGC"]) {
+    const k = taken.filter(t => t.sym === s);
+    if (k.length >= 15 && k.reduce((a,t)=>a+(+t.resR||0),0)/k.length < 0)
+      insights.push(`${s} shows negative expectancy over ${k.length} trades — the ramp says that symbol comes off the list.`);
+  }
+  host.innerHTML =
+    `<table><thead><tr><th>By grade / symbol</th><th>Taken</th><th>Win %</th><th>Total R</th><th>Expectancy</th></tr></thead>
+      <tbody>${grades}${syms}</tbody></table>` +
+    (insights.length ? `<p class="note" style="color:var(--bad)">${insights.map(i => "⚠ " + i).join("<br>")}</p>` : "");
 }
 
 $("save").onclick = () => {
@@ -455,7 +565,7 @@ $("save").onclick = () => {
   j.push({
     date: new Date().toISOString().slice(0,10),
     sym: $("sym").value, dir: $("dir").value,
-    grade: state.grade, score: state.score, denom: state.denom,
+    grade: state.grade, score: state.score, denom: state.denom, verdict: state.verdict,
     plan: state.plan, room: +state.room.toFixed(2), plannedR: +state.plannedR.toFixed(2),
     entry: $("entry").value || null, stop: $("stop").value || null,
     qty: state.qty, riskUsd: Math.round(state.riskUsd),
@@ -485,7 +595,7 @@ $("wipe").onclick = () => {
 $("csv").onclick = () => {
   const j = load();
   if (!j.length) return alert("Journal is empty.");
-  const cols = ["date","stage","sym","dir","grade","score","plan","room","plannedR","entry","stop","qty","riskUsd","outcome","resR","notes"];
+  const cols = ["date","stage","sym","dir","grade","verdict","score","plan","room","plannedR","entry","stop","qty","riskUsd","outcome","resR","notes"];
   const esc = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
   const csv = [cols.join(","), ...j.map(t => cols.map(c => esc(t[c])).join(","))].join("\n");
   const a = document.createElement("a");
@@ -603,6 +713,8 @@ try { const ps = JSON.parse(localStorage.getItem(PKEY)) || {};
   if (ps.tgt) $("propTgt").value = ps.tgt; } catch {}
 document.addEventListener("change", () =>
   localStorage.setItem(PKEY, JSON.stringify({on:$("propOn").checked, dd:$("propDD").value, tgt:$("propTgt").value})));
+
+$("stageFilter").addEventListener("change", render);
 
 evaluate(); render(); renderBullet();
 </script>

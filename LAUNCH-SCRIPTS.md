@@ -236,11 +236,183 @@ one to test if you ever put money behind a post.
 
 ---
 
+---
+
+# The AI lane — five more, 14 to 18
+
+The thirteen above came off Google volume in `KEYWORDS.md`. These five come off
+the **AI Visibility → Prompt Research** pull in
+`reference/ai-demand-2026-08-08.md` — how often people ask *AI assistants*
+about a topic. Different metric, different scale, don't compare the numbers.
+
+Why it's worth a separate five: **not one recovery app appears anywhere in that
+data.** Not I Am Sober, not Reframe, not Quittr. The competition for AI
+attention is SAMHSA, Mayo Clinic, Reddit and — on betrayal trauma — a
+dictionary and Netflix. Nobody is optimising for this. Whatever share exists is
+unclaimed.
+
+---
+
+### 14. Hangxiety — 28,200 AI demand · `/hangxiety` page is live
+
+**On screen:** HANGXIETY
+
+> You woke at 4am and your heart wouldn't slow down. Nothing bad happened — it
+> just felt like something did. That's hangxiety. The drink quiets it for a few
+> hours, then it comes back louder. Free app. It counts from today.
+
+*44 words · ~15s.* **The best single opening in the whole file.** Ad-safe, not
+medical, and it's the most common doorway into *maybe I should stop*.
+
+⚠️ The existing hangxiety asset (`AI-SCENES.md` A6) is a **40-second AI-image
+film** — made before the shorts-only decision. This script replaces it as the
+launch version. Keep the film for YouTube if you want, don't make another.
+
+---
+
+### 15. Emotional eating — 121,600 AI demand
+
+**On screen:** EMOTIONAL EATING
+
+> Emotional eating and binge eating are the same thing from the inside — nobody
+> tells you that. You're not weak and you're not greedy, you're soothing
+> something. There's a free app for it, and it doesn't weigh you.
+
+*40 words · ~13s.* Biggest non-medical number in the AI file. "It doesn't weigh
+you" is the line — every other food app does.
+
+---
+
+### 16. Why betrayal feels physical — 70,200 AI demand
+
+**On screen:** WHY BETRAYAL FEELS PHYSICAL
+
+> Betrayal isn't only heartbreak, it's a physical injury. You can't eat, you
+> can't sleep, you check things you swore you'd never check. That's a nervous
+> system, not a character flaw. Free quiz, free app.
+
+*39 words · ~13s.* Different video from #9 — that one names the thing, this one
+explains the body. Against 70,200 in demand the field is Reddit, a dictionary
+and Netflix. There is no authoritative answer here yet.
+
+---
+
+### 17. The 2pm plan — the naming play
+
+**On screen:** WRITE IT AT 2PM, NOT 2AM
+
+> Here's what actually worked. At 2pm, when you're fine, you write the plan for
+> 2am, when you're not. 2am you doesn't make good decisions. 2pm you does.
+> That's the whole thing, and it's free.
+
+*42 words · ~14s.* Read the section below before shooting this one — it's the
+most important finding in the AI file and it needs a decision from you first.
+
+---
+
+### 18. The covering-up one — "living with alcoholic spouses", 21,500 AI demand
+
+**On screen:** LIVING WITH AN ALCOHOLIC PARTNER
+
+> You've started hiding it from your own family. Cancelling things. Making
+> excuses that got easier to say. That isn't disloyalty, that's exhaustion.
+> Free app — part of it is for the person doing the covering.
+
+*40 words · ~13s.*
+
+---
+
+### The one NOT to make
+
+**Alcohol withdrawal — 674,800 AI demand, the biggest number in the file.**
+Leave it. It's genuinely medical, people die detoxing from alcohol, and
+`/how-to-stop-drinking` already says see a doctor first. That line is right.
+Don't let the number talk you into it.
+
+---
+
+# The naming finding — this needs your decision
+
+Across every lane, the biggest AI topics are **named things**, not questions:
+
+| What people ask AI about | AI Volume | What it is |
+|---|---|---|
+| Rethinking Drinking | 7,300 | the US government's NIAAA programme |
+| Betrayal Bond | 3,100 | Patrick Carnes' book |
+| Easy Way to Quit Drinking | 1,500 | Allen Carr's book |
+| Kick the Drink | 1,300 | Jason Vale's book |
+| Brain Over Binge | 258 | Kathryn Hansen's book |
+
+When someone asks an AI how to stop, they ask for **a thing with a name they
+half-remember**. The app has a name. **The method inside it doesn't.**
+
+The relapse plan you write at 2pm for the 2am version of yourself is the most
+distinctive thing in the product, no competitor has it, and right now it's a
+feature with no name — so nobody can recommend it, ask an AI about it, or repeat
+it to a friend.
+
+Naming it costs nothing and changes what script 17 is. Four options, pick one or
+tell me none of them:
+
+| Name | Reads like |
+|---|---|
+| **The 2pm Plan** | plain, describes itself, hardest to forget |
+| **The 2am Letter** | you're writing *to* someone, which is what it feels like |
+| **The Sober Hour Plan** | broadest, works for food and scrolling too, least distinctive |
+| **Note to 2am** | shortest, most repeatable, least self-explanatory |
+
+My pick is **The 2pm Plan** — it's the only one that explains itself in four
+words, and "2pm, not 2am" is the whole idea in one breath. But this is your
+product and your language, so it's your call.
+
+---
+
+# The Reddit question — the honest answer
+
+**The finding:** Reddit is the #1 or #2 source AI names in every single lane —
+1,400 mentions on drinking, 2,700 on binge eating, 1,300 on betrayal trauma. AI
+leans on Reddit harder than it leans on SAMHSA.
+
+That's a real signal, and I'm still going to tell you to be careful with it.
+
+**Why it isn't a free win:**
+
+1. **Reddit bans promotion faster than any platform you're on.** A link in a
+   post gets you removed in a day, and a banned account can't be undone. Nobody
+   there is looking for an app.
+2. **The recovery subreddits are the wrong room for you personally.** They're
+   relapse stories and drinking talk all day. That is the exact feed the whole
+   Buffer-only rule exists to keep you out of, and no traffic number is worth
+   sitting in it.
+
+**Where it could actually work:** the **partner** subreddits are a different
+room. You're not the addict in there — you're the rare person who was on the
+other side and can say what he was thinking. Almost nobody in those threads can
+say that honestly. That is worth more there than a link ever would be.
+
+**If you do it, the only version that works:**
+- **One subreddit.** Partner side only. Never open the drinking ones.
+- **Comments, never posts. No link, ever.** The link lives in your profile bio
+  and nowhere else. People who want it will find it.
+- **Ten minutes, three days a week.** Answer as yourself: 38 years, free at 50.
+- **Stop the day it stops feeling okay.** That's not a business decision.
+
+**My honest ranking:** this is third. The scripts are first, the employer pile
+is second, Reddit is a slow burn with a personal cost attached and it should
+only happen if *you* want to be in that conversation. It's a real channel. It's
+not a free one.
+
+---
+
 ## Posting order
 
-**1, 3, 12, 9, 11** first — that's the two easiest partner terms, the biggest
-winnable term, the biggest moat term, and the one where you tell your own story.
-Five videos, one an hour to shoot, one a day to post.
+**1, 3, 14, 12, 11** first — the two easiest partner terms, **hangxiety**, the
+biggest winnable Google term, and the one where you tell your own story. Five
+videos, an hour to shoot, one a day to post.
+
+*(Hangxiety replaced #9 in that first five once the AI data came in: 28,200 in
+demand, the page is already live, it's ad-safe, and it's the doorway question —
+the one people ask before they've admitted anything to themselves.)*
 
 Then the rest in any order. **5 and 10 are the two most likely to travel** and
 also the two most likely to draw a nasty comment; post them once the first five

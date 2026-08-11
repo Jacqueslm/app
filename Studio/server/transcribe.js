@@ -107,7 +107,17 @@ async function transcribeLocal(ffmpeg, inputPath, onPhase, onNote) {
     try {
       asr = await getAsr(FALLBACK_MODEL_ID, (pct) => onPhase && onPhase('model', pct));
     } catch (e2) {
-      throw new Error('Could not download the speech model (first run needs internet). Check your connection and try again - after the first download it works offline.');
+      // "check your connection" was a guess, and it was wrong often enough to
+      // waste an afternoon: a half-downloaded or cloud-evicted model-cache
+      // fails exactly the same way with the internet working fine. Say what
+      // actually happened and what to do about it.
+      const why = String((e2 && e2.message) || e2 || '').slice(0, 200);
+      let cached = false;
+      try { cached = fs.existsSync(CACHE_DIR) && fs.readdirSync(CACHE_DIR).length > 0; } catch (_) {}
+      const hint = cached
+        ? `There is already a part-downloaded model in ${CACHE_DIR}. If you are online, that folder is probably damaged or has been turned into an online-only placeholder by cloud sync - delete it and try again, and Studio will fetch a clean copy.`
+        : 'Nothing has been downloaded yet, so this really is the first run - it needs internet once. After that it works offline.';
+      throw new Error(`Could not load the speech model. ${hint}\n\nWhat went wrong: ${why}`);
     }
   }
 

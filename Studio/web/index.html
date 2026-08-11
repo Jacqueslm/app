@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0835</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0836</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -2106,6 +2106,22 @@ async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
   renderSocialAssetPicker();
+  reportMissingFiles();
+}
+
+// A file can vanish from the media folder while its library row stays behind -
+// cloud sync moves it, or the folder is copied without it. The old symptom was
+// a diagnostics log full of identical ENOENT lines naming a Windows path and
+// nothing else. Say it once, in the app, naming the files.
+let missingShown = false;
+async function reportMissingFiles() {
+  const gone = (st.assets || []).filter((a) => a.missing);
+  if (!gone.length || missingShown) return;
+  missingShown = true;
+  let advice = '';
+  try { advice = (await jfetch('/api/studio/assets/missing')).advice || ''; } catch (_) {}
+  const names = gone.slice(0, 4).map((a) => a.label).join(', ');
+  showError(`${gone.length} file${gone.length > 1 ? 's are' : ' is'} missing from your media folder (${names}${gone.length > 4 ? `, +${gone.length - 4} more` : ''}). ${advice}`);
 }
 
 /* ---------------- Teleprompter ----------------

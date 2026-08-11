@@ -22,6 +22,7 @@ const PORT = 4410;
 const GRADER = path.join(__dirname, "..", "trade-grader.html");
 const SECRET_FILE = path.join(__dirname, "secret.txt");
 const LOG_FILE = path.join(__dirname, "alerts.log");
+const STATE_FILE = path.join(__dirname, "state.json");
 
 // A private token in the webhook path so random internet noise can't inject
 // fake alerts. Generated once, kept in relay/secret.txt.
@@ -46,18 +47,32 @@ let nextId = 1;
 // OFF until you turn it on in relay/autotrade.json, and it starts on Sim101.
 // Requirements in NinjaTrader: Tools → Options → Automated trading interface
 // → tick "AT interface". That folder only exists while NinjaTrader is running.
+//
+// Between the alert and the order sit the SAFETY RAILS. Every one of them can
+// only ever block a trade, never invent one, and every decision is printed
+// and written to alerts.log so you can audit what the bot did and why.
+//   · kill switch   — /bot page (phone-friendly). DISARMED survives restarts.
+//   · one a day     — maxPerDay, counted in state.json, restart-proof.
+//   · duplicates    — the same alert text inside dupWindowMin places once.
+//   · session gate  — orders only inside that instrument's ET window, Mon–Fri.
+//   · sanity        — stop/T1/T2 on the correct side, risk within maxRiskPts.
+//   · rollover      — expired contract month blocks; rollover month warns.
 const AUTO_FILE = path.join(__dirname, "autotrade.json");
 const AUTO_DEFAULT = {
   enabled: false,
   account: "Sim101",
   contracts: 2,
+  maxPerDay: 1,           // the bot's bullet count — same rule as yours
+  dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
     "Documents", "NinjaTrader 8", "incoming"),
   // TradingView ticker → the actual contract NinjaTrader trades. Update at rollover.
+  // session = the ET window orders are allowed; maxRiskPts = a stop wider than
+  // this is treated as a bad alert, not a big trade.
   instruments: {
-    "MNQ1!": { name: "MNQ 09-26", tick: 0.25 },
-    "MES1!": { name: "MES 09-26", tick: 0.25 },
-    "MGC1!": { name: "MGC 12-26", tick: 0.10 }
+    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 120 },
+    "MES1!": { name: "MES 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 40 },
+    "MGC1!": { name: "MGC 12-26", tick: 0.10, session: "0800-1300", maxRiskPts: 20 }
   }
 };
 let auto = AUTO_DEFAULT;
@@ -65,6 +80,56 @@ try {
   auto = Object.assign({}, AUTO_DEFAULT, JSON.parse(fs.readFileSync(AUTO_FILE, "utf8")));
 } catch {
   fs.writeFileSync(AUTO_FILE, JSON.stringify(AUTO_DEFAULT, null, 2));
+}
+
+// Bot state that must survive a restart: the kill switch, today's trade count,
+// and recent alert fingerprints. Lives in relay/state.json.
+let state = { killed: false, day: "", placed: [], recent: [] };
+try { state = Object.assign(state, JSON.parse(fs.readFileSync(STATE_FILE, "utf8"))); } catch {}
+const saveState = () => { try { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); } catch {} };
+
+// Everything the bot decides, on one line: console + alerts.log + the /bot page.
+let decisions = [];
+function decide(placed, msg) {
+  const line = (placed ? "🤖 " : "✗ bot: ") + msg;
+  console.log(line);
+  fs.appendFile(LOG_FILE, new Date().toISOString() + "  BOT " + (placed ? "PLACED " : "blocked ") + msg + "\n", () => {});
+  decisions.push({ t: Date.now(), placed, msg });
+  if (decisions.length > 20) decisions = decisions.slice(-20);
+}
+
+// New York clock, no libraries: weekday, date and HHMM in ET.
+function etNow() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York", hourCycle: "h23", weekday: "short",
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
+  }).formatToParts(new Date());
+  const g = t => (parts.find(p => p.type === t) || {}).value;
+  return { wd: g("weekday"), date: `${g("year")}-${g("month")}-${g("day")}`,
+           hm: +g("hour") * 100 + +g("minute"), month: +g("month"), year: +g("year") };
+}
+
+// "MNQ 09-26" → how close is that contract to the grave?
+//   ok        — trades fine
+//   rollover  — we're inside the contract month; roll to the next one soon
+//   expired   — the month is behind us; the order would hit a dead contract
+function contractStatus(name) {
+  const m = /(\d{2})-(\d{2})\s*$/.exec(name || "");
+  if (!m) return "unknown";
+  const cm = +m[1], cy = 2000 + +m[2];
+  const now = etNow();
+  if (cy < now.year || (cy === now.year && cm < now.month)) return "expired";
+  if (cy === now.year && cm === now.month) return "rollover";
+  return "ok";
+}
+
+function inSession(sess) {
+  const m = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(sess || "");
+  if (!m) return true;                              // no window configured = no gate
+  const now = etNow();
+  if (now.wd === "Sat" || now.wd === "Sun") return false;
+  const from = +m[1] * 100 + +m[2], to = +m[3] * 100 + +m[4];
+  return now.hm >= from && now.hm <= to;
 }
 
 let oifSeq = 0;
@@ -75,15 +140,66 @@ function tryAutotrade(text) {
   if (!auto.enabled) return;
   const m = text.match(/^(\S+)\s+MSB PURE dir (-?1)(?:\.0+)?\s*\|/);
   if (!m) return;                                   // not a PURE signal — ignore
+
+  // ── the rails, in order ────────────────────────────────────────────────────
+  if (state.killed) { decide(false, "KILL SWITCH is on — no orders until you re-arm at /bot"); return; }
+
+  const today = etNow().date;
+  if (state.day !== today) { state.day = today; state.placed = []; saveState(); }
+
+  // Duplicate: TradingView retries, double-fired alerts, a re-sent webhook.
+  const hash = crypto.createHash("sha1").update(text).digest("hex").slice(0, 12);
+  const winMs = (auto.dupWindowMin || 10) * 60000;
+  state.recent = (state.recent || []).filter(r => Date.now() - r.t < Math.max(winMs, 7200000));
+  const dup = state.recent.find(r => r.h === hash && Date.now() - r.t < winMs);
+  state.recent.push({ h: hash, t: Date.now() });
+  saveState();
+  if (dup) { decide(false, "duplicate of an alert " + Math.round((Date.now() - dup.t) / 60000) + " min ago — placed once, not twice"); return; }
+
+  if (state.placed.length >= (auto.maxPerDay || 1)) {
+    decide(false, "bullet already spent — " + state.placed.length + "/" + (auto.maxPerDay || 1) + " trade(s) placed today. This one is tomorrow's.");
+    return;
+  }
+
   const inst = auto.instruments[m[1]];
-  if (!inst) { console.log("✗ autotrade: no instrument mapping for " + m[1]); return; }
+  if (!inst) { decide(false, "no instrument mapping for " + m[1]); return; }
+
+  // Late is the same as wrong: an alert that lands outside the session window
+  // (delayed webhook, relay started mid-day, a stale retry) executes at a
+  // price the levels no longer describe.
+  if (!inSession(inst.session)) {
+    decide(false, m[1] + " alert outside the " + (inst.session || "?") + " ET window — stale levels, no order");
+    return;
+  }
+
+  const cs = contractStatus(inst.name);
+  if (cs === "expired") {
+    decide(false, inst.name + " looks EXPIRED — update the contract month in relay/autotrade.json");
+    return;
+  }
+
   const num = re => { const g = text.match(re); return g ? parseFloat(g[1]) : NaN; };
   const entrySide = m[2] === "1";
+  const entry = num(/entry\s+([\d.]+)/i);
   const stop = num(/stop\s+([\d.]+)/i);
   const t1   = num(/T1\s+([\d.]+)/);
   const t2   = num(/T2\s+([\d.]+)/);
-  if (!(stop > 0 && t1 > 0 && t2 > 0)) { console.log("✗ autotrade: bad numbers in alert"); return; }
+  if (!(stop > 0 && t1 > 0 && t2 > 0)) { decide(false, "bad numbers in alert"); return; }
 
+  // Sanity: every level on the side it belongs. A mangled alert fails here
+  // instead of becoming a live position with the stop above a long entry.
+  if (entry > 0) {
+    const wrong = entrySide
+      ? (stop >= entry || t1 <= entry || t2 <= entry)
+      : (stop <= entry || t1 >= entry || t2 >= entry);
+    if (wrong) { decide(false, "levels on the wrong side of entry for a " + (entrySide ? "LONG" : "SHORT") + " — mangled alert, no order"); return; }
+    if (inst.maxRiskPts > 0 && Math.abs(entry - stop) > inst.maxRiskPts) {
+      decide(false, "stop is " + Math.abs(entry - stop).toFixed(2) + " pts from entry — over the " + inst.maxRiskPts + " pt cap for " + m[1] + ". That is a bad alert, not a big trade.");
+      return;
+    }
+  }
+
+  // ── the order ──────────────────────────────────────────────────────────────
   const qty  = Math.max(2, auto.contracts);
   const half = Math.floor(qty / 2);
   const rest = qty - half;
@@ -104,12 +220,54 @@ function tryAutotrade(text) {
   const file = path.join(auto.incoming, "oif" + (++oifSeq) + "." + id + ".txt");
   try {
     fs.writeFileSync(file, lines.join("\r\n") + "\r\n");
-    console.log("🤖 AUTOTRADE → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
-      "  stop " + S + "  T1 " + P1 + "  T2 " + P2);
+    state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty });
+    saveState();
+    decide(true, "AUTOTRADE → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
+      "  stop " + S + "  T1 " + P1 + "  T2 " + P2 +
+      (cs === "rollover" ? "   ⚠ rollover month — update the contract soon" : ""));
   } catch (e) {
-    console.log("✗ autotrade: could not write to " + auto.incoming);
-    console.log("  Is NinjaTrader running with the AT interface enabled?  (" + e.message + ")");
+    decide(false, "could not write to " + auto.incoming +
+      " — is NinjaTrader running with the AT interface enabled? (" + e.message + ")");
   }
+}
+
+// ── the /bot page: status + the kill switch, phone-sized ─────────────────────
+function botPage() {
+  const armed = auto.enabled && !state.killed;
+  const today = etNow().date;
+  const used = state.day === today ? state.placed.length : 0;
+  const live = auto.account !== "Sim101";
+  const rows = Object.entries(auto.instruments).map(([tk, i]) => {
+    const cs = contractStatus(i.name);
+    const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED — fix autotrade.json</b>'
+               : cs === "rollover" ? ' <b style="color:#f0a020">rollover month</b>' : "";
+    return `<tr><td>${tk}</td><td>${i.name}${warn}</td><td>${i.session || "—"} ET</td></tr>`;
+  }).join("");
+  const dec = decisions.slice().reverse().map(d =>
+    `<li>${new Date(d.t).toLocaleTimeString()} — ${d.placed ? "✅" : "🚫"} ${d.msg}</li>`).join("") ||
+    "<li>Nothing yet this session.</li>";
+  return `<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>MSB Bot</title>
+<style>body{background:#0e1116;color:#e6edf3;font:16px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;
+max-width:520px;margin:0 auto;padding:20px}h1{font-size:20px}table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:6px 4px;border-bottom:1px solid #2a3341}li{font-size:13px;color:#8b96a5;margin-bottom:6px}
+.big{font-size:26px;font-weight:800;padding:14px;border-radius:10px;text-align:center;margin:14px 0}
+button{width:100%;padding:16px;font-size:18px;font-weight:700;border:0;border-radius:10px;cursor:pointer}
+.pill{padding:2px 10px;border-radius:20px;font-size:13px;font-weight:700}</style></head><body>
+<h1>MSB Bot — ${today}</h1>
+<div class="big" style="background:${armed ? "rgba(38,166,154,.15);color:#26a69a" : "rgba(239,83,80,.15);color:#ef5350"}">
+${armed ? "ARMED" : state.killed ? "KILLED" : "OFF (autotrade.json)"}</div>
+<p>Account: <span class="pill" style="background:${live ? "rgba(239,83,80,.25);color:#ef5350" : "rgba(38,166,154,.25);color:#26a69a"}">
+${auto.account}${live ? " — REAL MONEY" : " — sim"}</span>
+&nbsp; Bullets: <b>${Math.max(0, (auto.maxPerDay || 1) - used)} / ${auto.maxPerDay || 1}</b> left today</p>
+<form method="POST" action="/bot/${secret}/toggle">
+<button style="background:${state.killed ? "#26a69a" : "#ef5350"};color:#fff">
+${state.killed ? "RE-ARM THE BOT" : "KILL — stop placing orders"}</button></form>
+<p style="font-size:13px;color:#8b96a5">The kill switch survives restarts. It stops new orders only —
+anything already working in NinjaTrader stays yours to manage.</p>
+<table>${rows}</table>
+<h1 style="font-size:16px;margin-top:22px">Decisions this session</h1><ul>${dec}</ul>
+</body></html>`;
 }
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -142,6 +300,22 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // Bot status + kill switch. Same secret as the webhook — the page is yours alone.
+  if (req.method === "GET" && url === "/bot/" + secret) {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(botPage());
+    return;
+  }
+  if (req.method === "POST" && url === "/bot/" + secret + "/toggle") {
+    state.killed = !state.killed;
+    saveState();
+    console.log(state.killed ? "🔴 KILL SWITCH ON — the bot will not place orders."
+                             : "🟢 Bot re-armed from the /bot page.");
+    res.writeHead(303, { Location: "/bot/" + secret });
+    res.end();
+    return;
+  }
+
   // TradingView posts the alert text here
   if (req.method === "POST" && url === "/hook/" + secret) {
     let body = "";
@@ -162,7 +336,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Wrong secret on the hook path — say nothing useful to strangers.
-  if (req.method === "POST" && url.startsWith("/hook/")) {
+  if ((req.method === "POST" || req.method === "GET") && (url.startsWith("/hook/") || url.startsWith("/bot/"))) {
     res.writeHead(403); res.end();
     return;
   }
@@ -172,6 +346,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
+  const armed = auto.enabled && !state.killed;
   console.log("");
   console.log("  ┌─────────────────────────────────────────────────────────────┐");
   console.log("  │  MSB ALERT RELAY is running                                 │");
@@ -179,6 +354,16 @@ server.listen(PORT, () => {
   console.log("");
   console.log("  Your grader:      http://localhost:" + PORT);
   console.log("  Webhook path:     /hook/" + secret);
+  console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
+  console.log("");
+  console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
+                                             : state.killed ? "🔴 KILLED — re-arm on the /bot page"
+                                             : "⚪ off (relay/autotrade.json)"));
+  for (const [tk, i] of Object.entries(auto.instruments)) {
+    const cs = contractStatus(i.name);
+    if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — update autotrade.json before trading.");
+    else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — update it soon.");
+  }
   console.log("");
   console.log("  To let TradingView reach it, run your tunnel in another window:");
   console.log("      ngrok http " + PORT);

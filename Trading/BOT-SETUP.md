@@ -42,3 +42,26 @@ word is the difference between practice and real money.
 Computer on · relay window open · ngrok window open · NinjaTrader running with
 AT interface on. If any of those is missing, alerts still reach your phone —
 they just don't become orders.
+
+## The safety rails — what stands between an alert and an order
+
+Every alert passes through six checks before it becomes an order. Each one can
+only ever **block** a trade, never create one, and every decision — placed or
+blocked — is printed in the relay window and written to `relay\alerts.log` so
+you can always audit what the bot did and why.
+
+| Rail | What it stops |
+|---|---|
+| **Kill switch** | You, from your phone. Open the `/bot` page (URL is printed when the relay starts — same address as the grader, plus `/bot/<secret>`), hit **KILL**. No orders until you re-arm. Survives restarts. |
+| **One a day** | A second signal after the bullet is spent. Counted in `relay\state.json`, so restarting the relay does not reload the gun. Change it with `maxPerDay` in `autotrade.json`. |
+| **Duplicates** | TradingView retrying a webhook, or an alert double-firing. The identical alert inside 10 minutes places once, not twice. |
+| **Session gate** | Stale alerts. An alert that lands outside that instrument's ET window (delayed webhook, relay started mid-day, weekends) is describing prices that no longer exist — it's logged, not traded. |
+| **Sanity check** | Mangled alerts. Stop, T1 and T2 must sit on the correct side of entry, and the stop can't be wider than `maxRiskPts` for the instrument. A garbled message fails here instead of becoming a naked position. |
+| **Rollover** | An expired contract month in `autotrade.json`. Expired blocks the order; the contract's own delivery month gets a loud warning at startup and on every fill. |
+
+The **/bot page** is the one to bookmark on your phone: ARMED/KILLED status,
+which account it's pointed at (red if it's not Sim101), bullets left today,
+contract months with rollover warnings, and the last 20 decisions.
+
+The kill switch stops **new** orders only. Anything already working in
+NinjaTrader stays yours to manage — flatten it there if you need to be flat.

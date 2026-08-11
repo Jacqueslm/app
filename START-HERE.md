@@ -327,6 +327,20 @@ the app is live in the Play Store.
 ---
 
 ## Rules of the house
+
+- **Every email drafted into Gmail is written as HTML with a real link, never
+  as a bare URL in plain text.** Gmail rewrites every link it sends through
+  `google.com/url?q=…&source=gmail&ust=…` — that happens to everyone, on every
+  message, whether the link was typed by hand or inserted through the API, and
+  it cannot be turned off. What it *can* be stopped from doing is making that
+  string the text the reader sees. Write
+  `<a href="https://www.turnsomedayintodayone.com">www.turnsomedayintodayone.com</a>`
+  and the recipient reads the address; the redirect stays in the invisible href
+  where it belongs. Write the bare URL and the reader gets a wall of
+  `google.com/url?q=` in the middle of a cold pitch, which reads like tracking.
+  Learned 11 Aug 2026, after 22 school emails and two podcast pitches had
+  already gone out the wrong way.
+
 - Story, not statistics (see medical-claims-audit.md).
 - **Never default to R&B, hip-hop or soul when writing a song prompt.** Jacques
   listens to everything and has had to say so more than once, because tools

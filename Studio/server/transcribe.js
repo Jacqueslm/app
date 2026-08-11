@@ -16,6 +16,44 @@ const FALLBACK_MODEL_ID = 'Xenova/whisper-base.en';
 const CACHE_DIR = path.join(__dirname, 'model-cache');
 const SR = 16000;
 
+// Which of the two possible causes of a native-load failure this actually is.
+// Reports facts, not theories: what CPU this computer runs, which build the
+// speech engine shipped, and whether that file is a whole one.
+function onnxDiagnosis() {
+  const arch = process.arch;
+  const plat = process.platform;
+  const base = path.join(__dirname, 'node_modules', 'onnxruntime-node', 'bin', 'napi-v6', plat);
+  let builds = [];
+  try { builds = fs.readdirSync(base); } catch (_) {}
+  const bin = path.join(base, arch, 'onnxruntime_binding.node');
+  let size = 0;
+  let header = '';
+  try {
+    size = fs.statSync(bin).size;
+    const fd = fs.openSync(bin, 'r');
+    const h = Buffer.alloc(2);
+    fs.readSync(fd, h, 0, 2, 0);
+    fs.closeSync(fd);
+    header = h.toString('ascii');
+  } catch (_) {}
+
+  const lines = [`This computer: ${plat} ${arch}. Speech engine builds installed: ${builds.join(', ') || 'none found'}.`];
+  if (!builds.length) {
+    lines.push('The speech engine was never installed. Run: npm install  (inside Studio\\server)');
+  } else if (!builds.includes(arch)) {
+    lines.push(`There is no ${arch} build here, so this computer cannot run any of them. Run: npm install  (inside Studio\\server) — it will fetch the right one.`);
+  } else if (!size) {
+    lines.push(`The ${arch} file is missing from ${base}. Delete the onnxruntime-node folder and run: npm install`);
+  } else if (plat === 'win32' && header !== 'MZ') {
+    lines.push(`The ${arch} file is damaged — it is ${size} bytes and does not start like a real program file, so the install did not finish. Delete Studio\\server\\node_modules\\onnxruntime-node and run: npm install`);
+  } else if (size < 50000) {
+    lines.push(`The ${arch} file is only ${size} bytes, far too small — the install did not finish. Delete Studio\\server\\node_modules\\onnxruntime-node and run: npm install`);
+  } else {
+    lines.push(`The ${arch} file looks intact (${size} bytes), so something outside Studio is blocking it — usually antivirus, or a folder the computer is not allowed to run programs from. Try moving Studio to a plain folder like C:\\Studio.`);
+  }
+  return lines.join('\n');
+}
+
 const asrCache = new Map(); // modelId -> Promise<pipeline>
 async function getAsr(modelId, onDownloadPct) {
   if (!asrCache.has(modelId)) {
@@ -121,14 +159,17 @@ async function transcribeLocal(ffmpeg, inputPath, onPhase, onNote) {
       // placeholder. Sending someone to delete the model cache here wastes
       // their afternoon on the wrong folder.
       const nativeLoadFailed = /cannot run %1|not a valid Win32|ERR_DLOPEN_FAILED|onnxruntime|\.node['"]?$|\.node[\s'"]/i.test(why);
-      const inCloudFolder = /[\\/](OneDrive|Dropbox|Google Drive|iCloudDrive)[\\/]/i.test(__dirname);
       if (nativeLoadFailed) {
+        // Error 193 means the file exists but the OS refused to load it. Only
+        // two things do that: the wrong CPU architecture, or a truncated file.
+        // Guessing between them wastes an afternoon, so measure both and say
+        // which it is - a valid Windows binary starts with the bytes "MZ".
         throw new Error(
-          'The speech engine could not start. This is not a download problem - Windows could not load one of Studio\'s built-in program files.' +
-          (inCloudFolder
-            ? `\n\nStudio is installed inside a cloud-synced folder (${__dirname}). Cloud sync turns files it thinks are idle into online-only placeholders, and Windows cannot run a placeholder. This is also why media files go missing.\n\nThe real fix: move the whole Studio folder somewhere outside OneDrive - C:\\Studio works - and start it from there. Failing that, right-click the Studio folder, choose "Always keep on this device", and wait for it to finish downloading.`
-            : '\n\nRe-install Studio\'s program files: delete Studio\\server\\node_modules\\onnxruntime-node and run npm install in Studio\\server.') +
-          `\n\nWhat Windows said: ${why}`
+          'The speech engine could not start. This is NOT a download problem - the model may be fully present. ' +
+          'The computer refused to load one of Studio\'s built-in program files.\n\n' +
+          onnxDiagnosis() +
+          `\n\nWhat the computer said: ${why}\n\n` +
+          'You do not need this to caption a video you scripted yourself: paste your lines into Lyrics & Captions and press Tap to sync.'
         );
       }
 

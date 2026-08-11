@@ -244,6 +244,11 @@ function assetJson(row) {
     meta: row.meta ? JSON.parse(row.meta) : null,
     createdAt: row.created_at,
     url: `/api/studio/assets/${row.id}/file`,
+    // The library row exists in the database but the file itself can go
+    // missing underneath us - OneDrive evicting it, a folder moved, a
+    // half-finished copy. Saying so here lets the page grey the item out
+    // instead of firing a request that can only fail.
+    missing: !fs.existsSync(mediaPath(row.filename)) || undefined,
   };
 }
 
@@ -1479,7 +1484,41 @@ router.get('/assets/:id/file', (req, res) => {
   const type = (ext === '.webm' && row.kind === 'audio')
     ? 'audio/webm'
     : (CONTENT_TYPES[ext] || 'application/octet-stream');
-  res.sendFile(mediaPath(row.filename), { headers: { 'Content-Type': type } });
+  const p = mediaPath(row.filename);
+  // Handing a missing path to sendFile throws a raw ENOENT with the full
+  // Windows path, once per request, and the diagnostics log fills with
+  // hundreds of identical lines that say nothing about which video broke.
+  // Answer plainly instead, and let /assets/missing do the explaining.
+  if (!fs.existsSync(p)) {
+    return res.status(410).json({
+      error: `The file for "${row.label}" is no longer on this computer.`,
+      filename: row.filename,
+      missing: true,
+    });
+  }
+  res.sendFile(p, { headers: { 'Content-Type': type } });
+});
+
+// One honest answer instead of a wall of ENOENT: what is gone, and the most
+// likely reason. Cloud sync is the usual culprit - a folder inside OneDrive
+// gets its contents turned into placeholders or moved, and Studio's media
+// folder is deliberately not in git, so nothing restores it.
+router.get('/assets/missing', (req, res) => {
+  const gone = db.getAssets(req.userId, null)
+    .filter((row) => !fs.existsSync(mediaPath(row.filename)))
+    .map((row) => ({ id: row.id, kind: row.kind, label: row.label, filename: row.filename }));
+  const inCloudFolder = /[\\/](OneDrive|Dropbox|Google Drive|iCloudDrive)[\\/]/i.test(MEDIA_DIR);
+  res.json({
+    missing: gone,
+    count: gone.length,
+    mediaDir: MEDIA_DIR,
+    inCloudFolder,
+    advice: !gone.length
+      ? 'Every file in your library is present.'
+      : inCloudFolder
+        ? 'Studio is installed inside a cloud-synced folder. Cloud sync can turn files into online-only placeholders or move them, and Studio\'s media folder is not in git, so nothing puts them back. Right-click the media folder, choose "Always keep on this device", and keep a backup with the Backup button.'
+        : 'These files were removed or moved outside Studio. Restore them from a backup, or delete the library entries to clear the errors.',
+  });
 });
 
 // Remove an image from a character's reference set without deleting it from

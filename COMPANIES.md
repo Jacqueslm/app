@@ -35,13 +35,13 @@ These have published addresses and their job is literally to collect resources
 like yours. Free costs them nothing to recommend, which is the whole reason
 this angle works now that the app is positioned as free.
 
-### 1. National Recovery Friendly Workplace Institute — [ ] sent
+### 1. National Recovery Friendly Workplace Institute — [x] SENT 11 Aug
 
 **Send to:** info@rfwinstitute.org
 1,500+ employers, 570,000+ employees, 35+ states. They certify employers as
 Recovery Friendly and hand them tools. The biggest single lever in this file.
 
-### 2. Recovery Friendly Missouri — [ ] sent
+### 2. Recovery Friendly Missouri — [x] SENT 11 Aug
 
 **Send via:** https://recoveryfriendlymo.com/contact/ (contact form, no
 published email)
@@ -49,7 +49,7 @@ Run by MU Extension with the Missouri Chamber of Commerce, Missouri Hospital
 Association, Missouri Department of Mental Health and Missouri Rural Health
 Association. Missouri employers, and you are a Missouri founder. Say that.
 
-### 3. National Safety Council — Recovery Supportive Workplaces — [ ] sent
+### 3. National Safety Council — Recovery Supportive Workplaces — [x] SENT 11 Aug
 
 **Send via:** https://www.nsc.org/workplace/workplace-wellbeing-hub/risk-based-education-resources/wellbeing-foundations/recovery-supportive-workplaces
 (contact form). No published email for the team.
@@ -62,7 +62,7 @@ These are the employers, bundled. One email reaches every member company, and
 these three industries have the highest substance-use rates of any workforce in
 the state — construction, trucking, restaurants. They already know it.
 
-### 4. AGC of Missouri (construction) — [ ] sent
+### 4. AGC of Missouri (construction) — [x] SENT 11 Aug
 
 **Send to:** ltoenjes@agcmo.org — **Leonard P. Toenjes**, President
 6330 Knox Industrial Dr, Suite 200, St. Louis, MO 63139 · (314) 781-2356
@@ -71,12 +71,12 @@ the state — construction, trucking, restaurants. They already know it.
 bounces, ring (314) 781-2356 and ask for the President's office.** They are
 headquartered in St. Louis — that is your local one.
 
-### 5. Missouri Trucking Association — [ ] sent
+### 5. Missouri Trucking Association — [x] SENT 11 Aug
 
 **Send to:** Kaitlynn@motrucking.org — **Kaitlynn Orr**
 102 E High Street, Jefferson City, MO 65101 · (573) 634-3388
 
-### 6. Missouri Restaurant Association — [ ] sent
+### 6. Missouri Restaurant Association — [x] SENT 11 Aug
 
 **Send to:** buddyl@morestaurants.org — **Buddy Lahl**, CEO
 St. Louis office: 1810 Craig Rd, Suite 225, St. Louis, MO 63146 ·
@@ -84,7 +84,7 @@ St. Louis office: 1810 Craig Rd, Suite 225, St. Louis, MO 63146 ·
 ⚠️ From a company directory listing, not seen on their own site (their site
 blocks me). Fallback: (816) 753-5222.
 
-### 7. St. Louis Building & Construction Trades Council — [ ] sent
+### 7. St. Louis Building & Construction Trades Council — [x] SENT 11 Aug
 
 **Send via:** https://stlbctc.org/ contact form · 2300 Hampton Ave, St. Louis,
 MO 63139 · (314) 647-0628
@@ -187,12 +187,12 @@ below already do.
 
 | # | Target | Drafted | Sent | Reply |
 |---|---|---|---|---|
-| 1 | RFW Institute | 11 Aug | | |
-| 2 | Recovery Friendly Missouri | form | | |
-| 3 | National Safety Council | form | | |
-| 4 | AGC of Missouri | 11 Aug | | |
-| 5 | MO Trucking Association | 11 Aug | | |
-| 6 | MO Restaurant Association | 11 Aug | | |
-| 7 | STL Building Trades | form | | |
+| 1 | RFW Institute | 11 Aug | **11 Aug** | |
+| 2 | Recovery Friendly Missouri | form | **11 Aug** | |
+| 3 | National Safety Council | form | **11 Aug** | |
+| 4 | AGC of Missouri | 11 Aug | **11 Aug** | |
+| 5 | MO Trucking Association | 11 Aug | **11 Aug** | |
+| 6 | MO Restaurant Association | 11 Aug | **11 Aug** | |
+| 7 | STL Building Trades | form | **11 Aug** | |
 
 Follow up once, 16 Aug, same as the schools. Then let it go.

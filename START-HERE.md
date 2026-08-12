@@ -161,6 +161,32 @@ Do not call it overdue.
   `BackColour` are a **file format** and were deliberately left alone —
   Americanizing them breaks captions.
 - **`DAILY-50.md`** — 50 outreach targets a day with six templates.
+- **Ten song cards** — `reference/song-cards/`, built by
+  `reference/make-song-cards.py` off five Suno tracks Jacques wrote. **No
+  lyrics are quoted** — he did not want to paste them and there is no
+  transcription in this environment, so each card is written to the idea the
+  song is named for. The two "That's Just the Illness" files are the same song
+  twice and got two different cards rather than one card twice.
+  **Every card is habit-agnostic on purpose** — no card says "sober", because
+  that word makes it invisible to whoever came in for the phone, the food or
+  the money.
+- **`reference/EPISODE-CAPTIONS.md`** — one caption per episode for all three
+  channels. **Not per-platform splits**: it goes into **Buffer**, which pushes
+  the same text everywhere. YouTube's title box is the only field the others
+  don't have. **No Instagram** — Jacques does Facebook, YouTube and TikTok.
+
+### ⭐ CARD RULE CHANGED — two frames must say two different things
+The partner cards draw the hook on frame A, then the hook **plus** a quiet line
+on frame B. Jacques called that out on 12 Aug: *"if you write two make them say
+different things."* He is right — that cut redraws what the reader already read.
+
+**The song cards now put a whole sentence on each frame, and the second one is
+the turn.** Either half stands alone: *"Nobody relapses on their worst day."* /
+*"They relapse on their best one."* Type runs to 96px since a frame holds one
+sentence instead of a sentence plus a footnote.
+
+**The 34 partner cards were left on the old build** — they are made and posted
+already. If they ever get rebuilt, rebuild them this way.
 - **`TARGET-MARKET.md`**, **`reference/NEW-AVENUES.md`**,
   **`reference/REDDIT-ORGANIC.md`**, **`reference/EPISODE-CAPTIONS.md`**,
   **`reference/IPHONE-INSTALL.md`** — all new.

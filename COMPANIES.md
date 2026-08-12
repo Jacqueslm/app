@@ -505,3 +505,41 @@ ARHE, Celebrate Recovery, Faces & Voices, Missouri DBH, both St. Louis libraries
 
 Next round comes from `reference/NEW-AVENUES.md` — twenty-five targets pulled
 from who actually ranks, not from guessing.
+
+---
+
+## REPLY — Missouri DBH, 12 Aug, 9:47am
+
+A form response, and the most useful thing anyone has sent back:
+
+> "Our resource listings are normally limited to affiliated national
+> organizations such as **SAMHSA and NASADAD**, and organizations that are
+> **certified by the Department**. Your email has been forwarded to subject
+> matter experts for review."
+
+**Read it as a map, not a no.** They named the exact two doors that open theirs,
+and one of them was emailed the same morning.
+
+**1. NASADAD — already sent, now the highest-value pending email in the file.**
+It was sent because it reaches fifty state agency directors at once. Missouri
+has now confirmed in writing that a NASADAD listing is a route onto a state
+resource page. That one reply is worth more than the other six combined.
+
+**2. SAMHSA — new target, not previously in this file.**
+The national body Missouri defers to. Also appears in `NEW-AVENUES.md` as a
+domain that ranks on page one for the head terms — so it is both a listing and
+a search result. Needs its own pass.
+
+**3. "Certified by the Department" — not the route.**
+Certification is for treatment providers. The app is not one, does not claim to
+be, and should not try to be. Ignore this branch.
+
+**No reply owed now.** They said staff will contact you. Answering "thank you"
+adds nothing and puts a second email in a queue that already has yours.
+
+**The reply that IS owed, later:** if NASADAD lists it, go straight back to this
+thread — not a new one — with one line: *"You mentioned NASADAD. We're on their
+list now."* That is their own stated criterion handed back to them, and it is
+much harder to leave sitting.
+
+**Log:** DBH = open, waiting on NASADAD. Do not chase DBH directly.

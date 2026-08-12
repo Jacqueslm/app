@@ -266,3 +266,86 @@ Hi — floating this back up once. Short version: 38 years addicted, free at 50,
 Either way, thanks for what you put out.
 
 Jacques
+
+---
+
+# BATCH 2 — every platform, not just podcasts (opened 12 Aug)
+
+Batch 1 was ten podcasts. That was one room. Creators on TikTok, Instagram and
+YouTube reach the same audience faster, reply faster, and cost nothing.
+
+## Why I am not handing you a list of handles
+
+I invented four YouTube channel ids from memory on 12 Aug. All four 404'd and it
+ate a morning. **I will not do that again with creator handles.** Finding them
+takes you five minutes and takes me a search I cannot verify.
+
+**How to build the list in five minutes:**
+
+1. TikTok search — **`sober`, `sobriety`, `alcoholic husband`, `betrayal trauma`,
+   `binge eating`**. Sort by **Users**, not Top.
+2. Take anyone with **5,000–80,000 followers.** Not bigger. Somebody with 500k
+   has a manager and a rate card; somebody with 8k reads their own messages and
+   answers.
+3. Skip anyone selling a coaching programme — they see you as competition.
+   Keep the ones just telling their story.
+4. Their email is in the bio, or on a Linktree in the bio. If there is no email,
+   the DM is fine — on TikTok and Instagram it is normal.
+5. Twenty names is plenty. Do it once, keep the list here.
+
+## The templates — different per platform, on purpose
+
+A podcast pitch asks for an hour. **A creator pitch must ask for almost nothing**,
+or it reads as work.
+
+### TikTok / Instagram DM — keep it this short
+
+> Hey — I'm Jacques, I was addicted 38 years and got free at 50. I built a free
+> app for it: counter, panic button, lessons, journal, and a whole section for
+> the partner. No card, no trial.
+>
+> Not asking for a post. If you look at it and it's any good, it's yours to
+> mention. If it isn't, tell me why — I'd genuinely rather know.
+>
+> turnsomedayintodayone.com
+
+**Why "not asking for a post" is the whole thing.** Every DM they get asks for
+something. The one that doesn't gets read, and half the time gets a post anyway.
+
+### YouTube — via the email on the About tab
+
+> **Subject:** A free recovery app, from someone who was addicted 38 years
+>
+> I was addicted for 38 years and got free at 50, and I built the app I needed
+> the whole time. It's free — counter, a button for the moment it hits, a lesson
+> a day, a private journal, and a section for the partner, which almost nothing
+> else has.
+>
+> No ask attached. If it's useful to your audience it's yours to mention; if it
+> isn't, I'd rather hear that than nothing.
+>
+> www.turnsomedayintodayone.com
+>
+> Jacques Malone, Saint Louis
+
+### The partner creators — the ones worth finding first
+
+The lane nobody serves. Search **`lovinganaddict`, `alanon`, `betrayaltrauma`,
+`soberwife`, `addictionrecoverywife`**. Smaller accounts, fierce audiences, and
+you are the only app with a section built for them. **Lead with the partner
+section, not the counter** — for these creators that is the whole story.
+
+## The rule from batch 1, so it does not repeat
+
+Sober Powered said no because it is a solo show that has never had a guest, and
+the pitch asked for an interview. **Check the format before writing the ask.**
+For creators that means: watch two of their videos first. One line proving you
+did beats three paragraphs proving you can write.
+
+## Log
+
+| Platform | Found | Sent | Replied |
+|---|---|---|---|
+| TikTok | | | |
+| Instagram | | | |
+| YouTube | | | |

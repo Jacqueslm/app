@@ -175,7 +175,7 @@ difficulty 41, tagged Build**, not too hard.
 11. 99-free-end  Still     3.0s  cut
 ```
 
-**Caption:** Nobody hides a jumper. They hide how many. Small enough that you believe them every time — until you add it up. There's a free app, and part of it is for the person doing the adding.
+**Caption:** Nobody hides a sweater. They hide how many. Small enough that you believe them every time — until you add it up. There's a free app, and part of it is for the person doing the adding.
 `#shoppingaddiction #lovinganaddict #recoverysupport #lgbtqrecovery`
 
 ---

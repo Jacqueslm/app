@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0843</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0844</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -1784,6 +1784,7 @@ const st = {
   relationships: [],    // saved chemistry [{charA, charB, descriptor}]
   soundTarget: null,    // assetId with the sound-swap panel open
   chromaTarget: null,   // assetId (green-screen clip) with the background picker open
+  panelsTarget: null,   // assetId sitting in panel 1 with the layout picker open
   reframeTarget: null,  // assetId with the reframe (aspect) panel open
   libSelectMode: false, // My Media: multi-select mode on/off
   libSelected: new Set(), // My Media: assetIds checked for bulk delete
@@ -4639,6 +4640,7 @@ function renderLibrary() {
     if (a.kind === 'video') btn('Sound', '', () => { st.soundTarget = st.soundTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.chromaTarget = null; renderLibrary(); }, 'motion');
     if (a.kind === 'video') btn('🟢 Green screen', '', () => { st.chromaTarget = st.chromaTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion');
     if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion'); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
+    if (a.kind === 'image' || a.kind === 'video') { const pb = btn('▦ Panels', '', () => { st.panelsTarget = st.panelsTarget === a.id ? null : a.id; st.chromaTarget = null; st.reframeTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion'); pb.title = 'FREE — the CapCut layouts: 2x2 collage, or the stacked duet (reference on top, you underneath)'; }
     // Finish (polish / quality / audio, free)
     if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic color grade + sharpen + loudness master in one pass. Best on your finished render.'; }
     if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap color themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
@@ -4844,6 +4846,74 @@ function renderLibrary() {
           });
           if (job) await pollJob(job.id, () => {});
           st.chromaTarget = null;
+          await loadAssets();
+        } catch (err) { setErr('#scenes-err', err.message); btnEl.disabled = false; btnEl.textContent = old; }
+      };
+      el.querySelector('.li-meta').appendChild(panel);
+    }
+    if (st.panelsTarget === a.id) {
+      // The two CapCut layouts, built locally and free. Grid is the 2x2
+      // collage; Duet is the "follow the move" stack — a reference clip on top
+      // and you underneath doing it. Every slot after the first defaults to
+      // repeating panel 1, so one clip four times works and nothing is
+      // required beyond the thing already selected.
+      const others = st.assets.filter((x) => x.kind === 'image' || x.kind === 'video');
+      const panel = document.createElement('div');
+      panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      let pnLayout = 'grid';
+      const opts = (sel) => `<option value="0">↺ same as panel 1</option>` +
+        others.map((s) => `<option value="${s.id}"${s.id === sel ? ' selected' : ''}>${s.kind === 'video' ? '🎬' : '🖼'} ${escapeHtml(s.label)}</option>`).join('');
+      panel.innerHTML = `
+        <div class="chips pn-layout">
+          <button class="chip on" data-l="grid">▦ 4-panel collage</button>
+          <button class="chip" data-l="stack">⬍ Duet (top / bottom)</button>
+        </div>
+        <select class="input pn-2" style="padding:8px 10px;font-size:12px">${opts()}</select>
+        <select class="input pn-3" style="padding:8px 10px;font-size:12px">${opts()}</select>
+        <select class="input pn-4" style="padding:8px 10px;font-size:12px">${opts()}</select>
+        <select class="input pn-audio" style="padding:8px 10px;font-size:12px">
+          <option value="0">🔊 Sound from panel 1</option>
+          <option value="1">🔊 Sound from panel 2</option>
+          <option value="2">🔊 Sound from panel 3</option>
+          <option value="3">🔊 Sound from panel 4</option>
+        </select>
+        <button class="btn2 quiet pn-go">▦ Build the panels · free</button>
+        <span class="usage pn-help"></span>`;
+      const pn2 = panel.querySelector('.pn-2'), pn3 = panel.querySelector('.pn-3'), pn4 = panel.querySelector('.pn-4');
+      const pnAudio = panel.querySelector('.pn-audio'), pnHelp = panel.querySelector('.pn-help');
+      const syncLayout = () => {
+        const duet = pnLayout === 'stack';
+        // A duet only has two slots, so the third and fourth are hidden rather
+        // than left on screen doing nothing.
+        pn3.style.display = duet ? 'none' : '';
+        pn4.style.display = duet ? 'none' : '';
+        [...pnAudio.options].forEach((o, i) => { o.style.display = (duet && i > 1) ? 'none' : ''; });
+        if (duet && Number(pnAudio.value) > 1) pnAudio.value = '0';
+        pnHelp.innerHTML = duet
+          ? 'Panel 1 on top, panel 2 underneath — the "do the move" layout. <b>Put the reference clip in panel 1</b> and yours in panel 2.'
+          : 'Four panels, clockwise from the top left. Leave a slot on <b>same as panel 1</b> to repeat it — one clip four times is a real look.';
+      };
+      panel.querySelectorAll('.pn-layout .chip').forEach((c) => c.onclick = () => {
+        panel.querySelectorAll('.pn-layout .chip').forEach((x) => x.classList.remove('on'));
+        c.classList.add('on'); pnLayout = c.dataset.l; syncLayout();
+      });
+      syncLayout();
+      panel.querySelector('.pn-go').onclick = async (e) => {
+        setErr('#scenes-err', null);
+        const btnEl = e.target; btnEl.disabled = true; const old = btnEl.textContent; btnEl.textContent = 'Working…';
+        try {
+          // A slot left on "same as panel 1" sends panel 1's id, which is also
+          // what the server falls back to, so both ends agree.
+          const pick = (sel) => Number(sel.value) || a.id;
+          const ids = pnLayout === 'stack'
+            ? [a.id, pick(pn2)]
+            : [a.id, pick(pn2), pick(pn3), pick(pn4)];
+          const { job } = await jfetch('/api/studio/panels', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ assetIds: ids, layout: pnLayout, size: '1080x1920', audioFrom: Number(pnAudio.value) || 0 }),
+          });
+          if (job) await pollJob(job.id, () => {});
+          st.panelsTarget = null;
           await loadAssets();
         } catch (err) { setErr('#scenes-err', err.message); btnEl.disabled = false; btnEl.textContent = old; }
       };

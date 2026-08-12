@@ -3074,6 +3074,92 @@ router.post('/chroma', async (req, res) => {
   res.status(202).json({ job: jobJson(job) });
 });
 
+/* ---------------- panels: the CapCut collage and duet layouts ------------- */
+// Two layouts, both free and local, both of them things CapCut charges nothing
+// for and every template on the For You page is built out of:
+//
+//   grid  - 2x2, four things at once. The "collage" template.
+//   stack - two stacked top and bottom. The "follow the move" duet: reference
+//           clip on top, you underneath doing it.
+//
+// Every cell is filled by scaling UP and cropping rather than letterboxing.
+// Black bars inside a panel read as a mistake, and this is the same reason the
+// split episode images were rebuilt with fills instead of bars.
+//
+// Shorter inputs loop rather than freezing on a last frame. A frozen panel is
+// the single thing that makes a homemade collage look homemade - the templates
+// all loop, which is why they never look dead.
+router.post('/panels', async (req, res) => {
+  const { assetIds, layout, size, secs, audioFrom } = req.body || {};
+  const mode = layout === 'stack' ? 'stack' : 'grid';
+  const wanted = mode === 'stack' ? 2 : 4;
+
+  const ids = Array.isArray(assetIds) ? assetIds.map(Number).filter(Boolean) : [];
+  if (!ids.length) return res.status(400).json({ error: 'Pick at least one picture or clip.' });
+  // Fewer than the layout needs: repeat what was given rather than refusing.
+  // The same clip four times is a real look, not a mistake.
+  const filled = Array.from({ length: wanted }, (_, i) => ids[i % ids.length]);
+  const assets = filled.map((id) => db.getAsset(req.userId, id));
+  if (assets.some((a) => !a || (a.kind !== 'image' && a.kind !== 'video'))) {
+    return res.status(404).json({ error: 'Panels take pictures and clips only.' });
+  }
+
+  const { W, H } = parseSize(size, '1080x1920');
+  // Even numbers throughout: an odd dimension anywhere kills yuv420p output.
+  const even = (n) => Math.floor(n / 2) * 2;
+  const cw = even(mode === 'stack' ? W : W / 2);
+  const ch = even(H / 2);
+
+  // Longest video wins, so nothing is cut off mid-move. All stills falls back
+  // to the requested length.
+  let dur = 0;
+  for (const a of assets) {
+    if (a.kind !== 'video') continue;
+    let m = {}; try { m = JSON.parse(a.meta || 'null') || {}; } catch (_) {}
+    const d = m.duration || await probeMediaDuration(mediaPath(a.filename));
+    if (d && d > dur) dur = d;
+  }
+  if (!dur) dur = Math.max(2, Math.min(30, Number(secs) || 5));
+
+  const inputs = [];
+  for (const a of assets) {
+    const p = mediaPath(a.filename);
+    if (a.kind === 'image') inputs.push('-loop', '1', '-i', p);
+    else inputs.push('-stream_loop', '-1', '-i', p);
+  }
+
+  const cells = assets.map((_, i) =>
+    `[${i}:v]scale=${cw}:${ch}:force_original_aspect_ratio=increase,` +
+    `crop=${cw}:${ch},setsar=1,fps=${FPS}[p${i}]`);
+  const tags = assets.map((_, i) => `[p${i}]`).join('');
+  const join = mode === 'stack'
+    ? `${tags}vstack=inputs=2[v]`
+    // xstack lays the four out clockwise from the top left. w0/h0 reference the
+    // first cell's size, which is why every cell is normalized above first.
+    : `${tags}xstack=inputs=4:layout=0_0|w0_0|0_h0|w0_h0[v]`;
+  const filter = `${cells.join(';')};${join}`;
+
+  // One panel's sound, not four playing over each other. Defaults to the first,
+  // which for a duet is the reference clip carrying the music.
+  let aIdx = Number.isInteger(Number(audioFrom)) ? Number(audioFrom) : 0;
+  if (aIdx < 0 || aIdx >= wanted) aIdx = 0;
+  const aAsset = assets[aIdx];
+  const hasAudio = aAsset.kind === 'video' && await probeHasAudio(mediaPath(aAsset.filename));
+
+  const outFile = newFilename(req.userId, '.mp4');
+  const args = [
+    ...inputs,
+    '-filter_complex', filter,
+    '-map', '[v]', ...(hasAudio ? ['-map', `${aIdx}:a?`] : []),
+    '-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p',
+    ...(hasAudio ? ['-c:a', 'aac', '-b:a', '192k'] : ['-an']),
+    '-t', String(dur), '-movflags', '+faststart',
+  ];
+  const label = mode === 'stack' ? `${assets[0].label} + ${assets[1].label}` : `${assets[0].label} 4-up`;
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, { source: 'panels', layout: mode, fromAssetId: assets[0].id });
+  res.status(202).json({ job: jobJson(job) });
+});
+
 /* ---------------- output sizes ---------------- */
 const RENDER_SIZES = new Set([
   // 16:9 / 9:16 / 1:1

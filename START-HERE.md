@@ -476,6 +476,46 @@ the app is live in the Play Store.
 
 ---
 
+## Pictures and video — who can fetch what
+
+Recorded 12 Aug 2026 because a session tried to walk Jacques through setting up
+something he had already been using for weeks.
+
+- **Pexels is already set up in Studio, and has been.** Studio → My Media →
+  **🎬 Free stock b-roll**, with **🎬 Clips** and **🖼 Photos** chips. Free key,
+  free clips, no attribution, imports straight to My Media and onto the
+  timeline. **Do not tell him to go and get a key — he has one.** The key lives
+  in his local `.env` and is deliberately not in this repo.
+- **This is the first place to look for anything that isn't a scripted moment**
+  — establishing shots, weather, textures, transitions. An AI scene is ~$2; a
+  Pexels clip is free and lands in two taps. Reserve fal.ai spend for shots
+  Pexels cannot give.
+- **A session CANNOT search Pexels.** `pexels.com` and `api.pexels.com` are both
+  blocked by the session network policy, there is no Pexels connector in the
+  registry, and the key isn't here. Verified 12 Aug. A session's job is to write
+  the search terms; Jacques runs the search in Studio.
+- **A session CAN search Shutterstock** (connector, read-only: previews and
+  metadata, no licensing or download). It's paid, and it has no video import
+  path into Studio — so it's the fallback for one specific shot Pexels lacks,
+  not the default.
+- **Faces are the thing to avoid, on either service.** Shutterstock's license
+  restricts showing a recognizable person in connection with sensitive subjects
+  (addiction, mental health) without a "posed by a model" disclaimer, and
+  Pexels' license says identifiable people may not appear "in a bad light or in
+  a way that is offensive" — with no disclaimer option at all. This app's whole
+  subject sits inside that clause. **Search rooms, weather, hands, doors, roads,
+  light — not people.** The text cards already work precisely because the reader
+  supplies the face.
+- **What a session can and cannot make.** No session can generate an image or a
+  video — there is no image model here. What it CAN do is write code that draws
+  deterministically (`reference/make-song-cards.py` is PIL: gradient, icon,
+  type), and write the prompts that Studio sends to fal.ai. Cards are free and
+  instant; AI scenes cost money and run in Studio, on his account.
+- Licence terms for everything in use are logged in
+  `reference/asset-licenses-2026-08-08.md`.
+
+---
+
 ## Rules of the house
 
 - **Every email drafted into Gmail is written as HTML with a real link, never

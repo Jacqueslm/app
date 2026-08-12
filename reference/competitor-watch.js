@@ -1,16 +1,16 @@
-// Who is winning in the recovery niche, and what are they posting.
+// What your competitors are posting on YouTube.
 //
-//     node reference/competitor-watch.js
-//     node reference/competitor-watch.js --days 14
+//     node competitorwatch.js @SoberLeon @RecoveryElevator
+//     node competitorwatch.js https://www.youtube.com/@SomeChannel --days 14
 //
-// Node, not Python — Studio already needs Node, so this runs with nothing to
-// install. (competitor-watch.py is the same tool for anyone who has Python.)
+// YOU supply the channels — handles, URLs, or UC… ids. An earlier version had
+// four channel ids hardcoded from memory; every one of them 404'd, because
+// they were invented. Nothing in this file guesses at data any more.
 //
-// Reads only what the platforms publish for reading:
-//   * YouTube channel RSS — youtube.com/feeds/videos.xml, official, no key.
-//   * Reddit's public .json listings, read-only and rate limited.
-// No logins, no headless browser, no TikTok or Instagram — neither publishes a
-// key-free endpoint, and the only way in is against their terms.
+// Reads YouTube's official, key-free channel RSS and nothing else. The Reddit
+// half was removed: Reddit now answers 403 to any non-browser client, and the
+// only way past that is to pretend to be a browser, which is exactly the kind
+// of thing this tool was written to avoid.
 
 const fs = require('fs');
 const path = require('path');
@@ -18,29 +18,34 @@ const path = require('path');
 const UA = 'turnsomedayintodayone-research/1.0 (+https://www.turnsomedayintodayone.com; turnsomedayintodayone@gmail.com)';
 const PAUSE = 1000; // one request a second — be a good guest
 
-// Channel ids start "UC" and are on a channel's page under Share > Copy channel ID.
-const CHANNELS = [
-  ['Put The Shovel Down', 'UCTQF_wGnLPHqPRHnvJ2xVaQ'],
-  ['Sober Leon', 'UCkKDGkC0Ye6iL6zqHUbxYUw'],
-  ['Recovery Elevator', 'UCWy6y5Cx6hHUvGiJHKfHRJA'],
-  ['The Sober Experiment', 'UCjOxHOjJ0ycTv0h5C8yqL0w'],
-];
-
-// Partner rooms first — the lane KEYWORDS.md says is winnable.
-const SUBREDDITS = ['AlAnon', 'stopdrinking', 'loveafteraddiction', 'SupportforWaywardSpouses'];
-
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function get(url, asJson) {
+async function get(url) {
   try {
     const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9' } });
     if (!res.ok) return { __error__: `HTTP ${res.status}` };
-    return asJson ? await res.json() : await res.text();
+    return await res.text();
   } catch (e) {
     return { __error__: String(e.message || e).slice(0, 120) };
   } finally {
     await sleep(PAUSE);
   }
+}
+
+// A handle or channel URL is what people actually have; the feed needs a UC…
+// id. The channel page carries its own id in the HTML, so one fetch converts.
+async function resolveChannel(input) {
+  const raw = String(input).trim();
+  const direct = raw.match(/(UC[\w-]{20,})/);
+  if (direct) return { id: direct[1], label: direct[1] };
+
+  const handle = raw.startsWith('http') ? raw : `https://www.youtube.com/${raw.startsWith('@') ? raw : '@' + raw}`;
+  const html = await get(handle);
+  if (typeof html !== 'string') return { error: `${raw} — could not open the channel page (${html.__error__})` };
+  const m = html.match(/"channelId":"(UC[\w-]+)"/) || html.match(/channel\/(UC[\w-]+)/);
+  if (!m) return { error: `${raw} — opened the page but found no channel id on it` };
+  const name = (html.match(/<title>([^<]*?)(?: - YouTube)?<\/title>/) || [, raw])[1];
+  return { id: m[1], label: name.trim() || raw };
 }
 
 // The feed is small, regular Atom. A regex is enough and keeps this
@@ -73,34 +78,43 @@ const HOOKS = {
 };
 
 async function main() {
-  const i = process.argv.indexOf('--days');
-  const days = i > -1 ? Number(process.argv[i + 1]) || 30 : 30;
+  const args = process.argv.slice(2);
+  const di = args.indexOf('--days');
+  const days = di > -1 ? Number(args[di + 1]) || 30 : 30;
+  const inputs = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--days');
+
+  if (!inputs.length) {
+    console.log('Give me at least one channel. For example:\n');
+    console.log('  node competitorwatch.js @SoberLeon @RecoveryElevator\n');
+    console.log('Handles, full URLs and UC… ids all work. Add --days 14 to look back further.');
+    return;
+  }
+
   const cutoff = new Date(Date.now() - days * 86400000);
   const L = [];
-
-  console.log(`Reading ${CHANNELS.length} YouTube feeds and ${SUBREDDITS.length} subreddits `
-    + `(one request a second, so about ${CHANNELS.length + SUBREDDITS.length} seconds)…\n`);
+  console.log(`Looking up ${inputs.length} channel${inputs.length > 1 ? 's' : ''}…\n`);
 
   L.push(`# Competitor watch — last ${days} days\n`);
-  L.push(`Generated ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC by \`reference/competitor-watch.js\`.\n`);
-  L.push('Sources: YouTube channel RSS (official, key-free) and Reddit public JSON '
-    + 'listings. No logins, no scraping, no TikTok or Instagram.\n');
+  L.push(`Generated ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC.\n`);
+  L.push('Source: YouTube channel RSS — official, key-free, no login.\n');
 
-  L.push('\n## YouTube — what they published, and how often\n');
   const allTitles = [];
-  for (const [name, cid] of CHANNELS) {
-    const raw = await get(`https://www.youtube.com/feeds/videos.xml?channel_id=${cid}`);
-    if (typeof raw !== 'string') { L.push(`\n**${name}** — could not read (${raw.__error__}).\n`); continue; }
+  for (const input of inputs) {
+    const ch = await resolveChannel(input);
+    if (ch.error) { L.push(`\n**${input}** — ${ch.error}\n`); console.log('  ✗', ch.error); continue; }
+    const raw = await get(`https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`);
+    if (typeof raw !== 'string') { L.push(`\n**${ch.label}** — could not read the feed (${raw.__error__}).\n`); console.log('  ✗', ch.label, raw.__error__); continue; }
     const vids = parseFeed(raw, cutoff);
+    console.log('  ✓', ch.label, `— ${vids.length} in ${days} days`);
     const pace = `${vids.length} in ${days} days` + (vids.length ? ` — about one every ${Math.round(days / vids.length)} days` : '');
-    L.push(`\n**${name}** — ${pace}\n`);
+    L.push(`\n**${ch.label}** — ${pace}\n`);
     if (!vids.length) L.push('\nNothing published in this window.\n');
     for (const v of vids) { L.push(`- \`${v.published}\` [${v.title}](${v.url})`); allTitles.push(v.title); }
     L.push('');
   }
 
   if (allTitles.length) {
-    L.push('\n### What their titles have in common\n');
+    L.push('\n## What their titles have in common\n');
     L.push(`Across ${allTitles.length} titles:\n`);
     L.push('| Shape | Titles using it |');
     L.push('|---|---|');
@@ -109,43 +123,16 @@ async function main() {
       .sort((a, b) => b[1] - a[1]);
     for (const [k, c] of counts) L.push(`| ${k} | ${c} of ${allTitles.length} |`);
     L.push('\n**Read it against `KEYWORDS.md`.** If "partner-facing" is low across '
-      + 'everyone, that is the moat showing up from a third direction — nobody is '
-      + 'making videos for the person who loves someone using.\n');
+      + 'everyone, that is the moat showing up from a direction that has nothing '
+      + 'to do with keyword tools — nobody is making videos for the person who '
+      + 'loves someone using.\n');
+  } else {
+    L.push('\nNo videos read, so there is nothing to compare. Check the channel names.\n');
   }
 
-  L.push('\n## Reddit — what this audience is actually saying\n');
-  L.push('Sorted by comments, not upvotes: a post with 200 comments is a question '
-    + 'people need answered, which is a video subject. A post with 2,000 upvotes '
-    + 'and 6 comments is just agreement.\n');
-  const rCut = Date.now() / 1000 - days * 86400;
-  for (const sub of SUBREDDITS) {
-    const data = await get(`https://www.reddit.com/r/${sub}/top.json?t=month&limit=25`, true);
-    L.push(`\n### r/${sub}\n`);
-    if (data.__error__) { L.push(`Could not read (${data.__error__}).\n`); continue; }
-    const posts = (data?.data?.children || [])
-      .map((c) => c.data || {})
-      .filter((d) => (d.created_utc || 0) >= rCut)
-      .sort((a, b) => (b.num_comments || 0) - (a.num_comments || 0))
-      .slice(0, 10);
-    if (!posts.length) L.push('Nothing in this window.\n');
-    for (const p of posts) {
-      L.push(`- **${p.num_comments} comments** · ${p.score} pts — [${String(p.title).slice(0, 110)}](https://reddit.com${p.permalink})`);
-    }
-    L.push('');
-  }
-
-  L.push('\n---\n');
-  L.push('**How to use this.** The titles are the copyable part — a phrasing that '
-    + 'repeats across four channels is one the audience responds to. The Reddit '
-    + 'rows are subject matter: a question asked over and over with a hundred '
-    + 'replies is a script you have not written yet. Check either against '
-    + '`KEYWORDS.md` before making anything — search volume beats a hunch.\n');
-
-  const out = path.join(__dirname, 'watch-report.md');
-  const md = L.join('\n');
-  fs.writeFileSync(out, md);
-  console.log(md.slice(0, 1500));
-  console.log(`\n… full report written to ${out}`);
+  const out = path.join(process.cwd(), 'watch-report.md');
+  fs.writeFileSync(out, L.join('\n'));
+  console.log(`\nReport written to ${out}`);
 }
 
 main();

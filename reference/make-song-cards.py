@@ -69,6 +69,20 @@ CARDS = [
     ("06-you-survived",
      "You survived something\nthat kills people.",
      "Celebrate that. Nobody else is going to do it for you."),
+
+    # Thinking it over. Card 01 says the decision comes back every day; this is
+    # the minute before it, and the tell is that it stops being a decision at
+    # all. Nobody weighs up something they were never going to do.
+    ("07-negotiating",
+     "You're not deciding.\nYou're negotiating.",
+     "And the part of you doing the talking always wins."),
+
+    # After the celebration - the milestone trap, and the one moment in the
+    # whole set nobody else warns about. Deliberately follows card 06: the win
+    # is real, and the night after it is the dangerous one.
+    ("08-after-the-good-news",
+     "Nobody relapses on their worst day.\nThey relapse on their best one.",
+     "\"You've earned it\" is the oldest lie there is."),
 ]
 
 

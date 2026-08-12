@@ -307,3 +307,37 @@ husband` are six separate terms at 140-390 each, all difficulty 27-29. That is
 **about 1,500 searches a month for one page**, as long as the page uses all six
 verbs rather than picking one.
 
+
+---
+
+## ADDENDUM — the two head terms this file missed (pulled live 12 Aug 2026)
+
+The 6 Aug pulls are still final for everything above; nothing there was
+re-run or changed. But the file only ever contained `al anon alternative`
+(0/mo, Skip), and never the head terms themselves — so the two biggest doors
+into the partner audience were invisible. Pulled live from Semrush US on
+12 Aug 2026 and verified before saving, same rule as the rest of the file.
+
+| Term | Vol | KD | Tag | Why |
+|---|---|---|---|---|
+| codependency | 33,100 | 72 | Too hard (page exists) | Head term. The page targets it; the long tail is what will actually land |
+| codependent | 18,100 | 72 | Too hard | Same SERP as above |
+| codependent no more | 9,900 | 43 | Skip | Someone else's book |
+| signs of codependency | 1,900 | 64 | Build | On `/codependency` — the signs section is written to it |
+| how to stop being codependent | 1,600 | 46 | Build | The winnable heart of the cluster |
+| codependency in relationships | 1,300 | 48 | Build | Same page |
+| am i codependent | 880 | 49 | Build | Routes to `/quiz` |
+| codependency test | 390 | 15 | Build | **Lowest difficulty on the whole site.** A dedicated check-in page is the next obvious build |
+| codependency recovery | 260 | 33 | Build | Same page |
+| al anon | 33,100 | 68 | Too hard | Navigational — they want a meeting, not an app. Never bid on it |
+| alanon | 18,100 | 68 | Too hard | Same |
+| al anon meetings | 22,200 | 39 | Skip | We cannot honestly answer this; only Al-Anon can |
+| al anon meetings near me | 14,800 | 32 | Skip | Same — a page here would be a bait page |
+| what is al anon | 3,600 | 33 | Build | Answerable honestly, and CPC **$5.76** says the intent is worth something |
+| al anon online meetings | 2,900 | 26 | Build | Mentioned on `/what-is-al-anon`; the link goes to al-anon.org |
+
+**The rule this cluster tests:** intercepting `al anon meetings near me` would
+be easy and dishonest. `/what-is-al-anon` answers the question and sends people
+to the real organization — and says on the page that we are not affiliated with
+them. The app is offered for the six days between meetings, which is a gap the
+meeting itself does not claim to fill.

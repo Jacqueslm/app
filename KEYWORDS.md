@@ -341,3 +341,136 @@ be easy and dishonest. `/what-is-al-anon` answers the question and sends people
 to the real organization — and says on the page that we are not affiliated with
 them. The app is offered for the six days between meetings, which is a gap the
 meeting itself does not claim to fill.
+
+---
+
+## FINAL PULL — 12 Aug 2026, before the trial ended
+
+Jacques flagged that the Semrush trial was nearly up, so this is a last sweep
+for anything the file would be stuck without. Live US pulls, verified before
+saving. **After this the connector is gone: quote these numbers, do not
+re-estimate them, and do not assume a term missing from this file is unclaimed
+— it may simply never have been pulled.**
+
+Three lanes came out of it that the file did not have at all.
+
+### ⭐ Lane 8 — "dry drunk". ~11,700/mo at difficulty 30-34, and it is his story
+
+| Term | Vol | KD | Tag |
+|---|---|---|---|
+| what is a dry drunk | 2,900 | 32 | **Build** |
+| alcoholic dry drunk | 2,400 | 32 | Build |
+| dry drunk meaning | 2,400 | 31 | Build |
+| dry drunk definition | 1,600 | 30 | Build |
+| dry drunkenness | 1,600 | 33 | Build |
+| dry drunk syndrome | 720 | 34 | Build |
+
+**One page answers all six.** Sober and still the same person — stopped the
+drink, kept the temper, the secrecy, the flatness. It is the single closest
+match in the whole dataset to what Jacques actually lived through and what the
+app's lessons are for, and nothing on the site mentions it. **This is the
+strongest unbuilt page in this file.**
+
+### ⭐ Lane 9 — the grown-up child. A third audience, not a variant of the other two
+
+Everything above serves the drinker or the partner. This is the person who
+*grew up* in it — and it is winnable in a way the partner terms are not.
+
+| Term | Vol | KD | Tag |
+|---|---|---|---|
+| adult children of alcoholics | 8,100 | 31 | **Build** — head term, and gettable |
+| adults of alcoholics | 5,400 | 33 | Build |
+| laundry list / aca laundry list / acoa laundry list | 2,400 / 1,600 / 1,300 | 24 / 16 / 18 | Build — ACA's 14 traits, ~6,000/mo combined at very low difficulty |
+| children of alcoholics | 1,300 | 38 | Build |
+| adult child syndrome | 880 | 6 | Build — near-zero difficulty |
+| adult children of alcoholics and dysfunctional families | 480 | 18 | Build |
+| acoa traits | 390 | 20 | Build |
+| support groups for families of alcoholics | 720 | 32 | Build |
+| **aca meetings / acoa meetings / …near me** | **6,600 / 4,400 / 2,900** | 20 / 11 / 21 | **Skip** |
+
+**The Skip row is the Al-Anon rule again**, and it is the biggest test of it in
+the file: 14,000+ searches a month at difficulty 11-21, which is the cheapest
+traffic anywhere in this document. We cannot tell somebody where their ACA
+meeting is. Catching that search to show them an app instead is a bait page.
+Answer the *what is* questions; send the *where is* ones to the real fellowship.
+
+### Lane 10 — "what is an alcoholic really like"
+
+| Term | Vol | KD | Tag |
+|---|---|---|---|
+| alcoholic personality | 2,400 | 30 | Build |
+| what is an alcoholic personality | 1,000 | 20 | Build |
+| alcoholic personality traits | 880 | 28 | Build |
+| alcoholics personality | 720 | 27 | Build |
+| personality of an alcoholic | 720 | 17 | Build |
+| traits of an alcoholic | 590 | 28 | Build |
+| what is an alcoholics personality | 590 | 26 | Build |
+| alcoholics personality characteristics | 590 | 33 | Build |
+| drinker types | 1,900 | 10 | Build |
+
+**~9,400/mo for one page**, all difficulty 33 or under, all six phrasings of a
+single question. **Tone warning:** this is one keystroke from a page that
+labels people. It has to be written as *"here is what the behaviour looks like
+from the outside, and why it is not who they are"* — the claims audit applies
+at full strength, and Jacques's own story is the only safe narrator.
+
+### The codependency long tail, now with the easy ones named
+
+Extends the addendum above. Everything here is difficulty 25 or under.
+
+| Question | Vol | KD |
+|---|---|---|
+| how to fix codependent relationship | 170 | **8** |
+| how to work with a codependent partner | 260 | **9** |
+| how to fix codependency in a relationship | 140 | **10** |
+| how to fix a codependent relationship | 210 | **13** |
+| am i codependent quiz | 390 | **14** |
+| what does codependency look like | 390 | **15** |
+| why is codependency bad | 170 | 16 |
+| is codependency a mental illness | 210 | 20 |
+| how to heal from codependency / how to heal codependency | 320 / 170 | 25 |
+| how to cure codependency | 260 | 26 |
+
+`am i codependent quiz` (390, KD 14) plus `codependency test` (390, KD 15) is
+**780/mo of quiz intent at almost no difficulty** — the `/quiz` pattern already
+exists, so this is a build, not an invention.
+
+### Partner-side terms worth having, all winnable
+
+| Term | Vol | KD | Note |
+|---|---|---|---|
+| trauma bonding | 33,100 | 62 | Too hard as a page. Real as **video** — biggest untapped term for her |
+| living with an alcoholic | 1,000 | 23 | Build |
+| how to help an alcoholic spouse | 260 | 20 | Build |
+| alcoholic in denial | 210 | 17 | Build |
+| walking on eggshells relationship | 210 | 18 | Build |
+| loving an alcoholic | 170 | 5 | Build — lowest KD on the partner side |
+| detachment with love | 140 | 19 | Build — Al-Anon's own phrase |
+| when to leave an alcoholic | 110 | 20 | Build, carefully — never advise leaving or staying |
+| setting boundaries with an alcoholic | 70 | 15 | Build |
+| enabling vs helping | 70 | 10 | Build |
+| nar anon | 1,600 | 51 | Skip — same rule as al anon |
+
+### Self-side odds and ends
+
+| Term | Vol | KD | Note |
+|---|---|---|---|
+| how long does hangxiety last | 590 | **16** | **Add to the existing /hangxiety page** — it already ranks for the head term |
+| is porn cheating | 2,900 | 35 | Build (video) — the partner-porn lane, said safely |
+| porn addiction recovery timeline | 590 | 33 | Build |
+| relapse prevention plan | 3,600 | 49 | Borderline |
+| sober curious | 2,900 | 64 | Too hard |
+| alcohol withdrawal timeline | 8,100 | 59 | Too hard — and medical. Leave it |
+| how to quit porn | 5,400 | 59 | Too hard |
+| 90 days sober | 390 | **6** | Build — trivially easy |
+| sobriety milestones | 140 | **8** | Build |
+| accountability partner app | 210 | 22 | Build **when `/together` ships** — the deferred feature has a search term waiting |
+| smart recovery vs aa | 390 | 21 | Build |
+| aa alternatives | 390 | 27 | Build |
+| faith based recovery | 110 | 20 | Build — **CPC $11.93**, the highest commercial intent in the file |
+| free sobriety app | 260 | 46 | Borderline |
+| sober tracker app | 320 | 45 | Borderline |
+
+**Build order, if the pages get built in the order that pays:** dry drunk →
+adult children of alcoholics → alcoholic personality → the codependency quiz.
+That is roughly 30,000 searches a month, all at difficulty the site can reach.

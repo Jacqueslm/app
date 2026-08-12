@@ -219,6 +219,31 @@ it is a bait page. The app is offered for the six days *between* meetings.
 this environment — the network policy blocks the domain — so it went out
 unverified.)*
 
+### ⭐ LAST SEMRUSH PULL — the trial is ending, KEYWORDS.md is now closed
+Jacques said the trial was nearly up, so a final sweep went into `KEYWORDS.md`
+("FINAL PULL — 12 Aug 2026"). **After this there is no way to pull a number.
+Quote the file; never re-estimate, and never assume a term missing from it is
+unclaimed — it may simply never have been pulled.**
+
+Three lanes came out of it that the file never had, all bigger than anything
+currently built:
+
+1. **"dry drunk" — ~11,700/mo at difficulty 30-34, one page.** Sober and still
+   the same person. It is the closest term in the whole dataset to what Jacques
+   actually lived, the site never mentions it, and it is the strongest unbuilt
+   page anywhere in the file.
+2. **Adult children of alcoholics — 8,100/mo at KD 31**, plus the "laundry
+   list" cluster at ~6,000/mo and difficulty 14-24. **A third audience**, not a
+   variant of the drinker or the partner: the person who grew up in it.
+3. **"Alcoholic personality" — ~9,400/mo, all KD 33 or under**, six phrasings
+   of one question. Tone warning in the file: one keystroke from a page that
+   labels people.
+
+**The Skip rule held again and it cost the most this time:** `aca meetings` and
+`acoa meetings near me` are 14,000+/mo at difficulty 11-21 — the cheapest
+traffic in the document — and they are tagged Skip for the same reason as
+`al anon meetings near me`. We cannot say where somebody's meeting is.
+
 ### The finding that should steer marketing
 Semrush, live: **the partner audience is ~74,500 US searches a month against
 ~23,000 for the drinker.** Three times bigger, and the segment nothing else in

@@ -91,6 +91,14 @@ CARDS = [
     ("09-handed-it-over",
      "You didn't lose your strength.\nYou handed it over.",
      "One yes at a time. It comes back the same way."),
+
+    # Letting go of the blame for somebody else's addiction. Straight at the
+    # partner - the half of this audience nobody else writes for - and it names
+    # the behavior rather than the feeling, because self-blame doesn't feel like
+    # blame from the inside. It feels like searching.
+    ("10-nothing-you-did",
+     "You keep looking for the thing\nyou did wrong.",
+     "There isn't one. That's the part nobody tells you."),
 ]
 
 

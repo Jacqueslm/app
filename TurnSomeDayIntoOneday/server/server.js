@@ -195,6 +195,15 @@ app.get('/what-is-al-anon', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'what-is-al-anon.html'));
 });
 
+// "Dry drunk" - about 11,700 searches a month across six phrasings, all at
+// difficulty 30-34, and one page answers the lot: what is a dry drunk / dry
+// drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.
+// Sober and still the same person. Both audiences search it - the one who
+// stopped and the one living with them - so the page carries a CTA for each.
+app.get('/dry-drunk', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'dry-drunk.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

@@ -330,3 +330,51 @@ because it is true and because it is why a librarian will care.
 
 Library systems keep community resource lists and answer their email — this is
 one of the few doors in this file that reliably opens.
+
+### 17. NASADAD — all 50 state agencies in one email — [ ] sent
+
+**Send to:** mwhitter@nasadad.org — **Melanie Whitter, Deputy Executive Director**
+— **draft in Gmail**
+1919 Pennsylvania Ave NW, Suite M-250, Washington DC 20006 · (202) 293-0090
+Email pattern: `finitial+last@nasadad.org`
+
+The National Association of State Alcohol and Drug Agency Directors. **Every
+state's substance-use agency director is a member.** This replaces the plan to
+email fifty agencies one at a time — and it is a better email, because it asks
+someone who knows all fifty which of them it might suit rather than assuming.
+
+The draft leads with what the app **isn't**: it doesn't diagnose, doesn't treat,
+doesn't replace anything a state funds. A national body of state directors will
+check that before reading anything else.
+
+### 18. Celebrate Recovery — [ ] sent
+
+**Send to:** info@celebraterecovery.community — **draft in Gmail**
+Global HQ Lake Forest, CA · corporate office 21 Otter Dr, Cherokee Village, AR 72529
+Church-based recovery groups in tens of thousands of churches worldwide.
+
+**The angle, and it's the strongest in this file:** their groups meet **once a
+week**, and the week is the hard part. The app lives in the six days between —
+it is not a group and not a sponsor and never pretends to be either. It is
+something to hold onto on a Tuesday night. That framing makes it a complement
+rather than a competitor, which is the only way a faith network says yes.
+
+### 19. SHRM of Greater St. Louis — [ ] sent
+
+**Start at:** https://shrmstl.org/form.php?form_id=13 (contact form; their email
+is obfuscated everywhere it appears)
+2650 S. Hanley Rd, Suite 100, St. Louis, MO 63144 · (314) 892-7994
+They run a **Business Partners Directory** — the local version of the SHRM
+national directory, and the room every St. Louis HR person is already in.
+
+**Ask about the directory, not about a partnership.** One is a form; the other
+is a sales call they don't want.
+
+### 20. Salvation Army Adult Rehabilitation Centers — [ ] not sent
+
+Their centres are run regionally and each publishes its own address; there is a
+command contact page at
+https://westernarc.salvationarmy.org/adult_rehabilitation_centers_command/contact-us
+**No single national address found**, so this is a per-region job rather than
+one email. Worth doing, not worth doing badly — park it until something in
+Lane E or G answers.

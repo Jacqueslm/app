@@ -342,10 +342,111 @@ the pitch asked for an interview. **Check the format before writing the ask.**
 For creators that means: watch two of their videos first. One line proving you
 did beats three paragraphs proving you can write.
 
+---
+
+# BATCH 3 — actual names (12 Aug)
+
+You said: *"you find them, no being lazy — I do enough work, ideas, other
+resources, the vision."* Fair. Batch 2 handed you a method instead of a list.
+Here is the list.
+
+**One honest caveat and then no more excuses.** These came out of published
+directories and treatment-centre round-ups, not from me opening TikTok — this
+machine is blocked from most of the web. **Follower counts are as-of the list
+that published them**, and a handle can change. Look at each one for ten
+seconds before you send. But these are real people with real audiences, not
+four invented channel ids.
+
+## TikTok — start here, they answer fastest
+
+| Handle | Following | Who they are |
+|---|---|---|
+| **@abifeltham** | ~73.5K | "Past junkie → recovery 2018. Spicy brain. Sober mom." Mixes the hard stuff with humour |
+| **@julseybee_** | ~68.7K | Recovery, daily |
+| **@recoveringaddict8** | ~60.5K | Straight-ahead recovery storytelling |
+| **@albertsbucketlist** | ~56.3K | Sober life, not sober lecturing |
+| **@realchrishoward** | ~53K | Recovery + men's audience |
+
+**Order to send: @abifeltham first.** Sober mom + humour + "spicy brain" means
+her audience is people who have not got it perfect, which is your audience.
+Then @realchrishoward — a male recovery audience is where a 38-years-and-free-at-50
+story lands hardest and where you have the least competition.
+
+All five sit in the 50–75K band. That is above the 5–80K rule from batch 2 but
+still under a manager. Use the **TikTok DM template** above, unchanged, and
+watch two of their videos first.
+
+## YouTube — and these are also the channels your scraper has been waiting for
+
+`competitor-watch.js` has been sitting there needing channels from you since
+you downloaded it. **These are the channels.** Feed it these and it works
+tonight.
+
+| Channel | Subs | Who |
+|---|---|---|
+| **Sober Leon** — `@LeonSylvester` | ~121K | UK, rock bottom → sober after heavy drink and drug use. Biggest of the set |
+| **Soberdogs** | ~46.2K | Kyle Ruggeri, certified addiction recovery coach |
+| **Be Sober** (Quit Alcohol Coach) | ~36K | Simon Chapple, bestselling sobriety author, This Naked Mind coach |
+| **SMART Recovery** | ~28.1K | The organisation, not a person — different door, see below |
+| **Rewired Addiction** | — | Derek Lambert, quit alcohol *and* heroin. Lived experience, hard end |
+| **Fostering Resilience** | — | Dr. KJ Foster, counsellor, substance use + trauma, 15+ years |
+
+Use the **YouTube email template** above — the address is on the About tab.
+
+**Two different asks in that table.** The five people get "no ask attached."
+**SMART Recovery is an organisation** and belongs in `COMPANIES.md`, not here —
+they run meetings worldwide and keep resource lists, so that one is the Lane G
+pitch, not a creator DM.
+
+**Dr. KJ Foster is the credibility one.** A counsellor with 15 years and a
+doctorate saying the app is not harmful is worth more than 100K views, because
+it is the thing you can quote to the Salvation Army, to Missouri DBH, and on a
+SHRM stage.
+
+## Instagram
+
+| Handle | Who | Note |
+|---|---|---|
+| **@recoveryisthenewblack** | Michelle Smith — sober motherhood | Not yet contacted anywhere |
+| **@soberblackgirlsclub** | Sober Black Girls Club | A community, not one person — they amplify |
+| **Sober Brown Girls** | Kirstin Walker | Women of colour in recovery |
+| **@miraclesarebrewing** | Carly Benson | **Already batch 1 #9** — the DM is a second door if the email went quiet |
+| **@recoveryelevator** | Paul Churchill | **Already batch 1 #1** — same |
+| **@thisnakedmind** | Annie Grace (~large) | **Batch 1 #10, still send last** |
+| Laura McKowen | ~86K | **Batch 1 #6** |
+
+**The three at the top are new.** The rest are people you have already written
+to as podcasts — do not pitch them twice in one week from two directions, it
+reads as a mailing list.
+
+## The partner lane — still the gap, and I could not fill it
+
+One real find: **The Recovery Couple** — a couple who post their recovery
+across platforms and run a Facebook Live show. Multi-platform, so search the
+name on whichever one you are on.
+
+Beyond that, **there is no published list of partner-side creators.** I looked.
+The directories are all sober-person directories. What exists instead is
+hashtags with real traffic behind them:
+
+`#lovinganaddict` · `#alcoholichusbands` · `#wifeofanalcoholic` ·
+`#livingwithanalcoholic` · `#spouseofanalcoholic` · `#spouseofanaddict` ·
+`#codependencyrecovery` · `#betrayaltrauma`
+
+**That absence is the opportunity, not a dead end.** Nobody has built the list
+because nobody serves that audience — which is the same reason `for-her.html`
+and the partner section exist and almost no app has one. Ten minutes in those
+hashtags, sorted by Users, gets you names no treatment centre has written down.
+
+**And the copy rule holds here too.** `#wifeofanalcoholic` is a real search term
+so it goes in as-is when you're matching what people type. What you *say* to
+them never assumes a husband and a wife — it's built for all types of couple.
+
 ## Log
 
 | Platform | Found | Sent | Replied |
 |---|---|---|---|
-| TikTok | | | |
-| Instagram | | | |
-| YouTube | | | |
+| TikTok | 5 | | |
+| Instagram | 3 new | | |
+| YouTube | 6 | | |
+| Partner | 1 + hashtags | | |

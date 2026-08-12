@@ -21,6 +21,10 @@
 <meta name="theme-color" content="#0f0c29">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/icon-192.png">
+<!-- Without this, Add to Home Screen from the front page saves a Safari
+     bookmark to the marketing copy instead of installing the app. The
+     manifest's start_url is /app, so installing from here opens the app. -->
+<link rel="manifest" href="manifest.json">
 <style>
 :root{
   --brand:#0f0c29;--accent:#534AB7;--green:#7ee8a2;
@@ -307,6 +311,130 @@ function sendToHer(){
     window.prompt('Copy this link:',url);
   }
 }
+
+/* ── INSTALL NUDGE ──────────────────────────────────────────────────────────
+   Cold traffic lands here, not on /app, so the same card the app carries has
+   to exist on the front page too — otherwise the only people who ever see it
+   are the ones already using the product.
+
+   Apple has never implemented beforeinstallprompt, and Chrome and Edge on iOS
+   cannot install a PWA at all, so on an iPhone there is no button anyone can
+   offer. The instruction IS the install mechanism. Standalone rather than
+   shared with index.html: this page has none of the app's helpers, and one
+   self-contained block beats loading the app's runtime on a marketing page. */
+(function(){
+  var KEY='installNudgeDismissed', QUIET=14*86400000, deferred=null;
+
+  function standalone(){
+    try{ return window.matchMedia('(display-mode: standalone)').matches
+              || window.navigator.standalone===true; }catch(e){ return false; }
+  }
+  function iOS(){
+    var ua=navigator.userAgent||'';
+    // iPadOS 13+ claims to be a Mac; touch points are the only tell.
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints>1);
+  }
+  function iOSSafari(){
+    return iOS() && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Firefox/i.test(navigator.userAgent||'');
+  }
+  function muted(){
+    try{ var at=parseInt(localStorage.getItem(KEY)||'0',10);
+         return !!at && (Date.now()-at)<QUIET; }catch(e){ return false; }
+  }
+
+  var SHARE='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"'
+    +' stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    +'<path d="M12 4v11"/><path d="M8.5 7.5 12 4l3.5 3.5"/>'
+    +'<path d="M9 10H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg>';
+  var PHONE='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"'
+    +' stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    +'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>';
+  var DOWN='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor"'
+    +' stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    +'<path d="M12 4v12"/><path d="M8 12l4 4 4-4"/><path d="M4 20h16"/></svg>';
+
+  function close(){
+    try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){}
+    var n=document.getElementById('install-nudge');
+    if(n) n.parentNode.removeChild(n);
+  }
+
+  function show(kind){
+    if(standalone()||muted()||document.getElementById('install-nudge'))return;
+    var ico=SHARE, title, sub, btn='';
+    if(kind==='ios-safari'){
+      title='Keep this on your home screen';
+      sub='Tap <b>Share</b> at the bottom of Safari — the square with the arrow '
+         +'pointing up — then scroll down and tap <b>Add to Home Screen</b>. '
+         +'Reminders only work once you do.';
+    }else if(kind==='ios-other'){
+      ico=PHONE;
+      title='Open this in Safari to keep it';
+      sub='Apple only lets <b>Safari</b> put a web app on the home screen — this '
+         +'browser cannot do it. Open the same link in Safari, then tap Share → '
+         +'Add to Home Screen.';
+    }else{
+      ico=DOWN;
+      title='Install it on your phone';
+      sub='Opens on its own like any other app, works offline, and reminders '
+         +'arrive properly.';
+      btn='Install';
+    }
+
+    var css=document.createElement('style');
+    css.textContent=
+      '#install-nudge{position:fixed;left:50%;transform:translateX(-50%) translateY(10px);'
+      +'bottom:calc(14px + env(safe-area-inset-bottom));width:min(100% - 20px,420px);'
+      +'background:var(--s2);border:1px solid var(--bdr);border-radius:14px;padding:13px 14px;'
+      +'z-index:900;box-shadow:0 8px 26px rgba(0,0,0,.45);opacity:0;'
+      +'transition:opacity .25s ease,transform .25s ease}'
+      +'#install-nudge.up{opacity:1;transform:translateX(-50%) translateY(0)}'
+      +'#install-nudge .r{display:flex;align-items:flex-start;gap:11px}'
+      +'#install-nudge .i{flex:0 0 auto;width:34px;height:34px;border-radius:10px;'
+      +'background:rgba(83,74,183,.28);color:#b9b2ff;display:flex;align-items:center;justify-content:center}'
+      +'#install-nudge .t{font-size:13.5px;font-weight:650;color:var(--tp);line-height:1.35}'
+      +'#install-nudge .s{font-size:12.5px;color:var(--ts);line-height:1.5;margin-top:3px}'
+      +'#install-nudge .s b{color:var(--tp);font-weight:650}'
+      +'#install-nudge .x{flex:0 0 auto;background:none;border:none;color:var(--tm);'
+      +'cursor:pointer;font-size:19px;line-height:1;padding:0;font-family:var(--f)}'
+      +'#install-nudge .go{margin-top:10px;width:100%;background:var(--accent);color:#fff;'
+      +'border:none;border-radius:10px;padding:11px;font-size:13.5px;font-weight:650;'
+      +'cursor:pointer;font-family:var(--f)}';
+    document.head.appendChild(css);
+
+    var el=document.createElement('div');
+    el.id='install-nudge';
+    el.setAttribute('role','dialog');
+    el.innerHTML='<div class="r"><div class="i">'+ico+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="t">'+title+'</div>'
+      +'<div class="s">'+sub+'</div></div>'
+      +'<button class="x" aria-label="Not now">&times;</button></div>'
+      +(btn?'<button class="go">'+btn+'</button>':'');
+    document.body.appendChild(el);
+
+    el.querySelector('.x').addEventListener('click',close);
+    var go=el.querySelector('.go');
+    if(go) go.addEventListener('click',function(){
+      if(!deferred){ close(); return; }
+      var p=deferred; deferred=null;
+      try{ p.prompt(); }catch(e){}
+      close();
+    });
+    requestAnimationFrame(function(){ el.classList.add('up'); });
+  }
+
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); deferred=e;
+    if(!standalone()&&!muted()) setTimeout(function(){ show('android'); },20000);
+  });
+  window.addEventListener('appinstalled',close);
+
+  // iPhone gets no event, so it runs on a timer. 20 seconds — long enough that
+  // somebody who bounced straight off the page never sees it.
+  if(iOS()&&!standalone()&&!muted()){
+    setTimeout(function(){ show(iOSSafari()?'ios-safari':'ios-other'); },20000);
+  }
+})();
 </script>
 </body>
 </html>

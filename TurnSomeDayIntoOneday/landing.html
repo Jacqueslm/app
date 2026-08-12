@@ -429,6 +429,17 @@ function sendToHer(){
   });
   window.addEventListener('appinstalled',close);
 
+  // ?install=1 shows it immediately and ignores a previous dismissal, so this
+  // can be checked in three seconds instead of waiting out a timer and then
+  // guessing whether nothing appeared because it is broken or because the
+  // twenty seconds had not elapsed. Deliberately never triggered by anything
+  // but the query string.
+  if(/[?&]install=1/.test(location.search)){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    show(iOS() ? (iOSSafari()?'ios-safari':'ios-other') : 'android');
+    return;
+  }
+
   // iPhone gets no event, so it runs on a timer. 20 seconds — long enough that
   // somebody who bounced straight off the page never sees it.
   if(iOS()&&!standalone()&&!muted()){

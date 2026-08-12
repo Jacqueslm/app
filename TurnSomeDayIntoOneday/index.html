@@ -10712,9 +10712,16 @@ window.addEventListener('beforeinstallprompt',(e)=>{
 // Once it is installed there is nothing left to ask for.
 window.addEventListener('appinstalled',()=>{ deferredInstall=null; dismissNudge(); });
 
-// iPhone gets no event, so it is on a timer. 30 seconds in — long enough that
-// somebody who bounced immediately never sees it.
-if(isIOSDevice()&&!isStandalone()&&!nudgeMuted()){
+// ?install=1 shows it immediately and ignores a previous dismissal, so this can
+// be checked in three seconds instead of waiting out a timer and then guessing
+// whether nothing appeared because it is broken or because the thirty seconds
+// had not elapsed. Only ever triggered by the query string.
+if(/[?&]install=1/.test(location.search)){
+  try{ localStorage.removeItem(NUDGE_KEY); }catch(e){}
+  showNudge(isIOSDevice() ? (isIOSSafari()?'ios-safari':'ios-other') : 'android');
+}else if(isIOSDevice()&&!isStandalone()&&!nudgeMuted()){
+  // iPhone gets no event, so it is on a timer. 30 seconds in — long enough that
+  // somebody who bounced immediately never sees it.
   setTimeout(()=>showNudge(isIOSSafari()?'ios-safari':'ios-other'),30000);
 }
 

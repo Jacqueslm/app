@@ -445,8 +445,28 @@ SHRM is the largest HR body in the world and this is where its members go
 looking for benefits vendors. **The listing is free** — SHRM says so on the
 page. ComPsych and Workplace Options are on that shelf.
 
-I could not open the form (their site is blocked from this machine), so here is
-the copy to paste into whatever fields it asks for:
+**⚠️ CORRECTION, 12 Aug — it is not a form.** Jacques opened it. The page is a
+**Calendly booking with a MediaBrains marketing specialist, 15 minutes, phone
+or Zoom.** MediaBrains runs the directory on SHRM's behalf. I said "free
+self-serve listing" and it isn't self-serve.
+
+**Take the call anyway, but know what it is.** MediaBrains runs directories for
+dozens of trade associations and the model is always the same: a free basic
+listing exists, and the call is how they get you on the phone to sell the
+enhanced one. That is a fair trade for 15 minutes to be on SHRM's shelf.
+
+**What to say, and the one sentence that ends the upsell:**
+
+> "I'm a solo founder, the product is free to use, and I have no marketing
+> budget at all this year. Put me on the free basic listing and if it sends
+> anyone I'll come back to you about the paid tier."
+
+Say it early, in the first two minutes, before the deck. It is true, it gives
+them a reason to keep you on file rather than write you off, and it stops the
+whole pitch. **Do not agree to anything on the call itself** — "send it to me
+in an email" is a complete sentence.
+
+Here is the copy for whatever they ask you to supply:
 
 **Company:** Turn Someday Into Day One
 **URL:** https://turnsomedayintodayone.com
@@ -475,3 +495,13 @@ instead — do not tick EAP if it asks you to certify it, you are not one.
 
 **Take the free tier only.** If it upsells a featured placement, decline. A
 paid listing before you know it converts is the exact spend to avoid.
+
+---
+
+## Log — 12 Aug, evening
+
+All seven Lane E/F/G drafts **SENT**: Salvation Army Midland Division, NASADAD,
+ARHE, Celebrate Recovery, Faces & Voices, Missouri DBH, both St. Louis libraries.
+
+Next round comes from `reference/NEW-AVENUES.md` — twenty-five targets pulled
+from who actually ranks, not from guessing.

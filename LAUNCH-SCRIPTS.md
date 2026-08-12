@@ -329,16 +329,17 @@ and Netflix. There is no authoritative answer here yet.
 
 ---
 
-### 17. The 2pm plan — the naming play
+### 17. The Day One Plan — named 12 Aug
 
-**On screen:** WRITE IT AT 2PM, NOT 2AM
+**On screen:** THE DAY ONE PLAN
 
 > Here's what actually worked. At 2pm, when you're fine, you write the plan for
 > 2am, when you're not. 2am you doesn't make good decisions. 2pm you does.
 > That's the whole thing, and it's free.
 
-*42 words · ~14s.* Read the section below before shooting this one — it's the
-most important finding in the AI file and it needs a decision from you first.
+*42 words · ~14s.* **Named.** See `DAY-ONE-PLAN.md` — the plan has two halves,
+and the second one (what you read *after* a relapse) is the half no competitor
+has.
 
 ---
 
@@ -414,6 +415,21 @@ this block, shoot this.
 
 ---
 
+### 23. The morning after — the one with no competition
+
+**On screen:** THE HARD PART ISN'T THE NIGHT
+
+> The hard part isn't the night you drink. It's the morning after. The urge is
+> gone and all that's left is what you think of yourself. That's where people
+> quit for good. There's a free app, and it wrote you something for that
+> morning.
+
+*44 words · ~15s.* Everyone makes content about the craving. **Nobody makes it
+about the morning after**, which is where people actually leave. This is the
+most distinctive script in the file and it came straight from Jacques on 12 Aug.
+
+---
+
 ### The one NOT to make
 
 **Alcohol withdrawal — 674,800 AI demand, the biggest number in the file.**
@@ -448,14 +464,11 @@ tell me none of them:
 
 | Name | Reads like |
 |---|---|
-| **The 2pm Plan** | plain, describes itself, hardest to forget |
-| **The 2am Letter** | you're writing *to* someone, which is what it feels like |
-| **The Sober Hour Plan** | broadest, works for food and scrolling too, least distinctive |
-| **Note to 2am** | shortest, most repeatable, least self-explanatory |
+| **The Day One Plan** | ✅ **CHOSEN 12 Aug.** Carries the app's name, and names what it is for — getting back to day one. |
 
-My pick is **The 2pm Plan** — it's the only one that explains itself in four
-words, and "2pm, not 2am" is the whole idea in one breath. But this is your
-product and your language, so it's your call.
+Decided. And the naming was the smaller half of it — see `DAY-ONE-PLAN.md` for
+the correction that came with it: the plan is not only for before, it is for the
+morning after, which is where people actually leave.
 
 ---
 

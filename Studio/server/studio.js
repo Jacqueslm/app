@@ -1422,11 +1422,31 @@ router.get('/backup', (req, res) => {
         archive.file(file, { name: `backup/${a.kind}s/${a.id}-${a.label.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 50)}${path.extname(a.filename)}` });
       }
     }
+    // Everything the database holds that is NOT a file on disk. Projects are
+    // safe without this — they are saved as assets, so the loop above already
+    // copied them — but teleprompter scripts, locations and relationships live
+    // in their own tables and were silently missing from every backup taken so
+    // far. A backup that quietly leaves things out is worse than no backup,
+    // because you only find out on the day the machine dies.
+    const safe = (fn) => { try { return fn() || []; } catch (_) { return []; } };
     const manifest = {
       exportedAt: new Date().toISOString(),
       assets: assets.map((a) => ({ id: a.id, kind: a.kind, label: a.label, meta: a.meta ? JSON.parse(a.meta) : null, createdAt: a.created_at })),
-      characters: db.getCharacters(req.userId).map((c) => ({ id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word })),
+      // loraUrl is the face lock. It is a trained model that cost money and ten
+      // minutes, and it lives on fal, not here — so this URL is the only thing
+      // standing between you and paying to train it twice.
+      characters: safe(() => db.getCharacters(req.userId)).map((c) => ({ id: c.id, name: c.name, loraUrl: c.lora_url, triggerWord: c.trigger_word })),
+      locations: safe(() => db.getLocations(req.userId)),
+      relationships: safe(() => db.getRelationships(req.userId)),
+      scripts: safe(() => db.getScripts(req.userId)),
     };
+    // Scripts are the teleprompter ones — the words, not a file. Written out
+    // separately as well as in the manifest so they can be read without
+    // digging through JSON.
+    for (const sc of manifest.scripts) {
+      const nm = String(sc.title || sc.name || `script-${sc.id}`).replace(/[^a-zA-Z0-9_ -]/g, '_').slice(0, 50);
+      archive.append(String(sc.body || sc.text || ''), { name: `backup/scripts/${sc.id}-${nm}.txt` });
+    }
     archive.append(JSON.stringify(manifest, null, 2), { name: 'backup/manifest.json' });
     archive.finalize();
   } catch (err) {

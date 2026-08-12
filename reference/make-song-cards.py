@@ -83,6 +83,14 @@ CARDS = [
     ("08-after-the-good-news",
      "Nobody relapses on their worst day.\nThey relapse on their best one.",
      "\"You've earned it\" is the oldest lie there is."),
+
+    # Giving your strength away. Says the opposite of what this audience has
+    # been told their whole life - not that they are weak, but that the strength
+    # was handed over and can be taken back the same way it went. "One at a
+    # time" is also literally how the counter works.
+    ("09-handed-it-over",
+     "You didn't lose your strength.\nYou handed it over.",
+     "One yes at a time. It comes back the same way."),
 ]
 
 

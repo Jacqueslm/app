@@ -27,7 +27,7 @@ Images 4 and 5 are the SAME living room from different positions and must
 match each other. Image 1 is the same kitchen as the reference photo.
 
 STYLE — apply to all six: cinematic photograph, shot on 35mm, shallow depth of
-field, moody realistic lighting, muted colour grade, documentary realism,
+field, moody realistic lighting, muted color grade, documentary realism,
 vertical 9:16 composition.
 
 DO NOT PUT ANY TEXT IN THE IMAGES. No captions, no subtitles, no titles, no
@@ -42,9 +42,9 @@ phone screen is the brightest thing in the frame.
 
 The screen shows the app in the second attached image — copy it exactly: a
 very dark navy background, a large circle in the upper middle drawn as a thin
-bright green ring with a darker teal centre, and two lines of white text
+bright green ring with a darker teal center, and two lines of white text
 directly beneath the circle. Below that, smaller and dimmer, a rounded button.
-Keep the proportions and the colours; the small text at the bottom can fall
+Keep the proportions and the colors; the small text at the bottom can fall
 soft and out of focus.
 
 2. OUT THE DOOR
@@ -65,7 +65,7 @@ wooden floor. His shoulders are low. Pale sofa visible behind him.
 
 5. THREE O'CLOCK
 The same living room as image 4, from further back. Elias standing alone in
-the middle of it, nothing in his hands, arms at his sides. Flat grey
+the middle of it, nothing in his hands, arms at his sides. Flat gray
 mid-afternoon light, no lamps on, no sunlight. The television is off and
 black. The room is tidy and completely still. Wide shot with a lot of empty
 space above and around him. It should feel too quiet and slightly
@@ -90,7 +90,7 @@ picture ends up as a second set of words over the first.
 
 **The clock is gone.** Image generators draw clock faces at ten past ten
 almost every time, whatever you ask for. Shot 5 doesn't need a clock — flat
-grey light, no lamps and a dead television say "afternoon" on their own. Never
+gray light, no lamps and a dead television say "afternoon" on their own. Never
 hang a shot on a detail the generator reliably gets wrong.
 
 **Which rooms match which.** "Same apartment throughout" is too loose. Shots 4
@@ -115,7 +115,7 @@ reference for the phone display. An app screen that looks wrong is worse than
 no app screen.
 
 **Image 5 has to come back uncomfortable.** If it arrives warm and cosy, ask
-again: flat grey light, no lamps, more empty space above his head.
+again: flat gray light, no lamps, more empty space above his head.
 
 **Image 6 has to say "Day 2" legibly.** AI handwriting usually doesn't. If it
 comes back as scribble, write it on paper yourself, photograph it, and use

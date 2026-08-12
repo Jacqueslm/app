@@ -5,7 +5,7 @@
 //
 // Every voice here is public domain or CC0. That is deliberate: videos made
 // with these are sold and monetised, and most of the good-sounding Piper
-// voices (hfc_female, hfc_male, ryan, lessac) are non-commercial licences that
+// voices (hfc_female, hfc_male, ryan, lessac) are non-commercial licenses that
 // we are not allowed to use for that.
 const path = require('path');
 const fs = require('fs');

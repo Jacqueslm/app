@@ -255,7 +255,7 @@ Turn Someday Into Day One · St. Louis
 confirmed in search*
 **Why them:** Kirkwood publishes a page titled "Behavioral Health Benefits and
 **Free Resources**" for staff. Same play as Parkway — you are adding an item to
-a list that already exists, not proposing a programme. That line is in the
+a list that already exists, not proposing a program. That line is in the
 email below.
 **Benefits page:** https://www.kirkwoodschools.org/staff/human-resources/employee-resources/employee-benefits
 
@@ -543,7 +543,7 @@ email pattern rather than a published address; each has a named fallback in its
 entry above. A bounce is not a no — it is a typo, and it is worth thirty seconds.
 
 Fill the rest in as you go. One "yes" here is worth more than ten rehab listings —
-it's a name you can drop with every neighbouring district after it.
+it's a name you can drop with every neighboring district after it.
 
 **Sources for Batch 1:**
 [Osceola County Schools](https://www.osceolaschools.net/46370_4) ·

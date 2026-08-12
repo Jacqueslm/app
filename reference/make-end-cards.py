@@ -31,7 +31,7 @@ CARDS = [
 
 
 def tracked(draw, text, font, tracking, cx, y, fill):
-    """Draw letterspaced text centred on cx. PIL has no tracking, so step it."""
+    """Draw letterspaced text centered on cx. PIL has no tracking, so step it."""
     widths = [draw.textlength(ch, font=font) for ch in text]
     total = sum(widths) + tracking * (len(text) - 1)
     x = cx - total / 2
@@ -48,7 +48,7 @@ def build(name, line1, line2, k=1):
     f1 = ImageFont.truetype(REG, 46 * k)
     f2 = ImageFont.truetype(REG, 28 * k)
 
-    # Sits just above centre. Dead centre reads as a title card; a little high
+    # Sits just above center. Dead center reads as a title card; a little high
     # reads as an ending.
     y = H * k * 0.46
     tracked(d, line1, f1, 14 * k, W * k / 2, y, INK)

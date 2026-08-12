@@ -48,5 +48,5 @@ The real number to watch is **referring domains that are recovery, health or
 media sites**. Today that is zero.
 
 Which makes `OUTREACH.md` the only genuine link-building in play: 16 reachable
-targets left, each one a real editorial mention on a treatment-centre or
+targets left, each one a real editorial mention on a treatment-center or
 health-media site. One of those outweighs all 14 domains above.

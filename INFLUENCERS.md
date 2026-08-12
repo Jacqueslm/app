@@ -287,7 +287,7 @@ takes you five minutes and takes me a search I cannot verify.
 2. Take anyone with **5,000–80,000 followers.** Not bigger. Somebody with 500k
    has a manager and a rate card; somebody with 8k reads their own messages and
    answers.
-3. Skip anyone selling a coaching programme — they see you as competition.
+3. Skip anyone selling a coaching program — they see you as competition.
    Keep the ones just telling their story.
 4. Their email is in the bio, or on a Linktree in the bio. If there is no email,
    the DM is fine — on TikTok and Instagram it is normal.
@@ -351,7 +351,7 @@ resources, the vision."* Fair. Batch 2 handed you a method instead of a list.
 Here is the list.
 
 **One honest caveat and then no more excuses.** These came out of published
-directories and treatment-centre round-ups, not from me opening TikTok — this
+directories and treatment-center round-ups, not from me opening TikTok — this
 machine is blocked from most of the web. **Follower counts are as-of the list
 that published them**, and a handle can change. Look at each one for ten
 seconds before you send. But these are real people with real audiences, not
@@ -361,13 +361,13 @@ four invented channel ids.
 
 | Handle | Following | Who they are |
 |---|---|---|
-| **@abifeltham** | ~73.5K | "Past junkie → recovery 2018. Spicy brain. Sober mom." Mixes the hard stuff with humour |
+| **@abifeltham** | ~73.5K | "Past junkie → recovery 2018. Spicy brain. Sober mom." Mixes the hard stuff with humor |
 | **@julseybee_** | ~68.7K | Recovery, daily |
 | **@recoveringaddict8** | ~60.5K | Straight-ahead recovery storytelling |
 | **@albertsbucketlist** | ~56.3K | Sober life, not sober lecturing |
 | **@realchrishoward** | ~53K | Recovery + men's audience |
 
-**Order to send: @abifeltham first.** Sober mom + humour + "spicy brain" means
+**Order to send: @abifeltham first.** Sober mom + humor + "spicy brain" means
 her audience is people who have not got it perfect, which is your audience.
 Then @realchrishoward — a male recovery audience is where a 38-years-and-free-at-50
 story lands hardest and where you have the least competition.
@@ -387,14 +387,14 @@ tonight.
 | **Sober Leon** — `@LeonSylvester` | ~121K | UK, rock bottom → sober after heavy drink and drug use. Biggest of the set |
 | **Soberdogs** | ~46.2K | Kyle Ruggeri, certified addiction recovery coach |
 | **Be Sober** (Quit Alcohol Coach) | ~36K | Simon Chapple, bestselling sobriety author, This Naked Mind coach |
-| **SMART Recovery** | ~28.1K | The organisation, not a person — different door, see below |
+| **SMART Recovery** | ~28.1K | The organization, not a person — different door, see below |
 | **Rewired Addiction** | — | Derek Lambert, quit alcohol *and* heroin. Lived experience, hard end |
 | **Fostering Resilience** | — | Dr. KJ Foster, counsellor, substance use + trauma, 15+ years |
 
 Use the **YouTube email template** above — the address is on the About tab.
 
 **Two different asks in that table.** The five people get "no ask attached."
-**SMART Recovery is an organisation** and belongs in `COMPANIES.md`, not here —
+**SMART Recovery is an organization** and belongs in `COMPANIES.md`, not here —
 they run meetings worldwide and keep resource lists, so that one is the Lane G
 pitch, not a creator DM.
 
@@ -409,7 +409,7 @@ SHRM stage.
 |---|---|---|
 | **@recoveryisthenewblack** | Michelle Smith — sober motherhood | Not yet contacted anywhere |
 | **@soberblackgirlsclub** | Sober Black Girls Club | A community, not one person — they amplify |
-| **Sober Brown Girls** | Kirstin Walker | Women of colour in recovery |
+| **Sober Brown Girls** | Kirstin Walker | Women of color in recovery |
 | **@miraclesarebrewing** | Carly Benson | **Already batch 1 #9** — the DM is a second door if the email went quiet |
 | **@recoveryelevator** | Paul Churchill | **Already batch 1 #1** — same |
 | **@thisnakedmind** | Annie Grace (~large) | **Batch 1 #10, still send last** |
@@ -436,7 +436,7 @@ hashtags with real traffic behind them:
 **That absence is the opportunity, not a dead end.** Nobody has built the list
 because nobody serves that audience — which is the same reason `for-her.html`
 and the partner section exist and almost no app has one. Ten minutes in those
-hashtags, sorted by Users, gets you names no treatment centre has written down.
+hashtags, sorted by Users, gets you names no treatment center has written down.
 
 **And the copy rule holds here too.** `#wifeofanalcoholic` is a real search term
 so it goes in as-is when you're matching what people type. What you *say* to

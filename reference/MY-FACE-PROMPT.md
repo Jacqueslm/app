@@ -25,7 +25,7 @@ them. Then paste:
 > House look for every image, unless I say otherwise:
 > vertical 9:16, photographic, documentary realism, warm practical light from
 > lamps or windows only — no studio lighting, no rim light, no lens flare.
-> Muted colour, soft contrast, shallow depth of field, shot on 35mm. An
+> Muted color, soft contrast, shallow depth of field, shot on 35mm. An
 > ordinary American home or street. Nothing futuristic, no neon, no holograms,
 > no floating screens, no text in the image.
 >
@@ -51,7 +51,7 @@ Ask for these one at a time, not in a batch — batches drift.
 | 1 | Me leaning on a bathroom sink, looking at myself in the mirror, late at night, one vanity light on |
 | 2 | Me sitting on the edge of a bed in the dark, elbows on knees, phone face-down beside me |
 | 3 | Me at a kitchen table before sunrise, both hands around a mug, not drinking it |
-| 4 | Me standing at a window in grey early light, curtains half open |
+| 4 | Me standing at a window in gray early light, curtains half open |
 | 5 | Me in a parked car outside a house, hands on the wheel, engine off, streetlight through the windscreen |
 | 6 | Me on a front porch step at dusk, phone in hand, not looking at it |
 | 7 | Close on my hands writing in a cheap notebook at a kitchen table |

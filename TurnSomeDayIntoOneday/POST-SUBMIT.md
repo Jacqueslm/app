@@ -87,7 +87,7 @@ verified in the build environment. It has to be done on a real phone.
 | `PLAY_PACKAGE_NAME` | Defaults to `com.turnsomedayintodayone.app` | optional |
 
 ## Rebuilding the .aab
-Only needed for shell-level changes — package name, icon, splash colour, target
+Only needed for shell-level changes — package name, icon, splash color, target
 SDK. Everything inside the app updates from Railway with no new build and no
 review, because the Android app loads the live site.
 

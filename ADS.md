@@ -190,7 +190,7 @@ have written anyway.**
 An advert that reads as monetising addiction gets publicly taken apart *inside
 the advert*, where every future viewer sees it. No other platform does this.
 
-It also cuts the other way, and in your favour: the honest version is the one
+It also cuts the other way, and in your favor: the honest version is the one
 that survives, and on Reddit an honest founder post can get **upvoted**. Yours
 is one of the few products where the true thing and the effective thing are the
 same sentence.

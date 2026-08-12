@@ -70,7 +70,7 @@ MOTION: `The laptop snaps shut, the blue light vanishes, the room goes dark, his
 SAY: *"And the face you practiced doesn't work anymore."*
 
 **SHOT 4**
-IMAGE: `A man and a woman sitting on opposite ends of the same bed in a dim bedroom, both facing away from each other, a wide empty gap of rumpled sheets between them, early morning grey light through a window`
+IMAGE: `A man and a woman sitting on opposite ends of the same bed in a dim bedroom, both facing away from each other, a wide empty gap of rumpled sheets between them, early morning gray light through a window`
 MOTION: `Neither moves, she exhales slowly, the curtain shifts slightly in the light`
 SAY: *"The secret was never just yours. She's been carrying it too."*
 
@@ -126,7 +126,7 @@ MOTION: `Slow push in continues, the darkness closes in around the edges of fram
 SAY: *"It doesn't happen fast. It happens one 'just tonight' at a time."*
 
 **SHOT 3**
-IMAGE: `A gaunt man in torn filthy clothes leaning over a rusted dumpster in a wet graffiti-covered alley, head down, overcast grey daylight, rain-slicked pavement`
+IMAGE: `A gaunt man in torn filthy clothes leaning over a rusted dumpster in a wet graffiti-covered alley, head down, overcast gray daylight, rain-slicked pavement`
 MOTION: `He shifts through the dumpster slowly, rain drips from the rim, he does not look up`
 SAY: *"This is just the far end of the same road. Most people never picture it. That's the problem."*
 
@@ -235,7 +235,7 @@ CAPTION: *"Nothing bad had happened. It felt like something did"*
 **SHOT 4** — `The same man scrolling his phone in the dark, face lit from below, reading back messages, jaw tight`
 CAPTION: *"Reading back what I sent"*
 
-**SHOT 5** — `The same man standing at a window in grey early light, curtains half open, city outside still dark`
+**SHOT 5** — `The same man standing at a window in gray early light, curtains half open, city outside still dark`
 CAPTION: *"The drink quiets it for a few hours"*
 
 **SHOT 6** — `Empty bottles lined up on a kitchen counter in hard morning light, the man out of focus behind them`
@@ -274,7 +274,7 @@ CAPTION: *"Monday. That was always the plan"*
 **SHOT 3** — `The same man standing in front of a lit shop fridge at night, hand resting on the door handle, not opening it yet`
 CAPTION: *"Monday lasted until Tuesday"*
 
-**SHOT 4** — `Bottles standing next to a kitchen bin in grey morning light, the man's back turned in the doorway behind`
+**SHOT 4** — `Bottles standing next to a kitchen bin in gray morning light, the man's back turned in the doorway behind`
 CAPTION: *"I wasn't lying to anybody but me"*
 
 **SHOT 5** — `The same man sitting alone at a kitchen table, still, hands flat on the wood, nothing in front of him`

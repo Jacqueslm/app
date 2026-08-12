@@ -90,7 +90,7 @@ body{display:flex;justify-content:center}
 .ob-input{background:rgba(255,255,255,0.08);border:0.5px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;font-size:15px;color:#fff;width:100%;margin-bottom:14px;font-family:var(--f);outline:none}
 .ob-input:focus{border-color:var(--green)}
 /* Show/hide password. The wrapper carries the field's own bottom margin so it
-   hugs the input exactly, letting the eye sit dead-centre with top/bottom:0. */
+   hugs the input exactly, letting the eye sit dead-center with top/bottom:0. */
 .pw-wrap{position:relative}
 .pw-wrap .ob-input{margin-bottom:0;padding-right:46px}
 .pw-eye{position:absolute;top:0;bottom:0;right:4px;width:40px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;color:#8892c0;cursor:pointer;font-family:var(--f)}
@@ -8308,7 +8308,7 @@ function setBill(type){
 // ─── GOOGLE PLAY BUILD: FREE TIER ONLY ───────────────────────────────────────
 // Google Play requires that digital goods sold inside a Play-distributed app go
 // through Play Billing. Rather than run a second billing system or enrol in the
-// external-offers programme, the Android wrapper ships free-tier only: no
+// external-offers program, the Android wrapper ships free-tier only: no
 // prices, no upgrade buttons, and no link out to a payment page. Pro is sold on
 // the web alone. Existing Pro accounts still work here - only BUYING is gone.
 //
@@ -8375,7 +8375,7 @@ async function becomeProViaStore(plan){
   }
   // Asked fresh rather than read from the last sync: this is the last moment
   // before the store takes real money, and a stale "ready" here costs a
-  // customer a payment that cannot be honoured.
+  // customer a payment that cannot be honored.
   try{
     const ready=await fetch('/api/billing/status').then(r=>r.ok?r.json():null);
     if(!ready||!ready.storeBillingReady){

@@ -79,11 +79,11 @@ COUNT_PAUSE_S = 0.55 # breathing-count pause where the script writes "..."
 #
 # EVERY VOICE HERE MUST BE PUBLIC DOMAIN OR CC0, and the MODEL_CARD inside each
 # download is where you check. This app charges money, and the best-sounding
-# voices in the Piper catalogue - hfc_female, hfc_male, ryan, lessac - are all
-# non-commercial or research-only licences. The first version of this script
+# voices in the Piper catalog - hfc_female, hfc_male, ryan, lessac - are all
+# non-commercial or research-only licenses. The first version of this script
 # used two of them, which took a year of shipping to notice. Read the card.
 #
-# The catalogue holds exactly THREE licence-clean American women's voices -
+# The catalog holds exactly THREE license-clean American women's voices -
 # kristin, kathleen and ljspeech - and they are all already in use here. So
 # when a voice needs to be calmer, it cannot come from picking a different
 # model; it comes from the slower length_scale below plus the softening EQ in

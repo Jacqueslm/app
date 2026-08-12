@@ -73,7 +73,7 @@ new Shot 3 so the phone shows your app.
 
 **On screen:** "I didn't fight it. I let it break over me"
 
-**IMAGE:** `Elias holding his phone in one hand at the kitchen counter, the screen showing a dark app with one large soft glowing circle at its centre and a short line of white text beneath it, his other hand flat on the counter, his eyes closed, mid-breath, soft window light — the phone screen is the brightest thing in the frame`
+**IMAGE:** `Elias holding his phone in one hand at the kitchen counter, the screen showing a dark app with one large soft glowing circle at its center and a short line of white text beneath it, his other hand flat on the counter, his eyes closed, mid-breath, soft window light — the phone screen is the brightest thing in the frame`
 
 **Sound:** one amplified inhale and exhale, close and intimate. Nothing else.
 
@@ -123,7 +123,7 @@ If you'd rather it be Shot 2 anyway, say so and I'll move it.
 
 **On screen:** "Nobody warns you about the afternoon"
 
-**IMAGE:** `Elias standing alone in the middle of his living room in flat grey mid-afternoon light, nothing in his hands, television off and black, the room tidy and completely still, a clock on the wall just past three, wide shot with a lot of empty space around him`
+**IMAGE:** `Elias standing alone in the middle of his living room in flat gray mid-afternoon light, nothing in his hands, television off and black, the room tidy and completely still, a clock on the wall just past three, wide shot with a lot of empty space around him`
 
 **Sound:** a fridge hum two rooms away. No music. Let it be uncomfortable.
 

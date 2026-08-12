@@ -12,7 +12,7 @@
 //
 // Get the two codes once, at https://www.reddit.com/prefs/apps
 //   → "create another app…" → type: script → redirect uri: http://localhost:8080
-//   → the ID is the short string under the app name, the secret is labelled.
+//   → the ID is the short string under the app name, the secret is labeled.
 
 const fs = require('fs');
 const path = require('path');

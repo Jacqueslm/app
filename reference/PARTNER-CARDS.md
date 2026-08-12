@@ -86,7 +86,7 @@ repeat the card, it should extend it.
 it, and it lands hardest after everything before it was only about them.
 
 **Order:** run 1 to 12 as before, then 13 to 16. The free cards work better
-after somebody already recognised themselves in one of the first twelve —
+after somebody already recognized themselves in one of the first twelve —
 "free" answers a question they haven't asked yet on day one.
 
 ---

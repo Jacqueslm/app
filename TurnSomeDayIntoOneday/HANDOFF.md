@@ -10,7 +10,7 @@ compares commit SHAs, so the number only has to change, never increase).
 
 ## What this is
 
-A recovery companion — day counter, 30-day lesson programmes, private journal,
+A recovery companion — day counter, 30-day lesson programs, private journal,
 SOS tools, and an AI companion called **Friendly**. Live, taking real payments.
 One person built it and runs it.
 
@@ -60,7 +60,7 @@ The `.aab` is a **shell**. It contains no app content — it opens
 `https://www.turnsomedayintodayone.com/app?src=play` full screen. Every Railway
 deploy updates the Android app instantly, with no rebuild and no review.
 
-Rebuild only for shell-level changes (package name, icon, splash colour, target
+Rebuild only for shell-level changes (package name, icon, splash color, target
 SDK): `cd twa && bubblewrap build`, after bumping `appVersionCode` in
 `twa-manifest.json`.
 

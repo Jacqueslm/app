@@ -246,7 +246,7 @@ function assetJson(row) {
     url: `/api/studio/assets/${row.id}/file`,
     // The library row exists in the database but the file itself can go
     // missing underneath us - OneDrive evicting it, a folder moved, a
-    // half-finished copy. Saying so here lets the page grey the item out
+    // half-finished copy. Saying so here lets the page gray the item out
     // instead of firing a request that can only fail.
     missing: !fs.existsSync(mediaPath(row.filename)) || undefined,
   };
@@ -1211,7 +1211,7 @@ router.post('/buffer/post', async (req, res) => {
       if (!r) results.push({ channelId, ok: false, error: 'Buffer accepted the request but returned nothing — the post was not created.' });
       else if (r.message) results.push({ channelId, ok: false, error: r.message });
       else if (r.post?.id) results.push({ channelId, ok: true, postId: r.post.id });
-      else results.push({ channelId, ok: false, error: `Buffer returned ${r.__typename || 'an unrecognised result'} with no post id.` });
+      else results.push({ channelId, ok: false, error: `Buffer returned ${r.__typename || 'an unrecognized result'} with no post id.` });
     } catch (err) {
       results.push({ channelId, ok: false, error: err.message });
       if (!needs) {
@@ -2700,7 +2700,7 @@ router.post('/cleanmark', async (req, res) => {
   const c = MARK_BOXES[corner] ? corner : 'br';
   const box = MARK_BOXES[c];
   const k = MARK_SIZES[size] || 1.0;
-  // Scale the box around its own centre by k, then re-clamp inside a safe border.
+  // Scale the box around its own center by k, then re-clamp inside a safe border.
   const cx = box.x + box.w / 2, cy = box.y + box.h / 2;
   let bw = box.w * k, bh = box.h * k;
   let bx = cx - bw / 2, by = cy - bh / 2;
@@ -2865,7 +2865,7 @@ router.post('/transform', async (req, res) => {
     }
 
     // POLISH — one-tap "make it look finished" pass for a rendered video: a
-    // gentle cinematic colour grade (lift contrast + saturation a touch, tiny
+    // gentle cinematic color grade (lift contrast + saturation a touch, tiny
     // brightness lift), a light sharpen for crispness, and — if it has sound —
     // a loudness master so it plays as loud and balanced as commercial music
     // video. Free, no AI. Makes a new copy; the original stays.
@@ -2882,7 +2882,7 @@ router.post('/transform', async (req, res) => {
       return res.status(202).json({ job: jobJson(job) });
     }
 
-    // LOOK THEMES — one-tap whole-video colour grades (like CapCut filters).
+    // LOOK THEMES — one-tap whole-video color grades (like CapCut filters).
     // Each is a themed grade + sharpen; audio is preserved. Free, no AI.
     if (op === 'grade') {
       if (src.kind !== 'video') return res.status(400).json({ error: 'Look themes apply to a video (render first, then pick a look).' });
@@ -2903,7 +2903,7 @@ router.post('/transform', async (req, res) => {
       return res.status(202).json({ job: jobJson(job) });
     }
 
-    // MOTION BLUR — averages neighbouring frames (tmix) so fast motion smears
+    // MOTION BLUR — averages neighboring frames (tmix) so fast motion smears
     // into a silky cinematic blur, and hard cuts/jumps read softer. Same length,
     // audio preserved. Free, no AI.
     if (op === 'motionblur') {
@@ -3043,14 +3043,14 @@ router.post('/transform', async (req, res) => {
 });
 
 /* ---------------- green screen / chroma key (free, local) ---------------- */
-// Drop a subject shot/generated on a solid colour onto any picture or clip.
-// scale2ref sizes the background to the foreground, chromakey removes the colour,
+// Drop a subject shot/generated on a solid color onto any picture or clip.
+// scale2ref sizes the background to the foreground, chromakey removes the color,
 // overlay composites. Foreground audio (if any) is kept; original never touched.
 router.post('/chroma', async (req, res) => {
   const { fgAssetId, bgAssetId, color } = req.body || {};
   const fg = db.getAsset(req.userId, Number(fgAssetId));
   const bg = db.getAsset(req.userId, Number(bgAssetId));
-  if (!fg || fg.kind !== 'video') return res.status(404).json({ error: 'Pick the green-screen video clip first (the subject on a solid colour).' });
+  if (!fg || fg.kind !== 'video') return res.status(404).json({ error: 'Pick the green-screen video clip first (the subject on a solid color).' });
   if (!bg || (bg.kind !== 'image' && bg.kind !== 'video')) return res.status(404).json({ error: 'Pick a picture or clip from your library as the new background.' });
   const key = /^0x[0-9a-fA-F]{6}$/.test(color) ? color : '0x00d600';
   const fgPath = mediaPath(fg.filename);
@@ -3533,7 +3533,7 @@ const TRANSITIONS = { cut: null, fade: 'fade', fadeblack: 'fadeblack' };
 //    reconfigure mid-stream. Zooms therefore go through zoompan.
 const CLIP_EFFECTS = {
   none:      () => '',
-  // --- colour, instant
+  // --- color, instant
   bw:        () => 'hue=s=0,eq=contrast=1.14:brightness=0.01',
   noir:      () => 'hue=s=0,eq=contrast=1.35:brightness=-0.03,vignette=PI/4.5',
   warm:      () => 'eq=contrast=1.05:saturation=1.12,colortemperature=temperature=4600',
@@ -3658,7 +3658,7 @@ router.post('/render', async (req, res) => {
         return res.status(400).json({ error: `Clip "${row.label}" has an invalid trim range.` });
       }
       // keepAudio: preserve this clip's own sound (e.g. dialogue) in the mix.
-      // Only honour it if the clip actually has an audio stream.
+      // Only honor it if the clip actually has an audio stream.
       const keepAudio = !!c.keepAudio && await probeHasAudio(file);
       resolved.push({ kind: 'video', file, start, end, dur: end - start, eq: c.eq, fx: c.fx, label: row.label, keepAudio });
     }
@@ -3670,7 +3670,7 @@ router.post('/render', async (req, res) => {
     const t = (Array.isArray(transitions) && transitions[i]) || {};
     const type = TRANSITIONS[t.type] !== undefined ? t.type : 'cut';
     let td = Math.min(2, Math.max(0.2, Number(t.duration) || 0.5));
-    // A transition can't be longer than either neighbour.
+    // A transition can't be longer than either neighbor.
     td = Math.min(td, resolved[i].dur * 0.9, resolved[i + 1].dur * 0.9);
     trans.push({ type, td: type === 'cut' ? 0 : td });
   }
@@ -4080,7 +4080,7 @@ const localTts = require('./speak');
 const VOICE_REF_DIR = path.join(__dirname, 'model-cache', 'voices', 'refs');
 // Emotion needs fal (index-tts-2), and fal needs a reference clip to clone.
 // Rather than ship one, we have the local narrator read a fixed passage once
-// and keep that as the reference - same voice, no bundled audio, no licence to
+// and keep that as the reference - same voice, no bundled audio, no license to
 // worry about.
 const VOICE_REF_TEXT =
   'This is how I sound when I read something out loud. I keep an even pace, ' +

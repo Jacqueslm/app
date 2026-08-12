@@ -89,7 +89,7 @@ Five prompts:
    Eat. Shower. Open the app.
 
 **The counter is the point.** When a relapse is marked, the app must not read
-as punishment. The number going back to zero is a fact, not a judgement, and
+as punishment. The number going back to zero is a fact, not a judgment, and
 the wording around it decides whether somebody opens the app again or deletes
 it. **Streaks reset. The person doesn't.** Nothing in this flow says "failed",
 "broken", "start over", or "again" in a tone that lands as *again?*

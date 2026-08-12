@@ -60,6 +60,15 @@ CARDS = [
     ("05-nobody-claps",
      "Nobody claps when you don't do it.",
      "So the app counts it. Every single day."),
+
+    # The celebration one. Every other card in this set is about the hard part,
+    # and a set with no win in it is a set that only ever asks something of the
+    # reader. This names the achievement out loud — and it deliberately does not
+    # say "sober", because a sober-only card is invisible to the person who came
+    # in for the phone, the food or the money.
+    ("06-you-survived",
+     "You survived something\nthat kills people.",
+     "Celebrate that. Nobody else is going to do it for you."),
 ]
 
 

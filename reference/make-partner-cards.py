@@ -150,8 +150,11 @@ def chrome(im, d):
     except Exception:
         pass
 
+    # "No card" beats "link in bio": a card cannot be tapped, the link lives in
+    # the bio regardless, and not needing a credit card is the actual reason
+    # somebody chooses this over an app charging $9.99 a month.
     f_foot = ImageFont.truetype(BOLD, 24)
-    tracked(d, "FREE  ·  LINK IN BIO", f_foot, 6, W / 2, H - 250, FREE)
+    tracked(d, "FREE  ·  NO CARD", f_foot, 6, W / 2, H - 250, FREE)
     f_brand = ImageFont.truetype(REG, 21)
     tracked(d, "TURN SOMEDAY INTO DAY ONE", f_brand, 5, W / 2, H - 200, FOOT)
 

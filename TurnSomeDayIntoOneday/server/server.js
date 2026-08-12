@@ -204,6 +204,32 @@ app.get('/dry-drunk', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dry-drunk.html'));
 });
 
+// The three from the final Semrush sweep (12 Aug), in the order they pay:
+//   /adult-children-of-alcoholics - 8,100/mo at KD 31, plus the "laundry list"
+//     cluster at ~6,000/mo and KD 14-24. A THIRD audience: not the drinker and
+//     not the partner, but the person who grew up in it. Links out to
+//     adultchildren.org rather than reproducing ACA's list, which is theirs.
+//   /alcoholic-personality - ~9,400/mo across six phrasings, all KD 33 or under.
+//     Written as "here is what the behavior does, and why it is not who they
+//     are" - the claims audit applies at full strength on this one.
+//   /codependency-test - `codependency test` (390, KD 15) and `am i codependent
+//     quiz` (390, KD 14). Same eight-question shape as the binge-eating quiz.
+//     NOTE: deliberately NO email capture. /api/lead collapses any unrecognized
+//     source into the 'quiz' nurture, which is written in Jacques's voice and
+//     must never go to the partner - and this audience IS the partner. A
+//     partner-side sequence would need writing before a capture box goes here.
+app.get('/adult-children-of-alcoholics', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'adult-children-of-alcoholics.html'));
+});
+
+app.get('/alcoholic-personality', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'alcoholic-personality.html'));
+});
+
+app.get('/codependency-test', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'codependency-test.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

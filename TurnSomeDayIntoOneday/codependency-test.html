@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Codependency Test — Am I Codependent? Free, Private, No Signup</title>
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
+<meta name="description" content="A free codependency test: eight honest questions, about two minutes. Worked out on your device, nothing stored or sent. Not a diagnosis — codependency isn't one.">
+<link rel="canonical" href="https://www.turnsomedayintodayone.com/codependency-test">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Turn Someday Into Day One">
+<meta property="og:url" content="https://www.turnsomedayintodayone.com/codependency-test">
+<meta property="og:title" content="Am I codependent? A free, private 2-minute check-in.">
+<meta property="og:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta property="og:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Am I codependent? A free, private 2-minute check-in.">
+<meta name="twitter:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<style>
+:root{
+  --brand:#0f0c29;--s0:#181632;--s1:#201d3f;--s2:#262347;--bdr:#33305c;
+  --tp:#eef0ff;--ts:#b8bfe8;--tm:#7e86b8;--accent:#f0b15a;--green:#4ecb9b;--f:-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#08071a}
+body{font-family:var(--f);background:linear-gradient(180deg,var(--brand) 0%,#24243e 55%,#302b63 100%);color:var(--tp);min-height:100dvh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;padding:28px 22px calc(28px + env(safe-area-inset-bottom))}
+.brand{font-size:11px;letter-spacing:.18em;color:var(--tm);text-transform:uppercase;text-align:center;font-weight:600;margin-bottom:26px}
+.step{display:none;flex:1;flex-direction:column}
+.step.on{display:flex}
+h1{font-size:26px;line-height:1.25;font-weight:700;margin-bottom:12px}
+h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
+.sub{font-size:14px;color:var(--ts);line-height:1.55;margin-bottom:22px}
+.qnum{font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.bar{height:4px;background:var(--s2);border-radius:99px;margin-bottom:26px;overflow:hidden}
+.bar>div{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s ease}
+.opt{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:14.5px;color:var(--tp);margin-bottom:10px;cursor:pointer;line-height:1.4;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.btn{display:block;width:100%;background:linear-gradient(135deg,#f0b15a,#e08a2e);color:#241503;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:650;font-family:var(--f);cursor:pointer;text-align:center;text-decoration:none;margin-top:auto}
+.btn.ghost{background:none;color:var(--tm);font-weight:500;font-size:13px;margin-top:10px}
+.btn.calm{background:none;border:1px solid var(--bdr);color:var(--tp);font-weight:600;margin-top:10px}
+.result-seg{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.fine{font-size:11.5px;color:var(--tm);line-height:1.6;margin-top:16px;text-align:center}
+.fine a{color:var(--ts)}
+.crisis{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ts);line-height:1.5;margin-top:14px;text-align:center}
+.crisis a{color:var(--green);font-weight:600;text-decoration:none}
+.free{color:var(--green);font-weight:650}
+@media (prefers-reduced-motion: reduce){.bar>div{transition:none}}
+</style>
+<script>
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Turn Someday Into Day One</div>
+
+  <!-- INTRO -->
+  <div class="step on" id="st-intro">
+    <h1>Am I codependent?</h1>
+    <p class="sub">Eight honest questions, about two minutes. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
+    <p class="sub"><strong>This is not a diagnosis — and codependency isn't one either.</strong> No doctor hands it out and no quiz can make it official. What this can do is put words to something you've probably been carrying without a name for it.</p>
+    <button class="btn" onclick="startQ()">Start the check-in</button>
+    <div class="crisis">If you're in crisis right now, call or text <strong>988</strong> — free, confidential, 24/7. If you're afraid of someone in your home, the National Domestic Violence Hotline is <a href="tel:18007997233">1-800-799-7233</a>.</div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="step" id="st-q">
+    <div class="bar"><div id="barfill-q"></div></div>
+    <div class="qnum" id="q-num"></div>
+    <h2 id="q-title"></h2>
+    <div id="q-opts"></div>
+    <div id="q-back" style="text-align:center;margin-top:14px;display:none"><span onclick="qBack()" style="color:var(--tm);font-size:14px;cursor:pointer">&larr; Back</span></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="st-result">
+    <div class="result-seg" id="res-seg"></div>
+    <h2 id="res-title"></h2>
+    <p class="sub" id="res-body" style="margin-bottom:4px"></p>
+    <p class="sub" id="res-close"></p>
+    <div id="res-pro" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:14px"></div>
+    <a class="btn" href="/for-her">Show me the part built for me</a>
+    <a class="btn calm" href="/codependency">Read what codependency actually means</a>
+    <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
+    <div class="fine"><span class="free">Free — no card, no trial.</span><br>Your journal is nobody's business — private by design, and they never see what you write.</div>
+    <div class="crisis">Not a diagnosis. In crisis? Call or text <strong>988</strong>. Afraid of someone at home? <a href="tel:18007997233">1-800-799-7233</a>, or text START to 88788.</div>
+    <nav class="more" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--bdr);font-size:12.5px;line-height:2;text-align:center;color:var(--tm)">
+      Keep reading:
+      <a href="/codependency" style="color:var(--green);text-decoration:none">Codependency: the signs, and how to stop</a> &middot;
+      <a href="/what-is-al-anon" style="color:var(--green);text-decoration:none">What is Al-Anon?</a> &middot;
+      <a href="/dry-drunk" style="color:var(--green);text-decoration:none">What is a dry drunk?</a> &middot;
+      <a href="/betrayal-trauma-recovery" style="color:var(--green);text-decoration:none">Betrayal trauma recovery</a> &middot;
+      <a href="/quiz" style="color:var(--green);text-decoration:none">The check-in for a habit of your own</a>
+    </nav>
+  </div>
+</div>
+
+<script>
+// Written from the patterns people describe, in the words they use. Deliberately
+// NOT a clinical instrument: codependency has no diagnosis to reproduce, so
+// there is no scale here to borrow and no threshold that means anything
+// official. The bands are about recognition. The top one sends people to a
+// person, not to the app.
+const QUESTIONS=[
+  {t:'How much of your day is spent tracking how they are?',o:[['Barely any — I know how they are, I don\'t track it',0],['Some. More on a bad week',1],['Most of it. I read the mood before I decide anything',2],['All of it. I can tell from the sound of the car door',3]]},
+  {t:'When you say no to them, what happens next?',o:[['Nothing much. It\'s fine',0],['A bit of friction, then it passes',1],['Guilt, mostly mine, for a day or two',2],['A fight, or a silence, and a lot of repair work. So I rarely say it',3]]},
+  {t:'Have you covered for them?',o:[['No',0],['Once or twice, small things',1],['Yes — to family, to work, to friends',2],['Routinely. There\'s a whole story I keep straight',3]]},
+  {t:'Somebody asks how you are. What comes out of your mouth?',o:[['How I am',0],['A bit about me, then about them',1],['Mostly an update on them',2],['I honestly don\'t know how I am. I\'d have to think about it',3]]},
+  {t:'When things are calm at home, how does that feel?',o:[['Good. Calm feels like calm',0],['Nice, though I stay a bit alert',1],['I enjoy it and I\'m waiting for it to end',2],['I don\'t relax. Calm is just the gap before the next thing',3]]},
+  {t:'What happens to the consequences of their choices?',o:[['They handle them',0],['We share them, more or less fairly',1],['I smooth most of them over — money, lifts, excuses',2],['I handle all of them, and then wonder why nothing ever changes',3]]},
+  {t:'What have you given up because of this?',o:[['Nothing much',0],['A few plans here and there',1],['Friendships, hobbies, time off — quite a lot',2],['I couldn\'t tell you what I like doing anymore',3]]},
+  {t:'When you think about what happens if they don\'t change, what comes up?',o:[['I\'d be sad, but I\'d be okay',0],['I\'d manage. I don\'t like thinking about it',1],['I don\'t let myself think about it',2],['I feel like I\'d disappear. There isn\'t a me separate from this',3]]}
+];
+let score=0,qi=0,answerScores=[];
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');window.scrollTo(0,0);}
+function startQ(){qi=0;score=0;answerScores=[];renderQ();show('st-q');}
+function renderQ(){
+  const q=QUESTIONS[qi];
+  $('q-num').textContent=`Question ${qi+1} of ${QUESTIONS.length}`;
+  $('q-title').textContent=q.t;
+  $('barfill-q').style.width=Math.round(10+(qi/QUESTIONS.length)*85)+'%';
+  $('q-opts').innerHTML=q.o.map((o,i)=>`<div class="opt" onclick="answer(${i})">${o[0].replace(/</g,'&lt;')}</div>`).join('');
+  $('q-back').style.display=qi>0?'block':'none';
+}
+function answer(i){
+  const pts=QUESTIONS[qi].o[i][1];
+  answerScores[qi]=pts; score+=pts; qi++;
+  if(qi<QUESTIONS.length){renderQ();}else{showResult();}
+}
+function qBack(){ if(qi<=0)return; qi--; score-=answerScores[qi]||0; renderQ(); }
+
+function showResult(){
+  // Max score is 24. Gentle at the bottom, honest at the top, and never a label.
+  let seg,title,body,close,pro='';
+  if(score<=5){
+    seg='Not what this describes';
+    title="This doesn't sound like codependency.";
+    body="Caring about somebody and worrying about them is not the same thing as losing yourself in them. Nothing in your answers points at the pattern this check-in looks for.";
+    close="If something still feels wrong, trust that over eight questions. You know your own house better than a quiz does.";
+  }else if(score<=11){
+    seg='It has started to tilt';
+    title="You're still in there — but it's tilting.";
+    body="Some of what you described is how this begins: saying yes when you meant no, smoothing things over because it's quicker, keeping half an eye on their mood. None of it is dramatic. That's exactly why it grows.";
+    close="The fix at this stage is small and unglamorous — one no, said out loud, and one thing a week that is yours. That's genuinely most of it.";
+  }else if(score<=17){
+    seg='You are carrying it';
+    title="You've been carrying a job that was never yours.";
+    body="Tracking the mood, managing the consequences, keeping the story straight, answering “how are you” with news about them. That isn't a character flaw and it isn't weakness — it's what happens when somebody has to hold a household together and nobody else will.";
+    close="Their recovery is theirs. Your healing is yours. Those are two different jobs and you only ever had one of them — which means you can start today, without their agreement and without telling them anything.";
+  }else{
+    seg='Please talk to somebody';
+    title="There's almost nothing left over for you.";
+    body="Everything you answered points the same way, including the part where you'd struggle to say what you want or who you'd be without this. That's a heavy thing to carry, and carrying it alone is what makes it heavier, not what makes you strong.";
+    close="The app is free and it will be here — the part built for your side of it, and a journal nobody else reads. Use it. But use it alongside a real person, not instead of one.";
+    pro="<strong>This is the part I won't soften.</strong> What you described is worth taking to a therapist who works with families of addiction, or to an Al-Anon room where everybody already knows this story. Not because anything is wrong with you — because you have been doing this without support for a long time, and you don't have to.";
+  }
+  $('res-seg').textContent=seg;
+  $('res-title').textContent=title;
+  $('res-body').textContent=body;
+  $('res-close').textContent=close;
+  if(pro){$('res-pro').innerHTML=pro;$('res-pro').style.display='block';}
+  show('st-result');
+}
+</script>
+</body>
+</html>

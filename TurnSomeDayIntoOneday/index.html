@@ -382,7 +382,25 @@ body.nova-open #audio-pill-label{bottom:222px}
 .toggle-sw.on .toggle-knob{left:21px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:14px;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
 .usage{font-size:12px;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:21px;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:9px;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:9px;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
-/* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px} </style> <script>
+/* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px}
+/* INSTALL NUDGE — the only route onto an iPhone home screen is the user doing
+   Share -> Add to Home Screen by hand. Apple has never shipped
+   beforeinstallprompt, so there is no button anyone can offer; the instruction
+   is the whole mechanism. Sits above the bottom nav, and hides the guide fab
+   while it is up so the two don't stack on top of each other. */
+#install-nudge{display:none;position:fixed;left:50%;transform:translateX(-50%) translateY(8px);bottom:calc(70px + env(safe-area-inset-bottom));width:min(100% - 20px,410px);background:var(--s2);border:0.5px solid var(--bdr2);border-radius:14px;padding:13px 14px;z-index:520;box-shadow:0 6px 22px rgba(0,0,0,0.30);opacity:0;transition:opacity .25s ease,transform .25s ease}
+#install-nudge.up{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
+#install-nudge .in-row{display:flex;align-items:flex-start;gap:11px}
+#install-nudge .in-ico{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--acc);color:var(--acc-t);display:flex;align-items:center;justify-content:center}
+#install-nudge .in-ico i{font-size:19px}
+#install-nudge .in-t{font-size:13.5px;font-weight:600;color:var(--tp);line-height:1.35}
+#install-nudge .in-s{font-size:12.5px;color:var(--ts);line-height:1.5;margin-top:3px}
+#install-nudge .in-s b{color:var(--tp);font-weight:600}
+#install-nudge .in-x{flex-shrink:0;background:transparent;border:none;color:var(--tm);cursor:pointer;padding:2px 0 0;font-family:var(--f)}
+#install-nudge .in-x i{font-size:17px}
+#install-nudge .in-go{margin-top:10px;width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:var(--f)}
+body.nudging #guide-fab,body.nudging #guide-fab-label,body.nudging #audio-pill,body.nudging #audio-pill-label{display:none !important}
+ </style> <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
 // First touch wins: someone who lands from TikTok, reads /for-her, then signs up
 // belongs to TikTok - not to whatever page they happened to be on at the end.
@@ -10577,6 +10595,127 @@ async function boot(){
     return;
   }
   showPreviewGate();
+}
+
+// ─── INSTALL NUDGE ────────────────────────────────────────────────────────────
+// Android fires beforeinstallprompt, so there we can show a real button that
+// installs. iPhone cannot: every browser on iOS is WebKit underneath, Chrome
+// and Edge on iOS cannot install a PWA at all, and Apple has never implemented
+// beforeinstallprompt in Safari. The only route onto an iPhone home screen is
+// the user tapping Share -> Add to Home Screen themselves, which means the
+// instruction IS the install mechanism. Without it an iPhone user also never
+// gets notifications, because iOS only delivers those to an installed app.
+const NUDGE_KEY='installNudgeDismissed';
+const NUDGE_QUIET_DAYS=14;
+
+function isStandalone(){
+  try{
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone===true;
+  }catch(e){ return false; }
+}
+function isIOSDevice(){
+  const ua=navigator.userAgent||'';
+  // iPadOS 13+ reports itself as a Mac, so touch points are the only tell.
+  return /iPad|iPhone|iPod/.test(ua)
+      || (/Macintosh/.test(ua) && navigator.maxTouchPoints>1);
+}
+function isIOSSafari(){
+  // Every iOS browser is Safari underneath, but only real Safari exposes
+  // Add to Home Screen. The others announce themselves in the UA.
+  return isIOSDevice() && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Firefox/i.test(navigator.userAgent||'');
+}
+function nudgeMuted(){
+  try{
+    const at=parseInt(localStorage.getItem(NUDGE_KEY)||'0',10);
+    if(!at) return false;
+    return (Date.now()-at) < NUDGE_QUIET_DAYS*86400000;
+  }catch(e){ return false; }
+}
+function dismissNudge(){
+  try{ localStorage.setItem(NUDGE_KEY,String(Date.now())); }catch(e){}
+  const n=document.getElementById('install-nudge');
+  if(n) n.classList.remove('up');
+  document.body.classList.remove('nudging');
+}
+
+let deferredInstall=null;
+
+function showNudge(kind){
+  if(isStandalone()||nudgeMuted()||document.getElementById('install-nudge'))return;
+
+  // The icon set here is Tabler, whose ti-share is the Android three-dot glyph.
+  // An iPhone user is being told to look for the square with an arrow out of
+  // the top, so that exact shape is drawn inline rather than shown the wrong
+  // one — the whole instruction depends on recognising the button.
+  const IOS_SHARE_SVG='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" '
+    +'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    +'<path d="M12 4v11"/><path d="M8.5 7.5 12 4l3.5 3.5"/>'
+    +'<path d="M9 10H7a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-2"/></svg>';
+
+  let ico='ti-share', title='', sub='', btn='', rawIco='';
+  if(kind==='ios-safari'){
+    rawIco=IOS_SHARE_SVG;
+    title='Keep this on your home screen';
+    sub='Tap <b>Share</b> at the bottom of Safari — the square with the arrow '
+       +'pointing up — then scroll down and tap <b>Add to Home Screen</b>. '
+       +'Reminders only work once you do.';
+  }else if(kind==='ios-other'){
+    ico='ti-devices';
+    title='Open this in Safari to keep it';
+    sub='Apple only lets <b>Safari</b> put a web app on the home screen — this '
+       +'browser cannot do it. Open the same link in Safari, then tap Share → '
+       +'Add to Home Screen.';
+  }else{
+    ico='ti-download';
+    title='Install it on your phone';
+    sub='Opens on its own like any other app, works offline, and reminders '
+       +'arrive properly.';
+    btn='Install';
+  }
+
+  const el=document.createElement('div');
+  el.id='install-nudge';
+  el.setAttribute('role','dialog');
+  el.setAttribute('aria-label',title);
+  el.innerHTML=
+    '<div class="in-row">'
+    + '<div class="in-ico">'+(rawIco||'<i class="ti '+ico+'"></i>')+'</div>'
+    + '<div style="flex:1;min-width:0"><div class="in-t">'+title+'</div>'
+    + '<div class="in-s">'+sub+'</div></div>'
+    + '<button class="in-x" aria-label="Not now"><i class="ti ti-x"></i></button>'
+    + '</div>'
+    + (btn?'<button class="in-go">'+btn+'</button>':'');
+  document.body.appendChild(el);
+  renderIcons(el);
+
+  el.querySelector('.in-x').addEventListener('click',dismissNudge);
+  const go=el.querySelector('.in-go');
+  if(go) go.addEventListener('click',async()=>{
+    if(!deferredInstall){ dismissNudge(); return; }
+    const prompt=deferredInstall;
+    deferredInstall=null;
+    try{ prompt.prompt(); await prompt.userChoice; }catch(e){}
+    dismissNudge();
+  });
+
+  document.body.classList.add('nudging');
+  requestAnimationFrame(()=>el.classList.add('up'));
+}
+
+// Android and desktop Chrome hand us the real thing. Hold it and offer a button.
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();
+  deferredInstall=e;
+  if(!isStandalone()&&!nudgeMuted()) setTimeout(()=>showNudge('android'),30000);
+});
+// Once it is installed there is nothing left to ask for.
+window.addEventListener('appinstalled',()=>{ deferredInstall=null; dismissNudge(); });
+
+// iPhone gets no event, so it is on a timer. 30 seconds in — long enough that
+// somebody who bounced immediately never sees it.
+if(isIOSDevice()&&!isStandalone()&&!nudgeMuted()){
+  setTimeout(()=>showNudge(isIOSSafari()?'ios-safari':'ios-other'),30000);
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────

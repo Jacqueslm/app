@@ -196,3 +196,64 @@ below already do.
 | 7 | STL Building Trades | form | **11 Aug** | |
 
 Follow up once, 16 Aug, same as the schools. Then let it go.
+
+---
+
+# LANE E — the national bodies (opened 12 Aug)
+
+The RFW Institute proved the shape: one email to an organisation whose job is
+handing out resource lists beats fifty to the people who read them. These are
+the same lever in four more rooms.
+
+### 8. Association of Recovery in Higher Education (ARHE) — [ ] sent
+
+**Send to:** kristina.canfield@collegiaterecovery.org — **draft in Gmail**
+P.O. Box 1541, Kennesaw, GA 30156
+The umbrella for **every collegiate recovery program in the country**. One yes
+here reaches a student at 3am in a dorm room in a way no individual university
+email would. Email pattern is `First.Last@collegiaterecovery.org`; there is also
+a contact form at https://collegiaterecovery.org/contact/
+
+**The angle, and it's specific to them:** a student in a collegiate recovery
+programme already has people around them who know. What they don't have is
+something free at 3am that doesn't require waking anybody.
+
+### 9. Faces & Voices of Recovery — [ ] sent
+
+**Send to:** info@facesandvoicesofrecovery.org — **draft in Gmail**
+50 F St NW, Suite 350, Washington DC 20001 · (202) 737-0690
+The biggest recovery advocacy organisation in the US. Lead with the partner
+section — advocacy groups know families are the underserved half.
+
+### 10. National Alliance for Recovery Residences (NARR) — [ ] sent
+
+**Send via:** https://narronline.org/contact-us/ (contact form; the published
+address is obfuscated) · P.O. Box 793, Burlington, VT 05402
+Sets the standards for sober living homes nationally, and every one of those
+homes has residents in exactly the first ninety days this app is built for.
+Ask about their state affiliates too — that is a second list behind the first.
+
+### 11. Missouri Chamber of Commerce — [ ] sent
+
+**Send via:** https://mochamber.com/contact-us/ or a named person from
+https://mochamber.com/about/team-directory/ · email pattern `jdoe@mochamber.com`
+428 E Capitol Ave, Jefferson City, MO 65101 · (573) 634-3511
+They co-run Recovery Friendly Missouri with MU Extension. Chase this one only
+if Recovery Friendly Missouri hasn't answered by the 16th — same people, and
+two emails into one building looks like pestering.
+
+---
+
+## The pattern, so the next batch writes itself
+
+Every target that has worked or looked promising is **an organisation that
+publishes a list other people read**. Not the employer — the body that certifies
+employers. Not the university — the association every university's programme
+belongs to. Not the sober house — the alliance that sets its standards.
+
+**Rooms not yet knocked on, in rough order of size:**
+- State health departments' substance-use divisions (all 50 publish resource pages)
+- Public library systems — they keep community resource lists and answer email
+- Celebrate Recovery and similar church-based recovery ministries
+- Employee unions with published member-assistance programmes
+- County drug courts and diversion programmes (careful, and worth doing properly)

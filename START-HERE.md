@@ -253,22 +253,24 @@ alive as video and outreach.
   vendor directory is free but goes through a **Calendly call with a MediaBrains
   rep**, not a form.
 
-### ⚠️ OPEN BUG — found and tested, NOT fixed
-**Studio's Quick Video paste box mis-reads decimal durations.** Verified by
-running the real `parseShotLine()` against real lines:
+### ✅ FIXED 12 Aug — Studio b0845, the Quick Video decimal bug
+`1.3s` set a shot to **3 seconds**, `2.0s` to **1**, and the row number turned
+up at the front of the caption. **That was one bug, not two:** the leading
+`/\d{1,3}\s*[.)]/` numbering strip ate the `1.` of `1.3s` as a row number and
+left `3s` for the duration match to find.
 
-| Pasted | What Studio sets |
-|---|---|
-| `1.3s` | **3 seconds** |
-| `1.4s` | **4 seconds** |
-| `2.0s` | **1 second** |
+The strip now requires the dot to be followed by a space or end of line — a row
+number is `1. `, a decimal is `1.3` — and the duration regex accepts decimals
+to one place. Verified against ten lines through the real `parseShotLine()`,
+including the regressions that had to keep working (`1. 30s A long hold.` still
+reads 30; `Day 400 was the hard one.` still refuses to treat 400 as a length).
 
-It also **prepends the row number into the caption** — "1. Nothing looked wrong."
-
-Two fixes needed in `parseShotLine()` in `Studio/web/index.html`: the duration
-regex takes the digit *after* the decimal point, and the leading-number strip
-runs before the duration match instead of after. Until then, paste the block
-then set the sub-second durations by hand.
+**Still true, and not a bug:** "⚡ Cut on the beat of the song" is on by default
+and rounds every shot up to a whole musical bar with a 1.5s floor, so sub-second
+times still come out longer with it ticked. Uncheck it for the episode
+slideshows. If it ever becomes worth fixing properly, the culprit is
+`Math.max(1, Math.round(d / bar)) * bar` — forcing a minimum of one full bar is
+what turns a 17-second piece into 30+ on a slow song.
 
 **Also:** "⚡ Cut on the beat of the song" is **on by default** and snaps every
 shot to a whole musical bar with a 1.5s floor. On a sparse instrumental that

@@ -241,3 +241,69 @@ husband**, **recovery app for couples**. Never quote volume for them.
 Videos: any **Build** term is a title, said the way the term is written.
 Pages: follow the page plan above, in order — everything else Build-tagged
 already has a page or belongs in video.
+
+---
+
+## QUESTION TERMS — pulled live 12 Aug 2026
+
+`phrase_questions`, US database. These are the actual sentences people type,
+which is a different list from the terms above and mostly much easier. **Where
+a difficulty here disagrees with the tables above, this pull is the newer one** —
+Semrush re-scores over time; neither number is wrong, they were taken on
+different days.
+
+### The near-zero ones — nothing to outrank
+
+| Question | Vol | KD |
+|---|---|---|
+| how can i help my alcoholic husband | 40 | **0** |
+| are betrayal trauma and ptsd different | 50 | **0** |
+| how long does betrayal trauma last | 40 | **0** |
+| do i have betrayal trauma quiz | 30 | **0** |
+| what betrayal trauma does to the brain | 30 | **0** |
+| does betrayal trauma ever go away | 20 | **0** |
+| how do i know if my husband is an alcoholic | 50 | **2** |
+| do i have betrayal trauma 26 symptoms | 70 | **7** |
+| is my husband alcoholic | 70 | **9** |
+| how to deal with betrayal trauma | 50 | **10** |
+
+Small volumes individually. Together they are roughly **460 searches a month at
+an average difficulty under 5**, and they are questions this app can answer
+honestly and most sites answer badly.
+
+### The quiz terms — a page that already exists
+
+| Question | Vol | KD |
+|---|---|---|
+| **do i have a binge eating problem quiz** | **720** | **15** |
+| is my husband an alcoholic quiz | 50 | 14 |
+| do i have betrayal trauma quiz | 30 | 0 |
+
+`/quiz` is live. **720 a month at difficulty 15** for a binge-eating quiz is the
+single best unclaimed thing found in any pull so far — it needs a quiz variant,
+not a new site.
+
+### The "at night" cluster — script 12 already says this
+
+| Question | Vol | KD |
+|---|---|---|
+| how to stop binge eating at night | 880 | 33 |
+| how to stop binge eating at night time | 880 | 32 |
+| how to stop from binge eating at night | 720 | 29 |
+| how to recover from a binge eating disorder | 1,000 | 29 |
+
+**About 3,480 searches a month at difficulty 29-33**, against the head term
+`how to stop binge eating` at 9,900 and **difficulty 46**. Nearly the same
+traffic, far easier ground.
+
+And script 12 already opens *"It's the ten minutes after everyone else goes to
+bed"* — the video was written for this cluster before the cluster was found.
+**Retitle it to "how to stop binge eating at night".**
+
+### The husband cluster — how many ways people ask one question
+
+`how to deal / treat / cope with / help / handle / live with an alcoholic
+husband` are six separate terms at 140-390 each, all difficulty 27-29. That is
+**about 1,500 searches a month for one page**, as long as the page uses all six
+verbs rather than picking one.
+

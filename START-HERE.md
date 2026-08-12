@@ -191,6 +191,34 @@ already. If they ever get rebuilt, rebuild them this way.
   **`reference/REDDIT-ORGANIC.md`**, **`reference/EPISODE-CAPTIONS.md`**,
   **`reference/IPHONE-INSTALL.md`** — all new.
 
+### Shipped 12 Aug, later — the two partner pages
+**`/codependency` and `/what-is-al-anon` are live** (v5.1.3). These are the two
+biggest doors into the partner audience and the site had no page for either.
+Routes, sitemap, `llms.txt`, landing footer, cross-links from the four other
+partner pages, crisis block above every signup link, server boot-tested.
+
+**Aimed at the winnable half of each cluster, not the head term** — a fresh
+Semrush pull (12 Aug, appended to `KEYWORDS.md` as an addendum; the 6 Aug
+numbers were not touched) put `codependency` at **KD 72** and `al anon` at
+**KD 68**. So `/codependency` is written to `how to stop being codependent`
+(1,600, KD 46), `signs of codependency` (1,900), `am i codependent` (880) and
+`codependency in relationships` (1,300); `/what-is-al-anon` to
+`what is al anon` (3,600, KD 33, **CPC $5.76**) and `al anon online meetings`
+(2,900, KD 26).
+
+**`codependency test` is 390/mo at difficulty 15 — the lowest number on the
+whole site.** A dedicated check-in page (the `/quiz` pattern) is the next
+obvious build and nobody has taken it.
+
+**Two deliberate calls on the Al-Anon page, don't undo them:** it links out to
+al-anon.org and states plainly that we are not affiliated with Al-Anon Family
+Groups; and `al anon meetings near me` (14,800/mo) is tagged **Skip**, not
+Build. We cannot honestly answer "where is my meeting" — a page that intercepts
+it is a bait page. The app is offered for the six days *between* meetings.
+*(One thing to click: the outbound al-anon.org link could not be loaded from
+this environment — the network policy blocks the domain — so it went out
+unverified.)*
+
 ### The finding that should steer marketing
 Semrush, live: **the partner audience is ~74,500 US searches a month against
 ~23,000 for the drinker.** Three times bigger, and the segment nothing else in
@@ -198,7 +226,8 @@ the category serves.
 
 **But the aim is wrong.** The two words that audience actually types are
 **`al anon` (33,100/mo)** and **`codependency` (33,100/mo, CPC $0.12 — nobody
-monetizing it)**, and there is no page for either.
+monetizing it)**. Both now have pages, built later the same day — see the block
+above for what they actually target, which is not the head terms.
 `is-my-husband-an-alcoholic.html` targets a **260/mo** phrase.
 
 **Best term already owned: `hangxiety` — 12,100/mo, difficulty 35, CPC $0.11.**

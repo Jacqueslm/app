@@ -177,6 +177,24 @@ app.get('/hangxiety', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'hangxiety.html'));
 });
 
+// The partner audience's two biggest search terms, added 2026-08-12 after a
+// live Semrush pull: `codependency` (33,100/mo) and `al anon` (33,100/mo)
+// together outweigh anything else this side of the door, and the site had no
+// page for either. Both head terms are hard (KD 72 and 68), so each page is
+// written for the winnable half of its cluster: `how to stop being
+// codependent` (1,600, KD 46) / `codependency test` (390, KD 15), and
+// `what is al anon` (3,600, KD 33) / `al anon online meetings` (2,900, KD 26).
+// The Al-Anon page links out to al-anon.org and states plainly that we are not
+// affiliated - the search intent there is navigational, so intercepting it
+// without sending people on to the real thing would be a bait page.
+app.get('/codependency', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'codependency.html'));
+});
+
+app.get('/what-is-al-anon', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'what-is-al-anon.html'));
+});
+
 // Our own "best recovery apps" roundup - the standard competitor move done
 // honestly (disclosure up top, real alternatives listed). Targets the
 // "best recovery apps 2026" search and anchors the rehab outreach emails.

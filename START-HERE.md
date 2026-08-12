@@ -219,6 +219,30 @@ it is a bait page. The app is offered for the six days *between* meetings.
 this environment — the network policy blocks the domain — so it went out
 unverified.)*
 
+### THE BUILD ORDER IS DONE — six pages shipped 12 Aug (v5.1.5)
+All of it live: `/codependency`, `/what-is-al-anon`, `/dry-drunk`,
+`/adult-children-of-alcoholics`, `/alcoholic-personality`,
+`/codependency-test`. Roughly **45,000 searches a month** of target terms,
+every one at a difficulty the site can reach. Routes, sitemap, `llms.txt`,
+landing footer, cross-links, crisis-above-signup, boot-tested each time.
+
+**Three things a future session must not undo:**
+- **`/codependency-test` has no email capture, on purpose.** `/api/lead`
+  collapses any unrecognized `source` into the `'quiz'` nurture — which the
+  server's own comment says is written in Jacques's voice and must never go to
+  her. This audience *is* her. **A partner-side sequence has to be written
+  before a capture box belongs on that page.** That sequence does not exist yet
+  and is the obvious next build.
+- **The ACA Laundry List is not reproduced.** It's theirs; the page describes
+  the traits in its own words and links to `adultchildren.org`. Same
+  not-affiliated line as the Al-Anon page.
+- **`/alcoholic-personality` opens by denying its own head term** — "there
+  isn't one" — then explains what each behavior is *doing*. It is one keystroke
+  from a page that labels people. Do not "strengthen" it.
+
+*(Two outbound links went out unverified: `al-anon.org` and `adultchildren.org`
+are both blocked from session environments. Worth one click each.)*
+
 ### ⭐ LAST SEMRUSH PULL — the trial is ending, KEYWORDS.md is now closed
 Jacques said the trial was nearly up, so a final sweep went into `KEYWORDS.md`
 ("FINAL PULL — 12 Aug 2026"). **After this there is no way to pull a number.

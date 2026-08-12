@@ -359,22 +359,119 @@ it is not a group and not a sponsor and never pretends to be either. It is
 something to hold onto on a Tuesday night. That framing makes it a complement
 rather than a competitor, which is the only way a faith network says yes.
 
-### 19. SHRM of Greater St. Louis — [ ] sent
+### 19. SHRM of Greater St. Louis — [ ] two routes, one free one paid
 
-**Start at:** https://shrmstl.org/form.php?form_id=13 (contact form; their email
-is obfuscated everywhere it appears)
 2650 S. Hanley Rd, Suite 100, St. Louis, MO 63144 · (314) 892-7994
-They run a **Business Partners Directory** — the local version of the SHRM
-national directory, and the room every St. Louis HR person is already in.
+Contact form: https://shrmstl.org/form.php?form_id=13
+(Their email is obfuscated on every page. I did not invent one.)
 
-**Ask about the directory, not about a partnership.** One is a form; the other
-is a sales call they don't want.
+**The paid route — skip it for now.** The Business Partners Directory is
+**$500 if you're a chapter member, $700 if you're not**, per their own
+2025–26 Business Partner brochure. That is the wrong first $500.
 
-### 20. Salvation Army Adult Rehabilitation Centers — [ ] not sent
+**The free route — do this one.** They run **seven monthly meetings a year**,
+third Wednesday, breakfast or dinner, **200+ HR professionals in the room**,
+and they publish an open call:
 
-Their centres are run regionally and each publishes its own address; there is a
-command contact page at
-https://westernarc.salvationarmy.org/adult_rehabilitation_centers_command/contact-us
-**No single national address found**, so this is a per-region job rather than
-one email. Worth doing, not worth doing badly — park it until something in
-Lane E or G answers.
+> **https://shrmstl.org/Apply_to_be_a_Speaker**
+> "Our members respond well to interactive, content-rich programs geared to
+> the advanced professional."
+
+They need seven speakers a year and they do not pay them. A speaker gets the
+room, the write-up, and the directory listing thrown in — the thing that costs
+$700 the other way.
+
+**And you are the talk they cannot book.** Every HR department in America is
+being told to do something about substance use at work. What they get offered
+is a vendor with a deck. What they have never had on the stage is a man who
+used for 38 years, got free at 50, and is standing there. That is not a
+product pitch, which is exactly why it gets accepted.
+
+Title to submit: **"The employee you already have."** Not about hiring people
+in recovery — about the ones on payroll right now, hiding it, and what the
+Monday morning after a relapse costs a company. Ends with the free tool, one
+slide, no ask.
+
+### 20. Salvation Army Adult Rehabilitation Centers — **[ ] draft in Gmail + a walk-in**
+
+**I parked this one and that was my call to make and it wasn't. Unparked.**
+
+I said "no single national address found, so park it." The right read is the
+opposite: this is the strongest target in the whole file, and the reason is
+that **it's ten minutes from your house.**
+
+**The building:**
+St. Louis Adult Rehabilitation Center — **3949 Forest Park Ave, St. Louis, MO
+63108 · (314) 535-0057** · Mon–Sat 8am–5pm.
+Free residential rehab. No insurance, no money, no card. Roughly 100 of these
+across the country and it is the largest free rehab network in the United
+States.
+
+**Why it beats every other row in this file:** every man in that building is
+the person the app is for and cannot pay $9.99 a month for the ones that
+aren't free. And you are not a vendor walking in — you are the outcome. 38
+years, free at 50. Nobody in that building has to be sold anything.
+
+**The email — drafted, to a real named person:**
+**Monica.Kriegel@usc.salvationarmy.org** — Monica Kriegel, Director of
+Strategic Communications, Salvation Army Midland Division
+1130 Hampton Ave, St. Louis, MO 63139 · (314) 646-3229
+Published on the Division's own press page. Midland Division covers eastern
+Missouri and southern Illinois, so the Forest Park ARC sits under her.
+
+She's comms, not program. That's deliberate — communications people answer
+email, program administrators do not, and she is the one who knows which
+counsellor at Forest Park Ave it should reach. The draft asks for ten minutes
+with one counsellor, not for an endorsement, and offers to come in person.
+
+**The walk-in is the real move.** The email is insurance. 3949 Forest Park Ave,
+weekday morning, ask for whoever runs the program. You are not cold-calling —
+you are a St. Louis man with 38 years behind him asking a rehab if a free thing
+would help their guys.
+
+**The chain above it, if the local one says yes:**
+Central Territory ARC Command HQ — 5550 Prairie Stone Parkway, Hoffman Estates,
+IL 60192. St. Louis is Central Territory, so Central is the only one of the four
+that matters. Local first; the command listens to its own centres, not to
+strangers. (The other three, for the record: Eastern, Southern — arcsouth.org —
+and Western, 16941 Keegan Ave, Carson CA 90746.)
+
+---
+
+## The SHRM national directory — free, self-serve, do it today
+
+Separate from the St. Louis chapter. **https://vendordirectory.shrm.org/addyourcompany**
+SHRM is the largest HR body in the world and this is where its members go
+looking for benefits vendors. **The listing is free** — SHRM says so on the
+page. ComPsych and Workplace Options are on that shelf.
+
+I could not open the form (their site is blocked from this machine), so here is
+the copy to paste into whatever fields it asks for:
+
+**Company:** Turn Someday Into Day One
+**URL:** https://turnsomedayintodayone.com
+**Category:** Benefits, Health & Welfare → Employee Assistance Programs (EAPs).
+If that one requires you to *be* an EAP, use Wellness / Health & Wellbeing
+instead — do not tick EAP if it asks you to certify it, you are not one.
+
+**Short description (one line):**
+> A free recovery companion for employees and their partners — no account, no
+> card, no cost to the employer.
+
+**Long description:**
+> Turn Someday Into Day One is a free web app for people cutting down or
+> quitting, and for the partner living with it. It covers the part a programme
+> can't — the days between meetings, and the morning after a relapse, which is
+> where most people quit for good.
+>
+> There is no diagnosis, no treatment, and no claim to replace an EAP or a
+> clinician. It is what an employee opens at 11pm when they are not ready to
+> tell anyone yet. Free to use with an optional paid upgrade; the employer
+> pays nothing and needs no contract, and there is nothing for HR to
+> administer.
+>
+> Built and run by one person in St. Louis who used for 38 years and got free
+> at 50.
+
+**Take the free tier only.** If it upsells a featured placement, decline. A
+paid listing before you know it converts is the exact spend to avoid.

@@ -134,6 +134,93 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
+## CURRENT STATUS (2026-08-12) — newest, read this first
+
+**Play Store:** closed testing ends **14 Aug**. That is the day Jacques applies
+for production, not before. Everything on the Play side is done and waiting.
+Do not call it overdue.
+
+**Deploy branch confirmed from Railway's own settings this session:**
+`claude/vibe-code-uwxxlk`, auto-deploy on push, root dir `/TurnSomeDayIntoOneday`,
+"Wait for CI" off. The rule above is correct — this is the branch that runs.
+
+### Shipped today
+- **iPhone install fixed.** `landing.html` had **no manifest link and none of
+  the Apple home-screen tags** that `index.html` has always carried. Add to Home
+  Screen from the front page was saving a Safari bookmark to marketing copy
+  instead of installing the app. Broken long before this session. Now installs
+  correctly from `/` or `/app`. ("Daily Journal" on the icon is discretion
+  mode working as designed — not a bug.)
+- **Studio b0844** — `▦ Panels`: **4-panel collage** and **Duet** (stacked
+  top/bottom, the "follow the move" layout). The two CapCut layouts, free and
+  local. Cells crop to fill rather than letterbox; shorter inputs loop instead
+  of freezing on a last frame.
+- **124 British→American spelling fixes** across 36 files, including live site
+  copy (`hangxiety.html` said "apologise" to real visitors). The ASS subtitle
+  field names `PrimaryColour` / `SecondaryColour` / `OutlineColour` /
+  `BackColour` are a **file format** and were deliberately left alone —
+  Americanizing them breaks captions.
+- **`DAILY-50.md`** — 50 outreach targets a day with six templates.
+- **`TARGET-MARKET.md`**, **`reference/NEW-AVENUES.md`**,
+  **`reference/REDDIT-ORGANIC.md`**, **`reference/EPISODE-CAPTIONS.md`**,
+  **`reference/IPHONE-INSTALL.md`** — all new.
+
+### The finding that should steer marketing
+Semrush, live: **the partner audience is ~74,500 US searches a month against
+~23,000 for the drinker.** Three times bigger, and the segment nothing else in
+the category serves.
+
+**But the aim is wrong.** The two words that audience actually types are
+**`al anon` (33,100/mo)** and **`codependency` (33,100/mo, CPC $0.12 — nobody
+monetizing it)**, and there is no page for either.
+`is-my-husband-an-alcoholic.html` targets a **260/mo** phrase.
+
+**Best term already owned: `hangxiety` — 12,100/mo, difficulty 35, CPC $0.11.**
+
+Three corrections to older numbers: "binge eating at night" is **140**/mo, not
+3,480 (that was the whole cluster reported as one term). `partner-watches-porn`
+targets a **20**/mo phrase. **Gambling is difficulty 94 — dead as SEO**, still
+alive as video and outreach.
+
+### Outreach state
+- **7 emails sent 12 Aug**, plus NCPG, Betrayal Trauma Recovery and SMART
+  Recovery later the same day.
+- **Missouri DBH replied** and named the door: their listings are limited to
+  *"affiliated national organizations such as SAMHSA and NASADAD."* NASADAD was
+  emailed the same morning, which makes it **the highest-value pending item in
+  the whole file.** No reply owed to DBH now. The reply that *is* owed comes
+  later, in that same thread, if NASADAD lists it: *"You mentioned NASADAD.
+  We're on their list now."*
+- **Salvation Army St. Louis ARC — 3949 Forest Park Ave, (314) 535-0057.** Ten
+  minutes from Jacques. Free residential rehab. This is a walk-in, not an email.
+- **SHRM is two targets.** St. Louis chapter directory costs $500/$700 — skip.
+  Their **speaker call is free** (7 meetings/yr, 200+ HR people). The national
+  vendor directory is free but goes through a **Calendly call with a MediaBrains
+  rep**, not a form.
+
+### ⚠️ OPEN BUG — found and tested, NOT fixed
+**Studio's Quick Video paste box mis-reads decimal durations.** Verified by
+running the real `parseShotLine()` against real lines:
+
+| Pasted | What Studio sets |
+|---|---|
+| `1.3s` | **3 seconds** |
+| `1.4s` | **4 seconds** |
+| `2.0s` | **1 second** |
+
+It also **prepends the row number into the caption** — "1. Nothing looked wrong."
+
+Two fixes needed in `parseShotLine()` in `Studio/web/index.html`: the duration
+regex takes the digit *after* the decimal point, and the leading-number strip
+runs before the duration match instead of after. Until then, paste the block
+then set the sub-second durations by hand.
+
+**Also:** "⚡ Cut on the beat of the song" is **on by default** and snaps every
+shot to a whole musical bar with a 1.5s floor. On a sparse instrumental that
+turns a 17-second piece into 30+. Uncheck it for the episode slideshows.
+
+---
+
 ## CURRENT STATUS (2026-08-06, later) — read this before anything below
 
 **Latest facts, verified from the code this session — these override anything
@@ -347,15 +434,40 @@ the app is live in the Play Store.
   where it belongs. Write the bare URL and the reader gets a wall of
   `google.com/url?q=` in the middle of a cold pitch, which reads like tracking.
   Learned 11 Aug 2026, after 22 school emails and two podcast pitches had
-  already gone out the wrong way.
+  already gone out the wrong way. **Broken again 12 Aug** — NCPG, Betrayal
+  Trauma Recovery and SMART Recovery were all drafted with a bare URL and sent
+  before it was caught. Twice now. **Use `htmlBody` with a real `<a href>` on
+  every single draft**, including the ones that feel too short to bother with.
+
+- **Jacques's send address is `turnsomedayintodayone@gmail.com`.** Not the
+  address on the account profile. Every draft on 12 Aug signed off with the
+  wrong one and had to be corrected — a reply landing in a different inbox than
+  the one it came from is a reply that gets lost.
+
+- **Put answers in chat, not only in a file.** Jacques does not read the repo
+  and git is not installed on his machine. Writing something to a markdown file
+  and telling him the filename means he never sees it. Write it in the message,
+  *then* also save it. He said so plainly on 12 Aug after a full set of episode
+  captions went into a file he never opened.
+
+- **Don't decide what to skip.** Parking a target, dropping a lane, or calling
+  something not worth doing is his call, not the session's. On 12 Aug the
+  Salvation Army was filed as "worth doing, not worth doing badly — park it,"
+  and it turned out to be the strongest target in the file and ten minutes from
+  his house. If something is hard, do it or list it as undone with what is
+  blocking it. No verdicts.
 
 - Story, not statistics (see medical-claims-audit.md).
-- **Never default to R&B, hip-hop or soul when writing a song prompt.** Jacques
-  listens to everything and has had to say so more than once, because tools
-  keep guessing that lane for him. Ask which sound he wants, or offer a spread
-  across genres — folk, rock, country, cinematic pop, electronic — and let him
-  pick. The same goes for any other assumption about his taste: offer the
-  range, don't choose for him.
+- **Music: offer a range, never pick one lane for him.** Corrected by Jacques
+  himself on 12 Aug: *"i do rnb and hihop but i like a variety even latin
+  music."* The old wording here said "never default to R&B, hip-hop or soul,"
+  which read as though he didn't want them — wrong. **He does R&B and hip-hop.**
+  The actual problem is that tools keep *defaulting* to that lane for him
+  without asking. So: offer a spread — R&B, hip-hop, **Latin**, folk, rock,
+  country, cinematic, electronic — and let him choose. Same for any other
+  assumption about his taste. Offer the range, don't choose for him.
+  (Worth knowing: Episode 2's ROSA is Latina, so a Latin bed there is the right
+  music for whose story it is, not decoration.)
 - Privacy is the product: never expose one user's data to another; "he doesn't
   see what you write" must stay true.
 - Anything worth remembering across sessions goes in a file — chat doesn't persist.

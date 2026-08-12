@@ -257,3 +257,47 @@ belongs to. Not the sober house — the alliance that sets its standards.
 - Celebrate Recovery and similar church-based recovery ministries
 - Employee unions with published member-assistance programmes
 - County drug courts and diversion programmes (careful, and worth doing properly)
+
+---
+
+# LANE F — where HR people go looking (opened 12 Aug)
+
+The employer lane's problem was always that companies don't publish a benefits
+address. These solve it from the other side: **directories that HR people search
+when they need a vendor.** Get listed and the employer finds you.
+
+### 12. SHRM Vendor Directory — [ ] sent
+
+**Start at:** https://vendordirectory.shrm.org/category/benefits-health-welfare/employee-assistance-programs-eaps
+SHRM is the largest HR professional body in the world and this directory is
+where its members go to find benefits vendors. ComPsych and Workplace Options
+are both listed in it — that is the shelf to be on.
+
+Look for "list your company" or "add your business". Most of these directories
+have a free tier and charge for placement; **take the free tier only** — a paid
+listing before you know it converts is the exact spend to avoid.
+
+### 13. Shortlister — [ ] sent
+
+**Start at:** https://www.myshortlister.com
+Used by benefits consultants and brokers to shortlist vendors for employer
+clients. Same shelf, different room.
+
+### 14. Benefits brokers, the local version — [ ] not built yet
+
+A broker recommends the same benefits package to dozens of employers at once,
+which is the RFW lever in miniature and much more reachable than an HR
+department. St. Louis has plenty and they all publish addresses.
+
+**Not researched yet.** Worth a proper pass once one of the national bodies
+answers — a broker takes you more seriously with one name behind you.
+
+## ⚠️ What was NOT verified
+
+Gusto, Rippling, Justworks and TriNet all run app or benefits marketplaces, and
+a free wellbeing app is plausibly a fit. **I could not find their partner
+application pages and did not want to write down a URL I had not seen** — that
+mistake cost a morning already with four invented YouTube channel ids.
+
+If you want them: search each platform's site for "partner" or "marketplace",
+send me what you find, and I will write the pitch.

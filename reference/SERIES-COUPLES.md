@@ -16,13 +16,28 @@ Each episode opens a door nobody else is standing in:
 |---|---|---|---|
 | 1 | Two men | Gambling | Same-sex male couples · the only addiction with no physical tell |
 | 2 | Two women | Shopping | Same-sex female couples · **880/mo, KD 41 — a Build term, not too hard** |
-| 3 | *open* | Food / binge | 9,900/mo, the biggest winnable term you own, fully ad-safe |
-| 4 | *open* | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
+| 3 | Man + woman, flipped | Food / binge | **Men with eating disorders** — 9,900/mo, biggest winnable term you own, fully ad-safe |
+| 4 | Young couple | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
 
 **The rule that makes the series work:** the person using is never the villain
 and never forgiven. Every episode has one line that says *they're not a bad
 person* and one that says *that's what makes it hard*. That pair is what every
 partner recognises and what no advert ever says.
+
+---
+
+## ⏳ Generate everything before 25 August
+
+Manus's advanced models are free until **25 Aug 2026**. That is the whole
+series — **40 images** — for nothing, and it does all ten at once without the
+face drifting.
+
+**So bank all four episodes now, even the ones you won't post until October.**
+Images keep. A free window doesn't. This is the cheapest the artwork will ever
+be, and after the 25th every one of these costs money.
+
+Order to generate in, if the window gets tight: **Episode 3 first** (biggest
+term, ad-safe, the one you'd put money behind), then 2, then 4, then 1.
 
 ---
 
@@ -165,7 +180,146 @@ difficulty 41, tagged Build**, not too hard.
 
 ---
 
-## How to build either one
+# EPISODE 3 · The Second Dinner — a man who binges, his wife
+
+> **RAY:** Black man, mid 40s, broad, short beard going grey, work shirt.
+> **TAMMY:** Black woman, early 40s, braids, glasses, cardigan.
+
+**Every article about binge eating is written for a woman.** Men who do this
+have nowhere to read about themselves, so this flips the default the way
+episode 2 flips the couple. And it is the biggest winnable term you own —
+**how to stop binge eating, 9,900/mo, difficulty 37** — plus the only fully
+ad-safe lane in the file.
+
+**The tell is the disposal, not the eating.** Wrappers under the seat. Eating in
+the car before he comes in so he can sit down to dinner like nothing happened.
+There is no substance to blame and no smell to catch — just a man being very
+careful, and a wife who notices he is never hungry.
+
+**SHOT 1** — `TAMMY setting two plates on a kitchen table in warm evening light, RAY coming in from work, ordinary and easy`
+*"He was never hungry at dinner."*
+
+**SHOT 2** — `RAY sitting alone in a parked car outside a house at night, dome light off, eating quickly, looking at the front door`
+*"I thought he'd eaten at work."*
+
+**SHOT 3** — `Close on the footwell of a car, fast food wrappers pushed under the seat, a torn bag, shot from above`
+*"I found them cleaning out the car."*
+
+**SHOT 4** — `TAMMY standing very still by the open car door in daylight, keys in hand, looking down`
+*"I sat in that car a long time."*
+
+**SHOT 5** — `RAY at the kitchen table with a full plate in front of him, moving food around, TAMMY watching from the counter behind him, out of focus`
+*"He wasn't hiding food. He was hiding himself."*
+
+**SHOT 6** — `Close on RAY's hands resting on the edge of a kitchen counter at night, kitchen dark, fridge light on his face`
+*"Ten minutes after everyone goes to bed."*
+
+**SHOT 7** — `A framed photo of RAY and TAMMY at a family cookout, laughing, warm, slightly out of focus in a dim room`
+*"He's not weak. He's not greedy."*
+
+**SHOT 8** — `RAY asleep on top of the covers still in his work clothes, TAMMY sitting on the end of the bed, awake`
+*"He's soothing something he's never said out loud."*
+
+**SHOT 9** — `TAMMY at the kitchen table at first light, phone in hand, grey window behind her, searching`
+*"Nothing I found was written for him."*
+
+**SHOT 10** — `Wide of a bright morning kitchen, RAY and TAMMY sitting at the table facing each other, two coffees, mid-conversation`
+*"So I stopped waiting for him to bring it up."*
+
+**YouTube:** When it's your husband, and nothing you read is about him
+**TikTok:** He wasn't hiding food. He was hiding himself.
+
+```
+1. 01_dinner     Still     1.3s  cut   He was never hungry at dinner.
+2. 02_car        Zoom in   1.4s  cut   I thought he'd eaten at work.
+3. 03_wrappers   Zoom in   1.4s  cut   I found them cleaning out the car.
+4. 04_stillness  Still     1.5s  cut   I sat in that car a long time.
+5. 05_plate      Zoom in   1.5s  cut   He wasn't hiding food. He was hiding himself.
+6. 06_fridge     Still     1.4s  cut   Ten minutes after everyone goes to bed.
+7. 07_photo      Zoom in   1.4s  cut   He's not weak. He's not greedy.
+8. 08_asleep     Still     1.6s  cut   He's soothing something he's never said out loud.
+9. 09_dawn       Zoom in   1.6s  cut   Nothing I found was written for him.
+10. 10_kitchen   Zoom out  2.0s  cut   So I stopped waiting for him to bring it up.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** Every article about this is written for a woman. He read all of them looking for himself and none of them were about him. There's a free app — the counter, the button for the ten minutes after everyone goes to bed, and a section for the person who noticed.
+`#bingeeating #emotionaleating #recoverysupport #lovinganaddict`
+
+---
+
+# EPISODE 4 · Right Here — a young couple, doomscrolling
+
+> **AMARA:** Black woman, late 20s, box braids, oversized sweatshirt.
+> **JOSH:** white man, late 20s, messy dark hair, hoodie, tired eyes.
+
+The cheapest reach in the file — **how to stop doomscrolling, 1,600/mo,
+difficulty 24**, and the youngest audience you have. It is also the one addiction
+everybody watching is doing *while they watch it*, which is why it lands
+differently from the others.
+
+**The tell is time, not substance.** Nothing is hidden and nothing is spent.
+Somebody is just gone — sitting right there and gone — and the person beside
+them can't name what they've lost, which is exactly why they never bring it up.
+
+**SHOT 1** — `AMARA and JOSH on a sofa in a small apartment at night, sitting close, JOSH's face lit blue from a phone, AMARA looking at him`
+*"He was right here."*
+
+**SHOT 2** — `Close on AMARA's face in warm lamplight, mid-sentence, talking to someone off-frame`
+*"I told him about my day."*
+
+**SHOT 3** — `JOSH from AMARA's side, phone in hand, blue light on his face, nodding slightly, not looking up`
+*"He said mm-hm in the right places."*
+
+**SHOT 4** — `A dinner table with two plates, JOSH's phone face-up beside his fork, food half-eaten`
+*"He couldn't tell me one thing I said."*
+
+**SHOT 5** — `A dark bedroom, 2:47 on a bedside clock, JOSH's face lit by a phone, AMARA turned away asleep`
+*"Two hours. Every night."*
+
+**SHOT 6** — `Close on a phone screen at night showing an endless feed, blurred, a thumb mid-swipe`
+*"He couldn't name one thing he'd read either."*
+
+**SHOT 7** — `A photo on a fridge of AMARA and JOSH somewhere outdoors, laughing, sunlight, held on by a magnet`
+*"He's not bored of me."*
+
+**SHOT 8** — `JOSH asleep with the phone still in his open hand, screen on, AMARA awake beside him looking at the ceiling`
+*"He's just somewhere he can't stop going."*
+
+**SHOT 9** — `AMARA at a small kitchen table at first light, her own phone in her hand, catching herself, grey window`
+*"And I do it too. That's the part nobody says."*
+
+**SHOT 10** — `Bright morning, both of them on the sofa, phones face-down on the table between them, talking`
+*"So we put them face-down and started again."*
+
+**YouTube:** He was right here and he was gone
+**TikTok:** He said mm-hm in the right places.
+
+```
+1. 01_sofa       Still     1.3s  cut   He was right here.
+2. 02_talking    Zoom in   1.3s  cut   I told him about my day.
+3. 03_nodding    Still     1.4s  cut   He said mm-hm in the right places.
+4. 04_dinner     Zoom in   1.4s  cut   He couldn't tell me one thing I said.
+5. 05_clock      Still     1.5s  cut   Two hours. Every night.
+6. 06_feed       Zoom in   1.3s  cut   He couldn't name one thing he'd read either.
+7. 07_fridge     Zoom in   1.4s  cut   He's not bored of me.
+8. 08_asleep     Still     1.6s  cut   He's just somewhere he can't stop going.
+9. 09_dawn       Zoom in   1.7s  cut   And I do it too. That's the part nobody says.
+10. 10_facedown  Zoom out  2.0s  cut   So we put them face-down and started again.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** Nothing gets hidden and nothing gets spent. Somebody's just gone — sitting right there and gone. Free app, and it counts whatever you're quitting.
+`#doomscrolling #screentime #recoverysupport #phoneaddiction`
+
+**Shot 9 is why this one travels.** Every other episode has a clean line between
+the person using and the person who found out. This one admits the narrator does
+it too — which is true, and which is what makes a young audience send it to
+somebody instead of scrolling past.
+
+---
+
+## How to build any of them
 
 **Cuts, not blends.** The rhythm is the point — it's the feeling of scrolling a
 statement. A blend softens it.

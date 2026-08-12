@@ -25,6 +25,7 @@ That gate splits this file in two:
 
 - **Lane A — runnable now, no certification.** Binge eating and doomscrolling
   are not in the restricted category. 9,900 and 1,600 searches a month.
+- **Lane R — Reddit, possibly open now, no certification.** See below.
 - **Lane B — written and waiting.** Everything alcohol- or porn-related. Do not
   submit these until certification is done, or you will collect disapprovals
   and a strike against the ad account.
@@ -122,6 +123,99 @@ competitor on them charges.
 Reframe, Covenant Eyes, Brainbuddy, Ever Accountable, Sunnyside. Several
 others are free or freemium, and a false claim is both a policy violation and
 the opposite of what this brand is.
+
+---
+
+# LANE R — Reddit, and it may be open now
+
+Added 12 Aug 2026.
+
+**Reddit is missing from every LegitScript list.** Every article naming the
+certification names Google, Microsoft and Meta. Reddit never appears. That
+suggests Reddit does not gate recovery ads the same way — which would make it
+the only paid channel open without a 30-60 day wait and an annual fee.
+
+**Unverified.** Reddit's policy page is unreachable from here. Confirm it on
+the Reddit Ads site before building anything on it.
+
+## Why it fits better than Meta or Google
+
+**You can buy your way into the actual room.** Reddit sells targeting by
+subreddit. Meta sells fuzzy interests, Google sells a search term — Reddit sells
+r/AlAnon. The partner cards were written for those exact people, so nothing has
+to be adapted.
+
+**The targets, in order:**
+
+| Subreddit | Why |
+|---|---|
+| r/AlAnon | The partner lane, undiluted. Cards 1-12 were written for this room. |
+| r/loveafteraddiction | Smaller, same audience, less advertised to. |
+| r/stopdrinking | Big and warm, but they are the person using — lead with the free app, never the partner angle. |
+| r/BingeEatingDisorder | The ad-safe lane and the biggest term you own. |
+
+## The format that changes the creative — Free-Form Ads
+
+Reddit lets an ad be a **post**: long text, first person, no banner. On Reddit
+that outperforms a designed card, because a designed card announces itself as
+an advert in a feed of people talking.
+
+**So the Reddit creative is not a 15-second short. It is the thing you would
+have written anyway.**
+
+> **I was addicted for 38 years. I got free at 50. Then I built the app I needed the whole time.**
+>
+> I'm not in recovery marketing. I'm a guy in Saint Louis who spent 38 years
+> using and got out at 50, and everything I found afterwards either cost money
+> I didn't have or was written by someone who'd never done it.
+>
+> So I built one. A day counter, a button for the moment it hits, a lesson a
+> day, a private journal, and someone to talk to at 3am when there's nobody to
+> call.
+>
+> It's free. No card, no trial, no first-week-free. There's a paid upgrade if
+> you want more, but everything that keeps a person alive costs nothing and
+> always will.
+>
+> There's also a whole section for the person who loves someone using — my wife
+> lived every one of those 38 years with me and nobody ever built anything for
+> her.
+>
+> Happy to answer anything in the comments.
+
+**"Happy to answer anything in the comments" is not a flourish.** See below.
+
+## The risk nobody mentions: Reddit ads have comments
+
+An advert that reads as monetising addiction gets publicly taken apart *inside
+the advert*, where every future viewer sees it. No other platform does this.
+
+It also cuts the other way, and in your favour: the honest version is the one
+that survives, and on Reddit an honest founder post can get **upvoted**. Yours
+is one of the few products where the true thing and the effective thing are the
+same sentence.
+
+**Three rules if you run it:**
+1. **Answer every comment, in your own voice, the same day.** An unanswered
+   recovery ad reads as a company. An answered one reads as a man.
+2. **Never argue.** If somebody says it's a cash grab, say what's free and move on.
+3. **If the room turns, pull it.** Costs you a day's spend and nothing else.
+
+## What to spend
+
+**Not $500.** The promo on that page is *$500 credit when you spend $500* — you
+put up the money first, and the code has an expiry. Check the date before it
+becomes a deadline you lose rather than an offer you took.
+
+In order:
+1. **Wait for production access.** App-install campaigns need a live listing.
+2. **One ad, one subreddit — r/AlAnon — minimum daily spend, seven days.**
+   Free-Form, the post above.
+3. **Read the comments before you read the clicks.** That is the data no other
+   platform gives you, and it is worth more than the CPC.
+4. Only then decide whether $500 is worth matching.
+
+If the first ad gets savaged, you found that out for the price of a takeaway.
 
 ---
 

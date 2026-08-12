@@ -751,7 +751,7 @@ body.simple-only #view-simple{display:flex !important}
       <h3>Text &amp; titles</h3>
       <div id="ovl-list" class="row"></div>
       <button class="btn2 quiet" id="ovl-add">+ Add text</button>
-      <p class="usage">Whatever font, size, colour and position you set last is remembered — every new text starts that way. Press <b>↧ same look for all</b> on any text to push its look onto all the others. <a href="#" id="ovl-look-reset">Back to Studio's default look</a>.</p>
+      <p class="usage">Whatever font, size, color and position you set last is remembered — every new text starts that way. Press <b>↧ same look for all</b> on any text to push its look onto all the others. <a href="#" id="ovl-look-reset">Back to Studio's default look</a>.</p>
     </div>
 
     <div class="card adv-card">
@@ -2552,7 +2552,7 @@ function renderMediaPage() {
     if (a.kind === 'video') {
       const pol = document.createElement('button');
       pol.textContent = '✨ Polish';
-      pol.title = 'FREE — cinematic colour grade + sharpen + loudness master. Best on your finished render.';
+      pol.title = 'FREE — cinematic color grade + sharpen + loudness master. Best on your finished render.';
       pol.onclick = (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish');
       actions.appendChild(add); actions.appendChild(pol);
       const del2 = document.createElement('button'); del2.textContent = '🗑';
@@ -2647,7 +2647,7 @@ function facecamPrefs() {
   let p = {};
   try { p = JSON.parse(localStorage.getItem('studio_facecam') || '{}'); } catch (_) {}
   return {
-    x: typeof p.x === 'number' ? p.x : 0.86,   // bubble centre, fraction of frame
+    x: typeof p.x === 'number' ? p.x : 0.86,   // bubble center, fraction of frame
     y: typeof p.y === 'number' ? p.y : 0.82,   // default: bottom-right
     size: FACECAM_SIZES[p.size] ? p.size : 'medium',
   };
@@ -3698,7 +3698,7 @@ const POST_TYPES = {
   cards:      { label: '🃏 Card + AI music', services: ['tiktok', 'facebook'],          aiLabel: true,
                 note: 'Text cards over AI music — YouTube is left off these.' },
   storyboard: { label: '🎬 AI storyboard', services: ['tiktok', 'youtube', 'facebook'], aiLabel: true,
-                note: 'AI-generated scenes. Goes everywhere, labelled as AI.' },
+                note: 'AI-generated scenes. Goes everywhere, labeled as AI.' },
 };
 function postTypePrefs() {
   try { return JSON.parse(localStorage.getItem('tsid-buffer-types') || '{}') || {}; } catch (_) { return {}; }
@@ -4640,8 +4640,8 @@ function renderLibrary() {
     if (a.kind === 'video') btn('🟢 Green screen', '', () => { st.chromaTarget = st.chromaTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; st.loopTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion');
     if (a.kind === 'image' || a.kind === 'video') { const rb = btn('📱 Reframe', '', () => { st.reframeTarget = st.reframeTarget === a.id ? null : a.id; st.chromaTarget = null; st.cutTarget = null; st.soundTarget = null; renderLibrary(); }, 'motion'); rb.title = 'FREE — turn this into a vertical Short (9:16), Square (1:1), or Wide (16:9)'; }
     // Finish (polish / quality / audio, free)
-    if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic colour grade + sharpen + loudness master in one pass. Best on your finished render.'; }
-    if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap colour themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
+    if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic color grade + sharpen + loudness master in one pass. Best on your finished render.'; }
+    if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap color themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
     if (a.kind === 'video' || a.kind === 'image') { const dyb = btn('🔥 Dynamics', '', () => { st.dynTarget = st.dynTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); dyb.title = 'FREE — CapCut-style beat effects: strobe hits, thermal flips, glow, shake, Time Machine, 3-2-1 opener. A picture becomes a clip; a clip keeps its sound in sync.'; }
     if (a.kind === 'image') btn('2× sharper', '', async (e) => {
       const b = e.target; b.disabled = true; b.textContent = '…';
@@ -4812,7 +4812,7 @@ function renderLibrary() {
       el.querySelector('.li-meta').appendChild(panel);
     }
     if (st.chromaTarget === a.id) {
-      // Green screen: drop this clip's subject (shot/generated on a solid colour)
+      // Green screen: drop this clip's subject (shot/generated on a solid color)
       // onto any picture or clip in your library. Free, local ffmpeg chroma key.
       const bgs = st.assets.filter((x) => x.id !== a.id && (x.kind === 'image' || x.kind === 'video'));
       const panel = document.createElement('div');
@@ -4827,7 +4827,7 @@ function renderLibrary() {
           ${bgs.map((s) => `<option value="${s.id}">${s.kind === 'video' ? '🎬' : '🖼'} ${escapeHtml(s.label)}</option>`).join('')}
         </select>
         <button class="btn2 quiet ck-go">🟢 Put me on this background · free</button>
-        <span class="usage">Keys out the solid colour behind your subject and lays them over the picture/clip you pick. Makes a new copy — the original is untouched. Works best when the background colour is even and doesn't appear on your subject.</span>`
+        <span class="usage">Keys out the solid color behind your subject and lays them over the picture/clip you pick. Makes a new copy — the original is untouched. Works best when the background color is even and doesn't appear on your subject.</span>`
         : '<span class="usage">Add a picture or another clip to your library first — that becomes the new background.</span>';
       panel.querySelectorAll('.ck-colors .chip').forEach((c) => c.onclick = () => {
         panel.querySelectorAll('.ck-colors .chip').forEach((x) => x.classList.remove('on'));
@@ -4865,7 +4865,7 @@ function renderLibrary() {
           <button class="chip" data-m="blur">Blurred bars (keep all)</button>
         </div>
         <button class="btn2 quiet rf-go">📱 Reframe · free</button>
-        <span class="usage">Makes a new copy sized for the platform. <b>Fill</b> crops in on the centre; <b>Blurred bars</b> keeps the whole shot with a soft zoom behind it.</span>`;
+        <span class="usage">Makes a new copy sized for the platform. <b>Fill</b> crops in on the center; <b>Blurred bars</b> keeps the whole shot with a soft zoom behind it.</span>`;
       panel.querySelectorAll('.rf-target .chip').forEach((c) => c.onclick = () => { panel.querySelectorAll('.rf-target .chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); rfTarget = c.dataset.t; });
       panel.querySelectorAll('.rf-mode .chip').forEach((c) => c.onclick = () => { panel.querySelectorAll('.rf-mode .chip').forEach((x) => x.classList.remove('on')); c.classList.add('on'); rfMode = c.dataset.m; });
       panel.querySelector('.rf-go').onclick = async (e) => {
@@ -5092,7 +5092,7 @@ function renderLibrary() {
       panel.innerHTML = `
         <div class="chips look-chips">${LOOKS.map(([k, l]) => `<button class="chip" data-look="${k}">${l}</button>`).join('')}</div>
         <div class="progress-line look-prog"><div></div></div>
-        <span class="usage">One-tap colour theme for the whole clip (free, no AI). Makes a new copy — the original stays. Best on your finished render.</span>`;
+        <span class="usage">One-tap color theme for the whole clip (free, no AI). Makes a new copy — the original stays. Best on your finished render.</span>`;
       panel.querySelectorAll('.look-chips .chip').forEach((chip) => {
         chip.onclick = async () => {
           setErr('#scenes-err', null);
@@ -6222,7 +6222,7 @@ function drawOverlay(specIn, W, H, canvas) {
 }
 
 // One look for every piece of text. Each overlay used to be born from a
-// hardcoded font/size/colour, so changing one changed only that one and the
+// hardcoded font/size/color, so changing one changed only that one and the
 // next one you added started over. Now the last look you set is remembered and
 // every new text uses it; "same look for all" pushes it onto existing ones too.
 const LOOK_KEYS = ['font', 'size', 'color', 'bold', 'pos'];

@@ -16,7 +16,7 @@ team, on purpose — everything goes through procurement, procurement wants a
 vendor with a contract and a security review, and that is a six-month door for
 a solo founder.
 
-**But there are organisations whose entire job is handing employers a list of
+**But there are organizations whose entire job is handing employers a list of
 recovery resources.** Get on one of those lists and you are in front of every
 employer they serve at once. The national one, the RFW Institute, works with
 **1,500+ employers across 35+ states**. One email there is worth fifty cold
@@ -201,7 +201,7 @@ Follow up once, 16 Aug, same as the schools. Then let it go.
 
 # LANE E — the national bodies (opened 12 Aug)
 
-The RFW Institute proved the shape: one email to an organisation whose job is
+The RFW Institute proved the shape: one email to an organization whose job is
 handing out resource lists beats fifty to the people who read them. These are
 the same lever in four more rooms.
 
@@ -215,14 +215,14 @@ email would. Email pattern is `First.Last@collegiaterecovery.org`; there is also
 a contact form at https://collegiaterecovery.org/contact/
 
 **The angle, and it's specific to them:** a student in a collegiate recovery
-programme already has people around them who know. What they don't have is
+program already has people around them who know. What they don't have is
 something free at 3am that doesn't require waking anybody.
 
 ### 9. Faces & Voices of Recovery — [ ] sent
 
 **Send to:** info@facesandvoicesofrecovery.org — **draft in Gmail**
 50 F St NW, Suite 350, Washington DC 20001 · (202) 737-0690
-The biggest recovery advocacy organisation in the US. Lead with the partner
+The biggest recovery advocacy organization in the US. Lead with the partner
 section — advocacy groups know families are the underserved half.
 
 ### 10. National Alliance for Recovery Residences (NARR) — [ ] sent
@@ -246,17 +246,17 @@ two emails into one building looks like pestering.
 
 ## The pattern, so the next batch writes itself
 
-Every target that has worked or looked promising is **an organisation that
+Every target that has worked or looked promising is **an organization that
 publishes a list other people read**. Not the employer — the body that certifies
-employers. Not the university — the association every university's programme
+employers. Not the university — the association every university's program
 belongs to. Not the sober house — the alliance that sets its standards.
 
 **Rooms not yet knocked on, in rough order of size:**
 - State health departments' substance-use divisions (all 50 publish resource pages)
 - Public library systems — they keep community resource lists and answer email
 - Celebrate Recovery and similar church-based recovery ministries
-- Employee unions with published member-assistance programmes
-- County drug courts and diversion programmes (careful, and worth doing properly)
+- Employee unions with published member-assistance programs
+- County drug courts and diversion programs (careful, and worth doing properly)
 
 ---
 
@@ -313,9 +313,9 @@ send me what you find, and I will write the pitch.
 The state's own list. Being a Missouri resident is the whole reason this one is
 worth sending — a state agency is far likelier to look at somebody who lives
 there. The draft says plainly that the app does not diagnose and does not
-replace treatment, because a state behavioural health division will check.
+replace treatment, because a state behavioral health division will check.
 
-**And this is a template for 49 more.** Every state runs a behavioural health
+**And this is a template for 49 more.** Every state runs a behavioral health
 division and every one publishes an address. Missouri first, because it is
 home; the rest are a batch for a quiet afternoon.
 
@@ -432,7 +432,7 @@ would help their guys.
 **The chain above it, if the local one says yes:**
 Central Territory ARC Command HQ — 5550 Prairie Stone Parkway, Hoffman Estates,
 IL 60192. St. Louis is Central Territory, so Central is the only one of the four
-that matters. Local first; the command listens to its own centres, not to
+that matters. Local first; the command listens to its own centers, not to
 strangers. (The other three, for the record: Eastern, Southern — arcsouth.org —
 and Western, 16941 Keegan Ave, Carson CA 90746.)
 
@@ -480,7 +480,7 @@ instead — do not tick EAP if it asks you to certify it, you are not one.
 
 **Long description:**
 > Turn Someday Into Day One is a free web app for people cutting down or
-> quitting, and for the partner living with it. It covers the part a programme
+> quitting, and for the partner living with it. It covers the part a program
 > can't — the days between meetings, and the morning after a relapse, which is
 > where most people quit for good.
 >

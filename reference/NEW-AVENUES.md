@@ -24,7 +24,7 @@ Healthline, psychiatry.org, MedlinePlus, Harvard Health. You will never
 outrank these and you should stop thinking of them as competition. They are
 the ceiling of the room, not people in it.
 
-**Pile two — the reachable.** Small treatment centres, independent therapists,
+**Pile two — the reachable.** Small treatment centers, independent therapists,
 one-person sites, and non-profits, all with blogs, all with a marketing person,
 all needing free resources to point their readers at. **This is the whole
 opportunity and it is most of every SERP below.**
@@ -42,7 +42,7 @@ the data rather than by me saying so.
 `is my husband an alcoholic`
 
 **There is not one institution on this page.** No Mayo, no NHS, no government.
-It is **entirely small treatment centres**, which means it is the easiest page
+It is **entirely small treatment centers**, which means it is the easiest page
 one in your whole niche and it is the one your app is uniquely built for.
 
 Reachable, all of them:
@@ -82,8 +82,8 @@ real people who read their own email.
 
 | Domain | What it is |
 |---|---|
-| **btr.org** | Betrayal Trauma Recovery — ranks **twice**, including their resources page. An organisation built entirely around your partner audience |
-| **partnerbetrayaltrauma.org** | Same audience, organisation, own domain |
+| **btr.org** | Betrayal Trauma Recovery — ranks **twice**, including their resources page. An organization built entirely around your partner audience |
+| **partnerbetrayaltrauma.org** | Same audience, organization, own domain |
 | **anniewright.com** | A therapist. Her "complete guide" outranks hospitals |
 | **drjillmanning.com** | Named expert with her own domain |
 | thehealinggroup.com | Practice with a blog |
@@ -106,15 +106,15 @@ built. This is where they get seen.
 | Domain | Why it matters |
 |---|---|
 | **ncpgambling.org** | National Council on Problem Gambling — and the page that ranks is **"help by state."** That is a fifty-state directory. **This is the NASADAD play again** |
-| **helpguide.org** | Enormous independent resource publisher, not a treatment centre. They link out constantly |
-| smartrecovery.org | Already flagged in INFLUENCERS as an organisation, not a creator |
+| **helpguide.org** | Enormous independent resource publisher, not a treatment center. They link out constantly |
+| smartrecovery.org | Already flagged in INFLUENCERS as an organization, not a creator |
 | gatewayfoundation.org | Treatment, has a blog |
 | eastpointbehavioralhealth.com | Treatment, has a blog |
 | allencarr.com | The Allen Carr method — a brand, not a hospital |
 | talkspace.com | Therapy platform |
 
 **ncpgambling.org is the single highest-value row on this page.** One email to
-the organisation that publishes a state-by-state help directory. Episode 1 of
+the organization that publishes a state-by-state help directory. Episode 1 of
 the Couples series is two men and gambling — you already have the content.
 
 ---
@@ -127,7 +127,7 @@ the Couples series is two men and gambling — you already have the content.
 |---|---|
 | **breakbingeeating.com** | A **one-person site** ranking against Mayo Clinic. Whoever runs it reads their own email |
 | **eatingdisorderhope.com** | The page that ranks is their **hotlines list**. Another directory — same play |
-| montenido.com · eatingrecoverycenter.com · withinhealth.com | Treatment centres with content teams |
+| montenido.com · eatingrecoverycenter.com · withinhealth.com | Treatment centers with content teams |
 | guthrie.org | "Why you binge at night" — **that is your night cluster**, ~3,480/mo |
 | **reddit.com/r/CPTSD** | Ranks on page one. Not r/BingeEatingDisorder — **r/CPTSD**, which tells you the audience frames it as trauma, not diet |
 
@@ -181,7 +181,7 @@ Two exceptions worth noting:
 - **addictioncenter.com** — "the first year after you stop drinking." Big
   independent publisher, takes contributions.
 - **americanaddictioncenters.org** — ranks on this **and** the husband term
-  **and** hangxiety. One organisation, three of your six categories. They
+  **and** hangxiety. One organization, three of your six categories. They
   publish constantly and they were also the source of the Instagram influencer
   round-up. **Highest-frequency name across the whole sweep.**
 
@@ -191,7 +191,7 @@ Don't chase the keyword. Chase the two publishers.
 
 ## What to actually do, in order
 
-1. **The ten partner-of-an-alcoholic treatment centres.** Softest page one, and
+1. **The ten partner-of-an-alcoholic treatment centers.** Softest page one, and
    your `for-her` section is the thing every one of those pages is missing.
 2. **ncpgambling.org** — a fifty-state directory, one email, and you have the
    gambling episode already written.

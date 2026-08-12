@@ -1,4 +1,4 @@
-# What we're allowed to use — licence audit, 8 Aug 2026
+# What we're allowed to use — license audit, 8 Aug 2026
 
 Both products, everything third-party. Prompted by finding that two of the
 recovery app's five SOS voices were licensed **non-commercial** while the app
@@ -12,19 +12,19 @@ has to be free for commercial use.** "Free to download" is not the same thing.
 ## The problem that started this — FIXED
 
 The five SOS "Talk me through it" recordings were built with Piper voices
-picked for how they sounded. Nobody read the licence file inside the download.
+picked for how they sounded. Nobody read the license file inside the download.
 
-| File | Old voice | Old licence | Allowed? |
+| File | Old voice | Old license | Allowed? |
 |---|---|---|---|
 | sos-talk-warm.mp3 | hfc_female | CC BY-NC-SA 4.0 | **No** — non-commercial |
 | sos-talk-male.mp3 | hfc_male | CC BY-NC-SA 4.0 | **No** — non-commercial |
-| sos-talk-clear.mp3 | lessac | Blizzard 2013 research licence | **No** |
+| sos-talk-clear.mp3 | lessac | Blizzard 2013 research license | **No** |
 | sos-talk-soft.mp3 | amy | unstated, points at a dead URL | Unknown |
 | sos-talk-gentle.mp3 | kristin | public domain | Yes |
 
 Rebuilt 8 Aug with voices that are all public domain or CC0:
 
-| File | New voice | Licence |
+| File | New voice | License |
 |---|---|---|
 | sos-talk-warm.mp3 | en_US-kristin-medium | public domain |
 | sos-talk-soft.mp3 | en_GB-cori-medium | public domain (LibriVox) |
@@ -53,7 +53,7 @@ embedded widget. Every byte the app serves comes from our own server.
 Jacques-made, the icons and Play Store screenshots were made for this app, and
 Studio's watermark is the Day One logo. No stock, no scraped images.
 
-**Recovery-programme text.** Nothing copied. This matters more than it sounds:
+**Recovery-program text.** Nothing copied. This matters more than it sounds:
 the Twelve Steps, the Serenity Prayer and the Big Book text are all owned by
 Alcoholics Anonymous World Services, and recovery apps get taken down for
 reprinting them. Searched the whole app — no trace of any of it. The lessons
@@ -72,7 +72,7 @@ naming:
 
 GPL only creates obligations when you **give the software to someone else**.
 Studio runs on Jacques's own machine and is not distributed, so nothing is
-triggered. **The videos ffmpeg produces are not covered by its licence** — what
+triggered. **The videos ffmpeg produces are not covered by its license** — what
 comes out is entirely his to sell. If Studio is ever handed to another person,
 revisit this first.
 
@@ -81,7 +81,7 @@ commercially.
 
 **Pexels stock footage** — free for commercial use, no attribution required.
 The one rule: don't resell the clips unaltered as stock. Using them inside a
-video is exactly what the licence is for.
+video is exactly what the license is for.
 
 **fal.ai generated images, video and voice** — fal's terms assign the output to
 the account that generated it. His to use and sell.
@@ -106,6 +106,6 @@ retroactively covering anything made earlier on the free plan.
 ## Rule going forward
 
 Before any third-party asset goes into either product — a voice, a font, an
-image, a music track, a sound effect — find its licence and write it down. If
-the licence says "non-commercial", "research only", or "no derivatives", it
+image, a music track, a sound effect — find its license and write it down. If
+the license says "non-commercial", "research only", or "no derivatives", it
 cannot go in. If it can't be found at all, treat it as a no.

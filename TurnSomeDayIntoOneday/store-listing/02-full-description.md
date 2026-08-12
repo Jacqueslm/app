@@ -19,7 +19,7 @@ WHAT IS INSIDE
 
 • A day counter that shows how long you have been at this, and a lifetime total that never resets — because a hard day should not erase a hard year.
 
-• A 30-day guided programme, written in plain language, one short lesson a day. There are separate tracks depending on what you are working on, including a track written specifically for people supporting someone else.
+• A 30-day guided program, written in plain language, one short lesson a day. There are separate tracks depending on what you are working on, including a track written specifically for people supporting someone else.
 
 • A companion you can talk to, any hour, that responds to what you actually typed rather than a menu.
 
@@ -45,9 +45,9 @@ This app is not an emergency service. If you are in danger or thinking about har
 
 WHAT COSTS MONEY
 
-The app is free to download and the core of it is free to keep using — the day counter, the first half of every programme, the SOS tools, the journal, and the companion. There is no card required to start and no time limit on the free version.
+The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the journal, and the companion. There is no card required to start and no time limit on the free version.
 
-Pro is an optional in-app subscription that unlocks the rest: the second half of every programme, more daily conversations, weekly reports, reminders, voice journaling and the couples exercises. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
+Pro is an optional in-app subscription that unlocks the rest: the second half of every program, more daily conversations, weekly reports, reminders, voice journaling and the couples exercises. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
 
 WHO MADE THIS
 

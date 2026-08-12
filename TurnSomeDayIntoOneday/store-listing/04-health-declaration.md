@@ -25,7 +25,7 @@ Choose, under **Health and fitness**:
 
 > **Stress management, relaxation, mental acuity**
 
-**Do not choose "Mental and behavioural health"** — that sits under the
+**Do not choose "Mental and behavioral health"** — that sits under the
 **Medical** group, which is the category that pulls regulatory expectations and
 the stricter account requirements. This app manages habits and self-reported
 wellbeing. It does not assess, diagnose, or manage a condition, and nothing in

@@ -26,7 +26,7 @@ his forties with a full dark beard, wearing a plain black t-shirt. Same face,
 same build, same clothes throughout. Match the attached reference photo.
 
 STYLE — apply to all seven: cinematic photograph, shot on 35mm, shallow depth of
-field, moody realistic lighting, muted colour grade, documentary realism,
+field, moody realistic lighting, muted color grade, documentary realism,
 vertical 9:16 composition.
 
 NO CAPTIONS, NO SUBTITLES, NO TITLES, NO LOGOS, NO WATERMARKS, NO SIGNATURE.
@@ -53,7 +53,7 @@ A phone lying face-up on a kitchen counter, seen from directly above, its
 screen lit with an incoming message notification. A man's hand rests on the
 counter near it, not picking it up, fingers still. Evening light going blue at
 the edges of the frame. The phone screen is the brightest thing in the picture.
-The notification is a plain grey message bubble with no readable words in it.
+The notification is a plain gray message bubble with no readable words in it.
 
 3. HE GOES ANYWAY
 Elias sitting at a crowded table in a warm, busy restaurant. Other people

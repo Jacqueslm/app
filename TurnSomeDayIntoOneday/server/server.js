@@ -713,7 +713,7 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
     user = db.getUserById(req.userId) || user;
   }
   // storeBillingReady tells the client whether a purchase can actually be
-  // honoured. Without it, a misconfigured server takes the customer's money in
+  // honored. Without it, a misconfigured server takes the customer's money in
   // the store and then fails verification - they have paid and got nothing.
   // Better to refuse before the payment sheet opens than to refund afterwards.
   // lifetimeSoldOut travels with this for the same reason storeBillingReady

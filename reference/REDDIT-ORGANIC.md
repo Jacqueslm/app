@@ -71,7 +71,7 @@ removing the URL leaves nothing, you are an ad.
 **Google now surfaces Reddit threads at the top for almost every long-tail
 recovery question.** "does hangxiety go away", "is my partner an alcoholic or am
 I overreacting", "how long until the mornings stop" — the thing ranking first is
-usually a Reddit thread, not a treatment centre.
+usually a Reddit thread, not a treatment center.
 
 So there are two ways to own that search:
 - Rank your own page above the thread. Slow, and you are outgunned.
@@ -135,7 +135,7 @@ does not touch the Play Store freeze.
 
 1. https://www.reddit.com/prefs/apps → **create another app…**
 2. Type: **script**. Redirect uri: `http://localhost:8080`
-3. The **ID** is the short string under the app name. The **secret** is labelled.
+3. The **ID** is the short string under the app name. The **secret** is labeled.
 4. Then: `node redditwatch.js YOUR_ID YOUR_SECRET`
 
 It writes `reddit-report.md` — every question sorted by **comment count, not

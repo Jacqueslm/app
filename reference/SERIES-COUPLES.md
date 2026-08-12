@@ -22,7 +22,7 @@ Each episode opens a door nobody else is standing in:
 **The rule that makes the series work:** the person using is never the villain
 and never forgiven. Every episode has one line that says *they're not a bad
 person* and one that says *that's what makes it hard*. That pair is what every
-partner recognises and what no advert ever says.
+partner recognizes and what no advert ever says.
 
 ---
 
@@ -44,7 +44,7 @@ term, ad-safe, the one you'd put money behind), then 2, then 4, then 1.
 ## House look — paste at the end of EVERY image prompt
 
 > cinematic photograph, shot on 35mm, shallow depth of field, warm practical
-> light from lamps and screens only, muted colour grade, documentary realism,
+> light from lamps and screens only, muted color grade, documentary realism,
 > vertical 9:16 composition, ordinary American apartment, no text in the image
 
 Keep each couple's descriptions **identical in every prompt** or the faces
@@ -86,7 +86,7 @@ partner is always last to know. Build the whole piece on that.
 **SHOT 8** — `MARCUS asleep in bed in the dark, DANNY sitting up beside him awake, looking straight ahead at nothing`
 *"That's what makes it hard."*
 
-**SHOT 9** — `DANNY on the sofa at first light, grey morning through the window, phone in his hand, searching for something, face tired`
+**SHOT 9** — `DANNY on the sofa at first light, gray morning through the window, phone in his hand, searching for something, face tired`
 *"I didn't know who to ask."*
 
 **SHOT 10** — `Wide of the same living room in full morning light, both men sitting on the sofa turned toward each other, mid-conversation, nothing resolved but the talking started`
@@ -152,7 +152,7 @@ difficulty 41, tagged Build**, not too hard.
 **SHOT 8** — `KAT asleep on the sofa under a blanket in lamplight, ROSA sitting on the floor beside her, awake, looking at nothing`
 *"She's just scared of something she won't say."*
 
-**SHOT 9** — `ROSA at a kitchen table at first light, laptop open, grey morning window behind her, tired, searching`
+**SHOT 9** — `ROSA at a kitchen table at first light, laptop open, gray morning window behind her, tired, searching`
 *"I didn't want to punish her. I wanted it to stop."*
 
 **SHOT 10** — `Wide of a bright morning kitchen, both women sitting at the table facing each other, coffee between them, mid-conversation, unresolved but talking`
@@ -182,7 +182,7 @@ difficulty 41, tagged Build**, not too hard.
 
 # EPISODE 3 · The Second Dinner — a man who binges, his wife
 
-> **RAY:** Black man, mid 40s, broad, short beard going grey, work shirt.
+> **RAY:** Black man, mid 40s, broad, short beard going gray, work shirt.
 > **TAMMY:** Black woman, early 40s, braids, glasses, cardigan.
 
 **Every article about binge eating is written for a woman.** Men who do this
@@ -220,7 +220,7 @@ careful, and a wife who notices he is never hungry.
 **SHOT 8** — `RAY asleep on top of the covers still in his work clothes, TAMMY sitting on the end of the bed, awake`
 *"He's soothing something he's never said out loud."*
 
-**SHOT 9** — `TAMMY at the kitchen table at first light, phone in hand, grey window behind her, searching`
+**SHOT 9** — `TAMMY at the kitchen table at first light, phone in hand, gray window behind her, searching`
 *"Nothing I found was written for him."*
 
 **SHOT 10** — `Wide of a bright morning kitchen, RAY and TAMMY sitting at the table facing each other, two coffees, mid-conversation`
@@ -286,7 +286,7 @@ them can't name what they've lost, which is exactly why they never bring it up.
 **SHOT 8** — `JOSH asleep with the phone still in his open hand, screen on, AMARA awake beside him looking at the ceiling`
 *"He's just somewhere he can't stop going."*
 
-**SHOT 9** — `AMARA at a small kitchen table at first light, her own phone in her hand, catching herself, grey window`
+**SHOT 9** — `AMARA at a small kitchen table at first light, her own phone in her hand, catching herself, gray window`
 *"And I do it too. That's the part nobody says."*
 
 **SHOT 10** — `Bright morning, both of them on the sofa, phones face-down on the table between them, talking`
@@ -347,4 +347,4 @@ Each episode has a pair:
 
 Nothing in these pieces blames the person using, and nothing forgives them
 either. That pair is the entire emotional argument, it's what every partner
-recognises, and no advert has ever said it. Everything else can be reworded.
+recognizes, and no advert has ever said it. Everything else can be reworded.

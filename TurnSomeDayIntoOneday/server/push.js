@@ -7,7 +7,7 @@
 //   is ever rebuilt and existing subscriptions must keep working - the keys are
 //   what tie a subscription to this server).
 // - Reminder times live in the user's own state blob, written by the client, so
-//   the schedule the user set in the app is the schedule the server honours -
+//   the schedule the user set in the app is the schedule the server honors -
 //   there is no second copy to drift out of sync.
 // - Local time is derived from tzOffsetMinutes, which the client stamps on every
 //   save. Without it a user is assumed to be on the server's clock, which is

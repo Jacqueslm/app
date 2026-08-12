@@ -86,7 +86,7 @@ function buildChain({ W, H, dur, fps, dir, strength }) {
   // Travel is a share of the axis it happens on - using width for a vertical
   // slide would make it crawl on a portrait video and sprint on a landscape one.
   const px = Math.round((vertical ? BH : BW) * drift);
-  // Eased travel, -0.5..0.5 so the shot is centred on its midpoint rather than
+  // Eased travel, -0.5..0.5 so the shot is centered on its midpoint rather than
   // starting at one extreme and only ever leaving.
   const p = `(t/${dur.toFixed(3)})`;
   const eased = `(${p}*${p}*(3-2*${p}))`;

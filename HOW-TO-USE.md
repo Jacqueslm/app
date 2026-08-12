@@ -295,7 +295,7 @@ Every AI generation is now saved the moment it's sent. The card shows a **runnin
 - **Mirror / Slow-mo / Freeze** — flip a shot for variety, slow it for drama (doubles its length too), or grab a still from a clip.
 - **🎙 Take the voice out** (on any video clip) — lifts the sound off a filmed clip into its own audio file in your Songs, cleaned up on the way. Free. This is how you use your **own voice** without re-recording it: film yourself talking, take the voice out, then add it as narration and caption it with 🎙️ Captions from my voice. (It's the same job as **✨ Master for release** on a video — just named for what people actually go looking for.)
 - **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
-- **🟢 Green screen** — drop a subject shot on a solid colour onto any picture or clip as the new background.
+- **🟢 Green screen** — drop a subject shot on a solid color onto any picture or clip as the new background.
 - **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
 - **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
 - **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).

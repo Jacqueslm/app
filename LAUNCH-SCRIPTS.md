@@ -58,7 +58,7 @@ loud costs about eighty words and there's room for forty-five.
 | | What it is | Where it lives | Words spent |
 |---|---|---|---|
 | **WHO** | the person this is for | the title on screen + the first four words | ~4 |
-| **WHY** | the line they recognise themselves in | beats 1 and 2, spoken | ~25 |
+| **WHY** | the line they recognize themselves in | beats 1 and 2, spoken | ~25 |
 | **WHAT** | a free app | one clause, beat 3 | ~5 |
 | **HOW** | one concrete thing it does | one clause, beat 3 | ~8 |
 | **WHERE** | link in bio | the end card, silent | **0** |
@@ -227,7 +227,7 @@ already live, so this one has somewhere real to land.
 *44 words · ~15s.*
 
 ⚠️ **The tells only — never anything explicit.** That's what keeps it on the
-platform, and it's also what the person searching actually recognises.
+platform, and it's also what the person searching actually recognizes.
 
 ---
 
@@ -445,7 +445,7 @@ Across every lane, the biggest AI topics are **named things**, not questions:
 
 | What people ask AI about | AI Volume | What it is |
 |---|---|---|
-| Rethinking Drinking | 7,300 | the US government's NIAAA programme |
+| Rethinking Drinking | 7,300 | the US government's NIAAA program |
 | Betrayal Bond | 3,100 | Patrick Carnes' book |
 | Easy Way to Quit Drinking | 1,500 | Allen Carr's book |
 | Kick the Drink | 1,300 | Jason Vale's book |

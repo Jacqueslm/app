@@ -21,7 +21,7 @@ function isConfigured() {
   return Boolean(RESEND_API_KEY);
 }
 
-// Every send funnels through here. Honouring `unsubscribed` lives at this
+// Every send funnels through here. Honoring `unsubscribed` lives at this
 // choke point on purpose - no caller can forget it. The single exception is
 // force:true, reserved for account access (password reset): opting out of
 // emails must never lock someone out of their own account.

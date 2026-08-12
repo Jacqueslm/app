@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TradeDesk</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#14181d; --panel2:#1b2027; --line:#262d36;
+    --text:#e8ecf1; --dim:#8b95a3; --faint:#5d6674;
+    --green:#3ddc97; --red:#ff5c6c; --blue:#5aa9ff; --amber:#ffb454;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:16px 16px 80px}
+  header{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+  h1{font-size:20px;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:13px}
+
+  nav{display:flex;gap:4px;margin:16px 0;background:var(--panel);padding:4px;border-radius:10px}
+  nav button{
+    flex:1;padding:9px 8px;border:0;border-radius:7px;background:transparent;
+    color:var(--dim);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+  }
+  nav button.on{background:var(--panel2);color:var(--text)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin:0 0 14px}
+
+  .grid{display:grid;gap:10px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:620px){.g3{grid-template-columns:1fr 1fr}}
+  @media(max-width:440px){.g2,.g3{grid-template-columns:1fr}}
+
+  label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:600}
+  input,select,textarea{
+    width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--text);font-size:15px;font-family:inherit;
+  }
+  input[type=number],.num{font-family:var(--mono)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue)}
+  textarea{resize:vertical;min-height:56px}
+
+  button.act{
+    padding:11px 16px;border:0;border-radius:8px;background:var(--blue);color:#06121f;
+    font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;
+  }
+  button.act:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+  button.danger{background:transparent;color:var(--red);border:1px solid var(--line)}
+
+  .out{background:var(--panel2);border-radius:10px;padding:14px;margin-top:14px}
+  .big{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+  .rows{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px}
+  .kv{min-width:88px}
+  .kv .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .kv .v{font-family:var(--mono);font-size:16px;margin-top:2px}
+
+  .warn{margin-top:12px;padding:10px 12px;border-radius:8px;font-size:13px;
+        background:rgba(255,92,108,.1);border:1px solid rgba(255,92,108,.3);color:#ffa7b0}
+  .ok{background:rgba(61,220,151,.1);border-color:rgba(61,220,151,.3);color:#8ef0c4}
+  .note{background:rgba(255,180,84,.1);border-color:rgba(255,180,84,.3);color:#ffd39e}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--faint);font-weight:600;padding:8px 6px;border-bottom:1px solid var(--line)}
+  td{padding:9px 6px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  td.txt{font-family:inherit}
+  tr:last-child td{border-bottom:0}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  .pos{color:var(--green)} .neg{color:var(--red)} .dim{color:var(--dim)}
+  .pill{display:inline-block;padding:2px 7px;border-radius:5px;background:var(--panel2);
+        font-size:11px;font-family:inherit;color:var(--dim)}
+  .empty{color:var(--faint);text-align:center;padding:28px 12px;font-size:14px}
+  .x{background:none;border:0;color:var(--faint);cursor:pointer;font-size:16px;padding:2px 6px}
+  .x:hover{color:var(--red)}
+  .stat{background:var(--panel2);border-radius:10px;padding:13px}
+  .stat .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .stat .v{font-family:var(--mono);font-size:23px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+  .stat .s{font-size:11px;color:var(--faint);margin-top:2px}
+  .bar{height:6px;border-radius:3px;background:var(--panel);overflow:hidden;margin-top:5px}
+  .bar i{display:block;height:100%}
+  .foot{color:var(--faint);font-size:12px;text-align:center;margin-top:24px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>TradeDesk</h1>
+  <span class="sub" id="sub"></span>
+</header>
+
+<nav>
+  <button data-tab="size" class="on">Size</button>
+  <button data-tab="journal">Journal</button>
+  <button data-tab="review">Review</button>
+  <button data-tab="setup">Setup</button>
+</nav>
+
+<!-- ============ SIZE ============ -->
+<section id="tab-size">
+  <div class="card">
+    <h2>Position size</h2>
+    <div class="grid g3">
+      <div>
+        <label>Contract</label>
+        <select id="s-sym"></select>
+      </div>
+      <div>
+        <label>Entry</label>
+        <input type="number" id="s-entry" step="any" inputmode="decimal" placeholder="5000.00">
+      </div>
+      <div>
+        <label>Stop</label>
+        <input type="number" id="s-stop" step="any" inputmode="decimal" placeholder="4995.00">
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div>
+        <label>Target <span class="dim">(optional)</span></label>
+        <input type="number" id="s-target" step="any" inputmode="decimal" placeholder="5010.00">
+      </div>
+      <div>
+        <label>Risk per trade</label>
+        <input type="number" id="s-risk" step="any" inputmode="decimal">
+      </div>
+      <div>
+        <label>Risk mode</label>
+        <select id="s-mode">
+          <option value="pct">% of account</option>
+          <option value="usd">Fixed $</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="out" id="s-out"></div>
+  </div>
+
+  <div class="card" id="guard-card">
+    <h2>Today's guardrails</h2>
+    <div id="guard"></div>
+  </div>
+</section>
+
+<!-- ============ JOURNAL ============ -->
+<section id="tab-journal" hidden>
+  <div class="card">
+    <h2>Log a trade</h2>
+    <div class="grid g3">
+      <div>
+        <label>Date &amp; time</label>
+        <input type="datetime-local" id="j-when">
+      </div>
+      <div>
+        <label>Contract</label>
+        <select id="j-sym"></select>
+      </div>
+      <div>
+        <label>Direction</label>
+        <select id="j-dir">
+          <option value="long">Long</option>
+          <option value="short">Short</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div><label>Entry</label><input type="number" id="j-entry" step="any" inputmode="decimal"></div>
+      <div><label>Stop <span class="dim">(planned)</span></label><input type="number" id="j-stop" step="any" inputmode="decimal"></div>
+      <div><label>Exit</label><input type="number" id="j-exit" step="any" inputmode="decimal"></div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div><label>Contracts</label><input type="number" id="j-qty" step="1" min="1" value="1" inputmode="numeric"></div>
+      <div>
+        <label>Setup</label>
+        <input type="text" id="j-setup" list="setups" placeholder="ORB, VWAP fade…">
+        <datalist id="setups"></datalist>
+      </div>
+      <div>
+        <label>Followed plan?</label>
+        <select id="j-plan">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label>Note <span class="dim">— why you took it, what you saw</span></label>
+      <textarea id="j-note" placeholder="Optional, but this is the field that pays."></textarea>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="act" id="j-add">Log trade</button>
+      <span id="j-prev" class="dim" style="font-family:var(--mono);font-size:13px"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Trades <span id="j-count" class="dim"></span></h2>
+    <div class="scroll"><table id="j-table"></table></div>
+  </div>
+</section>
+
+<!-- ============ REVIEW ============ -->
+<section id="tab-review" hidden>
+  <div id="rv"></div>
+</section>
+
+<!-- ============ SETUP ============ -->
+<section id="tab-setup">
+  <div class="card">
+    <h2>Account</h2>
+    <div class="grid g2">
+      <div>
+        <label>Account size ($)</label>
+        <input type="number" id="c-acct" step="any" inputmode="decimal">
+      </div>
+      <div>
+        <label>Default risk (% of account)</label>
+        <input type="number" id="c-riskpct" step="any" inputmode="decimal">
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:10px">
+      <div>
+        <label>Max daily loss ($)</label>
+        <input type="number" id="c-maxloss" step="any" inputmode="decimal">
+      </div>
+      <div>
+        <label>Max trades / day</label>
+        <input type="number" id="c-maxtrades" step="1" inputmode="numeric">
+      </div>
+      <div>
+        <label>Commission (round turn / contract)</label>
+        <input type="number" id="c-comm" step="any" inputmode="decimal">
+      </div>
+    </div>
+    <div class="warn note" style="margin-top:14px">
+      Prop firms (Topstep, Apex, TPT) have their own hard daily-loss and trailing-drawdown
+      limits. Set <b>max daily loss</b> below theirs, not equal to it — their number ends the
+      account, this one just tells you to stop.
+    </div>
+    <div style="margin-top:14px"><button class="act" id="c-save">Save</button> <span id="c-msg" class="dim"></span></div>
+  </div>
+
+  <div class="card">
+    <h2>Data</h2>
+    <p class="dim" style="margin:0 0 12px;font-size:13px">
+      Everything lives in this browser only — nothing is uploaded anywhere. Clearing site
+      data wipes it, so export now and then.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="act ghost" id="d-export">Export JSON</button>
+      <button class="act ghost" id="d-csv">Export CSV</button>
+      <button class="act ghost" id="d-import">Import JSON</button>
+      <button class="act danger" id="d-wipe">Erase all</button>
+    </div>
+    <input type="file" id="d-file" accept="application/json" hidden>
+  </div>
+
+  <div class="card">
+    <h2>Contract specs</h2>
+    <div class="scroll"><table id="spec-table"></table></div>
+  </div>
+</section>
+
+<p class="foot">
+  TradeDesk keeps your numbers honest. It does not place orders, connect to a broker,
+  or predict anything.<br>Futures trading involves substantial risk of loss.
+</p>
+
+</div>
+<script>
+/* ---------------------------------------------------------------
+   Contract specs. tick = minimum price increment,
+   tickValue = $ per tick per contract. point = tickValue / tick.
+   --------------------------------------------------------------- */
+const CONTRACTS = {
+  ES  : {name:"E-mini S&P 500",      tick:0.25,     tickValue:12.50,  dp:2},
+  MES : {name:"Micro E-mini S&P",    tick:0.25,     tickValue:1.25,   dp:2},
+  NQ  : {name:"E-mini Nasdaq 100",   tick:0.25,     tickValue:5.00,   dp:2},
+  MNQ : {name:"Micro E-mini Nasdaq", tick:0.25,     tickValue:0.50,   dp:2},
+  RTY : {name:"E-mini Russell 2000", tick:0.10,     tickValue:5.00,   dp:2},
+  M2K : {name:"Micro Russell 2000",  tick:0.10,     tickValue:0.50,   dp:2},
+  YM  : {name:"E-mini Dow",          tick:1.00,     tickValue:5.00,   dp:0},
+  MYM : {name:"Micro E-mini Dow",    tick:1.00,     tickValue:0.50,   dp:0},
+  CL  : {name:"Crude Oil",           tick:0.01,     tickValue:10.00,  dp:2},
+  MCL : {name:"Micro Crude Oil",     tick:0.01,     tickValue:1.00,   dp:2},
+  NG  : {name:"Natural Gas",         tick:0.001,    tickValue:10.00,  dp:3},
+  GC  : {name:"Gold",                tick:0.10,     tickValue:10.00,  dp:1},
+  MGC : {name:"Micro Gold",          tick:0.10,     tickValue:1.00,   dp:1},
+  SI  : {name:"Silver",              tick:0.005,    tickValue:25.00,  dp:3},
+  ZB  : {name:"30-Year T-Bond",      tick:0.03125,  tickValue:31.25,  dp:5},
+  ZN  : {name:"10-Year T-Note",      tick:0.015625, tickValue:15.625, dp:6},
+  ZF  : {name:"5-Year T-Note",       tick:0.0078125,tickValue:7.8125, dp:7},
+  "6E": {name:"Euro FX",             tick:0.00005,  tickValue:6.25,   dp:5},
+  "6J": {name:"Japanese Yen",        tick:0.0000005,tickValue:6.25,   dp:7},
+  MBT : {name:"Micro Bitcoin",       tick:5.00,     tickValue:0.50,   dp:0},
+  MET : {name:"Micro Ether",         tick:0.50,     tickValue:0.05,   dp:2}
+};
+const ptValue = c => CONTRACTS[c].tickValue / CONTRACTS[c].tick;
+
+/* --------------------------- state --------------------------- */
+const KEY = "tradedesk.v1";
+const DEFAULTS = {acct:50000, riskPct:0.5, maxLoss:1000, maxTrades:4, comm:4.00, lastSym:"MES"};
+let S = {cfg:{...DEFAULTS}, trades:[]};
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const p = JSON.parse(raw);
+      S.cfg = {...DEFAULTS, ...(p.cfg||{})};
+      S.trades = Array.isArray(p.trades) ? p.trades : [];
+    }
+  }catch(e){ /* corrupt storage — start clean rather than blow up */ }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+
+/* --------------------------- helpers --------------------------- */
+const $  = id => document.getElementById(id);
+const num = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
+const money = n => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const money0 = n => (n<0?"-":"") + "$" + Math.abs(n).toLocaleString("en-US",{maximumFractionDigits:0});
+const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "dim";
+const esc = s => String(s??"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const localISO = d => {
+  const p = n => String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+"T"+p(d.getHours())+":"+p(d.getMinutes());
+};
+const dayKey = iso => (iso||"").slice(0,10);
+
+/* Core trade math. Returns null when the inputs can't describe a trade. */
+function calc(t){
+  const spec = CONTRACTS[t.sym]; if(!spec) return null;
+  const pv = ptValue(t.sym);
+  const riskPts = t.dir === "long" ? (t.entry - t.stop) : (t.stop - t.entry);
+  if(!(riskPts > 0)) return null;                       // stop on the wrong side
+  const resPts = t.dir === "long" ? (t.exit - t.entry) : (t.entry - t.exit);
+  const gross  = resPts * pv * t.qty;
+  const fees   = (S.cfg.comm || 0) * t.qty;
+  const net    = gross - fees;
+  return {
+    riskPts, resPts, gross, fees, net,
+    riskUsd : riskPts * pv * t.qty,
+    r       : resPts / riskPts,                          // R-multiple, gross of fees
+    rNet    : net / (riskPts * pv * t.qty)
+  };
+}
+
+/* --------------------------- tabs --------------------------- */
+const TABS = ["size","journal","review","setup"];
+document.querySelectorAll("nav button").forEach(b=>{
+  b.onclick = () => {
+    document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on", x===b));
+    TABS.forEach(t => $("tab-"+t).hidden = (t !== b.dataset.tab));
+    if(b.dataset.tab === "review") renderReview();
+    if(b.dataset.tab === "journal") renderJournal();
+    if(b.dataset.tab === "size") renderSize();
+  };
+});
+
+/* --------------------------- symbol pickers --------------------------- */
+function fillSymbols(){
+  const opts = Object.keys(CONTRACTS)
+    .map(k => `<option value="${k}">${k} — ${esc(CONTRACTS[k].name)}</option>`).join("");
+  $("s-sym").innerHTML = opts;
+  $("j-sym").innerHTML = opts;
+  $("s-sym").value = S.cfg.lastSym;
+  $("j-sym").value = S.cfg.lastSym;
+}
+
+/* ============================ SIZE ============================ */
+function renderSize(){
+  const sym  = $("s-sym").value;
+  const spec = CONTRACTS[sym];
+  const pv   = ptValue(sym);
+  const entry = num($("s-entry").value), stop = num($("s-stop").value), target = num($("s-target").value);
+  const mode = $("s-mode").value;
+  const riskIn = num($("s-risk").value);
+
+  const budget = mode === "pct"
+    ? S.cfg.acct * ((riskIn ?? S.cfg.riskPct) / 100)
+    : (riskIn ?? 0);
+
+  const out = $("s-out");
+
+  if(entry === null || stop === null || entry === stop){
+    out.innerHTML = `<div class="dim">Enter an entry and a stop.</div>
+      <div class="rows"><div class="kv"><div class="k">Risk budget</div><div class="v">${money(budget)}</div></div>
+      <div class="kv"><div class="k">Tick</div><div class="v">${spec.tick} = ${money(spec.tickValue)}</div></div>
+      <div class="kv"><div class="k">Point</div><div class="v">${money(pv)}</div></div></div>`;
+    return;
+  }
+
+  const dir     = entry > stop ? "long" : "short";
+  const riskPts = Math.abs(entry - stop);
+  const ticks   = riskPts / spec.tick;
+  const perCon  = riskPts * pv;
+  const raw     = budget / perCon;
+  const qty     = Math.floor(raw);
+  const actual  = qty * perCon;
+  const fees    = (S.cfg.comm||0) * Math.max(qty,0);
+
+  let rr = "";
+  if(target !== null){
+    const rewardPts = Math.abs(target - entry);
+    const good = dir === "long" ? target > entry : target < entry;
+    rr = good
+      ? `<div class="kv"><div class="k">R:R</div><div class="v pos">${(rewardPts/riskPts).toFixed(2)} : 1</div></div>`
+      : `<div class="kv"><div class="k">R:R</div><div class="v neg">wrong side</div></div>`;
+  }
+
+  out.innerHTML = `
+    <div class="big ${qty>0?"":"neg"}">${qty} <span style="font-size:16px;font-weight:600;color:var(--dim)">
+      contract${qty===1?"":"s"} ${sym} · ${dir}</span></div>
+    <div class="rows">
+      <div class="kv"><div class="k">Actual risk</div><div class="v">${money(actual)}</div></div>
+      <div class="kv"><div class="k">Budget</div><div class="v dim">${money(budget)}</div></div>
+      <div class="kv"><div class="k">Stop</div><div class="v">${ticks.toFixed(ticks<10?1:0)} ticks</div></div>
+      <div class="kv"><div class="k">Per contract</div><div class="v">${money(perCon)}</div></div>
+      <div class="kv"><div class="k">Commission</div><div class="v dim">${money(fees)}</div></div>
+      ${rr}
+    </div>
+    ${qty === 0 ? `<div class="warn">Stop is too wide for your risk budget — one contract
+      risks ${money(perCon)}. Widen the budget, tighten the stop, or trade the micro.</div>` : ""}
+    ${qty > 0 && raw - qty > 0.75 ? `<div class="warn note">Rounded down from ${raw.toFixed(2)}.
+      Sizing up to ${qty+1} would risk ${money((qty+1)*perCon)} — over budget.</div>` : ""}
+  `;
+}
+
+function renderGuard(){
+  const today = dayKey(localISO(new Date()));
+  const todays = S.trades.filter(t => dayKey(t.when) === today);
+  const pnl = todays.reduce((a,t) => a + (calc(t)?.net ?? 0), 0);
+  const n = todays.length;
+  const lossPct = S.cfg.maxLoss > 0 ? Math.min(100, Math.max(0, -pnl / S.cfg.maxLoss * 100)) : 0;
+  const tradePct = S.cfg.maxTrades > 0 ? Math.min(100, n / S.cfg.maxTrades * 100) : 0;
+
+  const stopNow = (pnl <= -S.cfg.maxLoss && S.cfg.maxLoss > 0) || (S.cfg.maxTrades > 0 && n >= S.cfg.maxTrades);
+
+  $("guard").innerHTML = `
+    <div class="grid g3">
+      <div class="stat">
+        <div class="k">Today P&amp;L</div>
+        <div class="v ${cls(pnl)}">${money(pnl)}</div>
+        <div class="bar"><i style="width:${lossPct}%;background:var(--red)"></i></div>
+        <div class="s">${S.cfg.maxLoss>0 ? money0(S.cfg.maxLoss)+" limit" : "no limit set"}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Trades today</div>
+        <div class="v">${n}</div>
+        <div class="bar"><i style="width:${tradePct}%;background:var(--amber)"></i></div>
+        <div class="s">${S.cfg.maxTrades>0 ? S.cfg.maxTrades+" max" : "no limit set"}</div>
+      </div>
+      <div class="stat">
+        <div class="k">Risk per trade</div>
+        <div class="v">${money0(S.cfg.acct * S.cfg.riskPct/100)}</div>
+        <div class="s">${S.cfg.riskPct}% of ${money0(S.cfg.acct)}</div>
+      </div>
+    </div>
+    ${stopNow ? `<div class="warn"><b>Done for the day.</b> You've hit
+      ${pnl <= -S.cfg.maxLoss && S.cfg.maxLoss>0 ? "your loss limit" : "your trade count"}.
+      The next one is not a trade, it's a decision to ignore your own rule.</div>`
+     : n === 0 ? `<div class="warn ok">Clean slate. Size the first one properly.</div>` : ""}
+  `;
+}
+
+["s-sym","s-entry","s-stop","s-target","s-risk","s-mode"].forEach(id=>{
+  $(id).addEventListener("input", () => {
+    if(id === "s-sym"){ S.cfg.lastSym = $("s-sym").value; save(); }
+    renderSize();
+  });
+});
+
+/* ============================ JOURNAL ============================ */
+function journalPreview(){
+  const t = readForm();
+  const c = t && calc(t);
+  $("j-prev").textContent = c
+    ? `${c.r>=0?"+":""}${c.r.toFixed(2)}R  ·  ${money(c.net)} net`
+    : "";
+  $("j-add").disabled = !c;
+}
+function readForm(){
+  const t = {
+    when : $("j-when").value,
+    sym  : $("j-sym").value,
+    dir  : $("j-dir").value,
+    entry: num($("j-entry").value),
+    stop : num($("j-stop").value),
+    exit : num($("j-exit").value),
+    qty  : Math.max(1, parseInt($("j-qty").value||"1",10)),
+    setup: $("j-setup").value.trim(),
+    plan : $("j-plan").value,
+    note : $("j-note").value.trim()
+  };
+  if(!t.when || t.entry===null || t.stop===null || t.exit===null) return null;
+  return t;
+}
+["j-sym","j-dir","j-entry","j-stop","j-exit","j-qty","j-when"].forEach(id=>
+  $(id).addEventListener("input", journalPreview));
+
+$("j-add").onclick = () => {
+  const t = readForm(); if(!t) return;
+  if(!calc(t)){ alert("Stop is on the wrong side of entry for a "+t.dir+"."); return; }
+  t.id = Date.now();
+  S.cfg.lastSym = t.sym;
+  S.trades.push(t); save();
+  ["j-entry","j-stop","j-exit","j-note"].forEach(id => $(id).value = "");
+  $("j-when").value = localISO(new Date());
+  journalPreview(); renderJournal(); renderGuard(); fillSetups();
+};
+
+function renderJournal(){
+  const rows = [...S.trades].sort((a,b) => (b.when||"").localeCompare(a.when||""));
+  $("j-count").textContent = rows.length ? `(${rows.length})` : "";
+  if(!rows.length){ $("j-table").innerHTML = `<tr><td class="empty">No trades yet.</td></tr>`; return; }
+  $("j-table").innerHTML = `
+    <thead><tr><th>When</th><th>Sym</th><th>Dir</th><th>Qty</th><th>Entry</th><th>Exit</th>
+    <th>R</th><th>Net</th><th>Setup</th><th></th></tr></thead><tbody>
+    ${rows.map(t=>{
+      const c = calc(t); if(!c) return "";
+      const d = CONTRACTS[t.sym].dp;
+      return `<tr>
+        <td class="dim">${esc((t.when||"").replace("T"," ").slice(5))}</td>
+        <td>${esc(t.sym)}</td>
+        <td class="txt"><span class="pill">${t.dir==="long"?"L":"S"}</span></td>
+        <td>${t.qty}</td>
+        <td>${t.entry.toFixed(d)}</td>
+        <td>${t.exit.toFixed(d)}</td>
+        <td class="${cls(c.r)}">${c.r>=0?"+":""}${c.r.toFixed(2)}</td>
+        <td class="${cls(c.net)}">${money(c.net)}</td>
+        <td class="txt">${esc(t.setup||"")}${t.plan==="no"?' <span class="pill" style="color:var(--red)">off-plan</span>':""}</td>
+        <td><button class="x" data-del="${t.id}">×</button></td>
+      </tr>`;
+    }).join("")}</tbody>`;
+  $("j-table").querySelectorAll("[data-del]").forEach(b=>{
+    b.onclick = () => {
+      const id = Number(b.dataset.del);
+      S.trades = S.trades.filter(t => t.id !== id);
+      save(); renderJournal(); renderGuard();
+    };
+  });
+}
+function fillSetups(){
+  const tags = [...new Set(S.trades.map(t=>t.setup).filter(Boolean))];
+  $("setups").innerHTML = tags.map(t=>`<option value="${esc(t)}">`).join("");
+}
+
+/* ============================ REVIEW ============================ */
+function agg(list){
+  const cs = list.map(t => ({t, c:calc(t)})).filter(x => x.c);
+  if(!cs.length) return null;
+  const wins = cs.filter(x => x.c.net > 0), losses = cs.filter(x => x.c.net < 0);
+  const net = cs.reduce((a,x) => a + x.c.net, 0);
+  const grossWin = wins.reduce((a,x) => a + x.c.net, 0);
+  const grossLoss = Math.abs(losses.reduce((a,x) => a + x.c.net, 0));
+  const totalR = cs.reduce((a,x) => a + x.c.rNet, 0);
+  return {
+    n: cs.length, net, totalR,
+    winRate: wins.length / cs.length * 100,
+    expR: totalR / cs.length,
+    avgWin: wins.length ? grossWin/wins.length : 0,
+    avgLoss: losses.length ? grossLoss/losses.length : 0,
+    pf: grossLoss > 0 ? grossWin/grossLoss : (grossWin > 0 ? Infinity : 0),
+    fees: cs.reduce((a,x) => a + x.c.fees, 0),
+    items: cs
+  };
+}
+
+function breakdown(title, groups){
+  const keys = Object.keys(groups).filter(k => groups[k].length);
+  if(!keys.length) return "";
+  const rows = keys.map(k => ({k, a:agg(groups[k])})).filter(x => x.a)
+                   .sort((a,b) => b.a.net - a.a.net);
+  if(!rows.length) return "";
+  return `<div class="card"><h2>${title}</h2><div class="scroll"><table>
+    <thead><tr><th>${title.split(" ").pop()}</th><th>N</th><th>Win%</th><th>Exp</th><th>Net</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td class="txt">${esc(r.k)}</td>
+      <td class="dim">${r.a.n}</td>
+      <td>${r.a.winRate.toFixed(0)}%</td>
+      <td class="${cls(r.a.expR)}">${r.a.expR>=0?"+":""}${r.a.expR.toFixed(2)}R</td>
+      <td class="${cls(r.a.net)}">${money(r.a.net)}</td>
+    </tr>`).join("")}</tbody></table></div></div>`;
+}
+
+function equityCurve(items){
+  const sorted = [...items].sort((a,b) => (a.t.when||"").localeCompare(b.t.when||""));
+  let eq = 0; const pts = [0];
+  sorted.forEach(x => { eq += x.c.net; pts.push(eq); });
+  const W = 640, H = 130, pad = 4;
+  const lo = Math.min(...pts), hi = Math.max(...pts), span = (hi - lo) || 1;
+  const X = i => pad + i * (W - 2*pad) / Math.max(1, pts.length - 1);
+  const Y = v => H - pad - (v - lo) / span * (H - 2*pad);
+  const line = pts.map((v,i) => `${i?"L":"M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  const zeroY = (lo <= 0 && hi >= 0) ? Y(0) : null;
+  const col = eq >= 0 ? "var(--green)" : "var(--red)";
+  return `<div class="card"><h2>Equity curve <span class="dim">— net of commissions</span></h2>
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:130px;display:block">
+      ${zeroY!==null ? `<line x1="0" y1="${zeroY.toFixed(1)}" x2="${W}" y2="${zeroY.toFixed(1)}"
+        stroke="#3a434f" stroke-width="1" stroke-dasharray="3 3"/>` : ""}
+      <path d="${line}" fill="none" stroke="${col}" stroke-width="2"
+            stroke-linejoin="round" stroke-linecap="round"/>
+    </svg>
+    <div class="rows">
+      <div class="kv"><div class="k">Final</div><div class="v ${cls(eq)}">${money(eq)}</div></div>
+      <div class="kv"><div class="k">Peak</div><div class="v">${money(hi)}</div></div>
+      <div class="kv"><div class="k">Max drawdown</div><div class="v neg">${money(maxDD(pts))}</div></div>
+    </div></div>`;
+}
+function maxDD(pts){
+  let peak = pts[0], dd = 0;
+  pts.forEach(v => { if(v > peak) peak = v; dd = Math.min(dd, v - peak); });
+  return dd;
+}
+
+function renderReview(){
+  const a = agg(S.trades);
+  if(!a){ $("rv").innerHTML = `<div class="card"><div class="empty">
+    Log a few trades and this fills in.</div></div>`; return; }
+
+  /* tilt check: how do you trade the bar right after a loss? */
+  const chrono = [...a.items].sort((x,y) => (x.t.when||"").localeCompare(y.t.when||""));
+  const afterLoss = [], afterWin = [];
+  for(let i=1;i<chrono.length;i++){
+    (chrono[i-1].c.net < 0 ? afterLoss : afterWin).push(chrono[i].t);
+  }
+  const aL = agg(afterLoss), aW = agg(afterWin);
+
+  const byHour = {}; chrono.forEach(x=>{
+    const h = (x.t.when||"").slice(11,13);
+    if(h) (byHour[h+":00"] ||= []).push(x.t);
+  });
+  const bySetup = {}; chrono.forEach(x=>{ (bySetup[x.t.setup||"(untagged)"] ||= []).push(x.t); });
+  const bySym   = {}; chrono.forEach(x=>{ (bySym[x.t.sym] ||= []).push(x.t); });
+  const byPlan  = {"Followed plan":[], "Off-plan":[]};
+  chrono.forEach(x => byPlan[x.t.plan === "no" ? "Off-plan" : "Followed plan"].push(x.t));
+
+  let tilt = "";
+  if(aL && aW && aL.n >= 3 && aW.n >= 3){
+    const gap = aL.expR - aW.expR;
+    tilt = `<div class="card"><h2>After a loss</h2>
+      <div class="grid g2">
+        <div class="stat"><div class="k">Next trade after a loss</div>
+          <div class="v ${cls(aL.expR)}">${aL.expR>=0?"+":""}${aL.expR.toFixed(2)}R</div>
+          <div class="s">${aL.n} trades · ${aL.winRate.toFixed(0)}% win</div></div>
+        <div class="stat"><div class="k">Next trade after a win</div>
+          <div class="v ${cls(aW.expR)}">${aW.expR>=0?"+":""}${aW.expR.toFixed(2)}R</div>
+          <div class="s">${aW.n} trades · ${aW.winRate.toFixed(0)}% win</div></div>
+      </div>
+      ${gap < -0.3 ? `<div class="warn"><b>You tilt.</b> Your trade after a loss is
+        ${Math.abs(gap).toFixed(2)}R worse than after a win. That gap is the cheapest
+        money on this page — a mandatory pause after any loser collects it.</div>`
+      : `<div class="warn ok">No revenge-trading signal. You recover from losers cleanly.</div>`}
+    </div>`;
+  }
+
+  const planWarn = (() => {
+    const on = agg(byPlan["Followed plan"]), off = agg(byPlan["Off-plan"]);
+    if(!off || off.n < 3 || !on) return "";
+    return `<div class="warn ${off.expR < on.expR ? "" : "ok"}">
+      Off-plan trades: ${off.expR>=0?"+":""}${off.expR.toFixed(2)}R over ${off.n} trades,
+      versus ${on.expR>=0?"+":""}${on.expR.toFixed(2)}R when you followed it
+      (${money(off.net)} ${off.net<0?"lost":"made"} off-plan).</div>`;
+  })();
+
+  $("rv").innerHTML = `
+    <div class="card"><h2>Overall</h2>
+      <div class="grid g3">
+        <div class="stat"><div class="k">Net P&amp;L</div>
+          <div class="v ${cls(a.net)}">${money(a.net)}</div>
+          <div class="s">${money(a.fees)} in commissions</div></div>
+        <div class="stat"><div class="k">Expectancy</div>
+          <div class="v ${cls(a.expR)}">${a.expR>=0?"+":""}${a.expR.toFixed(2)}R</div>
+          <div class="s">per trade, over ${a.n}</div></div>
+        <div class="stat"><div class="k">Win rate</div>
+          <div class="v">${a.winRate.toFixed(0)}%</div>
+          <div class="s">${money(a.avgWin)} avg win / ${money(a.avgLoss)} avg loss</div></div>
+        <div class="stat"><div class="k">Profit factor</div>
+          <div class="v ${a.pf>=1?"pos":"neg"}">${a.pf===Infinity?"∞":a.pf.toFixed(2)}</div>
+          <div class="s">gross won ÷ gross lost</div></div>
+        <div class="stat"><div class="k">Total R</div>
+          <div class="v ${cls(a.totalR)}">${a.totalR>=0?"+":""}${a.totalR.toFixed(1)}R</div>
+          <div class="s">sum of all outcomes</div></div>
+        <div class="stat"><div class="k">Trades</div>
+          <div class="v">${a.n}</div>
+          <div class="s">${a.n < 20 ? "too few to trust yet" : "enough to read"}</div></div>
+      </div>
+      ${a.n < 20 ? `<div class="warn note">Under 20 trades, none of these numbers mean much.
+        Keep logging — the breakdowns below get useful around 50.</div>` : ""}
+      ${planWarn}
+    </div>
+    ${equityCurve(a.items)}
+    ${tilt}
+    ${breakdown("By setup", bySetup)}
+    ${breakdown("By hour", byHour)}
+    ${breakdown("By contract", bySym)}
+  `;
+}
+
+/* ============================ SETUP ============================ */
+function fillCfg(){
+  $("c-acct").value = S.cfg.acct;
+  $("c-riskpct").value = S.cfg.riskPct;
+  $("c-maxloss").value = S.cfg.maxLoss;
+  $("c-maxtrades").value = S.cfg.maxTrades;
+  $("c-comm").value = S.cfg.comm;
+}
+$("c-save").onclick = () => {
+  S.cfg.acct      = num($("c-acct").value) ?? S.cfg.acct;
+  S.cfg.riskPct   = num($("c-riskpct").value) ?? S.cfg.riskPct;
+  S.cfg.maxLoss   = num($("c-maxloss").value) ?? S.cfg.maxLoss;
+  S.cfg.maxTrades = parseInt($("c-maxtrades").value||"0",10);
+  S.cfg.comm      = num($("c-comm").value) ?? S.cfg.comm;
+  save();
+  $("s-risk").value = S.cfg.riskPct;
+  $("c-msg").textContent = "Saved.";
+  setTimeout(()=> $("c-msg").textContent = "", 1800);
+  renderSize(); renderGuard(); renderSub();
+};
+
+function download(name, text, type){
+  const b = new Blob([text], {type});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement("a");
+  a.href = u; a.download = name; a.click();
+  URL.revokeObjectURL(u);
+}
+$("d-export").onclick = () => download("tradedesk-"+dayKey(localISO(new Date()))+".json",
+  JSON.stringify(S,null,2), "application/json");
+$("d-csv").onclick = () => {
+  const head = "when,symbol,direction,qty,entry,stop,exit,r,net,fees,setup,followed_plan,note";
+  const lines = S.trades.map(t=>{
+    const c = calc(t); if(!c) return null;
+    const q = s => `"${String(s??"").replace(/"/g,'""')}"`;
+    return [t.when,t.sym,t.dir,t.qty,t.entry,t.stop,t.exit,
+            c.r.toFixed(4),c.net.toFixed(2),c.fees.toFixed(2),
+            q(t.setup),t.plan,q(t.note)].join(",");
+  }).filter(Boolean);
+  download("tradedesk-"+dayKey(localISO(new Date()))+".csv", [head,...lines].join("\n"), "text/csv");
+};
+$("d-import").onclick = () => $("d-file").click();
+$("d-file").onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const p = JSON.parse(r.result);
+      if(!p || !Array.isArray(p.trades)) throw 0;
+      S.cfg = {...DEFAULTS, ...(p.cfg||{})};
+      S.trades = p.trades;
+      save(); fillCfg(); fillSymbols(); fillSetups();
+      renderSize(); renderGuard(); renderJournal(); renderSub();
+      alert("Imported "+p.trades.length+" trades.");
+    }catch(err){ alert("That file isn't a TradeDesk export."); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+};
+$("d-wipe").onclick = () => {
+  if(!confirm("Erase every trade and setting? Export first if you want them back.")) return;
+  S = {cfg:{...DEFAULTS}, trades:[]};
+  save(); fillCfg(); fillSymbols(); fillSetups();
+  renderSize(); renderGuard(); renderJournal(); renderSub();
+};
+
+function renderSpecs(){
+  $("spec-table").innerHTML = `
+    <thead><tr><th>Sym</th><th>Contract</th><th>Tick</th><th>Tick $</th><th>Point $</th></tr></thead>
+    <tbody>${Object.entries(CONTRACTS).map(([k,v])=>`<tr>
+      <td>${k}</td><td class="txt dim">${esc(v.name)}</td>
+      <td>${v.tick}</td><td>${money(v.tickValue)}</td><td>${money(ptValue(k))}</td>
+    </tr>`).join("")}</tbody>`;
+}
+function renderSub(){
+  $("sub").textContent = `${money0(S.cfg.acct)} · ${S.cfg.riskPct}% risk · ${S.trades.length} trades`;
+}
+
+/* --------------------------- boot --------------------------- */
+load();
+fillSymbols(); fillSetups(); fillCfg(); renderSpecs(); renderSub();
+$("s-risk").value = S.cfg.riskPct;
+$("j-when").value = localISO(new Date());
+$("tab-setup").hidden = true;
+renderSize(); renderGuard(); renderJournal(); journalPreview();
+</script>
+</body>
+</html>

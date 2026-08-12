@@ -301,3 +301,32 @@ mistake cost a morning already with four invented YouTube channel ids.
 
 If you want them: search each platform's site for "partner" or "marketplace",
 send me what you find, and I will write the pitch.
+
+---
+
+# LANE G — state and civic (opened 12 Aug, drafts in Gmail)
+
+### 15. Missouri Department of Mental Health, Division of Behavioral Health — [ ] sent
+
+**Send to:** dbhmail@dmh.mo.gov — **draft in Gmail**
+(573) 751-4942 · Recovery Support Services runs the resource lists
+The state's own list. Being a Missouri resident is the whole reason this one is
+worth sending — a state agency is far likelier to look at somebody who lives
+there. The draft says plainly that the app does not diagnose and does not
+replace treatment, because a state behavioural health division will check.
+
+**And this is a template for 49 more.** Every state runs a behavioural health
+division and every one publishes an address. Missouri first, because it is
+home; the rest are a batch for a quiet afternoon.
+
+### 16. St. Louis County Library + St. Louis Public Library — [ ] sent
+
+**Send to:** information@slcl.org, cc webref@slpl.org — **one draft in Gmail**
+(314) 994-3300
+**The reason this one is different from every other target in the file:** a
+library is where somebody goes when they are not ready to tell anyone yet. No
+appointment, no insurance, nobody asking questions. The draft says exactly that,
+because it is true and because it is why a librarian will care.
+
+Library systems keep community resource lists and answer their email — this is
+one of the few doors in this file that reliably opens.

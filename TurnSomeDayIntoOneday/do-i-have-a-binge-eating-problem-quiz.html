@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Do I Have a Binge Eating Problem? Free Quiz — No Card, No Signup</title>
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
+<meta name="description" content="Free to use — no card, no signup. A private 2-minute check-in on binge eating: eight honest questions, results worked out on your device, and what a next step could look like. Not a diagnosis.">
+<link rel="canonical" href="https://www.turnsomedayintodayone.com/do-i-have-a-binge-eating-problem-quiz">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Turn Someday Into Day One">
+<meta property="og:url" content="https://www.turnsomedayintodayone.com/do-i-have-a-binge-eating-problem-quiz">
+<meta property="og:title" content="Do I have a binge eating problem? A free, private 2-minute check-in.">
+<meta property="og:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta property="og:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Do I have a binge eating problem? A free, private 2-minute check-in.">
+<meta name="twitter:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
+<style>
+:root{
+  --brand:#0f0c29;--s0:#181632;--s1:#201d3f;--s2:#262347;--bdr:#33305c;
+  --tp:#eef0ff;--ts:#b8bfe8;--tm:#7e86b8;--accent:#f0b15a;--green:#4ecb9b;--f:-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:#08071a}
+body{font-family:var(--f);background:linear-gradient(180deg,var(--brand) 0%,#24243e 55%,#302b63 100%);color:var(--tp);min-height:100dvh;display:flex;justify-content:center}
+.wrap{width:100%;max-width:430px;min-height:100dvh;display:flex;flex-direction:column;padding:28px 22px calc(28px + env(safe-area-inset-bottom))}
+.brand{font-size:11px;letter-spacing:.18em;color:var(--tm);text-transform:uppercase;text-align:center;font-weight:600;margin-bottom:26px}
+.step{display:none;flex:1;flex-direction:column}
+.step.on{display:flex}
+h1{font-size:26px;line-height:1.25;font-weight:700;margin-bottom:12px}
+h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
+.sub{font-size:14px;color:var(--ts);line-height:1.55;margin-bottom:22px}
+.qnum{font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.bar{height:4px;background:var(--s2);border-radius:99px;margin-bottom:26px;overflow:hidden}
+.bar>div{height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width .3s ease}
+.opt{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:14.5px;color:var(--tp);margin-bottom:10px;cursor:pointer;line-height:1.4;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent)}
+.btn{display:block;width:100%;background:linear-gradient(135deg,#f0b15a,#e08a2e);color:#241503;border:0;border-radius:12px;padding:15px;font-size:15px;font-weight:650;font-family:var(--f);cursor:pointer;text-align:center;text-decoration:none;margin-top:auto}
+.btn.ghost{background:none;color:var(--tm);font-weight:500;font-size:13px;margin-top:10px}
+input[type=number],input[type=email]{width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin-bottom:10px}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.lbl{font-size:12.5px;color:var(--tm);margin-bottom:6px}
+.result-seg{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.stat-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.stat{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px;text-align:center}
+.stat .n{font-size:22px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .l{font-size:11px;color:var(--tm);margin-top:3px;line-height:1.4}
+.fine{font-size:11.5px;color:var(--tm);line-height:1.6;margin-top:16px;text-align:center}
+.fine a{color:var(--ts)}
+.crisis{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ts);line-height:1.5;margin-top:14px;text-align:center}
+.free{color:var(--green);font-weight:650}
+@media (prefers-reduced-motion: reduce){.bar>div{transition:none}}
+</style>
+<script>
+function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
+(function(){try{
+  if(sessionStorage.getItem('tsid_utm'))return;
+  var q=new URLSearchParams(location.search);
+  var u={source:q.get('utm_source'),medium:q.get('utm_medium'),campaign:q.get('utm_campaign')};
+  if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
+}catch(e){}})();
+</script>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Turn Someday Into Day One</div>
+
+  <!-- INTRO -->
+  <div class="step on" id="st-intro">
+    <h1>Do I have a binge eating problem?</h1>
+    <p class="sub">Eight honest questions, about two minutes. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
+    <p class="sub"><strong>This is not a diagnosis.</strong> Binge eating disorder is a real medical condition and only a doctor or therapist can diagnose it. What this can do is help you say out loud what has been going on — which is usually the part that's been stuck.</p>
+    <button class="btn" onclick="startQ()">Start the check-in</button>
+    <div class="crisis">If you're in crisis right now, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline) — free, confidential, 24/7.</div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="step" id="st-q">
+    <div class="bar"><div id="barfill-q"></div></div>
+    <div class="qnum" id="q-num"></div>
+    <h2 id="q-title"></h2>
+    <div id="q-opts"></div>
+    <div id="q-back" style="text-align:center;margin-top:14px;display:none"><span onclick="qBack()" style="color:var(--tm);font-size:14px;cursor:pointer">&larr; Back</span></div>
+  </div>
+
+  <!-- COST -->
+  <div class="step" id="st-cost">
+    <div class="bar"><div style="width:88%"></div></div>
+    <div class="qnum">Almost done</div>
+    <h2>Two last numbers</h2>
+    <p class="sub">Rough guesses are fine. Nobody sees these but you — they only power the maths on the next screen.</p>
+    <div class="lbl">Times in a typical week</div>
+    <input type="number" id="in-times" inputmode="decimal" min="0" max="50" placeholder="e.g. 3">
+    <div class="lbl">Hours afterwards it stays with you — the feeling, not the food</div>
+    <input type="number" id="in-hours" inputmode="decimal" min="0" max="24" placeholder="e.g. 4">
+    <button class="btn" onclick="showResult()">See my results</button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="step" id="st-result">
+    <div class="result-seg" id="res-seg"></div>
+    <h2 id="res-title"></h2>
+    <p class="sub" id="res-body" style="margin-bottom:4px"></p>
+    <div class="stat-cards" id="res-stats"></div>
+    <p class="sub" id="res-close"></p>
+    <div id="res-pro" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:14px"></div>
+    <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:6px 0 14px;text-align:left" id="capture-box">
+      <div style="font-size:15px;font-weight:650;margin-bottom:4px">Want the 5-day plan for this result?</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Five short emails, one a day. No card, no app required.</div>
+      <input type="email" id="cap-email" placeholder="you@email.com" autocomplete="email">
+      <button class="btn" style="margin-top:0" id="cap-btn" onclick="sendPlan()">Send it to me</button>
+      <div style="font-size:11.5px;color:var(--tm);margin-top:8px;text-align:center" id="cap-note">One email a day for five days, then I'll leave you alone.</div>
+    </div>
+    <a class="btn" href="/app?join=1">Start free — today is Day One</a>
+    <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
+    <div class="fine"><span class="free">Free — no card, no trial.</span> Pay only if you want more.<br>Your journal is nobody's business — private by design, never sold to advertisers.</div>
+    <div class="crisis">Not a diagnosis. Only a doctor or therapist can diagnose binge eating disorder. In crisis? Call or text <strong>988</strong> — free, confidential, 24/7.</div>
+    <nav class="more" style="margin-top:22px;padding-top:16px;border-top:1px solid var(--bdr);font-size:12.5px;line-height:2;text-align:center;color:var(--tm)">
+      Keep reading:
+      <a href="/how-to-stop-binge-eating" style="color:var(--green);text-decoration:none">How to stop binge eating</a> &middot;
+      <a href="/brainreset" style="color:var(--green);text-decoration:none">The 90-day brain reset</a> &middot;
+      <a href="/quiz" style="color:var(--green);text-decoration:none">The check-in for any other habit</a> &middot;
+      <a href="/for-her" style="color:var(--green);text-decoration:none">For the partner</a>
+    </nav>
+  </div>
+</div>
+
+<script>
+// Written from the patterns people actually describe, in the words they use.
+// Deliberately NOT a clinical instrument: no scale is reproduced, no threshold
+// claims to diagnose anything, and the top band sends people to a professional
+// rather than to the app.
+const QUESTIONS=[
+  {t:'When it happens, how much food is it?',o:[['A normal amount, I just wish I hadn\'t',0],['More than I meant to',1],['A lot more than most people would eat',2],['An amount I would not want anyone to know about',3]]},
+  {t:'While it\'s happening, how in control do you feel?',o:[['Fully in control',0],['I could stop if I really wanted to',1],['Not much — it\'s sort of driving',2],['None. I\'m watching myself do it',3]]},
+  {t:'How fast does it go?',o:[['Normal speed',0],['Quicker than usual',1],['Fast, barely tasting it',2],['So fast I don\'t remember most of it',3]]},
+  {t:'Do you stop when you\'re full?',o:[['Usually, yes',0],['A bit past full',1],['Well past full, most times',2],['I stop when it hurts or it\'s gone',3]]},
+  {t:'Is it hunger?',o:[['Usually, yes',0],['Sometimes',1],['Rarely — it\'s more of a feeling',2],['Almost never. Hunger has nothing to do with it',3]]},
+  {t:'When does it mostly happen?',o:[['Around normal meals, with people',0],['Whenever, no pattern',1],['Alone, when the house is quiet',2],['At night, after everyone else has gone to bed',3]]},
+  {t:'Does anyone else know how often it happens?',o:[['Yes, it\'s not a secret',0],['One person, roughly',1],['I\'ve played it down',2],['Nobody. There\'s a whole system for that',3]]},
+  {t:'How do you feel afterwards?',o:[['Fine',0],['A bit annoyed at myself',1],['Ashamed, and it lasts a while',2],['Disgusted with myself. It sets the tone for the next day',3]]}
+];
+let score=0,qi=0,answerScores=[];
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('on'));$(id).classList.add('on');window.scrollTo(0,0);}
+function startQ(){qi=0;score=0;answerScores=[];renderQ();show('st-q');}
+function renderQ(){
+  const q=QUESTIONS[qi];
+  $('q-num').textContent=`Question ${qi+1} of ${QUESTIONS.length}`;
+  $('q-title').textContent=q.t;
+  $('barfill-q').style.width=Math.round(10+(qi/QUESTIONS.length)*75)+'%';
+  $('q-opts').innerHTML=q.o.map((o,i)=>`<div class="opt" onclick="answer(${i})">${o[0].replace(/</g,'&lt;')}</div>`).join('');
+  $('q-back').style.display=qi>0?'block':'none';
+}
+function answer(i){
+  const pts=QUESTIONS[qi].o[i][1];
+  answerScores[qi]=pts; score+=pts; qi++;
+  if(qi<QUESTIONS.length){renderQ();}else{show('st-cost');}
+}
+function qBack(){ if(qi<=0)return; qi--; score-=answerScores[qi]||0; renderQ(); }
+
+let lastSeg='';
+async function sendPlan(){
+  const em=($('cap-email').value||'').trim();
+  const note=$('cap-note');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){note.textContent='That email doesn\'t look right — check it and try again.';return;}
+  const btn=$('cap-btn');btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,quiz_result:lastSeg,source:'binge-quiz',utm:tsidUtm()})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok){note.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send it to me';return;}
+    $('capture-box').innerHTML='<div style="font-size:14px;color:var(--green);text-align:center;padding:6px 0">Day 1 is on its way to your inbox. ✓</div>';
+  }catch(e){
+    note.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send it to me';
+  }
+}
+
+function showResult(){
+  const times=Math.max(0,parseFloat($('in-times').value)||0);
+  const hours=Math.min(24,Math.max(0,parseFloat($('in-hours').value)||0));
+  const yearTimes=times*52, yearHours=times*hours*52, days=yearHours/24;
+
+  // Max score is 24. Bands are deliberately gentle at the bottom and honest at
+  // the top — the point is recognition, never a label.
+  let seg,title,body,close,pro='';
+  if(score<=5){
+    seg='Not what this describes';
+    title="What you described doesn't sound like bingeing.";
+    body="Eating more than you meant to happens to everybody, and feeling a bit off about it afterwards is normal. Nothing in your answers points at the pattern this check-in looks for.";
+    close="If something still feels wrong, trust that over a quiz. You know your own life better than eight questions do.";
+  }else if(score<=11){
+    seg='Something is starting';
+    title="It's not nothing, and you already knew that.";
+    body="Some of what you described is the shape bingeing takes early — eating past full, eating when it isn't hunger, feeling worse afterwards than the food was worth. It's not a crisis. It's a pattern with a beginning, which is the cheapest time to look at it.";
+    close="Naming it is most of the work at this stage. A daily lesson, a private journal and one button for the moment it hits are enough — and all three are free.";
+  }else if(score<=17){
+    seg='The loop is running';
+    title="This isn't willpower. It's a loop.";
+    body="What you described has all of it: the speed, the eating past full, the hiding, and the shame afterwards that sets up the next one. That's not weakness and it isn't greed — it's a loop that closes on itself, and shame is the part that keeps it turning.";
+    close="Loops break with structure, not effort. The counter, the button for the ten minutes after everyone goes to bed, a lesson a day and somewhere private to write it down — free, no card.";
+    pro="<strong>Worth saying plainly:</strong> what you described is also what doctors look at when they assess binge eating disorder. That's not a diagnosis — it's a reason to mention it to a GP or therapist. An app is a good companion to that. It isn't a substitute for it.";
+  }else{
+    seg='Please talk to somebody';
+    title="You've been carrying this on your own for a long time.";
+    body="Everything you just answered points the same way, including the part where nobody knows how often it happens. That is a heavy thing to hold alone, and holding it alone is what makes it worse rather than what makes you strong.";
+    close="The app is free and it will be here — the counter, the button, the journal, someone to talk to at 3am. Use it. But use it alongside a real person, not instead of one.";
+    pro="<strong>This is the one part I won't soften.</strong> What you described belongs in front of a doctor or a therapist. Binge eating disorder is real, it's common, it's treatable, and it is not something anybody should have to sort out alone with an app. Say it out loud to one professional. That's the step.";
+  }
+  lastSeg=seg;
+  $('res-seg').textContent=seg;
+  $('res-title').textContent=title;
+  $('res-body').textContent=body;
+  const stats=[];
+  if(yearTimes>0)stats.push(`<div class="stat"><div class="n">${Math.round(yearTimes).toLocaleString()}</div><div class="l">times a year, at your numbers</div></div>`);
+  if(yearHours>0)stats.push(`<div class="stat"><div class="n">${Math.round(days)}</div><div class="l">days a year spent feeling that way afterwards</div></div>`);
+  $('res-stats').innerHTML=stats.join('');
+  $('res-stats').style.display=stats.length?'grid':'none';
+  $('res-close').textContent=close;
+  if(pro){$('res-pro').innerHTML=pro;$('res-pro').style.display='block';}
+  show('st-result');
+}
+</script>
+</body>
+</html>

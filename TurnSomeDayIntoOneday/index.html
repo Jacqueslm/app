@@ -645,7 +645,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
-<div class="hdr"> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
+<div class="hdr"> <div style="display:flex;align-items:center;gap:10px"> <i class="ti ti-arrow-left" id="hdr-back" onclick="goBackScreen()" style="font-size:22px;color:#a0a8d0;cursor:pointer;display:none;padding:4px" title="Back"></i> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:20px;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
 
 <!-- HOME -->
 <div id="s-home" class="scr on">
@@ -1308,6 +1308,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="openLessonPacksScreen()">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Spiritual</div></div>
+      <div class="setting-row" onclick="openPack('spiritual')">
+        <i class="ti ti-sun-high" style="color:var(--accent)"></i>
+        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -2996,6 +3003,49 @@ function setLegalTab(which){
 // LESSON_PACKS, getTodayLesson/renderTodayLesson/completeLessonForToday) so that
 // system stays completely untouched. Packs track their own per-pack day.
 const PREDEFINED_PACKS={
+  // Requested by Jacques 13 Aug 2026: a spiritual section - no particular
+  // religion, God as a reference. The register is the one recovery rooms
+  // solved a century ago: God as you understand God. It never cites one
+  // scripture, never names one faith, never argues anyone into belief - and
+  // never apologizes for the word God either. First in the list because it is
+  // the only 30-day pack; the 7-day packs follow.
+  spiritual:{
+    title:"Spiritual Path",
+    icon:"ti-sun-high",
+    description:"Thirty days on faith and recovery — God as you understand God. For the devout, the doubting, and the 2am pray-ers.",
+    lessons:[
+      {day:1,title:`God, As You Understand God`,content:`Let's settle the ground rule first, because it decides whether the next thirty days help you or annoy you: this track says God, and it means God as YOU understand God. For some of you that's the God of a church, a mosque, a temple. For others it's something you can't name that you talked to anyway, once, on the worst night. Both of you are welcome here, and neither gets argued with. Recovery rooms figured this out a hundred years ago — the word matters less than the direction: something bigger than the habit, bigger than your willpower, that you can hand things to. You don't need a theology to start. You need exactly one working assumption: you are not the highest power in your own life. The habit already proved that. The question is only what is.`,action:`Write one honest sentence about where you actually stand with God today — devout, angry, absent, unsure. Nobody sees it. Start from the truth, not the answer you think is expected.`,reflection:`When was the last time you spoke to God like you meant it — and what was happening that night?`},
+      {day:2,title:`The 2am Prayer Counts`,content:`Most people in recovery have prayed exactly one kind of prayer for years: the emergency kind. God, get me out of this one and I'll never do it again. Then morning comes, the bargain is forgotten, and by the next emergency you feel like too much of a hypocrite to pray at all. Hear this clearly: the 2am prayer counts. It was real when you prayed it. Desperation is not a lesser form of faith — in most traditions it's where faith starts, because it's the first moment the self-sufficiency cracked. You weren't lying to God at 2am. You were meeting God at the only hour your defenses were down. The work of this track is moving that honesty to daylight hours — not replacing it with something more respectable.`,action:`Tonight, before bed and not in crisis, say one sentence to God. Out loud or silent. Not a bargain — just a report: "Here's where I actually am."`,reflection:`What made the 2am prayers feel true in a way the daytime ones didn't?`},
+      {day:3,title:`Willpower Was Never the Plan`,content:`You've tried being stronger. Years of it — white knuckles, promises, day counts powered by gritted teeth. And here you are, which tells you what willpower is worth against a rewired reward system. That's not an insult; it's the doorway. Every spiritual tradition converges on the same strange arithmetic: strength arrives when you admit you don't have it. Surrender isn't quitting the fight — it's changing who's fighting. "God, I can't do this one alone" is not weakness. It's the most accurate sentence you've said in years, and accuracy is where recovery starts. Notice something: you already surrendered once — to the habit. You already know how to hand your will to something. This time you get to choose what.`,action:`Say it once today, in your own words: "I can't do this part alone." To God, in the shower, in the car. Just once, and mean it.`,reflection:`What's the difference between giving up and giving it over? Where have you confused the two?`},
+      {day:4,title:`Praying Badly Is Praying`,content:`Somewhere you picked up the idea that prayer has correct words — a posture, a formula, a level of holiness you don't currently hold. So you don't pray, the way a man who can't write formal letters stops writing home. Throw that out. Prayer is not a performance review. "Help." is a complete prayer. "Thanks." is a complete prayer. "I'm furious at You and I don't even know if You're there" is — ask anyone who's read the Psalms — a very traditional prayer indeed. God is not grading your grammar. The traditions agree on this with rare unanimity: the honest fragment outranks the polished paragraph. You will not be good at this. Be bad at it daily anyway.`,action:`Pray one word today. Pick it — help, thanks, stay, sorry, why. One word, said toward God on purpose.`,reflection:`Who taught you what prayer is "supposed" to sound like — and is that voice helping or stopping you?`},
+      {day:5,title:`The God Who Saw It All`,content:`Here's the thought that keeps more people out of faith than any argument: God saw everything. The hidden hours, the lies, the thing you did that you've never told a living soul. So you stay away, the way you'd avoid a person who knows too much. Turn that around. God saw it ALL — and you're still here, still breathing, still being nudged toward this page. Whatever that is, it isn't rejection. Every tradition carries the same scandalous claim at its center: being fully known and not discarded. You've been performing "fine" for people for years, exhausted from it. Here is the one relationship where the mask was never working anyway. That's not the threat. That's the rest.`,action:`Tell God the one thing you've never said out loud. Not the details — just "You saw that. You know." Then notice you're still here.`,reflection:`What would change if you actually believed you were fully known and not discarded?`},
+      {day:6,title:`Forgiveness Runs Downhill First`,content:`Before this gets to forgiving other people — and it will, later, when you're ready — it has to start where it's hardest: receiving it. You have a ledger against yourself that you'd never hold against anyone else. Whatever you believe about God, notice you've made yourself the exception to mercy: everyone can be forgiven except you, because you knew better, because you kept doing it. That exceptionalism sounds like humility. It's actually a kind of pride — appointing yourself a judge more severe than God. Every tradition says the same thing here: mercy is not earned by having needed less of it. You start receiving forgiveness the way you start anything in recovery: badly, in small amounts, daily.`,action:`Say: "God, I accept that I don't get to be the exception to mercy." Once today. It will feel untrue. Say it anyway — feelings arrive after practice, not before.`,reflection:`Why is it easier to believe God forgives others than to believe it about yourself? What are you protecting by staying condemned?`},
+      {day:7,title:`One Week: Rest Is Spiritual`,content:`Seven days in, and today is deliberately light, because rest is not a break from the spiritual work — it IS spiritual work, old as any scripture. A day of rest was commanded, not suggested, in traditions that agree on little else. The habit never gave you one honest day off; it turned every rest into a setup and every quiet hour into a hunting ground. Reclaiming actual rest — rest that isn't numbing, isn't escape, isn't the thing — is one of the most concrete spiritual acts available to you. Today: no extra lesson-work, no self-audit. Sit outside for ten minutes. Eat something good slowly. Let the week you just did count.`,action:`Take fifteen unhurried minutes today with nothing to consume and nothing to achieve. If a prayer shows up in it, fine. If not, the rest itself was the prayer.`,reflection:`When did rest stop feeling safe — and what would it take to trust a quiet hour again?`},
+      {day:8,title:`The Habit Was a Counterfeit`,content:`Look at what the habit promised: relief, escape, comfort, a moment of transcendence — getting out of yourself for a while. Now notice something uncomfortable: that's a religious list. The habit wasn't the opposite of a spiritual life; it was a counterfeit of one. It promised what the traditions promise — peace, release, being lifted out of the grind — and delivered a rented version that billed you afterward. This reframe matters practically: you were never just seeking a substance or a screen. You were seeking transcendence in a vending machine. Which means the hunger itself was never the problem — it was aimed at the wrong altar. You don't have to kill the hunger. You have to feed it real food.`,action:`Name what the habit actually gave you in the first ten minutes — peace? escape? feeling held? Write the word down. That word is what your spiritual life has to learn to supply.`,reflection:`If the craving is hunger for transcendence wearing a disguise — what would the undisguised version look like in your week?`},
+      {day:9,title:`Anger at God Is a Relationship`,content:`Some of you are carrying a grievance you haven't filed: where was God during the years this thing had you? Where was God when you prayed to stop and woke up in it again? Maybe further back — where was God in the house you grew up in? Say it. Anger at God is not the opposite of faith; indifference is. You can't be furious at someone you believe is absent — the fury itself is a confession of relationship. The traditions are full of people who argued with God at full volume and were called faithful for it, not in spite of it. A faith that can't hold your anger is too small for a person in recovery. Bring the real grievance. The relationship can take it.`,action:`Write the angry question you've never let yourself ask God. Actually write it. You don't need the answer today — you need to stop pretending the question isn't there.`,reflection:`What happened to anger in your childhood house — and did you learn to treat God the way you treated whoever it wasn't safe to be angry at?`},
+      {day:10,title:`Ask for Today, Not Forever`,content:`"Never again" is a prayer that sets you up. It borrows trouble from every future day and stacks it on this one, and when forever cracks — one bad Tuesday — the whole vow reads as failed and shame does the rest. Every tradition that deals seriously with human weakness lands on the same unit of time: today. Daily bread, not a warehouse. One day at a time isn't a recovery slogan that borrowed from faith; it's faith's oldest practical teaching. So change what you ask for. Not "God, keep me clean forever" — you're asking God to co-sign a fantasy. Ask: "Get me through today." Tomorrow, ask again. The asking-again isn't a failure of the first prayer. The asking-again is the practice.`,action:`This morning (or right now): "God, just today." Tomorrow morning: same. Put it next to something you already do daily — kettle, toothbrush, ignition.`,reflection:`What does "never again" protect you from feeling that "just today" makes you face?`},
+      {day:11,title:`Reading Something Older Than You`,content:`Whatever your tradition — or lack of one — there is writing in it older than every problem you have. You don't need a study plan. You need five minutes with words that have outlived empires: a psalm, a proverb, a page of whatever your people kept. Here's why this matters for recovery specifically: the habit shrank your world to a loop of now — next hit, next hide, next promise. Old words are the antidote to now. They put your Tuesday inside a story thousands of years long, where people fell, got up, doubted, bargained, and were not discarded. If you have no tradition, start with the Psalms anyway — not as doctrine, as company. They contain every mood you'll have this month, including the ones you think disqualify you.`,action:`Read one short passage from something older than a century — your scripture if you have one, a psalm if you don't. Five minutes. Don't study it. Just let it be older than your problem.`,reflection:`What's it like to hear your exact 2am feeling described by somebody three thousand years dead?`},
+      {day:12,title:`Gratitude Without the Greeting Card`,content:`Gratitude has been flattened into a wellness sticker, so let's restore its edge. In every tradition, thanksgiving is not a mood — it's a discipline practiced precisely when the mood is absent. Anyone can be grateful on a good day. The spiritual version is naming three real things on a flat, gray, nothing day, because the act itself retrains what your eyes look for. The habit trained your attention for years: scan for the opening, the trigger, the excuse. Gratitude is counter-training on the same equipment. And addressed gratitude works differently than a list — "thank You for" does something "I'm grateful for" doesn't, because it makes it a conversation instead of an inventory.`,action:`Three thank-Yous tonight, addressed, specific, small. Not "my family" — "the way the kitchen smelled at six." Small is the discipline.`,reflection:`What did years of the habit train your attention to scan for — and what would eyes retrained by thanksgiving notice instead?`},
+      {day:13,title:`The Amends You Owe Yourself First`,content:`We'll get to the people you've hurt — that work is real and it's coming. But there's a preliminary amends almost everyone skips: the one to yourself. Years of the habit meant years of breaking promises to the person in the mirror — I'll stop, I'll change, this is the last time. Every broken one taught you that your own word is worthless, and a person who can't trust their own word can't build anything on it. The spiritual repair here is small and concrete: make yourself one tiny promise a day and keep it. Not a resolution — a promise. The size doesn't matter; the keeping does. This is how self-trust rebuilds, and in every tradition, keeping faith with the small is the training ground for the large.`,action:`Make one small promise to yourself this morning — one glass of water, one walk, lights out by eleven — and keep it like it was made to somebody you respect. Because it was.`,reflection:`What did it do to you, spiritually, to spend years unable to believe your own word? What would thirty kept promises change?`},
+      {day:14,title:`Two Weeks: The Doubt Day`,content:`Fourteen days of praying, reading, thanking — and some of you feel nothing. No presence, no warmth, no sign the line was ever connected. Today exists to say: that's normal, it's survivable, and it is emphatically not proof you're doing it wrong. Every serious tradition documents the dry stretch — saints wrote whole books about decades of silence. Doubt is not the exit from the spiritual life; it's a room inside it, and everyone serious passes through. Here's the recovery parallel you already know: some days the counter climbs and you feel nothing either, and you keep counting anyway, because the practice is the point and the feelings are weather. Faith on a day you feel nothing counts double. Show up anyway. That's the whole lesson.`,action:`Do today's one-word prayer and three thank-Yous exactly as if you felt something. Attendance IS the faith today.`,reflection:`In the rest of your life, what have you kept doing through a stretch of feeling nothing — and what did that turn out to be worth?`},
+      {day:15,title:`Halfway: Whose Judgment Are You Under?`,content:`Half the people doing this track carry a verdict: God is disappointed in me. Look closely at that God for a second — the one keeping score, cataloguing relapses, waiting for you to finally be acceptable. Now ask an honest question: whose face does that God actually have? A parent's? A congregation's? The version of you that talks at 3am? Much of what people call the judgment of God is old human judgment wearing borrowed robes. The traditions describe something stranger: a God more interested in return than in record — the shepherd who leaves the herd for the one, the father scanning the road. You've been avoiding a courtroom that may never have been in session. What's actually waiting might be a door.`,action:`Write two lists side by side: what the scorekeeper God says about you, and what a God "more interested in return than record" would say. Notice which list you wrote faster.`,reflection:`Where did your picture of God's face come from — and is it possible you've been avoiding somebody's disappointment that isn't God's at all?`},
+      {day:16,title:`The Body Is Not the Enemy`,content:`Somewhere in the wreckage you started treating your body as the enemy — the thing that craves, the traitor that marches you to the fridge, the phone, the bottle. Spiritually, that split is a dead end. Every major tradition, at its best, says the body is not the opposite of the spirit — it's the instrument of it. You pray IN a body. Sleep is spiritual. Food is spiritual — half the traditions organize themselves around meals. The walk you take at craving-hour is not a distraction technique; it's prayer with your legs. So today the practice is embodied: care for the instrument. Not punishment-exercise, not optimization — maintenance of the one thing you were actually given to live in. The craving lives in the body; so does the recovery.`,action:`Do one physical thing today as care, not punishment: the walk, the shower taken slowly, the meal eaten sitting down. Do it as maintenance of something entrusted to you.`,reflection:`When did your body become the enemy in your story — and what would change if it were the instrument instead?`},
+      {day:17,title:`Ask Somebody to Pray for You`,content:`This one costs more than any lesson so far, which is exactly why it's here: ask one person to pray for you. Not "keep me in your thoughts" — the real sentence: "Would you pray for me? I'm working on something hard." Here's what it does. The habit lived on secrecy; this is anti-secrecy with a witness. Asking admits, out loud, to a person, that you need help you can't supply — which is the whole spiritual posture of recovery in one social act. And it enlists somebody. People who are prayed for by name tend to get asked how they're doing, and that question is worth more than the asker knows. If you have nobody who prays, adapt it: "Would you root for me? I'm working on something hard." The vulnerability is the substance; the vocabulary is packaging.`,action:`Ask one person today. Text is allowed. "Would you pray for me? Working on something hard." You don't have to say what.`,reflection:`What does the resistance to asking feel like — and how much of your habit's power lived in exactly that resistance?`},
+      {day:18,title:`Forgiving the Ones Who Made This Likely`,content:`Trace the habit back far enough and there are usually people standing there: the parent who drank first, the house where feelings weren't allowed, the person who hurt you and made numbness necessary. Today is NOT about excusing them. Forgiveness, in every tradition worth its salt, is not saying it was okay — it's refusing to keep drinking the poison yourself and calling it justice. Resentment is a rope tying you to the worst thing that happened; forgiveness is cutting the rope, and the other person may never even know. It's also not a single act — it's a direction you turn, some days convincingly, some days not at all. Start with the smallest debt on the ledger, not the biggest. You're learning a motion.`,action:`Pick the SMALLEST resentment on your list — not the big one — and say: "God, I'm willing to be made willing to let this one go." That double-willing is a real prayer; use it when you can't pray the direct one.`,reflection:`What has carrying the rope actually cost you — in sleep, in softness, in years? Who's been paying: them, or you?`},
+      {day:19,title:`The Quiet You've Been Avoiding`,content:`Notice how fast you reach for noise — podcast on with the ignition, phone in the bathroom, TV as wallpaper. The habit taught you that quiet is dangerous, because quiet is where the feelings caught up. But every tradition, without exception, puts silence near the center: the still small voice, the desert, the mountain, the closed door. Not because silence is pleasant — because it's where anything real gets through. You cannot hear anything — God, your gut, the actual state of your own heart — over a feed. Today's practice is small and it will itch: five minutes of genuine quiet. No input. Sit in it. The discomfort that rises in minute two is not the practice failing; it's the practice working. That's the noise floor dropping.`,action:`Five minutes, no phone, no sound, door closed if you can. When the itch comes, name it — "there it is" — and stay the whole five.`,reflection:`What is the quiet keeping an appointment with — what caught up with you in silence, back when you stopped allowing any?`},
+      {day:20,title:`Service Is the Fastest Exit From Your Head`,content:`Here's a spiritual mechanic every tradition knows and recovery rooms rediscovered: the fastest way out of your own head is somebody else's need. Craving is a spotlight aimed inward — MY discomfort, MY relief, MY next hour. Service physically redirects the beam. This is not about grand charity. It's the text to the friend who's struggling worse, the door held, the chair stacked, the call to the lonely relative everyone else dodges. Ten minutes of genuine usefulness does something an hour of self-examination cannot: it proves, with evidence, that you are not only a problem to be managed but a person with something to give. The habit called you useless for years. Service is how you cross-examine that testimony.`,action:`Do one concrete, unglamorous useful thing for a specific person today — and don't tell anyone else you did it. The secrecy that once hid the habit can hide a kindness for a change.`,reflection:`Who helped you once when they didn't have to — and what would it mean to become that person in somebody else's story?`},
+      {day:21,title:`Three Weeks: Building Your Own Liturgy`,content:`Three weeks of borrowed practices — now make them yours. Every tradition has a liturgy: a fixed shape for the day that doesn't depend on mood. Yours doesn't need candles. It needs a morning sentence ("God, just today"), a midday touch-point (the one-word prayer at the craving hour), and a night close (three addressed thank-Yous, and an honest "here's where I actually am"). Write it down — your three moments, your words. The point of a fixed shape is that it carries you on the days you can't carry it: mood-independent, argument-proof, small enough to survive a terrible Tuesday. The habit had a liturgy too — same hour, same ritual, same hiding places. You're not learning something foreign. You're replacing a dark liturgy with a lit one.`,action:`Write your three-moment liturgy on paper — morning line, midday line, night close. Put it where the habit's old ritual used to live.`,reflection:`What was the habit's liturgy — its fixed hours and rituals? What does that reveal about what your days were already organized around?`},
+      {day:22,title:`When the Craving Prays Louder`,content:`There will be an hour — maybe it already came — when the craving is louder than every practice in this track. Here is the spiritual truth about that hour: you don't have to win it with theology. You have to survive it with company. The prayer for that hour is not eloquent: "God, stay. Get me ten minutes." Then use everything else you have — the SOS button, the walk, the phone call. Grace and tools are not rivals; the tools ARE the grace, arriving in usable form. Afterward — and this matters — do not skip the thank-You. Surviving a craving hour with help is exactly the kind of rescue every tradition tells stories about; it just doesn't feel mythic because it happened in your kitchen. Log it. Rescues you don't record become rescues you forget, and forgotten rescues are how despair wins arguments.`,action:`Decide NOW the sentence for the loud hour: "God, stay. Ten minutes." Say it once today in calm, so it's worn-in before you need it.`,reflection:`Look back at the closest call you've survived so far. What got you through it — and have you ever once said thank You for it?`},
+      {day:23,title:`The People of It`,content:`Faith kept entirely private has a shelf life, and so does recovery — the two share a load-bearing wall: other people. This is delicate, because maybe a congregation hurt you once, judged you, or would judge you now if they knew. Real. And also: somewhere within reach there are people trying to live toward the same light — a church, a mosque, a temple, a recovery meeting with prayer at the end, a friend who believes. You don't have to sign a membership card. Start at the edge of the room: attend once, sit at the back, leave when you want. The habit isolated you with surgical patience — every spiritual tradition rebuilds through gathering for the same reason recovery does. Some things only hold when more than one person is holding them.`,action:`Take one step toward the people of it this week: look up the service time, the meeting, or message the one believing friend. The step, not the arrival.`,reflection:`What happened between you and religious community — and is the thing you're avoiding still true of every room, or just the one that hurt you?`},
+      {day:24,title:`Reading Your Story Backward`,content:`Do something dangerous today: look back at the whole story — the years in it, the failed attempts, the night it broke, the strange chain of events that led you to this app, this track, this day — and ask the question you're not supposed to ask cynically: was anything leading me? Call it providence, call it grace, call it nothing yet. Notice the coincidences that don't feel like coincidences: the person who said the right sentence, the bottom that could have been lower and wasn't, the fact that you're still here when the odds said otherwise. This isn't a proof; faith doesn't work by proof. It's a way of reading. The same events can be read as random wreckage or as a long rescue in progress. Nobody can make that reading for you. But you're allowed to try it on.`,action:`Write the three moments in your story that feel, in hindsight, like turnings — and read them once as luck, once as leading. Notice which reading you WANT to be true, and sit with that wanting.`,reflection:`If the whole thing was a long rescue in progress — what would that make this exact day?`},
+      {day:25,title:`Money, Stuff, and the God-Shaped Purchase`,content:`The habit was expensive — you've done that math. But look underneath the spending: much of it was buying feelings. Relief, status, comfort, the rush of the purchase, the version of you the thing promised. Every tradition warns about this in its own vocabulary — idols, mammon, attachment — and the warning is practical, not prudish: things you buy to feel whole have a way of billing you twice. This isn't a lecture on thrift. It's an inventory question: what are you still buying that's really a feeling in a box? The spiritual practice here is old and strangely reliable: giving. Not because God needs your money — because generosity is the only known solvent for the grip of stuff. Even tiny giving, done regularly, retrains the hand from grasping to open.`,action:`Give something small away today — money, an object someone needs, an hour. Small and real. Notice what the hand does when it opens.`,reflection:`What feeling were you buying, all those years, in all those transactions? What would supply it that doesn't come in a box?`},
+      {day:26,title:`What You'll Tell Your People`,content:`At some point somebody will ask what changed. Family have already noticed; eventually one of them will say it out loud. Today is for deciding, calmly and in advance, what you'll say about the faith part — because caught unprepared, most people either evangelize or deny, and both are wrong sizes. You don't owe anyone a testimony, and you don't have to hide the candle either. A middle sentence exists: "I got help I can't fully explain — some of it was people, some of it was prayer." True, complete, unpressuring. Careful with the house you live in: a spouse who watched years of broken promises may flinch at big spiritual announcements — they've heard transformation talk before. Let them see the Tuesday, not hear the sermon. In every tradition the instruction is the same: the life is the testimony. Words are the footnote.`,action:`Write your one middle sentence — the true, calm answer for "what changed?" Keep it under twenty words. Practice it once out loud.`,reflection:`Who in your life has earned the right to hear the whole story — and who just needs to see the changed Tuesdays for a while first?`},
+      {day:27,title:`The Relapse Question, Asked in Faith`,content:`Ask it now, in daylight, so it doesn't get asked for the first time at the bottom of a bad night: what happens to all this if I slip? Here is what does NOT happen: God does not leave. The thirty days do not un-happen. The account does not close. Every tradition that has anything to say about human beings says this in its loudest voice — the return is always possible, and the returner is not received as a stranger. A slip in a life of practice is a fall inside the house, not an exile from it. You know the app's rule: a slip triggers the plan, not a verdict. The spiritual version is identical: the plan is confession (say it to God plainly, same day), connection (tell your person — shame dies in daylight), and continuation (tomorrow's morning sentence, on schedule, as if you were still worthy of it — because you are). Write that down while you're strong. It's not planning to fail. It's removing despair's best weapon in advance.`,action:`Write the three-line spiritual slip plan on the same page as your liturgy: same-day honesty with God, same-day telling your person, next-morning practice on schedule. Signed, dated, done while strong.`,reflection:`What does shame tell you God would say after a slip — and what does everything you've read this month say instead? Which voice has evidence?`},
+      {day:28,title:`Becoming Somebody's Evidence`,content:`There is a stage of this you can't reach alone in a room: being the proof for somebody else. Somewhere behind you on this road is a person who believes recovery is impossible for people like them — and no argument will convince them. You might. Not by preaching; by existing on day whatever-you're-on, ordinary and unmiraculous and visibly still standing. In recovery rooms this is the twelfth step; in the traditions it's the oldest pattern there is — the rescued become the rescuers, and somewhere in the transaction the rescue finishes taking hold. You don't have to found anything. It's the quiet word to the coworker who drinks like you drank. The "I'll go with you" to somebody's first meeting. Your story, told once, plainly, to one person it might unlock. You spent years as a cautionary tale. You are allowed to spend the rest as evidence.`,action:`Think of one person for whom your existence could be evidence. Don't preach at them. Just move one inch closer — the coffee, the question, the "I've been there." One inch.`,reflection:`Who was evidence for you — the person whose existence proved this was possible? Have they any idea? Should they?`},
+      {day:29,title:`The Long Middle`,content:`Tomorrow this track ends, so today is about the truth of what comes after: the long middle. Not the dramatic beginning, not some finish line — the years of Tuesdays where nothing is on fire and nobody applauds. This is where faith and recovery both actually live, and where both are quietly won or lost. The dangers of the long middle are not dramatic: drift, boredom, the slow shelving of practices that feel unnecessary precisely because they worked. Every tradition knows this season and prescribes the same medicine: rhythm over intensity. The daily liturgy, kept small enough to survive. The weekly gathering. The seasonal honest inventory. Not fireworks — farming. You were built for this part, though nobody told you: the same stubbornness that kept the habit alive for years is, converted, exactly the endurance the long middle runs on. You have already proven you can keep a daily practice for decades. You just get to choose which one now.`,action:`Look at your liturgy page and cut it to what will survive year three — the version small enough that you'll still be doing it when nobody, including you, finds it interesting. That version is the real one.`,reflection:`The stubbornness that kept the habit going for years — what does it look like, converted? What else in your life has that endurance ever been given to?`},
+      {day:30,title:`Day Thirty: An Altar of Ordinary Things`,content:`In the old stories, people who crossed something — a sea, a desert, a worst year — stopped and built an altar: a pile of ordinary stones marking the spot where help happened, so that when children asked "what are these stones?", the story got told again. Today you build yours. Not marble — evidence: thirty days of one-word prayers, of thank-Yous addressed and sent, of the quiet survived, the loud hour outlived, the person you asked to pray, the small promises kept to yourself. Ordinary stones, every one. Stack them: write the plain list of what actually happened this month. Then say the whole prayer, the one this track has been teaching in pieces: "God — as I understand You and mostly don't — thank You for today. I couldn't do this alone. I didn't have to. Just today, again, tomorrow." That's the entire theology of this track, and it's enough to live on. The track ends. The liturgy doesn't. Same time tomorrow.`,action:`Write the altar list — everything that actually happened in these thirty days, however small. Date it. Keep it where the day-one sentence about where you stood with God is kept. Read them together.`,reflection:`Read your day-one sentence about where you stood with God. Then read your altar list. What moved — and what do you want the next thirty days to move?`},
+    ],
+  },
   relationships:{
     title:'Relationships Pack',
     icon:'ti-heart',
@@ -3659,10 +3709,11 @@ function handleAppPopstate(){
     }
   }
 
-  // 3) Not on Home: go Home instead of leaving.
+  // 3) Not on Home: step back one screen, exactly like the header arrow, so
+  //    the hardware button and the visible button walk the same path.
   const homeEl=document.getElementById(SCREEN_MAP.home);
   if(homeEl&&!homeEl.classList.contains('on')){
-    switchTo('home');actBn('bn-home');
+    goBackScreen();
     try{history.pushState({tsidApp:true},'');}catch(e){}
     return;
   }
@@ -3926,7 +3977,7 @@ function initApp(){
     }else if(S.userType==='both'){
       greeting=`Hey${S.name?' '+S.name:''}. You're carrying both sides of this — your own day one and someone you love. We can start with either. Which is louder right now?`;
     }else{
-      greeting=`Hey${S.name?' '+S.name:''}. I'm really glad you opened this today.\n\n${days>0?`Day ${days} is not a small thing — it's ${days} choice${days===1?'':'s'} to choose yourself, over and over. I see that.`:`Day One starts right now — and you already made the hardest choice: you're here.`}\n\nWhat's on your mind right now? You can be completely honest with me.`;
+      greeting=`Hey${S.name?' '+S.name:''}. Good to see you.\n\n${days>0?`Day ${days}. That's ${days} morning${days===1?'':'s'} you chose this on purpose — nobody did that for you.`:`Day One starts right now — and the hardest part, showing up, you just did.`}\n\nSo what's actually going on today? Don't dress it up for me.`;
     }
     addBubble('nova',greeting);
     if(S.chatHistory.length>0){
@@ -4626,7 +4677,54 @@ function maybeShowProMilestoneCelebration(days){
   save();
   openMilestoneCelebration(days);
 }
+// ─── CELEBRATION BURST ───────────────────────────────────────────────────────
+// Confetti for milestone days. Pure canvas, no library, ~2.5s and gone, and it
+// respects prefers-reduced-motion (some people find bursts genuinely
+// unpleasant, and an accessibility setting is a stated preference).
+function celebrationBurst(){
+  try{
+    if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const c=document.createElement('canvas');
+    c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:10000';
+    c.width=innerWidth;c.height=innerHeight;
+    document.body.appendChild(c);
+    const ctx=c.getContext('2d');
+    const colors=['#7ee8a2','#f0b15a','#534AB7','#e8637e','#5fc9c9','#f0efe9'];
+    const N=140;const parts=[];
+    for(let i=0;i<N;i++){
+      const fromLeft=i%2===0;
+      parts.push({
+        x:fromLeft?-10:c.width+10,
+        y:c.height*0.65+Math.random()*c.height*0.2,
+        vx:(fromLeft?1:-1)*(4+Math.random()*7),
+        vy:-(8+Math.random()*7),
+        w:5+Math.random()*6,h:8+Math.random()*8,
+        rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.3,
+        color:colors[i%colors.length],
+      });
+    }
+    const t0=performance.now();
+    const tick=(t)=>{
+      const el=(t-t0)/1000;
+      ctx.clearRect(0,0,c.width,c.height);
+      let alive=0;
+      for(const p of parts){
+        p.vy+=0.25;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vx*=0.99;
+        if(p.y<c.height+30){alive++;}
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+        ctx.globalAlpha=Math.max(0,1-el/2.5);
+        ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+        ctx.restore();
+      }
+      if(alive>0&&el<2.6)requestAnimationFrame(tick);
+      else c.remove();
+    };
+    requestAnimationFrame(tick);
+  }catch(e){}
+}
+
 function openMilestoneCelebration(days){
+  celebrationBurst();
   document.getElementById('mc-days').textContent=days;
   document.getElementById('mc-message').textContent=buildMilestoneEncouragement(days);
   document.getElementById('mc-reflection-input').value='';
@@ -5362,6 +5460,13 @@ function maybeShowMilestoneOffer(){
   if(offeredMilestone===null||!S.startDate){bar.style.display='none';return;}
   document.getElementById('milestone-offer-title').textContent=milestoneCardTitle(offeredMilestone);
   bar.style.display='block';
+  // The banner appearing IS the celebration moment for free users - Pro gets
+  // the modal, but a milestone should burst for everybody, once per milestone.
+  if(!(S.burstMilestones||[]).includes(offeredMilestone)){
+    S.burstMilestones=(S.burstMilestones||[]).concat(offeredMilestone);
+    save();
+    celebrationBurst();
+  }
 }
 function markMilestoneSeen(d){
   if(!(S.seenMilestones||[]).includes(d)){
@@ -5455,7 +5560,7 @@ function selectTriggerType(type){
   document.getElementById('trig-step-tip').style.display='block';
   document.getElementById('trig-tip-title').textContent=type;
   document.getElementById('trig-tip-text').textContent=TRIGGER_COPING_TIPS[type]||TRIGGER_COPING_TIPS['Other'];
-  novaNudge(`Just so you know I'm here — you named "${type}" as what's triggering you right now. That's a real coping skill in action.\n\n${TRIGGER_COPING_TIPS[type]||TRIGGER_COPING_TIPS['Other']}`);
+  novaNudge(`I saw you log "${type}" — naming it while it's happening is the hard part, and you just did it.\n\n${TRIGGER_COPING_TIPS[type]||TRIGGER_COPING_TIPS['Other']}`);
 }
 function goLogCravingWithTrigger(){
   const type=currentTriggerType;
@@ -6263,17 +6368,54 @@ function vgSpeakStep(i){
   speechSynthesis.speak(u);
 }
 function vgSilentLoop(){
-  // Script finished - keep the circle breathing quietly until they stop it.
+  // Script finished. This used to go QUIET - captions kept changing but the
+  // voice stopped, which is exactly what Jacques reported as "the talk quits
+  // too early." Now it keeps talking: breathing cues spoken aloud, with a
+  // rotating quiet encouragement every few breaths, until they close it
+  // themselves. The name is kept so every existing caller still lands here.
   if(!vgActive)return;
-  vgAudioStep=VG_STEPS.length;// a voice switch during the quiet loop stays quiet
-  const phases=[{ph:'in',s:4},{ph:'hold',s:7},{ph:'out',s:8}];
-  let idx=0;
+  vgAudioStep=VG_STEPS.length;// a voice switch during the loop re-enters here
   const cap=document.getElementById('vg-caption');
-  const labels={in:'Breathe in...',hold:'Hold...',out:'And slowly out...'};
+  // Three-phase breath, spoken. Longer text = the utterance itself paces the
+  // phase, with the timer as the floor so captions never race ahead.
+  const breath=[
+    {ph:'in',s:4,t:'Breathe in... two... three... four.'},
+    {ph:'hold',s:7,t:'Hold it gently... four... five... six... seven.'},
+    {ph:'out',s:8,t:'And slowly out... six... seven... eight.'},
+  ];
+  // Said between breath cycles, one at a time, round and round. Written like a
+  // person sitting with you, not a meditation app.
+  const company=[
+    "I'm still here. Take your time.",
+    "You're doing the only thing this moment needs.",
+    "The wave is already smaller than when we started.",
+    "No hurry. We can do this as long as you want.",
+    "Still with you. Just keep breathing.",
+    "Whenever you're ready to stop, stop. Until then, I'm not going anywhere.",
+  ];
+  let idx=0,cycles=0,compIdx=0;
+  const say=(text)=>{
+    if(!('speechSynthesis' in window))return;
+    const u=new SpeechSynthesisUtterance(text);
+    const voice=vgPickVoice();
+    if(voice)u.voice=voice;
+    u.rate=0.85;u.pitch=1;
+    speechSynthesis.speak(u);
+  };
   const run=()=>{
     if(!vgActive)return;
-    const p=phases[idx%3];idx++;
-    vgSetPhase(p.ph);cap.textContent=labels[p.ph];
+    // Every third full breath, a spoken line of company before the next one.
+    if(idx%3===0&&idx>0){cycles++;}
+    if(idx%3===0&&cycles>0&&cycles%3===0&&idx>0){
+      const line=company[compIdx%company.length];compIdx++;
+      vgSetPhase('rest');cap.textContent=line;say(line);
+      cycles=0;
+      vgTimer=setTimeout(run,4500);
+      return;
+    }
+    const pIdx=idx%3;idx++;
+    const p=breath[pIdx];
+    vgSetPhase(p.ph);cap.textContent=p.t;say(p.t);
     vgTimer=setTimeout(run,p.s*1000);
   };
   run();
@@ -7767,13 +7909,13 @@ const FALLBACK_PATTERNS=[
    ]},
   {test:/craving|urge|want to (drink|use|smoke)|tempted/i,
    reply:[
-     `Cravings can feel intense and scary, but they always peak and pass — usually within 20 minutes. You already reached out, which is a real coping skill in action.\n\nCan you tell me what triggered this one?`,
+     `Cravings peak and pass — usually inside 20 minutes, even the ugly ones. And you're talking to me instead of acting on it, which is already the right move.\n\nWhat set this one off?`,
      `An urge is loud, but it's temporary — it rises, peaks, and falls like a wave, and you don't have to act on it while it does.\n\nWhere are you right now, and what's within reach that could carry you through the next 20 minutes?`,
      `Right now your brain is promising relief it can't actually deliver — you've watched that promise fail before, and that's exactly why you're here instead.\n\nHow strong is it, 1 to 10? And what usually helps even a little?`,
    ]},
   {test:/proud|good day|great day|did it|feeling good|amazing/i,
    reply:[
-     `I'm really glad you're feeling proud — that matters, and you should let yourself feel it fully.\n\nWhat's one thing you did recently that you want to remember on harder days?`,
+     `Good. Don't rush past this bit — you'll want it on file for the harder days.\n\nWhat's the thing you did that you most want to remember?`,
      `That's worth stopping for — really. Hard days are easy to dwell on and wins are easy to rush past, so let this one land.\n\nWhat made today different?`,
      `Look at that. You did that — nobody handed it to you.\n\nHow are you going to mark it? Even something small counts.`,
    ]},
@@ -7801,7 +7943,7 @@ const FALLBACK_PATTERNS=[
    ]},
   {test:/lonel|isolat|no one (understands|gets it)|alone in this/i,
    reply:[
-     `Loneliness is a real, physical kind of pain — it makes sense it would push you toward old coping habits. You reaching out here is already you refusing to be fully alone with it.\n\nIs there one person you trust that you could message today, even just a small hello?`,
+     `Loneliness hurts in the body, not just the head — and it's one of the oldest doors back to the habit. Right now you're talking instead of disappearing into it, which counts.\n\nIs there one person you trust that you could message today, even just a small hello?`,
      `Feeling alone in this is one of the heaviest parts — and it lies, because it tells you no one would understand when plenty of people would.\n\nWhen did the loneliness get loud today?`,
    ]},
   {test:/bored|nothing to do|so restless/i,
@@ -7821,12 +7963,12 @@ const FALLBACK_PATTERNS=[
    ]},
   {test:/confus(ed|ing)|don'?t know what i'?m feeling|mixed up|can'?t (figure|make sense) (it|this) out/i,
    reply:[
-     `It's okay not to have this fully sorted out yet — a lot of recovery is sitting with confusing feelings without rushing to resolve them.\n\nCan you describe what's confusing without trying to make it neat yet? Sometimes just saying it out loud untangles part of it.`,
+     `You don't have to have it sorted to talk about it — messy is fine here.\n\nSay it exactly as tangled as it is. Sometimes hearing yourself say it does half the untangling.`,
      `Not knowing what you're feeling is itself information — usually it means several things at once, tangled together.\n\nIf you had to name just one strand of it, what would you call it?`,
    ]},
   {test:/struggl|hard|rough|bad day|tough|heavy/i,
    reply:[
-     `Thank you for being honest about struggling — that takes real courage.\n\nWhat's making today feel heavy?`,
+     `Rough ones happen. I'd rather hear about it than have you polish it up.\n\nWhat's making today feel heavy?`,
      `I'm glad you said it instead of holding it. Heavy days don't mean it's going wrong — they're part of what recovery looks like up close.\n\nWhat's been the hardest hour of today so far?`,
      `Okay — I'm right here, and you don't have to make it sound better than it is.\n\nWhat happened today?`,
    ]},
@@ -8335,7 +8477,40 @@ const TITLES={home:'Today',nova:'Friendly — AI recovery companion',journal:'Jo
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
-function switchTo(id){
+// In-app back: every screen change records where it came from, the header
+// arrow walks back through it, and the arrow hides on Home where there is
+// nowhere further back. This is the visible twin of the phone's back button
+// (armAppBackTrap) - Jacques's phone-test note asked for a button on the page
+// itself, not only the hardware one.
+let screenHistory=[];
+function currentScreenId(){
+  const el=document.querySelector('.scr.on');
+  if(!el)return null;
+  return Object.keys(SCREEN_MAP).find(k=>SCREEN_MAP[k]===el.id)||null;
+}
+function goBackScreen(){
+  const prev=screenHistory.pop();
+  if(prev){switchTo(prev,{fromBack:true});actBn(BN_FOR_SCREEN[prev]||'bn-home');}
+  else{switchTo('home',{fromBack:true});actBn('bn-home');}
+}
+// Which bottom-nav tab each screen belongs to, so back also fixes the
+// highlight instead of leaving the wrong tab lit.
+const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',
+  rooms:'bn-tools',community:'bn-tools',timeline:'bn-tools',progress:'bn-tools',
+  plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
+  'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
+  analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
+  'pack-wizard':'bn-tools','habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
+function switchTo(id,opts){
+  // Record the leaving screen unless we're already walking backward.
+  const from=currentScreenId();
+  if(!(opts&&opts.fromBack)&&from&&from!==id){
+    screenHistory.push(from);
+    if(screenHistory.length>30)screenHistory.shift();
+  }
+  const backEl=document.getElementById('hdr-back');
+  if(backEl)backEl.style.display=(id==='home')?'none':'';
+  if(id==='home')screenHistory=[];
   document.body.classList.toggle('nova-open',id==='nova');
   if(id==='plans'){
     const activeEl=document.querySelector('.scr.on');
@@ -9406,7 +9581,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.3.0';
+const APP_VERSION='5.4.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -9835,6 +10010,7 @@ const HELP_INDEX=[
   // reference this entry by its original name after applySupporterUI() renames it.
   {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
   {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-tools');}},
+  {name:'Spiritual Path',sub:'30 days on faith and recovery — God as you understand God',k:'spiritual god faith prayer pray religious religion church higher power spirit',go:()=>openPack('spiritual')},
   {name:'Lesson Packs',sub:'Relationships, trauma, anxiety, confidence — or build your own',k:'lesson packs pack custom deeper relationships trauma anxiety confidence build your own',go:()=>openLessonPacksScreen()},
   {name:'Share my milestone',sub:'A card for your day count — nothing names the habit',k:'share milestone card post day count image proud show',go:()=>shareMyMilestone()},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},

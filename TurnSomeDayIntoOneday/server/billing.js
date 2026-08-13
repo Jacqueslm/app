@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const db = require('./db');
 const emailer = require('./email');
+const analytics = require('./analytics');
 
 const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
@@ -154,6 +155,9 @@ function recordLifetimePurchase(userId) {
     cancelAtPeriodEnd: false,
   });
   invalidateLifetimeCount();
+  // Recorded only for the first sale of a seat - a refresh re-confirming an
+  // existing lifetime account must not fire the conversion goal again.
+  if (!alreadyOwned) analytics.purchase('lifetime');
   if (!alreadyOwned && soldBefore >= LIFETIME_CAP) {
     try {
       db.logError(
@@ -221,6 +225,7 @@ async function refreshFromStripe(user) {
     const best = subs.data.find((s) => s.status === 'active' || s.status === 'trialing') || subs.data[0];
     if (!best) return;
     const isActive = best.status === 'active' || best.status === 'trialing';
+    const wasPaid = user.plan !== 'free' && user.subscription_status === 'active';
     const { trialJustStarted } = db.updateSubscriptionFromStripe(user.id, {
       plan: isActive ? ((best.metadata && best.metadata.plan) || user.plan || 'monthly') : 'free',
       subscriptionStatus: best.status,
@@ -230,7 +235,12 @@ async function refreshFromStripe(user) {
         : null,
       cancelAtPeriodEnd: best.cancel_at_period_end,
     });
+    // First transition into 'active' = the trial converted / first charge.
+    if (!wasPaid && best.status === 'active') {
+      analytics.purchase((best.metadata && best.metadata.plan) || user.plan || 'monthly');
+    }
     if (trialJustStarted) {
+      analytics.track('Trial Started', { props: { plan: (best.metadata && best.metadata.plan) || user.plan || 'monthly' } });
       const freshUser = db.getUserById(user.id);
       if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
     }
@@ -263,6 +273,7 @@ async function handleWebhookEvent(rawBody, signature) {
           cancelAtPeriodEnd: sub.cancel_at_period_end,
         });
         if (trialJustStarted) {
+          analytics.track('Trial Started', { props: { plan } });
           const freshUser = db.getUserById(userId);
           if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
         }
@@ -275,6 +286,7 @@ async function handleWebhookEvent(rawBody, signature) {
       const user = db.getUserByStripeCustomerId(sub.customer);
       if (!user) break;
       const isActive = sub.status === 'active' || sub.status === 'trialing';
+      const wasPaid = user.plan !== 'free' && user.subscription_status === 'active';
       const { trialJustStarted } = db.updateSubscriptionFromStripe(user.id, {
         plan: isActive ? (user.plan === 'lifetime' ? 'lifetime' : sub.metadata.plan || user.plan) : 'free',
         subscriptionStatus: sub.status,
@@ -284,7 +296,12 @@ async function handleWebhookEvent(rawBody, signature) {
           : null,
         cancelAtPeriodEnd: sub.cancel_at_period_end,
       });
+      // 'active' after being free/trialing is the first real charge.
+      if (!wasPaid && sub.status === 'active') {
+        analytics.purchase(sub.metadata.plan || user.plan || 'monthly');
+      }
       if (trialJustStarted) {
+        analytics.track('Trial Started', { props: { plan: sub.metadata.plan || user.plan || 'monthly' } });
         const freshUser = db.getUserById(user.id);
         if (freshUser) emailer.startTrialSequence(freshUser).catch(() => {});
       }

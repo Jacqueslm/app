@@ -8,6 +8,8 @@
   },
   "scripts": {
     "postinstall": "npm install --prefix server --no-audit --no-fund",
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "dev": "node server/server.js",
+    "build": "node -e \"console.log('No build step: Turn Someday Into Day One serves its static HTML via the Express server.')\""
   }
 }

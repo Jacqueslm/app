@@ -11,6 +11,7 @@ const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
 const push = require('./push');
+const analytics = require('./analytics');
 const {
   COOKIE_NAME,
   hashPassword,
@@ -80,6 +81,25 @@ app.use((req, res, next) => {
   const host = String(req.headers.host || '').toLowerCase().split(':')[0];
   if (host !== APEX_HOST) return next();
   res.redirect(301, `https://${CANONICAL_HOST}${req.originalUrl}`);
+});
+
+// ─── PLAUSIBLE PAGEVIEWS ─────────────────────────────────────────────────────
+// Recorded server-side (no third-party script on the visitor's device, no
+// cookies). The guard limits it to genuine page loads so assets, API calls and
+// the unsubscribe token never leak into the dashboard.
+function shouldTrackPageview(req) {
+  if (req.method !== 'GET') return false;
+  const p = req.path;
+  if (p.startsWith('/api/')) return false;
+  if (p.startsWith('/admin')) return false;
+  if (p.startsWith('/go/')) return false;
+  if (p === '/unsubscribe') return false; // URL carries a capability token
+  if (/\.(js|css|png|jpe?g|webp|svg|gif|ico|json|woff2?|map|mp3|mp4|webmanifest|xml|txt|pdf)$/i.test(p)) return false;
+  return true;
+}
+app.use((req, res, next) => {
+  if (shouldTrackPageview(req)) analytics.pageview(req);
+  next();
 });
 
 app.use('/preview', requireAuth);
@@ -354,6 +374,9 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
     const pdf = emailer.brainresetPdfEmail();
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
+  // New-lead funnel event, tagged with the door they came through (quiz,
+  // partner, for-her or brainreset) - no email, no result, no PII.
+  analytics.event(req, 'Lead', { source: src });
   res.json({ ok: true, message: (src === 'quiz' || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
@@ -459,6 +482,9 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
   setSessionCookie(res, userId);
   res.status(201).json({ email: normalizedEmail });
+  // Funnel event - fire-and-forget, and it carries only the plan level, never
+  // anything that could identify the person who just signed up.
+  analytics.event(req, 'Signup', { plan: 'free' });
   // After the response - a slow or failed email must never slow down signup.
   const user = db.getUserById(userId);
   if (user) {

@@ -3643,6 +3643,41 @@ const CLIP_EFFECTS = {
   punch:     (W, H, fps) => `zoompan=z='1+0.16*exp(-4*(on/${fps}))':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${fps}`,
   pulse:     (W, H, fps) => `zoompan=z='1.05+0.045*sin((on/${fps})*3.1)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=${W}x${H}:fps=${fps}`,
   shake:     (W, H) => `crop=w='2*trunc((iw-20)/2)':h='2*trunc((ih-20)/2)':x='10+6*sin(t*13)':y='10+6*cos(t*11)',scale=${W}:${H}`,
+
+  // ── Added b0847, from Jacques's list. Everything here is pure ffmpeg, so it
+  // stays on the free side: no model, no upload, no per-clip cost.
+  // --- looks
+  comic:     () => "eq=saturation=1.9:contrast=1.5,edgedetect=low=0.1:high=0.35:mode=colormix,unsharp=5:5:1.1:5:5:0",
+  nightclub: () => "eq=contrast=1.3:saturation=1.6,colorbalance=rs=0.15:bh=0.25:gm=-0.05,vignette=PI/4,noise=alls=8:allf=t",
+  nature:    () => "eq=saturation=1.28:contrast=1.06,colorbalance=gm=0.10:bs=0.05:rh=-0.04,unsharp=5:5:0.5:5:5:0",
+  neon:      () => "split[na][nb];[nb]curves=all='0/0 0.55/0.8 1/1',gblur=sigma=26[ng];[na][ng]blend=all_mode=screen:all_opacity=0.45,eq=saturation=1.7:contrast=1.2",
+  sepia:     () => 'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131',
+  infrared:  () => 'colorchannelmixer=.2:.6:.2:0:.6:.2:.2:0:.2:.2:.6,eq=saturation=1.5:contrast=1.2',
+  // Smoke: soft moving haze that drifts across the frame. A real particle pass
+  // would need an overlay asset; this reads as atmosphere and costs nothing.
+  smoke:     () => 'split[sa][sb];[sb]gblur=sigma=40,eq=brightness=0.06:contrast=0.85[sg];[sa][sg]blend=all_mode=screen:all_opacity=0.34,vignette=PI/5',
+  fog:       () => "split[fa][fb];[fb]boxblur=luma_radius=30:luma_power=2,eq=brightness=0.12:saturation=0.5[fg];[fa][fg]blend=all_mode=screen:all_opacity=0.4",
+  // --- speed. setpts rewrites timestamps, so the clip genuinely runs slower or
+  // faster rather than just looking like it. Audio is handled by the render
+  // path separately; these are picture effects on Ken Burns clips.
+  slowmo:    () => 'setpts=2.0*PTS',
+  slowmo_x4: () => 'setpts=4.0*PTS',
+  fastmo:    () => 'setpts=0.5*PTS',
+  fastmo_x4: () => 'setpts=0.25*PTS',
+  // Velocity: slow, then snaps to fast at the midpoint - the ramp people mean
+  // when they say "velocity edit".
+  velocity:  () => "setpts='if(lt(T,1.2),2.0*PTS,0.55*PTS)'",
+  // --- appear / disappear
+  vanish:    () => "fade=t=out:st=1.2:d=0.5,fade=t=in:st=2.0:d=0.4",
+  blink:     () => "eq=brightness='if(lt(mod(t\\,1.4)\\,0.12)\\,-1\\,0)'",
+  materialize: () => "gblur=sigma=10:enable='lt(t\\,0.7)',fade=t=in:d=0.9",
+  // --- transformation. A morph between two different images needs optical flow
+  // or a model; what IS free is a transformation OF one image, so that's what
+  // this is: the frame stretches and settles, like it's re-forming.
+  morph:     (W, H, fps) => `zoompan=z='1.25-0.25*min(1,on/${fps})':d=1:x='iw/2-(iw/zoom/2)+18*sin(on/6)':y='ih/2-(ih/zoom/2)+14*cos(on/7)':s=${W}x${H}:fps=${fps},gblur=sigma=5:enable='lt(t\\,0.5)'`,
+  ripple:    () => "geq=lum='p(X+4*sin(Y/22+T*2.2),Y)':cb='p(X+4*sin(Y/22+T*2.2),Y)':cr='p(X+4*sin(Y/22+T*2.2),Y)'",
+  mirror_x:  () => 'split[ma][mb];[mb]hflip[mf];[ma][mf]blend=all_mode=average:all_opacity=1',
+  kaleido:   (W, H) => `split[ka][kb];[kb]hflip[kf];[ka][kf]hstack=inputs=2,scale=${W}:${H}`,
 };
 
 function effectFilter(name, W, H, fps) {

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact us</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+  .card { width: 100%; max-width: 30rem; }
+  .footer { text-align: center; margin-top: 1rem; font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="panel" id="mount">
+    <p class="muted" id="loading">Loading…</p>
+  </div>
+  <p class="footer muted">Powered by LeadCatch</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // The hosted page is the same widget the customer embeds elsewhere - one
+  // renderer, so a form can never look right in one place and wrong in the other.
+  var key = decodeURIComponent(location.pathname.replace(/^\/f\//, '').replace(/\/$/, ''));
+  if (!key) {
+    document.getElementById('loading').textContent = 'This link is missing a form.';
+    return;
+  }
+  var mount = document.getElementById('mount');
+  var script = document.createElement('script');
+  script.src = '/embed.js';
+  script.setAttribute('data-form', key);
+  script.setAttribute('data-target', '#mount');
+  script.onload = function () {
+    // Give the widget a moment to fetch its config, then report a dead link
+    // rather than leaving a visitor staring at "Loading…" forever.
+    setTimeout(function () {
+      if (mount.querySelector('[data-leadcatch]')) document.getElementById('loading').remove();
+      else document.getElementById('loading').textContent = 'This form is no longer available.';
+    }, 2500);
+  };
+  document.body.appendChild(script);
+})();
+</script>
+</body>
+</html>

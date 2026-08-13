@@ -1746,7 +1746,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
         <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Do this together</p><span>Weekly couple exercises — check-ins, slip plans, trigger walkthroughs <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
@@ -2408,7 +2408,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <div class="sos-modal" id="couples-modal" onclick="if(event.target===this)closeCouplesExercises()">
   <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
     <div class="sos-title" style="color:var(--accent)">Do this together</div>
-    <div class="sos-sub">One a week is plenty. Ten minutes, phones down, no fixing — just the two of you.</div>
+    <div class="sos-sub">Ten minutes a day, phones down, no fixing — a 30-day program for the two of you, plus exercises you can reach for anytime.</div>
     <div id="couples-list" style="overflow-y:auto;flex:1;min-height:120px"></div>
     <button class="sos-close" onclick="closeCouplesExercises()">Close</button>
   </div>
@@ -7956,8 +7956,8 @@ function categoryFallbackNote(){
 const PRO_TOOLS={
   couples:{
     title:'Do this together',
-    teaser:"Guided ten-minute exercises for you and your partner: the weekly check-in, the craving signal, the slip plan you agree on before you need it, and more. Recovery is a team sport — this is the playbook.",
-    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">1. The weekly check-in — 10 min<br>2. The craving signal<br>3. The slip plan<br>4. Trigger walkthrough...</div>',
+    teaser:"A 30-day program the two of you do together — ten minutes a day, phones down. Plus the anytime exercises: the weekly check-in, the craving signal, the slip plan you agree on before you need it. Recovery is a team sport — this is the playbook.",
+    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Day 1. Two Jobs, One Table<br>Day 2. The Rules Of This Table<br>Day 3. What It Is And What It Is Not<br>… 30 days, plus the anytime exercises</div>',
     open:'openCouplesExercises'
   },
   partnerCheck:{
@@ -9406,7 +9406,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.1.6';
+const APP_VERSION='5.2.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -10094,15 +10094,59 @@ const COUPLES_EXERCISES=[
   {t:'The gratitude swap',w:'Addiction narrows life to the next fix; gratitude widens it back. Do this one out loud.',s:['Each of you names three things you\'re grateful for today — at least one about the other person.','No repeats from last time.','Do it at the same time each week — after dinner, before bed — so it becomes yours.']},
   {t:'Reclaim the hour',w:'The habit used to own a time slot. Take one hour of it back, together.',s:['Pick the hour the struggle usually claims (late night, Sunday afternoon — you know yours).','Fill it with something analog you both do: walk, cook, cards, drive, music.','Protect it like an appointment. This is the hour you\'re stealing back from the old life.']},
 ];
+// The 30-day Together program. Progress is S.togetherDone (count of completed
+// days) - same kind of data as lesson progress, synced with the rest of S.
+// Jacques's phone-test note, 12 Aug: the old modal was six cards and a dead
+// end - "you open it up and say do this together, but it really goes nowhere."
+let couplesViewDay=null; // null = the current day; a number = re-reading a done day
+function togetherPack(){return (typeof LESSON_PACKS==='object'&&LESSON_PACKS['Together'])||[];}
 function openCouplesExercises(){
   logActivity('couples_exercises',{});
-  document.getElementById('couples-list').innerHTML=COUPLES_EXERCISES.map(e=>
+  couplesViewDay=null;
+  renderCouples();
+  document.getElementById('couples-modal').classList.add('open');
+}
+function renderCouples(){
+  const pack=togetherPack();
+  const done=Math.min(S.togetherDone||0,pack.length);
+  const el=document.getElementById('couples-list');
+  let html='';
+  if(pack.length){
+    const finished=done>=pack.length;
+    const showDay=couplesViewDay||(finished?pack.length:done+1);
+    const l=pack[showDay-1];
+    const isCurrent=!finished&&showDay===done+1;
+    html+=`<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · ${finished?'complete — re-read anytime':`day ${done+1} of ${pack.length}`}</div>`;
+    html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
+      <div style="font-size:11px;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
+      <div style="font-size:15px;font-weight:650;color:var(--tp)">${escapeHtml(l.title)}</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.65;margin-top:8px">${escapeHtml(l.content)}</div>
+      <div style="font-size:12.5px;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> ${escapeHtml(l.action)}</div>
+      <div style="font-size:12.5px;color:var(--ts);line-height:1.6;margin-top:6px"><b style="color:var(--accent)">Ask each other:</b> ${escapeHtml(l.reflection)}</div>
+      ${isCurrent?`<button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="markTogetherDone()">We did this one — mark day ${l.day} done</button>`:''}
+      ${couplesViewDay?`<button class="sos-close" style="margin-top:10px" onclick="couplesViewDay=null;renderCouples()">Back to ${finished?'the last day':'today'}</button>`:''}
+    </div>`;
+    if(done>0&&!couplesViewDay){
+      html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${pack.slice(0,done).map(p=>`<span onclick="couplesViewDay=${p.day};renderCouples()" style="font-size:11.5px;color:var(--ts);background:var(--s1);border:1px solid var(--bdr);border-radius:99px;padding:4px 10px;cursor:pointer">✓ ${p.day}</span>`).join('')}</div>`;
+    }
+  }
+  html+=`<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:6px 0 8px">Anytime exercises</div>`;
+  html+=COUPLES_EXERCISES.map(e=>
     `<div class="card" style="padding:14px 16px;margin-bottom:10px">
       <div style="font-size:14px;font-weight:600;color:var(--tp)">${escapeHtml(e.t)}</div>
       <div style="font-size:12.5px;color:var(--tm);margin:4px 0 8px;line-height:1.5">${escapeHtml(e.w)}</div>
       <div style="font-size:13px;color:var(--ts);line-height:1.7">${e.s.map((st,i)=>`<b style="color:var(--tp)">${i+1}.</b> ${escapeHtml(st)}`).join('<br>')}</div>
     </div>`).join('');
-  document.getElementById('couples-modal').classList.add('open');
+  el.innerHTML=html;
+}
+function markTogetherDone(){
+  const pack=togetherPack();
+  S.togetherDone=Math.min((S.togetherDone||0)+1,pack.length);
+  logActivity('together_day',{day:S.togetherDone});
+  save();
+  couplesViewDay=null;
+  renderCouples();
+  document.getElementById('couples-list').scrollTop=0;
 }
 function closeCouplesExercises(){document.getElementById('couples-modal').classList.remove('open');}
 

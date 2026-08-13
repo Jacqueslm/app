@@ -320,6 +320,43 @@ somebody instead of scrolling past.
 
 ---
 
+## STATE — 12 Aug 2026, end of day
+
+**Episodes 1 and 2 are built.** Jacques assembled both in Studio this evening.
+
+**Cut lengths changed.** The original 17-second blocks are superseded: at
+1.3-1.5s a shot, **five of the ten captions could not be read in one pass** —
+timed against normal reading speed, and these captions are the whole story
+because there is no voiceover. The cuts are now:
+
+- **30 seconds, all hard cuts** — for TikTok. Typed seconds equal finished
+  seconds, because nothing is lost to blend overlap.
+- **50 seconds, all blends** — for YouTube and Facebook. 55s raw; ten blends
+  overlap 0.5s each (`TRANS_DUR`), so Studio reports 50.0 finished.
+
+**Two arithmetic traps that cost an hour, written down so they don't again:**
+- **Studio reports FINISHED length, not raw.** Every blend eats 0.5s. A block
+  summing to 30 with four blends reads as 28.
+- **"⚡ Cut on the beat" must be unticked on both episodes.** It rounds every
+  shot up to a whole musical bar with a 1.5s floor, which flattens deliberate
+  timing differences into one number.
+
+**Episode 2's last four panels came back letterboxed** — widescreen pictures
+inside a vertical canvas, black bars top and bottom, where 1-6 were true
+full-frame. Jacques built with them as they are rather than wait. The re-render
+prompt is written and sits in the chat log; the fix is a ten-minute rebuild
+whenever Manus is generating images again, because the paste blocks don't
+change. **Shot 10 is the one that genuinely needs it** — the two women sit at
+opposite ends of a wide frame, so no vertical crop keeps both faces.
+
+**Music:** written fresh this session rather than reused. Episode 1 is cold and
+tense (the piece is a man doing arithmetic he doesn't want to finish); episode 2
+is warm (a woman who keeps forgiving). Three unusual options for episode 2 are
+in the chat log — marimba and upright bass, Rhodes through tape delay, bowed
+vibraphone with sub bass — all instrumental, quiet, with real low end.
+
+---
+
 ## How to build any of them
 
 **Cuts, not blends.** The rhythm is the point — it's the feeling of scrolling a

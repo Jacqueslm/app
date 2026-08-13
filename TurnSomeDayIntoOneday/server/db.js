@@ -541,6 +541,18 @@ function getUsersInTrialWindow() {
   return db.prepare('SELECT * FROM users WHERE trial_started_at IS NOT NULL AND trial_started_at > ?').all(cutoff);
 }
 
+// Accounts whose synced state exists and who have an email we can write to.
+// The win-back runner reads each one's state to decide if they've gone quiet;
+// doing the filtering in JS keeps the JSON blob out of SQL, which is where it
+// belongs given state_json has no schema guarantees.
+function getUsersWithState() {
+  return db.prepare(`
+    SELECT u.id, u.email, s.state_json
+    FROM users u JOIN user_state s ON s.user_id = u.id
+    WHERE u.email IS NOT NULL AND u.email != ''
+  `).all();
+}
+
 // ─── OWNER STATS ──────────────────────────────────────────────────────────────
 // Untagged traffic buckets as "(direct)" rather than being dropped, so the
 // per-source rows always sum back to the totals - a breakdown that quietly
@@ -574,6 +586,63 @@ function getAdminStats(opts) {
       FROM leads GROUP BY 1 ORDER BY leads DESC
     `).all(),
   };
+
+  // ── Funnel + retention (13 Aug 2026) ──────────────────────────────────────
+  // The gap this closes: every number above stops at "a trial started". None
+  // of them answer the two questions that decide whether to make more content
+  // or fix the product - does a trial become money, and does anybody come back
+  // after week one. Both are computed from data already stored; nothing new is
+  // collected and no third-party analytics is involved, which keeps the
+  // "privacy is the product" promise literally true.
+  const trialStarts = totals.trial_starts;
+  const funnel = {
+    leads: totals.leads,
+    signups: totals.signups,
+    trial_starts: trialStarts,
+    paid: totals.paid,
+    // Percentages are only shown once a denominator is big enough to mean
+    // something. Below that they read as precision the data cannot support -
+    // one paying customer out of three is not "33% conversion".
+    lead_to_signup: totals.leads >= 20 ? Math.round((totals.signups / totals.leads) * 100) : null,
+    signup_to_trial: totals.signups >= 20 ? Math.round((trialStarts / totals.signups) * 100) : null,
+    trial_to_paid: trialStarts >= 20 ? Math.round((totals.paid / trialStarts) * 100) : null,
+    min_sample: 20,
+  };
+
+  // Retention: of the accounts that reached each age, how many were still
+  // doing something in the app on/after that day. Anchored to each user's own
+  // start date, so a cohort of one week ago cannot dilute D30.
+  const retention = (() => {
+    let rows = [];
+    try { rows = getUsersWithState(); } catch (_) { return null; }
+    const buckets = { d1: [0, 0], d7: [0, 0], d30: [0, 0] };
+    for (const r of rows) {
+      let st = null;
+      try { st = JSON.parse(r.state_json); } catch (_) { continue; }
+      if (!st || !st.startDate) continue;
+      const start = new Date(st.startDate).getTime();
+      if (!start) continue;
+      const ageDays = Math.floor((Date.now() - start) / 86400000);
+      const log = Array.isArray(st.activityLog) ? st.activityLog : [];
+      const lastTs = log.reduce((m, a) => {
+        const t = a && a.ts ? new Date(a.ts).getTime() : 0;
+        return t > m ? t : m;
+      }, 0);
+      const aliveDays = lastTs ? Math.floor((lastTs - start) / 86400000) : -1;
+      for (const [key, day] of [['d1', 1], ['d7', 7], ['d30', 30]]) {
+        if (ageDays < day) continue;          // hasn't had the chance yet
+        buckets[key][1] += 1;                 // eligible
+        if (aliveDays >= day) buckets[key][0] += 1; // still active at that age
+      }
+    }
+    const pct = ([kept, elig]) => (elig >= 10 ? Math.round((kept / elig) * 100) : null);
+    return {
+      d1: { kept: buckets.d1[0], eligible: buckets.d1[1], pct: pct(buckets.d1) },
+      d7: { kept: buckets.d7[0], eligible: buckets.d7[1], pct: pct(buckets.d7) },
+      d30: { kept: buckets.d30[0], eligible: buckets.d30[1], pct: pct(buckets.d30) },
+      min_sample: 10,
+    };
+  })();
 
   const bySourceRows = db.prepare(`
     SELECT COALESCE(NULLIF(utm_source,''), ?) AS utm_source,
@@ -630,6 +699,8 @@ function getAdminStats(opts) {
   return {
     generated_at: new Date().toISOString(),
     totals,
+    funnel,
+    retention,
     by_utm_source,
     by_week,
     usage: {
@@ -692,6 +763,7 @@ module.exports = {
   hasEmailBeenSentToAddress,
   getLeadsInNurtureWindow,
   getUsersInTrialWindow,
+  getUsersWithState,
   getUserByStripeCustomerId,
   setStripeCustomerId,
   updateSubscriptionFromStripe,

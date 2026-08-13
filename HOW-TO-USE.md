@@ -108,6 +108,13 @@ line and puts whatever's left in the caption:
 - Remember the beat-snap note above: paste sub-second times, then **untick
   "⚡ Cut on the beat"**, or they'll be rounded straight back up.
 
+### Lower thirds (a name in the corner)
+
+Two of the **words:** positions put text at 72% of the frame height, which is
+below faces and above the platform buttons: **lower (safe)** centres it, and
+**lower left** puts it where a broadcast lower third goes. In a pasted shot
+list they're `words safe` and `words lower left`.
+
 ### Controlling the zoom speed
 
 Every picture row has a **move:** dropdown — **slow**, **medium** (the default)
@@ -368,6 +375,11 @@ Every AI generation is now saved the moment it's sent. The card shows a **runnin
 - **🔊 Clean audio** — de-noise, de-rumble, and level-out narration or any clip with sound (great for spoken-word).
 - **🟢 Green screen** — drop a subject shot on a solid color onto any picture or clip as the new background.
 - **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
+- **🎨 Color preset** (any picture or clip) — twelve one-tap film grades:
+  Teal & Orange, Bleach Bypass, Moody Blue, Golden Hour, Soft Pastel, Crushed
+  Blacks, Kodak Warm, Fuji Green, Silver, High Key, Low Key. A graded copy
+  lands in your library and the original is untouched, so you can try five and
+  keep one. Free — it's a filter, nothing is generated.
 - **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
 - **▦ Panels** (any picture or clip in your Library) — the two CapCut layouts, free and made on your own machine. **4-panel collage** puts four things in a 2×2 grid; **⬍ Duet** stacks two — a reference clip on top, you underneath — which is the "follow the move" layout. Cells crop to fill rather than letterbox, and a shorter clip loops instead of freezing on its last frame.
 - **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).

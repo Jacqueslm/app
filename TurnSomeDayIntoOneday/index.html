@@ -1291,11 +1291,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
+        <i class="ti ti-users"></i>
+        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging.</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Journal</div></div>
       <div class="setting-row" onclick="switchTo('journal');actBn('bn-tools')">
         <i class="ti ti-notebook"></i>
         <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
+      <div class="setting-row" onclick="openLessonPacksScreen()">
+        <i class="ti ti-notebook"></i>
+        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1308,6 +1320,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="openProTool('streaks')">
         <i class="ti ti-flame"></i>
         <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and comeback tracking</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="shareMyMilestone()">
+        <i class="ti ti-share"></i>
+        <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Inspire someone else</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="sec" style="padding-bottom:0;padding-top:4px">
@@ -1557,13 +1574,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
-      <div class="setting-row" onclick="openLessonPacksScreen()">
-        <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Help</div></div>
       <div class="setting-row" onclick="openHelpFinder()">
         <i class="ti ti-lifebuoy" style="color:#1D9E75"></i>
@@ -1643,16 +1653,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-eye-off"></i>
         <div class="setting-row-txt"><p>Discretion mode</p><span id="discretion-sub">Home screen shows a neutral name — nobody can tell what this app is by glancing at your phone</span></div>
         <div class="toggle-sw" id="discretion-toggle"><div class="toggle-knob"></div></div>
-      </div>
-      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-plans')">
-        <i class="ti ti-users"></i>
-        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging.</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="shareMyMilestone()">
-        <i class="ti ti-share"></i>
-        <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Inspire someone else</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="window.location.href='tel:988'">
         <i class="ti ti-phone" style="color:#E24B4A"></i>
@@ -3358,7 +3358,7 @@ function backToPackList(){
   switchTo('pack-list');actBn('bn-plans');
 }
 function buildPackReflectionGuidance(){
-  if(!S.activeCustomPack)return "You don't have an active lesson pack right now — open one from Lesson Packs in your Profile, and I can help you reflect on it as you go.";
+  if(!S.activeCustomPack)return "You don't have an active lesson pack right now — open one from Lesson Packs in Tools, and I can help you reflect on it as you go.";
   const meta=getPackMeta(S.activeCustomPack);
   const day=getPackDay(S.activeCustomPack);
   const lesson=getPackLessonForDay(S.activeCustomPack,day);
@@ -9406,7 +9406,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.2.0';
+const APP_VERSION='5.2.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -9834,7 +9834,9 @@ const HELP_INDEX=[
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
   // reference this entry by its original name after applySupporterUI() renames it.
   {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
-  {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-plans');}},
+  {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-tools');}},
+  {name:'Lesson Packs',sub:'Relationships, trauma, anxiety, confidence — or build your own',k:'lesson packs pack custom deeper relationships trauma anxiety confidence build your own',go:()=>openLessonPacksScreen()},
+  {name:'Share my milestone',sub:'A card for your day count — nothing names the habit',k:'share milestone card post day count image proud show',go:()=>shareMyMilestone()},
   {name:'Crisis helpline — 988',sub:'Free, confidential, 24/7',k:'crisis 988 suicide helpline hotline call',go:()=>{window.location.href='tel:988';}},
   {name:'Export my data',sub:'Download everything the app has saved',k:'export download data backup copy',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Delete my account',sub:'In Profile under Danger zone',k:'delete account erase remove everything quit',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const els=document.querySelectorAll('.sec-hd');els.forEach(h=>{if(h.textContent.trim()==='Danger zone')h.scrollIntoView({behavior:'smooth',block:'center'});});},150);}},

@@ -399,6 +399,88 @@ async function sendLeadSequenceEmail(lead, sequence, step, subject, text) {
   return result;
 }
 
+// ---- Partner sequence (written 12 Aug 2026, wired 13 Aug) -----------------
+// Five emails for the person who LOVES somebody with a habit - never the
+// person with the habit. It exists because every other sequence here is
+// written in Jacques's voice TO the one struggling, and would land badly on a
+// wife who just took the codependency check-in at midnight.
+// The rules these follow, and which must survive any rewrite:
+//   - no day counting, no relapse talk, no quitting advice; she isn't quitting
+//   - never tells her to leave, and never tells her to stay. That is her call
+//   - never asks her to manage him. His recovery is not her job
+//   - Jacques's angle is the one nobody else has: he was the one with the
+//     secret for 38 years, so he can say what was behind the behaviour
+const PARTNER_EMAILS = [
+  { step: 1, subject: "You're not imagining it", text: `Jacques here. I built this thing, so you get an email from me and not a robot.
+
+I'm going to start with the thing nobody said to you: you're not imagining it, and you're not dramatic, and you're not "reading into things."
+
+I know that because I was the one being read. For thirty-eight years I was the person with the secret in the house. And every single time somebody close to me noticed something was off, they were right. Every time. Not once was anybody wrong about me - they just couldn't prove it, and I was very good at making them feel unreasonable for asking.
+
+So if you've been told you're paranoid, or too sensitive, or that you're making something out of nothing - I'd trust what you noticed over what you were told about noticing it.
+
+That's all for today. Tomorrow I'll tell you the one thing that changed everything for the people around me, and it isn't what you'd expect.
+
+- Jacques
+{APP_URL}` },
+  { step: 2, subject: 'Two jobs, and you only ever had one', text: `There are two jobs in your house.
+
+One is his: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages him.
+
+Almost everybody in your position quietly takes on both. It's not weakness - it's what happens when somebody has to keep the household upright and nobody else is going to. But here's the thing I watched from the other side: me not getting better was never once caused by somebody not managing me well enough. Nobody talked me into it and nobody could have. The people who tried the hardest just got the most worn out.
+
+Your healing does not have to wait in a queue behind his.
+
+That's not permission to stop caring. It's permission to stop carrying the half that was never yours.
+
+- Jacques
+{APP_URL}` },
+  { step: 3, subject: 'The ten minutes when you want to check his phone', text: `You know the ten minutes. He's in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
+
+I'm not going to tell you not to. Checking is not a character flaw - it's what a person does when they've been lied to and their own judgment stopped feeling reliable. That's the real injury, by the way. Not the drinking. The fact that you can't trust your own read on your own life anymore.
+
+Here's what I'd say instead. Whatever you find, you already know. You've known for a while. Checking doesn't give you information - it gives you thirty seconds of certainty and then a worse night.
+
+So: when the ten minutes come, write it down instead. In the app, in a notebook, in your phone's notes. There's a journal in there that nobody else can open, and it's free. Put the 2am sentence somewhere other than around and around your own head.
+
+It won't fix anything tonight. It'll give you back one night.
+
+- Jacques
+{APP_URL}` },
+  { step: 4, subject: 'A promise and a change look identical from the outside', text: `This is the one I owe you an honest answer on, because I made a lot of promises and meant every single one of them.
+
+That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "he promised" and "he lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
+
+So here's the only thing I know that separates a promise from a change, and it's not what he says:
+
+A promise is about the future. A change shows up in the boring middle of an ordinary week. Not a grand declaration after a bad night - the Tuesday. Did anything about the Tuesday get different? That's the whole test. It takes weeks to read, it can't be rushed, and it's the only honest measure there is.
+
+You don't have to decide anything based on it. Just stop grading him on the apologies. They were never the evidence.
+
+- Jacques
+{APP_URL}` },
+  { step: 5, subject: "One thing this week that's yours", text: `Last one, then I'll leave you alone.
+
+I want you to do one thing this week that has nothing to do with him. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
+
+I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was him, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
+
+Don't let that be yours.
+
+The app's free and there's a section built for your side of it - not monitoring tools, not couples homework. Yours. Use it, don't use it, that's genuinely fine. But do the one hour.
+
+You've been the reliable one for a long time. Somebody should be telling you to put it down for an afternoon, so it may as well be me.
+
+- Jacques
+{APP_URL}` },
+];
+
+function partnerEmailFor(step) {
+  const e = PARTNER_EMAILS.find((x) => x.step === step);
+  if (!e) return null;
+  return { subject: e.subject, text: e.text.split('{APP_URL}').join(APP_URL) };
+}
+
 function quizEmailFor(step, lead) {
   const e = QUIZ_EMAILS.find((x) => x.step === step);
   if (!e) return null;
@@ -413,6 +495,11 @@ function quizEmailFor(step, lead) {
 async function startQuizNurture(lead) {
   const e = quizEmailFor(1, lead);
   return sendLeadSequenceEmail(lead, 'quiz', 1, e.subject, e.text);
+}
+
+async function startPartnerNurture(lead) {
+  const e = partnerEmailFor(1);
+  return sendLeadSequenceEmail(lead, 'partner', 1, e.subject, e.text);
 }
 
 // Hourly runner: step N sends only while the lead is actually on day N-1
@@ -433,9 +520,23 @@ async function runQuizNurture() {
   }
 }
 
+// The partner side. Same one-a-day cadence as the quiz nurture, but a separate
+// sequence name so email_log can never confuse the two - and so a person who
+// somehow appears on both lists still gets each one exactly once.
+async function runPartnerNurture() {
+  for (const lead of db.getLeadsInNurtureWindow()) {
+    if (lead.source !== 'partner') continue;
+    const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
+    const step = day + 1;
+    if (step < 1 || step > 5) continue;
+    const e = partnerEmailFor(step);
+    if (e) await sendLeadSequenceEmail(lead, 'partner', step, e.subject, e.text);
+  }
+}
+
 // Hourly scheduler. Task 5 ships the machinery; Tasks 6/7 register their
 // sequences. Each runner must use the guarded senders so email_log applies.
-const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture];
+const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture, runPartnerNurture];
 
 async function runScheduledEmails() {
   for (const runner of SEQUENCE_RUNNERS) {
@@ -464,6 +565,8 @@ module.exports = {
   runTrialSequence,
   startQuizNurture,
   runQuizNurture,
+  startPartnerNurture,
+  runPartnerNurture,
   brainresetPdfEmail,
   sendLeadSequenceEmail,
   runScheduledEmails,

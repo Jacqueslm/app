@@ -307,9 +307,17 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   if (!EMAIL_RE.test(addr)) {
     return res.status(400).json({ error: 'Enter a valid email address.' });
   }
-  // 'for-her' is the partner pages: she gets the PDF she asked for and nothing
-  // else - the quiz nurture is written in his voice and never goes to her.
-  const src = source === 'brainreset' ? 'brainreset' : source === 'for-her' ? 'for-her' : 'quiz';
+  // 'for-her' is the older partner-page capture: she gets the PDF she asked for
+  // and nothing else. 'partner' (added 13 Aug) is the real partner sequence -
+  // five emails written to the person who LOVES somebody with a habit. Both are
+  // kept away from the quiz nurture, which is written in his voice to the person
+  // struggling and would land badly on her.
+  // Anything unrecognised still collapses to 'quiz', so a new page cannot start
+  // sending her his emails by forgetting to declare itself.
+  const src = source === 'brainreset' ? 'brainreset'
+    : source === 'for-her' ? 'for-her'
+    : source === 'partner' ? 'partner'
+    : 'quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
   const cleanUtm = readUtm(req.body);
 
@@ -325,13 +333,16 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
     }
-    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : 'Check your email — the PDF is on the way.' });
+    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : src === 'partner' ? "You're all set." : 'Check your email — the PDF is on the way.' });
   }
 
   const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
   const lead = db.getLeadById(leadId);
   if (src === 'quiz') {
     emailer.startQuizNurture(lead).catch(() => {});
+  } else if (src === 'partner') {
+    // Her day 1 goes immediately; the hourly runner picks up days 2-5.
+    emailer.startPartnerNurture(lead).catch(() => {});
   } else {
     if (src === 'brainreset') {
       // Brainreset leads skip day 1 (it restates a quiz result they don't have):
@@ -343,7 +354,7 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
     const pdf = emailer.brainresetPdfEmail();
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
-  res.json({ ok: true, message: src === 'quiz' ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
+  res.json({ ok: true, message: (src === 'quiz' || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
 const loginLimiter = rateLimit({

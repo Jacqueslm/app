@@ -130,6 +130,19 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
 
   <!-- Crisis resources sit before the app links on purpose: someone who needs a
        person tonight should find that before they find a signup button. -->
+
+  <section class="partner" id="get-the-five">
+    <h2>Five short emails, one a day</h2>
+    <p>Written for your side of it, not his. No day counting, no advice about how to fix him — and nothing that tells you to leave or to stay. That part is yours.</p>
+    <p class="lead">Day one is called "You're not imagining it."</p>
+    <form id="p5-form" onsubmit="return p5Send(event)" style="margin-top:14px">
+      <input id="p5-email" type="email" required placeholder="you@email.com" autocomplete="email"
+        style="width:100%;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;font-size:16px;color:var(--tp);font-family:var(--f);margin-bottom:10px">
+      <button class="btn" type="submit" id="p5-btn" style="margin-bottom:8px">Send me the five</button>
+    </form>
+    <p id="p5-note" style="font-size:12.5px;color:var(--tm);text-align:center;margin:0">One a day for five days, then I leave you alone. Unsubscribe in every one.</p>
+  </section>
+
   <section class="crisis" id="crisis">
     <h2>If tonight is worse than that</h2>
     <p>If you're in crisis, or you've had thoughts of hurting yourself, please talk to a person tonight — not an app. Call or text <a href="tel:988">988</a> (US), any hour, free and confidential.</p>
@@ -157,5 +170,31 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
 
   <div class="foot">Turn Someday Into Day One</div>
 </div>
+<script>
+// The partner sequence. source:'partner' matters - the server routes anything
+// it doesn't recognise into the quiz nurture, which is written in Jacques's
+// voice to the person struggling and must never reach her.
+async function p5Send(ev){
+  ev.preventDefault();
+  var em=(document.getElementById('p5-email').value||'').trim();
+  var note=document.getElementById('p5-note');
+  var btn=document.getElementById('p5-btn');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){note.textContent="That email doesn't look right — check it and try again.";return false;}
+  btn.disabled=true;btn.textContent='Sending…';
+  try{
+    var utm=null;try{utm=JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){}
+    var r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:em,source:'partner',utm:utm})});
+    var d=await r.json().catch(function(){return {};});
+    if(!r.ok){note.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send me the five';return false;}
+    document.getElementById('p5-form').innerHTML='<div style="font-size:14.5px;color:var(--green);text-align:center;padding:8px 0">Day one is on its way. ✓</div>';
+    note.textContent='Check your inbox — and your spam folder, just in case.';
+  }catch(e){
+    note.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send me the five';
+  }
+  return false;
+}
+</script>
 </body>
 </html>

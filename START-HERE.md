@@ -153,8 +153,10 @@ He walked the whole app on his phone and dictated a list; it lives triaged in
 - **v5.2.0:** **"Do this together" is a real 30-day couples program** with
   progression (`S.togetherDone`), the six old cards kept as anytime exercises —
   and the **supporter track grew days 31-35, the boundary course** (why, what,
-  against who, how to hold it, when it's crossed). New lessons speak through
-  phone TTS until MP3s are generated. No Data safety change, no Play impact.
+  against who, how to hold it, when it's crossed). **All 35 lessons have real
+  MP3s in all five voices** — generated in-session with the Piper pipeline,
+  audio pushed to the `lesson-audio` branch (c235a4c), manifest shipped, CDN
+  spot-checked. No Data safety change, no Play impact.
 
 **Still open from his list:** notifications not arriving on his phone — needs
 him present (per-device subscription, Android permission, battery optimization,

@@ -170,3 +170,65 @@ Android 13+ can prompt for permission natively. Bump `appVersionCode`,
 `bubblewrap build`, re-upload. Server and web code need no changes — the whole
 push pipeline verified working this session (subscription valid, VAPID stable,
 scheduler correct, test push accepted by the push service).
+
+---
+
+## Studio effects — what the market actually searches for (Semrush, 13 Aug 2026)
+
+Pulled live before building, so the effect list follows demand instead of
+guesses. **The lesson in the numbers: the demand is in LOOKS and TEMPLATES, not
+in exotic transforms.**
+
+| Term | Vol/mo | KD | Read |
+|---|---|---|---|
+| ai video generator | 165,000 | 96 | The category's centre of gravity — and unwinnable |
+| capcut templates | 22,200 | 27 | **The one to study.** Huge, and difficulty 27 |
+| royalty free music | 40,500 | 75 | Adjacent, already served by Suno import |
+| video editing software free | 9,900 | 90 | What Studio IS — too hard as a term |
+| caption generator | 6,600 | 74 | Studio already does this, free |
+| free stock video | 5,400 | 91 | Pexels lane, already wired in |
+| glitch effect | 4,400 | 39 | Studio has it |
+| photo to video ai | 4,400 | 60 | Ken Burns + fal, already the core loop |
+| free luts | 2,900 | 45 | **Colour presets are a real, gettable demand** |
+| lower thirds | 2,900 | 41 | Not built — a genuine gap |
+| subtitle generator | 2,400 | 60 | Built |
+| vhs / film grain / light leaks | 1,600 each | 30-44 | All three built or trivially buildable |
+| tiktok video editor | 1,900 | 51 | Positioning term |
+| text animation | 1,300 | 46 | Not built — gap |
+| motion graphics templates | 1,000 | 37 | Template demand again |
+| particle effects | 590 | 43 | Overlay assets needed |
+| velocity edit | 320 | 31 | Built b0847 |
+| 3d text effect | 260 | 30 | Not built |
+| color grading presets | 140 | **19** | Lowest difficulty here. Studio has 20+ looks already |
+
+**What this says to build next, in order:**
+1. **More templates, not more effects.** `capcut templates` at 22,200/mo and KD
+   27 dwarfs every individual effect term. Studio's Dynamics templates are the
+   right shape — there just need to be more of them, and named for occasions.
+2. **Colour/LUT presets as a named feature.** `free luts` (2,900) + `color
+   grading presets` (140, KD 19) + the individual look terms. Studio already
+   HAS the grades; they're just not presented as a preset library.
+3. **Lower thirds and text animation** (2,900 + 1,300) are the biggest genuine
+   feature gaps — neither exists in Studio today.
+4. Particle/overlay effects (smoke, light leaks, dust) want real overlay assets
+   rather than filters. Free sources exist (Pexels has overlay clips); this is
+   an asset-sourcing job, not a coding one.
+
+### Built b0847 off Jacques's list (all pure ffmpeg, all free, all render-tested)
+Looks: comic, nightclub, nature, neon, infrared, sepia, smoke, fog.
+Transform: morph, ripple, mirror, kaleidoscope.
+Speed: slow ×2, slow ×4, fast ×2, fast ×4, velocity ramp.
+Appear: disappear+return, blink, materialize.
+**Every one was rendered through real ffmpeg before shipping — four failed on
+the first pass** (blend opacity and gblur sigma reject expressions; a fade-out
+needs a real start time) and were rewritten or dropped rather than shipped.
+
+### Still on his list, NOT built, and why
+- **Multi-angle "whole film crew" / POV coverage** — needs either several real
+  generations of the same moment (fal, costs money — Studio's `/coverage`
+  route already does exactly this) or a video model. Not a filter. The honest
+  answer is that `/coverage` IS this feature and it isn't free.
+- **True morph between two different images** — needs optical flow or a model.
+  What shipped is a transformation of one image, and is named "Transform" so it
+  doesn't over-promise.
+- **Layers** — Studio has overlays; a real layer stack is a much bigger job.

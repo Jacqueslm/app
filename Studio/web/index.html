@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0846</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0847</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -5842,7 +5842,10 @@ async function addToSeq(asset, opts) {
 // active drag at a time; only the ⠿ handle starts it so normal list
 // scrolling on a phone still works everywhere else on the row.
 let seqDrag = null;
-function seqDragStart(e, i, row) {
+// The timeline and Quick Video are both lists of .seq-item rows, so one drag
+// implementation serves both - pass the array being reordered and how to
+// redraw it. Defaults keep the timeline's original call working unchanged.
+function seqDragStart(e, i, row, arr, redraw, onBefore) {
   e.preventDefault();
   const handle = e.currentTarget;
   handle.setPointerCapture(e.pointerId);
@@ -5869,11 +5872,12 @@ function seqDragStart(e, i, row) {
     const { fromIndex, overIndex } = seqDrag;
     seqDrag = null;
     if (overIndex !== fromIndex) {
-      snapSeq();
-      const [moved] = st.seq.splice(fromIndex, 1);
-      st.seq.splice(overIndex, 0, moved);
+      if (onBefore) onBefore(); else snapSeq();
+      const list = arr || st.seq;
+      const [moved] = list.splice(fromIndex, 1);
+      list.splice(overIndex, 0, moved);
     }
-    renderSeq();
+    (redraw || renderSeq)();
   };
   document.addEventListener('pointermove', onMove);
   document.addEventListener('pointerup', onUp);
@@ -8198,13 +8202,28 @@ const QK_FX = [
   ['none', 'No effect'],
   ['cinematic', '🎞 Cinematic'], ['warm', '🔆 Warm'], ['cool', '❄ Cool'],
   ['vibrant', '🌈 Vibrant'], ['faded', '📼 Faded film'], ['bw', '⬛ Black & white'],
-  ['noir', '🕶 Noir'],
+  ['noir', '🕶 Noir'], ['sepia', '🟤 Sepia'],
   ['grain', '🎬 Film grain'], ['vhs', '📺 VHS'], ['vignette', '🔲 Vignette'],
   ['dream', '💭 Dream glow'], ['bloom', '✨ Bloom'],
+  // b0847 — looks
+  ['comic', '💥 Comic book'], ['nightclub', '🪩 Nightclub'], ['nature', '🌿 Nature'],
+  ['neon', '🌆 Neon'], ['infrared', '🌡 Infrared'],
+  ['smoke', '🌫 Smoke'], ['fog', '🌁 Fog'],
+  // b0847 — transformation
+  ['morph', '🌀 Transform'], ['ripple', '🌊 Ripple'],
+  ['mirror_x', '🪞 Mirror'], ['kaleido', '🔮 Kaleidoscope'],
+  // b0847 — speed
+  ['slowmo', '🐢 Slow motion'], ['slowmo_x4', '🐢 Slow motion ×4'],
+  ['fastmo', '🐇 Fast motion'], ['fastmo_x4', '🐇 Fast motion ×4'],
+  ['velocity', '⚡ Velocity ramp'],
+  // b0847 — appear / disappear
+  ['vanish', '👻 Disappear + return'], ['blink', '⚫ Blink'], ['materialize', '🪄 Materialize'],
+  // energy
   ['punch', '👊 Zoom punch'], ['pulse', '💓 Pulse'], ['shake', '📳 Shake'],
   ['whip', '💨 Whip in'], ['flash', '⚡ Flash'], ['glitch', '📶 Glitch'],
   ['rgb', '🔴 RGB split'], ['strobe', '🔦 Strobe'],
 ];
+
 const qk = { shots: [], format: '9:16', busy: false };
 
 // Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
@@ -8471,8 +8490,12 @@ function renderQkShots() {
         </div>
       </div>
       <div class="seq-btns">
-        <button class="q-up">↑</button><button class="q-dn">↓</button><button class="q-rm">✕</button>
+        <button class="q-handle" title="Drag to move this picture anywhere in the list">⠿</button>
+        <button class="q-up" title="Up one — hold Shift, or long-press, to send it to the top">↑</button>
+        <button class="q-dn" title="Down one — hold Shift, or long-press, to send it to the bottom">↓</button>
+        <button class="q-rm">✕</button>
       </div>`;
+    row.dataset.idx = i;
     const mv = row.querySelector('.q-move');           // absent on a video row
     if (mv) mv.onchange = (e) => { s.move = e.target.value; };
     row.querySelector('.q-fx').onchange = (e) => { s.fx = e.target.value; };
@@ -8483,8 +8506,33 @@ function renderQkShots() {
     row.querySelector('.q-pos').onchange = (e) => { s.pos = Number(e.target.value); };
     const sp = row.querySelector('.q-speed');   // absent on a video row
     if (sp) sp.onchange = (e) => { s.speed = e.target.value; };
-    row.querySelector('.q-up').onclick = () => { if (i > 0) { [qk.shots[i - 1], qk.shots[i]] = [qk.shots[i], qk.shots[i - 1]]; renderQkShots(); } };
-    row.querySelector('.q-dn').onclick = () => { if (i < qk.shots.length - 1) { [qk.shots[i + 1], qk.shots[i]] = [qk.shots[i], qk.shots[i + 1]]; renderQkShots(); } };
+    // Moving a picture used to be one arrow tap per position - fifteen taps to
+    // bring the last shot to the front. Three ways now: drag the ⠿ handle
+    // anywhere in the list, shift-click an arrow to jump to the end, or
+    // long-press an arrow to do the same on a phone.
+    row.querySelector('.q-handle').onpointerdown = (e) =>
+      seqDragStart(e, i, row, qk.shots, renderQkShots, () => {});
+    const jump = (toEnd) => {
+      const [moved] = qk.shots.splice(i, 1);
+      qk.shots.splice(toEnd ? qk.shots.length : 0, 0, moved);
+      renderQkShots();
+    };
+    const step = (delta) => {
+      const j = i + delta;
+      if (j < 0 || j >= qk.shots.length) return;
+      [qk.shots[j], qk.shots[i]] = [qk.shots[i], qk.shots[j]];
+      renderQkShots();
+    };
+    const armArrow = (sel, delta) => {
+      const b = row.querySelector(sel);
+      let held = false, timer = null;
+      b.onpointerdown = () => { held = false; timer = setTimeout(() => { held = true; jump(delta > 0); }, 500); };
+      const cancel = () => { clearTimeout(timer); };
+      b.onpointerup = cancel; b.onpointerleave = cancel; b.onpointercancel = cancel;
+      b.onclick = (e) => { if (held) { held = false; return; } if (e.shiftKey) jump(delta > 0); else step(delta); };
+    };
+    armArrow('.q-up', -1);
+    armArrow('.q-dn', 1);
     row.querySelector('.q-rm').onclick = () => { qk.shots.splice(i, 1); renderQkShots(); };
     list.appendChild(row);
   });

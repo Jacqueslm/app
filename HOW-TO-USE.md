@@ -93,6 +93,12 @@ line and puts whatever's left in the caption:
 3. 4s  drift left     That was the whole trick.
 ```
 
+- **Two optional columns, both needing their prefix:** `words safe` /
+  `words bottom` / `words top` / `words center` (and the corners) sets where
+  that shot's text sits, and `move slow` / `move medium` / `move fast` sets how
+  far the camera travels. **The prefix is required** — bare "slow" or "center"
+  appear in real captions all the time, and a line reading *"Cut the light off.
+  Slow down."* would lose its "Slow" to the column.
 - **Times can have decimals.** `1.3s`, `0.5s`, `2.5s` all work. *(Before build
   b0845 they didn't — `1.3s` came out as 3 seconds, because the row number and
   the decimal point confused each other. Fixed.)*
@@ -101,6 +107,14 @@ line and puts whatever's left in the caption:
   "Day 400" keeps its 400.
 - Remember the beat-snap note above: paste sub-second times, then **untick
   "⚡ Cut on the beat"**, or they'll be rounded straight back up.
+
+### Controlling the zoom speed
+
+Every picture row has a **move:** dropdown — **slow**, **medium** (the default)
+or **fast**. It sets how far the camera travels in the time that shot has, so
+the same 3-second push reads as a barely-there drift on slow and a real move on
+fast. Slow on a long hold is the "creeping in" look; fast on a short shot has
+punch. In a pasted shot list it's `move slow` / `move medium` / `move fast`.
 
 **The AI way (your characters star in it):**
 1. **Characters** tab → create your character, upload **6–20 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). Variety is what makes it *look like them*.
@@ -289,11 +303,15 @@ On a 1080 × 1920 video, the rule is:
 | **✅ The safe stripe** | **1150 – 1470** | **Put your captions here** — chest height, below faces, above the buttons |
 | Platform buttons | 1500 – 1920 | Never. This is their space |
 
-Studio's own captions sit in that stripe already, so the burned-in captions and
-the shorts are fine. **This matters when a video comes from somewhere else** —
-if you have a clip made elsewhere with the words along the very bottom, they
-will be covered. And a black bar at the bottom is not a fix: the buttons sit on
-top of the bar, not below it.
+**Studio's default was in that danger zone too** — corrected in b0846. Quick
+Video used to put every caption at the very bottom of the frame (93% down),
+which is under the buttons. Each shot now has a **words:** dropdown, and the
+first option, **words: lower (safe)**, sits the text at 72% — below the faces,
+above the furniture. Pick it per shot, or write `words safe` in a pasted shot
+list. The old bottom position is still there if you want it.
+
+And a black bar at the bottom is not a fix: the buttons sit on top of the bar,
+not below it.
 
 Also worth knowing: a video whose picture doesn't fill the whole 1080 × 1920
 frame — black bars top or bottom — is **not really 9:16**, even if the file

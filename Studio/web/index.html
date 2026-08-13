@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0845</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0846</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -6254,14 +6254,25 @@ function drawOverlay(specIn, W, H, canvas) {
   if (spec.bg || spec.stroke) { ctx.shadowColor = 'rgba(0,0,0,0.45)'; ctx.shadowBlur = size / 14; ctx.shadowOffsetY = size / 40; }
   else { ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = size / 7; ctx.shadowOffsetY = size / 22; }
   const m = 0.07;
-  const col = (spec.pos - 1) % 3, rowP = Math.floor((spec.pos - 1) / 3); // 1..9 grid
+  // 1..9 grid, reading top row first: 1 2 3 across the top, 4 5 6 middle,
+  // 7 8 9 along the bottom. Plus 10, the safe lower third (see below).
+  const safeLow = spec.pos === 10;
+  const posN = safeLow ? 8 : spec.pos;
+  const col = (posN - 1) % 3, rowP = Math.floor((posN - 1) / 3);
   ctx.textAlign = ['left', 'center', 'right'][col];
   ctx.textBaseline = ['top', 'middle', 'bottom'][rowP];
   const x = [W * m, W / 2, W * (1 - m)][col];
   const lines = String(spec.text || '').split('\n');
   const lh = size * 1.18;
   const blockH = lh * (lines.length - 1);
-  let y = [H * m, H / 2 - blockH / 2, H * (1 - m) - blockH][rowP];
+  // Position 10 sits the text at 72% of the height instead of 93%. TikTok,
+  // Reels and Shorts all stack their username, caption and buttons over the
+  // bottom ~20% of a vertical video, so bottom-row text (pos 7/8/9) is
+  // underneath their furniture on at least one platform. 72% clears that and
+  // still sits below faces, which are almost always in the upper half.
+  let y = safeLow
+    ? H * 0.72 - blockH
+    : [H * m, H / 2 - blockH / 2, H * (1 - m) - blockH][rowP];
   for (const line of lines) {
     if (spec.bg && line.trim()) {
       // rounded box behind the line (TikTok/CapCut look)
@@ -8264,6 +8275,19 @@ const PASTE_TRANS = [
   ['cut', 'cut'], ['hard cut', 'cut'],
 ];
 
+// Words a plan can use for the two per-shot controls. Same earliest-match
+// rule as moves and transitions, so a caption that happens to contain "slow"
+// can't be eaten - the columns come first on the line.
+const PASTE_POS = [
+  ['words safe', 10], ['words lower', 10],
+  ['words top left', 1], ['words top right', 3], ['words top', 2],
+  ['words center', 5], ['words centre', 5], ['words middle', 5],
+  ['words bottom left', 7], ['words bottom right', 9], ['words bottom', 8],
+];
+const PASTE_SPEED = [
+  ['move slow', 'slow'], ['move medium', 'medium'], ['move fast', 'fast'],
+];
+
 function parseShotLine(line) {
   let s = ` ${line} `;
   const out = {};
@@ -8320,6 +8344,16 @@ function parseShotLine(line) {
   };
   out.move = earliest(PASTE_MOVES) || undefined;
   out.transAfter = earliest(PASTE_TRANS) || undefined;
+  // Position and speed are optional columns, and both MUST be written with
+  // their prefix - "words bottom", "move slow". Bare "slow" / "center" /
+  // "low" were tried and are far too common in real captions: a line reading
+  // "Cut the light off. Slow down." lost its "Slow" to the speed column. The
+  // dropdowns in each row are labelled with exactly this wording, so the UI
+  // teaches the syntax. Read BEFORE the caption is salvaged either way.
+  const posKey = earliest(PASTE_POS);
+  if (posKey !== null && posKey !== undefined) out.pos = posKey;
+  const speedKey = earliest(PASTE_SPEED);
+  if (speedKey) out.speed = speedKey;
   // a scene/file name token like 01_indulgence or shot-3.png - useful for
   // matching a picture in the library, never wanted as on-screen words
   const n = take(/(?:^|\s)([A-Za-z0-9]+[_-][A-Za-z0-9_-]+(?:\.(?:png|jpg|jpeg|webp))?)(?=\s|$)/);
@@ -8346,7 +8380,7 @@ function parseShotList(text) {
     .filter((l) => l && !/^[-=_|+\s]+$/.test(l))
     .filter((l) => !((l.match(/\|/g) || []).length >= 2 && !/\d/.test(l)))
     .map(parseShotLine)
-    .filter((r) => r.move || r.dur || r.transAfter || r.text);
+    .filter((r) => r.move || r.dur || r.transAfter || r.text || r.pos !== undefined || r.speed);
 }
 
 // The menu used to be a fixed list with no 7 in it, so a shot list asking for
@@ -8358,6 +8392,34 @@ function parseShotList(text) {
 // drift away from the video you get.
 const TRANS_DUR = 0.5;
 const QK_DURS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 45, 60];
+// Where a shot's words sit. Values are the numeric positions drawOverlay
+// already understands (numpad layout: 7 8 9 across the top, 1 2 3 along the
+// bottom), so nothing downstream needs teaching.
+// 8 stays the default: middle-height text clears faces AND clears the
+// username/buttons every platform stacks over the bottom of a vertical video.
+const QK_POSITIONS = [
+  { v: 10, label: 'words: lower (safe)' },
+  { v: 8, label: 'words: bottom' },
+  { v: 5, label: 'words: center' },
+  { v: 2, label: 'words: top' },
+  { v: 7, label: 'words: bottom left' },
+  { v: 9, label: 'words: bottom right' },
+  { v: 1, label: 'words: top left' },
+  { v: 3, label: 'words: top right' },
+];
+// How far the camera travels in the time it has - the same 1..3 intensity the
+// manual Ken Burns card sends, named for what it does rather than a number.
+// A slow move on a short shot reads as almost still; a fast one on a long shot
+// is the "creeping in" look people mean by cinematic.
+const QK_SPEEDS = [
+  { v: 'slow', label: 'move: slow', intensity: 1 },
+  { v: 'medium', label: 'move: medium', intensity: 2 },
+  { v: 'fast', label: 'move: fast', intensity: 3 },
+];
+function qkIntensity(shot) {
+  const found = QK_SPEEDS.find((x) => x.v === (shot && shot.speed));
+  return found ? found.intensity : 2;
+}
 function qkDurations(cur) {
   const n = Number(cur);
   const all = Number.isFinite(n) && n > 0 && !QK_DURS.includes(n) ? [...QK_DURS, n] : QK_DURS;
@@ -8397,8 +8459,16 @@ function renderQkShots() {
             <option value="cut"${s.transAfter === 'cut' ? ' selected' : ''}>cut</option>
             <option value="fadeblack"${s.transAfter === 'fadeblack' ? ' selected' : ''}>black</option>
           </select>` : ''}
+          ${s.kind === 'video' ? '' : `<select class="input q-speed" title="How fast the move travels" style="width:auto;padding:5px 8px;font-size:12px">
+            ${QK_SPEEDS.map((sp) => `<option value="${sp.v}"${(s.speed || 'medium') === sp.v ? ' selected' : ''}>${sp.label}</option>`).join('')}
+          </select>`}
         </div>
-        <input class="input q-text" placeholder="words on screen (optional)" value="${escapeHtml(s.text)}" style="padding:7px 10px;font-size:12px">
+        <div style="display:flex;gap:6px;align-items:center">
+          <input class="input q-text" placeholder="words on screen (optional)" value="${escapeHtml(s.text)}" style="flex:1;padding:7px 10px;font-size:12px">
+          <select class="input q-pos" title="Where the words sit" style="width:auto;padding:7px 8px;font-size:12px">
+            ${QK_POSITIONS.map((o) => `<option value="${o.v}"${(s.pos || 8) === o.v ? ' selected' : ''}>${o.label}</option>`).join('')}
+          </select>
+        </div>
       </div>
       <div class="seq-btns">
         <button class="q-up">↑</button><button class="q-dn">↓</button><button class="q-rm">✕</button>
@@ -8410,6 +8480,9 @@ function renderQkShots() {
     const tr = row.querySelector('.q-tr');
     if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; };
     row.querySelector('.q-text').oninput = (e) => { s.text = e.target.value; };
+    row.querySelector('.q-pos').onchange = (e) => { s.pos = Number(e.target.value); };
+    const sp = row.querySelector('.q-speed');   // absent on a video row
+    if (sp) sp.onchange = (e) => { s.speed = e.target.value; };
     row.querySelector('.q-up').onclick = () => { if (i > 0) { [qk.shots[i - 1], qk.shots[i]] = [qk.shots[i], qk.shots[i - 1]]; renderQkShots(); } };
     row.querySelector('.q-dn').onclick = () => { if (i < qk.shots.length - 1) { [qk.shots[i + 1], qk.shots[i]] = [qk.shots[i], qk.shots[i + 1]]; renderQkShots(); } };
     row.querySelector('.q-rm').onclick = () => { qk.shots.splice(i, 1); renderQkShots(); };
@@ -8607,6 +8680,8 @@ if (document.getElementById('qk-paste-go')) $('#qk-paste-go').onclick = () => {
     if (r.move) s.move = r.move;
     if (r.dur) s.dur = r.dur;
     if (r.transAfter) s.transAfter = r.transAfter;
+    if (r.pos !== undefined) s.pos = r.pos;
+    if (r.speed) s.speed = r.speed;
     if (r.text) s.text = r.text;
   }
   renderQkShots();
@@ -8781,7 +8856,7 @@ $('#qk-assemble').onclick = async () => {
       btn.innerHTML = `<span class="spinner"></span>Picture ${i + 1} of ${qk.shots.length}…`;
       const { job } = await jfetch('/api/studio/kenburns', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: s.assetId, move: s.move, duration: durs[i], intensity: 2, size: currentSize() }),
+        body: JSON.stringify({ assetId: s.assetId, move: s.move, duration: durs[i], intensity: qkIntensity(s), size: currentSize() }),
       });
       const done = await pollJob(job.id, (j) => setProg('#qk-prog', ((i + j.progress / 100) / qk.shots.length) * 100));
       clipAssets.push(done.assetId);
@@ -8818,7 +8893,10 @@ $('#qk-assemble').onclick = async () => {
         const startAt = cum + 0.3;
         const endAt = Math.max(startAt + 0.5, cum + durs[i] - Math.max(0.2, td));
         st.overlays.push({
+          // the row's own position wins over the saved look, so one shot can
+          // sit high and the next low without changing everything
           ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }),
+          pos: s.pos || 8,
           text: s.text,
           start: Math.round(startAt * 10) / 10,
           end: Math.round(endAt * 10) / 10,

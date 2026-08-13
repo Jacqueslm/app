@@ -144,6 +144,25 @@ Do not call it overdue.
 `claude/vibe-code-uwxxlk`, auto-deploy on push, root dir `/TurnSomeDayIntoOneday`,
 "Wait for CI" off. The rule above is correct — this is the branch that runs.
 
+### Late 12 Aug — Jacques's phone-test list, and what shipped off it (v5.2.0)
+He walked the whole app on his phone and dictated a list; it lives triaged in
+`reference/POST-LAUNCH-BUILD-LIST.md`. Shipped the same night:
+- **v5.1.6:** voice journaling no longer cuts off at the first pause (mic is
+  now a tap-to-finish toggle), and the phone back button closes modals →
+  overlays → steps Home instead of exiting the app from anywhere.
+- **v5.2.0:** **"Do this together" is a real 30-day couples program** with
+  progression (`S.togetherDone`), the six old cards kept as anytime exercises —
+  and the **supporter track grew days 31-35, the boundary course** (why, what,
+  against who, how to hold it, when it's crossed). New lessons speak through
+  phone TTS until MP3s are generated. No Data safety change, no Play impact.
+
+**Still open from his list:** notifications not arriving on his phone — needs
+him present (per-device subscription, Android permission, battery optimization,
+then a live test push). Layout moves (Rooms/Share milestones/custom packs →
+Tools), Ask-me-anything as first-open greeter, Friendly conversation realism,
+"talk me through it" pacing, and the Rooms-as-community question (that one is
+moderation + privacy + Data safety — a decision, not a build).
+
 ### Shipped today
 - **iPhone install fixed.** `landing.html` had **no manifest link and none of
   the Apple home-screen tags** that `index.html` has always carried. Add to Home

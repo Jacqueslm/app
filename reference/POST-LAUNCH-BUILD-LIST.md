@@ -91,3 +91,64 @@ than new capability).
 ## Guardrail reminder
 None of these get built until through the 12-tester/14-day window and live.
 Items 1 and 3 also need the Data safety form checked before they go live.
+
+---
+
+## Jacques's real-phone test list — 12 Aug 2026, late
+
+He went through the whole app on his phone and dictated this. Every item below
+is his, in triage order. **Two were fixed the same night (v5.1.6):**
+
+### ✅ Fixed 12 Aug — voice journaling cut off after a few words
+`startVoiceJournal()` ran SpeechRecognition in single-phrase mode, so the
+browser stopped at the first pause and saved whatever it had — two to four
+words. Now `continuous=true`, pieces accumulate across pauses, the browser's
+own timeouts restart transparently, and the mic button becomes a red
+**"Listening… tap to finish"** stop button. Entry saves when HE ends it.
+
+### ✅ Fixed 12 Aug — phone back button exited the app from anywhere
+One press of Android back from any screen or tool and you were out. Now the
+same history-trap onboarding already used, applied app-wide
+(`armAppBackTrap`/`handleAppPopstate`): back closes the topmost open modal
+through its own close function (background-tap path, so timers and wake locks
+clean up), then closes full-screen overlays, then steps to Home — and only
+exits when you're already on Home with nothing open, where exiting is correct.
+
+### 🔴 Needs diagnosis with his phone in hand — notifications still not arriving
+Web push shipped in 5.1.0 and he still gets nothing. Can't be fixed blind.
+Next session with him: check Settings → the reminder bell is actually
+subscribed on THIS phone (the subscription is per-device); check Android
+notification permission for the browser/TWA; check the phone's battery
+optimization isn't killing delivery; send the test push from the app and watch
+the server log. If all that passes, the bug is in `server/push.js` scheduling.
+
+### Content builds (no code risk, big wins — good next-session jobs)
+- **Couples/Together section is a dead end.** "It's like you open it up and say
+  do this together, but it really goes nowhere." He wants ~**30 lessons done
+  together**, structured like every other track. This turns the deferred
+  `/together` feature into a real product surface. (Data safety review needed
+  only if it starts collecting new data — lessons alone don't.)
+- **Supporter section: 5 boundary lessons** — why set boundaries, how to
+  protect yourself, and against whom. Fits the existing supporter track
+  format; the partner-page voice already written this week is the tone.
+- **"Ask me anything" as the first-open greeter.** New users should land in a
+  guided welcome — ask me anything, full tour of how and where to start —
+  instead of finding it later. It exists; it's the placement that's wrong.
+- **Friendly's daily conversations** — day-of-week themed or fully async;
+  right now the daily conversation loops back on itself. And make Friendly's
+  check-in messages read like a person, not a template.
+
+### Layout moves (small, safe, do as one batch)
+- **Rooms → Tools.**
+- **Share milestones → Tools.**
+- **Custom packs → Tools.**
+- Possibly **open Rooms up as a real community** — his call on scope; today
+  it's stories, he's imagining people. That one is NOT small: moderation,
+  privacy ("never expose one user's data to another"), and a Data safety
+  update. Park it as a question for him, not a build.
+
+### Voice
+- **"Talk me through it" should keep talking** — the guided voice pauses out
+  too early for him. Related to the step-sequencing note in START-HERE (the
+  setTimeout chain freezes on a hidden page); real fix is driving steps off
+  the audio's own timeupdate/ended events.

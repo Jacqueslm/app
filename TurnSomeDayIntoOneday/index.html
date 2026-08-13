@@ -3620,6 +3620,58 @@ function handleOnboardingPopstate(){
   obBack(prev);
   try{history.pushState({tsidOnboarding:true},'');}catch(e){}
 }
+// ─── APP-WIDE BACK BUTTON ────────────────────────────────────────────────────
+// The phone's back button used to leave the app from anywhere - one press on
+// any screen or inside any tool and you were out. Same trap pattern onboarding
+// uses, applied to the whole app: back closes the topmost open thing, then
+// steps to Home, and only exits when you're already on Home with nothing open.
+let appBackTrapArmed=false;
+function armAppBackTrap(){
+  if(appBackTrapArmed)return;
+  appBackTrapArmed=true;
+  try{history.pushState({tsidApp:true},'');}catch(e){}
+  window.addEventListener('popstate',handleAppPopstate);
+}
+function handleAppPopstate(){
+  // Onboarding runs its own trap - stay out of its way while it's showing.
+  const ob=document.getElementById('onboarding');
+  if(ob&&ob.style.display==='flex')return;
+
+  // 1) A modal is open: close the topmost one through its own close path.
+  //    Every .sos-modal closes on a background tap, and click() on the
+  //    container IS a background tap (event.target === the container), so the
+  //    real close function runs - timers cleared, wake locks released.
+  const modals=document.querySelectorAll('.sos-modal.open');
+  if(modals.length){
+    modals[modals.length-1].click();
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
+
+  // 2) A full-screen overlay is up (these use display, not the modal class).
+  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay]];
+  for(const [id,close] of overlays){
+    const el=document.getElementById(id);
+    if(el&&el.style.display!=='none'&&el.style.display!==''){
+      try{close();}catch(e){el.style.display='none';}
+      try{history.pushState({tsidApp:true},'');}catch(e){}
+      return;
+    }
+  }
+
+  // 3) Not on Home: go Home instead of leaving.
+  const homeEl=document.getElementById(SCREEN_MAP.home);
+  if(homeEl&&!homeEl.classList.contains('on')){
+    switchTo('home');actBn('bn-home');
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
+
+  // 4) On Home with nothing open: don't re-arm. The next back press leaves
+  //    the app, which is what back should do from the front door.
+  appBackTrapArmed=false;
+}
+
 function armOnboardingBackTrap(){
   if(obBackTrapArmed)return;
   obBackTrapArmed=true;
@@ -3805,6 +3857,7 @@ function finishOnboard(){
   if(!S.currentAddiction)S.currentAddiction=S.selectedAddictions[0]||'';
   save();
   disarmOnboardingBackTrap();
+  armAppBackTrap();
   document.getElementById('onboarding').style.display='none';
   document.getElementById('main-app').style.display='flex';
   // Always land on Today - browsing in preview mode before signing up can
@@ -5111,30 +5164,78 @@ function startVoiceJournal(){
     appInfo('Voice journaling',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
     return;
   }
-  if(S.voiceJournalActive)return;
+  // Tapping the mic again while listening is how an entry ends. Before this,
+  // a second tap did nothing and the entry ended itself at the first pause.
+  if(S.voiceJournalActive){stopVoiceJournal();return;}
 
   S.voiceJournalActive=true;
-  appInfo('Voice journaling',"I'm listening — close this and speak your journal entry whenever you're ready.");
+  appInfo('Voice journaling',"I'm listening — close this and speak for as long as you like. Tap the mic again when you're finished.");
 
   const rec=new SpeechRecognition();
+  S.voiceJournalRec=rec;
   rec.lang='en-US';
+  // continuous keeps the mic open across pauses. Without it the browser stops
+  // at the first gap in speech, which cut every entry off at a few words.
+  rec.continuous=true;
   rec.interimResults=false;
 
+  // Pieces accumulate across pauses and only save when the person is done.
+  S.voiceJournalParts=[];
   rec.onresult=e=>{
-    const text=e.results[0][0].transcript;
-    saveVoiceJournal(text);
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)S.voiceJournalParts.push(e.results[i][0].transcript.trim());
+    }
+    markVoiceJourBtn(true);
   };
 
-  rec.onerror=()=>{
+  rec.onerror=ev=>{
+    // 'no-speech' just means a long quiet stretch - onend handles the restart.
+    if(ev.error==='no-speech')return;
     appInfo('Voice journaling',"Something went wrong with the microphone. Try again when you're ready.");
     S.voiceJournalActive=false;
+    S.voiceJournalRec=null;
+    markVoiceJourBtn(false);
   };
 
   rec.onend=()=>{
-    S.voiceJournalActive=false;
+    // Browsers end recognition on their own after silence or ~60s. While the
+    // person hasn't tapped stop, restart so the entry keeps going; whatever
+    // was said so far is already in voiceJournalParts.
+    if(S.voiceJournalActive&&S.voiceJournalRec===rec){
+      try{rec.start();return;}catch(e){}
+    }
+    finishVoiceJournal();
   };
 
   rec.start();
+  markVoiceJourBtn(true);
+}
+
+function stopVoiceJournal(){
+  S.voiceJournalActive=false;
+  const rec=S.voiceJournalRec;
+  S.voiceJournalRec=null;
+  if(rec){try{rec.stop();}catch(e){finishVoiceJournal();}}
+  else finishVoiceJournal();
+}
+
+function finishVoiceJournal(){
+  S.voiceJournalActive=false;
+  S.voiceJournalRec=null;
+  markVoiceJourBtn(false);
+  const text=(S.voiceJournalParts||[]).join(' ').trim();
+  S.voiceJournalParts=[];
+  if(text)saveVoiceJournal(text);
+}
+
+// The mic button doubles as the recording light: red text and a square icon
+// while listening, back to normal when not.
+function markVoiceJourBtn(on){
+  const b=document.getElementById('voiceJourBtn');
+  if(!b)return;
+  b.innerHTML=on
+    ?'<i class="ti ti-player-stop" style="font-size:18px;color:#e5484d"></i> Listening… tap to finish'
+    :'<i class="ti ti-microphone" style="font-size:18px"></i> Speak today\'s entry <span class="badge badge-acc" style="margin-left:4px">Pro</span>';
 }
 
 function saveVoiceJournal(text){
@@ -9305,7 +9406,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.1.5';
+const APP_VERSION='5.1.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -10420,6 +10521,10 @@ function showAuthGate(mode){
 function enterApp(){
   document.getElementById('preview-gate').style.display='none';
   document.getElementById('auth-gate').style.display='none';
+  armAppBackTrap();
+  // Any tap re-arms the trap after it deliberately stands down on Home (a
+  // second back on Home should exit; the next interaction restores the guard).
+  document.addEventListener('click',armAppBackTrap,true);
   updateAccountUI();
   loadLessonPacks();
   loadRoomStories();

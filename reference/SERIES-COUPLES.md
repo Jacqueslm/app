@@ -16,7 +16,7 @@ Each episode opens a door nobody else is standing in:
 |---|---|---|---|
 | 1 | Two men | Gambling | Same-sex male couples · the only addiction with no physical tell |
 | 2 | Two women | Shopping | Same-sex female couples · **880/mo, KD 41 — a Build term, not too hard** |
-| 3 | Man + woman, flipped | Food / binge | **Men with eating disorders** — 9,900/mo, biggest winnable term you own, fully ad-safe |
+| ~~3~~ | ~~Man + woman, flipped~~ | ~~Food / binge~~ | **DROPPED by Jacques, 12 Aug 2026 — do not re-pitch it.** The lane is still served by the `/how-to-stop-binge-eating` page, which is live and targets the 9,900/mo term. What was given up is the video, not the search. |
 | 4 | Young couple | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
 
 **The rule that makes the series work:** the person using is never the villain
@@ -29,15 +29,16 @@ partner recognizes and what no advert ever says.
 ## ⏳ Generate everything before 25 August
 
 Manus's advanced models are free until **25 Aug 2026**. That is the whole
-series — **40 images** — for nothing, and it does all ten at once without the
+series — **30 images** — for nothing, and it does all ten at once without the
 face drifting.
 
 **So bank all four episodes now, even the ones you won't post until October.**
 Images keep. A free window doesn't. This is the cheapest the artwork will ever
 be, and after the 25th every one of these costs money.
 
-Order to generate in, if the window gets tight: **Episode 3 first** (biggest
-term, ad-safe, the one you'd put money behind), then 2, then 4, then 1.
+Order to generate in, if the window gets tight: **Episode 2 first** (its search
+term is the one that's actually winnable — shopping addiction help, 880/mo at
+difficulty 41), then 4, then 1. **Episode 3 is dropped** — see the table above.
 
 ---
 

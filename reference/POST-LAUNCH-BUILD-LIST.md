@@ -152,3 +152,21 @@ the server log. If all that passes, the bug is in `server/push.js` scheduling.
   too early for him. Related to the step-sequencing note in START-HERE (the
   setTimeout chain freezes on a hidden page); real fix is driving steps off
   the audio's own timeupdate/ended events.
+
+### 🔔 Notifications diagnosis — RESOLVED to a cause, 13 Aug 2026 (live with his phone)
+The test push "sends" but nothing arrives, and the app never appears in
+Android's notification list. Root cause found in the repo: **the TWA was built
+with `enableNotifications: false`** (`twa/twa-manifest.json` line 15), so the
+Play app has no notification identity at all — web push can only surface
+through **Chrome**, and on his phone Chrome's own notification/battery settings
+were the wall. The "reminder" he saw on opening the app was the in-app banner,
+not a push.
+
+**Post-launch task (needs a new .aab — do NOT do before production approval):**
+rebuild the shell with `enableNotifications: true` so notifications are
+delegated to the app itself — they'd then say "Turn Someday Into Day One"
+instead of "Chrome", the app appears in the phone's notification settings, and
+Android 13+ can prompt for permission natively. Bump `appVersionCode`,
+`bubblewrap build`, re-upload. Server and web code need no changes — the whole
+push pipeline verified working this session (subscription valid, VAPID stable,
+scheduler correct, test push accepted by the push service).

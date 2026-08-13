@@ -232,3 +232,61 @@ needs a real start time) and were rewritten or dropped rather than shipped.
   What shipped is a transformation of one image, and is named "Transform" so it
   doesn't over-promise.
 - **Layers** — Studio has overlays; a real layer stack is a much bigger job.
+
+## TikTok-tool demand (Semrush, live 13 Aug 2026)
+
+Second pull, on the TikTok side of the same market. **The finding is that
+demand has moved off "effects" entirely.** Nobody is searching for more
+filters; they're searching for *what to make, and when to post it*.
+
+| Term | Vol/mo | KD | CPC | Studio's position |
+|---|---|---|---|---|
+| tiktok downloader | 450,000 | 35 | $1.24 | Skip — piracy-adjacent, wrong company to be |
+| **best time to post on tiktok** | **90,500** | **37** | $0.70 | **Studio's 📅 Post tab already IS this** |
+| tiktok watermark remover | 22,200 | 64 | $1.50 | Studio has "Remove corner mark" |
+| tiktok trends | 9,900 | 64 | $3.31 | — |
+| tiktok analytics | 9,900 | 47 | **$12.20** | — |
+| **how to go viral on tiktok** | **8,100** | **22** | $1.31 | Content, not a feature. Very winnable |
+| ai voice over | 6,600 | 71 | $1.94 | Studio has Piper TTS, free |
+| tiktok algorithm | 4,400 | 75 | — | Too hard |
+| tiktok hashtag generator | 2,900 | 44 | $0.45 | Not built — small job |
+| tiktok filters | 2,400 | 34 | $2.86 | Studio has 41 |
+| **tiktok voice generator** | **1,900** | **21** | $1.26 | **Studio does this free already** |
+| tiktok bio ideas | 1,900 | 24 | — | Content |
+| tiktok seo | 1,900 | 45 | $4.52 | — |
+| tiktok video ideas | 1,000 | 25 | $1.71 | Content |
+| hook generator | 1,000 | 40 | $2.62 | Not built |
+| tiktok script generator | 720 | 24 | $1.18 | Teleprompter is adjacent |
+| clip finder | 480 | **18** | $1.29 | Not built — long video → clips |
+| text to speech tiktok | 390 | **16** | $1.57 | Built |
+| tiktok automation | 390 | **16** | **$8.03** | Post tab is adjacent |
+| tiktok caption ideas | 320 | **16** | — | Content |
+| **tiktok hooks** | 260 | **21** | **$9.64** | Highest CPC per unit of difficulty here |
+| faceless tiktok | 210 | 24 | $3.23 | Studio's whole storyboard flow |
+| viral hook | 90 | 17 | $4.07 | — |
+| b roll ideas | 90 | **2** | — | Pexels is wired in |
+
+**Terms with effectively zero demand — stop building for these:** subtitles for
+tiktok (20), burned in captions (30), caption styles (40), karaoke captions
+(30), word by word captions (20), stock footage for tiktok (20), podcast to
+clips (20), auto clip generator (20), tiktok video editor app (40).
+
+### What this says
+
+1. **"Best time to post" is the giant: 90,500/mo at difficulty 37.** Studio's
+   Post tab schedules but doesn't *advise*. A best-time recommendation — even a
+   simple one built from his own /admin/stats and posting history — is the
+   single highest-value thing that could be added to Studio.
+2. **The money is in hooks and ideas, not effects.** `tiktok hooks` carries a
+   **$9.64 CPC** at difficulty 21, `tiktok automation` $8.03 at 16, `tiktok
+   content calendar` $10.69 at 25. Advertisers pay that because those searchers
+   convert. Studio has a Crew/Director that could generate hooks.
+3. **Two features Studio already has are searched for by name** and never
+   presented as such: the corner-mark remover (22,200) and the free voice
+   generator (1,900 at KD 21, plus 390 at KD 16).
+4. **`clip finder` (480, KD 18)** — long video → short clips — is the clearest
+   unbuilt feature with real demand and low difficulty.
+
+**Deliberately not recommended:** `tiktok downloader`, despite 450,000 searches
+a month. Downloading other people's videos is the wrong business for a company
+whose whole pitch is honesty, and it would put the Play Store listing at risk.

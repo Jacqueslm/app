@@ -11,6 +11,7 @@
 // working without knowing this file exists.
 
 const db = require('./db');
+const analytics = require('./analytics');
 
 // Product IDs are configured in each store's console and mapped here rather
 // than parsed, so a malformed or unknown ID can never be coerced into a plan.
@@ -205,6 +206,11 @@ async function redeemPurchase({ userId, source, productId, purchaseToken }) {
     productId, purchaseToken, recurring: mapping.recurring,
   });
 
+  // Re-verifying the same token on a second device must not double-count the
+  // conversion - only the transition from unpaid to paid fires the goal.
+  const before = db.getUserById(userId);
+  const wasPaid = before && before.plan !== 'free' && before.subscription_status === 'active';
+
   db.recordStorePurchase(userId, {
     source,
     plan: mapping.plan,
@@ -213,6 +219,8 @@ async function redeemPurchase({ userId, source, productId, purchaseToken }) {
     subscriptionStatus: result.subscriptionStatus,
     currentPeriodEnd: result.currentPeriodEnd,
   });
+
+  if (!wasPaid) analytics.purchase(mapping.plan);
 
   return { plan: mapping.plan, currentPeriodEnd: result.currentPeriodEnd };
 }

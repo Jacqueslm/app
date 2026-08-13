@@ -55,6 +55,27 @@ fetch('/api/admin/stats').then(async r=>{
       .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
     '<div class="note">Paid counts Stripe status <code>active</code> only. Trialing is shown separately — a trial that has not converted is not revenue.</div>';
 
+  // Funnel and retention. Both deliberately print "—" rather than a percentage
+  // until the sample is big enough to mean anything: one paying customer out of
+  // three is not "33% conversion", and a number that precise invites decisions
+  // the data cannot support.
+  if(d.funnel){
+    const f=d.funnel, pc=v=>v===null||v===undefined?'—':v+'%';
+    h+='<h2>Funnel</h2><div class="cards">'+
+      [['Leads',f.leads],['Signups',f.signups],['Trials',f.trial_starts],['Paid',f.paid]]
+        .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+
+      [['Lead → signup',f.lead_to_signup],['Signup → trial',f.signup_to_trial],['Trial → paid',f.trial_to_paid]]
+        .map(([l,v])=>`<div class="card"><div class="n">${esc(pc(v))}</div><div class="l">${esc(l)}</div></div>`).join('')+
+      '</div><div class="note">Rates appear once there are at least '+esc(f.min_sample)+' in the denominator. <b>Trial → paid is the number that decides whether to make more content or fix the product.</b></div>';
+  }
+  if(d.retention){
+    const r=d.retention, cell=x=>x.pct===null?`— <span style="color:#7e86b8">(${esc(x.kept)}/${esc(x.eligible)})</span>`:`${esc(x.pct)}% <span style="color:#7e86b8">(${esc(x.kept)}/${esc(x.eligible)})</span>`;
+    h+='<h2>Retention</h2><div class="cards">'+
+      [['Day 1',r.d1],['Day 7',r.d7],['Day 30',r.d30]]
+        .map(([l,x])=>`<div class="card"><div class="n" style="font-size:17px">${cell(x)}</div><div class="l">${esc(l)} — still active</div></div>`).join('')+
+      '</div><div class="note">Of the accounts old enough to reach each day, how many were still doing something in the app by then. Anchored to each person\'s own start date, so a new cohort cannot dilute Day 30. Shown once '+esc(r.min_sample)+' accounts are eligible.</div>';
+  }
+
   const srcCols=[{key:'utm_source',label:'Source'},{key:'signups',label:'Signups',n:1},{key:'trial_starts',label:'Trials',n:1},{key:'paid',label:'Paid',n:1},{key:'leads',label:'Leads',n:1}];
   h+='<h2>By UTM source</h2>'+table(srcCols,d.by_utm_source,{
     utm_source:'TOTAL',signups:sum(d.by_utm_source,'signups'),trial_starts:sum(d.by_utm_source,'trial_starts'),

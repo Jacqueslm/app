@@ -534,9 +534,73 @@ async function runPartnerNurture() {
   }
 }
 
+// ---- Win-back (13 Aug 2026) ------------------------------------------------
+// The gap this closes: somebody slips, stops opening the app out of shame, and
+// hears nothing from us ever again. That is the exact moment the whole product
+// is FOR, and it was the one moment with no email attached to it.
+//
+// Rules, because this one can do harm if it gets them wrong:
+//   - it is never disappointed, and it never mentions a broken streak
+//   - it never asks why they stopped
+//   - it goes out ONCE. If it doesn't land, that's the answer, and a second
+//     nudge to somebody in shame is just pressure
+//   - a person who reset and came back is active, so the quiet window is
+//     measured from their last activity, not from their start date
+const WINBACK_EMAILS = [
+  { step: 1, subject: 'Day one is still there', text: `It's Jacques. You haven't been in for a couple of weeks, and I'm not writing to ask why.
+
+I stopped and started more times than I could count over thirty-eight years, and the thing that kept me away longest was never the drink. It was the feeling of having to explain myself to somebody before I could start again.
+
+So: no explanation needed here. Nothing expired. Your account is exactly where you left it, and the counter starts whenever you say it does - today, next week, or a year from now.
+
+If you want the smallest possible step, open the app and do one lesson. Not a plan, not a commitment. One lesson, then close it.
+
+And if you're not ready, that's genuinely all right. This email is the only one you'll get about it - I'm not going to chase you. But the door doesn't lock.
+
+- Jacques
+{APP_URL}/app
+
+If you'd rather not hear from me again, the unsubscribe link is below and I won't take it personally.` },
+];
+
+function winbackEmailFor(step) {
+  const e = WINBACK_EMAILS.find((x) => x.step === step);
+  if (!e) return null;
+  return { subject: e.subject, text: e.text.split('{APP_URL}').join(APP_URL) };
+}
+
+// Quiet for 14+ days, but with a real history behind them (someone who signed
+// up and never started has nothing to come back TO - they get the trial
+// sequence instead, and a win-back would just be a second cold pitch).
+const WINBACK_QUIET_DAYS = 14;
+const WINBACK_MAX_QUIET_DAYS = 120; // beyond this it reads as a cold email, not a welcome back
+
+async function runWinbackSequence() {
+  let rows = [];
+  try { rows = db.getUsersWithState(); } catch (_) { return; }
+  for (const row of rows) {
+    let st = null;
+    try { st = JSON.parse(row.state_json); } catch (_) { continue; }
+    if (!st || !st.startDate) continue;
+    if (st.remindersEnabled === false) continue; // they asked for quiet; honour it here too
+    const log = Array.isArray(st.activityLog) ? st.activityLog : [];
+    if (!log.length) continue;
+    const last = log.reduce((m, a) => {
+      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
+      return t > m ? t : m;
+    }, 0);
+    if (!last) continue;
+    const quietDays = Math.floor((Date.now() - last) / 86400000);
+    if (quietDays < WINBACK_QUIET_DAYS || quietDays > WINBACK_MAX_QUIET_DAYS) continue;
+    const e = winbackEmailFor(1);
+    // sendSequenceEmail's email_log guard makes this send-once by construction.
+    await sendSequenceEmail({ id: row.id, email: row.email }, 'winback', 1, e.subject, e.text);
+  }
+}
+
 // Hourly scheduler. Task 5 ships the machinery; Tasks 6/7 register their
 // sequences. Each runner must use the guarded senders so email_log applies.
-const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture, runPartnerNurture];
+const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture, runPartnerNurture, runWinbackSequence];
 
 async function runScheduledEmails() {
   for (const runner of SEQUENCE_RUNNERS) {
@@ -567,6 +631,7 @@ module.exports = {
   runQuizNurture,
   startPartnerNurture,
   runPartnerNurture,
+  runWinbackSequence,
   brainresetPdfEmail,
   sendLeadSequenceEmail,
   runScheduledEmails,

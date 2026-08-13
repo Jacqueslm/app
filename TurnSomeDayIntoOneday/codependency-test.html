@@ -88,6 +88,13 @@ h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
     <p class="sub" id="res-body" style="margin-bottom:4px"></p>
     <p class="sub" id="res-close"></p>
     <div id="res-pro" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:14px"></div>
+    <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:6px 0 14px;text-align:left" id="p5-box">
+      <div style="font-size:15px;font-weight:650;margin-bottom:4px">Five short emails, one a day?</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Written for your side of it. No day counting, no advice about fixing him, and nothing telling you to leave or to stay.</div>
+      <input type="email" id="p5-email" placeholder="you@email.com" autocomplete="email">
+      <button class="btn" style="margin-top:0" id="p5-btn" onclick="p5Send()">Send me the five</button>
+      <div style="font-size:11.5px;color:var(--tm);margin-top:8px;text-align:center" id="p5-note">Only your email leaves this device — never your answers.</div>
+    </div>
     <a class="btn" href="/for-her">Show me the part built for me</a>
     <a class="btn calm" href="/codependency">Read what codependency actually means</a>
     <button class="btn ghost" onclick="location.reload()">Retake the check-in</button>
@@ -138,6 +145,28 @@ function answer(i){
   if(qi<QUESTIONS.length){renderQ();}else{showResult();}
 }
 function qBack(){ if(qi<=0)return; qi--; score-=answerScores[qi]||0; renderQ(); }
+
+async function p5Send(){
+  var em=(document.getElementById('p5-email').value||'').trim();
+  var note=document.getElementById('p5-note');
+  var btn=document.getElementById('p5-btn');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){note.textContent="That email doesn't look right — check it and try again.";return;}
+  btn.disabled=true;btn.textContent='Sending…';
+  try{
+    var utm=null;try{utm=JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){}
+    // source:'partner' joins the single partner sequence. Anything the server
+    // does not recognise falls into the quiz nurture, which is written in his
+    // voice to the person struggling and must never reach her.
+    var r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:em,source:'partner',utm:utm})});
+    var d=await r.json().catch(function(){return {};});
+    if(!r.ok){note.textContent=d.error||'Something went wrong — try again.';btn.disabled=false;btn.textContent='Send me the five';return;}
+    document.getElementById('p5-box').innerHTML='<div style="font-size:14px;color:var(--green);text-align:center;padding:6px 0">Day one is on its way. ✓</div>';
+  }catch(e){
+    note.textContent='Could not reach the server — check your connection.';
+    btn.disabled=false;btn.textContent='Send me the five';
+  }
+}
 
 function showResult(){
   // Max score is 24. Gentle at the bottom, honest at the top, and never a label.

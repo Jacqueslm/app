@@ -2773,6 +2773,40 @@ router.post('/transform', async (req, res) => {
   const enc = ['-c:v', 'libx264', '-preset', 'fast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'];
 
   try {
+    // COLOUR PRESET (b0848) — one-tap grade for a picture or clip. Pictures
+    // stay pictures (the whole point is a graded still you can then move),
+    // clips stay clips and keep their sound. Free: it is a filter, nothing
+    // is generated. Mirrors the mirror/slowmo ops exactly - images finish
+    // inline, video goes through the job queue so long clips report progress.
+    if (op === 'grade') {
+      const key = COLOR_PRESETS[req.body.preset] ? req.body.preset : 'teal_orange';
+      const preset = COLOR_PRESETS[key];
+      if (!preset.vf) return res.status(400).json({ error: 'That preset leaves the picture unchanged.' });
+      const label = `${src.label} · ${preset.label}`;
+      const meta = { ...carry, transform: 'grade', preset: key };
+      if (src.kind === 'image') {
+        const ext = path.extname(src.filename).toLowerCase() || '.png';
+        const outFile = newFilename(req.userId, ext);
+        const proc = spawn(ffmpegBin(), ['-y', '-i', srcPath, '-vf', preset.vf, '-frames:v', '1', mediaPath(outFile)]);
+        proc.on('error', (e) => res.status(500).json({ error: `ffmpeg: ${e.message}` }));
+        proc.on('close', (code) => {
+          if (code !== 0 || !fs.existsSync(mediaPath(outFile))) return res.status(500).json({ error: 'Could not apply that colour preset.' });
+          const id = db.createAsset(req.userId, 'image', label, outFile, src.character_id || null, meta);
+          res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+        });
+        return;
+      }
+      if (src.kind === 'video') {
+        const dur = srcMeta.duration || await probeMediaDuration(srcPath);
+        const hasAudio = await probeHasAudio(srcPath);
+        const outFile = newFilename(req.userId, '.mp4');
+        const args = ['-i', srcPath, '-vf', preset.vf, ...(hasAudio ? ['-c:a', 'copy'] : ['-an']), ...enc];
+        const job = spawnFfmpegJob(req.userId, args, outFile, dur, label, meta);
+        return res.status(202).json({ job: jobJson(job) });
+      }
+      return res.status(400).json({ error: 'Colour presets work on pictures and clips.' });
+    }
+
     // MIRROR — image or video, horizontal flip
     if (op === 'mirror') {
       if (src.kind === 'image') {
@@ -2967,6 +3001,9 @@ router.post('/transform', async (req, res) => {
       const seg = (from, to) => `enable='between(mod(t,${c}),${from * b},${to * b})'`;
       // A short white pop at the top of every beat - the "hit" that sells the cut.
       const flash = `eq=brightness='if(lt(mod(t,${b}),0.09),0.38,0)'`;
+      // Length is needed by the templates that ramp across the whole clip,
+      // so it is resolved before the table rather than after it.
+      const dur = isImg ? secs : (srcMeta.duration || await probeMediaDuration(srcPath));
       const DYNAMICS = {
         beatmix: { label: 'Beat Mix', vf: [
           `hue=s=0:${seg(1, 2)}`, `eq=contrast=1.25:${seg(1, 2)}`,
@@ -2985,8 +3022,42 @@ router.post('/transform', async (req, res) => {
         shake: { label: 'Hype Shake', vf: [`crop=w='floor(iw*0.94/2)*2':h='floor(ih*0.94/2)*2':x='(iw-ow)/2+(iw*0.02)*sin(t*19)':y='(ih-oh)/2+(ih*0.015)*cos(t*23)'`, flash].join(',') },
         mirror: { label: 'Mirror World', fc: "[0:v]crop=w='floor(iw/2)':h=ih:x=0:y=0,split[l1][l2];[l2]hflip[r];[l1][r]hstack[v]" },
         countdown: { label: '3-2-1 Opener' },
+
+        // ── b0848. `capcut templates` is 22,200 searches a month at difficulty
+        // 27 - bigger than every individual effect term put together - so the
+        // next ten are templates rather than more filters. Named for the
+        // occasion you'd reach for them, not for what they do technically.
+        // MOMENT — a held breath: desaturates and darkens toward the middle,
+        // then blooms back. For the line you want people to sit with.
+        moment: { label: 'The Moment', fc:
+          `[0:v]format=gbrp,split[ma][mb];[mb]gblur=sigma=14[mg];[ma][mg]blend=all_mode=screen:all_opacity=0.30,`
+          + `eq=saturation='0.55+0.45*abs(2*t/${dur}-1)':eval=frame:contrast=1.12,vignette=PI/4.5,format=yuv420p[v]` },
+        // CONFESSION — quiet, close, slightly cold. The look for a talking head
+        // saying something hard.
+        confession: { label: 'Confession', vf: "eq=saturation=0.72:contrast=1.14:brightness=-0.02,colortemperature=temperature=7200,vignette=PI/4" },
+        // MEMORY — a warm faded past. Sits under a voiceover about before.
+        memory: { label: 'Memory', vf: "curves=all='0/0.10 0.5/0.52 1/0.92',eq=saturation=0.68,colortemperature=temperature=5200,noise=alls=9:allf=t,vignette=PI/5" },
+        // MORNING AFTER — flat, grey, over-bright. The hangxiety look.
+        morningafter: { label: 'Morning After', vf: "eq=saturation=0.6:contrast=0.92:brightness=0.07,colortemperature=temperature=7800,gblur=sigma=1.4" },
+        // NIGHT DRIVE — deep blue, high contrast, lights blooming.
+        nightdrive: { label: 'Night Drive', fc:
+          "[0:v]format=gbrp,split[na][nb];[nb]curves=all='0/0 0.62/0.85 1/1',gblur=sigma=20[ng];[na][ng]blend=all_mode=screen:all_opacity=0.38,"
+          + "colorbalance=bs=0.20:bh=0.12:rs=-0.06,eq=contrast=1.28:saturation=1.15,format=yuv420p[v]" },
+        // COUNTDOWN PULSE — a slow throb on the beat. Under a list or a build.
+        throb: { label: 'Slow Throb', vf: [`eq=brightness='0.05*sin(t*${(6.28318 / (b * 2)).toFixed(4)})':contrast=1.08`, `vignette='PI/4+0.12*sin(t*${(6.28318 / (b * 2)).toFixed(4)})':eval=frame`].join(',') },
+        // RECEIPT — hard, clinical, blue-white. For numbers and evidence shots.
+        receipt: { label: 'The Receipt', vf: "eq=saturation=0.35:contrast=1.35:brightness=0.04,colortemperature=temperature=8600,unsharp=5:5:0.9:5:5:0" },
+        // FIRST LIGHT — cold open warming through to gold. An ending shot.
+        firstlight: { label: 'First Light', vf: `colortemperature=temperature=6100,eq=saturation='0.72+0.42*min(1,t/${dur})':eval=frame:contrast='1.02+0.08*min(1,t/${dur})'` },
+        // DOORWAY — vignette closing slowly inward. Endings, or a title card.
+        doorway: { label: 'Doorway', vf: `vignette=a='PI/5+0.55*min(1,t/${dur})':eval=frame,eq=contrast=1.1` },
+        // HANDHELD — a documentary wobble with a touch of grain. Makes a still
+        // picture feel filmed rather than posed.
+        handheld: { label: 'Handheld', vf: [
+          `crop=w='floor(iw*0.96/2)*2':h='floor(ih*0.96/2)*2':x='(iw-ow)/2+(iw*0.012)*sin(t*2.7)+(iw*0.006)*sin(t*5.1)':y='(ih-oh)/2+(ih*0.010)*cos(t*2.1)+(ih*0.005)*cos(t*4.3)'`,
+          'noise=alls=6:allf=t', 'eq=contrast=1.04',
+        ].join(',') },
       };
-      const dur = isImg ? secs : (srcMeta.duration || await probeMediaDuration(srcPath));
       // TIME MACHINE - first half plays as a worn old photo/film (sepia, grain,
       // vignette, faded), a white flash hits at the middle, and the second half
       // comes back sharper and more vibrant than the original. The switch point
@@ -3678,6 +3749,27 @@ const CLIP_EFFECTS = {
   ripple:    () => "geq=lum='p(X+4*sin(Y/22+T*2.2),Y)':cb='p(X+4*sin(Y/22+T*2.2),Y)':cr='p(X+4*sin(Y/22+T*2.2),Y)'",
   mirror_x:  () => 'split[ma][mb];[mb]hflip[mf];[ma][mf]blend=all_mode=average:all_opacity=1',
   kaleido:   (W, H) => `split[ka][kb];[kb]hflip[kf];[ka][kf]hstack=inputs=2,scale=${W}:${H}`,
+};
+
+// ── Colour presets (b0848) ───────────────────────────────────────────────────
+// `free luts` is 2,900 searches a month and `color grading presets` sits at
+// difficulty 19 - the lowest number in the whole research pull. Studio already
+// had these grades scattered through CLIP_EFFECTS; presenting them as a named
+// preset library is the feature, not new code. Each one is a still-image or
+// clip grade applied in one tap, with a plain-English name.
+const COLOR_PRESETS = {
+  none:        { label: 'Original', vf: '' },
+  teal_orange: { label: 'Teal & Orange', vf: "curves=r='0/0.02 0.5/0.55 1/1':b='0/0.06 0.5/0.46 1/0.94',eq=contrast=1.14:saturation=1.18" },
+  bleach:      { label: 'Bleach Bypass', vf: "eq=saturation=0.45:contrast=1.4,curves=all='0/0.06 0.5/0.5 1/0.96',unsharp=5:5:0.7:5:5:0" },
+  moody_blue:  { label: 'Moody Blue', vf: 'colorbalance=bs=0.18:bh=0.08:rs=-0.05,eq=contrast=1.22:saturation=0.85:brightness=-0.03' },
+  golden_hour: { label: 'Golden Hour', vf: 'colortemperature=temperature=4200,eq=saturation=1.2:contrast=1.06,curves=all=\'0/0.04 0.5/0.54 1/1\'' },
+  soft_pastel: { label: 'Soft Pastel', vf: "curves=all='0/0.12 0.5/0.55 1/0.95',eq=saturation=0.9:contrast=0.94" },
+  crushed:     { label: 'Crushed Blacks', vf: "curves=all='0/0 0.25/0.12 0.5/0.5 1/1',eq=contrast=1.25" },
+  kodak:       { label: 'Kodak Warm', vf: "colortemperature=temperature=4800,curves=r='0/0.04 0.5/0.54 1/1':b='0/0.02 0.5/0.47 1/0.96',eq=saturation=1.1" },
+  fuji:        { label: 'Fuji Green', vf: 'colorbalance=gm=0.12:gs=0.06:rh=-0.04,eq=saturation=1.12:contrast=1.08' },
+  silver:      { label: 'Silver', vf: 'hue=s=0,curves=all=\'0/0.05 0.5/0.52 1/0.98\',eq=contrast=1.22' },
+  high_key:    { label: 'High Key', vf: "curves=all='0/0.18 0.5/0.62 1/1',eq=saturation=0.95:contrast=0.9" },
+  low_key:     { label: 'Low Key', vf: "curves=all='0/0 0.5/0.38 1/0.9',eq=contrast=1.3:saturation=0.9,vignette=PI/4" },
 };
 
 function effectFilter(name, W, H, fps) {

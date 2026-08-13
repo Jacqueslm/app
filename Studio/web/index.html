@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0847</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0848</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -1776,6 +1776,7 @@ const st = {
   singTarget: null,     // assetId with the lip-sync panel open
   lookTarget: null,     // assetId with the look-theme panel open
   dynTarget: null,      // assetId with the dynamics-template panel open
+  gradeTarget: null,    // assetId with the colour-preset panel open (b0848)
   loopTarget: null,     // assetId with the free-loop panel open
   cropTarget: null,     // assetId with the crop panel open
   cutTarget: null,      // assetId with the cut panel open
@@ -4644,6 +4645,7 @@ function renderLibrary() {
     // Finish (polish / quality / audio, free)
     if (a.kind === 'video') { const pb = btn('✨ Polish my video', 'primary', (e) => freeTransform(a.id, 'polish', e.target, '✨ Polish my video'), 'finish'); pb.title = 'FREE — cinematic color grade + sharpen + loudness master in one pass. Best on your finished render.'; }
     if (a.kind === 'video') { const lb = btn('🎨 Look', '', () => { st.lookTarget = st.lookTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); lb.title = 'FREE — one-tap color themes (Dark Luxury, Neon, Cinematic, Warm, B&W, Vibrant).'; }
+    if (a.kind === 'video' || a.kind === 'image') { const gb = btn('🎨 Color preset', '', () => { st.gradeTarget = st.gradeTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); gb.title = 'FREE — twelve one-tap film grades: teal & orange, bleach bypass, golden hour, moody blue, Kodak, Fuji and more. A picture stays a picture; a clip keeps its sound.'; }
     if (a.kind === 'video' || a.kind === 'image') { const dyb = btn('🔥 Dynamics', '', () => { st.dynTarget = st.dynTarget === a.id ? null : a.id; renderLibrary(); }, 'finish'); dyb.title = 'FREE — CapCut-style beat effects: strobe hits, thermal flips, glow, shake, Time Machine, 3-2-1 opener. A picture becomes a clip; a clip keeps its sound in sync.'; }
     if (a.kind === 'image') btn('2× sharper', '', async (e) => {
       const b = e.target; b.disabled = true; b.textContent = '…';
@@ -5185,6 +5187,35 @@ function renderLibrary() {
       });
       el.querySelector('.li-meta').appendChild(panel);
     }
+    if (st.gradeTarget === a.id) {
+      const gp = document.createElement('div');
+      gp.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
+      const LUTS = [
+        ['teal_orange', '🟠 Teal & Orange'], ['bleach', '⚪ Bleach Bypass'], ['moody_blue', '🔵 Moody Blue'],
+        ['golden_hour', '🌇 Golden Hour'], ['soft_pastel', '🌸 Soft Pastel'], ['crushed', '⬛ Crushed Blacks'],
+        ['kodak', '🎞 Kodak Warm'], ['fuji', '🍃 Fuji Green'], ['silver', '⚙ Silver'],
+        ['high_key', '☀ High Key'], ['low_key', '🌑 Low Key'],
+      ];
+      gp.innerHTML = `<div class="chips">${LUTS.map(([k, l]) => `<button class="chip" data-lut="${k}">${l}</button>`).join('')}</div>
+        <p class="usage" style="margin:0">Free — a graded copy lands in your library, the original stays untouched.</p>
+        <div class="note" id="grade-note-${a.id}" style="text-align:left"></div>`;
+      gp.querySelectorAll('.chip').forEach((chip) => {
+        chip.onclick = async () => {
+          const note = gp.querySelector(`#grade-note-${a.id}`);
+          note.textContent = 'Applying…';
+          try {
+            const r = await jfetch('/api/studio/transform', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ assetId: a.id, op: 'grade', preset: chip.dataset.lut }),
+            });
+            if (r.job) await pollJob(r.job.id, (j) => { note.textContent = `Applying… ${j.progress || 0}%`; });
+            note.textContent = 'Done — check your library.';
+            await loadAssets();
+          } catch (e) { note.textContent = e.message; }
+        };
+      });
+      el.querySelector('.li-meta').appendChild(gp);
+    }
     if (st.dynTarget === a.id) {
       const panel = document.createElement('div');
       panel.style.cssText = 'display:flex;flex-direction:column;gap:6px;margin-top:6px';
@@ -5193,6 +5224,11 @@ function renderLibrary() {
         ['thermal', '🌡 Thermal'], ['glow', '✨ Glow Up'], ['trails', '👻 Echo Trails'],
         ['shake', '📳 Hype Shake'], ['mirror', '🪞 Mirror World'], ['timemachine', '⏳ Time Machine'],
         ['countdown', '🕒 3-2-1 Opener'],
+        // b0848 — named for the moment you'd use them, not the filter they run.
+        ['moment', '🫧 The Moment'], ['confession', '🕯 Confession'], ['memory', '📽 Memory'],
+        ['morningafter', '☀ Morning After'], ['nightdrive', '🌃 Night Drive'],
+        ['throb', '💗 Slow Throb'], ['receipt', '🧾 The Receipt'],
+        ['firstlight', '🌅 First Light'], ['doorway', '🚪 Doorway'], ['handheld', '🎥 Handheld'],
       ];
       const dynIsImg = a.kind === 'image';
       let dynBeat = Number(localStorage.getItem('tsid-dyn-beat')) || 2;
@@ -6260,8 +6296,10 @@ function drawOverlay(specIn, W, H, canvas) {
   const m = 0.07;
   // 1..9 grid, reading top row first: 1 2 3 across the top, 4 5 6 middle,
   // 7 8 9 along the bottom. Plus 10, the safe lower third (see below).
-  const safeLow = spec.pos === 10;
-  const posN = safeLow ? 8 : spec.pos;
+  // 10 = safe lower third, centred. 11 = the same height but left-aligned,
+  // which is where a broadcast lower third sits.
+  const safeLow = spec.pos === 10 || spec.pos === 11;
+  const posN = spec.pos === 10 ? 8 : spec.pos === 11 ? 7 : spec.pos;
   const col = (posN - 1) % 3, rowP = Math.floor((posN - 1) / 3);
   ctx.textAlign = ['left', 'center', 'right'][col];
   ctx.textBaseline = ['top', 'middle', 'bottom'][rowP];
@@ -6277,6 +6315,21 @@ function drawOverlay(specIn, W, H, canvas) {
   let y = safeLow
     ? H * 0.72 - blockH
     : [H * m, H / 2 - blockH / 2, H * (1 - m) - blockH][rowP];
+  // A lower third's accent bar: a short colour rule sitting just above the
+  // text block, the width of the longest line. Drawn before the text so the
+  // type always sits on top of it.
+  if (spec.bar) {
+    const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    const barH = Math.max(3, size * 0.09);
+    const barW = Math.max(size * 1.6, Math.min(widest, W * (1 - 2 * m)));
+    const barX = col === 0 ? x : col === 2 ? x - barW : x - barW / 2;
+    const sh = ctx.shadowColor, sb = ctx.shadowBlur;
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+    ctx.fillStyle = spec.bar === true ? '#7ee8a2' : spec.bar;
+    ctx.fillRect(barX, y - size * 0.42, barW, barH);
+    ctx.shadowColor = sh; ctx.shadowBlur = sb;
+    ctx.fillStyle = spec.color || '#ffffff';
+  }
   for (const line of lines) {
     if (spec.bg && line.trim()) {
       // rounded box behind the line (TikTok/CapCut look)
@@ -8298,7 +8351,7 @@ const PASTE_TRANS = [
 // rule as moves and transitions, so a caption that happens to contain "slow"
 // can't be eaten - the columns come first on the line.
 const PASTE_POS = [
-  ['words safe', 10], ['words lower', 10],
+  ['words lower left', 11], ['words safe', 10], ['words lower', 10],
   ['words top left', 1], ['words top right', 3], ['words top', 2],
   ['words center', 5], ['words centre', 5], ['words middle', 5],
   ['words bottom left', 7], ['words bottom right', 9], ['words bottom', 8],
@@ -8418,6 +8471,7 @@ const QK_DURS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 45, 60];
 // username/buttons every platform stacks over the bottom of a vertical video.
 const QK_POSITIONS = [
   { v: 10, label: 'words: lower (safe)' },
+  { v: 11, label: 'words: lower left' },
   { v: 8, label: 'words: bottom' },
   { v: 5, label: 'words: center' },
   { v: 2, label: 'words: top' },

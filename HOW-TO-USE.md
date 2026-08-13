@@ -74,7 +74,33 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
 3. Pick a shape: Phone 9:16 · YouTube 16:9 · Square 1:1
 4. **3️⃣ Assemble my video** → wait for the bar → **Download my video**
 
-Leave "⚡ Cut on the beat" checked — your cuts will land on the music automatically.
+**"⚡ Cut on the beat" — leave it on for songs, turn it OFF for slideshows.**
+It's ticked by default, and on a song it's exactly what you want: every cut
+lands on the music. But it works by rounding each picture up to a whole musical
+bar, with a minimum of 1.5 seconds — so on a sparse instrumental, or any cut
+where you asked for short holds, it can stretch a 17-second piece past 30.
+**Untick it whenever you've set your own times and want them respected.**
+
+### Typing your own shot list (the paste box)
+
+Instead of setting every picture by hand, you can paste a whole plan — one line
+per shot — and Studio fills the rows in order. It reads three things off each
+line and puts whatever's left in the caption:
+
+```
+1. 2s  slow push in   Nothing looked wrong.
+2. 1.3s hold          Not from the outside.
+3. 4s  drift left     That was the whole trick.
+```
+
+- **Times can have decimals.** `1.3s`, `0.5s`, `2.5s` all work. *(Before build
+  b0845 they didn't — `1.3s` came out as 3 seconds, because the row number and
+  the decimal point confused each other. Fixed.)*
+- **Row numbers are optional** — `1.` or `1)` or a dash or nothing at all.
+- A bare number only counts as a time if it's on its own, so a caption like
+  "Day 400" keeps its 400.
+- Remember the beat-snap note above: paste sub-second times, then **untick
+  "⚡ Cut on the beat"**, or they'll be rounded straight back up.
 
 **The AI way (your characters star in it):**
 1. **Characters** tab → create your character, upload **6–20 clear photos, different angles** (straight on, both sides, one smiling — good light, no sunglasses, same-ish hair). Variety is what makes it *look like them*.
@@ -247,13 +273,40 @@ The ZIP has every video, thumbnail, and caption organized with a posting schedul
 
 **Pasting from a chat, doc or notes app?** Just paste it. Studio strips the `>` quote marks and bullet dots people's apps add, and throws away the marker-only lines between paragraphs — those used to become blank captions that ate a timing slot and pushed every later line early.
 
+### ⭐ Where captions go on a phone (the mistake that wrecks good videos)
+
+**Never put words in the bottom fifth of a vertical video.** TikTok, Reels and
+Shorts all stack their own username, caption, music line and buttons across the
+bottom of the screen. Anything you put down there is sitting *underneath* their
+furniture, and on at least one platform it will be unreadable.
+
+On a 1080 × 1920 video, the rule is:
+
+| Zone | Pixels from top | Use it? |
+|---|---|---|
+| Top bar | 0 – 250 | Avoid — some apps put a header here |
+| **Faces** | 250 – 950 | Never cover a face with type |
+| **✅ The safe stripe** | **1150 – 1470** | **Put your captions here** — chest height, below faces, above the buttons |
+| Platform buttons | 1500 – 1920 | Never. This is their space |
+
+Studio's own captions sit in that stripe already, so the burned-in captions and
+the shorts are fine. **This matters when a video comes from somewhere else** —
+if you have a clip made elsewhere with the words along the very bottom, they
+will be covered. And a black bar at the bottom is not a fix: the buttons sit on
+top of the bar, not below it.
+
+Also worth knowing: a video whose picture doesn't fill the whole 1080 × 1920
+frame — black bars top or bottom — is **not really 9:16**, even if the file
+says it is. Use **Reframe (9:16)** in the editing toolbox to fill the frame
+properly.
+
 > ⚠️ **Captions are words, not sound.** A video with captions and nothing else renders **silent** — Studio warns you before you render. To hear your voice, the recording has to be added as audio: **🎬 Use in video** on the Voice card, the Music card, or the extraction trick below.
 
 ---
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, 🎙️ Captions from my voice (listening happens on your own computer), 🎙 Take the voice out of a clip, and using your own pictures for storyboard scenes** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, 🎙️ Captions from my voice (listening happens on your own computer), 🎙 Take the voice out of a clip, and using your own pictures for storyboard scenes** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, ▦ Panels (4-panel collage + Duet), and free stock b-roll (Pexels)**. Everything except AI generation.
 
 **A whole video for $0 is a real option.** Your own photos or filmed clips → your own voice (film it, take the voice out) → free captions from that voice → assemble, master, render, and cut shorts. Every step above is free and unlimited. AI generation is for the shots you can't get any other way, not a toll on the door.
 
@@ -298,6 +351,7 @@ Every AI generation is now saved the moment it's sent. The card shows a **runnin
 - **🟢 Green screen** — drop a subject shot on a solid color onto any picture or clip as the new background.
 - **🎥 Record my screen** (My Media) — capture anything playing on screen straight into your library.
 - **🎬 Free stock b-roll** (My Media) — paste a free Pexels key and search millions of free clips & photos for establishing shots and transitions.
+- **▦ Panels** (any picture or clip in your Library) — the two CapCut layouts, free and made on your own machine. **4-panel collage** puts four things in a 2×2 grid; **⬍ Duet** stacks two — a reference clip on top, you underneath — which is the "follow the move" layout. Cells crop to fill rather than letterbox, and a shorter clip loops instead of freezing on its last frame.
 - **Pre-render check** — when you press Render, Studio warns you first about anything worth fixing (no song, reused clips, super-short flashes, length mismatch).
 - **One-click setups** (AI Scenes → Director's brief) — tap a face-locked character to make them the star; save your vibe/energy/star/place as a reusable setup; your last brief is remembered.
 

@@ -341,7 +341,12 @@ because there is no voiceover. The cuts are now:
   shot up to a whole musical bar with a 1.5s floor, which flattens deliberate
   timing differences into one number.
 
-**Episode 2's last four panels came back letterboxed** — widescreen pictures
+**RESOLVED 12 Aug, later:** the four panels were re-rendered full-frame and
+episode 2 was rebuilt. The letterboxed version is superseded — if a future
+session finds two cuts of this episode, the full-frame one is the keeper.
+
+*(Original note, kept for the lesson:)* **Episode 2's last four panels came back
+letterboxed** — widescreen pictures
 inside a vertical canvas, black bars top and bottom, where 1-6 were true
 full-frame. Jacques built with them as they are rather than wait. The re-render
 prompt is written and sits in the chat log; the fix is a ten-minute rebuild

@@ -924,6 +924,12 @@ router.get('/buffer/channels', async (req, res) => {
         }
       } catch (_) { /* introspection may be disabled; the raw error still goes back */ }
     }
+    // Record it. Without this, a Buffer failure vanished the moment the card
+    // re-rendered and there was nothing to show anyone afterwards.
+    try {
+      db.logError('buffer', `connection test failed (HTTP ${err.status || '?'}): ${err.message}`,
+        needs ? `Buffer schema said: ${needs.join(' | ')}` : null);
+    } catch (_) {}
     res.status(err.status === 401 || err.status === 403 ? 401 : 502)
       .json({ error: err.message, needs, hint: 'Buffer answered this verbatim. A 401 means the key is wrong or expired.' });
   }
@@ -1098,6 +1104,7 @@ router.post('/buffer/post', async (req, res) => {
       : ext === '.png' ? 'image/png' : ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'application/octet-stream';
     mediaUrl = await falUploadFile(buf, path.basename(asset.filename), ctype, { permanent: true });
   } catch (err) {
+    try { db.logError('buffer', `media upload failed before posting: ${err.message}`); } catch (_) {}
     return res.status(502).json({ error: `Could not publish the video to a link Buffer can reach: ${err.message}` });
   }
 
@@ -1136,6 +1143,7 @@ router.post('/buffer/post', async (req, res) => {
   try {
     shape = await bufferCreateShape();
   } catch (err) {
+    try { db.logError('buffer', `could not read Buffer's posting schema: ${err.message}`); } catch (_) {}
     return res.status(502).json({ error: `Could not read Buffer's posting format: ${err.message}` });
   }
 
@@ -1215,6 +1223,13 @@ router.post('/buffer/post', async (req, res) => {
     }
   }
   if (dropped.length) { try { db.logError('buffer', `dropped unknown post fields: ${dropped.join(', ')}`); } catch (_) {} }
+  // Every per-channel refusal goes to Diagnostics too. A post can fail on one
+  // channel and succeed on another, and the failing half used to leave no
+  // trace once the page moved on.
+  for (const r of results) {
+    if (r.ok) continue;
+    try { db.logError('buffer', `post refused on channel ${r.channelId}: ${r.error}`, needs ? needs.join(' | ') : null); } catch (_) {}
+  }
   const anyOk = results.some((r) => r.ok);
   // Lead with Buffer's own words. The first version of this response had no
   // `error` field at all, so the browser showed "Request failed (502)" and

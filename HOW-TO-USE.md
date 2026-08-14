@@ -86,6 +86,14 @@ bar, with a minimum of 1.5 seconds — so on a sparse instrumental, or any cut
 where you asked for short holds, it can stretch a 17-second piece past 30.
 **Untick it whenever you've set your own times and want them respected.**
 
+**🏁 End with a 3-second CTA card (b0857)** — ticked by default. Every Quick
+Video finishes on a dark card with your big line and the small line beneath it
+(edit both in the boxes — the defaults point at your 2-minute test). The card
+is drawn in the video's own shape and held for 3 seconds, so every piece of
+content ends at your funnel instead of a dead stop. It's remembered in saved
+templates, so a series keeps the same card without re-typing it. Untick it for
+slideshows or anything that should end cold.
+
 ### Typing your own shot list (the paste box)
 
 Instead of setting every picture by hand, you can paste a whole plan — one line
@@ -231,7 +239,8 @@ At the top of the **📅 Post** tab. Write the words once, then read them steady
 |---|---|
 | **Space** or **▶/❚❚** | Play / pause |
 | **+ speed / − speed** (or ↑ ↓) | Faster or slower — start slow, 3 is a calm speaking pace |
-| **A+ / A−** | Bigger or smaller words (bigger = you can stand further back) |
+| **A+ / A−** | Bigger or smaller words (bigger = you can stand further back; A− goes all the way down to tiny for a long or wordy script) |
+| **␣− / ␣+** | Condense or stretch the letters — pull a line that's still too wide back onto the screen without shrinking the type |
 | **Mirror** | Flips the text for a teleprompter glass rig |
 | **↺ Restart** (or R) | Back to the top for another take |
 | **✕ Close** (or Esc) | Done |
@@ -344,6 +353,30 @@ reproduce the problem, and whatever appears is the actual fault.
   The same job is now: put the clip in **Quick Video**, use **Lyrics & Captions →
   🎙️ Captions from my voice (free)** or **Auto-spread** to time the lines, then
   Assemble. One place for shorts instead of two.
+
+---
+
+## 5g. 📆 Make the week (b0857) — stage once, every template becomes a queued post
+
+On the **📅 Post tab**, under the Send card: **📆 Make the week**. It runs your
+saved Quick Video templates one after another against the pictures + song
+currently staged in Quick Video, and queues each finished video to Buffer with
+the caption on its row — the whole week in one button.
+
+1. **Quick Video** → add the pictures (and song) for this run. This is the
+   batch's input — every template gets the same pictures, each in its own
+   style (its own moves, timings, words, CTA card).
+2. **📅 Post tab** → **📆 Make the week** → tick the templates you want this
+   week, write a caption per row (left blank, it uses the template's name)
+3. **📆 Make this week** → watch the log: each row goes *applying →
+   assembling → queuing to Buffer*
+4. Done. Each video sits in your Buffer queue for the next open slot
+   (8am / 12pm / 7pm).
+
+It stops at the first failure — the log shows which rows are already ✅
+queued, so untick those, fix the problem, and press Make again to finish the
+rest. Posts use the post type (and channel ticks) selected in the **Send** card
+above, so an AI-made week gets its "Made with AI" label automatically.
 
 ---
 
@@ -508,6 +541,14 @@ Same card: **⬇ Download full backup (ZIP)** → save it to a USB stick or clou
 Your whole library lives only on this computer — a backup means a broken laptop costs you nothing.
 
 Also on that card: see what's using disk space and delete big old files.
+
+**Automatic snapshots (b0857):** Studio now saves a rotating copy of
+`data.sqlite` — the file that holds your account, characters and face locks —
+on every start and again right before every update (the last 8 are kept). A
+failed snapshot never blocks startup, and it's no replacement for the ZIP
+backup: the ZIP holds your whole library; the snapshots are the insurance that
+survives an update gone wrong. If you ever need one back, the copies live in
+`Studio\server\backups\`.
 
 ---
 

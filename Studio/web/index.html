@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0856</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0858</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -643,6 +643,12 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="qk-import-song">🔗 Import</button>
       </div>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="qk-beat" checked> ⚡ Cut on the beat of the song</label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="qk-cta" checked> 🏁 End with a 3-second CTA card</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center" id="qk-cta-row">
+        <input class="input" id="qk-cta-text" value="Take the 2-minute test →" maxlength="60" style="flex:1;min-width:150px">
+        <input class="input" id="qk-cta-sub" value="turnsomedayintodayone.com" maxlength="90" style="flex:1;min-width:150px">
+      </div>
+      <p class="usage" style="margin:2px 0 0">The big line, then the small line beneath it. Swap in your own link or tagline — saved templates remember it.</p>
       <div style="margin-top:4px">
         <span class="usage">🎬 Premade looks — add your pictures, tap a look, press Assemble:</span>
         <div id="qk-premade" class="row" style="gap:6px;margin-top:4px"></div>
@@ -1053,6 +1059,16 @@ body.simple-only #view-simple{display:flex !important}
       <div class="err" id="send-err" style="display:none;white-space:pre-wrap"></div>
     </div>
 
+    <div class="card" id="week-card" style="display:none">
+      <h3>📆 Make the week <span class="usage">— stage once, every checked template becomes a queued post</span></h3>
+      <p class="usage">Stage your pictures + song in Quick Video first. Each template you tick here is run against them, one after another — assembled, then queued to Buffer with the caption on its row. Posts use the post type picked in the Send card above. It stops at the first thing that fails, so you fix and resume.</p>
+      <div id="week-list" style="display:flex;flex-direction:column;gap:6px;margin-top:8px"></div>
+      <button class="gen-btn" id="week-go" style="margin-top:10px">📆 Make this week</button>
+      <div class="progress-line" id="week-prog"><div></div></div>
+      <div id="week-log" style="display:flex;flex-direction:column;gap:4px;margin-top:8px"></div>
+      <div class="err" id="week-err" style="display:none;white-space:pre-wrap"></div>
+    </div>
+
     <div class="card">
       <h3>🎤 Teleprompter</h3>
       <p class="usage" style="margin:0">Write it once, read it steady. Put this screen right behind your camera so your eyes stay on the lens — slow speed, short lines, and it still sounds like you.</p>
@@ -1140,6 +1156,9 @@ body.simple-only #view-simple{display:flex !important}
     <button class="tp-btn" id="tp-faster" title="Faster">+ speed</button>
     <button class="tp-btn" id="tp-smaller" title="Smaller text">A−</button>
     <button class="tp-btn" id="tp-bigger" title="Bigger text">A+</button>
+    <button class="tp-btn" id="tp-tighter" title="Condense: pull the letters closer together so the line fits">␣−</button>
+    <span class="tp-val" id="tp-space-val" style="min-width:52px">normal</span>
+    <button class="tp-btn" id="tp-looser" title="Wider text">␣+</button>
     <button class="tp-btn" id="tp-mirror" title="Flip for a teleprompter mirror">Mirror</button>
     <button class="tp-btn" id="tp-restart" title="Back to the top">↺ Restart</button>
     <button class="tp-btn" id="tp-close" title="Close (Esc)">✕ Close</button>
@@ -2137,7 +2156,7 @@ async function reportMissingFiles() {
    thought per line, a slow default, a green band marking the line to read
    from (keeps the eyes level with the lens), and a 3-2-1 countdown so the
    first words aren't spent finding your place. */
-let tpSpeed = 3, tpFont = 44, tpPlaying = false, tpRaf = null, tpPos = 0, tpLast = 0, tpEditingId = null;
+let tpSpeed = 3, tpFont = 44, tpSpace = 0.2, tpPlaying = false, tpRaf = null, tpPos = 0, tpLast = 0, tpEditingId = null;
 
 async function loadScripts() {
   const wrap = $('#tp-list');
@@ -2197,8 +2216,19 @@ $('#tp-save')?.addEventListener('click', async () => {
 });
 
 function tpSetFont(px) {
-  tpFont = Math.max(20, Math.min(96, px));
+  // 12px floor, not 20: long lines or small monitors need to go properly
+  // small before a line wraps and the reading rhythm breaks.
+  tpFont = Math.max(12, Math.min(96, px));
   $('#tp-text').style.fontSize = tpFont + 'px';
+}
+// Letter-spacing is the second half of "make it fit": pulling glyphs together
+// narrows a line without shrinking the type itself, which is the condense
+// control for lines that are still too wide at minimum size.
+function tpSetSpace(px) {
+  tpSpace = Math.round(Math.max(-2, Math.min(3, px)) * 10) / 10;
+  $('#tp-text').style.letterSpacing = tpSpace + 'px';
+  const v = $('#tp-space-val');
+  if (v) v.textContent = tpSpace <= -0.4 ? 'narrow' : (tpSpace >= 0.8 ? 'wide' : 'normal');
 }
 // Speed 3 is a calm speaking pace. Below that the steps are halved, because the
 // difference between 1 and 2 is huge when you're reading slowly and trying to
@@ -2244,7 +2274,7 @@ function openTeleprompter() {
   setErr('#tp-err', '');
   if (!body) return setErr('#tp-err', 'Write or load a script first.');
   $('#tp-text').textContent = body;
-  tpSetFont(tpFont); tpSetSpeed(tpSpeed);
+  tpSetFont(tpFont); tpSetSpace(tpSpace); tpSetSpeed(tpSpeed);
   tpPos = 0; tpApplyPos();
   const stage = $('#tp-stage');
   stage.classList.add('on');
@@ -2285,6 +2315,8 @@ $('#tp-slower')?.addEventListener('click', () => tpSpeedStep(-1));
 $('#tp-faster')?.addEventListener('click', () => tpSpeedStep(1));
 $('#tp-smaller')?.addEventListener('click', () => tpSetFont(tpFont - 4));
 $('#tp-bigger')?.addEventListener('click', () => tpSetFont(tpFont + 4));
+$('#tp-tighter')?.addEventListener('click', () => tpSetSpace(tpSpace - 0.4));
+$('#tp-looser')?.addEventListener('click', () => tpSetSpace(tpSpace + 0.4));
 $('#tp-mirror')?.addEventListener('click', () => $('#tp-stage').classList.toggle('mirrored'));
 $('#tp-restart')?.addEventListener('click', tpRestart);
 $('#tp-close')?.addEventListener('click', closeTeleprompter);
@@ -3769,6 +3801,131 @@ $('#send-go') && ($('#send-go').onclick = async () => {
   } finally {
     $('#send-go').disabled = false;
     setTimeout(() => setProg('#send-prog', null), 1200);
+  }
+});
+
+/* ---------------- make the week: saved templates, one after another, into Buffer ---------------- */
+function weekTemplates() {
+  return (st.assets || []).filter((a) => a.kind === 'project' && a.label.endsWith('[template]'));
+}
+function weekCaptions() {
+  try { return JSON.parse(localStorage.getItem('tsid-week-captions') || '{}') || {}; } catch (_) { return {}; }
+}
+function renderWeekCard() {
+  const card = document.getElementById('week-card');
+  if (!card) return;
+  card.style.display = st.cfg?.bufferAvailable ? 'flex' : 'none';
+  if (!st.cfg?.bufferAvailable) return;
+  const list = $('#week-list');
+  const tpls = weekTemplates();
+  if (!tpls.length) {
+    list.innerHTML = '<span class="usage">No templates yet — save one from the bottom of the Quick Video card and it appears here.</span>';
+    return;
+  }
+  const saved = weekCaptions();
+  list.innerHTML = '';
+  tpls.forEach((a) => {
+    const name = a.label.replace(' [template]', '');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13.5px;flex-wrap:wrap';
+    const chk = document.createElement('label');
+    chk.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer;flex:1;min-width:120px';
+    chk.innerHTML = '<input type="checkbox" checked> <b></b>';
+    chk.querySelector('b').textContent = name;
+    chk.querySelector('input').dataset.tpl = String(a.id);
+    const cap = document.createElement('input');
+    cap.className = 'input';
+    cap.type = 'text';
+    cap.value = saved[name] || '';
+    cap.placeholder = 'Caption for this post (defaults to the template name)';
+    cap.style.cssText = 'flex:2;min-width:200px';
+    cap.oninput = () => { const all = weekCaptions(); all[name] = cap.value; localStorage.setItem('tsid-week-captions', JSON.stringify(all)); };
+    row.appendChild(chk);
+    row.appendChild(cap);
+    list.appendChild(row);
+  });
+}
+let weekRunning = false;
+$('#week-go') && ($('#week-go').onclick = async () => {
+  if (weekRunning) return;
+  $('#week-err').style.display = 'none';
+  const tpls = weekTemplates();
+  const picked = tpls.filter((a) => {
+    const box = document.querySelector(`#week-list input[data-tpl="${a.id}"]`);
+    return box && box.checked;
+  });
+  if (!picked.length) { const e = $('#week-err'); e.style.display = 'block'; e.textContent = 'Tick at least one template.'; return; }
+  if (!qk.shots.length) { const e = $('#week-err'); e.style.display = 'block'; e.textContent = 'Stage pictures (and a song if you want one) in Quick Video first — every template runs against what is set up there right now.'; return; }
+  if (!st.cfg?.bufferAvailable || !(st.bufferChannels || []).length) { const e = $('#week-err'); e.style.display = 'block'; e.textContent = 'Connect Buffer and load your channels first (Post tab → Test the connection).'; return; }
+  const conf = postTypeConf(sendType);
+  const chans = (st.bufferChannels || []).filter((c) => (conf.services || []).includes(c.service));
+  if (!chans.length) { const e = $('#week-err'); e.style.display = 'block'; e.textContent = 'No channels ticked for the post type selected in the Send card above.'; return; }
+  if (!confirm(`${picked.length} template${picked.length > 1 ? 's' : ''} will be assembled one after another and each queued to Buffer (${chans.map((c) => c.name || c.service).join(', ')}). Start?`)) return;
+  weekRunning = true;
+  const btn = $('#week-go');
+  btn.disabled = true;
+  const log = $('#week-log');
+  log.innerHTML = '';
+  const captions = weekCaptions();
+  const lineFor = (i, name) => {
+    const line = document.createElement('div');
+    line.textContent = `${i + 1}/${picked.length} ${name} — waiting…`;
+    log.appendChild(line);
+    return line;
+  };
+  try {
+    for (let i = 0; i < picked.length; i++) {
+      const a = picked[i];
+      const name = a.label.replace(' [template]', '');
+      const line = lineFor(i, name);
+      setProg('#week-prog', (i / picked.length) * 100);
+      // 1. apply this template to the staged pictures
+      const tpl = await (await fetch(a.url)).json();
+      if (!tpl || tpl.type !== 'quick-template' || !Array.isArray(tpl.slots)) throw new Error(`"${name}" is not a valid template file.`);
+      qk.shots.forEach((s, si) => {
+        const slot = tpl.slots[si % tpl.slots.length];
+        s.move = slot.move || s.move;
+        s.dur = slot.dur || s.dur;
+        s.transAfter = slot.transAfter || s.transAfter;
+        if (slot.text) s.text = slot.text;
+      });
+      if (SIZE_MAP[tpl.format]) { qk.format = tpl.format; renderQkFormat(); }
+      if (tpl.cta) {
+        $('#qk-cta').checked = !!tpl.cta.on;
+        $('#qk-cta-text').value = tpl.cta.text || '';
+        $('#qk-cta-sub').value = tpl.cta.sub || '';
+      }
+      // 2. assemble (strips and re-adds the CTA end card to match the template)
+      line.textContent = `${i + 1}/${picked.length} ${name} — assembling…`;
+      const asset = await $('#qk-assemble').onclick();
+      if (!asset) {
+        const why = $('#seq-err').textContent || 'no video came out';
+        throw new Error(`"${name}" failed to assemble: ${why}`);
+      }
+      // 3. queue it to Buffer with this row's caption
+      line.textContent = `${i + 1}/${picked.length} ${name} — queuing to Buffer…`;
+      const caption = (captions[name] || '').trim() || name;
+      const d = await jfetch('/api/studio/buffer/post', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetId: asset.id, caption, aiLabel: !!conf.aiLabel, channelIds: chans.map((c) => c.id) }),
+      });
+      const bad = (d.results || []).filter((r) => !r.ok);
+      if (bad.length && bad.length === (d.results || []).length) throw new Error(`Buffer refused "${name}": ${bad[0].error}`);
+      line.textContent = `${i + 1}/${picked.length} ${name} — ${(d.results || []).filter((r) => r.ok).length}/${(d.results || []).length} channels queued ✅`;
+      line.style.color = 'var(--green)';
+    }
+    setProg('#week-prog', 100);
+    const done = document.createElement('div');
+    done.textContent = '🎉 Week made — every checked template is in your Buffer queue.';
+    log.appendChild(done);
+  } catch (e) {
+    const err = $('#week-err');
+    err.style.display = 'block';
+    err.textContent = `Stopped: ${e.message}\n\nTemplates with a ✅ above are already queued — untick them, fix the problem, and press Make again to finish the rest.`;
+  } finally {
+    weekRunning = false;
+    btn.disabled = false;
+    setTimeout(() => setProg('#week-prog', null), 1200);
   }
 });
 
@@ -5850,6 +6007,7 @@ function renderSeqPickers() {
   $('#qk-tpl-select').innerHTML = templates.length
     ? templates.map((a) => `<option value="${a.id}">${escapeHtml(a.label.replace(' [template]', ''))}</option>`).join('')
     : '<option value="">No templates yet</option>';
+  renderWeekCard();
 }
 
 /* ---------------- Ken Burns panel ---------------- */
@@ -8944,6 +9102,16 @@ $('#qk-assemble').onclick = async () => {
   pvStop(); // a running preview and a render would fight over the same clips
   setErr('#seq-err', null);
   if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures or clips first (button 1).');
+  // CTA end card: drop any end-card shot a previous run left behind, then add
+  // it fresh so the card always matches the text in the boxes right now.
+  const priorEnd = qk.shots.findIndex((s) => s.isEndCard);
+  if (priorEnd >= 0) qk.shots.splice(priorEnd, 1);
+  if ($('#qk-cta').checked && $('#qk-cta-text').value.trim()) {
+    try {
+      const ctaImg = await makeCtaCard($('#qk-cta-text').value.trim(), $('#qk-cta-sub').value.trim());
+      qk.shots.push({ assetId: ctaImg.id, kind: 'image', label: ctaImg.label, move: 'still', dur: 3, text: '', transAfter: 'cut', isEndCard: true });
+    } catch (_) { /* an end card is a nicety — never fail the whole video for it */ }
+  }
   qk.busy = true;
   const btn = $('#qk-assemble');
   btn.disabled = true;
@@ -9053,6 +9221,7 @@ $('#qk-assemble').onclick = async () => {
     $('#qk-status').textContent = asset
       ? 'Done! 🎉 Press play, or Download your video below. Want to change something? Everything is in the Timeline below — tweak and press Render again.'
       : '';
+    return asset; // the one-click pipeline and 'Make the week' read the finished clip
   } catch (e) {
     $('#qk-status').textContent = '';
     setErr('#seq-err', e.message);
@@ -9302,6 +9471,50 @@ $('#qk-fit-song').onclick = async () => {
   $('#qk-status').textContent = `🎯 Fitted: ${qkTotalSeconds().toFixed(1)}s of video for your ${target.toFixed(1)}s song. Beat-snap can still nudge each cut a little at assemble.`;
 };
 
+/* ---------------- the CTA end card ---------------- */
+// Drawn here, not in ffmpeg: a dark frame with the big line and the small line
+// beneath, in the video's own format, uploaded as a still picture the assembler
+// holds for 3s with the 'still' camera move.
+async function makeCtaCard(text, sub) {
+  const [w, h] = currentSize().split('x').map(Number);
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0d0d1f';
+  ctx.fillRect(0, 0, w, h);
+  const cx = w / 2;
+  let big = Math.round(h * 0.08);
+  ctx.font = `700 ${big}px system-ui, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  while (ctx.measureText(text).width > w * 0.86 && big > 24) {
+    big -= 2;
+    ctx.font = `700 ${big}px system-ui, sans-serif`;
+  }
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(text, cx, h * 0.42);
+  if (sub) {
+    let subSize = Math.round(big * 0.4);
+    ctx.font = `500 ${subSize}px system-ui, sans-serif`;
+    while (ctx.measureText(sub).width > w * 0.8 && subSize > 18) {
+      subSize -= 2;
+      ctx.font = `500 ${subSize}px system-ui, sans-serif`;
+    }
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fillText(sub, cx, h * 0.56);
+  }
+  // a thin rule between the two lines keeps the card feeling composed
+  ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+  ctx.lineWidth = Math.max(1, Math.round(h * 0.002));
+  ctx.beginPath();
+  ctx.moveTo(cx - w * 0.12, h * 0.485);
+  ctx.lineTo(cx + w * 0.12, h * 0.485);
+  ctx.stroke();
+  const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
+  return uploadFile(new File([blob], `cta-${Date.now()}.png`, { type: 'image/png' }), 'image');
+}
+
 /* ---------------- quick video templates ---------------- */
 $('#qk-tpl-save').onclick = async () => {
   setErr('#seq-err', null);
@@ -9311,6 +9524,7 @@ $('#qk-tpl-save').onclick = async () => {
     const tpl = {
       v: 1, type: 'quick-template', format: qk.format,
       slots: qk.shots.map((s) => ({ move: s.move, dur: s.dur, text: s.text, transAfter: s.transAfter })),
+      cta: { on: $('#qk-cta').checked, text: $('#qk-cta-text').value.trim(), sub: $('#qk-cta-sub').value.trim() },
     };
     const blob = new Blob([JSON.stringify(tpl)], { type: 'application/json' });
     await uploadFile(new File([blob], `${name} [template].json`, { type: 'application/json' }), 'project');
@@ -9336,6 +9550,11 @@ $('#qk-tpl-apply').onclick = async () => {
       if (slot.text) s.text = slot.text;
     });
     if (SIZE_MAP[tpl.format]) { qk.format = tpl.format; renderQkFormat(); }
+    if (tpl.cta) {
+      $('#qk-cta').checked = !!tpl.cta.on;
+      $('#qk-cta-text').value = tpl.cta.text || '';
+      $('#qk-cta-sub').value = tpl.cta.sub || '';
+    }
     renderQkShots();
     $('#qk-status').textContent = 'Template applied — press Assemble!';
   } catch (e) { setErr('#seq-err', `Could not load that template: ${e.message}`); }
@@ -9391,6 +9610,7 @@ bootStudio().then(() => {
       const saved = JSON.parse(localStorage.getItem('tsid-studio-qk') || 'null');
       if (saved && Array.isArray(saved.shots) && saved.shots.length) {
         saved.shots.forEach((d) => {
+          if (d.isEndCard) return; // rebuilt fresh at each assemble, never restored
           const a = st.assets.find((x) => x.id === d.assetId);
           if (!a) return;
           qk.shots.push({

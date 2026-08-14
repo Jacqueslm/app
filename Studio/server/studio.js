@@ -699,6 +699,8 @@ router.get('/config', (req, res) => {
     // so instead of silently offering voices that can't speak.
     voices: localTts.available() ? localTts.list() : [],
     localVoice: localTts.available(),
+    // Free cloning: when installed, "my own voice" costs nothing.
+    voiceCloneLocal: localClone.status(),
     chatAvailable: Boolean(ANTHROPIC_API_KEY),
     imagesUsed: db.getImageCount(req.userId, todayUTC()),
     imageLimit: DAILY_AI_IMAGE_LIMIT,
@@ -4290,6 +4292,10 @@ const VOICE_EMO_RATE = Number(process.env.STUDIO_RATE_VOICE_EMO || 0.12); // per
 // back in under a second, so the clips are gone and fal is only used now for
 // cloning YOUR voice, or for emotional delivery.
 const localTts = require('./speak');
+// Free voice cloning on this computer (Chatterbox, MIT incl. weights). Optional
+// and installed on demand — everything below degrades to the paid fal path
+// when it isn't there.
+const localClone = require('./voiceclone');
 const VOICE_REF_DIR = path.join(__dirname, 'model-cache', 'voices', 'refs');
 // Emotion needs fal (index-tts-2), and fal needs a reference clip to clone.
 // Rather than ship one, we have the local narrator read a fixed passage once
@@ -4412,6 +4418,39 @@ router.post('/voice-clone', async (req, res) => {
     return;
   }
 
+  /* ---- free path: your own voice, cloned on this computer ----
+     Installed locally, a clone costs nothing, so it goes ahead of the paid
+     path and never asks. Moods still need fal (Chatterbox reads plainly),
+     so a mood request falls through. If the local run fails, the job reports
+     it rather than silently spending money on the paid path instead. */
+  if (!preset && !wantsMood && localClone.isInstalled()) {
+    const job = createJob(req.userId, 'voice', {});
+    res.status(202).json({ job: jobJson(job) });
+    (async () => {
+      try {
+        const filename = newFilename(req.userId, '.wav');
+        await localClone.clone({
+          refPath: mediaPath(ref.filename),
+          text,
+          outPath: mediaPath(filename),
+          onPct: (p) => { job.progress = Math.min(95, p); },
+        });
+        job.progress = 96;
+        const label = `${ref.label} says: ${text.slice(0, 36)}${text.length > 36 ? '…' : ''}`;
+        job.assetId = db.createAsset(req.userId, 'audio', label, filename, null, {
+          source: 'voice', clonedFrom: ref.id, free: true, local: true,
+          duration: await probeMediaDuration(mediaPath(filename)),
+        });
+        job.progress = 100;
+        job.status = 'done';
+      } catch (err) {
+        job.error = `${err.message || 'Voice cloning failed.'}`;
+        job.status = 'error';
+      }
+    })();
+    return;
+  }
+
   /* ---- paid path: your own voice, or a narrator with a mood on it ---- */
   if (!FAL_KEY) {
     return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
@@ -4459,6 +4498,29 @@ router.post('/voice-clone', async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
+});
+
+/* ---------------- free voice cloning: install / status / remove ---------------- */
+// The install is big (Python + engine + model), so it is always a deliberate
+// button press, reports real progress, and can be undone.
+router.get('/voice-clone-local', (req, res) => {
+  res.json({ ...localClone.status(), bytes: localClone.diskUsage() });
+});
+
+router.post('/voice-clone-local/install', async (req, res) => {
+  if (localClone.isInstalled()) return res.json({ installed: true, alreadyInstalled: true });
+  const st = localClone.status();
+  if (st.installing) return res.status(409).json({ error: 'The install is already running.' });
+  // Answer immediately; the browser polls the status route for progress. A
+  // ten-minute request would time out somewhere between here and the tab.
+  res.status(202).json({ started: true });
+  localClone.install().catch(() => { /* the error is kept in status() */ });
+});
+
+router.post('/voice-clone-local/remove', (req, res) => {
+  if (localClone.status().installing) return res.status(409).json({ error: 'Wait for the install to finish first.' });
+  localClone.uninstall();
+  res.json({ removed: true });
 });
 
 // Hear a narrator before committing a script to it. Free and local, so this

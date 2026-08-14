@@ -156,6 +156,37 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — Studio b0851: FREE VOICE CLONING, running on Jacques's own machine
+He pushed back hard — "it's my voice, why do I have to pay" — and he was right
+twice. b0850 fixed the dead-end; this removes the bill entirely.
+
+**What it is:** `Studio/server/voiceclone.js` (Node: detect Python, build a
+venv, install, drive it) + `Studio/server/clone-worker.py` (one clone per
+process, JSON over stdio, `@PCT n` progress lines on stderr — same shape as
+`speak-worker.js`). Model is **Chatterbox (Resemble AI), MIT-licensed
+INCLUDING weights**, which is the whole reason it was chosen: `speak.js` only
+ships CC0/public-domain voices because Studio's output is commercial, and the
+better-known free cloners fail that bar (XTTS-v2 non-commercial; F5-TTS's
+weights inherit a non-commercial dataset licence). **Do not swap the model for
+a "better" one without checking the weights' licence.**
+
+**Routing:** in `/voice-clone`, a plain clone with the local engine installed
+runs free and LOCAL, ahead of the paid fal branch. Moods still go to fal
+(Chatterbox reads plainly). If a local run fails it reports the error — it
+never silently falls through to spending money.
+
+**Routes:** `GET/POST /api/studio/voice-clone-local[/install|/remove]`. Install
+answers 202 immediately and the browser polls, because a ten-minute request
+times out somewhere in the middle.
+
+**Verified here:** module guards, all four worker error paths, `chunk_text`
+(no words lost, nothing over the limit, run-on sentences split), routes, config
+exposure, and the real install including its **pytorch.org→PyPI fallback**
+(this sandbox blocks pytorch.org, and the fallback fired exactly as designed).
+**NOT verified: generation itself** — the sandbox blocks huggingface.co so
+model weights never download. On Jacques's machine that's not a constraint, but
+if he reports a generation failure, that is the untested seam, start there.
+
 ### 14 Aug — Studio b0850: the free voice path no longer dead-ends
 Jacques, angry and right: "why do I have to pay for my voice to narrate."
 **Root cause found — it was a real bug, not a pricing complaint.** The

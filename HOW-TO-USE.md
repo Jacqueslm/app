@@ -292,10 +292,39 @@ reading two parts = two real voices — record one, then the other.
 |---|---|---|
 | **🎙 Record my voice** | **Free** | Your actual voice. Unlimited |
 | **Built-in narrators** (Warm, Calm male…) | **Free** | Speak on your own computer. Plain reads only |
-| **🎤 Clone a voice** | ~$0.05 per 1,000 characters | AI speaks *typed text* in a voice from a clip. The price shows before you spend |
+| **🎤 Clone a voice** | **Free once installed** (see below), otherwise ~$0.05 per 1,000 characters | AI speaks *typed text* in a voice from a clip |
 
-Cloning is only for when you want text spoken **without anyone reading it**. If
-you're willing to read it, recording is free and sounds more like you.
+### Free voice cloning (b0851) — install once, never pay for a voice again
+
+Cloning is for when you want text spoken **without anyone reading it aloud**.
+That used to be the one part of this card that cost money. Now it can run on
+your own computer for nothing:
+
+1. **🎤 Clone a voice** chip → the panel under it appears
+2. **⬇ Install free voice cloning (one time)** → several minutes; it downloads
+   Python packages and the speech engine (about 2 GB). You can leave the page,
+   it keeps going
+3. Pick your reference clip, type the line, **Speak** — free, unlimited, as many
+   takes as you want
+
+**Two things to expect the first time.** The very first line downloads the voice
+model (about another gigabyte), so it takes a few minutes; every line after that
+is quick. And it runs on your processor, not a graphics card, so a long
+narration is minutes rather than seconds — start it and go do something else.
+
+**If the install says Python is missing:** get it from python.org and tick
+*"Add Python to PATH"* during setup, then press the button again.
+
+**Moods still use fal.** The local engine reads plainly — 😊 Happy / 🔥 Hyped
+and the rest still go through your fal key, and still show their price first.
+
+**Remove it any time** with the button in that panel; it deletes the lot and
+gives the disk space back.
+
+**Why this model:** Chatterbox is MIT-licensed *including its weights*, so
+videos you make with it can be sold. That is the same bar the free narrators
+are held to, and it rules out the better-known free cloners — XTTS-v2 and
+F5-TTS are both non-commercial.
 
 ---
 

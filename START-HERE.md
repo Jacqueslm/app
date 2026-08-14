@@ -14,11 +14,14 @@ marked DONE below is closed history, not a to-do list.
 
 ## OPEN ITEMS — 14 Aug 2026
 
-Two things left. Everything else is committed, pushed and working.
+Three things left. Everything else is committed, pushed and working.
 
-1. ~~**Paste the corrected full description into Play Console.**~~ **DONE
-   14 Aug 2026 — Jacques pasted it and saved.** The live listing now matches
-   `store-listing/02-full-description.md`. Do not re-ask him to do this.
+1. **Paste the corrected full description into Play Console.** STILL OPEN as of
+   14 Aug 2026, 12:30pm. The live listing still sells **voice journaling as a
+   Pro feature** — it has been free since 5.5.0, and the first fifteen days of
+   *every* pack are free rather than one pack. Corrected text is in
+   `store-listing/02-full-description.md`; the console holds its own copy, so it
+   has to be pasted in by hand. Do this BEFORE applying for production.
 2. **Apply for production access.** Every requirement is met (see CLOSED TESTING
    below — do not re-verify it). The ten answers are written, verified against
    the code, and live at

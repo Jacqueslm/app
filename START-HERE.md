@@ -5,15 +5,13 @@ does NOT carry between sessions — this repo is the shared memory. Read this fi
 
 ---
 
-## OPEN ITEMS — 14 Aug 2026, 4pm
+## OPEN ITEMS — 14 Aug 2026
 
-Four things, in order. Everything else is committed, pushed and working.
+Three things, in order. Everything else is committed, pushed and working.
 
-1. **Paste the corrected full description into Play Console.** The live listing
-   still sells **voice journaling as a Pro feature** — it has been free since
-   5.5.0, and the first fifteen days of *every* pack are free rather than one
-   pack. Corrected text is in `store-listing/02-full-description.md`; the console
-   holds its own copy, so it has to be pasted in by hand.
+1. ~~**Paste the corrected full description into Play Console.**~~ **DONE
+   14 Aug 2026 — Jacques pasted it and saved.** The live listing now matches
+   `store-listing/02-full-description.md`. Do not re-ask him to do this.
 2. **Apply for production access.** Every requirement is met (see CLOSED TESTING
    below — do not re-verify it). The ten answers are written, verified against
    the code, and live at

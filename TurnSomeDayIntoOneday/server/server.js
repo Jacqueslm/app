@@ -215,6 +215,12 @@ app.get('/what-is-al-anon', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'what-is-al-anon.html'));
 });
 
+// Social proof / SEO target for "reviews" searches. Renders only real quotes
+// from data/reviews.json - deliberately never fabricated testimonials.
+app.get('/reviews', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'reviews.html'));
+});
+
 // "Dry drunk" - about 11,700 searches a month across six phrasings, all at
 // difficulty 30-34, and one page answers the lot: what is a dry drunk / dry
 // drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.

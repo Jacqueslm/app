@@ -1,6 +1,10 @@
 node_modules/
 .env
 data.sqlite
+# Auto-backup snapshots are copies of data.sqlite, so they need exactly the same
+# rule as data.sqlite itself. Without this line they sit untracked inside a
+# PUBLIC repo, and one `git add -A` publishes the whole Studio database.
+backups/
 media/
 update-state.json
 model-cache/

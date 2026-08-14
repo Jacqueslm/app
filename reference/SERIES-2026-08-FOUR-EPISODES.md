@@ -3,8 +3,23 @@
 Written 14 Aug 2026, same build as the Couples series. Ten shots each, one line
 of narration per shot, ready to paste into Manus.
 
-**Generate before 25 Aug** — Manus's advanced models are free until then. Four
-episodes is 40 images. After the 25th every one of them costs money.
+## WHERE THE ARTWORK STANDS — 14 Aug 2026
+
+| # | Episode | Habit | Images |
+|---|---|---|---|
+| 1 | The Gambler | Gambling | ✅ done, posting this weekend |
+| 2 | The Packages | Shopping | ✅ done, posting this weekend |
+| 3 | Three Hours a Night | Doomscrolling | ⬜ not generated |
+| 4 | The Light Turns Green | Anger / road rage | ✅ **generated 14 Aug** |
+| 5 | Somebody Needs Me | Gaming | ✅ **generated 14 Aug** |
+| 6 | The Respectable One | Work | ✅ **generated 14 Aug** |
+| 7 | The Hoodie | Smoking / vaping | ⬜ not generated |
+| 8 | The Empty Chair | Substances | ⬜ not generated |
+| 9 | The Second Dinner | Food / binging | ✅ **generated 14 Aug** |
+
+**Three left: 3, 7 and 8 — 30 images.** Manus's advanced models are free until
+**25 Aug 2026**. After that every one of them costs. Do not let the window close
+with three episodes unbanked; images keep, a free window does not.
 
 ---
 

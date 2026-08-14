@@ -290,3 +290,13 @@ clips (20), auto clip generator (20), tiktok video editor app (40).
 **Deliberately not recommended:** `tiktok downloader`, despite 450,000 searches
 a month. Downloading other people's videos is the wrong business for a company
 whose whole pitch is honesty, and it would put the Play Store listing at risk.
+
+
+## Studio — stem separation (asked 14 Aug, 4am)
+Jacques asked to split voice FROM music inside one mixed track (karaoke-style).
+Not built: needs a real separation model (Demucs — torch, multi-GB local
+install) or a paid API (LALAL.AI has one; no verified fal endpoint found on
+14 Aug). What already exists and covers most of the need: "🎙 Take the voice
+out" lifts the WHOLE soundtrack off any clip (free, mastered WAV → Songs), and
+"🎤 My own voice" clones any uploaded voice clip to narrate typed text (fal,
+paid). Build the splitter only if a mixed-track case actually comes up.

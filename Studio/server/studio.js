@@ -1765,10 +1765,19 @@ router.post('/assets/:id/unlink-character', (req, res) => {
 router.delete('/assets/:id', (req, res) => {
   const row = db.getAsset(req.userId, Number(req.params.id));
   if (!row) return res.status(404).json({ error: 'Asset not found.' });
-  db.deleteAsset(req.userId, row.id);
+  let out;
+  try {
+    out = db.deleteAsset(req.userId, row.id);
+  } catch (err) {
+    // Say what actually went wrong. A delete that silently refuses looks like a
+    // broken button, and the whole point of Diagnostics is that failures land
+    // somewhere you can read them.
+    db.logError('assets', `delete ${row.id} (${row.label}): ${err.message}`);
+    return res.status(409).json({ error: `Could not delete "${row.label}": ${err.message}` });
+  }
   try { fs.unlinkSync(mediaPath(row.filename)); } catch (_) {}
   try { fs.unlinkSync(path.join(REFCACHE_DIR, path.basename(row.filename).replace(/\.[^.]+$/, '') + '.jpg')); } catch (_) {}
-  res.json({ ok: true });
+  res.json({ ok: true, queuedPostsRemoved: (out && out.queuedPostsRemoved) || 0 });
 });
 
 // Raw-body upload keeps us dependency-free (no multer). The client sends the

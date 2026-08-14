@@ -156,6 +156,31 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — Studio b0854: Buffer failures are now recorded (they weren't)
+Jacques: "buffer still dont work." **Could not diagnose it — no error text, and
+none was being kept.** What was verified:
+- **Endpoint and auth are CORRECT.** `https://api.buffer.com`, `Authorization:
+  Bearer <key>`, GraphQL POST — matches Buffer's current docs. `ORG_QUERIES[1]`
+  (`account { organizations { id } }`) is the documented org lookup. So this is
+  NOT a wrong-URL bug; don't "fix" the endpoint.
+- **Buffer's API is an invite-only public beta** (verified 14 Aug 2026). Free
+  accounts get 1 personal key, paid get 5, owner only. **If his account has not
+  been granted API access, nothing on our side can work** — that is the first
+  thing to rule out, not the last.
+- **The real defect found: Buffer failures never reached Diagnostics.** Only a
+  "dropped unknown fields" note did. Every failure vanished when the card
+  re-rendered. Now logged: connection test, media upload, schema read, and each
+  per-channel refusal — with Buffer's verbatim message.
+
+**The loop to use when he reports it again:** ⚙ Settings → Diagnostics →
+🧹 Clear → reproduce → screenshot Diagnostics. That gives Buffer's own words,
+which is the one thing needed and the one thing we never had.
+
+**Note the fal dependency:** `/buffer/post` requires FAL_KEY, because Buffer
+will not accept a file upload — the video must be given to it as a public URL,
+and fal storage is what provides one. No fal key (or no credit) = posting fails
+even with a perfect Buffer key.
+
 ### 14 Aug — Studio b0853: clear diagnostics, two dead cards removed
 - **Diagnostics now has 🧹 Clear the list** (`POST /api/studio/diagnostics/clear`
   → `db.clearErrors()`). It is a rolling view, not an audit log; an old list of

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0853</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0854</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -1014,7 +1014,7 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card" id="buffer-card">
       <h3>📅 Connect Buffer <span class="usage" id="buffer-state"></span></h3>
-      <p class="usage" id="buffer-hint">Buffer is where your posts get queued. Make a key at <b>publish.buffer.com/settings/api</b> (Settings → API — it's free on every plan, and you need to be the account owner), then paste it here. Connecting only reads which channels you have; nothing gets posted.</p>
+      <p class="usage" id="buffer-hint">Buffer is where your posts get queued. Make a key at <b>publish.buffer.com/settings/api</b> (Settings → API — free accounts get one key, paid get five, and you must be the account owner), then paste it here. Connecting only reads which channels you have; nothing gets posted.<br><b>Buffer's API is still an invite-only beta.</b> If the key page is missing, or a saved key keeps failing with 401, your account probably hasn't been granted API access yet — request it from Buffer, because no amount of fixing on this end gets round that.<br><b>If it fails:</b> ⚙ Settings → Diagnostics → <b>🧹 Clear the list</b>, come back, press Test again, then screenshot Diagnostics. Buffer's exact words land there now.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="buffer-key-row">
         <input class="input" id="buffer-input" placeholder="Paste your Buffer API key" style="flex:1;min-width:140px" autocomplete="off">
         <button class="btn2" id="buffer-save">Save</button>

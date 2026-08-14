@@ -3411,6 +3411,7 @@ function renderPackLesson(){
     <div style="display:flex;gap:8px;margin-top:0;margin-bottom:14px">
       <button class="ob-btn outline" id="pack-listen-btn" style="flex:1;margin:0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="togglePackLessonAudio()"><i class="ti ti-headphones"></i> Listen to this lesson</button>
       <button class="ob-btn outline" id="pack-pause-btn" title="Pause / resume" style="display:none;width:auto;margin:0;padding:9px 13px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="laTogglePause()"><i class="ti ti-player-pause"></i></button>
+      <button class="ob-btn outline" id="pack-voice-btn" title="Narrator voice" style="width:auto;margin:0;padding:9px 12px;font-size:12.5px;color:var(--ts);border-color:var(--bdr);white-space:nowrap" onclick="cycleLessonVoice()">Warm</button>
       <button class="ob-btn outline" id="pack-speed-btn" title="Narrator speed" style="width:auto;margin:0;padding:9px 12px;font-size:12.5px;color:var(--ts);border-color:var(--bdr);white-space:nowrap" onclick="cycleLessonSpeed()">1× normal</button>
     </div>
     <div id="pack-lesson-text">
@@ -3429,6 +3430,7 @@ function renderPackLesson(){
   </div>`;
   renderIcons(wrap);
   if(typeof updateSpeedBtns==='function')updateSpeedBtns();
+  if(typeof updateLessonVoiceBtns==='function')updateLessonVoiceBtns();
 }
 function completePackLessonToday(){
   const key=S.activeCustomPack;
@@ -6738,6 +6740,7 @@ function lessonVoiceKey(){return VG_VOICES[S.lessonVoice]?S.lessonVoice:'warm';}
 function updateLessonVoiceBtns(){
   const l=VG_VOICES[lessonVoiceKey()].label;
   const a=document.getElementById('lessonVoiceBtn');if(a)a.textContent=l;
+  const p=document.getElementById('pack-voice-btn');if(p)p.textContent=l;
   const o=document.getElementById('la-ov-voice');if(o)o.textContent='Voice: '+l;
 }
 // Mirrors applyRelationshipVariant's decision so the recording matches the
@@ -7028,12 +7031,32 @@ function toggleLessonAudio(){
 }
 function togglePackLessonAudio(){
   if(lessonAudioState==='playing'&&lessonAudioBtnId==='pack-listen-btn'){stopLessonAudio();return;}
+  const key=S.activeCustomPack;
+  const meta=getPackMeta(key);
+  const day=getPackDay(key);
+  const lesson=getPackLessonForDay(key,day);
   const textEl=document.getElementById('pack-lesson-text');
-  if(!textEl)return;
-  // Packs have no pre-made recordings (yet) - meta carries just a title so the
-  // big player and lock-screen card still say what's playing on the TTS path.
-  const hd=document.querySelector('#s-pack-lesson .sec-hd');
-  startLessonAudio(textEl.textContent.replace(/[ \t]+/g,' ').trim(),'pack-listen-btn',{title:hd?hd.textContent.trim():'Lesson pack'});
+  if(!lesson&&!textEl)return;
+  // Built exactly like toggleLessonAudio's text, so the recording and the
+  // read-aloud fallback say the same words.
+  let text;
+  if(lesson){
+    text=`${lesson.title}. ${lesson.content}`;
+    if(lesson.action)text+="\n\nToday's action: "+lesson.action;
+    if(lesson.reflection)text+='\n\nSomething to reflect on: '+lesson.reflection;
+  }else{
+    text=textEl.textContent.replace(/[ \t]+/g,' ').trim();
+  }
+  // The ready-made packs have real recordings in all five voices, filed under
+  // a "pack:" category so they cannot collide with a track name. A pack the
+  // person built themselves has none, so that key simply misses the manifest
+  // and it reads aloud instead - which is the right answer, not a failure.
+  startLessonAudio(text,'pack-listen-btn',{
+    category:key?`pack:${key}`:null,
+    day:lesson?lesson.day:null,
+    variant:'base',
+    title:lesson?lesson.title:(meta?meta.title:'Lesson pack'),
+  });
 }
 
 // ─── URGE SURFING TIMER (Pro) ─────────────────────────────────────────────────
@@ -9682,7 +9705,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.5.0';
+const APP_VERSION='5.6.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

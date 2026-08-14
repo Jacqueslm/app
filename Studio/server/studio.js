@@ -1119,7 +1119,7 @@ function youtubeTitleFrom(caption) {
 // Build the metadata object for ONE channel. Only fields the network's input
 // actually declares are included, and an enum value is checked against what
 // Buffer lists before it is sent.
-async function bufferMetadataFor(service, { caption, youtubeCategoryId, facebookType }) {
+async function bufferMetadataFor(service, { caption, youtubeCategoryId, facebookType, aiLabel }) {
   const shape = await bufferMetaShape();
   if (!shape.key) return null;
   const fields = shape.networks[service];
@@ -1135,6 +1135,11 @@ async function bufferMetadataFor(service, { caption, youtubeCategoryId, facebook
       const val = String(youtubeCategoryId || '22');
       meta[cat.name] = /^Int$/i.test(cat.scalar || '') ? Number(val) : val;
     }
+    // YouTube now requires AI disclosure for realistic AI content; pass the
+    // flag through when the caption is labeled as AI-made.
+    if (has('isAiGenerated') && aiLabel) meta.isAiGenerated = true;
+  } else if (service === 'tiktok') {
+    if (has('isAiGenerated') && aiLabel) meta.isAiGenerated = true;
   } else if (service === 'facebook') {
     const t = has('type');
     if (t) {
@@ -1264,6 +1269,7 @@ router.post('/buffer/post', async (req, res) => {
           caption,
           youtubeCategoryId: req.body?.youtubeCategoryId,
           facebookType: req.body?.facebookType,
+          aiLabel,
         });
         if (extra) wanted[extra.key] = extra.value;
       } catch (_) { /* Buffer's own refusal is more useful than ours */ }

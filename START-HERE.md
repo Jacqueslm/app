@@ -7,7 +7,7 @@ does NOT carry between sessions — this repo is the shared memory. Read this fi
 
 ## OPEN ITEMS — 14 Aug 2026
 
-Three things, in order. Everything else is committed, pushed and working.
+Two things left. Everything else is committed, pushed and working.
 
 1. ~~**Paste the corrected full description into Play Console.**~~ **DONE
    14 Aug 2026 — Jacques pasted it and saved.** The live listing now matches
@@ -18,8 +18,9 @@ Three things, in order. Everything else is committed, pushed and working.
    `https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9`.
    Two are dropdowns and Jacques's call: **Difficult** for recruiting, **1k–10k**
    for first-year installs.
-3. **A test post captioned `hi` is queued in Buffer** on Facebook, TikTok and
-   YouTube. It will publish at the next open slot unless deleted.
+3. ~~**Buffer test post captioned `hi`.**~~ **DELETED 14 Aug 2026.** Buffer
+   posting itself is fixed and confirmed working on Facebook, TikTok and
+   YouTube — do not "fix" it again.
 4. **NASADAD** — emailed 12 Aug to mwhitter@nasadad.org, no reply. Normal.
    **Do not chase before 19 Aug.** Missouri DBH is waiting behind it and has
    confirmed in writing that a NASADAD listing is a route onto their page.

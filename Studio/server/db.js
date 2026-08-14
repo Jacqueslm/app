@@ -282,8 +282,37 @@ function getAsset(userId, id) {
   return db.prepare('SELECT * FROM studio_assets WHERE user_id = ? AND id = ?').get(userId, id);
 }
 
+// Deleting a clip used to fail with a bare "Something went wrong on the server"
+// whenever that clip was sitting in the Post queue.
+//
+// The reason is a difference people get caught by: **node:sqlite enforces
+// foreign keys by default** (better-sqlite3 does not), and social_posts.asset_id
+// REFERENCES studio_assets(id). So the DELETE threw a constraint error, the
+// route had no handler for it, and the only thing you could see was that the
+// clip would not go away and nothing said why.
+//
+// What happens now, in one transaction:
+//   - a post still waiting to go out loses its whole row. A queued post with no
+//     video is not a post, it is a thing that fails at 9am.
+//   - a post already sent keeps its row for the history, and just forgets which
+//     asset it used.
+// Returns how many queued posts were removed so the caller can say so.
 function deleteAsset(userId, id) {
-  db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
+  db.exec('BEGIN');
+  try {
+    const pending = db.prepare(
+      "SELECT COUNT(*) AS c FROM social_posts WHERE user_id = ? AND asset_id = ? AND status != 'posted'",
+    ).get(userId, id).c;
+    db.prepare("DELETE FROM social_posts WHERE user_id = ? AND asset_id = ? AND status != 'posted'").run(userId, id);
+    db.prepare('UPDATE social_posts SET asset_id = NULL WHERE user_id = ? AND asset_id = ?').run(userId, id);
+    try { db.prepare('UPDATE fal_receipts SET asset_id = NULL WHERE user_id = ? AND asset_id = ?').run(userId, id); } catch (_) {}
+    db.prepare('DELETE FROM studio_assets WHERE user_id = ? AND id = ?').run(userId, id);
+    db.exec('COMMIT');
+    return { queuedPostsRemoved: pending };
+  } catch (err) {
+    try { db.exec('ROLLBACK'); } catch (_) {}
+    throw err;
+  }
 }
 
 // Wipe ALL of a user's content (pictures, videos, songs, characters, locations,

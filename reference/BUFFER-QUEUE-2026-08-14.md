@@ -26,6 +26,35 @@ Arriving traffic should find a running channel, not an empty one.
    Gambler post gets **pinned** — money trouble is what that audience
    recognizes fastest, and your Facebook numbers are your best numbers.
 
+---
+
+## TIKTOK "SPAM" WARNING — read before loading TikTok posts
+
+14 Aug: TikTok started answering uploads with a **spam** message. Posts went
+through after hitting publish several times. The account has no flags and no
+violations — this is the automated upload filter, not moderation.
+
+**Do not hit publish repeatedly.** That is the one thing that makes it worse.
+Each retry inside a short window reads as the exact behaviour the filter is
+watching for, so a post that would have gone through on a single try gets a
+harder block. If it refuses, **wait an hour and try once**.
+
+**Two changes made to the TikTok captions here because of it:**
+- **`#freeapp` removed from every TikTok caption.** App-promotion tags are what
+  TikTok's spam classifier is built to catch, and it was on both 50s posts.
+- **The hashtag blocks no longer repeat.** All three TikTok posts previously
+  shared `#lovinganaddict #recoverytok`. Identical tag blocks posted day after
+  day from the same account is a spam signal on its own. They are now varied.
+
+Confidence, honestly: the retry escalation is certain — that is documented
+TikTok behaviour. The `#freeapp` and repeated-tags part is likely rather than
+proven; both are known classifier triggers and neither costs anything to drop.
+
+**Never put the domain in a TikTok caption.** It isn't in any of these. Keep it
+that way — links in TikTok captions are a much stronger spam signal than tags.
+
+---
+
 **What to look at Monday (not before):** /admin/stats for site hits from the
 caption links, and each platform's view counts per hook line. The winning hook
 becomes next week's default. Do not read numbers Saturday — two-day-old shorts
@@ -39,7 +68,7 @@ tell you nothing but anxiety.
 
 > He was laughing at the TV. I was looking at four years of savings.
 >
-> #gamblingaddiction #gamblingrecovery #lovinganaddict #recoverytok #freeapp
+> #gamblingaddiction #gamblingrecovery #lovinganaddict #recoverytok
 
 ### 2 · Instagram Reels · 12:30pm · The Packages (50s master)
 
@@ -106,7 +135,7 @@ tell you nothing but anxiety.
 
 > None of them were big. That's the thing.
 >
-> #shoppingaddiction #compulsiveshopping #lovinganaddict #recoverytok #freeapp
+> #shoppingaddiction #compulsiveshopping #debtfreejourney #recoveryjourney
 
 ### 6 · Instagram Reels · 11:00am · The Gambler (50s master)
 
@@ -181,7 +210,7 @@ which line does the pulling.*
 
 > how to stop gambling — the part nobody tells the person watching it happen
 >
-> #howtostopgambling #gamblingaddiction #lovinganaddict #recoverytok
+> #howtostopgambling #gamblingaddiction #recoverysupport #lovinganaddict
 
 ### 10 · Instagram Reels · 9:30am · The Packages (30s cut)
 

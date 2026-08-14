@@ -285,6 +285,19 @@ hits harder.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
+**b0859 — stock fills the gaps, and the query builder is not a bug.**
+`server/stock-query.js` deliberately keeps the panel name and the narration as
+**separate search attempts** rather than one merged query. Merging them was
+tried first and was worse: `01_drive` + "Nobody calls this an addiction" became
+`"drive nobody calls addiction"`, which finds nothing, where `"drive"` alone
+finds footage. The stoplist strips story verbs (*makes, saw, stopped, hard*)
+because they describe no picture, and ALL-CAPS words are dropped because that is
+how a plan writes a character and no stock library has your Hector in it. There
+are 14 tests in `server/test/` — run `node --test Studio/server/test/*.test.js`
+before touching any of it. **Stock only ever fills empty shots; it never
+replaces a picture Jacques put there.**
+
+
 Studio moved b0848 → b0856 in one long session. Every item below was a real
 fault that took real work to find. **Read this before editing anything under
 `Studio/`.**

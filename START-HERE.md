@@ -156,6 +156,14 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — BUFFER POSTING CONFIRMED WORKING (b0855, 9:39am)
+**Verified by Jacques on his own machine: "queued" on all three channels —
+Facebook, TikTok and YouTube — from the Post tab.** Buffer is no longer broken.
+Do not re-diagnose it, and do not reintroduce the video thumbnail (see below).
+
+Note for next time he posts: the YouTube **title is the caption's first line**,
+so a caption starting with a throwaway word becomes the video's title.
+
 ### 14 Aug — Studio b0855: BUFFER POSTING FIXED (his errors named all three)
 The b0854 logging did its job immediately — Jacques posted and Buffer said
 exactly what was wrong. Connection was never broken (org + 3 channels found);

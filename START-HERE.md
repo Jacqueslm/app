@@ -241,6 +241,38 @@ Jacques asked for a simpler, more autonomous Studio workflow. Shipped:
   the computed finished length, reload-restore round-trips every field.
 - Manual (`HOW-TO-USE.md`) updated. Version badge b0848 → b0849.
 
+## CLOSED TESTING — DONE. DO NOT RE-ASK. (verified 14 Aug 2026, 6:04am)
+
+**Read this before saying one word to Jacques about testers, reports, or the
+Play Store checklist. Asking him to redo any of it is the single thing that
+most wastes his time, and it has happened more than once.**
+
+Testing ran through **testerscommunity.com** (Starter plan), app dashboard
+`testerscommunity.com/app-details/XF05RakyIVSOpfpwYHfb`:
+
+- **Day 16 of 16. 0 days remaining. 94%+ complete.** All 16 days ticked green.
+- **38 testers actively testing against a target of 15** (Google's floor is 12).
+  Oversubscribed on purpose: Google needs 12 opted in for 14 *continuous* days,
+  and if dropouts take the count under 12 the clock can reset. 38 is insurance,
+  not overkill. **This is the answer to "why 38 testers" — do not re-derive it.**
+- **Reports: 2/2 ready, and Jacques ALREADY READ THEM.** He acted on them:
+  **the new Play Store visuals/graphics were made because of tester advice.**
+  That work is finished. Do not tell him to go download or review reports.
+- The service carries a 100% Production Access Guarantee — full refund for the
+  app if Google declines production after the 14 days are completed.
+
+**So the testing phase is CLOSED and its feedback is already spent.** When the
+production application asks what testers said and what changed: the answer is
+the Play Store visuals were reworked on tester feedback, plus his own phone-test
+fixes (voice journaling cut-off, hardware back button, Rooms/Share milestones
+buried in Profile) — all shipped in 5.1.6 / 5.2.0.
+
+**The standing rule this exists to enforce:** before asking Jacques to do
+anything, check this file for whether it is already done. He is running two AIs
+and every repeated question costs him twice.
+
+---
+
 ## PREVIOUS STATUS (2026-08-12)
 
 **Play Store:** closed testing ends **14 Aug**. That is the day Jacques applies

@@ -14,7 +14,9 @@ marked DONE below is closed history, not a to-do list.
 
 ## OPEN ITEMS — 14 Aug 2026
 
-Two things left. Everything else is committed, pushed and working.
+One thing left, and it is not due until 19 Aug. Everything else is committed,
+pushed and working. **The Play Store is submitted. Do not ask him to do anything
+in Play Console — just wait for Google's email.**
 
 1. ~~**Paste the corrected full description into Play Console.**~~ **SENT FOR
    REVIEW 14 Aug 2026, 12:46pm.** Jacques pasted it, saved, and sent it through
@@ -24,12 +26,12 @@ Two things left. Everything else is committed, pushed and working.
    by `make-captioned-screenshots.py`, and the feature graphic is the icon and
    app name composited on the app gradient. No generative AI imagery is used
    anywhere in the listing. Do not re-ask him to do this.
-2. **Apply for production access.** Every requirement is met (see CLOSED TESTING
-   below — do not re-verify it). The ten answers are written, verified against
-   the code, and live at
-   `https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9`.
-   Two are dropdowns and Jacques's call: **Difficult** for recruiting, **1k–10k**
-   for first-year installs.
+2. ~~**Apply for production access.**~~ **SUBMITTED 14 Aug 2026, 1:09pm.**
+   Google says 7 days or less, by email to the account owner. All three
+   requirements showed struck through with green ticks before applying, so
+   eligibility is not in question. **Do not re-verify it, do not re-apply, do
+   not walk him back through the form.** The answers actually submitted are
+   recorded below under PRODUCTION APPLICATION — AS SUBMITTED.
 3. ~~**Buffer test post captioned `hi`.**~~ **DELETED 14 Aug 2026.** Buffer
    posting itself is fixed and confirmed working on Facebook, TikTok and
    YouTube — do not "fix" it again.
@@ -44,6 +46,77 @@ and consider Google Sign-In only if the funnel shows people dropping at signup.
 **Never proxy the `www` DNS record while Google is reviewing** —
 `.well-known/assetlinks.json` is what verifies the Android app owns the domain,
 and breaking it is silent.
+
+---
+
+## PRODUCTION APPLICATION — AS SUBMITTED (14 Aug 2026, 1:09pm)
+
+Kept verbatim so nobody has to reconstruct it, and so any follow-up Google sends
+can be answered consistently. Every box had a 300-character limit.
+
+**1. How did you recruit users for your closed test?**
+> I used a paid third-party testing service, Testers Community
+> (testerscommunity.com), on their Starter plan. I did not have twelve people in
+> my own network who would install the app and open it daily for two weeks. 38
+> testers enrolled, against a target of 15.
+
+**2. How easy was it to recruit testers?** → **Difficult**
+
+**3. Describe the engagement you received from testers.**
+> Testers opened the app daily through onboarding, the day counter, lessons and
+> the journal. Engagement was genuine but not identical to real use - they were
+> doing a task, so they explored more screens and went shallower than someone
+> working on a habit. Their feedback is why I rebuilt the screenshots.
+
+**4. Summary of feedback, and how you collected it.**
+> Collected as two written reports through the Testers Community dashboard, plus
+> my own daily use. Main point: the store screenshots did not show what any
+> screen does, so I rebuilt them with captions. Testers also wanted more free
+> content, so 15 days of every pack are free. No crashes reported.
+
+**5. Who is the intended audience?**
+> Adults working on a habit they want to change - drinking, drugs, gambling,
+> pornography, nicotine, screens or food - and equally the partners, parents and
+> friends supporting someone else, who have their own track in the app. Not
+> aimed at clinicians, not aimed at minors.
+
+**6. Describe how your app provides value to users.**
+> It is built for the moment the urge hits, not for reporting. One tap opens
+> guided breathing, grounding and a hands-free walkthrough. A day counter keeps
+> a lifetime total that never resets. Daily plain-language lessons, a private
+> journal, and a companion that answers at any hour.
+
+**7. Expected installs in the first year?** → **0 – 10K**
+
+**8. What changes did you make based on the closed test?**
+> Rebuilt the store screenshots with captions, since testers said the listing did
+> not show what any screen does. Moved the paywall back: 15 days of every lesson
+> pack are now free, and voice journaling is free. Added spoken narration to
+> every lesson and dictation to text inputs. Now on build 5.6.1.
+
+**9. How did you decide the app is ready for production?**
+> 16 continuous days of closed testing with no crashes reported, plus my own
+> daily use on a physical Android phone. I walked every screen by hand -
+> onboarding, all lesson tracks, SOS, journal, paywall and settings. Errors are
+> logged server-side and reviewed. Every point testers raised has shipped.
+
+**Two deliberate choices in these answers, do not "improve" them later:**
+- The paid testing service is named outright, and the engagement answer says
+  plainly that tester behaviour differed from real users. Google asks that
+  second part explicitly. Claiming testers behaved like real users is what gets
+  applications flagged.
+- No outcome claims anywhere ("helps you quit", "reduces cravings"). The app is
+  health-adjacent and those claims are a rejection trigger.
+
+**If Google approves:** approval is not a release. Still required —
+**Test and release → Production → Create new release**, upload the **same
+`.aab`** currently in closed testing, release notes, Save → Review release →
+Start rollout. Note **managed publishing is OFF**, so anything sent goes live on
+approval with no hold step.
+
+**If Google declines:** the Testers Community Starter plan carries a 100%
+Production Access Guarantee — a full refund if Google declines after the 14 days
+were completed. Do not let that lapse unclaimed.
 
 ---
 

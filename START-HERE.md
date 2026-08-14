@@ -141,6 +141,21 @@ one thread in Gmail). Two days of silence at a national association is normal �
 do not chase before ~19 Aug. Missouri DBH stays parked behind it; the play when
 NASADAD lists us is one line back into the DBH thread, per NEW-AVENUES/COMPANIES.
 
+### 14 Aug (later) — App v5.5.0: free tier opens wide, congrats card, speak anywhere
+Jacques's call, deliberate: **the first 15 days of EVERY lesson pack are now
+free** — Spiritual, Supporting Someone boundary days, all predefined packs
+(`openPack` no longer pro-gates; `renderPackLesson` locks day 16+), and the
+**Together couples program opens free to day 15** (`openProTool` passes
+'couples' through; gate card inside `renderCouples`). **Voice journaling is
+free** (Pro badge removed from the journal pill, pricing lists and FAQ
+updated). **`toggleDictation(inputId)`** adds a "Speak it instead" mic to the
+lesson reflection, pack reflection, and milestone reflection boxes.
+**Congratulations card** (`openCongratsCard` — "Keep going — you can do this."
++ celebrationBurst) fires on finishing any pack's last lesson and on Together
+day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
+across the quadruple. All paths verified in headless Chromium against the real
+server. No Data safety change, no Play impact.
+
 ### 14 Aug — Studio b0849: Campaign gone, Quick Video preview, Auto shorts
 Jacques asked for a simpler, more autonomous Studio workflow. Shipped:
 - **Campaign Export removed entirely** — UI card, all its JS, the `/campaign`

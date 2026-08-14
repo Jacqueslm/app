@@ -17,7 +17,7 @@ Each episode opens a door nobody else is standing in:
 | 1 | Two men | Gambling | Same-sex male couples · the only addiction with no physical tell |
 | 2 | Two women | Shopping | Same-sex female couples · **880/mo, KD 41 — a Build term, not too hard** |
 | ~~3~~ | ~~Man + woman, flipped~~ | ~~Food / binge~~ | **DROPPED by Jacques, 12 Aug 2026 — do not re-pitch it.** The lane is still served by the `/how-to-stop-binge-eating` page, which is live and targets the 9,900/mo term. What was given up is the video, not the search. |
-| 3 | Young couple | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
+| — | Young couple | Doomscrolling | **BENCHED** | 1,600/mo, KD 24, youngest audience, cheapest reach |
 
 **The rule that makes the series work:** the person using is never the villain
 and never forgiven. Every episode has one line that says *they're not a bad
@@ -249,7 +249,10 @@ careful, and a wife who notices he is never hungry.
 
 ---
 
-# EPISODE 3 · Right Here — a young couple, doomscrolling
+# BENCHED (no episode number) · Right Here — a young couple, doomscrolling
+
+**Held back 14 Aug 2026.** One doomscrolling episode in the lineup, and it went
+to Nia. Two people both on their phones is also the version everybody has seen.
 
 > **AMARA:** Black woman, late 20s, box braids, oversized sweatshirt.
 > **JOSH:** white man, late 20s, messy dark hair, hoodie, tired eyes.

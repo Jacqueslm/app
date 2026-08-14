@@ -134,7 +134,36 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
-## CURRENT STATUS (2026-08-12) — newest, read this first
+## CURRENT STATUS (2026-08-14) — newest, read this first
+
+**NASADAD: no reply yet** as of 14 Aug (sent 12 Aug to mwhitter@nasadad.org, the
+one thread in Gmail). Two days of silence at a national association is normal —
+do not chase before ~19 Aug. Missouri DBH stays parked behind it; the play when
+NASADAD lists us is one line back into the DBH thread, per NEW-AVENUES/COMPANIES.
+
+### 14 Aug — Studio b0849: Campaign gone, Quick Video preview, Auto shorts
+Jacques asked for a simpler, more autonomous Studio workflow. Shipped:
+- **Campaign Export removed entirely** — UI card, all its JS, the `/campaign`
+  server route. The flow that replaced it: ⚡ Auto shorts → Post tab → phone.
+  **Song title/artist inputs (`#cp-title`/`#cp-artist`) moved to the Lyrics &
+  Captions card** — three other features (title intro, storyboard, crew
+  director) read them; do not delete them as leftovers, they are load-bearing.
+- **Quick Video ▶ Preview** — free instant in-browser canvas playback of the
+  whole plan (moves approximated, captions via the real `drawOverlay` at the
+  row's chosen position, blends/cuts/dip-to-black, song audio). Uses the
+  assembler's own length arithmetic. `pvStop()` runs at assemble.
+- **🎯 Fit shots to song length** — scales stills (never filmed clips) so the
+  finished length lands on the song; two passes because of the 1.5s floor.
+- **Quick Video plan survives reload** — `tsid-studio-qk` localStorage key,
+  restored against the live library at boot (missing assets dropped silently).
+- **⚡ Auto shorts** — one tap: `autoDetectHighlights(silent)` (refactored out
+  of the hl-auto button) → 15s+30s list → render all. Manual controls folded
+  into a "🛠 Fine control" `<details>` drawer.
+- All verified in headless Chromium: no page errors, preview plays and stops at
+  the computed finished length, reload-restore round-trips every field.
+- Manual (`HOW-TO-USE.md`) updated. Version badge b0848 → b0849.
+
+## PREVIOUS STATUS (2026-08-12)
 
 **Play Store:** closed testing ends **14 Aug**. That is the day Jacques applies
 for production, not before. Everything on the Play side is done and waiting.

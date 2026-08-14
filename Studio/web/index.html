@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0848</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0849</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -585,7 +585,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
     </div>
     <div class="card" id="pipe-card">
-      <h3>🚀 One-Click Pipeline <span class="usage">— song in, campaign out, you approve each step</span></h3>
+      <h3>🚀 One-Click Pipeline <span class="usage">— song in, finished video and shorts out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
       <p class="usage">Each step lights up when the one before it is done. Nothing is generated without you pressing its button — every checkpoint is yours.</p>
     </div>
@@ -619,6 +619,14 @@ body.simple-only #view-simple{display:flex !important}
         <div id="qk-premade" class="row" style="gap:6px;margin-top:4px"></div>
       </div>
       <div class="chips" id="qk-format"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="qk-preview" style="flex:1;min-width:150px">▶ Preview — free, instant</button>
+        <button class="btn2 quiet" id="qk-fit-song" style="flex:1;min-width:150px">🎯 Fit shots to song length</button>
+      </div>
+      <div id="qk-pv-stage" style="display:none">
+        <canvas id="qk-pv-canvas" style="width:100%;max-height:60vh;border-radius:12px;background:#000;display:block;margin:0 auto"></canvas>
+        <p class="usage" id="qk-pv-note" style="margin:4px 0 0"></p>
+      </div>
       <button class="gen-btn" id="qk-assemble">3️⃣ &nbsp;Assemble my video</button>
       <div class="progress-line" id="qk-prog"><div></div></div>
       <p class="usage" id="qk-status"></p>
@@ -815,6 +823,10 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card">
       <h3>🎤 Lyrics &amp; Captions</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="input" id="cp-title" placeholder="Song title" style="flex:1;min-width:120px">
+        <input class="input" id="cp-artist" placeholder="Artist name" style="flex:1;min-width:120px">
+      </div>
       <textarea id="lyr-text" placeholder="Paste your lyrics — one line per caption" style="min-height:88px"></textarea>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="lyr-tap">▶ Tap to sync</button>
@@ -888,71 +900,47 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card">
       <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
+      <button class="gen-btn" id="sh-auto" style="width:100%">⚡ Auto shorts — find the hook, cut 15s + 30s, render</button>
+      <p class="usage" style="margin:0">One tap does the whole job: Studio listens for your chorus or drop, plans the cuts so each one opens on it, and renders them. The list appears below — tweak anything, or just download.</p>
       <div class="row">
         <label class="lbl">📱 Quick templates <span style="text-transform:none;font-weight:400">— one tap sets the length, captions &amp; loop, then builds</span></label>
         <div class="chips" id="sh-templates"></div>
       </div>
-      <div class="row">
-        <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
-        <div class="chips" id="hl-chips"></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <input class="input" id="hl-label" placeholder="hook / drop / chorus" style="flex:1;min-width:90px">
-          <input class="input" id="hl-time" type="number" min="0" step="0.5" placeholder="time (s)" style="width:90px">
-          <button class="btn2" id="hl-add">Mark</button>
-          <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
+      <details>
+        <summary style="cursor:pointer;font-size:13px;color:var(--ts)">🛠 Fine control — mark your own moments, pick sentences, choose lengths</summary>
+        <div class="row" style="margin-top:8px">
+          <label class="lbl">Highlights <span style="text-transform:none;font-weight:400">— mark the hook, the drop, key visuals</span></label>
+          <div class="chips" id="hl-chips"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input class="input" id="hl-label" placeholder="hook / drop / chorus" style="flex:1;min-width:90px">
+            <input class="input" id="hl-time" type="number" min="0" step="0.5" placeholder="time (s)" style="width:90px">
+            <button class="btn2" id="hl-add">Mark</button>
+            <button class="btn2 quiet" id="hl-auto">Auto-detect from music</button>
+          </div>
         </div>
-      </div>
-      <div class="row" id="clip-picker-row">
-        <label class="lbl">Clip picker <span style="text-transform:none;font-weight:400">— pick the strongest sentences from your filmed video</span></label>
-        <div id="cp-transcript-list" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn2" id="cp-load-transcript">Load my transcript</button>
-          <button class="btn2" id="cp-add-clips" style="display:none">Add selected as clips</button>
-          <button class="btn2 quiet" id="cp-clear-sel" style="display:none">Clear selection</button>
+        <div class="row" id="clip-picker-row">
+          <label class="lbl">Clip picker <span style="text-transform:none;font-weight:400">— pick the strongest sentences from your filmed video</span></label>
+          <div id="cp-transcript-list" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn2" id="cp-load-transcript">Load my transcript</button>
+            <button class="btn2" id="cp-add-clips" style="display:none">Add selected as clips</button>
+            <button class="btn2 quiet" id="cp-clear-sel" style="display:none">Clear selection</button>
+          </div>
         </div>
-      </div>
-      <div class="trim" style="font-size:12px">
-        <span>Lengths</span>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="7">7s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="30" checked>30s</label>
-        <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="60">60s</label>
-        <label style="display:flex;align-items:center;gap:4px;margin-left:auto"><input type="checkbox" id="sh-loop-default" checked>seamless loop</label>
-      </div>
-      <button class="btn2" id="sh-build">Build shorts list</button>
+        <div class="trim" style="font-size:12px">
+          <span>Lengths</span>
+          <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="7">7s</label>
+          <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="15" checked>15s</label>
+          <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="30" checked>30s</label>
+          <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" class="sh-len" value="60">60s</label>
+          <label style="display:flex;align-items:center;gap:4px;margin-left:auto"><input type="checkbox" id="sh-loop-default" checked>seamless loop</label>
+        </div>
+        <button class="btn2" id="sh-build" style="width:100%">Build shorts list</button>
+      </details>
       <div id="sh-list" class="row"></div>
       <button class="gen-btn" id="sh-render" style="display:none">Render all shorts</button>
       <div id="sh-results" class="row"></div>
       <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
-    </div>
-
-    <div class="card">
-      <h3>📦 Campaign Export <span class="usage">(one video → a ready-to-post campaign)</span></h3>
-      <input class="input" id="cp-title" placeholder="Song title">
-      <input class="input" id="cp-artist" placeholder="Artist name">
-      <input class="input" id="cp-link" placeholder="Link (Spotify / YouTube / linktree…)">
-      <input class="input" id="cp-tags" placeholder="#yourhashtags #music #newmusic">
-      <div class="row">
-        <label class="lbl">Main video</label>
-        <select class="input" id="cp-main"></select>
-      </div>
-      <div class="row">
-        <label class="lbl">Shorts to include <span style="text-transform:none;font-weight:400">(tap to toggle)</span></label>
-        <div class="chips" id="cp-shorts"></div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2" id="cp-thumbs">Make thumbnails</button>
-        <button class="btn2" id="cp-captions">Write my captions</button>
-      </div>
-      <div class="char-refs" id="cp-thumb-row"></div>
-      <div id="cp-posts" class="row"></div>
-      <div class="trim" style="font-size:12px">
-        <span>Start posting on</span><input type="date" id="cp-date" class="input" style="width:auto;padding:6px 8px;font-size:12px">
-        <span>· one post per day, main video first</span>
-      </div>
-      <button class="gen-btn" id="cp-export">Export campaign (ZIP)</button>
-      <p class="usage" id="cp-status"></p>
-      <p class="usage">The ZIP contains your videos, thumbnails, a posts.csv with every caption + suggested time, and campaign.json (ready for the Buffer API hookup later). Upload to Buffer post-by-post — everything's pre-written.</p>
     </div>
 
     <div class="card adv-card">
@@ -967,7 +955,7 @@ body.simple-only #view-simple{display:flex !important}
 
     <div class="card adv-card">
       <h3>📖 Guide &amp; help</h3>
-      <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow. Open it any time.</p>
+      <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-post flow. Open it any time.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="doc-guide">📖 Open the guide (PDF)</button>
         <button class="btn2 quiet" id="doc-pricelist">📄 Price list (PDF)</button>
@@ -5759,12 +5747,6 @@ function renderSeqPickers() {
     ? music.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
     : '<option value="">No songs uploaded yet</option>';
 
-  const fullVids = st.assets.filter((a) => a.kind === 'video' && !a.label.startsWith('short_'));
-  $('#cp-main').innerHTML = fullVids.length
-    ? fullVids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('')
-    : '<option value="">Render a video first</option>';
-  renderCampaignShorts();
-
   const kbCurrent = $('#kb-image').value;
   $('#kb-image').innerHTML = '<option value="">Choose a still image…</option>' +
     imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
@@ -7065,7 +7047,7 @@ $('#crew-direct').onclick = async () => {
         if (shots.some((s) => s.scene.section === 'bridge')) tips.push('🎭 The bridge is a great <b>Live Portrait</b> moment (~10¢): film your face performing the emotion, your still delivers it.');
         return tips.length ? `<p style="font-size:12px;margin:0">💡 <b>Crew suggestions (optional, not in the budget):</b></p>` + tips.slice(0, 4).map((t) => `<p style="font-size:12px;color:var(--ts);margin:0">&nbsp;&nbsp;${t}</p>`).join('') : '';
       })()
-      + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> shorts &amp; reels cut to open right on the hook (the Shorts card's auto-detect reads your captions for the chorus), then Campaign Export packs everything with captions and a posting schedule.</p>`
+      + `<p style="font-size:12px;margin:0">📱 <b>After the render (free):</b> shorts &amp; reels cut to open right on the hook — the Shorts card's ⚡ Auto shorts button finds the hook and renders the 15s and 30s cuts in one tap.</p>`
       + `<p style="font-size:12px;margin:0"><b>💼 Producer's budget check:</b> $${spent.toFixed(2)} of $${budget.toFixed(2)} — ${
         shots.filter((s) => s.generate).length} scene(s) to generate, ${shots.filter((s) => !s.generate).length} from your images. This plan is free — nothing is charged until you press the Producer.</p>`;
     $('#crew-produce').style.display = 'block';
@@ -7147,7 +7129,7 @@ $('#crew-produce').onclick = async () => {
     b.innerHTML = '<span class="spinner"></span>Assembling…';
     await $('#qk-assemble').onclick();
     crew.eqByIndex = null; // grade is on the timeline now; manual assembles stay clean
-    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts & campaign are one card away.';
+    $('#crew-status').textContent = '🎉 Done — your video is below in Quick Video (and the timeline is loaded for tweaks). Shorts are one tap away — ⚡ Auto shorts.';
     crew.qcFlags = 0;
   } catch (e) { setErr('#seq-err', e.message); }
   b.disabled = false; b.textContent = '💼 Producer: make it';
@@ -7209,8 +7191,8 @@ function renderPipeline() {
       hint: 'Full video with captions burned in', action: 'Render', run: () => $('#seq-render').onclick(),
     },
     {
-      icon: '📱', name: 'Shorts & campaign', done: false, needs: st.seq.length > 0,
-      hint: 'Hook-aware shorts, then the posting ZIP', action: 'Open', run: () => flashCard('#hl-auto'),
+      icon: '📱', name: 'Shorts', done: false, needs: st.seq.length > 0,
+      hint: 'One tap finds the hook and renders the cuts', action: 'Open', run: () => flashCard('#sh-auto'),
     },
   ];
   box.innerHTML = '';
@@ -7930,15 +7912,14 @@ $('#hl-add').onclick = () => {
 };
 
 // Find the loudest sustained sections of the song (drop/chorus candidates)
-// and mark them as highlights, mapped into timeline time.
-$('#hl-auto').onclick = async () => {
-  setErr('#seq-err', null);
+// and mark them as highlights, mapped into timeline time. Callable silently so
+// ⚡ Auto shorts can run it without the button UI — a miss there just means the
+// list builder falls back to its open/mid/end spread.
+async function autoDetectHighlights(silent) {
   const asset = firstMusicAsset();
-  if (!asset) return setErr('#seq-err', 'Add a music track first.');
+  if (!asset) { if (!silent) setErr('#seq-err', 'Add a music track first.'); return 0; }
   const total = timelineTotal();
-  if (!total) return setErr('#seq-err', 'Build your timeline first.');
-  $('#hl-auto').disabled = true;
-  $('#hl-auto').textContent = 'Listening…';
+  if (!total) { if (!silent) setErr('#seq-err', 'Build your timeline first.'); return 0; }
   try {
     const buf = await (await fetch(asset.url)).arrayBuffer();
     const ac = new (window.AudioContext || window.webkitAudioContext)();
@@ -7981,16 +7962,52 @@ $('#hl-auto').onclick = async () => {
       if (picked.some((p) => Math.abs(p.t - tl) < 15)) continue;
       picked.push({ t: tl, label: 'drop' });
     }
-    if (!picked.length) return setErr('#seq-err', 'Could not find distinct loud sections inside the timeline.');
+    if (!picked.length) { if (!silent) setErr('#seq-err', 'Could not find distinct loud sections inside the timeline.'); return 0; }
     picked.sort((a, b) => a.t - b.t).forEach((p, i) => {
       st.highlights.push({ label: picked.filter((x) => x.label === p.label).length > 1 ? `${p.label}${i + 1}` : p.label, time: Math.round(p.t * 10) / 10 });
     });
     renderHighlights(); persistDraft();
+    return picked.length;
   } catch (e) {
-    setErr('#seq-err', `Could not analyze that track: ${e.message}`);
+    if (!silent) setErr('#seq-err', `Could not analyze that track: ${e.message}`);
+    return 0;
+  }
+}
+$('#hl-auto').onclick = async () => {
+  setErr('#seq-err', null);
+  $('#hl-auto').disabled = true;
+  $('#hl-auto').textContent = 'Listening…';
+  await autoDetectHighlights(false);
+  $('#hl-auto').disabled = false;
+  $('#hl-auto').textContent = 'Auto-detect from music';
+};
+
+// ⚡ Auto shorts — the whole Shorts card in one tap. Listen for the hook, plan
+// 15s + 30s cuts that open on it, render them all. Every step is the same
+// machinery the manual buttons drive; this only removes the walking between
+// them. If the song won't analyze (or there is no song), the planner's own
+// open/mid/end spread still produces a usable batch rather than an error.
+$('#sh-auto').onclick = async () => {
+  if (st.busyRender) return;
+  setErr('#seq-err', null);
+  const total = timelineTotal();
+  if (!total) return setErr('#seq-err', 'Nothing to cut from yet — assemble a video first (Quick Video or the timeline), then tap this again.');
+  const btn = $('#sh-auto');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Finding your hook…';
+  try {
+    if (!st.highlights.length) await autoDetectHighlights(true);
+    document.querySelectorAll('.sh-len').forEach((el) => { el.checked = el.value === '15' || el.value === '30'; });
+    $('#sh-loop-default').checked = true;
+    $('#sh-build').onclick();
+    if (!st.shorts.length) throw new Error('No shorts could be planned from this timeline.');
+    btn.innerHTML = `<span class="spinner"></span>Rendering ${st.shorts.length} shorts…`;
+    await $('#sh-render').onclick();
+  } catch (e) {
+    setErr('#seq-err', e.message || 'Auto shorts hit a snag.');
   } finally {
-    $('#hl-auto').disabled = false;
-    $('#hl-auto').textContent = 'Auto-detect from music';
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Auto shorts — find the hook, cut 15s + 30s, render';
   }
 };
 
@@ -8279,8 +8296,23 @@ const QK_FX = [
 
 const qk = { shots: [], format: '9:16', busy: false };
 
+// A nine-shot plan was the one thing in Studio a page refresh could still eat —
+// the timeline has a draft, projects save, but Quick Video started from zero.
+// Every change writes the plan here; boot restores it against the library.
+function persistQkDraft() {
+  try {
+    localStorage.setItem('tsid-studio-qk', JSON.stringify({
+      format: qk.format,
+      shots: qk.shots.map((s) => ({
+        assetId: s.assetId, kind: s.kind, move: s.move, dur: s.dur, text: s.text,
+        transAfter: s.transAfter, fx: s.fx, pos: s.pos, speed: s.speed,
+      })),
+    }));
+  } catch (_) {}
+}
+
 // Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
-// else — Quick Video, pipeline, storyboard, shorts, campaign — is one tap away.
+// else — Quick Video, pipeline, storyboard, shorts — is one tap away.
 function applySimpleMode() {
   const simple = localStorage.getItem('tsid-studio-simple') !== '0';
   document.querySelectorAll('#view-seq > .card').forEach((c) => {
@@ -8302,7 +8334,7 @@ $('#mode-toggle').onclick = () => {
 function renderQkFormat() {
   chipRow($('#qk-format'), [
     { key: '9:16', label: 'Phone 9:16' }, { key: '16:9', label: 'YouTube 16:9' }, { key: '1:1', label: 'Square 1:1' },
-  ], qk.format, (k) => { qk.format = k; renderQkFormat(); });
+  ], qk.format, (k) => { qk.format = k; renderQkFormat(); persistQkDraft(); });
 }
 
 /* ---------------- paste a shot list ----------------
@@ -8551,15 +8583,17 @@ function renderQkShots() {
       </div>`;
     row.dataset.idx = i;
     const mv = row.querySelector('.q-move');           // absent on a video row
-    if (mv) mv.onchange = (e) => { s.move = e.target.value; };
-    row.querySelector('.q-fx').onchange = (e) => { s.fx = e.target.value; };
-    row.querySelector('.q-dur').onchange = (e) => { s.dur = Number(e.target.value); };
+    if (mv) mv.onchange = (e) => { s.move = e.target.value; persistQkDraft(); };
+    row.querySelector('.q-fx').onchange = (e) => { s.fx = e.target.value; persistQkDraft(); };
+    // duration and transition changes move the finished length, so the total
+    // line follows them live instead of waiting for the next full re-render
+    row.querySelector('.q-dur').onchange = (e) => { s.dur = Number(e.target.value); renderQkTotal(); persistQkDraft(); };
     const tr = row.querySelector('.q-tr');
-    if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; };
-    row.querySelector('.q-text').oninput = (e) => { s.text = e.target.value; };
-    row.querySelector('.q-pos').onchange = (e) => { s.pos = Number(e.target.value); };
+    if (tr) tr.onchange = (e) => { s.transAfter = e.target.value; renderQkTotal(); persistQkDraft(); };
+    row.querySelector('.q-text').oninput = (e) => { s.text = e.target.value; persistQkDraft(); };
+    row.querySelector('.q-pos').onchange = (e) => { s.pos = Number(e.target.value); persistQkDraft(); };
     const sp = row.querySelector('.q-speed');   // absent on a video row
-    if (sp) sp.onchange = (e) => { s.speed = e.target.value; };
+    if (sp) sp.onchange = (e) => { s.speed = e.target.value; persistQkDraft(); };
     // Moving a picture used to be one arrow tap per position - fifteen taps to
     // bring the last shot to the front. Three ways now: drag the ⠿ handle
     // anywhere in the list, shift-click an arrow to jump to the end, or
@@ -8591,6 +8625,7 @@ function renderQkShots() {
     list.appendChild(row);
   });
   renderQkTotal();
+  persistQkDraft();
 }
 
 /* ---------------- One-tap short ----------------
@@ -8910,6 +8945,7 @@ $('#qk-import-song').onclick = async () => {
 
 $('#qk-assemble').onclick = async () => {
   if (qk.busy || st.busyRender) return;
+  pvStop(); // a running preview and a render would fight over the same clips
   setErr('#seq-err', null);
   if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures or clips first (button 1).');
   qk.busy = true;
@@ -9032,6 +9068,244 @@ $('#qk-assemble').onclick = async () => {
   }
 };
 
+/* ---------------- Quick Video preview ----------------
+   A render takes minutes; a look takes seconds. This plays the plan right in
+   the browser — order, timing, camera moves, words, blends, and your song —
+   before any render is spent on it. The moves are honest approximations (the
+   real Ken Burns is smoother; grain, glitch, slow-mo and beat-snap are done
+   properly at render), which is exactly enough to answer the only question a
+   preview exists for: "is this the video I meant?" */
+const qkpv = { playing: false, raf: 0, audio: null, t0: 0, imgs: new Map(), caps: new Map(), vids: new Map() };
+
+// The looks a canvas can honestly fake with a CSS filter string. Anything not
+// here (grain, glitch, strobe, morph…) previews clean and renders with the
+// real effect — the note under the canvas says so.
+const PV_FILTERS = {
+  bw: 'grayscale(1)', noir: 'grayscale(1) contrast(1.35)', sepia: 'sepia(0.85)',
+  warm: 'sepia(0.25) saturate(1.25)', cool: 'hue-rotate(-14deg) saturate(1.1)',
+  vibrant: 'saturate(1.6) contrast(1.08)', faded: 'saturate(0.65) contrast(0.9) brightness(1.06)',
+  cinematic: 'contrast(1.15) saturate(1.15)', dream: 'brightness(1.08)', bloom: 'brightness(1.14)',
+  neon: 'saturate(1.8) contrast(1.2)', infrared: 'hue-rotate(120deg) saturate(1.6)',
+  nightclub: 'hue-rotate(-30deg) saturate(1.7) contrast(1.2)', nature: 'saturate(1.35) hue-rotate(8deg)',
+  vhs: 'saturate(1.25) contrast(1.1)',
+};
+
+function pvDims() {
+  return qk.format === '16:9' ? [960, 540] : qk.format === '1:1' ? [720, 720] : [540, 960];
+}
+
+// The same arithmetic the assembler uses: a blend overlaps its two shots by
+// TRANS_DUR, a cut doesn't. Each segment carries its absolute start time.
+function pvPlan() {
+  let t = 0;
+  const segs = qk.shots.map((s, i) => {
+    const dur = Math.max(0.5, Number(s.dur) || 4);
+    const td = i < qk.shots.length - 1 && s.transAfter !== 'cut' ? TRANS_DUR : 0;
+    const seg = { shot: s, start: t, dur, transAfter: i < qk.shots.length - 1 ? s.transAfter : null, td };
+    t += dur - td;
+    return seg;
+  });
+  return { segs, total: qkTotalSeconds() };
+}
+
+// p runs 0→1 across the shot, k is the row's speed (1..3). Returns scale,
+// offsets as fractions of the frame, and degrees — enough to read the motion,
+// not the physics.
+function pvMove(move, p, k) {
+  const a = 0.05 * k;
+  const z = 1 + 0.045 * k;
+  const lerp = (from, to) => from + (to - from) * p;
+  switch (move) {
+    case 'still': return { s: 1.02, x: 0, y: 0, r: 0 };
+    case 'push': return { s: lerp(1.02, z + 0.04), x: 0, y: 0, r: 0 };
+    case 'pull': return { s: lerp(z + 0.04, 1.02), x: 0, y: 0, r: 0 };
+    case 'pan_right': case 'parallax_right': return { s: z, x: lerp(a, -a), y: 0, r: 0 };
+    case 'pan_left': case 'parallax_left': return { s: z, x: lerp(-a, a), y: 0, r: 0 };
+    case 'pan_up': case 'crane_up': case 'drone': case 'hover': return { s: z, x: 0, y: lerp(a, -a), r: 0 };
+    case 'pan_down': case 'crane_down': return { s: z, x: 0, y: lerp(-a, a), r: 0 };
+    case 'drift': return { s: lerp(1.03, z), x: Math.sin(p * Math.PI) * a * 0.4, y: -p * a * 0.5, r: 0 };
+    case 'low_angle': return { s: lerp(1.05, z), x: 0, y: a * 0.6, r: 0 };
+    case 'high_angle': return { s: lerp(1.05, z), x: 0, y: -a * 0.6, r: 0 };
+    case 'orbit_left': return { s: z, x: lerp(a, -a), y: 0, r: 1 - 2 * p };
+    case 'orbit_right': return { s: z, x: lerp(-a, a), y: 0, r: 2 * p - 1 };
+    case 'dutch': return { s: z + 0.05, x: 0, y: 0, r: lerp(-3, 3) };
+    case 'shake': return { s: z, x: Math.sin(p * 90) * 0.008 * k, y: Math.cos(p * 117) * 0.008 * k, r: Math.sin(p * 73) * 0.6 };
+    case 'push_pan': return { s: lerp(1.02, z + 0.03), x: lerp(a * 0.6, -a * 0.6), y: 0, r: 0 };
+    default: return { s: lerp(1.02, z), x: 0, y: 0, r: 0 };
+  }
+}
+
+async function pvPrepare(W, H) {
+  for (const s of qk.shots) {
+    if (s.kind === 'video') {
+      if (!qkpv.vids.has(s.assetId)) {
+        const v = document.createElement('video');
+        v.src = s.url; v.muted = true; v.playsInline = true; v.preload = 'auto';
+        qkpv.vids.set(s.assetId, v);
+      }
+      continue;
+    }
+    if (!qkpv.imgs.has(s.assetId)) {
+      const img = new Image();
+      await new Promise((ok, err) => { img.onload = () => ok(); img.onerror = err; img.src = s.url; });
+      qkpv.imgs.set(s.assetId, img);
+    }
+  }
+  // captions prerendered once, by the same drawOverlay the renders use, at the
+  // same position the row chose — so where the words sit is exactly honest
+  qkpv.caps.clear();
+  qk.shots.forEach((s, i) => {
+    if (!s.text || !s.text.trim()) return;
+    const c = drawOverlay(
+      { ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }), pos: s.pos || 8, text: s.text },
+      W, H);
+    qkpv.caps.set(i, c);
+  });
+}
+
+function pvDrawShot(ctx, seg, i, t, W, H) {
+  const s = seg.shot;
+  const p = Math.min(1, Math.max(0, (t - seg.start) / seg.dur));
+  const src = s.kind === 'video' ? qkpv.vids.get(s.assetId) : qkpv.imgs.get(s.assetId);
+  if (!src) return;
+  if (s.kind === 'video' && src.paused && src.readyState >= 2) {
+    try { src.currentTime = Math.max(0, t - seg.start); src.play().catch(() => {}); } catch (_) {}
+  }
+  const iw = s.kind === 'video' ? (src.videoWidth || W) : src.naturalWidth;
+  const ih = s.kind === 'video' ? (src.videoHeight || H) : src.naturalHeight;
+  if (!iw || !ih) return;
+  const m = s.kind === 'video' ? { s: 1, x: 0, y: 0, r: 0 } : pvMove(s.move, p, qkIntensity(s));
+  const cover = Math.max(W / iw, H / ih) * m.s;
+  ctx.save();
+  const f = PV_FILTERS[s.fx];
+  if (f) ctx.filter = f;
+  ctx.translate(W / 2 + m.x * W, H / 2 + m.y * H);
+  if (m.r) ctx.rotate((m.r * Math.PI) / 180);
+  ctx.drawImage(src, (-iw * cover) / 2, (-ih * cover) / 2, iw * cover, ih * cover);
+  ctx.restore();
+  if (s.fx === 'vignette') {
+    const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.45, W / 2, H / 2, Math.max(W, H) * 0.75);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
+  // this shot's words, with the same 0.3s fades the assembler writes
+  const cap = qkpv.caps.get(i);
+  if (cap) {
+    const local = t - seg.start;
+    const endLocal = seg.dur - Math.max(0.2, seg.td || 0);
+    const alpha = Math.min(
+      Math.min(1, Math.max(0, (local - 0.3) / 0.3)),
+      Math.min(1, Math.max(0, (endLocal - local) / 0.3)));
+    if (alpha > 0) {
+      const keep = ctx.globalAlpha;
+      ctx.globalAlpha = keep * alpha;
+      ctx.drawImage(cap, 0, 0, W, H);
+      ctx.globalAlpha = keep;
+    }
+  }
+}
+
+function pvStop(msg) {
+  qkpv.playing = false;
+  cancelAnimationFrame(qkpv.raf);
+  if (qkpv.audio) { try { qkpv.audio.pause(); } catch (_) {} qkpv.audio = null; }
+  qkpv.vids.forEach((v) => { try { v.pause(); } catch (_) {} });
+  const btn = document.getElementById('qk-preview');
+  if (btn) btn.textContent = '▶ Preview — free, instant';
+  if (msg) $('#qk-pv-note').textContent = msg;
+}
+
+$('#qk-preview').onclick = async () => {
+  if (qkpv.playing) return pvStop('Stopped.');
+  setErr('#seq-err', null);
+  if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures or clips first (button 1).');
+  const [W, H] = pvDims();
+  const cv = $('#qk-pv-canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  $('#qk-pv-stage').style.display = '';
+  $('#qk-pv-note').textContent = 'Loading your pictures…';
+  try { await pvPrepare(W, H); } catch (_) {
+    $('#qk-pv-note').textContent = '';
+    return setErr('#seq-err', 'Could not load a picture for the preview — check the shots list.');
+  }
+  const plan = pvPlan();
+  const music = firstMusicAsset();
+  if (music) { qkpv.audio = new Audio(music.url); qkpv.audio.play().catch(() => {}); }
+  qkpv.playing = true;
+  qkpv.t0 = performance.now();
+  $('#qk-preview').textContent = '⏹ Stop preview';
+  $('#qk-pv-note').textContent = `Rough preview, ${plan.total.toFixed(1)}s — the render is smoother, and ` +
+    `${$('#qk-beat').checked && music ? 'beat-snap plus ' : ''}effects like grain, glitch and slow-mo are done properly at render.`;
+  const tick = () => {
+    if (!qkpv.playing) return;
+    const t = (performance.now() - qkpv.t0) / 1000;
+    if (t >= plan.total) return pvStop('That was the whole video — press Assemble when it looks right.');
+    ctx.filter = 'none';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    let i = plan.segs.length - 1;
+    while (i > 0 && plan.segs[i].start > t) i--;
+    const seg = plan.segs[i];
+    const prev = i > 0 ? plan.segs[i - 1] : null;
+    // any clip not on screen right now gets paused so it doesn't run ahead
+    qk.shots.forEach((s, j) => {
+      if (s.kind !== 'video' || j === i || j === i - 1) return;
+      const v = qkpv.vids.get(s.assetId);
+      if (v && !v.paused) v.pause();
+    });
+    const overlapping = prev && prev.start + prev.dur > t && prev.transAfter && prev.transAfter !== 'cut';
+    if (overlapping) {
+      const q = Math.min(1, (t - seg.start) / (prev.td || TRANS_DUR));
+      if (prev.transAfter === 'fadeblack') {
+        // dip to black: old shot out through the first half, new one in through the second
+        if (q < 0.5) { pvDrawShot(ctx, prev, i - 1, t, W, H); ctx.fillStyle = `rgba(0,0,0,${q * 2})`; ctx.fillRect(0, 0, W, H); }
+        else { pvDrawShot(ctx, seg, i, t, W, H); ctx.fillStyle = `rgba(0,0,0,${(1 - q) * 2})`; ctx.fillRect(0, 0, W, H); }
+      } else {
+        pvDrawShot(ctx, prev, i - 1, t, W, H);
+        ctx.globalAlpha = q;
+        pvDrawShot(ctx, seg, i, t, W, H);
+        ctx.globalAlpha = 1;
+      }
+    } else {
+      pvDrawShot(ctx, seg, i, t, W, H);
+    }
+    qkpv.raf = requestAnimationFrame(tick);
+  };
+  tick();
+};
+
+/* ---------------- fit shots to song ----------------
+   Planning a video to land exactly on the song's last note used to be manual
+   arithmetic against the finished-length line. This scales every still's time
+   (clips play as filmed and are left alone) so the FINISHED length — blends
+   subtracted, same arithmetic as the assembler — matches the song. */
+$('#qk-fit-song').onclick = async () => {
+  setErr('#seq-err', null);
+  if (!qk.shots.length) return setErr('#seq-err', 'Add some pictures first (button 1).');
+  const music = firstMusicAsset();
+  if (!music) return setErr('#seq-err', 'Add your song first — then this can match the video to it.');
+  let target = Number(music.meta?.duration) || 0;
+  if (!target) { try { target = await probeDuration(music.url); } catch (_) {} }
+  if (!target || target <= 0) return setErr('#seq-err', "Studio couldn't read that song's length. Re-add the song and try again.");
+  const stills = qk.shots.filter((s) => s.kind !== 'video');
+  if (!stills.length) return setErr('#seq-err', 'Every shot here is a filmed clip — those keep their own length, so there is nothing to stretch.');
+  // Two passes: the 1.5s floor and 60s ceiling can absorb part of the first
+  // correction, and the second pass re-spreads what they swallowed.
+  for (let pass = 0; pass < 2; pass++) {
+    const cur = qkTotalSeconds();
+    const stillTime = stills.reduce((a, s) => a + (Number(s.dur) || 0), 0);
+    const fixed = cur - stillTime; // clips minus blend overlap — scaling can't touch it
+    const want = target - fixed;
+    if (want <= stills.length * 1.5) { stills.forEach((s) => { s.dur = 1.5; }); break; }
+    const scale = want / stillTime;
+    stills.forEach((s) => { s.dur = Math.round(Math.min(60, Math.max(1.5, (Number(s.dur) || 4) * scale)) * 10) / 10; });
+  }
+  renderQkShots();
+  $('#qk-status').textContent = `🎯 Fitted: ${qkTotalSeconds().toFixed(1)}s of video for your ${target.toFixed(1)}s song. Beat-snap can still nudge each cut a little at assemble.`;
+};
+
 /* ---------------- quick video templates ---------------- */
 $('#qk-tpl-save').onclick = async () => {
   setErr('#seq-err', null);
@@ -9069,173 +9343,6 @@ $('#qk-tpl-apply').onclick = async () => {
     renderQkShots();
     $('#qk-status').textContent = 'Template applied — press Assemble!';
   } catch (e) { setErr('#seq-err', `Could not load that template: ${e.message}`); }
-};
-
-/* ---------------- campaign export ---------------- */
-const cp = { thumbs: [], posts: [], shortsSel: new Set() };
-const CP_HOOKS = ['This part 🔥', 'Turn it up 🔊', 'New one out now 🎵', 'On repeat ♾️', 'Wait for the drop 👀'];
-
-function renderCampaignShorts() {
-  const el = $('#cp-shorts');
-  if (!el) return;
-  const shorts = st.assets.filter((a) => a.kind === 'video' && a.label.startsWith('short_'));
-  // newly rendered shorts start selected
-  shorts.forEach((a) => { if (!cp.seen?.has(a.id)) cp.shortsSel.add(a.id); });
-  cp.seen = new Set(shorts.map((a) => a.id));
-  el.innerHTML = shorts.length ? '' : '<span class="usage">No shorts yet — the Shorts Generator above makes them.</span>';
-  shorts.forEach((a) => {
-    const b = document.createElement('button');
-    b.className = 'chip' + (cp.shortsSel.has(a.id) ? ' on' : '');
-    b.textContent = a.label;
-    b.onclick = () => {
-      cp.shortsSel.has(a.id) ? cp.shortsSel.delete(a.id) : cp.shortsSel.add(a.id);
-      renderCampaignShorts();
-    };
-    el.appendChild(b);
-  });
-}
-
-// A YouTube-style thumbnail: the frame + a dark scrim + your title (or a lyric
-// line) in big bold text - all composited in the browser, free.
-async function textedThumb(frameAsset, text) {
-  const img = await new Promise((ok, err) => {
-    const i = new Image(); i.onload = () => ok(i); i.onerror = err; i.src = frameAsset.url;
-  });
-  const c = document.createElement('canvas');
-  c.width = img.width; c.height = img.height;
-  const ctx = c.getContext('2d');
-  ctx.drawImage(img, 0, 0);
-  const g = ctx.createLinearGradient(0, c.height * 0.5, 0, c.height);
-  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.78)');
-  ctx.fillStyle = g; ctx.fillRect(0, c.height * 0.5, c.width, c.height * 0.5);
-  let size = c.height * 0.12;
-  ctx.font = `800 ${size}px system-ui`;
-  const widest = Math.max(...text.split('\n').map((l) => ctx.measureText(l).width));
-  if (widest > c.width * 0.9) { size *= (c.width * 0.9) / widest; ctx.font = `800 ${size}px system-ui`; }
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-  ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = size / 6; ctx.shadowOffsetY = size / 20;
-  const lines = text.split('\n');
-  let y = c.height * 0.94 - (lines.length - 1) * size * 1.15;
-  for (const line of lines) { ctx.fillText(line, c.width / 2, y); y += size * 1.15; }
-  const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
-  return uploadFile(new File([blob], 'thumb-text.png', { type: 'image/png' }), 'image', null, { overlay: '1' });
-}
-
-$('#cp-thumbs').onclick = async () => {
-  setErr('#seq-err', null);
-  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
-  if (!main) return setErr('#seq-err', 'Pick a main video first.');
-  const dur = main.meta?.duration || 30;
-  $('#cp-thumbs').disabled = true;
-  $('#cp-status').textContent = 'Grabbing your best frames…';
-  try {
-    cp.thumbs = [];
-    const title = $('#cp-title').value.trim();
-    // best lyric hook = the first caption line, if lyrics are loaded
-    const hook = st.captions.length ? st.captions[0].text : '';
-    const texts = [title, hook && title ? `${hook}\n— ${title} —` : hook || title, title];
-    let k = 0;
-    for (const frac of [0.2, 0.5, 0.8]) {
-      const { asset } = await jfetch('/api/studio/thumbnail', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: main.id, time: Math.round(dur * frac * 10) / 10 }),
-      });
-      cp.thumbs.push(texts[k] ? await textedThumb(asset, texts[k]) : asset);
-      k++;
-    }
-    $('#cp-thumb-row').innerHTML = cp.thumbs.map((t) => `<img src="${t.url}" alt="">`).join('');
-    $('#cp-status').textContent = `${cp.thumbs.length} thumbnails ready — they'll be in the ZIP.`;
-    await loadAssets();
-  } catch (e) {
-    setErr('#seq-err', e.message);
-    $('#cp-status').textContent = '';
-  } finally {
-    $('#cp-thumbs').disabled = false;
-  }
-};
-
-function cpFields() {
-  return {
-    title: $('#cp-title').value.trim() || 'New track',
-    artist: $('#cp-artist').value.trim() || '',
-    link: $('#cp-link').value.trim(),
-    tags: $('#cp-tags').value.trim(),
-  };
-}
-
-$('#cp-captions').onclick = () => {
-  setErr('#seq-err', null);
-  const main = st.assets.find((a) => a.id === Number($('#cp-main').value));
-  if (!main) return setErr('#seq-err', 'Pick a main video first.');
-  const f = cpFields();
-  const by = f.artist ? ` — ${f.artist}` : '';
-  cp.posts = [{
-    assetId: main.id, label: main.label, platform: 'YouTube',
-    caption: `${f.title}${by} (Official Video)\n\n${f.link ? f.link + '\n\n' : ''}${f.tags}`.trim(),
-  }];
-  const shorts = st.assets.filter((a) => a.kind === 'video' && cp.shortsSel.has(a.id));
-  shorts.forEach((a, i) => {
-    cp.posts.push({
-      assetId: a.id, label: a.label, platform: 'TikTok / Reels / Shorts',
-      caption: `${CP_HOOKS[i % CP_HOOKS.length]}\n${f.title}${by}, out now${f.link ? '\n' + f.link : ''}\n\n${f.tags}`.trim(),
-    });
-  });
-  renderCpPosts();
-  $('#cp-status').textContent = 'Captions written — tweak any of them, then export.';
-};
-
-function renderCpPosts() {
-  const list = $('#cp-posts');
-  list.innerHTML = '';
-  cp.posts.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'seq-item';
-    row.style.flexDirection = 'column';
-    row.style.alignItems = 'stretch';
-    row.innerHTML = `
-      <div class="trim" style="font-size:12px"><b style="color:var(--tp)">${escapeHtml(p.label)}</b>
-        <select class="input p-platform" style="width:auto;padding:5px 8px;font-size:12px;margin-left:auto">
-          ${['YouTube', 'TikTok / Reels / Shorts', 'Instagram', 'X / Twitter', 'Facebook'].map((pl) => `<option${pl === p.platform ? ' selected' : ''}>${pl}</option>`).join('')}
-        </select></div>
-      <textarea class="p-caption" style="min-height:84px;padding:8px 10px;font-size:12px">${escapeHtml(p.caption)}</textarea>`;
-    row.querySelector('.p-platform').onchange = (e) => { p.platform = e.target.value; };
-    row.querySelector('.p-caption').oninput = (e) => { p.caption = e.target.value; };
-    list.appendChild(row);
-  });
-}
-
-$('#cp-export').onclick = async () => {
-  setErr('#seq-err', null);
-  if (!cp.posts.length) $('#cp-captions').click();
-  if (!cp.posts.length) return;
-  const f = cpFields();
-  const startDate = $('#cp-date').value ? new Date($('#cp-date').value + 'T18:00:00') : new Date();
-  const btn = $('#cp-export');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Packing your campaign…';
-  try {
-    const { asset } = await jfetch('/api/studio/campaign', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: f.title,
-        posts: cp.posts.map((p, i) => ({
-          assetId: p.assetId, platform: p.platform, caption: p.caption,
-          scheduledAt: new Date(startDate.getTime() + i * 86400000).toISOString(),
-        })),
-        thumbnails: cp.thumbs.map((t) => t.id),
-        info: f,
-      }),
-    });
-    await loadAssets();
-    const l = document.createElement('a'); l.href = asset.url; l.download = asset.label + '.zip'; l.click();
-    $('#cp-status').textContent = `Campaign packed: ${cp.posts.length} posts + ${cp.thumbs.length} thumbnails, one per day starting ${startDate.toDateString()}. The ZIP is downloading — open README.txt inside.`;
-  } catch (e) {
-    setErr('#seq-err', e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Export campaign (ZIP)';
-  }
 };
 
 /* ---------------- projects ---------------- */
@@ -9280,6 +9387,30 @@ bootStudio().then(() => {
     } catch (_) {}
   }
   updateQkMusicLabel();
+  // Quick Video shots survive a page reload now. Restored against the live
+  // library — a picture deleted since is quietly dropped, never guessed at.
+  if (!qk.shots.length) {
+    try {
+      const saved = JSON.parse(localStorage.getItem('tsid-studio-qk') || 'null');
+      if (saved && Array.isArray(saved.shots) && saved.shots.length) {
+        saved.shots.forEach((d) => {
+          const a = st.assets.find((x) => x.id === d.assetId);
+          if (!a) return;
+          qk.shots.push({
+            assetId: a.id, url: a.url, label: a.label,
+            kind: d.kind === 'video' ? 'video' : undefined,
+            move: d.move || 'push', dur: Number(d.dur) || 4, text: d.text || '',
+            transAfter: d.transAfter || 'fade', fx: d.fx, pos: d.pos, speed: d.speed,
+          });
+        });
+        if (qk.shots.length) {
+          if (SIZE_MAP[saved.format]) { qk.format = saved.format; renderQkFormat(); }
+          renderQkShots();
+          $('#qk-status').textContent = `Welcome back — your ${qk.shots.length}-shot plan is right where you left it.`;
+        }
+      }
+    } catch (_) {}
+  }
   draftReady = true;
   // Pick up an overnight queue that's still running (or finished while this
   // tab was closed) regardless of what's in the local draft.

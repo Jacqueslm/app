@@ -108,7 +108,18 @@ def main():
     try:
         model = ChatterboxTTS.from_pretrained(device="cpu")
     except Exception as e:
-        sys.stderr.write("could not load the voice model: %s" % e)
+        # The first run downloads about a gigabyte of model. Every way that can
+        # fail looks the same from here (403/timeout/DNS), and "403 Forbidden"
+        # tells a person nothing about what to do next.
+        msg = str(e)
+        if any(k in msg.lower() for k in ("403", "forbidden", "connection", "timeout",
+                                          "temporarily", "resolve", "network", "ssl", "proxy")):
+            sys.stderr.write(
+                "could not download the voice model. It needs internet the first time "
+                "(about 1 GB). Check the connection and try again - it picks up where it "
+                "left off. Details: %s" % msg[:160])
+        else:
+            sys.stderr.write("could not load the voice model: %s" % msg[:200])
         return 1
 
     pct(25)

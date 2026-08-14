@@ -181,11 +181,19 @@ times out somewhere in the middle.
 
 **Verified here:** module guards, all four worker error paths, `chunk_text`
 (no words lost, nothing over the limit, run-on sentences split), routes, config
-exposure, and the real install including its **pytorch.org→PyPI fallback**
-(this sandbox blocks pytorch.org, and the fallback fired exactly as designed).
-**NOT verified: generation itself** — the sandbox blocks huggingface.co so
-model weights never download. On Jacques's machine that's not a constraint, but
-if he reports a generation failure, that is the untested seam, start there.
+exposure, the UI price flip ($0.05→free, moods stay paid), and **the real
+install ran to completion** (`installed:true`, pct 100) including its
+**pytorch.org→PyPI fallback**, which fired because this sandbox blocks
+pytorch.org. Generation was driven end to end and fails only at the model
+fetch (sandbox blocks huggingface.co) with a clean, actionable message.
+**NOT verified: the actual audio out** — no weights here, so nothing has heard
+Chatterbox speak. If Jacques reports a generation problem, that is the one
+untested seam; the plumbing either side of it is proven.
+
+**Install size gotcha:** the fallback pulled the CUDA torch and the install
+landed at **8.7 GB on Linux**. On Windows the default PyPI `torch` wheel is
+CPU-only, so his install should be far smaller — but the UI now says "a few
+gigabytes", not "about 2 GB", because the fallback case is real.
 
 ### 14 Aug — Studio b0850: the free voice path no longer dead-ends
 Jacques, angry and right: "why do I have to pay for my voice to narrate."

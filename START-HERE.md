@@ -156,6 +156,21 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — the in-app PDF guide was 16 builds stale; now generated from the manual
+`HOW-TO-USE.md` was current all day, but Studio's **📖 Open the guide (PDF)**
+button serves a static `Studio/Studio-Guide.pdf` that was last rebuilt at
+**b0836** — it still described Campaign Export, a card removed at b0849. The
+markdown and the PDF had silently diverged because nothing in the repo could
+rebuild the PDF; the original generator was never committed.
+
+**Fixed properly: `Studio/tools-make-guide.py` builds the PDF from
+HOW-TO-USE.md.** One source of truth, one command:
+`python3 Studio/tools-make-guide.py`. **Whenever you change HOW-TO-USE.md,
+run it and commit the regenerated PDF** — otherwise the guide Jacques opens
+inside Studio drifts again. Regenerated at b0852 and verified by decoding the
+PDF (ASCII85+Flate) — all of today's features present, Campaign Export appears
+only in its removal note.
+
 ### 14 Aug — Studio b0851: FREE VOICE CLONING, running on Jacques's own machine
 He pushed back hard — "it's my voice, why do I have to pay" — and he was right
 twice. b0850 fixed the dead-end; this removes the bill entirely.

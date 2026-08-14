@@ -556,6 +556,15 @@ function getRecentErrors(limit) {
   return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
 }
 
+// Wipe the diagnostics list. It is a rolling view of recent errors, not an
+// audit log, so clearing it loses nothing that matters - and a list still
+// showing last week's fixed problems makes a fresh one hard to spot.
+function clearErrors() {
+  const n = db.prepare('SELECT COUNT(*) AS c FROM error_log').get().c;
+  db.prepare('DELETE FROM error_log').run();
+  return n;
+}
+
 function updatePassword(userId, passwordHash) {
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(passwordHash, userId);
 }
@@ -642,6 +651,7 @@ module.exports = {
   clearFinishedQueue,
   logError,
   getRecentErrors,
+  clearErrors,
   addFanSignup,
   getFanSignups,
   getFanSignupCount,

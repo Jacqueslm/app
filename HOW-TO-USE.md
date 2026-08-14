@@ -328,6 +328,25 @@ F5-TTS are both non-commercial.
 
 ---
 
+## 5e. Diagnostics — and clearing it (b0853)
+
+**⚙ Settings → Diagnostics** lists recent errors so you can screenshot them when
+something breaks. It now has **🧹 Clear the list** — safe to press any time. It
+is a rolling view of recent errors, not a record you need to keep, and an old
+list full of already-fixed problems makes a new one hard to spot. Clear it, then
+reproduce the problem, and whatever appears is the actual fault.
+
+**Two cards were removed in b0853:**
+- **🎵 Your Audience** — a fan-email signup list for `join.html`, built for
+  musicians collecting emails at gigs. It only ever worked on this computer, and
+  the recovery app has its own email system. Nothing you were using.
+- **⚡ One-tap short** — it captioned a single filmed clip from a pasted script.
+  The same job is now: put the clip in **Quick Video**, use **Lyrics & Captions →
+  🎙️ Captions from my voice (free)** or **Auto-spread** to time the lines, then
+  Assemble. One place for shorts instead of two.
+
+---
+
 ## 6. From finished video to posted (what replaced Campaign Export)
 
 Campaign Export (the ZIP-for-Buffer card) is gone as of b0849 — it was a detour nobody took. The flow that replaced it is shorter and already in the app: **⚡ Auto shorts** cuts the batch, the **📅 Post tab** holds the schedule and captions, and your phone (**⚙ Settings → 📱 Open Studio on your phone**) is where the final tap happens, natively, which the platforms reward anyway. Song title and artist now live at the top of the **Lyrics & Captions** card — the title-card button and the storyboard both read them from there.

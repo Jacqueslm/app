@@ -239,18 +239,30 @@ out, not just the person who's using.
 
 ---
 
-# EPISODE 8 · The Empty Chair — the spiritual one · **ALCOHOL**
+# EPISODE 8 · The Empty Chair — the spiritual one · **SUBSTANCES**
 
 > **CURTIS:** Black man, 50s, greying close beard, collared shirt with the
 > sleeves rolled, heavy hands, reading glasses in his breast pocket.
 
-**Addiction picked: Alcohol**, from the 13 in the app. The app's own faith line
-for it is *"You weren't chasing a drink. You were chasing peace — the quiet that
-comes when you're not running your own defence."* That is the empty chair said
-another way: he stopped going to the room where the quiet was and bought it
-somewhere else. Film and app say one thing instead of two. It is also the
-biggest search pairing in the whole category — faith and sobriety — and it has
-the only natural slot in the week, Sunday morning.
+**Addiction: Substances**, Jacques's pick. The app's own faith line for it is
+*"You wanted lifting out of yourself — transcendence, the old word for it.
+That's not a defect, it's the most human appetite there is."* That is the
+episode's whole argument, and it's the reason this pairs with the spiritual
+track better than any of the other twelve: the appetite underneath it was
+already a religious one. Film and app say one thing instead of two.
+
+> ### ⚠ NOTHING IS SHOWN. This is a hard rule, not a style note.
+>
+> No pills, no powder, no needles, no paraphernalia, no use, no substance named
+> — not in a single frame, not blurred, not in the background. TikTok and Meta
+> remove content that depicts drugs, and being a recovery story is **not** an
+> exemption; it is the category their filters watch hardest. One prop ends this
+> episode's reach and can put a strike on the account.
+>
+> The film is built entirely on **absence** — an empty chair, a dark hallway, a
+> dusty book, hands with nothing in them. That is not a workaround. It is the
+> truer version: what this actually looks like from the inside is rooms you
+> stopped going into, not anything anyone could photograph.
 
 **This matches the new onboarding question exactly** — the one that asks about
 stepping away, tied to whatever the person picked. So the film has to say the
@@ -277,14 +289,14 @@ that's all.
 **SHOT 4** — `The same empty chair in the same room, now in flat grey daylight, everything slightly dustier, a jacket left over the back of it`
 *"Then it was a year."*
 
-**SHOT 5** — `CURTIS alone at a kitchen table at night, one lamp on, a glass in front of him, the rest of the house dark and put away`
+**SHOT 5** — `CURTIS alone at a kitchen table at night, one lamp on, the table completely bare in front of him, the rest of the house dark and put away, his eyes on the middle distance`
 *"Something moves into a room you stop going into."*
 
-**SHOT 6** — `Close on CURTIS's hands flat on the kitchen table either side of the glass, not holding it, knuckles heavy`
-*"I wasn't after the drink. I was after the quiet."*
+**SHOT 6** — `Close on CURTIS's open empty hands resting on a bare kitchen table, knuckles heavy, nothing else on the table at all`
+*"I wasn't chasing a feeling. I wanted lifting out of myself."*
 
 **SHOT 7** — `A worn book on a shelf with a bookmark still in it, a thin layer of dust on the top edge, warm lamp light`
-*"It just takes the seat."*
+*"That's the oldest want there is. It just got answered wrong."*
 
 **SHOT 8** — `CURTIS standing in a doorway at first light, shirt untucked, looking out, hand on the frame`
 *"I'm not a faithless man. That was never the problem."*
@@ -296,7 +308,7 @@ that's all.
 *"So I went back and sat down."*
 
 **YouTube:** I didn't stop believing. I stopped showing up.
-**TikTok:** I wasn't after the drink. I was after the quiet.
+**TikTok:** I wasn't chasing a feeling. I wanted lifting out of myself.
 
 ```
 1. 01_car        Still     1.4s  cut   I didn't stop believing.
@@ -304,8 +316,8 @@ that's all.
 3. 03_chair      Still     1.5s  cut   First it was one week. Something came up.
 4. 04_chair2     Zoom in   1.3s  cut   Then it was a year.
 5. 05_table      Still     1.6s  cut   Something moves into a room you stop going into.
-6. 06_hands      Zoom in   1.5s  cut   I wasn't after the drink. I was after the quiet.
-7. 07_book       Still     1.3s  cut   It just takes the seat.
+6. 06_hands      Zoom in   1.7s  cut   I wasn't chasing a feeling. I wanted lifting out of myself.
+7. 07_book       Still     1.6s  cut   That's the oldest want there is. It just got answered wrong.
 8. 08_doorway    Zoom in   1.6s  cut   I'm not a faithless man. That was never the problem.
 9. 09_street     Still     1.4s  cut   That's what makes it hard.
 10. 10_sitdown   Zoom out  2.2s  cut   So I went back and sat down.
@@ -314,10 +326,10 @@ that's all.
 
 **Caption:** Nobody wakes up and decides to walk away. You miss one week because
 something came up, then it's a year, and something has moved into the room you
-stopped going into. I wasn't after the drink. I was after the quiet. There's a
-spiritual track in my free app, and it asks that question before it asks
-anything else.
-`#sobriety #faithandrecovery #spiritualrecovery #alcoholfree #recoverysupport`
+stopped going into. What I actually wanted was lifting out of myself — and
+that's the oldest want there is. It just got answered wrong. There's a spiritual
+track in my free app, and it asks that question before it asks anything else.
+`#recovery #faithandrecovery #spiritualrecovery #recoverysupport #sobriety`
 
 ---
 

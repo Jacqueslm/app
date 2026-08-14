@@ -3,6 +3,13 @@
 Orientation for Jacques and for any Claude session picking this up. Chat history
 does NOT carry between sessions — this repo is the shared memory. Read this first.
 
+**RULE ZERO — for any AI reading this.** Jacques should never have to say the
+same thing twice. If this file says something is DONE, it is done: do not
+re-check it, do not re-ask him about it, do not walk him back through it to
+"confirm." If he tells you something is done, write it into this file yourself
+in the same turn — do not ask him to record it. Anything struck through or
+marked DONE below is closed history, not a to-do list.
+
 ---
 
 ## OPEN ITEMS — 14 Aug 2026

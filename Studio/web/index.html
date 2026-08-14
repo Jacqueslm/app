@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0851</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0852</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -4107,7 +4107,7 @@ function renderVoiceCloneBox() {
   rm.style.display = 'none';
   note.innerHTML = vclStatus.error
     ? `<b style="color:#e5484d">That didn't finish.</b> ${escapeHtml(vclStatus.error)}`
-    : 'Right now, typing text and hearing it in your own voice costs ~$0.05 per 1,000 characters. <b>Install this once and it is free forever</b> — it runs on this computer, no key, no per-word charge. It needs Python and about 2 GB of disk, and takes several minutes on a normal connection.';
+    : 'Right now, typing text and hearing it in your own voice costs ~$0.05 per 1,000 characters. <b>Install this once and it is free forever</b> — it runs on this computer, no key, no per-word charge. It needs Python and a few gigabytes of disk, and takes several minutes on a normal connection.';
 }
 if (document.getElementById('vcl-install')) $('#vcl-install').onclick = async () => {
   try {

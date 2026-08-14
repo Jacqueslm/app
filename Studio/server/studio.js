@@ -996,6 +996,8 @@ async function bufferCreateShape() {
       // Enum-typed fields matter: sending a string an enum doesn't declare is
       // a validation error, and "addToQueue" is our guess at their spelling.
       enumType: (x.type?.kind === 'ENUM' && x.type.name) || (x.type?.ofType?.kind === 'ENUM' && x.type.ofType.name) || null,
+      // Needed to introspect `metadata`, whose type name varies by schema version.
+      typeName: nameOf(x.type),
     }));
   } catch (_) { /* introspection closed: send our best guess and let Buffer object */ }
 
@@ -1058,22 +1060,105 @@ async function bufferAssetShapes() {
   return shapes;
 }
 
-// First frame of a video as a hosted jpg - Buffer's video asset takes (and on
-// some channels expects) a thumbnail, and the file itself lives on this
-// computer where Buffer can't see it.
-async function makeVideoThumbUrl(filename) {
-  const out = path.join(os.tmpdir(), `thumb-${crypto.randomBytes(5).toString('hex')}.jpg`);
-  await new Promise((resolve, reject) => {
-    const proc = spawn(ffmpegBin(), ['-y', '-ss', '0.5', '-i', mediaPath(filename), '-frames:v', '1', '-q:v', '3', out]);
-    proc.on('error', reject);
-    proc.on('close', (code) => (code === 0 && fs.existsSync(out) ? resolve() : reject(new Error(`thumbnail failed (${code})`))));
-  });
+/* ---- channel-specific requirements (metadata) ----
+   Buffer refuses a post that is missing what a given network demands, and the
+   demands differ per network: YouTube wants a title and a category, Facebook
+   wants a post type. Those live in CreatePostInput.metadata, keyed by service.
+   Every name below is read off Buffer's own schema rather than assumed - the
+   thumbnailUrl episode above is exactly what assuming costs. */
+let bufferChannelServiceCache = null;
+async function bufferChannelServices() {
+  if (bufferChannelServiceCache) return bufferChannelServiceCache;
+  const map = new Map();
   try {
-    return await falUploadFile(fs.readFileSync(out), 'thumb.jpg', 'image/jpeg', { permanent: true });
-  } finally {
-    try { fs.unlinkSync(out); } catch (_) {}
-  }
+    const org = await bufferOrganization();
+    const data = await bufferGraphQL(BUFFER_CHANNELS_Q, { input: { organizationId: org.id } });
+    for (const c of data?.channels || []) map.set(c.id, String(c.service || '').toLowerCase());
+  } catch (_) { /* leave empty: metadata is then skipped, not guessed */ }
+  if (map.size) bufferChannelServiceCache = map;
+  return map;
 }
+
+// metadata's own shape: which networks it accepts, and what each one takes.
+let bufferMetaShapeCache = null;
+async function bufferMetaShape() {
+  if (bufferMetaShapeCache) return bufferMetaShapeCache;
+  const out = { key: null, networks: {} };
+  try {
+    const create = await bufferCreateShape();
+    const metaField = (create.inputFields || []).find((f) => f.name === 'metadata');
+    if (!metaField?.typeName) return out;
+    out.key = metaField.name;
+    const d = await bufferGraphQL(
+      `query { __type(name: "${metaField.typeName}") { inputFields { name type { kind name ofType { kind name } } } } }`);
+    for (const f of d?.__type?.inputFields || []) {
+      const tn = nameOf(f.type);
+      if (!tn) continue;
+      const sub = await bufferGraphQL(
+        `query { __type(name: "${tn}") { inputFields { name type { kind name ofType { kind name } } } } }`);
+      const fields = sub?.__type?.inputFields;
+      if (!fields?.length) continue;
+      out.networks[f.name.toLowerCase()] = fields.map((x) => ({
+        name: x.name,
+        required: x.type?.kind === 'NON_NULL',
+        scalar: nameOf(x.type),
+        enumType: (x.type?.kind === 'ENUM' && x.type.name) || (x.type?.ofType?.kind === 'ENUM' && x.type.ofType.name) || null,
+      }));
+    }
+  } catch (_) { /* introspection closed: send nothing and let Buffer say so */ }
+  bufferMetaShapeCache = out;
+  return out;
+}
+
+// YouTube titles are capped at 100 characters and cannot contain < or >.
+function youtubeTitleFrom(caption) {
+  const first = String(caption).split('\n').map((l) => l.trim()).find(Boolean) || 'Turn Someday Into Day One';
+  return first.replace(/[<>]/g, '').slice(0, 100);
+}
+
+// Build the metadata object for ONE channel. Only fields the network's input
+// actually declares are included, and an enum value is checked against what
+// Buffer lists before it is sent.
+async function bufferMetadataFor(service, { caption, youtubeCategoryId, facebookType }) {
+  const shape = await bufferMetaShape();
+  if (!shape.key) return null;
+  const fields = shape.networks[service];
+  if (!fields) return null;
+  const has = (n) => fields.find((f) => f.name === n);
+  const meta = {};
+
+  if (service === 'youtube') {
+    if (has('title')) meta.title = youtubeTitleFrom(caption);
+    // Buffer names it categoryId; older shapes said category. 22 = People & Blogs.
+    const cat = has('categoryId') || has('category');
+    if (cat) {
+      const val = String(youtubeCategoryId || '22');
+      meta[cat.name] = /^Int$/i.test(cat.scalar || '') ? Number(val) : val;
+    }
+  } else if (service === 'facebook') {
+    const t = has('type');
+    if (t) {
+      let val = String(facebookType || 'post');
+      if (t.enumType) {
+        const allowed = await bufferEnumValues(t.enumType);
+        if (allowed?.length) {
+          const hit = allowed.find((a) => a.toLowerCase() === val.toLowerCase()) || allowed.find((a) => /post/i.test(a));
+          if (hit) val = hit;
+        }
+      }
+      meta[t.name] = val;
+    }
+  }
+
+  if (!Object.keys(meta).length) return null;
+  return { key: shape.key, value: { [service]: meta } };
+}
+
+// NOTE: there was a makeVideoThumbUrl() here that rendered a first frame and
+// uploaded it as the video's thumbnailUrl. It is gone on purpose. Buffer
+// rejects thumbnailUrl on every network ("social networks do not accept custom
+// video thumbnail images"), so sending one failed the whole post. Do not
+// reintroduce it.
 
 // Queue one finished render onto one channel. Buffer has no file upload, so
 // the file goes to fal storage (permanently, see falUploadFile) and Buffer is
@@ -1122,14 +1207,13 @@ router.post('/buffer/post', async (req, res) => {
     const urlField = shape?.find((f) => f.name === 'url')
       || shape?.find((f) => /url/i.test(f.name) && !/thumb/i.test(f.name));
     v[urlField ? urlField.name : 'url'] = mediaUrl;
-    const thumbField = shape?.find((f) => /thumb/i.test(f.name));
-    if (thumbField) {
-      const thumbUrl = await makeVideoThumbUrl(asset.filename).catch(() => null);
-      if (thumbUrl) v[thumbField.name] = thumbUrl;
-      else if (thumbField.required) {
-        return res.status(502).json({ error: `Buffer requires a video thumbnail (${thumbField.name}) and one could not be made from this clip.` });
-      }
-    }
+    // NO THUMBNAIL. Buffer's VideoAssetInput declares a thumbnailUrl field, so
+    // the "trust the schema" rule above filled it in - and Buffer then refused
+    // every post with: "Video thumbnailUrl is not supported: social networks do
+    // not accept custom video thumbnail images... Remove thumbnailUrl from the
+    // video asset." Declared in the schema is not the same as accepted by the
+    // validator. Their suggested alternative (metadata.thumbnailOffset) is
+    // Instagram/TikTok/Pinterest only and optional, so nothing replaces it.
     // A required field we have nothing for: name it now, once, instead of
     // failing identically on every channel.
     const missing = (shape || []).filter((f) => f.required && v[f.name] === undefined).map((f) => f.name);
@@ -1147,10 +1231,14 @@ router.post('/buffer/post', async (req, res) => {
     return res.status(502).json({ error: `Could not read Buffer's posting format: ${err.message}` });
   }
 
+  // Which network each chosen channel is, so the right requirements go with it.
+  const services = await bufferChannelServices();
+
   const results = [];
   let needs = null;
   let dropped = [];
   for (const channelId of channelIds) {
+    const service = services.get(channelId) || null;
     const wanted = {
       text: caption,
       channelId,
@@ -1166,6 +1254,20 @@ router.post('/buffer/post', async (req, res) => {
       aiAssisted: !!aiLabel,
       assets: [assetObj],
     };
+    // What this particular network insists on: YouTube refuses a post with no
+    // title and no category; Facebook refuses one with no type. Skipped
+    // silently when the service is unknown or the schema is closed, so a
+    // network that needs nothing extra is unaffected.
+    if (service) {
+      try {
+        const extra = await bufferMetadataFor(service, {
+          caption,
+          youtubeCategoryId: req.body?.youtubeCategoryId,
+          facebookType: req.body?.facebookType,
+        });
+        if (extra) wanted[extra.key] = extra.value;
+      } catch (_) { /* Buffer's own refusal is more useful than ours */ }
+    }
     // Send only what this input actually declares. A field Buffer doesn't
     // know is a hard validation error that kills the whole post, and their
     // schema has already been renamed under us once.

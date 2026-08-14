@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0854</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0855</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -361,6 +361,29 @@ body.simple-only #view-simple{display:flex !important}
 
     <p class="note" id="foot-note">Everything is generated on your device — nothing you type here is uploaded.</p>
     </details>
+    <div class="card">
+      <h3>Diagnostics <span class="usage" id="diag-count"></span></h3>
+      <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="diag-refresh">Refresh</button>
+        <button class="btn2 quiet" id="diag-clear">🧹 Clear the list</button>
+      </div>
+      <div id="diag-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h3>Storage &amp; Backup</h3>
+      <p class="usage" id="stor-total">…</p>
+      <div id="stor-list" class="row"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2 quiet" id="stor-refresh">Refresh</button>
+        <button class="btn2" id="stor-backup">⬇ Download full backup (ZIP)</button>
+        <button class="btn2 quiet" id="stor-open-folder">📁 Open my media folder</button>
+      </div>
+      <p class="usage" id="stor-folder-path" style="word-break:break-all"></p>
+      <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
+      <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-change">Change it</a> · <a href="#" id="falkey-remove">Remove it</a>.</p>
+    </div>
   </div><!-- /view-art -->
 
   <div class="view" id="view-scenes">
@@ -937,19 +960,7 @@ body.simple-only #view-simple{display:flex !important}
       </div>
     </div>
 
-    <div class="card adv-card">
-      <h3>Storage &amp; Backup</h3>
-      <p class="usage" id="stor-total">…</p>
-      <div id="stor-list" class="row"></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2 quiet" id="stor-refresh">Refresh</button>
-        <button class="btn2" id="stor-backup">⬇ Download full backup (ZIP)</button>
-        <button class="btn2 quiet" id="stor-open-folder">📁 Open my media folder</button>
-      </div>
-      <p class="usage" id="stor-folder-path" style="word-break:break-all"></p>
-      <p class="usage">Backup contains every file in your library plus a manifest of your characters and projects. Keep a copy somewhere safe — this computer is the only place your media lives.</p>
-      <p class="usage" id="falkey-manage" style="display:none">AI key is saved on this server. <a href="#" id="falkey-change">Change it</a> · <a href="#" id="falkey-remove">Remove it</a>.</p>
-    </div>
+    
 
     <div class="card adv-card" id="recover-card">
       <h3>💸 Recover paid clips <span class="usage" id="recover-open"></span></h3>
@@ -981,15 +992,7 @@ body.simple-only #view-simple{display:flex !important}
       </details>
     </div>
 
-    <div class="card adv-card">
-      <h3>Diagnostics <span class="usage" id="diag-count"></span></h3>
-      <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2 quiet" id="diag-refresh">Refresh</button>
-        <button class="btn2 quiet" id="diag-clear">🧹 Clear the list</button>
-      </div>
-      <div id="diag-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
-    </div>
+    
 
     <div class="card adv-card">
       <h3>Project</h3>

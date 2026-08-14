@@ -347,6 +347,29 @@ reproduce the problem, and whatever appears is the actual fault.
 
 ---
 
+## 5f. Sending to Buffer — what each network demands (b0855)
+
+Buffer refused every post until b0855, and its own error messages said exactly
+why. Three separate things, now all handled automatically:
+
+- **No thumbnail.** Studio used to render a first frame and send it as the
+  video's `thumbnailUrl`. Buffer's schema *lists* that field but its validator
+  rejects it — *"social networks do not accept custom video thumbnail images"* —
+  and that one field failed the whole post on **every** channel. It is gone.
+- **YouTube needs a title and a category.** The title is taken from the first
+  line of your caption (trimmed to YouTube's 100-character limit), and the
+  category defaults to **People & Blogs**.
+- **Facebook needs a post type.** Defaults to a normal feed **post**.
+
+You don't set any of it — Studio reads what each network requires from Buffer
+directly and fills it in per channel, so YouTube gets its title while TikTok
+gets left alone.
+
+**If a post is still refused,** the message now lands in ⚙ Settings →
+Diagnostics in Buffer's own words. Clear the list, try again, screenshot it.
+
+---
+
 ## 6. From finished video to posted (what replaced Campaign Export)
 
 Campaign Export (the ZIP-for-Buffer card) is gone as of b0849 — it was a detour nobody took. The flow that replaced it is shorter and already in the app: **⚡ Auto shorts** cuts the batch, the **📅 Post tab** holds the schedule and captions, and your phone (**⚙ Settings → 📱 Open Studio on your phone**) is where the final tap happens, natively, which the platforms reward anyway. Song title and artist now live at the top of the **Lyrics & Captions** card — the title-card button and the storyboard both read them from there.

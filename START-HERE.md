@@ -156,6 +156,30 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — Studio b0855: BUFFER POSTING FIXED (his errors named all three)
+The b0854 logging did its job immediately — Jacques posted and Buffer said
+exactly what was wrong. Connection was never broken (org + 3 channels found);
+**posting** was. Three faults, all fixed:
+
+1. **`thumbnailUrl` killed every post on every channel.** `VideoAssetInput`
+   DECLARES the field, so the file's "trust Buffer's schema" rule filled it in
+   — and Buffer's validator rejects it: *"social networks do not accept custom
+   video thumbnail images... Remove thumbnailUrl from the video asset."*
+   **Declared in the schema ≠ accepted by the validator.** `makeVideoThumbUrl()`
+   is deleted with a comment where it stood. DO NOT REINTRODUCE IT.
+2. **YouTube requires `title` + category.** Title from the caption's first line
+   (≤100 chars, `<>` stripped); `categoryId` defaults to 22 (People & Blogs).
+3. **Facebook requires `type`** (post/story/reel). Defaults to `post`.
+
+(2) and (3) go in `CreatePostInput.metadata`, keyed by network. All names are
+read from Buffer's schema at runtime (`bufferMetaShape`, `bufferChannelServices`)
+rather than hardcoded, and enum values are checked against what Buffer declares.
+Overridable per request via `youtubeCategoryId` / `facebookType`.
+
+**Also: Diagnostics and Storage & Backup were in the SEQUENCER, not Settings**
+— Jacques corrected me on this. Both moved to `view-art` (⚙ Settings) and
+un-gated from `adv-card`, so they no longer need "show all studio tools".
+
 ### 14 Aug — Studio b0854: Buffer failures are now recorded (they weren't)
 Jacques: "buffer still dont work." **Could not diagnose it — no error text, and
 none was being kept.** What was verified:

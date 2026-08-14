@@ -156,6 +156,30 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — Studio b0850: the free voice path no longer dead-ends
+Jacques, angry and right: "why do I have to pay for my voice to narrate."
+**Root cause found — it was a real bug, not a pricing complaint.** The
+"🎬 Use in video (narration + captions)" button was armed ONLY inside the paid
+voice-clone success branch. Recording your own voice (free, already built)
+saved the clip to Songs and offered nothing further, so the free path visibly
+dead-ended and paying looked mandatory. Extracted `armVoiceUse(assetId)` and
+called it from BOTH paths; the recorded-voice note now points at it. Card copy
+now leads with "Your own voice is free, always"; the clone chip is relabelled
+"🎤 Clone a voice" and states its rate ($0.05/1k chars, STUDIO_RATE_VOICE).
+Verified in headless Chromium: record → one tap → narration track. b0850.
+
+**Local free cloning — researched, NOT built.** Chatterbox (Resemble AI) is
+MIT-licensed incl. weights, commercial use OK, zero-shot from ~5s of audio —
+it clears the licensing bar speak.js deliberately sets (see its header comment
+on CC0 voices). `pip install chatterbox-tts` works and imports cleanly; I
+could not test generation because this sandbox's proxy blocks huggingface.co
+and download.pytorch.org, so model weights never download. On Jacques's
+machine that's not a constraint. Cost to add: Python + torch + ~1GB weights
+(the CUDA torch pulled here was 8.3GB; CPU-only wheels from pytorch.org are
+far smaller), CPU generation is slow but workable. Build it only if he wants
+typed-text-in-his-voice badly enough for the install — recording is free,
+instant, and genuinely his voice.
+
 ### 14 Aug — Studio b0849: Campaign gone, Quick Video preview, Auto shorts
 Jacques asked for a simpler, more autonomous Studio workflow. Shipped:
 - **Campaign Export removed entirely** — UI card, all its JS, the `/campaign`

@@ -271,6 +271,34 @@ The first time, Windows may ask to allow Studio through the firewall — choose 
 
 ---
 
+## 5d. Narrating in your own voice (free, always)
+
+Your voice costs nothing and never did — but until b0850 the button that put it
+on the video only appeared after a *paid* generation, so the free path saved
+your recording and stopped there. Fixed. The flow now:
+
+1. Sequencer → **🎙 Voice** card → **🎙 Record my voice — free**
+2. Read your line (the **Teleprompter** on the 📅 Post tab holds the script if
+   it's long), tap again to stop
+3. **🎬 Use in video (narration + captions)** → it's the narration track on
+   your video, and every caption tool works on it
+
+That is your real voice, free, unlimited, and better than any clone. Two people
+reading two parts = two real voices — record one, then the other.
+
+**What the three options actually cost:**
+
+| Option | Cost | What it is |
+|---|---|---|
+| **🎙 Record my voice** | **Free** | Your actual voice. Unlimited |
+| **Built-in narrators** (Warm, Calm male…) | **Free** | Speak on your own computer. Plain reads only |
+| **🎤 Clone a voice** | ~$0.05 per 1,000 characters | AI speaks *typed text* in a voice from a clip. The price shows before you spend |
+
+Cloning is only for when you want text spoken **without anyone reading it**. If
+you're willing to read it, recording is free and sounds more like you.
+
+---
+
 ## 6. From finished video to posted (what replaced Campaign Export)
 
 Campaign Export (the ZIP-for-Buffer card) is gone as of b0849 — it was a detour nobody took. The flow that replaced it is shorter and already in the app: **⚡ Auto shorts** cuts the batch, the **📅 Post tab** holds the schedule and captions, and your phone (**⚙ Settings → 📱 Open Studio on your phone**) is where the final tap happens, natively, which the platforms reward anyway. Song title and artist now live at the top of the **Lyrics & Captions** card — the title-card button and the storyboard both read them from there.

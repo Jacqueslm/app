@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0849</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0850</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -562,7 +562,7 @@ body.simple-only #view-simple{display:flex !important}
       <h3>🎙 Voice — narrate your story <span class="usage">— the narrators are free</span></h3>
       <div id="voice-off" style="display:none"><p class="usage">Voice needs either the free speech add-on (run “Update my app” in Settings) or your fal.ai key.</p></div>
       <div id="voice-on" style="display:none">
-        <p class="usage" style="margin:0 0 4px">1. Pick a <b>narrator</b> below — press ▶ to hear it. 2. Type the line. 3. Generate. The narrators cost nothing; anything that does show its price first.</p>
+        <p class="usage" style="margin:0 0 4px"><b>Your own voice is free, always.</b> Press <b>🎙 Record my voice</b>, read your line, then <b>Use in video</b> — that's narration in your real voice for nothing. The built-in narrators are free too. Only <b>Clone a voice</b> (typing text and having AI speak it in someone's voice) costs, and it shows the price before you spend.</p>
         <div class="chips" id="voice-presets" style="margin-bottom:4px"></div>
         <p class="usage" id="voice-preset-note" style="margin:0 0 6px"></p>
         <button class="btn2" id="voice-hear" style="margin-bottom:6px;display:none">▶ Hear this narrator</button>
@@ -3987,7 +3987,7 @@ function renderVoiceCard() {
   // the old clone-my-own-clip behaviour rather than showing an empty row.
   if (!voices.length) voicePreset = 'own';
   else if (voicePreset !== 'own' && !voices.some((v) => v.key === voicePreset)) voicePreset = voices[0].key;
-  const own = { key: 'own', label: '🎤 My own voice', note: 'Clone any voice from an audio clip you uploaded — a vocal stem, or a recording of yourself. This one is not free.' };
+  const own = { key: 'own', label: '🎤 Clone a voice', note: 'Types text and speaks it in a voice from a clip you uploaded. This one is not free (~$0.05 per 1,000 characters) — to narrate in your own voice for nothing, press “Record my voice” below and read the line yourself.' };
   const box = $('#voice-presets');
   box.innerHTML = '';
   [...voices, ...(st.cfg?.falAvailable ? [own] : [])].forEach((v) => {
@@ -4046,6 +4046,25 @@ if (document.getElementById('voice-moods')) $('#voice-moods').querySelectorAll('
   updateVoicePrice();
 });
 
+/* Put a voice clip on the video as its narration track. Any audio asset works
+   the same way, whether it was generated, uploaded, or spoken into the mic a
+   second ago — which is the whole point. Until b0850 this button only ever
+   appeared after a PAID generation, so recording your own voice saved the file
+   and stopped there. The free path existed and dead-ended, which is exactly
+   what makes narrating look like something you have to pay for. */
+function armVoiceUse(assetId) {
+  const useBtn = $('#voice-use');
+  if (!useBtn) return;
+  useBtn.style.display = 'block';
+  useBtn.onclick = () => {
+    addMusicUnique(assetId);
+    renderMusicList();
+    updateQkMusicLabel && updateQkMusicLabel();
+    persistDraft();
+    document.querySelector('#mtabs button[data-view="seq"]').click();
+  };
+}
+
 /* Record your own voice, straight into the library. This is the answer to
    "why can't I use my own voice for free" - you always could, but only by
    filming yourself and lifting the audio off the clip afterwards. Nothing
@@ -4099,7 +4118,10 @@ if (document.getElementById('voice-rec')) $('#voice-rec').onclick = async () => 
       if (sel) sel.value = String(asset.id);
       const au = $('#voice-audio');
       au.src = asset.url; au.style.display = 'block';
-      note.textContent = `Saved — ${secs}s in your Songs. Use it as narration, or clone it above.`;
+      // Same one-tap finish the paid path gets: your voice, straight onto the
+      // video as its narration track.
+      armVoiceUse(asset.id);
+      note.textContent = `Saved — ${secs}s of your own voice, free. Press “Use in video” below to make it the narration.`;
     } catch (err) {
       note.textContent = `Couldn't save that recording: ${err.message}`;
     }
@@ -4176,15 +4198,7 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
       // tap-sync - works on it too. Without this button the only way through
       // was to leave the card, hunt it down in My Media and press "Use in
       // video" there, which made narration look unsupported.
-      const useBtn = $('#voice-use');
-      useBtn.style.display = 'block';
-      useBtn.onclick = () => {
-        addMusicUnique(made.id);
-        renderMusicList();
-        updateQkMusicLabel && updateQkMusicLabel();
-        persistDraft();
-        document.querySelector('#mtabs button[data-view="seq"]').click();
-      };
+      armVoiceUse(made.id);
     }
   } catch (e) { note.textContent = e.message; }
   b.disabled = false; b.innerHTML = old; updateVoicePrice();

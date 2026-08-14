@@ -3,7 +3,7 @@
 **Read this first, before anything else in this folder.** It is the record of
 what is actually done in Play Console, so nobody re-walks finished ground.
 
-Last checked in the console: **9 Aug 2026**
+Last checked in the console: **9 Aug 2026** · answers refreshed **14 Aug 2026**
 
 ---
 
@@ -66,16 +66,26 @@ The disclaimer still has to stay as the first paragraph of the full
 description, because there is no regulatory clearance. See
 `04-health-declaration.md`.
 
-### 3. Production access — around 13 Aug
+### 3. Production access — REQUIREMENT MET 14 Aug, answers current
 
-The closed test started **28 July**. Google wants 12+ testers for 14
-consecutive days.
+**Closed testing is finished: day 16 of 16, 0 days remaining, 38 testers
+against a target of 15, both reports delivered.** The 12-testers-for-14-days
+requirement is satisfied. Nothing is blocking the application.
 
 Answers are written and ready, with a copy button on each:
 **https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9**
 
-Do not use the answer sheet the testing provider sent. Two of its answers
-describe work that does not exist.
+**Rewritten 14 Aug** and now current — it previously said "the current build is
+5.1.0" when the app is on **5.5.0**, which was the one checkable falsehood in
+it. Question 8 also gained the five fixes that came out of Jacques walking the
+whole app on his own phone (voice journaling cutting off, the back button
+closing the app, tools buried in Profile, the couples dead end, the free tier),
+and question 3 now says 38 testers rather than twelve.
+
+**Do not use the answer sheet the testing provider sent.** Its question 8 claims
+a first-run walkthrough and Google Sign-In. Verified 14 Aug: the app has
+**neither** — login is email/password, zero Google Sign-In in the codebase. Only
+the screenshots claim is true. Google can check this.
 
 ---
 

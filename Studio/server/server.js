@@ -145,6 +145,10 @@ app.get('/api/studio-lan', requireAuth, (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Studio running on http://localhost:${PORT}`);
+  // One auto-backup of data.sqlite at every start - the file that "hurts to
+  // lose" (account, characters, face locks, projects). Rotating copies, see
+  // auto-backup.js. A failed snapshot must never block startup.
+  try { require('./auto-backup').snapshot(db); } catch (err) { try { db.logError('auto-backup', `startup snapshot failed: ${err.message}`); } catch (_) {} }
   const lan = lanAddresses();
   if (lan.length) {
     console.log('');

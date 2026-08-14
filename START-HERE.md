@@ -5,6 +5,37 @@ does NOT carry between sessions — this repo is the shared memory. Read this fi
 
 ---
 
+## OPEN ITEMS — 14 Aug 2026, 4pm
+
+Four things, in order. Everything else is committed, pushed and working.
+
+1. **Paste the corrected full description into Play Console.** The live listing
+   still sells **voice journaling as a Pro feature** — it has been free since
+   5.5.0, and the first fifteen days of *every* pack are free rather than one
+   pack. Corrected text is in `store-listing/02-full-description.md`; the console
+   holds its own copy, so it has to be pasted in by hand.
+2. **Apply for production access.** Every requirement is met (see CLOSED TESTING
+   below — do not re-verify it). The ten answers are written, verified against
+   the code, and live at
+   `https://claude.ai/code/artifact/27923b2f-74c7-4e92-a283-0c1e6dd7d2c9`.
+   Two are dropdowns and Jacques's call: **Difficult** for recruiting, **1k–10k**
+   for first-year installs.
+3. **A test post captioned `hi` is queued in Buffer** on Facebook, TikTok and
+   YouTube. It will publish at the next open slot unless deleted.
+4. **NASADAD** — emailed 12 Aug to mwhitter@nasadad.org, no reply. Normal.
+   **Do not chase before 19 Aug.** Missouri DBH is waiting behind it and has
+   confirmed in writing that a NASADAD listing is a route onto their page.
+
+**Post-launch only, not before Google answers:** rebuild the TWA with
+`enableNotifications: true` (that flag is why pushes don't arrive on his phone),
+and consider Google Sign-In only if the funnel shows people dropping at signup.
+
+**Never proxy the `www` DNS record while Google is reviewing** —
+`.well-known/assetlinks.json` is what verifies the Android app owns the domain,
+and breaking it is silent.
+
+---
+
 ## What this repo is
 
 Two separate apps in one repo (kept fully separate on disk):

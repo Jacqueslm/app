@@ -1,4 +1,4 @@
-# Four episodes — doomscrolling ×2, the teenager, the spiritual one
+# The episode library — one habit each
 
 Written 14 Aug 2026, same build as the Couples series. Ten shots each, one line
 of narration per shot, ready to paste into Manus.
@@ -19,19 +19,24 @@ the face drifts between shots.
 
 ---
 
-## The rule all four obey
+## The rule they all obey
 
 The person using is never the villain and never let off. Every episode carries
 one line that says **they're not a bad person** and one that says **that's what
 makes it hard**. That pair is what people recognise and what no advert says.
 
-**Two of these are told from the inside** — the doomscrolling pair — because
-doomscrolling has no witness. Nobody walks in on it. The only person who can
-find it is you, and the only evidence is the hours.
+**Some are told from the inside** — doomscrolling, gaming, work, anger — because
+those have no witness. Nobody walks in on them. The only person who can find
+them is you. **The rest are told by the person who found out** — the parent, the
+wife — which is the Couples-series shape.
 
 ---
 
-# EPISODE 4 · The Hours — a man, doomscrolling
+# BENCHED (no episode number) · The Hours — a man, doomscrolling
+
+**Held back 14 Aug 2026.** The lineup carries one doomscrolling episode now, and
+that slot went to Nia. This script is finished and costs nothing to keep — if
+the trans-woman angle ever feels wrong for a given week, this is the swap.
 
 > **DEAN:** Black man, mid 40s, shaved head, broad shoulders, short beard going
 > grey at the chin, plain dark t-shirt.
@@ -97,7 +102,7 @@ anything. No card, no trial.
 
 ---
 
-# EPISODE 5 · Three Hours a Night — a trans woman, doomscrolling
+# EPISODE 3 · Three Hours a Night — a trans woman, doomscrolling
 
 > **NIA:** Black trans woman, early 30s, shoulder-length braids, gold hoop
 > earrings, soft round face, oversized cardigan.
@@ -168,7 +173,7 @@ card, no trial.
 
 ---
 
-# EPISODE 6 · The Hoodie — a parent, a teenager, smoking
+# EPISODE 7 · The Hoodie — a parent, a teenager, smoking
 
 > **DEE:** white woman, late 40s, hair up in a clip, reading glasses pushed on
 > her head, cardigan, tired kind face.
@@ -239,7 +244,7 @@ out, not just the person who's using.
 
 ---
 
-# EPISODE 7 · The Empty Chair — the spiritual one · **SUBSTANCES**
+# EPISODE 8 · The Empty Chair — the spiritual one · **SUBSTANCES**
 
 > **CURTIS:** Black man, 50s, greying close beard, collared shirt with the
 > sleeves rolled, heavy hands, reading glasses in his breast pocket.
@@ -347,3 +352,272 @@ track in my free app, and it asks that question before it asks anything else.
 - **No outcome claims anywhere in the four.** Nobody quits, nobody is fixed,
   nothing is cured. Every ending is one small action. That is a policy line for
   a health-adjacent app as much as a taste one.
+
+---
+
+# EPISODE 4 · The Light Turns Green — anger, road rage
+
+> **HECTOR:** Latino man, late 30s, close-trimmed beard, work polo shirt,
+> forearm tattoo, short dark hair.
+> **MATEO:** his son, 7, small for his age, school polo, backpack.
+
+**Anger is the only one on the list nobody calls an addiction**, because there
+is nothing to buy and nothing to hide. But it runs the identical loop — the hit,
+the crash, the promise — and road rage is where it's cleanest: a sealed box, a
+stranger who will never know your name, and a witness in the back seat.
+
+**The turn is not the shouting. It's the mimicry.** He doesn't stop because he
+feels guilty; he stops because he sees his own hands on his son.
+
+**SHOT 1** — `HECTOR driving in daylight with MATEO in a booster seat in the back, both relaxed, radio on, ordinary afternoon`
+*"Nobody calls this an addiction."*
+
+**SHOT 2** — `Close on HECTOR's hands tightening on a steering wheel, knuckles going pale`
+*"There's nothing to buy. Nothing to hide."*
+
+**SHOT 3** — `Close on HECTOR's face mid-shout inside a car, mouth open, neck tight, windows up`
+*"Twenty seconds, and it's free."*
+
+**SHOT 4** — `Close on MATEO in the back seat seen through a rearview mirror, gone completely still, eyes down, hands in his lap`
+*"He stopped talking in the back seat."*
+
+**SHOT 5** — `HECTOR alone in a parked car in a driveway, engine off, both hands over his face`
+*"I always said sorry."*
+
+**SHOT 6** — `MATEO at a kitchen table doing homework, very quiet, not looking up, evening light`
+*"He stopped asking to come with me."*
+
+**SHOT 7** — `Close on MATEO's small hands gripping the wheel of a ride-on toy car in a yard, knuckles tight, the same shape as his father's`
+*"Then I saw him hold a wheel like that."*
+
+**SHOT 8** — `HECTOR standing in a dark hallway outside a child's bedroom door, hand raised but not touching it`
+*"I'm not a violent man."*
+
+**SHOT 9** — `HECTOR sitting on the edge of his bed at night, phone dark in his hand, staring at the floor`
+*"That's what makes it hard."*
+
+**SHOT 10** — `HECTOR driving the next morning with MATEO in the back, another car cutting in front of him, HECTOR's hands loose on the wheel, MATEO talking`
+*"So somebody cut me off, and I let it go."*
+
+**YouTube:** My son stopped talking in the back seat
+**TikTok:** Then I saw him hold a wheel like that.
+
+```
+1. 01_drive      Still     1.4s  cut   Nobody calls this an addiction.
+2. 02_knuckles   Zoom in   1.4s  cut   There's nothing to buy. Nothing to hide.
+3. 03_shout      Zoom in   1.3s  cut   Twenty seconds, and it's free.
+4. 04_mirror     Still     1.5s  cut   He stopped talking in the back seat.
+5. 05_driveway   Still     1.3s  cut   I always said sorry.
+6. 06_homework   Zoom in   1.4s  cut   He stopped asking to come with me.
+7. 07_toywheel   Zoom in   1.6s  cut   Then I saw him hold a wheel like that.
+8. 08_hallway    Still     1.4s  cut   I'm not a violent man.
+9. 09_bededge    Still     1.5s  cut   That's what makes it hard.
+10. 10_letitgo   Zoom out  2.0s  cut   So somebody cut me off, and I let it go.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** Nobody calls this one an addiction. There's nothing to buy, nothing
+to hide, and it's over in twenty seconds — so it just runs for years. I stopped
+the day I saw my son hold a toy wheel the way I hold mine. Free app, and anger
+is one of the tracks in it.
+`#angerissues #roadrage #angermanagement #fatherhood #recoverysupport`
+
+---
+
+# EPISODE 5 · Somebody Needs Me — gaming
+
+> **ELI:** mixed-race man, 24, curly dark hair, headset around his neck, grey
+> hoodie, thin build.
+
+**Gaming's tell is not the hours. It's that leaving feels like abandoning
+people.** Every other habit isolates you; this one hands you a team that is
+counting on you at ten o'clock, and quitting means letting five real humans
+down. Nobody films that, and it is the entire reason people stay.
+
+**SHOT 1** — `ELI at a desk in a dark bedroom at night, monitor light on his face, headset on, mouth moving, talking to someone`
+*"I wasn't hiding. Everybody knew where I was."*
+
+**SHOT 2** — `Wide of the same bedroom in daylight with the curtains shut, plates stacked on the desk, bed unmade, monitors still on`
+*"That's the part people get wrong."*
+
+**SHOT 3** — `Close on a chat window on a monitor, text deliberately blurred and unreadable, a cursor blinking`
+*"Somebody in there needed me at ten o'clock."*
+
+**SHOT 4** — `ELI asleep at the desk, head on his forearm, headset still on, dawn light at the edge of the curtain`
+*"So I was never the one who left."*
+
+**SHOT 5** — `A dining table set for three with one chair pushed back and empty, the food on that plate gone cold`
+*"They stopped waiting to eat."*
+
+**SHOT 6** — `Close on ELI's hand on a mouse, thumb moving, the rest of him completely still`
+*"In there I was good at something."*
+
+**SHOT 7** — `A folded shirt still in its packaging on a chair with a lanyard beside it, a layer of dust on both`
+*"Out here I was behind on everything."*
+
+**SHOT 8** — `ELI standing in a dark kitchen at 4am eating cereal, phone face-up on the counter, rest of the house dark`
+*"I'm not a waster."*
+
+**SHOT 9** — `ELI sitting on the edge of the bed holding the headset in both hands, monitors dark behind him`
+*"That's what makes it hard."*
+
+**SHOT 10** — `ELI opening the curtains in daylight, the room bright for the first time, the desk behind him with the chair pushed in`
+*"So I told them I'd be back. And I got up."*
+
+**YouTube:** Leaving the game felt like walking out on people
+**TikTok:** Somebody in there needed me at ten o'clock.
+
+```
+1. 01_desk       Still     1.4s  cut   I wasn't hiding. Everybody knew where I was.
+2. 02_daylight   Zoom in   1.3s  cut   That's the part people get wrong.
+3. 03_chat       Zoom in   1.5s  cut   Somebody in there needed me at ten o'clock.
+4. 04_asleep     Still     1.4s  cut   So I was never the one who left.
+5. 05_table      Still     1.4s  cut   They stopped waiting to eat.
+6. 06_mouse      Zoom in   1.3s  cut   In there I was good at something.
+7. 07_shirt      Still     1.4s  cut   Out here I was behind on everything.
+8. 08_cereal     Zoom in   1.4s  cut   I'm not a waster.
+9. 09_headset    Still     1.5s  cut   That's what makes it hard.
+10. 10_curtains  Zoom out  2.0s  cut   So I told them I'd be back. And I got up.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** People think gaming addiction is about the hours. It isn't. It's
+that five real people are counting on you at ten o'clock, and leaving feels like
+walking out on them. That's why nobody just stops. Free app, no card, no trial.
+`#gamingaddiction #gaming #screentime #videogames #recoverysupport`
+
+---
+
+# EPISODE 6 · The Respectable One — work
+
+> **MEG:** white woman, 45, hair in a low ponytail, blazer over a t-shirt,
+> reading glasses, tired eyes.
+> **LILY:** her daughter, 12, braces, school hoodie.
+
+**This is the one people congratulate you for**, which is exactly what keeps it
+invisible for a decade. Every other habit gets whispered about; this one gets a
+plaque. The app's own line for it is the spine of the film: *rest is the test —
+if you cannot stop, you're not working, you're worshipping.*
+
+**Do not make her a bad mother and do not redeem her.** She closes a laptop for
+one morning. That's the whole ending.
+
+**SHOT 1** — `MEG at a kitchen table at 1am, laptop open, the screen the only light, the house dark behind her`
+*"Nobody has an intervention for this one."*
+
+**SHOT 2** — `Close on MEG's face lit by a laptop screen, reading glasses on, no expression at all`
+*"They give you a plaque."*
+
+**SHOT 3** — `A school hall with rows of chairs facing a small stage, one seat empty in an otherwise full row, audience blurred`
+*"I missed it. Again."*
+
+**SHOT 4** — `Close on a phone screen showing a missed call and a photo message from a daughter, a thumb resting over it`
+*"She stopped being surprised."*
+
+**SHOT 5** — `MEG at an office desk in daylight, a colleague's hand setting a coffee down beside her, both of them smiling`
+*"'I don't know how you do it.'"*
+
+**SHOT 6** — `A framed certificate on an office wall, very slightly crooked, lit by a window`
+*"That's what they say to me."*
+
+**SHOT 7** — `LILY eating alone at a kitchen table with a tablet propped up in front of her, one plate, evening`
+*"She eats at the table I work at."*
+
+**SHOT 8** — `MEG standing in a bedroom doorway looking at LILY asleep, laptop bag still on her shoulder`
+*"I'm not a bad mother."*
+
+**SHOT 9** — `MEG sitting in a parked car outside her own house at night, engine off, hands in her lap, not going in`
+*"That's what makes it hard."*
+
+**SHOT 10** — `MEG at the kitchen table in the morning with the laptop closed and pushed away, LILY beside her, two bowls between them`
+*"So I closed it. For one morning."*
+
+**YouTube:** The addiction people give you a plaque for
+**TikTok:** Nobody has an intervention for this one. They give you a plaque.
+
+```
+1. 01_1am        Still     1.4s  cut   Nobody has an intervention for this one.
+2. 02_face       Zoom in   1.3s  cut   They give you a plaque.
+3. 03_hall       Still     1.5s  cut   I missed it. Again.
+4. 04_phone      Zoom in   1.4s  cut   She stopped being surprised.
+5. 05_office     Still     1.4s  cut   "I don't know how you do it."
+6. 06_plaque     Zoom in   1.3s  cut   That's what they say to me.
+7. 07_lily       Still     1.5s  cut   She eats at the table I work at.
+8. 08_doorway    Zoom in   1.4s  cut   I'm not a bad mother.
+9. 09_car        Still     1.5s  cut   That's what makes it hard.
+10. 10_closed    Zoom out  2.0s  cut   So I closed it. For one morning.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** Every other habit gets whispered about. This one gets a plaque.
+"I don't know how you do it" is what people say right up until the day you work
+out you've been hiding in plain sight, and getting praised for it. Work is one
+of the tracks in my free app.
+`#workaholic #workaddiction #burnout #workingmom #recoverysupport`
+
+---
+
+# EPISODE 9 · The Second Dinner — a couple, food and binging
+
+> **RAY:** Black man, mid 40s, broad, short beard going grey, work shirt.
+> **TAMMY:** Black woman, early 40s, braids, glasses, cardigan.
+
+**Every article about binge eating is written for a woman.** Men who do this
+have nowhere to read about themselves, which is why this one flips the default —
+and why it's told from Tammy's side, like the Couples episodes.
+
+**Nobody hides a meal. They hide the second one.** And the hiding place is never
+the house, because the house has her in it. It's the car.
+
+**SHOT 1** — `RAY and TAMMY eating dinner together at a kitchen table, ordinary, plates half finished, warm light`
+*"We eat dinner together every night."*
+
+**SHOT 2** — `RAY rinsing his plate at the sink, TAMMY leaving the room behind him, ordinary evening`
+*"He never eats much in front of me."*
+
+**SHOT 3** — `A dark hallway at night seen from a bedroom doorway, a kitchen light on at the far end`
+*"Then the kitchen light goes on at eleven."*
+
+**SHOT 4** — `TAMMY opening a car door in the morning, close on a door pocket packed tight with folded fast-food wrappers pushed down out of sight`
+*"I found them in the car. Not the house."*
+
+**SHOT 5** — `Close on TAMMY's hands holding a paper receipt in a driver's seat, timestamp visible but not readable`
+*"Eleven forty. Every night that week."*
+
+**SHOT 6** — `TAMMY sitting alone in the parked car in the driveway, both hands in her lap, staring through the windscreen`
+*"Nobody hides a meal. They hide the second one."*
+
+**SHOT 7** — `A framed photo of RAY and TAMMY somewhere happy on a shelf, slightly out of focus, foreground dark`
+*"He's not greedy."*
+
+**SHOT 8** — `RAY asleep in bed in the dark, TAMMY sitting up beside him awake, looking straight ahead`
+*"That's what makes it hard."*
+
+**SHOT 9** — `RAY at the kitchen table in the morning, both hands around a mug, not looking up, TAMMY across from him`
+*"He'd never said it out loud. Not once."*
+
+**SHOT 10** — `Wide of the kitchen, both of them at the table turned toward each other, plates cleared, mid-conversation`
+*"So I asked. And then I shut up and listened."*
+
+**YouTube:** I found the wrappers in the car, not the house
+**TikTok:** Nobody hides a meal. They hide the second one.
+
+```
+1. 01_dinner     Still     1.4s  cut   We eat dinner together every night.
+2. 02_sink       Zoom in   1.4s  cut   He never eats much in front of me.
+3. 03_hallway    Still     1.4s  cut   Then the kitchen light goes on at eleven.
+4. 04_wrappers   Zoom in   1.5s  cut   I found them in the car. Not the house.
+5. 05_receipt    Zoom in   1.4s  cut   Eleven forty. Every night that week.
+6. 06_parked     Still     1.6s  cut   Nobody hides a meal. They hide the second one.
+7. 07_photo      Zoom in   1.3s  cut   He's not greedy.
+8. 08_awake      Still     1.4s  cut   That's what makes it hard.
+9. 09_mug        Still     1.5s  cut   He'd never said it out loud. Not once.
+10. 10_talking   Zoom out  2.0s  cut   So I asked. And then I shut up and listened.
+11. 99-free-end  Still     3.0s  cut
+```
+
+**Caption:** Nobody hides a meal. They hide the second one — and never in the
+house, because the house has you in it. Every article about this is written for
+a woman, so the men doing it have nowhere to read about themselves. Free app,
+and there's a section for the person who found out.
+`#bingeeating #bingeeatingrecovery #emotionaleating #lovinganaddict #recoverysupport`

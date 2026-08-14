@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0852</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0853</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -806,27 +806,6 @@ body.simple-only #view-simple{display:flex !important}
       <div class="progress-line" id="seq-prog"><div></div></div>
     </div>
 
-    <div class="card" id="one-tap-card">
-      <h3>⚡ One-tap short <span class="usage">— clip in, captioned video out</span></h3>
-      <p class="usage" style="margin:0 0 8px">For a piece to camera you already scripted. Pick the clip, paste what you said, press the button. No timing, no tapping, no speech model — it spaces the lines by how long each one takes to say.</p>
-      <select class="input" id="ot-clip" style="margin-bottom:8px"></select>
-      <textarea id="ot-text" placeholder="Paste your script — one line per caption.&#10;&#10;You're not asking because you're dramatic. You're asking because you already know.&#10;Nobody says it out loud, so you google it at midnight.&#10;I was that husband, 38 years. I built a free app - and part of it is for you, not them." style="min-height:104px"></textarea>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-        <select class="input" id="ot-fx" style="width:auto;padding:6px 10px;font-size:13px"></select>
-        <select class="input" id="ot-style" style="width:auto;padding:6px 10px;font-size:13px">
-          <option value="pop">Caption: Pop</option>
-          <option value="boxed">Caption: Boxed</option>
-          <option value="outline" selected>Caption: Outline</option>
-          <option value="classic">Caption: Classic</option>
-        </select>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ot-endcard"> add end card</label>
-      </div>
-      <button class="gen-btn" id="ot-go" style="width:100%;margin-top:10px">⚡ Make my short</button>
-      <div class="progress-line" id="ot-prog"><div></div></div>
-      <p class="usage" id="ot-status" style="margin-top:6px"></p>
-      <div class="err" id="ot-err"></div>
-    </div>
-
     <div class="card">
       <h3>🎤 Lyrics &amp; Captions</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -950,16 +929,6 @@ body.simple-only #view-simple{display:flex !important}
     </div>
 
     <div class="card adv-card">
-      <h3>🎵 Your Audience <span class="usage" id="fans-count"></span></h3>
-      <p class="usage">An email signup page (<code>join.html</code>) is built in — a fan list you own, not one an algorithm controls. Right now it only works on this computer; to actually catch signups, this server needs to live at a real public address (see below).</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn2 quiet" id="fans-refresh">Refresh</button>
-        <button class="btn2" id="fans-download">⬇ Download email list (CSV)</button>
-      </div>
-      <p class="usage" id="fans-hosting-note" style="margin-top:8px"></p>
-    </div>
-
-    <div class="card adv-card">
       <h3>📖 Guide &amp; help</h3>
       <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-post flow. Open it any time.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1017,6 +986,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2 quiet" id="diag-refresh">Refresh</button>
+        <button class="btn2 quiet" id="diag-clear">🧹 Clear the list</button>
       </div>
       <div id="diag-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
     </div>
@@ -2113,7 +2083,6 @@ async function bootStudio() {
   renderWatermark();
   loadStorage();
   loadDiagnostics();
-  loadFans();
   loadReceipts();
   $('#chars-form').style.display = 'flex';
   await Promise.all([loadAssets(), loadCharacters(), loadLocations(), loadRelationships(), loadSchedule()]);
@@ -2123,7 +2092,6 @@ async function loadAssets() {
   st.assets = (await jfetch('/api/studio/assets')).assets;
   renderLibrary(); renderSeqPickers(); renderMediaPage(); renderSimpleScreen(); renderVoiceCard();
   renderSocialAssetPicker();
-  renderOneTapPickers();
   reportMissingFiles();
 }
 
@@ -4421,18 +4389,19 @@ async function loadDiagnostics() {
   } catch (e) { $('#diag-count').textContent = ''; }
 }
 $('#diag-refresh').onclick = loadDiagnostics;
-
-async function loadFans() {
+// Clearing is safe: this is a rolling view of recent errors, not an audit log.
+// A list still showing last week's fixed problems makes a fresh one hard to see.
+$('#diag-clear').onclick = async () => {
+  const b = $('#diag-clear');
+  b.disabled = true;
   try {
-    const { count } = await jfetch('/api/studio/fans');
-    $('#fans-count').textContent = `(${count} signed up)`;
-    $('#fans-hosting-note').innerHTML = count
-      ? `Signups so far came in through <code>join.html</code> on whatever address reached this server. To grow this for real: put this computer (or a small always-on server) online with a real domain and HTTPS, then share <code>yourdomain.com/join.html</code> — on social bios, after shows, anywhere fans find you.`
-      : `Nobody's signed up yet — expected on localhost. To go live: host this server somewhere with a public address (a cheap VPS, or a small hosting provider that runs Node), point a domain at it, then share <code>yourdomain.com/join.html</code>.`;
-  } catch (e) { $('#fans-count').textContent = ''; }
-}
-$('#fans-refresh').onclick = loadFans;
-$('#fans-download').onclick = () => { location.href = '/api/studio/fans.csv'; };
+    const { cleared } = await jfetch('/api/studio/diagnostics/clear', { method: 'POST' });
+    await loadDiagnostics();
+    $('#diag-count').textContent = cleared ? `(cleared ${cleared})` : '(nothing to clear)';
+  } catch (e) { $('#diag-count').textContent = e.message; }
+  b.disabled = false;
+};
+
 
 async function runUpdate(statusSel, btnSel) {
   if (!confirm('Update the app to the latest version? Your library, account and settings are kept. Do not update while a render is running.')) return;
@@ -7363,7 +7332,6 @@ function renderLyrList() {
   });
 }
 
-$('#ot-go').onclick = makeOneTapShort;
 
 $('#lyr-spread').onclick = () => {
   setErr('#seq-err', null);
@@ -8771,80 +8739,6 @@ function captionPlan(text, duration) {
       end: Math.round((at - (i < lines.length - 1 ? 0.08 : 0)) * 100) / 100,
     };
   });
-}
-
-function renderOneTapPickers() {
-  const sel = $('#ot-clip');
-  if (!sel) return;
-  const vids = (st.assets || []).filter((a) => a.kind === 'video' && !a.missing);
-  const keep = sel.value;
-  sel.innerHTML = vids.length
-    ? vids.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}${a.meta?.duration ? ` · ${a.meta.duration.toFixed(1)}s` : ''}</option>`).join('')
-    : '<option value="">No clips yet — film one and add it to My Media</option>';
-  // Default to the newest clip, which is almost always the one just filmed.
-  if (keep && vids.some((a) => String(a.id) === keep)) sel.value = keep;
-  const fxSel = $('#ot-fx');
-  if (fxSel && !fxSel.options.length) {
-    fxSel.innerHTML = QK_FX.map(([v, l]) => `<option value="${v}"${v === 'cinematic' ? ' selected' : ''}>${l}</option>`).join('');
-  }
-}
-
-async function makeOneTapShort() {
-  const btn = $('#ot-go');
-  setErr('#ot-err', null);
-  const assetId = Number($('#ot-clip').value);
-  const asset = st.assets.find((a) => a.id === assetId);
-  if (!asset) return setErr('#ot-err', 'Pick a clip first — film one and add it to My Media.');
-  const text = $('#ot-text').value.trim();
-  if (!text) return setErr('#ot-err', 'Paste the lines you said. One line per caption.');
-
-  let dur = asset.meta?.duration;
-  if (!dur || dur <= 0) return setErr('#ot-err', "Studio couldn't read that clip's length. Re-add it to My Media.");
-
-  const captionLines = captionPlan(text, dur);
-  const clips = [{ assetId, start: 0, end: dur, eq: null, fx: $('#ot-fx').value, keepAudio: true }];
-  const transitions = [];
-
-  // The end card is a still, so it needs a clip of its own on the tail.
-  if ($('#ot-endcard').checked) {
-    const card = (st.assets || []).find((a) => a.kind === 'image' && /free.?end|end.?card/i.test(a.label));
-    if (card) {
-      clips.push({ assetId: card.id, duration: 2.5, eq: null, fx: 'none' });
-      transitions.push({ type: 'cut', duration: 0 });
-    } else {
-      setErr('#ot-err', 'No end card in My Media yet — add 99-free-end.png and tick this again. Making the short without it.');
-    }
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Making your short…';
-  $('#ot-status').textContent = `${captionLines.length} caption${captionLines.length > 1 ? 's' : ''} across ${dur.toFixed(1)}s…`;
-  try {
-    const { job } = await jfetch('/api/studio/render', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        clips, transitions,
-        captionLines,
-        captionStyle: $('#ot-style').value,
-        captionSize: 'big',
-        size: currentSize(),
-        fadeToBlack: false,
-        name: (text.split('\n')[0] || 'short').slice(0, 40),
-      }),
-    });
-    const done = await pollJob(job.id, (j) => setProg('#ot-prog', j.progress));
-    setProg('#ot-prog', 100);
-    await loadAssets();
-    const made = st.assets.find((a) => a.id === done.assetId);
-    $('#ot-status').textContent = 'Done — it is in My Media, ready to post.';
-    if (made) openLightbox(made.url, 'video', made.label);
-  } catch (e) {
-    setErr('#ot-err', e.message || 'Could not make the short.');
-    $('#ot-status').textContent = '';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '⚡ Make my short';
-  }
 }
 
 // The finished length, using the same arithmetic the assembler uses. Adding the

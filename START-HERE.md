@@ -156,6 +156,20 @@ day 30; the main track keeps its own Day 30 overlay. Versions 5.4.0 → 5.5.0
 across the quadruple. All paths verified in headless Chromium against the real
 server. No Data safety change, no Play impact.
 
+### 14 Aug — Studio b0853: clear diagnostics, two dead cards removed
+- **Diagnostics now has 🧹 Clear the list** (`POST /api/studio/diagnostics/clear`
+  → `db.clearErrors()`). It is a rolling view, not an audit log; an old list of
+  fixed problems hides the new one.
+- **Removed 🎵 Your Audience** — fan-email capture for `join.html`, a musician
+  feature that only worked on localhost. Server routes `/fans` and `/fans.csv`
+  deleted with it.
+- **Removed ⚡ One-tap short.** It captioned ONE filmed clip from a pasted
+  script (timing lines by how long each takes to say). Distinct from the Shorts
+  Generator, which cuts many shorts OUT of a finished timeline — but Jacques
+  called the overlap unnecessary and the capability survives via Quick Video +
+  Lyrics & Captions. `captionPlan()`/`speakSeconds()` are KEPT; other code uses
+  them. Verified in-browser: no page errors, Shorts card intact.
+
 ### 14 Aug — the in-app PDF guide was 16 builds stale; now generated from the manual
 `HOW-TO-USE.md` was current all day, but Studio's **📖 Open the guide (PDF)**
 button serves a static `Studio/Studio-Guide.pdf` that was last rebuilt at

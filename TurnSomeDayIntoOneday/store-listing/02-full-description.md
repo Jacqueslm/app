@@ -45,9 +45,9 @@ This app is not an emergency service. If you are in danger or thinking about har
 
 WHAT COSTS MONEY
 
-The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the journal, and the companion. There is no card required to start and no time limit on the free version.
+The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the journal you can type or speak into, and the companion. There is no card required to start and no time limit on the free version.
 
-Pro is an optional in-app subscription that unlocks the rest: the second half of every program, more daily conversations, weekly reports, reminders, voice journaling and the couples exercises. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
+Pro is an optional in-app subscription that unlocks the rest: the second half of every program, more daily conversations, weekly reports, reminders and the advanced pattern tools. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
 
 WHO MADE THIS
 
@@ -55,6 +55,12 @@ One person, who needed it first and could not find it. It is not a clinic and do
 ```
 
 **Character count is checked in `_char-counts.txt` in this folder.**
+
+> **Corrected 14 Aug 2026.** This text sold **voice journaling** as a Pro feature.
+> It has been free since 5.5.0, and the first fifteen days of *every* lesson pack
+> are free (not one pack). A listing that oversells the paywall is both wrong and
+> the wrong way round — it hides the thing that makes people stay.
+> **The live listing in Play Console still has the old wording. Paste this one in.**
 
 ---
 

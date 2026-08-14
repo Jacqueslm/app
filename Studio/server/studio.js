@@ -4804,6 +4804,10 @@ async function aiCleanTranscriptLines(lines) {
   return out.filter((_, i) => !deletions.has(i));
 }
 
+// A model fallback (whisper-small -> base) is non-fatal and logged once
+// per server run, not on every use - otherwise a morning of transcribing
+// buries real errors in Diagnostics with the same line three times.
+const transcribeNotesSeen = new Set();
 router.post('/transcribe-local', (req, res) => {
   const asset = db.getAsset(req.userId, Number(req.body?.assetId));
   if (!asset || (asset.kind !== 'video' && asset.kind !== 'audio')) {
@@ -4821,7 +4825,7 @@ router.post('/transcribe-local', (req, res) => {
           else if (phase === 'model') job.progress = 5 + Math.round(pct * 0.35); // 5-40%: first-run model download
           else job.progress = 40 + Math.round((pct || 0) * 0.5); // 40-90%: listening, moves per audio piece
         },
-        (note) => { try { db.logError('transcribe', note); } catch (_) {} }
+        (note) => { if (note && !transcribeNotesSeen.has(note)) { transcribeNotesSeen.add(note); try { db.logError('transcribe', note); } catch (_) {} } }
       );
       // AI cleanup of mishears/garbles - ONLY when the user said yes to the
       // priced confirm (falls back to the raw transcript if it fails).
@@ -5154,6 +5158,10 @@ router.get('/update/check', async (req, res) => {
 });
 
 router.post('/update', async (req, res) => {
+  // Back up data.sqlite BEFORE the code overlay replaces the app - the one
+  // snapshot that guards the files no update touches. Same rotating scheme as
+  // the startup snapshot; never let it block an update.
+  try { require('./auto-backup').snapshot(db); } catch (_) {}
   const os = require('os');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
   // remember the current dependencies so we only run the slow npm install when

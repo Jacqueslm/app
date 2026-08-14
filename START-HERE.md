@@ -14,14 +14,16 @@ marked DONE below is closed history, not a to-do list.
 
 ## OPEN ITEMS — 14 Aug 2026
 
-Three things left. Everything else is committed, pushed and working.
+Two things left. Everything else is committed, pushed and working.
 
-1. **Paste the corrected full description into Play Console.** STILL OPEN as of
-   14 Aug 2026, 12:30pm. The live listing still sells **voice journaling as a
-   Pro feature** — it has been free since 5.5.0, and the first fifteen days of
-   *every* pack are free rather than one pack. Corrected text is in
-   `store-listing/02-full-description.md`; the console holds its own copy, so it
-   has to be pasted in by hand. Do this BEFORE applying for production.
+1. ~~**Paste the corrected full description into Play Console.**~~ **SENT FOR
+   REVIEW 14 Aug 2026, 12:46pm.** Jacques pasted it, saved, and sent it through
+   Publishing overview — one change, "Change full description", en-US. The
+   AI asset declaration on that screen was answered **Don't label assets**,
+   which is correct: the screenshots are real captures with caption bands drawn
+   by `make-captioned-screenshots.py`, and the feature graphic is the icon and
+   app name composited on the app gradient. No generative AI imagery is used
+   anywhere in the listing. Do not re-ask him to do this.
 2. **Apply for production access.** Every requirement is met (see CLOSED TESTING
    below — do not re-verify it). The ten answers are written, verified against
    the code, and live at

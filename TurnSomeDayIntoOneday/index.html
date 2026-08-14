@@ -484,6 +484,30 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <button class="ob-btn outline" onclick="obBack(0)">Back</button>
 </div>
 
+<!-- STEP 1.5: THE SPIRITUAL QUESTION -->
+<!-- Jacques, 14 Aug 2026: the Spiritual Path should not sit in Tools waiting to
+     be found - the question belongs at the start, tied to what the person just
+     told us they are fighting. It is ASKED, not asserted: the same page that
+     says "you stepped away from God" to someone who says yes would tell an
+     atheist their addiction is a spiritual failure at the exact moment the app
+     is trying to earn their trust. Asked, it lands harder and costs nothing. -->
+<div class="ob-step" id="obs1_5">
+  <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Before we go on</div>
+  <p style="font-size:12.5px;color:#8892c0;text-align:left;margin-bottom:16px;line-height:1.6">
+    A lot of people find there is a spiritual side to this — and a lot don't. Neither answer is the
+    right one. It only changes what the app says to you.
+  </p>
+  <div id="ob-faith-lead" style="font-size:13.5px;color:#dfe4ff;text-align:left;line-height:1.7;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;margin-bottom:16px"></div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">
+    <div class="add-chip" id="fc-yes" style="text-align:left" onclick="chooseFaith('yes')">Yes — God is part of this for me</div>
+    <div class="add-chip" id="fc-open" style="text-align:left" onclick="chooseFaith('open')">I'm not sure, but I'm open to it</div>
+    <div class="add-chip" id="fc-no" style="text-align:left" onclick="chooseFaith('no')">No — leave faith out of it</div>
+  </div>
+  <p style="font-size:11px;color:#6672a0;text-align:left;margin-bottom:12px">No denomination, no scripture, nobody asking you to join anything. You can change this any time in Profile.</p>
+  <button class="ob-btn" onclick="obNext(2)">Continue</button>
+  <button class="ob-btn outline" onclick="obBack(1)">Back</button>
+</div>
+
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
 <div class="ob-step" id="obs2">
   <div style="font-size:15px;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
@@ -2486,7 +2510,7 @@ let S = {
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
-  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,
+  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
@@ -3647,6 +3671,9 @@ function syncAddictionChips(){
 }
 
 function obNext(n){
+  // Step 2's questions are built from the chosen areas, which the faith step
+  // now sits in front of - so build them on the way in rather than earlier.
+  if(n===2&&typeof buildBehavioralStep==='function')buildBehavioralStep();
   document.getElementById('obs'+obStep).classList.remove('on');
   if(document.getElementById('od'+obStep))document.getElementById('od'+obStep).classList.remove('on');
   obStep=n;
@@ -3699,7 +3726,7 @@ function obBack(n){
 // trap for the rest of onboarding. Once disarmed, the next back exited the SPA
 // and lost every unsaved answer (name/gender/focus aren't persisted until the
 // end). Now the map is complete, and underflow never disarms mid-flow.
-const OB_PREV_STEP={1:0,2:1,'2_5':2,3:'2_5',4:3};
+const OB_PREV_STEP={1:0,'1_5':1,2:'1_5','2_5':2,3:'2_5',4:3};
 let obBackTrapArmed=false;
 function handleOnboardingPopstate(){
   if(document.getElementById('onboarding').style.display!=='flex')return;
@@ -3855,6 +3882,13 @@ function goToBehavioralStep(){
     return;
   }
   if(errEl)errEl.textContent='';
+  // The spiritual question comes first, because it is about what they just
+  // told us they are fighting. renderFaithLead names it back to them.
+  renderFaithLead();
+  obNext('1_5');
+  return;
+}
+function buildBehavioralStep(){
   const container=document.getElementById('dynamic-behavior-questions');
   container.innerHTML='';
   // On the "both" path the supporter questions always come first - carrying
@@ -7029,6 +7063,99 @@ function toggleLessonAudio(){
     :{title};
   startLessonAudio(text,'lessonListenBtn',meta);
 }
+
+// ─── THE SPIRITUAL SIDE, MATCHED TO WHAT THEY'RE FIGHTING ─────────────────────
+// Jacques, 14 Aug 2026. Every line below says the same thing in the shape of one
+// particular habit: the appetite underneath it was real and pointed somewhere,
+// and the habit is the counterfeit that got there first. "God as you understand
+// God" - never a denomination, never a verse, never an argument. Shown only to
+// someone who said yes or open on the onboarding question.
+const FAITH_BY_ADDICTION={
+  'Porn & Sex':{
+    hunger:'to be known',
+    line:"You didn't want pixels. You wanted to be known — seen all the way down and wanted anyway. That hunger is holy, and it was pointed at God and at real people before it got redirected to a screen that can't know anybody. Porn is the counterfeit that arrives in nine seconds; the real thing takes years and is worth every one of them.",
+  },
+  'Alcohol':{
+    hunger:'peace',
+    line:"You weren't chasing a drink. You were chasing peace — the quiet that comes when you're not running your own defence. That's what people have gone to God for since there were people. Alcohol sells you the quiet without the peace, and takes the deposit back with interest every morning.",
+  },
+  'Smoking / Vaping':{
+    hunger:'a moment that was yours',
+    line:"Every one of them was a small ritual — step outside, breathe in, be still for four minutes. You built a liturgy around a cigarette because you needed one somewhere. The stillness you were buying is real and it's free; it was never in the smoke.",
+  },
+  'Substances':{
+    hunger:'to be lifted out',
+    line:"You wanted lifting out of yourself — transcendence, the old word for it. That's not a defect, it's the most human appetite there is, and every tradition on earth is built around it. Substances deliver a chemical forgery of it on credit, and the bill is your life.",
+  },
+  'Gambling':{
+    hunger:'to be watched over',
+    line:"Under the bet is a question: is anything looking after me? You were asking providence a question and letting a machine answer it. The hope was real. The house was never going to be the one holding you.",
+  },
+  'Social media':{
+    hunger:'to matter to someone',
+    line:"You wanted to be seen, and you settled for being watched. Those are not the same thing and the gap between them is where the ache lives. Being known by God and by three real people will do what four thousand strangers never could, no matter how the number moves.",
+  },
+  'Gaming':{
+    hunger:'a life that counts',
+    line:"You wanted a world where effort is honoured and progress is visible and you matter to the story. That's not escapism, that's a description of what you were made for. The game guarantees it in six hours; your actual life offers it slowly, and only that one is real.",
+  },
+  'Food / Binging':{
+    hunger:'to be filled',
+    line:"You weren't hungry. You were empty — and those two feel identical at eleven at night. Filling is the oldest picture there is for what God does to a person, and food is the nearest thing at hand. It works for nine minutes, which is exactly how you know it isn't the thing.",
+  },
+  'Shopping / Spending':{
+    hunger:'enough',
+    line:"Every purchase was a small vote that this time it would be enough. That word — enough — is a spiritual word before it's a financial one. Nothing you can order will settle it, because the restlessness was never about what you owned.",
+  },
+  'Work':{
+    hunger:'to be worth something',
+    line:"This is the respectable one, the one everybody congratulates you for, which is what makes it the hardest to see. You were earning a verdict on yourself — proving you're worth something by producing something. That verdict was already given, and not by your output. Rest is the test: if you cannot stop, you're not working, you're worshipping.",
+  },
+  'Anger / outbursts':{
+    hunger:'for things to be made right',
+    line:"Under the anger is a demand that things be put right — and it usually is a real wrong. But somewhere you climbed into the judge's chair, and it's a seat nobody can hold without being crushed by it. Handing the verdict back is not letting them win. It's putting down a weight that was never yours.",
+  },
+  'Other':{
+    hunger:'something you couldn’t name',
+    line:"Whatever shape it took, the appetite underneath it was real and it was pointed at something. Habits are what we reach for when the thing we actually need feels too far away. Naming what you were really after is the first honest move.",
+  },
+  'Supporting someone I love':{
+    hunger:'to save them',
+    line:"You didn't step away from God — you tried to do His job. Watching, managing, checking, saving. That's love doing something love was never built to carry, and it is breaking you. Putting them down is not abandoning them; it's admitting you were never the one who could do it.",
+  },
+};
+function faithMode(){return S.faithPath||'';}
+function faithOn(){return S.faithPath==='yes'||S.faithPath==='open';}
+function chooseFaith(v){
+  S.faithPath=v;
+  ['yes','open','no'].forEach(k=>{
+    const el=document.getElementById('fc-'+k);
+    if(el)el.classList.toggle('on',k===v);
+  });
+  renderFaithLead();
+  save();
+}
+// The lead paragraph names the person's OWN habit back to them before they
+// answer - a general question about faith is easy to wave off; this one isn't.
+function renderFaithLead(){
+  const el=document.getElementById('ob-faith-lead');
+  if(!el)return;
+  const picks=(S.selectedAddictions||[]).filter(a=>FAITH_BY_ADDICTION[a]);
+  if(!picks.length){
+    el.textContent='Some people find that what they were reaching for was never really the thing they were reaching for.';
+    return;
+  }
+  if(S.faithPath==='no'){
+    el.textContent="Understood — the app will keep faith out of it. Nothing further on this, and the Spiritual Path stays in Tools if you ever want it.";
+    return;
+  }
+  // One line per chosen area, so two areas get two answers rather than a blur.
+  el.innerHTML=picks.slice(0,3).map(a=>{
+    const f=FAITH_BY_ADDICTION[a];
+    return `<div style="margin-bottom:10px"><b style="color:#fff">${escapeHtml(a)}</b> — what you were really after: <i>${escapeHtml(f.hunger)}</i>.<br>${escapeHtml(f.line)}</div>`;
+  }).join('');
+}
+
 function togglePackLessonAudio(){
   if(lessonAudioState==='playing'&&lessonAudioBtnId==='pack-listen-btn'){stopLessonAudio();return;}
   const key=S.activeCustomPack;
@@ -9705,7 +9832,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.6.0';
+const APP_VERSION='5.6.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

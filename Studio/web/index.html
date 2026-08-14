@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0850</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0851</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -568,6 +568,12 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2" id="voice-hear" style="margin-bottom:6px;display:none">▶ Hear this narrator</button>
         <button class="btn2" id="voice-rec" style="margin-bottom:6px;display:none">🎙 Record my voice — free</button>
         <select class="input" id="voice-ref" style="margin-bottom:6px;display:none"></select>
+        <div id="vcl-box" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;margin-bottom:6px">
+          <div style="font-size:12.5px;color:var(--ts);line-height:1.55" id="vcl-note"></div>
+          <div class="progress-line" id="vcl-prog"><div></div></div>
+          <button class="btn2" id="vcl-install" style="width:100%;margin-top:8px">⬇ Install free voice cloning (one time)</button>
+          <button class="btn2 quiet" id="vcl-remove" style="width:100%;margin-top:6px;display:none;font-size:12px;padding:6px">Remove it and free the space</button>
+        </div>
         <textarea id="voice-text" placeholder="Type what they should say… e.g. This is the story of Saving Queens." style="min-height:70px"></textarea>
         <div class="chips" id="voice-moods" style="margin-top:6px">
           <button class="chip on" data-mood="neutral">😐 Neutral</button>
@@ -3953,8 +3959,18 @@ if (document.getElementById('crewchat-key-save')) $('#crewchat-key-save').onclic
    Built-in narrators speak on this computer and cost nothing. Your own voice,
    and any narrator with a mood on it, still go through fal and are priced. */
 let voiceMood = 'neutral';
-// A plain read by a built-in narrator is the free path. Everything else is not.
-function voiceIsFree() { return voicePreset !== 'own' && voiceMood === 'neutral'; }
+// Local cloning status, refreshed from the server. When it's installed,
+// cloning your own voice costs nothing — so "free" has to mean that here too,
+// or the button would keep quoting a price that no longer applies.
+let vclStatus = { installed: false, installing: false, pct: 0, step: '', error: null, bytes: 0 };
+function cloneIsLocal() { return !!(vclStatus && vclStatus.installed); }
+// A plain read by a built-in narrator is free. So is a plain clone, once the
+// local engine is installed. Moods always go through fal.
+function voiceIsFree() {
+  if (voiceMood !== 'neutral') return false;
+  if (voicePreset !== 'own') return true;
+  return cloneIsLocal();
+}
 function voicePrice() {
   if (voiceIsFree()) return 0;
   const pr = st.cfg?.pricing;
@@ -3987,7 +4003,9 @@ function renderVoiceCard() {
   // the old clone-my-own-clip behaviour rather than showing an empty row.
   if (!voices.length) voicePreset = 'own';
   else if (voicePreset !== 'own' && !voices.some((v) => v.key === voicePreset)) voicePreset = voices[0].key;
-  const own = { key: 'own', label: '🎤 Clone a voice', note: 'Types text and speaks it in a voice from a clip you uploaded. This one is not free (~$0.05 per 1,000 characters) — to narrate in your own voice for nothing, press “Record my voice” below and read the line yourself.' };
+  const own = { key: 'own', label: '🎤 Clone a voice', note: cloneIsLocal()
+    ? 'Types text and speaks it in a voice from a clip you uploaded — running on this computer, so it is free and unlimited.'
+    : 'Types text and speaks it in a voice from a clip you uploaded. Free once you install it below (runs on this computer); until then it uses your fal key at ~$0.05 per 1,000 characters.' };
   const box = $('#voice-presets');
   box.innerHTML = '';
   [...voices, ...(st.cfg?.falAvailable ? [own] : [])].forEach((v) => {
@@ -4030,6 +4048,7 @@ function renderVoiceCard() {
     ? songs.map((a) => `<option value="${a.id}">🎤 ${escapeHtml(a.label)}</option>`).join('')
     : '<option value="">Upload a voice clip first (My Media → Upload a song)</option>';
   if (songs.some((a) => String(a.id) === cur)) sel.value = cur;
+  renderVoiceCloneBox();
   updateVoicePrice();
 }
 if (document.getElementById('voice-moods')) $('#voice-moods').querySelectorAll('.chip').forEach((c) => c.onclick = () => {
@@ -4045,6 +4064,72 @@ if (document.getElementById('voice-moods')) $('#voice-moods').querySelectorAll('
   }
   updateVoicePrice();
 });
+
+/* ---------------- free voice cloning, installed on this computer ----------------
+   Typing a script and hearing it back in your own voice used to be the one
+   part of the Voice card that cost money. Chatterbox runs it locally for
+   nothing; the trade is a one-time install (Python + engine + model, a couple
+   of gigabytes), so it is a button rather than something that happens to you.
+   Everything degrades: not installed just means the old paid path. */
+async function refreshVoiceClone() {
+  try { vclStatus = await jfetch('/api/studio/voice-clone-local'); }
+  catch (_) { vclStatus = { installed: false, installing: false, pct: 0, step: '', error: null, bytes: 0 }; }
+  renderVoiceCloneBox();
+  updateVoicePrice();
+}
+function renderVoiceCloneBox() {
+  const box = $('#vcl-box');
+  if (!box) return;
+  // Only relevant when you're actually cloning a voice.
+  box.style.display = voicePreset === 'own' ? 'block' : 'none';
+  const note = $('#vcl-note');
+  const btn = $('#vcl-install');
+  const rm = $('#vcl-remove');
+  if (vclStatus.installing) {
+    note.innerHTML = `<b>Installing…</b> ${escapeHtml(vclStatus.step || 'working')}<br>You can leave this page — it keeps going. The big download is the speech engine.`;
+    setProg('#vcl-prog', vclStatus.pct || 3);
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Installing…';
+    rm.style.display = 'none';
+    return;
+  }
+  setProg('#vcl-prog', null);
+  btn.disabled = false;
+  if (vclStatus.installed) {
+    const gb = vclStatus.bytes ? (vclStatus.bytes / 1e9).toFixed(1) + ' GB' : '';
+    note.innerHTML = `✅ <b>Voice cloning is free on this computer.</b> Pick a clip above, type your line, and it costs nothing — as many takes as you like.${gb ? ` <span style="color:var(--tm)">(${gb} on disk)</span>` : ''}<br><span style="color:var(--tm)">The very first line downloads the model (about a gigabyte) so it takes a few minutes. After that it's quick.</span>`;
+    btn.style.display = 'none';
+    rm.style.display = 'block';
+    return;
+  }
+  btn.style.display = 'block';
+  btn.innerHTML = '⬇ Install free voice cloning (one time)';
+  rm.style.display = 'none';
+  note.innerHTML = vclStatus.error
+    ? `<b style="color:#e5484d">That didn't finish.</b> ${escapeHtml(vclStatus.error)}`
+    : 'Right now, typing text and hearing it in your own voice costs ~$0.05 per 1,000 characters. <b>Install this once and it is free forever</b> — it runs on this computer, no key, no per-word charge. It needs Python and about 2 GB of disk, and takes several minutes on a normal connection.';
+}
+if (document.getElementById('vcl-install')) $('#vcl-install').onclick = async () => {
+  try {
+    await jfetch('/api/studio/voice-clone-local/install', { method: 'POST' });
+    vclStatus.installing = true; vclStatus.pct = 2; vclStatus.step = 'starting…';
+    renderVoiceCloneBox();
+    // Poll until it lands one way or the other.
+    const tick = async () => {
+      await refreshVoiceClone();
+      if (vclStatus.installing) setTimeout(tick, 2000);
+      else if (vclStatus.installed) $('#voice-note').textContent = 'Voice cloning is free on this computer now. Type your line and press Speak.';
+    };
+    setTimeout(tick, 1500);
+  } catch (e) {
+    vclStatus.error = e.message; renderVoiceCloneBox();
+  }
+};
+if (document.getElementById('vcl-remove')) $('#vcl-remove').onclick = async () => {
+  if (!confirm('Remove free voice cloning and delete its files? You can install it again any time.')) return;
+  try { await jfetch('/api/studio/voice-clone-local/remove', { method: 'POST' }); } catch (_) {}
+  await refreshVoiceClone();
+};
 
 /* Put a voice clip on the video as its narration track. Any audio asset works
    the same way, whether it was generated, uploaded, or spoken into the mic a
@@ -9401,6 +9486,7 @@ bootStudio().then(() => {
     } catch (_) {}
   }
   updateQkMusicLabel();
+  refreshVoiceClone();
   // Quick Video shots survive a page reload now. Restored against the live
   // library — a picture deleted since is quietly dropped, never guessed at.
   if (!qk.shots.length) {

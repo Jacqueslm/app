@@ -17,7 +17,7 @@ Each episode opens a door nobody else is standing in:
 | 1 | Two men | Gambling | Same-sex male couples · the only addiction with no physical tell |
 | 2 | Two women | Shopping | Same-sex female couples · **880/mo, KD 41 — a Build term, not too hard** |
 | ~~3~~ | ~~Man + woman, flipped~~ | ~~Food / binge~~ | **DROPPED by Jacques, 12 Aug 2026 — do not re-pitch it.** The lane is still served by the `/how-to-stop-binge-eating` page, which is live and targets the 9,900/mo term. What was given up is the video, not the search. |
-| 4 | Young couple | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
+| 3 | Young couple | Doomscrolling | 1,600/mo, KD 24, youngest audience, cheapest reach |
 
 **The rule that makes the series work:** the person using is never the villain
 and never forgiven. Every episode has one line that says *they're not a bad
@@ -38,7 +38,7 @@ be, and after the 25th every one of these costs money.
 
 Order to generate in, if the window gets tight: **Episode 2 first** (its search
 term is the one that's actually winnable — shopping addiction help, 880/mo at
-difficulty 41), then 4, then 1. **Episode 3 is dropped** — see the table above.
+difficulty 41), then 3, then 1. **Episode 3 is dropped** — see the table above.
 
 ---
 
@@ -181,7 +181,7 @@ difficulty 41, tagged Build**, not too hard.
 
 ---
 
-# EPISODE 3 · The Second Dinner — a man who binges, his wife
+# DROPPED (no episode number) · The Second Dinner — a man who binges, his wife
 
 > **RAY:** Black man, mid 40s, broad, short beard going gray, work shirt.
 > **TAMMY:** Black woman, early 40s, braids, glasses, cardigan.
@@ -249,7 +249,7 @@ careful, and a wife who notices he is never hungry.
 
 ---
 
-# EPISODE 4 · Right Here — a young couple, doomscrolling
+# EPISODE 3 · Right Here — a young couple, doomscrolling
 
 > **AMARA:** Black woman, late 20s, box braids, oversized sweatshirt.
 > **JOSH:** white man, late 20s, messy dark hair, hoodie, tired eyes.

@@ -31,9 +31,9 @@ find it is you, and the only evidence is the hours.
 
 ---
 
-# EPISODE 5 · The Hours — a man, doomscrolling
+# EPISODE 4 · The Hours — a man, doomscrolling
 
-> **RAY:** Black man, mid 40s, shaved head, broad shoulders, short beard going
+> **DEAN:** Black man, mid 40s, shaved head, broad shoulders, short beard going
 > grey at the chin, plain dark t-shirt.
 
 **Doomscrolling's tell is time, and nothing else.** There is no smell, no
@@ -42,10 +42,10 @@ leaves something behind for someone to find. This one leaves an empty evening.
 That's why the discovery has to come from a screen-time report — it's the only
 witness there is. Build the whole piece on that.
 
-**SHOT 1** — `RAY lying on his back on a sofa in a dark living room at night, phone held above his face, the screen the only light in the room, TV off`
+**SHOT 1** — `DEAN lying on his back on a sofa in a dark living room at night, phone held above his face, the screen the only light in the room, TV off`
 *"I wasn't doing anything bad."*
 
-**SHOT 2** — `Close on RAY's face lit blue from below by a phone screen, eyes moving, expression flat, no reaction to anything he is seeing`
+**SHOT 2** — `Close on DEAN's face lit blue from below by a phone screen, eyes moving, expression flat, no reaction to anything he is seeing`
 *"That's what I kept telling myself."*
 
 **SHOT 3** — `A wall clock in a dark room reading 1:40, the room otherwise unlit except for a glow from off-frame`
@@ -54,7 +54,7 @@ witness there is. Build the whole piece on that.
 **SHOT 4** — `Close on a phone screen showing a weekly screen time report, a bar chart, one bar much higher than the others, a thumb resting still on the glass`
 *"Then the phone told me the number."*
 
-**SHOT 5** — `RAY sitting up on the edge of the sofa in the dark, phone face-down on his knee, both hands over his mouth, staring at nothing`
+**SHOT 5** — `DEAN sitting up on the edge of the sofa in the dark, phone face-down on his knee, both hands over his mouth, staring at nothing`
 *"Seven hours a day. For a year."*
 
 **SHOT 6** — `A kitchen calendar on a wall with most days blank, one square circled and passed, morning light coming in from a window`
@@ -63,13 +63,13 @@ witness there is. Build the whole piece on that.
 **SHOT 7** — `A basketball sitting deflated in the corner of a garage behind a stack of boxes, dusty, untouched`
 *"I used to do things."*
 
-**SHOT 8** — `RAY standing at a kitchen counter in the morning, phone plugged in and face-down across the room from him, coffee in his hand, looking at it`
+**SHOT 8** — `DEAN standing at a kitchen counter in the morning, phone plugged in and face-down across the room from him, coffee in his hand, looking at it`
 *"I'm not a lazy man."*
 
-**SHOT 9** — `Close on RAY's hand setting the phone down screen-first on a shelf in another room and drawing back, doorway visible beyond`
+**SHOT 9** — `Close on DEAN's hand setting the phone down screen-first on a shelf in another room and drawing back, doorway visible beyond`
 *"That's what makes it hard."*
 
-**SHOT 10** — `RAY sitting on his front steps in early evening light with no phone anywhere in frame, elbows on knees, looking out at the street`
+**SHOT 10** — `DEAN sitting on his front steps in early evening light with no phone anywhere in frame, elbows on knees, looking out at the street`
 *"So I gave myself back one night."*
 
 **YouTube:** The night my phone told me how much of my life I'd spent on it
@@ -97,7 +97,7 @@ anything. No card, no trial.
 
 ---
 
-# EPISODE 6 · Three Hours a Night — a trans woman, doomscrolling
+# EPISODE 5 · Three Hours a Night — a trans woman, doomscrolling
 
 > **NIA:** Black trans woman, early 30s, shoulder-length braids, gold hoop
 > earrings, soft round face, oversized cardigan.
@@ -168,7 +168,7 @@ card, no trial.
 
 ---
 
-# EPISODE 7 · The Hoodie — a parent, a teenager, smoking
+# EPISODE 6 · The Hoodie — a parent, a teenager, smoking
 
 > **DEE:** white woman, late 40s, hair up in a clip, reading glasses pushed on
 > her head, cardigan, tired kind face.
@@ -239,7 +239,7 @@ out, not just the person who's using.
 
 ---
 
-# EPISODE 8 · The Empty Chair — the spiritual one · **SUBSTANCES**
+# EPISODE 7 · The Empty Chair — the spiritual one · **SUBSTANCES**
 
 > **CURTIS:** Black man, 50s, greying close beard, collared shirt with the
 > sleeves rolled, heavy hands, reading glasses in his breast pocket.
@@ -335,10 +335,10 @@ track in my free app, and it asks that question before it asks anything else.
 
 ## Notes for whoever cuts these
 
-- **Episode 6 and 7 are the two with real reach.** 6 has no competition at all
-  in this category; 7 sits on parent search terms, which are high-intent and
+- **Episode 5 and 6 are the two with real reach.** 5 has no competition at all
+  in this category; 6 sits on parent search terms, which are high-intent and
   cheap because everyone else targets the person using.
-- **Episode 8 goes out on a Sunday morning.** It is the only one of the four
+- **Episode 7 goes out on a Sunday morning.** It is the only one of the four
   with a natural slot, and Sunday morning is the cheapest attention in the week
   for that audience.
 - **Every hook line is the TikTok caption's first sentence.** That is deliberate

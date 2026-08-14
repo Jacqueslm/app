@@ -56,7 +56,7 @@ That's it. No internet needed except for AI generations.
 | **🖼 My Media** | Your home base — every picture, video clip and song you've uploaded or made, shown as thumbnails, split into Pictures / Video clips / Songs. Upload here, and "Open my media folder". |
 | **AI Scenes** | Make AI images (1–4 takes at once), animate them into clips, **Sing** (lip-sync), dance, Live Portrait, simple screens. Your **Library** (with its free editing tools, incl. the **Sing** button on each picture) lives here. |
 | **Characters** | Your stars — photos + a trained face lock so every scene shows the same face. Paste a LoRA URL + trigger word here to restore a face lock. |
-| **Sequencer** | Where videos get made — Quick Video, timeline, lyrics, shorts, campaigns, everything. |
+| **Sequencer** | Where videos get made — Quick Video, timeline, lyrics, shorts, everything. |
 | **📅 Post** | Your posting schedule — line up finished clips with captions and times, and Studio tells you the moment each one is due. |
 | **⚙ Settings** | AI key, open Studio on your phone, update the app, back up everything, and **🗑 Start fresh** (wipe everything). |
 
@@ -72,7 +72,12 @@ The Sequencer opens simple (3 cards). Tap **🛠 Show studio tools** for the ful
    - **🖼 Use pictures made in Studio** — a grid of everything Studio has already made for you (AI Scenes, Storyboard). Tap to add; anything already in the cut goes dim with a green edge so you don't double it up
 2. **2️⃣ Add your song** — or paste a **Suno link** (Share → Copy link) in the box underneath and press **🔗 Import**; the song downloads straight into Studio
 3. Pick a shape: Phone 9:16 · YouTube 16:9 · Square 1:1
-4. **3️⃣ Assemble my video** → wait for the bar → **Download my video**
+4. **▶ Preview — free, instant** to watch the plan before spending a render: order, timing, camera moves, words and blends play right in the browser with your song. Rough on purpose — the render is smoother, and looks like grain or slow-mo are done properly at render — but it answers "is this the video I meant?" in seconds instead of minutes. Tap again to stop.
+5. **3️⃣ Assemble my video** → wait for the bar → **Download my video**
+
+**🎯 Fit shots to song length** — one tap scales every picture's time so the finished video (blends already subtracted) lands exactly on your song's last note. Clips you filmed keep their own length; only stills stretch. Set your relative rhythm first (which shots hold longer), then fit.
+
+**Your plan survives a refresh now.** Quick Video shots — order, times, words, effects, positions — are saved on every change and come back when you reopen Studio. A picture deleted from the library since is quietly dropped, never guessed at.
 
 **"⚡ Cut on the beat" — leave it on for songs, turn it OFF for slideshows.**
 It's ticked by default, and on a song it's exactly what you want: every cut
@@ -195,17 +200,15 @@ Nothing generates or spends until you press the Producer button — the plan is 
 
 ## 4b. The 🚀 One-Click Pipeline (the whole flow, guided)
 
-At the top of the Sequencer there's a pipeline card with the full journey: **Song → Captions → Storyboard → Scenes → Timeline → Render → Shorts & campaign.** Each step lights up when the one before it is done, and each has its own button — nothing generates without you pressing it, so every checkpoint is yours. If you ever wonder "what do I do next?", the pipeline card is the answer.
+At the top of the Sequencer there's a pipeline card with the full journey: **Song → Captions → Storyboard → Scenes → Timeline → Render → Shorts.** Each step lights up when the one before it is done, and each has its own button — nothing generates without you pressing it, so every checkpoint is yours. If you ever wonder "what do I do next?", the pipeline card is the answer.
 
 ---
 
 ## 5. Make Shorts (daily content, free)
 
-1. With your video's timeline still loaded: **Shorts Generator** card
-2. **Auto-detect from music** — and it's smart now: if you have captions, it finds your **chorus** (repeated lines) and opens shorts right on the hook, using loudness only as a backup
-3. Check lengths (15s / 30s) → **Build shorts list**
-4. Type a different caption on each one (free A/B testing)
-5. **Render all shorts** → **Download all shorts**
+**The one-tap way:** with your video's timeline still loaded, press **⚡ Auto shorts**. Studio listens for your chorus or drop (captions first — repeated lines are the chorus — loudness as backup), plans 15s and 30s cuts that each **open** on that moment, and renders the whole batch. The list appears as it works; tweak any cut or just **Download all shorts**. No song, or a song it can't read? It still cuts from the open, middle and end rather than stopping.
+
+**The fine-control way** lives under the **🛠 Fine control** drawer on the same card: mark your own moments, pick the strongest sentences from a filmed video with the clip picker, choose lengths (7/15/30/60s), then **Build shorts list** → type a different caption on each one (free A/B testing) → **Render all shorts**.
 
 One music video = a week of posts. Seamless loop makes them replay forever.
 
@@ -268,15 +271,9 @@ The first time, Windows may ask to allow Studio through the firewall — choose 
 
 ---
 
-## 6. Campaign Export (ready to post)
+## 6. From finished video to posted (what replaced Campaign Export)
 
-1. **Campaign Export** card → fill in song title, artist, link, hashtags
-2. Pick your main video — your shorts are already selected
-3. **Make thumbnails** (grabs 3 covers with your title on them)
-4. **Write my captions** (writes every post for you — edit anything)
-5. Pick a start date → **Export campaign (ZIP)**
-
-The ZIP has every video, thumbnail, and caption organized with a posting schedule. Open README.txt inside and follow it in Buffer.
+Campaign Export (the ZIP-for-Buffer card) is gone as of b0849 — it was a detour nobody took. The flow that replaced it is shorter and already in the app: **⚡ Auto shorts** cuts the batch, the **📅 Post tab** holds the schedule and captions, and your phone (**⚙ Settings → 📱 Open Studio on your phone**) is where the final tap happens, natively, which the platforms reward anyway. Song title and artist now live at the top of the **Lyrics & Captions** card — the title-card button and the storyboard both read them from there.
 
 ---
 
@@ -331,13 +328,13 @@ properly.
 
 ## 8. What Things Cost
 
-**Free forever:** Quick Video, motion, timeline, lyrics, captions & styles, shorts, campaigns, thumbnails, storyboard prompts, backups, **the Post schedule, phone access, 🎙️ Captions from my voice (listening happens on your own computer), 🎙 Take the voice out of a clip, and using your own pictures for storyboard scenes** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, ▦ Panels (4-panel collage + Duet), and free stock b-roll (Pexels)**. Everything except AI generation.
+**Free forever:** Quick Video (with its instant preview and fit-to-song), motion, timeline, lyrics, captions & styles, shorts (with ⚡ Auto shorts), thumbnails, storyboard prompts, backups, **the Post schedule, phone access, 🎙️ Captions from my voice (listening happens on your own computer), 🎙 Take the voice out of a clip, and using your own pictures for storyboard scenes** — plus the whole editing toolbox: Crop, 2× resize, Cut, Loop, Sound swap, Simple screens, **Mirror, Slow-mo, Freeze-frame, Clean audio, Master for release (48k WAV), Reframe (9:16/1:1/16:9), Remove corner mark, Green screen, brand watermark, keep-clip-audio + song ducking, Screen recording, ▦ Panels (4-panel collage + Duet), and free stock b-roll (Pexels)**. Everything except AI generation.
 
 **A whole video for $0 is a real option.** Your own photos or filmed clips → your own voice (film it, take the voice out) → free captions from that voice → assemble, master, render, and cut shorts. Every step above is free and unlimited. AI generation is for the shots you can't get any other way, not a toll on the door.
 
 > 📄 **Want this as a one-page sheet?** A printable **Studio Price List** PDF is available — ask for it any time.
 >
-> 📖 **The full guide is built in.** Open **⚙ Settings → 📖 Guide & help → Open the guide (PDF)** for the complete Studio manual (every tab, tool, fix, the money-safety layers, and the ideal video-to-campaign flow). The price list is right beside it.
+> 📖 **The full guide is built in.** Open **⚙ Settings → 📖 Guide & help → Open the guide (PDF)** for the complete Studio manual (every tab, tool, fix, the money-safety layers, and the ideal video-to-post flow). The price list is right beside it.
 
 **AI (from your fal.ai balance) — verified July 2026, and every price shows on the button before you tap:**
 | Thing | Rough cost |

@@ -134,6 +134,40 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
+## 14 Aug — app 5.6.1: pack lessons got real audio, and a spiritual question in onboarding
+
+**Every lesson in the app now has real narration.** The thirteen main tracks had
+425 recorded lessons in five voices; the ten packs (Spiritual Path + nine
+seven-day packs, 93 lessons) fell back to the phone's robot voice. All 93 are
+now recorded in all five voices — **465 new MP3s, 518 lessons total with audio**.
+- Pipeline: Piper via `sherpa-onnx-node`, voices kristin/cori/kathleen/ljspeech/
+  norman, **every one public-domain or CC0** (MODEL_CARD checked on each — the
+  8 Aug licence incident is why). Generator: scratchpad `gen-pack-audio.js`.
+- Audio pushed to `lesson-audio` (commit b27c572) **using git plumbing**
+  (read-tree/hash-object/write-tree/commit-tree) so the multi-GB branch is never
+  checked out. Script kept at scratchpad `push-pack-audio.sh` — reuse that
+  approach, do not `git checkout lesson-audio`.
+- Manifest keys for packs are **`pack:<packKey>|<day>|base`** — namespaced so a
+  pack can never collide with a track name. Custom user-built packs have no
+  recordings and correctly fall back to read-aloud.
+- The pack lesson card gained the **voice picker** it never had.
+
+**Spiritual question added to onboarding (step `obs1_5`, between the addiction
+picker and the behaviour questions).** Jacques's ask: the app should say that
+stepping away from God is why the habit took hold, matched to each addiction.
+**It is ASKED, not asserted** — three answers (yes / open / no), stored as
+`S.faithPath`. That was a deliberate call and the reason matters: the same
+sentence that lands hard for someone who says yes would tell an atheist their
+addiction is a spiritual failure, on the trust-earning screen, in an app whose
+whole promise is a counter that doesn't shame you. Asked, it costs nothing and
+hits harder.
+- `FAITH_BY_ADDICTION` carries a line for **all 13 categories**, each naming the
+  real appetite under that specific habit (alcohol→peace, gambling→being watched
+  over, work→being worth something…). No denomination, no scripture, no verse —
+  verified by test. Register is the Spiritual Path's: God as you understand God.
+- **The supporter line is deliberately different**: not "you fell prey" but
+  "you tried to do His job." Do not flatten it into the others.
+
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
 Studio moved b0848 → b0856 in one long session. Every item below was a real

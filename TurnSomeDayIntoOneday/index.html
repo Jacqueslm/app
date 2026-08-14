@@ -761,7 +761,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec">
         <div class="sec-hd">Your journal</div>
         <div class="jour-new" id="newJourBtn" onclick="openJour()"><i class="ti ti-pencil" style="font-size:18px"></i> Write today's entry</div>
-        <div class="jour-new" id="voiceJourBtn" onclick="startVoiceJournal()" style="margin-top:8px"><i class="ti ti-microphone" style="font-size:18px"></i> Speak today's entry <span class="badge badge-acc" style="margin-left:4px">Pro</span></div>
+        <div class="jour-new" id="voiceJourBtn" onclick="startVoiceJournal()" style="margin-top:8px"><i class="ti ti-microphone" style="font-size:18px"></i> Speak today's entry</div>
         <div class="jour-form" id="jourForm">
           <input id="jourTitle" type="text" placeholder="Title (optional)" style="width:100%;border:0.5px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--tp);background:var(--s2);margin-bottom:10px;font-family:var(--f)">
           <div id="jour-prompt-pro" style="display:none;background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer" onclick="useGuidedPrompt()">
@@ -950,6 +950,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:6px">Reflect</div>
               <div id="lessonReflection" style="font-size:13.5px;color:var(--ts);line-height:1.65;font-style:italic;margin-bottom:12px"></div>
               <textarea class="ob-input" id="lesson-reflect-input" rows="3" placeholder="Write it right here — it saves straight to your journal" style="color:var(--tp);background:var(--s0);border-color:var(--bdr);resize:vertical;font-family:var(--f);margin-bottom:8px"></textarea>
+              <button class="ob-btn outline" id="dictate-lesson-reflect-input" style="margin:0 0 8px;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleDictation('lesson-reflect-input')"><i class="ti ti-microphone"></i> Speak it instead</button>
               <button class="log-btn" style="margin:0" onclick="saveLessonReflection('lesson-reflect-input','lesson-reflect-saved')">Save to my journal</button>
               <div id="lesson-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-top:8px">Saved to your journal ✓</div>
             </div>
@@ -1447,7 +1448,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div>✓ Urge Surfing, Panic Mode &amp; Emergency Plan</div>
           <div>✓ Weekly reports &amp; analytics</div>
           <div>✓ Smart reminders</div>
-          <div>✓ Pro journal, guided prompts &amp; voice journaling</div>
+          <div>✓ Pro journal &amp; guided prompts</div>
           <div>✓ Advanced streaks &amp; Habit Coach</div>
           <div>✓ Custom lesson packs</div>
         </div>
@@ -1498,7 +1499,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Recovery scripts &amp; distraction tools</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
-            <div class="feat y"><i class="ti ti-check"></i>Pro journal, guided prompts &amp; voice journaling</div>
+            <div class="feat y"><i class="ti ti-check"></i>Pro journal &amp; guided prompts</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced streak system &amp; Habit Coach</div>
             <div class="feat y"><i class="ti ti-check"></i>Analytics, emotional trends &amp; pattern detection</div>
             <div class="feat y"><i class="ti ti-check"></i>Custom lesson packs &amp; Build Your Own Pack</div>
@@ -1934,6 +1935,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- CUSTOM LESSON PACK PREVIEW (Free) -->
+<!-- PACK / PROGRAM COMPLETE — congratulations card -->
+<div class="sos-modal" id="congrats-modal" onclick="if(event.target===this)closeCongratsCard()">
+  <div class="sos-sheet" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:6px">🎉</div>
+    <div class="sos-title" style="color:var(--accent)">Every lesson. Done.</div>
+    <div class="sos-sub" id="congrats-sub" style="margin:6px 0 4px"></div>
+    <div style="font-size:15px;font-weight:650;color:var(--tp);margin:10px 0 14px;line-height:1.5">Keep going — you can do this.</div>
+    <button class="ob-btn" onclick="closeCongratsCard()">Thank you</button>
+  </div>
+</div>
+
 <div class="sos-modal" id="pack-preview-modal" onclick="if(event.target===this)closePackPreview()">
   <div class="sos-sheet">
     <div class="sos-title" id="pp-title" style="color:var(--accent)">Pack</div>
@@ -2116,6 +2128,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="sos-title" style="justify-content:center"><span id="mc-days">0</span> days</div>
     <div class="sos-sub" id="mc-message" style="margin-bottom:16px"></div>
     <textarea class="ob-input" id="mc-reflection-input" rows="3" placeholder="Optional: what's one thing that got you here? (saved to your journal)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f);text-align:left"></textarea>
+    <button class="ob-btn outline" id="dictate-mc-reflection-input" style="margin:8px 0 0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleDictation('mc-reflection-input')"><i class="ti ti-microphone"></i> Speak it instead</button>
     <button class="ob-btn" style="margin-top:4px" onclick="saveMilestoneReflection()">Save &amp; close</button>
     <button class="ob-btn outline" style="margin-top:8px;color:var(--ts);border-color:var(--bdr)" onclick="shareProgressCard()"><i class="ti ti-share" style="font-size:13px"></i> Share this milestone</button>
     <button class="sos-close" onclick="closeMilestoneCelebration()">Close</button>
@@ -3302,11 +3315,21 @@ function getPackLessonForDay(packKey,day){
   return meta.lessons.find(l=>l.day===day)||null;
 }
 function openPack(packKey){
-  if(!S.isPro){showPackPreview(packKey);return;}
+  // Every pack is open to everyone now — Spiritual, Together-adjacent, all of
+  // them. The free tier gets the first 15 days of each (same cap as the main
+  // program); the per-day gate lives in renderPackLesson.
   S.activeCustomPack=packKey;
   save();
   switchTo('pack-lesson');actBn('bn-plans');
 }
+// Pack complete / program complete → the congratulations card, with the burst.
+function openCongratsCard(sub){
+  const el=document.getElementById('congrats-sub');
+  if(el)el.textContent=sub||'You finished every lesson in this pack.';
+  document.getElementById('congrats-modal').classList.add('open');
+  if(typeof celebrationBurst==='function')celebrationBurst();
+}
+function closeCongratsCard(){document.getElementById('congrats-modal').classList.remove('open');}
 function showPackPreview(packKey){
   const meta=getPackMeta(packKey);
   if(!meta)return;
@@ -3369,6 +3392,20 @@ function renderPackLesson(){
     wrap.innerHTML=`<div class="card"><div class="sec-hd" style="margin-top:0">Pack complete</div><div style="font-size:13px;color:var(--ts);line-height:1.6">You've completed every lesson in this pack. Nice work seeing it through.</div></div>`;
     return;
   }
+  // Free tier: the first 15 days of every pack, same cap as the main program.
+  if(!S.isPro&&day>FREE_LESSON_CAP){
+    wrap.innerHTML=`<div class="card">
+      <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
+      <div style="position:relative;margin-top:10px;max-height:80px;overflow:hidden">
+        <div style="font-size:13px;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none">${lesson.content.slice(0,140)}…</div>
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
+      </div>
+      <div style="font-size:13px;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">The first 15 days of every pack are free — you finished them all. Days 16 and up are part of Pro.</div>
+      <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+    </div>`;
+    renderIcons(wrap);
+    return;
+  }
   wrap.innerHTML=`<div class="card">
     <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
     <div style="display:flex;gap:8px;margin-top:0;margin-bottom:14px">
@@ -3384,6 +3421,7 @@ function renderPackLesson(){
     <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:10px">${lesson.reflection}</div>
     </div>
     <textarea class="ob-input" id="pack-reflect-input" rows="3" placeholder="Write it right here — it saves straight to your journal" style="color:var(--tp);background:var(--s0);border-color:var(--bdr);resize:vertical;font-family:var(--f);margin-bottom:8px"></textarea>
+    <button class="ob-btn outline" id="dictate-pack-reflect-input" style="margin:0 0 8px;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleDictation('pack-reflect-input')"><i class="ti ti-microphone"></i> Speak it instead</button>
     <button class="log-btn" style="margin-bottom:8px" onclick="saveLessonReflection('pack-reflect-input','pack-reflect-saved')">Save to my journal</button>
     <div id="pack-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-bottom:8px">Saved to your journal ✓</div>
     <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
@@ -3401,6 +3439,11 @@ function completePackLessonToday(){
   logActivity('lesson_completed',{day:doneDay,pack:key});// the day finished, not the next one
   save();
   renderPackLesson();
+  // That was the last one → the congratulations card, confetti and all.
+  const meta=getPackMeta(key);
+  if(meta&&doneDay>=meta.lessons.length){
+    setTimeout(()=>openCongratsCard(`You finished every lesson in ${meta.title}.`),400);
+  }
 }
 function backToPackList(){
   S.activeCustomPack='';
@@ -5253,10 +5296,8 @@ function maybeShowHabitCelebration(days){
 // screen, and addBubble writes to the Friendly chat area they can't see, which made
 // this button look like it silently did nothing.
 function startVoiceJournal(){
-  if(!S.isPro){
-    appInfo('Voice journaling',"Voice journaling is part of Friendly Pro. You can still type your journal anytime.");
-    return;
-  }
+  // Free for everyone as of 5.5.0 — talking is how a lot of people journal at
+  // all, and a paywall in that moment was the wrong door to knock on.
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SpeechRecognition){
     appInfo('Voice journaling',"Voice journaling isn't supported in this browser yet. Try typing your entry instead.");
@@ -5333,7 +5374,65 @@ function markVoiceJourBtn(on){
   if(!b)return;
   b.innerHTML=on
     ?'<i class="ti ti-player-stop" style="font-size:18px;color:#e5484d"></i> Listening… tap to finish'
-    :'<i class="ti ti-microphone" style="font-size:18px"></i> Speak today\'s entry <span class="badge badge-acc" style="margin-left:4px">Pro</span>';
+    :'<i class="ti ti-microphone" style="font-size:18px"></i> Speak today\'s entry';
+}
+
+// ─── SPEAK INTO ANY BOX ───────────────────────────────────────────────────────
+// The same continuous-listening machinery as voice journaling, but instead of
+// creating its own entry it types into a textarea — the lesson reflections,
+// mainly. Jacques's note: needing to speak a reflection and finding only a
+// keyboard "was an inconvenience when I needed it." One dictation at a time;
+// tapping the button again (or starting another) stops it.
+let dictState=null; // {id, rec}
+function toggleDictation(inputId){
+  const btn=document.getElementById('dictate-'+inputId);
+  if(dictState){
+    const wasThis=dictState.id===inputId;
+    const rec=dictState.rec;
+    dictState=null;
+    try{rec.stop();}catch(e){}
+    if(wasThis)return; // tapped the same mic: just stop
+  }
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    appInfo('Speak it instead',"Speaking isn't supported in this browser yet. Typing still works.");
+    return;
+  }
+  const el=document.getElementById(inputId);
+  if(!el)return;
+  const rec=new SpeechRecognition();
+  rec.lang='en-US';
+  rec.continuous=true;
+  rec.interimResults=false;
+  dictState={id:inputId,rec};
+  rec.onresult=e=>{
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(!e.results[i].isFinal)continue;
+      const piece=e.results[i][0].transcript.trim();
+      if(piece)el.value=(el.value.trim()?el.value.trim()+' ':'')+piece;
+    }
+  };
+  rec.onerror=ev=>{
+    if(ev.error==='no-speech')return;
+    if(dictState&&dictState.rec===rec)dictState=null;
+    markDictateBtn(inputId,false);
+  };
+  rec.onend=()=>{
+    // browsers self-stop after silence; keep going until the person taps stop
+    if(dictState&&dictState.rec===rec){
+      try{rec.start();return;}catch(e){dictState=null;}
+    }
+    markDictateBtn(inputId,false);
+  };
+  rec.start();
+  markDictateBtn(inputId,true);
+}
+function markDictateBtn(inputId,on){
+  const b=document.getElementById('dictate-'+inputId);
+  if(!b)return;
+  b.innerHTML=on
+    ?'<i class="ti ti-player-stop" style="color:#e5484d"></i> Listening… tap to finish'
+    :'<i class="ti ti-microphone"></i> Speak it instead';
 }
 
 function saveVoiceJournal(text){
@@ -8195,7 +8294,9 @@ const PRO_TOOLS={
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
-  if(S.isPro){window[PRO_TOOLS[key].open]();return;}
+  // "Do this together" opens for everyone — the first 15 days are free (the
+  // per-day gate is inside renderCouples), same cap as every lesson track.
+  if(S.isPro||key==='couples'){window[PRO_TOOLS[key].open]();return;}
   showProToolPreview(key);
 }
 function showProToolPreview(key){
@@ -8241,7 +8342,7 @@ function proFeaturePreviewText(text){
   if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
   if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
   if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/\bpacks?\b/i.test(text))return "Custom lesson packs — and guided reflections on them — are part of Friendly Pro. Relationships, trauma, anxiety, confidence, and more, plus building your own.\n\nUnlock Friendly Pro to continue.";
+  if(/\bpacks?\b/i.test(text))return "Every ready-made lesson pack is open to you — the first 15 days of each are free (Tools → Lesson Packs). Building your own custom pack, days 16 and up, and guided reflections on them are part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
   if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
   return "I can help you analyze your patterns more deeply here. That level of analysis is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
 }
@@ -9581,7 +9682,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.4.0';
+const APP_VERSION='5.5.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -10294,6 +10395,23 @@ function renderCouples(){
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
     const isCurrent=!finished&&showDay===done+1;
+    // Free tier: the first 15 days, same cap as every lesson track.
+    if(!S.isPro&&!couplesViewDay&&!finished&&done+1>FREE_LESSON_CAP){
+      html+=`<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · day ${done+1} of ${pack.length}</div>`;
+      html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
+        <div style="font-size:15px;font-weight:650;color:var(--tp)">You two did the first 15 together.</div>
+        <div style="font-size:13px;color:var(--ts);line-height:1.65;margin-top:8px">That's the whole free half — and doing it as a team is the hard part. Days 16–30 go deeper: repair, boundaries, the long game. They're part of Pro.</div>
+        <button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="closeCouplesExercises();switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+      </div>`;
+      html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${pack.slice(0,done).map(p=>`<span onclick="couplesViewDay=${p.day};renderCouples()" style="font-size:11.5px;color:var(--ts);background:var(--s1);border:1px solid var(--bdr);border-radius:99px;padding:4px 10px;cursor:pointer">✓ ${p.day}</span>`).join('')}</div>`;
+      el.innerHTML=html+`<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:6px 0 8px">Anytime exercises</div>`+COUPLES_EXERCISES.map(e=>
+        `<div class="card" style="padding:14px 16px;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:600;color:var(--tp)">${escapeHtml(e.t)}</div>
+          <div style="font-size:12.5px;color:var(--tm);margin:4px 0 8px;line-height:1.5">${escapeHtml(e.w)}</div>
+          <div style="font-size:13px;color:var(--ts);line-height:1.7">${e.s.map((st,i)=>`<b style="color:var(--tp)">${i+1}.</b> ${escapeHtml(st)}`).join('<br>')}</div>
+        </div>`).join('');
+      return;
+    }
     html+=`<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · ${finished?'complete — re-read anytime':`day ${done+1} of ${pack.length}`}</div>`;
     html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
       <div style="font-size:11px;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
@@ -10325,6 +10443,9 @@ function markTogetherDone(){
   couplesViewDay=null;
   renderCouples();
   document.getElementById('couples-list').scrollTop=0;
+  if(pack.length&&S.togetherDone>=pack.length){
+    setTimeout(()=>openCongratsCard('You finished all 30 days of the Together program — as a team.'),400);
+  }
 }
 function closeCouplesExercises(){document.getElementById('couples-modal').classList.remove('open');}
 
@@ -10420,7 +10541,7 @@ function buildGuideIndex(){
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>30 Friendly chats a day</b> (free is 3), custom Lesson Packs, Smart Reminders, voice journaling, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal, lessons — is free forever.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>30 Friendly chats a day</b> (free is 3), building your own Lesson Packs, days 16+ of every pack, Smart Reminders, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal (typed or spoken), and the first 15 days of every lesson pack — is free forever.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0859</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0860</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -9355,7 +9355,11 @@ async function pvPrepare(W, H) {
     if (s.kind === 'video') {
       if (!qkpv.vids.has(s.assetId)) {
         const v = document.createElement('video');
-        v.src = s.url; v.muted = true; v.playsInline = true; v.preload = 'auto';
+        // NOT muted. A clip of you talking is the whole point of the shot, and
+        // a silent preview of it tells you nothing about whether the video
+        // works. Preview always starts from a tap, so unmuted playback is
+        // allowed; pvDrawShot falls back to muted if a browser refuses anyway.
+        v.src = s.url; v.muted = false; v.volume = 1; v.playsInline = true; v.preload = 'auto';
         qkpv.vids.set(s.assetId, v);
       }
       continue;
@@ -9384,7 +9388,12 @@ function pvDrawShot(ctx, seg, i, t, W, H) {
   const src = s.kind === 'video' ? qkpv.vids.get(s.assetId) : qkpv.imgs.get(s.assetId);
   if (!src) return;
   if (s.kind === 'video' && src.paused && src.readyState >= 2) {
-    try { src.currentTime = Math.max(0, t - seg.start); src.play().catch(() => {}); } catch (_) {}
+    try {
+      src.currentTime = Math.max(0, t - seg.start);
+      // If the browser refuses to start an unmuted clip, mute it and try once
+      // more — a preview with no sound still beats a preview with no picture.
+      src.play().catch(() => { src.muted = true; src.play().catch(() => {}); });
+    } catch (_) {}
   }
   const iw = s.kind === 'video' ? (src.videoWidth || W) : src.naturalWidth;
   const ih = s.kind === 'video' ? (src.videoHeight || H) : src.naturalHeight;
@@ -9451,7 +9460,7 @@ $('#qk-preview').onclick = async () => {
   qkpv.t0 = performance.now();
   $('#qk-preview').textContent = '⏹ Stop preview';
   $('#qk-pv-note').textContent = `Rough preview, ${plan.total.toFixed(1)}s — the render is smoother, and ` +
-    `${$('#qk-beat').checked && music ? 'beat-snap plus ' : ''}effects like grain, glitch and slow-mo are done properly at render.`;
+    `${$('#qk-beat').checked && music ? 'beat-snap plus ' : ''}effects like grain, glitch and slow-mo are done properly at render. Your clips play with their own sound, and the song ducks under them exactly as it will in the finished video.`;
   const tick = () => {
     if (!qkpv.playing) return;
     const t = (performance.now() - qkpv.t0) / 1000;
@@ -9464,6 +9473,20 @@ $('#qk-preview').onclick = async () => {
     while (i > 0 && plan.segs[i].start > t) i--;
     const seg = plan.segs[i];
     const prev = i > 0 ? plan.segs[i - 1] : null;
+    // Duck the song while a clip carrying its own sound is on screen, so your
+    // voice isn't fighting the music. It slides rather than jumping, because a
+    // hard volume step is more distracting than the music itself.
+    if (qkpv.audio) {
+      const talking = seg.shot.kind === 'video'
+        || Boolean(prev && prev.shot.kind === 'video' && prev.start + prev.dur > t);
+      // 0.35 is not a taste call — it is exactly what the render does
+      // (`volume='1-0.65*...'` in the mix), so the preview tells the truth
+      // about how loud the song will sit under you. Change both or neither.
+      const want = talking ? 0.35 : 1;
+      if (Math.abs(qkpv.audio.volume - want) > 0.01) {
+        qkpv.audio.volume = Math.min(1, Math.max(0, qkpv.audio.volume + (want - qkpv.audio.volume) * 0.12));
+      }
+    }
     // any clip not on screen right now gets paused so it doesn't run ahead
     qk.shots.forEach((s, j) => {
       if (s.kind !== 'video' || j === i || j === i - 1) return;

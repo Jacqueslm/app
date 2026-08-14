@@ -134,6 +134,42 @@ next action at a time. If something new is needed, fold it into an existing file
 
 ---
 
+## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
+
+Studio moved b0848 → b0856 in one long session. Every item below was a real
+fault that took real work to find. **Read this before editing anything under
+`Studio/`.**
+
+1. **NEVER send a video thumbnail to Buffer.** `VideoAssetInput` *declares* a
+   `thumbnailUrl` field, so "trust the schema" logic will happily fill it in —
+   and Buffer's validator then rejects the entire post on **every** network:
+   *"social networks do not accept custom video thumbnail images."* This is the
+   single bug that made Buffer look permanently broken. `makeVideoThumbUrl()`
+   was deleted; a comment marks the spot. **Declared in a GraphQL schema ≠
+   accepted by the validator.**
+2. **Buffer posting WORKS.** Confirmed by Jacques 14 Aug 9:39am — queued on
+   Facebook, TikTok and YouTube. Do not "fix" or re-diagnose it. YouTube needs
+   `title` + `categoryId` and Facebook needs `type`; both are built from
+   Buffer's own schema in `bufferMetadataFor()`. The YouTube title is the
+   caption's first line.
+3. **The guide PDF is generated, not hand-made.** After ANY edit to
+   `HOW-TO-USE.md`, run `python3 Studio/tools-make-guide.py` and commit the
+   regenerated `Studio/Studio-Guide.pdf`. It drifted 16 builds once and told
+   Jacques to use a card that no longer existed.
+4. **Bump the build stamp** (`>b08XX<` in `Studio/web/index.html`) on every
+   Studio change — it is how he knows the update landed.
+5. **These were removed on purpose. Leave them gone:** Campaign Export (b0849),
+   🎵 Your Audience and ⚡ One-tap short (b0853).
+6. **Diagnostics and Storage & Backup live in ⚙ Settings** (`view-art`), not the
+   Sequencer, and are deliberately not `adv-card`. Jacques had to correct a
+   session on this — don't move them back.
+7. **Free voice cloning is optional and local** (`voiceclone.js` +
+   `clone-worker.py`, Chatterbox). If a model swap is ever considered, the
+   replacement's **weights** must be commercially licensed — `speak.js` only
+   ships CC0 voices for that reason, and XTTS-v2 / F5-TTS both fail it.
+
+---
+
 ## CURRENT STATUS (2026-08-14) — newest, read this first
 
 **NASADAD: no reply yet** as of 14 Aug (sent 12 Aug to mwhitter@nasadad.org, the

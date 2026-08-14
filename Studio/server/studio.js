@@ -1475,32 +1475,116 @@ router.get('/stock/search', async (req, res) => {
   }
 });
 
+// A Pexels media URL and nothing else. Everything that downloads from stock
+// goes through this, so there is one place that decides what we will fetch.
+function isPexelsUrl(url) {
+  const trustedBase = (PEXELS_BASE || '').replace(/\/$/, '');
+  return typeof url === 'string' && !/\s/.test(url) && (
+    /^https:\/\/([^/\s]*\.)?(pexels\.com|pexels\.io|pexelsusercontent\.com)\//.test(url) ||
+    (Boolean(trustedBase) && url.startsWith(trustedBase + '/'))
+  );
+}
+
+// Download one Pexels file into the library and return the asset row. Shared by
+// the manual import button and the automatic gap-filler below.
+async function importStockUrl(userId, url, kind, label) {
+  const isVideo = kind === 'video';
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Download failed (${r.status}).`);
+  const buf = Buffer.from(await r.arrayBuffer());
+  if (!buf.length) throw new Error('Downloaded an empty file.');
+  const filename = newFilename(userId, isVideo ? '.mp4' : '.jpg');
+  fs.writeFileSync(mediaPath(filename), buf);
+  const meta = { source: 'stock', stock: 'pexels' };
+  if (isVideo) meta.duration = await probeMediaDuration(mediaPath(filename));
+  const id = db.createAsset(userId, isVideo ? 'video' : 'image', String(label || 'stock clip').slice(0, 80), filename, null, meta);
+  return db.getAsset(userId, id);
+}
+
 router.post('/stock/import', async (req, res) => {
   if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings first.' });
   const { url, kind, label } = req.body || {};
-  const trustedBase = (PEXELS_BASE || '').replace(/\/$/, '');
-  const okUrl = typeof url === 'string' && !/\s/.test(url) && (
-    /^https:\/\/([^/\s]*\.)?(pexels\.com|pexels\.io|pexelsusercontent\.com)\//.test(url) ||
-    (trustedBase && url.startsWith(trustedBase + '/'))
-  );
-  if (!okUrl) return res.status(400).json({ error: 'That is not a valid Pexels media link.' });
-  const isVideo = kind === 'video';
+  if (!isPexelsUrl(url)) return res.status(400).json({ error: 'That is not a valid Pexels media link.' });
   try {
-    const r = await fetch(url);
-    if (!r.ok) return res.status(502).json({ error: `Download failed (${r.status}).` });
-    const buf = Buffer.from(await r.arrayBuffer());
-    if (!buf.length) return res.status(502).json({ error: 'Downloaded an empty file.' });
-    const ext = isVideo ? '.mp4' : '.jpg';
-    const filename = newFilename(req.userId, ext);
-    fs.writeFileSync(mediaPath(filename), buf);
-    const meta = { source: 'stock', stock: 'pexels' };
-    if (isVideo) meta.duration = await probeMediaDuration(mediaPath(filename));
-    const cleanLabel = String(label || 'stock clip').slice(0, 80);
-    const id = db.createAsset(req.userId, isVideo ? 'video' : 'image', cleanLabel, filename, null, meta);
-    res.status(201).json({ asset: assetJson(db.getAsset(req.userId, id)) });
+    res.status(201).json({ asset: assetJson(await importStockUrl(req.userId, url, kind, label)) });
   } catch (err) {
     res.status(502).json({ error: `Could not import: ${err.message}` });
   }
+});
+
+/* ---------------- turn a line of a plan into footage ---------------- */
+// stockQueryFrom lives in its own file so it can be unit-tested without booting
+// the server. See stock-query.js.
+const { stockQueriesFrom } = require('./stock-query');
+
+// The shared engine. Storyboard, Quick Video and the Director all have the same
+// hole: they know WHAT each shot should be, in words, and have no way to get a
+// picture for it without paying to generate one. Stock is free and already
+// wired up - it was just never connected to any of the three.
+//
+// The rule everywhere: this only ever fills empties. It never replaces a
+// picture you put there, and AI generation stays the fallback for lines stock
+// cannot answer, not the first move.
+
+async function stockSearchOne(query, type, usedIds) {
+  const url = type === 'videos'
+    ? `${PEXELS_BASE}/videos/search?query=${encodeURIComponent(query)}&per_page=12&size=medium&orientation=portrait`
+    : `${PEXELS_BASE}/v1/search?query=${encodeURIComponent(query)}&per_page=12&orientation=portrait`;
+  const r = await fetch(url, { headers: { Authorization: PEXELS_KEY } });
+  if (!r.ok) throw new Error(`Pexels error ${r.status}`);
+  const data = await r.json();
+  if (type === 'videos') {
+    for (const v of data.videos || []) {
+      if (usedIds.has(`v${v.id}`)) continue;
+      const files = (v.video_files || []).filter((f) => f.file_type === 'video/mp4');
+      const file = files.filter((f) => (f.width || 0) <= 1280).sort((a, b) => (b.width || 0) - (a.width || 0))[0]
+        || files.sort((a, b) => (a.width || 0) - (b.width || 0))[0];
+      if (!file) continue;
+      usedIds.add(`v${v.id}`);
+      return { url: file.link, kind: 'video' };
+    }
+    return null;
+  }
+  for (const p of data.photos || []) {
+    if (usedIds.has(`p${p.id}`)) continue;
+    usedIds.add(`p${p.id}`);
+    return { url: p.src.large2x || p.src.large || p.src.original, kind: 'image' };
+  }
+  return null;
+}
+
+router.post('/stock/fill', async (req, res) => {
+  if (!PEXELS_KEY) return res.status(503).json({ error: 'Add a free Pexels key in Settings to fill shots from stock.' });
+  const rows = Array.isArray(req.body && req.body.rows) ? req.body.rows.slice(0, 30) : [];
+  if (!rows.length) return res.status(400).json({ error: 'Nothing to fill.' });
+  const type = req.body.type === 'videos' ? 'videos' : 'photos';
+  // Never hand the same clip to two shots in one video - a repeat inside 50
+  // seconds is the most obvious thing in the finished cut.
+  const usedIds = new Set();
+  const filled = [];
+  const missed = [];
+  for (const row of rows) {
+    const index = Number(row && row.index);
+    const tries = stockQueriesFrom(row && row.name, row && row.text);
+    const query = tries[0] || '';
+    if (!Number.isFinite(index) || !tries.length) { missed.push({ index, query, why: 'nothing to search for' }); continue; }
+    try {
+      // Best guess first, then the fallbacks in order. Separate attempts, never
+      // one merged query - see the note in stock-query.js for why.
+      let hit = null;
+      for (const q of tries) {
+        hit = await stockSearchOne(q, type, usedIds);
+        if (hit) break;
+      }
+      if (!hit) { missed.push({ index, query, why: 'no match in stock' }); continue; }
+      const asset = await importStockUrl(req.userId, hit.url, hit.kind, `stock · ${query}`);
+      filled.push({ index, query, asset: assetJson(asset) });
+    } catch (err) {
+      db.logError('stock', `fill "${query}": ${err.message}`);
+      missed.push({ index, query, why: err.message });
+    }
+  }
+  res.json({ filled, missed });
 });
 
 /* ---------------- storage manager ---------------- */

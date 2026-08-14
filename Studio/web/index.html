@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0858</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0859</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -632,6 +632,7 @@ body.simple-only #view-simple{display:flex !important}
         <p class="usage" style="margin:6px 0 4px">One line per shot, in order. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
         <textarea id="qk-paste" placeholder="1. 01_indulgence   Zoom in   10s  cut    I wasn't hungry. I was filling a hole&#10;2. 02_aftermath    Zoom out  10s  blend  Then the room got quiet&#10;3. 03_realization  Float      5s  blend  Wasn't there" style="min-height:96px;font-size:12px"></textarea>
         <button class="btn2" id="qk-paste-go" style="width:100%;margin-top:6px">Fill the shots from this</button>
+        <button class="btn2" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Find free footage for the lines with no picture</button>
         <p class="usage" id="qk-paste-note" style="margin:4px 0 0"></p>
       </details>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -8985,6 +8986,55 @@ if (document.getElementById('qk-paste-go')) $('#qk-paste-go').onclick = () => {
   if (qk.shots.length > rows.length) bits.push(`${qk.shots.length - rows.length} shot${qk.shots.length - rows.length > 1 ? 's' : ''} left as they were`);
   bits.push(`${Math.round(total)}s total`);
   note.textContent = bits.join(' · ') + '.';
+};
+
+// A pasted plan knows what every shot should be, in words, and used to stop
+// dead there: "no pictures to put them on yet". Stock was already in the app,
+// one card away, and nothing connected the two. This does - it takes only the
+// lines that have no picture and finds each one free footage.
+//
+// It never touches a shot you already filled. Your own pictures always win.
+if (document.getElementById('qk-stock-fill')) $('#qk-stock-fill').onclick = async (e) => {
+  const btn = e.currentTarget;
+  const note = $('#qk-paste-note');
+  const rows = parseShotList($('#qk-paste').value);
+  if (!rows.length) { note.textContent = 'Paste your shot list in the box above first — one line per shot.'; return; }
+
+  // Only the tail: rows past the pictures you have already added.
+  const need = [];
+  for (let i = qk.shots.length; i < rows.length; i++) need.push({ index: i, name: rows[i].name, text: rows[i].text });
+  if (!need.length) { note.textContent = `Every one of your ${rows.length} lines already has a picture — nothing to look for.`; return; }
+
+  btn.disabled = true;
+  const was = btn.textContent;
+  btn.textContent = `Searching for ${need.length}…`;
+  try {
+    const out = await jfetch('/api/studio/stock/fill', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows: need, type: 'photos' }),
+    });
+    const found = new Map((out.filled || []).map((f) => [f.index, f]));
+    for (let i = qk.shots.length; i < rows.length; i++) {
+      const hit = found.get(i);
+      if (!hit) break; // keep the shots in the plan's order - stop at the first gap
+      const r = rows[i];
+      qk.shots.push({
+        assetId: hit.asset.id, url: hit.asset.url, label: hit.asset.label,
+        move: r.move || 'push', dur: r.dur || 4, text: r.text || '',
+        transAfter: r.transAfter || 'fade', speed: r.speed, pos: r.pos,
+      });
+    }
+    await loadAssets();
+    renderQkShots(); renderQkTotal(); persistQkDraft(); persistDraft();
+    const missed = (out.missed || []).length;
+    note.textContent = `Found free footage for ${found.size} of ${need.length}.`
+      + (missed ? ` ${missed} had no match — add those yourself, or generate them in AI Scenes.` : '')
+      + ' Everything found is now in your library too.';
+  } catch (err) {
+    note.textContent = err.message || 'Could not reach the stock library.';
+  } finally {
+    btn.disabled = false; btn.textContent = was;
+  }
 };
 
 // Builds the shot a picture OR a clip you filmed becomes. A video keeps its

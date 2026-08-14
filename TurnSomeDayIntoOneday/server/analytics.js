@@ -10,7 +10,11 @@
 // on a preview costs nothing and sends nothing.
 
 const PLAUSIBLE_DOMAIN = (process.env.PLAUSIBLE_DOMAIN || '').trim();
-const ENDPOINT = 'https://plausible.io/api/event';
+// Defaults to Plausible's cloud. Self-hosting the open-source Community
+// Edition later is then an env var, not a code change: set PLAUSIBLE_HOST to
+// your own instance (e.g. https://stats.example.com). Nothing else moves.
+const PLAUSIBLE_HOST = (process.env.PLAUSIBLE_HOST || 'https://plausible.io').trim().replace(/\/+$/, '');
+const ENDPOINT = `${PLAUSIBLE_HOST}/api/event`;
 // A neutral UA for events that originate server-side (a webhook-confirmed
 // payment, for instance) and therefore have no visitor request to forward.
 // It only exists because Plausible requires the User-Agent header.

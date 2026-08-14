@@ -97,16 +97,16 @@ partner is always last to know. Build the whole piece on that.
 **TikTok:** He was laughing at the TV. I was looking at four years of savings.
 
 ```
-1. 01_sofa       Still     1.3s  cut   Nothing looked wrong.
-2. 02_phone      Zoom in   1.3s  cut   I was only checking the balance.
-3. 03_screen     Zoom in   1.4s  cut   The same charge. Over and over.
-4. 04_lookup     Still     1.4s  cut   He was laughing at something on TV.
-5. 05_kitchen    Zoom in   1.3s  cut   So I added it up. All of it.
-6. 06_savings    Still     1.4s  cut   Four years of saving.
-7. 07_photo      Zoom in   1.4s  cut   He's not a bad man.
-8. 08_awake      Still     1.5s  cut   That's what makes it hard.
-9. 09_dawn       Zoom in   1.5s  cut   I didn't know who to ask.
-10. 10_talking   Zoom out  2.0s  cut   So I started with the truth.
+1. 01_sofa       Still     5.0s  cut   Nothing looked wrong.
+2. 02_phone      Zoom in   5.0s  cut   I was only checking the balance.
+3. 03_screen     Zoom in   5.0s  cut   The same charge. Over and over.
+4. 04_lookup     Still     5.0s  cut   He was laughing at something on TV.
+5. 05_kitchen    Zoom in   5.0s  cut   So I added it up. All of it.
+6. 06_savings    Still     5.0s  cut   Four years of saving.
+7. 07_photo      Zoom in   5.0s  cut   He's not a bad man.
+8. 08_awake      Still     5.0s  cut   That's what makes it hard.
+9. 09_dawn       Zoom in   5.0s  cut   I didn't know who to ask.
+10. 10_talking   Zoom out  5.0s  cut   So I started with the truth.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -163,16 +163,16 @@ difficulty 41, tagged Build**, not too hard.
 **TikTok:** None of them were big. That's the thing.
 
 ```
-1. 01_door       Still     1.3s  cut   She always got home before me.
-2. 02_boxes      Zoom in   1.4s  cut   I found them looking for a coat.
-3. 03_tags       Zoom in   1.4s  cut   Tags still on. All of them.
-4. 04_bag        Still     1.4s  cut   I'd seen her do that before. I let it go.
-5. 05_statement  Zoom in   1.5s  cut   None of them were big. That's the thing.
-6. 06_bathroom   Still     1.4s  cut   Small enough that I believed her every time.
-7. 07_photo      Zoom in   1.4s  cut   She's not greedy. She's not selfish.
-8. 08_asleep     Still     1.6s  cut   She's just scared of something she won't say.
-9. 09_dawn       Zoom in   1.6s  cut   I didn't want to punish her. I wanted it to stop.
-10. 10_kitchen   Zoom out  2.0s  cut   So I said it out loud.
+1. 01_door       Still     5.0s  cut   She always got home before me.
+2. 02_boxes      Zoom in   5.0s  cut   I found them looking for a coat.
+3. 03_tags       Zoom in   5.0s  cut   Tags still on. All of them.
+4. 04_bag        Still     5.0s  cut   I'd seen her do that before. I let it go.
+5. 05_statement  Zoom in   5.0s  cut   None of them were big. That's the thing.
+6. 06_bathroom   Still     5.0s  cut   Small enough that I believed her every time.
+7. 07_photo      Zoom in   5.0s  cut   She's not greedy. She's not selfish.
+8. 08_asleep     Still     5.0s  cut   She's just scared of something she won't say.
+9. 09_dawn       Zoom in   5.0s  cut   I didn't want to punish her. I wanted it to stop.
+10. 10_kitchen   Zoom out  5.0s  cut   So I said it out loud.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -231,16 +231,16 @@ careful, and a wife who notices he is never hungry.
 **TikTok:** He wasn't hiding food. He was hiding himself.
 
 ```
-1. 01_dinner     Still     1.3s  cut   He was never hungry at dinner.
-2. 02_car        Zoom in   1.4s  cut   I thought he'd eaten at work.
-3. 03_wrappers   Zoom in   1.4s  cut   I found them cleaning out the car.
-4. 04_stillness  Still     1.5s  cut   I sat in that car a long time.
-5. 05_plate      Zoom in   1.5s  cut   He wasn't hiding food. He was hiding himself.
-6. 06_fridge     Still     1.4s  cut   Ten minutes after everyone goes to bed.
-7. 07_photo      Zoom in   1.4s  cut   He's not weak. He's not greedy.
-8. 08_asleep     Still     1.6s  cut   He's soothing something he's never said out loud.
-9. 09_dawn       Zoom in   1.6s  cut   Nothing I found was written for him.
-10. 10_kitchen   Zoom out  2.0s  cut   So I stopped waiting for him to bring it up.
+1. 01_dinner     Still     5.0s  cut   He was never hungry at dinner.
+2. 02_car        Zoom in   5.0s  cut   I thought he'd eaten at work.
+3. 03_wrappers   Zoom in   5.0s  cut   I found them cleaning out the car.
+4. 04_stillness  Still     5.0s  cut   I sat in that car a long time.
+5. 05_plate      Zoom in   5.0s  cut   He wasn't hiding food. He was hiding himself.
+6. 06_fridge     Still     5.0s  cut   Ten minutes after everyone goes to bed.
+7. 07_photo      Zoom in   5.0s  cut   He's not weak. He's not greedy.
+8. 08_asleep     Still     5.0s  cut   He's soothing something he's never said out loud.
+9. 09_dawn       Zoom in   5.0s  cut   Nothing I found was written for him.
+10. 10_kitchen   Zoom out  5.0s  cut   So I stopped waiting for him to bring it up.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -300,16 +300,16 @@ them can't name what they've lost, which is exactly why they never bring it up.
 **TikTok:** He said mm-hm in the right places.
 
 ```
-1. 01_sofa       Still     1.3s  cut   He was right here.
-2. 02_talking    Zoom in   1.3s  cut   I told him about my day.
-3. 03_nodding    Still     1.4s  cut   He said mm-hm in the right places.
-4. 04_dinner     Zoom in   1.4s  cut   He couldn't tell me one thing I said.
-5. 05_clock      Still     1.5s  cut   Two hours. Every night.
-6. 06_feed       Zoom in   1.3s  cut   He couldn't name one thing he'd read either.
-7. 07_fridge     Zoom in   1.4s  cut   He's not bored of me.
-8. 08_asleep     Still     1.6s  cut   He's just somewhere he can't stop going.
-9. 09_dawn       Zoom in   1.7s  cut   And I do it too. That's the part nobody says.
-10. 10_facedown  Zoom out  2.0s  cut   So we put them face-down and started again.
+1. 01_sofa       Still     5.0s  cut   He was right here.
+2. 02_talking    Zoom in   5.0s  cut   I told him about my day.
+3. 03_nodding    Still     5.0s  cut   He said mm-hm in the right places.
+4. 04_dinner     Zoom in   5.0s  cut   He couldn't tell me one thing I said.
+5. 05_clock      Still     5.0s  cut   Two hours. Every night.
+6. 06_feed       Zoom in   5.0s  cut   He couldn't name one thing he'd read either.
+7. 07_fridge     Zoom in   5.0s  cut   He's not bored of me.
+8. 08_asleep     Still     5.0s  cut   He's just somewhere he can't stop going.
+9. 09_dawn       Zoom in   5.0s  cut   And I do it too. That's the part nobody says.
+10. 10_facedown  Zoom out  5.0s  cut   So we put them face-down and started again.
 11. 99-free-end  Still     3.0s  cut
 ```
 

@@ -96,16 +96,16 @@ witness there is. Build the whole piece on that.
 **TikTok:** I looked up and two hours were gone. Then the phone showed me the year.
 
 ```
-1. 01_sofa       Still     1.3s  cut   I wasn't doing anything bad.
-2. 02_face       Zoom in   1.3s  cut   That's what I kept telling myself.
-3. 03_clock      Still     1.4s  cut   I'd look up and two hours were gone.
-4. 04_report     Zoom in   1.5s  cut   Then the phone told me the number.
-5. 05_handsup    Still     1.5s  cut   Seven hours a day. For a year.
-6. 06_calendar   Zoom in   1.4s  cut   That's a year of evenings.
-7. 07_ball       Still     1.3s  cut   I used to do things.
-8. 08_counter    Zoom in   1.4s  cut   I'm not a lazy man.
-9. 09_setdown    Still     1.5s  cut   That's what makes it hard.
-10. 10_steps     Zoom out  2.0s  cut   So I gave myself back one night.
+1. 01_sofa       Still     5.0s  cut   I wasn't doing anything bad.
+2. 02_face       Zoom in   5.0s  cut   That's what I kept telling myself.
+3. 03_clock      Still     5.0s  cut   I'd look up and two hours were gone.
+4. 04_report     Zoom in   5.0s  cut   Then the phone told me the number.
+5. 05_handsup    Still     5.0s  cut   Seven hours a day. For a year.
+6. 06_calendar   Zoom in   5.0s  cut   That's a year of evenings.
+7. 07_ball       Still     5.0s  cut   I used to do things.
+8. 08_counter    Zoom in   5.0s  cut   I'm not a lazy man.
+9. 09_setdown    Still     5.0s  cut   That's what makes it hard.
+10. 10_steps     Zoom out  5.0s  cut   So I gave myself back one night.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -167,16 +167,16 @@ distinction; it's the whole episode.
 **TikTok:** I called it staying informed. It was a habit.
 
 ```
-1. 01_bed        Still     1.3s  cut   It starts as one post.
-2. 02_thread     Zoom in   1.3s  cut   Then it's the replies.
-3. 03_face       Zoom in   1.6s  cut   Reading strangers argue about whether I get to exist.
-4. 04_clock      Still     1.4s  cut   Every night. Three, four hours.
-5. 05_edge       Still     1.4s  cut   I called it staying informed.
-6. 06_tea        Zoom in   1.4s  cut   It wasn't. It was a habit.
-7. 07_friends    Still     1.5s  cut   The people who love me were never in that app.
-8. 08_facedown   Zoom in   1.4s  cut   Caring about it isn't the problem.
-9. 09_window     Still     1.5s  cut   Giving it every night was.
-10. 10_asleep    Zoom out  2.0s  cut   So I took the nights back first.
+1. 01_bed        Still     5.0s  cut   It starts as one post.
+2. 02_thread     Zoom in   5.0s  cut   Then it's the replies.
+3. 03_face       Zoom in   5.0s  cut   Reading strangers argue about whether I get to exist.
+4. 04_clock      Still     5.0s  cut   Every night. Three, four hours.
+5. 05_edge       Still     5.0s  cut   I called it staying informed.
+6. 06_tea        Zoom in   5.0s  cut   It wasn't. It was a habit.
+7. 07_friends    Still     5.0s  cut   The people who love me were never in that app.
+8. 08_facedown   Zoom in   5.0s  cut   Caring about it isn't the problem.
+9. 09_window     Still     5.0s  cut   Giving it every night was.
+10. 10_asleep    Zoom out  5.0s  cut   So I took the nights back first.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -238,16 +238,16 @@ frightened at the same time* — that's the real feeling and nobody films it.
 **TikTok:** He wasn't sneaking. He was managing me.
 
 ```
-1. 01_wash       Still     1.3s  cut   It was in the wash.
-2. 02_hand       Zoom in   1.4s  cut   Not a big dramatic discovery.
-3. 03_still      Still     1.4s  cut   I stood there a long time.
-4. 04_door       Zoom in   1.4s  cut   He was fifteen feet away doing homework.
-5. 05_window     Zoom in   1.4s  cut   Then I found the window.
-6. 06_bag        Still     1.4s  cut   And the mints. And the spare hoodie.
-7. 07_stair      Still     1.5s  cut   That's when it landed. He wasn't sneaking.
-8. 08_photo      Zoom in   1.5s  cut   He was managing me. For months.
-9. 09_kitchen    Still     1.5s  cut   He's not a bad kid.
-10. 10_wide      Zoom out  2.0s  cut   That's what makes it hard.
+1. 01_wash       Still     5.0s  cut   It was in the wash.
+2. 02_hand       Zoom in   5.0s  cut   Not a big dramatic discovery.
+3. 03_still      Still     5.0s  cut   I stood there a long time.
+4. 04_door       Zoom in   5.0s  cut   He was fifteen feet away doing homework.
+5. 05_window     Zoom in   5.0s  cut   Then I found the window.
+6. 06_bag        Still     5.0s  cut   And the mints. And the spare hoodie.
+7. 07_stair      Still     5.0s  cut   That's when it landed. He wasn't sneaking.
+8. 08_photo      Zoom in   5.0s  cut   He was managing me. For months.
+9. 09_kitchen    Still     5.0s  cut   He's not a bad kid.
+10. 10_wide      Zoom out  5.0s  cut   That's what makes it hard.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -331,16 +331,16 @@ that's all.
 **TikTok:** I wasn't chasing a feeling. I wanted lifting out of myself.
 
 ```
-1. 01_car        Still     1.4s  cut   I didn't stop believing.
-2. 02_face       Zoom in   1.4s  cut   I stopped showing up.
-3. 03_chair      Still     1.5s  cut   First it was one week. Something came up.
-4. 04_chair2     Zoom in   1.3s  cut   Then it was a year.
-5. 05_table      Still     1.6s  cut   Something moves into a room you stop going into.
-6. 06_hands      Zoom in   1.7s  cut   I wasn't chasing a feeling. I wanted lifting out of myself.
-7. 07_book       Still     1.6s  cut   That's the oldest want there is. It just got answered wrong.
-8. 08_doorway    Zoom in   1.6s  cut   I'm not a faithless man. That was never the problem.
-9. 09_street     Still     1.4s  cut   That's what makes it hard.
-10. 10_sitdown   Zoom out  2.2s  cut   So I went back and sat down.
+1. 01_car        Still     5.0s  cut   I didn't stop believing.
+2. 02_face       Zoom in   5.0s  cut   I stopped showing up.
+3. 03_chair      Still     5.0s  cut   First it was one week. Something came up.
+4. 04_chair2     Zoom in   5.0s  cut   Then it was a year.
+5. 05_table      Still     5.0s  cut   Something moves into a room you stop going into.
+6. 06_hands      Zoom in   5.0s  cut   I wasn't chasing a feeling. I wanted lifting out of myself.
+7. 07_book       Still     5.0s  cut   That's the oldest want there is. It just got answered wrong.
+8. 08_doorway    Zoom in   5.0s  cut   I'm not a faithless man. That was never the problem.
+9. 09_street     Still     5.0s  cut   That's what makes it hard.
+10. 10_sitdown   Zoom out  5.0s  cut   So I went back and sat down.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -418,16 +418,16 @@ feels guilty; he stops because he sees his own hands on his son.
 **TikTok:** Then I saw him hold a wheel like that.
 
 ```
-1. 01_drive      Still     1.4s  cut   Nobody calls this an addiction.
-2. 02_knuckles   Zoom in   1.4s  cut   There's nothing to buy. Nothing to hide.
-3. 03_shout      Zoom in   1.3s  cut   Twenty seconds, and it's free.
-4. 04_mirror     Still     1.5s  cut   He stopped talking in the back seat.
-5. 05_driveway   Still     1.3s  cut   I always said sorry.
-6. 06_homework   Zoom in   1.4s  cut   He stopped asking to come with me.
-7. 07_toywheel   Zoom in   1.6s  cut   Then I saw him hold a wheel like that.
-8. 08_hallway    Still     1.4s  cut   I'm not a violent man.
-9. 09_bededge    Still     1.5s  cut   That's what makes it hard.
-10. 10_letitgo   Zoom out  2.0s  cut   So somebody cut me off, and I let it go.
+1. 01_drive      Still     5.0s  cut   Nobody calls this an addiction.
+2. 02_knuckles   Zoom in   5.0s  cut   There's nothing to buy. Nothing to hide.
+3. 03_shout      Zoom in   5.0s  cut   Twenty seconds, and it's free.
+4. 04_mirror     Still     5.0s  cut   He stopped talking in the back seat.
+5. 05_driveway   Still     5.0s  cut   I always said sorry.
+6. 06_homework   Zoom in   5.0s  cut   He stopped asking to come with me.
+7. 07_toywheel   Zoom in   5.0s  cut   Then I saw him hold a wheel like that.
+8. 08_hallway    Still     5.0s  cut   I'm not a violent man.
+9. 09_bededge    Still     5.0s  cut   That's what makes it hard.
+10. 10_letitgo   Zoom out  5.0s  cut   So somebody cut me off, and I let it go.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -483,16 +483,16 @@ down. Nobody films that, and it is the entire reason people stay.
 **TikTok:** Somebody in there needed me at ten o'clock.
 
 ```
-1. 01_desk       Still     1.4s  cut   I wasn't hiding. Everybody knew where I was.
-2. 02_daylight   Zoom in   1.3s  cut   That's the part people get wrong.
-3. 03_chat       Zoom in   1.5s  cut   Somebody in there needed me at ten o'clock.
-4. 04_asleep     Still     1.4s  cut   So I was never the one who left.
-5. 05_table      Still     1.4s  cut   They stopped waiting to eat.
-6. 06_mouse      Zoom in   1.3s  cut   In there I was good at something.
-7. 07_shirt      Still     1.4s  cut   Out here I was behind on everything.
-8. 08_cereal     Zoom in   1.4s  cut   I'm not a waster.
-9. 09_headset    Still     1.5s  cut   That's what makes it hard.
-10. 10_curtains  Zoom out  2.0s  cut   So I told them I'd be back. And I got up.
+1. 01_desk       Still     5.0s  cut   I wasn't hiding. Everybody knew where I was.
+2. 02_daylight   Zoom in   5.0s  cut   That's the part people get wrong.
+3. 03_chat       Zoom in   5.0s  cut   Somebody in there needed me at ten o'clock.
+4. 04_asleep     Still     5.0s  cut   So I was never the one who left.
+5. 05_table      Still     5.0s  cut   They stopped waiting to eat.
+6. 06_mouse      Zoom in   5.0s  cut   In there I was good at something.
+7. 07_shirt      Still     5.0s  cut   Out here I was behind on everything.
+8. 08_cereal     Zoom in   5.0s  cut   I'm not a waster.
+9. 09_headset    Still     5.0s  cut   That's what makes it hard.
+10. 10_curtains  Zoom out  5.0s  cut   So I told them I'd be back. And I got up.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -551,16 +551,16 @@ one morning. That's the whole ending.
 **TikTok:** Nobody has an intervention for this one. They give you a plaque.
 
 ```
-1. 01_1am        Still     1.4s  cut   Nobody has an intervention for this one.
-2. 02_face       Zoom in   1.3s  cut   They give you a plaque.
-3. 03_hall       Still     1.5s  cut   I missed it. Again.
-4. 04_phone      Zoom in   1.4s  cut   She stopped being surprised.
-5. 05_office     Still     1.4s  cut   "I don't know how you do it."
-6. 06_plaque     Zoom in   1.3s  cut   That's what they say to me.
-7. 07_lily       Still     1.5s  cut   She eats at the table I work at.
-8. 08_doorway    Zoom in   1.4s  cut   I'm not a bad mother.
-9. 09_car        Still     1.5s  cut   That's what makes it hard.
-10. 10_closed    Zoom out  2.0s  cut   So I closed it. For one morning.
+1. 01_1am        Still     5.0s  cut   Nobody has an intervention for this one.
+2. 02_face       Zoom in   5.0s  cut   They give you a plaque.
+3. 03_hall       Still     5.0s  cut   I missed it. Again.
+4. 04_phone      Zoom in   5.0s  cut   She stopped being surprised.
+5. 05_office     Still     5.0s  cut   "I don't know how you do it."
+6. 06_plaque     Zoom in   5.0s  cut   That's what they say to me.
+7. 07_lily       Still     5.0s  cut   She eats at the table I work at.
+8. 08_doorway    Zoom in   5.0s  cut   I'm not a bad mother.
+9. 09_car        Still     5.0s  cut   That's what makes it hard.
+10. 10_closed    Zoom out  5.0s  cut   So I closed it. For one morning.
 11. 99-free-end  Still     3.0s  cut
 ```
 
@@ -618,16 +618,16 @@ the house, because the house has her in it. It's the car.
 **TikTok:** Nobody hides a meal. They hide the second one.
 
 ```
-1. 01_dinner     Still     1.4s  cut   We eat dinner together every night.
-2. 02_sink       Zoom in   1.4s  cut   He never eats much in front of me.
-3. 03_hallway    Still     1.4s  cut   Then the kitchen light goes on at eleven.
-4. 04_wrappers   Zoom in   1.5s  cut   I found them in the car. Not the house.
-5. 05_receipt    Zoom in   1.4s  cut   Eleven forty. Every night that week.
-6. 06_parked     Still     1.6s  cut   Nobody hides a meal. They hide the second one.
-7. 07_photo      Zoom in   1.3s  cut   He's not greedy.
-8. 08_awake      Still     1.4s  cut   That's what makes it hard.
-9. 09_mug        Still     1.5s  cut   He'd never said it out loud. Not once.
-10. 10_talking   Zoom out  2.0s  cut   So I asked. And then I shut up and listened.
+1. 01_dinner     Still     5.0s  cut   We eat dinner together every night.
+2. 02_sink       Zoom in   5.0s  cut   He never eats much in front of me.
+3. 03_hallway    Still     5.0s  cut   Then the kitchen light goes on at eleven.
+4. 04_wrappers   Zoom in   5.0s  cut   I found them in the car. Not the house.
+5. 05_receipt    Zoom in   5.0s  cut   Eleven forty. Every night that week.
+6. 06_parked     Still     5.0s  cut   Nobody hides a meal. They hide the second one.
+7. 07_photo      Zoom in   5.0s  cut   He's not greedy.
+8. 08_awake      Still     5.0s  cut   That's what makes it hard.
+9. 09_mug        Still     5.0s  cut   He'd never said it out loud. Not once.
+10. 10_talking   Zoom out  5.0s  cut   So I asked. And then I shut up and listened.
 11. 99-free-end  Still     3.0s  cut
 ```
 

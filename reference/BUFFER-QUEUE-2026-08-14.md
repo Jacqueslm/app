@@ -28,10 +28,23 @@ Arriving traffic should find a running channel, not an empty one.
 
 ---
 
+## TIKTOK CADENCE — ONE A DAY FROM MON 17 AUG. JACQUES'S CALL.
+
+Decided 14 Aug 2026, after uploads kept coming back "spam" at three a day and
+only went through after several tries. **From Monday: one TikTok post per day.**
+This weekend's queue is already one a day, so nothing here changes.
+
+**Do not talk him back up to three.** If a week runs clean at one, two is the
+next step, and only then three. Facebook, YouTube and Instagram stay as they
+are — this limit is TikTok's, not a content decision.
+
+---
+
 ## TIKTOK "SPAM" WARNING — read before loading TikTok posts
 
 14 Aug: TikTok started answering uploads with a **spam** message. Posts went
-through after hitting publish several times. The account has no flags and no
+through after hitting publish several times (and did go through — the posts are
+live; this was throttling, never a rejection). The account has no flags and no
 violations — this is the automated upload filter, not moderation.
 
 **Do not hit publish repeatedly.** That is the one thing that makes it worse.

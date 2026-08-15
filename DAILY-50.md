@@ -137,6 +137,16 @@ can write.
 Subject lines matter more than bodies. Every one of these is short on purpose —
 the schools pile proved short gets answered.
 
+**Master one-liner — the closing beat of every template, word for word:**
+
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
+
+Six different bodies, one identical close. That's how someone who reads two of
+these knows it's the same voice — and the privacy line is the line the partner
+remembers. Never paraphrase it; it's the only part of the email that repeats
+across every send.
+
 ## Template 1 — treatment centers with a blog
 
 > **Subject:** Something for the person reading your page
@@ -151,6 +161,9 @@ the schools pile proved short gets answered.
 > in between one.
 >
 > Link it or don't. Your readers are asking for it either way.
+>
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
 >
 > https://www.turnsomedayintodayone.com
 >
@@ -171,6 +184,9 @@ the schools pile proved short gets answered.
 > I'm writing to ask what it takes to be listed. That's the entire ask — a link
 > on a page. It costs nothing and needs nothing from you but the link.
 >
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
+>
 > https://www.turnsomedayintodayone.com
 >
 > Jacques Malone, Saint Louis, Missouri
@@ -188,6 +204,9 @@ the schools pile proved short gets answered.
 >
 > If it's useful to anyone you see, it's yours to hand out. If something in it
 > is wrong, I'd genuinely rather hear that.
+>
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
 >
 > https://www.turnsomedayintodayone.com
 >
@@ -208,6 +227,9 @@ the schools pile proved short gets answered.
 >
 > No partnership, no fee, no contract. Just a link if you want one.
 >
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
+>
 > https://www.turnsomedayintodayone.com
 >
 > Jacques Malone, Saint Louis
@@ -220,6 +242,9 @@ the schools pile proved short gets answered.
 >
 > Not asking for a post. If you look at it and it's any good, it's yours to
 > mention. If it isn't, tell me why — I'd genuinely rather know.
+>
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
 >
 > turnsomedayintodayone.com
 
@@ -237,6 +262,9 @@ something. The one that doesn't gets read, and half the time gets a post anyway.
 >
 > No ask attached. If it's useful to your audience it's yours to mention; if it
 > isn't, I'd rather hear that than nothing.
+>
+> Free. Private — nobody has to see it, not even the person beside you. Built by
+> a man who used for 38 years and got free at 50.
 >
 > https://www.turnsomedayintodayone.com
 >

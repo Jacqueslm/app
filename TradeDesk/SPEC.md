@@ -81,6 +81,30 @@ labelled `—`.
 
 ## 4. Break of structure and change of character
 
+Structure is tracked at **two levels at once**. Collapsing them into one is what
+makes a naive implementation flip its bias on every pullback, and separating them is
+what makes "internal aligning with external" mechanically expressible.
+
+| Level | Watches | Meaning |
+|---|---|---|
+| **minor** | the most recent confirmed swing | every shallow pullback that fails; the pullback-level detail you execute against |
+| **major** | the **protected level** | the low that launched the current bullish leg, or the high that launched the bearish one |
+
+The protected level **advances only on a BOS**, never on an ordinary swing. In a
+bullish leg from 100, pullbacks print swing lows at 105, 108, 110 — a dip to 109 breaks
+the most recent one, but the leg is untouched. Only a close below the low that launched
+the breakout ends it.
+
+Inside one timeframe that is swing structure versus internal structure. Read across
+timeframes it is the same idea: major on the Daily and 4H is your external bias, minor
+on the 1H and 15M is where entries live.
+
+This was found empirically, not assumed. With one level only, real MES data gave
+roughly one BOS per CHoCH on every timeframe — a trend that never persists, which is
+not what price does. Raising the swing sensitivity did not fix it and made 4H worse,
+which is what ruled out noise as the cause. With the protected level separated out,
+the daily runs 2.09 BOS per CHoCH and 1H runs 2.33.
+
 The engine carries a **bias**: `bull`, `bear`, or `null` before the first break.
 
 On each bar, the close is compared with the most recent *confirmed and unbroken* swing
@@ -91,6 +115,9 @@ high and swing low.
 | `bull` | **BOS bullish** — continuation | **CHoCH bearish** — bias flips to `bear` |
 | `bear` | **CHoCH bullish** — bias flips to `bull` | **BOS bearish** — continuation |
 | `null` | **BOS bullish**, bias becomes `bull` | **BOS bearish**, bias becomes `bear` |
+
+At the major level the same table applies, but the level being tested is the protected
+one, and each BOS drags the protected level up (or down) behind it.
 
 A CHoCH is exactly the pattern you described: price making HH and HL, then breaking the
 previous HL. That break is the first mechanical evidence the leg is finished.
@@ -125,6 +152,11 @@ A **bullish sweep** is the mirror below a swing low.
 This is the precise complement of §4: same level, wick through versus close through. A
 close beyond is a break; a wick beyond that closes back inside is a sweep. Nothing can be
 both.
+
+A sweep is tagged `isProtected` when the level taken is the protected one. That is the
+signature worth hunting: liquidity raided at the level defending the entire leg. On real
+MES data these are rare in exactly the right way — 0.44/wk on 4H, 0.59/wk on 1H, 3.17/wk
+on 15M, against your stated 2–3 trades a week.
 
 **Displacement** — the "exposing it" half — is the move that follows and confirms the
 sweep was manipulation rather than a failed break. Left deliberately undefined until the
@@ -173,17 +205,20 @@ to settle.
 4. **Displacement (§5).** What makes a sweep credible to you — a full-body candle back
    through the swing, a fair value gap, speed, something else? Best answered against real
    charts once the engine is drawing them.
-5. **Data.** The engine needs OHLC candles. What can you export, and from where — Tradovate,
-   NinjaTrader, TradingView? Format and history depth determine what can be verified.
+5. ~~**Data.**~~ Settled — TradingView MES exports, four timeframes, in `data/`.
+   The 15M is only 4.4 days, which is enough to eyeball but not to conclude anything
+   from. A deeper 15M and 1H export is the one thing that would most improve the next
+   step.
 
 ---
 
 ## 9. Build order
 
 1. **Swing detection and labelling** — done, tested. §2, §3.
-2. **BOS and CHoCH** — done, tested. §4.
-3. **Sweep detection** — engine written, awaiting real data to tune. §5.
-4. Real candles in, structure drawn on a chart, checked bar by bar against your own.
+2. **BOS and CHoCH, major and minor** — done, tested. §4.
+3. **Sweep detection** — done, including protected-level tagging. §5.
+4. **Real candles drawn with structure on them** — done: `chart.html`.
+   ← *checking those labels against your own chart is the current step*
 5. Multi-timeframe alignment: external bias from D/4H gating internal 1H/15M.
 6. Consolidation state.
 7. Displacement, then entry, stop, target.

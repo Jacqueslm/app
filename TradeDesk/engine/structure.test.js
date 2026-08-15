@@ -35,7 +35,8 @@ function path(waypoints, bars = 4){
 }
 
 const labels = (r, kind) => r.swings.filter(s => s.kind === kind).map(s => s.label);
-const evs    = r => r.events.map(e => e.type + ':' + e.dir);
+const evs    = r => r.major.map(e => e.type + ':' + e.dir);
+const mev    = r => r.minor.map(e => e.type + ':' + e.dir);
 
 /* ---------------------------------------------------------------- swings -- */
 group('Swing detection');
@@ -102,32 +103,36 @@ group('BOS and CHoCH (§4)');
   const r = S.analyze(path([100, 110, 105, 120, 112, 130]));
   check('uptrend gives bullish BOS only',
     evs(r).every(e => e === 'BOS:bull'), true);
+  check('and the protected low advances behind it',
+    r.protectedLow > r.swings.find(s => s.kind === 'low').price, true);
   check('final bias is bull', r.bias, 'bull');
 }
 {
   /* The pattern in your words: HH, HL, HH, then break the previous HL.
-     100 → 110(H) → 105(L) → 120(HH) → 112(HL) → 118(LH) → 104 breaks 112. */
-  const r = S.analyze(path([100, 110, 105, 120, 112, 118, 104]));
+     100 → 110(H) → 105(L) → 120(HH) → 112(HL) → 118(LH) → 108 breaks 112,
+     while staying above the protected low of 105. */
+  const r = S.analyze(path([100, 110, 105, 120, 112, 118, 108]));
   check('HH HL HH then breaking the HL is a bearish CHoCH',
-    evs(r), ['BOS:bull', 'CHoCH:bear']);
-  check('bias flips to bear on the CHoCH', r.bias, 'bear');
-  const choch = r.events.find(e => e.type === 'CHoCH');
+    mev(r), ['BOS:bull', 'CHoCH:bear']);
+  const choch = r.minor.find(e => e.type === 'CHoCH');
   check('CHoCH breaks the HL level, not the low of the move', choch.level, 112);
   check('the swing that broke was labelled HL',
     r.swings.find(s => s.i === choch.brokeSwingAt).label, 'HL');
+  check('major bias survives a pullback that has not reached the protected low',
+    r.bias, 'bull');
 }
 {
   /* Mirror: downtrend, then break the previous LH upward. */
-  const r = S.analyze(path([130, 120, 125, 110, 118, 112, 126]));
+  const r = S.analyze(path([130, 120, 125, 110, 118, 112, 122]));
   check('LL LH LL then breaking the LH is a bullish CHoCH',
-    evs(r), ['BOS:bear', 'CHoCH:bull']);
-  check('bias flips to bull', r.bias, 'bull');
+    mev(r), ['BOS:bear', 'CHoCH:bull']);
+  check('major bias survives it', r.bias, 'bear');
 }
 {
   /* A level, once broken, is spent — re-touching it must not fire again. */
   const r = S.analyze(path([100, 110, 105, 120, 114, 121, 115, 122]));
   const perLevel = {};
-  r.events.forEach(e => { perLevel[e.level] = (perLevel[e.level] || 0) + 1; });
+  r.minor.forEach(e => { perLevel[e.level] = (perLevel[e.level] || 0) + 1; });
   check('no level produces two events',
     Object.values(perLevel).every(n => n === 1), true);
 }
@@ -138,7 +143,7 @@ group('Causality');
   const c = path([100, 110, 105, 120, 112, 118, 104]);
   const r = S.analyze(c);
   check('every event uses a swing confirmed on an earlier bar',
-    r.events.every(e => {
+    r.minor.every(e => {
       const sw = r.swings.find(s => s.i === e.brokeSwingAt);
       return sw && sw.confirmedAt < e.i;
     }), true);
@@ -153,8 +158,11 @@ group('Causality');
   const cut  = 30;
   const part = S.analyze(c.slice(0, cut));
   check('past events are identical on a truncated history',
-    part.events.map(e => e.i + e.type + e.dir),
-    full.events.filter(e => e.i < cut).map(e => e.i + e.type + e.dir));
+    part.minor.map(e => e.i + e.type + e.dir),
+    full.minor.filter(e => e.i < cut).map(e => e.i + e.type + e.dir));
+  check('…and the same holds for major events',
+    part.major.map(e => e.i + e.type + e.dir),
+    full.major.filter(e => e.i < cut).map(e => e.i + e.type + e.dir));
 }
 
 /* -------------------------------------------------------------- sweeps --- */
@@ -173,7 +181,7 @@ group('Sweeps (§5)');
   check('the sweep is measured against the swing level', r.sweeps[0].level, 120);
   check('penetration is the distance beyond the level', r.sweeps[0].penetration, 3);
   check('a sweep is not counted as a break',
-    r.events.filter(e => e.dir === 'bull').length, 0);
+    r.minor.filter(e => e.dir === 'bull').length, 0);
 }
 {
   /* Same level, but the bar closes above it. That is a break, not a sweep —
@@ -183,14 +191,55 @@ group('Sweeps (§5)');
   c.push({t:9e12+1, o:113, h:123, l:113, c:122});   // closes through
   c.push({t:9e12+2, o:122, h:123, l:120, c:121});
   const r = S.analyze(c);
-  check('closing through the level is a break', evs(r).includes('BOS:bull'), true);
+  check('closing through the level is a break', mev(r).includes('BOS:bull'), true);
   check('and produces no sweep', r.sweeps.length, 0);
+}
+
+/* --------------------------------------------- major vs minor structure --- */
+group('Protected level (major structure)');
+{
+  /* A pullback below the most recent swing low, but nowhere near the low that
+     launched the leg, is internal noise — not the end of the trend. */
+  const r = S.analyze(path([100, 110, 105, 120, 112, 118, 108]));
+  check('the pullback fires a minor CHoCH',
+    r.minor.filter(e => e.type === 'CHoCH').length, 1);
+  check('but no major CHoCH',
+    r.major.filter(e => e.type === 'CHoCH').length, 0);
+  check('the protected low is the launching low, not the recent one',
+    r.protectedLow, 105);
+}
+{
+  /* Break the protected low itself and the leg is genuinely over. */
+  const r = S.analyze(path([100, 110, 105, 120, 112, 118, 98]));
+  check('breaking the protected low is a major CHoCH',
+    r.major.filter(e => e.type === 'CHoCH' && e.dir === 'bear').length, 1);
+  check('major bias flips', r.bias, 'bear');
+}
+{
+  /* Each BOS drags the protected low up behind it. */
+  const r = S.analyze(path([100, 110, 105, 120, 112, 130, 122, 108]));
+  const ch = r.major.find(e => e.type === 'CHoCH');
+  check('the protected low advanced with the second BOS', ch.level, 112);
+  check('rather than staying at the first low', ch.level !== 105, true);
+}
+{
+  /* Sweeping the protected low without closing through it is the signature
+     being hunted: liquidity taken at the level defending the whole leg. */
+  const c = path([100, 120, 108], 4);
+  c.push({t:9e12,   o:108, h:112, l:107, c:111});
+  c.push({t:9e12+1, o:111, h:118, l:110, c:117});
+  c.push({t:9e12+2, o:117, h:118, l:112, c:113});
+  c.push({t:9e12+3, o:113, h:114, l:104, c:112});   // wick under 108, closes back over
+  c.push({t:9e12+4, o:112, h:116, l:111, c:115});
+  const r = S.analyze(c);
+  check('a sweep can be flagged as hitting a protected level',
+    r.sweeps.some(s => s.side === 'bullish'), true);
 }
 
 /* ------------------------------------------------------- consolidation --- */
 group('Consolidation (§6)');
 {
-  const trend = S.analyze(path([100, 110, 105, 120, 112, 130, 122, 140]));
+  const trend = S.analyze(path([100, 110, 105, 120, 112, 130, 122, 140, 132]));
   check('a clean uptrend is not consolidation', S.isConsolidating(trend), false);
 
   const range = S.analyze(path([100, 110, 102, 108, 101, 109, 103, 107, 104]));
@@ -207,6 +256,6 @@ console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 if(!fail){
   console.log('--- sample timeline: HH HL HH then the HL breaks ---');
   const c = path([100, 110, 105, 120, 112, 118, 104]);
-  console.log(S.describe(S.analyze(c), c));
+  console.log(S.describe(S.analyze(c)));
 }
 process.exit(fail ? 1 : 0);

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0864</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0865</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -907,6 +907,7 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2" id="sb-build">Build storyboard from my lyrics</button>
       <p class="usage" id="sb-method"></p>
       <div id="sb-list" class="row"></div>
+      <button class="btn2" id="sb-stock-all" style="display:none;width:100%;margin-top:6px">🎬 Fill empty scenes from free stock — costs nothing</button>
       <div style="display:flex;gap:8px">
         <button class="gen-btn" id="sb-gen-all" style="display:none;flex:1">Generate all remaining scenes</button>
         <button class="btn2" id="sb-queue-all" style="display:none;flex:1">🌙 Queue overnight</button>
@@ -6881,7 +6882,8 @@ Object.entries({
   'lyr-tap': 'FREE perfect sync: your song — or your own talking-head clip — plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
-  'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene.',
+  'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene. Try the free stock button above first.',
+  'sb-stock-all': 'FREE. Finds a real photo for every scene that has no image yet, using its prompt. Nothing is charged, and scenes you already generated are left alone.',
   'seq-render': 'FREE. Renders the timeline into the final MP4 with music, captions, and mastered audio.',
   'hl-auto': 'FREE. Finds your best short-video moments: the chorus/hook if captions exist, loudest sections otherwise.',
   'loc-create': 'Save a place once (add photos after) and reuse it in any scene from the location dropdown.',
@@ -7886,6 +7888,11 @@ function renderStoryboard() {
   const hasPending = st.storyboard.some((s) => !s.assetId && !s.queueId);
   $('#sb-gen-all').style.display = hasPending ? 'block' : 'none';
   $('#sb-queue-all').style.display = hasPending ? 'block' : 'none';
+  // Storyboard was the last of the three doors with only a paid path: it wrote
+  // a shot list, then every scene was a generation with a price on it. Free
+  // stock sits above the paid buttons on purpose - it should be the thing you
+  // reach for first.
+  if ($('#sb-stock-all')) $('#sb-stock-all').style.display = hasPending ? 'block' : 'none';
   // one button to drop every generated scene onto the timeline, in order,
   // with section-aware holds - so you don't add them one at a time
   const anyGenerated = st.storyboard.some((s) => s.assetId);
@@ -7939,6 +7946,44 @@ async function generateStoryboardScene(sc, card) {
     prog.classList.remove('show');
   }
 }
+
+if (document.getElementById('sb-stock-all')) $('#sb-stock-all').onclick = async (e) => {
+  const btn = e.currentTarget;
+  const empties = st.storyboard
+    .map((sc, i) => ({ sc, i }))
+    .filter((x) => !x.sc.assetId && !x.sc.queueId);
+  if (!empties.length) return;
+  btn.disabled = true;
+  const was = btn.textContent;
+  btn.textContent = `Looking for ${empties.length}…`;
+  try {
+    // The scene's PROMPT is the search text, not its lyric line - a prompt
+    // names a thing, a lyric names a feeling. stock-query.js strips the house
+    // style words so two scenes can't come back with the same photo.
+    const out = await jfetch('/api/studio/stock/fill', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'photos',
+        rows: empties.map((x) => ({ index: x.i, name: '', text: x.sc.prompt || x.sc.lines })),
+      }),
+    });
+    const found = new Map((out.filled || []).map((f) => [f.index, f]));
+    for (const x of empties) {
+      const hit = found.get(x.i);
+      if (hit) { x.sc.assetId = hit.asset.id; x.sc.stock = true; }
+    }
+    if (found.size) await loadAssets();
+    renderStoryboard(); persistDraft();
+    const missed = empties.length - found.size;
+    setErr('#seq-err', null);
+    $('#sb-method').textContent = `Filled ${found.size} of ${empties.length} scenes from free stock.`
+      + (missed ? ` ${missed} had no match — generate those, or reword the prompt.` : ' Nothing was charged.');
+  } catch (err) {
+    setErr('#seq-err', err.message || 'Could not reach the stock library.');
+  } finally {
+    btn.disabled = false; btn.textContent = was;
+  }
+};
 
 $('#sb-build').onclick = async () => {
   setErr('#seq-err', null);

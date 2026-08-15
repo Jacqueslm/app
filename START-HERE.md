@@ -313,6 +313,12 @@ warning had been there for months and cost him a sign-in every single update.
 machine.
 
 
+**b0865 — all three doors now reach the same free-stock engine.** Quick Video
+(b0859), the Director (b0864) and Storyboard (b0865) each fill empty shots from
+Pexels through one shared service, `POST /stock/fill`, with the query built by
+`server/stock-query.js`. Do not reimplement it in any of the three. Storyboard's
+free button sits ABOVE its paid buttons on purpose.
+
 **b0864 — free stock is tried BEFORE the Producer spends. Keep that order.**
 The Director now fills empty shots from Pexels first and only generates the
 lines stock cannot answer. The order is: your dropped images → scouted from your

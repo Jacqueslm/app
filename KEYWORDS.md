@@ -1,7 +1,8 @@
 # KEYWORDS — the only source of search truth
 
-Two live Semrush pulls (US database), both **6 Aug 2026** — the last before the
-subscription ends. Every number here was verified against the live API before
+Two live Semrush pulls (US database), both **6 Aug 2026**, plus later sweeps on
+10, 12 and 15 Aug. **The subscription ended 15 Aug 2026** — nothing can be
+re-pulled after that date. Every number here was verified against the live API before
 saving; the two pulls agreed on every overlapping term. **Do not delete this
 file. This file is final** — no re-running research, no fresh volumes, no
 estimating numbers that aren't here.

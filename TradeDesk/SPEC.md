@@ -219,9 +219,46 @@ to settle.
 3. **Sweep detection** — done, including protected-level tagging. §5.
 4. **Real candles drawn with structure on them** — done: `chart.html`.
    ← *checking those labels against your own chart is the current step*
-5. Multi-timeframe alignment: external bias from D/4H gating internal 1H/15M.
-6. Consolidation state.
-7. Displacement, then entry, stop, target.
-8. Frequency check against the 2–3 per week constraint.
+5. **Multi-timeframe alignment** — done, tested. No higher timeframe is read
+   before its bar has closed, and that property is asserted rather than assumed.
+6. **Frequency check** — done, and it says the encoding is too tight: 0.4
+   trades/wk against a target of 2–3. See §10.
+7. Consolidation as a second setup type — *not built*. This is the likely
+   source of most of the missing frequency.
+8. Displacement, then entry, stop, target.
 
 Nothing at step *n* is built until step *n − 1* has been checked against a real chart.
+
+---
+
+## 10. What the first frequency check said
+
+Scanned over 256 days of 2H with the daily and a 4H derived from it. The funnel,
+at N=2:
+
+| stage | count | |
+|---|---|---|
+| sweeps in the usable window | 187 | |
+| …matching external bias | 53 | 72% removed |
+| …confirmed by a minor shift within 6 bars | 14 | a further 74% removed |
+
+That is **0.4 trades/wk against a target of 2–3**. The rules as encoded are far
+too *tight*, which is the opposite of the failure mode expected.
+
+Win rate 21% and expectancy −0.36R at a flat 2R exit. **Both numbers are
+meaningless at 14 trades** and are recorded only so the next run can be compared
+against them. The 2R exit is a placeholder invented for this test.
+
+Three knobs in that scan are inventions, not the method:
+
+1. **The 6-bar confirmation window.** Nothing said confirmation must arrive
+   within six bars. This filter removes three quarters of what survives bias.
+2. **Requiring the daily and 4H to agree exactly.** "Follow daily and 4hr" may
+   mean the 4H leads and the daily is context, which is looser.
+3. **The 2R exit.** Entirely a placeholder.
+
+And one whole setup type is missing: the consolidation trade. "Trade
+consolidation but only when the 1hr is making HH HL LL LH" is a second, separate
+entry condition, and none of it is wired in. That is the most likely reason the
+frequency is a fifth of what it should be — the scan is only looking for one of
+the two things actually traded.

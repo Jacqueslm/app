@@ -56,6 +56,7 @@ function analyze(candles, options){
   const minor  = [];   // breaks of the most recent swing
   const major  = [];   // breaks of the protected level
   const sweeps = [];
+  const states = [];   // what was known once bar i closed — see stateAt()
 
   let minorBias = null, bias = null;
   let pendingHigh = null, pendingLow = null;      // most recent confirmed, unbroken
@@ -169,10 +170,19 @@ function analyze(candles, options){
                      isProtected: !!(protectedLow && protectedLow.i === pendingLow.i)});
       }
     }
+
+    /* 5. snapshot — exactly what was knowable once this bar closed. Multi-
+          timeframe alignment reads this and nothing else, which is what stops
+          a higher timeframe leaking a bias it had not formed yet. */
+    states.push({
+      bias, minorBias,
+      pLow : protectedLow  ? protectedLow.price  : null,
+      pHigh: protectedHigh ? protectedHigh.price : null
+    });
   }
 
   return {
-    swings, minor, major, sweeps,
+    swings, minor, major, sweeps, states,
     bias, minorBias,
     protectedLow : protectedLow  ? protectedLow.price  : null,
     protectedHigh: protectedHigh ? protectedHigh.price : null,
@@ -213,6 +223,14 @@ function describe(res){
   return rows.map(r => r.line).join('\n');
 }
 
-const API = {analyze, isConsolidating, describe, isSwingHigh, isSwingLow, DEFAULTS};
+/* State as of the close of bar `i`. Anything reading structure across
+   timeframes must go through this rather than the summary fields, which
+   describe the end of the series. */
+function stateAt(res, i){
+  if(i < 0) return {bias:null, minorBias:null, pLow:null, pHigh:null};
+  return res.states[Math.min(i, res.states.length - 1)];
+}
+
+const API = {analyze, stateAt, isConsolidating, describe, isSwingHigh, isSwingLow, DEFAULTS};
 if(typeof module !== 'undefined' && module.exports) module.exports = API;
 if(typeof window !== 'undefined') window.Structure = API;

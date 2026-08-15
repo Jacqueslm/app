@@ -64,10 +64,12 @@ in Play Console — just wait for Google's email.**
    confirmed in writing that a NASADAD listing is a route onto their page.
 
 **Two calendar dates (15 Aug):** **25 Aug** — Manus goes paid; episodes 3, 7,
-8, 10 still need images before then, and the renderer script Manus says it
-saved is **NOT in this repo** (checked all branches 15 Aug) — see
-`reference/EPISODE-RENDERER.md`. **29 Sep** — Play Billing 8 rebuild (Google
-deadline); not now.
+8, 10 still need images before then. **29 Sep** — Play Billing 8 rebuild
+(Google deadline); not now. Manus's ffmpeg renderer and its recipe README are
+saved verbatim at `reference/manus-recipes/` — its three look numbers are
+verified in `scripts/assemble_nia_video.py`: 2% zoom, captions `0xF4F0E8` on
+black at 60%, fades 0.5s in / 0.35s out. Studio's 2% "Almost still" port is
+b0867; the caption fades / warm white / drifting still are the next ports.
 
 **Post-launch only, not before Google answers:** rebuild the TWA with
 `enableNotifications: true` (that flag is why pushes don't arrive on his phone),

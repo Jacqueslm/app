@@ -127,6 +127,19 @@ string external = na
 if useHTF and not na(midBias) and midBias == highBias
     external := midBias
 
+// An external timeframe at or below the chart's is being compared with itself,
+// which quietly produces "disagree" forever and no setups. Silent misuse is
+// worse than a loud error, so say it on the chart.
+tfSeconds(tf) => timeframe.in_seconds(tf)
+chartSec = timeframe.in_seconds(timeframe.period)
+badTF = useHTF and (tfSeconds(tfMid) <= chartSec or tfSeconds(tfHigh) <= chartSec)
+if badTF and barstate.islast
+    label.new(bar_index, high, "External timeframes must be HIGHER than the chart.\n" +
+              "Chart is " + timeframe.period + ", externals are " + tfMid + " and " + tfHigh +
+              ".\nEverything here was measured on the 1H chart with 4H and 1D externals.",
+              style = label.style_label_down, color = color.new(#ef5350, 15),
+              textcolor = color.white, size = size.normal)
+
 // --------------------------------------------------------------- update -----
 newHigh = isHigh()
 newLow  = isLow()

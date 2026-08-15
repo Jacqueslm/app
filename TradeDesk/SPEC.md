@@ -406,3 +406,51 @@ pullback, on 26–35 trades. Nothing here separates "shorts do not work" from
 "this window had no good shorts" — the balanced 256-day window is the only
 counter-evidence and it is smaller. A bear or sideways year is what would settle
 it, and until then the short side is unproven rather than disproven.
+
+---
+
+## 14. 3.6 years — the short side answered
+
+21,369 bars of 1H, January 2023 to August 2026. 2H and 4H derive from it exactly.
+The daily needs session-aware bucketing rather than a fixed offset, because the
+CME session runs 18:00–17:00 ET and the clock shifts twice a year; bucketing by
+the ET calendar date of bar time + 6h gets 397 of 399 sessions exact, the two
+misses being the DST-change days themselves.
+
+**1H execution, daily and 4H agreeing, target the prior extreme:**
+
+| depth | all | | longs | | shorts | |
+|---|---|---|---|---|---|---|
+| | n | exp | n | exp | n | exp |
+| 0.33 | 363 | +0.22R | 266 | +0.22R | 97 | +0.21R |
+| 0.50 | 309 | +0.28R | 223 | +0.30R | 86 | +0.20R |
+| 0.62 | 268 | +0.40R | 195 | +0.46R | 73 | +0.25R |
+| 0.75 | 217 | +0.50R | 154 | +0.50R | 63 | **+0.50R** |
+
+**The shorts work.** At 0.75 depth longs and shorts are identical to the cent.
+The §13 result — shorts near zero — was the 466-day window being a bull market,
+exactly as flagged. With 3.6 years the asymmetry disappears.
+
+| year | n | exp | long | short | range |
+|---|---|---|---|---|---|
+| 2023 | 65 | +0.58R | +0.69R | +0.30R | 4574–5437 |
+| 2024 | 74 | +0.15R | +0.17R | −0.02R | 5298–6520 |
+| 2025 | 80 | +0.46R | +0.46R | +0.46R | 5114–7126 |
+| 2026 | 49 | +0.43R | +0.73R | +0.07R | 6415–7839 |
+
+Positive every year, weakest in 2024. 1.4 trades/wk at depth 0.62, 1.9 at 0.33.
+
+The no-break trigger is negative almost everywhere across the same 3.6 years
+(−0.21R to +0.07R). At 542 trades that is no longer a sample-size question. The
+break requirement is where the edge lives.
+
+Slippage does not threaten this. Median risk is 15 points, so a tick of adverse
+fill on the stop costs 1.6% of one R.
+
+### Still not settled
+
+The exit is the largest untested assumption in the whole project — the prior
+extreme was chosen because something had to be, and it does all the work in
+every number above. Fills assume a resting limit takes the trigger price and is
+never gapped through. One instrument. And the consolidation setup remains
+entirely unbuilt.

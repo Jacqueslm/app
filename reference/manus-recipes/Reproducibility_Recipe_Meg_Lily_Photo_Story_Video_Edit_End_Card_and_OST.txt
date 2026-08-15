@@ -1,0 +1,255 @@
+Reproducibility Recipe: Meg/Lily Photo
+Story, Video Edit, End Card, and OST
+This document records what was actually completed in the task. The completed visual
+story is the Meg/Lily series. A later Ray/Tammy generation request was attempted but no
+Ray/Tammy images were generated because the free image-generation quota had already
+reached its daily limit.
+￾. Exact image prompts used for the completed ￾￾-shot
+series
+The following are the exact prompts sent for the final regenerated Meg/Lily series. Each
+subsequent generation used /home/ubuntu/meg_lily_series_regen_￾￾.png as its visual
+reference.
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 1 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 2 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 3 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 4 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 5 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 6 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 7 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 8 of a consistent cinematic documentary photo series. Character con
+Shot ￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 9 of a consistent cinematic documentary photo series. Character con
+Shot ￾￾ — meg_lily_series_regen_￾￾.png
+Plain Text
+Create image 10 of a consistent cinematic documentary photo series. Character co
+All ten image-generation calls used aspect_ratio: "￾:￾￾" , quality: "high" , and the default
+image model. Shot ￾ had no reference image. Shots ￾–￾￾ referenced
+meg_lily_series_regen_￾￾.png .
+￾. Story shot list and final timing
+The completed edit used the following durations. The first ten scenes are five seconds each.
+The end card is three seconds.
+The total duration is approximately ￾￾.￾￾ seconds.
+￾. Exact video assembly implementation
+The actual shell command run to assemble the MP￾ was:
+Bash
+Shot Source asset Motion Caption Duration
+￾
+meg_lily_series_reg
+en_￾￾.png
+Still
+Nobody has an
+intervention for
+this one.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Zoom in
+They give you a
+plaque.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Still I missed it. Again. ￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Zoom in
+She stopped
+being surprised.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Still
+"I don't know
+how you do it."
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Zoom in
+That's what they
+say to me.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Still
+She eats at the
+table I work at.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Zoom in
+I'm not a bad
+mother.
+￾.￾ s
+￾
+meg_lily_series_reg
+en_￾￾.png
+Still
+That's what
+makes it hard.
+￾.￾ s
+￾￾
+meg_lily_series_reg
+en_￾￾.png
+Zoom out
+So I closed it. For
+one morning.
+￾.￾ s
+￾￾ ￾￾freeend￾x.webp Still None ￾.￾ s
+cd /home/ubuntu && python3 build_story_edit.py
+The Python script generated and executed one ffmpeg command through subprocess.run .
+There was no audio mix in that command and no audio stream in the final MP￾. The
+following is the exact command shape produced by the script, expanded for the ten five￾second image inputs and the three-second end-card input:
+Bash
+ffmpeg -y \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_01.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_02.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_03.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_04.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_05.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_06.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_07.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_08.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_09.png \
+ -loop 1 -t 5.0 -i /home/ubuntu/meg_lily_series_regen_10.png \
+ -loop 1 -t 3 -i /home/ubuntu/upload/99freeend2x.webp \
+ -filter_complex "[0:v]scale=1440:2560:force_original_aspect_ratio=increase,cro
+ -map "[outv]" -r 30 -c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -movf
+ /home/ubuntu/meg_lily_story_edit.mp4
+The exact executable implementation is retained in build_story_edit.py . The script writes the
+caption files, constructs the command above, and runs it with subprocess.run(cmd,
+check=True) .
+￾. Caption files
+The script generated the following plain UTF-￾ text files and used each as a
+drawtext=textfile=... source:
+Plain Text
+story_caption_01.txt: Nobody has an intervention for this one.
+story_caption_02.txt: They give you a plaque.
+story_caption_03.txt: I missed it. Again.
+story_caption_04.txt: She stopped being surprised.
+story_caption_05.txt: "I don't know how you do it."
+story_caption_06.txt: That's what they say to me.
+story_caption_07.txt: She eats at the table I work at.
+story_caption_08.txt: I'm not a bad mother.
+story_caption_09.txt: That's what makes it hard.
+story_caption_10.txt: So I closed it. For one morning.
+￾. Asset and folder structure
+The working directory was /home/ubuntu . The relevant structure was:
+Plain Text
+/home/ubuntu/
+├── build_story_edit.py
+├── meg_lily_series_regen_01.png
+├── meg_lily_series_regen_02.png
+├── meg_lily_series_regen_03.png
+├── meg_lily_series_regen_04.png
+├── meg_lily_series_regen_05.png
+├── meg_lily_series_regen_06.png
+├── meg_lily_series_regen_07.png
+├── meg_lily_series_regen_08.png
+├── meg_lily_series_regen_09.png
+├── meg_lily_series_regen_10.png
+├── story_caption_01.txt
+├── story_caption_02.txt
+├── story_caption_03.txt
+├── story_caption_04.txt
+├── story_caption_05.txt
+├── story_caption_06.txt
+├── story_caption_07.txt
+├── story_caption_08.txt
+├── story_caption_09.txt
+├── story_caption_10.txt
+├── meg_lily_story_edit.mp4
+├── clean_minimal_piano_ostinato.wav
+└── upload/
+ └── 99freeend2x.webp
+The ten final series images were ￾￾￾￾×￾￾￾￾ PNG files. The supplied end card was a
+￾￾￾￾×￾￾￾￾ WebP file with a ￾:￾￾ aspect ratio. The end card was scaled and padded to
+￾￾￾×￾￾￾￾ by FFmpeg without adding a caption.
+Earlier superseded Meg/Lily images also existed as meg_lily_series_￾￾.png through
+meg_lily_series_￾￾.png ; those were not used in the final video. The final video used the
+_regen_ assets listed above.
+￾. Music generation
+The track was generated by Manus’s dedicated music-generation function, not by FFmpeg
+or a local synthesizer. The exact prompt was:
+Plain Text
+Instrumental only, no vocals. Create a 60-second original cinematic OST at exac
+The generated file was saved as:
+Plain Text
+/home/ubuntu/clean_minimal_piano_ostinato.wav
+The generated file was not mixed into the final MP￾. The final MP￾ is video-only. Although
+the filename ends in .wav , media inspection identified its stream codec as MP￾, with
+￾￾,￾￾￾ Hz stereo audio and a duration of approximately ￾￾.￾￾￾ seconds. If a true PCM WAV
+is required on another machine, convert it explicitly, for example:
+Bash
+ffmpeg -i clean_minimal_piano_ostinato.wav -c:a pcm_s16le clean_minimal_piano_os
+￾. Final MP￾ settings
+The final file was /home/ubuntu/meg_lily_story_edit.mp￾ .
+Property Final setting
+Container MP￾
+Video codec H.￾￾￾ / AVC, libx￾￾￾
+Resolution ￾￾￾×￾￾￾￾ pixels
+Aspect ratio ￾:￾￾
+Frame rate ￾￾ fps
+Pixel format yuv￾￾￾p
+Encoder preset medium
+Rate control CRF ￾￾
+Reported video bitrate
+Approximately ￾￾￾.￾ kb/s from the encoder
+output
+The verification command was:
+Bash
+cd /home/ubuntu && ffprobe -v error -show_entries format=duration,size:stream=co
+￾. Reproduction requirements
+Install FFmpeg with the libx￾￾￾ encoder and the drawtext , zoompan , scale , crop , pad ,
+and concat filters enabled. Install a TrueType font at
+/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf , or change the fontfile path in the script. Place
+the ten PNG images and the end-card WebP at the paths shown above. Create the ten
+caption files exactly as listed, save the supplied Python script as build_story_edit.py , and run:
+Bash
+cd /home/ubuntu
+python3 build_story_edit.py
+The script depends only on Python’s standard library and the local FFmpeg executable.
+The script’s current output path overwrites /home/ubuntu/meg_lily_story_edit.mp￾ because
+it uses ffmpeg -y .
+For exact visual reproduction, use the same image-generation model, quality: high , ￾:￾￾
+aspect ratio, the same prompts, and the same anchor reference for shots ￾–￾￾. Image￾generation systems are stochastic, so the prompts and reference setup can be reproduced
+exactly, but pixel-identical regenerated images are not guaranteed.
+￾. Ray/Tammy request status
+The later Ray/Tammy request was not completed. The exact first attempted prompt was
+submitted, but image generation stopped immediately because the daily free image￾Reported total file bitrate
+Approximately ￾￾￾.￾ kb/s from the encoder
+output
+Audio None; the MP￾ contains no audio stream
+Duration ￾￾.￾￾￾￾￾￾ seconds according to ffprobe
+Fast start Enabled with -movflags +faststart
+File size Approximately ￾.￾￾ MB in the final rebuild
+generation quota had reached its limit. No Ray/Tammy image files, video, or music were
+created, and there are therefore no exact prompts sent for Ray/Tammy shots ￾–￾￾ to
+document.
+The attempted first-shot prompt was:
+Plain Text
+Create image 1 of a consistent cinematic documentary photo series. Character con
+No remake or additional generation was performed for the documentation request.

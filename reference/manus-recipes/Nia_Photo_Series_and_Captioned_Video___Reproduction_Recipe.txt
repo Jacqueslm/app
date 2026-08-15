@@ -1,0 +1,355 @@
+Nia Photo Series and Captioned Video — 
+Reproduction Recipe
+This document records what was actually done in the Nia task. It is intended to be saved as
+a single Markdown file and used as a reproduction reference. No new media was generated
+while preparing this document.
+￾. Working Directory and Inputs
+The working directory used in the sandbox was:
+Plain Text
+/home/ubuntu/nia_photo_series/
+The supplied reference images were used at these paths:
+Plain Text
+/home/ubuntu/upload/ChatGPTImageAug15,2026,05_34_58AM.png
+/home/ubuntu/upload/ChatGPTImageAug15,2026,05_32_41AM.png
+The image-generation calls used both supplied reference images for the first anchor image.
+Subsequent image-generation calls used the generated anchor image as their reference.
+￾. Exact Image Prompts
+The following are the exact prompt strings sent for the ten generated image shots. The
+repeated identity text was kept identical in every prompt:
+Plain Text
+NIA: Black trans woman, early 30s,
+￾￾ — ￾￾_sunday.png
+Plain Text
+Create a cinematic documentary photograph for a consistent 10-image narrative ph
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/01_sunday.png
+references:
+ - /home/ubuntu/upload/ChatGPTImageAug15,2026,05_34_58AM.png
+ - /home/ubuntu/upload/ChatGPTImageAug15,2026,05_32_41AM.png
+￾￾ — ￾￾_hands.png
+Plain Text
+Create the second image in the same consistent cinematic photo series. Identity 
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/02_hands.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_church.png
+Plain Text
+Create the third image in the same consistent cinematic photo series. Identity a
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/03_church.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_windscreen.png
+Plain Text
+Create the fourth image in the same consistent cinematic photo series. Identity 
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/04_windscreen.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_photo.png
+Plain Text
+Create the fifth image in the same consistent cinematic photo series. Identity a
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/05_photo.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_glass.png
+Plain Text
+Create the sixth image in the same consistent cinematic photo series. Identity a
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/06_glass.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_bededge.png
+Plain Text
+Create the seventh image in the same consistent cinematic photo series. Identity
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/07_bededge.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_dishes.png
+Plain Text
+Create the eighth image in the same consistent cinematic photo series. Identity 
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/08_dishes.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_friends.png
+Plain Text
+Create the ninth image in the same consistent cinematic photo series. Identity a
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/09_friends.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾￾ — ￾￾_doorway.png
+Plain Text
+Create the tenth image in the same consistent cinematic photo series. Identity a
+Generation parameters:
+Plain Text
+model: default
+quality: high
+aspect_ratio: 9:16
+path: /home/ubuntu/nia_photo_series/10_doorway.png
+references:
+ - /home/ubuntu/nia_photo_series/01_sunday.png
+￾. Exact Music Prompt and Generation Tool
+The music was generated with the dedicated music-generation tool. The output path was:
+Plain Text
+/home/ubuntu/nia_photo_series/slow_hymnal_instrumental_53s.wav
+The exact music prompt was:
+Plain Text
+Instrumental only, no vocals. Create a 53-second track at 52 BPM. Slow hymnal o
+The call used:
+Plain Text
+brief: Generate the requested 53-second instrumental score for Nia’s photo narra
+path: /home/ubuntu/nia_photo_series/slow_hymnal_instrumental_53s.wav
+￾. Exact Render Script and Commands
+The actual render script was saved as:
+Plain Text
+/home/ubuntu/nia_photo_series/render_nia_video.sh
+The exact script contents were:
+Bash
+#!/usr/bin/env bash
+set -euo pipefail
+cd /home/ubuntu/nia_photo_series
+FONT="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+WORK="render_work"
+mkdir -p "$WORK"
+rm -f "$WORK"/*.mp4 "$WORK/concat.txt" nia_rendered_video_53s.mp4
+render_clip() {
+ local input="$1"; local output="$2"; local caption="$3"; local motion="$4"; lo
+ local zoom_expr
+ if [[ "$motion" == "in" ]]; then zoom_expr="min(zoom+0.00022,1.02)"; else zoom
+ if [[ "$motion" == "out" ]]; then zoom_expr="max(1.02-on*0.00022,1.0)"; fi
+ ffmpeg -y -loglevel error -loop 1 -i "$input" -t "$duration" -vf "scale=1440:2
+}
+render_clip 01_sunday.png "$WORK/01.mp4" $'I didn’t leave God.' still 5
+render_clip 02_hands.png "$WORK/02.mp4" $'The room left me.' in 5
+render_clip 03_church.png "$WORK/03.mp4" $'I transitioned at twenty-nine.\\nTha
+render_clip 04_windscreen.png "$WORK/04.mp4" $'I still park across the street\\n
+render_clip 05_photo.png "$WORK/05.mp4" $'I know every word they’re singing\\ni
+render_clip 06_glass.png "$WORK/06.mp4" $'What I was actually after\\nwas the q
+render_clip 07_bededge.png "$WORK/07.mp4" $'One drink bought an hour\\nof not de
+render_clip 08_dishes.png "$WORK/08.mp4" $'My body still remembers the songs.\\n
+render_clip 09_friends.png "$WORK/09.mp4" $'I’m not a faithless woman.\\nThat wa
+render_clip 10_doorway.png "$WORK/10.mp4" $'So I stopped waiting on that door,\\
+render_clip 10_doorway.png "$WORK/11.mp4" $'and found one\\nthat opened.' still
+for n in $(seq -w 1 11); do echo "file '$n.mp4'" >> "$WORK/concat.txt"; done
+ffmpeg -y -loglevel error -f concat -safe 0 -i "$WORK/concat.txt" -c copy "$WOR
+ffmpeg -y -loglevel error -i "$WORK/video_no_audio.mp4" -i slow_hymnal_instrume
+ffmpeg -y -loglevel error -i "$WORK/mixed.mp4" -vf "tpad=stop_mode=clone:stop_d
+ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers
+The exact shell command used to execute the script was:
+Bash
+cd /home/ubuntu/nia_photo_series && chmod +x render_nia_video.sh && ./render_nia
+Individual FFmpeg commands in execution order
+The function generated one command per shot. The command template was exactly:
+Bash
+ffmpeg -y -loglevel error -loop 1 -i "$input" -t "$duration" -vf "scale=1440:256
+The eleven actual function invocations were:
+Bash
+render_clip 01_sunday.png "$WORK/01.mp4" $'I didn’t leave God.' still 5
+render_clip 02_hands.png "$WORK/02.mp4" $'The room left me.' in 5
+render_clip 03_church.png "$WORK/03.mp4" $'I transitioned at twenty-nine.\\nTha
+render_clip 04_windscreen.png "$WORK/04.mp4" $'I still park across the street\\n
+render_clip 05_photo.png "$WORK/05.mp4" $'I know every word they’re singing\\ni
+render_clip 06_glass.png "$WORK/06.mp4" $'What I was actually after\\nwas the q
+render_clip 07_bededge.png "$WORK/07.mp4" $'One drink bought an hour\\nof not de
+render_clip 08_dishes.png "$WORK/08.mp4" $'My body still remembers the songs.\\n
+render_clip 09_friends.png "$WORK/09.mp4" $'I’m not a faithless woman.\\nThat wa
+render_clip 10_doorway.png "$WORK/10.mp4" $'So I stopped waiting on that door,\\
+render_clip 10_doorway.png "$WORK/11.mp4" $'and found one\\nthat opened.' still
+The exact concat-manifest command was:
+Bash
+for n in $(seq -w 1 11); do echo "file '$n.mp4'" >> "$WORK/concat.txt"; done
+The exact video-only assembly command was:
+Bash
+ffmpeg -y -loglevel error -f concat -safe 0 -i "$WORK/concat.txt" -c copy "$WOR
+The exact music-mix command was:
+Bash
+ffmpeg -y -loglevel error -i "$WORK/video_no_audio.mp4" -i slow_hymnal_instrume
+The exact final padding/re-encode command was:
+Bash
+ffmpeg -y -loglevel error -i "$WORK/mixed.mp4" -vf "tpad=stop_mode=clone:stop_d
+The exact verification command was:
+Bash
+ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers
+The recorded verification output was:
+Plain Text
+duration=53.000000
+size=15970608
+￾. Asset and Folder Structure
+The final working structure was:
+Plain Text
+/home/ubuntu/nia_photo_series/
+├── 01_sunday.png
+├── 02_hands.png
+├── 03_church.png
+├── 04_windscreen.png
+├── 05_photo.png
+├── 06_glass.png
+├── 07_bededge.png
+├── 08_dishes.png
+├── 09_friends.png
+├── 10_doorway.png
+├── nia_photo_series.zip
+├── nia_rendered_video_53s.mp4
+├── render_nia_video.sh
+├── sequence_sheet.md
+├── slow_hymnal_instrumental_53s.wav
+└── render_work/
+ ├── 01.mp4
+ ├── 02.mp4
+ ├── 03.mp4
+ ├── 04.mp4
+ ├── 05.mp4
+ ├── 06.mp4
+ ├── 07.mp4
+ ├── 08.mp4
+ ├── 09.mp4
+ ├── 10.mp4
+ ├── 11.mp4
+ ├── concat.txt
+ ├── mixed.mp4
+ └── video_no_audio.mp4
+The archive nia_photo_series.zip contained the ten PNGs, the WAV soundtrack, and
+sequence_sheet.md . The rendered MP￾ was delivered separately.
+￾. Final MP￾ Settings
+The final file was:
+Plain Text
+/home/ubuntu/nia_photo_series/nia_rendered_video_53s.mp4
+Property Setting used
+Duration Exactly ￾￾.￾￾￾ seconds
+Frame size ￾￾￾￾ × ￾￾￾￾ pixels
+Aspect ratio ￾:￾￾ vertical
+Frame rate ￾￾ fps, set in the zoompan filter with fps=￾￾
+There was no explicit video bitrate in the final render command because the video was
+encoded with CRF ￾￾. If a fixed bitrate is required on another machine, that would be a
+modification rather than an exact reproduction.
+￾. How the Camera Motion Worked
+The Ken Burns-style movement was implemented in zoompan :
+Plain Text
+Video codec H.￾￾￾ / libx￾￾￾
+Video preset veryfast
+Video quality control Constant Rate Factor crf ￾￾
+Explicit video bitrate
+Not specified; CRF mode determined bitrate
+automatically
+Pixel format yuv￾￾￾p
+Audio codec AAC
+Audio bitrate ￾￾￾ kbit/s
+Audio source slow_hymnal_instrumental_￾￾s.wav
+Audio gain volume=￾.￾￾ before mixing into the MP￾
+Audio duration handling apad,atrim=duration=￾￾
+Fast start -movflags +faststart
+Captions FFmpeg drawtext burned into the video
+Caption font /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+Caption size ￾￾ px
+Caption color ￾xF￾F￾E￾
+Caption backing box=￾ , color ￾x￾￾￾￾￾￾￾￾ , border width ￾￾
+Caption position Horizontally centered; y=h-￾￾￾
+Caption fades
+￾.￾-second fade-in and ￾.￾￾-second fade-out
+per shot
+Zoom-in shots:
+min(zoom+0.00022,1.02)
+Still shots:
+1.0+on*0.000035
+Final zoom-out shot:
+max(1.02-on*0.00022,1.0)
+All shots used the same crop and center framing:
+Plain Text
+scale=1440:2560:force_original_aspect_ratio=increase,
+crop=1440:2560,
+zoompan ... :x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1440x2560:fps=30
+￾. Caption Layout Used in the Render
+The captions were burned into the source image clips using drawtext , not added as a
+separate subtitle stream. The explicit line breaks were passed through Bash ANSI-C quoting
+$'...' and represented with \\n in the render script. The caption strings were:
+Plain Text
+I didn’t leave God.
+The room left me.
+I transitioned at twenty-nine.
+That building stopped at twenty-eight.
+I still park across the street
+some Sundays.
+I know every word they’re singing
+in there.
+What I was actually after
+was the quiet.
+One drink bought an hour
+of not defending myself.
+My body still remembers the songs.
+That’s what makes it hard.
+I’m not a faithless woman.
+That was never the problem.
+So I stopped waiting on that door,
+and found one that opened.
+and found one
+that opened.
+The first two captions were single-line strings in the actual script. The third through
+eleventh clips used explicit line breaks. The final end hold used two lines.
+￾. Reproduction Requirements on Another Machine
+Install a Bash-compatible shell, FFmpeg with the zoompan , drawtext , tpad , concat , apad ,
+atrim , and volume filters, and FFprobe. Install or provide a TrueType font at the path
+referenced by FONT , or change the FONT variable to an available font path.
+Copy the ten PNG files and the WAV file into one directory. Copy render_nia_video.sh into
+that same directory. If the absolute cd /home/ubuntu/nia_photo_series line is not appropriate,
+change it to the new directory. Ensure the filenames match exactly, including underscores
+and capitalization.
+Then run:
+Bash
+chmod +x render_nia_video.sh
+./render_nia_video.sh
+The source PNGs generated in this task were ￾￾￾￾ × ￾￾￾￾ pixels. Using different
+dimensions may still work because the script scales and crops each image, but it will not be
+a pixel-identical reproduction. The soundtrack should be the same generated WAV file if
+audio identity matters; generating a new track from the same prompt will not necessarily
+produce identical audio.
+￾￾. Important Task History and Non-Executed Edit
+After the video was rendered, a request was made to change Nia’s clothing to jeans after
+scene ￾ and force all captions into double-line formatting. The attempted image edit did
+not run because the free image-generation quota had reached its daily limit. No
+replacement clothing images were generated, and no revised video was rendered afterward.
+Therefore, the reproducible rendered video documented here is the original file:
+Plain Text
+nia_rendered_video_53s.mp4
+It uses the original generated images and the caption strings in render_nia_video.sh . The
+jeans revision is not part of the completed output.

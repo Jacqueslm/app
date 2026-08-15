@@ -1,0 +1,294 @@
+Eli Story Series — Reproduction Recipe
+This document records the work already completed in this task. It is a recipe and audit trail,
+not a new render. The final video described below is the last version produced: ten five￾second story scenes, each with a two-line burned-in caption, followed by the supplied
+three-second end card.
+￾. Image-generation prompts
+The following prompts are reproduced verbatim from the image-generation calls,
+numbered in output order. Image ￾ established the character reference; images ￾–￾￾ used
+/home/ubuntu/eli_￾￾_reference.png as a visual reference.
+￾. eli_￾￾_reference.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+ELI at a desk in a dark bedroom at night, monitor light on his face, headset on
+￾. eli_￾￾_bedroom_daylight.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+Wide of the same bedroom in daylight with the curtains shut, plates stacked on 
+￾. eli_￾￾_chat_window.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+Close on a chat window on a monitor, text deliberately blurred and unreadable, a
+￾. eli_￾￾_asleep_desk.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+ELI asleep at the desk, head on his forearm, headset still on, dawn light at the
+￾. eli_￾￾_dining_table.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+A dining table set for three with one chair pushed back and empty, the food on 
+￾. eli_￾￾_mouse_hand.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+Close on ELI's hand on a mouse, thumb moving, the rest of him completely still. 
+￾. eli_￾￾_folded_shirt.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+A folded shirt still in its packaging on a chair with a lanyard beside it, a lay
+￾. eli_￾￾_kitchen_cereal.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+ELI standing in a dark kitchen at 4am eating cereal, phone face-up on the counte
+￾. eli_￾￾_bed_headset.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+ELI sitting on the edge of the bed holding the headset in both hands, monitors d
+￾￾. eli_￾￾_open_curtains.png
+Plain Text
+ELI: mixed-race man, 24, curly dark hair, headset around his neck, grey hoodie, 
+ELI opening the curtains in daylight, the room bright for the first time, the de
+￾. Final video assembly
+The renderer used was /home/ubuntu/render_eli_story.py . It generated ten intermediate MP￾
+parts, assembled them into a ￾￾-second story, generated a three-second end-card MP￾
+from ￾￾freeend￾x.webp , and then concatenated the story and end card with an explicit
+FFmpeg concat filter.
+There was no audio mix in the final MP￾. Every video command used -an , so the final MP￾
+contains video only. The two generated WAV tracks documented in Section ￾ were not
+inserted into this video.
+￾.￾ Exact per-shot FFmpeg command template used by the renderer
+The Python renderer ran this command once for each of the ten shots, with the listed input,
+output, frame count, zoom expression, and caption file substituted:
+Bash
+ffmpeg -y -loop 1 -i /home/ubuntu/<input-image>.png -vf "zoompan=z='<zoom-expres
+The concrete substitutions were:
+Shot Input Output Motion Zoompan
+expression
+Frames Caption
+file
+contents
+￾
+e
+li_
+￾
+￾
+_
+r
+e
+f
+e
+r
+e
+n
+c
+e.p
+n
+g
+p
+a
+r
+t
+_
+￾
+￾.m
+p
+￾
+S
+til
+l
+￾.￾
+￾
+￾
+￾ I w
+a
+s
+n't
+hidin
+g. /
+E
+v
+e
+r
+y
+b
+o
+d
+y
+k
+n
+e
+w
+w
+h
+e
+r
+e I was. ￾ eli_￾￾_bedro om_daylight. png part_￾￾.mp ￾ Zoom in min(zoom+￾. ￾￾￾￾,￾.￾￾) ￾￾￾ That's the part / people get wrong. ￾ eli_￾￾_chat_ window.png part_￾￾.mp ￾ Zoom in min(zoom+￾. ￾￾￾￾,￾.￾￾) ￾￾￾ Somebody in there needed me / at ten o'clock. ￾ eli_￾￾_aslee p_desk.png part_￾￾.mp ￾ Still ￾.￾ ￾￾￾ So I was never the one / who left. ￾ eli_￾￾_dinin g_table.png part_￾￾.mp ￾ Still ￾.￾ ￾￾￾ They stopped waiting / to eat. ￾ eli_￾￾_mous e_hand.png part_￾￾.mp ￾ Zoom in min(zoom+￾. ￾￾￾￾,￾.￾￾) ￾￾￾ In there I was good / at something. ￾ eli_￾￾_folde d_shirt.png part_￾￾.mp ￾ Still ￾.￾ ￾￾￾ Out here I was behind / on everything. ￾ eli_￾￾_kitche n_cereal.png part_￾￾.mp ￾ Zoom in min(zoom+￾. ￾￾￾￾,￾.￾￾) ￾￾￾ I'm not a / waster. ￾ eli_￾￾_bed_ headset.png part_￾￾.mp ￾ Still ￾.￾ ￾￾￾ That's what makes / it hard. ￾￾ eli_￾￾_open _curtains.pn g part_￾￾.mp ￾ Zoom out if(eq(on,￾),￾. ￾￾,max(zoom -￾.￾￾￾￾,￾.￾)) ￾￾￾ So I told them I'd be back. / And I got up.
+￾.￾ Exact story-only concat command
+The renderer wrote /home/ubuntu/eli_story_parts/concat.txt with one file '<absolute-path>' line
+per part and ran:
+Bash
+ffmpeg -y -f concat -safe 0 -i /home/ubuntu/eli_story_parts/concat.txt -an -c:v
+￾.￾ Exact end-card command
+The supplied image was /home/ubuntu/upload/￾￾freeend￾x.webp . It was scaled to ￾￾￾￾×￾￾￾￾
+and held for three seconds:
+Bash
+ffmpeg -y -loop 1 -i /home/ubuntu/upload/99freeend2x.webp -vf "scale=1080:1920:f
+￾.￾ Exact final assembly command
+The final story and end card were combined with this explicit video concat filter:
+Bash
+ffmpeg -y -i /home/ubuntu/eli_story_parts/story_only.mp4 -i /home/ubuntu/eli_sto
+The earlier attempt used a final concat manifest, but the final successful render used the
+explicit filter_complex command above. No subtitle-file muxing or external audio mixing
+command was run; the captions were burned into the video by the drawtext=textfile=... filter.
+￾. Folder and file structure
+The relevant working structure was:
+Plain Text
+/home/ubuntu/
+├── eli_01_reference.png
+├── eli_02_bedroom_daylight.png
+├── eli_03_chat_window.png
+├── eli_04_asleep_desk.png
+├── eli_05_dining_table.png
+├── eli_06_mouse_hand.png
+├── eli_07_folded_shirt.png
+├── eli_08_kitchen_cereal.png
+├── eli_09_bed_headset.png
+├── eli_10_open_curtains.png
+├── detuned_melancholy_arpeggio.wav
+├── minimal_piano_ostinato.wav
+├── eli_story_captioned.mp4
+├── render_eli_story.py
+├── eli_story_reproduction_recipe.md
+└── upload/
+ └── 99freeend2x.webp
+/home/ubuntu/eli_story_parts/
+├── caption_01.txt
+├── caption_02.txt
+├── caption_03.txt
+├── caption_04.txt
+├── caption_05.txt
+├── caption_06.txt
+├── caption_07.txt
+├── caption_08.txt
+├── caption_09.txt
+├── caption_10.txt
+├── concat.txt
+├── part_01.mp4
+├── part_02.mp4
+├── part_03.mp4
+├── part_04.mp4
+├── part_05.mp4
+├── part_06.mp4
+├── part_07.mp4
+├── part_08.mp4
+├── part_09.mp4
+├── part_10.mp4
+├── story_only.mp4
+└── endcard.mp4
+The ten caption files contained exactly two lines each:
+Plain Text
+caption_01.txt
+I wasn't hiding.
+Everybody knew where I was.
+caption_02.txt
+That's the part
+people get wrong.
+caption_03.txt
+Somebody in there needed me
+at ten o'clock.
+caption_04.txt
+So I was never the one
+who left.
+caption_05.txt
+They stopped waiting
+to eat.
+caption_06.txt
+In there I was good
+at something.
+caption_07.txt
+Out here I was behind
+on everything.
+caption_08.txt
+I'm not a
+waster.
+caption_09.txt
+That's what makes
+it hard.
+caption_10.txt
+So I told them I'd be back.
+And I got up.
+￾. Music prompts and generation tool
+Both tracks below were generated with the dedicated music-generation tool. Neither track
+was mixed into eli_story_captioned.mp￾ ; the final MP￾ was intentionally video-only because
+all assembly commands used -an .
+￾.￾ Detuned melancholy arpeggio
+Output file: /home/ubuntu/detuned_melancholy_arpeggio.wav
+Plain Text
+Instrumental only, no vocals. Create an approximately 90-second track at 68 BPM
+￾.￾ Minimal piano ostinato
+Output file: /home/ubuntu/minimal_piano_ostinato.wav
+Plain Text
+Instrumental only, no vocals. Create an approximately 90-second original minima
+￾. Final MP￾ settings actually observed
+The final file was inspected with ffprobe after rendering. The measured values were:
+Property Final value
+File eli_story_captioned.mp￾
+Container MP￾
+Video codec H.￾￾￾ / AVC ( libx￾￾￾ )
+Width ￾￾￾￾ px
+Height ￾￾￾￾ px
+Aspect ratio ￾:￾￾
+Frame rate ￾￾ fps average and nominal
+Frames ￾,￾￾￾
+Duration ￾￾.￾￾ seconds
+Video bitrate
+approximately ￾,￾￾￾,￾￾￾ bit/s reported for
+the stream
+Overall file bitrate approximately ￾,￾￾￾,￾￾￾ bit/s
+Audio stream None; -an was used throughout
+Audio codec, sample rate, channels Not applicable
+Encoding controls -preset medium -crf ￾￾ -movflags +faststart
+End card ￾ seconds, supplied ￾￾freeend￾x.webp
+The small measured duration difference from an ideal ￾￾.￾￾ seconds is due to the final
+concat-filter timing and frame quantization. The ten story parts were each rendered at five
+seconds; the end card was rendered for three seconds.
+￾. Reproduction requirements and caveats
+Use Python ￾ with Pillow only if you need to inspect or resize assets; the actual video
+renderer requires FFmpeg with the following capabilities: libx￾￾￾ , the zoompan video filter,
+the drawtext video filter, the concat filter, and a TrueType font at
+/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf . On another machine, replace that font path
+with an installed equivalent and update all absolute paths.
+The source images are ￾￾￾￾×￾￾￾￾ PNGs, already in a ￾:￾￾ composition. The end-card
+source is a ￾￾￾￾×￾￾￾￾ WEBP and is scaled to ￾￾￾￾×￾￾￾￾. The renderer does not crop the
+story images; zoompan creates the still, zoom-in, and zoom-out motion from each native
+vertical source.
+To reproduce the exact final render, place the ten PNGs, the WEBP end card, and
+render_eli_story.py at the paths shown above, ensure the caption files are generated with
+the exact contents shown in Section ￾, and run:
+Bash
+python3 /home/ubuntu/render_eli_story.py
+If reproducing outside /home/ubuntu , edit the absolute paths in the script. The generated
+WAV music files are independent assets and are not required to reproduce the final video
+because the final MP￾ contains no audio.
+The final successful renderer logic, in compact form, was:
+Python
+# Per-shot processing:
+ffmpeg -y -loop 1 -i <image> \\
+ -vf "zoompan=z='<expression>':d=150:s=1080x1920:fps=30,drawtext=fontfile=/usr/
+ -t 5.0 -an -c:v libx264 -preset medium -crf 18 <part-output>.mp4
+# Story-only assembly:
+ffmpeg -y -f concat -safe 0 -i /home/ubuntu/eli_story_parts/concat.txt \\
+ -an -c:v libx264 -preset medium -crf 18 \\
+ /home/ubuntu/eli_story_parts/story_only.mp4
+# End card:
+ffmpeg -y -loop 1 -i /home/ubuntu/upload/99freeend2x.webp \\
+ -vf "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw
+ -t 3 -an -c:v libx264 -preset medium -crf 18 \\
+ /home/ubuntu/eli_story_parts/endcard.mp4
+# Final assembly:
+ffmpeg -y -i /home/ubuntu/eli_story_parts/story_only.mp4 \\
+ -i /home/ubuntu/eli_story_parts/endcard.mp4 \\
+ -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[v]" \\
+ -map "[v]" -an -c:v libx264 -preset medium -crf 18 -movflags +faststart \\
+ /home/ubuntu/eli_story_captioned.mp4
+This recipe intentionally distinguishes between what was generated, what was actually
+assembled into the MP￾, and what was not done. In particular, the music tracks were
+generated but no audio mix or audio mux was performed in the final video.

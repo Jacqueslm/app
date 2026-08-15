@@ -316,9 +316,16 @@ function evaluateToLevel(setups, candles){
    `frac` may be an array, in which case the position is scaled out in equal
    parts at each level and the result is the average R across those parts. The
    stop applies to whatever is still on. */
-function evaluateFraction(setups, candles, frac, frame){
+function evaluateFraction(setups, candles, frac, frame, opts){
   const fracs = Array.isArray(frac) ? frac.slice().sort((a,b)=>a-b) : [frac];
   const f = frame || 'origin';
+  /* A target is NOT honoured on the entry bar unless explicitly asked for. The
+     limit fills when the bar trades to it, and that bar's extreme in the other
+     direction may have printed first — OHLC cannot say. The stop is honoured
+     there, because taking the pessimistic side of an unknowable ordering is the
+     only safe asymmetry. Passing targetOnEntryBar:true gives the optimistic
+     bound, which is useful only for bracketing. */
+  const sameBarTarget = !!(opts && opts.targetOnEntryBar);
 
   return setups.map(s => {
     const span = Math.abs(s.extreme - s.origin);
@@ -345,6 +352,7 @@ function evaluateFraction(setups, candles, frac, frame){
         outcome = filled > 0 ? 'partial' : 'stop';
         break;
       }
+      if(i === s.entryAt && !sameBarTarget) continue;
       while(filled < 1 - 1e-9){
         const idx = Math.round(filled / part);
         if(idx >= live.length) break;

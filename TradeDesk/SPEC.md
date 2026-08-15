@@ -834,3 +834,40 @@ for something described as a swing trade, and 0.1 bars for the ES variant, which
 would mean nearly every trade resolving on the bar it opened. Neither is
 impossible. Both together said the result depended on intrabar behaviour that
 was never modelled.
+
+### The exit, re-decided on resolved paths
+
+The conservative bound reshuffled the exit table — 80% suddenly beat 65% — but
+that is an artifact, not a finding: a further target is less likely to be denied
+on the entry bar, so denying it costs less. Ranking exits by a rule about entry
+bars measures the rule.
+
+Resolved on 15M instead:
+
+| depth | exit | n | win% | gross | net MES | net ES |
+|---|---|---|---|---|---|---|
+| 0.62 | 0.50 | 64 | 89% | +0.167R | +0.113R | +0.161R |
+| 0.62 | 0.65 | 64 | 72% | +0.219R | +0.165R | +0.213R |
+| 0.62 | 0.80 | 63 | 63% | +0.323R | +0.268R | +0.316R |
+| 0.75 | 0.50 | 57 | 67% | +0.315R | +0.239R | +0.307R |
+| 0.75 | 0.65 | 56 | 50% | +0.276R | +0.200R | +0.268R |
+| **0.75** | **0.80** | 55 | 49% | **+0.539R** | **+0.462R** | **+0.530R** |
+
+Deeper entry and a further exit is best on both dimensions, monotonically, which
+is at least a coherent shape rather than a lone winning cell. It also sits at the
+top of the 50–80% band rather than the middle.
+
+**On 55 trades.** That is the honest ceiling of what is verified, and it is small
+enough that the ordering between these cells should not be trusted — only the
+sign, and the direction of the gradient.
+
+### Where the whole thing stands
+
+| claim | basis | trades |
+|---|---|---|
+| +0.62R | 1H only, target allowed on the entry bar | 217 — **withdrawn, artifact** |
+| +0.13R | 1H only, target denied on the entry bar | 217 — a floor, not an estimate |
+| **+0.20 to +0.46R** | **resolved on 15M** | **55–56 — the real number** |
+
+One instrument. 318 days of the 3.6 years verifiable. The exit and depth chosen
+by scanning, on a sample too small to separate adjacent cells.

@@ -123,6 +123,18 @@ out.push('\nEquivalence with the batch research');
     st.trades.length - matched, 0);
   check('and identical entry, stop and result on every one', mismatched, 0);
 
+  /* the optimistic bound must be strictly better, never worse — if denying a
+     same-bar target ever improved a trade, the sign convention is inverted */
+  const opt = evaluateFraction(findPullbacks(a, {depth:0.75, on:'bos'}), h1, 0.65,
+                               'origin', {targetOnEntryBar:true}).filter(x => x.r != null);
+  const optByBar = new Map(opt.map(x => [x.entryAt, x]));
+  let worse = 0;
+  for(const l of st.trades){
+    const b = optByBar.get(l.entryAt);
+    if(b && b.r < l.r - 1e-9) worse++;
+  }
+  check('the optimistic bound is never worse than the conservative one', worse, 0);
+
   /* the backtest allows overlapping positions; the loop holds one at a time.
      That is a real difference and the only one permitted. */
   const extra = bt.length - matched;

@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0863</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0864</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -519,6 +519,7 @@ body.simple-only #view-simple{display:flex !important}
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-stock" checked> 🎬 Fill the rest with free stock before spending anything <span class="usage">(Pexels — free, needs the key in Settings)</span></label>
 
       <p class="usage" style="margin:8px 0 0"><b>4. Director's brief</b> <span class="usage">(answer a few — the Director plans around your answers instead of guessing)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:13px">
@@ -6867,7 +6868,8 @@ async function runRender(windowOpt, btnSel, opts) {
 /* ---------------- hover help on every major button ---------------- */
 Object.entries({
   'crew-drop': 'Pick images from your computer for the Director to cast into scenes. You can also let them scout your Library instead.',
-  'crew-direct': 'FREE. The Director reads your words — song lyrics or a narration script — and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-direct': 'FREE. The Director reads your words — song lyrics or a narration script — fills what it can from free stock, and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-stock': 'FREE. Any shot with no picture of yours gets one from Pexels before the Producer spends a cent. Your own images are never replaced.',
   'crew-produce': 'This is the spend button: generates the planned gap scenes, applies motion and grade, and renders the full video with captions.',
   'qk-add-imgs': 'Pick pictures from your computer for a quick beat-matched video.',
   'qk-add-music': 'Upload your song file (mp3/wav) from your computer.',
@@ -7244,6 +7246,42 @@ $('#crew-direct').onclick = async () => {
           if (n > bestN) { bestN = n; best = a; }
         }
         if (best) { s.source = { assetId: best.id, label: `${best.label} (scouted)` }; used.add(best.id); }
+      }
+    }
+    // FREE BEFORE PAID. Every gap used to go straight to the Producer's budget
+    // and get generated at ~9c a scene, while Pexels sat one card away in My
+    // Media doing nothing. Stock is tried first now; generation is what happens
+    // to the lines stock cannot answer.
+    //
+    // Order is deliberate and must stay this way:
+    //   your dropped images  ->  scouted from your library  ->  free stock  ->  paid generation
+    // Anything you put there yourself always wins. Stock only ever fills empties.
+    //
+    // The scene's image PROMPT is the search text, not its lyric line: the
+    // prompt says "a wall clock in a dark room", the lyric says "I'd look up
+    // and two hours were gone". Only one of those exists in a stock library.
+    if ($('#crew-stock') && $('#crew-stock').checked) {
+      const empties = shots.filter((s) => !s.source);
+      if (empties.length) {
+        b.innerHTML = `<span class="spinner"></span>Looking for free footage for ${empties.length} shot${empties.length > 1 ? 's' : ''}…`;
+        try {
+          const out = await jfetch('/api/studio/stock/fill', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'photos',
+              rows: empties.map((s) => ({ index: s.idx, name: '', text: s.scene.prompt || s.scene.lines })),
+            }),
+          });
+          const found = new Map((out.filled || []).map((f) => [f.index, f]));
+          for (const s of empties) {
+            const hit = found.get(s.idx);
+            if (hit) s.source = { assetId: hit.asset.id, label: `${hit.asset.label} (free stock)`, kind: 'image' };
+          }
+          if (found.size) await loadAssets();
+        } catch (_) {
+          // No key, or Pexels unreachable. Fall through to generation exactly as
+          // before - a missing free step must never break the plan.
+        }
       }
     }
     const gaps = shots.filter((s) => !s.source);

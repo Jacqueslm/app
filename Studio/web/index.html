@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0865</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0866</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -9653,20 +9653,26 @@ async function makeCtaCard(text, sub) {
   ctx.fillStyle = '#0d0d1f';
   ctx.fillRect(0, 0, w, h);
   const cx = w / 2;
-  let big = Math.round(h * 0.08);
+  // Sizes are deliberately smaller than they look like they should be. The card
+  // used to start at 8% of frame height and shrink only until it filled 86% of
+  // the width, so the words ran nearly edge to edge and read as shouting on a
+  // phone. 6.2% with a 72% measure leaves real margin either side - the same
+  // proportions as the PNG end cards in Studio/end-cards, so the built-in card
+  // and the picture ones look like the same set.
+  let big = Math.round(h * 0.062);
   ctx.font = `700 ${big}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  while (ctx.measureText(text).width > w * 0.86 && big > 24) {
+  while (ctx.measureText(text).width > w * 0.72 && big > 24) {
     big -= 2;
     ctx.font = `700 ${big}px system-ui, sans-serif`;
   }
   ctx.fillStyle = '#ffffff';
   ctx.fillText(text, cx, h * 0.42);
   if (sub) {
-    let subSize = Math.round(big * 0.4);
+    let subSize = Math.round(big * 0.36);
     ctx.font = `500 ${subSize}px system-ui, sans-serif`;
-    while (ctx.measureText(sub).width > w * 0.8 && subSize > 18) {
+    while (ctx.measureText(sub).width > w * 0.66 && subSize > 18) {
       subSize -= 2;
       ctx.font = `500 ${subSize}px system-ui, sans-serif`;
     }

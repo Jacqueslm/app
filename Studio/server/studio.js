@@ -5036,7 +5036,23 @@ const SECTION_STYLE = {
   outro: { shots: ['slow pull-back closing shot'], energy: 'quiet resolution, fading light' },
 };
 
-function storyboardHeuristic(lyrics, title, artist, style) {
+function storyboardHeuristic(lyrics, title, artist, style, mode) {
+  // A narration script has no stanzas - it is one line per shot, and blank
+  // lines between them are formatting, not structure. Splitting it by stanza
+  // gives one enormous scene, which is why the Director looked broken on
+  // anything that was not a song.
+  if (mode === 'script') {
+    const lines = lyrics.split('\n').map((l) => l.trim()).filter(Boolean).slice(0, MAX_SCENES);
+    return lines.map((line, i) => {
+      // The same section vocabulary as a song, so every downstream thing -
+      // pacing, camera moves, hold lengths - keeps working untouched. First
+      // shot opens, last shot closes, everything between is a verse.
+      const section = i === 0 ? 'intro' : (i === lines.length - 1 ? 'outro' : 'verse');
+      const prompt = `cinematic film still, a real moment that shows "${line}", ordinary believable setting, `
+        + `natural light, documentary realism${style ? `, ${style}` : ''}`;
+      return { index: i, lines: line, prompt, section };
+    });
+  }
   const stanzas = splitStanzas(lyrics);
   const { cleaned, sections } = detectSections(stanzas);
   const perSectionCount = {};
@@ -5058,8 +5074,23 @@ function storyboardHeuristic(lyrics, title, artist, style) {
   });
 }
 
-async function storyboardWithClaude(lyrics, title, artist, style) {
-  const system = `You are a music video director. Given song lyrics, split them into filmable scenes ` +
+async function storyboardWithClaude(lyrics, title, artist, style, mode) {
+  // Two directors, one endpoint. The music one splits by verse and chorus; the
+  // narration one gets one shot per line and is told plainly not to invent
+  // anything the words did not say - a narrated story fails the moment the
+  // pictures drift from the sentence being read over them.
+  const system = mode === 'script' ? (
+    `You are the director of a short narrated film. You are given a script: one line per shot, in order. ` +
+    `Write exactly one filmable image-generation prompt per line, in the same order, never merging or reordering ` +
+    `lines. Each prompt is 15-30 words, visual only - shot type, subject, setting, light, mood - and must show ` +
+    `ONLY what that line implies. Do not invent events the script does not state. Prefer ordinary, believable, ` +
+    `documentary-real settings over spectacle. Keep one consistent world and one consistent look across all ` +
+    `shots. NEVER put a person's name in a prompt; describe them instead. Label the first shot "intro", the ` +
+    `last "outro", the single most emotionally loaded line "chorus", and everything else "verse". Reply with ` +
+    `ONLY a JSON array, no other text, shaped exactly like: ` +
+    `[{"lines":"<the script line, verbatim>","section":"<intro|verse|chorus|bridge|outro>","prompt":"<image prompt>"}, ...]. ` +
+    `Make at most ${MAX_SCENES} scenes.`
+  ) : (`You are a music video director. Given song lyrics, split them into filmable scenes ` +
     `(usually one scene per verse/chorus/bridge stanza) and write one vivid, concrete, filmable image-generation ` +
     `prompt per scene (15-30 words, visual only - camera shot type, subject, setting, lighting, mood; no song ` +
     `metadata, no quotes around lyrics). Label each scene's song section and match the visual energy to it: ` +
@@ -5067,12 +5098,12 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
     `intimate (medium/close-up), the bridge goes moody or abstract, intro/outro are calm bookends. Keep a ` +
     `consistent visual world across scenes unless the lyrics clearly change setting. Reply with ONLY a JSON ` +
     `array, no other text, shaped exactly like: ` +
-    `[{"lines":"<the lyric lines for this scene, verbatim>","section":"<intro|verse|chorus|bridge|outro>","prompt":"<image prompt>"}, ...]. Make at most ${MAX_SCENES} scenes.`;
+    `[{"lines":"<the lyric lines for this scene, verbatim>","section":"<intro|verse|chorus|bridge|outro>","prompt":"<image prompt>"}, ...]. Make at most ${MAX_SCENES} scenes.`);
   const userMsg = [
-    title ? `Song title: ${title}` : null,
+    title ? `${mode === 'script' ? 'Title' : 'Song title'}: ${title}` : null,
     artist ? `Artist: ${artist}` : null,
     style ? `Visual style to apply throughout: ${style}` : null,
-    `Lyrics:\n${lyrics}`,
+    `${mode === 'script' ? 'Script, one line per shot' : 'Lyrics'}:\n${lyrics}`,
   ].filter(Boolean).join('\n');
 
   const res = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
@@ -5106,8 +5137,10 @@ async function storyboardWithClaude(lyrics, title, artist, style) {
 
 router.post('/storyboard', async (req, res) => {
   const { lyrics, title, artist, style } = req.body || {};
+  // 'script' = a narrated story, one line per shot, no song required.
+  const mode = (req.body && req.body.mode) === 'script' ? 'script' : 'song';
   if (typeof lyrics !== 'string' || !lyrics.trim()) {
-    return res.status(400).json({ error: 'Paste your lyric sheet first.' });
+    return res.status(400).json({ error: mode === 'script' ? 'Paste your script first — one line per shot.' : 'Paste your lyric sheet first.' });
   }
   const cleanLyrics = lyrics.trim().slice(0, 8000);
   const cleanStyle = typeof style === 'string' ? style.trim().slice(0, 200) : '';
@@ -5116,17 +5149,17 @@ router.post('/storyboard', async (req, res) => {
 
   if (ANTHROPIC_API_KEY) {
     try {
-      const scenes = await storyboardWithClaude(cleanLyrics, cleanTitle, cleanArtist, cleanStyle);
+      const scenes = await storyboardWithClaude(cleanLyrics, cleanTitle, cleanArtist, cleanStyle, mode);
       return res.json({ scenes, method: 'ai' });
     } catch (err) {
       // Fall through to the free local splitter rather than failing the request.
     }
   }
   try {
-    const scenes = storyboardHeuristic(cleanLyrics, cleanTitle, cleanArtist, cleanStyle);
+    const scenes = storyboardHeuristic(cleanLyrics, cleanTitle, cleanArtist, cleanStyle, mode);
     res.json({ scenes, method: 'local' });
   } catch (err) {
-    res.status(500).json({ error: 'Could not build a storyboard from those lyrics.' });
+    res.status(500).json({ error: `Could not build a storyboard from that ${mode === 'script' ? 'script' : 'lyric sheet'}.` });
   }
 });
 

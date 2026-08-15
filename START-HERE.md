@@ -285,6 +285,19 @@ hits harder.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
+**b0862 — the Director is not a music-only tool. Do not put the song check
+back.** It used to refuse to plan anything without a song loaded, which made it
+useless for a narrated story — and narrated stories are most of what gets made
+here. The words are the only thing it needs; music is a bed. There is now a
+**"this is a narrated story"** tick under the words box: with it on, no song is
+required, the planner gets one shot per line, and the AI prompt swaps from a
+music-video director to a narrated-film director that is told not to invent
+anything the script did not say. Song mode is unchanged and still requires a
+song, because beat-snap and length come from it. Script mode reuses the same
+intro/verse/chorus/outro labels on purpose — that is what keeps every
+downstream thing (pacing, camera moves, hold lengths) working untouched.
+
+
 **b0859 — stock fills the gaps, and the query builder is not a bug.**
 `server/stock-query.js` deliberately keeps the panel name and the narration as
 **separate search attempts** rather than one merged query. Merging them was

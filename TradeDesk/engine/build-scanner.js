@@ -21,6 +21,7 @@ const Csv = (function(){
   return {parse, audit, ET};
 })();
 const Gaps = (function(){ ${strip('gaps.js')} return {create, update, detect, openAt, displacedBy}; })();
+const Loop = (function(){ ${strip('loop.js')} return {create, tick, DEFAULTS}; })();
 const LiveSetup = (function(){ ${strip('setup-live.js')} return {liveState}; })();
 `;
 

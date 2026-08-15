@@ -51,6 +51,15 @@
   .swings{font-family:var(--mono);font-size:13px;color:var(--dim);word-spacing:6px}
   .levels{font-family:var(--mono);font-size:19px;line-height:1.7;white-space:pre;
     background:var(--panel2);border-radius:9px;padding:14px;overflow-x:auto}
+  .btn{padding:9px 14px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel2);color:var(--text);font:600 13px inherit;cursor:pointer}
+  .btn.danger{color:var(--red)}
+  .stat3{display:grid;gap:10px;grid-template-columns:repeat(4,1fr);margin-bottom:6px}
+  @media(max-width:620px){.stat3{grid-template-columns:1fr 1fr}}
+  .box{background:var(--panel2);border-radius:9px;padding:12px}
+  .box .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .box .v{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:3px}
+  .box .s{font-size:11px;color:var(--faint);margin-top:2px}
 </style>
 </head>
 <body>
@@ -62,11 +71,16 @@
     <div id="drop">
       <b>Drop your MES 1H CSV here</b><br>
       <span style="font-size:13px">or click to choose · TradingView → chart → Export chart data</span>
-      <input type="file" id="file" accept=".csv" hidden>
     </div>
+    <!-- outside #drop on purpose: importing rewrites that element's HTML, and an
+         input nested inside it would be destroyed, making the second import
+         impossible -->
+    <input type="file" id="file" accept=".csv" hidden>
   </div>
 
   <div id="out"></div>
+
+  <div id="track"></div>
 
   <div class="card" id="sizecard" hidden>
     <h2>Sizing</h2>
@@ -79,6 +93,18 @@
       </select></div>
     </div>
     <div id="size"></div>
+  </div>
+
+  <div class="card">
+    <h2>Paper record</h2>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--dim)">
+      Only 55 of the backtest's trades could be verified against finer data. The
+      rest are bracketed, not known. This grows the verified count forward —
+      every export adds whatever closed since the last one.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="exp">Export record (CSV)</button>
+      <button class="btn danger" id="wipe">Erase record</button>
+    </div>
   </div>
 
   <p class="foot">
@@ -202,6 +228,7 @@ ${u.origin.toFixed(2)}  invalid on a close through this</div>
     </div>`;
   }
   $('out').innerHTML = html;
+  track();
 }
 
 function size(u){
@@ -224,6 +251,112 @@ function size(u){
   ${feeR > 0.05 ? `<div class="banner warn">Fees are ${(feeR*100).toFixed(0)}% of one R.
     Above about 5% the edge starts going to the broker — this is the MES-versus-ES problem.</div>` : ''}`;
 }
+/* --- paper record -------------------------------------------------------
+   The loop is deterministic, so "what the system said" needs no marking — it
+   is recomputed from the same bars every time. What accumulates is coverage:
+   each export closes out whatever finished since the last one, and the running
+   figure is compared against the verified baseline rather than the withdrawn
+   one. */
+const KEY = 'tradedesk.paper.v2';
+const BASELINE = {exp: 0.276, win: 50, label: '15M-resolved baseline'};
+
+const loadRec = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+                        catch(e){ return {}; } };
+const saveRec = r => localStorage.setItem(KEY, JSON.stringify(r));
+
+function track(){
+  const st = Loop.create();
+  for(const c of H1) Loop.tick(st, c);
+
+  const rec = loadRec();
+
+  /* The first export sets a boundary. Everything before it is backtest — the
+     unverified part, and the whole reason this exists — so it is deliberately
+     NOT counted. Only trades that close after you start recording accumulate,
+     because those are the ones nothing has been fitted to. */
+  if(!rec.__start){
+    rec.__start = H1[H1.length-1].t;
+    saveRec(rec);
+  }
+  const start = rec.__start;
+
+  let added = 0;
+  for(const t of st.trades){
+    if(H1[t.entryAt].t <= start) continue;
+    const id = String(H1[t.entryAt].t);
+    if(rec[id]) continue;
+    rec[id] = {t: H1[t.entryAt].t, dir: t.dir, entry: t.entry, stop: t.stop,
+               target: t.target, risk: t.risk, r: t.r, bars: t.exitAt - t.entryAt,
+               seen: Date.now()};
+    added++;
+  }
+  saveRec(rec);
+
+  const all = Object.keys(rec).filter(k => k !== '__start')
+                .map(k => rec[k]).sort((a,b) => a.t - b.t);
+  if(!all.length){
+    $('track').innerHTML = `<div class="card"><h2>Paper record</h2>
+      <div class="banner ok">Recording from ${new Date(start).toLocaleString()}.
+      Nothing counted yet — the backtest before this point is deliberately excluded,
+      because it is the part that has not been verified. Export again after the next
+      setup closes and it will appear here.</div></div>`;
+    return;
+  }
+  const wins = all.filter(x => x.r > 0).length;
+  const exp  = all.reduce((s,x) => s + x.r, 0) / all.length;
+  const win  = wins / all.length * 100;
+
+  /* how far the running figure sits from the verified baseline, in standard
+     errors — a crude guard against reading noise as divergence */
+  const sd = Math.sqrt(all.reduce((s,x) => s + (x.r-exp)*(x.r-exp), 0) / all.length) || 1;
+  const se = sd / Math.sqrt(all.length);
+  const z  = (exp - BASELINE.exp) / (se || 1);
+  const verdict = all.length < 30 ? 'too few trades to compare yet'
+    : Math.abs(z) < 2 ? 'consistent with the baseline'
+    : z < 0 ? 'running BELOW the baseline — worth investigating'
+            : 'running above the baseline';
+
+  const recent = all.slice(-8).reverse();
+  $('track').innerHTML = `<div class="card">
+    <h2>Paper record ${added ? `· ${added} new this export` : ''}</h2>
+    <div class="stat3">
+      <div class="box"><div class="k">Trades</div><div class="v">${all.length}</div>
+        <div class="s">from ${new Date(all[0].t).toLocaleDateString()}</div></div>
+      <div class="box"><div class="k">Win rate</div><div class="v">${win.toFixed(0)}%</div>
+        <div class="s">baseline ${BASELINE.win}%</div></div>
+      <div class="box"><div class="k">Expectancy</div>
+        <div class="v ${exp>=0?'bull':'bear'}">${exp>=0?'+':''}${exp.toFixed(2)}R</div>
+        <div class="s">baseline +${BASELINE.exp}R</div></div>
+      <div class="box"><div class="k">Total</div>
+        <div class="v ${exp>=0?'bull':'bear'}">${(exp*all.length).toFixed(1)}R</div>
+        <div class="s">gross, before fees</div></div>
+    </div>
+    <div class="banner ${all.length<30?'warn':Math.abs(z)<2?'ok':z<0?'bad':'ok'}">${verdict}</div>
+    <table style="margin-top:10px">${recent.map(x => `<tr>
+      <td>${new Date(x.t).toLocaleDateString()} ${x.dir==='bull'?'long':'short'}</td>
+      <td>${x.entry.toFixed(2)}</td>
+      <td class="${x.r>0?'bull':'bear'}">${x.r>0?'+':''}${x.r.toFixed(2)}R</td>
+      <td style="color:var(--dim)">${x.bars} bars</td></tr>`).join('')}</table>
+  </div>`;
+}
+
+$('exp').onclick = () => {
+  const r = loadRec();
+  const all = Object.keys(r).filter(k => k !== '__start')
+                .map(k => r[k]).sort((a,b) => a.t - b.t);
+  if(!all.length) return alert('Nothing recorded yet.');
+  const rows = ['time,direction,entry,stop,target,risk_pts,r,bars'].concat(
+    all.map(x => [new Date(x.t).toISOString(), x.dir, x.entry, x.stop, x.target,
+                  x.risk.toFixed(2), x.r.toFixed(4), x.bars].join(',')));
+  const b = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'paper-record.csv'; a.click();
+};
+$('wipe').onclick = () => {
+  if(confirm('Erase the paper record? Export it first if you want it.')){
+    localStorage.removeItem(KEY); $('track').innerHTML = ''; }
+};
+
 ['acct','riskpct','sym'].forEach(id => $(id).oninput = () => H1 && render());
 </script>
 </body>

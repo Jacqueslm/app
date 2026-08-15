@@ -109,20 +109,96 @@ var int   legBar     = na
 var string legDir    = na
 
 // ------------------------------------------------------ higher timeframes ---
+// Real structure on the higher timeframes, not a proxy.
+//
+// The first version of this asked whether the last closed 4H candle was green
+// or red. On a chart ripping to new highs, one red 4H candle made it "bear" and
+// the setup vanished. That is not a bias, it is a coin toss on one bar.
+//
+// This runs the same rules the chart logic runs — swings confirmed N bars late,
+// protected level advancing only on a BOS, change of character when it breaks.
+// Pine gives every call site its own `var` state, so calling it inside two
+// request.security() calls gives two independent engines, one per timeframe.
+structuralBias() =>
+    var float sHigh = na        // confirmed and unbroken
+    var float sLow  = na
+    var float lHigh = na        // most recent confirmed
+    var float lLow  = na
+    var float pL    = na        // protected level
+    var float pH    = na
+    var string b    = na
+    var string kind = na
+
+    bool isH = bar_index >= 2 * N
+    bool isL = bar_index >= 2 * N
+    for j = 1 to N
+        if not (high[N] > high[N + j])
+            isH := false
+        if not (high[N] >= high[N - j])
+            isH := false
+        if not (low[N] < low[N + j])
+            isL := false
+        if not (low[N] <= low[N - j])
+            isL := false
+
+    if isH and kind != "high"
+        lHigh := high[N]
+        sHigh := high[N]
+        kind  := "high"
+    else if isH and kind == "high" and high[N] > lHigh
+        lHigh := high[N]
+        sHigh := high[N]
+
+    if isL and kind != "low"
+        lLow := low[N]
+        sLow := low[N]
+        kind := "low"
+    else if isL and kind == "low" and low[N] < lLow
+        lLow := low[N]
+        sLow := low[N]
+
+    up = not na(sHigh) and close > sHigh
+    dn = not na(sLow)  and close < sLow
+    string d = na
+    if up and dn
+        d := close >= open ? "bull" : "bear"
+    else if up
+        d := "bull"
+    else if dn
+        d := "bear"
+    if d == "bull"
+        sHigh := na
+    if d == "bear"
+        sLow := na
+
+    if b == "bull"
+        if d == "bull"
+            pL := lLow
+        else if not na(pL) and close < pL
+            b  := "bear"
+            pH := lHigh
+            pL := na
+    else if b == "bear"
+        if d == "bear"
+            pH := lHigh
+        else if not na(pH) and close > pH
+            b  := "bull"
+            pL := lLow
+            pH := na
+    else if not na(d)
+        b := d
+        if d == "bull"
+            pL := lLow
+        else
+            pH := lHigh
+    b
+
 // [1] plus lookahead_off. Either alone is not enough: lookahead_off stops the
 // future leaking in, and [1] stops the CURRENT unfinished HTF bar being used.
-htfBias(tf) =>
-    request.security(syminfo.tickerid, tf, close > open ? "bull" : "bear",
-                     lookahead = barmerge.lookahead_off)[1]
-
-// A structural bias per higher timeframe would need the whole engine running
-// there too, which Pine cannot express cheaply. This uses the direction of the
-// last CLOSED HTF candle as a proxy. It is coarser than the engine's protected
-// -level bias, and the difference is stated rather than hidden.
-// request.security is evaluated regardless, so branch on the result rather than
-// wrapping the call in a ternary that would mix string and na
-string midBias  = htfBias(tfMid)
-string highBias = htfBias(tfHigh)
+string midBias  = request.security(syminfo.tickerid, tfMid,  structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
+string highBias = request.security(syminfo.tickerid, tfHigh, structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
 string external = na
 if useHTF and not na(midBias) and midBias == highBias
     external := midBias
@@ -305,9 +381,10 @@ if barstate.islast
     bt = bias == "bull" ? cBull : bias == "bear" ? cBear : color.gray
     table.cell(t, 0, 0, "bias",     text_color = color.gray, text_size = size.small)
     table.cell(t, 1, 0, na(bias) ? "—" : bias, text_color = bt, text_size = size.small)
-    table.cell(t, 0, 1, "external", text_color = color.gray, text_size = size.small)
-    table.cell(t, 1, 1, na(external) ? "disagree" : external, text_size = size.small,
-               text_color = external == "bull" ? cBull : external == "bear" ? cBear : color.gray)
+    table.cell(t, 0, 1, "4H / D",   text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 1, (na(midBias) ? "—" : midBias) + " / " + (na(highBias) ? "—" : highBias),
+               text_size = size.small,
+               text_color = na(external) ? color.gray : external == "bull" ? cBull : cBear)
     table.cell(t, 0, 2, "protected", text_color = color.gray, text_size = size.small)
     table.cell(t, 1, 2, str.tostring(bias == "bull" ? protLow : protHigh, format.mintick), text_size = size.small)
     table.cell(t, 0, 3, "entry",  text_color = color.gray, text_size = size.small)

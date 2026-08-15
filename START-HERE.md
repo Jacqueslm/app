@@ -309,6 +309,22 @@ hits harder.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
+**b0868 — the Python search looks in the folders, not just on PATH, and it
+does not take the newest one.** Two separate ways "Install free voice cloning"
+used to fail on a machine that was fine:
+1. The python.org installer ships with **"Add Python to PATH" unticked**, so a
+   perfectly good Python is invisible to `python`/`py`. `windowsGuesses()` now
+   also looks in `%LOCALAPPDATA%\Programs\Python`, `%ProgramFiles%\Python` and
+   `C:\Python3xx`. Do not delete that as "belt and braces" — it is the common
+   case, not the edge case.
+2. **torch has no wheels for the newest Python**, and python.org's front page
+   always offers the newest. Taking the first interpreter that answered meant
+   dying ten minutes into a multi-gigabyte download with "no matching
+   distribution found for torch", which reads as a broken app. `pickPython()`
+   now takes the highest version **≤ 3.13**, and only uses something newer if
+   that is all there is. When torch catches up, raise `PY_BEST_MAX` — do not
+   remove the ceiling. Covered by `test/voiceclone-python.test.js`.
+
 **b0863 — SESSION_SECRET writes itself to `server/.env`. Leave it there.**
 Without it, `auth.js` invents a random signing key on every boot, so **every
 server restart signs Jacques out** — and updating Studio restarts the server.

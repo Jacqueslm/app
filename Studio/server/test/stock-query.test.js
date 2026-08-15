@@ -63,3 +63,24 @@ test('narration verbs never become the search', () => {
   const tries = stockQueriesFrom('09_setdown', "That's what makes it hard.");
   assert.deepStrictEqual(tries, ['setdown']);
 });
+
+test('film-craft words never become the search', () => {
+  // The Director writes real image prompts and they all open with the same
+  // house style. Before this was filtered, EVERY shot in a video searched for
+  // "cinematic film still" and every shot came back with the same photo.
+  const tries = stockQueriesFrom('', 'cinematic film still, a man alone at a kitchen table at night, documentary realism');
+  assert.ok(!/cinematic|film|still|documentary|realism/.test(tries[0]), `style words survived in "${tries[0]}"`);
+  assert.ok(/man|kitchen|table|night/.test(tries[0]), `lost the subject: "${tries[0]}"`);
+});
+
+test('shot types and camera moves are dropped, the subject is kept', () => {
+  assert.ok(!/medium|crane|dolly/.test(stockQueryFrom('', 'medium crane shot, an empty wooden chair in a plain room')));
+  assert.ok(stockQueryFrom('', 'medium crane shot, an empty wooden chair in a plain room').includes('chair'));
+});
+
+test('two different scenes never produce the same query from style alone', () => {
+  // The regression that mattered: identical queries meant identical footage.
+  const a = stockQueryFrom('', 'cinematic film still, a wall clock in a dark room, natural light');
+  const b = stockQueryFrom('', 'cinematic film still, hands on a steering wheel, natural light');
+  assert.notStrictEqual(a, b, `both scenes searched for "${a}"`);
+});

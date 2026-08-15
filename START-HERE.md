@@ -313,6 +313,22 @@ warning had been there for months and cost him a sign-in every single update.
 machine.
 
 
+**b0865 — all three doors now reach the same free-stock engine.** Quick Video
+(b0859), the Director (b0864) and Storyboard (b0865) each fill empty shots from
+Pexels through one shared service, `POST /stock/fill`, with the query built by
+`server/stock-query.js`. Do not reimplement it in any of the three. Storyboard's
+free button sits ABOVE its paid buttons on purpose.
+
+**b0864 — free stock is tried BEFORE the Producer spends. Keep that order.**
+The Director now fills empty shots from Pexels first and only generates the
+lines stock cannot answer. The order is: your dropped images → scouted from your
+library → free stock → paid generation. Your own footage always wins; stock only
+fills empties. The tick is on by default and that is deliberate — free before
+paid. Also: `stock-query.js` strips film-craft words (cinematic, film still,
+medium, crane, documentary, realism). Without that, every shot in a video
+searched for "cinematic film still" and every shot came back the same photo.
+There are tests for it.
+
 **b0862 — the Director is not a music-only tool. Do not put the song check
 back.** It used to refuse to plan anything without a song loaded, which made it
 useless for a narrated story — and narrated stories are most of what gets made

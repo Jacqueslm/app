@@ -155,10 +155,13 @@ function findSetups(aligned, opts){
 function evaluate(setups, candles, rMultiple){
   const R = rMultiple || 2;
   return setups.map(s => {
+    const from = s.entryAt != null ? s.entryAt : s.shiftAt;
     const target = s.dir === 'bull' ? s.entry + R*s.risk : s.entry - R*s.risk;
     let outcome = 'open', barsHeld = 0;
-    for(let i = s.shiftAt + 1; i < candles.length; i++){
-      const k = candles[i]; barsHeld = i - s.shiftAt;
+    /* start ON the entry bar. A limit filled intrabar can be stopped by the
+       same bar, and skipping it scores those as wins. */
+    for(let i = from; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - from;
       const hitStop   = s.dir === 'bull' ? k.l <= s.stop   : k.h >= s.stop;
       const hitTarget = s.dir === 'bull' ? k.h >= target   : k.l <= target;
       /* both inside one bar is unresolvable from OHLC alone; count it as the
@@ -170,4 +173,103 @@ function evaluate(setups, candles, rMultiple){
   });
 }
 
-module.exports = {align, findSetups, evaluate, barDuration, lastClosedAt};
+
+
+/* --- pullback to origin ----------------------------------------------------
+   The other setup: a 4H or daily swing is running, the execution timeframe
+   makes a higher high confirming it, price pulls back toward where that leg
+   came from, and the trade is taken there in the direction of the swing.
+
+   "Where it came from" is the origin of the impulse — the swing low that the
+   leg launched from, which is precisely the protected level (§4). No new
+   concept is needed and no new number is invented, except how far back into
+   the leg counts as a pullback, which is `depth` and is meant to be scanned
+   rather than assumed.
+
+     depth 1.00  price must return all the way to the origin
+     depth 0.50  halfway back into the leg
+     depth 0.33  a shallow pullback
+
+   The leg is measured to its running extreme, so a leg that extends further
+   raises the entry with it. The trade dies if price closes through the origin,
+   because that is a change of character and the read was wrong.            */
+
+function findPullbacks(aligned, opts){
+  /* tickBuffer: the stop sits this far BEYOND the origin. At depth 1.00 the
+     entry is the origin, so a stop placed exactly on it gives zero risk and
+     the setup silently vanishes — which is how this was found. */
+  const o = Object.assign({depth: 0.5, maxBars: 40, tickBuffer: 0.25}, opts || {});
+  const ex = aligned.meta[aligned.opt.exec];
+  const res = ex.res, candles = ex.candles;
+  const out = [];
+
+  for(const bos of res.major){
+    if(bos.type !== 'BOS') continue;
+    const dir = bos.dir;
+    const origin = bos.protectedNow;          // the low/high the leg launched from
+    if(origin == null) continue;
+
+    /* only with the higher timeframes behind it */
+    const row = aligned.rows[bos.i];
+    if(!row || row.external !== dir) continue;
+
+    let extreme = dir === 'bull' ? candles[bos.i].h : candles[bos.i].l;
+
+    for(let i = bos.i + 1; i < Math.min(candles.length, bos.i + 1 + o.maxBars); i++){
+      const k = candles[i];
+
+      /* closing through the origin invalidates the leg */
+      if(dir === 'bull' ? k.c < origin : k.c > origin) break;
+
+      /* a fresh BOS starts a new leg; this one stops being the live setup */
+      if(res.major.some(e => e.i === i && e.type === 'BOS' && e.dir === dir)) break;
+
+      extreme = dir === 'bull' ? Math.max(extreme, k.h) : Math.min(extreme, k.l);
+      const span = Math.abs(extreme - origin);
+      if(!(span > 0)) continue;
+      const trigger = dir === 'bull' ? extreme - o.depth*span : extreme + o.depth*span;
+
+      const touched = dir === 'bull' ? k.l <= trigger : k.h >= trigger;
+      if(touched){
+        const entry = trigger;                       // a resting limit at the level
+        const stop  = dir === 'bull' ? origin - o.tickBuffer : origin + o.tickBuffer;
+        const risk  = Math.abs(entry - stop);
+        if(risk > 0){
+          out.push({
+            kind:'pullback', dir, bosAt: bos.i, entryAt: i, t: k.t,
+            origin, extreme, entry, stop, risk,
+            legTarget: extreme, barsToPullback: i - bos.i,
+            external: row.external, internal: row.internal
+          });
+        }
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/* Exit at a FIXED PRICE rather than a fixed R. Comparing pullback depths by
+   R-multiple is not a fair test: a deeper entry has a tighter stop, so its 2R
+   target sits nearer in absolute price and is easier to reach. Aiming every
+   depth at the same level — the extreme the leg already made — isolates
+   whether the entry is actually better, rather than merely closer. */
+function evaluateToLevel(setups, candles){
+  return setups.map(s => {
+    const target = s.legTarget;
+    let outcome = 'open', barsHeld = 0;
+    for(let i = s.entryAt; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - s.entryAt;
+      const hitStop   = s.dir === 'bull' ? k.l <= s.stop : k.h >= s.stop;
+      const hitTarget = s.dir === 'bull' ? k.h >= target : k.l <= target;
+      if(hitStop)   { outcome = 'stop';   break; }
+      if(hitTarget) { outcome = 'target'; break; }
+    }
+    const reward = Math.abs(target - s.entry) / s.risk;
+    return {...s, target, outcome, barsHeld, rr: reward,
+            r: outcome === 'target' ? reward : outcome === 'stop' ? -1 : 0};
+  });
+}
+
+module.exports = {align, findSetups, findPullbacks, evaluate, evaluateToLevel,
+                  barDuration, lastClosedAt};

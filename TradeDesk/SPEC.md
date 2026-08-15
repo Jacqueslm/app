@@ -262,3 +262,59 @@ consolidation but only when the 1hr is making HH HL LL LH" is a second, separate
 entry condition, and none of it is wired in. That is the most likely reason the
 frequency is a fifth of what it should be — the scan is only looking for one of
 the two things actually traded.
+
+---
+
+## 11. The pullback-to-origin setup
+
+Your words: *in a 4hr or daily swing, if the 1hr makes HH, pullback then take
+up or down to where it came from.*
+
+Mechanically:
+
+- external bias set by the 4H and/or daily
+- a BOS on the execution timeframe in that direction — the HH
+- price retraces toward the **origin** of the leg that made it, which is the
+  protected level already tracked in §4
+- entry as a resting limit at that retracement, stop beyond the origin
+- invalidated by a close through the origin, or by a fresh BOS starting a new leg
+
+The only invented number is **depth** — how far back into the leg counts as the
+pullback — so it is scanned rather than assumed.
+
+### Results, 256 days of 2H
+
+| depth | trades | /wk | win% | expectancy | avg R:R |
+|---|---|---|---|---|---|
+| 0.33 | 56 | 1.5 | 79% | +0.17R | 0.49 |
+| 0.50 | 43 | 1.2 | 63% | +0.25R | 0.99 |
+| 0.62 | 38 | 1.0 | 53% | +0.37R | 1.60 |
+| **0.75** | **33** | **0.9** | **42%** | **+0.68R** | **2.96** |
+
+Target is the prior extreme, identical for every depth. That matters: comparing
+depths by R-multiple is not a fair test, because a deeper entry has a tighter
+stop and so its 2R target sits nearer in price and is easier to reach. Fixing
+the target price isolates whether the entry is genuinely better rather than
+merely closer.
+
+Deeper is better, and for a coherent reason — reward-to-risk improves faster
+than win rate decays. The pattern is monotone and holds in all four
+configurations tested, which is stronger evidence than any single cell.
+
+### Checks that could have killed it
+
+- **Not a bull market.** External bias across the window was 35% bull, 33% bear,
+  32% neither, and trades at depth 0.75 split 18 long / 15 short.
+- **Costs are irrelevant here.** Median risk is 18 points, $91 on MES, so a $4
+  round turn is 0.04R. Expectancy goes +0.68R → +0.63R.
+- **Depth 1.00 is degenerate,** not a result. Entry converges on the origin and
+  the stop sits a tick beyond it, so risk collapses to 0.25 points and every
+  trade is stopped instantly. It is left in the table as a reminder that the
+  model breaks down there.
+
+### What this is not
+
+33 trades, one instrument, one 256-day window. Depth 0.75 was chosen by scanning
+five values, which is mild curve-fitting — the monotone trend is the defence, not
+the winning cell. The exit at the prior extreme is a choice never stated. Fills
+assume a resting limit is filled at the trigger price and never gapped through.

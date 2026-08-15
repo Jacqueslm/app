@@ -9,11 +9,20 @@ writing a page, a video title, a caption or an ad.
 
 ## The single most important thing
 
-**The Semrush subscription has ended. There is no way to pull a new number.**
+**The Semrush subscription ends 15 August 2026. After that there is no way to
+pull a new number.**
 
 Everything in `KEYWORDS.md` came from live US-database pulls on **6, 10 and 12
-August 2026**, verified against the API before saving, with the two 6 Aug pulls
-cross-checked against each other on every overlapping term.
+August 2026** (plus a final sweep on the 15th, if the exports below landed),
+verified against the API before saving, with the two 6 Aug pulls cross-checked
+against each other on every overlapping term.
+
+**Last-day exports (15 Aug).** Four habits had no measured data because their
+video episodes were written after the research was done: **road rage** (anger),
+**workaholic** (work), **screen time** (doomscrolling) and **teen vaping** (the
+parent side of smoking). If CSVs for those exist in the repo, they are the
+newest data in the project. If they do not, those four lanes are **unmeasured** —
+say so, and never estimate them.
 
 That means three rules, and they are not stylistic:
 

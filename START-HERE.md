@@ -44,12 +44,18 @@ in Play Console — just wait for Google's email.**
    by `make-captioned-screenshots.py`, and the feature graphic is the icon and
    app name composited on the app gradient. No generative AI imagery is used
    anywhere in the listing. Do not re-ask him to do this.
-2. ~~**Apply for production access.**~~ **SUBMITTED 14 Aug 2026, 1:09pm.**
-   Google says 7 days or less, by email to the account owner. All three
-   requirements showed struck through with green ticks before applying, so
-   eligibility is not in question. **Do not re-verify it, do not re-apply, do
-   not walk him back through the form.** The answers actually submitted are
-   recorded below under PRODUCTION APPLICATION — AS SUBMITTED.
+2. ~~**Apply for production access.**~~ **GRANTED 15 Aug 2026, 11:09am** —
+   about 22 hours after applying. Email from Google Play Support: *"Congratulations!
+   Your app has been granted Google Play production access."* Do not re-apply,
+   do not re-verify, do not walk him back through the form. The answers that won
+   it are recorded below under PRODUCTION APPLICATION — AS SUBMITTED.
+
+   **APPROVAL IS NOT A RELEASE. The app is still not public.** What remains is
+   one upload: **Test and release → Production → Create new release**, upload the
+   same `.aab` that is in closed testing, write release notes, Save → Review
+   release → Start rollout to Production. **Managed publishing is OFF**, so it
+   goes live on approval with no hold step — that is his decision to make, not a
+   thing to do for him.
 3. ~~**Buffer test post captioned `hi`.**~~ **DELETED 14 Aug 2026.** Buffer
    posting itself is fixed and confirmed working on Facebook, TikTok and
    YouTube — do not "fix" it again.

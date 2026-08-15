@@ -563,3 +563,77 @@ the first sensitivity table reported identical numbers for 0.15 and 0.30 and
 called it stability. It was caught because two rows of a sensitivity test came
 out byte-identical, which they never should. Wired up, the parameter turns out
 to decide the sign of the whole result.
+
+---
+
+## 17. The scalp, with your actual rule
+
+*"the 5min break ll lh failed ll makes hh retest entry exiting lh"*
+
+Long side, as a sequence:
+
+1. 5M in bear structure — LL then LH
+2. a low **fails**: it prints a higher low, or sweeps the prior low and closes
+   back above it
+3. price makes a high above the last LH — the change of character
+4. **entry is the RETEST** of that broken level, not the break
+5. **exit at the LH above** — the previous lower high, which in a downtrend sits
+   higher than the one just taken
+
+Stop beyond the failed low, because that low failing is the entire premise.
+Short side mirrors it.
+
+The retest is the part previously got wrong: §16 entered at the break, which is
+a different trade and a worse one.
+
+| timeframe | failed-low required | n | /wk | win% | gross |
+|---|---|---|---|---|---|
+| **5M** | **yes** | **206** | **14.0** | **55%** | **+0.140R** |
+| 5M | no | 340 | 23.1 | 52% | +0.080R |
+| 15M | yes | 185 | 4.1 | 45% | +0.030R |
+| 15M | no | 348 | 7.7 | 49% | +0.040R |
+
+The failed-low condition nearly doubles expectancy while cutting trade count by
+40%, which is what a real filter looks like. And the setup belongs on the 5M:
+the 15M version is flat.
+
+### It is uneconomic on MES, and that is arithmetic, not opinion
+
+| contract | round turn | cost in R | gross | net |
+|---|---|---|---|---|
+| MES | $4.00 | 0.142R | +0.140R | **−0.002R** |
+| MES | $2.00 | 0.071R | +0.140R | +0.069R |
+| **ES** | **$4.50** | **0.016R** | **+0.140R** | **+0.124R** |
+| ES | $6.00 | 0.021R | +0.140R | +0.118R |
+
+Mean risk is 9.2 points. On MES that is $46 a contract, so a $4 round turn is
+14% of one R and swallows the entire edge — net zero, with a 20R drawdown along
+the way for nothing.
+
+Commission is charged per contract while point value is not. The same dollar
+risk is one ES or ten MES, identical exposure, one commission against ten. On ES
+the same trades net +0.124R: **25.5R over 206 trades, worst drawdown 10.2R**,
+positive in three months of four.
+
+This is the only place in the project where the instrument, rather than the
+rule, decides whether something is tradeable. The swing trade risks 9–18 points
+too but holds for hours, so its edge is 0.5R and fees are noise. A scalp earning
+0.14R cannot survive a 0.14R fee.
+
+### Two arithmetic errors caught here
+
+Expectancy is the mean of per-trade R, so a cost must be converted to R **per
+trade and then averaged**. Averaging the risks first and dividing once gives
+0.087R instead of 0.142R, because the small-risk trades that suffer most get
+diluted. That mistake turned MES from breakeven into +0.053R and was caught only
+by the two methods disagreeing.
+
+Earlier, in §16, an edge-band parameter was never wired into the function, so a
+sensitivity table printed identical rows and nearly read as stability.
+
+### Not settled
+
+103 days, one instrument, four months of which one is negative. Fills assume the
+retest limit takes the level and the stop takes its price. 14 trades a week is
+far above the two or three stated at the outset, so this is a different activity
+from the swing trade and should be judged separately.

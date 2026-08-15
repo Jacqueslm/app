@@ -23,8 +23,10 @@
 //  around one a week. That is a real edge and a small sample. It is not advice.
 // =============================================================================
 
+// max_bars_back is explicit because the swing test indexes with a variable
+// (high[N + j]), and Pine cannot always infer the lookback it needs from that.
 indicator("Market Structure", overlay = true, max_lines_count = 500,
-          max_labels_count = 500, max_boxes_count = 100)
+          max_labels_count = 500, max_boxes_count = 100, max_bars_back = 300)
 
 // ---------------------------------------------------------------- inputs ----
 grpS = "Structure"
@@ -117,9 +119,13 @@ htfBias(tf) =>
 // there too, which Pine cannot express cheaply. This uses the direction of the
 // last CLOSED HTF candle as a proxy. It is coarser than the engine's protected
 // -level bias, and the difference is stated rather than hidden.
-midBias  = useHTF ? htfBias(tfMid)  : na
-highBias = useHTF ? htfBias(tfHigh) : na
-external = not useHTF ? na : (midBias == highBias ? midBias : na)
+// request.security is evaluated regardless, so branch on the result rather than
+// wrapping the call in a ternary that would mix string and na
+string midBias  = htfBias(tfMid)
+string highBias = htfBias(tfHigh)
+string external = na
+if useHTF and not na(midBias) and midBias == highBias
+    external := midBias
 
 // --------------------------------------------------------------- update -----
 newHigh = isHigh()
@@ -221,7 +227,7 @@ else if not na(mDir)
     else
         protHigh := lastHighPrice
 
-if not na(majorBOS)
+if not na(majorBOS) and not na(minorLevel)
     line.new(bar_index - 15, minorLevel, bar_index, minorLevel, color = cMaj, width = 1)
     label.new(bar_index, minorLevel, "BOS", style = majorBOS == "bull" ? label.style_label_up : label.style_label_down,
               color = color.new(color.black, 100), textcolor = cMaj, size = size.tiny)
@@ -242,7 +248,9 @@ if not na(legDir)
         legDir := na
 
 // -------------------------------------------------------- live levels ------
-float eEntry = na, float eStop = na, float eTarget = na
+float eEntry  = na
+float eStop   = na
+float eTarget = na
 if showSetup and not na(legDir)
     span = math.abs(legExtreme - legOrigin)
     if span > 0
@@ -250,14 +258,16 @@ if showSetup and not na(legDir)
         eStop   := legDir == "bull" ? legOrigin - tickBuf       : legOrigin + tickBuf
         eTarget := legDir == "bull" ? legOrigin + exitFrac * span : legOrigin - exitFrac * span
         // a target behind the fill is not a trade
-        if legDir == "bull" ? eTarget <= eEntry : eTarget >= eEntry
+        behind = legDir == "bull" ? eTarget <= eEntry : eTarget >= eEntry
+        if behind
             eEntry := na
             eStop := na
             eTarget := na
 
-plot(eEntry,  "Entry",  color = eEntry  ? color.new(cProt, 0) : na, style = plot.style_linebr, linewidth = 2)
-plot(eStop,   "Stop",   color = eStop   ? color.new(cBear, 0) : na, style = plot.style_linebr, linewidth = 1)
-plot(eTarget, "Target", color = eTarget ? color.new(cBull, 0) : na, style = plot.style_linebr, linewidth = 1)
+// `eEntry ?` is a float where Pine wants a bool — na() is the test, not truthiness
+plot(eEntry,  "Entry",  color = not na(eEntry)  ? color.new(cProt, 0) : na, style = plot.style_linebr, linewidth = 2)
+plot(eStop,   "Stop",   color = not na(eStop)   ? color.new(cBear, 0) : na, style = plot.style_linebr, linewidth = 1)
+plot(eTarget, "Target", color = not na(eTarget) ? color.new(cBull, 0) : na, style = plot.style_linebr, linewidth = 1)
 plot(bias == "bull" ? protLow : protHigh, "Protected", color = color.new(cProt, 50),
      style = plot.style_circles, linewidth = 1)
 
@@ -279,5 +289,7 @@ if barstate.islast
     table.cell(t, 0, 5, "target", text_color = color.gray, text_size = size.small)
     table.cell(t, 1, 5, na(eTarget) ? "—" : str.tostring(eTarget, format.mintick), text_size = size.small)
 
-alertcondition(not na(eEntry) and low <= eEntry and high[1] > eEntry, "Pullback entry reached",
-     "Price has reached the pullback entry level.")
+// comparing against eEntry[1] rather than high[1]: the level itself moves as the
+// leg extends, so the question is whether price crossed the level as it stood
+entryTouched = not na(eEntry) and low <= eEntry and not (low[1] <= nz(eEntry[1], low[1] - 1))
+alertcondition(entryTouched, "Pullback entry reached", "Price has reached the pullback entry level.")

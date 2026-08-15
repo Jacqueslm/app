@@ -195,50 +195,78 @@ function evaluate(setups, candles, rMultiple){
    because that is a change of character and the read was wrong.            */
 
 function findPullbacks(aligned, opts){
-  /* tickBuffer: the stop sits this far BEYOND the origin. At depth 1.00 the
+  /* on: 'swing' — the leg is defined by a swing high LABELLED HH (or a low
+          labelled LL). It need not have broken anything: that high may itself
+          be a lower high on a bigger timeframe, and the leg is still a leg.
+     on: 'bos'   — the older reading, where the leg had to break structure.
+
+     tickBuffer: the stop sits this far BEYOND the origin. At depth 1.00 the
      entry is the origin, so a stop placed exactly on it gives zero risk and
      the setup silently vanishes — which is how this was found. */
-  const o = Object.assign({depth: 0.5, maxBars: 40, tickBuffer: 0.25}, opts || {});
+  const o = Object.assign({depth: 0.5, maxBars: 40, tickBuffer: 0.25,
+                           on: 'swing'}, opts || {});
   const ex = aligned.meta[aligned.opt.exec];
   const res = ex.res, candles = ex.candles;
   const out = [];
 
-  for(const bos of res.major){
-    if(bos.type !== 'BOS') continue;
-    const dir = bos.dir;
-    const origin = bos.protectedNow;          // the low/high the leg launched from
-    if(origin == null) continue;
+  /* legs: {dir, origin, extreme, from} where `from` is the first bar on which
+     the leg was knowable — the swing's confirmation bar, never the swing bar
+     itself, or the scan would be reading N bars into the future. */
+  const legs = [];
+  if(o.on === 'bos'){
+    for(const e of res.major){
+      if(e.type === 'BOS' && e.protectedNow != null)
+        legs.push({dir:e.dir, origin:e.protectedNow,
+                   seed: e.dir === 'bull' ? candles[e.i].h : candles[e.i].l, from:e.i});
+    }
+  } else {
+    for(let k = 0; k < res.swings.length; k++){
+      const sw = res.swings[k];
+      const isHH = sw.kind === 'high' && sw.label === 'HH';
+      const isLL = sw.kind === 'low'  && sw.label === 'LL';
+      if(!isHH && !isLL) continue;
+      /* the leg came from the opposite swing immediately before it */
+      let origin = null;
+      for(let j = k - 1; j >= 0; j--){
+        if(res.swings[j].kind !== sw.kind){ origin = res.swings[j]; break; }
+      }
+      if(!origin) continue;
+      legs.push({dir: isHH ? 'bull' : 'bear', origin: origin.price,
+                 seed: sw.price, from: sw.confirmedAt});
+    }
+  }
 
-    /* only with the higher timeframes behind it */
-    const row = aligned.rows[bos.i];
+  for(const leg of legs){
+    const {dir, origin} = leg;
+    const row = aligned.rows[leg.from];
     if(!row || row.external !== dir) continue;
 
-    let extreme = dir === 'bull' ? candles[bos.i].h : candles[bos.i].l;
-
-    for(let i = bos.i + 1; i < Math.min(candles.length, bos.i + 1 + o.maxBars); i++){
+    let extreme = leg.seed;
+    /* start the bar AFTER the leg became knowable. A swing is confirmed at the
+       close of leg.from, so an order resting during that same bar would be
+       trading on information that bar had not yet finished producing. */
+    for(let i = leg.from + 1; i < Math.min(candles.length, leg.from + 1 + o.maxBars); i++){
       const k = candles[i];
 
       /* closing through the origin invalidates the leg */
       if(dir === 'bull' ? k.c < origin : k.c > origin) break;
-
-      /* a fresh BOS starts a new leg; this one stops being the live setup */
-      if(res.major.some(e => e.i === i && e.type === 'BOS' && e.dir === dir)) break;
+      /* a newer leg the same way supersedes this one */
+      if(i > leg.from && legs.some(l => l !== leg && l.dir === dir && l.from === i)) break;
 
       extreme = dir === 'bull' ? Math.max(extreme, k.h) : Math.min(extreme, k.l);
       const span = Math.abs(extreme - origin);
       if(!(span > 0)) continue;
       const trigger = dir === 'bull' ? extreme - o.depth*span : extreme + o.depth*span;
 
-      const touched = dir === 'bull' ? k.l <= trigger : k.h >= trigger;
-      if(touched){
-        const entry = trigger;                       // a resting limit at the level
+      if(dir === 'bull' ? k.l <= trigger : k.h >= trigger){
+        const entry = trigger;
         const stop  = dir === 'bull' ? origin - o.tickBuffer : origin + o.tickBuffer;
         const risk  = Math.abs(entry - stop);
         if(risk > 0){
           out.push({
-            kind:'pullback', dir, bosAt: bos.i, entryAt: i, t: k.t,
+            kind:'pullback', dir, bosAt: leg.from, entryAt: i, t: k.t,
             origin, extreme, entry, stop, risk,
-            legTarget: extreme, barsToPullback: i - bos.i,
+            legTarget: extreme, barsToPullback: i - leg.from,
             external: row.external, internal: row.internal
           });
         }

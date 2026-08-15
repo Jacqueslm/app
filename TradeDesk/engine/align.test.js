@@ -127,6 +127,28 @@ group('Setups');
     ev.every(x => x.barsHeld >= 0), true);
 }
 
+/* ------------------------------------------------------ pullback timing -- */
+group('Pullback entries cannot precede their own signal');
+{
+  const {findPullbacks} = require('./align');
+  const h2 = load(path.join(__dirname, '..', 'data', 'MES-2h.csv'));
+  const d1 = load(path.join(__dirname, '..', 'data', 'MES-1d.csv'));
+  const a  = align({'1d':d1,'2h':h2}, {exec:'2h', external:['1d'], internal:[]});
+
+  for(const on of ['swing','bos']){
+    const p = findPullbacks(a, {depth:0.62, on});
+    check(`[${on}] entry is strictly after the leg became knowable`,
+      p.every(x => x.entryAt > x.bosAt), true);
+    check(`[${on}] stop sits beyond the origin, never on it`,
+      p.every(x => x.dir === 'bull' ? x.stop < x.origin : x.stop > x.origin), true);
+    check(`[${on}] risk is positive`, p.every(x => x.risk > 0), true);
+    check(`[${on}] entry lies between origin and extreme`,
+      p.every(x => x.dir === 'bull'
+        ? x.entry > x.origin && x.entry <= x.extreme
+        : x.entry < x.origin && x.entry >= x.extreme), true);
+  }
+}
+
 console.log(out.join('\n'));
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

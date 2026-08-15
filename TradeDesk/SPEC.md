@@ -318,3 +318,45 @@ configurations tested, which is stronger evidence than any single cell.
 five values, which is mild curve-fitting — the monotone trend is the defence, not
 the winning cell. The exit at the prior extreme is a choice never stated. Fills
 assume a resting limit is filled at the trigger price and never gapped through.
+
+---
+
+## 12. The HH does not have to break anything
+
+Correction to §11. The leg is defined by a swing high **labelled HH** — higher
+than the previous swing high — and nothing more. It need not break structure,
+because that high may itself be a lower high on a larger timeframe: the 1H can
+rally into a 4H LH and still be a leg worth trading. Which it is depends on the
+market, not on a rule.
+
+So the trigger is the swing label, not the break. Both readings are implemented
+(`on: 'swing'` and `on: 'bos'`) because the difference turns out to matter.
+
+### Both, over 256 days of 2H with the daily and 4H agreeing
+
+Target is the prior extreme in every row.
+
+| depth | swing trades | /wk | exp | break trades | /wk | exp |
+|---|---|---|---|---|---|---|
+| 0.33 | 77 | 2.1 | −0.18R | 56 | 1.5 | +0.17R |
+| 0.50 | 58 | 1.6 | −0.23R | 43 | 1.2 | +0.25R |
+| 0.62 | 54 | 1.5 | −0.04R | 38 | 1.0 | +0.37R |
+| 0.75 | 44 | 1.2 | +0.17R | 33 | 0.9 | +0.68R |
+
+The swing trigger fires roughly 40% more often and lands much closer to a target
+of 2–3 a week. It is also worth substantially less per trade, and at shallow
+depths it is negative where the break version is positive.
+
+That is a genuine tension rather than a bug. Requiring the break is a filter;
+it discards legs that never confirm, and those legs lose money. Both remain
+positive at depth 0.75, so the question is not which is correct but whether the
+extra frequency is worth roughly a third of the expectancy.
+
+### A lookahead bug this refactor introduced
+
+Rewriting the leg detection also moved the pullback scan to start **on** the bar
+that revealed the leg rather than after it, letting a resting limit fill during
+the same bar whose close first made the setup knowable. It inflated the break
+version from +0.68R to +1.18R, which is how it was caught — a number improving
+after a change that should not have touched it. Fixed, and four tests per
+trigger mode now assert entries come strictly after their own signal.

@@ -36,7 +36,8 @@ for(const cfg of CONFIGS){
   console.log('                            |  win%      exp    |  win%      exp    avg R:R');
   console.log('    ' + '-'.repeat(76));
   for(const depth of DEPTHS){
-    const p = findPullbacks(a, {depth});
+   for(const on of ['swing','bos']){
+    const p = findPullbacks(a, {depth, on});
     const stat = ev => {
       const d = ev.filter(x => x.outcome !== 'open');
       const w = d.filter(x => x.outcome === 'target').length;
@@ -47,12 +48,13 @@ for(const cfg of CONFIGS){
     const B = stat(evaluateToLevel(p, c));
     const rr = p.length ? p.reduce((s,x)=>s+Math.abs(x.legTarget-x.entry)/x.risk,0)/p.length : 0;
     const fmt = (v,suf) => v==null ? '—' : (v>=0&&suf==='R'?'+':'')+v.toFixed(suf==='R'?2:0)+suf;
-    console.log('    ' + depth.toFixed(2).padStart(5) +
+    console.log('    ' + (on==='swing' ? depth.toFixed(2) : '  \u00b7 ').padStart(5) +
       String(p.length).padStart(8) +
       (days ? (p.length*7/days).toFixed(1) : '—').padStart(6) + '  |' +
       fmt(A.win,'%').padStart(7) + fmt(A.exp,'R').padStart(9) + '   |' +
       fmt(B.win,'%').padStart(7) + fmt(B.exp,'R').padStart(9) +
-      rr.toFixed(2).padStart(10));
+      rr.toFixed(2).padStart(10) + (on==='bos' ? '   (break required)' : ''));
+   }
   }
   console.log();
 }

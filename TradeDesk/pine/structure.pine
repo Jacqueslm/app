@@ -37,6 +37,10 @@ showMinor = input.bool(false, "Show minor structure", group = grpS,
                     tooltip = "Breaks of the most recent swing — every pullback that failed. " +
                               "Off by default because there are many and they are not the trade.")
 showLabels= input.bool(true,  "Show HH / HL / LH / LL", group = grpS)
+quiet     = input.bool(false, "Quiet mode — levels only", group = grpS,
+                    tooltip = "Draws nothing but the protected level and the live entry, " +
+                              "stop and target. No swing labels, no BOS or CHoCH text, no " +
+                              "minor structure. The readout still tells you everything.")
 
 grpB = "Bias"
 useHTF   = input.bool(true, "Require the 4H and daily to agree", group = grpB,
@@ -209,12 +213,16 @@ if useHTF and not na(midBias) and midBias == highBias
 tfSeconds(tf) => timeframe.in_seconds(tf)
 chartSec = timeframe.in_seconds(timeframe.period)
 badTF = useHTF and (tfSeconds(tfMid) <= chartSec or tfSeconds(tfHigh) <= chartSec)
+// barstate.islast is true on every realtime tick, so label.new() here made a
+// new label per tick and stacked them into a wall of red. One label, moved.
+var label warnLbl = na
 if badTF and barstate.islast
-    label.new(bar_index, high, "External timeframes must be HIGHER than the chart.\n" +
-              "Chart is " + timeframe.period + ", externals are " + tfMid + " and " + tfHigh +
-              ".\nEverything here was measured on the 1H chart with 4H and 1D externals.",
-              style = label.style_label_down, color = color.new(#ef5350, 15),
-              textcolor = color.white, size = size.normal)
+    if na(warnLbl)
+        warnLbl := label.new(bar_index, high, "", style = label.style_label_down,
+                             color = color.new(#ef5350, 15), textcolor = color.white)
+    label.set_xy(warnLbl, bar_index, high)
+    label.set_text(warnLbl, "External timeframes must be higher than the chart.\n" +
+                   "Chart " + timeframe.period + ", externals " + tfMid + " / " + tfHigh)
 
 // --------------------------------------------------------------- update -----
 newHigh = isHigh()
@@ -226,7 +234,7 @@ if newHigh and lastKind != "high"
     lastHighBar   := bar_index - N
     pendingHigh   := high[N]
     lastKind      := "high"
-    if showLabels
+    if showLabels and not quiet
         lbl = na(prevHighPrice) ? "—" : high[N] > prevHighPrice ? "HH" : "LH"
         label.new(bar_index - N, high[N], lbl, style = label.style_label_down,
                   color = color.new(color.black, 100), size = size.tiny,
@@ -243,7 +251,7 @@ if newLow and lastKind != "low"
     lastLowBar   := bar_index - N
     pendingLow   := low[N]
     lastKind     := "low"
-    if showLabels
+    if showLabels and not quiet
         lbl = na(prevLowPrice) ? "—" : low[N] > prevLowPrice ? "HL" : "LL"
         label.new(bar_index - N, low[N], lbl, style = label.style_label_up,
                   color = color.new(color.black, 100), size = size.tiny,
@@ -277,7 +285,7 @@ else if mDir == "bear"
     pendingLow  := na
     minorBias   := "bear"
 
-if showMinor and not na(minorLevel)
+if showMinor and not quiet and not na(minorLevel)
     line.new(bar_index - 10, minorLevel, bar_index, minorLevel, color = cMin,
              style = line.style_dotted, width = 1)
 
@@ -289,9 +297,10 @@ if bias == "bull"
         majorBOS := "bull"
         protLow  := lastLowPrice
     else if not na(protLow) and close < protLow
-        line.new(bar_index - 20, protLow, bar_index, protLow, color = cMaj, width = 2)
-        label.new(bar_index, protLow, "CHoCH", style = label.style_label_up,
-                  color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
+        if not quiet
+            line.new(bar_index - 20, protLow, bar_index, protLow, color = cMaj, width = 2)
+            label.new(bar_index, protLow, "CHoCH", style = label.style_label_up,
+                      color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
         bias := "bear"
         protHigh := lastHighPrice
         protLow  := na
@@ -301,9 +310,10 @@ else if bias == "bear"
         majorBOS := "bear"
         protHigh := lastHighPrice
     else if not na(protHigh) and close > protHigh
-        line.new(bar_index - 20, protHigh, bar_index, protHigh, color = cMaj, width = 2)
-        label.new(bar_index, protHigh, "CHoCH", style = label.style_label_down,
-                  color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
+        if not quiet
+            line.new(bar_index - 20, protHigh, bar_index, protHigh, color = cMaj, width = 2)
+            label.new(bar_index, protHigh, "CHoCH", style = label.style_label_down,
+                      color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
         bias := "bull"
         protLow  := lastLowPrice
         protHigh := na
@@ -316,7 +326,7 @@ else if not na(mDir)
     else
         protHigh := lastHighPrice
 
-if not na(majorBOS) and not na(minorLevel)
+if not na(majorBOS) and not na(minorLevel) and not quiet
     line.new(bar_index - 15, minorLevel, bar_index, minorLevel, color = cMaj, width = 1)
     label.new(bar_index, minorLevel, "BOS", style = majorBOS == "bull" ? label.style_label_up : label.style_label_down,
               color = color.new(color.black, 100), textcolor = cMaj, size = size.tiny)

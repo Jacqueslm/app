@@ -7,9 +7,12 @@ const {resample} = require('./resample');
 const {align, findPullbacks, evaluate, evaluateToLevel} = require('./align');
 
 const F = tf => load(path.join(__dirname, '..', 'data', `MES-${tf}.csv`));
-const D = {}; ['1d','4h','2h','1h','15m'].forEach(tf => D[tf] = F(tf));
-D['4h'] = resample(D['2h'], 4*3600*1000, F('4h')[0].t);
-D['1h_deep'] = null;
+const D = {'1d': F('1d'), '1h': F('1h'), '15m': F('15m')};
+/* 2H and 4H derived from the 466-day 1H series. Both match the vendor exports
+   exactly on every overlapping full bucket, and reach back three to five times
+   further than the exports themselves. */
+D['2h'] = resample(D['1h'], 2*3600*1000, F('2h')[0].t);
+D['4h'] = resample(D['1h'], 4*3600*1000, F('4h')[0].t);
 
 const N = Number(process.argv[2]) || 2;
 const DEPTHS = [0.33, 0.50, 0.618, 0.75, 1.00];
@@ -18,6 +21,7 @@ const CONFIGS = [
   {exec:'2h', external:['4h'],      label:'2H exec · 4H swing'},
   {exec:'2h', external:['1d'],      label:'2H exec · daily swing'},
   {exec:'2h', external:['1d','4h'], label:'2H exec · both agree'},
+  {exec:'1h', external:['4h'],      label:'1H exec · 4H swing'},
   {exec:'1h', external:['1d','4h'], label:'1H exec · both agree'}
 ];
 

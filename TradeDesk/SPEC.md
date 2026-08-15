@@ -360,3 +360,49 @@ the same bar whose close first made the setup knowable. It inflated the break
 version from +0.68R to +1.18R, which is how it was caught — a number improving
 after a change that should not have touched it. Fixed, and four tests per
 trigger mode now assert entries come strictly after their own signal.
+
+---
+
+## 13. 466 days changes the answer
+
+A deeper 1H export — 7571 bars, 466 days — replaces the 24-day one. 2H and 4H are
+now derived from it, matching the vendor exports exactly on every overlapping
+full bucket while reaching three to five times further back.
+
+With a real sample the §12 conclusion inverts.
+
+**1H execution, daily and 4H agreeing, target the prior extreme:**
+
+| depth | your reading (no break) | | break required | |
+|---|---|---|---|---|
+| | trades | exp | trades | exp |
+| 0.33 | 210 | −0.25R | 137 | **+0.20R** |
+| 0.50 | 175 | −0.16R | 118 | **+0.21R** |
+| 0.62 | 153 | −0.05R | 107 | **+0.40R** |
+| 0.75 | 129 | +0.03R | 91 | **+0.50R** |
+
+Without the break the setup is breakeven at best and negative most places. The
++0.17R it showed over 256 days was small-sample noise, and it washed out. With
+the break it is positive at every depth, 1.4–2.1 trades a week, on 91–137 trades.
+
+Costs remain irrelevant: median risk 10–26 points, so a $4 round turn takes
+0.03–0.09R off.
+
+### The caveat that matters more than the result
+
+This window is a bull market. Price ran 5949 → 7802, external bias was 47% bull
+against 20% bear, and trades split roughly 74% long. Splitting by direction:
+
+| depth | longs | | shorts | |
+|---|---|---|---|---|
+| | n | exp | n | exp |
+| 0.33 | 102 | +0.24R | 35 | +0.11R |
+| 0.50 | 87 | +0.28R | 31 | +0.03R |
+| 0.62 | 80 | +0.52R | 27 | +0.07R |
+| 0.75 | 65 | +0.55R | 26 | +0.37R |
+
+**Longs carry nearly all of it.** Shorts are close to zero except at the deepest
+pullback, on 26–35 trades. Nothing here separates "shorts do not work" from
+"this window had no good shorts" — the balanced 256-day window is the only
+counter-evidence and it is smaller. A bear or sideways year is what would settle
+it, and until then the short side is unproven rather than disproven.

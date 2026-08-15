@@ -598,9 +598,49 @@ async function runWinbackSequence() {
   }
 }
 
+// ---- Review ask (16 Aug 2026) --------------------------------------------
+// Closes the trust gap named in REVENUE-PLAN.md: the /reviews page exists but
+// stays empty until real people say something, and a recovery app converts on
+// proof. Sent ONCE around day 30 to people who actually used the app.
+// Rules: never pressure, never reward, never invent anything. If it didn't
+// help, the copy says the right move is to not leave one.
+const REVIEW_EMAIL = {
+  subject: '30 days — one honest line, if you have one',
+  text: `Jacques here. You've been in for about a month now, and I've got one ask — and it isn't money.
+
+If the app has done anything for you — a hard night it got you through, a morning it made easier — would you leave one sentence where people can see it?
+
+${APP_URL}/reviews
+
+There aren't many there yet. That's on purpose. I don't fake reviews, so the page says so until real people write them. One line from you is worth more than any ad I could buy.
+
+If it hasn't helped, don't leave one. You don't owe me a review for trying. But if it has, that sentence is how the next person at 2am finds it.
+
+— Jacques`,
+};
+
+const REVIEW_DAY = 30;
+const REVIEW_END_DAY = 60; // a server down for a while shouldn't cost anyone the ask
+
+async function runReviewAskSequence() {
+  let rows = [];
+  try { rows = db.getUsersWithState(); } catch (_) { return; }
+  for (const row of rows) {
+    let st = null;
+    try { st = JSON.parse(row.state_json); } catch (_) { continue; }
+    if (!st || !st.startDate) continue;
+    if (st.remindersEnabled === false) continue; // they asked for quiet
+    const log = Array.isArray(st.activityLog) ? st.activityLog : [];
+    if (!log.length) continue; // never really used it — nothing honest to review
+    const day = Math.floor((Date.now() - new Date(st.startDate).getTime()) / 86400000);
+    if (day < REVIEW_DAY || day > REVIEW_END_DAY) continue;
+    await sendSequenceEmail({ id: row.id, email: row.email }, 'review', 1, REVIEW_EMAIL.subject, REVIEW_EMAIL.text);
+  }
+}
+
 // Hourly scheduler. Task 5 ships the machinery; Tasks 6/7 register their
 // sequences. Each runner must use the guarded senders so email_log applies.
-const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture, runPartnerNurture, runWinbackSequence];
+const SEQUENCE_RUNNERS = [runTrialSequence, runQuizNurture, runPartnerNurture, runWinbackSequence, runReviewAskSequence];
 
 async function runScheduledEmails() {
   for (const runner of SEQUENCE_RUNNERS) {
@@ -632,6 +672,7 @@ module.exports = {
   startPartnerNurture,
   runPartnerNurture,
   runWinbackSequence,
+  runReviewAskSequence,
   brainresetPdfEmail,
   sendLeadSequenceEmail,
   runScheduledEmails,

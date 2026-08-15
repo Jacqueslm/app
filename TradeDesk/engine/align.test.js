@@ -6,7 +6,13 @@
 const path = require('path');
 const {align, findSetups, evaluate, barDuration, lastClosedAt} = require('./align');
 const {load} = require('./csv');
+const {resample} = require('./resample');
 const S = require('./structure');
+
+/* The 1H series now reaches back years further than the 4H and daily exports,
+   so tests that pair them must derive the higher timeframe from the 1H rather
+   than loading a file whose history starts later. */
+const derive4h = h1 => resample(h1, 4*3600000, h1[0].t);
 
 let pass = 0, fail = 0; const out = [];
 function check(name, got, want){
@@ -52,7 +58,7 @@ group('Bar duration and closure');
 group('No lookahead (the whole point)');
 {
   const h1  = load(path.join(__dirname, '..', 'data', 'MES-1h.csv'));
-  const h4  = load(path.join(__dirname, '..', 'data', 'MES-4h.csv'));
+  const h4  = derive4h(h1);
   const d1  = load(path.join(__dirname, '..', 'data', 'MES-1d.csv'));
   const a   = align({'1d':d1, '4h':h4, '1h':h1}, {exec:'1h', external:['1d','4h'], internal:[]});
 
@@ -79,7 +85,7 @@ group('No lookahead (the whole point)');
   /* Truncating the future must not change the past. If a bias at bar 200 shifts
      when later bars are removed, something downstream is reading ahead. */
   const h1 = load(path.join(__dirname, '..', 'data', 'MES-1h.csv'));
-  const h4 = load(path.join(__dirname, '..', 'data', 'MES-4h.csv'));
+  const h4 = derive4h(h1);
   const cut = 250;
   const full = align({'4h':h4, '1h':h1}, {exec:'1h', external:['4h'], internal:[]});
   const part = align({'4h':h4.filter(c => c.t <= h1[cut].t),
@@ -105,7 +111,7 @@ group('No lookahead (the whole point)');
 group('Setups');
 {
   const h1 = load(path.join(__dirname, '..', 'data', 'MES-1h.csv'));
-  const h4 = load(path.join(__dirname, '..', 'data', 'MES-4h.csv'));
+  const h4 = derive4h(h1);
   const d1 = load(path.join(__dirname, '..', 'data', 'MES-1d.csv'));
   const a  = align({'1d':d1,'4h':h4,'1h':h1}, {exec:'1h', external:['1d','4h'], internal:[]});
   const s  = findSetups(a);
@@ -147,6 +153,16 @@ group('Pullback entries cannot precede their own signal');
         ? x.entry > x.origin && x.entry <= x.extreme
         : x.entry < x.origin && x.entry >= x.extreme), true);
   }
+}
+
+group('Non-overlapping histories fail loudly');
+{
+  let msg = null;
+  try { barDuration([]); } catch(e){ msg = e.message; }
+  check('an empty series explains itself', /do not overlap/.test(msg || ''), true);
+  msg = null;
+  try { barDuration([{t:0}]); } catch(e){ msg = e.message; }
+  check('a single bar does too', /at least 2 bars/.test(msg || ''), true);
 }
 
 console.log(out.join('\n'));

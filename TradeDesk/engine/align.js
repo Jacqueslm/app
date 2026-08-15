@@ -23,6 +23,9 @@ const S = require('./structure');
 
 /* Modal spacing between bars — the nominal duration, immune to session gaps. */
 function barDuration(candles){
+  if(!candles || candles.length < 2)
+    throw new Error(`barDuration(): need at least 2 bars, got ${candles ? candles.length : 0}. ` +
+      `Usually this means two timeframes were combined whose histories do not overlap.`);
   const gaps = {};
   for(let i = 1; i < candles.length; i++){
     const g = candles[i].t - candles[i-1].t;

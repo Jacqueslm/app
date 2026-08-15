@@ -135,3 +135,36 @@ background. Every table and every hand is empty. This film is built on absence.
 3. **Log the music** in `MUSIC-LIBRARY.md` — prompt, file, date.
 4. **Post through Studio**, not the tool, so the AI-disclosure flag is set and
    it lands in the Buffer queue.
+
+---
+
+# TEMPLATE 2 — get the recipe back out
+
+Paste this **into the task that already made the video**, not a new one. A new
+task has none of the files and will reverse-engineer from pixels, which means it
+will guess. The original task still has the prompts, the commands and the
+history.
+
+```
+Don't re-make anything. Document what you already did in this task, as a recipe
+I can run myself.
+
+1. The exact image prompt you sent for each of the 10 shots, verbatim, numbered.
+2. The exact ffmpeg command(s) you ran to assemble the video — full command
+   lines, including the zoompan/Ken Burns filters, the subtitle burn-in, and the
+   audio mix. Not a description; the actual commands.
+3. The folder and file structure you used, and the filename of every asset.
+4. The music prompt, and which tool generated the track.
+5. Frame rate, resolution, codec, bitrate and audio settings on the final MP4.
+6. Anything else needed to reproduce this exactly on another machine.
+
+Write it as a single markdown file I can save. No video output needed.
+```
+
+**Do this for every episode Manus makes, while it is free.** Save the result in
+`reference/manus-recipes/`. The films are the output; the recipes are the asset.
+
+It already paid for itself once: the recipes revealed that Manus's camera move
+is a **2% zoom over five seconds**, where Studio's default was 25%. That single
+number was most of the difference in how the two looked. See
+`reference/manus-recipes/README.md`.

@@ -1,0 +1,234 @@
+Nia Photo Story — Exact Task Record and
+Reproduction Recipe
+￾. Workspace and actual file structure
+The workspace creation command that was actually run was:
+Bash
+mkdir -p /home/ubuntu/nia-photo-story
+The following is the exact file inventory at the time this record was written. All existing
+image files are RGB PNGs at ￾￾￾ × ￾￾￾￾ pixels (a ￾:￾￾ vertical frame). There are no
+subdirectories, audio files, video files, subtitle files, or ffmpeg scripts in this task workspace.
+Plain Text
+/home/ubuntu/nia-photo-story/
+├── 01_nia_sunday_morning.png
+├── 01_nia_sunday_morning_clean.png
+├── 02_nia_hands_listening.png
+├── 03_church_through_windscreen.png
+├── 04_nia_in_drivers_seat.png
+├── 05_childhood_photo_on_fridge.png
+├── 06_empty_glass_in_sink.png
+├── 07_nia_on_bed_edge.png
+├── 08_nia_washing_dishes.png
+├── 09_nia_with_friends_at_table.png
+└── nia_task_reproduction_recipe.md
+The intended asset names, including the unavailable final scene, were as follows.
+Scope and status. This document records only the Nia task. It does not include
+commands or assets from the earlier Dee/Tyler task. The Nia task stopped when the tenth
+image call was rejected for reaching the daily image-generation limit. Consequently, nine
+source scenes and one corrected variant of scene ￾ exist; scene ￾￾, a music track, an
+edit script, and a final MP￾ do not exist. No media is recreated by this document.
+Scene Intended filename Actual status
+￾￾ ￾￾_nia_sunday_morning.png
+Generated, then superseded by
+the cleaned variant below.
+￾. Image-generation parameters and continuity method
+Every initial image-generation call used the following parameters:
+Shot ￾ used no reference image. Shots ￾–￾ used ￾￾_nia_sunday_morning_clean.png as their
+single visual reference. The attempted shot ￾￾ used two references:
+￾￾_nia_with_friends_at_table.png and ￾￾_nia_sunday_morning_clean.png .
+￾￾ correction ￾￾_nia_sunday_morning_clean.png
+Generated; this was the
+preferred identity reference for
+subsequent image calls.
+￾￾ ￾￾_nia_hands_listening.png Generated.
+￾￾
+￾￾_church_through_windscreen.pn
+g
+Generated.
+￾￾ ￾￾_nia_in_drivers_seat.png Generated.
+￾￾
+￾￾_childhood_photo_on_fridge.pn
+g
+Generated.
+￾￾ ￾￾_empty_glass_in_sink.png Generated.
+￾￾ ￾￾_nia_on_bed_edge.png Generated.
+￾￾ ￾￾_nia_washing_dishes.png Generated.
+￾￾ ￾￾_nia_with_friends_at_table.png Generated.
+￾￾ ￾￾_nia_open_doorway.png
+Not generated. The request
+was sent but rejected because
+the image-generation limit had
+been reached.
+Parameter Value
+Model default
+Quality default
+Aspect ratio ￾:￾￾
+Transparent background Empty / disabled
+The exact continuity clause was deliberately repeated in every shot prompt without
+changes:
+￾. Exact image prompts sent, verbatim
+￾￾ — Sunday morning
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ correction — removal of readable refrigerator materials
+The original ￾￾ output had refrigerator materials that did not meet the requested no-text
+constraint. It was therefore refined, without changing Nia’s identity or the rest of the
+scene, to /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png .
+Refinement model and quality: default / default
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning.png
+Plain Text
+Edit the provided image. Preserve Nia's identity, pose, clothing, coffee mug, ki
+￾￾ — Hands listening
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_hands_listening.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Church through windscreen
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_church_through_windscreen.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+NIA: Black trans woman, early ￾￾s, shoulder-length braids, gold hoop earrings, soft round face, oversized
+cardigan.
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Nia in driver’s seat
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_in_drivers_seat.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Childhood photograph on fridge
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_childhood_photo_on_fridge.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Empty glass in sink
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_empty_glass_in_sink.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Nia on bed edge
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_on_bed_edge.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Nia washing dishes
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_washing_dishes.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Nia with friends at table
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_with_friends_at_table.png
+Reference: /home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾￾ — Nia in open doorway
+Output path requested: /home/ubuntu/nia-photo-story/￾￾_nia_open_doorway.png
+References requested: /home/ubuntu/nia-photo-story/￾￾_nia_with_friends_at_table.png ,
+/home/ubuntu/nia-photo-story/￾￾_nia_sunday_morning_clean.png
+Generation result: the call was rejected before an image was produced.
+Plain Text
+Create a cinematic vertical documentary photograph for a consistent ten-image na
+￾. Requested caption plan
+The following caption and timing plan came from the task specification. It was not burned
+into a video in this Nia task.
+Order Shot key Camera
+treatment
+Duration Transition Caption
+￾ ￾￾_sunday Still ￾.￾ s cut
+I didn't leave
+God.
+￾ ￾￾_hands Zoom in ￾.￾ s cut
+The room left
+me.
+￾
+￾
+￾
+_
+c
+h
+u
+r
+c
+h
+Z
+o
+o
+m in
+￾.￾
+s
+c
+u
+t I t
+r
+a
+n
+sitio
+n
+e
+d
+a
+t
+t
+w
+e
+n
+t
+y
+-
+nin
+e. That building stopped at twenty-eight. ￾ ￾￾_windscreen Still ￾.￾ s cut I still park across the stree
+t
+s
+o
+m
+e
+S
+u
+n
+d
+a
+y
+s. ￾ ￾￾_photo Zoom in ￾.￾ s cut I know every word they're singing in there. ￾ ￾￾_glass Zoom in ￾.￾ s cut What I was actually after was the quiet. ￾ ￾￾_bededge Still ￾.￾ s cut One drink bought an hour of not defending myself. ￾ ￾￾_dishes Still ￾.￾ s cut My body still remembers the songs. That's what makes it hard. ￾ ￾￾_friends Still ￾.￾ s cut I'm not a faithless woman. That was never the problem. ￾￾ ￾￾_doorway Zoom out ￾.￾ s cut So I stopped waiting on that door, and found one that opened. ￾￾ ￾￾-free-end Still ￾.￾ s cut No caption; the instruction was double line captions for the
+The intended total runtime was ￾￾ seconds: ten five-second shots and one three-second
+end hold.
+￾. ffmpeg command record
+No ffmpeg command was run in the Nia task. No video assembly, Ken Burns / zoompan
+processing, subtitle burn-in, audio mixing, encoding, or probing occurred. Therefore there
+are no actual Nia-task command lines to reproduce or report.
+This is intentionally not substituted with the command set used in the earlier Dee/Tyler
+task, because that would misrepresent what occurred in this task.
+￾. Music prompt and generation status
+The requested music brief was:
+Plain Text
+slow hymnal organ, distant wordless choir pad, long sustained chords, sacred and
+Track status: no music track was generated. No music-generation tool call was made in the
+Nia task, because production paused immediately after the scene-￾￾ image-generation call
+was rejected. As a result, there is no generated music filename, no sample rate, no channel
+count, and no audio duration to report.
+￾. Final-MP￾ technical settings
+No final MP￾ exists for the Nia task. Consequently, there is no actual final-video frame rate,
+resolution, video codec, video bitrate, audio codec, audio bitrate, sample rate, or audio
+channel configuration to document.
+The only media settings actually produced were the image settings listed below.
+captioned
+shots.
+Asset type Actual settings
+Existing still images PNG, RGB, ￾￾￾ × ￾￾￾￾ pixels, ￾:￾￾ vertical
+Image generation model default
+Image generation quality default
+￾. Reproduction requirements and limitations
+To recreate the intended sequence on another machine, you will need the nine existing
+PNGs listed above, a newly generated tenth image using the exact shot-￾￾ prompt, a newly
+generated music track from the supplied music brief, a subtitle file containing the caption
+plan, and an ffmpeg edit command or script that renders ten five-second segments plus the
+final three-second hold.
+The original generation system did not return a seed, sampling parameters, model-version
+identifier, or deterministic replay token. Therefore, even with these prompts and reference
+images, a newly generated tenth shot or recreated first nine shots will not be pixel-identical
+to the original outputs. Identity consistency was managed by reusing
+￾￾_nia_sunday_morning_clean.png as the reference image for scenes ￾–￾ and by using scenes
+￾￾ plus ￾￾ clean as references for the attempted scene ￾￾.
+The only task interruption was the rejection of the scene-￾￾ image request after the free￾plan generation quota was reached. The later user instruction was to wait, after which this
+documentation task replaced media production. No additional images, music, or video
+were created.
+Video file Not created
+Audio file Not created

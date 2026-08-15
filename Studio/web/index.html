@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0866</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0867</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -812,9 +812,10 @@ body.simple-only #view-simple{display:flex !important}
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="ken-burns" checked> 🎞 Still motion on photos (free, no AI)</label>
       <div class="trim" style="font-size:12px;gap:8px;flex-wrap:wrap">
         <select class="input" id="kb-amount" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="0.02" selected>Almost still — 2%</option>
           <option value="0.08">Barely there</option>
           <option value="0.15">Subtle</option>
-          <option value="0.25" selected>Noticeable</option>
+          <option value="0.25">Noticeable</option>
           <option value="0.40">Strong</option>
           <option value="0.55">Dramatic</option>
           <option value="0.70">Max</option>

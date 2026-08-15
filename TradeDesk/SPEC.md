@@ -763,3 +763,74 @@ two more were added: that same-bar exits occur, and that each one resolves.
 
 It returns a decision. It does not place an order, hold a broker connection, or
 know what account you are on. A human reads it and clicks.
+
+---
+
+## 21. The backtest, and a correction to everything above it
+
+Run through the loop, which holds one position at a time and cannot see an
+unclosed bar. $50,000, 0.5% risk, fixed-fractional on a constant account. No
+compounding: compounding 214 trades over 3.6 years turns a small edge into a
+fortune on paper and is the commonest way a backtest lies.
+
+### The correction
+
+Every expectancy in §11 through §20 allowed a trade to hit its **target on its
+own entry bar**. That assumes a price path OHLC does not contain. A bull entry
+fills when the bar trades *down* to the limit, and that bar's high may have
+printed before the fill — in which case the target was never available.
+
+It matters here more than it usually would, because the average hold is under
+three bars. Most trades live and die inside one or two candles, so the ordering
+inside those candles decides almost everything.
+
+Removing that assumption:
+
+| | expectancy | total |
+|---|---|---|
+| target allowed on the entry bar | +0.495R | $23,473 |
+| target denied on the entry bar | **−0.005R** | −$888 |
+
+**The headline result was carried entirely by an assumption that cannot be
+checked from 1H data.**
+
+### Resolving it instead of guessing
+
+Neither bound is the answer. The 15M series covers 318 of those days, so for
+trades in that window the actual sequence can be replayed rather than assumed.
+
+| | trades | win% | gross |
+|---|---|---|---|
+| resolved on 15M | 56 | 50.0% | **+0.276R** |
+| resolved on 5M | 23 | 52.2% | +0.335R |
+| the same trades, conservative bound | 56 | — | +0.050R |
+
+Two independent finer series agree. The truth sits between the bounds and nearer
+the middle: **+0.276R gross**, not +0.495R and not zero.
+
+Net of fees, median risk 12.8 points:
+
+| contract | fee in R | gross | net |
+|---|---|---|---|
+| MES | 0.076R | +0.276R | **+0.200R** |
+| ES | 0.009R | +0.276R | **+0.268R** |
+
+### What the honest number is
+
+**About +0.20R a trade on MES, +0.27R on ES**, at roughly one trade a week and a
+50% win rate — not the 64% reported earlier, which was the same artifact.
+
+Still a positive edge. A third of what §15 claimed.
+
+And it rests on 56 verified trades, not 217. The other 158 are in a period with
+no finer data to check them against, so their outcomes remain bracketed between
++0.05R and +0.50R rather than known. Closing that gap needs 15M history as deep
+as the 1H, which is beyond what the vendor will export.
+
+### How this was caught
+
+Two numbers looked wrong before the cause was known: an average hold of 1.9 bars
+for something described as a swing trade, and 0.1 bars for the ES variant, which
+would mean nearly every trade resolving on the bar it opened. Neither is
+impossible. Both together said the result depended on intrabar behaviour that
+was never modelled.

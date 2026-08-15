@@ -229,18 +229,19 @@ function tick(st, c){
              batch evaluator made before it was fixed. Stop first, because the
              order within a bar is unknowable from OHLC. */
           const p = st.pos;
-          const sHit = dir === 'bull' ? c.l <= p.stop   : c.h >= p.stop;
-          const tHit = dir === 'bull' ? c.h >= p.target : c.l <= p.target;
+          const sHit = dir === 'bull' ? c.l <= p.stop : c.h >= p.stop;
           if(sHit){
-            action = 'stop'; reason = `filled and stopped on the same bar`;
+            action = 'stop'; reason = 'filled and stopped on the same bar';
             st.trades.push({...p, exitAt:i, exit:p.stop, r:-1});
             st.pos = null;
-          } else if(tHit){
-            action = 'exit'; reason = `filled and target hit on the same bar`;
-            st.trades.push({...p, exitAt:i, exit:p.target,
-                            r:Math.abs(p.target-p.entry)/p.risk});
-            st.pos = null;
           }
+          /* The TARGET is deliberately not honoured on the entry bar. OHLC
+             carries no path: a bull entry fills when the bar trades DOWN to the
+             limit, and that bar's high may well have printed before the fill.
+             Counting it as a win assumes an order of events the data cannot
+             show. The stop is treated differently on purpose — taking the
+             pessimistic side of an unknowable ordering is the only safe
+             asymmetry. */
         } else if(risk > 0 && reachable){
           st.armed = {dir, entry, stop, target, risk};
         }

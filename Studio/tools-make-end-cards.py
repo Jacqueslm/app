@@ -30,8 +30,8 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "end-cards")
 # (filename, big line, small line)
 CARDS = [
     ("let-me-be-honest", "Let me be honest", "38 years. Free at 50.\nturnsomedayintodayone.com"),
-    ("learn-to-love-yourself", "Learn to love yourself again", "Free. No card, no trial.\nturnsomedayintodayone.com"),
-    ("face-yourself", "Face yourself", "The 2-minute check-in — free, no signup\nturnsomedayintodayone.com/quiz"),
+    ("learn-to-love-yourself", "Learn to love yourself again", "Free. No card.\nturnsomedayintodayone.com"),
+    ("face-yourself", "Face yourself", "The 2-minute check-in. Free.\nturnsomedayintodayone.com/quiz"),
     ("keep-going", "Keep going", "turnsomedayintodayone.com"),
 ]
 
@@ -65,13 +65,16 @@ def build(name, big, small):
             break
         size -= 6
     f_big = ImageFont.truetype(BOLD, size)
-    f_small = ImageFont.truetype(REG, 40)
+    # 34, not 40, and measured against a much narrower column. At 40pt across
+    # the full width the sub-line ran almost edge to edge, which reads as
+    # cramped on a phone and is unreadable in the 3 seconds it is on screen.
+    f_small = ImageFont.truetype(REG, 34)
 
     big_lines = wrap(d, big, f_big, W - 160)
-    small_lines = wrap(d, small, f_small, W - 200)
+    small_lines = wrap(d, small, f_small, W - 380)
 
     big_h = len(big_lines) * (size + 18)
-    small_h = len(small_lines) * 58
+    small_h = len(small_lines) * 50
     # Sit the block slightly above centre — text centred in a 9:16 frame reads
     # low, because the eye finds the middle higher than the maths does.
     y = (H - big_h - small_h - 90) / 2 - 60
@@ -86,7 +89,7 @@ def build(name, big, small):
 
     for line in small_lines:
         d.text((W / 2, y), line, font=f_small, fill=SUB, anchor="ma")
-        y += 58
+        y += 50
 
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, f"{name}.png")

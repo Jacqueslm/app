@@ -389,7 +389,7 @@ tonight.
 | **Be Sober** (Quit Alcohol Coach) | ~36K | Simon Chapple, bestselling sobriety author, This Naked Mind coach |
 | **SMART Recovery** | ~28.1K | The organization, not a person — different door, see below |
 | **Rewired Addiction** | — | Derek Lambert, quit alcohol *and* heroin. Lived experience, hard end |
-| **Fostering Resilience** | — | Dr. KJ Foster, counsellor, substance use + trauma, 15+ years |
+| **Fostering Resilience** | — | Dr. KJ Foster (Karrol-Jo Foster), PhD, licensed therapist, substance use + trauma |
 
 Use the **YouTube email template** above — the address is on the About tab.
 
@@ -398,10 +398,11 @@ Use the **YouTube email template** above — the address is on the About tab.
 they run meetings worldwide and keep resource lists, so that one is the Lane G
 pitch, not a creator DM.
 
-**Dr. KJ Foster is the credibility one.** A counsellor with 15 years and a
-doctorate saying the app is not harmful is worth more than 100K views, because
-it is the thing you can quote to the Salvation Army, to Missouri DBH, and on a
-SHRM stage.
+**Dr. KJ Foster is the credibility one.** A licensed therapist with a PhD in
+Counselor Education saying the app is not harmful is worth more than 100K views,
+because it is the thing you can quote to the Salvation Army, to Missouri DBH,
+and on a SHRM stage. **Email found: gratitudeflows@gmail.com** (Fostering
+Resilience's public contact, Vero Beach FL) — see the co-sign ask below.
 
 ## Instagram
 
@@ -452,9 +453,16 @@ the landing page and gets quoted to the Salvation Army, Missouri DBH, and a
 SHRM stage. (REVENUE-PLAN.md: the `/reviews` page is real but empty, and this
 is the co-sign that fills the authority gap.)
 
-**Target first: Dr. KJ Foster** (Fostering Resilience, YouTube table above) —
-a counsellor with 15+ years in substance use and trauma. After her, any
-therapist, counsellor or recovery coach with a licence and a public email.
+**Target first: Dr. Karrol-Jo (K.J.) Foster** — PhD in Counselor Education,
+licensed therapist, 10+ years clinical, founder of Fostering Resilience
+(Vero Beach FL). Her whole lane is substance use + trauma, and her bio also
+lists her as a family-program director at a treatment centre — the exact
+co-signer this page needs.
+**Send to: gratitudeflows@gmail.com** (Fostering Resilience's public contact,
+confirmed from their site). If it bounces: Psychology Today "Call or Email"
+for drkjfoster — (772) 247-0646 — or linkedin.com/in/kjfoster. After her, any
+therapist, counsellor or recovery coach with a licence and a public email —
+same letter, new name.
 
 **Never ask for an endorsement.** Ask whether it's safe, and if yes, for one
 honest sentence. A clinician can say "this doesn't hurt people" — they can't

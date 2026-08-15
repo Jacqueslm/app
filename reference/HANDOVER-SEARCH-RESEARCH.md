@@ -17,12 +17,21 @@ August 2026** (plus a final sweep on the 15th, if the exports below landed),
 verified against the API before saving, with the two 6 Aug pulls cross-checked
 against each other on every overlapping term.
 
-**Last-day exports (15 Aug).** Four habits had no measured data because their
-video episodes were written after the research was done: **road rage** (anger),
-**workaholic** (work), **screen time** (doomscrolling) and **teen vaping** (the
-parent side of smoking). If CSVs for those exist in the repo, they are the
-newest data in the project. If they do not, those four lanes are **unmeasured** —
-say so, and never estimate them.
+**The last pull happened.** On 15 Aug, before access closed, the four
+unmeasured lanes were pulled live: anger/road rage, work, screen time and teen
+vaping. They are the final section of `KEYWORDS.md`. **The file is now complete
+and closed.** Two findings changed the plan:
+
+- **`how to help a man whos always mad` — 1,900/mo at difficulty 11.** The
+  cheapest term in the entire file, and it is the moat again: not the angry
+  person searching, the person living with him. Keep the broken grammar; that is
+  how it is typed.
+- **Three of the four lanes should not get pages.** Road rage is news and
+  dashcam intent, "workaholic" is people looking up a word, and "screen time" is
+  people trying to switch off the iPhone feature or beat a parental lock. Their
+  episodes still stand as films. That is a finding, not a failure — and it is
+  exactly the kind of thing that gets re-litigated by someone who only reads the
+  volume column.
 
 That means three rules, and they are not stylistic:
 

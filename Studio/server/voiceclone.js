@@ -66,23 +66,99 @@ function run(cmd, args, opts = {}) {
   });
 }
 
-// Find a Python the person already has. Windows ships the `py` launcher with
-// python.org installs; Linux/macOS use python3. 3.9+ is what torch needs.
-async function findPython() {
-  const candidates = process.platform === 'win32'
-    ? [['py', ['-3', '-c', 'import sys;print(sys.version_info[:2])']], ['python', ['-c', 'import sys;print(sys.version_info[:2])']], ['python3', ['-c', 'import sys;print(sys.version_info[:2])']]]
-    : [['python3', ['-c', 'import sys;print(sys.version_info[:2])']], ['python', ['-c', 'import sys;print(sys.version_info[:2])']]];
-  for (const [cmd, args] of candidates) {
-    try {
-      const out = await run(cmd, args);
-      const m = out.match(/\((\d+),\s*(\d+)\)/);
-      if (!m) continue;
-      const major = Number(m[1]);
-      const minor = Number(m[2]);
-      if (major === 3 && minor >= 9) return { cmd, args: args[0] === '-3' ? ['-3'] : [], version: `3.${minor}` };
-    } catch (_) { /* not this one */ }
+// torch publishes wheels for a fixed range of Python versions and lags behind
+// python.org's front page by a year or so. Installing "the latest Python"
+// therefore fails ten minutes into the download with "no matching distribution
+// found for torch", which reads like a broken app rather than a wrong version.
+// So: collect every Python on the machine and pick the best one, rather than
+// taking the first that answers.
+const PY_MIN = 9;
+const PY_BEST_MAX = 13;
+
+const PROBE = ['-c', 'import sys;print(sys.version_info[:2])'];
+
+async function probe(cmd, pre = []) {
+  try {
+    const out = await run(cmd, [...pre, ...PROBE]);
+    const m = out.match(/\((\d+),\s*(\d+)\)/);
+    if (!m) return null;
+    if (Number(m[1]) !== 3) return null;
+    const minor = Number(m[2]);
+    if (minor < PY_MIN) return null;
+    return { cmd, args: pre, minor, version: `3.${minor}` };
+  } catch (_) {
+    // Also lands here for the Microsoft Store stub named python.exe, which
+    // opens the Store and exits instead of running anything. Correct outcome.
+    return null;
   }
-  return null;
+}
+
+// Where the python.org installer puts things when "Add Python to PATH" was
+// left unticked — which is how it ships, so this is the common case, not the
+// edge case. Without this the app tells someone to install Python they have.
+function windowsGuesses() {
+  const out = [];
+  const roots = [
+    process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Programs', 'Python'),
+    process.env.ProgramFiles && path.join(process.env.ProgramFiles, 'Python'),
+    'C:\\Python',
+  ].filter(Boolean);
+  for (const root of roots) {
+    try {
+      for (const entry of fs.readdirSync(root)) {
+        const exe = path.join(root, entry, 'python.exe');
+        if (fs.existsSync(exe)) out.push(exe);
+      }
+    } catch (_) { /* root not there */ }
+  }
+  // Bare C:\Python313\python.exe style, alongside a C:\Python folder.
+  try {
+    for (const entry of fs.readdirSync('C:\\')) {
+      if (!/^Python3\d+$/i.test(entry)) continue;
+      const exe = path.join('C:\\', entry, 'python.exe');
+      if (fs.existsSync(exe) && !out.includes(exe)) out.push(exe);
+    }
+  } catch (_) { /* no C: */ }
+  return out;
+}
+
+async function findPython() {
+  const found = [];
+  const seen = new Set();
+  const consider = async (cmd, pre) => {
+    const key = `${cmd} ${(pre || []).join(' ')}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    const hit = await probe(cmd, pre);
+    if (hit) found.push(hit);
+  };
+
+  if (process.platform === 'win32') {
+    // The py launcher can enumerate every install at once, so ask it for each
+    // version rather than only for its own default.
+    for (let m = PY_MIN; m <= 20; m += 1) await consider('py', [`-3.${m}`]);
+    await consider('py', ['-3']);
+    await consider('python', []);
+    await consider('python3', []);
+    for (const exe of windowsGuesses()) await consider(exe, []);
+  } else {
+    for (let m = PY_MIN; m <= 20; m += 1) await consider(`python3.${m}`, []);
+    await consider('python3', []);
+    await consider('python', []);
+  }
+
+  return pickPython(found);
+}
+
+// Split out from the searching so the choice can be tested without needing
+// four Pythons installed on the machine running the tests.
+function pickPython(found) {
+  if (!found || !found.length) return null;
+  // Highest version torch still builds for; if everything is newer than that,
+  // take the lowest of them so the odds of a wheel existing are best.
+  const supported = found.filter((p) => p.minor <= PY_BEST_MAX);
+  if (supported.length) return supported.slice().sort((a, b) => b.minor - a.minor)[0];
+  return found.slice().sort((a, b) => a.minor - b.minor)[0];
 }
 
 async function install(onProgress) {
@@ -99,8 +175,10 @@ async function install(onProgress) {
     const py = await findPython();
     if (!py) {
       throw new Error(
-        'Python 3.9 or newer is needed for free voice cloning and this computer does not have it. '
-        + 'Install it from python.org (tick "Add Python to PATH" during setup), then press this button again.'
+        'Free voice cloning needs Python and this computer does not have it yet. '
+        + 'Get Python 3.13 from python.org/downloads — not the newest one on the front page, '
+        + 'the speech engine has no build for that yet. During setup tick "Add Python to PATH". '
+        + 'Then press this button again — nothing else to do.'
       );
     }
 
@@ -216,4 +294,4 @@ function uninstall() {
   return true;
 }
 
-module.exports = { isInstalled, status, install, clone, diskUsage, uninstall, ROOT };
+module.exports = { isInstalled, status, install, clone, diskUsage, uninstall, ROOT, pickPython, findPython };

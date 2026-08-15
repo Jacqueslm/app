@@ -706,3 +706,60 @@ there; they go on the chart, and when price arrives there is nothing left to
 work out. That is the only kind of speed a discretionary trader on an exported
 CSV can actually have — and it is the useful kind, because the thing that costs
 money at the moment is hesitation, not latency.
+
+---
+
+## 20. The loop
+
+Track, compare, enter, exit — the same four steps, folded one candle at a time
+instead of re-scanning history.
+
+```
+  track      structure on 1H, with 4H and daily rolled up from it
+  compare    price against the level already computed
+  enter      when price reaches it
+  exit       at the target, the stop, or invalidation
+```
+
+`analyze()` walks the whole array and costs 129ms on 21,000 bars. Fine for
+research, wrong for a loop. `tick()` holds its state between calls, so the cost
+per bar is flat however long the session runs: **2.0µs a bar, 21,369 bars in
+42ms.**
+
+The higher timeframes are rolled up inside the loop and fed only when a bucket
+**completes**, so a 4H bar still forming can never leak its bias into a 1H
+decision. That is the §5 property, enforced by construction rather than checked.
+
+### It reproduces the research exactly
+
+A state machine that disagrees with the batch pass means one of them is wrong,
+and the number in this document stops meaning anything either way.
+
+| | trades | win% | expectancy |
+|---|---|---|---|
+| batch research | 217 | 64% | +0.615R |
+| the loop | 214 | 63% | **+0.602R** |
+
+**Zero differences in entry, stop, or result across all 214 matched trades.**
+
+The three the loop does not take overlapped a position it was already holding.
+That is a real difference and the only one allowed: the backtest can hold two
+trades at once and a person cannot.
+
+### A bug the comparison caught
+
+The loop originally created the position at the end of the bar and started
+checking stop and target on the *next* one — so a limit filled intrabar and
+stopped before that same bar closed was scored as if it had survived. It showed
+up as 50 of 214 trades disagreeing in **both** directions, which is the
+signature of an off-by-one rather than a rule difference. Same mistake the batch
+evaluator made earlier, made again in a new place.
+
+Fixing it also invalidated a test that asserted every exit comes strictly after
+its entry. Same-bar exits are now legitimate, so the assertion became `>=` and
+two more were added: that same-bar exits occur, and that each one resolves.
+
+### What it does not do
+
+It returns a decision. It does not place an order, hold a broker connection, or
+know what account you are on. A human reads it and clicks.

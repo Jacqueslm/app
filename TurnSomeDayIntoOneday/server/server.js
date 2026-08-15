@@ -178,6 +178,10 @@ app.get('/how-to-stop-binge-eating', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
 });
 
+app.get('/do-i-have-a-binge-eating-problem-quiz', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'do-i-have-a-binge-eating-problem-quiz.html'));
+});
+
 // Final two pages of the KEYWORDS.md plan: the moat's companion page
 // (betrayal trauma recovery, supporter side) and the one borderline
 // long-form worth attempting (how to stop drinking, self side - carries

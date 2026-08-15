@@ -44,8 +44,10 @@ quiet     = input.bool(false, "Quiet mode — levels only", group = grpS,
 
 grpB = "Bias"
 useHTF   = input.bool(true, "Require the 4H and daily to agree", group = grpB,
-                    tooltip = "The measured edge depends on this. Without it the same rules " +
-                              "were roughly breakeven across 3.6 years.")
+                    tooltip = "Roughly halves drawdown for about a third of the return. " +
+                              "It was once thought worth ~0.5R a trade; that measurement " +
+                              "predated a bug fix and does not survive it. A risk preference, " +
+                              "not an edge.")
 tfMid    = input.timeframe("240", "External timeframe 1", group = grpB)
 tfHigh   = input.timeframe("1D",  "External timeframe 2", group = grpB)
 

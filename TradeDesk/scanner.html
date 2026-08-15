@@ -109,7 +109,8 @@
 
   <p class="foot">
     Reads price only. Places no orders, connects to no broker.<br>
-    Backtested +0.62R over 217 trades and 3.6 years — which is history, not a promise.
+    Roughly +0.20R to +0.46R a trade over 55 trades whose path could be verified.
+    History, not a promise.
   </p>
 </div>
 
@@ -144,23 +145,34 @@
 
 const DEFAULTS = {
   fractalN : 2,        // bars required either side to confirm a swing
-  breakOn  : 'close'   // 'close' | 'wick'
+  breakOn  : 'close',  // 'close' | 'wick'  — what counts as accepting a level
+  swingOn  : 'wick'    // 'wick'  | 'body'  — what counts as making a swing
 };
+
+/* A swing's high and low. On 'wick' these are the bar's extremes, which is
+   where resting liquidity actually is. On 'body' they are the open/close
+   envelope, so a long wick that closed back inside never registers as a swing
+   at all. The two answer different questions and the difference is measured
+   rather than argued — see SPEC §22. */
+const hiOf = (c, mode) => mode === 'body' ? Math.max(c.o, c.c) : c.h;
+const loOf = (c, mode) => mode === 'body' ? Math.min(c.o, c.c) : c.l;
 
 /* --- §2 swing points -------------------------------------------------------
    Strict on the left, non-strict on the right, so a double top resolves to the
    first bar rather than printing twice or not at all. */
 
-function isSwingHigh(c, i, N){
+function isSwingHigh(c, i, N, mode){
   if(i - N < 0 || i + N >= c.length) return false;
-  for(let j = i - N; j < i; j++) if(!(c[i].h >  c[j].h)) return false;
-  for(let j = i + 1; j <= i + N; j++) if(!(c[i].h >= c[j].h)) return false;
+  const v = hiOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v >  hiOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v >= hiOf(c[j], mode))) return false;
   return true;
 }
-function isSwingLow(c, i, N){
+function isSwingLow(c, i, N, mode){
   if(i - N < 0 || i + N >= c.length) return false;
-  for(let j = i - N; j < i; j++) if(!(c[i].l <  c[j].l)) return false;
-  for(let j = i + 1; j <= i + N; j++) if(!(c[i].l <= c[j].l)) return false;
+  const v = loOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v <  loOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v <= loOf(c[j], mode))) return false;
   return true;
 }
 
@@ -205,11 +217,11 @@ function analyze(candles, options){
     /* 1. confirm the swing sitting N bars back */
     const p = i - N;
     if(p >= 0){
-      if(isSwingHigh(candles, p, N)){
-        pushSwing({i:p, t:candles[p].t, kind:'high', price:candles[p].h,
+      if(isSwingHigh(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'high', price:hiOf(candles[p], opt.swingOn),
                    confirmedAt:i, broken:false, label:null});
-      } else if(isSwingLow(candles, p, N)){
-        pushSwing({i:p, t:candles[p].t, kind:'low', price:candles[p].l,
+      } else if(isSwingLow(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'low', price:loOf(candles[p], opt.swingOn),
                    confirmedAt:i, broken:false, label:null});
       }
     }
@@ -461,6 +473,12 @@ function align(series, opts){
   const o = Object.assign({
     exec: '15m', external: ['1d','4h'], internal: ['1h'], fractalN: 2
   }, opts || {});
+  /* Anything the structure engine understands is forwarded to it. Listing only
+     fractalN here silently dropped every other option — a test comparing two
+     settings came back identical to three decimals, which is what that looks
+     like from the outside. */
+  const engineOpts = {};
+  for(const k of Object.keys(S.DEFAULTS)) if(o[k] !== undefined) engineOpts[k] = o[k];
 
   const tfs = [...new Set([...o.external, ...o.internal, o.exec])];
   const meta = {};
@@ -469,7 +487,7 @@ function align(series, opts){
     meta[tf] = {
       candles: series[tf],
       dur    : barDuration(series[tf]),
-      res    : S.analyze(series[tf], {fractalN: o.fractalN}),
+      res    : S.analyze(series[tf], engineOpts),
       cursor : 0
     };
   }
@@ -1138,7 +1156,11 @@ function tick(st, c){
 
   const r = feedStruct(st.h1, c);
   const events = r.events;
-  const external = (st.h4.bias && st.h4.bias === st.d1.bias) ? st.h4.bias : null;
+  /* st.noHTF lets a caller disable the external filter, which is the single
+     most consequential switch in the whole system — it was measured at roughly
+     0.5R a trade, so it is worth being able to turn off and see. */
+  const external = st.noHTF ? (r.majorBOS || null)
+                 : (st.h4.bias && st.h4.bias === st.d1.bias) ? st.h4.bias : null;
 
   /* 3 — a BOS starts a fresh leg, but only with the higher timeframes behind it */
   if(r.majorBOS && r.majorBOS === external){

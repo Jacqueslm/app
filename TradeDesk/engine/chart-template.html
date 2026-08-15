@@ -65,7 +65,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const cv = $('c'), ctx = cv.getContext('2d');
-const TFS = ['1d','4h','1h','15m'];
+const TFS = ['1d','4h','2h','1h','15m'];
 let tf = '1h', N = 2, view = null, res = null, dpr = 1;
 
 const ET = t => new Date(t).toLocaleString('en-US',{timeZone:'America/New_York',

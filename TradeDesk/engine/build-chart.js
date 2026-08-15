@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const {load} = require('./csv');
 
-const TFS = ['1d','4h','1h','15m'];
+const TFS = ['1d','4h','2h','1h','15m'];
 const root = path.join(__dirname, '..');
 
 const data = {};

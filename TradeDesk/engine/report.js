@@ -8,7 +8,7 @@ const path = require('path');
 const {load, audit, ET} = require('./csv');
 const S = require('./structure');
 
-const TF = ['1d', '4h', '1h', '15m'];
+const TF = ['1d', '4h', '2h', '1h', '15m'];
 const file = tf => path.join(__dirname, '..', 'data', `MES-${tf}.csv`);
 
 const want = process.argv[2];

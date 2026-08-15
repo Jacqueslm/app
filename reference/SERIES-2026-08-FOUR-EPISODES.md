@@ -9,15 +9,16 @@ of narration per shot, ready to paste into Manus.
 |---|---|---|---|
 | 1 | The Gambler | Gambling | ✅ done, posting this weekend |
 | 2 | The Packages | Shopping | ✅ done, posting this weekend |
-| 3 | Three Hours a Night | Doomscrolling | ⬜ not generated |
+| 3 | The Room I Grew Up In | Alcohol / spiritual, trans | ⬜ not generated |
 | 4 | The Light Turns Green | Anger / road rage | ✅ **generated 14 Aug** |
 | 5 | Somebody Needs Me | Gaming | ✅ **generated 14 Aug** |
 | 6 | The Respectable One | Work | ✅ **generated 14 Aug** |
 | 7 | The Hoodie | Smoking / vaping | ⬜ not generated |
 | 8 | The Empty Chair | Substances | ⬜ not generated |
 | 9 | The Second Dinner | Food / binging | ✅ **generated 14 Aug** |
+| 10 | The Hours | Doomscrolling | ⬜ not generated |
 
-**Three left: 3, 7 and 8 — 30 images.** Manus's advanced models are free until
+**Four left: 3, 7, 8 and 10 — 40 images.** Manus's advanced models are free until
 **25 Aug 2026**. After that every one of them costs. Do not let the window close
 with three episodes unbanked; images keep, a free window does not.
 
@@ -47,11 +48,10 @@ wife — which is the Couples-series shape.
 
 ---
 
-# BENCHED (no episode number) · The Hours — a man, doomscrolling
+# EPISODE 10 · The Hours — a man, doomscrolling
 
-**Held back 14 Aug 2026.** The lineup carries one doomscrolling episode now, and
-that slot went to Nia. This script is finished and costs nothing to keep — if
-the trans-woman angle ever feels wrong for a given week, this is the swap.
+**Off the bench 14 Aug 2026.** Nia's episode became the spiritual one, so
+doomscrolling is his again. Unchanged from when it was written.
 
 > **DEAN:** Black man, mid 40s, shaved head, broad shoulders, short beard going
 > grey at the chin, plain dark t-shirt.
@@ -117,74 +117,88 @@ anything. No card, no trial.
 
 ---
 
-# EPISODE 3 · Three Hours a Night — a trans woman, doomscrolling
+# EPISODE 3 · The Room I Grew Up In — a trans woman, the spiritual one · **ALCOHOL**
 
 > **NIA:** Black trans woman, early 30s, shoulder-length braids, gold hoop
 > earrings, soft round face, oversized cardigan.
 
-**This one is not about being trans. It's about the hours.** The specific pull
-here is that the scroll is *about her* — she isn't watching videos, she's
-checking whether the world still has room for her in it, every night, for hours,
-from strangers. Nobody in this category has made that piece, and the search
-terms in that lane are wide open.
+**Replaced her doomscrolling episode, 14 Aug 2026, at Jacques's call — and it
+says outright that she is trans.** The earlier version deliberately never
+mentioned it. This one names it in shot 3, because a story that will not say
+what it is about cannot be found by the people it is for.
 
-**Do not make this political and do not make her a victim.** She is not scared
-in this film, she is tired. The turn at the end is not that she gives up caring
-— it's that she stops letting strangers decide how her nights go. Keep that
-distinction; it's the whole episode.
+**The turn is the opposite of Curtis's.** Episode 8 is a man who stopped showing
+up. She never stopped — **the room closed.** That distinction is the whole
+piece, and it is why the two spiritual episodes do not repeat each other: his
+guilt is that he left, hers is that she would still go.
 
-**SHOT 1** — `NIA in bed in a dark bedroom at night, propped on one elbow, phone in hand, the screen the only light, blanket pulled up`
-*"It starts as one post."*
+**Alcohol, from the 13 in the app.** The app's own line for it is *"You weren't
+chasing a drink. You were chasing peace — the quiet that comes when you're not
+running your own defence."* For someone who has to defend her existence to
+strangers, that lands harder than it does for anyone else, and it never has to
+be explained on screen.
 
-**SHOT 2** — `Close on a phone screen filled with a long thread of comments, text deliberately blurred and unreadable, a thumb dragging upward`
-*"Then it's the replies."*
+**Three rules, and they matter more here than anywhere else in the series.**
+1. **She is tired, not frightened, and never pitiable.** No crying, no cowering.
+2. **No denomination, no scripture, no argument, and no villain.** The building
+   is never named and nobody in it is shown behaving badly. The film is about
+   what she lost, not about who to blame.
+3. **Nothing preachy at the end.** She finds a different room with chairs in a
+   circle. That is all that happens.
 
-**SHOT 3** — `Close on NIA's face lit by the phone, her expression steady, not crying, just still, eyes moving line to line`
-*"Reading strangers argue about whether I get to exist."*
+**SHOT 1** — `NIA in her own kitchen on a Sunday morning, dressed for nothing in particular, coffee in hand, radio on, ordinary light`
+*"I didn't leave God."*
 
-**SHOT 4** — `A bedside clock reading 3:12 in a dark room, a phone face-up beside it still lit`
-*"Every night. Three, four hours."*
+**SHOT 2** — `Close on NIA's hands resting still on a kitchen counter, head slightly turned, listening to something off-frame`
+*"The room left me."*
 
-**SHOT 5** — `NIA sitting on the edge of the bed in the dark with the phone dark in her lap, both feet on the floor, shoulders down`
-*"I called it staying informed."*
+**SHOT 3** — `A small ordinary church across a street seen through a car windscreen from a distance, a few people going in, nobody's face readable`
+*"I transitioned at twenty-nine. That building stopped at twenty-eight."*
 
-**SHOT 6** — `A mug of tea gone cold on a nightstand next to a closed paperback with a bookmark barely into it, morning light`
-*"It wasn't. It was a habit."*
+**SHOT 4** — `Close on NIA in a driver's seat, hands in her lap, watching something across the street, not moving to get out`
+*"I still park across the street some Sundays."*
 
-**SHOT 7** — `NIA at a kitchen table in daylight with two friends, mid-laugh, phones nowhere in the frame, plates and mugs between them`
-*"The people who love me were never in that app."*
+**SHOT 5** — `A childhood photograph held on a fridge by a magnet, a kid in Sunday clothes on a church step, slightly out of focus`
+*"I know every word they're singing in there."*
 
-**SHOT 8** — `Close on NIA's hands turning a phone face-down on a wooden table, a plant and a window beyond`
-*"Caring about it isn't the problem."*
+**SHOT 6** — `Close on a single empty glass in a kitchen sink in flat morning light, nothing else in the sink`
+*"What I was actually after was the quiet."*
 
-**SHOT 9** — `NIA standing at a window in the evening looking out at a street with lights coming on, phone not in the shot`
-*"Giving it every night was."*
+**SHOT 7** — `NIA sitting on the edge of her bed at night in a dark room, phone dark beside her, both feet on the floor`
+*"One drink bought an hour of not defending myself."*
 
-**SHOT 10** — `NIA asleep in bed, room dark and calm, phone charging face-down on a dresser across the room, first grey light at the curtain`
-*"So I took the nights back first."*
+**SHOT 8** — `NIA washing dishes at a window in daylight, eyes closed, mouth moving, singing to herself`
+*"My body still remembers the songs. That's what makes it hard."*
 
-**YouTube:** Three hours a night reading strangers argue about me
-**TikTok:** I called it staying informed. It was a habit.
+**SHOT 9** — `NIA at a kitchen table in daylight with two friends, hands held across the table, mugs and plates, warm`
+*"I'm not a faithless woman. That was never the problem."*
+
+**SHOT 10** — `NIA standing in the open doorway of a bright ordinary hall with chairs set in a circle, stepping in, coat still on`
+*"So I stopped waiting on that door, and found one that opened."*
+
+**YouTube:** I didn't leave God. The room left me.
+**TikTok:** I transitioned at twenty-nine. That building stopped at twenty-eight.
 
 ```
-1. 01_bed        Still     5.0s  cut   It starts as one post.
-2. 02_thread     Zoom in   5.0s  cut   Then it's the replies.
-3. 03_face       Zoom in   5.0s  cut   Reading strangers argue about whether I get to exist.
-4. 04_clock      Still     5.0s  cut   Every night. Three, four hours.
-5. 05_edge       Still     5.0s  cut   I called it staying informed.
-6. 06_tea        Zoom in   5.0s  cut   It wasn't. It was a habit.
-7. 07_friends    Still     5.0s  cut   The people who love me were never in that app.
-8. 08_facedown   Zoom in   5.0s  cut   Caring about it isn't the problem.
-9. 09_window     Still     5.0s  cut   Giving it every night was.
-10. 10_asleep    Zoom out  5.0s  cut   So I took the nights back first.
+1. 01_sunday     Still     5.0s  cut   I didn't leave God.
+2. 02_hands      Zoom in   5.0s  cut   The room left me.
+3. 03_church     Zoom in   5.0s  cut   I transitioned at twenty-nine. That building stopped at twenty-eight.
+4. 04_windscreen Still     5.0s  cut   I still park across the street some Sundays.
+5. 05_photo      Zoom in   5.0s  cut   I know every word they're singing in there.
+6. 06_glass      Zoom in   5.0s  cut   What I was actually after was the quiet.
+7. 07_bededge    Still     5.0s  cut   One drink bought an hour of not defending myself.
+8. 08_dishes     Still     5.0s  cut   My body still remembers the songs. That's what makes it hard.
+9. 09_friends    Still     5.0s  cut   I'm not a faithless woman. That was never the problem.
+10. 10_doorway   Zoom out  5.0s  cut   So I stopped waiting on that door, and found one that opened.
 11. 99-free-end  Still     3.0s  cut
 ```
 
-**Caption:** Doomscrolling isn't always boredom. Sometimes it's checking, every
-night, whether the world still has room for you — and calling it staying
-informed. Caring isn't the problem. Handing it every night is. Free app, no
-card, no trial.
-`#doomscrolling #phoneaddiction #trans #screentime #recoverysupport`
+**Caption:** I didn't leave God. The room left me. I transitioned at twenty-nine
+and that building stopped at twenty-eight — and I still know every word they're
+singing in there. What I was actually after was the quiet, and a drink sells you
+an hour of it. There's a spiritual track in my free app and it never asks which
+church. No card, no trial.
+`#transrecovery #lgbtqrecovery #faithandrecovery #sobriety #recoverysupport`
 
 ---
 

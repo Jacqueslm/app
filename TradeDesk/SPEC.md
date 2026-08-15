@@ -454,3 +454,71 @@ extreme was chosen because something had to be, and it does all the work in
 every number above. Fills assume a resting limit takes the trigger price and is
 never gapped through. One instrument. And the consolidation setup remains
 entirely unbuilt.
+
+---
+
+## 15. The exit, and it beats the assumption
+
+Your rule: exit at 50–80% of the previous high or low. Two readings were tested —
+the fraction measured from the **origin** of the leg (origin 0%, prior extreme
+100%) and from the **entry fill** (remaining distance to the extreme is 100%) —
+plus scaling out in thirds across the band.
+
+**MES 1H, 3.6 years, D+4H agree, BOS trigger, depth 0.75:**
+
+| exit | win% | expectancy |
+|---|---|---|
+| 50% of leg from origin | 77% | +0.52R |
+| **65% of leg from origin** | **64%** | **+0.62R** |
+| 80% of leg from origin | 52% | +0.61R |
+| scale out 50/65/80 | 64% | +0.58R |
+| 50% measured from entry | 66% | +0.61R |
+| *prior extreme (the old assumption)* | *39%* | *+0.50R* |
+
+Your exit is better than mine on both counts: **+0.62R against +0.50R, at a 64%
+win rate against 39%.** The old target asked price to make a full round trip; the
+50–80% band takes the part of the move that actually pays and leaves the tail.
+A 64% win rate is also a materially different thing to sit through than 39%.
+
+Measuring from the origin edges measuring from the entry, and the difference is
+small enough not to lean on. Scaling out is slightly worse than a single exit at
+65% but tighter than either extreme, which is what scaling out is for.
+
+Note the blank cell: at depth 0.50 a 50% target sits exactly at the entry, so it
+is unreachable and the evaluator refuses it rather than scoring a free win.
+
+### The best configuration found so far
+
+Depth 0.75, exit at 65% of the leg from origin, 1H execution, daily and 4H agreeing.
+
+| slice | n | win% | expectancy |
+|---|---|---|---|
+| all | 217 | 64% | +0.62R |
+| long | 154 | 67% | +0.69R |
+| short | 63 | 56% | +0.43R |
+| 2023 | 49 | 69% | +0.75R |
+| 2024 | 60 | 65% | +0.64R |
+| 2025 | 64 | 64% | +0.63R |
+| 2026 | 44 | 55% | +0.40R |
+
+133.5R over 217 trades, worst drawdown 6.0R, 1.2 trades a week. Median risk 9.2
+points, $46 a contract. Both directions work, every year works, 2026 weakest.
+
+Still: one instrument, the fill assumes a resting limit takes the trigger price
+and is never gapped through, and depth and exit were both chosen by scanning —
+though every cell in the exit table is positive, so the choice is between good
+options rather than between edge and no edge.
+
+---
+
+## 16. Consolidation — the scalp (not built)
+
+Your rule: in consolidation, the 5M and 15M are the scalp.
+
+So the consolidation trade is a different animal from the pullback — a lower
+timeframe scalp inside a range, not a swing continuation. That is consistent with
+2–3 swing trades a week from §15 plus scalps on top.
+
+**Blocked on data.** There is no 5M series at all, and the 15M reaches back 4.4
+days. Nothing can be concluded from that. A 5M and a deep 15M export are what
+this needs, and everything else is already built to receive them.

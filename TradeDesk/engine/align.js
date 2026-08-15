@@ -302,5 +302,63 @@ function evaluateToLevel(setups, candles){
   });
 }
 
+/* Exit at a fraction of the way back to the prior extreme.
+
+   frame 'origin' — the leg is measured from where it came from. Origin is 0%,
+     the prior extreme is 100%, and the exit sits at `frac`. Note this is only
+     reachable when the entry is deeper than the target: entry sits at
+     (1 - depth) of the leg, so frac must exceed that or the target is already
+     behind price at entry.
+
+   frame 'entry'  — the remaining distance from the fill to the prior extreme
+     is 100%, and the exit takes `frac` of it. Always reachable.
+
+   `frac` may be an array, in which case the position is scaled out in equal
+   parts at each level and the result is the average R across those parts. The
+   stop applies to whatever is still on. */
+function evaluateFraction(setups, candles, frac, frame){
+  const fracs = Array.isArray(frac) ? frac.slice().sort((a,b)=>a-b) : [frac];
+  const f = frame || 'origin';
+
+  return setups.map(s => {
+    const span = Math.abs(s.extreme - s.origin);
+    const targets = fracs.map(x => f === 'origin'
+      ? (s.dir === 'bull' ? s.origin + x*span        : s.origin - x*span)
+      : (s.dir === 'bull' ? s.entry + x*(s.extreme - s.entry)
+                          : s.entry - x*(s.entry - s.extreme)));
+
+    /* a target already behind price at the fill cannot be traded */
+    const reachable = targets.map(t => s.dir === 'bull' ? t > s.entry : t < s.entry);
+    if(!reachable.some(Boolean)) return {...s, outcome:'unreachable', r:null, barsHeld:0};
+
+    const live = targets.filter((t,i) => reachable[i]);
+    const part = 1 / live.length;
+    let filled = 0, realised = 0, outcome = 'open', barsHeld = 0;
+
+    for(let i = s.entryAt; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - s.entryAt;
+      const hitStop = s.dir === 'bull' ? k.l <= s.stop : k.h >= s.stop;
+      /* stop first: both inside one bar is unresolvable from OHLC, so take the
+         reading that does not flatter the result */
+      if(hitStop){
+        realised += (1 - filled) * -1;
+        outcome = filled > 0 ? 'partial' : 'stop';
+        break;
+      }
+      while(filled < 1 - 1e-9){
+        const idx = Math.round(filled / part);
+        if(idx >= live.length) break;
+        const t = live[idx];
+        const hit = s.dir === 'bull' ? k.h >= t : k.l <= t;
+        if(!hit) break;
+        realised += part * (Math.abs(t - s.entry) / s.risk);
+        filled += part;
+      }
+      if(filled >= 1 - 1e-9){ outcome = 'target'; break; }
+    }
+    return {...s, outcome, barsHeld, r: outcome === 'open' ? null : realised};
+  });
+}
+
 module.exports = {align, findSetups, findPullbacks, evaluate, evaluateToLevel,
-                  barDuration, lastClosedAt};
+                  evaluateFraction, barDuration, lastClosedAt};

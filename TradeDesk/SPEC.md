@@ -871,3 +871,50 @@ sign, and the direction of the gradient.
 
 One instrument. 318 days of the 3.6 years verifiable. The exit and depth chosen
 by scanning, on a sample too small to separate adjacent cells.
+
+---
+
+## 22. Why a wick makes a swing but a close makes a break
+
+Asked on a live chart: a low was labelled LL when no body closed below the
+previous low. That is deliberate, and the two tests are separate on purpose.
+
+| | measured on | why |
+|---|---|---|
+| a **swing** | the wick — `high` / `low` | the extreme is where resting liquidity is, and the whole method is about liquidity being taken |
+| a **break** | the **close** | a wick through a level is a sweep; only a close proves acceptance |
+
+So an `LL` label means the wick went lower than the previous swing low. It does
+**not** mean structure broke and it does not move the bias — that needs a close,
+and it would print as CHoCH rather than a label.
+
+Labels are not inert, though. They feed the consolidation test and the scalp's
+failed-low condition, so the choice is worth measuring rather than asserting.
+
+### Measured
+
+Same rules throughout, only the definition of a swing changed:
+
+| swingOn | swings | legs | resolved on 15M | win% | gross |
+|---|---|---|---|---|---|
+| **wick** | 4317 | 217 | 57 | 51% | **+0.595R** |
+| body | 4045 | 302 | 72 | 38% | +0.172R |
+
+The wick wins, and by enough not to be noise. Note the shape of the difference:
+the body definition finds *fewer* swings but produces *more* legs, because its
+swing prices sit inside the true range, so the protected level is shallower and
+gets broken more easily. More trades, worse ones.
+
+`swingOn: 'body'` remains available for anyone who wants to re-check it.
+
+### A bug this exposed
+
+The first run of that comparison returned **identical results to three decimal
+places** for both settings. That is not a finding, it is a symptom: `align()`
+forwarded only `fractalN` to the structure engine and silently dropped every
+other option, so `swingOn` never arrived. It now forwards anything the engine
+declares in its defaults.
+
+Worth noting that the tell was the result being *too clean*. Two different
+definitions of a swing producing the same expectancy to three decimals is not
+something markets do.

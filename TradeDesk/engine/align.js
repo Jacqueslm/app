@@ -51,6 +51,12 @@ function align(series, opts){
   const o = Object.assign({
     exec: '15m', external: ['1d','4h'], internal: ['1h'], fractalN: 2
   }, opts || {});
+  /* Anything the structure engine understands is forwarded to it. Listing only
+     fractalN here silently dropped every other option — a test comparing two
+     settings came back identical to three decimals, which is what that looks
+     like from the outside. */
+  const engineOpts = {};
+  for(const k of Object.keys(S.DEFAULTS)) if(o[k] !== undefined) engineOpts[k] = o[k];
 
   const tfs = [...new Set([...o.external, ...o.internal, o.exec])];
   const meta = {};
@@ -59,7 +65,7 @@ function align(series, opts){
     meta[tf] = {
       candles: series[tf],
       dur    : barDuration(series[tf]),
-      res    : S.analyze(series[tf], {fractalN: o.fractalN}),
+      res    : S.analyze(series[tf], engineOpts),
       cursor : 0
     };
   }

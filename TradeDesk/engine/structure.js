@@ -28,23 +28,34 @@
 
 const DEFAULTS = {
   fractalN : 2,        // bars required either side to confirm a swing
-  breakOn  : 'close'   // 'close' | 'wick'
+  breakOn  : 'close',  // 'close' | 'wick'  — what counts as accepting a level
+  swingOn  : 'wick'    // 'wick'  | 'body'  — what counts as making a swing
 };
+
+/* A swing's high and low. On 'wick' these are the bar's extremes, which is
+   where resting liquidity actually is. On 'body' they are the open/close
+   envelope, so a long wick that closed back inside never registers as a swing
+   at all. The two answer different questions and the difference is measured
+   rather than argued — see SPEC §22. */
+const hiOf = (c, mode) => mode === 'body' ? Math.max(c.o, c.c) : c.h;
+const loOf = (c, mode) => mode === 'body' ? Math.min(c.o, c.c) : c.l;
 
 /* --- §2 swing points -------------------------------------------------------
    Strict on the left, non-strict on the right, so a double top resolves to the
    first bar rather than printing twice or not at all. */
 
-function isSwingHigh(c, i, N){
+function isSwingHigh(c, i, N, mode){
   if(i - N < 0 || i + N >= c.length) return false;
-  for(let j = i - N; j < i; j++) if(!(c[i].h >  c[j].h)) return false;
-  for(let j = i + 1; j <= i + N; j++) if(!(c[i].h >= c[j].h)) return false;
+  const v = hiOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v >  hiOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v >= hiOf(c[j], mode))) return false;
   return true;
 }
-function isSwingLow(c, i, N){
+function isSwingLow(c, i, N, mode){
   if(i - N < 0 || i + N >= c.length) return false;
-  for(let j = i - N; j < i; j++) if(!(c[i].l <  c[j].l)) return false;
-  for(let j = i + 1; j <= i + N; j++) if(!(c[i].l <= c[j].l)) return false;
+  const v = loOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v <  loOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v <= loOf(c[j], mode))) return false;
   return true;
 }
 
@@ -89,11 +100,11 @@ function analyze(candles, options){
     /* 1. confirm the swing sitting N bars back */
     const p = i - N;
     if(p >= 0){
-      if(isSwingHigh(candles, p, N)){
-        pushSwing({i:p, t:candles[p].t, kind:'high', price:candles[p].h,
+      if(isSwingHigh(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'high', price:hiOf(candles[p], opt.swingOn),
                    confirmedAt:i, broken:false, label:null});
-      } else if(isSwingLow(candles, p, N)){
-        pushSwing({i:p, t:candles[p].t, kind:'low', price:candles[p].l,
+      } else if(isSwingLow(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'low', price:loOf(candles[p], opt.swingOn),
                    confirmedAt:i, broken:false, label:null});
       }
     }

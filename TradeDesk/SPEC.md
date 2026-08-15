@@ -918,3 +918,48 @@ declares in its defaults.
 Worth noting that the tell was the result being *too clean*. Two different
 definitions of a swing producing the same expectancy to three decimals is not
 something markets do.
+
+---
+
+## 23. A standalone backtester, and it revises §12
+
+`backtest.html` runs the loop over the full 1H series with the data baked in.
+Depth, exit fraction, swing sensitivity, contract, and the higher-timeframe
+filter are all switchable, and it recomputes on change.
+
+It applies the conservative rule throughout — no target on the entry bar — so
+what it reports is the **pessimistic end** of the range, not the middle.
+
+### The higher-timeframe filter is worth far less than claimed
+
+| | trades | /wk | win% | expectancy | total | max DD |
+|---|---|---|---|---|---|---|
+| 4H+D must agree | 211 | 1.1 | 37% | +0.061R | 12.9R | −14.1R |
+| filter off | 490 | 2.6 | 38% | +0.072R | 35.2R | −26.3R |
+
+Net of fees, at depth 0.75 and exit 0.80.
+
+**The filter is not worth 0.5R a trade.** It is worth nothing here, and slightly
+negative per trade — it halves the trade count for the same expectancy, so the
+total return is a third of the unfiltered version at half the drawdown.
+
+The 0.5R figure in §12 came from measurements taken **before** the same-bar
+target bug was found. Under the honest rule that advantage largely evaporates.
+Since that figure was quoted repeatedly as the most valuable thing the research
+produced, it needs withdrawing with the same emphasis.
+
+What survives: the filter roughly halves drawdown for roughly a third of the
+return. That is a risk preference, not an edge.
+
+### What still holds
+
+Depth and exit still matter and still point the same way. Expectancy is still
+positive. And the three estimates still bracket as they did:
+
+| | expectancy |
+|---|---|
+| pessimistic — no target on the entry bar | +0.06R |
+| **resolved on 15M paths (55 trades)** | **+0.20R to +0.46R** |
+| optimistic — target allowed on the entry bar | +0.50R |
+
+The middle row is still the only one measured against what actually happened.

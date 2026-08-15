@@ -170,7 +170,11 @@ function tick(st, c){
 
   const r = feedStruct(st.h1, c);
   const events = r.events;
-  const external = (st.h4.bias && st.h4.bias === st.d1.bias) ? st.h4.bias : null;
+  /* st.noHTF lets a caller disable the external filter, which is the single
+     most consequential switch in the whole system — it was measured at roughly
+     0.5R a trade, so it is worth being able to turn off and see. */
+  const external = st.noHTF ? (r.majorBOS || null)
+                 : (st.h4.bias && st.h4.bias === st.d1.bias) ? st.h4.bias : null;
 
   /* 3 — a BOS starts a fresh leg, but only with the higher timeframes behind it */
   if(r.majorBOS && r.majorBOS === external){

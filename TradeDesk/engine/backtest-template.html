@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backtest</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#14181d; --panel2:#1b2027; --line:#262d36;
+    --text:#e8ecf1; --dim:#8b95a3; --faint:#5d6674;
+    --green:#3ddc97; --red:#ff5c6c; --blue:#5aa9ff; --amber:#ffb454;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px 16px 60px}
+  h1{font-size:20px;margin:0 0 2px}
+  .sub{color:var(--faint);font-size:13px;margin-bottom:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-bottom:12px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--dim);margin:0 0 12px}
+  label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:600}
+  select,input{width:100%;padding:8px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--text);font:14px var(--mono)}
+  .grid{display:grid;gap:10px;grid-template-columns:repeat(5,1fr)}
+  @media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}
+  .ck{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--dim);
+    cursor:pointer;margin-top:22px}
+  .ck input{width:auto}
+  .stats{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+  .box{background:var(--panel2);border-radius:10px;padding:12px}
+  .box .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .box .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+  .box .s{font-size:11px;color:var(--faint);margin-top:2px}
+  .pos{color:var(--green)} .neg{color:var(--red)} .dim{color:var(--dim)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+     color:var(--faint);font-weight:600;padding:7px 6px;border-bottom:1px solid var(--line)}
+  td{padding:6px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  td.txt{font-family:inherit;color:var(--dim)}
+  tr:last-child td{border-bottom:0}
+  .scroll{max-height:340px;overflow:auto}
+  .banner{padding:12px 14px;border-radius:9px;font-size:13px;margin-top:12px;line-height:1.6}
+  .warn{background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.3);color:#ffd39e}
+  .foot{color:var(--faint);font-size:12px;text-align:center;margin-top:20px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Backtest</h1>
+  <div class="sub" id="span"></div>
+
+  <div class="card">
+    <h2>Settings</h2>
+    <div class="grid">
+      <div><label>Entry depth</label><select id="depth"></select></div>
+      <div><label>Exit fraction</label><select id="exitFrac"></select></div>
+      <div><label>Swing N</label><select id="fractalN"></select></div>
+      <div><label>Contract</label><select id="contract">
+        <option value="MES">MES · $5/pt</option>
+        <option value="ES">ES · $50/pt</option>
+      </select></div>
+      <div><label class="ck"><input type="checkbox" id="useHTF" checked> 4H+D must agree</label></div>
+    </div>
+    <div class="banner warn" id="note"></div>
+  </div>
+
+  <div class="card"><h2>Result</h2><div class="stats" id="stats"></div></div>
+  <div class="card"><h2>Equity, in R</h2><div id="curve"></div></div>
+  <div class="card"><h2>By year</h2><div id="years"></div></div>
+  <div class="card"><h2>Trades <span class="dim" id="tcount"></span></h2>
+    <div class="scroll"><table id="trades"></table></div></div>
+
+  <p class="foot">
+    Runs the same engine the research used, on the same 1H data.<br>
+    A target is never counted on the bar it filled on — see the note above.
+  </p>
+</div>
+
+<script>/*__ENGINE__*/</script>
+<script>const BARS = /*__DATA__*/;</script>
+<script>
+const $ = id => document.getElementById(id);
+const money = n => (n<0?'-$':'$') + Math.abs(n).toLocaleString('en-US',{maximumFractionDigits:0});
+const SPEC = {MES:{pv:5, rt:4.00}, ES:{pv:50, rt:4.50}};
+
+const fill = (id, vals, def) => {
+  $(id).innerHTML = vals.map(v => `<option value="${v}"${v===def?' selected':''}>${v}</option>`).join('');
+};
+fill('depth',    [0.33,0.50,0.62,0.75,0.85], 0.75);
+fill('exitFrac', [0.50,0.65,0.80,1.00], 0.80);
+fill('fractalN', [2,3,4,5], 2);
+
+$('span').textContent = `MES 1H · ${BARS.length.toLocaleString()} bars · ` +
+  new Date(BARS[0].t).toLocaleDateString() + ' → ' + new Date(BARS[BARS.length-1].t).toLocaleDateString();
+
+$('note').innerHTML =
+  '<b>A target is never counted on the entry bar.</b> A long fills when the bar trades ' +
+  'down to the limit, and that bar’s high may have printed before the fill — OHLC ' +
+  'cannot say which came first. Allowing it turned +0.00R into +0.50R in testing, which ' +
+  'is how the error was found. Resolving real paths against 15-minute data put the truth ' +
+  'between the two, nearer <b>+0.20R to +0.46R</b>. Treat what follows as the pessimistic end.';
+
+function run(){
+  const o = {
+    depth   : parseFloat($('depth').value),
+    exitFrac: parseFloat($('exitFrac').value),
+    fractalN: parseInt($('fractalN').value, 10),
+    useHTF  : $('useHTF').checked
+  };
+  const spec = SPEC[$('contract').value];
+
+  const st = Loop.create(o);
+  st.noHTF = !o.useHTF;
+  for(const c of BARS) Loop.tick(st, c);
+
+  const t = st.trades.map(x => {
+    const feeR = (spec.rt / spec.pv) / x.risk;
+    return {...x, t: BARS[x.entryAt].t, net: x.r - feeR, feeR};
+  });
+
+  if(!t.length){ $('stats').innerHTML = '<div class="box"><div class="k">Trades</div><div class="v">0</div></div>';
+                 $('curve').innerHTML = ''; $('years').innerHTML = ''; $('trades').innerHTML = ''; return; }
+
+  const sum = f => t.reduce((s,x) => s + f(x), 0);
+  const wins = t.filter(x => x.net > 0);
+  const exp  = sum(x => x.net) / t.length;
+  const days = (BARS[BARS.length-1].t - BARS[0].t) / 86400000;
+
+  let eq = 0, peak = 0, dd = 0;
+  const curve = t.map(x => { eq += x.net; peak = Math.max(peak, eq); dd = Math.min(dd, eq-peak); return eq; });
+
+  const gw = wins.reduce((s,x)=>s+x.net,0);
+  const gl = Math.abs(t.filter(x=>x.net<=0).reduce((s,x)=>s+x.net,0));
+  const medRisk = t.map(x=>x.risk).sort((a,b)=>a-b)[Math.floor(t.length/2)];
+
+  $('stats').innerHTML = `
+    <div class="box"><div class="k">Trades</div><div class="v">${t.length}</div>
+      <div class="s">${(t.length/(days/7)).toFixed(1)} per week</div></div>
+    <div class="box"><div class="k">Win rate</div><div class="v">${(wins.length/t.length*100).toFixed(0)}%</div>
+      <div class="s">${t.length-wins.length} losers</div></div>
+    <div class="box"><div class="k">Expectancy</div>
+      <div class="v ${exp>=0?'pos':'neg'}">${exp>=0?'+':''}${exp.toFixed(3)}R</div>
+      <div class="s">net of fees</div></div>
+    <div class="box"><div class="k">Total</div>
+      <div class="v ${eq>=0?'pos':'neg'}">${eq.toFixed(1)}R</div>
+      <div class="s">${money(eq * medRisk * spec.pv)} at 1 contract</div></div>
+    <div class="box"><div class="k">Max drawdown</div><div class="v neg">${dd.toFixed(1)}R</div>
+      <div class="s">peak to trough</div></div>
+    <div class="box"><div class="k">Profit factor</div>
+      <div class="v ${gw>gl?'pos':'neg'}">${gl>0?(gw/gl).toFixed(2):'∞'}</div>
+      <div class="s">won ÷ lost</div></div>
+    <div class="box"><div class="k">Median risk</div><div class="v">${medRisk.toFixed(1)}pt</div>
+      <div class="s">${money(medRisk*spec.pv)} a contract</div></div>
+    <div class="box"><div class="k">Fees</div>
+      <div class="v">${(sum(x=>x.feeR)/t.length*100).toFixed(1)}%</div>
+      <div class="s">of one R, per trade</div></div>`;
+
+  /* equity curve */
+  const W = 940, H = 150, pad = 6;
+  const lo = Math.min(0, ...curve), hi = Math.max(0, ...curve), span = (hi-lo)||1;
+  const X = i => pad + i*(W-2*pad)/Math.max(1,curve.length-1);
+  const Y = v => H - pad - (v-lo)/span*(H-2*pad);
+  $('curve').innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:150px;display:block">
+    <line x1="0" y1="${Y(0).toFixed(1)}" x2="${W}" y2="${Y(0).toFixed(1)}" stroke="#3a434f" stroke-dasharray="3 3"/>
+    <path d="${curve.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join('')}"
+      fill="none" stroke="${eq>=0?'#3ddc97':'#ff5c6c'}" stroke-width="1.8"/>
+  </svg>`;
+
+  /* by year and direction */
+  const grp = (key) => {
+    const g = {};
+    t.forEach(x => { const k = key(x); (g[k] = g[k]||[]).push(x); });
+    return Object.entries(g).sort().map(([k,v]) => {
+      const e = v.reduce((s,x)=>s+x.net,0);
+      return `<tr><td class="txt">${k}</td><td>${v.length}</td>
+        <td>${(v.filter(x=>x.net>0).length/v.length*100).toFixed(0)}%</td>
+        <td class="${e>=0?'pos':'neg'}">${e>=0?'+':''}${(e/v.length).toFixed(2)}R</td>
+        <td class="${e>=0?'pos':'neg'}">${e.toFixed(1)}R</td></tr>`;
+    }).join('');
+  };
+  $('years').innerHTML = `<table><thead><tr><th></th><th>n</th><th>win</th><th>per trade</th><th>total</th></tr></thead>
+    <tbody>${grp(x => new Date(x.t).getUTCFullYear())}
+    ${grp(x => x.dir === 'bull' ? 'long' : 'short')}</tbody></table>`;
+
+  $('tcount').textContent = `(${t.length})`;
+  $('trades').innerHTML = `<thead><tr><th>Date</th><th>Dir</th><th>Entry</th><th>Stop</th>
+    <th>Target</th><th>Risk</th><th>R</th></tr></thead><tbody>${
+    t.slice().reverse().map(x => `<tr>
+      <td class="txt">${new Date(x.t).toLocaleDateString()}</td>
+      <td class="txt">${x.dir==='bull'?'long':'short'}</td>
+      <td>${x.entry.toFixed(2)}</td><td>${x.stop.toFixed(2)}</td>
+      <td>${x.target.toFixed(2)}</td><td>${x.risk.toFixed(1)}</td>
+      <td class="${x.net>0?'pos':'neg'}">${x.net>0?'+':''}${x.net.toFixed(2)}</td></tr>`).join('')}</tbody>`;
+}
+
+['depth','exitFrac','fractalN','contract','useHTF'].forEach(id => $(id).onchange = run);
+run();
+</script>
+</body>
+</html>

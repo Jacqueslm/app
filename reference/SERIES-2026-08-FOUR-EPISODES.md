@@ -176,8 +176,25 @@ be explained on screen.
 **SHOT 4** — `Close on NIA in a driver's seat, coat on, hands in her lap, watching something across the street, not moving to get out`
 *"I still park across the street some Sundays."*
 
-**SHOT 5** — `A childhood photograph held on a fridge by a magnet, a kid in Sunday clothes on a church step, slightly out of focus`
+**SHOT 5** — `A faded family snapshot held on a fridge door by a magnet, photographed straight on. In the snapshot: a young Black BOY, about seven, in his Sunday best — a small boy's suit jacket, buttoned shirt, little clip-on tie, short cropped hair — on a church step in bright sunlight, squinting slightly, arms at his sides. He is a boy: no dress, no braids, no hair clips or bows. The snapshot is slightly out of focus and small in frame, soft grain and warm cast of a late-1990s print; the fridge and kitchen around it are sharper than the photo itself`
 *"I know every word they're singing in there."*
+
+> ### ⚠ THE CHILD IN SHOT 5 IS A BOY. Say it three times or it comes back a girl.
+>
+> This read `a kid in Sunday clothes` and Manus rendered a little girl
+> (15 Aug 2026). One mention of a gender word loses to the generator's own
+> defaults, the same way one word of wardrobe lost to the reference photo above.
+> Hence **BOY** repeated, plus an explicit *no dress, no braids, no hair clips*.
+>
+> It is not a detail. The photograph is the before, and it is the only place in
+> the episode that shows it. Shot 3 says she transitioned at twenty-nine; this
+> is the child that sentence is about.
+>
+> **Keep the photo soft, small and off-centre, and the kitchen sharper than it
+> is.** Crisp and centred turns it into a reveal, and the shot stops being
+> something she lives beside. The caption never mentions it — *"I know every
+> word they're singing in there"* stays exactly as it is. Naming it out loud
+> flattens the whole thing.
 
 **SHOT 6** — `Close on a single empty glass in a kitchen sink in flat morning light, nothing else in the sink`
 *"What I was actually after was the quiet."*

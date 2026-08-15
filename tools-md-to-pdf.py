@@ -11,10 +11,16 @@ This is the same renderer as Studio/tools-make-guide.py, made general.
     python3 tools-md-to-pdf.py KEYWORDS.md
     python3 tools-md-to-pdf.py reference/*.md
     python3 tools-md-to-pdf.py --all          # every handover doc, in one go
+    python3 tools-md-to-pdf.py --all --png    # ...and page images beside them
 
 PDFs land next to the markdown they came from, same name, .pdf.
 
-Needs: pip install reportlab
+**--png also writes one PNG per page**, into a folder named after the document,
+because most AI tools will take a picture and will not take a PDF. That is the
+whole reason the flag exists: a handover Jacques cannot paste into the tool he
+is actually using is not a handover.
+
+Needs: pip install reportlab pypdfium2
 """
 
 import glob
@@ -71,9 +77,9 @@ def esc(text):
     """Markdown inline -> reportlab's mini-HTML, with real escaping first."""
     t = text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
     t = re.sub(r'`([^`]+)`', r'<font face="Courier" size="8.5">\1</font>', t)
-    t = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', t)
+    t = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', t)
     # Single asterisks only when they wrap a word, so "2 * 3" survives.
-    t = re.sub(r'(?<!\*)\*([^*\n]+)\*(?!\*)', r'<i>\1</i>', t)
+    t = re.sub(r'(?<!\*)\*([^*\n]+?)\*(?!\*)', r'<i>\1</i>', t)
     t = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<link href="\2" color="#6d5efc">\1</link>', t)
     return t
 
@@ -83,11 +89,65 @@ def split_row(line):
     return cells
 
 
+def _join_wrapped(lines):
+    """Fold hard-wrapped prose into single lines. Structure is left alone."""
+    def structural(t):
+        st = t.strip()
+        return (not st
+                or st.startswith(('#', '>', '|', '```'))
+                or re.match(r'^\s*[-*]\s+', t)
+                or re.match(r'^\s*\d+\.\s+', t)
+                or re.match(r'^\s*---+\s*$', st))
+
+    is_item = lambda t: bool(re.match(r'^\s*[-*]\s+', t) or re.match(r'^\s*\d+\.\s+', t))
+
+    out, buf, in_code = [], [], False
+    open_item = False   # the last thing emitted was a list item, still unbroken
+
+    def flush():
+        if buf:
+            out.append(' '.join(x.strip() for x in buf))
+            buf.clear()
+
+    for line in lines:
+        if line.strip().startswith('```'):
+            flush()
+            out.append(line)
+            in_code = not in_code
+            open_item = False
+            continue
+        if in_code:
+            out.append(line)
+            continue
+        if structural(line):
+            flush()
+            out.append(line)
+            # a list item stays open across its own wrapped lines; a blank line
+            # or any other structure closes it
+            open_item = is_item(line)
+            continue
+        if open_item and not buf:
+            # continuation of the item above - glue it back on
+            out[-1] = out[-1].rstrip() + ' ' + line.strip()
+            continue
+        buf.append(line)
+    flush()
+    return out
+
+
 def build(src, out, title):
     if not os.path.exists(src):
         sys.exit(f'Cannot find {src}')
     with open(src, encoding='utf-8') as fh:
         lines = fh.read().split('\n')
+
+    # Markdown in this repo is hard-wrapped at ~80 columns. Rendering it one
+    # source line per paragraph produced two visible faults: ragged line breaks
+    # (reportlab re-wraps anyway, so it wrapped twice), and literal ** on any
+    # bold phrase that straddled a line break, because the ** opened on one
+    # line and closed on the next. Joining consecutive body lines into one
+    # paragraph first fixes both.
+    lines = _join_wrapped(lines)
 
     flow = []
     i = 0
@@ -220,7 +280,31 @@ def title_from(src):
     return os.path.splitext(os.path.basename(src))[0]
 
 
+def to_pngs(pdf_path, scale=2):
+    """One PNG per page, in a folder beside the PDF. Returns the file list.
+
+    150dpi-ish (scale 2) is the sweet spot: text stays sharp when an AI or a
+    phone zooms in, and a page still lands around 150-250KB rather than
+    several MB.
+    """
+    import pypdfium2  # imported here so the PDF path works without it
+
+    stem = os.path.splitext(pdf_path)[0]
+    folder = stem + '-pages'
+    os.makedirs(folder, exist_ok=True)
+    doc = pypdfium2.PdfDocument(pdf_path)
+    made = []
+    for i in range(len(doc)):
+        img = doc[i].render(scale=scale).to_pil()
+        out = os.path.join(folder, f'{os.path.basename(stem)}-{i + 1:02d}.png')
+        img.save(out, optimize=True)
+        made.append(out)
+    return made
+
+
 def main(argv):
+    want_png = '--png' in argv
+    argv = [a for a in argv if a != '--png']
     if not argv or argv[0] == '--all':
         targets = [os.path.join(HERE, p) for p in HANDOVER]
     else:
@@ -236,6 +320,12 @@ def main(argv):
         out = os.path.splitext(src)[0] + '.pdf'
         build(src, out, title_from(src))
         print(f'{out}  ({os.path.getsize(out) / 1024:.0f} KB)')
+        if want_png:
+            try:
+                pages = to_pngs(out)
+                print(f'   {len(pages)} page image(s) -> {os.path.dirname(pages[0])}/')
+            except ImportError:
+                print('   (no page images: pip install pypdfium2)')
 
 
 if __name__ == '__main__':

@@ -43,6 +43,10 @@ of state. The pile is empty. Nothing here needs a phone call any more.
 Only chase the ones that didn't reply at all; a "no" is a finished conversation
 and chasing it costs you the next district's goodwill.
 
+**The 22 follow-ups are already written as Gmail drafts** — see `gmail-drafts.gs`
+at the top of the repo. It's a Google Apps Script: run it once (steps are in the
+top of that file) and all 22 land in Gmail → Drafts for you to review and send.
+
 ---
 
 ## BATCH 1 — SAINT LOUIS. Send these first.

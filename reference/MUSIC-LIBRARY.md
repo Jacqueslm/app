@@ -62,6 +62,32 @@ database, not the media folder.
 
 ---
 
+## Manus-generated tracks — Jacques's call, 15 Aug 2026
+
+Manus generates a bespoke instrumental per episode from the Suno-style brief
+(the first was `slow_hymnal_instrumental_53s.wav`, 53s — exactly ten shots at
+five seconds plus the three-second card).
+
+Manus's own disclaimer: it cannot guarantee the output is copyright-free or
+cleared for commercial use. **Jacques has decided to use them anyway unless
+something gets flagged.** That is a reasonable bet and it is his to make — do
+not re-litigate it every session.
+
+What that decision requires, and it is the only obligation:
+
+- **Keep the generation record** for each track: the prompt, the output file,
+  and the date. That is the only thing that helps if anyone ever asks.
+- **If a track gets flagged** — a Content ID match on YouTube, an audio claim on
+  TikTok — the consequence is a muted video or redirected ad revenue, not a
+  strike. Swap the track, re-upload, move on.
+- **Keep a Suno version as the backup** for any episode carrying a Manus track.
+
+**Jacques pays for Suno**, so tracks generated *while subscribed* carry
+commercial rights. Rights are not retroactive: anything made before the
+subscription started is not covered, and re-generating it is the fix.
+
+---
+
 ## Template — copy this for the next track
 
 ```

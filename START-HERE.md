@@ -3,6 +3,19 @@
 Orientation for Jacques and for any Claude session picking this up. Chat history
 does NOT carry between sessions — this repo is the shared memory. Read this first.
 
+**RULE ONE — JACQUES GETS PDFs, NOT MARKDOWN.** He reads and forwards PDFs.
+A `.md` file handed to him is a file he cannot comfortably read on a phone or
+send to anyone. Every handover, summary, plan or research doc goes to him as a
+**PDF**. There is a tool for it and no excuse for forgetting again:
+
+```
+python3 tools-md-to-pdf.py --all          # rebuild the whole handover set
+python3 tools-md-to-pdf.py <any-file>.md  # one file
+```
+
+The PDF lands next to the markdown, same name. Write the markdown (it is the
+version control lives on), then convert, then send the PDF.
+
 **RULE ZERO — for any AI reading this.** Jacques should never have to say the
 same thing twice. If this file says something is DONE, it is done: do not
 re-check it, do not re-ask him about it, do not walk him back through it to

@@ -19,7 +19,14 @@ const STOCK_STOP = new Set(('a an the and or but of to in on at by for with from
   ' saw see seen look looks looked hold holds held keep kept stop stopped' +
   ' find found buy bought hide hid miss missed give gave take took' +
   ' hard easy good bad right wrong nobody somebody everybody anybody' +
-  ' always never ever once again year years day days night nights time times like').split(/\s+/));
+  ' always never ever once again year years day days night nights time times like' +
+  // Film-craft vocabulary. The Director writes real image prompts, and they all
+  // open with the same house style - "cinematic film still, ..." - so without
+  // this the query for every single shot came back "cinematic film still" and
+  // every shot in the video got the same stock photo.
+  ' cinematic film still frame photorealistic realism documentary establishing' +
+  ' medium crane dolly tracking panning tilt angle lens bokeh silhouette' +
+  ' moment ordinary believable setting natural composition vertical').split(/\s+/));
 
 // Panel names in a pasted plan carry the subject: 01_toywheel, 04_report,
 // 09_setdown. Leading numbers and separators come off, camel humps split.

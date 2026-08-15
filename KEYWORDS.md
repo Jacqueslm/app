@@ -2,9 +2,9 @@
 
 Two live Semrush pulls (US database), both **6 Aug 2026**, plus later sweeps on
 10, 12 and 15 Aug. **The subscription ended 15 Aug 2026** — nothing can be
-re-pulled after that date. Every number here was verified against the live API
-before saving; the two pulls agreed on every overlapping term. **Do not delete
-this file. This file is final** — no re-running research, no fresh volumes, no
+re-pulled after that date. Every number here was verified against the live API before
+saving; the two pulls agreed on every overlapping term. **Do not delete this
+file. This file is final** — no re-running research, no fresh volumes, no
 estimating numbers that aren't here.
 
 Tags:
@@ -485,30 +485,27 @@ filtered to difficulty under 42. **These four lanes had no data at all** because
 their video episodes were written after the August research was done. This
 closes that gap. **Nothing after this date can be pulled.**
 
-### Anger — and the supporter term is the find of the whole pull
+### ⭐ Anger — and the supporter term is the find of the whole pull
 
 | Term | Vol | KD | Tag |
 |---|---|---|---|
-| how to help a man whos always mad | 1,900 | 11 | Build — page, now |
-| why am i so angry all the time | 2,900 | 27 | Build |
+| **how to help a man whos always mad** | 1,900 | **11** | **Build — page, now** |
+| why am i so angry all the time | 2,900 | 27 | **Build** |
 | women with anger | 1,900 | 25 | Build |
 | signs of anger issues | 1,300 | 39 | Build |
 | angry all the time | 1,000 | 38 | Build (video) |
 | anger management counseling | 1,300 | 36 | Skip — not what the app is |
+| intermittent explosive disorder | 33,100 | 32 | **Skip — clinical diagnosis.** See the claims audit. |
 
-`how to help a man whos always mad` **at difficulty 11 is the single cheapest
+**`how to help a man whos always mad` at difficulty 11 is the single cheapest
 term in this entire file.** It is Lane 1 wearing different clothes: not the
 angry person searching, the person *living with* him. Same moat, same audience
 that outperforms everywhere else, and nobody institutional writes it. The
 grammar is broken because that is how it is typed — **match it, do not correct
 it**, or the page answers a query nobody makes.
 
-| Term | Vol | KD | Tag |
-|---|---|---|---|
-| intermittent explosive disorder | 33,100 | 32 | **Skip — clinical diagnosis.** See the claims audit. |
-
-**Do not** chase intermittent explosive disorder despite the 33,100. It is a DSM
-diagnosis; the app does not diagnose and must not appear to.
+Do **not** chase intermittent explosive disorder despite the 33,100. It is a
+DSM diagnosis; the app does not diagnose and must not appear to.
 
 ### Road rage — thin, and it is a news lane, not a recovery lane
 
@@ -541,20 +538,20 @@ there. That is a real finding, not a failure.
 
 | Term | Vol | KD | Tag |
 |---|---|---|---|
-| why do teenagers vape | 390 | 37 | Build |
-| 5 signs your kid is vaping | 320 | 32 | Build |
-| signs of vaping | 320 | 27 | Build |
-| appropriate punishment for vaping | 320 | 23 | Build — highest intent on the list |
+| why do teenagers vape | 390 | 37 | **Build** |
+| 5 signs your kid is vaping | 320 | 32 | **Build** |
+| signs of vaping | 320 | 27 | **Build** |
+| appropriate punishment for vaping | 320 | 23 | **Build — highest intent on the list** |
 | signs your teen is vaping | 260 | 24 | Build |
 | signs your kid is vaping | 260 | 28 | Build |
 | tips to stop vaping | 320 | 37 | Build |
 | how hard is it to quit vaping | 590 | 31 | Build |
 
-One page answers the whole cluster — roughly 2,400/mo at difficulty 23-37,
+**One page answers the whole cluster** — roughly 2,400/mo at difficulty 23-37,
 written for the parent who just found it. `appropriate punishment for vaping` is
 the tell: that parent is standing in the kitchen deciding what to do tonight.
 The honest answer — that punishment is not the lever, and the hiding was
-organised long before tonight — is Episode 7's script. Film and page say the
+organised long before tonight — **is Episode 7's script**. Film and page say the
 same thing.
 
 ### Screen time — no page, and one usable video term
@@ -562,17 +559,18 @@ same thing.
 | Term | Vol | KD | Tag |
 |---|---|---|---|
 | how to get rid of screen time | 1,300 | 41 | Skip — they mean the iPhone setting |
-| how to remove screen time / get past screen time | 260-480 | 24-33 | Skip — they want to defeat parental controls |
+| how to remove screen time / get past screen time | 260-480 | 24-33 | **Skip — they want to defeat parental controls** |
 | social media addiction symptoms | 390 | 39 | Build (video) |
 | screen addict | 480 | 25 | Build (video) |
 
-Nearly all "screen time" volume is people trying to switch the feature off or
-bypass a parent's lock. Wrong room entirely. Episode 10 keeps its story; use
+**Nearly all "screen time" volume is people trying to switch the feature off or
+bypass a parent's lock.** Wrong room entirely. Episode 10 keeps its story; use
 `screen addict` and `social media addiction symptoms` for titles.
 
 ### What this pull changes, in one line
 
-Build one page: the anger supporter page (`how to help a man whos always mad`,
-1,900/mo, KD 11) — and one vaping-parent page for that 2,400/mo cluster. Work,
-road rage and screen time stay as films only. Two pages, both in the lane the
-whole file says is the moat: the person who loves someone, not the person using.
+**Build one page: the anger supporter page** (`how to help a man whos always
+mad`, 1,900/mo, KD 11) — and **one vaping-parent page** for that 2,400/mo
+cluster. Work, road rage and screen time stay as films only. Two pages, both in
+the lane the whole file says is the moat: **the person who loves someone, not
+the person using.**

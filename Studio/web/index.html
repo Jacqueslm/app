@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0863</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0866</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -519,6 +519,7 @@ body.simple-only #view-simple{display:flex !important}
       <div id="crew-thumbs" class="char-refs" style="margin:4px 0"></div>
       <p class="usage" id="crew-imgs">Nothing dropped yet — the Director uses your images and clips <b>in the order you drop them</b>, and only generates scenes to fill gaps.</p>
       <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-scout"> 🔎 Let the Director also pull in matching images from my Library <span class="usage">(off = use only what I drop, in my order)</span></label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts)"><input type="checkbox" id="crew-stock" checked> 🎬 Fill the rest with free stock before spending anything <span class="usage">(Pexels — free, needs the key in Settings)</span></label>
 
       <p class="usage" style="margin:8px 0 0"><b>4. Director's brief</b> <span class="usage">(answer a few — the Director plans around your answers instead of guessing)</span></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:13px">
@@ -906,6 +907,7 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2" id="sb-build">Build storyboard from my lyrics</button>
       <p class="usage" id="sb-method"></p>
       <div id="sb-list" class="row"></div>
+      <button class="btn2" id="sb-stock-all" style="display:none;width:100%;margin-top:6px">🎬 Fill empty scenes from free stock — costs nothing</button>
       <div style="display:flex;gap:8px">
         <button class="gen-btn" id="sb-gen-all" style="display:none;flex:1">Generate all remaining scenes</button>
         <button class="btn2" id="sb-queue-all" style="display:none;flex:1">🌙 Queue overnight</button>
@@ -6867,7 +6869,8 @@ async function runRender(windowOpt, btnSel, opts) {
 /* ---------------- hover help on every major button ---------------- */
 Object.entries({
   'crew-drop': 'Pick images from your computer for the Director to cast into scenes. You can also let them scout your Library instead.',
-  'crew-direct': 'FREE. The Director reads your words — song lyrics or a narration script — and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-direct': 'FREE. The Director reads your words — song lyrics or a narration script — fills what it can from free stock, and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-stock': 'FREE. Any shot with no picture of yours gets one from Pexels before the Producer spends a cent. Your own images are never replaced.',
   'crew-produce': 'This is the spend button: generates the planned gap scenes, applies motion and grade, and renders the full video with captions.',
   'qk-add-imgs': 'Pick pictures from your computer for a quick beat-matched video.',
   'qk-add-music': 'Upload your song file (mp3/wav) from your computer.',
@@ -6879,7 +6882,8 @@ Object.entries({
   'lyr-tap': 'FREE perfect sync: your song — or your own talking-head clip — plays and you tap once when each line starts.',
   'lyr-spread': 'FREE instant guess: spreads your lines evenly across the song.',
   'sb-build': 'FREE. Splits your lyrics into scenes (intro/verse/chorus/bridge/outro) and writes a filmable prompt for each.',
-  'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene.',
+  'sb-gen-all': 'Generates every remaining storyboard scene as an image. Price shows per scene. Try the free stock button above first.',
+  'sb-stock-all': 'FREE. Finds a real photo for every scene that has no image yet, using its prompt. Nothing is charged, and scenes you already generated are left alone.',
   'seq-render': 'FREE. Renders the timeline into the final MP4 with music, captions, and mastered audio.',
   'hl-auto': 'FREE. Finds your best short-video moments: the chorus/hook if captions exist, loudest sections otherwise.',
   'loc-create': 'Save a place once (add photos after) and reuse it in any scene from the location dropdown.',
@@ -7244,6 +7248,42 @@ $('#crew-direct').onclick = async () => {
           if (n > bestN) { bestN = n; best = a; }
         }
         if (best) { s.source = { assetId: best.id, label: `${best.label} (scouted)` }; used.add(best.id); }
+      }
+    }
+    // FREE BEFORE PAID. Every gap used to go straight to the Producer's budget
+    // and get generated at ~9c a scene, while Pexels sat one card away in My
+    // Media doing nothing. Stock is tried first now; generation is what happens
+    // to the lines stock cannot answer.
+    //
+    // Order is deliberate and must stay this way:
+    //   your dropped images  ->  scouted from your library  ->  free stock  ->  paid generation
+    // Anything you put there yourself always wins. Stock only ever fills empties.
+    //
+    // The scene's image PROMPT is the search text, not its lyric line: the
+    // prompt says "a wall clock in a dark room", the lyric says "I'd look up
+    // and two hours were gone". Only one of those exists in a stock library.
+    if ($('#crew-stock') && $('#crew-stock').checked) {
+      const empties = shots.filter((s) => !s.source);
+      if (empties.length) {
+        b.innerHTML = `<span class="spinner"></span>Looking for free footage for ${empties.length} shot${empties.length > 1 ? 's' : ''}…`;
+        try {
+          const out = await jfetch('/api/studio/stock/fill', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'photos',
+              rows: empties.map((s) => ({ index: s.idx, name: '', text: s.scene.prompt || s.scene.lines })),
+            }),
+          });
+          const found = new Map((out.filled || []).map((f) => [f.index, f]));
+          for (const s of empties) {
+            const hit = found.get(s.idx);
+            if (hit) s.source = { assetId: hit.asset.id, label: `${hit.asset.label} (free stock)`, kind: 'image' };
+          }
+          if (found.size) await loadAssets();
+        } catch (_) {
+          // No key, or Pexels unreachable. Fall through to generation exactly as
+          // before - a missing free step must never break the plan.
+        }
       }
     }
     const gaps = shots.filter((s) => !s.source);
@@ -7848,6 +7888,11 @@ function renderStoryboard() {
   const hasPending = st.storyboard.some((s) => !s.assetId && !s.queueId);
   $('#sb-gen-all').style.display = hasPending ? 'block' : 'none';
   $('#sb-queue-all').style.display = hasPending ? 'block' : 'none';
+  // Storyboard was the last of the three doors with only a paid path: it wrote
+  // a shot list, then every scene was a generation with a price on it. Free
+  // stock sits above the paid buttons on purpose - it should be the thing you
+  // reach for first.
+  if ($('#sb-stock-all')) $('#sb-stock-all').style.display = hasPending ? 'block' : 'none';
   // one button to drop every generated scene onto the timeline, in order,
   // with section-aware holds - so you don't add them one at a time
   const anyGenerated = st.storyboard.some((s) => s.assetId);
@@ -7901,6 +7946,44 @@ async function generateStoryboardScene(sc, card) {
     prog.classList.remove('show');
   }
 }
+
+if (document.getElementById('sb-stock-all')) $('#sb-stock-all').onclick = async (e) => {
+  const btn = e.currentTarget;
+  const empties = st.storyboard
+    .map((sc, i) => ({ sc, i }))
+    .filter((x) => !x.sc.assetId && !x.sc.queueId);
+  if (!empties.length) return;
+  btn.disabled = true;
+  const was = btn.textContent;
+  btn.textContent = `Looking for ${empties.length}…`;
+  try {
+    // The scene's PROMPT is the search text, not its lyric line - a prompt
+    // names a thing, a lyric names a feeling. stock-query.js strips the house
+    // style words so two scenes can't come back with the same photo.
+    const out = await jfetch('/api/studio/stock/fill', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'photos',
+        rows: empties.map((x) => ({ index: x.i, name: '', text: x.sc.prompt || x.sc.lines })),
+      }),
+    });
+    const found = new Map((out.filled || []).map((f) => [f.index, f]));
+    for (const x of empties) {
+      const hit = found.get(x.i);
+      if (hit) { x.sc.assetId = hit.asset.id; x.sc.stock = true; }
+    }
+    if (found.size) await loadAssets();
+    renderStoryboard(); persistDraft();
+    const missed = empties.length - found.size;
+    setErr('#seq-err', null);
+    $('#sb-method').textContent = `Filled ${found.size} of ${empties.length} scenes from free stock.`
+      + (missed ? ` ${missed} had no match — generate those, or reword the prompt.` : ' Nothing was charged.');
+  } catch (err) {
+    setErr('#seq-err', err.message || 'Could not reach the stock library.');
+  } finally {
+    btn.disabled = false; btn.textContent = was;
+  }
+};
 
 $('#sb-build').onclick = async () => {
   setErr('#seq-err', null);
@@ -9570,20 +9653,26 @@ async function makeCtaCard(text, sub) {
   ctx.fillStyle = '#0d0d1f';
   ctx.fillRect(0, 0, w, h);
   const cx = w / 2;
-  let big = Math.round(h * 0.08);
+  // Sizes are deliberately smaller than they look like they should be. The card
+  // used to start at 8% of frame height and shrink only until it filled 86% of
+  // the width, so the words ran nearly edge to edge and read as shouting on a
+  // phone. 6.2% with a 72% measure leaves real margin either side - the same
+  // proportions as the PNG end cards in Studio/end-cards, so the built-in card
+  // and the picture ones look like the same set.
+  let big = Math.round(h * 0.062);
   ctx.font = `700 ${big}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  while (ctx.measureText(text).width > w * 0.86 && big > 24) {
+  while (ctx.measureText(text).width > w * 0.72 && big > 24) {
     big -= 2;
     ctx.font = `700 ${big}px system-ui, sans-serif`;
   }
   ctx.fillStyle = '#ffffff';
   ctx.fillText(text, cx, h * 0.42);
   if (sub) {
-    let subSize = Math.round(big * 0.4);
+    let subSize = Math.round(big * 0.36);
     ctx.font = `500 ${subSize}px system-ui, sans-serif`;
-    while (ctx.measureText(sub).width > w * 0.8 && subSize > 18) {
+    while (ctx.measureText(sub).width > w * 0.66 && subSize > 18) {
       subSize -= 2;
       ctx.font = `500 ${subSize}px system-ui, sans-serif`;
     }

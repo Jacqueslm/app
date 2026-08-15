@@ -178,6 +178,20 @@ app.get('/how-to-stop-binge-eating', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'how-to-stop-binge-eating.html'));
 });
 
+// The quiz that page sends people to. This route was missing, and one missing
+// route caused five separate findings in the 15 Aug site audit: the URL 404'd,
+// the two internal links pointing at it were "broken internal links", it was an
+// "incorrect page found in sitemap.xml", and it sat in the sitemap inviting
+// Google to crawl a 404.
+//
+// The page file existed the whole time — express.static serves it, but only at
+// the .html address. Every clean URL on this site needs its own route; there is
+// no catch-all, on purpose (see ALT_PAGES below). A page whose canonical tag,
+// sitemap entry and inbound links all point at an unrouted URL is invisible.
+app.get('/do-i-have-a-binge-eating-problem-quiz', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'do-i-have-a-binge-eating-problem-quiz.html'));
+});
+
 // Final two pages of the KEYWORDS.md plan: the moat's companion page
 // (betrayal trauma recovery, supporter side) and the one borderline
 // long-form worth attempting (how to stop drinking, self side - carries

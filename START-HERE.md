@@ -285,6 +285,16 @@ hits harder.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
+**b0863 — SESSION_SECRET writes itself to `server/.env`. Leave it there.**
+Without it, `auth.js` invents a random signing key on every boot, so **every
+server restart signs Jacques out** — and updating Studio restarts the server.
+It showed up as a lie: the header still said "Sign out" while every request came
+back "Not signed in." Do not "simplify" this back to a console warning; the
+warning had been there for months and cost him a sign-in every single update.
+`server/.env` is gitignored and written 0600, so the secret never leaves his
+machine.
+
+
 **b0862 — the Director is not a music-only tool. Do not put the song check
 back.** It used to refuse to plan anything without a song loaded, which made it
 useless for a narrated story — and narrated stories are most of what gets made

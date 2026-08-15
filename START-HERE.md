@@ -63,6 +63,12 @@ in Play Console — just wait for Google's email.**
    **Do not chase before 19 Aug.** Missouri DBH is waiting behind it and has
    confirmed in writing that a NASADAD listing is a route onto their page.
 
+**Two calendar dates (15 Aug):** **25 Aug** — Manus goes paid; episodes 3, 7,
+8, 10 still need images before then, and the renderer script Manus says it
+saved is **NOT in this repo** (checked all branches 15 Aug) — see
+`reference/EPISODE-RENDERER.md`. **29 Sep** — Play Billing 8 rebuild (Google
+deadline); not now.
+
 **Post-launch only, not before Google answers:** rebuild the TWA with
 `enableNotifications: true` (that flag is why pushes don't arrive on his phone),
 and consider Google Sign-In only if the funnel shows people dropping at signup.

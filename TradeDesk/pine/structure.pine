@@ -284,9 +284,24 @@ plot(eTarget, "Target", color = not na(eTarget) ? color.new(cBull, 0) : na, styl
 plot(bias == "bull" ? protLow : protHigh, "Protected", color = color.new(cProt, 50),
      style = plot.style_circles, linewidth = 1)
 
+// What state the setup is in. Printing an entry price with nothing beside it
+// is how a level that has already been and gone gets chased.
+string status = "none"
+if not na(eEntry)
+    reached = legDir == "bull" ? low <= eEntry : high >= eEntry
+    status := reached ? "PRICE ALREADY THERE" : "waiting"
+else if not na(legDir)
+    status := "leg live, no level yet"
+else if na(external)
+    status := "stand down - 4H and D disagree"
+
+statusCol = status == "waiting" ? cProt
+          : status == "PRICE ALREADY THERE" ? cMaj
+          : color.gray
+
 // ------------------------------------------------------------- readout -----
 if barstate.islast
-    var table t = table.new(position.top_right, 2, 6, border_width = 1)
+    var table t = table.new(position.top_right, 2, 7, border_width = 1)
     bt = bias == "bull" ? cBull : bias == "bear" ? cBear : color.gray
     table.cell(t, 0, 0, "bias",     text_color = color.gray, text_size = size.small)
     table.cell(t, 1, 0, na(bias) ? "—" : bias, text_color = bt, text_size = size.small)
@@ -301,8 +316,12 @@ if barstate.islast
     table.cell(t, 1, 4, na(eStop) ? "—" : str.tostring(eStop, format.mintick), text_size = size.small)
     table.cell(t, 0, 5, "target", text_color = color.gray, text_size = size.small)
     table.cell(t, 1, 5, na(eTarget) ? "—" : str.tostring(eTarget, format.mintick), text_size = size.small)
+    table.cell(t, 0, 6, "status", text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 6, status, text_color = statusCol, text_size = size.small)
 
 // comparing against eEntry[1] rather than high[1]: the level itself moves as the
 // leg extends, so the question is whether price crossed the level as it stood
-entryTouched = not na(eEntry) and low <= eEntry and not (low[1] <= nz(eEntry[1], low[1] - 1))
-alertcondition(entryTouched, "Pullback entry reached", "Price has reached the pullback entry level.")
+entryTouched = not na(eEntry) and (legDir == "bull" ? low <= eEntry : high >= eEntry) and
+   not (na(eEntry[1]) or (legDir == "bull" ? low[1] <= nz(eEntry[1]) : high[1] >= nz(eEntry[1])))
+alertcondition(entryTouched, "Pullback entry reached",
+   "Price has just reached the pullback entry level for the first time.")

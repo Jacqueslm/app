@@ -49,6 +49,8 @@
   @media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
   .foot{color:var(--faint);font-size:12px;text-align:center;margin-top:22px;line-height:1.7}
   .swings{font-family:var(--mono);font-size:13px;color:var(--dim);word-spacing:6px}
+  .levels{font-family:var(--mono);font-size:19px;line-height:1.7;white-space:pre;
+    background:var(--panel2);border-radius:9px;padding:14px;overflow-x:auto}
 </style>
 </head>
 <body>
@@ -836,6 +838,100 @@ const ET = t => new Date(t).toLocaleString('en-US', {
 
   return {parse, audit, ET};
 })();
+const Gaps = (function(){ 
+/* ---------------------------------------------------------------------------
+   Fair value gaps — inefficiency, and the displacement §5 left undefined.
+
+   Three candles. If the move through the middle one is violent enough that
+   candle 3 never trades where candle 1 traded, a band of price has been skipped:
+
+     bullish gap   low[i]  > high[i-2]     zone = high[i-2] .. low[i]
+     bearish gap   high[i] < low[i-2]      zone = high[i]   .. low[i-2]
+
+   No indicator, no threshold, no average. Either the two candles overlap or
+   they do not. That is the whole definition.
+
+   A gap is "filled" when price trades back through it. Two thresholds are
+   tracked because they answer different questions: the near edge (first touch)
+   and the far edge (fully consumed). The midpoint is tracked too, since a gap
+   half-filled is the level most people actually treat as the trade.
+
+   --- speed ------------------------------------------------------------------
+   Detection is a single pass and touches each bar three times. Fill tracking
+   keeps only the OPEN gaps in a working list and drops each one the moment it
+   is consumed, so the inner loop is over live gaps rather than all history.
+
+   For live use there is update(): feed it one new candle and it does the work
+   for that bar alone, no re-scan. That is what makes a per-tick decision cheap.
+   --------------------------------------------------------------------------- */
+
+function create(){
+  return {gaps: [], open: [], n: 0, prev: [null, null]};
+}
+
+/* Feed one candle. Returns the gap created on this bar, if any. */
+function update(st, c){
+  const i = st.n++;
+  const c2 = st.prev[0];             // candle i-2
+  let made = null;
+
+  if(c2){
+    if(c.l > c2.h){
+      made = {i, dir:'bull', bottom:c2.h, top:c.l, size:c.l - c2.h, t:c.t,
+              touchedAt:null, midAt:null, filledAt:null};
+    } else if(c.h < c2.l){
+      made = {i, dir:'bear', bottom:c.h, top:c2.l, size:c2.l - c.h, t:c.t,
+              touchedAt:null, midAt:null, filledAt:null};
+    }
+  }
+  if(made){ st.gaps.push(made); st.open.push(made); }
+
+  /* fills — walk the live list backwards so removal is cheap */
+  for(let k = st.open.length - 1; k >= 0; k--){
+    const g = st.open[k];
+    if(g.i >= i) continue;                    // a gap cannot fill on its own bar
+    const mid = (g.top + g.bottom) / 2;
+
+    if(g.dir === 'bull'){
+      if(g.touchedAt === null && c.l <= g.top)    g.touchedAt = i;
+      if(g.midAt     === null && c.l <= mid)      g.midAt     = i;
+      if(c.l <= g.bottom){ g.filledAt = i; st.open.splice(k,1); }
+    } else {
+      if(g.touchedAt === null && c.h >= g.bottom) g.touchedAt = i;
+      if(g.midAt     === null && c.h >= mid)      g.midAt     = i;
+      if(c.h >= g.top){ g.filledAt = i; st.open.splice(k,1); }
+    }
+  }
+
+  st.prev[0] = st.prev[1]; st.prev[1] = c;
+  return made;
+}
+
+function detect(candles){
+  const st = create();
+  for(const c of candles) update(st, c);
+  return st;
+}
+
+/* Gaps still unfilled as of bar i — the magnets price has left behind. */
+function openAt(st, i){
+  return st.gaps.filter(g => g.i < i && (g.filledAt === null || g.filledAt > i));
+}
+
+/* Was there displacement in `dir` within `within` bars ending at bar i?
+   This is the §5 answer: a sweep is manipulation when the move away from it
+   skips price rather than merely drifting. */
+function displacedBy(st, i, dir, within){
+  const w = within || 3;
+  for(const g of st.gaps){
+    if(g.dir !== dir) continue;
+    if(g.i > i) break;
+    if(g.i >= i - w) return g;
+  }
+  return null;
+}
+
+ return {create, update, detect, openAt, displacedBy}; })();
 const LiveSetup = (function(){ 
 /* ---------------------------------------------------------------------------
    Live setup state — the read, for right now.
@@ -859,6 +955,7 @@ function liveState(h1, opts){
   const S = typeof Structure !== 'undefined' ? Structure : require('./structure');
   const R = typeof Resample  !== 'undefined' ? Resample  : require('./resample');
   const A = typeof Align     !== 'undefined' ? Align     : require('./align');
+  const G = typeof Gaps      !== 'undefined' ? Gaps      : require('./gaps');
 
   const h4 = R.resample(h1, 4*3600e3, h1[0].t);
   const d1 = R.resampleDaily(h1);
@@ -876,8 +973,21 @@ function liveState(h1, opts){
     protectedLow: res.protectedLow, protectedHigh: res.protectedHigh,
     consolidating: S.isConsolidating(res),
     swings: res.swings.slice(-6).map(s => ({label:s.label, kind:s.kind, price:s.price})),
-    setup: null, note: null
+    setup: null, note: null, gaps: []
   };
+
+  /* Unfilled inefficiency, nearest first. Not a trade — roughly half fill
+     inside five bars, which is a coin toss — but useful as the thing price is
+     drawn toward, and as somewhere a target may stall. */
+  const gs = G.detect(h1);
+  const price = out.price;
+  out.gaps = G.openAt(gs, h1.length)
+    .map(g => ({dir:g.dir, top:g.top, bottom:g.bottom, size:g.size,
+                side: g.bottom > price ? 'above' : g.top < price ? 'below' : 'at price',
+                distance: g.bottom > price ? g.bottom - price
+                        : g.top < price ? price - g.top : 0}))
+    .sort((a,b) => a.distance - b.distance)
+    .slice(0, 6);
 
   if(!out.external){ out.note = 'Daily and 4H disagree — no external bias, stand down.'; return out; }
   if(out.consolidating){ out.note = '1H is ranging. Not a swing environment.'; }
@@ -1007,6 +1117,16 @@ function render(){
         ? 'Rest a limit at the entry. Invalid if price closes through the origin.'
         : 'Price is already at or past the entry — the pullback happened. Judge it on the chart rather than chasing.'}</div>
     </div>`;
+    html += `<div class="card">
+      <h2>Mark these before the moment</h2>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--dim)">
+        The point of this is that the decision is made now, not when price arrives.
+        Put these three lines on the chart and the moment needs no thinking.</p>
+      <div class="levels">${u.entry.toFixed(2)}  entry
+${u.stop.toFixed(2)}  stop
+${u.target.toFixed(2)}  target
+${u.origin.toFixed(2)}  invalid on a close through this</div>
+    </div>`;
     $('sizecard').hidden = false;
     size(u);
   } else {
@@ -1015,6 +1135,17 @@ function render(){
         ? 'The live leg is invalidated — price has closed through its origin. Wait for the next one.'
         : 'No setup. Nothing to do.'}</div></div>`;
     $('sizecard').hidden = true;
+  }
+  if(s.gaps.length){
+    html += `<div class="card"><h2>Unfilled gaps — context, not signals</h2>
+      <table>${s.gaps.map(g => `<tr>
+        <td>${g.side}${g.distance ? ' · ' + g.distance.toFixed(2) + 'pt' : ''}</td>
+        <td class="${g.dir==='bull'?'bull':'bear'}">${g.bottom.toFixed(2)} – ${g.top.toFixed(2)}</td>
+        <td style="color:var(--dim)">${g.size.toFixed(2)}pt</td></tr>`).join('')}</table>
+      <div class="banner warn">About half of these fill within five bars, which is a
+        coin toss. Use them as somewhere price is drawn to, or where a target may
+        stall — not as a reason to enter.</div>
+    </div>`;
   }
   $('out').innerHTML = html;
 }

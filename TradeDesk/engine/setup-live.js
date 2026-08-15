@@ -21,6 +21,7 @@ function liveState(h1, opts){
   const S = typeof Structure !== 'undefined' ? Structure : require('./structure');
   const R = typeof Resample  !== 'undefined' ? Resample  : require('./resample');
   const A = typeof Align     !== 'undefined' ? Align     : require('./align');
+  const G = typeof Gaps      !== 'undefined' ? Gaps      : require('./gaps');
 
   const h4 = R.resample(h1, 4*3600e3, h1[0].t);
   const d1 = R.resampleDaily(h1);
@@ -38,8 +39,21 @@ function liveState(h1, opts){
     protectedLow: res.protectedLow, protectedHigh: res.protectedHigh,
     consolidating: S.isConsolidating(res),
     swings: res.swings.slice(-6).map(s => ({label:s.label, kind:s.kind, price:s.price})),
-    setup: null, note: null
+    setup: null, note: null, gaps: []
   };
+
+  /* Unfilled inefficiency, nearest first. Not a trade — roughly half fill
+     inside five bars, which is a coin toss — but useful as the thing price is
+     drawn toward, and as somewhere a target may stall. */
+  const gs = G.detect(h1);
+  const price = out.price;
+  out.gaps = G.openAt(gs, h1.length)
+    .map(g => ({dir:g.dir, top:g.top, bottom:g.bottom, size:g.size,
+                side: g.bottom > price ? 'above' : g.top < price ? 'below' : 'at price',
+                distance: g.bottom > price ? g.bottom - price
+                        : g.top < price ? price - g.top : 0}))
+    .sort((a,b) => a.distance - b.distance)
+    .slice(0, 6);
 
   if(!out.external){ out.note = 'Daily and 4H disagree — no external bias, stand down.'; return out; }
   if(out.consolidating){ out.note = '1H is ranging. Not a swing environment.'; }

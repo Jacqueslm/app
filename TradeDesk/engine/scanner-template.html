@@ -49,6 +49,8 @@
   @media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
   .foot{color:var(--faint);font-size:12px;text-align:center;margin-top:22px;line-height:1.7}
   .swings{font-family:var(--mono);font-size:13px;color:var(--dim);word-spacing:6px}
+  .levels{font-family:var(--mono);font-size:19px;line-height:1.7;white-space:pre;
+    background:var(--panel2);border-radius:9px;padding:14px;overflow-x:auto}
 </style>
 </head>
 <body>
@@ -169,6 +171,16 @@ function render(){
         ? 'Rest a limit at the entry. Invalid if price closes through the origin.'
         : 'Price is already at or past the entry — the pullback happened. Judge it on the chart rather than chasing.'}</div>
     </div>`;
+    html += `<div class="card">
+      <h2>Mark these before the moment</h2>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--dim)">
+        The point of this is that the decision is made now, not when price arrives.
+        Put these three lines on the chart and the moment needs no thinking.</p>
+      <div class="levels">${u.entry.toFixed(2)}  entry
+${u.stop.toFixed(2)}  stop
+${u.target.toFixed(2)}  target
+${u.origin.toFixed(2)}  invalid on a close through this</div>
+    </div>`;
     $('sizecard').hidden = false;
     size(u);
   } else {
@@ -177,6 +189,17 @@ function render(){
         ? 'The live leg is invalidated — price has closed through its origin. Wait for the next one.'
         : 'No setup. Nothing to do.'}</div></div>`;
     $('sizecard').hidden = true;
+  }
+  if(s.gaps.length){
+    html += `<div class="card"><h2>Unfilled gaps — context, not signals</h2>
+      <table>${s.gaps.map(g => `<tr>
+        <td>${g.side}${g.distance ? ' · ' + g.distance.toFixed(2) + 'pt' : ''}</td>
+        <td class="${g.dir==='bull'?'bull':'bear'}">${g.bottom.toFixed(2)} – ${g.top.toFixed(2)}</td>
+        <td style="color:var(--dim)">${g.size.toFixed(2)}pt</td></tr>`).join('')}</table>
+      <div class="banner warn">About half of these fill within five bars, which is a
+        coin toss. Use them as somewhere price is drawn to, or where a target may
+        stall — not as a reason to enter.</div>
+    </div>`;
   }
   $('out').innerHTML = html;
 }

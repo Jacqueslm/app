@@ -20,6 +20,7 @@ const Csv = (function(){
       .replace(/const load = [\s\S]*?$/m,'').replace(/module\.exports[\s\S]*$/,'')}
   return {parse, audit, ET};
 })();
+const Gaps = (function(){ ${strip('gaps.js')} return {create, update, detect, openAt, displacedBy}; })();
 const LiveSetup = (function(){ ${strip('setup-live.js')} return {liveState}; })();
 `;
 

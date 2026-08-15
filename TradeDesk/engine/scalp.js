@@ -26,14 +26,20 @@
    --------------------------------------------------------------------------- */
 
 const S = require('./structure');
+const G = require('./gaps');
 
 function findScalps(candles, opts){
   const o = Object.assign({
     fractalN: 2, maxWaitForRetest: 20, requireFailure: true,
-    tickBuffer: 0.25, retestTolerance: 0
+    tickBuffer: 0.25, retestTolerance: 0,
+    requireDisplacement: false, displaceWithin: 3
   }, opts || {});
 
   const res = S.analyze(candles, {fractalN: o.fractalN});
+  /* Gaps are not a trade — fill inside five bars is close to a coin flip. They
+     are used only as confluence: a break that skipped price displaced, and a
+     break that merely drifted did not. */
+  const gaps = o.requireDisplacement ? G.detect(candles) : null;
   const sw  = res.swings;
   const out = [];
 
@@ -60,6 +66,8 @@ function findScalps(candles, opts){
         (Math.abs(s.level - failed.price) < 1e-9 && s.i <= ev.i));
       if(failed.label !== wanted && !swept) continue;
     }
+
+    if(gaps && !G.displacedBy(gaps, ev.i, dir, o.displaceWithin)) continue;
 
     /* step 5 — the next LH above, i.e. the previous swing of the same kind
        that sits beyond the one just broken */

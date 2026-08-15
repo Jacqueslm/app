@@ -637,3 +637,72 @@ sensitivity table printed identical rows and nearly read as stability.
 retest limit takes the level and the stop takes its price. 14 trades a week is
 far above the two or three stated at the outset, so this is a different activity
 from the swing trade and should be judged separately.
+
+---
+
+## 18. Gaps — measured, and not traded
+
+Fair value gaps, three candles, no threshold: if candle 3 never trades where
+candle 1 traded, price was skipped.
+
+```
+bullish   low[i]  > high[i-2]     zone = high[i-2] .. low[i]
+bearish   high[i] < low[i-2]      zone = high[i]   .. low[i-2]
+```
+
+This is also the **displacement** §5 left undefined — a move that skips price
+displaced; one that drifts did not.
+
+### They are not a trade, and the data says so plainly
+
+| timeframe | gaps | per day | fill in 3 bars | 5 | 10 | 20 | 50 |
+|---|---|---|---|---|---|---|---|
+| 1H | 4316 | 3.3 | 42% | 51% | 63% | 74% | 84% |
+| 15M | 3928 | 12.4 | 43% | 52% | 64% | 72% | 82% |
+| 5M | 3870 | 37.6 | 45% | 55% | 66% | 76% | 85% |
+
+Roughly half fill inside five bars. That is a coin toss, and the eventual
+98% fill rate is an artifact of old gaps having had years to fill. So gaps are
+carried as context — somewhere price is drawn, somewhere a target may stall —
+and never as a reason to enter.
+
+### As displacement confluence they are worth something, on one timeframe
+
+Requiring a gap at the break, on the §17 scalp:
+
+| timeframe | displacement | n | /wk | gross | net ES | net MES |
+|---|---|---|---|---|---|---|
+| 5M | no | 206 | 14.0 | +0.140R | +0.124R | −0.002R |
+| 5M | yes | 103 | 7.0 | +0.087R | +0.071R | −0.058R |
+| 15M | no | 185 | 4.1 | +0.030R | +0.021R | −0.054R |
+| **15M** | **yes** | **88** | **1.9** | **+0.136R** | **+0.127R** | **+0.061R** |
+
+On the 5M it hurts — halves the sample and cuts expectancy. On the 15M it takes
+a flat setup to a positive one and, uniquely among the scalps, one that survives
+MES fees. 1.9 a week, which is also the stated frequency.
+
+---
+
+## 19. Speed — where it actually is, and where it is not
+
+| step | time |
+|---|---|
+| read and parse 21,369 bars | 29 ms |
+| full analysis, four timeframes | 129 ms |
+| last 2000 bars only | 7 ms |
+| one new candle into the gap detector, warm | 0.3 µs |
+
+1.9M bars/sec on a full pass. A 1H bar arrives every 3,600,000 ms and the whole
+pipeline costs 159 of them — four thousandths of one percent of the time
+available.
+
+**Computation was never the bottleneck and never could be.** The slow step is
+exporting a CSV, which is minutes against milliseconds.
+
+Which means speed does not come from computing faster at the moment. It comes
+from the decision already being made when the moment arrives. The scanner prints
+the entry, the stop, the target and the invalidation level *before* price gets
+there; they go on the chart, and when price arrives there is nothing left to
+work out. That is the only kind of speed a discretionary trader on an exported
+CSV can actually have — and it is the useful kind, because the thing that costs
+money at the moment is hesitation, not latency.

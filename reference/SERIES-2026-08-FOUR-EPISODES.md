@@ -120,7 +120,25 @@ anything. No card, no trial.
 # EPISODE 3 · The Room I Grew Up In — a trans woman, the spiritual one · **ALCOHOL**
 
 > **NIA:** Black trans woman, early 30s, shoulder-length braids, gold hoop
-> earrings, soft round face, oversized cardigan.
+> earrings, soft round face. Wearing an oversized knit cardigan over a high-neck
+> long-sleeve top, and loose jeans. **Fully covered in every shot.**
+
+> ### ⚠ WARDROBE IS PART OF THE CHARACTER. Do not shorten this line.
+>
+> First render (15 Aug 2026) came back with her near-undressed in every frame.
+> Cause: the reference image handed to the generator was a fashion/model photo,
+> and **a reference picture beats one word of wardrobe in a prompt every time.**
+>
+> Two reasons this matters, and neither is squeamishness. It is wrong for the
+> film — she is in her own kitchen on a Sunday morning and parked outside a
+> church. And TikTok and Meta both demote skin-heavy content, so on an episode
+> already carrying trans and faith themes it hands their filters a third reason
+> to bury it.
+>
+> **Every prompt block for this episode carries an explicit rule line:**
+> *everyday modest clothing, fully clothed, shoulders and chest covered, no
+> swimwear, no lingerie, no bare midriff, no cleavage.* And the reference image
+> must be an ordinary person in ordinary clothes, never a fashion shot.
 
 **Replaced her doomscrolling episode, 14 Aug 2026, at Jacques's call — and it
 says outright that she is trans.** The earlier version deliberately never
@@ -155,7 +173,7 @@ be explained on screen.
 **SHOT 3** — `A small ordinary church across a street seen through a car windscreen from a distance, a few people going in, nobody's face readable`
 *"I transitioned at twenty-nine. That building stopped at twenty-eight."*
 
-**SHOT 4** — `Close on NIA in a driver's seat, hands in her lap, watching something across the street, not moving to get out`
+**SHOT 4** — `Close on NIA in a driver's seat, coat on, hands in her lap, watching something across the street, not moving to get out`
 *"I still park across the street some Sundays."*
 
 **SHOT 5** — `A childhood photograph held on a fridge by a magnet, a kid in Sunday clothes on a church step, slightly out of focus`
@@ -164,10 +182,10 @@ be explained on screen.
 **SHOT 6** — `Close on a single empty glass in a kitchen sink in flat morning light, nothing else in the sink`
 *"What I was actually after was the quiet."*
 
-**SHOT 7** — `NIA sitting on the edge of her bed at night in a dark room, phone dark beside her, both feet on the floor`
+**SHOT 7** — `NIA sitting on the edge of her bed at night in a dark room, in pyjamas and a robe, phone dark beside her, both feet on the floor`
 *"One drink bought an hour of not defending myself."*
 
-**SHOT 8** — `NIA washing dishes at a window in daylight, eyes closed, mouth moving, singing to herself`
+**SHOT 8** — `NIA washing dishes at a window in daylight, sleeves pushed up, eyes closed, mouth moving, singing to herself`
 *"My body still remembers the songs. That's what makes it hard."*
 
 **SHOT 9** — `NIA at a kitchen table in daylight with two friends, hands held across the table, mugs and plates, warm`

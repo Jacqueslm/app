@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0861</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0862</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -492,9 +492,9 @@ body.simple-only #view-simple{display:flex !important}
     <div class="banner" id="seq-banner" style="display:none"></div>
 
     <div class="card" id="crew-card" style="border-color:var(--accent);border-width:1.5px">
-      <h3>🎬 Make my video <span class="usage">— song + lyrics + pictures → the crew does the rest</span></h3>
+      <h3>🎬 Make my video <span class="usage">— your words + pictures → the crew does the rest. Song optional.</span></h3>
 
-      <p class="usage" style="margin:0"><b>1. Your song</b></p>
+      <p class="usage" style="margin:0"><b>1. Your song</b> <span class="usage">(skip it for a narrated story)</span></p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn2 quiet" id="crew-song-add" style="flex:1;min-width:120px">🎵 Add song file</button>
         <span class="usage" id="crew-song-label">no song yet</span>
@@ -504,8 +504,9 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2 quiet" id="crew-song-import">🔗 Import</button>
       </div>
 
-      <p class="usage" style="margin:8px 0 0"><b>2. Your lyrics</b></p>
-      <textarea id="crew-lyrics" placeholder="Paste your lyrics here (or press 🪄 Auto-captions to have AI listen to the song)" style="min-height:70px"></textarea>
+      <p class="usage" style="margin:8px 0 0"><b>2. Your words</b> <span class="usage">— song lyrics, or a narration script with one line per shot</span></p>
+      <textarea id="crew-lyrics" placeholder="Paste lyrics, or a script — one line per shot:&#10;It was in the wash.&#10;Not a big dramatic discovery.&#10;I stood there a long time." style="min-height:70px"></textarea>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ts);margin-top:4px"><input type="checkbox" id="crew-script-mode"> 🎙 This is a narrated story, not a music video <span class="usage">(no song needed — one shot per line)</span></label>
       <button class="btn2 quiet" id="crew-autocap" style="width:100%">🪄 Auto-captions (AI listens, ~35¢ — or paste lyrics above for free)</button>
       <button class="btn2 quiet" id="crew-voicecap" style="width:100%;margin-top:6px">🎙️ Captions from my own voice (free)</button>
 
@@ -6866,7 +6867,7 @@ async function runRender(windowOpt, btnSel, opts) {
 /* ---------------- hover help on every major button ---------------- */
 Object.entries({
   'crew-drop': 'Pick images from your computer for the Director to cast into scenes. You can also let them scout your Library instead.',
-  'crew-direct': 'FREE. The Director reads your song + lyrics and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
+  'crew-direct': 'FREE. The Director reads your words — song lyrics or a narration script — and shows the full plan: scenes, images, camera moves, look, and cost. Nothing is charged.',
   'crew-produce': 'This is the spend button: generates the planned gap scenes, applies motion and grade, and renders the full video with captions.',
   'qk-add-imgs': 'Pick pictures from your computer for a quick beat-matched video.',
   'qk-add-music': 'Upload your song file (mp3/wav) from your computer.',
@@ -7172,9 +7173,21 @@ function renderCrewPresets() {
 $('#crew-direct').onclick = async () => {
   setErr('#seq-err', null);
   if ($('#crew-lyrics').value.trim() && !$('#lyr-text').value.trim()) $('#lyr-text').value = $('#crew-lyrics').value;
-  if (!st.musicList.length) return setErr('#seq-err', 'Add your song first (button 1 above — a file or a Suno link).');
+  // The Director used to refuse without a song, which made it useless for a
+  // narrated story - and a narrated story is most of what gets made here. The
+  // words are the only thing it actually needs; music is a bed, and beds are
+  // optional. A song is still required for a music video, because beat-snap
+  // and length come from it.
+  const scriptMode = $('#crew-script-mode') && $('#crew-script-mode').checked;
+  if (!scriptMode && !st.musicList.length) {
+    return setErr('#seq-err', 'Add your song first (button 1 above) — or tick “narrated story” if there is no song.');
+  }
   const lyrics = $('#lyr-text').value.trim() || $('#crew-lyrics').value.trim() || st.captions.map((c) => c.text).join('\n');
-  if (!lyrics) return setErr('#seq-err', 'The Director needs the words: paste lyrics in Lyrics & Captions, or press 🪄 Auto-captions first.');
+  if (!lyrics) {
+    return setErr('#seq-err', scriptMode
+      ? 'The Director needs your script — one line per shot, in box 2 above.'
+      : 'The Director needs the words: paste lyrics in Lyrics & Captions, or press 🪄 Auto-captions first.');
+  }
   // apply the Director's brief: pin the chosen star + world so casting,
   // pricing and generation all honor your answers
   if (crew.brief.star && [...$('#scene-char').options].some((o) => o.value === crew.brief.star)) $('#scene-char').value = crew.brief.star;
@@ -7182,11 +7195,11 @@ $('#crew-direct').onclick = async () => {
   // the vibe's look words go into the prompts (your own style box still wins)
   const briefStyle = ($('#sb-style')?.value || '').trim() || (crew.brief.vibe ? CREW_VIBES[crew.brief.vibe].style : '');
   const b = $('#crew-direct');
-  b.disabled = true; b.innerHTML = '<span class="spinner"></span>Director is reading your song…';
+  b.disabled = true; b.innerHTML = `<span class="spinner"></span>Director is reading your ${scriptMode ? 'script' : 'song'}…`;
   try {
     const { scenes } = await jfetch('/api/studio/storyboard', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lyrics, title: $('#cp-title')?.value || '', style: briefStyle }),
+      body: JSON.stringify({ lyrics, title: $('#cp-title')?.value || '', style: briefStyle, mode: scriptMode ? 'script' : 'song' }),
     });
     const p = st.cfg?.pricing;
     const genRate = p ? ($('#scene-char').value ? p.characterImageRate : p.imageRate) : 0.09;

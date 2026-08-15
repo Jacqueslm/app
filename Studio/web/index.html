@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0868</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0869</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -629,9 +629,13 @@ body.simple-only #view-simple{display:flex !important}
       <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
       <p class="usage" id="qk-total" style="margin:6px 0 0;display:none"></p>
-      <details id="qk-paste-wrap" style="margin-top:6px">
-        <summary style="cursor:pointer;font-size:13px;color:var(--ts)">📋 Paste a shot list (from a plan you wrote elsewhere)</summary>
-        <p class="usage" style="margin:6px 0 4px">One line per shot, in order. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
+      <!-- Open, and styled as its own step. This was a collapsed <details> and
+           it was effectively invisible — the one control that starts a whole
+           episode read as a grey footnote, and got hunted for repeatedly. If
+           the card ever feels crowded, shrink something else. -->
+      <details id="qk-paste-wrap" open style="margin-top:8px;border:1px solid var(--accent);border-radius:12px;padding:10px">
+        <summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--tp)">📋 Paste your script — one line per shot</summary>
+        <p class="usage" style="margin:6px 0 4px">In order, one line each. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
         <textarea id="qk-paste" placeholder="1. 01_indulgence   Zoom in   10s  cut    I wasn't hungry. I was filling a hole&#10;2. 02_aftermath    Zoom out  10s  blend  Then the room got quiet&#10;3. 03_realization  Float      5s  blend  Wasn't there" style="min-height:96px;font-size:12px"></textarea>
         <button class="btn2" id="qk-paste-go" style="width:100%;margin-top:6px">Fill the shots from this</button>
         <button class="btn2" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Find free footage for the lines with no picture</button>

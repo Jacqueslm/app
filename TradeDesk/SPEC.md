@@ -519,6 +519,47 @@ So the consolidation trade is a different animal from the pullback — a lower
 timeframe scalp inside a range, not a swing continuation. That is consistent with
 2–3 swing trades a week from §15 plus scalps on top.
 
-**Blocked on data.** There is no 5M series at all, and the 15M reaches back 4.4
-days. Nothing can be concluded from that. A 5M and a deep 15M export are what
-this needs, and everything else is already built to receive them.
+Data arrived: 20,555 bars of 5M (103 days) and 20,591 of 15M (318 days) — the
+~20k-bar export cap at each timeframe.
+
+Detection is a 1H job and works: a run of swings carrying both label families,
+with no break of structure across the span, is a range. Over 3.6 years the 1H is
+in one 24% of the time, 303 episodes, median 15 bars and 65 points tall, about
+1.6 a week.
+
+### The scalp itself does not work — as encoded
+
+Execution was built from the machinery already proven on the swing trade: price
+sweeps a range edge, a minor shift confirms, the trade goes back into the range,
+target a fraction of the way across.
+
+| edge band | within | 15M | | 5M | |
+|---|---|---|---|---|---|
+| | | n | exp | n | exp |
+| 0.10 | 4 | 22 | −0.79R | 12 | −0.15R |
+| 0.10 | 8 | 31 | −0.63R | 29 | −0.43R |
+| 0.25 | 4 | 41 | +0.28R | 28 | −0.51R |
+| 0.25 | 8 | 62 | +0.67R | 62 | −0.47R |
+| 0.50 | 4 | 55 | +0.29R | 52 | −0.28R |
+| 0.50 | 8 | 101 | +0.50R | 111 | −0.09R |
+
+**The 5M is negative in every cell.** The 15M flips from −0.79R to +0.67R on the
+edge-band parameter alone — an arbitrary number that decides how close to the
+edge a sweep must be. A rule whose sign depends on a knob nobody chose is not an
+edge; it is noise being read as one.
+
+Compare the swing trade, which held its sign across every depth, both
+directions, and four calendar years. That is what a real result looks like, and
+this is not it.
+
+The likely reason is simple: "the 5M and 15M are the scalp" names a timeframe,
+not an entry. The sweep-and-confirm rule tested here was invented to fill the
+gap, and the gap is where the answer has to come from.
+
+### A bug in the first sensitivity run
+
+The edge-band parameter was not wired into the function — it was hardcoded — so
+the first sensitivity table reported identical numbers for 0.15 and 0.30 and
+called it stability. It was caught because two rows of a sensitivity test came
+out byte-identical, which they never should. Wired up, the parameter turns out
+to decide the sign of the whole result.

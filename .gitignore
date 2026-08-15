@@ -24,3 +24,7 @@ reference/watch-report.md
 # Python bytecode caches — never useful in the repo
 __pycache__/
 *.pyc
+
+# Page images built by tools-md-to-pdf.py --png. Regenerate them, don't commit
+# them — 95 PNGs of documents that are already in the repo as markdown.
+*-pages/

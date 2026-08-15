@@ -9,12 +9,17 @@ send to anyone. Every handover, summary, plan or research doc goes to him as a
 **PDF**. There is a tool for it and no excuse for forgetting again:
 
 ```
-python3 tools-md-to-pdf.py --all          # rebuild the whole handover set
-python3 tools-md-to-pdf.py <any-file>.md  # one file
+python3 tools-md-to-pdf.py --all --png    # rebuild the whole handover set
+python3 tools-md-to-pdf.py <file>.md --png
 ```
 
-The PDF lands next to the markdown, same name. Write the markdown (it is the
-version control lives on), then convert, then send the PDF.
+The PDF lands next to the markdown, same name. Write the markdown (it is what
+version control lives on), then convert, then send.
+
+**`--png` also writes one PNG per page** into a `<name>-pages/` folder. Use it
+every time: **most AI tools take a picture and will not take a PDF**, so a
+handover he cannot paste into the tool he is actually using is not a handover.
+Send him the PDF *and* the page images.
 
 **RULE ZERO — for any AI reading this.** Jacques should never have to say the
 same thing twice. If this file says something is DONE, it is done: do not

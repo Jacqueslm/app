@@ -442,6 +442,44 @@ hashtags, sorted by Users, gets you names no treatment center has written down.
 so it goes in as-is when you're matching what people type. What you *say* to
 them never assumes a husband and a wife — it's built for all types of couple.
 
+## THE CO-SIGN ASK — credibility, not reach (16 Aug 2026)
+
+**Why this is separate.** Every email above asks for attention — an interview,
+a mention. This one asks for something smaller and harder: look at the app and,
+if it's safe, say one honest sentence we can quote. One clinician's "this
+doesn't harm people" is worth more than 100K views — it's the line that goes on
+the landing page and gets quoted to the Salvation Army, Missouri DBH, and a
+SHRM stage. (REVENUE-PLAN.md: the `/reviews` page is real but empty, and this
+is the co-sign that fills the authority gap.)
+
+**Target first: Dr. KJ Foster** (Fostering Resilience, YouTube table above) —
+a counsellor with 15+ years in substance use and trauma. After her, any
+therapist, counsellor or recovery coach with a licence and a public email.
+
+**Never ask for an endorsement.** Ask whether it's safe, and if yes, for one
+honest sentence. A clinician can say "this doesn't hurt people" — they can't
+say "this works" without a study. The first one is all we need.
+
+**Subject:** One honest sentence, if you'll give it
+
+Hi Dr. Foster,
+
+I'm Jacques Malone. I was addicted for 38 years and got free at 50, and I built the app I needed the whole time — Turn Someday Into Day One. A day counter, a button for the worst ten minutes, a lesson a day, a private journal, and a whole section for the partner, which almost nothing else has.
+
+I'm not asking you to endorse it, and I'm not offering money or a partnership. I'm asking for something smaller: would you spend a few minutes inside it and tell me, as a professional, whether it's safe?
+
+If the answer is "this doesn't hurt people," I'd ask for one honest sentence I can put on the page — not "it works," not a cure claim, just the truth in your words. If the answer is "here's what's wrong with it," I'd rather hear that, and I'll fix it.
+
+That's the whole ask. https://www.turnsomedayintodayone.com
+
+Jacques Malone
+Turn Someday Into Day One · St. Louis
+
+**For the next clinician:** swap the name, change nothing else. The
+"is it safe, not is it good" framing is what lets a professional say yes.
+
+---
+
 ## Log
 
 | Platform | Found | Sent | Replied |

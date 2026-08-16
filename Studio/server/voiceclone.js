@@ -294,4 +294,4 @@ function uninstall() {
   return true;
 }
 
-module.exports = { isInstalled, status, install, clone, diskUsage, uninstall, ROOT, pickPython, findPython };
+module.exports = { isInstalled, status, install, clone, diskUsage, uninstall, ROOT, pickPython, findPython, run };

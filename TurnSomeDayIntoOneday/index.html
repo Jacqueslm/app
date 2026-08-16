@@ -62,6 +62,12 @@ body{display:flex;justify-content:center}
 .app.fs-bigger{zoom:1.18;min-height:calc(100dvh/1.18)}
 .app.fs-smaller .ob{min-height:calc(100dvh/0.88);max-height:calc(100dvh/0.88)}
 .app.fs-bigger .ob{min-height:calc(100dvh/1.18);max-height:calc(100dvh/1.18)}
+/* Big-text safety: at 1.18× zoom a fixed sheet can outgrow the screen and clip
+   its options off the bottom. Every sheet and the main scroll area become
+   scrollable so nothing ever disappears at the larger text size. */
+.app.fs-bigger .sos-sheet{max-height:calc(100dvh/1.18);overflow-y:auto}
+.app.fs-bigger .sos-sheet .ob-btn{flex:0 0 auto}
+.app.fs-bigger #screens{overflow-y:auto}
 @supports not (zoom: 1){
   .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
@@ -677,6 +683,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:13px;color:#8892c0;margin-bottom:4px" id="days-term-lbl">Days sober</div>
     <div class="days-big" id="dayCount">0</div>
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
+    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="program-lbl">The 90-day program — continuous support</div>
+    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="focus-lbl"></div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
     <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
     <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
@@ -897,7 +905,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="s-rooms" class="scr">
       <div class="sec">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--acc-t);line-height:1.5">
-          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
+          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Every program runs 90 days with continuous support beyond — this room is here for the whole road, not just the first month. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
         </div>
         <div id="your-rooms-wrap" style="display:none">
           <div class="sec-hd" style="margin-bottom:8px">Your rooms</div>
@@ -1117,6 +1125,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
+        <div class="setting-row" onclick="openMeditation()">
+          <i class="ti ti-moon-stars" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Meditation room</p><span>5–15 min guided quiet — breathing, calm sound, timer</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="open5to1()">
           <i class="ti ti-hand-stop" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Step-by-step sensory grounding</span></div>
@@ -1331,14 +1344,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
       <div class="setting-row" onclick="openLessonPacksScreen()">
         <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — the first 15 days of every pack are free; days 16+ are Pro</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Spiritual</div></div>
       <div class="setting-row" onclick="openPack('spiritual')">
         <i class="ti ti-sun-high" style="color:var(--accent)"></i>
-        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers — the first 15 days are free</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1782,7 +1795,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
         <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — the first 15 days are free</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
@@ -1869,6 +1882,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <input id="guide-input" placeholder="e.g. how do I cancel?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
       <button id="guide-send" onclick="guideSend()"><i class="ti ti-send"></i></button>
     </div>
+  </div>
+
+  <!-- POST-ONBOARDING WELCOME: shown once, right after setup, and read aloud so
+       a user who set up while walking can still hear it. The 90-day framing is
+       up front: this is a program with a shape, not an app to wander. -->
+  <div id="welcome-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:940;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px">
+    <div style="font-size:44px;margin-bottom:14px">🌅</div>
+    <div style="font-size:20px;font-weight:700;color:var(--tp);line-height:1.45;max-width:340px">Welcome. You made a difficult decision — and it's the bravest one you've made in a long time.</div>
+    <div style="font-size:15px;color:var(--ts);line-height:1.75;margin-top:14px;max-width:340px">You're on a path now — to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going. Don't give up. It's in the dark where the work is done — and in the light where it's shown.</div>
+    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is a 90-day program with continuous support — a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and Friendly beside you at any hour. You don't have to do this perfectly. You just have to do today.</div>
+    <button class="ob-btn" style="margin-top:18px;padding:12px 26px;font-size:15px" onclick="closeWelcomeOverlay()">Begin Day One — I'm ready</button>
   </div>
 
   <!-- APP TOUR: one-time guided walk of the navigation (replayable from
@@ -2440,7 +2464,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- BREATHE OVERLAY -->
-<div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+<div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+    <div id="med-timer" style="font-size:40px;font-weight:700;letter-spacing:1px">5:00</div>
+    <div id="med-phase" style="font-size:15px;opacity:.92;margin-top:6px">Settle in — eyes closed or a soft gaze</div>
+    <div id="med-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.14);margin:26px auto 0;display:flex;align-items:center;justify-content:center;transition:transform 4s ease-in-out">
+      <div id="med-circle-txt" style="font-size:13px;letter-spacing:2px;text-transform:uppercase">Breathe in</div>
+    </div>
+    <div id="med-dur-row" style="display:flex;gap:10px;margin-top:28px">
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(5)">5 min</button>
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(10)">10 min</button>
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(15)">15 min</button>
+    </div>
+    <button class="ob-btn outline" id="med-pause-btn" style="display:none;margin-top:16px;padding:9px 18px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="medPauseToggle()">Pause</button>
+    <button class="ob-btn outline" style="margin-top:14px;padding:9px 18px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.35)" onclick="closeMeditation()">End session</button>
+  </div>
+  <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
   <div style="font-size:22px;font-weight:600;margin-bottom:8px" id="breathe-label">Breathe in</div>
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
@@ -2548,7 +2586,7 @@ let S = {
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
-  pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,
+  pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,welcomeShown:false,
   userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
   bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -3781,6 +3819,21 @@ function handleOnboardingPopstate(){
 // uses, applied to the whole app: back closes the topmost open thing, then
 // steps to Home, and only exits when you're already on Home with nothing open.
 let appBackTrapArmed=false;
+// The App lock and the sign-in gates are deliberately NOT closable with back:
+// back on those would strand the user on a blank screen or bounce them out of
+// the app. Any tap re-arms the trap (enterApp), so this stays airtight.
+let homeBackAt=0,exitToastEl=null,exitToastTimer=null;
+function showExitToast(){
+  if(!exitToastEl){
+    exitToastEl=document.createElement('div');
+    exitToastEl.style.cssText='position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--s2);color:var(--tp);border:1px solid var(--bdr);padding:10px 16px;border-radius:99px;font-size:13px;z-index:2000;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:opacity .3s;max-width:90vw;text-align:center;pointer-events:none';
+    document.body.appendChild(exitToastEl);
+  }
+  exitToastEl.textContent='Tap back again to leave the app';
+  exitToastEl.style.opacity='1';
+  clearTimeout(exitToastTimer);
+  exitToastTimer=setTimeout(()=>{if(exitToastEl)exitToastEl.style.opacity='0';},2600);
+}
 function armAppBackTrap(){
   if(appBackTrapArmed)return;
   appBackTrapArmed=true;
@@ -3791,6 +3844,20 @@ function handleAppPopstate(){
   // Onboarding runs its own trap - stay out of its way while it's showing.
   const ob=document.getElementById('onboarding');
   if(ob&&ob.style.display==='flex')return;
+
+  // The sign-in / preview gates and the PIN lock are walls, not screens.
+  // Back there must never close the app (which would force a fresh sign-in).
+  const pinLock=document.getElementById('pin-lock');
+  if(pinLock&&pinLock.style.display==='flex'){
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
+  const authGate=document.getElementById('auth-gate');
+  const previewGate=document.getElementById('preview-gate');
+  if((authGate&&authGate.style.display==='flex')||(previewGate&&previewGate.style.display==='flex')){
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
 
   // 1) A modal is open: close the topmost one through its own close path.
   //    Every .sos-modal closes on a background tap, and click() on the
@@ -3804,7 +3871,12 @@ function handleAppPopstate(){
   }
 
   // 2) A full-screen overlay is up (these use display, not the modal class).
-  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay]];
+  //    Every overlay in the app is listed here so the hardware button closes
+  //    it through its own close path instead of leaving the app underneath it.
+  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
+    ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
+    ['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
+    ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
   for(const [id,close] of overlays){
     const el=document.getElementById(id);
     if(el&&el.style.display!=='none'&&el.style.display!==''){
@@ -3823,9 +3895,15 @@ function handleAppPopstate(){
     return;
   }
 
-  // 4) On Home with nothing open: don't re-arm. The next back press leaves
-  //    the app, which is what back should do from the front door.
+  // 4) On Home with nothing open: two-tap exit. The first back says so and
+  //    stands the guard down; the second back (within 3 seconds) actually
+  //    leaves. An accidental single back never closes the app anymore, and
+  //    any tap anywhere re-arms the trap (enterApp's click listener).
+  const now=Date.now();
   appBackTrapArmed=false;
+  if(now-homeBackAt<=3000)return;// second press: leave - no history state left
+  homeBackAt=now;
+  showExitToast();
 }
 
 function armOnboardingBackTrap(){
@@ -4089,6 +4167,80 @@ function navTourNext(){
 function endNavTour(){
   document.getElementById('nav-tour').style.display='none';
 }
+// ─── POST-ONBOARDING WELCOME ─────────────────────────────────────────────────
+function showWelcomeOverlay(){
+  const el=document.getElementById('welcome-overlay');
+  if(!el||S.welcomeShown)return;
+  S.welcomeShown=true;save();
+  el.style.display='flex';
+  // Read it aloud where the phone allows it (a tap just happened during setup,
+  // so most browsers let the voice speak). If not, the words are on screen.
+  try{
+    if(!('speechSynthesis' in window))return;
+    const u=new SpeechSynthesisUtterance('Welcome. You made a difficult decision, and it is the bravest one you have made in a long time. You are on a path now, to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going, you do not give up. It is in the dark where the work is done, and in the light where it is shown. This is a ninety day program with continuous support. You do not have to do this perfectly. You just have to do today.');
+    u.rate=0.95;u.pitch=1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function closeWelcomeOverlay(){
+  document.getElementById('welcome-overlay').style.display='none';
+  maybeStartNavTour();
+}
+function maybeStartNavTour(){
+  if(!S.navTourDone)setTimeout(startNavTour,300);
+}
+// ─── MEDITATION ROOM ─────────────────────────────────────────────────────────
+let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0;
+function openMeditation(){
+  document.getElementById('meditation-overlay').style.display='flex';
+  wakeLockAcquire('meditation');
+}
+function startMeditation(min){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  medRemainMs=min*60000;medPaused=false;medEndsAt=Date.now()+medRemainMs;
+  document.getElementById('med-dur-row').style.display='none';
+  document.getElementById('med-pause-btn').style.display='';
+  document.getElementById('med-pause-btn').textContent='Pause';
+  calmSoundOn();updateCalmToggles();
+  medTick();
+  medTimer=setInterval(medTick,1000);
+}
+function medTick(){
+  if(medPaused)return;
+  medRemainMs=Math.max(0,medEndsAt-Date.now());
+  const s=Math.ceil(medRemainMs/1000);
+  document.getElementById('med-timer').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  if(medRemainMs<=0){medFinish();return;}
+  const phaseEl=document.getElementById('med-circle');
+  const inPhase=Math.floor((Date.now()/4000)%2)===0;
+  phaseEl.style.transform=inPhase?'scale(1.22)':'scale(1)';
+  document.getElementById('med-circle-txt').textContent=inPhase?'Breathe in':'Breathe out';
+  document.getElementById('med-phase').textContent=inPhase?'Breathe in — soften the shoulders':'Breathe out — let it go';
+}
+function medPauseToggle(){
+  medPaused=!medPaused;
+  const btn=document.getElementById('med-pause-btn');
+  if(medPaused){medRemainMs=Math.max(0,medEndsAt-Date.now());btn.textContent='Resume';}
+  else{medEndsAt=Date.now()+medRemainMs;btn.textContent='Pause';}
+}
+function medFinish(){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  calmSoundOff();updateCalmToggles();
+  document.getElementById('med-circle').style.transform='scale(1)';
+  document.getElementById('med-circle-txt').textContent='Done';
+  document.getElementById('med-phase').textContent='Session complete — carry the quiet with you.';
+  document.getElementById('med-timer').textContent='0:00';
+  document.getElementById('med-pause-btn').style.display='none';
+  document.getElementById('med-dur-row').style.display='flex';
+  logActivity('meditation',{});
+}
+function closeMeditation(){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  calmSoundOff();updateCalmToggles();
+  wakeLockRelease('meditation');
+  document.getElementById('meditation-overlay').style.display='none';
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
@@ -4101,9 +4253,9 @@ function initApp(){
   // First visit: tell them what the floating ? is. Gone forever after one tap.
   const fabLabel=document.getElementById('guide-fab-label');
   if(fabLabel)fabLabel.style.display=S.guideFabExplained?'none':'block';
-  // One-time guided tour of the navigation (auto-shown after setup for new
-  // users; replayable any time from Profile → "How to use this app").
-  if(!S.navTourDone)setTimeout(startNavTour,700);
+  // Post-setup: the welcome message shows (and speaks) once, then the tour.
+  if(!S.welcomeShown)setTimeout(showWelcomeOverlay,600);
+  else maybeStartNavTour();
   renderMiniPricingRows();
   loadLifetimeAvailability();
   applyPlayBuildUI();
@@ -4305,7 +4457,10 @@ function updateStats(){
   if(justHitMilestone){
     S.notifiedMilestones=(S.notifiedMilestones||[]).concat(justHitMilestone.days);
     save();
-    maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Friendly Pro. No pressure though — today is worth celebrating on its own.`);
+    // A milestone day belongs to everyone, not just Pro. Burst + congrats card
+    // for all; the Pro deep-dive is an optional extra, never the only thing.
+    celebrationBurst();
+    openMilestoneCelebration(justHitMilestone.days);
   }
   maybeShowProMilestoneCelebration(days);
   maybeShowMilestoneOffer();
@@ -4317,6 +4472,13 @@ function updateStats(){
 
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const progLbl=document.getElementById('program-lbl');
+  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-day program — support continues past day 90`:'90 days done — continuous support continues';
+  const focusLbl=document.getElementById('focus-lbl');
+  if(focusLbl){
+    const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
+    focusLbl.textContent=list.length>1?('Focus: '+list.join(' · ')):'';
+  }
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
 
@@ -4848,6 +5010,9 @@ function buildStreakHistoryList(){
 function maybeShowProMilestoneCelebration(days){
   if(!S.isPro)return;
   if(!PRO_MILESTONE_DAYS.includes(days))return;
+  // Base milestone days already celebrate for everyone in updateStats; the Pro
+  // path only adds days the free milestone list doesn't cover (e.g. day 21).
+  if(MILESTONES.some(m=>m.days===days))return;
   if((S.notifiedProMilestones||[]).includes(days))return;
   S.notifiedProMilestones=(S.notifiedProMilestones||[]).concat(days);
   save();
@@ -5968,9 +6133,36 @@ function openRoom(category){
   actBn('bn-plans');
 }
 
+// Rooms stay safe by design: a post that attacks, hates, or discriminates
+// against people — or drops to raw abuse — is locked out at the door, with an
+// honest explanation instead of a silent swallow. The list is deliberately
+// strict and can grow; reclaimed words (e.g. some community terms) are left
+// out so the lockout targets abuse, not people.
+const ROOM_BLOCK_WORDS=['fuck','fucking','fucked','fucker','fuckers','motherfucker','motherfuckers','shit','bullshit','bitch','bitches','asshole','assholes','cunt','cunts','bastard','bastards','whore','whores','slut','sluts','twat','twats','dickhead','dickheads','prick','pricks','wanker','wankers','bollocks','arsehole','arseholes','douchebag','jackass','jackasses','pussy','nigga','nigger','faggot','faggots','retard','retards','kike','tranny','trannies','chink','gook','spic','spics','wetback','wetbacks','beaner','beaners','coon','jigaboo','sambo','raghead','towelhead','cameljockey','kraut','dago','wop','polack','mick','injun','redskin','gyp','halfbreed','shemale','cripple','mongoloid','porchmonkey','zipperhead','sandnigger','niger'];
+const ROOM_BLOCK_PHRASES=['kill yourself','kill urself','neck yourself','end it all','go die','die in a fire','kys'];
+function roomFilterHits(txt){
+  const t=' '+String(txt).toLowerCase()+' ';
+  if(ROOM_BLOCK_PHRASES.some(p=>t.includes(p)))return true;
+  // Hate aimed at a person or a group. "I hate my addiction" and "I don't
+  // hate you" must both stay sayable — recovery runs on that honesty — so
+  // only object-directed hate trips this, and a "don't / not / never" right
+  // before the word disarms it.
+  if(/\bhate\s+(?:all\s+of\s+|all\s+|on\s+)?(you|yourself|everyone|people|anyone|women|men|girls|boys|kids|children|black|white|whites|gays?|lesbians?|jews?|muslims?|christians?|immigrants?|refugees?|hispanics?|asians?|trans)\b/i.test(t)){
+    if(/\b(don't|dont|doesn't|doesnt|didn't|didnt|not|never|no)\s+hate\b/i.test(t)){/* "don't hate" is support, not abuse */}
+    else return true;
+  }
+  return ROOM_BLOCK_WORDS.some(w=>{
+    if(w.length<=3)return t.includes(' '+w+' ')||t.includes(' '+w+'s ')||t.includes(' '+w+'es ');
+    return t.includes(w);
+  });
+}
 function submitPost(){
   const inp=document.getElementById('postInput');
   const txt=inp.value.trim();if(!txt)return;
+  if(roomFilterHits(txt)){
+    appInfo('Room locked out',"That message can't be posted here. Rooms exist to support people — language that attacks, hates, or discriminates is locked out, no exceptions. Reword it and it will go through.");
+    return;
+  }
   S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0,category:currentRoom||S.currentAddiction||'Other'});
   save();
   inp.value='';
@@ -7857,6 +8049,100 @@ function updateNotificationPermissionUI(){
 // Pro used to be excluded here on the assumption that smart reminders covered
 // it - they don't, none of them is the daily lesson - so paying users were the
 // only ones getting no lesson reminder at all. Everyone gets this now.
+// 90 daily uplift messages, one per day of the program, then they keep cycling
+// for continuous support beyond day 90. The reminder is a gift, not a nudge.
+const DAY_90_UPLIFTS=[
+'One day is all anyone ever has to do. Today is yours.',
+'You showed up. That was the hardest part.',
+'Recovery isn\'t a straight line — it\'s a direction. You\'re pointed right.',
+'Be gentle with yourself today. You\'re doing something hard.',
+'The version of you that started this already did the brave thing.',
+'Progress isn\'t loud. It\'s the quiet choice you keep making.',
+'You don\'t have to feel ready. You just have to be here.',
+'Small steps are still steps. They all count.',
+'Whatever today brings, you don\'t have to carry it alone.',
+'Your past is a place you\'ve been, not a person you are.',
+'One breath at a time is a complete strategy.',
+'You\'re not behind. You\'re exactly where this takes you.',
+'Keep your head up — you\'ve survived every hard day so far.',
+'Rest isn\'t quitting. It\'s how you keep going.',
+'You are not your worst moment. Not even close.',
+'Recovery is a daily yes. Today, you already said it.',
+'The craving is a wave. Waves pass. You\'re still here.',
+'You\'re building something no one can take from you.',
+'Be proud of the small wins. They\'re the whole story.',
+'Your only job today is not to quit before tonight.',
+'It\'s okay to not be okay. It\'s not okay to give up.',
+'You\'ve already changed. Notice it.',
+'Strong isn\'t never falling. Strong is getting up again.',
+'This is the hardest work you\'ll ever do. That\'s why it\'s worth it.',
+'Don\'t compare your day one to someone else\'s day 500.',
+'You matter more than this struggle.',
+'Keep going. Your future self is counting on you.',
+'A moment of peace is still peace. Collect them.',
+'You\'re learning to be kind to the person who needed it most: you.',
+'Nothing about today has to be perfect. It just has to be.',
+'Every sober hour is an hour of freedom you earned.',
+'You\'re not weak for struggling. You\'re strong for staying.',
+'Somewhere inside you knows you can do this. Listen to that voice.',
+'Today\'s lesson isn\'t a chore — it\'s a gift to tomorrow\'s you.',
+'You\'ve made it through 100% of your hardest days.',
+'Breathe. You\'re here. That counts.',
+'Don\'t let a bad hour write your whole day.',
+'You\'re allowed to be proud of yourself. Really.',
+'The road is long, but you\'re not walking it alone.',
+'Your future is being decided by what you do today. Choose kindly.',
+'You are enough — even on the days you don\'t feel like it.',
+'Keep the promise you made to yourself. You\'re worth it.',
+'Healing is slow. That\'s how real healing works.',
+'You\'re not starting over. You\'re continuing, stronger.',
+'Be where your feet are. One moment at a time.',
+'The person you\'re becoming thanks you for today.',
+'It\'s okay to ask for help. That\'s courage, not weakness.',
+'Your recovery is nobody else\'s timeline.',
+'Even a short walk today is a win.',
+'You\'ve got this. Not because it\'s easy — because you\'re determined.',
+'Show yourself the patience you\'d show a friend.',
+'You\'re writing a new story. Today is another line.',
+'Feelings pass. Your commitment doesn\'t have to.',
+'Take it easy on yourself — you\'re doing the work.',
+'One more day of choosing you. That\'s everything.',
+'You are worthy of the life you\'re building.',
+'The hardest part is behind you: you started.',
+'Stay curious about tomorrow. It gets better.',
+'Your strength isn\'t loud. It\'s steady.',
+'Forgive yesterday. Show up today.',
+'You\'re not alone in this — millions walk the same road.',
+'Hydrate, breathe, move. Little things, big power.',
+'Your future is bright, and you\'re walking toward it.',
+'Don\'t rush the journey. Savor the progress.',
+'You\'re stronger than the voice that says give up.',
+'Every day of freedom is a victory. Today counts.',
+'Keep your eyes on your own paper. Your progress is yours.',
+'You\'re not defined by your addiction. You\'re defined by your fight.',
+'Peace is possible. You\'re building it daily.',
+'You showed up for yourself again. Notice that.',
+'It\'s okay to take it slow. Slow still gets there.',
+'You\'re more than this moment. Remember that.',
+'The work you\'re doing today is changing your life.',
+'Be proud — you\'re doing what most people never dare.',
+'One day at a time, and you\'re still standing.',
+'Your effort today is a deposit on tomorrow.',
+'You\'re exactly where you need to be. Keep going.',
+'Gentle reminder: you are loved, and you are enough.',
+'Today\'s struggle is tomorrow\'s strength.',
+'You don\'t have to be perfect to be proud.',
+'The quiet you\'re building is real. Protect it.',
+'You\'re choosing freedom with every single day.',
+'Hold on — the view gets better from here.',
+'Your recovery is the best thing you\'ll ever build.',
+'Be kind to yourself. You\'re healing.',
+'You\'ve come further than you think.',
+'Keep showing up. That\'s the whole secret.',
+'Today, choose you. Again.',
+'You are the author of this chapter. Write on.',
+'Days of you — and the road ahead is yours. Keep going.',
+];
 function maybeShowDailyLessonReminder(){
   if(S.remindersEnabled===false)return;
   // Outside the user's chosen hours, say nothing at all - and crucially, don't
@@ -7869,9 +8155,11 @@ function maybeShowDailyLessonReminder(){
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
   save();
+  const dayNum=Math.max(1,getDays());
+  const uplift=DAY_90_UPLIFTS[(dayNum-1)%DAY_90_UPLIFTS.length];
   const reminderText=S.userType==='partner'
-    ?"Whenever you're ready, today's lesson in your track is here — it's built for the one carrying this, not the one causing it."
-    :`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
+    ?`${uplift} Whenever you're ready, today's lesson in your track is here — it's built for the one carrying this, not the one causing it.`
+    :`${uplift} Today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
   novaNudge(reminderText);
   sendPhoneNotification("Today's lesson is ready",reminderText);
 }
@@ -10154,6 +10442,7 @@ function restartOnboarding(){
     S.lastDailyLessonReminderDate='';
     S.lastMissedLessonNoticeDate='';
     S.navTourDone=false;// re-running setup re-offers the navigation tour
+    S.welcomeShown=false;// ...and the welcome message plays again
     save();
 
     document.getElementById('ob-name').value='';
@@ -11233,6 +11522,10 @@ async function boot(){
   load();
   applyFontSize();
   applyDiscretionMode();
+  // Guard the gates too: back on sign-in / preview must not close the app
+  // and force a fresh login. The trap is already armed from enterApp when it
+  // matters; this covers the pre-app screens as well.
+  armAppBackTrap();
   try{
     const meRes=await fetch('/api/auth/me');
     if(meRes.ok){

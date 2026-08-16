@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0869</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0870</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -3433,7 +3433,12 @@ function renderSceneChips() {
   chipRow($('#scene-quality'), QUALITIES, st.sceneQuality, (k) => { st.sceneQuality = k; renderSceneChips(); });
   chipRow($('#scene-counts'), SCENE_COUNTS, st.sceneCount, (k) => { st.sceneCount = Number(k); renderSceneChips(); });
   const n = st.sceneCount;
-  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : p.imageRate) : null;
+  // With a character selected the server bills the character rate (the image
+  // goes through their reference photos / face lock), not the plain-Flux rate.
+  // Quoting imageRate here while charging characterImageRate made the button
+  // say ~$0.04 and the receipt say ~$0.09 — the receipt was the honest one.
+  const withChar = !!($('#scene-char')?.value || $('#scene-char2')?.value);
+  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : (withChar ? p.characterImageRate : p.imageRate)) : null;
   const price = rate ? ` · ~$${(rate * n).toFixed(2)}` : '';
   $('#scene-gen').textContent = (n > 1 ? `Generate ${n} images (${n} takes)` : 'Generate scene image') + price;
 }
@@ -3449,6 +3454,9 @@ function renderSceneCharSelect() {
   if ($('#sb-char')) $('#sb-char').innerHTML = opts;
   if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
   if ([...$('#scene-char2').options].some((o) => o.value === scene2Cur)) $('#scene-char2').value = scene2Cur;
+  // Picking a character changes what the generate button will cost — requote it.
+  $('#scene-char').onchange = renderSceneChips;
+  $('#scene-char2').onchange = renderSceneChips;
   if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
   // Auto-pin: if a storyboard character hasn't been chosen yet and exactly one
   // star exists, select them so generated scenes actually feature that person
@@ -7775,6 +7783,8 @@ function renderCaptionSizes() {
       // Overlays are drawn client-side, so their previews must be redrawn for
       // the new size to be visible before rendering.
       if (typeof renderOverlays === 'function') renderOverlays();
+      // And the caption preview box, or the chips look like they do nothing.
+      if (typeof renderCaptionPreview === 'function') renderCaptionPreview();
     };
     box.appendChild(b);
   });
@@ -7805,7 +7815,10 @@ function renderCaptionPreview() {
   let pv = document.getElementById('cap-preview');
   if (!pv) { pv = document.createElement('canvas'); pv.id = 'cap-preview'; pv.style.cssText = 'width:100%;max-width:280px;border-radius:8px;margin-top:6px;background:linear-gradient(135deg,#3a3a5a,#14121f);display:block'; box.after(pv); }
   const style = CAPTION_STYLES[captionStyleKey()];
-  drawOverlay({ text: 'your lyrics here', font: 'system-ui', size: 150, pos: 5, ...style }, 560, 200, pv);
+  // The preview must obey the Size chips or the control looks broken — the
+  // burned-in size was always applied at render, but this box never moved,
+  // so Small/Medium/Large appeared to do nothing.
+  drawOverlay({ text: 'your lyrics here', font: 'system-ui', size: Math.round(150 * captionSizeMul()), pos: 5, ...style }, 560, 200, pv);
 }
 // Captions go to the server as plain text + timings plus the chosen look; it
 // burns them in via a generated subtitle file. No per-line PNG uploads, no
@@ -9248,6 +9261,34 @@ $('#qk-import-song').onclick = async () => {
   b.disabled = false; b.textContent = '🔗 Import';
 };
 
+// Words should never sit on a face. Chrome ships a built-in face detector
+// (window.FaceDetector — free, local, no AI cost); where it exists, each
+// picture with words is checked once: face in the bottom of the frame and the
+// top clear → that shot's words move to the top. Both bands occupied, or no
+// detector in this browser → words stay in the bottom slot, which is where
+// TikTok viewers expect them. A row's own position (set in the shot list)
+// always wins — this only decides for shots nobody positioned by hand.
+const qkFaceCache = new Map();
+async function qkFaceSafePos(url) {
+  if (!('FaceDetector' in window) || !url) return null;
+  if (qkFaceCache.has(url)) return qkFaceCache.get(url);
+  let pos = null;
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const faces = await new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 }).detect(img);
+    if (faces.length) {
+      const H = img.naturalHeight || 1;
+      const inBottom = faces.some((f) => (f.boundingBox.y + f.boundingBox.height) > H * 0.55);
+      const inTop = faces.some((f) => f.boundingBox.y < H * 0.35);
+      pos = (inBottom && !inTop) ? 2 : 8;
+    }
+  } catch (_) { pos = null; }
+  qkFaceCache.set(url, pos);
+  return pos;
+}
+
 $('#qk-assemble').onclick = async () => {
   if (qk.busy || st.busyRender) return;
   pvStop(); // a running preview and a render would fight over the same clips
@@ -9276,6 +9317,16 @@ $('#qk-assemble').onclick = async () => {
     renderOutputChips();
     let durs = qk.shots.map((s) => s.dur);
     const musicAsset = firstMusicAsset();
+    // Two word systems can be live at once: per-picture words ride their
+    // picture wherever it goes, but the Lyrics & Captions list is timed to the
+    // SONG's clock. Beat-snap reshapes the pictures underneath those timings,
+    // so the words land over the wrong picture — "they don't move in sync."
+    // The Director already refuses this combination; the manual button now
+    // applies the same rule instead of silently producing a drifted video.
+    if ($('#qk-beat').checked && musicAsset && captionLinesPayload().length) {
+      $('#qk-beat').checked = false;
+      $('#qk-paste-note').textContent = '⚡ Beat-cutting turned itself off: your Lyrics & Captions are timed to the song, and moving the cuts would slide the pictures out from under the words. Clear the caption list if you want beat-cutting back.';
+    }
     if ($('#qk-beat').checked && musicAsset) {
       $('#qk-status').textContent = 'Listening to your song…';
       try {
@@ -9337,7 +9388,8 @@ $('#qk-assemble').onclick = async () => {
     // words on screen, timed to each picture
     st.overlays = [];
     let cum = 0;
-    qk.shots.forEach((s, i) => {
+    for (let i = 0; i < qk.shots.length; i++) {
+      const s = qk.shots[i];
       const td = i < st.trans.length && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0;
       if (s.text.trim()) {
         // Words hold for the whole picture. This used to stop at 4.3s, so an 8s
@@ -9345,11 +9397,14 @@ $('#qk-assemble').onclick = async () => {
         // into the next picture so text never bleeds across the change.
         const startAt = cum + 0.3;
         const endAt = Math.max(startAt + 0.5, cum + durs[i] - Math.max(0.2, td));
+        // No hand-set position → let the face check decide top or bottom.
+        const srcAsset = st.assets.find((x) => x.id === s.assetId);
+        const autoPos = s.pos ? null : await qkFaceSafePos(srcAsset?.url);
         st.overlays.push({
           // the row's own position wins over the saved look, so one shot can
           // sit high and the next low without changing everything
           ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }),
-          pos: s.pos || 8,
+          pos: s.pos || autoPos || 8,
           text: s.text,
           start: Math.round(startAt * 10) / 10,
           end: Math.round(endAt * 10) / 10,
@@ -9357,7 +9412,7 @@ $('#qk-assemble').onclick = async () => {
         });
       }
       cum += durs[i] - td;
-    });
+    }
     // tasteful defaults for a finished video: end on a fade to black
     $('#fade-black-out').checked = true;
     syncTrans(); renderSeq(); renderOverlays(); persistDraft();

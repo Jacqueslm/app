@@ -14,11 +14,31 @@ const APP_ROOT = path.join(__dirname, '..', '..'); // folder holding the launche
 const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
 // Private repos need a token (fine-grained PAT, Contents: read); public need none.
-const UPDATE_TOKEN = (process.env.APP_UPDATE_TOKEN || '').trim();
-const GH_HEADERS = {
-  'User-Agent': 'tsid-app-updater',
-  ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
-};
+// `let` + a function, NOT a const object: a token saved through the Settings UI
+// after boot must work on the very next request. The old const object captured
+// the (empty) value at module load and silently ignored a later-saved token
+// until a restart - which looked exactly like "GitHub rejected my token".
+let UPDATE_TOKEN = (process.env.APP_UPDATE_TOKEN || '').trim();
+function ghHeaders() {
+  return {
+    'User-Agent': 'tsid-app-updater',
+    ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
+  };
+}
+// Where settings saved from the app UI live (same gitignored .env the other
+// keys use - never checked in, never leaves the machine).
+const ENV_PATH = path.join(__dirname, '.env');
+function persistEnvKey(name, value) {
+  let lines = [];
+  try { lines = fs.readFileSync(ENV_PATH, 'utf8').split(/\r?\n/); } catch (_) {}
+  lines = lines.filter((l) => !l.startsWith(`${name}=`) && l.trim() !== '');
+  if (value) lines.push(`${name}=${value}`);
+  fs.writeFileSync(ENV_PATH, lines.join('\n') + '\n');
+}
+// Railway (the hosted web app) redeploys from git - its filesystem is
+// ephemeral, so in-place updates there are meaningless and get wiped. The
+// update/update-token UI is for LOCAL installs only.
+const IS_RAILWAY = !!(process.env.RAILWAY_SERVICE_ID || process.env.RAILWAY_PROJECT_ID || process.env.RAILWAY_PUBLIC_DOMAIN);
 // Tarball, not zipball: GNU tar (standard on every Linux host) reads .tar.gz
 // natively via `tar -xzf`, but cannot read a .zip - so a zip forced a fallback
 // to the `unzip` binary, which most servers don't have installed, and the whole
@@ -56,7 +76,7 @@ function runCmd(cmd, args, opts) {
 
 async function fetchLatestCommit() {
   const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${UPDATE_REF}`, {
-    headers: { ...GH_HEADERS, Accept: 'application/vnd.github+json' },
+    headers: { ...ghHeaders(), Accept: 'application/vnd.github+json' },
   });
   const data = await res.json();
   if (!res.ok) {
@@ -86,17 +106,59 @@ router.get('/check', async (req, res) => {
   try { current = JSON.parse(fs.readFileSync(UPDATE_STATE_FILE, 'utf8')); } catch (_) {}
   try {
     const latest = await fetchLatestCommit();
-    res.json({ latest, current, upToDate: Boolean(current && current.sha === latest.sha) });
+    res.json({ latest, current, upToDate: Boolean(current && current.sha === latest.sha), hasToken: Boolean(UPDATE_TOKEN), railway: IS_RAILWAY });
   } catch (err) {
-    res.status(502).json({ error: `Could not check GitHub: ${err.message}`, current });
+    res.status(502).json({
+      error: `Could not check GitHub: ${err.message}`,
+      current,
+      hasToken: Boolean(UPDATE_TOKEN),
+      railway: IS_RAILWAY,
+      needsToken: /not visible|private|404|Not Found/i.test(err.message) && !UPDATE_TOKEN,
+    });
+  }
+});
+
+// Paste a GitHub token so a PRIVATE app repo can still update in place on a
+// LOCAL install. Saved 0600 to the same gitignored .env as the other keys;
+// never leaves the machine except as an Authorization header to api.github.com.
+router.post('/settings/updatetoken', async (req, res) => {
+  if (IS_RAILWAY) return res.status(400).json({ error: 'This is the hosted web app — updates arrive automatically from the repo. The token is only used on a local install.' });
+  const { token } = req.body || {};
+  const clean = typeof token === 'string' ? token.trim() : '';
+  if (clean && (clean.length < 20 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a GitHub token. Fine-grained ones start with github_pat_ and classic ones with ghp_." });
+  }
+  const prev = UPDATE_TOKEN;
+  UPDATE_TOKEN = clean;
+  if (clean) {
+    // Prove it works BEFORE saving it - a token with the wrong repo or a
+    // missing Contents permission fails identically to no token at all.
+    try {
+      await fetchLatestCommit();
+    } catch (err) {
+      UPDATE_TOKEN = prev;
+      return res.status(400).json({ error: `GitHub would not accept that token: ${err.message} — check it has Contents: read on ${UPDATE_REPO}.` });
+    }
+  }
+  try {
+    persistEnvKey('APP_UPDATE_TOKEN', clean || null);
+    res.json({ hasToken: Boolean(clean), repo: UPDATE_REPO, branch: UPDATE_BRANCH });
+  } catch (err) {
+    UPDATE_TOKEN = prev;
+    res.status(500).json({ error: `Could not save the token: ${err.message}` });
   }
 });
 
 router.post('/', async (req, res) => {
+  // Local installs only - on Railway the filesystem is ephemeral and the next
+  // redeploy wipes any overlay, so an in-place "update" there is a no-op at
+  // best and a confusing partial state at worst. Hosted installs are always
+  // current: Railway redeploys from git on every push.
+  if (IS_RAILWAY) return res.status(400).json({ error: 'This is the hosted web app — it is always on the latest version. Updates arrive automatically from the repo.' });
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
   try {
     // 1. download the latest code
-    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
+    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: ghHeaders() });
     if (zipRes.status === 404 && !UPDATE_TOKEN) throw new Error('download blocked - GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to server/.env (or make the repo public)');
     if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
     const tarPath = path.join(tmp, 'update.tar.gz');

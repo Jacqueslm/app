@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0870</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0871</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -637,8 +637,10 @@ body.simple-only #view-simple{display:flex !important}
         <summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--tp)">📋 Paste your script — one line per shot</summary>
         <p class="usage" style="margin:6px 0 4px">In order, one line each. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
         <textarea id="qk-paste" placeholder="1. 01_indulgence   Zoom in   10s  cut    I wasn't hungry. I was filling a hole&#10;2. 02_aftermath    Zoom out  10s  blend  Then the room got quiet&#10;3. 03_realization  Float      5s  blend  Wasn't there" style="min-height:96px;font-size:12px"></textarea>
-        <button class="btn2" id="qk-paste-go" style="width:100%;margin-top:6px">Fill the shots from this</button>
-        <button class="btn2" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Find free footage for the lines with no picture</button>
+        <button class="gen-btn" id="qk-paste-all" style="width:100%;margin-top:6px">🚀 Make the whole video from this — one press</button>
+        <p class="usage" style="margin:2px 0 0">Reads your lines, matches pictures you already have by name, finds free footage for the rest, adds your song and the end card, assembles. Stops and tells you if any line has no picture, so nothing renders half-done.</p>
+        <button class="btn2 quiet" id="qk-paste-go" style="width:100%;margin-top:6px">Only fill the shots (no assemble)</button>
+        <button class="btn2 quiet" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Only find free footage for the lines with no picture</button>
         <p class="usage" id="qk-paste-note" style="margin:4px 0 0"></p>
       </details>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -3425,8 +3427,11 @@ function renderRelationships() {
 function renderSceneChips() {
   chipRow($('#scene-sizes'), SCENE_SIZES, st.sceneSize, (k) => { st.sceneSize = k; renderSceneChips(); });
   const p = st.cfg?.pricing;
+  // The Flux chip must quote what THIS generation will cost: with a character
+  // selected it runs through their photos/face lock at the character rate.
+  const chipChar = !!($('#scene-char')?.value || $('#scene-char2')?.value);
   const QUALITIES = [
-    { key: 'standard', label: `Flux${p ? ` · $${p.imageRate.toFixed(2)}` : ''}` },
+    { key: 'standard', label: `Flux${p ? ` · $${(chipChar ? p.characterImageRate : p.imageRate).toFixed(2)}` : ''}` },
     { key: 'best', label: `✨ Banana Pro${p ? ` · $${p.imageBestRate.toFixed(2)}` : ''}` },
     { key: 'gpt', label: `🤖 GPT-Image${p && p.imageGptRate ? ` · $${p.imageGptRate.toFixed(2)}` : ''}` },
   ];
@@ -4407,7 +4412,9 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   const p = voicePrice();
   // Nothing to confirm when nothing is being spent. Asking anyway is how a
   // free feature ends up feeling expensive.
-  if (!voiceIsFree() && !confirm(`Generate this line in that voice?\n\nUses AI on your fal key (~$${(p || 0.01).toFixed(3)}).`)) return;
+  // When the price can't be computed, say so — a made-up low number in a
+  // confirm dialog is the one place a wrong estimate becomes deception.
+  if (!voiceIsFree() && !confirm(`Generate this line in that voice?\n\nUses AI on your fal key ${p ? `(~$${p.toFixed(3)})` : '(price unavailable right now — it will show on your receipt)'}.`)) return;
   const b = $('#voice-go'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Speaking…';
   note.textContent = ''; $('#voice-audio').style.display = 'none'; $('#voice-use').style.display = 'none'; setProg('#voice-prog', 3);
   try {
@@ -9146,6 +9153,46 @@ if (document.getElementById('qk-stock-fill')) $('#qk-stock-fill').onclick = asyn
       + ' Everything found is now in your library too.';
   } catch (err) {
     note.textContent = err.message || 'Could not reach the stock library.';
+  } finally {
+    btn.disabled = false; btn.textContent = was;
+  }
+};
+
+// The whole episode pipeline behind one press. Nothing here is new machinery —
+// it chains the three buttons a person had to press in the right order every
+// time: fill the shots from the paste, find free footage for the gaps, then
+// assemble with the song and end card. The one rule it adds: it refuses to
+// render a half-filled episode. A missing shot stops it with a note naming
+// what's missing, because a video with a hole in it posted at 6am is worse
+// than no video.
+if (document.getElementById('qk-paste-all')) $('#qk-paste-all').onclick = async (e) => {
+  const btn = e.currentTarget;
+  const note = $('#qk-paste-note');
+  const rows = parseShotList($('#qk-paste').value);
+  if (!rows.length) { note.textContent = 'Paste your shot list first — one line per shot.'; return; }
+  if (qk.busy || st.busyRender) return;
+  btn.disabled = true;
+  const was = btn.textContent;
+  try {
+    // 1. your own pictures first, matched by the names in the lines
+    btn.textContent = 'Matching your pictures…';
+    $('#qk-paste-go').onclick();
+    // 2. free stock for whatever is still empty
+    if (qk.shots.length < rows.length) {
+      btn.textContent = 'Finding free footage…';
+      await $('#qk-stock-fill').onclick({ currentTarget: $('#qk-stock-fill') });
+    }
+    if (!qk.shots.length) return; // the buttons above already wrote the note
+    if (qk.shots.length < rows.length) {
+      const missing = rows.slice(qk.shots.length).map((r, i) => r.name || `line ${qk.shots.length + i + 1}`);
+      note.textContent = `Stopped before assembling — no picture for: ${missing.join(', ')}. `
+        + 'Add those (your own, or generate them in AI Scenes), then press this again.';
+      return;
+    }
+    // 3. everything has a picture — build the video
+    btn.textContent = 'Assembling…';
+    if (!firstMusicAsset()) note.textContent = 'No song in the library — assembling without music. Add one and press again if it needs a track.';
+    await $('#qk-assemble').onclick();
   } finally {
     btn.disabled = false; btn.textContent = was;
   }

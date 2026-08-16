@@ -1,6 +1,6 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 16, 2026 (second pass).
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 16, 2026 (third pass).
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
 
@@ -25,6 +25,7 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 | 5 | **Friendly — now works with EITHER key** | Server now runs on **Anthropic (Sonnet 5)** if `ANTHROPIC_API_KEY` is set, or **Gemini 2.5 Flash** if `GEMINI_API_KEY` is set (much cheaper; free tier). Same 3 free / 30 Pro chats-per-day limits. Until one key is set, Friendly stays in its offline mode — it is NOT hooked to anything yet, which is why it repeats canned lines. |
 | 6 | **All earlier fixes from the approval batch** | Spiritual "chooses but does nothing" fixed (faith choice now seeds the Spiritual Path + Home card + chip highlight), Smart Reminders ungated from Pro, Update/Diagnostics UI owner-only, welcome message uplift, day-3 celebration for everyone, 90-day program framing, meditation room, rooms-only safety filter, back-trap fixes, big-text scroll fix. |
 | 7 | No screenshot blocking, no hard IP blocking | 🚫 Decided NO, per Jacques — noted so nobody re-adds them. |
+| 8 | **Updater %2F bug FIXED (Aug 16, third pass)** | `TurnSomeDayIntoOneday/server/update.js` encoded the whole branch name (`claude%2Fvibe-code-uwxxlk`) — GitHub's ref endpoints 404 on %2F, so every in-app update check failed even with a token. Now splits on `/` and encodes each segment (same fix Studio shipped). Verified live: raw-slash commit API returns a SHA. Pushed to `main` + deploy branch. NOTE: the RUNNING server still has the old code until Railway redeploys — in-app update can't self-heal because it IS the broken piece. |
 
 ---
 
@@ -78,3 +79,4 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 11. **Nothing pushes without Jacques's approval.**
 12. No screenshot blocking, no hard IP blocking — decided no, don't re-add.
 13. **LANE SPLIT:** recovery-app AI owns `TurnSomeDayIntoOneday/`; Studio AI owns `Studio/`, `reference/`, `START-HERE.md`. Don't edit the other lane.
+14. **Token lives in BOTH servers' envs:** `Studio/server/.env` AND `TurnSomeDayIntoOneday/server/.env` each need `APP_UPDATE_TOKEN` — the recovery app runs on Railway, so that one goes in Railway's env vars. Owner email `APP_OWNER_EMAIL` too.

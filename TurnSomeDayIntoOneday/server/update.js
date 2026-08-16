@@ -26,8 +26,12 @@ const GH_HEADERS = {
 // tool anywhere: Linux GNU tar, plus the bsdtar shipped on Windows 10+/macOS,
 // all handle .tar.gz. The API endpoint honors the Authorization header
 // (codeload doesn't), so private repos keep working.
+// GitHub's ref endpoints want raw slashes in branch names ("claude/vibe-code-uwxxlk");
+// encoding the whole branch turns "/" into %2F and makes the endpoint 404, which
+// silently broke every in-app update. Encode only individual path segments.
+const UPDATE_REF = UPDATE_BRANCH.split('/').map(encodeURIComponent).join('/');
 const UPDATE_ZIP_URL = process.env.APP_UPDATE_ZIP_URL // test override
-  || `https://api.github.com/repos/${UPDATE_REPO}/tarball/${encodeURIComponent(UPDATE_BRANCH)}`;
+  || `https://api.github.com/repos/${UPDATE_REPO}/tarball/${UPDATE_REF}`;
 const UPDATE_STATE_FILE = path.join(__dirname, 'update-state.json');
 // Strict whitelist: an update only ever copies this app's own files. The repo
 // also contains Studio, and the two apps must stay fully separate on disk -
@@ -51,7 +55,7 @@ function runCmd(cmd, args, opts) {
 }
 
 async function fetchLatestCommit() {
-  const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${encodeURIComponent(UPDATE_BRANCH)}`, {
+  const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${UPDATE_REF}`, {
     headers: { ...GH_HEADERS, Accept: 'application/vnd.github+json' },
   });
   const data = await res.json();

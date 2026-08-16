@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0872</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0874</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -310,6 +310,15 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2" id="set-reset" style="border:1px solid #c0392b;color:#e74c3c">🗑 Start fresh — delete everything</button>
       <p class="usage" id="set-reset-status" style="margin:0">Wipes every picture, video, song, character and project so the app is empty. Your login stays. Back up first if unsure — this can't be undone.</p>
       <p class="usage" id="set-update-status" style="margin:0"></p>
+      <!-- Only appears when GitHub refuses the check and no token is saved,
+           i.e. the repo went private. Hidden the rest of the time so it is not
+           one more box to wonder about. -->
+      <div id="set-token-row" style="display:none;border:1px solid var(--accent);border-radius:12px;padding:10px;margin-top:6px">
+        <p class="usage" style="margin:0 0 6px"><b>This repo is private.</b> Studio needs a GitHub token to fetch updates. Make one at <b>github.com/settings/personal-access-tokens</b> → Generate new token → give it access to your <b>app</b> repo → Repository permissions → <b>Contents: Read-only</b>. Paste it here once.</p>
+        <input class="input" id="set-token" type="password" placeholder="github_pat_… or ghp_…" autocomplete="off" style="width:100%">
+        <button class="btn2" id="set-token-save" style="width:100%;margin-top:6px">Save token</button>
+        <p class="usage" id="set-token-status" style="margin:4px 0 0"></p>
+      </div>
       <p class="usage">Your files live in <b>Studio\\server\\media</b>. Your account, characters and settings are in <b>Studio\\server\\data.sqlite</b> — copy those to move or restore your work.</p>
     </div>
     <details id="art-fold" style="margin-top:4px;display:none">
@@ -1943,8 +1952,36 @@ function pickFiles(accept, cb) {
         s.textContent = d.upToDate ? "✅ You're on the latest version."
           : !d.current ? 'Press "Update my app" once and it syncs to the latest version.'
           : `⬆ Update available — press "Update my app".`;
-      } catch (_) { /* offline or GitHub unreachable - stay quiet */ }
+      } catch (err) {
+        // A private repo answers 404, which used to look like being offline.
+        // Show the token box instead of staying silent about a fixable thing.
+        const row = document.getElementById('set-token-row');
+        if (row && /private|not visible|404|Not Found|token/i.test(err.message || '')) {
+          row.style.display = '';
+          s.textContent = "⚠ Studio can't reach the app repo — it looks private. Paste a token below and updates work again.";
+        }
+      }
     })();
+    const tokenBtn = document.getElementById('set-token-save');
+    if (tokenBtn) tokenBtn.onclick = async () => {
+      const st = document.getElementById('set-token-status');
+      const input = document.getElementById('set-token');
+      const token = (input.value || '').trim();
+      if (!token) { st.textContent = 'Paste the token first.'; return; }
+      tokenBtn.disabled = true; st.textContent = 'Checking it with GitHub…';
+      try {
+        await jfetch('/api/studio/settings/updatetoken', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+        input.value = '';
+        st.textContent = '✅ Saved and working. Press "Update my app".';
+        const s2 = document.getElementById('set-update-status');
+        if (s2) s2.textContent = '⬆ Ready to update.';
+      } catch (e) {
+        st.textContent = e.message;
+      } finally { tokenBtn.disabled = false; }
+    };
     document.getElementById('set-backup') && (document.getElementById('set-backup').onclick = () => go('stor-backup'));
     document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => showFalKeyCard());
   };
@@ -9741,7 +9778,7 @@ $('#qk-assemble').onclick = async () => {
    real Ken Burns is smoother; grain, glitch, slow-mo and beat-snap are done
    properly at render), which is exactly enough to answer the only question a
    preview exists for: "is this the video I meant?" */
-const qkpv = { playing: false, raf: 0, audio: null, t0: 0, imgs: new Map(), caps: new Map(), vids: new Map() };
+const qkpv = { playing: false, raf: 0, audio: null, t0: 0, imgs: new Map(), caps: new Map(), vids: new Map(), songCaps: [] };
 
 // The looks a canvas can honestly fake with a CSS filter string. Anything not
 // here (grain, glitch, strobe, morph…) previews clean and renders with the
@@ -9831,6 +9868,31 @@ async function pvPrepare(W, H) {
       W, H);
     qkpv.caps.set(i, c);
   });
+
+  // Song captions (the Lyrics & Captions list) are burned in by the SERVER as
+  // a subtitle file, so until now the only way to see them was to assemble the
+  // whole video. They are timed to the song's clock, not to a shot, so they get
+  // their own prerendered list keyed by absolute start/end rather than by shot.
+  //
+  // AUTO_TEXT_SIZE is 0.042*1080, which is exactly ASS_SIZES.medium — so with
+  // the same Size chips applied by captionSizeMul() inside drawOverlay, what
+  // shows here is the height the burned-in caption will really be.
+  qkpv.songCaps = [];
+  const capStyle = (typeof CAPTION_STYLES !== 'undefined' && CAPTION_STYLES[captionStyleKey()]) || {};
+  (st.captions || []).forEach((c) => {
+    const text = String(c.text || '').trim();
+    if (!text) return;
+    const start = Number(c.start) || 0;
+    const end = Number(c.end) || start + 3;
+    if (end <= start) return;
+    qkpv.songCaps.push({
+      start,
+      end,
+      canvas: drawOverlay(
+        { text, font: 'system-ui', size: AUTO_TEXT_SIZE, pos: 8, ...capStyle },
+        W, H),
+    });
+  });
 }
 
 function pvDrawShot(ctx, seg, i, t, W, H) {
@@ -9910,8 +9972,17 @@ $('#qk-preview').onclick = async () => {
   qkpv.playing = true;
   qkpv.t0 = performance.now();
   $('#qk-preview').textContent = '⏹ Stop preview';
-  $('#qk-pv-note').textContent = `Rough preview, ${plan.total.toFixed(1)}s — the render is smoother, and ` +
-    `${$('#qk-beat').checked && music ? 'beat-snap plus ' : ''}effects like grain, glitch and slow-mo are done properly at render. Your clips play with their own sound, and the song ducks under them exactly as it will in the finished video.`;
+  {
+    const nCaps = (qkpv.songCaps || []).length;
+    // A caption timed past the end of the cut never appears, and before this
+    // there was no way to find that out except by rendering and counting.
+    const late = (qkpv.songCaps || []).filter((c) => c.start >= plan.total).length;
+    $('#qk-pv-note').textContent = `Rough preview, ${plan.total.toFixed(1)}s — the render is smoother, and `
+      + `${$('#qk-beat').checked && music ? 'beat-snap plus ' : ''}effects like grain, glitch and slow-mo are done properly at render. `
+      + 'Your clips play with their own sound, and the song ducks under them exactly as it will in the finished video.'
+      + (nCaps ? ` Showing your ${nCaps} song caption${nCaps === 1 ? '' : 's'} at the size and position they will be burned in.` : '')
+      + (late ? ` ⚠ ${late} of them start after the video ends — they will not appear. Press 🎯 Fit shots to song length, or shorten the caption times.` : '');
+  }
   const tick = () => {
     if (!qkpv.playing) return;
     const t = (performance.now() - qkpv.t0) / 1000;
@@ -9960,10 +10031,33 @@ $('#qk-preview').onclick = async () => {
     } else {
       pvDrawShot(ctx, seg, i, t, W, H);
     }
+    // Song captions sit on the song's clock, so they are drawn last, over
+    // whatever shot happens to be on screen — which is exactly where the
+    // burned-in ones land. Seeing them here is the whole point: if they drift
+    // off their pictures, that shows up now instead of after a render.
+    pvDrawSongCaps(ctx, t, W, H);
     qkpv.raf = requestAnimationFrame(tick);
   };
   tick();
 };
+
+// Same 0.3s in/out fade the .ass file gets, so the preview and the render
+// agree about when a line arrives and leaves.
+function pvDrawSongCaps(ctx, t, W, H) {
+  const caps = qkpv.songCaps;
+  if (!caps || !caps.length) return;
+  for (const c of caps) {
+    if (t < c.start || t > c.end) continue;
+    const alpha = Math.min(
+      Math.min(1, Math.max(0, (t - c.start) / 0.3)),
+      Math.min(1, Math.max(0, (c.end - t) / 0.3)));
+    if (alpha <= 0) continue;
+    const keep = ctx.globalAlpha;
+    ctx.globalAlpha = keep * alpha;
+    ctx.drawImage(c.canvas, 0, 0, W, H);
+    ctx.globalAlpha = keep;
+  }
+}
 
 /* ---------------- fit shots to song ----------------
    Planning a video to land exactly on the song's last note used to be manual

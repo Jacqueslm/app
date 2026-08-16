@@ -6,6 +6,14 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🛣 LANE SPLIT (two AI sessions, agreed Aug 16 2026)
+
+- **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (`index.html`), `server/`, `data/`, and the app's files. This is MY lane.
+- **Studio AI (the other session):** `Studio/`, `reference/`, and `START-HERE.md`. That is THEIR lane.
+- Neither touches the other's lane unless Jacques says otherwise. The other session touched `TurnSomeDayIntoOneday/index.html` once (7 string swaps + 2 hints in the "Other" copy, commit `6f56112`) — already merged cleanly into my push `c20f262`. No collision. Do NOT re-edit each other's work.
+
+---
+
 ## ✅ PUSHED THIS TURN (Aug 16, second pass) — live on `main` + deploy branch
 
 | # | Item | What changed |
@@ -69,3 +77,4 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 10. Pull before pushing; two sessions work this repo.
 11. **Nothing pushes without Jacques's approval.**
 12. No screenshot blocking, no hard IP blocking — decided no, don't re-add.
+13. **LANE SPLIT:** recovery-app AI owns `TurnSomeDayIntoOneday/`; Studio AI owns `Studio/`, `reference/`, `START-HERE.md`. Don't edit the other lane.

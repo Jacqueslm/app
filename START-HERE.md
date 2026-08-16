@@ -410,6 +410,30 @@ one thread in Gmail). Two days of silence at a national association is normal �
 do not chase before ~19 Aug. Missouri DBH stays parked behind it; the play when
 NASADAD lists us is one line back into the DBH thread, per NEW-AVENUES/COMPANIES.
 
+### 15-16 Aug — App: repo locked down, navigation tour, real mini player
+Three things, all in the Day One app (TurnSomeDayIntoOneday/index.html):
+
+1. **THE REPO IS NOW PRIVATE (16 Aug).** `Jacqueslm/app` was **public** from the
+day it was connected — anyone could read and clone all of it: both apps, the
+playbooks, the email sequences. Jacques asked for the source protected and it
+is done: visibility is **private**. Jacques and every connected session (Claude,
+Manus, Freebuff, Railway) keep full access. A new collaborator gets added in
+GitHub → Settings → Collaborators — never flip visibility back to public
+without asking.
+2. **Guided navigation tour.** A one-time 6-step walk after setup: Today/SOS →
+Tools → Friendly → Profile → guide bot → lesson listening. Each step switches
+to the screen and frames the key control, skip is one tap, and it never blocks.
+Replayable any time from **Profile → "How to use this app"** (S.navTourDone;
+re-offered if setup is re-run). Built because Jacques got a real complaint that
+the app is hard to navigate.
+3. **Real floating mini player.** The tiny headphones pill is now a proper
+player card above the bottom nav while a lesson plays: lesson title, play /
+pause, live progress bar, and a ✕ to stop. Tapping the card opens the big
+read-along player. The audio itself is unchanged — still keeps playing across
+screens and on the lock screen. Honest limit, already stated to Jacques: a true
+floating window over *other* apps needs native Android code this web app (TWA)
+cannot run; everything inside the app is covered.
+
 ### 14 Aug (later) — App v5.5.0: free tier opens wide, congrats card, speak anywhere
 Jacques's call, deliberate: **the first 15 days of EVERY lesson pack are now
 free** — Spiritual, Supporting Someone boundary days, all predefined packs
@@ -1132,3 +1156,7 @@ something he had already been using for weeks.
 - Privacy is the product: never expose one user's data to another; "he doesn't
   see what you write" must stay true.
 - Anything worth remembering across sessions goes in a file — chat doesn't persist.
+- **The repo is PRIVATE (16 Aug 2026) — keep it that way.** `Jacqueslm/app` was
+  public from connection until Jacques asked to lock it down; anyone could clone
+  the whole business. Adding a collaborator is a GitHub settings action, never a
+  visibility flip.

@@ -230,8 +230,7 @@ body.nova-open #guide-fab-label{display:none}
    narrated brightens, the rest stay dimmed. */
 #la-ov-text .la-para{margin:0 0 16px;transition:color 0.3s}
 #la-ov-text .la-para.on{color:var(--tp)}
-body.nova-open #audio-pill{bottom:216px}
-body.nova-open #audio-pill-label{bottom:222px}
+body.nova-open #mini-player{bottom:216px}
 #guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
 #guide-panel.open{display:flex}
 #guide-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:140px}
@@ -1676,6 +1675,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Text size</p><span id="fontsize-row-sub">Default</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="startNavTour()">
+        <i class="ti ti-compass"></i>
+        <div class="setting-row-txt"><p>How to use this app</p><span>Take the 30-second tour of the screens</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" onclick="toggleAppLock()">
         <i class="ti ti-lock"></i>
         <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
@@ -1807,8 +1811,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <!-- Discreet stop for lesson audio: the lesson keeps reading on ANY screen
        (privacy - flip to a neutral screen, the earbuds keep going), and this
        unlabeled button is how you stop it from anywhere. -->
-  <div id="audio-pill" title="Open the lesson player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:132px;right:max(12px,calc(50% - 203px));width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);color:var(--tp);align-items:center;justify-content:center;cursor:pointer;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)"><i class="ti ti-headphones" style="font-size:16px"></i></div>
-  <div id="audio-pill-label" style="display:none;position:fixed;bottom:138px;right:calc(max(12px,calc(50% - 203px)) + 44px);background:var(--s2);border:1px solid var(--bdr);color:var(--tp);font-size:12px;padding:6px 10px;border-radius:10px;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)">Lesson is playing — tap to open the player</div>
+  <!-- Mini lesson player: follows the audio across every screen while a lesson
+       is playing. One tap pauses, one tap on the ✕ stops, tapping the card
+       opens the big read-along player - the lesson never has to be found
+       again to be controlled. -->
+  <div id="mini-player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:132px;left:max(12px,calc(50% - 203px));right:calc(max(12px,calc(50% - 203px)) + 56px);z-index:499;cursor:pointer;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,0.35);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 8px 9px 10px">
+      <button id="mini-play" title="Pause / resume" onclick="event.stopPropagation();laTogglePause()" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px"><i class="ti ti-player-pause"></i></button>
+      <div style="flex:1;min-width:0">
+        <div id="mini-title" style="font-size:13px;font-weight:650;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lesson</div>
+        <div id="mini-sub" style="font-size:10.5px;color:var(--tm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">Lesson is playing — tap to open the player</div>
+      </div>
+      <button id="mini-stop" title="Stop listening" onclick="event.stopPropagation();stopLessonAudio()" style="flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr);background:transparent;color:var(--tm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="mini-progress" style="position:absolute;left:0;bottom:0;height:3px;width:0%;background:var(--accent)"></div>
+  </div>
   <!-- Full-screen lesson player: big read-along text + real controls. Opens from
        the Listen row or the floating pill; closing it never stops the audio. -->
   <div id="lesson-player-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:600;flex-direction:column">
@@ -1851,6 +1868,22 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="guide-input-row">
       <input id="guide-input" placeholder="e.g. how do I cancel?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
       <button id="guide-send" onclick="guideSend()"><i class="ti ti-send"></i></button>
+    </div>
+  </div>
+
+  <!-- APP TOUR: one-time guided walk of the navigation (replayable from
+       Profile → "How to use this app"). Skip any time - it never blocks. -->
+  <div id="nav-tour" style="display:none;position:fixed;inset:0;z-index:950" onclick="if(event.target===this)navTourNext()">
+    <div id="nav-tour-spot" style="display:none;position:fixed;pointer-events:none;border:2px solid var(--accent);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);transition:all .25s ease"></div>
+    <div id="nav-tour-card" style="position:fixed;left:max(12px,calc(50% - 203px));right:max(12px,calc(50% - 203px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:16px;z-index:951;box-shadow:0 8px 30px rgba(0,0,0,0.45)">
+      <div id="nav-tour-step" style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700"></div>
+      <div id="nav-tour-title" style="font-size:16px;font-weight:650;color:var(--tp);margin-top:3px"></div>
+      <div id="nav-tour-body" style="font-size:13.5px;color:var(--tm);line-height:1.6;margin-top:5px"></div>
+      <div id="nav-tour-dots" style="display:flex;gap:6px;margin-top:12px"></div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="ob-btn outline" id="nav-tour-skip" style="flex:1;margin:0;padding:10px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="endNavTour()">Skip</button>
+        <button class="ob-btn" id="nav-tour-next" style="flex:1;margin:0;padding:10px;font-size:13px" onclick="navTourNext()">Next →</button>
+      </div>
     </div>
   </div>
 
@@ -2515,7 +2548,7 @@ let S = {
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
-  pinHash:null,pinEnabled:false,discretionMode:false,
+  pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,
   userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
   bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -3996,6 +4029,67 @@ function finishOnboard(){
   initApp();
 }
 
+// ─── APP TOUR (navigation walkthrough) ────────────────────────────────────────
+// A short guided walk of the screens, auto-shown once after setup and
+// replayable any time from Profile → "How to use this app". Each step switches
+// to the screen it explains and frames the key control. Skipping is one tap.
+const NAV_TOUR_STEPS=[
+  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 6',title:'This is Today — your home base',
+   body:'Your day counter, today\'s lesson, and the SOS button live here. If a craving hits, the red SOS button is one tap away.'},
+  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 6',title:'Tools — everything for right now',
+   body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
+  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'3 of 6',title:'Friendly — your AI companion',
+   body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
+  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'4 of 6',title:'Profile — your plan and settings',
+   body:'Your subscription, reminders, app lock, and every setting live here — including the button that brings this tour back.'},
+  {screen:null,target:'#guide-fab',step:'5 of 6',title:'Lost? The guide bot knows the way',
+   body:'This floating ? answers plain questions — "where is my journal?" — on any screen. Free, always available.'},
+  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'6 of 6',title:'Every lesson can be listened to',
+   body:'Tap Listen and the lesson reads aloud while you do anything else in the app — a player floats above the nav so you can pause it any time.'},
+];
+let navTourIdx=0;
+function startNavTour(){
+  const ov=document.getElementById('nav-tour');
+  if(!ov||ov.style.display==='block')return;
+  S.navTourDone=true;save();// never auto-shows again; Profile is the replay door
+  navTourIdx=0;
+  ov.style.display='block';
+  navTourShowStep();
+}
+function navTourShowStep(){
+  const st=NAV_TOUR_STEPS[navTourIdx];
+  if(st.screen)switchTo(st.screen);
+  if(st.tab)actBn(st.tab);
+  document.getElementById('nav-tour-step').textContent=st.step;
+  document.getElementById('nav-tour-title').textContent=st.title;
+  document.getElementById('nav-tour-body').textContent=st.body;
+  document.getElementById('nav-tour-next').textContent=navTourIdx===NAV_TOUR_STEPS.length-1?'Done ✓':'Next →';
+  document.getElementById('nav-tour-dots').innerHTML=NAV_TOUR_STEPS.map((_,i)=>
+    '<div style="width:8px;height:8px;border-radius:50%;background:'+(i===navTourIdx?'var(--accent)':'var(--bdr)')+'"></div>').join('');
+  // Let the freshly-switched screen finish laying out, then frame the target.
+  setTimeout(navTourFrame,150);
+}
+function navTourFrame(){
+  const st=NAV_TOUR_STEPS[navTourIdx];
+  const spot=document.getElementById('nav-tour-spot');
+  const el=st.target?document.querySelector(st.target):null;
+  if(!el){spot.style.display='none';return;}
+  const r=el.getBoundingClientRect();
+  spot.style.display='block';
+  spot.style.left=(r.left-8)+'px';
+  spot.style.top=(r.top-8)+'px';
+  spot.style.width=(r.width+16)+'px';
+  spot.style.height=(r.height+16)+'px';
+}
+function navTourNext(){
+  navTourIdx++;
+  if(navTourIdx>=NAV_TOUR_STEPS.length){endNavTour();return;}
+  navTourShowStep();
+}
+function endNavTour(){
+  document.getElementById('nav-tour').style.display='none';
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
@@ -4007,6 +4101,9 @@ function initApp(){
   // First visit: tell them what the floating ? is. Gone forever after one tap.
   const fabLabel=document.getElementById('guide-fab-label');
   if(fabLabel)fabLabel.style.display=S.guideFabExplained?'none':'block';
+  // One-time guided tour of the navigation (auto-shown after setup for new
+  // users; replayable any time from Profile → "How to use this app").
+  if(!S.navTourDone)setTimeout(startNavTour,700);
   renderMiniPricingRows();
   loadLifetimeAvailability();
   applyPlayBuildUI();
@@ -6739,13 +6836,15 @@ function updateSpeedBtns(){
   ['lessonSpeedBtn','pack-speed-btn','la-ov-speed'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=l;});
 }
 function updateListenBtn(){
-  // The floating pill follows the audio, not the screen - the lesson keeps
-  // playing wherever you navigate, and this opens the full player from anywhere.
-  const pill=document.getElementById('audio-pill');
-  if(pill)pill.style.display=lessonAudioState==='playing'?'flex':'none';
-  // First time the pill ever appears, say what it is; once they've used it, icon only.
-  const pillLabel=document.getElementById('audio-pill-label');
-  if(pillLabel)pillLabel.style.display=(lessonAudioState==='playing'&&!S.audioPillExplained)?'block':'none';
+  // The mini player follows the audio, not the screen - the lesson keeps
+  // playing wherever you navigate, and it stays one tap from pause, stop, or
+  // the full read-along player. First time it appears, say what it is.
+  const mp=document.getElementById('mini-player');
+  if(mp)mp.style.display=lessonAudioState==='playing'?'block':'none';
+  const sub=document.getElementById('mini-sub');
+  if(sub)sub.textContent=S.audioPillExplained
+    ?'Playing on any screen — tap for the big player'
+    :'Lesson is playing — tap to open the player';
   ['lessonPauseBtn','pack-pause-btn'].forEach(id=>{
     const p=document.getElementById(id);
     if(!p)return;
@@ -6964,6 +7063,15 @@ function closeLessonPlayer(){
 function updateLessonPlayerUI(){
   const ovPlay=document.getElementById('la-ov-play');
   if(ovPlay){ovPlay.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';renderIcons(ovPlay);}
+  // Mirror into the floating mini player: title, play state, and progress bar
+  // stay live even when the full player is closed and the user is elsewhere.
+  const m=lessonAudioMeta||{};
+  const mt=document.getElementById('mini-title');
+  if(mt)mt.textContent=m.day?`Day ${m.day}: ${m.title||'Lesson'}`:(m.title||'Lesson');
+  const mb=document.getElementById('mini-play');
+  if(mb){mb.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';renderIcons(mb);}
+  const bar=document.getElementById('mini-progress');
+  if(bar)bar.style.width=Math.round(100*laProgressFraction())+'%';
   if(!lessonPlayerOpen)return;
   if(lessonAudioState!=='playing'){closeLessonPlayer();return;}
   const isMp3=lessonAudioMode==='mp3';
@@ -10045,6 +10153,7 @@ function restartOnboarding(){
     S.dailyHoursLost=0;
     S.lastDailyLessonReminderDate='';
     S.lastMissedLessonNoticeDate='';
+    S.navTourDone=false;// re-running setup re-offers the navigation tour
     save();
 
     document.getElementById('ob-name').value='';

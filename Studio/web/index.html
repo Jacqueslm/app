@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0873</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0874</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -310,6 +310,15 @@ body.simple-only #view-simple{display:flex !important}
       <button class="btn2" id="set-reset" style="border:1px solid #c0392b;color:#e74c3c">🗑 Start fresh — delete everything</button>
       <p class="usage" id="set-reset-status" style="margin:0">Wipes every picture, video, song, character and project so the app is empty. Your login stays. Back up first if unsure — this can't be undone.</p>
       <p class="usage" id="set-update-status" style="margin:0"></p>
+      <!-- Only appears when GitHub refuses the check and no token is saved,
+           i.e. the repo went private. Hidden the rest of the time so it is not
+           one more box to wonder about. -->
+      <div id="set-token-row" style="display:none;border:1px solid var(--accent);border-radius:12px;padding:10px;margin-top:6px">
+        <p class="usage" style="margin:0 0 6px"><b>This repo is private.</b> Studio needs a GitHub token to fetch updates. Make one at <b>github.com/settings/personal-access-tokens</b> → Generate new token → give it access to your <b>app</b> repo → Repository permissions → <b>Contents: Read-only</b>. Paste it here once.</p>
+        <input class="input" id="set-token" type="password" placeholder="github_pat_… or ghp_…" autocomplete="off" style="width:100%">
+        <button class="btn2" id="set-token-save" style="width:100%;margin-top:6px">Save token</button>
+        <p class="usage" id="set-token-status" style="margin:4px 0 0"></p>
+      </div>
       <p class="usage">Your files live in <b>Studio\\server\\media</b>. Your account, characters and settings are in <b>Studio\\server\\data.sqlite</b> — copy those to move or restore your work.</p>
     </div>
     <details id="art-fold" style="margin-top:4px;display:none">
@@ -1943,8 +1952,36 @@ function pickFiles(accept, cb) {
         s.textContent = d.upToDate ? "✅ You're on the latest version."
           : !d.current ? 'Press "Update my app" once and it syncs to the latest version.'
           : `⬆ Update available — press "Update my app".`;
-      } catch (_) { /* offline or GitHub unreachable - stay quiet */ }
+      } catch (err) {
+        // A private repo answers 404, which used to look like being offline.
+        // Show the token box instead of staying silent about a fixable thing.
+        const row = document.getElementById('set-token-row');
+        if (row && /private|not visible|404|Not Found|token/i.test(err.message || '')) {
+          row.style.display = '';
+          s.textContent = "⚠ Studio can't reach the app repo — it looks private. Paste a token below and updates work again.";
+        }
+      }
     })();
+    const tokenBtn = document.getElementById('set-token-save');
+    if (tokenBtn) tokenBtn.onclick = async () => {
+      const st = document.getElementById('set-token-status');
+      const input = document.getElementById('set-token');
+      const token = (input.value || '').trim();
+      if (!token) { st.textContent = 'Paste the token first.'; return; }
+      tokenBtn.disabled = true; st.textContent = 'Checking it with GitHub…';
+      try {
+        await jfetch('/api/studio/settings/updatetoken', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
+        input.value = '';
+        st.textContent = '✅ Saved and working. Press "Update my app".';
+        const s2 = document.getElementById('set-update-status');
+        if (s2) s2.textContent = '⬆ Ready to update.';
+      } catch (e) {
+        st.textContent = e.message;
+      } finally { tokenBtn.disabled = false; }
+    };
     document.getElementById('set-backup') && (document.getElementById('set-backup').onclick = () => go('stor-backup'));
     document.getElementById('set-key') && (document.getElementById('set-key').onclick = () => showFalKeyCard());
   };

@@ -132,6 +132,7 @@ body{display:flex;justify-content:center}
    old hardcoded dark-theme colors (#c0caff on white) were unreadable there. */
 .add-chip{border:1px solid var(--bdr2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:var(--s1);font-size:13px;color:var(--tp);font-weight:500}
 .add-chip.sel{border-color:var(--accent);background:var(--acc);color:var(--acc-t);font-weight:600}
+.add-chip.on{border-color:var(--accent);background:var(--acc);color:var(--acc-t);font-weight:600;box-shadow:0 0 0 2px rgba(164,157,235,0.35)}
 .behavior-chip-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
 .behavior-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:left;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
 .behavior-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
@@ -729,6 +730,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
     <i class="ti ti-arrow-right" style="font-size:18px;color:#0F6E56"></i>
+  </div>
+
+  <div class="nova-promo" id="home-faith-card" onclick="openPack('spiritual')" style="margin-top:10px;display:none;background:var(--s2);border:1px solid var(--bdr)">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-sun-high" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Spiritual Path</div><div style="font-size:12px;color:var(--tm)">Your faith &amp; recovery track — day by day, God as you understand God</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
 
   <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
@@ -1724,7 +1731,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates</div></div>
+      <div class="sec" style="padding-bottom:0" id="owner-updates-sec"><div class="sec-hd">App updates</div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
         <i class="ti ti-refresh"></i>
         <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
@@ -1741,7 +1748,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
+      <div class="sec" style="padding-bottom:0" id="owner-diag-sec"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
       <div class="sec">
         <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
         <div id="diag-list"></div>
@@ -1985,6 +1992,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title">You slipped. That's not the end of anything.</div>
     <div class="sos-sub" id="slipped-sub" style="margin-bottom:16px">However this happened, it doesn't erase the days you already put in. What matters now is the next choice, not this one.</div>
+    <div style="font-size:13px;color:var(--tp);line-height:1.7;background:var(--acc);border-radius:12px;padding:13px 15px;margin-bottom:14px">
+      This is the moment that decides the next 24 hours — and you just chose to stay in the game. <strong>You don't have to be strong right now. You just have to not quit.</strong> Everyone who ever made it out has had this exact hour. What made them different was only what they did next.
+    </div>
     <div style="font-size:12.5px;color:var(--ts);line-height:1.7;margin-bottom:16px">
       <strong style="color:var(--tp);font-weight:500">A few honest next steps:</strong><br>
       1. Get to a safe space, away from whatever's around you right now.<br>
@@ -2199,6 +2209,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <textarea class="ob-input" id="bedtime-reflection-input" rows="3" placeholder="How did today actually feel?" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f)"></textarea>
     <button class="ob-btn" style="margin-top:4px" onclick="submitBedtimeReflection()">Save reflection</button>
     <button class="sos-close" onclick="closeBedtimeReflection()">Skip for now</button>
+  </div>
+</div>
+
+<!-- DAILY WIN MOMENT (everyone, every new day) -->
+<div class="sos-modal" id="daily-win-modal" onclick="if(event.target===this)closeDailyWin()">
+  <div class="sos-sheet" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:6px">🎉</div>
+    <div class="sos-title" style="color:var(--accent)">Day <span id="dw-days">1</span> — you showed up.</div>
+    <div class="sos-sub" style="margin-bottom:18px">That's the whole win for today. The rest is just more of the same.</div>
+    <div id="dw-message" style="font-size:14px;color:var(--tp);line-height:1.65;background:var(--acc);border-radius:12px;padding:14px 16px;margin-bottom:18px"></div>
+    <button class="ob-btn" onclick="closeDailyWin()">Keep going — one more day</button>
   </div>
 </div>
 
@@ -2578,7 +2599,7 @@ let S = {
   // a civilised 9am-9pm rather than "whenever the app happens to be opened".
   reminderStartHour:9,reminderEndHour:21,
   novaDisclaimerDismissed:false,fontSize:'default',
-  notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],
+  notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',
@@ -2886,6 +2907,7 @@ function updateLessonPromo(){
 }
 
 function renderTodayLesson(){
+  updateHomeFaithCard();
   const switchRow=document.getElementById('lesson-track-switch-row');
   if(switchRow){
     switchRow.style.display=S.selectedAddictions.length>1?'flex':'none';
@@ -4450,6 +4472,10 @@ function updateStats(){
   const days=Math.max(0,Math.floor(diff/86400000));
   const hours=Math.max(0,Math.floor(diff/3600000));
   const saved=(days*S.dailySpend).toFixed(0);
+  // Daily win: every new day is its own small milestone - a moment, not a nag.
+  // Milestone days already get the bigger celebration, so the daily win steps
+  // aside and lets that one speak.
+  if(days>0&&days!==(S.lastDailyWinDay||0)&&!MILESTONES.some(m=>m.days===days)){S.lastDailyWinDay=days;save();maybeShowDailyWin(days);}
 
   if(days>(S.longestStreak||0)){S.longestStreak=days;S.longestStreakDate=new Date().toISOString();save();}
 
@@ -5079,6 +5105,20 @@ function buildMilestoneEncouragement(days){
 function closeMilestoneCelebration(){
   document.getElementById('milestone-celebration-modal').classList.remove('open');
 }
+// ─── DAILY WIN MOMENT ────────────────────────────────────────────────────────
+// Every new day gets its own quiet celebration - a burst and one honest line.
+// Milestones mark the big numbers; this marks the ordinary showing-up that
+// makes the big numbers possible.
+function maybeShowDailyWin(days){
+  const el=document.getElementById('daily-win-modal');
+  if(!el)return;
+  const msg=DAY_90_UPLIFTS[Math.max(0,days-1)%DAY_90_UPLIFTS.length];
+  document.getElementById('dw-days').textContent=days;
+  document.getElementById('dw-message').textContent=msg;
+  el.classList.add('open');
+  celebrationBurst();
+}
+function closeDailyWin(){document.getElementById('daily-win-modal').classList.remove('open');}
 // Reflection without leaving the lesson - nobody keeps a pen handy or wants to
 // bounce between screens mid-thought. Writes a real journal entry in place.
 function saveLessonReflection(inputId,savedId){
@@ -5979,7 +6019,7 @@ function openSlippedFlow(){
   const totalEver=(S.totalSoberDaysEver||0)+getDays();
   const longest=Math.max(S.longestStreak||0,getDays());
   const lifetimeNote=totalEver>0?` Your lifetime total — ${totalEver} day${totalEver===1?'':'s'} — and your longest run of ${longest} never reset.`:'';
-  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} What matters now is the next choice, not this one.`;
+  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} The days you already won are yours forever — and the next 24 hours are where the comeback starts.`;
   document.getElementById('slipped-modal').classList.add('open');
   logActivity('slip_reported');
   novaNudge("I saw you check in after a slip. I'm not here to judge you — a slip is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
@@ -6617,10 +6657,10 @@ const VG_STEPS=[
   {t:"The wave is already losing power. You don't need to be perfect today. You just need this next minute — and you're already in it.",ph:'rest'},
   {t:"Stay here breathing with the circle as long as you like. When you're ready, tap the button and go do the next small thing.",ph:'rest'},
 ];
-// Three pre-recorded voices (all generated locally and free - see
-// tools/generate-sos-talk.py) plus the phone's own speech engine as a fourth
-// choice for anyone who prefers it. Each recording has its own cue timeline
-// (start second of every step) so captions stay in sync no matter the voice.
+// Five recorded voices, all public-domain (see tools/generate-sos-talk.py).
+// Each recording has its own cue timeline (start second of every step) so
+// captions stay in sync no matter the voice. No phone/robot voice, ever -
+// if a recording is missing the app says so instead of switching voices.
 // Regenerate recordings AND cues together if the script text ever changes.
 const VG_VOICES={
   warm:{label:'Warm',url:'audio/sos-talk-warm.mp3',cues:[0,4.64,13.9,22.93,34.94,46.97,54.26,62.8,71.65,77.97,84.26,92.27,99.56,107.52,115.21]},
@@ -6628,9 +6668,8 @@ const VG_VOICES={
   gentle:{label:'Gentle',url:'audio/sos-talk-gentle.mp3',cues:[0,5.49,14.87,22.2,31.26,41.71,47.46,54.91,62.05,69.21,77.28,83.02,89.2,95.64,104.15]},
   clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,5.16,14.94,22.72,32.18,43.81,49.88,57.43,65.26,72.69,80.94,86.69,93.05,100.05,109.5]},
   male:{label:'Calm male',url:'audio/sos-talk-male.mp3',cues:[0,5.81,16.36,25.21,35.2,46.59,53.23,61.53,69.9,77.81,85.78,91.36,97.73,105.26,116.94]},
-  phone:{label:"Phone's own"},
 };
-const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','phone'];
+const VG_VOICE_ORDER=['warm','soft','gentle','clear','male'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
 let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null,vgFellBack=false,vgUserPaused=false;
 function vgPickVoice(){
@@ -6659,7 +6698,6 @@ function vgStartVoice(fromStep){
   if(fromStep>=VG_STEPS.length){vgSilentLoop();return;}
   vgFellBack=false;updateVgVoiceBtn();
   const key=vgVoiceKey();
-  if(key==='phone'){vgStartTTS(fromStep);return;}
   vgStartAudio(key,fromStep);
 }
 function vgStartAudio(key,fromStep){
@@ -6705,11 +6743,12 @@ function updateVgVoiceBtn(){
   // and only that case - on a recorded voice this stays silent.
   const n=document.getElementById('vg-fallback-note');
   if(!n)return;
-  const onPhoneVoice=vgFellBack||vgVoiceKey()==='phone';
-  n.style.display=onPhoneVoice?'block':'none';
-  if(onPhoneVoice)n.textContent=vgFellBack
-    ?"Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app."
-    :"Your phone's own voice pauses if you leave the app. Tap Voice for a recorded one that keeps playing.";
+  if(vgFellBack){
+    n.style.display='block';
+    n.textContent="The recording didn't load — keeping the captions and circle going instead of switching to your phone's own voice.";
+  }else{
+    n.style.display='none';
+  }
 }
 function vgSyncStep(i){
   if(i===vgAudioStep||!vgActive)return;
@@ -6750,12 +6789,17 @@ function vgStopAudio(){
   vgClearMediaSession();
 }
 function vgFallbackToTTS(){
-  // The MP3 couldn't load or play - the built-in voice picks up from the same step.
+  // The MP3 couldn't load or play. No robot voice, ever - if the recording is
+  // missing, the guide keeps pacing captions and the breathing circle instead
+  // of handing the talk to the phone's own voice (that was exactly what made
+  // people think the app was broken).
   const from=Math.max(0,vgAudioStep);
   vgStopAudio();
   if(!vgActive)return;
   vgFellBack=true;updateVgVoiceBtn();
-  vgStartTTS(from);
+  const cap=document.getElementById('vg-caption');
+  if(cap)cap.textContent="The recording didn't load on this device — follow the circle, I'm right here with you.";
+  vgSilentLoop();
 }
 function vgStartTTS(fromStep){
   if(!('speechSynthesis' in window)){vgSpeakStep(fromStep);return;}// captions alone still pace the talk
@@ -6819,12 +6863,9 @@ function vgSilentLoop(){
   ];
   let idx=0,cycles=0,compIdx=0;
   const say=(text)=>{
-    if(!('speechSynthesis' in window))return;
-    const u=new SpeechSynthesisUtterance(text);
-    const voice=vgPickVoice();
-    if(voice)u.voice=voice;
-    u.rate=0.85;u.pitch=1;
-    speechSynthesis.speak(u);
+    // Recorded voices only. After the talk, breathing cues and company lines
+    // show as captions rather than switching to the phone's own voice.
+    if(cap)cap.textContent=text;
   };
   const run=()=>{
     if(!vgActive)return;
@@ -6874,7 +6915,7 @@ let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,
 // branch and listed in data/lesson-audio-manifest.json). A recording is a real
 // <audio> element - it survives screen-off and app-switch like a podcast, can
 // pause/resume/seek, and gets a lock-screen card. Anything without a recording
-// (older manifests, lesson packs, "Phone's own" voice) uses the TTS engine
+// (older manifests, lesson packs) show a clear 'recording unavailable' note
 // below, which still gains pause/resume.
 let lessonAudioMode='tts',laAudio=null,laPausedByUser=false,lessonAudioMeta=null,lessonAudioText='',lessonAudioTtsPausedIdx=0;
 let LESSON_AUDIO_MANIFEST=null,lessonAudioManifestReq=null;
@@ -7084,15 +7125,22 @@ function startLessonAudio(text,btnId,meta,resume){
   wakeLockAcquire('lesson-audio');
   const voice=lessonVoiceKey();
   const key=meta&&meta.category&&meta.day?`${meta.category}|${meta.day}|${meta.variant||'base'}`:null;
-  const fallToTTS=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)startLessonTTS(text,resume);};
-  if(!key||voice==='phone'){fallToTTS();return;}
+  const fail=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)laRecordingUnavailable();};
+  if(!key){fail();return;}
   loadLessonAudioManifest().then(m=>{
     if(lessonAudioState!=='playing'||lessonAudioText!==text)return;// stopped or replaced while the manifest loaded
     const entry=m&&m.items&&m.items[key];
     const rel=entry&&entry[voice];
     if(rel)startLessonMp3((m.base||'')+rel,resume);
-    else fallToTTS();
+    else fail();
   });
+}
+function laRecordingUnavailable(){
+  // The recording is missing or failed to load. Honest over robot voice: stop
+  // cleanly with a clear note so nobody hears the phone's own voice coming out
+  // of the app and thinks something is broken.
+  stopLessonAudio();
+  appInfo('Listen',"This lesson's recording isn't available on this device right now. Read along below — or tap the voice button to try another voice.");
 }
 function startLessonTTS(text,resume){
   lessonAudioMode='tts';
@@ -7122,8 +7170,7 @@ function startLessonMp3(url,resume){
   // voice at the same spot, rather than going silent.
   a.addEventListener('error',()=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    const frac=a.duration?a.currentTime/a.duration:((resume&&resume.atFraction)||0);
-    laStopMp3();startLessonTTS(lessonAudioText,{atFraction:frac});
+    laStopMp3();laRecordingUnavailable();
   });
   // Same rule as the SOS talk: everything except the user's own pause is
   // retried, so battery savers and audio-focus grabs don't end the lesson.
@@ -7137,7 +7184,7 @@ function startLessonMp3(url,resume){
   const p=a.play();
   if(p&&p.catch)p.catch(()=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    laStopMp3();startLessonTTS(lessonAudioText,resume);
+    laStopMp3();laRecordingUnavailable();
   });
 }
 function laStopMp3(){
@@ -7432,8 +7479,19 @@ function chooseFaith(v){
     const el=document.getElementById('fc-'+k);
     if(el)el.classList.toggle('on',k===v);
   });
+  // The choice must DO something: yes/open opens the Spiritual Path in the
+  // plan immediately (Day 1 ready) so the app visibly changes. "No" keeps
+  // faith out everywhere, as promised.
+  if(v!=='no'){
+    S.customPackProgress=Object.assign({},S.customPackProgress||{},{spiritual:1});
+  }
+  updateHomeFaithCard();
   renderFaithLead();
   save();
+}
+function updateHomeFaithCard(){
+  const el=document.getElementById('home-faith-card');
+  if(el)el.style.display=faithOn()?'flex':'none';
 }
 // The lead paragraph names the person's OWN habit back to them before they
 // answer - a general question about faith is easy to wave off; this one isn't.
@@ -8376,7 +8434,9 @@ function submitBedtimeReflection(){
 
 // Dispatcher - checked on app load and every 60s while the app stays open
 function evaluateSmartReminders(){
-  if(!S.isPro)return;
+  // Every reminder is free: the daily lesson reminder, the accountability
+  // check-in, and all smart reminders (morning, bedtime, urge, relapse,
+  // trend, category, lesson integration). Reminding is care, not a perk.
   const sr=S.smartReminders||{};
   const now=new Date();
   const hour=now.getHours(),minute=now.getMinutes();
@@ -8842,7 +8902,8 @@ function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // "Do this together" opens for everyone — the first 15 days are free (the
   // per-day gate is inside renderCouples), same cap as every lesson track.
-  if(S.isPro||key==='couples'){window[PRO_TOOLS[key].open]();return;}
+  // Reminders are all free now (daily lesson, accountability, smart reminders).
+  if(S.isPro||key==='couples'||key==='reminders'||key==='smartReminders'){window[PRO_TOOLS[key].open]();return;}
   showProToolPreview(key);
 }
 function showProToolPreview(key){
@@ -10652,7 +10713,6 @@ const HELP_INDEX=[
   {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Dark mode',sub:'Switch between light and dark',k:'dark mode light theme night',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('dark-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Text size',sub:'Make the app text bigger or smaller',k:'text size font bigger smaller read',go:()=>openFontSizeModal()},
-  {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
@@ -10939,6 +10999,7 @@ function renderCouples(){
   const el=document.getElementById('couples-list');
   let html='';
   if(pack.length){
+    html+=`<div style="font-size:12.5px;color:var(--ts);line-height:1.6;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">Thirty real lessons, one a day, about the relationship itself — the check-ins, the hard conversations, the repair. Ten minutes together. Not a one-time assignment: a 30-day program for the two of you.</div>`;
     const finished=done>=pack.length;
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
@@ -11294,6 +11355,16 @@ let autoUpdateAttempted=false;
 // probing those endpoints put a red 403 in every regular user's console.
 let appIsOwner=false,appIsOwnerResolve;
 const appIsOwnerReady=new Promise(r=>{appIsOwnerResolve=r;});
+// The update UI (App updates + Diagnostics) is owner-only. Everyone else runs
+// the same server-side code, so they are automatically on the latest version
+// with no buttons - and nothing about updating shows up in their settings.
+function applyOwnerUI(){
+  const owner=!!appIsOwner;
+  ['owner-updates-sec','owner-diag-sec'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=owner?'':'none';
+  });
+}
 async function maybeAutoUpdate(){
   if(autoUpdateAttempted||S.autoUpdate===false||appUpdateRunning)return;
   await appIsOwnerReady;
@@ -11531,7 +11602,7 @@ async function boot(){
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
-      appIsOwner=!!me.isOwner;appIsOwnerResolve();
+      appIsOwner=!!me.isOwner;appIsOwnerResolve();applyOwnerUI();
       // A pin-reset flag only counts when it's followed by a fresh credential
       // sign-in. Landing here means the old session survived (e.g. the logout
       // request failed offline) - drop the flag so it can't unlock anything.
@@ -11562,14 +11633,14 @@ async function boot(){
     // in-app guide. So enter the app on the cached identity; the next
     // successful boot reconciles with the server.
     if(S.startDate){
-      appIsOwnerResolve();
+      appIsOwnerResolve();applyOwnerUI();
       enterApp();
       return;
     }
   }
   // Whatever path landed here, the owner question is settled as "no" - resolve
   // so nothing awaits it forever. (Resolving twice is a harmless no-op.)
-  appIsOwnerResolve();
+  appIsOwnerResolve();applyOwnerUI();
   // Arriving from the check-in quiz (/?join=1): skip the welcome screen and land
   // straight on signup while the motivation is still warm.
   if(new URLSearchParams(window.location.search).get('join')){

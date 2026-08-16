@@ -5390,11 +5390,17 @@ const UPDATE_REPO = process.env.APP_UPDATE_REPO || 'Jacqueslm/app';
 const UPDATE_BRANCH = process.env.APP_UPDATE_BRANCH || 'claude/vibe-code-uwxxlk';
 // A private repo needs a token (GitHub → Settings → Developer settings →
 // fine-grained PAT with Contents: read on this repo). Public repos need none.
-const UPDATE_TOKEN = (process.env.APP_UPDATE_TOKEN || '').trim();
-const GH_HEADERS = {
-  'User-Agent': 'tsid-studio-updater',
-  ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
-};
+// `let`, not const: the token can be pasted into Studio at runtime, and a
+// const here meant the only way to set it was hand-editing .env and restarting.
+let UPDATE_TOKEN = (process.env.APP_UPDATE_TOKEN || '').trim();
+// A function, not a frozen object — the old const object captured the token at
+// module load, so a token saved later was ignored until the next restart.
+function ghHeaders() {
+  return {
+    'User-Agent': 'tsid-studio-updater',
+    ...(UPDATE_TOKEN ? { Authorization: `Bearer ${UPDATE_TOKEN}` } : {}),
+  };
+}
 // The API zipball endpoint (unlike codeload) honors the Authorization header,
 // so the same URL serves both public and token-carrying private installs.
 // NOTE: do NOT encodeURIComponent the branch - GitHub's ref endpoints want
@@ -5433,7 +5439,7 @@ function runCmd(cmd, args, opts) {
 
 async function fetchLatestCommit() {
   const res = await fetch(`https://api.github.com/repos/${UPDATE_REPO}/commits/${UPDATE_REF}`, {
-    headers: { ...GH_HEADERS, Accept: 'application/vnd.github+json' },
+    headers: { ...ghHeaders(), Accept: 'application/vnd.github+json' },
   });
   const data = await res.json();
   if (!res.ok) {
@@ -5449,9 +5455,49 @@ router.get('/update/check', async (req, res) => {
   try { current = JSON.parse(fs.readFileSync(UPDATE_STATE_FILE, 'utf8')); } catch (_) {}
   try {
     const latest = await fetchLatestCommit();
-    res.json({ latest, current, upToDate: Boolean(current && current.sha === latest.sha) });
+    res.json({ latest, current, upToDate: Boolean(current && current.sha === latest.sha), hasToken: Boolean(UPDATE_TOKEN) });
   } catch (err) {
-    res.status(502).json({ error: `Could not check GitHub: ${err.message}`, current });
+    // needsToken lets the app show the paste box instead of a dead error - a
+    // private repo is the common cause and there is nothing else to try.
+    res.status(502).json({
+      error: `Could not check GitHub: ${err.message}`,
+      current,
+      needsToken: /not visible|private|404|Not Found/i.test(err.message) && !UPDATE_TOKEN,
+      hasToken: Boolean(UPDATE_TOKEN),
+    });
+  }
+});
+
+// Paste a GitHub token so a PRIVATE app repo can still update in place.
+// Without this the only way to set it was editing Studio/server/.env by hand
+// and restarting - which is not a thing to ask of somebody mid-workflow.
+// Saved 0600 to the same gitignored .env as the other keys; never leaves the
+// machine except as an Authorization header to api.github.com.
+router.post('/settings/updatetoken', async (req, res) => {
+  const { token } = req.body || {};
+  const clean = typeof token === 'string' ? token.trim() : '';
+  if (clean && (clean.length < 20 || /\s/.test(clean))) {
+    return res.status(400).json({ error: "That doesn't look like a GitHub token. Fine-grained ones start with github_pat_ and classic ones with ghp_." });
+  }
+  const prev = UPDATE_TOKEN;
+  UPDATE_TOKEN = clean;
+  if (clean) {
+    // Prove it works BEFORE saving it. A token with the wrong repo or a
+    // missing Contents permission fails identically to no token at all, and
+    // finding that out at update time is how an hour disappears.
+    try {
+      await fetchLatestCommit();
+    } catch (err) {
+      UPDATE_TOKEN = prev;
+      return res.status(400).json({ error: `GitHub would not accept that token: ${err.message} — check it has Contents: read on ${UPDATE_REPO}.` });
+    }
+  }
+  try {
+    persistEnvKey('APP_UPDATE_TOKEN', clean || null);
+    res.json({ hasToken: Boolean(clean), repo: UPDATE_REPO, branch: UPDATE_BRANCH });
+  } catch (err) {
+    UPDATE_TOKEN = prev;
+    res.status(500).json({ error: `Could not save the token: ${err.message}` });
   }
 });
 
@@ -5468,7 +5514,7 @@ router.post('/update', async (req, res) => {
   try { pkgBefore = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'); } catch (_) {}
   try {
     // 1. download the latest code
-    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: GH_HEADERS });
+    const zipRes = await fetch(UPDATE_ZIP_URL, { headers: ghHeaders() });
     if (zipRes.status === 404 && !UPDATE_TOKEN) throw new Error('download blocked - GitHub says the app repo is not visible. If the repo is private, add APP_UPDATE_TOKEN to Studio/server/.env (or make the repo public)');
     if (!zipRes.ok) throw new Error(`Download failed (${zipRes.status}).`);
     const tarPath = path.join(tmp, 'update.tar.gz');

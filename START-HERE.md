@@ -28,6 +28,25 @@ re-check it, do not re-ask him about it, do not walk him back through it to
 in the same turn — do not ask him to record it. Anything struck through or
 marked DONE below is closed history, not a to-do list.
 
+**RULE TWO — do what he asks; opinions only when he asks for them (16 Aug
+2026, his words).** Execute the request as given. Do not talk him out of a
+tool, add unrequested warnings, or re-litigate a call he already made — he has
+tested his own flow, gone against AI advice, and gotten better results. If a
+request is genuinely dangerous (money, account strikes, legal), say so once,
+briefly, then do what he decided. Everything else: just build it.
+
+**HIS IMAGE TOOLCHAIN — his tested findings, not suggestions (16 Aug 2026).**
+Do not steer him off these; work with them:
+- **Manus** — the best one: most of an episode in one take, rest as a collage.
+  Free until 25 Aug 2026.
+- **Creen** — face lock is actually great; free credits for images.
+- **ChatGPT** — free image credits, part of the flow.
+- **Microsoft Copilot** — keeps a face intact from one reference photo.
+- **Gemini** — dropped: leaves a watermark.
+- **Studio** — $0 spent to date; one paid test night (that's where the price
+  screenshots came from). The free path (stock, Ken Burns, captions, assemble,
+  Buffer posting) is its job in this flow; other AIs make the images.
+
 ---
 
 ## OPEN ITEMS — 14 Aug 2026

@@ -21,6 +21,20 @@ every time: **most AI tools take a picture and will not take a PDF**, so a
 handover he cannot paste into the tool he is actually using is not a handover.
 Send him the PDF *and* the page images.
 
+**RULE THREE — PUT IT IN THE CHAT, NOT JUST IN A FILE (16 Aug 2026, his
+words).** Anything he asks for goes **in the conversation, in full**, unless he
+says otherwise. Never answer with "it's in `<file>`" or "see the file above" —
+he should never have to scroll back or go hunting.
+
+- **Scripts: always all of them, every single time he asks.** Not a diff, not
+  "the changed one", not "the rest are unchanged". Every episode, complete,
+  in the message.
+- **Update him in the same turn as the work.** Do the request, then say what
+  changed, in the chat, immediately — so he is never one step behind.
+- **Files are the backup, the chat is the delivery.** Still commit and push
+  everything (RULE ONE still applies to handover docs — those go as PDFs), but
+  the file is never the answer on its own.
+
 **RULE ZERO — for any AI reading this.** Jacques should never have to say the
 same thing twice. If this file says something is DONE, it is done: do not
 re-check it, do not re-ask him about it, do not walk him back through it to

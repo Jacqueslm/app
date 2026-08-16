@@ -2372,6 +2372,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleAddiction(this, 'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
+    <!-- Said at the moment of choosing, not hidden behind an info tap. Someone
+         whose habit has no name will otherwise close the app here, assuming a
+         list of eleven things they don't have means this isn't for them. -->
+    <p class="sos-sub" style="margin-top:10px;font-size:13px">✨ <b>Other</b> covers anything not listed — caffeine or energy drinks, vaping, sugar, nail-biting, skin-picking, over-exercising, compulsive checking, or something you've never had a word for. Same loop, same tools.</p>
     <button class="ob-btn" style="margin-top:4px" onclick="closeAddictionModal()">Done</button>
   </div>
 </div>
@@ -2396,6 +2400,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleCategorySwitch(this,'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
+    <p class="sos-sub" style="margin-top:10px;font-size:13px">✨ <b>Other</b> covers anything not listed — caffeine or energy drinks, vaping, sugar, nail-biting, skin-picking, over-exercising, compulsive checking, or something you've never had a word for. Same loop, same tools.</p>
     <div class="pin-error" id="category-switch-error" style="text-align:left">&nbsp;</div>
     <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Done</button>
   </div>
@@ -4794,7 +4799,10 @@ const CATEGORY_JOURNAL_PROMPTS={
   'Food / Binging':'Did you eat emotionally today?',
   'Shopping / Spending':'Was there a moment today you wanted to buy something to feel better?',
   'Work':'Did work become a way to avoid something today?',
-  'Other':'What moment today felt the hardest to sit with?',
+  // Other is the only category whose habit has no name, so its prompt asks
+  // for one. Naming it is the move that turns "a thing I do" into something
+  // a person can actually work on.
+  'Other':"If you had to give this a name today, what would you call it?",
   'Anger & Control':'What number did you get to today, and what set it off?',
   'Supporting Someone':'What did you carry today that nobody noticed?',
 };
@@ -4931,7 +4939,7 @@ const CATEGORY_STREAK_MESSAGES={
   'Food / Binging':"You've been consistent with mindful eating.",
   'Shopping / Spending':'Your impulse spending is showing real improvement.',
   'Work':'Your relationship with rest is improving.',
-  'Other':'Your consistency here is building real momentum.',
+  'Other':"Nobody is congratulating you for this one. That makes every day of it entirely yours.",
   'Anger & Control':'Your household is getting more predictable — that\'s the whole target.',
   'Supporting Someone':"You've been showing up for yourself, not just for them.",
 };
@@ -5233,7 +5241,7 @@ const CATEGORY_ANALYTICS_INSIGHTS={
   'Food / Binging':'Stress leads to emotional eating.',
   'Shopping / Spending':'Low mood increases your urge to spend.',
   'Work':'Avoidance of rest increases your urge to overwork.',
-  'Other':'Stress and low structure increase your risk.',
+  'Other':'The gap in your day is the risk — unstructured time, more than any single trigger.',
   'Anger & Control':'Short sleep and skipped meals raise your risk more than any single trigger does.',
   'Supporting Someone':'Your hardest days line up with their hardest days — that connection is worth watching.',
 };
@@ -5248,7 +5256,7 @@ const CATEGORY_LOOP_VERBS={
   'Food / Binging':'eating emotionally',
   'Shopping / Spending':'wanting to spend',
   'Work':'overworking',
-  'Other':'the urge itself',
+  'Other':'doing it again',
   'Anger & Control':'climbing the ladder',
   'Supporting Someone':'carrying it alone',
 };
@@ -5413,7 +5421,7 @@ const CATEGORY_HABIT_COACHING={
   'Food / Binging':{weakSpot:'Stress eating spikes mid-week.',suggestion:"Add a grounding habit — a short walk or a few slow breaths — before meals."},
   'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
   'Work':{weakSpot:'Avoiding rest tends to be your highest-risk pattern.',suggestion:'Set one hard stop time in the evening, every day this week.'},
-  'Other':{weakSpot:'Unstructured moments tend to be your highest-risk time.',suggestion:'Build one small, repeatable routine around your hardest time of day.'},
+  'Other':{weakSpot:'Unstructured time is your highest-risk window — this kind of habit fills a gap rather than answering a trigger.',suggestion:'Give your hardest hour one fixed, boring job. A habit with no name needs a shape to push against.'},
   'Anger & Control':{weakSpot:'The first hour after you walk in the door tends to be your highest-risk time.',suggestion:'Take 20 minutes before anyone asks you anything — and tell them that\'s what you\'re doing, so it reads as a plan and not a mood.'},
   'Supporting Someone':{weakSpot:'The hours right before they come home tend to be your highest-tension time.',suggestion:'Put one thing that is purely yours in that window — a walk, a call, a shower with the door locked.'},
 };
@@ -8352,7 +8360,7 @@ const CATEGORY_REMINDER_TEXT={
   'Food / Binging':'Evenings can be a vulnerable time for this. Check in with yourself before you eat tonight.',
   'Shopping / Spending':'Evening browsing is a common trigger for this. Consider staying off shopping apps tonight.',
   'Work':'Evenings can blur into more work. Consider a real stop time tonight.',
-  'Other':'Evenings can be a vulnerable time. Stay mindful tonight.',
+  'Other':"No one else is counting this one but you. Check in anyway — that is what makes it real.",
   'Anger & Control':'Evenings after a long day are when it usually goes. Check your number before you walk in the door tonight.',
   'Supporting Someone':'Evenings are when the weight lands hardest. Before you take care of anyone else tonight, do one thing for you.',
 };
@@ -10306,7 +10314,12 @@ const CATEGORY_DESCRIPTIONS={
   'Food / Binging':'Focused on breaking the cycle of emotional or binge eating.',
   'Shopping / Spending':'Focused on curbing impulsive spending and rebuilding financial peace of mind.',
   'Work':'Focused on breaking the cycle of overworking and reclaiming rest.',
-  'Other':"A general recovery focus, tailored to whatever pattern you're working to change.",
+  // "Other" used to read "a general recovery focus, tailored to whatever
+  // pattern you're working to change" — true, and it named nothing, so nobody
+  // could tell whether the app was for them. Naming real habits is the whole
+  // job of this line: most people arriving here have something that has no
+  // support group and no word for it, and they are checking if they count.
+  'Other':"For the habit that isn't on any list — caffeine or energy drinks, vaping, sugar, nail-biting or skin-picking, over-exercising, checking and re-checking, lying, picking fights, or anything else you do more than you mean to. It has the same loop as everything else here, so it gets the same tools. You don't need a name for it to start.",
   'Anger & Control':"Focused on outbursts, road rage, and the damage it does to the people closest to you — catching it earlier and repairing it properly.",
   'Supporting Someone':"For you, not them — living with someone else's addiction, recognizing harm, setting boundaries, and getting your own life back.",
 };
@@ -10767,6 +10780,10 @@ const BOTH_FOCUS_PHRASE={
   'Social media':'getting my time back from a screen',
   'Gaming':'getting my time back from a screen',
   'Anger & Control':'the way I handle anger',
+  // Without this, an Other user fell through to the generic fallback in a
+  // sentence about their own focus - the one place the app should sound like
+  // it knows them.
+  'Other':'something I do more than I mean to',
 };
 const BOTH_FOCUS_FALLBACK="something I've been carrying for a long time";
 // Keyed off the SUPPORTED person's struggle, never the user's own. Those are two

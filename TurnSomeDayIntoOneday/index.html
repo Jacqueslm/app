@@ -2351,6 +2351,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="add-chip" onclick="toggleAddiction(this, 'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleAddiction(this, 'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
+    <!-- Said at the moment of choosing, not hidden behind an info tap. Someone
+         whose habit has no name will otherwise close the app here, assuming a
+         list of eleven things they don't have means this isn't for them. -->
+    <p class="sos-sub" style="margin-top:10px;font-size:13px">✨ <b>Other</b> covers anything not listed — caffeine or energy drinks, vaping, sugar, nail-biting, skin-picking, over-exercising, compulsive checking, or something you've never had a word for. Same loop, same tools.</p>
     <button class="ob-btn" style="margin-top:4px" onclick="closeAddictionModal()">Done</button>
   </div>
 </div>
@@ -2375,6 +2379,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="add-chip" onclick="toggleCategorySwitch(this,'Other')">✨ Other</div>
       <div class="add-chip" style="grid-column: span 2;border-color:var(--accent)" onclick="toggleCategorySwitch(this,'Supporting Someone')">💛 Supporting someone I love</div>
     </div>
+    <p class="sos-sub" style="margin-top:10px;font-size:13px">✨ <b>Other</b> covers anything not listed — caffeine or energy drinks, vaping, sugar, nail-biting, skin-picking, over-exercising, compulsive checking, or something you've never had a word for. Same loop, same tools.</p>
     <div class="pin-error" id="category-switch-error" style="text-align:left">&nbsp;</div>
     <button class="sos-close" style="margin-top:4px" onclick="closeCategorySwitcher()">Done</button>
   </div>
@@ -10245,7 +10250,12 @@ const CATEGORY_DESCRIPTIONS={
   'Food / Binging':'Focused on breaking the cycle of emotional or binge eating.',
   'Shopping / Spending':'Focused on curbing impulsive spending and rebuilding financial peace of mind.',
   'Work':'Focused on breaking the cycle of overworking and reclaiming rest.',
-  'Other':"A general recovery focus, tailored to whatever pattern you're working to change.",
+  // "Other" used to read "a general recovery focus, tailored to whatever
+  // pattern you're working to change" — true, and it named nothing, so nobody
+  // could tell whether the app was for them. Naming real habits is the whole
+  // job of this line: most people arriving here have something that has no
+  // support group and no word for it, and they are checking if they count.
+  'Other':"For the habit that isn't on any list — caffeine or energy drinks, vaping, sugar, nail-biting or skin-picking, over-exercising, checking and re-checking, lying, picking fights, or anything else you do more than you mean to. It has the same loop as everything else here, so it gets the same tools. You don't need a name for it to start.",
   'Anger & Control':"Focused on outbursts, road rage, and the damage it does to the people closest to you — catching it earlier and repairing it properly.",
   'Supporting Someone':"For you, not them — living with someone else's addiction, recognizing harm, setting boundaries, and getting your own life back.",
 };

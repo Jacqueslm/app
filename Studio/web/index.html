@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0874</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0875</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -915,6 +915,28 @@ body.simple-only #view-simple{display:flex !important}
         <p style="font-size:15px;color:var(--tp);text-align:center;font-weight:600" id="lyr-now">…</p>
         <button class="gen-btn" id="lyr-stamp">TAP when this line starts</button>
         <button class="btn2 quiet" id="lyr-stop">Stop syncing</button>
+      </div>
+      <!-- Captions that are all late by the same amount is the normal failure,
+           not ten separate mistakes: a song with an instrumental intro pushes
+           every line back by the length of that intro. Ten hand-typed numbers
+           can't fix that without redoing all ten. One shift can. -->
+      <div id="lyr-fix" style="display:none;border:1px solid var(--accent);border-radius:12px;padding:10px;margin-top:8px">
+        <p class="usage" style="margin:0 0 6px"><b>Words landing early or late?</b> Start a Preview, then nudge while you watch — every caption moves together and you see it straight away.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <button class="btn2 quiet" data-shift="-1" style="flex:1;min-width:56px">−1s</button>
+          <button class="btn2 quiet" data-shift="-0.25" style="flex:1;min-width:56px">−0.25</button>
+          <button class="btn2 quiet" data-shift="0.25" style="flex:1;min-width:56px">+0.25</button>
+          <button class="btn2 quiet" data-shift="1" style="flex:1;min-width:56px">+1s</button>
+        </div>
+        <p class="usage" id="lyr-shift-note" style="margin:6px 0 0">Shifted 0.0s</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px">
+          <span class="usage">Every</span>
+          <input class="input" id="lyr-every" type="number" min="0.5" step="0.5" value="5" style="width:64px">
+          <span class="usage">s from</span>
+          <input class="input" id="lyr-from" type="number" min="0" step="0.1" value="0" style="width:64px">
+          <button class="btn2 quiet" id="lyr-grid" style="flex:1;min-width:110px">Space them evenly</button>
+        </div>
+        <p class="usage" style="margin:4px 0 0">Every picture is 5 seconds, so 5 is right for a shot-per-line video. Set the start to where the singing actually begins.</p>
       </div>
       <div id="lyr-list" class="row"></div>
       <div style="margin-top:6px">
@@ -7833,6 +7855,10 @@ function finishCaptionEnds() {
 function renderLyrList() {
   const list = $('#lyr-list');
   list.innerHTML = '';
+  // The nudge panel is useless with nothing to nudge, and it is the first
+  // thing wanted the moment there IS something — so it tracks the list.
+  const fix = document.getElementById('lyr-fix');
+  if (fix) fix.style.display = st.captions.length ? '' : 'none';
   if (!st.captions.length) return;
   st.captions.forEach((c, i) => {
     const row = document.createElement('div');
@@ -7861,6 +7887,61 @@ $('#lyr-spread').onclick = () => {
   const span = Math.max(4, total - 1.5);
   st.captions = lines.map((text, i) => ({ text, start: Math.round((0.5 + (span / lines.length) * i) * 10) / 10, end: 0 }));
   finishCaptionEnds(); renderLyrList(); persistDraft();
+};
+
+/* ---------- move every caption at once ----------
+   The fix for "the words are off" is almost never ten separate corrections.
+   Either the whole set is late (a song with an intro) or the spacing is wrong
+   (lines every 5.4s against 5.0s shots). One control for each, and both work
+   WHILE the preview is playing so the answer is visible instead of guessed. */
+let lyrShiftTotal = 0;
+
+// The preview prerenders song captions once at start, so its copy carries its
+// own start/end. Without this the list would move and the preview would not.
+function syncPreviewCaptionTimes() {
+  if (!window.qkpv || !qkpv.songCaps || !qkpv.songCaps.length) return;
+  const caps = st.captions.filter((c) => String(c.text || '').trim());
+  qkpv.songCaps.forEach((sc, i) => {
+    const c = caps[i];
+    if (!c) return;
+    sc.start = Number(c.start) || 0;
+    sc.end = Number(c.end) || sc.start + 3;
+  });
+}
+
+function shiftAllCaptions(delta) {
+  if (!st.captions.length) return;
+  // Nothing may go negative, and the whole set has to keep its shape, so the
+  // shift is clamped by the earliest line rather than per-line.
+  const earliest = Math.min(...st.captions.map((c) => Number(c.start) || 0));
+  const applied = Math.max(delta, -earliest);
+  if (!applied) return;
+  st.captions.forEach((c) => {
+    c.start = Math.round((Number(c.start) + applied) * 100) / 100;
+    if (c.end) c.end = Math.round((Number(c.end) + applied) * 100) / 100;
+  });
+  lyrShiftTotal = Math.round((lyrShiftTotal + applied) * 100) / 100;
+  finishCaptionEnds(); renderLyrList(); persistDraft(); syncPreviewCaptionTimes();
+  const note = document.getElementById('lyr-shift-note');
+  if (note) note.textContent = `Shifted ${lyrShiftTotal > 0 ? '+' : ''}${lyrShiftTotal.toFixed(2)}s`;
+}
+
+document.querySelectorAll('#lyr-fix [data-shift]').forEach((b) => {
+  b.onclick = () => shiftAllCaptions(Number(b.dataset.shift));
+});
+
+if (document.getElementById('lyr-grid')) $('#lyr-grid').onclick = () => {
+  setErr('#seq-err', null);
+  const lines = lyrLines();
+  if (!lines.length && !st.captions.length) return setErr('#seq-err', 'Paste your lines first.');
+  const every = Math.max(0.5, Number($('#lyr-every').value) || 5);
+  const from = Math.max(0, Number($('#lyr-from').value) || 0);
+  const texts = st.captions.length ? st.captions.map((c) => c.text) : lines;
+  st.captions = texts.map((text, i) => ({ text, start: Math.round((from + every * i) * 100) / 100, end: 0 }));
+  lyrShiftTotal = 0;
+  finishCaptionEnds(); renderLyrList(); persistDraft(); syncPreviewCaptionTimes();
+  const note = document.getElementById('lyr-shift-note');
+  if (note) note.textContent = `Every ${every}s from ${from}s`;
 };
 
 $('#lyr-tap').onclick = () => {

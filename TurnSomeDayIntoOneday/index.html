@@ -1731,7 +1731,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0" id="owner-updates-sec"><div class="sec-hd">App updates</div></div>
+      <div id="owner-updates-wrap"><div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates <span id="upd-hosted-note" style="display:none;color:var(--tm);font-weight:400">— hosted, updates arrive automatically</span></div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
         <i class="ti ti-refresh"></i>
         <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
@@ -1746,6 +1746,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-download"></i>
         <div class="setting-row-txt"><p>Update the app</p><span id="upd-run-sub">Installs the latest version — your data is kept</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="toggleUpdateToken()">
+        <i class="ti ti-key"></i>
+        <div class="setting-row-txt"><p>GitHub token</p><span id="upd-token-sub">For private-repo updates on a local install</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0" id="owner-diag-sec"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
@@ -11347,7 +11353,16 @@ async function checkForAppUpdates(){
   try{
     const res=await fetch('/api/update/check');
     const data=await res.json().catch(()=>({}));
-    if(!res.ok){sub.textContent=data.error||'Could not check right now.';return;}
+    if(!res.ok){
+      applyUpdateUIContext(data);
+      const tokenSub=document.getElementById('upd-token-sub');
+      if(tokenSub)tokenSub.textContent=data.hasToken?'Token set':'No token set';
+      sub.textContent=data.needsToken?'Private repo — add your GitHub token below to enable updates.':(data.error||'Could not check right now.');
+      return;
+    }
+    applyUpdateUIContext(data);
+    const tokenSub=document.getElementById('upd-token-sub');
+    if(tokenSub)tokenSub.textContent=data.hasToken?'Token set — private-repo updates will work.':'No token set — private-repo updates need one (tap to add).';
     sub.textContent=data.upToDate
       ?"You're on the latest version. ✓"
       :!data.current
@@ -11358,6 +11373,30 @@ async function checkForAppUpdates(){
   }
 }
 
+// Hosted (Railway) installs are always current - redeploys come from git, and
+// the in-place updater would write to an ephemeral filesystem that the next
+// deploy wipes. On those, hide the whole update section; the updater + token
+// row only make sense on a local install.
+function applyUpdateUIContext(data){
+  if(!data||!data.railway)return;
+  const wrap=document.getElementById('owner-updates-wrap');
+  if(wrap)wrap.style.display='none';
+}
+async function toggleUpdateToken(){
+  appPassword('GitHub token','Paste your fine-grained GitHub token (starts with github_pat_...). It is saved only on this install and is used only to read your app repo for updates.',async(token)=>{
+    const sub=document.getElementById('upd-token-sub');
+    try{
+      const res=await fetch('/api/update/settings/updatetoken',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){pwConfirmError(data.error||'Could not save the token.');return;}
+      closePwConfirmModal();
+      if(sub)sub.textContent=data.hasToken?'Token set — private-repo updates will work.':'Token removed.';
+      appInfo('GitHub token saved','GitHub accepted the token — updates will now work on this install.');
+    }catch(e){
+      pwConfirmError('Could not reach the server.');
+    }
+  });
+}
 function toggleAutoUpdate(){
   S.autoUpdate=S.autoUpdate===false;// undefined counts as on
   save();
@@ -11377,7 +11416,7 @@ const appIsOwnerReady=new Promise(r=>{appIsOwnerResolve=r;});
 // with no buttons - and nothing about updating shows up in their settings.
 function applyOwnerUI(){
   const owner=!!appIsOwner;
-  ['owner-updates-sec','owner-diag-sec'].forEach(id=>{
+  ['owner-updates-wrap','owner-diag-sec'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.style.display=owner?'':'none';
   });
@@ -11392,6 +11431,8 @@ async function maybeAutoUpdate(){
     const res=await fetch('/api/update/check');
     if(!res.ok)return;
     const data=await res.json();
+    applyUpdateUIContext(data);
+    if(data.railway)return;
     if(data.upToDate)return;
     // A brand-new install has no recorded version yet - that's not "out of
     // date", so don't kick off a background reinstall on someone's first open.

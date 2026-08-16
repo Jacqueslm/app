@@ -230,20 +230,51 @@ be explained on screen.
 > word they're singing in there"* stays exactly as it is. Naming it out loud
 > flattens the whole thing.
 
-**SHOT 6** — `Close on a single empty glass in a kitchen sink in flat morning light, nothing else in the sink`
+**SHOT 6** — `A small living room at night with the television off and no lamp lit but one in the corner, everything tidy and put away, nobody in the room`
 *"What I was actually after was the quiet."*
 
-**SHOT 7** — `NIA sitting on the edge of her bed at night in a dark room, in pyjamas and a robe, phone dark beside her, both feet on the floor`
+**SHOT 7** — `NIA sitting on the bottom step of a staircase indoors at night, still wearing her coat, the front door shut behind her, one hand on the bannister`
 *"One drink bought an hour of not defending myself."*
 
 **SHOT 8** — `NIA washing dishes at a window in daylight, sleeves pushed up, eyes closed, mouth moving, singing to herself`
-*"My body still remembers the songs. That's what makes it hard."*
-
-**SHOT 9** — `NIA at a kitchen table in daylight with two friends, hands held across the table, mugs and plates, warm`
 *"I'm not a faithless woman. That was never the problem."*
+
+**SHOT 9** — `The same sink, the same window, seconds later: NIA's hands gone still under the water, head down, mouth closed, no longer singing`
+*"That's what makes it hard."*
 
 **SHOT 10** — `NIA standing in the open doorway of a bright ordinary hall with chairs set in a circle, stepping in, coat still on`
 *"So I stopped waiting on that door, and found one that opened."*
+
+> ### ⚠ WHAT WAS WRONG WITH THE BACK THIRD — fixed 16 Aug 2026
+>
+> Four faults, found when the whole series was read end to end. Do not undo any
+> of them:
+>
+> 1. **The pair was reversed.** Every other episode runs the defence first
+>    (*"I'm not a bad mother"*, *"I'm not a waster"*, *"He's not a bad kid"*) and
+>    lands **"That's what makes it hard"** after it. This one had them the wrong
+>    way round, and had crammed *"That's what makes it hard"* onto the end of
+>    another sentence instead of giving it its own beat. It is now shot 8 then
+>    shot 9, clean, like the rest of the series.
+> 2. **Shots 5 and 8 said the same thing twice.** *"I know every word they're
+>    singing in there"* and *"My body still remembers the songs"* are one idea.
+>    Shot 5 keeps it; shot 8's line is now the defence.
+> 3. **A phone and a bed-edge left over from the doomscrolling draft.** Shot 7
+>    was a near-copy of episode 4's shot 9 — same framing, same
+>    `bededge` filename, and a dark phone in an episode that has nothing to do
+>    with phones. It is now the bottom of the stairs with her coat still on:
+>    she got home from parking outside that building and never took it off.
+> 4. **Shot 9 stole the ending.** Friends holding hands round a table at shot 9
+>    resolved the film one shot early and made the circle of chairs redundant.
+>    The warmth belongs at shot 10 and nowhere before it.
+>
+> **Shots 8 and 9 are deliberately the same frame.** Same sink, same window,
+> seconds apart — singing, then stopped. Do not "vary" them; the repetition is
+> the shot. Match the light and the framing exactly.
+>
+> **Alcohol is spoken, never shown.** The empty glass is gone. The habit exists
+> in one line (shot 7) and nowhere in the picture — the same rule that governed
+> the substances episode, and the reason this one will not get demoted.
 
 **YouTube:** I didn't leave God. The room left me.
 **TikTok:** I transitioned at twenty-nine. That building stopped at twenty-eight.
@@ -254,10 +285,10 @@ be explained on screen.
 3. 03_church     Zoom in   5.0s  cut   I transitioned at twenty-nine. That building stopped at twenty-eight.
 4. 04_windscreen Still     5.0s  cut   I still park across the street some Sundays.
 5. 05_photo      Zoom in   5.0s  cut   I know every word they're singing in there.
-6. 06_glass      Zoom in   5.0s  cut   What I was actually after was the quiet.
-7. 07_bededge    Still     5.0s  cut   One drink bought an hour of not defending myself.
-8. 08_dishes     Still     5.0s  cut   My body still remembers the songs. That's what makes it hard.
-9. 09_friends    Still     5.0s  cut   I'm not a faithless woman. That was never the problem.
+6. 06_quiet      Zoom in   5.0s  cut   What I was actually after was the quiet.
+7. 07_stairs     Still     5.0s  cut   One drink bought an hour of not defending myself.
+8. 08_singing    Still     5.0s  cut   I'm not a faithless woman. That was never the problem.
+9. 09_stopped    Still     5.0s  cut   That's what makes it hard.
 10. 10_doorway   Zoom out  5.0s  cut   So I stopped waiting on that door, and found one that opened.
 11. 99-free-end  Still     3.0s  cut
 ```

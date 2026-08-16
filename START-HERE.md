@@ -309,6 +309,27 @@ hits harder.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
 
+**b0870/b0871 — prices never under-quote, and Jacques may take Studio public.**
+Every number on a button must match what the server will actually estimate
+(`estActionCost` in `server/studio.js` is the source of truth). The bug this
+fixed twice: selecting a character routes an image through their face lock at
+`characterImageRate` (~$0.09), but the Generate button and the Flux chip kept
+quoting plain `imageRate` (~$0.04) — receipt honest, button not. If a price
+can't be computed, the UI now says so rather than showing a made-up low
+number. **Never reintroduce a hardcoded dollar fallback in a confirm dialog.**
+
+**b0871 — the one-press episode button refuses half-filled renders.** 
+`#qk-paste-all` chains paste-fill → free-stock-fill → assemble. If any line
+still has no picture it STOPS and names the lines; it does not render a video
+with holes. Do not "helpfully" make it assemble whatever is there.
+
+**b0870 — Quick Video words: face-avoid and the beat/captions rule.** Words on
+pictures auto-move to the top when Chrome's FaceDetector finds a face low in
+frame (hand-set positions always win). And beat-cutting turns itself off when
+song-timed Lyrics & Captions exist — the Director already refused that
+combination; manual Assemble now matches. Words drifting over the wrong shot
+was the "not in sync" complaint of 16 Aug.
+
 **b0868 — the Python search looks in the folders, not just on PATH, and it
 does not take the newest one.** Two separate ways "Install free voice cloning"
 used to fail on a machine that was fine:

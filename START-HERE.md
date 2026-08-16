@@ -28,6 +28,25 @@ re-check it, do not re-ask him about it, do not walk him back through it to
 in the same turn — do not ask him to record it. Anything struck through or
 marked DONE below is closed history, not a to-do list.
 
+**RULE TWO — do what he asks; opinions only when he asks for them (16 Aug
+2026, his words).** Execute the request as given. Do not talk him out of a
+tool, add unrequested warnings, or re-litigate a call he already made — he has
+tested his own flow, gone against AI advice, and gotten better results. If a
+request is genuinely dangerous (money, account strikes, legal), say so once,
+briefly, then do what he decided. Everything else: just build it.
+
+**HIS IMAGE TOOLCHAIN — his tested findings, not suggestions (16 Aug 2026).**
+Do not steer him off these; work with them:
+- **Manus** — the best one: most of an episode in one take, rest as a collage.
+  Free until 25 Aug 2026.
+- **Creen** — face lock is actually great; free credits for images.
+- **ChatGPT** — free image credits, part of the flow.
+- **Microsoft Copilot** — keeps a face intact from one reference photo.
+- **Gemini** — dropped: leaves a watermark.
+- **Studio** — $0 spent to date; one paid test night (that's where the price
+  screenshots came from). The free path (stock, Ken Burns, captions, assemble,
+  Buffer posting) is its job in this flow; other AIs make the images.
+
 ---
 
 ## OPEN ITEMS — 14 Aug 2026
@@ -316,6 +335,43 @@ hits harder.
   "you tried to do His job." Do not flatten it into the others.
 
 ## ⚠ STUDIO — THINGS NOT TO UNDO (14 Aug 2026)
+
+**b0870/b0871 — prices never under-quote, and Jacques may take Studio public.**
+Every number on a button must match what the server will actually estimate
+(`estActionCost` in `server/studio.js` is the source of truth). The bug this
+fixed twice: selecting a character routes an image through their face lock at
+`characterImageRate` (~$0.09), but the Generate button and the Flux chip kept
+quoting plain `imageRate` (~$0.04) — receipt honest, button not. If a price
+can't be computed, the UI now says so rather than showing a made-up low
+number. **Never reintroduce a hardcoded dollar fallback in a confirm dialog.**
+
+**b0871 — the one-press episode button refuses half-filled renders.** 
+`#qk-paste-all` chains paste-fill → free-stock-fill → assemble. If any line
+still has no picture it STOPS and names the lines; it does not render a video
+with holes. Do not "helpfully" make it assemble whatever is there.
+
+**b0870 — Quick Video words: face-avoid and the beat/captions rule.** Words on
+pictures auto-move to the top when Chrome's FaceDetector finds a face low in
+frame (hand-set positions always win). And beat-cutting turns itself off when
+song-timed Lyrics & Captions exist — the Director already refused that
+combination; manual Assemble now matches. Words drifting over the wrong shot
+was the "not in sync" complaint of 16 Aug.
+
+**b0868 — the Python search looks in the folders, not just on PATH, and it
+does not take the newest one.** Two separate ways "Install free voice cloning"
+used to fail on a machine that was fine:
+1. The python.org installer ships with **"Add Python to PATH" unticked**, so a
+   perfectly good Python is invisible to `python`/`py`. `windowsGuesses()` now
+   also looks in `%LOCALAPPDATA%\Programs\Python`, `%ProgramFiles%\Python` and
+   `C:\Python3xx`. Do not delete that as "belt and braces" — it is the common
+   case, not the edge case.
+2. **torch has no wheels for the newest Python**, and python.org's front page
+   always offers the newest. Taking the first interpreter that answered meant
+   dying ten minutes into a multi-gigabyte download with "no matching
+   distribution found for torch", which reads as a broken app. `pickPython()`
+   now takes the highest version **≤ 3.13**, and only uses something newer if
+   that is all there is. When torch catches up, raise `PY_BEST_MAX` — do not
+   remove the ceiling. Covered by `test/voiceclone-python.test.js`.
 
 **b0863 — SESSION_SECRET writes itself to `server/.env`. Leave it there.**
 Without it, `auth.js` invents a random signing key on every boot, so **every

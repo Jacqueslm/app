@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0867</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0872</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -629,12 +629,18 @@ body.simple-only #view-simple{display:flex !important}
       <div id="qk-studio-grid" style="display:none;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px"></div>
       <div id="qk-shots" class="row"></div>
       <p class="usage" id="qk-total" style="margin:6px 0 0;display:none"></p>
-      <details id="qk-paste-wrap" style="margin-top:6px">
-        <summary style="cursor:pointer;font-size:13px;color:var(--ts)">📋 Paste a shot list (from a plan you wrote elsewhere)</summary>
-        <p class="usage" style="margin:6px 0 4px">One line per shot, in order. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
+      <!-- Open, and styled as its own step. This was a collapsed <details> and
+           it was effectively invisible — the one control that starts a whole
+           episode read as a grey footnote, and got hunted for repeatedly. If
+           the card ever feels crowded, shrink something else. -->
+      <details id="qk-paste-wrap" open style="margin-top:8px;border:1px solid var(--accent);border-radius:12px;padding:10px">
+        <summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--tp)">📋 Paste your script — one line per shot</summary>
+        <p class="usage" style="margin:6px 0 4px">In order, one line each. It reads the move, the seconds, cut or blend, and the words on screen — in any order, and it doesn't mind extra numbering or scene names.</p>
         <textarea id="qk-paste" placeholder="1. 01_indulgence   Zoom in   10s  cut    I wasn't hungry. I was filling a hole&#10;2. 02_aftermath    Zoom out  10s  blend  Then the room got quiet&#10;3. 03_realization  Float      5s  blend  Wasn't there" style="min-height:96px;font-size:12px"></textarea>
-        <button class="btn2" id="qk-paste-go" style="width:100%;margin-top:6px">Fill the shots from this</button>
-        <button class="btn2" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Find free footage for the lines with no picture</button>
+        <button class="gen-btn" id="qk-paste-all" style="width:100%;margin-top:6px">🚀 Make the whole video from this — one press</button>
+        <p class="usage" style="margin:2px 0 0">Reads your lines, matches pictures you already have by name, finds free footage for the rest, adds your song and the end card, assembles. Stops and tells you if any line has no picture, so nothing renders half-done.</p>
+        <button class="btn2 quiet" id="qk-paste-go" style="width:100%;margin-top:6px">Only fill the shots (no assemble)</button>
+        <button class="btn2 quiet" id="qk-stock-fill" style="width:100%;margin-top:6px">🎬 Only find free footage for the lines with no picture</button>
         <p class="usage" id="qk-paste-note" style="margin:4px 0 0"></p>
       </details>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -798,6 +804,47 @@ body.simple-only #view-simple{display:flex !important}
       <div id="ovl-list" class="row"></div>
       <button class="btn2 quiet" id="ovl-add">+ Add text</button>
       <p class="usage">Whatever font, size, color and position you set last is remembered — every new text starts that way. Press <b>↧ same look for all</b> on any text to push its look onto all the others. <a href="#" id="ovl-look-reset">Back to Studio's default look</a>.</p>
+    </div>
+
+    <div class="card adv-card">
+      <h3>📷 Photo tools <span class="usage">— most are free</span></h3>
+      <select class="input" id="pt-image"></select>
+      <div id="pt-preview-wrap" style="position:relative;display:none">
+        <img id="pt-preview" style="width:100%;border-radius:10px;display:block" alt="">
+        <canvas id="pt-boxes" style="position:absolute;inset:0;width:100%;height:100%;cursor:crosshair"></canvas>
+      </div>
+      <p class="usage" id="pt-box-hint" style="display:none">✂ Drag a box over the text or watermark to remove. Click a box to delete it.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="pt-bg" style="flex:1;min-width:140px">🪄 Remove background — free</button>
+        <button class="btn2" id="pt-textremove" style="flex:1;min-width:140px">✂ Remove text — free</button>
+      </div>
+      <div id="pt-bg-install" style="display:none">
+        <button class="btn2" id="pt-bg-install-btn" style="width:100%">⬇ Install free background removal (one time)</button>
+        <div class="progress-line" id="pt-bg-prog"><div></div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="input" id="pt-up-target" style="flex:1;min-width:100px">
+          <option value="1080">to 1080</option>
+          <option value="1440">to 1440</option>
+          <option value="4k">to 4K</option>
+        </select>
+        <button class="btn2" id="pt-upscale" style="flex:2;min-width:140px">🔍 Upscale &amp; sharpen — free</button>
+      </div>
+      <button class="btn2" id="pt-passport" style="width:100%">🛂 Passport photo (2×2 in) — free</button>
+      <p class="usage" style="margin:2px 0 0">Passport: straight-on photo, plain light background, whole head in frame. It crops to the official US spec or tells you to retake — it never guesses.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn2" id="pt-genderswap" style="flex:1;min-width:120px">⇄ Gender swap</button>
+        <button class="btn2" id="pt-caricature" style="flex:1;min-width:120px">✏ Caricature</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="input" id="pt-hair-style" style="flex:2;min-width:110px"></select>
+        <select class="input" id="pt-hair-color" style="flex:1;min-width:80px"></select>
+        <button class="btn2" id="pt-hairstyle" style="flex:2;min-width:110px">💇 Try hairstyle</button>
+      </div>
+      <button class="btn2 quiet" id="pt-palm" style="width:100%">🖐 Palm reading — for fun</button>
+      <div id="pt-palm-out" style="display:none;background:var(--bg2,rgba(255,255,255,0.04));border-radius:10px;padding:10px;font-size:13px;color:var(--ts);white-space:pre-wrap"></div>
+      <div class="progress-line" id="pt-prog"><div></div></div>
+      <p class="usage" id="pt-note"></p>
     </div>
 
     <div class="card adv-card">
@@ -3421,15 +3468,23 @@ function renderRelationships() {
 function renderSceneChips() {
   chipRow($('#scene-sizes'), SCENE_SIZES, st.sceneSize, (k) => { st.sceneSize = k; renderSceneChips(); });
   const p = st.cfg?.pricing;
+  // The Flux chip must quote what THIS generation will cost: with a character
+  // selected it runs through their photos/face lock at the character rate.
+  const chipChar = !!($('#scene-char')?.value || $('#scene-char2')?.value);
   const QUALITIES = [
-    { key: 'standard', label: `Flux${p ? ` · $${p.imageRate.toFixed(2)}` : ''}` },
+    { key: 'standard', label: `Flux${p ? ` · $${(chipChar ? p.characterImageRate : p.imageRate).toFixed(2)}` : ''}` },
     { key: 'best', label: `✨ Banana Pro${p ? ` · $${p.imageBestRate.toFixed(2)}` : ''}` },
     { key: 'gpt', label: `🤖 GPT-Image${p && p.imageGptRate ? ` · $${p.imageGptRate.toFixed(2)}` : ''}` },
   ];
   chipRow($('#scene-quality'), QUALITIES, st.sceneQuality, (k) => { st.sceneQuality = k; renderSceneChips(); });
   chipRow($('#scene-counts'), SCENE_COUNTS, st.sceneCount, (k) => { st.sceneCount = Number(k); renderSceneChips(); });
   const n = st.sceneCount;
-  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : p.imageRate) : null;
+  // With a character selected the server bills the character rate (the image
+  // goes through their reference photos / face lock), not the plain-Flux rate.
+  // Quoting imageRate here while charging characterImageRate made the button
+  // say ~$0.04 and the receipt say ~$0.09 — the receipt was the honest one.
+  const withChar = !!($('#scene-char')?.value || $('#scene-char2')?.value);
+  const rate = p ? (st.sceneQuality === 'best' ? p.imageBestRate : st.sceneQuality === 'gpt' ? p.imageGptRate : (withChar ? p.characterImageRate : p.imageRate)) : null;
   const price = rate ? ` · ~$${(rate * n).toFixed(2)}` : '';
   $('#scene-gen').textContent = (n > 1 ? `Generate ${n} images (${n} takes)` : 'Generate scene image') + price;
 }
@@ -3445,6 +3500,9 @@ function renderSceneCharSelect() {
   if ($('#sb-char')) $('#sb-char').innerHTML = opts;
   if ([...$('#scene-char').options].some((o) => o.value === sceneCur)) $('#scene-char').value = sceneCur;
   if ([...$('#scene-char2').options].some((o) => o.value === scene2Cur)) $('#scene-char2').value = scene2Cur;
+  // Picking a character changes what the generate button will cost — requote it.
+  $('#scene-char').onchange = renderSceneChips;
+  $('#scene-char2').onchange = renderSceneChips;
   if ($('#sb-char') && [...$('#sb-char').options].some((o) => o.value === sbCur)) $('#sb-char').value = sbCur;
   // Auto-pin: if a storyboard character hasn't been chosen yet and exactly one
   // star exists, select them so generated scenes actually feature that person
@@ -4395,7 +4453,9 @@ if (document.getElementById('voice-go')) $('#voice-go').onclick = async () => {
   const p = voicePrice();
   // Nothing to confirm when nothing is being spent. Asking anyway is how a
   // free feature ends up feeling expensive.
-  if (!voiceIsFree() && !confirm(`Generate this line in that voice?\n\nUses AI on your fal key (~$${(p || 0.01).toFixed(3)}).`)) return;
+  // When the price can't be computed, say so — a made-up low number in a
+  // confirm dialog is the one place a wrong estimate becomes deception.
+  if (!voiceIsFree() && !confirm(`Generate this line in that voice?\n\nUses AI on your fal key ${p ? `(~$${p.toFixed(3)})` : '(price unavailable right now — it will show on your receipt)'}.`)) return;
   const b = $('#voice-go'); b.disabled = true; const old = b.textContent; b.innerHTML = '<span class="spinner"></span>Speaking…';
   note.textContent = ''; $('#voice-audio').style.display = 'none'; $('#voice-use').style.display = 'none'; setProg('#voice-prog', 3);
   try {
@@ -5985,6 +6045,16 @@ function renderSeqPickers() {
     imgs.map((a) => `<option value="${a.id}">${escapeHtml(a.label)}</option>`).join('');
   if ([...$('#kb-image').options].some((o) => o.value === kbCurrent)) $('#kb-image').value = kbCurrent;
 
+  // Photo tools takes images AND videos (upscale/text-remove work on both).
+  if ($('#pt-image')) {
+    const ptCurrent = $('#pt-image').value;
+    const vids = st.assets.filter((a) => a.kind === 'video');
+    $('#pt-image').innerHTML = '<option value="">Choose an image or video…</option>' +
+      imgs.map((a) => `<option value="${a.id}">🖼 ${escapeHtml(a.label)}</option>`).join('') +
+      vids.map((a) => `<option value="${a.id}">🎬 ${escapeHtml(a.label)}</option>`).join('');
+    if ([...$('#pt-image').options].some((o) => o.value === ptCurrent)) $('#pt-image').value = ptCurrent;
+  }
+
   const dnImg = $('#dn-image'), dnVid = $('#dn-video');
   const dnImgCur = dnImg.value, dnVidCur = dnVid.value;
   dnImg.innerHTML = '<option value="">Your character (pick an image)…</option>' +
@@ -6069,6 +6139,203 @@ $('#kb-create').onclick = async () => {
     setProg('#kb-prog', null);
   }
 };
+
+/* ---------------- photo tools ---------------- */
+// Eight tools behind one picker. The free four run locally (ffmpeg or the
+// rembg model); the paid three quote the Best-image rate on their button; the
+// palm reading runs on the Anthropic key and is labelled entertainment.
+const pt = { boxes: [], drag: null, img: null };
+
+const PT_HAIRSTYLES = { buzz: 'Buzz cut', short: 'Short', medium: 'Medium', long: 'Long', curly: 'Curly', waves: 'Waves', braids: 'Braids', locs: 'Locs', afro: 'Afro', bob: 'Bob', ponytail: 'Ponytail', bald: 'Bald' };
+const PT_HAIRCOLORS = { same: 'Same color', black: 'Black', brown: 'Brown', blonde: 'Blonde', red: 'Red', grey: 'Grey', blue: 'Blue', pink: 'Pink' };
+if ($('#pt-hair-style')) {
+  $('#pt-hair-style').innerHTML = Object.entries(PT_HAIRSTYLES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+  $('#pt-hair-color').innerHTML = Object.entries(PT_HAIRCOLORS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+}
+
+function ptAsset() {
+  return st.assets.find((a) => a.id === Number($('#pt-image').value)) || null;
+}
+
+function ptDrawBoxes() {
+  const cv = $('#pt-boxes');
+  const img = $('#pt-preview');
+  if (!cv || !img.clientWidth) return;
+  cv.width = img.clientWidth; cv.height = img.clientHeight;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(74,222,128,0.15)';
+  for (const b of pt.boxes.concat(pt.drag ? [pt.drag] : [])) {
+    ctx.fillRect(b.x * cv.width, b.y * cv.height, b.w * cv.width, b.h * cv.height);
+    ctx.strokeRect(b.x * cv.width, b.y * cv.height, b.w * cv.width, b.h * cv.height);
+  }
+}
+
+if ($('#pt-image')) {
+  $('#pt-image').onchange = () => {
+    const a = ptAsset();
+    pt.boxes = []; pt.drag = null;
+    const isImg = a && a.kind === 'image';
+    $('#pt-preview-wrap').style.display = isImg ? 'block' : 'none';
+    $('#pt-box-hint').style.display = a ? 'block' : 'none';
+    $('#pt-palm-out').style.display = 'none';
+    if (isImg) { $('#pt-preview').src = a.url; $('#pt-preview').onload = ptDrawBoxes; }
+    $('#pt-note').textContent = a && a.kind === 'video' ? 'A video: upscale and text-remove work on it. The photo tools need a still.' : '';
+  };
+
+  // Box drawing for the text remover — drag to add, click inside one to delete.
+  const cv = $('#pt-boxes');
+  const rel = (e) => {
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  };
+  cv.onpointerdown = (e) => {
+    const p = rel(e);
+    const hit = pt.boxes.findIndex((b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
+    if (hit >= 0) { pt.boxes.splice(hit, 1); ptDrawBoxes(); return; }
+    pt.drag = { x: p.x, y: p.y, w: 0, h: 0, sx: p.x, sy: p.y };
+    cv.setPointerCapture(e.pointerId);
+  };
+  cv.onpointermove = (e) => {
+    if (!pt.drag) return;
+    const p = rel(e);
+    pt.drag.x = Math.min(pt.drag.sx, p.x); pt.drag.y = Math.min(pt.drag.sy, p.y);
+    pt.drag.w = Math.abs(p.x - pt.drag.sx); pt.drag.h = Math.abs(p.y - pt.drag.sy);
+    ptDrawBoxes();
+  };
+  cv.onpointerup = () => {
+    if (pt.drag && pt.drag.w > 0.01 && pt.drag.h > 0.01) {
+      const { sx, sy, ...box } = pt.drag;
+      pt.boxes.push(box);
+    }
+    pt.drag = null; ptDrawBoxes();
+  };
+
+  // One runner for every job-shaped tool, so busy/progress/errors behave the
+  // same across the card.
+  async function ptRun(btnSel, path, body, doneMsg) {
+    const btn = $(btnSel);
+    setErr('#seq-err', null);
+    $('#pt-note').textContent = '';
+    btn.disabled = true;
+    setProg('#pt-prog', 3);
+    try {
+      const { job } = await jfetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const done = await pollJob(job.id, (j) => setProg('#pt-prog', j.progress));
+      await loadAssets();
+      $('#pt-note').textContent = doneMsg + ' It is in your library.';
+      return done;
+    } catch (e) {
+      setErr('#seq-err', e.message);
+    } finally {
+      btn.disabled = false;
+      setProg('#pt-prog', null);
+    }
+  }
+
+  async function ptBgStatus() {
+    try { return await jfetch('/api/studio/phototools/bgremove/status'); } catch (_) { return { installed: false }; }
+  }
+
+  $('#pt-bg').onclick = async () => {
+    const a = ptAsset();
+    if (!a || a.kind !== 'image') return setErr('#seq-err', 'Pick a still image first.');
+    const s = await ptBgStatus();
+    if (!s.installed) {
+      $('#pt-bg-install').style.display = 'block';
+      $('#pt-note').textContent = s.installing ? 'Still installing — hold on…' : 'One-time install first (free, a few minutes). Press the install button above.';
+      return;
+    }
+    await ptRun('#pt-bg', '/api/studio/phototools/bgremove', { assetId: a.id }, 'Background removed — a transparent PNG.');
+  };
+
+  $('#pt-bg-install-btn').onclick = async () => {
+    $('#pt-bg-install-btn').disabled = true;
+    try {
+      await jfetch('/api/studio/phototools/bgremove/install', { method: 'POST' });
+      // Poll install progress until done or error.
+      for (;;) {
+        const s = await ptBgStatus();
+        setProg('#pt-bg-prog', s.installed ? 100 : (s.pct || 3));
+        $('#pt-note').textContent = s.step || '';
+        if (s.error) { setErr('#seq-err', s.error); break; }
+        if (s.installed) { $('#pt-bg-install').style.display = 'none'; $('#pt-note').textContent = 'Installed — background removal is free now. Press the button again.'; break; }
+        await new Promise((r) => setTimeout(r, 2500));
+      }
+    } catch (e) { setErr('#seq-err', e.message); }
+    $('#pt-bg-install-btn').disabled = false;
+    setProg('#pt-bg-prog', null);
+  };
+
+  $('#pt-textremove').onclick = async () => {
+    const a = ptAsset();
+    if (!a) return setErr('#seq-err', 'Pick an image or video first.');
+    if (!pt.boxes.length && a.kind === 'image') return setErr('#seq-err', 'Drag a box over the text you want removed first.');
+    if (!pt.boxes.length) return setErr('#seq-err', 'Text removal on video needs the boxes drawn on a still of it — pick an image, or screenshot a frame.');
+    await ptRun('#pt-textremove', '/api/studio/phototools/textremove', { assetId: a.id, boxes: pt.boxes }, 'Text removed.');
+    pt.boxes = []; ptDrawBoxes();
+  };
+
+  $('#pt-upscale').onclick = async () => {
+    const a = ptAsset();
+    if (!a) return setErr('#seq-err', 'Pick an image or video first.');
+    await ptRun('#pt-upscale', '/api/studio/phototools/upscale', { assetId: a.id, target: $('#pt-up-target').value }, 'Upscaled and sharpened.');
+  };
+
+  $('#pt-passport').onclick = async () => {
+    const a = ptAsset();
+    if (!a || a.kind !== 'image') return setErr('#seq-err', 'Pick a still photo first.');
+    if (!('FaceDetector' in window)) return setErr('#seq-err', 'This browser has no built-in face detector — open Studio in Chrome for passport photos.');
+    $('#pt-note').textContent = 'Finding the face…';
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = a.url; });
+      const faces = await new window.FaceDetector({ fastMode: false, maxDetectedFaces: 2 }).detect(img);
+      if (!faces.length) return setErr('#seq-err', 'No face found. Use a straight-on photo of one person, good light, plain background.');
+      if (faces.length > 1) return setErr('#seq-err', 'Two faces found — a passport photo has exactly one person in it.');
+      const b = faces[0].boundingBox;
+      await ptRun('#pt-passport', '/api/studio/phototools/passport',
+        { assetId: a.id, face: { x: b.x, y: b.y, width: b.width, height: b.height } },
+        'Passport photo made — 600×600 at the official 2×2in spec.');
+    } catch (e) { setErr('#seq-err', e.message); }
+  };
+
+  // The paid three — price on the button, confirm before spending.
+  function ptQuoteRestyles() {
+    const p = st.cfg?.pricing;
+    if (!p || !p.imageBestRate) return;
+    $('#pt-genderswap').textContent = `⇄ Gender swap · ~$${p.imageBestRate.toFixed(2)}`;
+    $('#pt-caricature').textContent = `✏ Caricature · ~$${p.imageBestRate.toFixed(2)}`;
+    $('#pt-hairstyle').textContent = `💇 Try hairstyle · ~$${p.imageBestRate.toFixed(2)}`;
+  }
+  setTimeout(ptQuoteRestyles, 1500);
+
+  async function ptRestyle(btnSel, kind, extra) {
+    const a = ptAsset();
+    if (!a || a.kind !== 'image') return setErr('#seq-err', 'Pick a still photo first.');
+    const rate = st.cfg?.pricing?.imageBestRate;
+    if (!confirm(`Make this on your fal key${rate ? ` (~$${rate.toFixed(2)})` : ''}?`)) return;
+    await ptRun(btnSel, '/api/studio/phototools/restyle', { assetId: a.id, kind, ...extra }, 'Done.');
+  }
+  $('#pt-genderswap').onclick = () => ptRestyle('#pt-genderswap', 'genderswap');
+  $('#pt-caricature').onclick = () => ptRestyle('#pt-caricature', 'caricature');
+  $('#pt-hairstyle').onclick = () => ptRestyle('#pt-hairstyle', 'hairstyle', { style: $('#pt-hair-style').value, color: $('#pt-hair-color').value });
+
+  $('#pt-palm').onclick = async () => {
+    const a = ptAsset();
+    if (!a || a.kind !== 'image') return setErr('#seq-err', 'Pick a photo of a palm first.');
+    $('#pt-palm').disabled = true;
+    $('#pt-note').textContent = 'Reading the palm…';
+    try {
+      const out = await jfetch('/api/studio/phototools/palm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ assetId: a.id }) });
+      $('#pt-palm-out').style.display = 'block';
+      $('#pt-palm-out').textContent = out.reading;
+      $('#pt-note').textContent = '';
+    } catch (e) { setErr('#seq-err', e.message); }
+    $('#pt-palm').disabled = false;
+  };
+}
 
 /* ---------------- timeline ---------------- */
 async function addToSeq(asset, opts) {
@@ -7771,6 +8038,8 @@ function renderCaptionSizes() {
       // Overlays are drawn client-side, so their previews must be redrawn for
       // the new size to be visible before rendering.
       if (typeof renderOverlays === 'function') renderOverlays();
+      // And the caption preview box, or the chips look like they do nothing.
+      if (typeof renderCaptionPreview === 'function') renderCaptionPreview();
     };
     box.appendChild(b);
   });
@@ -7801,7 +8070,10 @@ function renderCaptionPreview() {
   let pv = document.getElementById('cap-preview');
   if (!pv) { pv = document.createElement('canvas'); pv.id = 'cap-preview'; pv.style.cssText = 'width:100%;max-width:280px;border-radius:8px;margin-top:6px;background:linear-gradient(135deg,#3a3a5a,#14121f);display:block'; box.after(pv); }
   const style = CAPTION_STYLES[captionStyleKey()];
-  drawOverlay({ text: 'your lyrics here', font: 'system-ui', size: 150, pos: 5, ...style }, 560, 200, pv);
+  // The preview must obey the Size chips or the control looks broken — the
+  // burned-in size was always applied at render, but this box never moved,
+  // so Small/Medium/Large appeared to do nothing.
+  drawOverlay({ text: 'your lyrics here', font: 'system-ui', size: Math.round(150 * captionSizeMul()), pos: 5, ...style }, 560, 200, pv);
 }
 // Captions go to the server as plain text + timings plus the chosen look; it
 // burns them in via a generated subtitle file. No per-line PNG uploads, no
@@ -9134,6 +9406,46 @@ if (document.getElementById('qk-stock-fill')) $('#qk-stock-fill').onclick = asyn
   }
 };
 
+// The whole episode pipeline behind one press. Nothing here is new machinery —
+// it chains the three buttons a person had to press in the right order every
+// time: fill the shots from the paste, find free footage for the gaps, then
+// assemble with the song and end card. The one rule it adds: it refuses to
+// render a half-filled episode. A missing shot stops it with a note naming
+// what's missing, because a video with a hole in it posted at 6am is worse
+// than no video.
+if (document.getElementById('qk-paste-all')) $('#qk-paste-all').onclick = async (e) => {
+  const btn = e.currentTarget;
+  const note = $('#qk-paste-note');
+  const rows = parseShotList($('#qk-paste').value);
+  if (!rows.length) { note.textContent = 'Paste your shot list first — one line per shot.'; return; }
+  if (qk.busy || st.busyRender) return;
+  btn.disabled = true;
+  const was = btn.textContent;
+  try {
+    // 1. your own pictures first, matched by the names in the lines
+    btn.textContent = 'Matching your pictures…';
+    $('#qk-paste-go').onclick();
+    // 2. free stock for whatever is still empty
+    if (qk.shots.length < rows.length) {
+      btn.textContent = 'Finding free footage…';
+      await $('#qk-stock-fill').onclick({ currentTarget: $('#qk-stock-fill') });
+    }
+    if (!qk.shots.length) return; // the buttons above already wrote the note
+    if (qk.shots.length < rows.length) {
+      const missing = rows.slice(qk.shots.length).map((r, i) => r.name || `line ${qk.shots.length + i + 1}`);
+      note.textContent = `Stopped before assembling — no picture for: ${missing.join(', ')}. `
+        + 'Add those (your own, or generate them in AI Scenes), then press this again.';
+      return;
+    }
+    // 3. everything has a picture — build the video
+    btn.textContent = 'Assembling…';
+    if (!firstMusicAsset()) note.textContent = 'No song in the library — assembling without music. Add one and press again if it needs a track.';
+    await $('#qk-assemble').onclick();
+  } finally {
+    btn.disabled = false; btn.textContent = was;
+  }
+};
+
 // Builds the shot a picture OR a clip you filmed becomes. A video keeps its
 // own length and gets no camera move — it already moves. The assembler has
 // always known what to do with a video shot; until now there was simply no way
@@ -9244,6 +9556,34 @@ $('#qk-import-song').onclick = async () => {
   b.disabled = false; b.textContent = '🔗 Import';
 };
 
+// Words should never sit on a face. Chrome ships a built-in face detector
+// (window.FaceDetector — free, local, no AI cost); where it exists, each
+// picture with words is checked once: face in the bottom of the frame and the
+// top clear → that shot's words move to the top. Both bands occupied, or no
+// detector in this browser → words stay in the bottom slot, which is where
+// TikTok viewers expect them. A row's own position (set in the shot list)
+// always wins — this only decides for shots nobody positioned by hand.
+const qkFaceCache = new Map();
+async function qkFaceSafePos(url) {
+  if (!('FaceDetector' in window) || !url) return null;
+  if (qkFaceCache.has(url)) return qkFaceCache.get(url);
+  let pos = null;
+  try {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+    const faces = await new window.FaceDetector({ fastMode: true, maxDetectedFaces: 5 }).detect(img);
+    if (faces.length) {
+      const H = img.naturalHeight || 1;
+      const inBottom = faces.some((f) => (f.boundingBox.y + f.boundingBox.height) > H * 0.55);
+      const inTop = faces.some((f) => f.boundingBox.y < H * 0.35);
+      pos = (inBottom && !inTop) ? 2 : 8;
+    }
+  } catch (_) { pos = null; }
+  qkFaceCache.set(url, pos);
+  return pos;
+}
+
 $('#qk-assemble').onclick = async () => {
   if (qk.busy || st.busyRender) return;
   pvStop(); // a running preview and a render would fight over the same clips
@@ -9272,6 +9612,16 @@ $('#qk-assemble').onclick = async () => {
     renderOutputChips();
     let durs = qk.shots.map((s) => s.dur);
     const musicAsset = firstMusicAsset();
+    // Two word systems can be live at once: per-picture words ride their
+    // picture wherever it goes, but the Lyrics & Captions list is timed to the
+    // SONG's clock. Beat-snap reshapes the pictures underneath those timings,
+    // so the words land over the wrong picture — "they don't move in sync."
+    // The Director already refuses this combination; the manual button now
+    // applies the same rule instead of silently producing a drifted video.
+    if ($('#qk-beat').checked && musicAsset && captionLinesPayload().length) {
+      $('#qk-beat').checked = false;
+      $('#qk-paste-note').textContent = '⚡ Beat-cutting turned itself off: your Lyrics & Captions are timed to the song, and moving the cuts would slide the pictures out from under the words. Clear the caption list if you want beat-cutting back.';
+    }
     if ($('#qk-beat').checked && musicAsset) {
       $('#qk-status').textContent = 'Listening to your song…';
       try {
@@ -9333,7 +9683,8 @@ $('#qk-assemble').onclick = async () => {
     // words on screen, timed to each picture
     st.overlays = [];
     let cum = 0;
-    qk.shots.forEach((s, i) => {
+    for (let i = 0; i < qk.shots.length; i++) {
+      const s = qk.shots[i];
       const td = i < st.trans.length && st.trans[i].type !== 'cut' ? st.trans[i].duration : 0;
       if (s.text.trim()) {
         // Words hold for the whole picture. This used to stop at 4.3s, so an 8s
@@ -9341,11 +9692,14 @@ $('#qk-assemble').onclick = async () => {
         // into the next picture so text never bleeds across the change.
         const startAt = cum + 0.3;
         const endAt = Math.max(startAt + 0.5, cum + durs[i] - Math.max(0.2, td));
+        // No hand-set position → let the face check decide top or bottom.
+        const srcAsset = st.assets.find((x) => x.id === s.assetId);
+        const autoPos = s.pos ? null : await qkFaceSafePos(srcAsset?.url);
         st.overlays.push({
           // the row's own position wins over the saved look, so one shot can
           // sit high and the next low without changing everything
           ...textLook({ font: 'system-ui', size: AUTO_TEXT_SIZE, color: '#ffffff', bold: true, pos: 8 }),
-          pos: s.pos || 8,
+          pos: s.pos || autoPos || 8,
           text: s.text,
           start: Math.round(startAt * 10) / 10,
           end: Math.round(endAt * 10) / 10,
@@ -9353,7 +9707,7 @@ $('#qk-assemble').onclick = async () => {
         });
       }
       cum += durs[i] - td;
-    });
+    }
     // tasteful defaults for a finished video: end on a fade to black
     $('#fade-black-out').checked = true;
     syncTrans(); renderSeq(); renderOverlays(); persistDraft();

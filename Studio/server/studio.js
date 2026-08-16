@@ -1600,6 +1600,178 @@ router.get('/storage', (req, res) => {
   res.json({ total, count: items.length, items: items.slice(0, 30) });
 });
 
+/* ---------------- photo tools ---------------- */
+// Eight tools, added 16 Aug 2026 at Jacques's request. Four are free (ffmpeg
+// or a local model): background remover, upscaler, text remover, passport
+// photos. Three cost (they need an edit model): gender swap, caricature,
+// hairstyle. One uses the Anthropic key: palm reading, entertainment only.
+const photoTools = require('./photo-tools');
+const bgremove = require('./bgremove');
+
+router.get('/phototools/bgremove/status', (req, res) => res.json(bgremove.status()));
+
+router.post('/phototools/bgremove/install', (req, res) => {
+  if (bgremove.status().installing) return res.status(409).json({ error: 'Already installing — watch the progress.' });
+  bgremove.install().catch(() => {}); // progress/errors surface through /status
+  res.status(202).json({ started: true });
+});
+
+router.post('/phototools/bgremove', async (req, res) => {
+  const img = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!img || img.kind !== 'image') return res.status(404).json({ error: 'Pick an image from your library first.' });
+  if (!bgremove.isInstalled()) return res.status(503).json({ error: 'Install the free background remover first (one time, button above).' });
+  const job = createJob(req.userId, 'render', {});
+  const outFile = newFilename(req.userId, '.png');
+  res.status(202).json({ job: jobJson(job) });
+  try {
+    job.progress = 20;
+    await bgremove.removeBackground({ inPath: mediaPath(img.filename), outPath: mediaPath(outFile) });
+    job.assetId = db.createAsset(req.userId, 'image', `${img.label} · no background`, outFile, null, { source: 'bgremove', fromAssetId: img.id });
+    job.progress = 100;
+    job.status = 'done';
+  } catch (err) {
+    job.status = 'error';
+    job.error = err.message;
+  }
+});
+
+// Free upscale: Lanczos + a measured unsharp. Works on images and videos.
+router.post('/phototools/upscale', async (req, res) => {
+  const { assetId, target } = req.body || {};
+  const a = db.getAsset(req.userId, Number(assetId));
+  if (!a || (a.kind !== 'image' && a.kind !== 'video')) return res.status(404).json({ error: 'Pick an image or video from your library first.' });
+  const dims = await probeDimensions(mediaPath(a.filename));
+  if (!dims) return res.status(400).json({ error: 'Could not read that file.' });
+  const up = photoTools.upscaleFilter(dims.w, dims.h, String(target || '1080'));
+  if (!up) {
+    return res.status(400).json({ error: `Nothing to do — this is already ${dims.w}x${dims.h}, at or above that size. Upscaling never scales down.` });
+  }
+  let dur = 0;
+  if (a.kind === 'video') dur = (await probeMediaDuration(mediaPath(a.filename))) || 0;
+  const args = a.kind === 'image'
+    ? ['-i', mediaPath(a.filename), '-vf', up.filter, '-frames:v', '1']
+    : ['-i', mediaPath(a.filename), '-vf', up.filter, '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-c:a', 'copy', '-movflags', '+faststart'];
+  const outFile = newFilename(req.userId, a.kind === 'image' ? '.png' : '.mp4');
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur,
+    `${a.label} · ${up.width}x${up.height}`, { source: 'upscale', fromAssetId: a.id, factor: up.factor }, a.kind);
+  res.status(202).json({ job: jobJson(job) });
+});
+
+// Free text/watermark remover: delogo over boxes the person drew. Honest
+// about its limits — it interpolates from the border, so it is clean over
+// flat areas and smeary over detail.
+router.post('/phototools/textremove', async (req, res) => {
+  const { assetId, boxes } = req.body || {};
+  const a = db.getAsset(req.userId, Number(assetId));
+  if (!a || (a.kind !== 'image' && a.kind !== 'video')) return res.status(404).json({ error: 'Pick an image or video from your library first.' });
+  const dims = await probeDimensions(mediaPath(a.filename));
+  if (!dims) return res.status(400).json({ error: 'Could not read that file.' });
+  const filter = photoTools.delogoFilter(boxes, dims.w, dims.h);
+  if (!filter) return res.status(400).json({ error: 'Drag a box over the text you want removed first.' });
+  let dur = 0;
+  if (a.kind === 'video') dur = (await probeMediaDuration(mediaPath(a.filename))) || 0;
+  const args = a.kind === 'image'
+    ? ['-i', mediaPath(a.filename), '-vf', filter, '-frames:v', '1']
+    : ['-i', mediaPath(a.filename), '-vf', filter, '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-c:a', 'copy', '-movflags', '+faststart'];
+  const outFile = newFilename(req.userId, a.kind === 'image' ? '.png' : '.mp4');
+  const job = spawnFfmpegJob(req.userId, args, outFile, dur,
+    `${a.label} · text removed`, { source: 'textremove', fromAssetId: a.id }, a.kind);
+  res.status(202).json({ job: jobJson(job) });
+});
+
+// Free passport photo: the browser's face detector finds the face, this crops
+// to the US 2x2in spec (600x600@300dpi, head 50-69%, eyes 56-69% up). The
+// crop refuses to produce a non-compliant photo — it says retake instead.
+router.post('/phototools/passport', async (req, res) => {
+  const { assetId, face } = req.body || {};
+  const a = db.getAsset(req.userId, Number(assetId));
+  if (!a || a.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library first.' });
+  const dims = await probeDimensions(mediaPath(a.filename));
+  if (!dims) return res.status(400).json({ error: 'Could not read that photo.' });
+  const crop = photoTools.passportCrop(face, dims.w, dims.h);
+  if (!crop) return res.status(400).json({ error: 'No face found in that photo. Use a straight-on photo of one person against a plain background.' });
+  if (crop.error) return res.status(400).json({ error: crop.error });
+  const args = ['-i', mediaPath(a.filename),
+    '-vf', `crop=${crop.side}:${crop.side}:${crop.x}:${crop.y},scale=${crop.outSize}:${crop.outSize}:flags=lanczos`,
+    '-frames:v', '1'];
+  const job = spawnFfmpegJob(req.userId, args, newFilename(req.userId, '.png'), 0,
+    `${a.label} · passport 2x2`, { source: 'passport', fromAssetId: a.id }, 'image');
+  res.status(202).json({ job: jobJson(job) });
+});
+
+// The three paid restyles: gender swap, caricature, hairstyle. One edit model,
+// one image in, one image out, billed at the Best-image rate — quoted on the
+// button, counted by the receipts and the daily cap like every other spend.
+router.post('/phototools/restyle', async (req, res) => {
+  if (!FAL_KEY) return res.status(503).json({ error: 'AI generation is not set up yet. Paste your fal.ai key in the Turn on AI box first.' });
+  const { assetId, kind, style, color } = req.body || {};
+  const a = db.getAsset(req.userId, Number(assetId));
+  if (!a || a.kind !== 'image') return res.status(404).json({ error: 'Pick a photo from your library first.' });
+  const prompt = photoTools.restylePrompt(String(kind || ''), { style, color });
+  if (!prompt) return res.status(400).json({ error: 'Pick what to do first (gender swap, caricature, or a hairstyle).' });
+  if (db.getImageCount(req.userId, todayUTC()) + 1 > DAILY_AI_IMAGE_LIMIT) {
+    return res.status(429).json({ error: `Daily AI image cap (${DAILY_AI_IMAGE_LIMIT}) reached.` });
+  }
+  const capMsg = overDailyCap(req.userId, estActionCost('imageBest', { count: 1 }));
+  if (capMsg) return res.status(429).json({ error: capMsg });
+  try {
+    const uri = await scaledRefDataUri(a.filename);
+    if (!uri) throw new Error('could not read that image');
+    const submitted = await falSubmit(MODEL_IMAGE_BEST_EDIT, { image_urls: [uri], prompt });
+    const label = kind === 'hairstyle'
+      ? `${a.label} · ${photoTools.HAIRSTYLES[style] || 'new hair'}`
+      : `${a.label} · ${photoTools.RESTYLE[kind].label.toLowerCase()}`;
+    const job = createJob(req.userId, 'image', {
+      fal: {
+        statusUrl: submitted.status_url,
+        responseUrl: submitted.response_url,
+        expect: 'imageBest',
+        label,
+        meta: { source: 'restyle', restyle: kind, fromAssetId: a.id },
+      },
+    });
+    res.status(202).json({ job: jobJson(job) });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// Palm reading — entertainment only, and the endpoint says so in its answer.
+// Runs on the Anthropic key like crew chat; costs pennies, never invents lines
+// it cannot see, never predicts anything dark.
+router.post('/phototools/palm', async (req, res) => {
+  if (!ANTHROPIC_API_KEY) return res.status(503).json({ error: 'Add an Anthropic key in Settings first (same key the crew chat uses).' });
+  const a = db.getAsset(req.userId, Number(req.body?.assetId));
+  if (!a || a.kind !== 'image') return res.status(404).json({ error: 'Pick a photo of a palm from your library first.' });
+  try {
+    const uri = await scaledRefDataUri(a.filename);
+    if (!uri) throw new Error('could not read that image');
+    const m = uri.match(/^data:([^;]+);base64,(.+)$/);
+    if (!m) throw new Error('could not encode that image');
+    const r = await fetch(`${ANTHROPIC_BASE}/v1/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: ANTHROPIC_MODEL,
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } },
+            { type: 'text', text: photoTools.PALM_PROMPT },
+          ],
+        }],
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error((data && data.error && data.error.message) || 'Reading request failed.');
+    const reading = (data.content || []).map((b) => b.text || '').join('').trim();
+    res.json({ reading: reading || 'The palm reader had nothing to say — try a clearer photo.' });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
 /* ---------------- full backup (streamed, nothing extra stored) ---------------- */
 router.get('/backup', (req, res) => {
   try {

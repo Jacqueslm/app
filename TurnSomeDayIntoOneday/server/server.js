@@ -34,6 +34,12 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const ANTHROPIC_VERSION = '2023-06-01';
 const ANTHROPIC_MODEL = 'claude-sonnet-5';
 const ANTHROPIC_MAX_TOKENS = 1000;
+// Friendly can also run on Gemini - far cheaper at volume and with a free
+// tier for light use. Whichever key is present wins; if both are set, Gemini
+// wins only when GEMINI_FIRST is set, otherwise Anthropic stays the default
+// because it is the better recovery companion.
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 const PRO_CHAT_LIMIT = 30;
@@ -897,7 +903,7 @@ app.get('/api/chat/usage', requireAuth, (req, res) => {
 });
 
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
-  if (!ANTHROPIC_API_KEY) {
+  if (!ANTHROPIC_API_KEY && !GEMINI_API_KEY) {
     // No key configured (e.g. running without the API wired up yet) - the client falls back to
     // its offline local-reply mode whenever this endpoint isn't a 2xx, so this is a normal state.
     return res.status(503).json({ error: 'AI chat is not available on this server right now.' });
@@ -921,36 +927,67 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   }
 
   try {
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': ANTHROPIC_VERSION,
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: ANTHROPIC_MAX_TOKENS,
-        system,
-        messages,
-      }),
-    });
-
-    const data = await anthropicRes.json();
+    let res2, data;
+    if (GEMINI_API_KEY) {
+      const sysText = Array.isArray(system)
+        ? system.map((b) => (b && b.text) || '').join('\n\n')
+        : String(system || '');
+      const gemRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
+          contents: (messages || []).map((m) => {
+            const c = Array.isArray(m.content)
+              ? m.content.map((b) => (b && b.text) || '').join('')
+              : String(m.content || '');
+            return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: c }] };
+          }),
+          generationConfig: { maxOutputTokens: ANTHROPIC_MAX_TOKENS },
+        }),
+      });
+      const gd = await gemRes.json();
+      if (gemRes.ok) {
+        const parts = (gd.candidates && gd.candidates[0] && gd.candidates[0].content && gd.candidates[0].content.parts) || [];
+        const text = parts.map((p) => p.text || '').join('').trim();
+        // Same shape the client already parses (data.content[0].text).
+        data = { content: [{ type: 'text', text }] };
+      } else {
+        data = gd;
+      }
+      res2 = gemRes;
+    } else {
+      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': ANTHROPIC_VERSION,
+        },
+        body: JSON.stringify({
+          model: ANTHROPIC_MODEL,
+          max_tokens: ANTHROPIC_MAX_TOKENS,
+          system,
+          messages,
+        }),
+      });
+      data = await anthropicRes.json();
+      res2 = anthropicRes;
+    }
     // Only spend the user's daily quota on a response that actually succeeded - a bad server
-    // config or a transient Anthropic outage shouldn't cost them one of their free chats.
-    if (anthropicRes.ok) {
+    // config or a transient provider outage shouldn't cost them one of their free chats.
+    if (res2.ok) {
       db.incrementChatCount(req.userId, todayUTC());
     } else {
       // A failing key/model here degrades every chat into the client's canned
       // fallback with no visible symptom except repetitive replies - put the
       // real reason where Profile diagnostics can show it.
-      try { db.logError('anthropic-chat', `HTTP ${anthropicRes.status}: ${(data && data.error && data.error.message) || 'unknown error'}`); } catch (_) {}
+      try { db.logError('ai-chat', `HTTP ${res2.status}: ${(data && data.error && (data.error.message || data.error.status)) || 'unknown error'}`); } catch (_) {}
     }
-    res.status(anthropicRes.status).json(data);
+    res.status(res2.status).json(data);
   } catch (err) {
-    try { db.logError('anthropic-chat', 'Failed to reach Anthropic API', err && err.message); } catch (_) {}
-    res.status(502).json({ error: 'Failed to reach Anthropic API.' });
+    try { db.logError('ai-chat', 'Failed to reach the AI provider', err && err.message); } catch (_) {}
+    res.status(502).json({ error: 'Failed to reach the AI provider.' });
   }
 });
 

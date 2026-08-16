@@ -3,24 +3,32 @@
 Written 14 Aug 2026, same build as the Couples series. Ten shots each, one line
 of narration per shot, ready to paste into Manus.
 
-## WHERE THE ARTWORK STANDS — 14 Aug 2026
+## WHERE THE ARTWORK STANDS — 16 Aug 2026
 
 | # | Episode | Habit | Images |
 |---|---|---|---|
-| 1 | The Gambler | Gambling | ✅ done, posting this weekend |
-| 2 | The Packages | Shopping | ✅ done, posting this weekend |
-| 3 | The Room I Grew Up In | Alcohol / spiritual, trans | ⬜ not generated |
-| 4 | The Light Turns Green | Anger / road rage | ✅ **generated 14 Aug** |
-| 5 | Somebody Needs Me | Gaming | ✅ **generated 14 Aug** |
-| 6 | The Respectable One | Work | ✅ **generated 14 Aug** |
-| 7 | The Hoodie | Smoking / vaping | ⬜ not generated |
-| 8 | The Empty Chair | Substances | ⬜ not generated |
-| 9 | The Second Dinner | Food / binging | ✅ **generated 14 Aug** |
-| 10 | The Hours | Doomscrolling | ⬜ not generated |
+| 1 | The Gambler | Gambling | ✅ done |
+| 2 | The Packages | Shopping | ✅ done |
+| 3 | The Room I Grew Up In | Alcohol / spiritual, trans | 🔄 **being made now** |
+| 4 | The Light Turns Green | Anger / road rage | ✅ **done** |
+| 5 | Somebody Needs Me | Gaming | ✅ **done** |
+| 6 | The Respectable One | Work | ✅ **done** |
+| 7 | The Hoodie | Smoking / vaping | ✅ **done** |
+| 8 | ~~The Empty Chair~~ | ~~Substances~~ | ❌ **CUT 16 Aug — not doing it** |
+| 9 | The Second Dinner | Food / binging | ✅ **done** |
+| 10 | Nothing Happened Tonight | Doomscrolling — **married couple** | ⬜ not generated |
 
-**Four left: 3, 7, 8 and 10 — 40 images.** Manus's advanced models are free until
-**25 Aug 2026**. After that every one of them costs. Do not let the window close
-with three episodes unbanked; images keep, a free window does not.
+**One left: episode 10.** Everything else is either finished or in Manus right
+now. Manus's advanced models are free until **25 Aug 2026**.
+
+**Episode 8 was cut on 16 Aug at Jacques's call.** It is deleted, not shelved —
+do not offer to bring it back, do not re-pitch substances as a topic. The
+spiritual ground it covered is already held by episode 3.
+
+**Episode 10 was rewritten on 16 Aug.** It was a man alone with his phone
+(DEAN). It is now a **married couple**, where the phones are wrecking the
+communication and the intimacy. Same habit, entirely new film — the old
+version is gone.
 
 ---
 
@@ -41,79 +49,104 @@ The person using is never the villain and never let off. Every episode carries
 one line that says **they're not a bad person** and one that says **that's what
 makes it hard**. That pair is what people recognise and what no advert says.
 
-**Some are told from the inside** — doomscrolling, gaming, work, anger — because
-those have no witness. Nobody walks in on them. The only person who can find
-them is you. **The rest are told by the person who found out** — the parent, the
-wife — which is the Couples-series shape.
+**Some are told from the inside** — gaming, work, anger — because those have no
+witness. Nobody walks in on them. The only person who can find them is you.
+**The rest are told by the person who found out** — the parent, the wife —
+which is the Couples-series shape.
+
+**Episode 10 is the one that is neither**, and that is deliberate. She is
+married to it and doing it herself, so she is not a witness and she is not
+alone with it. Nobody found anything out, because nothing was hidden.
 
 ---
 
-# EPISODE 10 · The Hours — a man, doomscrolling
+# EPISODE 10 · Nothing Happened Tonight — a married couple, doomscrolling
 
-**Off the bench 14 Aug 2026.** Nia's episode became the spiritual one, so
-doomscrolling is his again. Unchanged from when it was written.
+**Rewritten 16 Aug 2026 at Jacques's call.** This slot used to be a man alone
+with his phone. It is now a marriage. Same habit, new film — the old one is
+gone, do not restore it.
 
-> **DEAN:** Black man, mid 40s, shaved head, broad shoulders, short beard going
-> grey at the chin, plain dark t-shirt.
+> **JUNE:** Filipina-American woman, late 30s, dark hair tied back loosely,
+> reading glasses, oversized sleep t-shirt and pyjama bottoms.
+> **PAUL:** her husband, white man, early 40s, stubble, thinning hair cut short,
+> plain t-shirt and lounge trousers.
+>
+> Both fully covered in every shot. This episode is about intimacy and there is
+> no nudity anywhere in it — no bare shoulders, no sheets-and-skin framing. The
+> whole point is two people fully dressed a foot apart, so dress them that way.
 
-**Doomscrolling's tell is time, and nothing else.** There is no smell, no
-receipt, no charge on a statement, nothing in the bin. Every other addiction
-leaves something behind for someone to find. This one leaves an empty evening.
-That's why the discovery has to come from a screen-time report — it's the only
-witness there is. Build the whole piece on that.
+**The tell is that nothing is wrong.** Every other habit hands the other person
+a grievance — you were drunk, you lied, you spent it, you weren't there. This
+one gives them nothing. Nobody cheated, nobody shouted, and both people were in
+the bed the whole time. Say it out loud and it sounds petty: *you were on your
+phone.* So nobody says it, and it runs for years.
 
-**SHOT 1** — `DEAN lying on his back on a sofa in a dark living room at night, phone held above his face, the screen the only light in the room, TV off`
-*"I wasn't doing anything bad."*
+**Both of them are doing it, and she says so.** She is not the wronged party
+reporting on him — that is the shape of every other couples episode and it is
+wrong here. She is describing a thing they are both inside, which is why the
+"not a bad person" line points at him **and** at her. That is the line nobody
+writes, and it is the one married people will recognise.
 
-**SHOT 2** — `Close on DEAN's face lit blue from below by a phone screen, eyes moving, expression flat, no reaction to anything he is seeing`
-*"That's what I kept telling myself."*
+**Intimacy is shown as distance, never as sex.** A hand that stops halfway. A
+foot of mattress. A charger cable in front of a wedding photo. Reaching for
+each other now means interrupting something, and that is the entire film.
 
-**SHOT 3** — `A wall clock in a dark room reading 1:40, the room otherwise unlit except for a glow from off-frame`
-*"I'd look up and two hours were gone."*
+**No outcome claims.** They do not fix their marriage. She puts a phone in a
+drawer and asks one question.
 
-**SHOT 4** — `Close on a phone screen showing a weekly screen time report, a bar chart, one bar much higher than the others, a thumb resting still on the glass`
-*"Then the phone told me the number."*
+**SHOT 1** — `JUNE and PAUL lying in bed at night, lights off, each holding a phone above them, two screens lighting two faces, a foot of empty mattress between them, both fully dressed in sleep clothes`
+*"Nothing happened tonight."*
 
-**SHOT 5** — `DEAN sitting up on the edge of the sofa in the dark, phone face-down on his knee, both hands over his mouth, staring at nothing`
-*"Seven hours a day. For a year."*
+**SHOT 2** — `Close on JUNE's face lit blue from below by a phone screen in the dark, eyes moving, no expression, not smiling at anything`
+*"That's the problem. Nothing happens."*
 
-**SHOT 6** — `A kitchen calendar on a wall with most days blank, one square circled and passed, morning light coming in from a window`
-*"That's a year of evenings."*
+**SHOT 3** — `Wide of the same bedroom seen from the doorway, both of them in bed, two small blue glows, the rest of the room black`
+*"There's nothing to be angry about. Nobody did anything."*
 
-**SHOT 7** — `A basketball sitting deflated in the corner of a garage behind a stack of boxes, dusty, untouched`
-*"I used to do things."*
+**SHOT 4** — `JUNE and PAUL eating dinner at a small kitchen table, both looking down at phones beside their plates, food between them going cold, evening light`
+*"We eat like two people waiting for a train."*
 
-**SHOT 8** — `DEAN standing at a kitchen counter in the morning, phone plugged in and face-down across the room from him, coffee in his hand, looking at it`
-*"I'm not a lazy man."*
+**SHOT 5** — `Close on JUNE's hand resting on the sheet in the empty space between them, stopped halfway, PAUL's turned back out of focus beyond it`
+*"I used to just reach over."*
 
-**SHOT 9** — `Close on DEAN's hand setting the phone down screen-first on a shelf in another room and drawing back, doorway visible beyond`
+**SHOT 6** — `A framed wedding photograph on a chest of drawers, the glass dusty, a coiled phone charger cable on the wood directly in front of it`
+*"Eleven years. We used to talk in the dark."*
+
+**SHOT 7** — `Close on two phones face-up and charging on two nightstands either side of a made bed in morning light, the bed empty`
+*"Now we say goodnight, and then we don't."*
+
+**SHOT 8** — `JUNE standing in a bathroom doorway at night with the light behind her, looking back toward the bed where PAUL's face is still lit blue`
+*"He's not ignoring me. I'm doing it too."*
+
+**SHOT 9** — `Close on JUNE sitting on the edge of the bed at night, phone face-down flat in her lap, both hands resting on top of it`
 *"That's what makes it hard."*
 
-**SHOT 10** — `DEAN sitting on his front steps in early evening light with no phone anywhere in frame, elbows on knees, looking out at the street`
-*"So I gave myself back one night."*
+**SHOT 10** — `JUNE and PAUL sitting up in bed with a lamp on, both phones face-down on the far nightstand out of reach, turned toward each other mid-conversation`
+*"So I put mine in a drawer and asked him about his day."*
 
-**YouTube:** The night my phone told me how much of my life I'd spent on it
-**TikTok:** I looked up and two hours were gone. Then the phone showed me the year.
+**YouTube:** Nothing is wrong in my marriage. That's the problem.
+**TikTok:** There's nothing to be angry about. Nobody did anything.
 
 ```
-1. 01_sofa       Still     5.0s  cut   I wasn't doing anything bad.
-2. 02_face       Zoom in   5.0s  cut   That's what I kept telling myself.
-3. 03_clock      Still     5.0s  cut   I'd look up and two hours were gone.
-4. 04_report     Zoom in   5.0s  cut   Then the phone told me the number.
-5. 05_handsup    Still     5.0s  cut   Seven hours a day. For a year.
-6. 06_calendar   Zoom in   5.0s  cut   That's a year of evenings.
-7. 07_ball       Still     5.0s  cut   I used to do things.
-8. 08_counter    Zoom in   5.0s  cut   I'm not a lazy man.
-9. 09_setdown    Still     5.0s  cut   That's what makes it hard.
-10. 10_steps     Zoom out  5.0s  cut   So I gave myself back one night.
-11. 99-free-end  Still     3.0s  cut
+1. 01_bed         Still     5.0s  cut   Nothing happened tonight.
+2. 02_face        Zoom in   5.0s  cut   That's the problem. Nothing happens.
+3. 03_doorway     Still     5.0s  cut   There's nothing to be angry about. Nobody did anything.
+4. 04_dinner      Zoom in   5.0s  cut   We eat like two people waiting for a train.
+5. 05_hand        Zoom in   5.0s  cut   I used to just reach over.
+6. 06_photo       Zoom in   5.0s  cut   Eleven years. We used to talk in the dark.
+7. 07_nightstands Still     5.0s  cut   Now we say goodnight, and then we don't.
+8. 08_bathroom    Still     5.0s  cut   He's not ignoring me. I'm doing it too.
+9. 09_edge        Still     5.0s  cut   That's what makes it hard.
+10. 10_lamp       Zoom out  5.0s  cut   So I put mine in a drawer and asked him about his day.
+11. 99-free-end   Still     3.0s  cut
 ```
 
-**Caption:** Doomscrolling doesn't leave anything behind. No bottles, no
-receipts, nothing for anyone to find. Just an evening that's gone and no memory
-of what was in it. I built a free app for the habits that don't look like
-anything. No card, no trial.
-`#doomscrolling #phoneaddiction #screentime #digitaldetox #recoverysupport`
+**Caption:** Nobody cheated. Nobody shouted. We were both in the bed the whole
+time — and that's exactly why neither of us can bring it up, because saying "you
+were on your phone" sounds like nothing. So it just runs for years. I built a
+free app for the habits that don't look like anything, and there's a section for
+couples. No card, no trial.
+`#marriage #phoneaddiction #doomscrolling #relationships #marriageproblems`
 
 ---
 
@@ -145,10 +178,11 @@ says outright that she is trans.** The earlier version deliberately never
 mentioned it. This one names it in shot 3, because a story that will not say
 what it is about cannot be found by the people it is for.
 
-**The turn is the opposite of Curtis's.** Episode 8 is a man who stopped showing
-up. She never stopped — **the room closed.** That distinction is the whole
-piece, and it is why the two spiritual episodes do not repeat each other: his
-guilt is that he left, hers is that she would still go.
+**The turn: she never stopped — the room closed.** Her guilt is not that she
+left; it is that she would still go. (This used to be framed against episode 8,
+a man who stopped showing up. That episode was cut on 16 Aug, so this is now the
+only spiritual one — it carries that ground alone and does not need the
+contrast.)
 
 **Alcohol, from the 13 in the app.** The app's own line for it is *"You weren't
 chasing a drink. You were chasing peace — the quiet that comes when you're not
@@ -176,8 +210,25 @@ be explained on screen.
 **SHOT 4** — `Close on NIA in a driver's seat, coat on, hands in her lap, watching something across the street, not moving to get out`
 *"I still park across the street some Sundays."*
 
-**SHOT 5** — `A childhood photograph held on a fridge by a magnet, a kid in Sunday clothes on a church step, slightly out of focus`
+**SHOT 5** — `A faded family snapshot held on a fridge door by a magnet, photographed straight on. In the snapshot: a young Black BOY, about seven, in his Sunday best — a small boy's suit jacket, buttoned shirt, little clip-on tie, short cropped hair — on a church step in bright sunlight, squinting slightly, arms at his sides. He is a boy: no dress, no braids, no hair clips or bows. The snapshot is slightly out of focus and small in frame, soft grain and warm cast of a late-1990s print; the fridge and kitchen around it are sharper than the photo itself`
 *"I know every word they're singing in there."*
+
+> ### ⚠ THE CHILD IN SHOT 5 IS A BOY. Say it three times or it comes back a girl.
+>
+> This read `a kid in Sunday clothes` and Manus rendered a little girl
+> (15 Aug 2026). One mention of a gender word loses to the generator's own
+> defaults, the same way one word of wardrobe lost to the reference photo above.
+> Hence **BOY** repeated, plus an explicit *no dress, no braids, no hair clips*.
+>
+> It is not a detail. The photograph is the before, and it is the only place in
+> the episode that shows it. Shot 3 says she transitioned at twenty-nine; this
+> is the child that sentence is about.
+>
+> **Keep the photo soft, small and off-centre, and the kitchen sharper than it
+> is.** Crisp and centred turns it into a reveal, and the shot stops being
+> something she lives beside. The caption never mentions it — *"I know every
+> word they're singing in there"* stays exactly as it is. Naming it out loud
+> flattens the whole thing.
 
 **SHOT 6** — `Close on a single empty glass in a kitchen sink in flat morning light, nothing else in the sink`
 *"What I was actually after was the quiet."*
@@ -288,100 +339,6 @@ afterwards, when you work out how organised the hiding was and how long you
 didn't notice. There's a whole section in my free app for the person who found
 out, not just the person who's using.
 `#parentingteens #vaping #quitsmoking #teenvaping #lovinganaddict`
-
----
-
-# EPISODE 8 · The Empty Chair — the spiritual one · **SUBSTANCES**
-
-> **CURTIS:** Black man, 50s, greying close beard, collared shirt with the
-> sleeves rolled, heavy hands, reading glasses in his breast pocket.
-
-**Addiction: Substances**, Jacques's pick. The app's own faith line for it is
-*"You wanted lifting out of yourself — transcendence, the old word for it.
-That's not a defect, it's the most human appetite there is."* That is the
-episode's whole argument, and it's the reason this pairs with the spiritual
-track better than any of the other twelve: the appetite underneath it was
-already a religious one. Film and app say one thing instead of two.
-
-> ### ⚠ NOTHING IS SHOWN. This is a hard rule, not a style note.
->
-> No pills, no powder, no needles, no paraphernalia, no use, no substance named
-> — not in a single frame, not blurred, not in the background. TikTok and Meta
-> remove content that depicts drugs, and being a recovery story is **not** an
-> exemption; it is the category their filters watch hardest. One prop ends this
-> episode's reach and can put a strike on the account.
->
-> The film is built entirely on **absence** — an empty chair, a dark hallway, a
-> dusty book, hands with nothing in them. That is not a workaround. It is the
-> truer version: what this actually looks like from the inside is rooms you
-> stopped going into, not anything anyone could photograph.
-
-**This matches the new onboarding question exactly** — the one that asks about
-stepping away, tied to whatever the person picked. So the film has to say the
-same thing the app says: *you didn't stop believing, you stopped showing up, and
-something moved into the space.* That order matters. It is not "you left God so
-you got punished." It is "a room went empty and something filled it."
-
-**Keep it open.** No denomination, no building named, no scripture quoted. Some
-people watching left a church, some left a sponsor, some left a father. The film
-works for all three only if it never gets specific.
-
-**No outcome claims. Nothing is fixed at the end** — he goes back and sits down,
-that's all.
-
-**SHOT 1** — `CURTIS sitting alone in a parked car outside a building at dusk, hands on the wheel, engine off, not getting out`
-*"I didn't stop believing."*
-
-**SHOT 2** — `Close on CURTIS's face through a car windscreen, evening light, looking toward something off-frame he isn't moving toward`
-*"I stopped showing up."*
-
-**SHOT 3** — `An empty wooden chair in a plain room with light coming through a window onto it, dust in the air`
-*"First it was one week. Something came up."*
-
-**SHOT 4** — `The same empty chair in the same room, now in flat grey daylight, everything slightly dustier, a jacket left over the back of it`
-*"Then it was a year."*
-
-**SHOT 5** — `CURTIS alone at a kitchen table at night, one lamp on, the table completely bare in front of him, the rest of the house dark and put away, his eyes on the middle distance`
-*"Something moves into a room you stop going into."*
-
-**SHOT 6** — `Close on CURTIS's open empty hands resting on a bare kitchen table, knuckles heavy, nothing else on the table at all`
-*"I wasn't chasing a feeling. I wanted lifting out of myself."*
-
-**SHOT 7** — `A worn book on a shelf with a bookmark still in it, a thin layer of dust on the top edge, warm lamp light`
-*"That's the oldest want there is. It just got answered wrong."*
-
-**SHOT 8** — `CURTIS standing in a doorway at first light, shirt untucked, looking out, hand on the frame`
-*"I'm not a faithless man. That was never the problem."*
-
-**SHOT 9** — `Wide of CURTIS walking alone along an ordinary street in early morning, buildings and parked cars, no destination visible, empty-handed`
-*"That's what makes it hard."*
-
-**SHOT 10** — `CURTIS sitting down in the same wooden chair from earlier, room now lit, jacket over the back, hands empty in his lap`
-*"So I went back and sat down."*
-
-**YouTube:** I didn't stop believing. I stopped showing up.
-**TikTok:** I wasn't chasing a feeling. I wanted lifting out of myself.
-
-```
-1. 01_car        Still     5.0s  cut   I didn't stop believing.
-2. 02_face       Zoom in   5.0s  cut   I stopped showing up.
-3. 03_chair      Still     5.0s  cut   First it was one week. Something came up.
-4. 04_chair2     Zoom in   5.0s  cut   Then it was a year.
-5. 05_table      Still     5.0s  cut   Something moves into a room you stop going into.
-6. 06_hands      Zoom in   5.0s  cut   I wasn't chasing a feeling. I wanted lifting out of myself.
-7. 07_book       Still     5.0s  cut   That's the oldest want there is. It just got answered wrong.
-8. 08_doorway    Zoom in   5.0s  cut   I'm not a faithless man. That was never the problem.
-9. 09_street     Still     5.0s  cut   That's what makes it hard.
-10. 10_sitdown   Zoom out  5.0s  cut   So I went back and sat down.
-11. 99-free-end  Still     3.0s  cut
-```
-
-**Caption:** Nobody wakes up and decides to walk away. You miss one week because
-something came up, then it's a year, and something has moved into the room you
-stopped going into. What I actually wanted was lifting out of myself — and
-that's the oldest want there is. It just got answered wrong. There's a spiritual
-track in my free app, and it asks that question before it asks anything else.
-`#recovery #faithandrecovery #spiritualrecovery #recoverysupport #sobriety`
 
 ---
 

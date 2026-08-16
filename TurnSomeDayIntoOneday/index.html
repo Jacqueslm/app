@@ -7257,7 +7257,29 @@ function laSeek(s){
   if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration){
     laAudio.currentTime=Math.min(Math.max(0,laAudio.duration-0.2),Math.max(0,laAudio.currentTime+s));
     updateLessonPlayerUI();
+    return;
   }
+  // TTS can't seek in time, but the queue IS the lesson split into sentences -
+  // "back" replays the sentence that's talking, "forward" skips it. Same
+  // promise as the recording skips: no pause, no start-over.
+  if(lessonAudioMode!=='tts'||lessonAudioState!=='playing'||laPausedByUser)return;
+  const len=lessonAudioQueue.length;
+  if(!len)return;
+  // While sentence N is talking, lessonAudioIdx===N+1 (it was incremented when
+  // the utterance was queued). Back targets N (replay it), forward targets N+1
+  // (skip the rest of the current one).
+  let idx;
+  if(s<0){
+    idx=Math.max(0,lessonAudioIdx-1);
+    if(idx===lessonAudioIdx)return; // nothing spoken yet - nowhere to go back to
+  }else{
+    idx=lessonAudioIdx;
+    if(idx>=len){stopLessonAudio();return;} // last sentence - skip ends the lesson
+  }
+  lessonAudioIdx=idx;
+  lessonAudioChunkStartedAt=Date.now();
+  try{speechSynthesis.cancel();}catch(e){}
+  lessonAudioNext();
 }
 function laSliderSeek(v){
   if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration)laAudio.currentTime=(v/1000)*laAudio.duration;
@@ -7328,10 +7350,25 @@ function updateLessonPlayerUI(){
   if(!lessonPlayerOpen)return;
   if(lessonAudioState!=='playing'){closeLessonPlayer();return;}
   const isMp3=lessonAudioMode==='mp3';
-  // TTS can't seek, so the scrubber row and skip buttons only show on recordings.
+  // The scrubber row stays recordings-only (TTS can't seek in time), but the
+  // skip buttons work in BOTH modes: ±15s on recordings, sentence-jump on TTS.
   const seekrow=document.getElementById('la-ov-seekrow');
   if(seekrow)seekrow.style.display=isMp3?'':'none';
-  ['la-ov-back','la-ov-fwd'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.visibility=isMp3?'visible':'hidden';});
+  const back=document.getElementById('la-ov-back');
+  const fwd=document.getElementById('la-ov-fwd');
+  if(back&&back.getAttribute('data-mode')!==lessonAudioMode){
+    back.setAttribute('data-mode',lessonAudioMode);
+    back.style.visibility='visible';
+    back.innerHTML=isMp3?'−15s':'<i class="ti ti-player-skip-back"></i>';
+    back.title=isMp3?'Back 15 seconds':'Back one sentence';
+  }
+  if(fwd&&fwd.getAttribute('data-mode')!==lessonAudioMode){
+    fwd.setAttribute('data-mode',lessonAudioMode);
+    fwd.style.visibility='visible';
+    fwd.innerHTML=isMp3?'+15s':'<i class="ti ti-player-skip-forward"></i>';
+    fwd.title=isMp3?'Forward 15 seconds':'Forward one sentence';
+  }
+  renderIcons();
   if(isMp3&&laAudio&&laAudio.duration){
     const sl=document.getElementById('la-ov-slider');
     if(sl&&document.activeElement!==sl)sl.value=Math.round(1000*laAudio.currentTime/laAudio.duration);

@@ -41,3 +41,36 @@ test('retentionCut handles unsorted input', () => {
   const names = ['studio-20260814-100000.sqlite', 'studio-20260813-100000.sqlite'];
   assert.deepStrictEqual(retentionCut(names, 1), ['studio-20260813-100000.sqlite']);
 });
+
+// The bug this file missed for months: snapshot() itself was never exercised,
+// only its filename helpers. db.exec was not exported from db.js, so EVERY
+// snapshot threw "db.exec is not a function" - including the silent one that
+// guards data.sqlite before an update. Exercise the real thing.
+test('snapshot() actually writes a database file', () => {
+  const fs = require('fs');
+  const os = require('os');
+  const path = require('path');
+  const { DatabaseSync } = require('node:sqlite');
+  const { snapshot } = require('../auto-backup');
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'snaptest-'));
+  const src = new DatabaseSync(path.join(tmp, 'src.sqlite'));
+  src.exec('CREATE TABLE t (a TEXT); INSERT INTO t VALUES (\'hello\')');
+
+  const dest = snapshot(src);
+  assert.ok(fs.existsSync(dest), 'snapshot file should exist on disk');
+  assert.ok(fs.statSync(dest).size > 0, 'snapshot should not be empty');
+
+  // and it must be a readable database carrying the data
+  const copy = new DatabaseSync(dest);
+  assert.strictEqual(copy.prepare('SELECT a FROM t').get().a, 'hello');
+  try { fs.unlinkSync(dest); } catch (_) {}
+});
+
+// The exact shape the callers use: server.js and studio.js both pass the db
+// MODULE, not the raw handle. If that stops working, backups die silently.
+test('snapshot works with the db module the real callers pass', () => {
+  const dbModule = require('../db');
+  assert.strictEqual(typeof dbModule.exec, 'function', 'db module must expose exec for auto-backup');
+  assert.ok(dbModule.raw, 'db module must expose the raw handle');
+});

@@ -5505,7 +5505,7 @@ router.post('/update', async (req, res) => {
   // Back up data.sqlite BEFORE the code overlay replaces the app - the one
   // snapshot that guards the files no update touches. Same rotating scheme as
   // the startup snapshot; never let it block an update.
-  try { require('./auto-backup').snapshot(db); } catch (_) {}
+  try { require('./auto-backup').snapshot(db); } catch (err) { try { db.logError('auto-backup', `pre-update snapshot failed: ${err.message}`); } catch (_) {} }
   const os = require('os');
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'tsid-update-'));
   // remember the current dependencies so we only run the slow npm install when

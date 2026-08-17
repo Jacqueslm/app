@@ -8,6 +8,84 @@ the $25 Play account fee, which you have already paid.
 
 ---
 
+## ⭐ 17 AUG 2026 — THE RELEASE BUILD (do this one now; everything below it is done history)
+
+Google granted production access on 15 Aug. Before pressing the final rollout
+button, one more build is needed: the test version of the app shell had
+**payments switched off** — people could install, but nobody could pay. The fix
+is already in the settings file; turning it into the app file (`.aab`) happens
+on your computer, because your signing key lives only there.
+
+**This one build also clears both Google deadlines** — no extension requests
+needed:
+- **31 Aug (Android 16):** already met — the app targets Android 16.
+- **29 Sep (Play Billing 8):** met by this build — the update step pulls the
+  current billing library automatically.
+
+### 1. Find your build folder
+The same folder from the first build — it contains `twa-manifest.json` and
+`android-upload.keystore`. If you can't remember where, search your PC in File
+Explorer for **android-upload.keystore**.
+
+### 2. Put the new settings file in it
+The repo is public, so you can download it straight from GitHub. Open:
+
+`https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/twa/twa-manifest.json`
+
+First rename the old file in your folder to `twa-manifest-old.json` (safety
+copy). Then save the page as **`twa-manifest.json`** into the folder
+(Ctrl+S — make sure the name is exactly that, not `.txt` on the end).
+
+*Or by hand:* open your `twa-manifest.json` in Notepad and make these say:
+`"appVersionName": "1.0.1"` · `"appVersionCode": 2` ·
+`"appVersion": "1.0.1"` ·
+`"features": { "playBilling": { "enabled": true } }` ·
+`"alphaDependencies": { "enabled": true }` — touch nothing else.
+
+### 3. Open a command window in that folder
+Click the folder's address bar in File Explorer, type `cmd`, press Enter.
+
+### 4. Build
+```
+bubblewrap update
+bubblewrap build
+```
+It asks for your keystore password — the one you wrote down when you made the
+key. (If it says bubblewrap isn't found, run `npm install -g @bubblewrap/cli`
+first, then try again.) Out comes a fresh **`app-release-bundle.aab`**.
+
+### 5. Upload — but do NOT roll out yet
+Play Console → **Test and release → Production → Create new release** → upload
+the new `.aab` (it should show version 1.0.1, code 2). Release notes: "First
+public release." Press **Save** and stop. The rollout button waits until
+step 8 — Google won't let you create the payment products until it has seen a
+build that contains billing, which is why the order matters.
+
+### 6. Create the three prices
+Play Console → **Monetize**:
+- **Subscriptions** → create ID `pro_monthly` — $9.99/month — add a **7-day
+  free trial** offer. Activate.
+- **Subscriptions** → create ID `pro_yearly` — $59.99/year. Activate.
+- **In-app products** → create ID `pro_lifetime` — $149.99 one-time. Activate.
+
+The IDs must be exactly those, letter for letter — they're what the app asks
+Google for.
+
+### 7. The payment-verification key (do this WITH the AI)
+The server never takes a phone's word that a purchase happened — it asks Google
+directly. For that, Railway needs one variable: `PLAY_SERVICE_ACCOUNT_JSON`.
+Setting it up is a 15-minute click-path through Google Cloud and Play Console.
+**When you reach this step, open a session and say "walk me through the payment
+service account"** — do it together, not from memory. Without this step, a
+person can pay Google and Pro won't unlock.
+
+### 8. Roll out
+Back to the saved release → **Review release → Start rollout to Production.**
+Managed publishing is off, so it goes live when Google approves. That click is
+the launch — it's yours.
+
+---
+
 ## Before anything else — two deadlines
 
 - **31 August 2026** — new apps must target Android 16 (API 36). The project I

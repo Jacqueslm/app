@@ -28,9 +28,10 @@ testing his candidates — the third guess worked. No key reset was ever filed.
   Variables tab this session). The USB "Json file google cloud" folder holds
   the backup copy (`day-one-play-ae2e16cba81b.json`). Do NOT walk him through
   creating a service account.
-- 🚀 **SUBMITTED — 17 Aug 2026, ~10:28am, seen on screen.** Publishing
-  overview shows "Changes in review" with item Production and Google's quick
-  pre-checks running ("sent for review as soon as checks complete"). Managed
+- 🚀 **IN REVIEW — confirmed 17 Aug 2026, 10:30am, on screen: "Your changes
+  are now in review."** Quick checks passed. Release is WORLDWIDE — Jacques
+  selected 176 countries + rest of world (that country selection was the
+  "1 Error" fix on the release page). Managed
   publishing OFF: approval = LIVE automatically. Awaiting Google's email —
   typically a few days for a first production release. The only follow-up
   once live: one test purchase on Jacques's phone (buy Pro, unlock, cancel).

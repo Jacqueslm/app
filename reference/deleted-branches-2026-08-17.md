@@ -1,14 +1,22 @@
-# Deleted branches — 17 Aug 2026
+# Branch cleanup — 17 Aug 2026
 
-Deleted as clutter. **Every one is recoverable**: a branch is just a pointer,
-and the commits survive. To bring one back:
+**STATUS: not deleted yet.** A Claude session cannot delete a remote branch here
+— GitHub returns 403 on `git push --delete` (the session's git credential is
+push-only) and the GitHub connector has no delete-branch tool. Jacques deletes
+these in the browser: **GitHub → the repo → Branches → the bin icon** on each
+row below. One minute, nine clicks.
+
+The nine below are verified safe: each was checked file-by-file and holds **no
+file that `main` does not already have**. Even after deletion every one is
+recoverable — a branch is only a pointer, the commits survive. To bring one
+back:
 ```
 git push origin <sha>:refs/heads/<branch-name>
 ```
 
 Each was verified to hold NO file that main does not already have.
 
-| branch | sha | last commit |
+| branch to delete | sha (for recovery) | last commit |
 |---|---|---|
 | `claude/app-qc-competitive-analysis-lehsn9` | `c3c2ba12ce3054dc1184158f70cfe78a73935577` | 2026-08-09 |
 | `claude/dayone-launch-fixes` | `5ab81b830dfbfd916439f37230817f062f5c5293` | 2026-07-21 |

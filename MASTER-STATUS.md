@@ -6,6 +6,26 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🚀 17 AUG 2026 — PLAY RELEASE SESSION HANDOFF (from the TWA/release session)
+
+**The app is IN GOOGLE REVIEW, worldwide, confirmed on screen.** Full detail in
+START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIST.md
+(top). The short version for this file:
+- 1.0.1 (2) built on Jacques's PC via `twa/Make-Play-App.bat`, signed with the
+  ORIGINAL key (found at `C:\dayone\...\twa\`, password recovered), uploaded,
+  submitted. Managed publishing OFF → approval = live automatically.
+- The build switches ON: Play Billing (was absent!), notifications
+  (`enableNotifications` true — the old FALSE was why pushes never reached his
+  phone), Android 16, Billing 8.
+- Play products (pro_monthly/yearly/lifetime) existed since 28 Jul;
+  `PLAY_SERVICE_ACCOUNT_JSON` already in Railway. Verified. Do not re-create.
+- Only follow-up once Google approves: test purchase on his phone. A daily
+  check-in Routine is armed in the release session — do not add another.
+- Do NOT re-ask: Android-16 extension (requested), key reset (never needed),
+  keystore location/password (he has it), country list (worldwide chosen).
+
+---
+
 ## 🛣 LANE SPLIT (two AI sessions, agreed Aug 16 2026)
 
 - **Recovery app AI (me):** `TurnSomeDayIntoOneday/` — the app (`index.html`), `server/`, `data/`, and the app's files. This is MY lane.

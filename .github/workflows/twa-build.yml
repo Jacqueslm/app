@@ -1,0 +1,61 @@
+# Builds the Play Store app shell (.aab) from TurnSomeDayIntoOneday/twa/
+# so nobody needs an Android toolchain on their own machine.
+#
+# Output is UNSIGNED on purpose: the signing key must never live in a public
+# repo. The unsigned bundle is pushed to the `twa-build` branch; a session
+# downloads it, signs it with Jacques's upload key, and hands him the file.
+name: Build the Play app (.aab)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Point bubblewrap at the runner's JDK and Android SDK
+        run: |
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME_17_X64" "$ANDROID_HOME" > ~/.bubblewrap/config.json
+          cat ~/.bubblewrap/config.json
+
+      - name: Regenerate the Android project (pulls current billing library)
+        working-directory: TurnSomeDayIntoOneday/twa
+        # --skipVersionUpgrade: CI has no keyboard; use the version already in
+        # twa-manifest.json (1.0.1 / code 2) instead of prompting for one.
+        run: bubblewrap update --skipVersionUpgrade
+
+      - name: Build unsigned bundle
+        working-directory: TurnSomeDayIntoOneday/twa
+        run: |
+          bubblewrap build --skipSigning --skipPwaValidation
+          ls -la *.aab *.apk 2>/dev/null || true
+
+      - name: Push the bundle to the twa-build branch
+        run: |
+          set -e
+          AAB=$(ls TurnSomeDayIntoOneday/twa/*.aab | head -1)
+          test -n "$AAB"
+          mkdir -p /tmp/out && cp "$AAB" /tmp/out/
+          cp TurnSomeDayIntoOneday/twa/twa-manifest.json /tmp/out/
+          cd /tmp/out
+          git init -q -b twa-build
+          git config user.name "twa-build"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -q -m "Unsigned .aab built from twa-manifest.json ($GITHUB_SHA)"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" twa-build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

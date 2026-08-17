@@ -19,9 +19,25 @@ Jacques has the password (told to write it into the USB "play key" note — it i
 NOT in this repo and never will be). The forgotten-password scare was solved by
 testing his candidates — the third guess worked. No key reset was ever filed.
 
-**REMAINING:** upload the new `.aab` (Production → Create new release → Save),
-create the three prices, set `PLAY_SERVICE_ACCOUNT_JSON` on Railway (do WITH a
-session), then Start rollout. Steps 5–8 below.
+**EVERYTHING IS STAGED (17 Aug, ~10:22am). Verified this session, do not re-do:**
+- 1.0.1 (2) `.aab` uploaded to Production, release notes in, saved. ✓
+- **All three products have existed since 28 JUL** — pro_monthly, pro_yearly
+  (Subscriptions, each 1 active base plan + 1 offer) and pro_lifetime
+  (One-time products, active). Do NOT create them again.
+- **`PLAY_SERVICE_ACCOUNT_JSON` is ALREADY SET in Railway** (seen in the
+  Variables tab this session). The USB "Json file google cloud" folder holds
+  the backup copy (`day-one-play-ae2e16cba81b.json`). Do NOT walk him through
+  creating a service account.
+- 🚀 **SUBMITTED — 17 Aug 2026, ~10:28am, seen on screen.** Publishing
+  overview shows "Changes in review" with item Production and Google's quick
+  pre-checks running ("sent for review as soon as checks complete"). Managed
+  publishing OFF: approval = LIVE automatically. Awaiting Google's email —
+  typically a few days for a first production release. The only follow-up
+  once live: one test purchase on Jacques's phone (buy Pro, unlock, cancel).
+  (Earlier this block flip-flopped: a premature SUBMITTED, then a NOT-YET —
+  this entry, with the screenshot evidence, is the accurate one.)
+- After it is live: one test purchase on his phone (buy Pro, see it unlock,
+  cancel) proves the till end-to-end.
 
 ## THE RELEASE BUILD — original walkthrough (steps 1–4 are done history)
 

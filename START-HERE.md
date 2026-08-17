@@ -63,6 +63,20 @@ Do not steer him off these; work with them:
 
 ---
 
+## 🚀 17 AUG 2026, 10:28am — PRODUCTION RELEASE IS IN REVIEW. CONFIRMED ON SCREEN.
+Publishing overview: "Changes in review", item Production, quick checks
+running, auto-sends to Google review on pass. Approval = live automatically
+(managed publishing off). Wait for Google's email; then one test purchase.
+
+The 1.0.1 (2) `.aab` — Play Billing ON, notifications ON (fixes phone
+reminders), Android 16, Billing 8 — is in Google review. Managed publishing is
+OFF, so approval = live worldwide, automatically. All three Play products have
+existed since 28 Jul; `PLAY_SERVICE_ACCOUNT_JSON` is already set in Railway.
+Full record: `TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` (top section — includes
+where the signing key lives and the reusable `Make-Play-App.bat`).
+**When Google's approval email arrives: one test purchase on his phone (buy
+Pro, see it unlock, cancel) proves the till. That is the only follow-up.**
+
 ## OPEN ITEMS — 14 Aug 2026
 
 One thing left, and it is not due until 19 Aug. Everything else is committed,

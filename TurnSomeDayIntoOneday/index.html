@@ -237,6 +237,9 @@ body.nova-open #guide-fab-label{display:none}
    narrated brightens, the rest stay dimmed. */
 #la-ov-text .la-para{margin:0 0 16px;transition:color 0.3s}
 #la-ov-text .la-para.on{color:var(--tp)}
+#la-ov-map .lm-row{display:flex;gap:10px;padding:5px 0;font-size:12.5px;line-height:1.5;border-bottom:0.5px solid var(--bdr)}
+#la-ov-map .lm-row:last-child{border-bottom:none}
+#la-ov-map .lm-k{flex:0 0 44px;color:var(--accent);font-weight:650;text-transform:uppercase;font-size:10.5px;letter-spacing:0.5px}
 body.nova-open #mini-player{bottom:216px}
 #guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
 #guide-panel.open{display:flex}
@@ -1862,6 +1865,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div onclick="closeLessonPlayer()" title="Back — keeps playing" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:10px;color:var(--tp)"><i class="ti ti-chevron-down"></i></div>
     </div>
+    <div id="la-ov-map" style="display:none;max-height:40vh;overflow-y:auto;margin:0 16px;border:1px solid var(--bdr);border-radius:12px;background:var(--s1);padding:10px 12px"></div>
     <div id="la-ov-text" style="flex:1;overflow-y:auto;padding:10px 18px 18px;font-size:16.5px;line-height:1.85;color:var(--tm)"></div>
     <div style="padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 14px);border-top:1px solid var(--bdr);background:var(--s1)">
       <div id="la-ov-seekrow">
@@ -2180,12 +2184,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- DAILY ACCOUNTABILITY CHECK-IN BANNER (free, shown once per day on app open) -->
 <div class="sos-modal" id="accountability-checkin-modal" onclick="if(event.target===this)dismissAccountabilityCheckin()">
   <div class="sos-sheet">
-    <div class="sos-title">Good to see you today</div>
-    <div class="sos-sub" style="margin-bottom:14px">How are you feeling about today, honestly?</div>
-    <div class="tc-wrap" style="margin-bottom:8px">
-      <div class="tc" onclick="answerAccountabilityCheckin('Good')">Good</div>
-      <div class="tc" onclick="answerAccountabilityCheckin('Shaky')">Shaky</div>
-      <div class="tc" onclick="answerAccountabilityCheckin('Struggling')">Struggling</div>
+    <div id="ac-step1">
+      <div class="sos-title">Good to see you today</div>
+      <div class="sos-sub" style="margin-bottom:14px">One tap — how's today, honestly?</div>
+      <div class="tc-wrap" style="margin-bottom:8px">
+        <div class="tc" onclick="answerAccountabilityCheckin('Good')">Good</div>
+        <div class="tc" onclick="answerAccountabilityCheckin('Shaky')">Shaky</div>
+        <div class="tc" onclick="answerAccountabilityCheckin('Struggling')">Struggling</div>
+      </div>
+    </div>
+    <div id="ac-step2" style="display:none">
+      <div class="sos-title">What's loudest right now?</div>
+      <div class="sos-sub" style="margin-bottom:14px">One more tap and we'll get you the right tool.</div>
+      <div class="tc-wrap" style="margin-bottom:8px">
+        <div class="tc" onclick="answerAccountabilityCheckin('Craving')">A craving</div>
+        <div class="tc" onclick="answerAccountabilityCheckin('Feelings')">My feelings</div>
+        <div class="tc" onclick="answerAccountabilityCheckin('Alone')">Lonely</div>
+      </div>
     </div>
     <button class="sos-close" onclick="dismissAccountabilityCheckin()">Skip for now</button>
   </div>
@@ -7314,12 +7329,39 @@ function cycleLessonVoice(){
 // ─── FULL-SCREEN LESSON PLAYER (read along big) ─────────────────────────────
 let lessonPlayerOpen=false,laParaCum=[],laUserScrolled=false,laUserScrollT=0;
 function laEsc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+// Who/Where for the lesson's "In 30 seconds" map, derived from the track so
+// every lesson answers all six questions without a rewrite of 500 lessons.
+function laMapWho(cat){
+  const c=String(cat||'').toLowerCase();
+  if(c.indexOf('pack:together')===0||c.indexOf('couples')>=0)return 'You and your partner';
+  if(c.indexOf('spiritual')>=0)return 'You — and what you believe in';
+  return 'You — and the people who love you';
+}
+function laMapWhere(cat){
+  const c=String(cat||'').toLowerCase();
+  if(c.indexOf('couples')>=0||c.indexOf('together')>=0)return 'In the conversations between you';
+  if(c.indexOf('spiritual')>=0)return 'In the quiet you usually fill';
+  return 'In the moment it hits — and the hour around it';
+}
 function openLessonPlayer(){
   if(lessonAudioState!=='playing')return;
   lessonPlayerOpen=true;laUserScrolled=false;
   const m=lessonAudioMeta||{};
   document.getElementById('la-ov-meta').textContent=m.category?`${m.category}${m.day?' — Day '+m.day:''}`:'Now playing';
   document.getElementById('la-ov-title').textContent=m.title||'Lesson';
+  // In 30 seconds: Who / What / Why / When / Where / How — surfaced up front so
+  // a user can orient instantly instead of reading the whole lesson blind.
+  const mapEl=document.getElementById('la-ov-map');
+  if(mapEl){
+    mapEl.style.display='';
+    mapEl.innerHTML=
+      '<div class="lm-row"><span class="lm-k">Who</span><span>'+laEsc(laMapWho(m.category))+'</span></div>'+
+      '<div class="lm-row"><span class="lm-k">What</span><span>'+laEsc(m.title||'This lesson')+'</span></div>'+
+      '<div class="lm-row"><span class="lm-k">Why</span><span>'+laEsc(m.reflection||'Because today is where the work lives.')+'</span></div>'+
+      '<div class="lm-row"><span class="lm-k">When</span><span>'+(m.day?('Day '+m.day):'Anytime')+'</span></div>'+
+      '<div class="lm-row"><span class="lm-k">Where</span><span>'+laEsc(laMapWhere(m.category))+'</span></div>'+
+      '<div class="lm-row"><span class="lm-k">How</span><span>'+laEsc(m.action||'Take one small next step today.')+'</span></div>';
+  }
   const holder=document.getElementById('la-ov-text');
   const paras=String(lessonAudioText||'').split(/\n\n+/).filter(p=>p.trim());
   holder.innerHTML=paras.map(p=>`<p class="la-para">${laEsc(p)}</p>`).join('');
@@ -7457,8 +7499,8 @@ function toggleLessonAudio(){
   if(action)text+="\n\nToday's action: "+action;
   if(reflect)text+='\n\nSomething to reflect on: '+reflect;
   const meta=lesson
-    ?{category:S.currentAddiction,day:lesson.day,variant:lessonVariantKey(lesson),title:lesson.title}
-    :{title};
+    ?{category:S.currentAddiction,day:lesson.day,variant:lessonVariantKey(lesson),title:lesson.title,action:action||lesson.action,reflection:reflect||lesson.reflection}
+    :{title,action:action||null,reflection:reflect||null};
   startLessonAudio(text,'lessonListenBtn',meta);
 }
 
@@ -7592,6 +7634,8 @@ function togglePackLessonAudio(){
     day:lesson?lesson.day:null,
     variant:'base',
     title:lesson?lesson.title:(meta?meta.title:'Lesson pack'),
+    action:lesson?lesson.action:null,
+    reflection:lesson?lesson.reflection:null,
   });
 }
 
@@ -7810,6 +7854,8 @@ function maybeShowAccountabilityCheckin(){
   if(!S.accountabilityRemindersEnabled)return;
   const today=new Date().toDateString();
   if(S.lastAccountabilityCheckinDate===today)return;
+  document.getElementById('ac-step1').style.display='';
+  document.getElementById('ac-step2').style.display='none';
   document.getElementById('accountability-checkin-modal').classList.add('open');
 }
 function dismissAccountabilityCheckin(){
@@ -7818,11 +7864,22 @@ function dismissAccountabilityCheckin(){
   document.getElementById('accountability-checkin-modal').classList.remove('open');
 }
 function answerAccountabilityCheckin(feeling){
-  dismissAccountabilityCheckin();
   if(feeling==='Struggling'){
-    novaNudge("Thanks for being honest about today — that's not nothing. Want to talk through it, or would a grounding tool help more right now?");
-  }else if(feeling==='Shaky'){
+    // One more tap, not a lecture: someone expressing a hard emotion has more
+    // to say, so give the feeling a name and route to the tool that matches it.
+    document.getElementById('ac-step1').style.display='none';
+    document.getElementById('ac-step2').style.display='';
+    return;
+  }
+  dismissAccountabilityCheckin();
+  if(feeling==='Shaky'){
     novaNudge("Shaky days are still days you're showing up for. I'm here if you want to talk through what's making it feel that way.");
+  }else if(feeling==='Craving'){
+    novaNudge("A craving is a wave, not a wall — it rises and it passes. Want to ride it out with the urge-surf timer, or talk it down with me first?");
+  }else if(feeling==='Feelings'){
+    novaNudge("Getting it out helps more than holding it in. Want to write it down in your journal, or talk it through with me right now?");
+  }else if(feeling==='Alone'){
+    novaNudge("You're not alone in this — not right now, because I'm right here. Want to talk, or would the breathing room help you feel steadier first?");
   }else{
     novaNudge("Good to hear. Keep noticing what's working today — it's worth remembering on the harder ones.");
   }
@@ -8621,6 +8678,33 @@ function buildSystemPrompt(){
   return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
 }
 
+// What Friendly already knows about this person: recent journal entries,
+// craving levels, and any slips in the last week. Fed to the AI every turn and
+// lightly referenced by the offline fallback so she sounds like she remembers.
+function buildMemoryBlock(){
+  const j=(S.journals||[]).slice(-3);
+  const c=(S.cravings||[]).slice(-5);
+  const wk=7*86400000;
+  const recent=(S.activityLog||[]).filter(a=>a&&a.ts&&(Date.now()-new Date(a.ts).getTime())<wk);
+  if(!j.length&&!c.length&&!recent.length)return 'No journal or check-in history yet — this person is new. Be warm and keep it simple.';
+  const parts=[];
+  if(j.length)parts.push('Recent journal entries: '+j.map(x=>`${(x.date||'').slice(0,10)} (${x.moodLabel||'mood'}): ${(x.body||'').slice(0,140)}`).join(' | '));
+  if(c.length)parts.push('Recent cravings (0-10): '+c.map(x=>`${x.val}${x.trigger?(' ('+x.trigger+')'):''}`).join(', '));
+  const slips=recent.filter(a=>a.type==='slip_reported'||a.type==='relapse_reset').length;
+  if(slips)parts.push(`Slip/reset event(s) in the last 7 days: ${slips} — be gentle, never shaming.`);
+  return 'What Friendly already knows about this person (weave it in naturally, never dump it back as a list):\n'+parts.join('\n');
+}
+function withMemory(reply){
+  if(!reply||reply.indexOf('988')!==-1)return reply; // the crisis line stays identical, always
+  const j=(S.journals||[]).filter(x=>x&&x.date);
+  if(!j.length)return reply;
+  const last=j[j.length-1];
+  const days=Math.round((Date.now()-new Date(last.date).getTime())/86400000);
+  if(days<0||days>3)return reply;
+  const when=days===0?'today':days===1?'yesterday':`${days} days ago`;
+  const snippet=String(last.body||'').slice(0,80);
+  return `You journaled ${when}: "${snippet}${(last.body||'').length>80?'…':''}" — I'm keeping that in mind.\n\n${reply}`;
+}
 // ─── LOCAL FALLBACK (used when /api/chat is unreachable or unconfigured) ─────
 const CRISIS_LINE="988 Suicide & Crisis Lifeline — call or text 988, free and confidential, 24/7.";
 // Not persisted on purpose - chatHistory itself resets on every app load (see load()),
@@ -9181,7 +9265,8 @@ Address the interactions of their unique blueprint and assign structured daily r
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({system:[
         {type:'text',text:buildSystemPrompt()},
-        {type:'text',text:profileBlock,cache_control:{type:'ephemeral'}}
+        {type:'text',text:profileBlock,cache_control:{type:'ephemeral'}},
+        {type:'text',text:buildMemoryBlock(),cache_control:{type:'ephemeral'}}
       ],messages:msgs})
     });
     if(res.status===429){
@@ -9199,7 +9284,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     if(!res.ok)throw new Error('api-unavailable');
     const data=await res.json();
     const liveText=data.content&&data.content[0]&&data.content[0].text;
-    const reply=liveText||localFallbackReply(text);
+    const reply=liveText||withMemory(localFallbackReply(text));
     setNovaMode(!!liveText);
     // A real AI reply consumed one of the day's chats server-side - refresh the
     // Pro meter so it ticks down live. (Guided-mode fallbacks don't count.)

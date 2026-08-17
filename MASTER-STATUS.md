@@ -64,6 +64,7 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
    - Sonnet 5 (Anthropic): best quality, ~$0.63/day at 30 Pro chats/day ≈ **$19/mo at heavy use**.
    - Gemini 2.5 Flash (Google): **free tier** (~1,500 requests/day), ~$0.07/day at the same load ≈ **$2/mo**. Good enough, ~15× cheaper.
    - Recommendation: start **Gemini** (free), switch to Sonnet when quality matters more than $17/mo.
+   - **DONE (Aug 17):** Gemini key rotated after it was exposed in a transcript. `GEMINI_API_KEY` is set.
 2. **`APP_UPDATE_TOKEN`** → **NO LONGER NEEDED (Aug 16): Jacques made the repo PUBLIC again at his request.** A public repo needs no token — in-app updates and the recorded voices work again with zero setup. If the repo ever goes private again, the steps are: GitHub fine-grained PAT with **Contents: read** on `Jacqueslm/app` → paste in the app's Settings → GitHub token (owner-only), or `server/.env` on a local install.
 3. **`APP_OWNER_EMAIL=turnsomedayintodayone@gmail.com`** → `server/.env` → only your email can trigger the update button (already coded; without it the update button refuses to work for everyone, by design).
 
@@ -108,3 +109,4 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 12. No screenshot blocking, no hard IP blocking — decided no, don't re-add.
 13. **LANE SPLIT:** recovery-app AI owns `TurnSomeDayIntoOneday/`; Studio AI owns `Studio/`, `reference/`, `START-HERE.md`. Don't edit the other lane.
 14. **Token lives in BOTH servers' envs:** `Studio/server/.env` AND `TurnSomeDayIntoOneday/server/.env` each need `APP_UPDATE_TOKEN` — the recovery app runs on Railway, so that one goes in Railway's env vars. Owner email `APP_OWNER_EMAIL` too. (As of Aug 16 the repo is PUBLIC again, so no token is currently needed.)
+15. **Railway auto-deploys on push to `claude/vibe-code-uwxxlk`** (Aug 17, Jacques's correction) — do NOT ask Jacques to redeploy Railway. It watches the branch and deploys itself. "Still broken on the phone" means the fix isn't on `origin/claude/vibe-code-uwxxlk` yet, not that a redeploy is pending.

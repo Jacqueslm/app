@@ -26,6 +26,14 @@ with older tools, so Google flagged it and offered an extension:
 - **29 Sep (Play Billing 8):** no extension exists, but this build clears it —
   the update step pulls the current billing library automatically.
 
+### ⭐ FOUND 17 Aug 2026 — the key and the build workshop live at `C:\dayone`
+`C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa\` holds
+`android-upload.keystore` (made 27 Jul), the closed-testing `app-release-bundle.aab`,
+and the whole gradle project. The copy under Documents is a second download with
+no key in it — do not be fooled by it again. The USB "play key" note is a
+path to this folder; the password hunt continues in the "google key" note.
+**The upload-key reset was never needed and was not submitted.**
+
 ### 1. Find your build folder
 The same folder from the first build — it contains `twa-manifest.json` and
 `android-upload.keystore`. If you can't remember where, search your PC in File

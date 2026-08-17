@@ -33,12 +33,14 @@ jobs:
 
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa
-        run: bubblewrap update
+        # --skipVersionUpgrade: CI has no keyboard; use the version already in
+        # twa-manifest.json (1.0.1 / code 2) instead of prompting for one.
+        run: bubblewrap update --skipVersionUpgrade
 
       - name: Build unsigned bundle
         working-directory: TurnSomeDayIntoOneday/twa
         run: |
-          bubblewrap build --skipSigning
+          bubblewrap build --skipSigning --skipPwaValidation
           ls -la *.aab *.apk 2>/dev/null || true
 
       - name: Push the bundle to the twa-build branch

@@ -16,11 +16,14 @@ button, one more build is needed: the test version of the app shell had
 is already in the settings file; turning it into the app file (`.aab`) happens
 on your computer, because your signing key lives only there.
 
-**This one build also clears both Google deadlines** — no extension requests
-needed:
-- **31 Aug (Android 16):** already met — the app targets Android 16.
-- **29 Sep (Play Billing 8):** met by this build — the update step pulls the
-  current billing library automatically.
+**The two Google deadlines, corrected 17 Aug — Jacques's console is the truth,
+not the repo's settings file.** The `.aab` uploaded for closed testing was built
+with older tools, so Google flagged it and offered an extension:
+- **31 Aug (Android 16): TAKE THE EXTENSION Google is offering** — free, one
+  form, moves the date to **1 Nov**. Then this build clears it for real: the
+  update step pulls Google's current tools, which target Android 16.
+- **29 Sep (Play Billing 8):** no extension exists, but this build clears it —
+  the update step pulls the current billing library automatically.
 
 ### 1. Find your build folder
 The same folder from the first build — it contains `twa-manifest.json` and

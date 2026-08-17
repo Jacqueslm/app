@@ -63,6 +63,78 @@ Do not steer him off these; work with them:
 
 ---
 
+## 🚀 17 AUG 2026 — THE APP IS IN GOOGLE REVIEW, WORLDWIDE. FULL SESSION HANDOFF.
+
+**Read this block before doing ANYTHING Play-related. Every item is verified
+on-screen or in-repo this session. Do not re-do, re-check, or re-ask any of it.**
+
+**The release:** Production 1.0.1 (versionCode 2) submitted 17 Aug, confirmed
+10:30am on Publishing overview: *"Your changes are now in review."* Set to
+release in **176 countries + rest of world**. **Managed publishing is OFF →
+Google approval = LIVE automatically**, no further click. Next event is
+Google's email (first production review typically takes days).
+- **When approved:** the ONLY follow-up is a test purchase on Jacques's phone
+  (install from Play, buy Pro, watch it unlock, cancel). Then record LIVE here.
+- **If rejected:** get the email text and fix from there.
+- **A daily check-in Routine is armed in the Play-release session**
+  (trigger `trig_01GRVwbDm66yN8joftU5hPxC`, fires ~10:30am daily until
+  resolved). Do NOT create a second reminder.
+
+**What the new build contains** (all four in one .aab): Play Billing ON
+(the closed-testing shell had NO billing library — it could never take money),
+`enableNotifications` TRUE (bubblewrap requires it for billing; also the
+long-standing reason push reminders never reached his phone), target Android
+16 (31 Aug rule — his extension to 1 Nov is ALSO already requested, never
+re-ask), Play Billing 8 library (29 Sep rule). Versions: 1.0.0/1 → 1.0.1/2.
+
+**How releases get built from now on:** `TurnSomeDayIntoOneday/twa/`
+**`Make-Play-App.bat`** — Jacques copies it into his build folder and
+double-clicks; it fetches the manifest from GitHub, updates bubblewrap, builds.
+His build workshop is **`C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa\`**
+(NOT the copy under Documents — that one has no key). `android-upload.keystore`
+lives there; Jacques knows the password (found on his 3rd guess this session;
+told to write it into the USB "play key" note). **The keystore and password
+never go in this repo. The upload-key reset was never filed — do not file one.**
+
+**Play money plumbing — ALL PRE-EXISTING since 28 Jul, verified this session:**
+pro_monthly + pro_yearly (Subscriptions, active, 1 offer each) and pro_lifetime
+(One-time products, active) already exist in Play Console;
+`PLAY_SERVICE_ACCOUNT_JSON` is already set in Railway (seen in Variables tab);
+backup key JSON on his USB (`Json file google cloud/day-one-play-ae2e16cba81b.json`).
+The server refuses to open the payment sheet until verification is configured,
+so no user can ever pay and get nothing.
+
+**Also done this session, non-Play:**
+- **Branches reconciled:** `main` == deploy (`claude/vibe-code-uwxxlk`) ==
+  `claude/status-update-rwf7zx` were made tree-identical; today's Play work is
+  on main + deploy. If working on `status-update-rwf7zx`, MERGE MAIN FIRST.
+- **Three projects rescued onto `main`** from dying session branches (only
+  copies anywhere): `Trading/` (+ `.claude/agents/trade-checker.md`),
+  `TradeDesk/`, `LeadCatch/`. Secret-scanned clean before push.
+- **Branch cleanup:** 9 branches verified safe to delete (Jacques's browser
+  clicks — sessions get 403 on branch deletion); SHAs + the one KEEP branch
+  (`claude/new-session-r8s2fg`, old-spelling app folder) in
+  `reference/deleted-branches-2026-08-17.md`.
+- **CI:** `.github/workflows/twa-build.yml` exists but is PARKED (3 failed
+  runs; bubblewrap rejects the runner's SDK path — unresolved, superseded by
+  the local bat). CodeQL runs on pushes to main; one job failed on today's
+  push, unexamined — worth one look, likely the new Trading/ C# code.
+- **GitHub/Google failure emails:** Jacques gets them because it's his repo
+  and his console; sessions read and fix them. He does not need to act on them.
+
+**Still owed elsewhere (not this session's lane):** Monday routine
+(`/admin/stats` + Buffer fill); episodes 3, 7, 8, 10 need images before Manus
+goes paid **25 Aug**; NASADAD chase opens **19 Aug**.
+
+The 1.0.1 (2) `.aab` — Play Billing ON, notifications ON (fixes phone
+reminders), Android 16, Billing 8 — is in Google review. Managed publishing is
+OFF, so approval = live worldwide, automatically. All three Play products have
+existed since 28 Jul; `PLAY_SERVICE_ACCOUNT_JSON` is already set in Railway.
+Full record: `TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` (top section — includes
+where the signing key lives and the reusable `Make-Play-App.bat`).
+**When Google's approval email arrives: one test purchase on his phone (buy
+Pro, see it unlock, cancel) proves the till. That is the only follow-up.**
+
 ## OPEN ITEMS — 14 Aug 2026
 
 One thing left, and it is not due until 19 Aug. Everything else is committed,
@@ -98,7 +170,15 @@ in Play Console — just wait for Google's email.**
 
 **Two calendar dates (15 Aug):** **25 Aug** — Manus goes paid; episodes 3, 7,
 8, 10 still need images before then. **29 Sep** — Play Billing 8 rebuild
-(Google deadline); not now. Manus's ffmpeg renderer and its recipe README are
+(Google deadline); not now.
+
+**Android 16 target deadline — EXTENSION ALREADY REQUESTED by Jacques
+(confirmed by him 17 Aug 2026). His deadline is 1 Nov, not 31 Aug. Do NOT tell
+him to request it, do NOT re-verify it.** The closed-testing `.aab` was built
+with older tools (the repo's manifest saying 36 is not what Google judges —
+the uploaded file is). The 17 Aug release build in
+`TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` clears it for real, plus Play
+Billing 8, plus switches payments on — one build, all three. Manus's ffmpeg renderer and its recipe README are
 saved verbatim at `reference/manus-recipes/` — its three look numbers are
 verified in `scripts/assemble_nia_video.py`: 2% zoom, captions `0xF4F0E8` on
 black at 60%, fades 0.5s in / 0.35s out. Studio's 2% "Almost still" port is

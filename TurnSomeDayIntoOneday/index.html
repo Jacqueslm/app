@@ -822,7 +822,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="mopt" onclick="selJourMood(this,'🌟','Amazing')">🌟<span>Amazing</span></div>
           </div>
           <div id="jour-promood-row-wrap" style="display:none">
-            <div style="font-size:12px;color:var(--tm);margin-bottom:8px">More specifically <span class="badge badge-acc" style="margin-left:2px">Pro</span></div>
+            <div style="font-size:12px;color:var(--tm);margin-bottom:8px">More specifically</div>
             <div class="tc-wrap" id="jour-promood-row" style="margin-bottom:12px">
               <div class="tc" onclick="selJourProMood(this,'calm')">Calm</div>
               <div class="tc" onclick="selJourProMood(this,'stressed')">Stressed</div>
@@ -858,7 +858,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div id="jour-insights-pro" style="display:none"></div>
         <div id="jour-insights-free" style="display:none;background:var(--s1);border:0.5px dashed var(--bdr2);border-radius:12px;padding:14px;margin-bottom:14px;cursor:pointer;text-align:center;color:var(--ts);font-size:12.5px" onclick="openProTool('proJournal')">
-          Friendly Pro insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
+          Friendly insights — emotional trends and patterns from your own entries — are part of <span style="color:var(--accent);font-weight:500">Pro</span>
         </div>
         <div id="journalList"></div>
       </div>
@@ -1167,7 +1167,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
       </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Advanced Pro tools</div>
+        <div class="sec-hd">Advanced tools</div>
         <div class="setting-row" onclick="openProTool('urgeSurf')">
           <i class="ti ti-clock" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Urge Surfing Timer</p><span>Guided countdown to ride out an urge</span></div>
@@ -1325,7 +1325,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p id="toolkit-row-title">Recovery Toolkit</p><span id="toolkit-row-sub">Grounding, "I'm triggered", "I slipped" — plus advanced Pro tools</span></div>
+        <div class="setting-row-txt"><p id="toolkit-row-title">Recovery Toolkit</p><span id="toolkit-row-sub">Grounding, "I'm triggered", "I slipped" — plus advanced tools</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="tools-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
@@ -1347,7 +1347,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Journal</div></div>
       <div class="setting-row" onclick="switchTo('journal');actBn('bn-tools')">
         <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1486,17 +1486,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:12.5px;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">If you want deeper support, you can unlock the full program with Pro. There's no pressure either way — every core recovery tool stays free.</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds two things: the second half of your program — Days 16–30 — and 30 Friendly chats a day instead of 3. There's no pressure either way.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Unlock Days 16–30</div>
-          <div>✓ Friendly Pro coaching (30 chats/day)</div>
-          <div id="plans-pro-together">✓ Together — couples exercises &amp; partner self-check</div>
-          <div>✓ Urge Surfing, Panic Mode &amp; Emergency Plan</div>
-          <div>✓ Weekly reports &amp; analytics</div>
-          <div>✓ Smart reminders</div>
-          <div>✓ Pro journal &amp; guided prompts</div>
-          <div>✓ Advanced streaks &amp; Habit Coach</div>
-          <div>✓ Custom lesson packs</div>
+          <div>✓ Days 16–30 of every track and pack</div>
+          <div>✓ 30 Friendly chats a day instead of 3</div>
+          <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
         <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:var(--ts);border-color:var(--bdr)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
@@ -1516,7 +1510,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Basic Friendly (3 chats/day)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Friendly, 3 chats a day</div>
+            <div class="feat y"><i class="ti ti-check"></i>Every tool: Urge Surfing, Panic Mode &amp; Emergency Plan</div>
+            <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
+            <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
+            <div class="feat y"><i class="ti ti-check"></i>Guided journal prompts &amp; insights</div>
+            <div class="feat y"><i class="ti ti-check"></i>Advanced streaks &amp; Build Your Own Pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Together for couples &amp; partner self-check (Days 1–15)</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
@@ -1537,18 +1537,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
           <div style="font-size:11.5px;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
           <div class="fl">
-            <div class="feat y"><i class="ti ti-check"></i>Everything in Free</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>30 Friendly AI chats/day</div>
-            <div class="feat y"><i class="ti ti-check"></i>Together for couples — guided exercises &amp; partner self-check</div>
-            <div class="feat y"><i class="ti ti-check"></i>Urge Surfing timer, Panic Mode &amp; Emergency Plan</div>
-            <div class="feat y"><i class="ti ti-check"></i>Recovery scripts &amp; distraction tools</div>
-            <div class="feat y"><i class="ti ti-check"></i>Weekly reports</div>
-            <div class="feat y"><i class="ti ti-check"></i>Smart reminders</div>
-            <div class="feat y"><i class="ti ti-check"></i>Pro journal &amp; guided prompts</div>
-            <div class="feat y"><i class="ti ti-check"></i>Advanced streak system &amp; Habit Coach</div>
-            <div class="feat y"><i class="ti ti-check"></i>Analytics, emotional trends &amp; pattern detection</div>
-            <div class="feat y"><i class="ti ti-check"></i>Custom lesson packs &amp; Build Your Own Pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of every track and pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
+            <div class="feat y"><i class="ti ti-check"></i>30 Friendly chats a day instead of 3</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
           </div>
           <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
@@ -1560,7 +1552,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every core recovery tool is free, always. Upgrade for up to 30 chats a day with Friendly.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30 and 30 Friendly chats a day.</div>
     </div>
 
     <!-- PROFILE -->
@@ -3107,7 +3099,7 @@ function advanceAfterLessonDone(){
 
 // ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
 function novaDay15Message(){
-  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. If you want me to guide you through the rest of the journey, you can unlock the full program with Pro.";
+  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. If you want me to guide you through the rest of the journey, you can unlock Days 16-30 with Pro.";
 }
 function openDay15Overlay(){
   document.getElementById('day15-nova-msg').textContent=novaDay15Message();
@@ -3615,7 +3607,7 @@ function discussPackLessonWithNova(){
 // Build Your Own Pack wizard
 let wizardFocusSel=[];
 function openBuildPackWizard(){
-  if(!S.isPro){showProToolPreview('buildOwnPack');return;}
+  // Free for everyone (17 Aug 2026).
   wizardFocusSel=[];
   document.getElementById('wiz-pack-name').value='';
   document.querySelectorAll('#wiz-length-wrap .tc').forEach(c=>c.classList.remove('sel'));
@@ -4105,7 +4097,11 @@ function buildBehavioralStep(){
     htmlBlock+=`</div>`;
     container.innerHTML+=htmlBlock;
   });
-  obNext(2);
+  // NO obNext(2) here. obNext(2) calls this function on the way in, so calling
+  // it back from here is infinite recursion - "Maximum call stack size
+  // exceeded" thrown inside the Continue handler, which silently froze the
+  // spiritual question (obs1_5) and made onboarding impossible to finish.
+  // This function BUILDS the questions; obNext does the navigating.
 }
 
 function showVoiceStep(){
@@ -4293,6 +4289,11 @@ function closeMeditation(){
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
+  // The faith choice has to survive a reload. chooseFaith() paints this card at
+  // the moment of choosing, but nothing repainted it at boot - so the card the
+  // spiritual question promises quietly vanished on the next app open, which
+  // read as "the God thing doesn't work."
+  updateHomeFaithCard();
   handleCheckoutReturn();
   syncBillingStatus(true);
   document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
@@ -4688,7 +4689,7 @@ function editJournalEntry(idx){
     const catOpt=[...document.querySelectorAll('#jour-category-row .tc')].find(c=>c.textContent.trim()===j.category);
     if(catOpt){catOpt.classList.add('sel');jourCategorySel=j.category;}
   }
-  if(j.proMood&&S.isPro){
+  if(j.proMood){
     const pmOpt=[...document.querySelectorAll('#jour-promood-row .tc')].find(c=>c.textContent.trim()===PRO_MOOD_LABELS[j.proMood]);
     if(pmOpt){pmOpt.classList.add('sel');jourProMoodSel=j.proMood;}
   }
@@ -4721,7 +4722,8 @@ function updateJourFormProUI(){
   const promoodWrap=document.getElementById('jour-promood-row-wrap');
   const promptPro=document.getElementById('jour-prompt-pro');
   const promptFree=document.getElementById('jour-prompt-free');
-  if(S.isPro){
+  // Guided prompts and mood tags are free now (17 Aug 2026).
+  if(true){
     promoodWrap.style.display='block';
     promptFree.style.display='none';
     const prompt=getGuidedPrompt();
@@ -4751,17 +4753,15 @@ function saveEntry(){
     existing.body=txt;
     existing.mood=jourMoodSel;existing.moodLabel=jourMoodLabel;
     existing.category=jourCategorySel||'';
-    if(S.isPro)existing.proMood=jourProMoodSel||'';
+    existing.proMood=jourProMoodSel||'';
     existing.editedAt=new Date().toISOString();
     save();
     renderJournal();closeJour();
     return;
   }
   const entry={date:new Date().toISOString(),mood:jourMoodSel,moodLabel:jourMoodLabel,title,body:txt,category:jourCategorySel||''};
-  if(S.isPro){
-    entry.proMood=jourProMoodSel||'';
-    if(jourPromptShown)entry.promptUsed=jourPromptShown;
-  }
+  entry.proMood=jourProMoodSel||'';
+  if(jourPromptShown)entry.promptUsed=jourPromptShown;
   S.journals.unshift(entry);
   jourDraftClear(); // the entry is saved for real now - the draft has done its job
   logActivity('journal',{moodLabel:jourMoodLabel});
@@ -4773,8 +4773,7 @@ function saveEntry(){
   renderJournal();closeJour();
   if(isFirstEntry)novaNudge("First journal entry — that's a real step, and it's saved for good.");
   if(txt.length>=150){
-    maybeNovaProNudge("Thank you for writing something that real. If you'd like help unpacking it further, that's something Friendly Pro can go deeper on with you — I'm always here either way.");
-    if(S.isPro)novaNudge(buildHabitReinforcement());
+    novaNudge(buildHabitReinforcement());
   }
 }
 function renderJournal(){
@@ -4927,11 +4926,7 @@ function renderJournalInsights(){
   const proBox=document.getElementById('jour-insights-pro');
   const freeBox=document.getElementById('jour-insights-free');
   if(!proBox||!freeBox)return;
-  if(!S.isPro){
-    proBox.style.display='none';
-    freeBox.style.display='block';
-    return;
-  }
+  // Insights are free now (17 Aug 2026).
   freeBox.style.display='none';
   if(!(S.journals||[]).length){proBox.style.display='none';return;}
   proBox.style.display='block';
@@ -5063,7 +5058,7 @@ function buildStreakHistoryList(){
 
 // Pro milestone celebration
 function maybeShowProMilestoneCelebration(days){
-  if(!S.isPro)return;
+  // Free for everyone (17 Aug 2026).
   if(!PRO_MILESTONE_DAYS.includes(days))return;
   // Base milestone days already celebrate for everyone in updateStats; the Pro
   // path only adds days the free milestone list doesn't cover (e.g. day 21).
@@ -5610,7 +5605,7 @@ function discussHabitsWithNova(){
 // Missed-lesson (Pro) + weekly consistency check-in share one daily cap so habit
 // coaching never stacks into more than one nudge per day - stays supportive, not naggy.
 function maybeShowMissedLessonHabitCoaching(){
-  if(!S.isPro)return;
+  // Free for everyone (17 Aug 2026).
   const today=new Date().toDateString();
   if(S.lastHabitAlertDate===today)return;
   const lessonEvents=(S.activityLog||[]).filter(a=>a.type==='lesson_completed');
@@ -5634,7 +5629,7 @@ function buildHabitAlertMessage(){
   return null;
 }
 function maybeShowHabitAlert(){
-  if(!S.isPro)return;
+  // Free for everyone (17 Aug 2026).
   const today=new Date().toDateString();
   if(S.lastHabitAlertDate===today)return;
   const msg=buildHabitAlertMessage();
@@ -5651,7 +5646,7 @@ function buildHabitRebuildPlan(priorStreakLength){
   return `Let's rebuild your routine from here. ${coaching.weakSpot} One small habit to restart with: ${coaching.suggestion}`;
 }
 function maybeShowHabitCelebration(days){
-  if(!S.isPro)return;
+  // Free for everyone (17 Aug 2026).
   if(!HABIT_CELEBRATION_DAYS.includes(days))return;
   S.notifiedHabitCelebrations=S.notifiedHabitCelebrations||[];
   if(S.notifiedHabitCelebrations.includes(days))return;
@@ -5982,7 +5977,7 @@ function logCraving(){
   S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
   logActivity('craving',{trigger,val:v});
   let habitSuggestionNudge=null;
-  if(S.isPro&&/stress|loneliness/i.test(trigger)){
+  if(/stress|loneliness/i.test(trigger)){
     const today=new Date().toDateString();
     if(S.lastHabitAlertDate!==today){
       S.lastHabitAlertDate=today;
@@ -6414,7 +6409,7 @@ const SUPPORTER_TEXT={
   'sos-sheet-sub':'This feeling will pass. Choose how to ride it out.',
   'tools-sec-hd':'Your tools',
   'toolkit-row-title':'Steady Yourself',
-  'toolkit-row-sub':'Grounding, breathing, and "I\'m triggered" — plus advanced Pro tools',
+  'toolkit-row-sub':'Grounding, breathing, and "I\'m triggered" — plus advanced tools',
   'plans-free-counter':'Day counter & milestones',
   // Session 2 hid the craving tracker and the timeline from supporters, so the free
   // tier can't keep advertising them as things she gets.
@@ -7991,7 +7986,7 @@ function buildReportForWindow(startTs,endTs,weekNumber){
   return report;
 }
 function maybeAutoGenerateWeeklyReport(){
-  if(!S.isPro||!S.startDate)return;
+  // Free for everyone (17 Aug 2026).
   const completedWeeks=Math.floor(getDays()/7);
   if(completedWeeks<1)return;
   const start=new Date(S.startDate).getTime();
@@ -8397,7 +8392,8 @@ function daysSinceSmartReminderSent(type){
   return Math.floor((Date.now()-new Date(last).getTime())/86400000);
 }
 function canSendSmartReminder(type){
-  if(!S.isPro)return false;
+  // Free for everyone (17 Aug 2026) - the screen always opened, but this
+  // returning false meant the reminders silently never fired.
   const sr=S.smartReminders||{};
   if(!sr[type])return false;
   return daysSinceSmartReminderSent(type)>=smartReminderFrequencyDays();
@@ -8657,10 +8653,9 @@ Core traits:
 const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Friendly Free mode. In this mode:
-- Keep things light, warm, and simple: basic reflection, light emotional support, help interpreting Days 1-15 of the lesson program, help with everyday triggers, help with journaling.
-- Do NOT provide deep pattern analysis, pattern breakdowns, weekly reports or weekly summaries, emotional trend analysis, risk indicators, category-specific deep coaching scripts, or blueprint-based coaching plans.
-- Do NOT describe or reference the content of Days 16-30 of the lesson program - those are part of Pro.
-- Do NOT bring up Friendly Pro or upgrading unless the user directly asks for one of the deeper things above. If they do, name in one warm sentence that it's part of Friendly Pro, then keep supporting them at the basic level anyway - never refuse to respond, never make them feel lesser for asking, never repeat the upgrade mention more than once in the same reply.
+- Everything in the app is available to this person EXCEPT Days 16-30 of the lesson program. Pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching, analytics - all of that is FREE now. Answer those questions fully and warmly; never withhold them, never treat them as a paid extra.
+- Do NOT describe or reference the content of Days 16-30 of the lesson program - those are the one thing that is part of Pro.
+- The only other Pro difference is the number of chats a day (3 free, 30 with Pro). Do not bring it up unless they ask.
 - EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
 
 const SYSTEM_PRO_ADDENDUM=`
@@ -8853,7 +8848,9 @@ function localFallbackReply(userText){
   // Structured Pro-feature requests are checked before the generic emotional-keyword fallbacks,
   // since a specific request (e.g. "my Anxiety Pack") can otherwise collide with a generic keyword
   // match (e.g. the general "anxiety" support pattern) and mask the more relevant, specific answer.
-  if(S.isPro){
+  // Free for everyone (17 Aug 2026) - these read the user's OWN data back to
+  // them; refusing was the app withholding something it already gives away.
+  if(true){
     if(/report/i.test(userText))return explainLatestWeeklyReport();
     if(/journal/i.test(userText))return buildJournalAnalysis();
     if(/\bpack\b/i.test(userText))return buildPackReflectionGuidance();
@@ -9004,7 +9001,7 @@ const PRO_TOOLS={
   },
   proJournal:{
     title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights are part of Pro — category-specific and slip-aware prompts, mood tracking, and Friendly Pro analysis of your own entries.',
+    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and Friendly Pro analysis of your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
   },
@@ -9035,11 +9032,12 @@ const PRO_TOOLS={
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
-  // "Do this together" opens for everyone — the first 15 days are free (the
-  // per-day gate is inside renderCouples), same cap as every lesson track.
-  // Reminders are all free now (daily lesson, accountability, smart reminders).
-  if(S.isPro||key==='couples'||key==='reminders'||key==='smartReminders'){window[PRO_TOOLS[key].open]();return;}
-  showProToolPreview(key);
+  // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
+  // things and nothing else: lesson/pack days 16-30, and 30 Friendly chats a
+  // day instead of 3. Those two gates live where they belong - isLessonLocked,
+  // renderPackLesson, renderCouples, and the chat cap - not here.
+  // The name openProTool is kept only because a dozen onclick handlers use it.
+  window[PRO_TOOLS[key].open]();
 }
 function showProToolPreview(key){
   const t=PRO_TOOLS[key];
@@ -9225,14 +9223,10 @@ async function sendMsg(){
   // only moment an upsell belongs on this path is a win worth celebrating.
   // No carve-out for good news: a supporter celebrating a win is still not a sales lead.
   const supporterNoUpsell=S.userType==='partner';
-  if(!S.isPro&&!isCrisis&&!supporterNoUpsell&&!DISTRESS_RE.test(text)&&isProFeatureRequest(text)){
-    const teaser=proFeaturePreviewText(text);
-    addProPreviewBubble(teaser);
-    S.chatHistory.push({role:'assistant',content:teaser});
-    if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
-    save();
-    return;
-  }
+  // REMOVED 17 Aug 2026: this used to intercept a free user asking about their
+  // own patterns, reports, journal, streaks or analytics and answer with an
+  // upsell instead of an answer. Those features are all free now, so refusing
+  // to talk about them was the app withholding something it already gives.
 
   showTyping(true);
   try{
@@ -9292,7 +9286,6 @@ Address the interactions of their unique blueprint and assign structured daily r
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Friendly Pro — but I'm right here either way.");
   }catch(e){
     setNovaMode(false);
     // The credit was spent up front, but a network failure means no real
@@ -9304,7 +9297,6 @@ Address the interactions of their unique blueprint and assign structured daily r
     S.chatHistory.push({role:'assistant',content:reply});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
-    if(!S.isPro&&!isCrisis&&!supporterNoUpsell)maybeNovaProNudge("If you ever want to go deeper into what's underneath moments like this, I can walk through it with you using Friendly Pro — but I'm right here either way.");
   }
 }
 
@@ -10264,10 +10256,8 @@ function confirmResetDate(){
   S.lastCandidateNudgeDate=new Date().toDateString();
   save();updateStats();renderMilestones();buildTimeline();
   closeResetDate();
-  maybeNovaProNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nIf you ever want to go deeper into the pattern behind moments like this, I can guide you through that with Friendly Pro — but for now, let's just focus on today.`);
-  if(S.isPro){
-    novaNudge(buildCombinedResetMessage(priorStreakLength));
-  }
+  novaNudge(`That took real honesty to acknowledge. However this happened, it doesn't erase the days you already put in — you've now put in ${S.totalSoberDaysEver||0} day${(S.totalSoberDaysEver||0)===1?'':'s'} total across this journey, and that number doesn't reset.\n\nLet's just focus on today.`);
+  novaNudge(buildCombinedResetMessage(priorStreakLength));
 }
 
 // ─── DAILY COST & TIME ────────────────────────────────────────────────────────
@@ -10425,7 +10415,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.6.1';
+const APP_VERSION='5.7.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -11295,7 +11285,7 @@ function buildGuideIndex(){
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Pro unlocks up to <b>30 Friendly chats a day</b> (free is 3), building your own Lesson Packs, days 16+ of every pack, Smart Reminders, and the advanced pattern tools. The core app — day counter, SOS, breathing, journal (typed or spoken), and the first 15 days of every lesson pack — is free forever.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Two things, and that's it: <b>Days 16–30</b> of every track and pack (including the Together couples program), and <b>30 Friendly chats a day</b> instead of 3. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},

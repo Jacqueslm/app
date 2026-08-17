@@ -19,9 +19,10 @@ on your computer, because your signing key lives only there.
 **The two Google deadlines, corrected 17 Aug — Jacques's console is the truth,
 not the repo's settings file.** The `.aab` uploaded for closed testing was built
 with older tools, so Google flagged it and offered an extension:
-- **31 Aug (Android 16): TAKE THE EXTENSION Google is offering** — free, one
-  form, moves the date to **1 Nov**. Then this build clears it for real: the
-  update step pulls Google's current tools, which target Android 16.
+- **31 Aug (Android 16): ~~take the extension~~ — DONE. Jacques ALREADY
+  REQUESTED IT (confirmed by him 17 Aug 2026). Deadline is now 1 Nov. DO NOT
+  ask him to do this again.** This build then clears it for real: the update
+  step pulls Google's current tools, which target Android 16.
 - **29 Sep (Play Billing 8):** no extension exists, but this build clears it —
   the update step pulls the current billing library automatically.
 

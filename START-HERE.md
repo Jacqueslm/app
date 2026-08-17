@@ -98,7 +98,15 @@ in Play Console — just wait for Google's email.**
 
 **Two calendar dates (15 Aug):** **25 Aug** — Manus goes paid; episodes 3, 7,
 8, 10 still need images before then. **29 Sep** — Play Billing 8 rebuild
-(Google deadline); not now. Manus's ffmpeg renderer and its recipe README are
+(Google deadline); not now.
+
+**Android 16 target deadline — EXTENSION ALREADY REQUESTED by Jacques
+(confirmed by him 17 Aug 2026). His deadline is 1 Nov, not 31 Aug. Do NOT tell
+him to request it, do NOT re-verify it.** The closed-testing `.aab` was built
+with older tools (the repo's manifest saying 36 is not what Google judges —
+the uploaded file is). The 17 Aug release build in
+`TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` clears it for real, plus Play
+Billing 8, plus switches payments on — one build, all three. Manus's ffmpeg renderer and its recipe README are
 saved verbatim at `reference/manus-recipes/` — its three look numbers are
 verified in `scripts/assemble_nia_video.py`: 2% zoom, captions `0xF4F0E8` on
 black at 60%, fades 0.5s in / 0.35s out. Studio's 2% "Almost still" port is

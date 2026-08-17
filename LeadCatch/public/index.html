@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LeadCatch - whoever calls back first gets the job</title>
+<meta name="description" content="Whoever calls back first gets the job. One line of code puts a contact form on your site and the enquiry on your phone in seconds. Built for trades and small businesses.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="site-header">
+    <a class="logo" href="/">Lead<span>Catch</span></a>
+    <button class="btn-secondary" id="go-signin">Sign in</button>
+  </header>
+</div>
+
+<main class="wrap">
+  <div class="hero hero-grid">
+    <div>
+      <h1>Whoever calls back first gets the job.</h1>
+      <p class="lede">
+        Right now that probably isn't you. Put a contact form on your website in one line,
+        and the enquiry hits your phone in seconds - name, number, what they need - so you
+        can ring them back while they're still looking at your site.
+      </p>
+      <div class="features" style="padding-bottom:0">
+        <div class="feature">
+          <h3>One line to install</h3>
+          <p>Paste one script tag on your site. No plugins, no builder, no developer.</p>
+        </div>
+        <div class="feature">
+          <h3>On your phone in seconds</h3>
+          <p>Name, phone and message in the first three lines - hit reply to answer.</p>
+        </div>
+        <div class="feature">
+          <h3>Follow-up you can see</h3>
+          <p>New, contacted, quoted, won, lost. You always know who's waiting on you.</p>
+        </div>
+        <div class="feature">
+          <h3>No website? No problem.</h3>
+          <p>Every form gets a shareable link for your bio, Google profile or WhatsApp.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel narrow" id="auth-panel">
+      <div class="tabs" role="tablist">
+        <button class="tab" id="tab-signup" role="tab" aria-selected="true" aria-controls="signup-form">Create account</button>
+        <button class="tab" id="tab-signin" role="tab" aria-selected="false" aria-controls="signin-form">Sign in</button>
+      </div>
+
+      <form id="signup-form" novalidate>
+        <div class="field">
+          <label for="su-business">Business name</label>
+          <input id="su-business" name="business_name" autocomplete="organization" required>
+        </div>
+        <div class="field">
+          <label for="su-email">Email</label>
+          <input id="su-email" name="email" type="email" autocomplete="email" required>
+          <p class="small muted" style="margin:.25rem 0 0">New leads get sent here.</p>
+        </div>
+        <div class="field">
+          <label for="su-password">Password</label>
+          <input id="su-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+          <p class="small muted" style="margin:.25rem 0 0">At least 8 characters.</p>
+        </div>
+        <button type="submit" style="width:100%">Create my account</button>
+      </form>
+
+      <form id="signin-form" novalidate hidden>
+        <div class="field">
+          <label for="si-email">Email</label>
+          <input id="si-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="si-password">Password</label>
+          <input id="si-password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" style="width:100%">Sign in</button>
+      </form>
+
+      <p class="msg error" id="auth-error" hidden role="alert"></p>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var tabSignup = document.getElementById('tab-signup');
+  var tabSignin = document.getElementById('tab-signin');
+  var signupForm = document.getElementById('signup-form');
+  var signinForm = document.getElementById('signin-form');
+  var error = document.getElementById('auth-error');
+
+  function show(which) {
+    var signup = which === 'signup';
+    tabSignup.setAttribute('aria-selected', String(signup));
+    tabSignin.setAttribute('aria-selected', String(!signup));
+    signupForm.hidden = !signup;
+    signinForm.hidden = signup;
+    error.hidden = true;
+  }
+  tabSignup.addEventListener('click', function () { show('signup'); });
+  tabSignin.addEventListener('click', function () { show('signin'); });
+  document.getElementById('go-signin').addEventListener('click', function () {
+    show('signin');
+    document.getElementById('si-email').focus();
+  });
+  if (location.hash === '#signin') show('signin');
+
+  function submit(form, url, body) {
+    var button = form.querySelector('button[type=submit]');
+    var original = button.textContent;
+    button.disabled = true;
+    button.textContent = 'One moment…';
+    error.hidden = true;
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.data.error || 'Something went wrong.');
+        location.href = '/app';
+      })
+      .catch(function (err) {
+        error.textContent = err.message;
+        error.hidden = false;
+        button.disabled = false;
+        button.textContent = original;
+      });
+  }
+
+  signupForm.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    submit(signupForm, '/api/auth/signup', {
+      business_name: document.getElementById('su-business').value,
+      email: document.getElementById('su-email').value,
+      password: document.getElementById('su-password').value,
+    });
+  });
+
+  signinForm.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    submit(signinForm, '/api/auth/login', {
+      email: document.getElementById('si-email').value,
+      password: document.getElementById('si-password').value,
+    });
+  });
+})();
+</script>
+</body>
+</html>

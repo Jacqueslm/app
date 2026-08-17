@@ -1,0 +1,14 @@
+{
+  "name": "leadcatch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lead capture and follow-up for small businesses - deployable root for hosting platforms",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "postinstall": "npm install --prefix server --no-audit --no-fund",
+    "start": "node server/server.js",
+    "test": "node test/smoke.js"
+  }
+}

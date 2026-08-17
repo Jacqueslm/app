@@ -12,7 +12,7 @@
   "navigationDividerColor": "#0f0c29",
   "navigationDividerColorDark": "#0f0c29",
   "backgroundColor": "#0f0c29",
-  "enableNotifications": false,
+  "enableNotifications": true,
   "startUrl": "/app?src=play",
   "iconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",
   "maskableIconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",

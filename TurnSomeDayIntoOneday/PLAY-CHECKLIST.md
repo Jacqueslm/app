@@ -8,6 +8,114 @@ the $25 Play account fee, which you have already paid.
 
 ---
 
+## ⭐ 17 AUG 2026 — THE RELEASE BUILD: **BUILT AND SIGNED, same day.**
+
+**DONE up to the upload.** The 1.0.1 (versionCode 2) `.aab` was built 17 Aug on
+Jacques's machine via `Make-Play-App.bat` (in this folder — reusable for every
+future release build) and signed with the ORIGINAL upload key. Play Billing on,
+notifications on (fixes phone reminders), Android 16, Billing 8. The key lives at
+`C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa\android-upload.keystore`;
+Jacques has the password (told to write it into the USB "play key" note — it is
+NOT in this repo and never will be). The forgotten-password scare was solved by
+testing his candidates — the third guess worked. No key reset was ever filed.
+
+**REMAINING:** upload the new `.aab` (Production → Create new release → Save),
+create the three prices, set `PLAY_SERVICE_ACCOUNT_JSON` on Railway (do WITH a
+session), then Start rollout. Steps 5–8 below.
+
+## THE RELEASE BUILD — original walkthrough (steps 1–4 are done history)
+
+Google granted production access on 15 Aug. Before pressing the final rollout
+button, one more build is needed: the test version of the app shell had
+**payments switched off** — people could install, but nobody could pay. The fix
+is already in the settings file; turning it into the app file (`.aab`) happens
+on your computer, because your signing key lives only there.
+
+**The two Google deadlines, corrected 17 Aug — Jacques's console is the truth,
+not the repo's settings file.** The `.aab` uploaded for closed testing was built
+with older tools, so Google flagged it and offered an extension:
+- **31 Aug (Android 16): ~~take the extension~~ — DONE. Jacques ALREADY
+  REQUESTED IT (confirmed by him 17 Aug 2026). Deadline is now 1 Nov. DO NOT
+  ask him to do this again.** This build then clears it for real: the update
+  step pulls Google's current tools, which target Android 16.
+- **29 Sep (Play Billing 8):** no extension exists, but this build clears it —
+  the update step pulls the current billing library automatically.
+
+### ⭐ FOUND 17 Aug 2026 — the key and the build workshop live at `C:\dayone`
+`C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa\` holds
+`android-upload.keystore` (made 27 Jul), the closed-testing `app-release-bundle.aab`,
+and the whole gradle project. The copy under Documents is a second download with
+no key in it — do not be fooled by it again. The USB "play key" note is a
+path to this folder; the password hunt continues in the "google key" note.
+**The upload-key reset was never needed and was not submitted.**
+
+### 1. Find your build folder
+The same folder from the first build — it contains `twa-manifest.json` and
+`android-upload.keystore`. If you can't remember where, search your PC in File
+Explorer for **android-upload.keystore**.
+
+### 2. Put the new settings file in it
+The repo is public, so you can download it straight from GitHub. Open:
+
+`https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/twa/twa-manifest.json`
+
+First rename the old file in your folder to `twa-manifest-old.json` (safety
+copy). Then save the page as **`twa-manifest.json`** into the folder
+(Ctrl+S — make sure the name is exactly that, not `.txt` on the end).
+
+*Or by hand:* open your `twa-manifest.json` in Notepad and make these say:
+`"appVersionName": "1.0.1"` · `"appVersionCode": 2` ·
+`"appVersion": "1.0.1"` ·
+`"features": { "playBilling": { "enabled": true } }` ·
+`"alphaDependencies": { "enabled": true }` — touch nothing else.
+
+### 3. Open a command window in that folder
+Click the folder's address bar in File Explorer, type `cmd`, press Enter.
+
+### 4. Build — three lines, in this order
+```
+npm install -g @bubblewrap/cli
+bubblewrap update
+bubblewrap build
+```
+The first line refreshes the builder to Google's current tools — that is what
+guarantees the Play Billing 8.0 library and Android 16. The second rebuilds the
+project from the new settings. The third makes the app file and asks for your
+keystore password — the one you wrote down when you made the key. Out comes a
+fresh **`app-release-bundle.aab`**.
+
+### 5. Upload — but do NOT roll out yet
+Play Console → **Test and release → Production → Create new release** → upload
+the new `.aab` (it should show version 1.0.1, code 2). Release notes: "First
+public release." Press **Save** and stop. The rollout button waits until
+step 8 — Google won't let you create the payment products until it has seen a
+build that contains billing, which is why the order matters.
+
+### 6. Create the three prices
+Play Console → **Monetize**:
+- **Subscriptions** → create ID `pro_monthly` — $9.99/month — add a **7-day
+  free trial** offer. Activate.
+- **Subscriptions** → create ID `pro_yearly` — $59.99/year. Activate.
+- **In-app products** → create ID `pro_lifetime` — $149.99 one-time. Activate.
+
+The IDs must be exactly those, letter for letter — they're what the app asks
+Google for.
+
+### 7. The payment-verification key (do this WITH the AI)
+The server never takes a phone's word that a purchase happened — it asks Google
+directly. For that, Railway needs one variable: `PLAY_SERVICE_ACCOUNT_JSON`.
+Setting it up is a 15-minute click-path through Google Cloud and Play Console.
+**When you reach this step, open a session and say "walk me through the payment
+service account"** — do it together, not from memory. Without this step, a
+person can pay Google and Pro won't unlock.
+
+### 8. Roll out
+Back to the saved release → **Review release → Start rollout to Production.**
+Managed publishing is off, so it goes live when Google approves. That click is
+the launch — it's yours.
+
+---
+
 ## Before anything else — two deadlines
 
 - **31 August 2026** — new apps must target Android 16 (API 36). The project I

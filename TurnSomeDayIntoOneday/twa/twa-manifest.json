@@ -12,7 +12,7 @@
   "navigationDividerColor": "#0f0c29",
   "navigationDividerColorDark": "#0f0c29",
   "backgroundColor": "#0f0c29",
-  "enableNotifications": false,
+  "enableNotifications": true,
   "startUrl": "/app?src=play",
   "iconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",
   "maskableIconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",
@@ -21,14 +21,20 @@
     "path": "./android-upload.keystore",
     "alias": "upload"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://www.turnsomedayintodayone.com/manifest.json",
   "fallbackType": "customtabs",
-  "features": {},
-  "alphaDependencies": { "enabled": false },
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": true
+  },
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
@@ -36,7 +42,7 @@
   "minSdkVersion": 23,
   "compileSdkVersion": 36,
   "targetSdkVersion": 36,
-  "appVersion": "1.0.0",
+  "appVersion": "1.0.1",
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "protocolHandlers": [],

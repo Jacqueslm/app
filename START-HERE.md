@@ -98,7 +98,15 @@ in Play Console — just wait for Google's email.**
 
 **Two calendar dates (15 Aug):** **25 Aug** — Manus goes paid; episodes 3, 7,
 8, 10 still need images before then. **29 Sep** — Play Billing 8 rebuild
-(Google deadline); not now. Manus's ffmpeg renderer and its recipe README are
+(Google deadline); not now.
+
+**Android 16 target deadline — EXTENSION ALREADY REQUESTED by Jacques
+(confirmed by him 17 Aug 2026). His deadline is 1 Nov, not 31 Aug. Do NOT tell
+him to request it, do NOT re-verify it.** The closed-testing `.aab` was built
+with older tools (the repo's manifest saying 36 is not what Google judges —
+the uploaded file is). The 17 Aug release build in
+`TurnSomeDayIntoOneday/PLAY-CHECKLIST.md` clears it for real, plus Play
+Billing 8, plus switches payments on — one build, all three. Manus's ffmpeg renderer and its recipe README are
 saved verbatim at `reference/manus-recipes/` — its three look numbers are
 verified in `scripts/assemble_nia_video.py`: 2% zoom, captions `0xF4F0E8` on
 black at 60%, fades 0.5s in / 0.35s out. Studio's 2% "Almost still" port is
@@ -1226,7 +1234,14 @@ something he had already been using for weeks.
 - Privacy is the product: never expose one user's data to another; "he doesn't
   see what you write" must stay true.
 - Anything worth remembering across sessions goes in a file — chat doesn't persist.
-- **The repo is PRIVATE (16 Aug 2026) — keep it that way.** `Jacqueslm/app` was
-  public from connection until Jacques asked to lock it down; anyone could clone
-  the whole business. Adding a collaborator is a GitHub settings action, never a
-  visibility flip.
+- **The repo is PUBLIC — Jacques's own call, later on 16 Aug 2026.** It was
+  flipped private earlier that day, then back to public the same day because
+  private broke two things that matter more: in-app updates needed a token, and
+  the 2,615 recorded lesson voices stopped loading on phones (raw.githubusercontent
+  only serves a public repo), which is what "recording unavailable" was. **Do not
+  flip it private again without asking him** — it costs the voices and the
+  updater. No user data is in git either way (journals and emails live in the
+  Railway database), and a full-history secret scan came back clean on 16 Aug.
+  Adding a collaborator is a GitHub settings action, never a visibility flip.
+  *(This block said PRIVATE until 17 Aug; MASTER-STATUS items 11–12 and rule 15
+  are the accurate record.)*

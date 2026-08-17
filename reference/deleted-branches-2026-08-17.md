@@ -28,12 +28,30 @@ Each was verified to hold NO file that main does not already have.
 | `claude/qc-testing-checklist-kud0fy` | `e3731ec7f660b069ab37f1a0c2c34c8d7b804620` | 2026-07-15 |
 | `claude/new-session-v5j88o` | `af511dd5757ec4106411929db5eef8b51140839a` | 2026-07-07 |
 
-## KEPT — these carry projects that exist nowhere else
+## RESCUED — their work is now on `main`, so the branches are safe to delete
+
+Each of these was the ONLY copy of a whole project. The folders were lifted onto
+`main` as-is (no code changed, scanned clean for secrets) on 17 Aug, so deleting
+the branch now costs nothing.
+
+| branch | sha (for recovery) | rescued into |
+|---|---|---|
+| `claude/trading-bot-improvements-756gua` | `4215d483c954606f2e20e71b51656522872be56e` | `Trading/` (22 files) + `.claude/agents/trade-checker.md` |
+| `claude/day-trading-market-structure-8kzz7w` | `f59fd1fc16bf03daaf8b7f75fb5bb955a6d22d18` | superseded — its `Trading/` is an older copy of the above |
+| `claude/new-session-undhzr` | `65a5f58fcc65f5db0e91bea52c3fee3bb8f75941` | `TradeDesk/` (42 files) |
+| `claude/lead-generation-app-dbxl0w` | `ea4591b943235955a3317a62181986d7e42d1999` | `LeadCatch/` (18 files) |
+
+## STILL THE ONLY COPY — do not delete this one
 
 | branch | sha | unique to it |
 |---|---|---|
-| `claude/day-trading-market-structure-8kzz7w` | `f59fd1fc16bf03daaf8b7f75fb5bb955a6d22d18` | `Trading/` — pine, ninjatrader, relay |
-| `claude/trading-bot-improvements-756gua` | `4215d483c954606f2e20e71b51656522872be56e` | `Trading/` — newer of the two |
-| `claude/new-session-undhzr` | `65a5f58fcc65f5db0e91bea52c3fee3bb8f75941` | `TradeDesk/` — engine, pine, data |
-| `claude/lead-generation-app-dbxl0w` | `ea4591b943235955a3317a62181986d7e42d1999` | `LeadCatch/` — server, public, test |
-| `claude/new-session-r8s2fg` | `a199faed48c5828328d7028de8caf04ce4ba789a` | `TurnSomeDayIntoDayOne/` — old-spelling app folder |
+| `claude/new-session-r8s2fg` | `a199faed48c5828328d7028de8caf04ce4ba789a` | `TurnSomeDayIntoDayOne/` — the old-spelling app folder, 10 Jul |
+
+**Left undone deliberately, and here is the blocker:** that folder is a stale
+July copy of the recovery app under the old misspelling. Copying it onto `main`
+would put two near-identical app folders side by side — `TurnSomeDayIntoDayOne/`
+and the live `TurnSomeDayIntoOneday/` — and the next session (or the next AI)
+edits the wrong one. That is a real hazard, not a tidiness preference, so it
+needs Jacques's call: rescue it under a clearly-dead name like
+`archive/TurnSomeDayIntoDayOne-2026-07/`, or leave the branch alone as the
+archive it already is. **Until he decides, the branch stays.**

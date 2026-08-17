@@ -62,6 +62,12 @@ body{display:flex;justify-content:center}
 .app.fs-bigger{zoom:1.18;min-height:calc(100dvh/1.18)}
 .app.fs-smaller .ob{min-height:calc(100dvh/0.88);max-height:calc(100dvh/0.88)}
 .app.fs-bigger .ob{min-height:calc(100dvh/1.18);max-height:calc(100dvh/1.18)}
+/* Big-text safety: at 1.18× zoom a fixed sheet can outgrow the screen and clip
+   its options off the bottom. Every sheet and the main scroll area become
+   scrollable so nothing ever disappears at the larger text size. */
+.app.fs-bigger .sos-sheet{max-height:calc(100dvh/1.18);overflow-y:auto}
+.app.fs-bigger .sos-sheet .ob-btn{flex:0 0 auto}
+.app.fs-bigger #screens{overflow-y:auto}
 @supports not (zoom: 1){
   .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
@@ -126,6 +132,7 @@ body{display:flex;justify-content:center}
    old hardcoded dark-theme colors (#c0caff on white) were unreadable there. */
 .add-chip{border:1px solid var(--bdr2);border-radius:10px;padding:12px;text-align:center;cursor:pointer;background:var(--s1);font-size:13px;color:var(--tp);font-weight:500}
 .add-chip.sel{border-color:var(--accent);background:var(--acc);color:var(--acc-t);font-weight:600}
+.add-chip.on{border-color:var(--accent);background:var(--acc);color:var(--acc-t);font-weight:600;box-shadow:0 0 0 2px rgba(164,157,235,0.35)}
 .behavior-chip-group{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
 .behavior-chip{border:0.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;text-align:left;cursor:pointer;background:rgba(255,255,255,0.05);font-size:13px;color:#c0caff}
 .behavior-chip.sel{border-color:var(--green);background:rgba(126,232,162,0.12);color:var(--green)}
@@ -230,8 +237,7 @@ body.nova-open #guide-fab-label{display:none}
    narrated brightens, the rest stay dimmed. */
 #la-ov-text .la-para{margin:0 0 16px;transition:color 0.3s}
 #la-ov-text .la-para.on{color:var(--tp)}
-body.nova-open #audio-pill{bottom:216px}
-body.nova-open #audio-pill-label{bottom:222px}
+body.nova-open #mini-player{bottom:216px}
 #guide-panel{display:none;position:fixed;bottom:134px;right:max(12px,calc(50% - 203px));width:min(340px,calc(100vw - 24px));max-height:62vh;background:var(--s2);border:0.5px solid var(--bdr);border-radius:16px;z-index:501;flex-direction:column;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
 #guide-panel.open{display:flex}
 #guide-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:140px}
@@ -678,6 +684,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:13px;color:#8892c0;margin-bottom:4px" id="days-term-lbl">Days sober</div>
     <div class="days-big" id="dayCount">0</div>
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
+    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="program-lbl">The 90-day program — continuous support</div>
+    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="focus-lbl"></div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
     <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
     <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
@@ -722,6 +730,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
     <i class="ti ti-arrow-right" style="font-size:18px;color:#0F6E56"></i>
+  </div>
+
+  <div class="nova-promo" id="home-faith-card" onclick="openPack('spiritual')" style="margin-top:10px;display:none;background:var(--s2);border:1px solid var(--bdr)">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-sun-high" style="font-size:20px;color:#fff"></i></div>
+    <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--tp)">Spiritual Path</div><div style="font-size:12px;color:var(--tm)">Your faith &amp; recovery track — day by day, God as you understand God</div></div>
+    <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
   </div>
 
   <div class="nova-promo" onclick="switchTo('nova');actBn('bn-nova')" style="margin-top:10px">
@@ -898,7 +912,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="s-rooms" class="scr">
       <div class="sec">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--acc-t);line-height:1.5">
-          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
+          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Every program runs 90 days with continuous support beyond — this room is here for the whole road, not just the first month. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
         </div>
         <div id="your-rooms-wrap" style="display:none">
           <div class="sec-hd" style="margin-bottom:8px">Your rooms</div>
@@ -1118,6 +1132,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
+        <div class="setting-row" onclick="openMeditation()">
+          <i class="ti ti-moon-stars" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Meditation room</p><span>5–15 min guided quiet — breathing, calm sound, timer</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="open5to1()">
           <i class="ti ti-hand-stop" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Step-by-step sensory grounding</span></div>
@@ -1332,14 +1351,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
       <div class="setting-row" onclick="openLessonPacksScreen()">
         <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — or build your own <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — the first 15 days of every pack are free; days 16+ are Pro</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Spiritual</div></div>
       <div class="setting-row" onclick="openPack('spiritual')">
         <i class="ti ti-sun-high" style="color:var(--accent)"></i>
-        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers — the first 15 days are free</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1663,7 +1682,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
         <i class="ti ti-bell" style="color:var(--accent)"></i>
-        <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+        <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleDark()">
@@ -1674,6 +1693,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="openFontSizeModal()">
         <i class="ti ti-text-size"></i>
         <div class="setting-row-txt"><p>Text size</p><span id="fontsize-row-sub">Default</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="startNavTour()">
+        <i class="ti ti-compass"></i>
+        <div class="setting-row-txt"><p>How to use this app</p><span>Take the 30-second tour of the screens</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="toggleAppLock()">
@@ -1707,7 +1731,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:11.5px;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates</div></div>
+      <div id="owner-updates-wrap"><div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates <span id="upd-hosted-note" style="display:none;color:var(--tm);font-weight:400">— hosted, updates arrive automatically</span></div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
         <i class="ti ti-refresh"></i>
         <div class="setting-row-txt"><p>Automatic updates</p><span>New versions install by themselves when the app opens</span></div>
@@ -1723,8 +1747,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Update the app</p><span id="upd-run-sub">Installs the latest version — your data is kept</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="toggleUpdateToken()">
+        <i class="ti ti-key"></i>
+        <div class="setting-row-txt"><p>GitHub token</p><span id="upd-token-sub">For private-repo updates on a local install</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
+      <div class="sec" style="padding-bottom:0" id="owner-diag-sec"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
       <div class="sec">
         <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
         <div id="diag-list"></div>
@@ -1766,7 +1796,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="card" style="padding:16px 18px;margin-top:10px">
           <div style="font-size:11px;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px" id="partner-5-label">5 things every partner should know</div>
           <div style="font-size:13px;color:var(--ts);line-height:1.8" id="partner-5-list">
-            <b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it's wiring in the brain's reward system that formed long before you.<br>
+            <b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it stops feeling like a choice, and it's a pattern that formed long before you.<br>
             <b style="color:var(--tp)">2.</b> Shame is the fuel. Anger and silent disappointment feed it; understanding starves it.<br>
             <b style="color:var(--tp)">3.</b> Policing doesn't work. Safety to be honest does — "I'm struggling today" should never start a fight.<br>
             <b style="color:var(--tp)">4.</b> A slip is a lost battle, not a betrayal — and the days after a slip decide everything.<br>
@@ -1778,12 +1808,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
         <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — the first 15 days are free</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
           <i class="ti ti-heart" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Partner self-check</p><span>Is something quietly running your life too? 10 gentle questions <span class="badge badge-acc" style="margin-left:2px">Pro</span></span></div>
+          <div class="setting-row-txt"><p>Partner self-check</p><span>Is something quietly running your life too? 10 gentle questions</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
       </div>
@@ -1807,8 +1837,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <!-- Discreet stop for lesson audio: the lesson keeps reading on ANY screen
        (privacy - flip to a neutral screen, the earbuds keep going), and this
        unlabeled button is how you stop it from anywhere. -->
-  <div id="audio-pill" title="Open the lesson player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:132px;right:max(12px,calc(50% - 203px));width:36px;height:36px;border-radius:50%;background:var(--s2);border:1px solid var(--bdr);color:var(--tp);align-items:center;justify-content:center;cursor:pointer;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)"><i class="ti ti-headphones" style="font-size:16px"></i></div>
-  <div id="audio-pill-label" style="display:none;position:fixed;bottom:138px;right:calc(max(12px,calc(50% - 203px)) + 44px);background:var(--s2);border:1px solid var(--bdr);color:var(--tp);font-size:12px;padding:6px 10px;border-radius:10px;z-index:499;box-shadow:0 3px 10px rgba(0,0,0,0.3)">Lesson is playing — tap to open the player</div>
+  <!-- Mini lesson player: follows the audio across every screen while a lesson
+       is playing. One tap pauses, one tap on the ✕ stops, tapping the card
+       opens the big read-along player - the lesson never has to be found
+       again to be controlled. -->
+  <div id="mini-player" onclick="S.audioPillExplained=true;save();openLessonPlayer()" style="display:none;position:fixed;bottom:132px;left:max(12px,calc(50% - 203px));right:calc(max(12px,calc(50% - 203px)) + 56px);z-index:499;cursor:pointer;background:var(--s2);border:1px solid var(--bdr);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,0.35);overflow:hidden">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 8px 9px 10px">
+      <button id="mini-play" title="Pause / resume" onclick="event.stopPropagation();laTogglePause()" style="flex:0 0 auto;width:38px;height:38px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px"><i class="ti ti-player-pause"></i></button>
+      <div style="flex:1;min-width:0">
+        <div id="mini-title" style="font-size:13px;font-weight:650;color:var(--tp);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Lesson</div>
+        <div id="mini-sub" style="font-size:10.5px;color:var(--tm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">Lesson is playing — tap to open the player</div>
+      </div>
+      <button id="mini-stop" title="Stop listening" onclick="event.stopPropagation();stopLessonAudio()" style="flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr);background:transparent;color:var(--tm);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="mini-progress" style="position:absolute;left:0;bottom:0;height:3px;width:0%;background:var(--accent)"></div>
+  </div>
   <!-- Full-screen lesson player: big read-along text + real controls. Opens from
        the Listen row or the floating pill; closing it never stops the audio. -->
   <div id="lesson-player-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:600;flex-direction:column">
@@ -1851,6 +1894,33 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="guide-input-row">
       <input id="guide-input" placeholder="e.g. how do I cancel?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
       <button id="guide-send" onclick="guideSend()"><i class="ti ti-send"></i></button>
+    </div>
+  </div>
+
+  <!-- POST-ONBOARDING WELCOME: shown once, right after setup, and read aloud so
+       a user who set up while walking can still hear it. The 90-day framing is
+       up front: this is a program with a shape, not an app to wander. -->
+  <div id="welcome-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:940;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px">
+    <div style="font-size:44px;margin-bottom:14px">🌅</div>
+    <div style="font-size:20px;font-weight:700;color:var(--tp);line-height:1.45;max-width:340px">Welcome. You made a difficult decision — and it's the bravest one you've made in a long time.</div>
+    <div style="font-size:15px;color:var(--ts);line-height:1.75;margin-top:14px;max-width:340px">You're on a path now — to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going. Don't give up. It's in the dark where the work is done — and in the light where it's shown.</div>
+    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is a 90-day program with continuous support — a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and Friendly beside you at any hour. You don't have to do this perfectly. You just have to do today.</div>
+    <button class="ob-btn" style="margin-top:18px;padding:12px 26px;font-size:15px" onclick="closeWelcomeOverlay()">Begin Day One — I'm ready</button>
+  </div>
+
+  <!-- APP TOUR: one-time guided walk of the navigation (replayable from
+       Profile → "How to use this app"). Skip any time - it never blocks. -->
+  <div id="nav-tour" style="display:none;position:fixed;inset:0;z-index:950" onclick="if(event.target===this)navTourNext()">
+    <div id="nav-tour-spot" style="display:none;position:fixed;pointer-events:none;border:2px solid var(--accent);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);transition:all .25s ease"></div>
+    <div id="nav-tour-card" style="position:fixed;left:max(12px,calc(50% - 203px));right:max(12px,calc(50% - 203px));bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--s1);border:1px solid var(--bdr);border-radius:16px;padding:16px;z-index:951;box-shadow:0 8px 30px rgba(0,0,0,0.45)">
+      <div id="nav-tour-step" style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700"></div>
+      <div id="nav-tour-title" style="font-size:16px;font-weight:650;color:var(--tp);margin-top:3px"></div>
+      <div id="nav-tour-body" style="font-size:13.5px;color:var(--tm);line-height:1.6;margin-top:5px"></div>
+      <div id="nav-tour-dots" style="display:flex;gap:6px;margin-top:12px"></div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="ob-btn outline" id="nav-tour-skip" style="flex:1;margin:0;padding:10px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="endNavTour()">Skip</button>
+        <button class="ob-btn" id="nav-tour-next" style="flex:1;margin:0;padding:10px;font-size:13px" onclick="navTourNext()">Next →</button>
+      </div>
     </div>
   </div>
 
@@ -1928,6 +1998,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title">You slipped. That's not the end of anything.</div>
     <div class="sos-sub" id="slipped-sub" style="margin-bottom:16px">However this happened, it doesn't erase the days you already put in. What matters now is the next choice, not this one.</div>
+    <div style="font-size:13px;color:var(--tp);line-height:1.7;background:var(--acc);border-radius:12px;padding:13px 15px;margin-bottom:14px">
+      This is the moment that decides the next 24 hours — and you just chose to stay in the game. <strong>You don't have to be strong right now. You just have to not quit.</strong> Everyone who ever made it out has had this exact hour. What made them different was only what they did next.
+    </div>
     <div style="font-size:12.5px;color:var(--ts);line-height:1.7;margin-bottom:16px">
       <strong style="color:var(--tp);font-weight:500">A few honest next steps:</strong><br>
       1. Get to a safe space, away from whatever's around you right now.<br>
@@ -2090,7 +2163,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 
-<!-- ACCOUNTABILITY REMINDERS (Pro) -->
+<!-- ACCOUNTABILITY REMINDERS (free for everyone) -->
 <div class="sos-modal" id="accountability-modal" onclick="if(event.target===this)closeAccountabilityReminders()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Accountability reminders</div>
@@ -2104,7 +2177,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 
-<!-- DAILY ACCOUNTABILITY CHECK-IN BANNER (Pro, shown once per day on app open) -->
+<!-- DAILY ACCOUNTABILITY CHECK-IN BANNER (free, shown once per day on app open) -->
 <div class="sos-modal" id="accountability-checkin-modal" onclick="if(event.target===this)dismissAccountabilityCheckin()">
   <div class="sos-sheet">
     <div class="sos-title">Good to see you today</div>
@@ -2142,6 +2215,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <textarea class="ob-input" id="bedtime-reflection-input" rows="3" placeholder="How did today actually feel?" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);resize:vertical;font-family:var(--f)"></textarea>
     <button class="ob-btn" style="margin-top:4px" onclick="submitBedtimeReflection()">Save reflection</button>
     <button class="sos-close" onclick="closeBedtimeReflection()">Skip for now</button>
+  </div>
+</div>
+
+<!-- DAILY WIN MOMENT (everyone, every new day) -->
+<div class="sos-modal" id="daily-win-modal" onclick="if(event.target===this)closeDailyWin()">
+  <div class="sos-sheet" style="text-align:center">
+    <div style="font-size:44px;margin-bottom:6px">🎉</div>
+    <div class="sos-title" style="color:var(--accent)">Day <span id="dw-days">1</span> — you showed up.</div>
+    <div class="sos-sub" style="margin-bottom:18px">That's the whole win for today. The rest is just more of the same.</div>
+    <div id="dw-message" style="font-size:14px;color:var(--tp);line-height:1.65;background:var(--acc);border-radius:12px;padding:14px 16px;margin-bottom:18px"></div>
+    <button class="ob-btn" onclick="closeDailyWin()">Keep going — one more day</button>
   </div>
 </div>
 
@@ -2412,7 +2496,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- BREATHE OVERLAY -->
-<div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+<div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
+    <div id="med-timer" style="font-size:40px;font-weight:700;letter-spacing:1px">5:00</div>
+    <div id="med-phase" style="font-size:15px;opacity:.92;margin-top:6px">Settle in — eyes closed or a soft gaze</div>
+    <div id="med-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.14);margin:26px auto 0;display:flex;align-items:center;justify-content:center;transition:transform 4s ease-in-out">
+      <div id="med-circle-txt" style="font-size:13px;letter-spacing:2px;text-transform:uppercase">Breathe in</div>
+    </div>
+    <div id="med-dur-row" style="display:flex;gap:10px;margin-top:28px">
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(5)">5 min</button>
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(10)">10 min</button>
+      <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(15)">15 min</button>
+    </div>
+    <button class="ob-btn outline" id="med-pause-btn" style="display:none;margin-top:16px;padding:9px 18px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="medPauseToggle()">Pause</button>
+    <button class="ob-btn outline" style="margin-top:14px;padding:9px 18px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.35)" onclick="closeMeditation()">End session</button>
+  </div>
+  <div id="breathe-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
   <div id="breathe-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(83,74,183,0.3);border:3px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:16px;color:var(--green);transition:transform 4s ease,opacity 4s;font-weight:500">Breathe in</div>
   <div style="font-size:22px;font-weight:600;margin-bottom:8px" id="breathe-label">Breathe in</div>
   <div style="font-size:14px;color:#8892c0;margin-bottom:32px">4 · 7 · 8 breathing — inhale for 4, hold for 7, exhale for 8</div>
@@ -2494,7 +2592,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
     <button class="calm-toggle" id="vg-voice-btn" onclick="cycleVgVoice()" style="margin-left:8px" title="Tap to try a different voice">Voice: Warm</button>
   </div>
-  <div id="vg-fallback-note" style="display:none;font-size:11.5px;color:#8892c0;margin-top:10px;max-width:300px">Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app.</div>
+  <div id="vg-fallback-note" style="display:none;font-size:11.5px;color:#8892c0;margin-top:10px;max-width:300px">The recording didn't load — keeping the captions and circle going instead of switching to your phone's own voice.</div>
 </div>
 
 </div><!-- /app -->
@@ -2512,7 +2610,7 @@ let S = {
   // a civilised 9am-9pm rather than "whenever the app happens to be opened".
   reminderStartHour:9,reminderEndHour:21,
   novaDisclaimerDismissed:false,fontSize:'default',
-  notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],
+  notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
   chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',
@@ -2520,7 +2618,7 @@ let S = {
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
-  pinHash:null,pinEnabled:false,discretionMode:false,
+  pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,welcomeShown:false,
   userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
   bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
@@ -2820,6 +2918,7 @@ function updateLessonPromo(){
 }
 
 function renderTodayLesson(){
+  updateHomeFaithCard();
   const switchRow=document.getElementById('lesson-track-switch-row');
   if(switchRow){
     switchRow.style.display=S.selectedAddictions.length>1?'flex':'none';
@@ -3058,7 +3157,7 @@ const PREDEFINED_PACKS={
     lessons:[
       {day:1,title:`God, As You Understand God`,content:`Let's settle the ground rule first, because it decides whether the next thirty days help you or annoy you: this track says God, and it means God as YOU understand God. For some of you that's the God of a church, a mosque, a temple. For others it's something you can't name that you talked to anyway, once, on the worst night. Both of you are welcome here, and neither gets argued with. Recovery rooms figured this out a hundred years ago — the word matters less than the direction: something bigger than the habit, bigger than your willpower, that you can hand things to. You don't need a theology to start. You need exactly one working assumption: you are not the highest power in your own life. The habit already proved that. The question is only what is.`,action:`Write one honest sentence about where you actually stand with God today — devout, angry, absent, unsure. Nobody sees it. Start from the truth, not the answer you think is expected.`,reflection:`When was the last time you spoke to God like you meant it — and what was happening that night?`},
       {day:2,title:`The 2am Prayer Counts`,content:`Most people in recovery have prayed exactly one kind of prayer for years: the emergency kind. God, get me out of this one and I'll never do it again. Then morning comes, the bargain is forgotten, and by the next emergency you feel like too much of a hypocrite to pray at all. Hear this clearly: the 2am prayer counts. It was real when you prayed it. Desperation is not a lesser form of faith — in most traditions it's where faith starts, because it's the first moment the self-sufficiency cracked. You weren't lying to God at 2am. You were meeting God at the only hour your defenses were down. The work of this track is moving that honesty to daylight hours — not replacing it with something more respectable.`,action:`Tonight, before bed and not in crisis, say one sentence to God. Out loud or silent. Not a bargain — just a report: "Here's where I actually am."`,reflection:`What made the 2am prayers feel true in a way the daytime ones didn't?`},
-      {day:3,title:`Willpower Was Never the Plan`,content:`You've tried being stronger. Years of it — white knuckles, promises, day counts powered by gritted teeth. And here you are, which tells you what willpower is worth against a rewired reward system. That's not an insult; it's the doorway. Every spiritual tradition converges on the same strange arithmetic: strength arrives when you admit you don't have it. Surrender isn't quitting the fight — it's changing who's fighting. "God, I can't do this one alone" is not weakness. It's the most accurate sentence you've said in years, and accuracy is where recovery starts. Notice something: you already surrendered once — to the habit. You already know how to hand your will to something. This time you get to choose what.`,action:`Say it once today, in your own words: "I can't do this part alone." To God, in the shower, in the car. Just once, and mean it.`,reflection:`What's the difference between giving up and giving it over? Where have you confused the two?`},
+      {day:3,title:`Willpower Was Never the Plan`,content:`You've tried being stronger. Years of it — white knuckles, promises, day counts powered by gritted teeth. And here you are, which tells you what willpower is worth against a pull that doesn't answer to it. That's not an insult; it's the doorway. Every spiritual tradition converges on the same strange arithmetic: strength arrives when you admit you don't have it. Surrender isn't quitting the fight — it's changing who's fighting. "God, I can't do this one alone" is not weakness. It's the most accurate sentence you've said in years, and accuracy is where recovery starts. Notice something: you already surrendered once — to the habit. You already know how to hand your will to something. This time you get to choose what.`,action:`Say it once today, in your own words: "I can't do this part alone." To God, in the shower, in the car. Just once, and mean it.`,reflection:`What's the difference between giving up and giving it over? Where have you confused the two?`},
       {day:4,title:`Praying Badly Is Praying`,content:`Somewhere you picked up the idea that prayer has correct words — a posture, a formula, a level of holiness you don't currently hold. So you don't pray, the way a man who can't write formal letters stops writing home. Throw that out. Prayer is not a performance review. "Help." is a complete prayer. "Thanks." is a complete prayer. "I'm furious at You and I don't even know if You're there" is — ask anyone who's read the Psalms — a very traditional prayer indeed. God is not grading your grammar. The traditions agree on this with rare unanimity: the honest fragment outranks the polished paragraph. You will not be good at this. Be bad at it daily anyway.`,action:`Pray one word today. Pick it — help, thanks, stay, sorry, why. One word, said toward God on purpose.`,reflection:`Who taught you what prayer is "supposed" to sound like — and is that voice helping or stopping you?`},
       {day:5,title:`The God Who Saw It All`,content:`Here's the thought that keeps more people out of faith than any argument: God saw everything. The hidden hours, the lies, the thing you did that you've never told a living soul. So you stay away, the way you'd avoid a person who knows too much. Turn that around. God saw it ALL — and you're still here, still breathing, still being nudged toward this page. Whatever that is, it isn't rejection. Every tradition carries the same scandalous claim at its center: being fully known and not discarded. You've been performing "fine" for people for years, exhausted from it. Here is the one relationship where the mask was never working anyway. That's not the threat. That's the rest.`,action:`Tell God the one thing you've never said out loud. Not the details — just "You saw that. You know." Then notice you're still here.`,reflection:`What would change if you actually believed you were fully known and not discarded?`},
       {day:6,title:`Forgiveness Runs Downhill First`,content:`Before this gets to forgiving other people — and it will, later, when you're ready — it has to start where it's hardest: receiving it. You have a ledger against yourself that you'd never hold against anyone else. Whatever you believe about God, notice you've made yourself the exception to mercy: everyone can be forgiven except you, because you knew better, because you kept doing it. That exceptionalism sounds like humility. It's actually a kind of pride — appointing yourself a judge more severe than God. Every tradition says the same thing here: mercy is not earned by having needed less of it. You start receiving forgiveness the way you start anything in recovery: badly, in small amounts, daily.`,action:`Say: "God, I accept that I don't get to be the exception to mercy." Once today. It will feel untrue. Say it anyway — feelings arrive after practice, not before.`,reflection:`Why is it easier to believe God forgives others than to believe it about yourself? What are you protecting by staying condemned?`},
@@ -3753,6 +3852,21 @@ function handleOnboardingPopstate(){
 // uses, applied to the whole app: back closes the topmost open thing, then
 // steps to Home, and only exits when you're already on Home with nothing open.
 let appBackTrapArmed=false;
+// The App lock and the sign-in gates are deliberately NOT closable with back:
+// back on those would strand the user on a blank screen or bounce them out of
+// the app. Any tap re-arms the trap (enterApp), so this stays airtight.
+let homeBackAt=0,exitToastEl=null,exitToastTimer=null;
+function showExitToast(){
+  if(!exitToastEl){
+    exitToastEl=document.createElement('div');
+    exitToastEl.style.cssText='position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--s2);color:var(--tp);border:1px solid var(--bdr);padding:10px 16px;border-radius:99px;font-size:13px;z-index:2000;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:opacity .3s;max-width:90vw;text-align:center;pointer-events:none';
+    document.body.appendChild(exitToastEl);
+  }
+  exitToastEl.textContent='Tap back again to leave the app';
+  exitToastEl.style.opacity='1';
+  clearTimeout(exitToastTimer);
+  exitToastTimer=setTimeout(()=>{if(exitToastEl)exitToastEl.style.opacity='0';},2600);
+}
 function armAppBackTrap(){
   if(appBackTrapArmed)return;
   appBackTrapArmed=true;
@@ -3763,6 +3877,20 @@ function handleAppPopstate(){
   // Onboarding runs its own trap - stay out of its way while it's showing.
   const ob=document.getElementById('onboarding');
   if(ob&&ob.style.display==='flex')return;
+
+  // The sign-in / preview gates and the PIN lock are walls, not screens.
+  // Back there must never close the app (which would force a fresh sign-in).
+  const pinLock=document.getElementById('pin-lock');
+  if(pinLock&&pinLock.style.display==='flex'){
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
+  const authGate=document.getElementById('auth-gate');
+  const previewGate=document.getElementById('preview-gate');
+  if((authGate&&authGate.style.display==='flex')||(previewGate&&previewGate.style.display==='flex')){
+    try{history.pushState({tsidApp:true},'');}catch(e){}
+    return;
+  }
 
   // 1) A modal is open: close the topmost one through its own close path.
   //    Every .sos-modal closes on a background tap, and click() on the
@@ -3776,7 +3904,12 @@ function handleAppPopstate(){
   }
 
   // 2) A full-screen overlay is up (these use display, not the modal class).
-  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay]];
+  //    Every overlay in the app is listed here so the hardware button closes
+  //    it through its own close path instead of leaving the app underneath it.
+  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
+    ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
+    ['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
+    ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
   for(const [id,close] of overlays){
     const el=document.getElementById(id);
     if(el&&el.style.display!=='none'&&el.style.display!==''){
@@ -3795,9 +3928,15 @@ function handleAppPopstate(){
     return;
   }
 
-  // 4) On Home with nothing open: don't re-arm. The next back press leaves
-  //    the app, which is what back should do from the front door.
+  // 4) On Home with nothing open: two-tap exit. The first back says so and
+  //    stands the guard down; the second back (within 3 seconds) actually
+  //    leaves. An accidental single back never closes the app anymore, and
+  //    any tap anywhere re-arms the trap (enterApp's click listener).
+  const now=Date.now();
   appBackTrapArmed=false;
+  if(now-homeBackAt<=3000)return;// second press: leave - no history state left
+  homeBackAt=now;
+  showExitToast();
 }
 
 function armOnboardingBackTrap(){
@@ -4001,6 +4140,141 @@ function finishOnboard(){
   initApp();
 }
 
+// ─── APP TOUR (navigation walkthrough) ────────────────────────────────────────
+// A short guided walk of the screens, auto-shown once after setup and
+// replayable any time from Profile → "How to use this app". Each step switches
+// to the screen it explains and frames the key control. Skipping is one tap.
+const NAV_TOUR_STEPS=[
+  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 6',title:'This is Today — your home base',
+   body:'Your day counter, today\'s lesson, and the SOS button live here. If a craving hits, the red SOS button is one tap away.'},
+  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 6',title:'Tools — everything for right now',
+   body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
+  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'3 of 6',title:'Friendly — your AI companion',
+   body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
+  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'4 of 6',title:'Profile — your plan and settings',
+   body:'Your subscription, reminders, app lock, and every setting live here — including the button that brings this tour back.'},
+  {screen:null,target:'#guide-fab',step:'5 of 6',title:'Lost? The guide bot knows the way',
+   body:'This floating ? answers plain questions — "where is my journal?" — on any screen. Free, always available.'},
+  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'6 of 6',title:'Every lesson can be listened to',
+   body:'Tap Listen and the lesson reads aloud while you do anything else in the app — a player floats above the nav so you can pause it any time.'},
+];
+let navTourIdx=0;
+function startNavTour(){
+  const ov=document.getElementById('nav-tour');
+  if(!ov||ov.style.display==='block')return;
+  S.navTourDone=true;save();// never auto-shows again; Profile is the replay door
+  navTourIdx=0;
+  ov.style.display='block';
+  navTourShowStep();
+}
+function navTourShowStep(){
+  const st=NAV_TOUR_STEPS[navTourIdx];
+  if(st.screen)switchTo(st.screen);
+  if(st.tab)actBn(st.tab);
+  document.getElementById('nav-tour-step').textContent=st.step;
+  document.getElementById('nav-tour-title').textContent=st.title;
+  document.getElementById('nav-tour-body').textContent=st.body;
+  document.getElementById('nav-tour-next').textContent=navTourIdx===NAV_TOUR_STEPS.length-1?'Done ✓':'Next →';
+  document.getElementById('nav-tour-dots').innerHTML=NAV_TOUR_STEPS.map((_,i)=>
+    '<div style="width:8px;height:8px;border-radius:50%;background:'+(i===navTourIdx?'var(--accent)':'var(--bdr)')+'"></div>').join('');
+  // Let the freshly-switched screen finish laying out, then frame the target.
+  setTimeout(navTourFrame,150);
+}
+function navTourFrame(){
+  const st=NAV_TOUR_STEPS[navTourIdx];
+  const spot=document.getElementById('nav-tour-spot');
+  const el=st.target?document.querySelector(st.target):null;
+  if(!el){spot.style.display='none';return;}
+  const r=el.getBoundingClientRect();
+  spot.style.display='block';
+  spot.style.left=(r.left-8)+'px';
+  spot.style.top=(r.top-8)+'px';
+  spot.style.width=(r.width+16)+'px';
+  spot.style.height=(r.height+16)+'px';
+}
+function navTourNext(){
+  navTourIdx++;
+  if(navTourIdx>=NAV_TOUR_STEPS.length){endNavTour();return;}
+  navTourShowStep();
+}
+function endNavTour(){
+  document.getElementById('nav-tour').style.display='none';
+}
+// ─── POST-ONBOARDING WELCOME ─────────────────────────────────────────────────
+function showWelcomeOverlay(){
+  const el=document.getElementById('welcome-overlay');
+  if(!el||S.welcomeShown)return;
+  S.welcomeShown=true;save();
+  el.style.display='flex';
+  // Read it aloud where the phone allows it (a tap just happened during setup,
+  // so most browsers let the voice speak). If not, the words are on screen.
+  try{
+    if(!('speechSynthesis' in window))return;
+    const u=new SpeechSynthesisUtterance('Welcome. You made a difficult decision, and it is the bravest one you have made in a long time. You are on a path now, to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going, you do not give up. It is in the dark where the work is done, and in the light where it is shown. This is a ninety day program with continuous support. You do not have to do this perfectly. You just have to do today.');
+    u.rate=0.95;u.pitch=1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function closeWelcomeOverlay(){
+  document.getElementById('welcome-overlay').style.display='none';
+  maybeStartNavTour();
+}
+function maybeStartNavTour(){
+  if(!S.navTourDone)setTimeout(startNavTour,300);
+}
+// ─── MEDITATION ROOM ─────────────────────────────────────────────────────────
+let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0;
+function openMeditation(){
+  document.getElementById('meditation-overlay').style.display='flex';
+  wakeLockAcquire('meditation');
+}
+function startMeditation(min){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  medRemainMs=min*60000;medPaused=false;medEndsAt=Date.now()+medRemainMs;
+  document.getElementById('med-dur-row').style.display='none';
+  document.getElementById('med-pause-btn').style.display='';
+  document.getElementById('med-pause-btn').textContent='Pause';
+  calmSoundOn();updateCalmToggles();
+  medTick();
+  medTimer=setInterval(medTick,1000);
+}
+function medTick(){
+  if(medPaused)return;
+  medRemainMs=Math.max(0,medEndsAt-Date.now());
+  const s=Math.ceil(medRemainMs/1000);
+  document.getElementById('med-timer').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+  if(medRemainMs<=0){medFinish();return;}
+  const phaseEl=document.getElementById('med-circle');
+  const inPhase=Math.floor((Date.now()/4000)%2)===0;
+  phaseEl.style.transform=inPhase?'scale(1.22)':'scale(1)';
+  document.getElementById('med-circle-txt').textContent=inPhase?'Breathe in':'Breathe out';
+  document.getElementById('med-phase').textContent=inPhase?'Breathe in — soften the shoulders':'Breathe out — let it go';
+}
+function medPauseToggle(){
+  medPaused=!medPaused;
+  const btn=document.getElementById('med-pause-btn');
+  if(medPaused){medRemainMs=Math.max(0,medEndsAt-Date.now());btn.textContent='Resume';}
+  else{medEndsAt=Date.now()+medRemainMs;btn.textContent='Pause';}
+}
+function medFinish(){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  calmSoundOff();updateCalmToggles();
+  document.getElementById('med-circle').style.transform='scale(1)';
+  document.getElementById('med-circle-txt').textContent='Done';
+  document.getElementById('med-phase').textContent='Session complete — carry the quiet with you.';
+  document.getElementById('med-timer').textContent='0:00';
+  document.getElementById('med-pause-btn').style.display='none';
+  document.getElementById('med-dur-row').style.display='flex';
+  logActivity('meditation',{});
+}
+function closeMeditation(){
+  if(medTimer){clearInterval(medTimer);medTimer=null;}
+  calmSoundOff();updateCalmToggles();
+  wakeLockRelease('meditation');
+  document.getElementById('meditation-overlay').style.display='none';
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initApp(){
   if(!S.currentAddiction&&S.selectedAddictions.length)S.currentAddiction=S.selectedAddictions[0];
@@ -4012,6 +4286,9 @@ function initApp(){
   // First visit: tell them what the floating ? is. Gone forever after one tap.
   const fabLabel=document.getElementById('guide-fab-label');
   if(fabLabel)fabLabel.style.display=S.guideFabExplained?'none':'block';
+  // Post-setup: the welcome message shows (and speaks) once, then the tour.
+  if(!S.welcomeShown)setTimeout(showWelcomeOverlay,600);
+  else maybeStartNavTour();
   renderMiniPricingRows();
   loadLifetimeAvailability();
   applyPlayBuildUI();
@@ -4206,6 +4483,10 @@ function updateStats(){
   const days=Math.max(0,Math.floor(diff/86400000));
   const hours=Math.max(0,Math.floor(diff/3600000));
   const saved=(days*S.dailySpend).toFixed(0);
+  // Daily win: every new day is its own small milestone - a moment, not a nag.
+  // Milestone days already get the bigger celebration, so the daily win steps
+  // aside and lets that one speak.
+  if(days>0&&days!==(S.lastDailyWinDay||0)&&!MILESTONES.some(m=>m.days===days)){S.lastDailyWinDay=days;save();maybeShowDailyWin(days);}
 
   if(days>(S.longestStreak||0)){S.longestStreak=days;S.longestStreakDate=new Date().toISOString();save();}
 
@@ -4213,7 +4494,10 @@ function updateStats(){
   if(justHitMilestone){
     S.notifiedMilestones=(S.notifiedMilestones||[]).concat(justHitMilestone.days);
     save();
-    maybeNovaProNudge(`${justHitMilestone.days} days — that's real. If you'd like, I can help you understand what's actually been working for you at a deeper level with Friendly Pro. No pressure though — today is worth celebrating on its own.`);
+    // A milestone day belongs to everyone, not just Pro. Burst + congrats card
+    // for all; the Pro deep-dive is an optional extra, never the only thing.
+    celebrationBurst();
+    openMilestoneCelebration(justHitMilestone.days);
   }
   maybeShowProMilestoneCelebration(days);
   maybeShowMilestoneOffer();
@@ -4225,6 +4509,13 @@ function updateStats(){
 
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  const progLbl=document.getElementById('program-lbl');
+  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-day program — support continues past day 90`:'90 days done — continuous support continues';
+  const focusLbl=document.getElementById('focus-lbl');
+  if(focusLbl){
+    const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
+    focusLbl.textContent=list.length>1?('Focus: '+list.join(' · ')):'';
+  }
   document.getElementById('h-hours').textContent=hours.toLocaleString();
   document.getElementById('h-saved').textContent='$'+Number(saved).toLocaleString();
 
@@ -4759,6 +5050,9 @@ function buildStreakHistoryList(){
 function maybeShowProMilestoneCelebration(days){
   if(!S.isPro)return;
   if(!PRO_MILESTONE_DAYS.includes(days))return;
+  // Base milestone days already celebrate for everyone in updateStats; the Pro
+  // path only adds days the free milestone list doesn't cover (e.g. day 21).
+  if(MILESTONES.some(m=>m.days===days))return;
   if((S.notifiedProMilestones||[]).includes(days))return;
   S.notifiedProMilestones=(S.notifiedProMilestones||[]).concat(days);
   save();
@@ -4825,6 +5119,20 @@ function buildMilestoneEncouragement(days){
 function closeMilestoneCelebration(){
   document.getElementById('milestone-celebration-modal').classList.remove('open');
 }
+// ─── DAILY WIN MOMENT ────────────────────────────────────────────────────────
+// Every new day gets its own quiet celebration - a burst and one honest line.
+// Milestones mark the big numbers; this marks the ordinary showing-up that
+// makes the big numbers possible.
+function maybeShowDailyWin(days){
+  const el=document.getElementById('daily-win-modal');
+  if(!el)return;
+  const msg=DAY_90_UPLIFTS[Math.max(0,days-1)%DAY_90_UPLIFTS.length];
+  document.getElementById('dw-days').textContent=days;
+  document.getElementById('dw-message').textContent=msg;
+  el.classList.add('open');
+  celebrationBurst();
+}
+function closeDailyWin(){document.getElementById('daily-win-modal').classList.remove('open');}
 // Reflection without leaving the lesson - nobody keeps a pen handy or wants to
 // bounce between screens mid-thought. Writes a real journal entry in place.
 function saveLessonReflection(inputId,savedId){
@@ -5725,7 +6033,7 @@ function openSlippedFlow(){
   const totalEver=(S.totalSoberDaysEver||0)+getDays();
   const longest=Math.max(S.longestStreak||0,getDays());
   const lifetimeNote=totalEver>0?` Your lifetime total — ${totalEver} day${totalEver===1?'':'s'} — and your longest run of ${longest} never reset.`:'';
-  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} What matters now is the next choice, not this one.`;
+  document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} The days you already won are yours forever — and the next 24 hours are where the comeback starts.`;
   document.getElementById('slipped-modal').classList.add('open');
   logActivity('slip_reported');
   novaNudge("I saw you check in after a slip. I'm not here to judge you — a slip is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
@@ -5879,9 +6187,36 @@ function openRoom(category){
   actBn('bn-plans');
 }
 
+// Rooms stay safe by design: a post that attacks, hates, or discriminates
+// against people — or drops to raw abuse — is locked out at the door, with an
+// honest explanation instead of a silent swallow. The list is deliberately
+// strict and can grow; reclaimed words (e.g. some community terms) are left
+// out so the lockout targets abuse, not people.
+const ROOM_BLOCK_WORDS=['fuck','fucking','fucked','fucker','fuckers','motherfucker','motherfuckers','shit','bullshit','bitch','bitches','asshole','assholes','cunt','cunts','bastard','bastards','whore','whores','slut','sluts','twat','twats','dickhead','dickheads','prick','pricks','wanker','wankers','bollocks','arsehole','arseholes','douchebag','jackass','jackasses','pussy','nigga','nigger','faggot','faggots','retard','retards','kike','tranny','trannies','chink','gook','spic','spics','wetback','wetbacks','beaner','beaners','coon','jigaboo','sambo','raghead','towelhead','cameljockey','kraut','dago','wop','polack','mick','injun','redskin','gyp','halfbreed','shemale','cripple','mongoloid','porchmonkey','zipperhead','sandnigger','niger'];
+const ROOM_BLOCK_PHRASES=['kill yourself','kill urself','neck yourself','end it all','go die','die in a fire','kys'];
+function roomFilterHits(txt){
+  const t=' '+String(txt).toLowerCase()+' ';
+  if(ROOM_BLOCK_PHRASES.some(p=>t.includes(p)))return true;
+  // Hate aimed at a person or a group. "I hate my addiction" and "I don't
+  // hate you" must both stay sayable — recovery runs on that honesty — so
+  // only object-directed hate trips this, and a "don't / not / never" right
+  // before the word disarms it.
+  if(/\bhate\s+(?:all\s+of\s+|all\s+|on\s+)?(you|yourself|everyone|people|anyone|women|men|girls|boys|kids|children|black|white|whites|gays?|lesbians?|jews?|muslims?|christians?|immigrants?|refugees?|hispanics?|asians?|trans)\b/i.test(t)){
+    if(/\b(don't|dont|doesn't|doesnt|didn't|didnt|not|never|no)\s+hate\b/i.test(t)){/* "don't hate" is support, not abuse */}
+    else return true;
+  }
+  return ROOM_BLOCK_WORDS.some(w=>{
+    if(w.length<=3)return t.includes(' '+w+' ')||t.includes(' '+w+'s ')||t.includes(' '+w+'es ');
+    return t.includes(w);
+  });
+}
 function submitPost(){
   const inp=document.getElementById('postInput');
   const txt=inp.value.trim();if(!txt)return;
+  if(roomFilterHits(txt)){
+    appInfo('Room locked out',"That message can't be posted here. Rooms exist to support people — language that attacks, hates, or discriminates is locked out, no exceptions. Reword it and it will go through.");
+    return;
+  }
   S.communityPosts.unshift({date:new Date().toISOString(),name:S.name||'You',days:getDays(),body:txt,likes:0,category:currentRoom||S.currentAddiction||'Other'});
   save();
   inp.value='';
@@ -5936,7 +6271,7 @@ function renderCommunityPosts(){
       if((p.category||'Other')!==room)return;
       const ds=new Date(p.date).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
       const div=document.createElement('div');div.className='post';div.setAttribute('data-post-idx',idx);
-      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${p.name}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
+      div.innerHTML=`<div class="ph"><div class="av av-p">${(p.name||'Y')[0].toUpperCase()}</div><div><div class="pu">${(p.name||'').replace(/</g,'&lt;')}</div><div class="pm">${p.days} days ${roomTerm} · ${ds}</div></div></div><div class="pb">${p.body.replace(/</g,'&lt;')}</div><div class="pacts"><button class="pa" onclick="likePost(this)"><i class="ti ti-heart" style="font-size:16px"></i> <span>${p.likes||0}</span></button><button class="pa"><i class="ti ti-message-circle" style="font-size:16px"></i> <span>0 replies</span></button><button class="pa" onclick="reportPost(this)" style="margin-left:auto"><i class="ti ti-alert-triangle" style="font-size:14px"></i> Report</button></div>`;
       container.appendChild(div);
     });
   }
@@ -5962,13 +6297,13 @@ function renderCommunityPosts(){
 // ─── TIMELINE ─────────────────────────────────────────────────────────────────
 // Physical-dependency timeline - only accurate for substances the body actually withdraws from.
 const TL_DATA_CHEMICAL=[
-  {range:'Hours 6–24',phase:'Early withdrawal',desc:'Anxiety, shaking, sweating, nausea, and headaches begin. Heart rate and blood pressure may rise.',warn:'If you experience severe symptoms, seek medical support immediately.',days:[0,1]},
+  {range:'Hours 6–24',phase:'Early withdrawal',desc:'Anxiety, shaking, sweating, nausea, and headaches begin. Your body is reacting to the change — you may feel on edge and unwell.',warn:'If you experience severe symptoms, seek medical support immediately.',days:[0,1]},
   {range:'Days 1–3',phase:'Peak withdrawal',desc:'Symptoms peak. Risk of seizures is highest during this window. Sleep is disrupted and irritability is intense.',warn:'Medically supervised detox is strongly recommended during this phase.',days:[1,3]},
   {range:'Days 4–7',phase:'Acute phase easing',desc:'Physical symptoms begin to ease. Mood swings, cravings, and brain fog remain. Sleep starts to improve.',days:[3,7]},
   {range:'Weeks 2–4',phase:'Early recovery',desc:'Emotional volatility and cravings continue. Energy and mental clarity start returning. Many report better sleep.',days:[7,30]},
-  {range:'Weeks 4–12',phase:'Post-acute withdrawal (PAWS)',desc:'Brain chemistry is actively rebalancing. Mood dips and occasional cravings are normal. Many people notice significant improvement around day 60.',days:[30,84]},
-  {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep normalises. The dopamine system repairs. Stress tolerance improves. Cravings become less frequent and shorter-lived.',days:[84,180]},
-  {range:'6 months–1 year',phase:'Restoration',desc:'Liver function and cardiovascular health measurably improve. Cognitive function often returns to pre-addiction levels.',days:[180,365]},
+  {range:'Weeks 4–12',phase:'The rough middle stretch',desc:'Your body is still adjusting. Mood dips and occasional cravings are normal. Many people notice a real shift around day 60.',days:[30,84]},
+  {range:'Months 3–6',phase:'Stabilisation',desc:'Sleep steadies. The pull loosens its grip. Stress tolerance improves. Cravings become less frequent and shorter-lived.',days:[84,180]},
+  {range:'6 months–1 year',phase:'Restoration',desc:'You start to feel like yourself again — steadier energy, clearer thinking, and a body that feels more like yours.',days:[180,365]},
   {range:'1 year+',phase:'Long-term recovery',desc:'Risk of setback drops substantially. Relationships, career, and wellbeing continue to strengthen. You are proof it is possible.',days:[365,9999]},
 ];
 // Behavioral-addiction timeline - no organs involved, so this is framed around urge intensity and
@@ -6094,7 +6429,7 @@ const PARTNER_SECTION_COPY={
     rowSub:'Help your partner understand — and fight this together',
     intro:"Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.",
     label:'5 things every partner should know',
-    list:`<b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it's wiring in the brain's reward system that formed long before you.<br>
+    list:`<b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it stops feeling like a choice, and it's a pattern that formed long before you.<br>
             <b style="color:var(--tp)">2.</b> Shame is the fuel. Anger and silent disappointment feed it; understanding starves it.<br>
             <b style="color:var(--tp)">3.</b> Policing doesn't work. Safety to be honest does — "I'm struggling today" should never start a fight.<br>
             <b style="color:var(--tp)">4.</b> A slip is a lost battle, not a betrayal — and the days after a slip decide everything.<br>
@@ -6106,7 +6441,7 @@ const PARTNER_SECTION_COPY={
     rowSub:"You're the one who loves them. This part is yours.",
     intro:"Most people who love someone through this don't fail because they're weak. They fail because nobody ever told them what they're actually dealing with — so they take the lying personally, fight the wrong battles, and burn out carrying weight that was never theirs. That ends here. This section isn't about fixing them. It's about keeping you whole while you decide what you can carry.",
     label:'5 things to hold onto',
-    list:`<b style="color:var(--tp)">1.</b> The lying isn't about your worth. People in active addiction lie to everyone — mostly themselves. It's the disease protecting itself, not a measure of what you deserve.<br>
+    list:`<b style="color:var(--tp)">1.</b> The lying isn't about your worth. People in active addiction lie to everyone — mostly themselves. It's the addiction protecting itself, not a measure of what you deserve.<br>
             <b style="color:var(--tp)">2.</b> You didn't cause it, and you can't cure it. Their recovery has to be theirs. You can support the person without carrying the outcome.<br>
             <b style="color:var(--tp)">3.</b> A slip isn't your failure either. You can do everything right and they can still fall. That math was never yours to own.<br>
             <b style="color:var(--tp)">4.</b> Boundaries are love with a spine. Saying "not in this house" or "not around me" isn't abandonment — it's often the most honest help there is.<br>
@@ -6336,10 +6671,10 @@ const VG_STEPS=[
   {t:"The wave is already losing power. You don't need to be perfect today. You just need this next minute — and you're already in it.",ph:'rest'},
   {t:"Stay here breathing with the circle as long as you like. When you're ready, tap the button and go do the next small thing.",ph:'rest'},
 ];
-// Three pre-recorded voices (all generated locally and free - see
-// tools/generate-sos-talk.py) plus the phone's own speech engine as a fourth
-// choice for anyone who prefers it. Each recording has its own cue timeline
-// (start second of every step) so captions stay in sync no matter the voice.
+// Five recorded voices, all public-domain (see tools/generate-sos-talk.py).
+// Each recording has its own cue timeline (start second of every step) so
+// captions stay in sync no matter the voice. No phone/robot voice, ever -
+// if a recording is missing the app says so instead of switching voices.
 // Regenerate recordings AND cues together if the script text ever changes.
 const VG_VOICES={
   warm:{label:'Warm',url:'audio/sos-talk-warm.mp3',cues:[0,4.64,13.9,22.93,34.94,46.97,54.26,62.8,71.65,77.97,84.26,92.27,99.56,107.52,115.21]},
@@ -6347,9 +6682,8 @@ const VG_VOICES={
   gentle:{label:'Gentle',url:'audio/sos-talk-gentle.mp3',cues:[0,5.49,14.87,22.2,31.26,41.71,47.46,54.91,62.05,69.21,77.28,83.02,89.2,95.64,104.15]},
   clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,5.16,14.94,22.72,32.18,43.81,49.88,57.43,65.26,72.69,80.94,86.69,93.05,100.05,109.5]},
   male:{label:'Calm male',url:'audio/sos-talk-male.mp3',cues:[0,5.81,16.36,25.21,35.2,46.59,53.23,61.53,69.9,77.81,85.78,91.36,97.73,105.26,116.94]},
-  phone:{label:"Phone's own"},
 };
-const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','phone'];
+const VG_VOICE_ORDER=['warm','soft','gentle','clear','male'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
 let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null,vgFellBack=false,vgUserPaused=false;
 function vgPickVoice(){
@@ -6378,7 +6712,6 @@ function vgStartVoice(fromStep){
   if(fromStep>=VG_STEPS.length){vgSilentLoop();return;}
   vgFellBack=false;updateVgVoiceBtn();
   const key=vgVoiceKey();
-  if(key==='phone'){vgStartTTS(fromStep);return;}
   vgStartAudio(key,fromStep);
 }
 function vgStartAudio(key,fromStep){
@@ -6424,11 +6757,12 @@ function updateVgVoiceBtn(){
   // and only that case - on a recorded voice this stays silent.
   const n=document.getElementById('vg-fallback-note');
   if(!n)return;
-  const onPhoneVoice=vgFellBack||vgVoiceKey()==='phone';
-  n.style.display=onPhoneVoice?'block':'none';
-  if(onPhoneVoice)n.textContent=vgFellBack
-    ?"Using your phone's own voice — the recorded one didn't load, so this will pause if you leave the app."
-    :"Your phone's own voice pauses if you leave the app. Tap Voice for a recorded one that keeps playing.";
+  if(vgFellBack){
+    n.style.display='block';
+    n.textContent="The recording didn't load — keeping the captions and circle going instead of switching to your phone's own voice.";
+  }else{
+    n.style.display='none';
+  }
 }
 function vgSyncStep(i){
   if(i===vgAudioStep||!vgActive)return;
@@ -6469,12 +6803,17 @@ function vgStopAudio(){
   vgClearMediaSession();
 }
 function vgFallbackToTTS(){
-  // The MP3 couldn't load or play - the built-in voice picks up from the same step.
+  // The MP3 couldn't load or play. No robot voice, ever - if the recording is
+  // missing, the guide keeps pacing captions and the breathing circle instead
+  // of handing the talk to the phone's own voice (that was exactly what made
+  // people think the app was broken).
   const from=Math.max(0,vgAudioStep);
   vgStopAudio();
   if(!vgActive)return;
   vgFellBack=true;updateVgVoiceBtn();
-  vgStartTTS(from);
+  const cap=document.getElementById('vg-caption');
+  if(cap)cap.textContent="The recording didn't load on this device — follow the circle, I'm right here with you.";
+  vgSilentLoop();
 }
 function vgStartTTS(fromStep){
   if(!('speechSynthesis' in window)){vgSpeakStep(fromStep);return;}// captions alone still pace the talk
@@ -6538,12 +6877,9 @@ function vgSilentLoop(){
   ];
   let idx=0,cycles=0,compIdx=0;
   const say=(text)=>{
-    if(!('speechSynthesis' in window))return;
-    const u=new SpeechSynthesisUtterance(text);
-    const voice=vgPickVoice();
-    if(voice)u.voice=voice;
-    u.rate=0.85;u.pitch=1;
-    speechSynthesis.speak(u);
+    // Recorded voices only. After the talk, breathing cues and company lines
+    // show as captions rather than switching to the phone's own voice.
+    if(cap)cap.textContent=text;
   };
   const run=()=>{
     if(!vgActive)return;
@@ -6593,7 +6929,7 @@ let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,
 // branch and listed in data/lesson-audio-manifest.json). A recording is a real
 // <audio> element - it survives screen-off and app-switch like a podcast, can
 // pause/resume/seek, and gets a lock-screen card. Anything without a recording
-// (older manifests, lesson packs, "Phone's own" voice) uses the TTS engine
+// (older manifests, lesson packs) show a clear 'recording unavailable' note
 // below, which still gains pause/resume.
 let lessonAudioMode='tts',laAudio=null,laPausedByUser=false,lessonAudioMeta=null,lessonAudioText='',lessonAudioTtsPausedIdx=0;
 let LESSON_AUDIO_MANIFEST=null,lessonAudioManifestReq=null;
@@ -6747,13 +7083,15 @@ function updateSpeedBtns(){
   ['lessonSpeedBtn','pack-speed-btn','la-ov-speed'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=l;});
 }
 function updateListenBtn(){
-  // The floating pill follows the audio, not the screen - the lesson keeps
-  // playing wherever you navigate, and this opens the full player from anywhere.
-  const pill=document.getElementById('audio-pill');
-  if(pill)pill.style.display=lessonAudioState==='playing'?'flex':'none';
-  // First time the pill ever appears, say what it is; once they've used it, icon only.
-  const pillLabel=document.getElementById('audio-pill-label');
-  if(pillLabel)pillLabel.style.display=(lessonAudioState==='playing'&&!S.audioPillExplained)?'block':'none';
+  // The mini player follows the audio, not the screen - the lesson keeps
+  // playing wherever you navigate, and it stays one tap from pause, stop, or
+  // the full read-along player. First time it appears, say what it is.
+  const mp=document.getElementById('mini-player');
+  if(mp)mp.style.display=lessonAudioState==='playing'?'block':'none';
+  const sub=document.getElementById('mini-sub');
+  if(sub)sub.textContent=S.audioPillExplained
+    ?'Playing on any screen — tap for the big player'
+    :'Lesson is playing — tap to open the player';
   ['lessonPauseBtn','pack-pause-btn'].forEach(id=>{
     const p=document.getElementById(id);
     if(!p)return;
@@ -6801,15 +7139,22 @@ function startLessonAudio(text,btnId,meta,resume){
   wakeLockAcquire('lesson-audio');
   const voice=lessonVoiceKey();
   const key=meta&&meta.category&&meta.day?`${meta.category}|${meta.day}|${meta.variant||'base'}`:null;
-  const fallToTTS=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)startLessonTTS(text,resume);};
-  if(!key||voice==='phone'){fallToTTS();return;}
+  const fail=()=>{if(lessonAudioState==='playing'&&lessonAudioText===text)laRecordingUnavailable();};
+  if(!key){fail();return;}
   loadLessonAudioManifest().then(m=>{
     if(lessonAudioState!=='playing'||lessonAudioText!==text)return;// stopped or replaced while the manifest loaded
     const entry=m&&m.items&&m.items[key];
     const rel=entry&&entry[voice];
     if(rel)startLessonMp3((m.base||'')+rel,resume);
-    else fallToTTS();
+    else fail();
   });
+}
+function laRecordingUnavailable(){
+  // The recording is missing or failed to load. Honest over robot voice: stop
+  // cleanly with a clear note so nobody hears the phone's own voice coming out
+  // of the app and thinks something is broken.
+  stopLessonAudio();
+  appInfo('Listen',"This lesson's recording isn't available on this device right now. Read along below — or tap the voice button to try another voice.");
 }
 function startLessonTTS(text,resume){
   lessonAudioMode='tts';
@@ -6839,8 +7184,7 @@ function startLessonMp3(url,resume){
   // voice at the same spot, rather than going silent.
   a.addEventListener('error',()=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    const frac=a.duration?a.currentTime/a.duration:((resume&&resume.atFraction)||0);
-    laStopMp3();startLessonTTS(lessonAudioText,{atFraction:frac});
+    laStopMp3();laRecordingUnavailable();
   });
   // Same rule as the SOS talk: everything except the user's own pause is
   // retried, so battery savers and audio-focus grabs don't end the lesson.
@@ -6854,7 +7198,7 @@ function startLessonMp3(url,resume){
   const p=a.play();
   if(p&&p.catch)p.catch(()=>{
     if(laAudio!==a||lessonAudioState!=='playing')return;
-    laStopMp3();startLessonTTS(lessonAudioText,resume);
+    laStopMp3();laRecordingUnavailable();
   });
 }
 function laStopMp3(){
@@ -6913,7 +7257,29 @@ function laSeek(s){
   if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration){
     laAudio.currentTime=Math.min(Math.max(0,laAudio.duration-0.2),Math.max(0,laAudio.currentTime+s));
     updateLessonPlayerUI();
+    return;
   }
+  // TTS can't seek in time, but the queue IS the lesson split into sentences -
+  // "back" replays the sentence that's talking, "forward" skips it. Same
+  // promise as the recording skips: no pause, no start-over.
+  if(lessonAudioMode!=='tts'||lessonAudioState!=='playing'||laPausedByUser)return;
+  const len=lessonAudioQueue.length;
+  if(!len)return;
+  // While sentence N is talking, lessonAudioIdx===N+1 (it was incremented when
+  // the utterance was queued). Back targets N (replay it), forward targets N+1
+  // (skip the rest of the current one).
+  let idx;
+  if(s<0){
+    idx=Math.max(0,lessonAudioIdx-1);
+    if(idx===lessonAudioIdx)return; // nothing spoken yet - nowhere to go back to
+  }else{
+    idx=lessonAudioIdx;
+    if(idx>=len){stopLessonAudio();return;} // last sentence - skip ends the lesson
+  }
+  lessonAudioIdx=idx;
+  lessonAudioChunkStartedAt=Date.now();
+  try{speechSynthesis.cancel();}catch(e){}
+  lessonAudioNext();
 }
 function laSliderSeek(v){
   if(lessonAudioMode==='mp3'&&laAudio&&laAudio.duration)laAudio.currentTime=(v/1000)*laAudio.duration;
@@ -6972,13 +7338,37 @@ function closeLessonPlayer(){
 function updateLessonPlayerUI(){
   const ovPlay=document.getElementById('la-ov-play');
   if(ovPlay){ovPlay.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';renderIcons(ovPlay);}
+  // Mirror into the floating mini player: title, play state, and progress bar
+  // stay live even when the full player is closed and the user is elsewhere.
+  const m=lessonAudioMeta||{};
+  const mt=document.getElementById('mini-title');
+  if(mt)mt.textContent=m.day?`Day ${m.day}: ${m.title||'Lesson'}`:(m.title||'Lesson');
+  const mb=document.getElementById('mini-play');
+  if(mb){mb.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';renderIcons(mb);}
+  const bar=document.getElementById('mini-progress');
+  if(bar)bar.style.width=Math.round(100*laProgressFraction())+'%';
   if(!lessonPlayerOpen)return;
   if(lessonAudioState!=='playing'){closeLessonPlayer();return;}
   const isMp3=lessonAudioMode==='mp3';
-  // TTS can't seek, so the scrubber row and skip buttons only show on recordings.
+  // The scrubber row stays recordings-only (TTS can't seek in time), but the
+  // skip buttons work in BOTH modes: ±15s on recordings, sentence-jump on TTS.
   const seekrow=document.getElementById('la-ov-seekrow');
   if(seekrow)seekrow.style.display=isMp3?'':'none';
-  ['la-ov-back','la-ov-fwd'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.visibility=isMp3?'visible':'hidden';});
+  const back=document.getElementById('la-ov-back');
+  const fwd=document.getElementById('la-ov-fwd');
+  if(back&&back.getAttribute('data-mode')!==lessonAudioMode){
+    back.setAttribute('data-mode',lessonAudioMode);
+    back.style.visibility='visible';
+    back.innerHTML=isMp3?'−15s':'<i class="ti ti-player-skip-back"></i>';
+    back.title=isMp3?'Back 15 seconds':'Back one sentence';
+  }
+  if(fwd&&fwd.getAttribute('data-mode')!==lessonAudioMode){
+    fwd.setAttribute('data-mode',lessonAudioMode);
+    fwd.style.visibility='visible';
+    fwd.innerHTML=isMp3?'+15s':'<i class="ti ti-player-skip-forward"></i>';
+    fwd.title=isMp3?'Forward 15 seconds':'Forward one sentence';
+  }
+  renderIcons();
   if(isMp3&&laAudio&&laAudio.duration){
     const sl=document.getElementById('la-ov-slider');
     if(sl&&document.activeElement!==sl)sl.value=Math.round(1000*laAudio.currentTime/laAudio.duration);
@@ -7140,8 +7530,19 @@ function chooseFaith(v){
     const el=document.getElementById('fc-'+k);
     if(el)el.classList.toggle('on',k===v);
   });
+  // The choice must DO something: yes/open opens the Spiritual Path in the
+  // plan immediately (Day 1 ready) so the app visibly changes. "No" keeps
+  // faith out everywhere, as promised.
+  if(v!=='no'){
+    S.customPackProgress=Object.assign({},S.customPackProgress||{},{spiritual:1});
+  }
+  updateHomeFaithCard();
   renderFaithLead();
   save();
+}
+function updateHomeFaithCard(){
+  const el=document.getElementById('home-faith-card');
+  if(el)el.style.display=faithOn()?'flex':'none';
 }
 // The lead paragraph names the person's OWN habit back to them before they
 // answer - a general question about faith is easy to wave off; this one isn't.
@@ -7392,7 +7793,7 @@ function closeDistractionGen(){
   document.getElementById('distraction-modal').classList.remove('open');
 }
 
-// ─── ACCOUNTABILITY REMINDERS (Pro, honest in-app daily check-in) ─────────────
+// ─── ACCOUNTABILITY REMINDERS (free, honest in-app daily check-in) ─────────────
 function openAccountabilityReminders(){
   document.getElementById('accountability-toggle').classList.toggle('on',!!S.accountabilityRemindersEnabled);
   document.getElementById('accountability-modal').classList.add('open');
@@ -7406,7 +7807,7 @@ function toggleAccountabilityReminders(){
   save();
 }
 function maybeShowAccountabilityCheckin(){
-  if(!S.isPro||!S.accountabilityRemindersEnabled)return;
+  if(!S.accountabilityRemindersEnabled)return;
   const today=new Date().toDateString();
   if(S.lastAccountabilityCheckinDate===today)return;
   document.getElementById('accountability-checkin-modal').classList.add('open');
@@ -7757,6 +8158,100 @@ function updateNotificationPermissionUI(){
 // Pro used to be excluded here on the assumption that smart reminders covered
 // it - they don't, none of them is the daily lesson - so paying users were the
 // only ones getting no lesson reminder at all. Everyone gets this now.
+// 90 daily uplift messages, one per day of the program, then they keep cycling
+// for continuous support beyond day 90. The reminder is a gift, not a nudge.
+const DAY_90_UPLIFTS=[
+'One day is all anyone ever has to do. Today is yours.',
+'You showed up. That was the hardest part.',
+'Recovery isn\'t a straight line — it\'s a direction. You\'re pointed right.',
+'Be gentle with yourself today. You\'re doing something hard.',
+'The version of you that started this already did the brave thing.',
+'Progress isn\'t loud. It\'s the quiet choice you keep making.',
+'You don\'t have to feel ready. You just have to be here.',
+'Small steps are still steps. They all count.',
+'Whatever today brings, you don\'t have to carry it alone.',
+'Your past is a place you\'ve been, not a person you are.',
+'One breath at a time is a complete strategy.',
+'You\'re not behind. You\'re exactly where this takes you.',
+'Keep your head up — you\'ve survived every hard day so far.',
+'Rest isn\'t quitting. It\'s how you keep going.',
+'You are not your worst moment. Not even close.',
+'Recovery is a daily yes. Today, you already said it.',
+'The craving is a wave. Waves pass. You\'re still here.',
+'You\'re building something no one can take from you.',
+'Be proud of the small wins. They\'re the whole story.',
+'Your only job today is not to quit before tonight.',
+'It\'s okay to not be okay. It\'s not okay to give up.',
+'You\'ve already changed. Notice it.',
+'Strong isn\'t never falling. Strong is getting up again.',
+'This is the hardest work you\'ll ever do. That\'s why it\'s worth it.',
+'Don\'t compare your day one to someone else\'s day 500.',
+'You matter more than this struggle.',
+'Keep going. Your future self is counting on you.',
+'A moment of peace is still peace. Collect them.',
+'You\'re learning to be kind to the person who needed it most: you.',
+'Nothing about today has to be perfect. It just has to be.',
+'Every sober hour is an hour of freedom you earned.',
+'You\'re not weak for struggling. You\'re strong for staying.',
+'Somewhere inside you knows you can do this. Listen to that voice.',
+'Today\'s lesson isn\'t a chore — it\'s a gift to tomorrow\'s you.',
+'You\'ve made it through 100% of your hardest days.',
+'Breathe. You\'re here. That counts.',
+'Don\'t let a bad hour write your whole day.',
+'You\'re allowed to be proud of yourself. Really.',
+'The road is long, but you\'re not walking it alone.',
+'Your future is being decided by what you do today. Choose kindly.',
+'You are enough — even on the days you don\'t feel like it.',
+'Keep the promise you made to yourself. You\'re worth it.',
+'Healing is slow. That\'s how real healing works.',
+'You\'re not starting over. You\'re continuing, stronger.',
+'Be where your feet are. One moment at a time.',
+'The person you\'re becoming thanks you for today.',
+'It\'s okay to ask for help. That\'s courage, not weakness.',
+'Your recovery is nobody else\'s timeline.',
+'Even a short walk today is a win.',
+'You\'ve got this. Not because it\'s easy — because you\'re determined.',
+'Show yourself the patience you\'d show a friend.',
+'You\'re writing a new story. Today is another line.',
+'Feelings pass. Your commitment doesn\'t have to.',
+'Take it easy on yourself — you\'re doing the work.',
+'One more day of choosing you. That\'s everything.',
+'You are worthy of the life you\'re building.',
+'The hardest part is behind you: you started.',
+'Stay curious about tomorrow. It gets better.',
+'Your strength isn\'t loud. It\'s steady.',
+'Forgive yesterday. Show up today.',
+'You\'re not alone in this — millions walk the same road.',
+'Hydrate, breathe, move. Little things, big power.',
+'Your future is bright, and you\'re walking toward it.',
+'Don\'t rush the journey. Savor the progress.',
+'You\'re stronger than the voice that says give up.',
+'Every day of freedom is a victory. Today counts.',
+'Keep your eyes on your own paper. Your progress is yours.',
+'You\'re not defined by your addiction. You\'re defined by your fight.',
+'Peace is possible. You\'re building it daily.',
+'You showed up for yourself again. Notice that.',
+'It\'s okay to take it slow. Slow still gets there.',
+'You\'re more than this moment. Remember that.',
+'The work you\'re doing today is changing your life.',
+'Be proud — you\'re doing what most people never dare.',
+'One day at a time, and you\'re still standing.',
+'Your effort today is a deposit on tomorrow.',
+'You\'re exactly where you need to be. Keep going.',
+'Gentle reminder: you are loved, and you are enough.',
+'Today\'s struggle is tomorrow\'s strength.',
+'You don\'t have to be perfect to be proud.',
+'The quiet you\'re building is real. Protect it.',
+'You\'re choosing freedom with every single day.',
+'Hold on — the view gets better from here.',
+'Your recovery is the best thing you\'ll ever build.',
+'Be kind to yourself. You\'re healing.',
+'You\'ve come further than you think.',
+'Keep showing up. That\'s the whole secret.',
+'Today, choose you. Again.',
+'You are the author of this chapter. Write on.',
+'Days of you — and the road ahead is yours. Keep going.',
+];
 function maybeShowDailyLessonReminder(){
   if(S.remindersEnabled===false)return;
   // Outside the user's chosen hours, say nothing at all - and crucially, don't
@@ -7769,9 +8264,11 @@ function maybeShowDailyLessonReminder(){
   if(completedToday)return;
   S.lastDailyLessonReminderDate=today;
   save();
+  const dayNum=Math.max(1,getDays());
+  const uplift=DAY_90_UPLIFTS[(dayNum-1)%DAY_90_UPLIFTS.length];
   const reminderText=S.userType==='partner'
-    ?"Whenever you're ready, today's lesson in your track is here — it's built for the one carrying this, not the one causing it."
-    :`Quick reminder — today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
+    ?`${uplift} Whenever you're ready, today's lesson in your track is here — it's built for the one carrying this, not the one causing it.`
+    :`${uplift} Today's lesson (Day ${getLessonDayFor(S.currentAddiction)}) is ready whenever you are.`;
   novaNudge(reminderText);
   sendPhoneNotification("Today's lesson is ready",reminderText);
 }
@@ -7988,7 +8485,9 @@ function submitBedtimeReflection(){
 
 // Dispatcher - checked on app load and every 60s while the app stays open
 function evaluateSmartReminders(){
-  if(!S.isPro)return;
+  // Every reminder is free: the daily lesson reminder, the accountability
+  // check-in, and all smart reminders (morning, bedtime, urge, relapse,
+  // trend, category, lesson integration). Reminding is care, not a perk.
   const sr=S.smartReminders||{};
   const now=new Date();
   const hour=now.getHours(),minute=now.getMinutes();
@@ -8185,7 +8684,7 @@ const FALLBACK_PATTERNS=[
   {test:/paws|post.?acute|withdrawal/i,
    reply:[
      `PAWS (post-acute withdrawal syndrome) can make you feel like you're back at square one, even when you're not. Mood dips, brain fog, and occasional cravings weeks or months in are a normal part of your brain rebalancing.\n\nWhat's been the hardest part of it for you?`,
-     `What you're describing fits PAWS — the long tail of your brain recalibrating. It's uncomfortable, it's temporary, and it's a sign of healing, not failure.\n\nWhen does it hit you hardest — mornings, nights, certain situations?`,
+     `What you're describing fits PAWS — the long tail of your body and mind adjusting. It's uncomfortable, it's temporary, and it's a sign of healing, not failure.\n\nWhen does it hit you hardest — mornings, nights, certain situations?`,
    ]},
   {test:/can'?t (cope|handle|deal)|not coping|too much for me|drowning|barely (holding|hanging) on|falling apart/i,
    reply:[
@@ -8454,7 +8953,8 @@ function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // "Do this together" opens for everyone — the first 15 days are free (the
   // per-day gate is inside renderCouples), same cap as every lesson track.
-  if(S.isPro||key==='couples'){window[PRO_TOOLS[key].open]();return;}
+  // Reminders are all free now (daily lesson, accountability, smart reminders).
+  if(S.isPro||key==='couples'||key==='reminders'||key==='smartReminders'){window[PRO_TOOLS[key].open]();return;}
   showProToolPreview(key);
 }
 function showProToolPreview(key){
@@ -10058,6 +10558,8 @@ function restartOnboarding(){
     S.dailyHoursLost=0;
     S.lastDailyLessonReminderDate='';
     S.lastMissedLessonNoticeDate='';
+    S.navTourDone=false;// re-running setup re-offers the navigation tour
+    S.welcomeShown=false;// ...and the welcome message plays again
     save();
 
     document.getElementById('ob-name').value='';
@@ -10267,7 +10769,6 @@ const HELP_INDEX=[
   {name:'Reminders & notifications',sub:'Daily lesson nudge and notification sound',k:'reminder notification bell nudge sound alert',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('notif-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Dark mode',sub:'Switch between light and dark',k:'dark mode light theme night',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('dark-toggle');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Text size',sub:'Make the app text bigger or smaller',k:'text size font bigger smaller read',go:()=>openFontSizeModal()},
-  {name:'Update the app',sub:'Install the latest version',k:'update version new latest install upgrade app',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.getElementById('upd-run-sub');if(el)el.closest('.setting-row').scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'Fix my start date / streak',sub:'Corrects your day counter, nothing else changes',k:'reset start date streak wrong fix counter',go:()=>{switchTo('profile');actBn('bn-plans');setTimeout(()=>{const el=document.querySelector('.reset-btn');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},150);}},
   {name:'My emergency plan',sub:'Build it before you need it',k:'emergency plan prepare crisis ready',go:()=>openEmergencyPlan()},
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
@@ -10558,6 +11059,7 @@ function renderCouples(){
   const el=document.getElementById('couples-list');
   let html='';
   if(pack.length){
+    html+=`<div style="font-size:12.5px;color:var(--ts);line-height:1.6;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">Thirty real lessons, one a day, about the relationship itself — the check-ins, the hard conversations, the repair. Ten minutes together. Not a one-time assignment: a 30-day program for the two of you.</div>`;
     const finished=done>=pack.length;
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
@@ -10888,7 +11390,16 @@ async function checkForAppUpdates(){
   try{
     const res=await fetch('/api/update/check');
     const data=await res.json().catch(()=>({}));
-    if(!res.ok){sub.textContent=data.error||'Could not check right now.';return;}
+    if(!res.ok){
+      applyUpdateUIContext(data);
+      const tokenSub=document.getElementById('upd-token-sub');
+      if(tokenSub)tokenSub.textContent=data.hasToken?'Token set':'No token set';
+      sub.textContent=data.needsToken?'Private repo — add your GitHub token below to enable updates.':(data.error||'Could not check right now.');
+      return;
+    }
+    applyUpdateUIContext(data);
+    const tokenSub=document.getElementById('upd-token-sub');
+    if(tokenSub)tokenSub.textContent=data.hasToken?'Token set — private-repo updates will work.':'No token set — private-repo updates need one (tap to add).';
     sub.textContent=data.upToDate
       ?"You're on the latest version. ✓"
       :!data.current
@@ -10899,6 +11410,30 @@ async function checkForAppUpdates(){
   }
 }
 
+// Hosted (Railway) installs are always current - redeploys come from git, and
+// the in-place updater would write to an ephemeral filesystem that the next
+// deploy wipes. On those, hide the whole update section; the updater + token
+// row only make sense on a local install.
+function applyUpdateUIContext(data){
+  if(!data||!data.railway)return;
+  const wrap=document.getElementById('owner-updates-wrap');
+  if(wrap)wrap.style.display='none';
+}
+async function toggleUpdateToken(){
+  appPassword('GitHub token','Paste your fine-grained GitHub token (starts with github_pat_...). It is saved only on this install and is used only to read your app repo for updates.',async(token)=>{
+    const sub=document.getElementById('upd-token-sub');
+    try{
+      const res=await fetch('/api/update/settings/updatetoken',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){pwConfirmError(data.error||'Could not save the token.');return;}
+      closePwConfirmModal();
+      if(sub)sub.textContent=data.hasToken?'Token set — private-repo updates will work.':'Token removed.';
+      appInfo('GitHub token saved','GitHub accepted the token — updates will now work on this install.');
+    }catch(e){
+      pwConfirmError('Could not reach the server.');
+    }
+  });
+}
 function toggleAutoUpdate(){
   S.autoUpdate=S.autoUpdate===false;// undefined counts as on
   save();
@@ -10913,6 +11448,16 @@ let autoUpdateAttempted=false;
 // probing those endpoints put a red 403 in every regular user's console.
 let appIsOwner=false,appIsOwnerResolve;
 const appIsOwnerReady=new Promise(r=>{appIsOwnerResolve=r;});
+// The update UI (App updates + Diagnostics) is owner-only. Everyone else runs
+// the same server-side code, so they are automatically on the latest version
+// with no buttons - and nothing about updating shows up in their settings.
+function applyOwnerUI(){
+  const owner=!!appIsOwner;
+  ['owner-updates-wrap','owner-diag-sec'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display=owner?'':'none';
+  });
+}
 async function maybeAutoUpdate(){
   if(autoUpdateAttempted||S.autoUpdate===false||appUpdateRunning)return;
   await appIsOwnerReady;
@@ -10923,6 +11468,8 @@ async function maybeAutoUpdate(){
     const res=await fetch('/api/update/check');
     if(!res.ok)return;
     const data=await res.json();
+    applyUpdateUIContext(data);
+    if(data.railway)return;
     if(data.upToDate)return;
     // A brand-new install has no recorded version yet - that's not "out of
     // date", so don't kick off a background reinstall on someone's first open.
@@ -11141,12 +11688,16 @@ async function boot(){
   load();
   applyFontSize();
   applyDiscretionMode();
+  // Guard the gates too: back on sign-in / preview must not close the app
+  // and force a fresh login. The trap is already armed from enterApp when it
+  // matters; this covers the pre-app screens as well.
+  armAppBackTrap();
   try{
     const meRes=await fetch('/api/auth/me');
     if(meRes.ok){
       const me=await meRes.json();
       S.accountEmail=me.email;
-      appIsOwner=!!me.isOwner;appIsOwnerResolve();
+      appIsOwner=!!me.isOwner;appIsOwnerResolve();applyOwnerUI();
       // A pin-reset flag only counts when it's followed by a fresh credential
       // sign-in. Landing here means the old session survived (e.g. the logout
       // request failed offline) - drop the flag so it can't unlock anything.
@@ -11177,14 +11728,14 @@ async function boot(){
     // in-app guide. So enter the app on the cached identity; the next
     // successful boot reconciles with the server.
     if(S.startDate){
-      appIsOwnerResolve();
+      appIsOwnerResolve();applyOwnerUI();
       enterApp();
       return;
     }
   }
   // Whatever path landed here, the owner question is settled as "no" - resolve
   // so nothing awaits it forever. (Resolving twice is a harmless no-op.)
-  appIsOwnerResolve();
+  appIsOwnerResolve();applyOwnerUI();
   // Arriving from the check-in quiz (/?join=1): skip the welcome screen and land
   // straight on signup while the motivation is still warm.
   if(new URLSearchParams(window.location.search).get('join')){

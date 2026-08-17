@@ -1,0 +1,308 @@
+//@version=6
+// =============================================================================
+//  Market Structure — STRATEGY
+//
+//  The same rules as structure.pine, wired into TradingView's Strategy Tester
+//  so the results can be checked without taking my word for anything.
+//
+//  Run it on MES, 1 hour. That is the only configuration anything was measured
+//  on.
+//
+//  ---------------------------------------------------------------------------
+//  BEFORE YOU BELIEVE THE NUMBER IT GIVES YOU
+//
+//  My own testing produced +0.62R per trade, and it was wrong. The backtest let
+//  a trade reach its target on the bar it was filled on, which assumes an order
+//  of events that OHLC data does not contain — a long fills when the bar trades
+//  DOWN to the limit, and that bar's high may have printed before the fill.
+//  Resolving the actual path against 15-minute data put the real figure at
+//  +0.20R to +0.46R. Roughly half.
+//
+//  TradingView has the same blind spot and it is worse here, because the
+//  average hold is under three bars: most of these trades live and die inside
+//  one or two candles, so intrabar ordering decides almost everything.
+//
+//  So, in Properties:
+//    - Recalculate: leave "On every tick" OFF
+//    - Fill orders: leave "On bar close" ON
+//    - Slippage: 1 tick minimum
+//    - Commission: your real round-turn
+//
+//  And then treat the result as the OPTIMISTIC END of a range. If the Strategy
+//  Tester shows something near +0.5R a trade, that is consistent with the true
+//  figure being about half of it. If it shows +2R, something is wrong and it is
+//  probably intrabar ordering.
+//
+//  The honest number, from 55 trades whose path could actually be verified:
+//  about +0.20R to +0.46R, roughly one trade a week, on one instrument.
+// =============================================================================
+
+strategy("Market Structure — Strategy", overlay = true,
+     default_qty_type   = strategy.percent_of_equity,
+     default_qty_value  = 100,
+     initial_capital    = 50000,
+     currency           = currency.USD,
+     commission_type    = strategy.commission.cash_per_order,
+     commission_value   = 2.00,          // half of a $4 round turn, charged twice
+     slippage           = 1,             // in ticks
+     process_orders_on_close = true,
+     calc_on_every_tick = false,
+     max_bars_back      = 300,
+     pyramiding         = 0)             // one position at a time, like a person
+
+// ---------------------------------------------------------------- inputs ----
+N        = input.int(2,    "Swing sensitivity", minval = 1, maxval = 10, group = "Structure")
+useHTF   = input.bool(true,"Require 4H and daily to agree", group = "Bias",
+             tooltip = "Turn this off to see what it is worth. Measured at roughly 0.5R a trade.")
+tfMid    = input.timeframe("240", "External 1", group = "Bias")
+tfHigh   = input.timeframe("1D",  "External 2", group = "Bias")
+depth    = input.float(0.75, "Entry depth into the leg", minval = 0.1, maxval = 0.95, step = 0.05, group = "Trade")
+exitFrac = input.float(0.80, "Exit at this fraction of the leg", minval = 0.2, maxval = 1.0, step = 0.05, group = "Trade")
+tickBuf  = input.float(0.25, "Stop buffer beyond the origin", minval = 0.0, step = 0.25, group = "Trade")
+maxAge   = input.int(40,   "Abandon a leg after N bars", minval = 5, group = "Trade")
+riskPct  = input.float(0.5,"Risk per trade (% of equity)", minval = 0.05, maxval = 5, step = 0.05, group = "Trade")
+
+startY   = input.int(2023, "Test from year", minval = 2000, group = "Window")
+
+// ------------------------------------------------------- structure engine ---
+// Identical rules to structure.js: strict left, non-strict right, swings
+// confirmed N bars late, protected level advancing only on a BOS.
+structuralBias() =>
+    var float sHigh = na
+    var float sLow  = na
+    var float lHigh = na
+    var float lLow  = na
+    var float pL    = na
+    var float pH    = na
+    var string b    = na
+    var string kind = na
+
+    bool isH = bar_index >= 2 * N
+    bool isL = bar_index >= 2 * N
+    for j = 1 to N
+        if not (high[N] > high[N + j])
+            isH := false
+        if not (high[N] >= high[N - j])
+            isH := false
+        if not (low[N] < low[N + j])
+            isL := false
+        if not (low[N] <= low[N - j])
+            isL := false
+
+    if isH and kind != "high"
+        lHigh := high[N]
+        sHigh := high[N]
+        kind  := "high"
+    else if isH and kind == "high" and high[N] > lHigh
+        lHigh := high[N]
+        sHigh := high[N]
+    if isL and kind != "low"
+        lLow := low[N]
+        sLow := low[N]
+        kind := "low"
+    else if isL and kind == "low" and low[N] < lLow
+        lLow := low[N]
+        sLow := low[N]
+
+    up = not na(sHigh) and close > sHigh
+    dn = not na(sLow)  and close < sLow
+    string d = na
+    if up and dn
+        d := close >= open ? "bull" : "bear"
+    else if up
+        d := "bull"
+    else if dn
+        d := "bear"
+    if d == "bull"
+        sHigh := na
+    if d == "bear"
+        sLow := na
+
+    if b == "bull"
+        if d == "bull"
+            pL := lLow
+        else if not na(pL) and close < pL
+            b  := "bear"
+            pH := lHigh
+            pL := na
+    else if b == "bear"
+        if d == "bear"
+            pH := lHigh
+        else if not na(pH) and close > pH
+            b  := "bull"
+            pL := lLow
+            pH := na
+    else if not na(d)
+        b := d
+        if d == "bull"
+            pL := lLow
+        else
+            pH := lHigh
+    b
+
+// [1] plus lookahead_off: only CLOSED higher-timeframe bars, ever. Without both
+// the tester reports a history that could never have been traded.
+string midBias  = request.security(syminfo.tickerid, tfMid,  structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
+string highBias = request.security(syminfo.tickerid, tfHigh, structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
+string external = na
+if useHTF and not na(midBias) and midBias == highBias
+    external := midBias
+if not useHTF
+    external := "any"
+
+// ------------------------------------------------------- chart structure ----
+var float sHigh = na
+var float sLow  = na
+var float lHigh = na
+var float lLow  = na
+var float protL = na
+var float protH = na
+var string bias = na
+var string kind = na
+
+var string legDir    = na
+var float  legOrigin = na
+var float  legExt    = na
+var int    legBar    = na
+
+bool isH = bar_index >= 2 * N
+bool isL = bar_index >= 2 * N
+for j = 1 to N
+    if not (high[N] > high[N + j])
+        isH := false
+    if not (high[N] >= high[N - j])
+        isH := false
+    if not (low[N] < low[N + j])
+        isL := false
+    if not (low[N] <= low[N - j])
+        isL := false
+
+if isH and kind != "high"
+    lHigh := high[N]
+    sHigh := high[N]
+    kind  := "high"
+else if isH and kind == "high" and high[N] > lHigh
+    lHigh := high[N]
+    sHigh := high[N]
+if isL and kind != "low"
+    lLow := low[N]
+    sLow := low[N]
+    kind := "low"
+else if isL and kind == "low" and low[N] < lLow
+    lLow := low[N]
+    sLow := low[N]
+
+up = not na(sHigh) and close > sHigh
+dn = not na(sLow)  and close < sLow
+string mDir = na
+if up and dn
+    mDir := close >= open ? "bull" : "bear"
+else if up
+    mDir := "bull"
+else if dn
+    mDir := "bear"
+if mDir == "bull"
+    sHigh := na
+if mDir == "bear"
+    sLow := na
+
+string majorBOS = na
+if bias == "bull"
+    if mDir == "bull"
+        majorBOS := "bull"
+        protL := lLow
+    else if not na(protL) and close < protL
+        bias  := "bear"
+        protH := lHigh
+        protL := na
+        legDir := na
+else if bias == "bear"
+    if mDir == "bear"
+        majorBOS := "bear"
+        protH := lHigh
+    else if not na(protH) and close > protH
+        bias  := "bull"
+        protL := lLow
+        protH := na
+        legDir := na
+else if not na(mDir)
+    bias := mDir
+    majorBOS := mDir
+    if mDir == "bull"
+        protL := lLow
+    else
+        protH := lHigh
+
+// a BOS starts a leg, but only with the higher timeframes behind it
+if not na(majorBOS) and (majorBOS == external or external == "any")
+    o = majorBOS == "bull" ? protL : protH
+    if not na(o)
+        legDir    := majorBOS
+        legOrigin := o
+        legExt    := majorBOS == "bull" ? high : low
+        legBar    := bar_index
+
+if not na(legDir)
+    legExt := legDir == "bull" ? math.max(legExt, high) : math.min(legExt, low)
+    if (legDir == "bull" ? close < legOrigin : close > legOrigin) or (bar_index - legBar > maxAge)
+        legDir := na
+
+// ------------------------------------------------------------- execution ----
+inWindow = year >= startY
+
+float eEntry = na
+float eStop  = na
+float eTgt   = na
+if not na(legDir)
+    span = math.abs(legExt - legOrigin)
+    if span > 0
+        eEntry := legDir == "bull" ? legExt - depth * span : legExt + depth * span
+        eStop  := legDir == "bull" ? legOrigin - tickBuf   : legOrigin + tickBuf
+        eTgt   := legDir == "bull" ? legOrigin + exitFrac * span : legOrigin - exitFrac * span
+        behind = legDir == "bull" ? eTgt <= eEntry : eTgt >= eEntry
+        if behind
+            eEntry := na
+            eStop  := na
+            eTgt   := na
+
+// size from risk, not from equity percentage — a fixed fraction of the account
+// against the actual stop distance, which is what the research assumed
+qty = 0.0
+if not na(eEntry) and not na(eStop)
+    riskPts = math.abs(eEntry - eStop)
+    if riskPts > 0
+        qty := math.floor((strategy.equity * riskPct / 100) / (riskPts * syminfo.pointvalue))
+
+if inWindow and not na(eEntry) and qty >= 1 and strategy.position_size == 0
+    if legDir == "bull"
+        strategy.entry("L", strategy.long, qty = qty, limit = eEntry)
+    else
+        strategy.entry("S", strategy.short, qty = qty, limit = eEntry)
+
+// cancel a resting order the moment its premise dies
+if na(legDir) and strategy.position_size == 0
+    strategy.cancel("L")
+    strategy.cancel("S")
+
+if strategy.position_size > 0
+    strategy.exit("L x", from_entry = "L", stop = eStop, limit = eTgt)
+if strategy.position_size < 0
+    strategy.exit("S x", from_entry = "S", stop = eStop, limit = eTgt)
+
+// ---------------------------------------------------------------- visual ----
+plot(strategy.position_size == 0 ? eEntry : na, "Entry",  color = color.new(#3ddc97, 0), style = plot.style_linebr)
+plot(not na(eStop) ? eStop : na, "Stop",   color = color.new(#ef5350, 60), style = plot.style_linebr)
+plot(not na(eTgt)  ? eTgt  : na, "Target", color = color.new(#26a69a, 60), style = plot.style_linebr)
+
+if barstate.islast
+    var table t = table.new(position.top_right, 2, 4, border_width = 1)
+    table.cell(t, 0, 0, "bias",   text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 0, na(bias) ? "—" : bias, text_size = size.small)
+    table.cell(t, 0, 1, "4H / D", text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 1, (na(midBias) ? "—" : midBias) + " / " + (na(highBias) ? "—" : highBias), text_size = size.small)
+    table.cell(t, 0, 2, "entry",  text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 2, na(eEntry) ? "—" : str.tostring(eEntry, format.mintick), text_size = size.small)
+    table.cell(t, 0, 3, "note",   text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 3, "same-bar fills flatter this", text_color = color.orange, text_size = size.small)

@@ -1,0 +1,416 @@
+//@version=6
+// =============================================================================
+//  Market Structure — a port of TradeDesk/engine/structure.js
+//
+//  Draws exactly what the engine computes: swing points labelled HH/HL/LH/LL,
+//  the protected level that defines the current leg, breaks of structure and
+//  changes of character, and the pullback entry with its stop and target.
+//
+//  No indicators. The only inputs are open, high, low, close and time.
+//
+//  Two properties are load-bearing and are preserved here deliberately:
+//
+//    1  A swing is invisible until N bars have printed after it. Pine will
+//       happily let you look at high[0] and call it a swing; this does not.
+//       Every label appears N bars late, which is when it was knowable.
+//
+//    2  Higher timeframes are read with lookahead_off AND indexed [1], so only
+//       CLOSED 4H and daily bars are ever used. Without both, a 4H bias leaks
+//       into a 1H decision three hours before that bar finishes, and the
+//       indicator paints a history that could never have been traded.
+//
+//  Measured on MES: roughly +0.20R to +0.46R per trade over 55 verified trades,
+//  around one a week. That is a real edge and a small sample. It is not advice.
+// =============================================================================
+
+// max_bars_back is explicit because the swing test indexes with a variable
+// (high[N + j]), and Pine cannot always infer the lookback it needs from that.
+indicator("Market Structure", overlay = true, max_lines_count = 500,
+          max_labels_count = 500, max_boxes_count = 100, max_bars_back = 300)
+
+// ---------------------------------------------------------------- inputs ----
+grpS = "Structure"
+N        = input.int(2, "Swing sensitivity (bars either side)", minval = 1, maxval = 10, group = grpS,
+                    tooltip = "2 is a five-bar swing. Higher is cleaner and slower to confirm. " +
+                              "Every label appears N bars after the swing itself, because that is when it became knowable.")
+showMinor = input.bool(false, "Show minor structure", group = grpS,
+                    tooltip = "Breaks of the most recent swing — every pullback that failed. " +
+                              "Off by default because there are many and they are not the trade.")
+showLabels= input.bool(true,  "Show HH / HL / LH / LL", group = grpS)
+quiet     = input.bool(false, "Quiet mode — levels only", group = grpS,
+                    tooltip = "Draws nothing but the protected level and the live entry, " +
+                              "stop and target. No swing labels, no BOS or CHoCH text, no " +
+                              "minor structure. The readout still tells you everything.")
+
+grpB = "Bias"
+useHTF   = input.bool(true, "Require the 4H and daily to agree", group = grpB,
+                    tooltip = "Roughly halves drawdown for about a third of the return. " +
+                              "It was once thought worth ~0.5R a trade; that measurement " +
+                              "predated a bug fix and does not survive it. A risk preference, " +
+                              "not an edge.")
+tfMid    = input.timeframe("240", "External timeframe 1", group = grpB)
+tfHigh   = input.timeframe("1D",  "External timeframe 2", group = grpB)
+
+grpT = "Trade"
+showSetup = input.bool(true,  "Show the pullback setup", group = grpT)
+depth     = input.float(0.75, "Entry depth into the leg", minval = 0.1, maxval = 0.95, step = 0.01, group = grpT,
+                    tooltip = "0.75 means price must retrace 75% of the leg before the limit is reached. " +
+                              "Deeper pulled better in testing, monotonically.")
+exitFrac  = input.float(0.80, "Exit at this fraction of the leg", minval = 0.2, maxval = 1.0, step = 0.05, group = grpT,
+                    tooltip = "Measured from the origin, not from your fill. 0.50-0.80 was the stated band; " +
+                              "0.80 tested best once intrabar paths were resolved properly.")
+tickBuf   = input.float(0.25, "Stop buffer beyond the origin", minval = 0.0, step = 0.25, group = grpT)
+maxAge    = input.int(40, "Abandon a leg after this many bars", minval = 5, group = grpT)
+
+cBull = input.color(color.new(#26a69a, 0), "Bullish", group = "Colours", inline = "c")
+cBear = input.color(color.new(#ef5350, 0), "Bearish", group = "Colours", inline = "c")
+cMaj  = input.color(color.new(#ffb454, 0), "Major",   group = "Colours", inline = "d")
+cMin  = input.color(color.new(#5aa9ff, 40),"Minor",   group = "Colours", inline = "d")
+cProt = input.color(color.new(#3ddc97, 0), "Protected", group = "Colours", inline = "d")
+
+// ------------------------------------------------------- swing detection ----
+// Strict on the left, non-strict on the right, matching the engine: a double
+// top resolves to the first bar rather than printing twice or not at all.
+// The candidate sits N bars back, so this can only ever run N bars late.
+isHigh() =>
+    bool ok = bar_index >= 2 * N
+    if ok
+        for j = 1 to N
+            if not (high[N] > high[N + j])
+                ok := false
+            if not (high[N] >= high[N - j])
+                ok := false
+    ok
+
+isLow() =>
+    bool ok = bar_index >= 2 * N
+    if ok
+        for j = 1 to N
+            if not (low[N] < low[N + j])
+                ok := false
+            if not (low[N] <= low[N - j])
+                ok := false
+    ok
+
+// --------------------------------------------------------------- state ------
+var float lastHighPrice = na          // most recent confirmed swing high
+var int   lastHighBar   = na
+var float prevHighPrice = na          // the one before it, for labelling
+var float lastLowPrice  = na
+var int   lastLowBar    = na
+var float prevLowPrice  = na
+
+var float pendingHigh   = na          // confirmed and not yet broken
+var float pendingLow    = na
+var string lastKind     = na          // enforces alternation
+
+var string bias      = na             // major bias
+var string minorBias = na
+var float protLow    = na             // the level defending a bullish leg
+var float protHigh   = na
+
+var float legOrigin  = na
+var float legExtreme = na
+var int   legBar     = na
+var string legDir    = na
+
+// ------------------------------------------------------ higher timeframes ---
+// Real structure on the higher timeframes, not a proxy.
+//
+// The first version of this asked whether the last closed 4H candle was green
+// or red. On a chart ripping to new highs, one red 4H candle made it "bear" and
+// the setup vanished. That is not a bias, it is a coin toss on one bar.
+//
+// This runs the same rules the chart logic runs — swings confirmed N bars late,
+// protected level advancing only on a BOS, change of character when it breaks.
+// Pine gives every call site its own `var` state, so calling it inside two
+// request.security() calls gives two independent engines, one per timeframe.
+structuralBias() =>
+    var float sHigh = na        // confirmed and unbroken
+    var float sLow  = na
+    var float lHigh = na        // most recent confirmed
+    var float lLow  = na
+    var float pL    = na        // protected level
+    var float pH    = na
+    var string b    = na
+    var string kind = na
+
+    bool isH = bar_index >= 2 * N
+    bool isL = bar_index >= 2 * N
+    for j = 1 to N
+        if not (high[N] > high[N + j])
+            isH := false
+        if not (high[N] >= high[N - j])
+            isH := false
+        if not (low[N] < low[N + j])
+            isL := false
+        if not (low[N] <= low[N - j])
+            isL := false
+
+    if isH and kind != "high"
+        lHigh := high[N]
+        sHigh := high[N]
+        kind  := "high"
+    else if isH and kind == "high" and high[N] > lHigh
+        lHigh := high[N]
+        sHigh := high[N]
+
+    if isL and kind != "low"
+        lLow := low[N]
+        sLow := low[N]
+        kind := "low"
+    else if isL and kind == "low" and low[N] < lLow
+        lLow := low[N]
+        sLow := low[N]
+
+    up = not na(sHigh) and close > sHigh
+    dn = not na(sLow)  and close < sLow
+    string d = na
+    if up and dn
+        d := close >= open ? "bull" : "bear"
+    else if up
+        d := "bull"
+    else if dn
+        d := "bear"
+    if d == "bull"
+        sHigh := na
+    if d == "bear"
+        sLow := na
+
+    if b == "bull"
+        if d == "bull"
+            pL := lLow
+        else if not na(pL) and close < pL
+            b  := "bear"
+            pH := lHigh
+            pL := na
+    else if b == "bear"
+        if d == "bear"
+            pH := lHigh
+        else if not na(pH) and close > pH
+            b  := "bull"
+            pL := lLow
+            pH := na
+    else if not na(d)
+        b := d
+        if d == "bull"
+            pL := lLow
+        else
+            pH := lHigh
+    b
+
+// [1] plus lookahead_off. Either alone is not enough: lookahead_off stops the
+// future leaking in, and [1] stops the CURRENT unfinished HTF bar being used.
+string midBias  = request.security(syminfo.tickerid, tfMid,  structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
+string highBias = request.security(syminfo.tickerid, tfHigh, structuralBias(),
+                                   lookahead = barmerge.lookahead_off)[1]
+string external = na
+if useHTF and not na(midBias) and midBias == highBias
+    external := midBias
+
+// An external timeframe at or below the chart's is being compared with itself,
+// which quietly produces "disagree" forever and no setups. Silent misuse is
+// worse than a loud error, so say it on the chart.
+tfSeconds(tf) => timeframe.in_seconds(tf)
+chartSec = timeframe.in_seconds(timeframe.period)
+badTF = useHTF and (tfSeconds(tfMid) <= chartSec or tfSeconds(tfHigh) <= chartSec)
+// barstate.islast is true on every realtime tick, so label.new() here made a
+// new label per tick and stacked them into a wall of red. One label, moved.
+var label warnLbl = na
+if badTF and barstate.islast
+    if na(warnLbl)
+        warnLbl := label.new(bar_index, high, "", style = label.style_label_down,
+                             color = color.new(#ef5350, 15), textcolor = color.white)
+    label.set_xy(warnLbl, bar_index, high)
+    label.set_text(warnLbl, "External timeframes must be higher than the chart.\n" +
+                   "Chart " + timeframe.period + ", externals " + tfMid + " / " + tfHigh)
+
+// --------------------------------------------------------------- update -----
+newHigh = isHigh()
+newLow  = isLow()
+
+if newHigh and lastKind != "high"
+    prevHighPrice := lastHighPrice
+    lastHighPrice := high[N]
+    lastHighBar   := bar_index - N
+    pendingHigh   := high[N]
+    lastKind      := "high"
+    if showLabels and not quiet
+        lbl = na(prevHighPrice) ? "—" : high[N] > prevHighPrice ? "HH" : "LH"
+        label.new(bar_index - N, high[N], lbl, style = label.style_label_down,
+                  color = color.new(color.black, 100), size = size.tiny,
+                  textcolor = lbl == "HH" ? cBull : cBear)
+else if newHigh and lastKind == "high" and high[N] > lastHighPrice
+    // same kind twice: the more extreme one survives (engine's alternation rule)
+    lastHighPrice := high[N]
+    lastHighBar   := bar_index - N
+    pendingHigh   := high[N]
+
+if newLow and lastKind != "low"
+    prevLowPrice := lastLowPrice
+    lastLowPrice := low[N]
+    lastLowBar   := bar_index - N
+    pendingLow   := low[N]
+    lastKind     := "low"
+    if showLabels and not quiet
+        lbl = na(prevLowPrice) ? "—" : low[N] > prevLowPrice ? "HL" : "LL"
+        label.new(bar_index - N, low[N], lbl, style = label.style_label_up,
+                  color = color.new(color.black, 100), size = size.tiny,
+                  textcolor = lbl == "HL" ? cBull : cBear)
+else if newLow and lastKind == "low" and low[N] < lastLowPrice
+    lastLowPrice := low[N]
+    lastLowBar   := bar_index - N
+    pendingLow   := low[N]
+
+// ------------------------------------------------------ breaks -------------
+// Break on CLOSE. A wick through a level is a sweep, not a break — that single
+// choice is what separates structure from liquidity.
+brokeUp   = not na(pendingHigh) and close > pendingHigh
+brokeDown = not na(pendingLow)  and close < pendingLow
+
+string mDir = na
+if brokeUp and brokeDown
+    mDir := close >= open ? "bull" : "bear"
+else if brokeUp
+    mDir := "bull"
+else if brokeDown
+    mDir := "bear"
+
+float minorLevel = na
+if mDir == "bull"
+    minorLevel := pendingHigh
+    pendingHigh := na
+    minorBias   := "bull"
+else if mDir == "bear"
+    minorLevel := pendingLow
+    pendingLow  := na
+    minorBias   := "bear"
+
+if showMinor and not quiet and not na(minorLevel)
+    line.new(bar_index - 10, minorLevel, bar_index, minorLevel, color = cMin,
+             style = line.style_dotted, width = 1)
+
+// major track: the protected level only advances on a BOS, never on an
+// ordinary swing. Without this the bias flips on every shallow pullback.
+string majorBOS = na
+if bias == "bull"
+    if mDir == "bull"
+        majorBOS := "bull"
+        protLow  := lastLowPrice
+    else if not na(protLow) and close < protLow
+        if not quiet
+            line.new(bar_index - 20, protLow, bar_index, protLow, color = cMaj, width = 2)
+            label.new(bar_index, protLow, "CHoCH", style = label.style_label_up,
+                      color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
+        bias := "bear"
+        protHigh := lastHighPrice
+        protLow  := na
+        legDir   := na
+else if bias == "bear"
+    if mDir == "bear"
+        majorBOS := "bear"
+        protHigh := lastHighPrice
+    else if not na(protHigh) and close > protHigh
+        if not quiet
+            line.new(bar_index - 20, protHigh, bar_index, protHigh, color = cMaj, width = 2)
+            label.new(bar_index, protHigh, "CHoCH", style = label.style_label_down,
+                      color = color.new(color.black, 100), textcolor = cMaj, size = size.small)
+        bias := "bull"
+        protLow  := lastLowPrice
+        protHigh := na
+        legDir   := na
+else if not na(mDir)
+    bias := mDir
+    majorBOS := mDir
+    if mDir == "bull"
+        protLow := lastLowPrice
+    else
+        protHigh := lastHighPrice
+
+if not na(majorBOS) and not na(minorLevel) and not quiet
+    line.new(bar_index - 15, minorLevel, bar_index, minorLevel, color = cMaj, width = 1)
+    label.new(bar_index, minorLevel, "BOS", style = majorBOS == "bull" ? label.style_label_up : label.style_label_down,
+              color = color.new(color.black, 100), textcolor = cMaj, size = size.tiny)
+
+// ------------------------------------------------------------- the leg -----
+if not na(majorBOS) and (not useHTF or majorBOS == external)
+    o = majorBOS == "bull" ? protLow : protHigh
+    if not na(o)
+        legDir     := majorBOS
+        legOrigin  := o
+        legExtreme := majorBOS == "bull" ? high : low
+        legBar     := bar_index
+
+if not na(legDir)
+    legExtreme := legDir == "bull" ? math.max(legExtreme, high) : math.min(legExtreme, low)
+    dead = (legDir == "bull" ? close < legOrigin : close > legOrigin) or (bar_index - legBar > maxAge)
+    if dead
+        legDir := na
+
+// -------------------------------------------------------- live levels ------
+float eEntry  = na
+float eStop   = na
+float eTarget = na
+if showSetup and not na(legDir)
+    span = math.abs(legExtreme - legOrigin)
+    if span > 0
+        eEntry  := legDir == "bull" ? legExtreme - depth * span : legExtreme + depth * span
+        eStop   := legDir == "bull" ? legOrigin - tickBuf       : legOrigin + tickBuf
+        eTarget := legDir == "bull" ? legOrigin + exitFrac * span : legOrigin - exitFrac * span
+        // a target behind the fill is not a trade
+        behind = legDir == "bull" ? eTarget <= eEntry : eTarget >= eEntry
+        if behind
+            eEntry := na
+            eStop := na
+            eTarget := na
+
+// `eEntry ?` is a float where Pine wants a bool — na() is the test, not truthiness
+plot(eEntry,  "Entry",  color = not na(eEntry)  ? color.new(cProt, 0) : na, style = plot.style_linebr, linewidth = 2)
+plot(eStop,   "Stop",   color = not na(eStop)   ? color.new(cBear, 0) : na, style = plot.style_linebr, linewidth = 1)
+plot(eTarget, "Target", color = not na(eTarget) ? color.new(cBull, 0) : na, style = plot.style_linebr, linewidth = 1)
+plot(bias == "bull" ? protLow : protHigh, "Protected", color = color.new(cProt, 50),
+     style = plot.style_circles, linewidth = 1)
+
+// What state the setup is in. Printing an entry price with nothing beside it
+// is how a level that has already been and gone gets chased.
+string status = "none"
+if not na(eEntry)
+    reached = legDir == "bull" ? low <= eEntry : high >= eEntry
+    status := reached ? "PRICE ALREADY THERE" : "waiting"
+else if not na(legDir)
+    status := "leg live, no level yet"
+else if na(external)
+    status := "stand down - 4H and D disagree"
+
+statusCol = status == "waiting" ? cProt
+          : status == "PRICE ALREADY THERE" ? cMaj
+          : color.gray
+
+// ------------------------------------------------------------- readout -----
+if barstate.islast
+    var table t = table.new(position.top_right, 2, 7, border_width = 1)
+    bt = bias == "bull" ? cBull : bias == "bear" ? cBear : color.gray
+    table.cell(t, 0, 0, "bias",     text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 0, na(bias) ? "—" : bias, text_color = bt, text_size = size.small)
+    table.cell(t, 0, 1, "4H / D",   text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 1, (na(midBias) ? "—" : midBias) + " / " + (na(highBias) ? "—" : highBias),
+               text_size = size.small,
+               text_color = na(external) ? color.gray : external == "bull" ? cBull : cBear)
+    table.cell(t, 0, 2, "protected", text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 2, str.tostring(bias == "bull" ? protLow : protHigh, format.mintick), text_size = size.small)
+    table.cell(t, 0, 3, "entry",  text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 3, na(eEntry) ? "—" : str.tostring(eEntry, format.mintick), text_size = size.small)
+    table.cell(t, 0, 4, "stop",   text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 4, na(eStop) ? "—" : str.tostring(eStop, format.mintick), text_size = size.small)
+    table.cell(t, 0, 5, "target", text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 5, na(eTarget) ? "—" : str.tostring(eTarget, format.mintick), text_size = size.small)
+    table.cell(t, 0, 6, "status", text_color = color.gray, text_size = size.small)
+    table.cell(t, 1, 6, status, text_color = statusCol, text_size = size.small)
+
+// comparing against eEntry[1] rather than high[1]: the level itself moves as the
+// leg extends, so the question is whether price crossed the level as it stood
+entryTouched = not na(eEntry) and (legDir == "bull" ? low <= eEntry : high >= eEntry) and
+   not (na(eEntry[1]) or (legDir == "bull" ? low[1] <= nz(eEntry[1]) : high[1] >= nz(eEntry[1])))
+alertcondition(entryTouched, "Pullback entry reached",
+   "Price has just reached the pullback entry level for the first time.")

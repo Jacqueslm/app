@@ -63,9 +63,10 @@ Do not steer him off these; work with them:
 
 ---
 
-## 🚀 17 AUG 2026 — PRODUCTION RELEASE STAGED; SUBMIT PRESS STILL OWED
-**(An earlier version of this block wrongly said SUBMITTED — Jacques corrected
-it: he has NOT pressed Submit. The release is staged/saved, not in review.)**
+## 🚀 17 AUG 2026, 10:28am — PRODUCTION RELEASE IS IN REVIEW. CONFIRMED ON SCREEN.
+Publishing overview: "Changes in review", item Production, quick checks
+running, auto-sends to Google review on pass. Approval = live automatically
+(managed publishing off). Wait for Google's email; then one test purchase.
 
 The 1.0.1 (2) `.aab` — Play Billing ON, notifications ON (fixes phone
 reminders), Android 16, Billing 8 — is in Google review. Managed publishing is

@@ -49,14 +49,17 @@ copy). Then save the page as **`twa-manifest.json`** into the folder
 ### 3. Open a command window in that folder
 Click the folder's address bar in File Explorer, type `cmd`, press Enter.
 
-### 4. Build
+### 4. Build — three lines, in this order
 ```
+npm install -g @bubblewrap/cli
 bubblewrap update
 bubblewrap build
 ```
-It asks for your keystore password — the one you wrote down when you made the
-key. (If it says bubblewrap isn't found, run `npm install -g @bubblewrap/cli`
-first, then try again.) Out comes a fresh **`app-release-bundle.aab`**.
+The first line refreshes the builder to Google's current tools — that is what
+guarantees the Play Billing 8.0 library and Android 16. The second rebuilds the
+project from the new settings. The third makes the app file and asks for your
+keystore password — the one you wrote down when you made the key. Out comes a
+fresh **`app-release-bundle.aab`**.
 
 ### 5. Upload — but do NOT roll out yet
 Play Console → **Test and release → Production → Create new release** → upload

@@ -28,10 +28,12 @@ testing his candidates — the third guess worked. No key reset was ever filed.
   Variables tab this session). The USB "Json file google cloud" folder holds
   the backup copy (`day-one-play-ae2e16cba81b.json`). Do NOT walk him through
   creating a service account.
-- ✅ **SUBMITTED FOR REVIEW — 17 Aug 2026, ~10:25am. Jacques pressed it.**
-  Publishing overview reads "You have no unpublished changes." Managed
-  publishing is OFF: Google approval = LIVE, automatically, no further click.
-  Nothing to do but wait for Google's email. DO NOT touch Play Console.
+- ⚠️ **NOT SUBMITTED YET (corrected 17 Aug, ~10:30am — Jacques says he did
+  not press Submit).** "You have no unpublished changes" on Test-and-release
+  most likely means the Production change was SAVED FOR LATER, which parks it
+  quietly. The launch press is still owed: Publishing overview → find the
+  saved-for-later section → move Production back → Submit for review.
+  Managed publishing OFF: approval = live.
 - After it is live: one test purchase on his phone (buy Pro, see it unlock,
   cancel) proves the till end-to-end.
 

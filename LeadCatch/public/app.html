@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leads - LeadCatch</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="wrap">
+    <a class="logo" href="/app">Lead<span>Catch</span></a>
+    <nav class="nav">
+      <button data-view="leads" aria-current="page">Leads</button>
+      <button data-view="forms">Forms</button>
+      <button data-view="settings">Settings</button>
+      <button id="signout" class="btn-ghost">Sign out</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="msg error" id="global-error" hidden role="alert"></p>
+
+  <!-- ---------------------------------------------------------- leads -->
+  <section id="view-leads">
+    <div class="stat-row" id="stats"></div>
+
+    <div class="toolbar">
+      <input class="grow" id="search" type="search" placeholder="Search name, email, phone, message, notes…" aria-label="Search leads">
+      <select id="filter-status" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="qualified">Quoted</option>
+        <option value="won">Won</option>
+        <option value="lost">Lost</option>
+      </select>
+      <select id="filter-form" aria-label="Filter by form">
+        <option value="">All forms</option>
+      </select>
+      <a class="btn btn-secondary" href="/api/leads/export.csv">Export CSV</a>
+    </div>
+
+    <div class="lead-list" id="lead-list"></div>
+    <div class="empty" id="leads-empty" hidden>
+      <p><strong>No leads yet.</strong></p>
+      <p>Add your form to your website and the first enquiry will show up here.</p>
+      <button data-view="forms">Get my form snippet</button>
+    </div>
+    <div style="text-align:center;margin-top:1rem">
+      <button id="load-more" class="btn-secondary" hidden>Load more</button>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- forms -->
+  <section id="view-forms" hidden>
+    <div class="toolbar">
+      <h2 style="margin:0;flex:1">Your forms</h2>
+      <button id="new-form">New form</button>
+    </div>
+    <div id="form-list"></div>
+  </section>
+
+  <!-- ------------------------------------------------------- settings -->
+  <section id="view-settings" hidden>
+    <div class="panel narrow" style="margin-bottom:1rem">
+      <h2 style="margin-top:0">Your account</h2>
+      <p class="muted small" id="account-email"></p>
+      <form id="business-form">
+        <div class="field">
+          <label for="business-name">Business name</label>
+          <input id="business-name" autocomplete="organization" required>
+        </div>
+        <button type="submit">Save</button>
+        <span class="small ok" id="business-saved" hidden>Saved.</span>
+      </form>
+      <p class="msg" id="email-status" hidden></p>
+    </div>
+
+    <div class="panel narrow" style="margin-bottom:1rem">
+      <h2 style="margin-top:0">Change password</h2>
+      <form id="password-form">
+        <div class="field">
+          <label for="current-password">Current password</label>
+          <input id="current-password" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field">
+          <label for="new-password">New password</label>
+          <input id="new-password" type="password" autocomplete="new-password" minlength="8" required>
+        </div>
+        <button type="submit">Change password</button>
+        <p class="msg" id="password-msg" hidden></p>
+      </form>
+    </div>
+
+    <div class="panel narrow">
+      <h2 style="margin-top:0">Delete account</h2>
+      <p class="small muted">
+        This permanently deletes your forms and every lead you've collected. Export your CSV first -
+        there is no undo and no backup to restore from.
+      </p>
+      <button class="btn-danger" id="delete-account">Delete my account</button>
+    </div>
+  </section>
+</main>
+
+<!-- --------------------------------------------------------- form editor -->
+<dialog id="form-dialog">
+  <form id="form-editor" method="dialog">
+    <h2 style="margin-top:0" id="editor-title">Edit form</h2>
+
+    <div class="field">
+      <label for="f-name">Form name <span class="muted small">(only you see this)</span></label>
+      <input id="f-name" required>
+    </div>
+    <div class="field">
+      <label for="f-headline">Headline</label>
+      <input id="f-headline" placeholder="Get in touch">
+    </div>
+    <div class="field">
+      <label for="f-intro">Intro text</label>
+      <textarea id="f-intro" placeholder="Leave your details and we'll get straight back to you."></textarea>
+    </div>
+    <div class="row">
+      <div class="field grow">
+        <label for="f-button">Button text</label>
+        <input id="f-button" placeholder="Send">
+      </div>
+      <div class="field">
+        <label for="f-color">Colour</label>
+        <input id="f-color" type="color" value="#2563eb" style="width:4rem;padding:.2rem">
+      </div>
+    </div>
+    <div class="field">
+      <label for="f-success">Thank-you message</label>
+      <input id="f-success" placeholder="Thanks! We'll be in touch shortly.">
+    </div>
+    <div class="field">
+      <label for="f-notify">Send new leads to</label>
+      <input id="f-notify" type="email" placeholder="you@yourbusiness.com">
+    </div>
+
+    <fieldset style="border:1px solid var(--border);border-radius:.55rem;padding:.75rem;margin:0 0 .85rem">
+      <legend class="small" style="font-weight:600">Fields to ask for</legend>
+      <div id="field-toggles"></div>
+    </fieldset>
+
+    <fieldset style="border:1px solid var(--border);border-radius:.55rem;padding:.75rem;margin:0 0 .85rem">
+      <legend class="small" style="font-weight:600">Extra questions</legend>
+      <div id="custom-fields"></div>
+      <button type="button" class="btn-secondary btn-sm" id="add-custom">Add a question</button>
+    </fieldset>
+
+    <label class="check"><input type="checkbox" id="f-active" checked> Accepting submissions</label>
+
+    <p class="msg error" id="editor-error" hidden role="alert"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary" id="editor-cancel">Cancel</button>
+      <button type="submit" id="editor-save">Save form</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/app.js"></script>
+</body>
+</html>

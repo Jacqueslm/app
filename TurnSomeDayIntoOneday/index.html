@@ -6697,10 +6697,8 @@ const VG_VOICES={
   gentle:{label:'Gentle',url:'audio/sos-talk-gentle.mp3',cues:[0,5.49,14.87,22.2,31.26,41.71,47.46,54.91,62.05,69.21,77.28,83.02,89.2,95.64,104.15]},
   clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,5.16,14.94,22.72,32.18,43.81,49.88,57.43,65.26,72.69,80.94,86.69,93.05,100.05,109.5]},
   male:{label:'Calm male',url:'audio/sos-talk-male.mp3',cues:[0,5.81,16.36,25.21,35.2,46.59,53.23,61.53,69.9,77.81,85.78,91.36,97.73,105.26,116.94]},
-  sage:{label:'Sage (woman)',url:'audio/sos-talk-sage.mp3',cues:[]},
-  miles:{label:'Miles (man)',url:'audio/sos-talk-miles.mp3',cues:[]},
 };
-const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','sage','miles'];
+const VG_VOICE_ORDER=['warm','soft','gentle','clear','male'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
 let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null,vgFellBack=false,vgUserPaused=false;
 function vgPickVoice(){

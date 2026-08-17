@@ -8,7 +8,22 @@ the $25 Play account fee, which you have already paid.
 
 ---
 
-## ⭐ 17 AUG 2026 — THE RELEASE BUILD (do this one now; everything below it is done history)
+## ⭐ 17 AUG 2026 — THE RELEASE BUILD: **BUILT AND SIGNED, same day.**
+
+**DONE up to the upload.** The 1.0.1 (versionCode 2) `.aab` was built 17 Aug on
+Jacques's machine via `Make-Play-App.bat` (in this folder — reusable for every
+future release build) and signed with the ORIGINAL upload key. Play Billing on,
+notifications on (fixes phone reminders), Android 16, Billing 8. The key lives at
+`C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa\android-upload.keystore`;
+Jacques has the password (told to write it into the USB "play key" note — it is
+NOT in this repo and never will be). The forgotten-password scare was solved by
+testing his candidates — the third guess worked. No key reset was ever filed.
+
+**REMAINING:** upload the new `.aab` (Production → Create new release → Save),
+create the three prices, set `PLAY_SERVICE_ACCOUNT_JSON` on Railway (do WITH a
+session), then Start rollout. Steps 5–8 below.
+
+## THE RELEASE BUILD — original walkthrough (steps 1–4 are done history)
 
 Google granted production access on 15 Aug. Before pressing the final rollout
 button, one more build is needed: the test version of the app shell had

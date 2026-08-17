@@ -168,7 +168,7 @@ body.simple-only #view-simple{display:flex !important}
   <div class="hdr">
     <h1>🎬 Studio</h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0876</span>
+    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0877</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -7908,7 +7908,7 @@ $('#lyr-auto').onclick = async () => {
   const song = entry && st.assets.find((a) => a.id === entry.assetId);
   if (!song) return setErr('#seq-err', 'Nothing to listen to yet — add your song or voice-over (Quick Video or Music card). Free instead: paste your lines above and press Auto-spread.');
   const est = st.cfg?.pricing?.transcribe;
-  if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI (~$${(est || 0.35).toFixed(2)}). Free instead: paste your lyrics and use Auto-spread or Tap-to-sync.\n\nYour current caption list will be replaced.`)) return;
+  if (!confirm(`Listen to "${song.label}" and write synced captions automatically?\n\nUses AI ${est ? `(~$${est.toFixed(2)})` : '(price unavailable right now — it will show on your receipt)'}. Free instead: paste your lyrics and use Auto-spread or Tap-to-sync.\n\nYour current caption list will be replaced.`)) return;
   const b = $('#lyr-auto');
   b.disabled = true; b.innerHTML = '<span class="spinner"></span>Listening…';
   try {

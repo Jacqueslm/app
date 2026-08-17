@@ -28,12 +28,14 @@ testing his candidates — the third guess worked. No key reset was ever filed.
   Variables tab this session). The USB "Json file google cloud" folder holds
   the backup copy (`day-one-play-ae2e16cba81b.json`). Do NOT walk him through
   creating a service account.
-- ⚠️ **NOT SUBMITTED YET (corrected 17 Aug, ~10:30am — Jacques says he did
-  not press Submit).** "You have no unpublished changes" on Test-and-release
-  most likely means the Production change was SAVED FOR LATER, which parks it
-  quietly. The launch press is still owed: Publishing overview → find the
-  saved-for-later section → move Production back → Submit for review.
-  Managed publishing OFF: approval = live.
+- 🚀 **SUBMITTED — 17 Aug 2026, ~10:28am, seen on screen.** Publishing
+  overview shows "Changes in review" with item Production and Google's quick
+  pre-checks running ("sent for review as soon as checks complete"). Managed
+  publishing OFF: approval = LIVE automatically. Awaiting Google's email —
+  typically a few days for a first production release. The only follow-up
+  once live: one test purchase on Jacques's phone (buy Pro, unlock, cancel).
+  (Earlier this block flip-flopped: a premature SUBMITTED, then a NOT-YET —
+  this entry, with the screenshot evidence, is the accurate one.)
 - After it is live: one test purchase on his phone (buy Pro, see it unlock,
   cancel) proves the till end-to-end.
 

@@ -28,8 +28,10 @@ testing his candidates — the third guess worked. No key reset was ever filed.
   Variables tab this session). The USB "Json file google cloud" folder holds
   the backup copy (`day-one-play-ae2e16cba81b.json`). Do NOT walk him through
   creating a service account.
-- The only remaining action is Jacques pressing **Publishing overview →
-  Submit 2 changes for review**. Managed publishing is OFF: approval = live.
+- ✅ **SUBMITTED FOR REVIEW — 17 Aug 2026, ~10:25am. Jacques pressed it.**
+  Publishing overview reads "You have no unpublished changes." Managed
+  publishing is OFF: Google approval = LIVE, automatically, no further click.
+  Nothing to do but wait for Google's email. DO NOT touch Play Console.
 - After it is live: one test purchase on his phone (buy Pro, see it unlock,
   cancel) proves the till end-to-end.
 

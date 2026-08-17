@@ -1,0 +1,1603 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Setup Scanner</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#14181d; --panel2:#1b2027; --line:#262d36;
+    --text:#e8ecf1; --dim:#8b95a3; --faint:#5d6674;
+    --green:#3ddc97; --red:#ff5c6c; --blue:#5aa9ff; --amber:#ffb454;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:18px 16px 60px}
+  h1{font-size:20px;margin:0 0 2px;letter-spacing:-.02em}
+  .sub{color:var(--faint);font-size:13px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-bottom:12px}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--dim);margin:0 0 12px}
+  #drop{border:2px dashed var(--line);border-radius:12px;padding:34px 18px;text-align:center;
+    color:var(--dim);cursor:pointer;transition:.15s}
+  #drop:hover,#drop.over{border-color:var(--blue);color:var(--text);background:var(--panel)}
+  #drop b{color:var(--text)}
+  .big{font-family:var(--mono);font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .rows{display:flex;flex-wrap:wrap;gap:20px;margin-top:12px}
+  .kv .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .kv .v{font-family:var(--mono);font-size:17px;margin-top:2px}
+  .bias{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  .chip{padding:6px 12px;border-radius:8px;background:var(--panel2);font-size:13px;
+    font-family:var(--mono)}
+  .chip b{font-family:inherit}
+  .bull{color:var(--green)} .bear{color:var(--red)} .none{color:var(--faint)}
+  .banner{padding:12px 14px;border-radius:9px;font-size:14px;margin-top:12px}
+  .ok{background:rgba(61,220,151,.1);border:1px solid rgba(61,220,151,.3);color:#8ef0c4}
+  .warn{background:rgba(255,180,84,.1);border:1px solid rgba(255,180,84,.3);color:#ffd39e}
+  .bad{background:rgba(255,92,108,.1);border:1px solid rgba(255,92,108,.3);color:#ffa7b0}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td{padding:7px 6px;border-bottom:1px solid var(--line);font-family:var(--mono)}
+  td:first-child{font-family:inherit;color:var(--dim)}
+  tr:last-child td{border-bottom:0}
+  label{display:block;font-size:12px;color:var(--dim);margin-bottom:5px;font-weight:600}
+  input,select{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);color:var(--text);font:15px var(--mono)}
+  .grid{display:grid;gap:10px;grid-template-columns:1fr 1fr 1fr}
+  @media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
+  .foot{color:var(--faint);font-size:12px;text-align:center;margin-top:22px;line-height:1.7}
+  .swings{font-family:var(--mono);font-size:13px;color:var(--dim);word-spacing:6px}
+  .levels{font-family:var(--mono);font-size:19px;line-height:1.7;white-space:pre;
+    background:var(--panel2);border-radius:9px;padding:14px;overflow-x:auto}
+  .btn{padding:9px 14px;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel2);color:var(--text);font:600 13px inherit;cursor:pointer}
+  .btn.danger{color:var(--red)}
+  .stat3{display:grid;gap:10px;grid-template-columns:repeat(4,1fr);margin-bottom:6px}
+  @media(max-width:620px){.stat3{grid-template-columns:1fr 1fr}}
+  .box{background:var(--panel2);border-radius:9px;padding:12px}
+  .box .k{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .box .v{font-family:var(--mono);font-size:21px;font-weight:700;margin-top:3px}
+  .box .s{font-size:11px;color:var(--faint);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Setup Scanner</h1>
+  <div class="sub">Drop a 1H export. The 4H and daily are derived from it.</div>
+
+  <div class="card">
+    <div id="drop">
+      <b>Drop your MES 1H CSV here</b><br>
+      <span style="font-size:13px">or click to choose · TradingView → chart → Export chart data</span>
+    </div>
+    <!-- outside #drop on purpose: importing rewrites that element's HTML, and an
+         input nested inside it would be destroyed, making the second import
+         impossible -->
+    <input type="file" id="file" accept=".csv" hidden>
+  </div>
+
+  <div id="out"></div>
+
+  <div id="track"></div>
+
+  <div class="card" id="sizecard" hidden>
+    <h2>Sizing</h2>
+    <div class="grid">
+      <div><label>Account ($)</label><input type="number" id="acct" value="50000"></div>
+      <div><label>Risk (%)</label><input type="number" id="riskpct" value="0.5" step="0.1"></div>
+      <div><label>Contract</label><select id="sym">
+        <option value="5">MES — $5/pt</option>
+        <option value="50">ES — $50/pt</option>
+      </select></div>
+    </div>
+    <div id="size"></div>
+  </div>
+
+  <div class="card">
+    <h2>Paper record</h2>
+    <p style="margin:0 0 10px;font-size:13px;color:var(--dim)">
+      Only 55 of the backtest's trades could be verified against finer data. The
+      rest are bracketed, not known. This grows the verified count forward —
+      every export adds whatever closed since the last one.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="exp">Export record (CSV)</button>
+      <button class="btn danger" id="wipe">Erase record</button>
+    </div>
+  </div>
+
+  <p class="foot">
+    Reads price only. Places no orders, connects to no broker.<br>
+    Roughly +0.20R to +0.46R a trade over 55 trades whose path could be verified.
+    History, not a promise.
+  </p>
+</div>
+
+<script>
+
+/* ---------------------------------------------------------------------------
+   Market structure engine — swings, HH/HL/LH/LL, BOS, CHoCH, sweeps.
+
+   Pure price action. No indicators, no averages, no smoothing. Inputs are
+   open/high/low/close/time and nothing else.
+
+   Two levels of structure are tracked at once, because they answer different
+   questions and conflating them is what makes naive implementations flip bias
+   on every pullback:
+
+     minor — breaks of the most recent confirmed swing. Every shallow pullback
+             that fails registers here. This is the pullback-level detail you
+             execute against.
+
+     major — breaks of the *protected* level: the swing low that launched the
+             current bullish leg, or the high that launched the bearish one.
+             It advances only when a BOS occurs, never on an ordinary swing.
+             Breaking it is what actually ends the leg.
+
+   Inside one timeframe that is swing structure versus internal structure. Read
+   across timeframes it is the same idea: major on the Daily and 4H is the
+   external bias; minor on the 1H and 15M is where entries live.
+
+   Causal by construction: a swing at bar i is invisible until bar i+N closes,
+   so every level acted on was knowable at the time. See SPEC.md.
+   --------------------------------------------------------------------------- */
+
+const DEFAULTS = {
+  fractalN : 2,        // bars required either side to confirm a swing
+  breakOn  : 'close',  // 'close' | 'wick'  — what counts as accepting a level
+  swingOn  : 'wick'    // 'wick'  | 'body'  — what counts as making a swing
+};
+
+/* A swing's high and low. On 'wick' these are the bar's extremes, which is
+   where resting liquidity actually is. On 'body' they are the open/close
+   envelope, so a long wick that closed back inside never registers as a swing
+   at all. The two answer different questions and the difference is measured
+   rather than argued — see SPEC §22. */
+const hiOf = (c, mode) => mode === 'body' ? Math.max(c.o, c.c) : c.h;
+const loOf = (c, mode) => mode === 'body' ? Math.min(c.o, c.c) : c.l;
+
+/* --- §2 swing points -------------------------------------------------------
+   Strict on the left, non-strict on the right, so a double top resolves to the
+   first bar rather than printing twice or not at all. */
+
+function isSwingHigh(c, i, N, mode){
+  if(i - N < 0 || i + N >= c.length) return false;
+  const v = hiOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v >  hiOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v >= hiOf(c[j], mode))) return false;
+  return true;
+}
+function isSwingLow(c, i, N, mode){
+  if(i - N < 0 || i + N >= c.length) return false;
+  const v = loOf(c[i], mode);
+  for(let j = i - N; j < i; j++) if(!(v <  loOf(c[j], mode))) return false;
+  for(let j = i + 1; j <= i + N; j++) if(!(v <= loOf(c[j], mode))) return false;
+  return true;
+}
+
+function analyze(candles, options){
+  const opt = Object.assign({}, DEFAULTS, options || {});
+  const N = opt.fractalN;
+
+  const swings = [];
+  const minor  = [];   // breaks of the most recent swing
+  const major  = [];   // breaks of the protected level
+  const sweeps = [];
+  const states = [];   // what was known once bar i closed — see stateAt()
+
+  let minorBias = null, bias = null;
+  let pendingHigh = null, pendingLow = null;      // most recent confirmed, unbroken
+  let lastHigh    = null, lastLow    = null;      // most recent confirmed, broken or not
+  let protectedLow = null, protectedHigh = null;  // advance only on a major BOS
+
+  function pushSwing(sw){
+    const last = swings[swings.length - 1];
+    if(last && last.kind === sw.kind){
+      const moreExtreme = sw.kind === 'high' ? sw.price > last.price : sw.price < last.price;
+      if(!moreExtreme) return;
+      swings.pop();
+      if(pendingHigh === last) pendingHigh = null;
+      if(pendingLow  === last) pendingLow  = null;
+    }
+    let prev = null;
+    for(let k = swings.length - 1; k >= 0; k--){
+      if(swings[k].kind === sw.kind){ prev = swings[k]; break; }
+    }
+    sw.label = !prev ? '—'
+      : sw.kind === 'high' ? (sw.price > prev.price ? 'HH' : 'LH')
+                           : (sw.price > prev.price ? 'HL' : 'LL');
+    swings.push(sw);
+    if(sw.kind === 'high'){ pendingHigh = sw; lastHigh = sw; }
+    else                  { pendingLow  = sw; lastLow  = sw; }
+  }
+
+  for(let i = 0; i < candles.length; i++){
+
+    /* 1. confirm the swing sitting N bars back */
+    const p = i - N;
+    if(p >= 0){
+      if(isSwingHigh(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'high', price:hiOf(candles[p], opt.swingOn),
+                   confirmedAt:i, broken:false, label:null});
+      } else if(isSwingLow(candles, p, N, opt.swingOn)){
+        pushSwing({i:p, t:candles[p].t, kind:'low', price:loOf(candles[p], opt.swingOn),
+                   confirmedAt:i, broken:false, label:null});
+      }
+    }
+
+    const bar = candles[i];
+    const up   = opt.breakOn === 'wick' ? bar.h : bar.c;
+    const down = opt.breakOn === 'wick' ? bar.l : bar.c;
+
+    /* 2. minor track — the most recent confirmed swing in each direction */
+    const mUp   = pendingHigh && pendingHigh.confirmedAt < i && up   > pendingHigh.price;
+    const mDown = pendingLow  && pendingLow.confirmedAt  < i && down < pendingLow.price;
+
+    let mDir = null, mAmbiguous = false;
+    if(mUp && mDown){ mAmbiguous = true; mDir = bar.c >= bar.o ? 'bull' : 'bear'; }
+    else if(mUp)   mDir = 'bull';
+    else if(mDown) mDir = 'bear';
+
+    if(mDir === 'bull'){
+      minor.push({i, t:bar.t, scope:'minor',
+                  type: minorBias === 'bear' ? 'CHoCH' : 'BOS', dir:'bull',
+                  level:pendingHigh.price, brokeSwingAt:pendingHigh.i, ambiguous:mAmbiguous});
+      pendingHigh.broken = true; pendingHigh = null; minorBias = 'bull';
+    } else if(mDir === 'bear'){
+      minor.push({i, t:bar.t, scope:'minor',
+                  type: minorBias === 'bull' ? 'CHoCH' : 'BOS', dir:'bear',
+                  level:pendingLow.price, brokeSwingAt:pendingLow.i, ambiguous:mAmbiguous});
+      pendingLow.broken = true; pendingLow = null; minorBias = 'bear';
+    }
+
+    /* 3. major track — a BOS extends the leg and drags the protected level up
+          behind it; only the protected level can end the leg. */
+    if(bias === 'bull'){
+      if(mDir === 'bull'){
+        major.push({i, t:bar.t, scope:'major', type:'BOS', dir:'bull',
+                    level:minor[minor.length-1].level, protectedNow:lastLow ? lastLow.price : null});
+        if(lastLow) protectedLow = lastLow;
+      } else if(protectedLow && down < protectedLow.price){
+        major.push({i, t:bar.t, scope:'major', type:'CHoCH', dir:'bear',
+                    level:protectedLow.price, brokeSwingAt:protectedLow.i});
+        bias = 'bear'; protectedHigh = lastHigh; protectedLow = null;
+      }
+    } else if(bias === 'bear'){
+      if(mDir === 'bear'){
+        major.push({i, t:bar.t, scope:'major', type:'BOS', dir:'bear',
+                    level:minor[minor.length-1].level, protectedNow:lastHigh ? lastHigh.price : null});
+        if(lastHigh) protectedHigh = lastHigh;
+      } else if(protectedHigh && up > protectedHigh.price){
+        major.push({i, t:bar.t, scope:'major', type:'CHoCH', dir:'bull',
+                    level:protectedHigh.price, brokeSwingAt:protectedHigh.i});
+        bias = 'bull'; protectedLow = lastLow; protectedHigh = null;
+      }
+    } else if(mDir){
+      /* bootstrap: the first break in either direction sets the leg */
+      bias = mDir;
+      major.push({i, t:bar.t, scope:'major', type:'BOS', dir:mDir,
+                  level:minor[minor.length-1].level});
+      if(mDir === 'bull') protectedLow = lastLow; else protectedHigh = lastHigh;
+    }
+
+    /* 4. sweeps — wick through, close back inside. Mutually exclusive with a
+          break by construction. A sweep of the protected level is the one that
+          matters: liquidity taken at the level defending the whole leg. */
+    if(!mDir){
+      if(pendingHigh && pendingHigh.confirmedAt < i &&
+         bar.h > pendingHigh.price && bar.c <= pendingHigh.price){
+        sweeps.push({i, t:bar.t, side:'bearish', level:pendingHigh.price,
+                     sweptSwingAt:pendingHigh.i, penetration:bar.h - pendingHigh.price,
+                     isProtected: !!(protectedHigh && protectedHigh.i === pendingHigh.i)});
+      }
+      if(pendingLow && pendingLow.confirmedAt < i &&
+         bar.l < pendingLow.price && bar.c >= pendingLow.price){
+        sweeps.push({i, t:bar.t, side:'bullish', level:pendingLow.price,
+                     sweptSwingAt:pendingLow.i, penetration:pendingLow.price - bar.l,
+                     isProtected: !!(protectedLow && protectedLow.i === pendingLow.i)});
+      }
+    }
+
+    /* 5. snapshot — exactly what was knowable once this bar closed. Multi-
+          timeframe alignment reads this and nothing else, which is what stops
+          a higher timeframe leaking a bias it had not formed yet. */
+    states.push({
+      bias, minorBias,
+      pLow : protectedLow  ? protectedLow.price  : null,
+      pHigh: protectedHigh ? protectedHigh.price : null
+    });
+  }
+
+  return {
+    swings, minor, major, sweeps, states,
+    bias, minorBias,
+    protectedLow : protectedLow  ? protectedLow.price  : null,
+    protectedHigh: protectedHigh ? protectedHigh.price : null,
+    opt
+  };
+}
+
+/* --- §6 consolidation ------------------------------------------------------
+   Both label families present across the recent window, and no major BOS over
+   the same span. Flagged as an open question in SPEC.md. */
+
+function isConsolidating(res, window){
+  const w = window || 4;
+  const recent = res.swings.slice(-w);
+  if(recent.length < w) return false;
+  const labels = recent.map(s => s.label);
+  if(!(labels.some(l => l === 'HH' || l === 'HL') &&
+       labels.some(l => l === 'LL' || l === 'LH'))) return false;
+  const from = recent[0].i;
+  return !res.major.some(e => e.type === 'BOS' && e.i >= from);
+}
+
+function describe(res){
+  const stamp = t => typeof t === 'number' && t > 1e11
+    ? new Date(t).toISOString().slice(0,16).replace('T',' ') : String(t);
+  const rows = [];
+  res.swings.forEach(s => rows.push({k:s.confirmedAt, i:s.i, line:
+    `${stamp(s.t)}  swing ${s.kind === 'high' ? 'high' : 'low '}  ` +
+    `${String(s.price).padStart(10)}  ${s.label}${s.broken ? '  (broken)' : ''}`}));
+  res.major.forEach(e => rows.push({k:e.i, i:e.i, line:
+    `${stamp(e.t)}  MAJOR ${e.type.padEnd(5)} ${e.dir.padEnd(4)} through ${String(e.level).padStart(10)}`}));
+  res.minor.forEach(e => rows.push({k:e.i, i:e.i, line:
+    `${stamp(e.t)}  minor ${e.type.padEnd(5)} ${e.dir.padEnd(4)} through ${String(e.level).padStart(10)}`}));
+  res.sweeps.forEach(s => rows.push({k:s.i, i:s.i, line:
+    `${stamp(s.t)}  sweep ${s.side.padEnd(8)} of ${String(s.level).padStart(10)}` +
+    `${s.isProtected ? '  [PROTECTED]' : ''}`}));
+  rows.sort((a,b) => a.k - b.k || a.i - b.i);
+  return rows.map(r => r.line).join('\n');
+}
+
+/* State as of the close of bar `i`. Anything reading structure across
+   timeframes must go through this rather than the summary fields, which
+   describe the end of the series. */
+function stateAt(res, i){
+  if(i < 0) return {bias:null, minorBias:null, pLow:null, pHigh:null};
+  return res.states[Math.min(i, res.states.length - 1)];
+}
+
+const API = {analyze, stateAt, isConsolidating, describe, isSwingHigh, isSwingLow, DEFAULTS};
+if(typeof module !== 'undefined' && module.exports) module.exports = API;
+if(typeof window !== 'undefined') window.Structure = API;
+
+const Structure = API;
+const Resample = (function(){ 
+/* Aggregate candles up to a higher timeframe. Buckets are absolute clock
+   boundaries, which is how futures sessions actually align, and which means a
+   session gap simply yields a bucket with fewer source bars rather than
+   smearing across the break. */
+function resample(candles, targetMs, offsetMs){
+  /* Futures bars phase off the session open, not UTC midnight — CME index
+     futures start at 18:00 ET, so a 4H bucket boundary sits two hours off the
+     UTC grid. Default to the source series' own phase; pass offsetMs to match
+     a specific vendor's grid. */
+  const off = ((offsetMs != null ? offsetMs : (candles[0] ? candles[0].t : 0)) % targetMs
+               + targetMs) % targetMs;
+  const out = []; let cur = null, key = null;
+  for(const c of candles){
+    const k = Math.floor((c.t - off) / targetMs) * targetMs + off;
+    if(k !== key){
+      if(cur) out.push(cur);
+      key = k; cur = {t:k, o:c.o, h:c.h, l:c.l, c:c.c, n:1};
+    } else {
+      cur.h = Math.max(cur.h, c.h);
+      cur.l = Math.min(cur.l, c.l);
+      cur.c = c.c; cur.n++;
+    }
+  }
+  if(cur) out.push(cur);
+  return out;
+}
+
+
+/* Daily bars for CME index futures cannot be bucketed on a fixed offset: the
+   session runs 18:00 ET to 17:00 ET, and the ET clock shifts twice a year, so
+   a fixed grid mis-assigns the bars around each DST change. Bucketing by the
+   actual ET calendar date of (bar time + 6h) puts the 18:00 open into the
+   session it belongs to and follows DST automatically. */
+const ET_DATE = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
+});
+
+function resampleDaily(candles){
+  const out = []; let cur = null, key = null;
+  for(const c of candles){
+    const k = ET_DATE.format(new Date(c.t + 6*3600*1000));
+    if(k !== key){
+      if(cur) out.push(cur);
+      key = k; cur = {t:c.t, o:c.o, h:c.h, l:c.l, c:c.c, n:1};
+    } else {
+      cur.h = Math.max(cur.h, c.h);
+      cur.l = Math.min(cur.l, c.l);
+      cur.c = c.c; cur.n++;
+    }
+  }
+  if(cur) out.push(cur);
+  return out;
+}
+
+ return {resample, resampleDaily}; })();
+const Align = (function(){ const S = Structure; 
+/* ---------------------------------------------------------------------------
+   Multi-timeframe alignment — §1 of SPEC.md.
+
+   External bias comes from the Daily and 4H. Internal state comes from the 1H.
+   Execution happens on the 15M. The whole job of this file is to answer, for
+   any bar on the execution timeframe: what did each higher timeframe actually
+   know at that instant?
+
+   The trap this exists to avoid: a 4H bar stamped 10:00 does not finish until
+   14:00. Reading its bias while executing an 11:15 bar on the 15M uses three
+   hours of price that had not happened yet. Every rule tested on top of that
+   looks better than it is, and the error is invisible in the output — the
+   equity curve just comes out too good.
+
+   So higher timeframes are consulted only through their last CLOSED bar, and
+   only through Structure.stateAt(). TradingView stamps a bar with its OPEN
+   time, so close time is stamp + duration, and duration is measured from the
+   data rather than assumed.
+   --------------------------------------------------------------------------- */
+
+
+
+/* Modal spacing between bars — the nominal duration, immune to session gaps. */
+function barDuration(candles){
+  if(!candles || candles.length < 2)
+    throw new Error(`barDuration(): need at least 2 bars, got ${candles ? candles.length : 0}. ` +
+      `Usually this means two timeframes were combined whose histories do not overlap.`);
+  const gaps = {};
+  for(let i = 1; i < candles.length; i++){
+    const g = candles[i].t - candles[i-1].t;
+    gaps[g] = (gaps[g] || 0) + 1;
+  }
+  return Number(Object.entries(gaps).sort((a,b) => b[1] - a[1])[0][0]);
+}
+
+/* Index of the last bar to have CLOSED at or before time t. -1 if none has. */
+function lastClosedAt(candles, dur, t, hint){
+  let i = Math.min(hint || 0, candles.length - 1);
+  if(i < 0) i = 0;
+  while(i < candles.length && candles[i].t + dur <= t) i++;
+  while(i > 0 && candles[i-1].t + dur > t) i--;
+  return i - 1;
+}
+
+/* Build a per-execution-bar view of every timeframe.
+
+   series : { '1d': candles, '4h': candles, '1h': candles, '15m': candles }
+   opts   : { exec: '15m', external: ['1d','4h'], internal: ['1h'], fractalN }   */
+function align(series, opts){
+  const o = Object.assign({
+    exec: '15m', external: ['1d','4h'], internal: ['1h'], fractalN: 2
+  }, opts || {});
+  /* Anything the structure engine understands is forwarded to it. Listing only
+     fractalN here silently dropped every other option — a test comparing two
+     settings came back identical to three decimals, which is what that looks
+     like from the outside. */
+  const engineOpts = {};
+  for(const k of Object.keys(S.DEFAULTS)) if(o[k] !== undefined) engineOpts[k] = o[k];
+
+  const tfs = [...new Set([...o.external, ...o.internal, o.exec])];
+  const meta = {};
+  for(const tf of tfs){
+    if(!series[tf]) throw new Error(`align(): no candles supplied for "${tf}"`);
+    meta[tf] = {
+      candles: series[tf],
+      dur    : barDuration(series[tf]),
+      res    : S.analyze(series[tf], engineOpts),
+      cursor : 0
+    };
+  }
+
+  const ex = meta[o.exec];
+  const rows = [];
+
+  for(let i = 0; i < ex.candles.length; i++){
+    const t = ex.candles[i].t + ex.dur;      // this bar has just closed
+    const row = {i, t: ex.candles[i].t, tf: {}};
+
+    for(const tf of tfs){
+      const m = meta[tf];
+      /* the execution timeframe knows its own bar i; everything else is
+         consulted only as far as its last closed bar */
+      const j = tf === o.exec ? i : lastClosedAt(m.candles, m.dur, t, m.cursor);
+      m.cursor = Math.max(0, j);
+      row.tf[tf] = {
+        barIndex: j,
+        barTime : j >= 0 ? m.candles[j].t : null,
+        ...S.stateAt(m.res, j)
+      };
+    }
+
+    /* external agreement — every external timeframe pointing the same way */
+    const ext = o.external.map(tf => row.tf[tf].bias);
+    row.external = ext.every(b => b === 'bull') ? 'bull'
+                 : ext.every(b => b === 'bear') ? 'bear' : null;
+
+    /* internal agreement with it */
+    const int = o.internal.map(tf => row.tf[tf].bias);
+    row.internal = int.every(b => b === 'bull') ? 'bull'
+                 : int.every(b => b === 'bear') ? 'bear' : null;
+
+    row.aligned = row.external !== null && row.external === row.internal
+                ? row.external : null;
+    rows.push(row);
+  }
+
+  return {rows, meta, opt: o};
+}
+
+/* --- setups ----------------------------------------------------------------
+   The method minus displacement, which stays undefined until it is defined
+   against real charts (SPEC.md §5, open question 4):
+
+     external bias set by D and 4H
+     a sweep on the execution timeframe in that direction — the manipulation
+     a minor shift on the execution timeframe confirming it, within `within`
+       bars — the internal aligning with the external
+
+   Stop sits beyond the swept extreme, because if price accepts back through
+   the level the read was simply wrong.                                       */
+
+function findSetups(aligned, opts){
+  const o = Object.assign({within: 6, requireInternal: false}, opts || {});
+  const ex = aligned.meta[aligned.opt.exec];
+  const res = ex.res, candles = ex.candles;
+  const out = [];
+
+  for(const sweep of res.sweeps){
+    const row = aligned.rows[sweep.i];
+    if(!row) continue;
+
+    /* a bullish sweep takes sell-side liquidity below, and is only tradable
+       long, so it has to sit under a bullish external bias */
+    const dir = sweep.side === 'bullish' ? 'bull' : 'bear';
+    if(row.external !== dir) continue;
+    if(o.requireInternal && row.internal !== dir) continue;
+
+    /* confirmation: a minor break the same way, shortly after */
+    const shift = res.minor.find(e =>
+      e.i > sweep.i && e.i <= sweep.i + o.within && e.dir === dir);
+    if(!shift) continue;
+
+    const entry = candles[shift.i].c;
+    const stop  = dir === 'bull' ? candles[sweep.i].l : candles[sweep.i].h;
+    const risk  = Math.abs(entry - stop);
+    if(!(risk > 0)) continue;
+
+    out.push({
+      dir, sweepAt: sweep.i, shiftAt: shift.i,
+      t: candles[shift.i].t,
+      sweptLevel: sweep.level, isProtected: sweep.isProtected,
+      entry, stop, risk,
+      barsToConfirm: shift.i - sweep.i,
+      external: row.external, internal: row.internal
+    });
+  }
+  return out;
+}
+
+/* Walk each setup forward to a fixed R multiple or the stop, whichever the
+   bars reach first. Not a strategy result — the exit rule is a placeholder —
+   but enough to see whether the entries land anywhere useful. */
+function evaluate(setups, candles, rMultiple){
+  const R = rMultiple || 2;
+  return setups.map(s => {
+    const from = s.entryAt != null ? s.entryAt : s.shiftAt;
+    const target = s.dir === 'bull' ? s.entry + R*s.risk : s.entry - R*s.risk;
+    let outcome = 'open', barsHeld = 0;
+    /* start ON the entry bar. A limit filled intrabar can be stopped by the
+       same bar, and skipping it scores those as wins. */
+    for(let i = from; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - from;
+      const hitStop   = s.dir === 'bull' ? k.l <= s.stop   : k.h >= s.stop;
+      const hitTarget = s.dir === 'bull' ? k.h >= target   : k.l <= target;
+      /* both inside one bar is unresolvable from OHLC alone; count it as the
+         stop rather than flattering the result */
+      if(hitStop)        { outcome = 'stop';   break; }
+      if(hitTarget)      { outcome = 'target'; break; }
+    }
+    return {...s, target, outcome, barsHeld, r: outcome === 'target' ? R : outcome === 'stop' ? -1 : 0};
+  });
+}
+
+
+
+/* --- pullback to origin ----------------------------------------------------
+   The other setup: a 4H or daily swing is running, the execution timeframe
+   makes a higher high confirming it, price pulls back toward where that leg
+   came from, and the trade is taken there in the direction of the swing.
+
+   "Where it came from" is the origin of the impulse — the swing low that the
+   leg launched from, which is precisely the protected level (§4). No new
+   concept is needed and no new number is invented, except how far back into
+   the leg counts as a pullback, which is `depth` and is meant to be scanned
+   rather than assumed.
+
+     depth 1.00  price must return all the way to the origin
+     depth 0.50  halfway back into the leg
+     depth 0.33  a shallow pullback
+
+   The leg is measured to its running extreme, so a leg that extends further
+   raises the entry with it. The trade dies if price closes through the origin,
+   because that is a change of character and the read was wrong.            */
+
+function findPullbacks(aligned, opts){
+  /* on: 'swing' — the leg is defined by a swing high LABELLED HH (or a low
+          labelled LL). It need not have broken anything: that high may itself
+          be a lower high on a bigger timeframe, and the leg is still a leg.
+     on: 'bos'   — the older reading, where the leg had to break structure.
+
+     tickBuffer: the stop sits this far BEYOND the origin. At depth 1.00 the
+     entry is the origin, so a stop placed exactly on it gives zero risk and
+     the setup silently vanishes — which is how this was found. */
+  const o = Object.assign({depth: 0.5, maxBars: 40, tickBuffer: 0.25,
+                           on: 'swing'}, opts || {});
+  const ex = aligned.meta[aligned.opt.exec];
+  const res = ex.res, candles = ex.candles;
+  const out = [];
+
+  /* legs: {dir, origin, extreme, from} where `from` is the first bar on which
+     the leg was knowable — the swing's confirmation bar, never the swing bar
+     itself, or the scan would be reading N bars into the future. */
+  const legs = [];
+  if(o.on === 'bos'){
+    for(const e of res.major){
+      if(e.type === 'BOS' && e.protectedNow != null)
+        legs.push({dir:e.dir, origin:e.protectedNow,
+                   seed: e.dir === 'bull' ? candles[e.i].h : candles[e.i].l, from:e.i});
+    }
+  } else {
+    for(let k = 0; k < res.swings.length; k++){
+      const sw = res.swings[k];
+      const isHH = sw.kind === 'high' && sw.label === 'HH';
+      const isLL = sw.kind === 'low'  && sw.label === 'LL';
+      if(!isHH && !isLL) continue;
+      /* the leg came from the opposite swing immediately before it */
+      let origin = null;
+      for(let j = k - 1; j >= 0; j--){
+        if(res.swings[j].kind !== sw.kind){ origin = res.swings[j]; break; }
+      }
+      if(!origin) continue;
+      legs.push({dir: isHH ? 'bull' : 'bear', origin: origin.price,
+                 seed: sw.price, from: sw.confirmedAt});
+    }
+  }
+
+  for(const leg of legs){
+    const {dir, origin} = leg;
+    const row = aligned.rows[leg.from];
+    if(!row || row.external !== dir) continue;
+
+    let extreme = leg.seed;
+    /* start the bar AFTER the leg became knowable. A swing is confirmed at the
+       close of leg.from, so an order resting during that same bar would be
+       trading on information that bar had not yet finished producing. */
+    for(let i = leg.from + 1; i < Math.min(candles.length, leg.from + 1 + o.maxBars); i++){
+      const k = candles[i];
+
+      /* closing through the origin invalidates the leg */
+      if(dir === 'bull' ? k.c < origin : k.c > origin) break;
+      /* a newer leg the same way supersedes this one */
+      if(i > leg.from && legs.some(l => l !== leg && l.dir === dir && l.from === i)) break;
+
+      extreme = dir === 'bull' ? Math.max(extreme, k.h) : Math.min(extreme, k.l);
+      const span = Math.abs(extreme - origin);
+      if(!(span > 0)) continue;
+      const trigger = dir === 'bull' ? extreme - o.depth*span : extreme + o.depth*span;
+
+      if(dir === 'bull' ? k.l <= trigger : k.h >= trigger){
+        const entry = trigger;
+        const stop  = dir === 'bull' ? origin - o.tickBuffer : origin + o.tickBuffer;
+        const risk  = Math.abs(entry - stop);
+        if(risk > 0){
+          out.push({
+            kind:'pullback', dir, bosAt: leg.from, entryAt: i, t: k.t,
+            origin, extreme, entry, stop, risk,
+            legTarget: extreme, barsToPullback: i - leg.from,
+            external: row.external, internal: row.internal
+          });
+        }
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+/* Exit at a FIXED PRICE rather than a fixed R. Comparing pullback depths by
+   R-multiple is not a fair test: a deeper entry has a tighter stop, so its 2R
+   target sits nearer in absolute price and is easier to reach. Aiming every
+   depth at the same level — the extreme the leg already made — isolates
+   whether the entry is actually better, rather than merely closer. */
+function evaluateToLevel(setups, candles){
+  return setups.map(s => {
+    const target = s.legTarget;
+    let outcome = 'open', barsHeld = 0;
+    for(let i = s.entryAt; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - s.entryAt;
+      const hitStop   = s.dir === 'bull' ? k.l <= s.stop : k.h >= s.stop;
+      const hitTarget = s.dir === 'bull' ? k.h >= target : k.l <= target;
+      if(hitStop)   { outcome = 'stop';   break; }
+      if(hitTarget) { outcome = 'target'; break; }
+    }
+    const reward = Math.abs(target - s.entry) / s.risk;
+    return {...s, target, outcome, barsHeld, rr: reward,
+            r: outcome === 'target' ? reward : outcome === 'stop' ? -1 : 0};
+  });
+}
+
+/* Exit at a fraction of the way back to the prior extreme.
+
+   frame 'origin' — the leg is measured from where it came from. Origin is 0%,
+     the prior extreme is 100%, and the exit sits at `frac`. Note this is only
+     reachable when the entry is deeper than the target: entry sits at
+     (1 - depth) of the leg, so frac must exceed that or the target is already
+     behind price at entry.
+
+   frame 'entry'  — the remaining distance from the fill to the prior extreme
+     is 100%, and the exit takes `frac` of it. Always reachable.
+
+   `frac` may be an array, in which case the position is scaled out in equal
+   parts at each level and the result is the average R across those parts. The
+   stop applies to whatever is still on. */
+function evaluateFraction(setups, candles, frac, frame, opts){
+  const fracs = Array.isArray(frac) ? frac.slice().sort((a,b)=>a-b) : [frac];
+  const f = frame || 'origin';
+  /* A target is NOT honoured on the entry bar unless explicitly asked for. The
+     limit fills when the bar trades to it, and that bar's extreme in the other
+     direction may have printed first — OHLC cannot say. The stop is honoured
+     there, because taking the pessimistic side of an unknowable ordering is the
+     only safe asymmetry. Passing targetOnEntryBar:true gives the optimistic
+     bound, which is useful only for bracketing. */
+  const sameBarTarget = !!(opts && opts.targetOnEntryBar);
+
+  return setups.map(s => {
+    const span = Math.abs(s.extreme - s.origin);
+    const targets = fracs.map(x => f === 'origin'
+      ? (s.dir === 'bull' ? s.origin + x*span        : s.origin - x*span)
+      : (s.dir === 'bull' ? s.entry + x*(s.extreme - s.entry)
+                          : s.entry - x*(s.entry - s.extreme)));
+
+    /* a target already behind price at the fill cannot be traded */
+    const reachable = targets.map(t => s.dir === 'bull' ? t > s.entry : t < s.entry);
+    if(!reachable.some(Boolean)) return {...s, outcome:'unreachable', r:null, barsHeld:0};
+
+    const live = targets.filter((t,i) => reachable[i]);
+    const part = 1 / live.length;
+    let filled = 0, realised = 0, outcome = 'open', barsHeld = 0;
+
+    for(let i = s.entryAt; i < candles.length; i++){
+      const k = candles[i]; barsHeld = i - s.entryAt;
+      const hitStop = s.dir === 'bull' ? k.l <= s.stop : k.h >= s.stop;
+      /* stop first: both inside one bar is unresolvable from OHLC, so take the
+         reading that does not flatter the result */
+      if(hitStop){
+        realised += (1 - filled) * -1;
+        outcome = filled > 0 ? 'partial' : 'stop';
+        break;
+      }
+      if(i === s.entryAt && !sameBarTarget) continue;
+      while(filled < 1 - 1e-9){
+        const idx = Math.round(filled / part);
+        if(idx >= live.length) break;
+        const t = live[idx];
+        const hit = s.dir === 'bull' ? k.h >= t : k.l <= t;
+        if(!hit) break;
+        realised += part * (Math.abs(t - s.entry) / s.risk);
+        filled += part;
+      }
+      if(filled >= 1 - 1e-9){ outcome = 'target'; break; }
+    }
+    return {...s, outcome, barsHeld, r: outcome === 'open' ? null : realised};
+  });
+}
+
+
+  return {align, findSetups, findPullbacks, evaluate, evaluateToLevel, evaluateFraction,
+          barDuration, lastClosedAt}; })();
+const Csv = (function(){
+  
+/* CSV loader for TradingView exports.
+
+   Format seen from TradingView's "Export chart data":
+     time,open,high,low,close,Volume
+     1786358700,7786,7788,7783.75,7785.25,2082
+
+   `time` is Unix epoch seconds, so it carries no timezone of its own. Everything
+   downstream displays in America/New_York, because that is the clock a CME index
+   futures trader actually reads. Note TradingView stamps a daily bar with the
+   session *open* (18:00 ET the previous calendar day), not the calendar date. */
+
+
+
+function parse(text){
+  const lines = text.trim().split(/\r?\n/);
+  const head = lines[0].toLowerCase().split(',').map(s => s.trim());
+
+  const col = name => {
+    const i = head.indexOf(name);
+    if(i < 0) throw new Error(`CSV is missing a "${name}" column. Found: ${head.join(', ')}`);
+    return i;
+  };
+  const iT = col('time'), iO = col('open'), iH = col('high'), iL = col('low'), iC = col('close');
+  const iV = head.indexOf('volume');
+
+  const out = [];
+  for(let n = 1; n < lines.length; n++){
+    const row = lines[n].split(',');
+    if(row.length < 5) continue;
+
+    const raw = row[iT].trim();
+    /* epoch seconds, epoch millis, or an ISO string — accept all three */
+    const t = /^\d+$/.test(raw)
+      ? (raw.length > 10 ? Number(raw) : Number(raw) * 1000)
+      : Date.parse(raw);
+
+    const c = {
+      t,
+      o: parseFloat(row[iO]), h: parseFloat(row[iH]),
+      l: parseFloat(row[iL]), c: parseFloat(row[iC]),
+      v: iV >= 0 ? parseFloat(row[iV]) : null
+    };
+    if(!isFinite(c.t) || !isFinite(c.o) || !isFinite(c.h) || !isFinite(c.l) || !isFinite(c.c)) continue;
+    out.push(c);
+  }
+
+  out.sort((a, b) => a.t - b.t);
+  return out;
+}
+
+/* Sanity checks worth running before trusting anything built on the data. */
+function audit(candles){
+  const problems = [];
+  let dupes = 0, badRange = 0;
+
+  for(let i = 0; i < candles.length; i++){
+    const c = candles[i];
+    if(c.h < c.l || c.h < c.o || c.h < c.c || c.l > c.o || c.l > c.c) badRange++;
+    if(i > 0 && candles[i].t === candles[i-1].t) dupes++;
+  }
+  if(badRange) problems.push(`${badRange} bars where OHLC is internally inconsistent`);
+  if(dupes)    problems.push(`${dupes} duplicate timestamps`);
+
+  /* Modal gap between bars — the nominal timeframe. Anything much larger is a
+     session break or a holiday, which is expected and not an error. */
+  const gaps = {};
+  for(let i = 1; i < candles.length; i++){
+    const g = (candles[i].t - candles[i-1].t) / 1000;
+    gaps[g] = (gaps[g] || 0) + 1;
+  }
+  const modal = Object.entries(gaps).sort((a,b) => b[1] - a[1])[0];
+  const step = modal ? Number(modal[0]) : null;
+  const breaks = Object.entries(gaps)
+    .filter(([g]) => Number(g) > step * 1.5)
+    .reduce((a, [,n]) => a + n, 0);
+
+  return {n: candles.length, stepSeconds: step, sessionBreaks: breaks, problems};
+}
+
+
+
+const ET = t => new Date(t).toLocaleString('en-US', {
+  timeZone: 'America/New_York', year: 'numeric', month: 'short', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', hour12: false
+});
+
+
+  return {parse, audit, ET};
+})();
+const Gaps = (function(){ 
+/* ---------------------------------------------------------------------------
+   Fair value gaps — inefficiency, and the displacement §5 left undefined.
+
+   Three candles. If the move through the middle one is violent enough that
+   candle 3 never trades where candle 1 traded, a band of price has been skipped:
+
+     bullish gap   low[i]  > high[i-2]     zone = high[i-2] .. low[i]
+     bearish gap   high[i] < low[i-2]      zone = high[i]   .. low[i-2]
+
+   No indicator, no threshold, no average. Either the two candles overlap or
+   they do not. That is the whole definition.
+
+   A gap is "filled" when price trades back through it. Two thresholds are
+   tracked because they answer different questions: the near edge (first touch)
+   and the far edge (fully consumed). The midpoint is tracked too, since a gap
+   half-filled is the level most people actually treat as the trade.
+
+   --- speed ------------------------------------------------------------------
+   Detection is a single pass and touches each bar three times. Fill tracking
+   keeps only the OPEN gaps in a working list and drops each one the moment it
+   is consumed, so the inner loop is over live gaps rather than all history.
+
+   For live use there is update(): feed it one new candle and it does the work
+   for that bar alone, no re-scan. That is what makes a per-tick decision cheap.
+   --------------------------------------------------------------------------- */
+
+function create(){
+  return {gaps: [], open: [], n: 0, prev: [null, null]};
+}
+
+/* Feed one candle. Returns the gap created on this bar, if any. */
+function update(st, c){
+  const i = st.n++;
+  const c2 = st.prev[0];             // candle i-2
+  let made = null;
+
+  if(c2){
+    if(c.l > c2.h){
+      made = {i, dir:'bull', bottom:c2.h, top:c.l, size:c.l - c2.h, t:c.t,
+              touchedAt:null, midAt:null, filledAt:null};
+    } else if(c.h < c2.l){
+      made = {i, dir:'bear', bottom:c.h, top:c2.l, size:c2.l - c.h, t:c.t,
+              touchedAt:null, midAt:null, filledAt:null};
+    }
+  }
+  if(made){ st.gaps.push(made); st.open.push(made); }
+
+  /* fills — walk the live list backwards so removal is cheap */
+  for(let k = st.open.length - 1; k >= 0; k--){
+    const g = st.open[k];
+    if(g.i >= i) continue;                    // a gap cannot fill on its own bar
+    const mid = (g.top + g.bottom) / 2;
+
+    if(g.dir === 'bull'){
+      if(g.touchedAt === null && c.l <= g.top)    g.touchedAt = i;
+      if(g.midAt     === null && c.l <= mid)      g.midAt     = i;
+      if(c.l <= g.bottom){ g.filledAt = i; st.open.splice(k,1); }
+    } else {
+      if(g.touchedAt === null && c.h >= g.bottom) g.touchedAt = i;
+      if(g.midAt     === null && c.h >= mid)      g.midAt     = i;
+      if(c.h >= g.top){ g.filledAt = i; st.open.splice(k,1); }
+    }
+  }
+
+  st.prev[0] = st.prev[1]; st.prev[1] = c;
+  return made;
+}
+
+function detect(candles){
+  const st = create();
+  for(const c of candles) update(st, c);
+  return st;
+}
+
+/* Gaps still unfilled as of bar i — the magnets price has left behind. */
+function openAt(st, i){
+  return st.gaps.filter(g => g.i < i && (g.filledAt === null || g.filledAt > i));
+}
+
+/* Was there displacement in `dir` within `within` bars ending at bar i?
+   This is the §5 answer: a sweep is manipulation when the move away from it
+   skips price rather than merely drifting. */
+function displacedBy(st, i, dir, within){
+  const w = within || 3;
+  for(const g of st.gaps){
+    if(g.dir !== dir) continue;
+    if(g.i > i) break;
+    if(g.i >= i - w) return g;
+  }
+  return null;
+}
+
+ return {create, update, detect, openAt, displacedBy}; })();
+const Loop = (function(){ 
+/* ---------------------------------------------------------------------------
+   The loop.
+
+     track      structure, folded one candle at a time
+     compare    price against the level already computed
+     enter      when price reaches it
+     exit       at the target, the stop, or invalidation
+
+   Same four steps, with the difference that every number here was measured
+   rather than claimed.
+
+   This is a state machine, not a re-scan. analyze() walks the whole array and
+   costs 129ms on 21,000 bars; that is fine for research and wrong for a loop.
+   tick() folds in one candle and holds everything it needs between calls, so
+   the cost per bar is flat no matter how long the session has run.
+
+   It must produce exactly the trades the backtest produced, or the backtest was
+   measuring something else. loop.test.js asserts that over 21,369 bars.
+
+   No orders. No broker. It returns a decision; the human places it.
+   --------------------------------------------------------------------------- */
+
+const DEFAULTS = {
+  fractalN : 2,
+  depth    : 0.75,     // how far back into the leg the entry rests
+  exitFrac : 0.65,     // exit at this fraction of the leg, measured from origin
+  tickBuffer: 0.25,
+  maxBars  : 40        // a leg older than this is stale
+};
+
+/* One timeframe's structure, folded a candle at a time. */
+function newStruct(N){
+  return {N, n:0, buf:[], swings:[], bias:null, minorBias:null,
+          pendingHigh:null, pendingLow:null, lastHigh:null, lastLow:null,
+          protectedLow:null, protectedHigh:null};
+}
+
+const ET_DATE = new Intl.DateTimeFormat('en-CA', {
+  timeZone:'America/New_York', year:'numeric', month:'2-digit', day:'2-digit'});
+
+function create(opts){
+  const o = Object.assign({}, DEFAULTS, opts || {});
+  return {
+    o, n: 0,
+    h1: newStruct(o.fractalN),      // execution
+    h4: newStruct(o.fractalN),      // external
+    d1: newStruct(o.fractalN),      // external
+    agg4: null, aggD: null, dKey: null,   // buckets still filling
+    leg: null,
+    pos: null,
+    armed: null,
+    trades: []
+  };
+}
+
+/* Accumulate a 1H candle into a higher-timeframe bucket, returning the bucket
+   only once it is COMPLETE — which is what keeps the higher timeframes honest:
+   a bar still forming is never visible. */
+function roll(bucket, c, key){
+  if(!bucket || bucket.key !== key)
+    return {key, o:c.o, h:c.h, l:c.l, c:c.c, t:c.t};
+  bucket.h = Math.max(bucket.h, c.h);
+  bucket.l = Math.min(bucket.l, c.l);
+  bucket.c = c.c;
+  return bucket;
+}
+
+/* --- the same swing test as structure.js, over the rolling window --- */
+function swingAt(buf, k, N){
+  const c = buf, i = k;
+  if(i - N < 0 || i + N >= c.length) return null;
+  let hi = true, lo = true;
+  for(let j = i - N; j < i; j++){
+    if(!(c[i].h >  c[j].h)) hi = false;
+    if(!(c[i].l <  c[j].l)) lo = false;
+  }
+  for(let j = i + 1; j <= i + N; j++){
+    if(!(c[i].h >= c[j].h)) hi = false;
+    if(!(c[i].l <= c[j].l)) lo = false;
+  }
+  return hi ? 'high' : lo ? 'low' : null;
+}
+
+function pushSwing(st, sw){
+  const last = st.swings[st.swings.length - 1];
+  if(last && last.kind === sw.kind){
+    const more = sw.kind === 'high' ? sw.price > last.price : sw.price < last.price;
+    if(!more) return;
+    st.swings.pop();
+    if(st.pendingHigh === last) st.pendingHigh = null;
+    if(st.pendingLow  === last) st.pendingLow  = null;
+  }
+  let prev = null;
+  for(let k = st.swings.length - 1; k >= 0; k--)
+    if(st.swings[k].kind === sw.kind){ prev = st.swings[k]; break; }
+  sw.label = !prev ? '—'
+    : sw.kind === 'high' ? (sw.price > prev.price ? 'HH' : 'LH')
+                         : (sw.price > prev.price ? 'HL' : 'LL');
+  st.swings.push(sw);
+  if(st.swings.length > 64) st.swings.shift();          // bounded memory
+  if(sw.kind === 'high'){ st.pendingHigh = sw; st.lastHigh = sw; }
+  else                  { st.pendingLow  = sw; st.lastLow  = sw; }
+}
+
+/* One candle into one timeframe. Returns {majorBOS, events, minorLevel}. */
+function feedStruct(st, c){
+  const N = st.N, i = st.n++;
+  st.buf.push(c);
+  if(st.buf.length > 2*N + 2) st.buf.shift();
+
+  const events = [];
+
+  /* 1 — confirm the swing N bars back */
+  const k = st.buf.length - 1 - N;
+  if(k >= N){
+    const kind = swingAt(st.buf, k, N);
+    if(kind) pushSwing(st, {
+      i: i - N, kind, price: kind === 'high' ? st.buf[k].h : st.buf[k].l,
+      confirmedAt: i, label: null
+    });
+  }
+
+  /* 2 — breaks, minor then major, exactly as structure.js orders them */
+  const mUp   = st.pendingHigh && st.pendingHigh.confirmedAt < i && c.c > st.pendingHigh.price;
+  const mDown = st.pendingLow  && st.pendingLow.confirmedAt  < i && c.c < st.pendingLow.price;
+  let mDir = null;
+  if(mUp && mDown) mDir = c.c >= c.o ? 'bull' : 'bear';
+  else if(mUp)   mDir = 'bull';
+  else if(mDown) mDir = 'bear';
+
+  let minorLevel = null;
+  if(mDir === 'bull'){ minorLevel = st.pendingHigh.price; st.pendingHigh = null; st.minorBias = 'bull'; }
+  else if(mDir === 'bear'){ minorLevel = st.pendingLow.price; st.pendingLow = null; st.minorBias = 'bear'; }
+
+  let majorBOS = null;
+  if(st.bias === 'bull'){
+    if(mDir === 'bull'){ majorBOS = 'bull'; if(st.lastLow) st.protectedLow = st.lastLow; }
+    else if(st.protectedLow && c.c < st.protectedLow.price){
+      events.push({type:'CHoCH', dir:'bear', level:st.protectedLow.price});
+      st.bias = 'bear'; st.protectedHigh = st.lastHigh; st.protectedLow = null;
+    }
+  } else if(st.bias === 'bear'){
+    if(mDir === 'bear'){ majorBOS = 'bear'; if(st.lastHigh) st.protectedHigh = st.lastHigh; }
+    else if(st.protectedHigh && c.c > st.protectedHigh.price){
+      events.push({type:'CHoCH', dir:'bull', level:st.protectedHigh.price});
+      st.bias = 'bull'; st.protectedLow = st.lastLow; st.protectedHigh = null;
+    }
+  } else if(mDir){
+    st.bias = mDir; majorBOS = mDir;
+    if(mDir === 'bull') st.protectedLow = st.lastLow; else st.protectedHigh = st.lastHigh;
+  }
+
+  if(majorBOS) events.push({type:'BOS', dir:majorBOS, level:minorLevel});
+  return {majorBOS, events, i};
+}
+
+/* --- one candle in, one decision out --- */
+function tick(st, c){
+  const o = st.o, i = st.n++;
+
+  /* higher timeframes first, and only on completed buckets */
+  const k4 = Math.floor((c.t - 7200000) / 14400000);
+  if(st.agg4 && st.agg4.key !== k4){ feedStruct(st.h4, st.agg4); st.agg4 = null; }
+  st.agg4 = roll(st.agg4, c, k4);
+
+  const kD = ET_DATE.format(new Date(c.t + 6*3600*1000));
+  if(st.aggD && st.aggD.key !== kD){ feedStruct(st.d1, st.aggD); st.aggD = null; }
+  st.aggD = roll(st.aggD, c, kD);
+
+  const r = feedStruct(st.h1, c);
+  const events = r.events;
+  /* st.noHTF lets a caller disable the external filter, which is the single
+     most consequential switch in the whole system — it was measured at roughly
+     0.5R a trade, so it is worth being able to turn off and see. */
+  const external = st.noHTF ? (r.majorBOS || null)
+                 : (st.h4.bias && st.h4.bias === st.d1.bias) ? st.h4.bias : null;
+
+  /* 3 — a BOS starts a fresh leg, but only with the higher timeframes behind it */
+  if(r.majorBOS && r.majorBOS === external){
+    const origin = r.majorBOS === 'bull'
+      ? (st.h1.protectedLow  ? st.h1.protectedLow.price  : null)
+      : (st.h1.protectedHigh ? st.h1.protectedHigh.price : null);
+    if(origin != null)
+      st.leg = {dir: r.majorBOS, origin, extreme: r.majorBOS === 'bull' ? c.h : c.l, bornAt: i};
+  }
+
+  /* 4 — the position state machine */
+  let action = null, reason = null;
+
+  if(st.pos){
+    const p = st.pos;
+    const hitStop   = p.dir === 'bull' ? c.l <= p.stop   : c.h >= p.stop;
+    const hitTarget = p.dir === 'bull' ? c.h >= p.target : c.l <= p.target;
+    /* stop first — a bar touching both is unresolvable from OHLC, and taking
+       the target would be marking your own homework */
+    if(hitStop){
+      action = 'stop'; reason = `stopped at ${p.stop}`;
+      st.trades.push({...p, exitAt:i, exit:p.stop, r:-1});
+      st.pos = null;
+    } else if(hitTarget){
+      action = 'exit'; reason = `target ${p.target}`;
+      st.trades.push({...p, exitAt:i, exit:p.target, r:Math.abs(p.target-p.entry)/p.risk});
+      st.pos = null;
+    }
+  }
+
+  if(st.leg && !st.pos){
+    const L = st.leg, dir = L.dir;
+    L.extreme = dir === 'bull' ? Math.max(L.extreme, c.h) : Math.min(L.extreme, c.l);
+
+    const dead = (dir === 'bull' ? c.c < L.origin : c.c > L.origin) ||
+                 (i - L.bornAt > o.maxBars);
+    if(dead){ st.leg = null; if(!action){ action = null; reason = 'leg invalidated'; } }
+    else if(i > L.bornAt){
+      const span = Math.abs(L.extreme - L.origin);
+      if(span > 0){
+        const entry  = dir === 'bull' ? L.extreme - o.depth*span : L.extreme + o.depth*span;
+        const stop   = dir === 'bull' ? L.origin - o.tickBuffer  : L.origin + o.tickBuffer;
+        const target = dir === 'bull' ? L.origin + o.exitFrac*span : L.origin - o.exitFrac*span;
+        const risk   = Math.abs(entry - stop);
+        const reachable = dir === 'bull' ? target > entry : target < entry;
+        const touched   = dir === 'bull' ? c.l <= entry : c.h >= entry;
+
+        if(risk > 0 && reachable && touched){
+          st.pos = {dir, entry, stop, target, risk, entryAt: i, origin: L.origin, extreme: L.extreme};
+          action = 'enter'; reason = `limit filled at ${entry.toFixed(2)}`;
+          st.leg = null;
+
+          /* The fill happened inside this bar, so the rest of this bar can still
+             take the stop or the target. Skipping it would score a trade stopped
+             on its own entry bar as if it had survived — the same mistake the
+             batch evaluator made before it was fixed. Stop first, because the
+             order within a bar is unknowable from OHLC. */
+          const p = st.pos;
+          const sHit = dir === 'bull' ? c.l <= p.stop : c.h >= p.stop;
+          if(sHit){
+            action = 'stop'; reason = 'filled and stopped on the same bar';
+            st.trades.push({...p, exitAt:i, exit:p.stop, r:-1});
+            st.pos = null;
+          }
+          /* The TARGET is deliberately not honoured on the entry bar. OHLC
+             carries no path: a bull entry fills when the bar trades DOWN to the
+             limit, and that bar's high may well have printed before the fill.
+             Counting it as a win assumes an order of events the data cannot
+             show. The stop is treated differently on purpose — taking the
+             pessimistic side of an unknowable ordering is the only safe
+             asymmetry. */
+        } else if(risk > 0 && reachable){
+          st.armed = {dir, entry, stop, target, risk};
+        }
+      }
+    }
+  }
+  if(!st.leg) st.armed = null;
+
+  return {
+    i, t: c.t, price: c.c,
+    bias: st.h1.bias, daily: st.d1.bias, h4: st.h4.bias, external,
+    protected: st.h1.protectedLow ? st.h1.protectedLow.price
+             : st.h1.protectedHigh ? st.h1.protectedHigh.price : null,
+    state: st.pos ? 'in' : st.armed ? 'armed' : 'flat',
+    levels: st.pos || st.armed || null,
+    action, reason, events
+  };
+}
+
+ return {create, tick, DEFAULTS}; })();
+const LiveSetup = (function(){ 
+/* ---------------------------------------------------------------------------
+   Live setup state — the read, for right now.
+
+   Given a 1H series ending at the present bar, work out:
+     what the daily and 4H bias are, from their last CLOSED bars
+     whether a leg is live and where its origin sits
+     where the pullback entry would rest, and the stop and target with it
+     whether the 1H is in a range instead
+
+   Deliberately conservative about the right-hand edge. The most recent swing is
+   unconfirmed until N bars have printed after it, so a leg that has not yet
+   confirmed is reported as forming rather than tradeable.
+   --------------------------------------------------------------------------- */
+
+function liveState(h1, opts){
+  const o = Object.assign({
+    fractalN: 2, depth: 0.75, exitFrac: 0.65, tickBuffer: 0.25, maxBars: 40
+  }, opts || {});
+
+  const S = typeof Structure !== 'undefined' ? Structure : require('./structure');
+  const R = typeof Resample  !== 'undefined' ? Resample  : require('./resample');
+  const A = typeof Align     !== 'undefined' ? Align     : require('./align');
+  const G = typeof Gaps      !== 'undefined' ? Gaps      : require('./gaps');
+
+  const h4 = R.resample(h1, 4*3600e3, h1[0].t);
+  const d1 = R.resampleDaily(h1);
+
+  const a = A.align({'1d':d1, '4h':h4, '1h':h1},
+                    {exec:'1h', external:['1d','4h'], internal:[], fractalN:o.fractalN});
+  const now = a.rows[a.rows.length - 1];
+  const res = a.meta['1h'].res;
+
+  const out = {
+    at: h1[h1.length-1].t,
+    price: h1[h1.length-1].c,
+    daily: now.tf['1d'].bias, h4: now.tf['4h'].bias, h1: now.tf['1h'].bias,
+    external: now.external,
+    protectedLow: res.protectedLow, protectedHigh: res.protectedHigh,
+    consolidating: S.isConsolidating(res),
+    swings: res.swings.slice(-6).map(s => ({label:s.label, kind:s.kind, price:s.price})),
+    setup: null, note: null, gaps: []
+  };
+
+  /* Unfilled inefficiency, nearest first. Not a trade — roughly half fill
+     inside five bars, which is a coin toss — but useful as the thing price is
+     drawn toward, and as somewhere a target may stall. */
+  const gs = G.detect(h1);
+  const price = out.price;
+  out.gaps = G.openAt(gs, h1.length)
+    .map(g => ({dir:g.dir, top:g.top, bottom:g.bottom, size:g.size,
+                side: g.bottom > price ? 'above' : g.top < price ? 'below' : 'at price',
+                distance: g.bottom > price ? g.bottom - price
+                        : g.top < price ? price - g.top : 0}))
+    .sort((a,b) => a.distance - b.distance)
+    .slice(0, 6);
+
+  if(!out.external){ out.note = 'Daily and 4H disagree — no external bias, stand down.'; return out; }
+  if(out.consolidating){ out.note = '1H is ranging. Not a swing environment.'; }
+
+  /* the live leg: most recent BOS in the direction of external bias */
+  const bos = [...res.major].reverse().find(e => e.type === 'BOS' && e.dir === out.external);
+  if(!bos || bos.protectedNow == null){
+    out.note = out.note || 'No leg yet in the direction of bias.';
+    return out;
+  }
+
+  const barsSince = (h1.length - 1) - bos.i;
+  if(barsSince > o.maxBars){ out.note = 'Last leg is stale — over 40 bars old.'; return out; }
+
+  const dir = out.external, origin = bos.protectedNow;
+  let extreme = dir === 'bull' ? -Infinity : Infinity;
+  for(let i = bos.i; i < h1.length; i++)
+    extreme = dir === 'bull' ? Math.max(extreme, h1[i].h) : Math.min(extreme, h1[i].l);
+
+  const span = Math.abs(extreme - origin);
+  if(!(span > 0)) return out;
+
+  const entry  = dir === 'bull' ? extreme - o.depth*span : extreme + o.depth*span;
+  const stop   = dir === 'bull' ? origin - o.tickBuffer  : origin + o.tickBuffer;
+  const target = dir === 'bull' ? origin + o.exitFrac*span : origin - o.exitFrac*span;
+  const risk   = Math.abs(entry - stop);
+
+  const invalidated = dir === 'bull' ? out.price < origin : out.price > origin;
+  const alreadyHit  = dir === 'bull' ? out.price <= entry : out.price >= entry;
+
+  out.setup = {
+    dir, origin, extreme, entry, stop, target, risk,
+    rr: Math.abs(target - entry)/risk,
+    barsSinceLeg: barsSince,
+    distance: Math.abs(out.price - entry),
+    status: invalidated ? 'invalidated'
+          : alreadyHit  ? 'triggered'
+          : 'waiting'
+  };
+  return out;
+}
+
+
+if(typeof window !== 'undefined') window.LiveSetup = {liveState};
+ return {liveState}; })();
+</script>
+<script>
+const $ = id => document.getElementById(id);
+let H1 = null;
+
+const ET = t => new Date(t).toLocaleString('en-US',{timeZone:'America/New_York',
+  dateStyle:'medium', timeStyle:'short'});
+const cls = b => b === 'bull' ? 'bull' : b === 'bear' ? 'bear' : 'none';
+const up  = b => (b || 'none').toUpperCase();
+
+/* --- file handling --- */
+const drop = $('drop');
+drop.onclick = () => $('file').click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => {
+  e.preventDefault(); drop.classList.remove('over');
+  if(e.dataTransfer.files[0]) read(e.dataTransfer.files[0]);
+};
+$('file').onchange = e => { if(e.target.files[0]) read(e.target.files[0]); };
+
+function read(f){
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      H1 = Csv.parse(r.result);
+      if(H1.length < 200) throw new Error(`only ${H1.length} bars — scroll the chart back further before exporting`);
+      const step = (H1[1].t - H1[0].t)/60000;
+      if(Math.abs(step - 60) > 1) throw new Error(`this looks like a ${step}-minute file, not 1H`);
+      drop.innerHTML = `<b>${f.name}</b><br><span style="font-size:13px">` +
+        `${H1.length} bars · ${ET(H1[0].t)} → ${ET(H1[H1.length-1].t)} · click to replace</span>`;
+      render();
+    } catch(err){
+      $('out').innerHTML = `<div class="card"><div class="banner bad">${err.message}</div></div>`;
+    }
+  };
+  r.readAsText(f);
+}
+
+/* --- render --- */
+function render(){
+  if(!H1) return;
+  const s = LiveSetup.liveState(H1);
+  const u = s.setup;
+
+  let html = `<div class="card">
+    <h2>Where we are</h2>
+    <div class="bias">
+      <span class="chip">Daily <b class="${cls(s.daily)}">${up(s.daily)}</b></span>
+      <span class="chip">4H <b class="${cls(s.h4)}">${up(s.h4)}</b></span>
+      <span class="chip">1H <b class="${cls(s.h1)}">${up(s.h1)}</b></span>
+      <span class="chip">External <b class="${cls(s.external)}">${up(s.external)}</b></span>
+    </div>
+    <div class="rows">
+      <div class="kv"><div class="k">Price</div><div class="v">${s.price}</div></div>
+      <div class="kv"><div class="k">Protected</div><div class="v">${s.protectedLow ?? s.protectedHigh ?? '—'}</div></div>
+      <div class="kv"><div class="k">1H state</div><div class="v">${s.consolidating ? 'ranging' : 'trending'}</div></div>
+      <div class="kv"><div class="k">Last bar</div><div class="v" style="font-size:13px">${ET(s.at)}</div></div>
+    </div>
+    <div class="swings" style="margin-top:12px">${
+      s.swings.map(x => `${x.label}${x.kind==='high'?'↑':'↓'}${x.price}`).join(' ')}</div>
+    ${s.note ? `<div class="banner warn">${s.note}</div>` : ''}
+  </div>`;
+
+  if(u && u.status !== 'invalidated'){
+    const waiting = u.status === 'waiting';
+    html += `<div class="card">
+      <h2>Setup</h2>
+      <div class="big ${u.dir==='bull'?'bull':'bear'}">${u.dir === 'bull' ? 'LONG' : 'SHORT'}
+        <span style="font-size:15px;color:var(--dim);font-weight:600">
+          ${waiting ? `— waiting, ${u.distance.toFixed(2)}pt away` : '— level already reached'}</span></div>
+      <table>
+        <tr><td>Entry (limit)</td><td>${u.entry.toFixed(2)}</td></tr>
+        <tr><td>Stop</td><td>${u.stop.toFixed(2)}</td></tr>
+        <tr><td>Target</td><td>${u.target.toFixed(2)}</td></tr>
+        <tr><td>Risk</td><td>${u.risk.toFixed(2)} pt</td></tr>
+        <tr><td>Reward : risk</td><td>${u.rr.toFixed(2)} : 1</td></tr>
+        <tr><td>Leg origin</td><td>${u.origin}</td></tr>
+        <tr><td>Leg extreme</td><td>${u.extreme}</td></tr>
+      </table>
+      <div class="banner ${waiting ? 'ok' : 'warn'}">${waiting
+        ? 'Rest a limit at the entry. Invalid if price closes through the origin.'
+        : 'Price is already at or past the entry — the pullback happened. Judge it on the chart rather than chasing.'}</div>
+    </div>`;
+    html += `<div class="card">
+      <h2>Mark these before the moment</h2>
+      <p style="margin:0 0 10px;font-size:13px;color:var(--dim)">
+        The point of this is that the decision is made now, not when price arrives.
+        Put these three lines on the chart and the moment needs no thinking.</p>
+      <div class="levels">${u.entry.toFixed(2)}  entry
+${u.stop.toFixed(2)}  stop
+${u.target.toFixed(2)}  target
+${u.origin.toFixed(2)}  invalid on a close through this</div>
+    </div>`;
+    $('sizecard').hidden = false;
+    size(u);
+  } else {
+    html += `<div class="card"><h2>Setup</h2>
+      <div class="banner ${u ? 'bad' : 'warn'}">${u
+        ? 'The live leg is invalidated — price has closed through its origin. Wait for the next one.'
+        : 'No setup. Nothing to do.'}</div></div>`;
+    $('sizecard').hidden = true;
+  }
+  if(s.gaps.length){
+    html += `<div class="card"><h2>Unfilled gaps — context, not signals</h2>
+      <table>${s.gaps.map(g => `<tr>
+        <td>${g.side}${g.distance ? ' · ' + g.distance.toFixed(2) + 'pt' : ''}</td>
+        <td class="${g.dir==='bull'?'bull':'bear'}">${g.bottom.toFixed(2)} – ${g.top.toFixed(2)}</td>
+        <td style="color:var(--dim)">${g.size.toFixed(2)}pt</td></tr>`).join('')}</table>
+      <div class="banner warn">About half of these fill within five bars, which is a
+        coin toss. Use them as somewhere price is drawn to, or where a target may
+        stall — not as a reason to enter.</div>
+    </div>`;
+  }
+  $('out').innerHTML = html;
+  track();
+}
+
+function size(u){
+  const acct = parseFloat($('acct').value) || 0;
+  const pct  = parseFloat($('riskpct').value) || 0;
+  const pv   = parseFloat($('sym').value);
+  const budget = acct * pct/100;
+  const perCon = u.risk * pv;
+  const n = Math.floor(budget / perCon);
+  const fee = 4;
+  const feeR = n > 0 ? (n*fee)/(n*perCon) : 0;
+  $('size').innerHTML = `<div class="rows">
+    <div class="kv"><div class="k">Contracts</div><div class="v ${n?'':'bear'}">${n}</div></div>
+    <div class="kv"><div class="k">Risk</div><div class="v">$${(n*perCon).toFixed(2)}</div></div>
+    <div class="kv"><div class="k">Budget</div><div class="v" style="color:var(--dim)">$${budget.toFixed(2)}</div></div>
+    <div class="kv"><div class="k">Per contract</div><div class="v">$${perCon.toFixed(2)}</div></div>
+    <div class="kv"><div class="k">Fees</div><div class="v">${(feeR*100).toFixed(1)}% of R</div></div>
+  </div>
+  ${n === 0 ? `<div class="banner bad">Stop is too wide for the budget — one contract risks $${perCon.toFixed(2)}.</div>` : ''}
+  ${feeR > 0.05 ? `<div class="banner warn">Fees are ${(feeR*100).toFixed(0)}% of one R.
+    Above about 5% the edge starts going to the broker — this is the MES-versus-ES problem.</div>` : ''}`;
+}
+/* --- paper record -------------------------------------------------------
+   The loop is deterministic, so "what the system said" needs no marking — it
+   is recomputed from the same bars every time. What accumulates is coverage:
+   each export closes out whatever finished since the last one, and the running
+   figure is compared against the verified baseline rather than the withdrawn
+   one. */
+const KEY = 'tradedesk.paper.v2';
+const BASELINE = {exp: 0.276, win: 50, label: '15M-resolved baseline'};
+
+const loadRec = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+                        catch(e){ return {}; } };
+const saveRec = r => localStorage.setItem(KEY, JSON.stringify(r));
+
+function track(){
+  const st = Loop.create();
+  for(const c of H1) Loop.tick(st, c);
+
+  const rec = loadRec();
+
+  /* The first export sets a boundary. Everything before it is backtest — the
+     unverified part, and the whole reason this exists — so it is deliberately
+     NOT counted. Only trades that close after you start recording accumulate,
+     because those are the ones nothing has been fitted to. */
+  if(!rec.__start){
+    rec.__start = H1[H1.length-1].t;
+    saveRec(rec);
+  }
+  const start = rec.__start;
+
+  let added = 0;
+  for(const t of st.trades){
+    if(H1[t.entryAt].t <= start) continue;
+    const id = String(H1[t.entryAt].t);
+    if(rec[id]) continue;
+    rec[id] = {t: H1[t.entryAt].t, dir: t.dir, entry: t.entry, stop: t.stop,
+               target: t.target, risk: t.risk, r: t.r, bars: t.exitAt - t.entryAt,
+               seen: Date.now()};
+    added++;
+  }
+  saveRec(rec);
+
+  const all = Object.keys(rec).filter(k => k !== '__start')
+                .map(k => rec[k]).sort((a,b) => a.t - b.t);
+  if(!all.length){
+    $('track').innerHTML = `<div class="card"><h2>Paper record</h2>
+      <div class="banner ok">Recording from ${new Date(start).toLocaleString()}.
+      Nothing counted yet — the backtest before this point is deliberately excluded,
+      because it is the part that has not been verified. Export again after the next
+      setup closes and it will appear here.</div></div>`;
+    return;
+  }
+  const wins = all.filter(x => x.r > 0).length;
+  const exp  = all.reduce((s,x) => s + x.r, 0) / all.length;
+  const win  = wins / all.length * 100;
+
+  /* how far the running figure sits from the verified baseline, in standard
+     errors — a crude guard against reading noise as divergence */
+  const sd = Math.sqrt(all.reduce((s,x) => s + (x.r-exp)*(x.r-exp), 0) / all.length) || 1;
+  const se = sd / Math.sqrt(all.length);
+  const z  = (exp - BASELINE.exp) / (se || 1);
+  const verdict = all.length < 30 ? 'too few trades to compare yet'
+    : Math.abs(z) < 2 ? 'consistent with the baseline'
+    : z < 0 ? 'running BELOW the baseline — worth investigating'
+            : 'running above the baseline';
+
+  const recent = all.slice(-8).reverse();
+  $('track').innerHTML = `<div class="card">
+    <h2>Paper record ${added ? `· ${added} new this export` : ''}</h2>
+    <div class="stat3">
+      <div class="box"><div class="k">Trades</div><div class="v">${all.length}</div>
+        <div class="s">from ${new Date(all[0].t).toLocaleDateString()}</div></div>
+      <div class="box"><div class="k">Win rate</div><div class="v">${win.toFixed(0)}%</div>
+        <div class="s">baseline ${BASELINE.win}%</div></div>
+      <div class="box"><div class="k">Expectancy</div>
+        <div class="v ${exp>=0?'bull':'bear'}">${exp>=0?'+':''}${exp.toFixed(2)}R</div>
+        <div class="s">baseline +${BASELINE.exp}R</div></div>
+      <div class="box"><div class="k">Total</div>
+        <div class="v ${exp>=0?'bull':'bear'}">${(exp*all.length).toFixed(1)}R</div>
+        <div class="s">gross, before fees</div></div>
+    </div>
+    <div class="banner ${all.length<30?'warn':Math.abs(z)<2?'ok':z<0?'bad':'ok'}">${verdict}</div>
+    <table style="margin-top:10px">${recent.map(x => `<tr>
+      <td>${new Date(x.t).toLocaleDateString()} ${x.dir==='bull'?'long':'short'}</td>
+      <td>${x.entry.toFixed(2)}</td>
+      <td class="${x.r>0?'bull':'bear'}">${x.r>0?'+':''}${x.r.toFixed(2)}R</td>
+      <td style="color:var(--dim)">${x.bars} bars</td></tr>`).join('')}</table>
+  </div>`;
+}
+
+$('exp').onclick = () => {
+  const r = loadRec();
+  const all = Object.keys(r).filter(k => k !== '__start')
+                .map(k => r[k]).sort((a,b) => a.t - b.t);
+  if(!all.length) return alert('Nothing recorded yet.');
+  const rows = ['time,direction,entry,stop,target,risk_pts,r,bars'].concat(
+    all.map(x => [new Date(x.t).toISOString(), x.dir, x.entry, x.stop, x.target,
+                  x.risk.toFixed(2), x.r.toFixed(4), x.bars].join(',')));
+  const b = new Blob([rows.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'paper-record.csv'; a.click();
+};
+$('wipe').onclick = () => {
+  if(confirm('Erase the paper record? Export it first if you want it.')){
+    localStorage.removeItem(KEY); $('track').innerHTML = ''; }
+};
+
+['acct','riskpct','sym'].forEach(id => $(id).oninput = () => H1 && render());
+</script>
+</body>
+</html>

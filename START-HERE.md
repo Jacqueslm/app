@@ -1226,7 +1226,14 @@ something he had already been using for weeks.
 - Privacy is the product: never expose one user's data to another; "he doesn't
   see what you write" must stay true.
 - Anything worth remembering across sessions goes in a file — chat doesn't persist.
-- **The repo is PRIVATE (16 Aug 2026) — keep it that way.** `Jacqueslm/app` was
-  public from connection until Jacques asked to lock it down; anyone could clone
-  the whole business. Adding a collaborator is a GitHub settings action, never a
-  visibility flip.
+- **The repo is PUBLIC — Jacques's own call, later on 16 Aug 2026.** It was
+  flipped private earlier that day, then back to public the same day because
+  private broke two things that matter more: in-app updates needed a token, and
+  the 2,615 recorded lesson voices stopped loading on phones (raw.githubusercontent
+  only serves a public repo), which is what "recording unavailable" was. **Do not
+  flip it private again without asking him** — it costs the voices and the
+  updater. No user data is in git either way (journals and emails live in the
+  Railway database), and a full-history secret scan came back clean on 16 Aug.
+  Adding a collaborator is a GitHub settings action, never a visibility flip.
+  *(This block said PRIVATE until 17 Aug; MASTER-STATUS items 11–12 and rule 15
+  are the accurate record.)*

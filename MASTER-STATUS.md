@@ -6,6 +6,41 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🔧 17 AUG 2026 (later) — APP 5.7.0 + STUDIO b0877: onboarding freeze, Pro opened up, backups fixed
+
+**App 5.7.0 — shipped to main + deploy branch (Railway auto-deploys).**
+1. **THE ONBOARDING FREEZE (blocked every new user).** Continue on the spiritual
+   question did nothing. Today's concurrent merge left `obNext()` calling
+   `buildBehavioralStep()` on the way in while that function still ended by calling
+   `obNext(2)` back — infinite mutual recursion, "Maximum call stack size exceeded"
+   thrown inside the click handler, killing it silently. Reproduced in a real browser
+   on all three answers. Fix: the builder only builds; `obNext` navigates. **Never put
+   `obNext(2)` back at the end of `buildBehavioralStep()`.**
+2. **Faith card survives reload** — it only painted at the moment of choosing;
+   `initApp()` now repaints it, so the spiritual choice persists visibly.
+3. **PRO IS NOW EXACTLY TWO THINGS (Jacques's call):** lesson/pack **days 16-30**, and
+   **30 Friendly chats/day vs 3**. Everything else is free. `openProTool()` gates nothing
+   (16 tools freed). Also freed: smart reminders now actually fire, weekly reports
+   generate, guided journal prompts + mood tags, habit coaching/celebration nudges,
+   craving suggestions. **Biggest hidden gate removed:** Friendly used to intercept a
+   free user asking about their own patterns/reports/journal/streaks and answer with an
+   upsell — in live chat AND the offline fallback — and the AI's free-mode instructions
+   told it to withhold that analysis. All of it now answers. Copy across the pricing
+   screen, both plan cards, the FAQ, the trial email and every stale Pro badge rewritten
+   to the true offer. **Verified: 28 headless-Chromium checks pass, zero page errors.**
+
+**Studio b0877 — auto-backup had NEVER worked.** `auto-backup.js` calls `db.exec()`, but
+both callers pass the `db.js` module object, which exposed no `exec` and no raw handle —
+every snapshot threw. The **pre-update** snapshot (the one guarding `data.sqlite` before
+an update overlays the code) swallowed it with `catch(_){}`, so every "Update my app" ran
+with no backup. `db.js` now exports `raw` + `exec`; the pre-update failure logs to
+Diagnostics. Verified live: a real snapshot file now appears at boot. Two new tests
+exercise `snapshot()` for real — **48/48 pass** (was 46; the old test only checked
+filename helpers, which is how this shipped broken). Also removed a hardcoded `$0.35`
+fallback in the auto-captions confirm dialog (violated the b0870 no-invented-prices rule).
+
+---
+
 ## 🚀 17 AUG 2026 — PLAY RELEASE SESSION HANDOFF (from the TWA/release session)
 
 **The app is IN GOOGLE REVIEW, worldwide, confirmed on screen.** Full detail in

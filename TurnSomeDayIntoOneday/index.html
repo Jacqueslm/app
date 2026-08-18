@@ -944,6 +944,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- ROOMS LIST -->
+    <!-- LESSON LIBRARY -->
+    <!-- 800+ lessons existed with no way to reach any of them: you could read
+         today's lesson, in your current track, and nothing else. The Spiritual
+         Path, Together and every pack were each behind their own door. This is
+         one door to all of it. -->
+    <div id="s-lesson-library" class="scr">
+      <div class="sec">
+        <input id="lesson-lib-search" type="search" placeholder="Search every lesson\u2026"
+               oninput="renderLessonLibrary()" autocomplete="off"
+               style="width:100%;box-sizing:border-box;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--tp);font-family:inherit;margin-bottom:6px">
+        <div id="lesson-lib-count" style="font-size:11.5px;color:var(--tm);margin:0 2px 12px"></div>
+        <div id="lesson-lib-list"></div>
+      </div>
+    </div>
+
     <div id="s-rooms" class="scr">
       <div class="sec">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--acc-t);line-height:1.5">
@@ -998,6 +1013,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <span style="font-size:12.5px;color:var(--tm)">Focus: <span id="lesson-track-switch-lbl" style="color:var(--tp);font-weight:600"></span></span>
           <span style="font-size:12.5px;color:var(--accent);font-weight:600">Switch lesson</span>
         </div>
+        <!-- Shown only when two tracks that share a mechanism are both being
+             worked. The whole point is that these are one person, not two
+             unrelated courses. -->
+        <div id="track-link-note" style="display:none;font-size:12px;color:var(--tm);line-height:1.5;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--green);border-radius:10px;padding:10px 12px;margin-bottom:12px"></div>
         <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLessonList()">
           <span>Today's lesson</span>
           <span id="lesson-list-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">View all lessons</span>
@@ -1368,6 +1387,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
         <i class="ti ti-heart" style="color:#E24B4A"></i>
         <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openLessonLibrary()">
+        <i class="ti ti-book"></i>
+        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app \u2014 all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -2495,24 +2519,35 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="sos-title" style="color:var(--accent)">Friendly's presence</div>
     <div class="sos-sub">You can change this any time.</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-      <div class="voice-card" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-female" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👩‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
       </div>
-      <div class="voice-card" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-male" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👨‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
       </div>
-      <div class="voice-card" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-neutral" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">🧑‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
       </div>
     </div>
+    <div id="voice-device-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-top:12px;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;text-align:left"></div>
     <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
   </div>
 </div>
 
 <!-- GENERIC CONFIRM MODAL -->
+<!-- LESSON READER (library) -->
+<div class="sos-modal" id="lesson-reader-modal" onclick="if(event.target===this)closeLibraryReader()">
+  <div class="sos-sheet" style="max-height:84vh">
+    <div class="sos-title" style="color:var(--accent);text-align:left" id="lib-read-title"></div>
+    <div style="font-size:11.5px;color:var(--tm);text-align:left;margin-bottom:10px" id="lib-read-meta"></div>
+    <div id="lib-read-body" style="max-height:56vh;overflow-y:auto;text-align:left;font-size:14px;line-height:1.65;color:var(--ts);white-space:pre-wrap;padding-right:4px"></div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeLibraryReader()">Close</button>
+  </div>
+</div>
+
 <div class="sos-modal" id="confirm-modal" onclick="if(event.target===this)closeConfirmModal()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Are you sure?</div>
@@ -2814,6 +2849,7 @@ const ICON_PATHS={
 'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
 'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-lock':'<rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+'ti-book':'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="8" y1="7" x2="15" y2="7"/><line x1="8" y1="11" x2="13" y2="11"/>',
 'ti-logout':'<path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3"/><path d="M21 12l-3 3"/>',
 'ti-refresh':'<path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>',
 'ti-download':'<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/>',
@@ -2903,6 +2939,120 @@ async function loadLessonPacks(){
   updateLessonPromo();
 }
 
+// ─── LESSON LIBRARY ──────────────────────────────────────────────────────────
+// One index over everything: the 14 tracks in lessons.json, the Spiritual Path,
+// and every pack. Built once on first open and cached - it is a few hundred
+// entries and rebuilding it on every keystroke would be felt on an old phone.
+//
+// The lock is unchanged. Days 16-30 are still Pro; this only makes them
+// FINDABLE, which is the opposite of giving them away - you cannot want
+// something you never knew was there.
+let LESSON_INDEX=null;
+function buildLessonIndex(){
+  const out=[];
+  // Marked so a partial index (packs only, tracks still in flight) can be
+  // spotted and rebuilt rather than cached as if it were complete.
+  out.partial=!lessonPacksLoaded;
+  const push=(group,kind,day,l)=>{
+    if(!l)return;
+    out.push({
+      group, kind, day,
+      title:l.title||`Day ${day}`,
+      body:[l.content,l.action,l.reflection].filter(Boolean).join('\n\n'),
+      hay:((l.title||'')+' '+(l.content||'')+' '+(l.action||'')+' '+(l.reflection||'')+' '+group).toLowerCase(),
+    });
+  };
+  Object.keys(LESSON_PACKS||{}).forEach(track=>{
+    (LESSON_PACKS[track]||[]).forEach((l,i)=>push(track,'track',l.day||i+1,l));
+  });
+  Object.keys(PREDEFINED_PACKS||{}).forEach(key=>{
+    const pk=PREDEFINED_PACKS[key];
+    (pk.lessons||pk.days||[]).forEach((l,i)=>push(pk.title||key,'pack',l.day||i+1,l));
+  });
+  return out;
+}
+async function openLessonLibrary(){
+  switchTo('lesson-library');actBn('bn-tools');
+  // The 14 tracks live in lessons.json and arrive over the network. Building
+  // the index before that lands silently produced a library of 93 lessons
+  // instead of 800 - the packs are inline, the tracks are not - and because the
+  // index is cached it stayed wrong for the rest of the session.
+  if(!lessonPacksLoaded){
+    const el=document.getElementById('lesson-lib-count');
+    if(el)el.textContent='Loading lessons\u2026';
+    try{ await loadLessonPacks(); }catch(e){}
+    LESSON_INDEX=null;
+  }
+  if(!LESSON_INDEX)LESSON_INDEX=buildLessonIndex();
+  renderLessonLibrary();
+}
+function renderLessonLibrary(){
+  const list=document.getElementById('lesson-lib-list');
+  const countEl=document.getElementById('lesson-lib-count');
+  if(!list)return;
+  if(!LESSON_INDEX||(LESSON_INDEX.partial&&lessonPacksLoaded))LESSON_INDEX=buildLessonIndex();
+  const q=(document.getElementById('lesson-lib-search')||{}).value||'';
+  const terms=q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hits=terms.length?LESSON_INDEX.filter(l=>terms.every(t=>l.hay.includes(t))):LESSON_INDEX;
+  if(countEl){
+    countEl.textContent=terms.length
+      ? `${hits.length} of ${LESSON_INDEX.length} lessons`
+      : `${LESSON_INDEX.length} lessons across ${new Set(LESSON_INDEX.map(l=>l.group)).size} tracks and packs`;
+  }
+  if(!hits.length){
+    list.innerHTML='<div style="font-size:13px;color:var(--tm);padding:18px 2px;line-height:1.5">Nothing matches that. Try a single word \u2014 <em>lying</em>, <em>sleep</em>, <em>anger</em>, <em>money</em>.</div>';
+    return;
+  }
+  // Grouped, and capped when browsing so opening the screen never renders 800
+  // rows at once. A search shows everything it found.
+  const CAP=terms.length?400:80;
+  const shown=hits.slice(0,CAP);
+  const groups=[];
+  shown.forEach(l=>{
+    let g=groups.find(x=>x.name===l.group);
+    if(!g){g={name:l.group,items:[]};groups.push(g);}
+    g.items.push(l);
+  });
+  list.innerHTML=groups.map(g=>
+    `<div class="sec-hd" style="margin:14px 0 8px">${escapeHtml(g.name)}</div>`+
+    `<div class="card" style="padding:0 14px">`+
+    g.items.map(l=>{
+      const locked=isLessonLocked(l.day);
+      return `<div class="setting-row" style="cursor:pointer" onclick="openLibraryLesson('${escapeHtml(g.name).replace(/'/g,"&#39;")}',${l.day})">
+        <div class="setting-row-txt" style="min-width:0">
+          <p style="white-space:normal">${escapeHtml(l.title)}</p>
+          <span>Day ${l.day}${locked?' \u00b7 Pro':''}</span>
+        </div>
+        <i class="ti ti-${locked?'lock':'chevron-right'}" style="font-size:${locked?15:18}px;color:var(--tm)"></i>
+      </div>`;
+    }).join('')+`</div>`
+  ).join('')
+  + (hits.length>CAP?`<div style="font-size:11.5px;color:var(--tm);padding:14px 2px">Showing the first ${CAP}. Search to find a specific one.</div>`:'');
+  try{renderIcons(list);}catch(e){}
+}
+function openLibraryLesson(group,day){
+  if(!LESSON_INDEX)LESSON_INDEX=buildLessonIndex();
+  const l=LESSON_INDEX.find(x=>x.group===group&&x.day===day);
+  if(!l)return;
+  if(isLessonLocked(day)){
+    // Same gate as everywhere else. Say what it is, do not pretend it is broken.
+    appConfirm(
+      `\u201c${l.title}\u201d is day ${day}, which is part of Pro. Days 1\u201315 of every track and pack are free; Pro opens 16\u201330, and 30 Friendly chats a day.`,
+      ()=>{switchTo('plans');actBn('bn-plans');},
+      {okText:'See Pro',cancelText:'Not now'}
+    );
+    return;
+  }
+  openLibraryReader(l);
+}
+function openLibraryReader(l){
+  document.getElementById('lib-read-title').textContent=l.title;
+  document.getElementById('lib-read-meta').textContent=`${l.group} \u00b7 Day ${l.day}`;
+  document.getElementById('lib-read-body').textContent=l.body;
+  document.getElementById('lesson-reader-modal').classList.add('open');
+}
+function closeLibraryReader(){document.getElementById('lesson-reader-modal').classList.remove('open');}
+
 const FREE_LESSON_CAP=15;
 // Journey phase — gives the user a predictable sense of where they are in the
 // program (Feature 16: no dead ends, always know what's next), without adding
@@ -2975,6 +3125,22 @@ function updateLessonPromo(){
   }
 }
 
+// The one line that says these two tracks are the same person. Only shown for
+// the track being read, only when its partner track is also being worked, and
+// only about the shared mechanism - never "this one causes that one".
+function renderTrackLinkNote(){
+  const el=document.getElementById('track-link-note');
+  if(!el)return;
+  const cur=S.currentAddiction;
+  const link=activeTrackLinks().find(l=>l.a===cur||l.b===cur);
+  if(!cur||!link){el.style.display='none';return;}
+  const other=link.a===cur?link.b:link.a;
+  el.innerHTML='<strong style="color:var(--tp)">This connects to your '+other+' track.</strong><br>'
+    +'You\u2019re working both, and they\u2019re not separate problems \u2014 '+link.why+'. '
+    +'What you learn here tends to show up there too.';
+  el.style.display='block';
+}
+
 function renderTodayLesson(){
   updateHomeFaithCard();
   const switchRow=document.getElementById('lesson-track-switch-row');
@@ -2983,6 +3149,7 @@ function renderTodayLesson(){
     const lbl=document.getElementById('lesson-track-switch-lbl');
     if(lbl)lbl.textContent=S.currentAddiction||'';
   }
+  renderTrackLinkNote();
   const day=viewingDay||getLessonDayFor(S.currentAddiction);
   const normalEl=document.getElementById('lesson-normal');
   const lockedEl=document.getElementById('lesson-locked');
@@ -3513,7 +3680,7 @@ function openCongratsCard(sub){
   const el=document.getElementById('congrats-sub');
   if(el)el.textContent=sub||'You finished every lesson in this pack.';
   document.getElementById('congrats-modal').classList.add('open');
-  if(typeof celebrationBurst==='function')celebrationBurst();
+  if(typeof celebrationBurst==='function')celebrationBurst('large');
 }
 function closeCongratsCard(){document.getElementById('congrats-modal').classList.remove('open');}
 function showPackPreview(packKey){
@@ -4563,7 +4730,7 @@ function updateStats(){
     save();
     // A milestone day belongs to everyone, not just Pro. Burst + congrats card
     // for all; the Pro deep-dive is an optional extra, never the only thing.
-    celebrationBurst();
+    celebrationBurst(burstTierForDay(justHitMilestone.days));
     openMilestoneCelebration(justHitMilestone.days);
   }
   maybeShowProMilestoneCelebration(days);
@@ -5120,27 +5287,53 @@ function maybeShowProMilestoneCelebration(days){
   openMilestoneCelebration(days);
 }
 // ─── CELEBRATION BURST ───────────────────────────────────────────────────────
-// Confetti for milestone days. Pure canvas, no library, ~2.5s and gone, and it
-// respects prefers-reduced-motion (some people find bursts genuinely
-// unpleasant, and an accessibility setting is a stated preference).
-function celebrationBurst(){
+// Confetti. Pure canvas, no library, and it respects prefers-reduced-motion
+// (some people find bursts genuinely unpleasant, and an accessibility setting
+// is a stated preference).
+//
+// TIERS. Every day used to fire the identical 140-piece burst, which means day
+// 2 looked exactly like day 365 - and a celebration that never grows stops
+// reading as a celebration at all. Three sizes now, so the app can be pleased
+// with you on a Tuesday and moved on the day you hit a year:
+//
+//   small   every ordinary day - a flicker, over in a second
+//   medium  week marks, and the fragile early days
+//   large   30 / 60 / 90 / 180 / 365 - the ones worth stopping for
+//
+// Default stays 'medium' so any existing caller behaves as it always did.
+const BURST_TIERS={
+  small: {n:40,  life:1.2, spread:5,  size:4},
+  medium:{n:110, life:2.2, spread:7,  size:5},
+  large: {n:220, life:3.4, spread:9,  size:7},
+};
+// Which tier a given day earns. Kept in one place so the Home strip, the modal
+// and the share card can never disagree about how big a day is.
+const BIG_MILESTONES=[30,60,90,180,365];
+const WEEK_MARKS=[7,14,21];
+function burstTierForDay(days){
+  if(BIG_MILESTONES.includes(days))return 'large';
+  if(WEEK_MARKS.includes(days)||days===1||days===3)return 'medium';
+  return 'small';
+}
+function celebrationBurst(tier){
   try{
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const T=BURST_TIERS[tier]||BURST_TIERS.medium;
     const c=document.createElement('canvas');
     c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:10000';
     c.width=innerWidth;c.height=innerHeight;
     document.body.appendChild(c);
     const ctx=c.getContext('2d');
     const colors=['#7ee8a2','#f0b15a','#534AB7','#e8637e','#5fc9c9','#f0efe9'];
-    const N=140;const parts=[];
+    const N=T.n;const parts=[];
     for(let i=0;i<N;i++){
       const fromLeft=i%2===0;
       parts.push({
         x:fromLeft?-10:c.width+10,
         y:c.height*0.65+Math.random()*c.height*0.2,
-        vx:(fromLeft?1:-1)*(4+Math.random()*7),
-        vy:-(8+Math.random()*7),
-        w:5+Math.random()*6,h:8+Math.random()*8,
+        vx:(fromLeft?1:-1)*(4+Math.random()*T.spread),
+        vy:-(8+Math.random()*T.spread),
+        w:T.size+Math.random()*6,h:T.size+3+Math.random()*8,
         rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.3,
         color:colors[i%colors.length],
       });
@@ -5154,11 +5347,11 @@ function celebrationBurst(){
         p.vy+=0.25;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vx*=0.99;
         if(p.y<c.height+30){alive++;}
         ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
-        ctx.globalAlpha=Math.max(0,1-el/2.5);
+        ctx.globalAlpha=Math.max(0,1-el/T.life);
         ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
         ctx.restore();
       }
-      if(alive>0&&el<2.6)requestAnimationFrame(tick);
+      if(alive>0&&el<T.life+0.1)requestAnimationFrame(tick);
       else c.remove();
     };
     requestAnimationFrame(tick);
@@ -5166,7 +5359,7 @@ function celebrationBurst(){
 }
 
 function openMilestoneCelebration(days){
-  celebrationBurst();
+  celebrationBurst(burstTierForDay(days));
   document.getElementById('mc-days').textContent=days;
   document.getElementById('mc-message').textContent=buildMilestoneEncouragement(days);
   document.getElementById('mc-reflection-input').value='';
@@ -5191,7 +5384,9 @@ function maybeShowDailyWin(days){
   document.getElementById('dw-days').textContent=days;
   document.getElementById('dw-message').textContent=msg;
   el.classList.add('open');
-  celebrationBurst();
+  // An ordinary day gets an ordinary burst. Same one every day is how a
+  // celebration turns into wallpaper.
+  celebrationBurst(burstTierForDay(days));
 }
 function closeDailyWin(){document.getElementById('daily-win-modal').classList.remove('open');}
 // Reflection without leaving the lesson - nobody keeps a pen handy or wants to
@@ -5977,7 +6172,7 @@ function maybeShowMilestoneOffer(){
   if(!(S.burstMilestones||[]).includes(offeredMilestone)){
     S.burstMilestones=(S.burstMilestones||[]).concat(offeredMilestone);
     save();
-    celebrationBurst();
+    celebrationBurst(burstTierForDay(offeredMilestone));
   }
 }
 function markMilestoneSeen(d){
@@ -8720,6 +8915,41 @@ You are running in Friendly Pro mode - the user has unlocked full coaching. In t
 - The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, risk indicators, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
 Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
 
+// ─── HOW THE TRACKS RELATE ───────────────────────────────────────────────────
+// Every track is its own 30 days and none of them mention each other, so
+// someone working Porn and Food is handed two unrelated courses about one
+// person. They are not unrelated: the object differs, the machinery does not.
+//
+// This names the machinery two tracks share, in plain words, once. It is used
+// two ways - shown on the lesson screen, and given to Friendly so she can say
+// "you told me the food thing spikes on the same nights" instead of treating
+// each track as a stranger.
+//
+// The line is deliberately about the SHARED MECHANISM, never causation. These
+// behaviours travel together; saying one causes another is a claim this app has
+// no business making, and would be wrong as often as right.
+const TRACK_LINKS=[
+  {a:'Porn & Sex',         b:'Food / Binging',      why:'both run on escalation - the same amount stops working, so the amount goes up'},
+  {a:'Porn & Sex',         b:'Social media',        why:'both are endless scroll on a screen, alone, usually late'},
+  {a:'Alcohol',            b:'Smoking',             why:'they cue each other - one hand reaches, the other follows'},
+  {a:'Alcohol',            b:'Food / Binging',      why:'both are how the evening gets softened after a day held together'},
+  {a:'Gambling',           b:'Shopping / Spending', why:'both are money spent chasing a feeling, then hidden'},
+  {a:'Gambling',           b:'Gaming',              why:'both are near-misses and one-more-go, engineered to feel almost won'},
+  {a:'Gaming',             b:'Social media',        why:'both fill the same empty hours and both are designed not to end'},
+  {a:'Food / Binging',     b:'Shopping / Spending', why:'both are relief bought quickly and regretted privately'},
+  {a:'Work',               b:'Alcohol',             why:'one earns the other - the drink is the permission to stop working'},
+  {a:'Work',               b:'Anger & Control',     why:'both are control held too tight, in different rooms'},
+  {a:'Anger & Control',    b:'Alcohol',             why:'one lowers the brake the other needs'},
+  {a:'Substances',         b:'Alcohol',             why:'the same night, the same reach, usually the same company'},
+  {a:'Social media',       b:'Shopping / Spending', why:'the feed sells, and the buying is the scroll finishing its sentence'},
+];
+// The links that apply to the tracks this person actually picked.
+function activeTrackLinks(tracks){
+  const t=tracks||S.selectedAddictions||[];
+  if(t.length<2)return [];
+  return TRACK_LINKS.filter(l=>t.includes(l.a)&&t.includes(l.b));
+}
+
 function buildSystemPrompt(){
   return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
 }
@@ -9411,6 +9641,15 @@ ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')
 ${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
 ${S.userType==='partner'&&S.partnerRelation==='minor-child'?`CRITICAL - THE LOVED ONE IS A MINOR: keep ALL guidance at the parental/household level (how the parent responds, boundaries at home, the parent's own wellbeing). NEVER discuss the minor's behavior in explicit detail, especially anything sexual - hard refusal, redirect to the parental level. Recommend adolescent-specialized professional support (family therapist, pediatrician) as the primary path for the child, alongside supporting the parent themselves.`:''}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
+${(()=>{
+  const t=S.selectedAddictions||[];
+  if(t.length<2)return '';
+  const where=t.map(a=>`${a} day ${getLessonDayFor(a)}`).join(', ');
+  const links=activeTrackLinks(t);
+  return `Working MORE THAN ONE track at once: ${where}.`
+    +(links.length?`\nThese overlap: ${links.map(l=>`${l.a} + ${l.b} (${l.why})`).join('; ')}.`:'')
+    +`\nTreat these as ONE person with one pattern showing up in different places - if they mention one, you may connect it to the other when it genuinely fits. Never claim one CAUSES another, and never bring it up to be clever; only when it helps them see something.`;
+})()}
 Friendly Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
 
@@ -9491,7 +9730,8 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
 };
-const TITLES={home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -10728,13 +10968,54 @@ function chooseGender(g){
   closeGenderModal();
 }
 
-function openVoiceModal(){document.getElementById('voice-modal').classList.add('open');}
+function openVoiceModal(){
+  document.getElementById('voice-modal').classList.add('open');
+  markChosenVoice();
+  describeVoiceSupport();
+}
+// The picker used to give no sign at all which one was chosen - you tapped, the
+// sheet closed, and nothing looked different. That alone made a working setting
+// feel broken.
+function markChosenVoice(){
+  const want=S.novaVoice||'neutral';
+  ['female','male','neutral'].forEach(v=>{
+    const el=document.getElementById('vp-'+v);
+    if(!el)return;
+    const on=(v===want);
+    el.style.borderColor=on?'var(--green)':'var(--bdr)';
+    el.style.background=on?'var(--green-dim)':'var(--s1)';
+    el.setAttribute('aria-selected',on?'true':'false');
+  });
+}
+// Say what the phone can actually do. Most Android phones ship exactly one
+// installed voice, and then all three presences come out sounding identical -
+// the app was offering a choice the device could not honour and saying nothing,
+// which reads as a broken setting rather than a missing voice.
+function describeVoiceSupport(){
+  const note=document.getElementById('voice-device-note');
+  if(!note)return;
+  let voices=[];
+  try{ voices=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }catch(e){}
+  if(!('speechSynthesis' in window)){
+    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes how she writes.';
+  }else if(voices.length<2){
+    note.textContent='Heads up: this phone has only one English voice installed, so all three will sound the same out loud. The presence you pick still shapes how Friendly writes to you. Adding more voices in your phone\u2019s text-to-speech settings gives her something to switch to.';
+  }else{
+    const kinds=new Set(voices.map(v=>novaVoiceGender(v.name)));
+    note.textContent=(kinds.has('female')&&kinds.has('male'))
+      ? 'This phone has '+voices.length+' English voices, so all three presences sound different out loud.'
+      : 'This phone has '+voices.length+' English voices, but they are hard to tell apart by presence - some may sound alike out loud. The presence still shapes how Friendly writes.';
+  }
+  note.style.display='block';
+}
 function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
 function chooseVoice(v){
   S.novaVoice=v;
   save();
+  markChosenVoice();
   updateProfileEditUI();
-  closeVoiceModal();
+  // Let the mark land before the sheet goes, so the tap visibly registers.
+  setTimeout(closeVoiceModal,180);
 }
 
 // Wipes what the user wrote, keeps who they are. The case this exists for is

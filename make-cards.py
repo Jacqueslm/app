@@ -8,6 +8,7 @@ Usage:
 Output: cards-png/*.png (1080x1920)
 Fonts:  tools/fonts/Lato-Regular.ttf, tools/fonts/Lato-Bold.ttf
 """
+import io
 import os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -119,31 +120,44 @@ def draw_centered(draw, lines, font, center_y, fill, gap=1.25):
         draw.text((x, y + i * lh * gap), ln, font=font, fill=fill)
 
 
-def draw_mark(img, cx, cy, size=112):
-    """The app's mark: two interlocking rings on the purple accent square with the
-    green border - the same square, radius and border as the onboarding logo.
+# The app's own icon, rendered from the exact path in index.html's ICON_PATHS
+# ('ti-handshake') rather than redrawn. Two hands clasped - it is the whole
+# "you and the one that supports you" idea in one glyph, and approximating it by
+# hand produced something that read as a squiggle. Same source as the app draws,
+# so the card and the app can never drift apart.
+HANDSHAKE = (
+    '<path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/>'
+    '<path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/>'
+    '<path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/>'
+    '<path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/>'
+)
 
-    Two rings, not a dot. The whole product is one person and the person holding
-    them up, and the mark should say that at 40px in a feed. A hand-drawn
-    handshake was tried first and read as a squiggle at this size; two linked
-    rings survive the shrink, which is the only test a social mark has to pass."""
-    S = 4                                    # supersample, then downscale for clean edges
+
+def handshake_glyph(px):
+    """Rasterise the icon at px, white, transparent background."""
+    import cairosvg
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" '
+        'stroke-linejoin="round">' + HANDSHAKE + '</svg>'
+    )
+    buf = cairosvg.svg2png(bytestring=svg.encode(), output_width=px, output_height=px)
+    return Image.open(io.BytesIO(buf)).convert("RGBA")
+
+
+def draw_mark(img, cx, cy, size=112):
+    """The icon on the purple accent square with the green border - the same
+    square, corner radius and border the onboarding logo uses."""
+    S = 4                       # supersample, then downscale so the edges are clean
     pad = int(size * 0.5)
     box = size + pad * 2
     tile = Image.new("RGBA", (box * S, box * S), (0, 0, 0, 0))
     d = ImageDraw.Draw(tile)
-    o = pad * S
-    n = size * S
+    o, n = pad * S, size * S
     d.rounded_rectangle([o, o, o + n, o + n], radius=int(n * 0.30),
                         fill=ACCENT, outline=GREEN, width=max(1, int(n * 0.045)))
-    # Two rings, overlapping in the middle.
-    lw = max(2, int(n * 0.070))
-    r = n * 0.185
-    gap = r * 0.78
-    mid = o + n / 2
-    for dx in (-gap, gap):
-        d.ellipse([mid + dx - r, mid - r, mid + dx + r, mid + r],
-                  outline=WHITE, width=lw)
+    g = handshake_glyph(int(n * 0.66))
+    tile.paste(g, (int(o + (n - g.width) / 2), int(o + (n - g.height) / 2)), g)
     tile = tile.resize((box, box), Image.LANCZOS)
     img.paste(tile, (int(cx - box / 2), int(cy - box / 2)), tile)
 

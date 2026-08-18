@@ -194,10 +194,16 @@ function getBillingStatus(user) {
   };
 }
 
+// Deleting an account used to cancel the subscription THAT INSTANT, which threw
+// away time already paid for: pay for a month, delete on day 3, lose 27 days you
+// bought. Nobody asked to be refunded-by-forfeit. Cancel at the end of the paid
+// period instead - no further charge ever, and the time they own stays theirs.
+// It is recoverable too: signing up again with the same email re-links the
+// Stripe customer (relinkCustomerByEmail) and the remaining days come back.
 async function cancelStripeSubscriptionForUser(user) {
   if (!user.stripe_subscription_id) return;
   try {
-    await stripe.subscriptions.cancel(user.stripe_subscription_id);
+    await stripe.subscriptions.update(user.stripe_subscription_id, { cancel_at_period_end: true });
   } catch (e) {
     // Best-effort: if Stripe is unreachable or the subscription is already gone, the local
     // account deletion should still proceed rather than getting blocked on this call.
@@ -208,8 +214,38 @@ async function cancelStripeSubscriptionForUser(user) {
 // paid for. A home install has no public URL for Stripe to send webhooks to,
 // so after checkout the app pulls the truth on demand and updates the local
 // account to match - Pro activates without any webhook setup.
+// Find the Stripe customer for an account that has lost its link to one, by
+// the email that paid. Without this, "Restore purchases" is a dead end for
+// anyone whose user row no longer carries a stripe_customer_id - most obviously
+// someone who deleted their account and signed up again with the same address,
+// who gets a fresh row, a NULL customer id, and no way back to what they bought.
+// A cancelled subscription stays cancelled; this only re-links the record so
+// the app can see the truth instead of assuming "free".
+async function relinkCustomerByEmail(user) {
+  if (!stripe || user.stripe_customer_id || !user.email) return null;
+  try {
+    const found = await stripe.customers.list({ email: user.email, limit: 10 });
+    if (!found.data.length) return null;
+    // Newest first, and never steal a customer already claimed by another
+    // account - two people can share an email address in a household.
+    const sorted = found.data.slice().sort((a, b) => (b.created || 0) - (a.created || 0));
+    for (const c of sorted) {
+      const taken = db.getUserByStripeCustomerId(c.id);
+      if (taken && taken.id !== user.id) continue;
+      db.setStripeCustomerId(user.id, c.id);
+      return c.id;
+    }
+  } catch (_) { /* Stripe unreachable - caller falls back to what it knows */ }
+  return null;
+}
+
 async function refreshFromStripe(user) {
-  if (!stripe || !user.stripe_customer_id) return;
+  if (!stripe) return;
+  if (!user.stripe_customer_id) {
+    const id = await relinkCustomerByEmail(user);
+    if (!id) return;
+    user = db.getUserById(user.id) || Object.assign({}, user, { stripe_customer_id: id });
+  }
   try {
     // Lifetime is a one-time payment, not a subscription - it shows up as a
     // completed payment-mode Checkout Session. A lifetime purchase never downgrades.
@@ -321,6 +357,7 @@ module.exports = {
   createCheckoutSession,
   createPortalSession,
   getBillingStatus,
+  relinkCustomerByEmail,
   refreshFromStripe,
   cancelStripeSubscriptionForUser,
   handleWebhookEvent,

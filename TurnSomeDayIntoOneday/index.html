@@ -3514,7 +3514,7 @@ function openCongratsCard(sub){
   const el=document.getElementById('congrats-sub');
   if(el)el.textContent=sub||'You finished every lesson in this pack.';
   document.getElementById('congrats-modal').classList.add('open');
-  if(typeof celebrationBurst==='function')celebrationBurst();
+  if(typeof celebrationBurst==='function')celebrationBurst('large');
 }
 function closeCongratsCard(){document.getElementById('congrats-modal').classList.remove('open');}
 function showPackPreview(packKey){
@@ -4564,7 +4564,7 @@ function updateStats(){
     save();
     // A milestone day belongs to everyone, not just Pro. Burst + congrats card
     // for all; the Pro deep-dive is an optional extra, never the only thing.
-    celebrationBurst();
+    celebrationBurst(burstTierForDay(justHitMilestone.days));
     openMilestoneCelebration(justHitMilestone.days);
   }
   maybeShowProMilestoneCelebration(days);
@@ -5121,27 +5121,53 @@ function maybeShowProMilestoneCelebration(days){
   openMilestoneCelebration(days);
 }
 // ─── CELEBRATION BURST ───────────────────────────────────────────────────────
-// Confetti for milestone days. Pure canvas, no library, ~2.5s and gone, and it
-// respects prefers-reduced-motion (some people find bursts genuinely
-// unpleasant, and an accessibility setting is a stated preference).
-function celebrationBurst(){
+// Confetti. Pure canvas, no library, and it respects prefers-reduced-motion
+// (some people find bursts genuinely unpleasant, and an accessibility setting
+// is a stated preference).
+//
+// TIERS. Every day used to fire the identical 140-piece burst, which means day
+// 2 looked exactly like day 365 - and a celebration that never grows stops
+// reading as a celebration at all. Three sizes now, so the app can be pleased
+// with you on a Tuesday and moved on the day you hit a year:
+//
+//   small   every ordinary day - a flicker, over in a second
+//   medium  week marks, and the fragile early days
+//   large   30 / 60 / 90 / 180 / 365 - the ones worth stopping for
+//
+// Default stays 'medium' so any existing caller behaves as it always did.
+const BURST_TIERS={
+  small: {n:40,  life:1.2, spread:5,  size:4},
+  medium:{n:110, life:2.2, spread:7,  size:5},
+  large: {n:220, life:3.4, spread:9,  size:7},
+};
+// Which tier a given day earns. Kept in one place so the Home strip, the modal
+// and the share card can never disagree about how big a day is.
+const BIG_MILESTONES=[30,60,90,180,365];
+const WEEK_MARKS=[7,14,21];
+function burstTierForDay(days){
+  if(BIG_MILESTONES.includes(days))return 'large';
+  if(WEEK_MARKS.includes(days)||days===1||days===3)return 'medium';
+  return 'small';
+}
+function celebrationBurst(tier){
   try{
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const T=BURST_TIERS[tier]||BURST_TIERS.medium;
     const c=document.createElement('canvas');
     c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:10000';
     c.width=innerWidth;c.height=innerHeight;
     document.body.appendChild(c);
     const ctx=c.getContext('2d');
     const colors=['#7ee8a2','#f0b15a','#534AB7','#e8637e','#5fc9c9','#f0efe9'];
-    const N=140;const parts=[];
+    const N=T.n;const parts=[];
     for(let i=0;i<N;i++){
       const fromLeft=i%2===0;
       parts.push({
         x:fromLeft?-10:c.width+10,
         y:c.height*0.65+Math.random()*c.height*0.2,
-        vx:(fromLeft?1:-1)*(4+Math.random()*7),
-        vy:-(8+Math.random()*7),
-        w:5+Math.random()*6,h:8+Math.random()*8,
+        vx:(fromLeft?1:-1)*(4+Math.random()*T.spread),
+        vy:-(8+Math.random()*T.spread),
+        w:T.size+Math.random()*6,h:T.size+3+Math.random()*8,
         rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.3,
         color:colors[i%colors.length],
       });
@@ -5155,11 +5181,11 @@ function celebrationBurst(){
         p.vy+=0.25;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.vx*=0.99;
         if(p.y<c.height+30){alive++;}
         ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
-        ctx.globalAlpha=Math.max(0,1-el/2.5);
+        ctx.globalAlpha=Math.max(0,1-el/T.life);
         ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
         ctx.restore();
       }
-      if(alive>0&&el<2.6)requestAnimationFrame(tick);
+      if(alive>0&&el<T.life+0.1)requestAnimationFrame(tick);
       else c.remove();
     };
     requestAnimationFrame(tick);
@@ -5167,7 +5193,7 @@ function celebrationBurst(){
 }
 
 function openMilestoneCelebration(days){
-  celebrationBurst();
+  celebrationBurst(burstTierForDay(days));
   document.getElementById('mc-days').textContent=days;
   document.getElementById('mc-message').textContent=buildMilestoneEncouragement(days);
   document.getElementById('mc-reflection-input').value='';
@@ -5192,7 +5218,9 @@ function maybeShowDailyWin(days){
   document.getElementById('dw-days').textContent=days;
   document.getElementById('dw-message').textContent=msg;
   el.classList.add('open');
-  celebrationBurst();
+  // An ordinary day gets an ordinary burst. Same one every day is how a
+  // celebration turns into wallpaper.
+  celebrationBurst(burstTierForDay(days));
 }
 function closeDailyWin(){document.getElementById('daily-win-modal').classList.remove('open');}
 // Reflection without leaving the lesson - nobody keeps a pen handy or wants to
@@ -5978,7 +6006,7 @@ function maybeShowMilestoneOffer(){
   if(!(S.burstMilestones||[]).includes(offeredMilestone)){
     S.burstMilestones=(S.burstMilestones||[]).concat(offeredMilestone);
     save();
-    celebrationBurst();
+    celebrationBurst(burstTierForDay(offeredMilestone));
   }
 }
 function markMilestoneSeen(d){

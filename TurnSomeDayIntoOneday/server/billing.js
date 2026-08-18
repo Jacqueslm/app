@@ -32,8 +32,18 @@ const COMP_PRO_EMAILS = new Set(
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean)
 );
+// The owner is always Pro. Jacques paid $9.99 to look at his own product, then
+// lost 18.8 days of it to the delete bug and had no way back in - the person who
+// built the paid tier should never be locked out of it, and should never have
+// been paying for it. Same env-only shape as the comp list: nothing is written
+// to the database, so it cannot take a Founding Lifetime seat or show up in
+// revenue. APP_OWNER_EMAIL already exists and already gates diagnostics.
+const OWNER_EMAIL = (process.env.APP_OWNER_EMAIL || '').trim().toLowerCase();
 function isComped(user) {
-  return !!(user && user.email && COMP_PRO_EMAILS.has(String(user.email).toLowerCase()));
+  if (!user || !user.email) return false;
+  const email = String(user.email).toLowerCase();
+  if (OWNER_EMAIL && email === OWNER_EMAIL) return true;
+  return COMP_PRO_EMAILS.has(email);
 }
 
 // ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────

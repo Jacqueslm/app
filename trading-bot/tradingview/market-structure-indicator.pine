@@ -1,0 +1,107 @@
+//@version=5
+// ─────────────────────────────────────────────────────────────────────────────
+//  Market Structure Bot — Bias + Manipulation + Break of Structure
+//  Pine Script v5 · indicator (chart signals + alerts, for manual/paper trading)
+//
+//  Same logic as market-structure-strategy.pine, minus the strategy orders.
+//  Use this one to fire TradingView alerts on new LONG/SHORT setups.
+//
+//  How to run (TradingView):
+//    1. Open a chart for MNQ1!, MES1! or MGC1! and set the timeframe to 5m.
+//    2. Paste into the Pine Editor → "Add to chart".
+//    3. Right-click the chart → "Add alert" → condition = this indicator's
+//       "Long signal" / "Short signal".
+// ─────────────────────────────────────────────────────────────────────────────
+indicator("Market Structure Bot — Signals", shorttitle = "MS Bot", overlay = true)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+swingLB   = input.int(2,     "Swing lookback (bars)",        minval = 1, maxval = 5)
+sweepWin  = input.int(24,    "Sweep lookback (15m bars)",    minval = 5, maxval = 120)
+showLvls  = input.bool(true, "Show liquidity levels")
+showSweep = input.bool(true, "Show manipulation sweeps")
+
+// ── Helper: trend direction from confirmed pivot highs/lows ─────────────────
+trendOf(ph, pl) =>
+    lastH = ta.valuewhen(not na(ph), ph, 0)
+    prevH = ta.valuewhen(not na(ph), ph, 1)
+    lastL = ta.valuewhen(not na(pl), pl, 0)
+    prevL = ta.valuewhen(not na(pl), pl, 1)
+    hh = not na(lastH) and not na(prevH) and lastH > prevH
+    hl = not na(lastL) and not na(prevL) and lastL > prevL
+    lh = not na(lastH) and not na(prevH) and lastH < prevH
+    ll = not na(lastL) and not na(prevL) and lastL < prevL
+    hh and hl ? 1 : lh and ll ? -1 : 0
+
+// ── Higher-timeframe pivots (bias: 1D / 4H / 1H) ────────────────────────────
+[dph, dpl]   = request.security(syminfo.tickerid, "D",   [ta.pivothigh(high, swingLB, swingLB), ta.pivotlow(low, swingLB, swingLB)], lookahead = barmerge.lookahead_off)
+[h4ph, h4pl] = request.security(syminfo.tickerid, "240", [ta.pivothigh(high, swingLB, swingLB), ta.pivotlow(low, swingLB, swingLB)], lookahead = barmerge.lookahead_off)
+[h1ph, h1pl] = request.security(syminfo.tickerid, "60",  [ta.pivothigh(high, swingLB, swingLB), ta.pivotlow(low, swingLB, swingLB)], lookahead = barmerge.lookahead_off)
+
+dTrend  = trendOf(dph, dpl)
+h4Trend = trendOf(h4ph, h4pl)
+h1Trend = trendOf(h1ph, h1pl)
+
+biasBull = dTrend == 1 and (h4Trend == 1 or h1Trend == 1)
+biasBear = dTrend == -1 and (h4Trend == -1 or h1Trend == -1)
+
+// ── 15m scalp timeframe ─────────────────────────────────────────────────────
+[h15, l15, c15, ph15, pl15] = request.security(syminfo.tickerid, "15", [high, low, close, ta.pivothigh(high, swingLB, swingLB), ta.pivotlow(low, swingLB, swingLB)], lookahead = barmerge.lookahead_off)
+
+lastPh15 = ta.valuewhen(not na(ph15), ph15, 0)
+lastPl15 = ta.valuewhen(not na(pl15), pl15, 0)
+
+// ── 5m entry timeframe (the chart itself) ───────────────────────────────────
+ph5 = ta.pivothigh(high, swingLB, swingLB)
+pl5 = ta.pivotlow(low, swingLB, swingLB)
+lastPh5 = ta.valuewhen(not na(ph5), ph5, 0)
+lastPl5 = ta.valuewhen(not na(pl5), pl5, 0)
+
+// ── Manipulation ────────────────────────────────────────────────────────────
+new15      = ta.change(time("15")) != 0
+bullSweep  = new15 and l15 < lastPl15 and c15 > lastPl15
+bearSweep  = new15 and h15 > lastPh15 and c15 < lastPh15
+
+// ── Break of structure ──────────────────────────────────────────────────────
+bos15up = ta.crossover(c15, lastPh15)
+bos15dn = ta.crossunder(c15, lastPl15)
+bos5up  = ta.crossover(close, lastPh5)
+bos5dn  = ta.crossunder(close, lastPl5)
+
+bsBullSweep = ta.barssince(bullSweep)
+bsBearSweep = ta.barssince(bearSweep)
+bsBos15up   = ta.barssince(bos15up)
+bsBos15dn   = ta.barssince(bos15dn)
+bsBos5up    = ta.barssince(bos5up)
+bsBos5dn    = ta.barssince(bos5dn)
+
+// ── Signals ─────────────────────────────────────────────────────────────────
+longArm   = biasBull and not na(bsBullSweep) and bsBullSweep <= sweepWin
+longScalp = longArm and not na(bsBos15up) and bsBos15up < bsBullSweep
+longEntry = longScalp and not na(bsBos5up) and bsBos5up == 0 and bsBos5up < bsBos15up
+sweepLow  = ta.valuewhen(bullSweep, l15, 0)
+longSig   = longEntry and close > sweepLow
+
+shortArm   = biasBear and not na(bsBearSweep) and bsBearSweep <= sweepWin
+shortScalp = shortArm and not na(bsBos15dn) and bsBos15dn < bsBearSweep
+shortEntry = shortScalp and not na(bsBos5dn) and bsBos5dn == 0 and bsBos5dn < bsBos15dn
+sweepHigh  = ta.valuewhen(bearSweep, h15, 0)
+shortSig   = shortEntry and close < sweepHigh
+
+// ── Visuals ─────────────────────────────────────────────────────────────────
+bgcolor(biasBull ? color.new(color.green, 92) : biasBear ? color.new(color.red, 92) : na)
+
+plot(showLvls ? lastPh5  : na, "5m swing high",  color = color.new(color.green, 20), style = plot.style_linebr)
+plot(showLvls ? lastPl5  : na, "5m swing low",   color = color.new(color.red,   20), style = plot.style_linebr)
+plot(showLvls ? lastPh15 : na, "15m swing high", color = color.new(color.green, 40), style = plot.style_circles, linewidth = 1)
+plot(showLvls ? lastPl15 : na, "15m swing low",  color = color.new(color.red,   40), style = plot.style_circles, linewidth = 1)
+
+plotshape(showSweep and bullSweep, title = "Sell-side sweep", style = shape.triangledown, location = location.belowbar, color = color.lime, size = size.small)
+plotshape(showSweep and bearSweep, title = "Buy-side sweep",  style = shape.triangleup,   location = location.abovebar, color = color.red,  size = size.small)
+plotshape(longSig,  title = "Long",  style = shape.labelup,   location = location.belowbar, color = color.new(color.green, 0), text = "LONG",  textcolor = color.white, size = size.small)
+plotshape(shortSig, title = "Short", style = shape.labeldown, location = location.abovebar, color = color.new(color.red,   0), text = "SHORT", textcolor = color.white, size = size.small)
+
+// ── Alerts (indicator alerts, e.g. push/webhook) ────────────────────────────
+alertcondition(longSig,  title = "Long signal",  message = "Market Structure LONG  {{ticker}} {{close}} (stop below manipulation low)")
+alertcondition(shortSig, title = "Short signal", message = "Market Structure SHORT {{ticker}} {{close}} (stop above manipulation high)")
+alertcondition(bullSweep, title = "Sell-side sweep", message = "{{ticker}} sell-side sweep (bullish manipulation)")
+alertcondition(bearSweep, title = "Buy-side sweep",  message = "{{ticker}} buy-side sweep (bearish manipulation)")

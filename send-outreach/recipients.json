@@ -1,0 +1,10 @@
+{
+  "from": "Jacques <jacques@yourdomain.com>",
+  "messages": [
+    {
+      "to": "person@example.com",
+      "subject": "Guest idea: 38 years addicted, free at 50 — and I built the app for the whole family",
+      "text": "Hi,\n\n(paste the email body here)\n\nJacques"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "symbols": {
+    "MNQ": { "yahoo": "MNQ=F", "label": "Micro E-mini Nasdaq-100", "tickSize": 0.25, "pointValue": 2, "basePrice": 22000 },
+    "MES": { "yahoo": "MES=F", "label": "Micro E-mini S&P 500", "tickSize": 0.25, "pointValue": 5, "basePrice": 6400 },
+    "MGC": { "yahoo": "MGC=F", "label": "Micro Gold (COMEX)", "tickSize": 0.1, "pointValue": 10, "basePrice": 3450 }
+  },
+  "timeframes": {
+    "bias": ["1d", "4h", "1h"],
+    "scalp": "15m",
+    "entry": "5m"
+  },
+  "swingLookback": 2,
+  "equalLevelTolerancePct": 0.05,
+  "equalLevelWindow": 10,
+  "sweepLookbackBars": 24,
+  "risk": {
+    "stopBufferTicks": 2,
+    "reward1": 1,
+    "reward2": 2
+  },
+  "contracts": 1,
+  "startCash": 100000,
+  "pollSeconds": 60,
+  "backtest": {
+    "warmup5m": 200
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "send-outreach",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Send the outreach emails via Resend.",
+  "scripts": {
+    "send": "node send.mjs"
+  },
+  "dependencies": {
+    "resend": "^4.1.2"
+  }
+}

@@ -1,8 +1,42 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 16, 2026 (third pass).
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 18, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## 🛠 18 AUG 2026 — SOCIAL CONTENT + OUTREACH BATCH (files written, NOT pushed — waiting on Jacques)
+
+Jacques assigned the social/marketing lane: cards in his "Who catches you"
+style, 20–25s scripts (addict AND supporter), new outreach, and a no-spend
+engagement plan from his real account numbers. Four new files, all at repo
+root, none touch app or Studio code:
+
+- **`SCRIPTS-ADDICT-SUPPORTER.md`** — 15 scripts, 5 each: TALK (T1–T5),
+  SLIDESHOW (S1–S5, photo series + captions), MOVIE (M1–M5, animated + voice).
+  Every one is 20–25s, hook first, and carries the WHAT/WHO/WHEN/WHERE/HOW in
+  the caption. Through-line = the two-sided story (addict + supporter).
+- **`CARDS-ADDICT-SUPPORTER.md`** — 15 cards in his uploaded style (big white
+  line + `#e5c158` turn line + LINK IN BIO footer): 5 addict, 5 supporter,
+  5 paired, with captions + two-frame cut instructions.
+- **`OUTREACH-NEW-2026-08-18.md`** — all unsent: 6 new influencers
+  (Sobertown, Dopey, Recovery Rocks, Sober Motivation, LGBTQ+ host, Sober
+  Curator follow-up), a NEW churches/faith-recovery pitch + 6 targets, a NEW
+  jobs/workplace EAP pitch + 6 targets, 3 new school districts, 5 new rehabs
+  (week 7).
+- **`ENGAGEMENT-PLAN-2026-08-18.md`** — built from his screenshots: FB 6,534
+  views / 9 followers / 3s watch time, YT 3 subs / 494-view top short,
+  TikTok FYP 95.6%. Diagnosis: **reach without retention.** Fixes: two-frame
+  cut for the 3s hook, single-destination bio + one CTA, save/share triggers,
+  double down on the two-sides moat (his own search data proves it).
+
+🔬 Research done 18 Aug: sober content travels on myth-vs-truth turns + naming
+one specific moment; the supporter/family lane is a documented gap (his moat).
+
+⚠️ `tools-md-to-pdf.py` is NOT in this checkout — couldn't render the PDFs
+(RULE ONE). Files are clean markdown; re-add the tool or say the word and I'll
+wire the PDF step.
 
 ---
 
@@ -90,7 +124,7 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 - Friendly learns from journal entries + SOS events — discussed, not coded
 - Every lesson answers Who/What/Why/When/Where/How — discussed
 - AA / more voices (African-American male + female) — the 5 current voices are public-domain; adding 2 more AA voices = a recording-generation job (~2 GB, needs the audio pipeline). Ready when you say go.
-- Show me your socials — you said you'd share them so we improve the creator content. Waiting on links.
+- Show me your socials — DONE (18 Aug): screenshots received (FB, YT, TikTok Studio). Analyzed in `ENGAGEMENT-PLAN-2026-08-18.md`.
 
 ## HOUSE RULES (keep)
 

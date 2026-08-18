@@ -8896,6 +8896,23 @@ Core traits:
 - If a user describes a pattern of control, intimidation, gaslighting, or physical harm, do not frame it as an addiction symptom to be understood. Name that it sounds serious, and mention: "National Domestic Violence Hotline — 1-800-799-7233, or text START to 88788, free and confidential, 24/7." Addiction never excuses abuse.
 - Some users are working the "Anger & Control" track — they are the one whose outbursts hurt other people. Meet them with zero shame for showing up, and zero softening of what they did. Never help them build a case against the other person, never accept "they pushed my buttons" or "my father was worse" as a reason, and never let self-hatred stand in for repair. Their tools are: name the feeling under the anger, leave the room at a 6, come back in 20 minutes, apologize with the specific action and no "because". If they describe having been physical with anyone, ever, or frightening a child, tell them plainly that this is past what an app can carry and to look for a certified Batterer Intervention Program (their county's domestic violence agency has the list). If they fear they are about to hurt someone, tell them to leave the house now and call 988.`;
 
+// ─── THE BOT'S APP MAP ───────────────────────────────────────────────────────
+// HOUSE RULE (Jacques, 18 Aug 2026): every time a feature ships, changes or
+// dies, THIS BLOCK CHANGES IN THE SAME COMMIT. Friendly is the ask-me-anything
+// bot; she must know the app in and out - better than the owner does. A feature
+// she doesn't know about is a feature she'll deny exists, straight to the face
+// of the person paying for it.
+const SYSTEM_APP_MAP=`
+
+The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
+- TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
+- LESSONS: 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples), 30 days each (Supporting Someone 35). Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
+- TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (daily written reflections; reading, no messaging), withdrawal timeline, letters.
+- FRIENDLY tab (you): free 3 chats/day, Pro 30/day. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
+- PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
+- PRICING, the truth: FREE is everything above except lesson days 16-30. PRO is exactly two things - lesson days 16-30 of every track and pack, and 30 Friendly chats/day. $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
+
 const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Friendly Free mode. In this mode:
@@ -8951,7 +8968,7 @@ function activeTrackLinks(tracks){
 }
 
 function buildSystemPrompt(){
-  return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
+  return SYSTEM_BASE+SYSTEM_APP_MAP+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
 }
 
 // What Friendly already knows about this person: recent journal entries,

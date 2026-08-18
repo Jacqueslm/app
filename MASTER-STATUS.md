@@ -39,6 +39,17 @@ disabled**, so that intent has no Gemini 3 equivalent — the closest value is
 `thinkingLevel: "MINIMAL"`, which still requires **thought signatures** (or the
 request 400s again).
 
+**Suggestions — offered, NOT implemented (Jacques: fix nothing, suggest only):**
+1. **Drop `thinkingConfig` entirely** — `gemini-3.6-flash` then defaults to
+   `thinkingLevel: MEDIUM`. His existing "retry without thinkingConfig" already
+   does this, so that path should clear the 400.
+2. **To stay cheap/fast** (his original `thinkingBudget: 0` intent), use
+   `thinkingConfig: {thinkingLevel: "LOW"}` — closest to minimal thinking
+   without the thought-signature requirement.
+3. **Avoid `MINIMAL`** unless thought signatures are wired up — it 400s without them.
+4. **Audit Friendly for `temperature` / `top_p` / `top_k`** — also deprecated on
+   Gemini 3.x; remove them if present anywhere.
+
 **Sources:** dgtlmoon/changedetection.io#4283 (identical bare-400 repro on
 Gemini 3.x); Google Cloud "Thinking" model doc (`thinking_level` vs `thinking_budget`).
 

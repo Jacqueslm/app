@@ -203,7 +203,16 @@ body{display:flex;justify-content:center}
 .limit-bar span{font-size:12px;color:var(--warn-t);flex:1}
 .up-sm{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:7px 15px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:var(--f)}
 .quick-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px}
+.bub-speak{display:block;margin-top:6px;background:none;border:0;padding:2px 0;color:var(--tm);cursor:pointer;font-size:15px;line-height:1;opacity:.75}
+.bub-speak.on{color:var(--accent);opacity:1}
 .qc{border:0.5px solid var(--bdr2);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--ts);cursor:pointer;background:var(--s2);user-select:none;white-space:nowrap}
+.qc-drop{flex:1 1 0px;display:flex;align-items:center;justify-content:space-between;gap:6px;border:0.5px solid var(--bdr2);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--tp);cursor:pointer;background:var(--s2);user-select:none;min-width:0}
+.qc-drop span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qc-drop i{font-size:15px;color:var(--tm);flex-shrink:0}
+.qc-drop.good{border-color:rgba(126,232,162,0.35)}
+.qc-drop.good span{color:var(--green)}
+.qc-drop.rough{border-color:rgba(83,74,183,0.45)}
+.qc-drop.rough span{color:#AFA9EC}
 .qc:active{background:var(--acc);color:var(--acc-t)}
 /* SOS BUTTON */
 .sos-wrap{padding:0 16px 16px}
@@ -766,14 +775,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:8px"></i> AI recovery companion · Non-judgmental · Confidential</div>
     </div>
   </div>
+  <!-- Two openers instead of seven chips. The chips ate roughly a third of the
+       screen on a phone, which is space the conversation needed. Jacques, 18 Aug. -->
   <div class="quick-chips" id="quickChips">
-    <div class="qc" onclick="quickSend(this)">I'm struggling today</div>
-    <div class="qc" onclick="quickSend(this)">I had a craving</div>
-    <div class="qc" onclick="quickSend(this)">I'm feeling proud</div>
-    <div class="qc" onclick="quickSend(this)">I slipped</div>
-    <div class="qc" onclick="quickSend(this)">I need motivation</div>
-    <div class="qc" onclick="quickSend(this)">Tell me about PAWS</div>
-    <div class="qc" onclick="quickSend(this)">What patterns do you see in me?</div>
+    <div class="qc-drop good" onclick="openQuickPick('good')">
+      <span>I'm doing okay</span><i class="ti ti-chevron-down"></i>
+    </div>
+    <div class="qc-drop rough" onclick="openQuickPick('rough')">
+      <span>Not feeling good</span><i class="ti ti-chevron-down"></i>
+    </div>
   </div>
   <div class="chat-area" id="chatArea"></div>
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
@@ -2433,6 +2443,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- FONT SIZE MODAL -->
+<!-- Friendly quick-opener picker: two moods, real sentences underneath. -->
+<div class="sos-modal" id="quickpick-modal" onclick="if(event.target===this)closeQuickPick()">
+  <div class="sos-sheet">
+    <div class="sos-title" id="quickpick-title">How are you doing?</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px" id="quickpick-list"></div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeQuickPick()">Cancel</button>
+  </div>
+</div>
 <div class="sos-modal" id="fontsize-modal" onclick="if(event.target===this)closeFontSizeModal()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Text size</div>
@@ -4934,7 +4952,7 @@ function renderJournalInsights(){
   if(!(S.journals||[]).length){proBox.style.display='none';return;}
   proBox.style.display='block';
   proBox.innerHTML=`<div class="card" style="margin-bottom:14px">
-    <div class="sec-hd" style="margin-top:0">Friendly Pro journal insights</div>
+    <div class="sec-hd" style="margin-top:0">Journal insights</div>
     <div style="font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:10px">${buildJournalWeeklySummary()}</div>
     <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussJournalWithNova()">Ask Friendly about my journal</button>
   </div>`;
@@ -8080,7 +8098,7 @@ function renderReportCard(report,idx,expanded){
       <div style="margin-bottom:12px">${highlightsHTML}</div>
       <div class="sec-hd">F. Personalized recommendations</div>
       <div style="margin-bottom:12px">${recsHTML}</div>
-      <div class="sec-hd">G. Friendly Pro summary</div>
+      <div class="sec-hd">G. Friendly summary</div>
       <div style="background:var(--acc);border-radius:10px;padding:12px;color:var(--acc-t);font-size:13px;line-height:1.6;margin-bottom:10px">${report.novaSummary}</div>
       <button class="ob-btn outline" style="margin:0;color:var(--accent);border-color:var(--accent)" onclick="discussLatestReportWithNova()">Ask Friendly to explain this report</button>
     </div>
@@ -8992,7 +9010,7 @@ const PRO_TOOLS={
   },
   weeklyReports:{
     title:'Weekly Recovery Reports',
-    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus Friendly Pro's personalized recommendations.",
+    teaser:"See your emotional patterns, triggers, and progress each week — a real report built from what you've actually logged, plus personalized recommendations.",
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Top mood: ●●●●●● (●●%)<br>Top trigger: ●●●●●●<br>Risk level: ●●●●●●●●</div>',
     open:'openWeeklyReportsScreen'
   },
@@ -9004,13 +9022,13 @@ const PRO_TOOLS={
   },
   proJournal:{
     title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and Friendly Pro analysis of your own entries.',
+    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and Friendly analysing your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
   },
   streaks:{
     title:'Advanced Streaks',
-    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and Friendly Pro streak coaching, all built from your real data.',
+    teaser:'Advanced streak insights help you understand your patterns and stay consistent — milestones, comeback tracking, and streak coaching, all built from your real data.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Your streak is strongest on ●●●●●●●●.<br>Longest streak: ●● days<br>You recovered in ● days last time.</div>',
     open:'openAdvancedStreaksScreen'
   },
@@ -9068,40 +9086,53 @@ function addBubble(who,text){
   d.className='bub '+who;
   d.style.whiteSpace='pre-wrap';
   d.textContent=text;
+  // Friendly can be heard, not just read. Her replies are written fresh every
+  // time so they can't be pre-recorded like the lessons and SOS guide are -
+  // this uses the phone's own voice, which costs nothing and works offline.
+  // Tap to hear, tap again to stop. Nothing plays unless asked.
+  if(who==='nova'&&'speechSynthesis' in window){
+    const b=document.createElement('button');
+    b.className='bub-speak';
+    b.type='button';
+    b.setAttribute('aria-label','Read this out loud');
+    b.innerHTML='<i class="ti ti-volume"></i>';
+    b.onclick=(ev)=>{ev.stopPropagation();speakBubble(text,b);};
+    d.appendChild(b);
+  }
   area.appendChild(d);
   setTimeout(()=>{const area=document.getElementById('chatArea');if(area)area.scrollTop=area.scrollHeight;},50);
+}
+// One speaking bubble at a time; tapping the one that is talking stops it.
+let speakingBtn=null;
+function speakBubble(text,btn){
+  try{
+    if(speakingBtn===btn){stopSpeaking();return;}
+    stopSpeaking();
+    const u=new SpeechSynthesisUtterance(text);
+    u.rate=0.95;u.pitch=1;
+    // Match the narrator the user already chose for lessons where we can.
+    try{
+      const want=(typeof lessonVoiceKey==='function')?lessonVoiceKey():'';
+      const vs=speechSynthesis.getVoices()||[];
+      const female=vs.find(v=>/female|samantha|zira|karen|moira/i.test(v.name));
+      const male=vs.find(v=>/male|david|daniel|alex/i.test(v.name));
+      const pick=(want==='male')?male:female;
+      if(pick)u.voice=pick;
+    }catch(e){}
+    u.onend=()=>{speakingBtn=null;btn.classList.remove('on');};
+    u.onerror=()=>{speakingBtn=null;btn.classList.remove('on');};
+    speakingBtn=btn;btn.classList.add('on');
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function stopSpeaking(){
+  try{speechSynthesis.cancel();}catch(e){}
+  if(speakingBtn)speakingBtn.classList.remove('on');
+  speakingBtn=null;
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
 const PRO_FEATURE_TEST=/patterns?|analyz|weekly (summary|check-?in|report)|reports?|trends?|deep dive|relapse loop|vulnerable times?|why do i keep|figure out why|journal|streaks?|milestones?|analytics|insights?|\bpacks?\b|habits?|consistency|routines?/i;
-function isProFeatureRequest(text){
-  return PRO_FEATURE_TEST.test(text);
-}
-function proFeaturePreviewText(text){
-  if(/relapse loop|why do i keep|figure out why/i.test(text))return "I can help you look at the loop behind moments like this — what leads up to it, what feeds it, what breaks it. That kind of pattern work is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/report/i.test(text))return "I can put together a real weekly report for you — your emotional patterns, triggers, risk indicators, and personalized recommendations, all built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/weekly (summary|check-?in)/i.test(text))return "I can put together a real weekly check-in for you — your mood trends, your cravings, what's actually been working. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/journal/i.test(text))return "I can read back through your journal entries and reflect the real themes, emotions, and patterns I notice — guided prompts and that kind of analysis are part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/streaks?|milestones?/i.test(text))return "I can go deeper on your streak — insights, comeback tracking, and the patterns behind when streaks tend to break. That level of streak coaching is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/habits?|consistency|routines?/i.test(text))return "Pro helps you build stronger habits with personalized guidance — your consistency patterns, vulnerability windows, and habit suggestions built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/analytics|insights?/i.test(text))return "Analytics help you understand your triggers, patterns, and emotional trends — simple, calm insights built from what you've actually logged. That's part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/\bpacks?\b/i.test(text))return "Every ready-made lesson pack is open to you — the first 15 days of each are free (Tools → Lesson Packs). Building your own custom pack, days 16 and up, and guided reflections on them are part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  if(/trend/i.test(text))return "I can help you see the emotional trends underneath your last few weeks. That kind of deeper look is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-  return "I can help you analyze your patterns more deeply here. That level of analysis is part of Friendly Pro.\n\nUnlock Friendly Pro to continue.";
-}
-function addProPreviewBubble(teaserText){
-  const area=document.getElementById('chatArea');
-  const d=document.createElement('div');
-  d.className='bub nova';
-  d.innerHTML=`<div style="background:var(--acc);border-radius:10px;padding:12px;color:var(--acc-t)">
-    <div style="font-size:13px;line-height:1.6;white-space:pre-wrap;margin-bottom:10px">${teaserText}</div>
-    <button class="log-btn" style="width:100%;margin-bottom:6px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
-    <div style="text-align:center"><span style="font-size:12px;color:var(--accent);cursor:pointer" onclick="this.closest('.bub').remove()">Maybe later</span></div>
-  </div>`;
-  area.appendChild(d);
-  setTimeout(()=>{const area=document.getElementById('chatArea');if(area)area.scrollTop=area.scrollHeight;},50);
-}
-
 // ─── NOVA SAFETY DISCLAIMER ────────────────────────────────────────────────────
 let novaDisclaimerTimer=null;
 function maybeShowNovaDisclaimer(){
@@ -9196,9 +9227,49 @@ function showTyping(show){
 }
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
-function quickSend(el){
-  document.getElementById('chatInput').value=el.textContent;
+// Two openers, each with real sentences under it. Seven always-on chips used a
+// third of a phone screen; this gives that space back to the conversation while
+// keeping a starting point for anyone who does not know how to begin.
+const QUICK_PICKS={
+  good:{title:"Good to hear \u2014 what's true right now?",items:[
+    "I'm feeling proud",
+    "I had a good day",
+    "I need motivation to keep going",
+    "I want to stay on track",
+    "What patterns do you see in me?",
+    "What should I watch out for?"
+  ]},
+  rough:{title:"I'm here. What's going on?",items:[
+    "I'm struggling today",
+    "I had a craving",
+    "I slipped",
+    "I can't sleep",
+    "I feel alone",
+    "I feel like giving up",
+    "Tell me about PAWS"
+  ]}
+};
+function openQuickPick(kind){
+  const set=QUICK_PICKS[kind];if(!set)return;
+  document.getElementById('quickpick-title').textContent=set.title;
+  const list=document.getElementById('quickpick-list');
+  list.innerHTML='';
+  set.items.forEach(t=>{
+    const d=document.createElement('div');
+    d.className='dd-opt';
+    d.textContent=t;
+    d.onclick=()=>{closeQuickPick();quickSendText(t);};
+    list.appendChild(d);
+  });
+  document.getElementById('quickpick-modal').classList.add('open');
+}
+function closeQuickPick(){document.getElementById('quickpick-modal').classList.remove('open');}
+function quickSendText(t){
+  document.getElementById('chatInput').value=t;
   sendMsg();
+}
+function quickSend(el){
+  quickSendText(el.textContent.trim());
 }
 async function sendMsg(){
   const inp=document.getElementById('chatInput');
@@ -10418,7 +10489,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.7.1';
+const APP_VERSION='5.8.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

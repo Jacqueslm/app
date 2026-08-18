@@ -944,6 +944,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- ROOMS LIST -->
+    <!-- LESSON LIBRARY -->
+    <!-- 800+ lessons existed with no way to reach any of them: you could read
+         today's lesson, in your current track, and nothing else. The Spiritual
+         Path, Together and every pack were each behind their own door. This is
+         one door to all of it. -->
+    <div id="s-lesson-library" class="scr">
+      <div class="sec">
+        <input id="lesson-lib-search" type="search" placeholder="Search every lesson\u2026"
+               oninput="renderLessonLibrary()" autocomplete="off"
+               style="width:100%;box-sizing:border-box;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--tp);font-family:inherit;margin-bottom:6px">
+        <div id="lesson-lib-count" style="font-size:11.5px;color:var(--tm);margin:0 2px 12px"></div>
+        <div id="lesson-lib-list"></div>
+      </div>
+    </div>
+
     <div id="s-rooms" class="scr">
       <div class="sec">
         <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:var(--acc-t);line-height:1.5">
@@ -1372,6 +1387,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
         <i class="ti ti-heart" style="color:#E24B4A"></i>
         <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openLessonLibrary()">
+        <i class="ti ti-book"></i>
+        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app \u2014 all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -2518,6 +2538,16 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- GENERIC CONFIRM MODAL -->
+<!-- LESSON READER (library) -->
+<div class="sos-modal" id="lesson-reader-modal" onclick="if(event.target===this)closeLibraryReader()">
+  <div class="sos-sheet" style="max-height:84vh">
+    <div class="sos-title" style="color:var(--accent);text-align:left" id="lib-read-title"></div>
+    <div style="font-size:11.5px;color:var(--tm);text-align:left;margin-bottom:10px" id="lib-read-meta"></div>
+    <div id="lib-read-body" style="max-height:56vh;overflow-y:auto;text-align:left;font-size:14px;line-height:1.65;color:var(--ts);white-space:pre-wrap;padding-right:4px"></div>
+    <button class="sos-close" style="margin-top:12px" onclick="closeLibraryReader()">Close</button>
+  </div>
+</div>
+
 <div class="sos-modal" id="confirm-modal" onclick="if(event.target===this)closeConfirmModal()">
   <div class="sos-sheet">
     <div class="sos-title" style="color:var(--accent)">Are you sure?</div>
@@ -2819,6 +2849,7 @@ const ICON_PATHS={
 'ti-home':'<path d="M3 10L12 3l9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
 'ti-info-circle':'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.5" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-lock':'<rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+'ti-book':'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><line x1="8" y1="7" x2="15" y2="7"/><line x1="8" y1="11" x2="13" y2="11"/>',
 'ti-logout':'<path d="M14 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/><path d="M9 12h12l-3-3"/><path d="M21 12l-3 3"/>',
 'ti-refresh':'<path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"/>',
 'ti-download':'<path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="7 11 12 16 17 11"/><line x1="12" y1="4" x2="12" y2="16"/>',
@@ -2907,6 +2938,120 @@ async function loadLessonPacks(){
   }catch(e){/* offline - lesson screen will show a friendly message */}
   updateLessonPromo();
 }
+
+// ─── LESSON LIBRARY ──────────────────────────────────────────────────────────
+// One index over everything: the 14 tracks in lessons.json, the Spiritual Path,
+// and every pack. Built once on first open and cached - it is a few hundred
+// entries and rebuilding it on every keystroke would be felt on an old phone.
+//
+// The lock is unchanged. Days 16-30 are still Pro; this only makes them
+// FINDABLE, which is the opposite of giving them away - you cannot want
+// something you never knew was there.
+let LESSON_INDEX=null;
+function buildLessonIndex(){
+  const out=[];
+  // Marked so a partial index (packs only, tracks still in flight) can be
+  // spotted and rebuilt rather than cached as if it were complete.
+  out.partial=!lessonPacksLoaded;
+  const push=(group,kind,day,l)=>{
+    if(!l)return;
+    out.push({
+      group, kind, day,
+      title:l.title||`Day ${day}`,
+      body:[l.content,l.action,l.reflection].filter(Boolean).join('\n\n'),
+      hay:((l.title||'')+' '+(l.content||'')+' '+(l.action||'')+' '+(l.reflection||'')+' '+group).toLowerCase(),
+    });
+  };
+  Object.keys(LESSON_PACKS||{}).forEach(track=>{
+    (LESSON_PACKS[track]||[]).forEach((l,i)=>push(track,'track',l.day||i+1,l));
+  });
+  Object.keys(PREDEFINED_PACKS||{}).forEach(key=>{
+    const pk=PREDEFINED_PACKS[key];
+    (pk.lessons||pk.days||[]).forEach((l,i)=>push(pk.title||key,'pack',l.day||i+1,l));
+  });
+  return out;
+}
+async function openLessonLibrary(){
+  switchTo('lesson-library');actBn('bn-tools');
+  // The 14 tracks live in lessons.json and arrive over the network. Building
+  // the index before that lands silently produced a library of 93 lessons
+  // instead of 800 - the packs are inline, the tracks are not - and because the
+  // index is cached it stayed wrong for the rest of the session.
+  if(!lessonPacksLoaded){
+    const el=document.getElementById('lesson-lib-count');
+    if(el)el.textContent='Loading lessons\u2026';
+    try{ await loadLessonPacks(); }catch(e){}
+    LESSON_INDEX=null;
+  }
+  if(!LESSON_INDEX)LESSON_INDEX=buildLessonIndex();
+  renderLessonLibrary();
+}
+function renderLessonLibrary(){
+  const list=document.getElementById('lesson-lib-list');
+  const countEl=document.getElementById('lesson-lib-count');
+  if(!list)return;
+  if(!LESSON_INDEX||(LESSON_INDEX.partial&&lessonPacksLoaded))LESSON_INDEX=buildLessonIndex();
+  const q=(document.getElementById('lesson-lib-search')||{}).value||'';
+  const terms=q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hits=terms.length?LESSON_INDEX.filter(l=>terms.every(t=>l.hay.includes(t))):LESSON_INDEX;
+  if(countEl){
+    countEl.textContent=terms.length
+      ? `${hits.length} of ${LESSON_INDEX.length} lessons`
+      : `${LESSON_INDEX.length} lessons across ${new Set(LESSON_INDEX.map(l=>l.group)).size} tracks and packs`;
+  }
+  if(!hits.length){
+    list.innerHTML='<div style="font-size:13px;color:var(--tm);padding:18px 2px;line-height:1.5">Nothing matches that. Try a single word \u2014 <em>lying</em>, <em>sleep</em>, <em>anger</em>, <em>money</em>.</div>';
+    return;
+  }
+  // Grouped, and capped when browsing so opening the screen never renders 800
+  // rows at once. A search shows everything it found.
+  const CAP=terms.length?400:80;
+  const shown=hits.slice(0,CAP);
+  const groups=[];
+  shown.forEach(l=>{
+    let g=groups.find(x=>x.name===l.group);
+    if(!g){g={name:l.group,items:[]};groups.push(g);}
+    g.items.push(l);
+  });
+  list.innerHTML=groups.map(g=>
+    `<div class="sec-hd" style="margin:14px 0 8px">${escapeHtml(g.name)}</div>`+
+    `<div class="card" style="padding:0 14px">`+
+    g.items.map(l=>{
+      const locked=isLessonLocked(l.day);
+      return `<div class="setting-row" style="cursor:pointer" onclick="openLibraryLesson('${escapeHtml(g.name).replace(/'/g,"&#39;")}',${l.day})">
+        <div class="setting-row-txt" style="min-width:0">
+          <p style="white-space:normal">${escapeHtml(l.title)}</p>
+          <span>Day ${l.day}${locked?' \u00b7 Pro':''}</span>
+        </div>
+        <i class="ti ti-${locked?'lock':'chevron-right'}" style="font-size:${locked?15:18}px;color:var(--tm)"></i>
+      </div>`;
+    }).join('')+`</div>`
+  ).join('')
+  + (hits.length>CAP?`<div style="font-size:11.5px;color:var(--tm);padding:14px 2px">Showing the first ${CAP}. Search to find a specific one.</div>`:'');
+  try{renderIcons(list);}catch(e){}
+}
+function openLibraryLesson(group,day){
+  if(!LESSON_INDEX)LESSON_INDEX=buildLessonIndex();
+  const l=LESSON_INDEX.find(x=>x.group===group&&x.day===day);
+  if(!l)return;
+  if(isLessonLocked(day)){
+    // Same gate as everywhere else. Say what it is, do not pretend it is broken.
+    appConfirm(
+      `\u201c${l.title}\u201d is day ${day}, which is part of Pro. Days 1\u201315 of every track and pack are free; Pro opens 16\u201330, and 30 Friendly chats a day.`,
+      ()=>{switchTo('plans');actBn('bn-plans');},
+      {okText:'See Pro',cancelText:'Not now'}
+    );
+    return;
+  }
+  openLibraryReader(l);
+}
+function openLibraryReader(l){
+  document.getElementById('lib-read-title').textContent=l.title;
+  document.getElementById('lib-read-meta').textContent=`${l.group} \u00b7 Day ${l.day}`;
+  document.getElementById('lib-read-body').textContent=l.body;
+  document.getElementById('lesson-reader-modal').classList.add('open');
+}
+function closeLibraryReader(){document.getElementById('lesson-reader-modal').classList.remove('open');}
 
 const FREE_LESSON_CAP=15;
 // Journey phase — gives the user a predictable sense of where they are in the
@@ -9585,7 +9730,8 @@ const SCREEN_MAP={
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
   'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
 };
-const TITLES={home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const TITLES={
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';

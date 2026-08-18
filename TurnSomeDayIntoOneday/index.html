@@ -180,7 +180,10 @@ body{display:flex;justify-content:center}
 .nova-badge{font-size:10px;background:#EEEDFE;color:#3C3489;border-radius:20px;padding:2px 8px;margin-left:6px}
 .nova-mode-chip{font-size:10px;background:rgba(255,255,255,0.12);color:#c0caff;border-radius:20px;padding:2px 8px}
 .nova-mode-chip.live{background:var(--green-dim);color:var(--green)}
-.chat-area{padding:14px 16px 20px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto;min-height:0}
+.chat-area{padding:14px 16px 20px;display:flex;flex-direction:column;gap:10px;flex:1 1 0px;overflow-y:auto;min-height:0}/* flex-basis MUST be 0px, not flex:1's default 0%. At the bigger text size the app is
+   zoomed 1.18x and #s-nova's height is indefinite, so a percentage basis cannot resolve -
+   the message list then sizes to its content and pushes the chat input off the bottom of
+   the screen, leaving only the quick-reply chips tappable. Reported on a real phone. */
 /* Friendly is a real chat layout: header/chips fixed, messages scroll in the middle,
    the typing bar pinned to the bottom - nothing ever renders below the input. */
 #s-nova.on{display:flex;flex-direction:column;height:100%}
@@ -10415,7 +10418,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.7.0';
+const APP_VERSION='5.7.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

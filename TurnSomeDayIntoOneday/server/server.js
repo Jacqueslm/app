@@ -934,7 +934,13 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
         : String(system || '');
       const gemRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // The key goes in x-goog-api-key. Without it Google answers every call
+        // with 403 "Method doesn't allow unregistered callers", the request
+        // never reaches a model, and the app quietly falls back to its canned
+        // replies - which is exactly how Friendly shipped sounding robotic with
+        // a perfectly good key sitting in the environment. Header, not ?key=,
+        // so the secret stays out of URLs, proxy logs and error messages.
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
         body: JSON.stringify({
           systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
           contents: (messages || []).map((m) => {

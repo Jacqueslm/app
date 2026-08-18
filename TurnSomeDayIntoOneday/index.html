@@ -2763,6 +2763,11 @@ function logActivity(type,extra){
 
 // ─── ICONS (inline SVG, no external font/CDN dependency) ─────────────────────
 const ICON_PATHS={
+  // Speaker icons for Friendly's read-aloud button. This map is hand-maintained:
+  // an <i class="ti ti-x"> whose key is missing here renders NOTHING AT ALL,
+  // which is exactly how the speak button shipped invisible. Check here first.
+  'ti-volume':'<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v14a.8.8 0 0 1-1.5.5l-3.5-4.5"/>',
+  'ti-volume-off':'<path d="M15 8a5 5 0 0 1 1.912 4.377"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v3"/><path d="M11 17.75v.25a.8.8 0 0 1-1.5.5l-3.5-4.5"/><path d="M3 3l18 18"/>',
 'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
@@ -9104,6 +9109,9 @@ function addBubble(who,text){
     d.appendChild(b);
   }
   area.appendChild(d);
+  // Icons are drawn from ICON_PATHS by renderIcons(); anything created after
+  // page load has to be rendered explicitly or it stays an empty <i>.
+  try{renderIcons(d);}catch(e){}
   setTimeout(()=>{const area=document.getElementById('chatArea');if(area)area.scrollTop=area.scrollHeight;},50);
 }
 // Picks a system voice matching Friendly's chosen presence. Voice names differ
@@ -9149,15 +9157,20 @@ function speakBubble(text,btn){
     // narrator, which is a separate choice. Hearing a man when you picked a
     // female presence breaks the one relationship this screen is built on.
     try{ if(typeof applyNovaVoice==='function')applyNovaVoice(u); }catch(e){}
-    u.onend=()=>{speakingBtn=null;btn.classList.remove('on');};
-    u.onerror=()=>{speakingBtn=null;btn.classList.remove('on');};
+    const restore=()=>{speakingBtn=null;btn.classList.remove('on');btn.innerHTML='<i class="ti ti-volume"></i>';try{renderIcons(btn);}catch(e){}};
+    u.onend=restore;u.onerror=restore;
     speakingBtn=btn;btn.classList.add('on');
+    btn.innerHTML='<i class="ti ti-volume-off"></i>';try{renderIcons(btn);}catch(e){}
     speechSynthesis.speak(u);
   }catch(e){}
 }
 function stopSpeaking(){
   try{speechSynthesis.cancel();}catch(e){}
-  if(speakingBtn)speakingBtn.classList.remove('on');
+  if(speakingBtn){
+    speakingBtn.classList.remove('on');
+    speakingBtn.innerHTML='<i class="ti ti-volume"></i>';
+    try{renderIcons(speakingBtn);}catch(e){}
+  }
   speakingBtn=null;
 }
 
@@ -10524,7 +10537,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8.3';
+const APP_VERSION='5.8.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -998,12 +998,17 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       };
       let gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(true) });
       if (gemRes.status === 400) {
+        // Retry without thinkingConfig on ANY 400, not just one that says the
+        // word "thinking". Google's answer here is the generic "Request
+        // contains an invalid argument" - the useful part is buried in
+        // error.details, and matching on the top-line message meant the retry
+        // never fired and every chat died on the only optional field we send.
         const probe = await gemRes.clone().json().catch(() => null);
-        const msg = (probe && probe.error && probe.error.message) || '';
-        if (/thinking/i.test(msg)) {
-          try { db.logError('ai-chat', `Model rejected thinkingConfig, retried without it: ${msg}`); } catch (_) {}
-          gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(false) });
-        }
+        const msg = (probe && probe.error && probe.error.message) || 'no message';
+        const det = probe && probe.error && probe.error.details
+          ? ` details: ${JSON.stringify(probe.error.details).slice(0, 400)}` : '';
+        try { db.logError('ai-chat', `400 with thinkingConfig, retrying without it: ${msg}${det}`); } catch (_) {}
+        gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(false) });
       }
       const gd = await gemRes.json();
       if (gemRes.ok) {
@@ -1064,7 +1069,9 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       // A failing key/model here degrades every chat into the client's canned
       // fallback with no visible symptom except repetitive replies - put the
       // real reason where Profile diagnostics can show it.
-      const why = `HTTP ${res2.status}: ${(data && data.error && (data.error.message || data.error.status)) || 'unknown error'}`;
+      const eobj = (data && data.error) || null;
+      const edet = eobj && eobj.details ? ` | ${JSON.stringify(eobj.details).slice(0, 400)}` : '';
+      const why = `HTTP ${res2.status}: ${(eobj && (eobj.message || eobj.status)) || 'unknown error'}${edet}`;
       try { db.logError('ai-chat', why); } catch (_) {}
       // Hand the reason straight back to the OWNER so a broken key shows up in
       // the chat itself instead of only in a diagnostics list nobody thinks to

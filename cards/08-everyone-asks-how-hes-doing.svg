@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#0a1228"/>
+      <stop offset="0.55" stop-color="#0d1c3a"/>
+      <stop offset="1" stop-color="#13294b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+  <circle cx="540" cy="150" r="24" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <circle cx="540" cy="150" r="9" fill="#ffffff"/>
+  <text x="540" y="240" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="1" text-anchor="middle">Recovery app for you and the one that supports you</text>
+  <text x="540" y="680" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="50" font-weight="800" text-anchor="middle">Everyone asks how he's doing.</text>
+  <text x="540" y="880" fill="#e5c158" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" text-anchor="middle">Nobody asks how you are.</text>
+  <text x="540" y="1728" fill="#e5c158" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700" text-anchor="middle" letter-spacing="8">LINK IN BIO</text>
+  <text x="540" y="1788" fill="#5b6577" font-family="Arial, Helvetica, sans-serif" font-size="24" letter-spacing="4" text-anchor="middle">TURN SOMEDAY INTO DAY ONE</text>
+</svg>

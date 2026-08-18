@@ -48,6 +48,10 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 // rather than borrowing Anthropic's. Friendly's replies are short; the room is
 // headroom, not length.
 const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
+// MINIMAL | LOW | MEDIUM | HIGH. LOW is the fastest setting a 3.x model will
+// actually accept - MINIMAL additionally requires thought signatures and 400s
+// without them. Overridable if Friendly ever needs to think harder.
+const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 const PRO_CHAT_LIMIT = 30;
@@ -985,13 +989,23 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
           // field's shape has changed between model generations, so if this
           // model rejects it we drop it and ask again rather than letting a
           // config detail take the whole chat down.
-          // CONFIRMED against the live API, 18 Aug: gemini-3.6-flash rejects
-          // thinkingConfig outright - HTTP 400 "Request contains an invalid
-          // argument" - so don't send it to a 3.x model at all. The retry below
-          // still exists as a net, but paying for a failed round-trip on every
-          // single message just to have it dropped is not a fix.
-          (withThinkingOff && /^gemini-2\./.test(GEMINI_MODEL))
-            ? { thinkingConfig: { thinkingBudget: 0 } } : {}
+          // How much the model thinks before it answers - and the knob is named
+          // differently per generation, so send the one this model understands.
+          //
+          //   2.x  thinkingBudget: 0     (thinking off entirely)
+          //   3.x  thinkingLevel: 'LOW'  (3.x cannot turn thinking off at all;
+          //                               left unset it defaults to MEDIUM,
+          //                               which means every reply is slower and
+          //                               costs more thinking tokens for a
+          //                               companion that should feel like
+          //                               texting a friend back)
+          //
+          // Sending 2.x's thinkingBudget to a 3.x model is a bare HTTP 400
+          // "Request contains an invalid argument" with nothing naming the
+          // field - that is what had Friendly canned on 18 Aug.
+          !withThinkingOff ? {}
+            : /^gemini-2\./.test(GEMINI_MODEL) ? { thinkingConfig: { thinkingBudget: 0 } }
+            : { thinkingConfig: { thinkingLevel: GEMINI_THINKING_LEVEL } }
         ),
       });
       const gemHeaders = {

@@ -6,6 +6,53 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🚨 18 AUG 2026 — HANDOFF FROM JACQUES → RECOVERY-APP AI: Friendly's Gemini 400 (root cause VERIFIED)
+
+**Jacques wants the recovery-app lane to pick this up now.** This is his status
+plus a root cause verified this turn, so nobody re-derives it from scratch.
+
+**His situation (his words):**
+- Friendly calls Gemini via `generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`,
+  key in the `x-goog-api-key` header, key confirmed present on Railway.
+- `gemini-2.5-flash` returned **404 "no longer available to new users, use gemini-3.6-flash"**.
+  Switched to `gemini-3.6-flash`.
+- `gemini-3.6-flash` now returns **HTTP 400 "Request contains an invalid argument."** with no details field.
+- Body sends `systemInstruction`, `contents`, and `generationConfig` with
+  `maxOutputTokens: 4096` and `thinkingConfig: {thinkingBudget: 0}`.
+
+**What he already changed (his words):** any 400 now retries once **without**
+`thinkingConfig`, and `error.details` is logged instead of discarded (the old
+retry only fired when the message contained the word "thinking").
+
+**VERIFIED ROOT CAUSE (found this turn, not a guess):**
+- The invalid field is **`thinkingConfig.thinkingBudget`**. On Gemini 3.x it is
+  **deprecated**; Google rejects it with a bare 400 INVALID_ARGUMENT and no
+  `details` field — exactly his symptom.
+- Replacement is **`thinkingLevel`** (discrete levels, not a token budget).
+  `gemini-3.6-flash` supports `MINIMAL | LOW | MEDIUM | HIGH`, default `MEDIUM`.
+- So: `thinkingConfig: {thinkingLevel: "LOW"}` — or omit `thinkingConfig`
+  entirely and it defaults to MEDIUM. His "retry without thinkingConfig" will
+  therefore succeed.
+- **Also deprecated on Gemini 3.x: `temperature`, `top_p`, `top_k`.** His body
+  doesn't send them, but strip them anywhere else Friendly sets them.
+- `maxOutputTokens: 4096` and `systemInstruction` are fine — not the problem.
+
+**The one thing his retry does NOT restore — his intent.** He set
+`thinkingBudget: 0` to **turn thinking off** (cheap/fast). On Gemini 3 thinking
+is **on by default and cannot be fully disabled**. Closest to off is
+`thinkingLevel: "MINIMAL"` — but MINIMAL still requires **thought signatures**
+(or it 400s again). **`LOW` is the safer mostly-off choice** unless thought
+signatures are wired up. If Friendly should stay cheap/fast, set
+`thinkingLevel: "LOW"` explicitly rather than letting it fall back to MEDIUM.
+
+**Sources:** dgtlmoon/changedetection.io#4283 (identical bare-400 repro on
+Gemini 3.x); Google Cloud "Thinking" model doc (`thinking_level` vs `thinking_budget`).
+
+**Lane note:** this lives in `TurnSomeDayIntoOneday/` (recovery-app AI's lane),
+so it is handed off here, not edited.
+
+---
+
 ## 🛠 18 AUG 2026 — SOCIAL CONTENT + OUTREACH BATCH (files written, NOT pushed — waiting on Jacques)
 
 Jacques assigned the social/marketing lane: cards in his "Who catches you"

@@ -799,7 +799,7 @@ own playbook — if it bounces, use the form. No address below is invented.
 ## LANE 1 — RECOVERY MEDIA & APP LISTICLES
 
 ### 1. Avenues Recovery
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** the contact options at https://www.avenuesrecovery.com/ — no email
 found in listings; **try info@avenuesrecovery.com first**, else the site form.
 Their article: https://www.avenuesrecovery.com/understanding-addiction/life-after-rehab/best-addiction-recovery-apps/
@@ -824,7 +824,7 @@ Turn Someday Into Day One
 ---
 
 ### 2. Ashley Addiction Treatment
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@ashleytreatment.org** — verified: published on
 https://www.ashleytreatment.org/contact-us/ per public listings.
 Their article: https://www.ashleytreatment.org/rehab-blog/helpful-sobriety-apps/
@@ -849,7 +849,7 @@ Turn Someday Into Day One
 ---
 
 ### 3. Hawaiian Recovery
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** the contact options at https://hawaiianrecovery.com/ — no email
 found in listings; **try info@hawaiianrecovery.com first**, else the site form.
 Their article: https://hawaiianrecovery.com/rehab-blog/best-recovery-apps-to-support-sobriety-which-sobriety-app-is-for-you
@@ -874,7 +874,7 @@ Turn Someday Into Day One
 ---
 
 ### 4. California Recovery Center
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** the contact options at https://calrecoverycenter.com/ — no email
 found in listings; **try info@calrecoverycenter.com first**, else the site form.
 Their article: https://calrecoverycenter.com/the-best-addiction-apps-for-recovery-support/
@@ -901,7 +901,7 @@ Turn Someday Into Day One
 ## LANE 2 — FAMILY-SIDE ORGANIZATIONS
 
 ### 5. Parents of Addicted Loved Ones (PAL)
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@palgroup.org** — verified: published on their contact page
 per public listings. Phone (480) 300-4712. They keep a resources page at
 https://palgroup.org/resources/
@@ -924,7 +924,7 @@ Turn Someday Into Day One
 ---
 
 ### 6. Learn to Cope
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **ltc@learn2cope.org** — verified: published on
 https://learn2cope.org/contact/ per public listings. Phone (508) 738-5148.
 
@@ -948,7 +948,7 @@ Turn Someday Into Day One
 ---
 
 ### 7. Herren Project
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@herrenproject.org** — verified: published on
 https://herrenproject.org/contact/ per public listings. Phone (844) 543-8555.
 
@@ -970,7 +970,7 @@ Turn Someday Into Day One
 ---
 
 ### 8. Partnership to End Addiction
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **contact@toendaddiction.org** — verified: published on
 https://drugfree.org/contact-us/ per public listings. Phone (212) 841-5200.
 
@@ -996,7 +996,7 @@ Turn Someday Into Day One
 ## LANE 3 — RECOVERY COMMUNITY ORGANIZATIONS
 
 ### 9. MoNetwork — St. Louis
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **Michelle@monetwork.org** — from a public staff/directory
 listing, not seen on their own site (blocked from here); if it bounces, the
 site is https://www.monetwork.org/ and they answer (314) 376-5400.
@@ -1018,7 +1018,7 @@ Turn Someday Into Day One
 ---
 
 ### 10. Missouri Coalition of Recovery Support Providers (MCRSP)
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** no published email found — **try info@mcrsp.org first**, else the
 contact options at https://mcrsp.org/ or phone (573) 761-1087. Jefferson City.
 
@@ -1040,7 +1040,7 @@ Turn Someday Into Day One
 ---
 
 ### 11. First Call KC — Kansas City
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **admin@firstcallkc.org** — from public nonprofit listings, not
 seen on their own site (blocked from here); if it bounces, the contact options
 at https://www.firstcallkc.org/. They run a 24/7 helpline and family programs.
@@ -1063,7 +1063,7 @@ Turn Someday Into Day One
 ---
 
 ### 12. Minnesota Recovery Connection
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@minnesotarecovery.org** — verified: published in their
 public listings. Phone (612) 584-4158. The state's first recovery community
 organization; they run telephone recovery support.
@@ -1134,7 +1134,7 @@ Turn Someday Into Day One
 ---
 
 ### 15. Fight the New Drug
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@fightthenewdrug.org** — verified: published on
 https://fightthenewdrug.org/contact-us/ per public listings.
 
@@ -1182,7 +1182,7 @@ St. Louis, Missouri — Turn Someday Into Day One
 ## LANE 5 — FAITH & COMMUNITY
 
 ### 17. Adult & Teen Challenge USA
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **feedback@teenchallengeusa.org** — verified: published on their
 own FAQ/contact pages per listings. National office: 5250 N Towne Center Dr,
 Ozark, MO — a Missouri organization, like you.
@@ -1203,7 +1203,7 @@ St. Louis, Missouri — Turn Someday Into Day One
 ---
 
 ### 18. Catholic in Recovery
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Send to:** **info@catholicinrecovery.com** — verified: published in their
 public listings. Phone (614) 558-7219.
 
@@ -1223,7 +1223,7 @@ Turn Someday Into Day One
 ---
 
 ### 19. Love Columbia
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** no published email found — **try info@lovecolumbia.org first**, else
 the contact options at https://lovecolumbia.org/. The page this email is about:
 https://lovecolumbia.org/faith-based-recovery-programs-in-missouri (they also
@@ -1247,7 +1247,7 @@ St. Louis, Missouri — Turn Someday Into Day One
 ---
 
 ### 20. Faith Partners
-- [ ] Sent
+- [x] Sent 18 Aug 2026 · Sent
 **Where:** no published email found — **try info@faith-partners.org first**,
 else the contact options at https://www.faith-partners.org/. Executive
 Director is Drew Brooks; they're in St. Paul, MN. They train congregational

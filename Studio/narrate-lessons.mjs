@@ -17,7 +17,12 @@
  * THEN RUN:
  *   node narrate-lessons.mjs --list-voices          # find your clip's id
  *   node narrate-lessons.mjs --ref 42 --limit 1     # one lesson, listen to it
- *   node narrate-lessons.mjs --ref 42               # all 518, go to bed
+ *   node narrate-lessons.mjs --ref 42 --name jacques   # all of them, go to bed
+ *
+ * ONE VOICE PER RUN. For a second voice, give it its own --name:
+ *   node narrate-lessons.mjs --ref 51 --name calm
+ * Each voice gets its own folder under lesson-audio-out/, and the script
+ * refuses to write two voices into the same one.
  *
  * It is safe to stop and re-run: anything already written is skipped, so a
  * crash, a reboot or a closed laptop costs you one take, not the night.
@@ -35,9 +40,14 @@ const arg = (name, dflt) => {
   return i >= 0 ? (process.argv[i + 1] ?? true) : dflt;
 };
 const STUDIO = String(arg('studio', 'http://127.0.0.1:4400')).replace(/\/$/, '');
-const OUT_DIR = String(arg('out', path.join(process.cwd(), 'lesson-audio-out')));
+// One folder PER VOICE, named after the voice, because the resume logic skips
+// files that already exist - point a second voice at the first voice's folder
+// and every lesson looks finished, the run "succeeds" in seconds, and you get
+// nothing. Naming the folder after the voice makes that impossible by accident.
+const VOICE_NAME = String(arg('name', '') || '').replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
 const LESSONS = String(arg('lessons', path.join(process.cwd(), 'all-lessons.json')));
 const REF = arg('ref', null);
+const OUT_DIR = String(arg('out', '')) || path.join(process.cwd(), 'lesson-audio-out', VOICE_NAME || (REF ? `voice-${REF}` : 'voice'));
 const LIMIT = Number(arg('limit', 0)) || 0;
 const EMAIL = arg('email', null);
 const PASSWORD = arg('password', null);
@@ -48,10 +58,19 @@ const MAX_CHARS = 1900;
 
 let cookie = '';
 const api = async (p, opts = {}) => {
-  const res = await fetch(STUDIO + p, {
-    ...opts,
-    headers: { 'Content-Type': 'application/json', ...(cookie ? { cookie } : {}), ...(opts.headers || {}) },
-  });
+  let res;
+  try {
+    res = await fetch(STUDIO + p, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(cookie ? { cookie } : {}), ...(opts.headers || {}) },
+    });
+  } catch (e) {
+    // By far the most likely first failure: Studio simply is not open. A raw
+    // undici stack trace helps nobody standing at a terminal at midnight.
+    die(`Cannot reach Studio at ${STUDIO}\n\n`
+      + 'Start Studio first (the "Start Studio" shortcut), leave it running, then run this again.\n'
+      + 'If Studio is on a different port, pass it with --studio http://127.0.0.1:PORT');
+  }
   const setC = res.headers.getSetCookie ? res.headers.getSetCookie() : [res.headers.get('set-cookie')];
   const fresh = setC.filter(Boolean).map((c) => c.split(';')[0]);
   if (fresh.length) cookie = fresh.join('; ');
@@ -134,13 +153,31 @@ async function main() {
     die(`Cannot find the lesson list at:\n  ${LESSONS}\n\n`
       + 'Pass it with --lessons /path/to/all-lessons.json');
   }
+  const listing = !!arg('list-voices', false);
+  if (!listing && !REF) die('Which voice? Run with --list-voices to see the ids, then pass --ref <id>.');
+
+  // A stamp in the folder records which voice made it. If a later run points a
+  // different voice here, stop - otherwise the resume logic would skip all 518
+  // as "already done" and hand back an empty run that looked like a success.
+  // Checked BEFORE signing in, so a wrong folder fails in a second rather than
+  // after a round trip.
+  const stampPath = path.join(OUT_DIR, '.voice');
+  const stamp = `${VOICE_NAME || 'unnamed'}#${REF}`;
+  if (!listing && fs.existsSync(stampPath)) {
+    const was = fs.readFileSync(stampPath, 'utf8').trim();
+    if (was !== stamp) {
+      die(`That folder already holds a different voice.\n\n  ${OUT_DIR}\n  holds: ${was}\n  you asked for: ${stamp}\n\n`
+        + 'Give this voice its own folder with --name <voicename>, or --out <folder>.');
+    }
+  }
+
   await signIn();
-  if (arg('list-voices', false)) return listVoices();
-  if (!REF) die('Which voice? Run with --list-voices to see the ids, then pass --ref <id>.');
+  if (listing) return listVoices();
 
   const lessons = JSON.parse(fs.readFileSync(LESSONS, 'utf8'));
   const todo = LIMIT ? lessons.slice(0, LIMIT) : lessons;
   fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.writeFileSync(stampPath, stamp);
 
   console.log(`\n${todo.length} lessons -> ${OUT_DIR}`);
   console.log('Already-finished files are skipped, so stopping and re-running is safe.\n');

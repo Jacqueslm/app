@@ -11855,19 +11855,6 @@ function guideSend(){
   }
 }
 
-// A guide search that finds nothing used to dead-end with "ask Friendly on the
-// Friendly tab" - walk there yourself, retype the question. The FAQ list will
-// always lag behind new features (it is hand-written), but Friendly's system
-// prompt is updated with every release, so she is the guide that stays current.
-// Hand the question over, already sent.
-function askFriendlyFromHelp(){
-  const q=(document.getElementById('help-search')||{}).value||'';
-  closeHelpFinder();
-  switchTo('nova');actBn('bn-nova');
-  const inp=document.getElementById('chatInput');
-  if(inp){inp.value=q?`Quick app question: ${q.trim()}`:'Can you explain what this app can do?';}
-  try{sendMsg();}catch(e){}
-}
 function openHelpFinder(){
   buildGuideIndex();
   document.getElementById('help-modal').classList.add('open');
@@ -11889,8 +11876,7 @@ function renderHelpResults(){
       const i=HELP_INDEX.indexOf(h);
       return `<div class="sos-opt" onclick="helpGo(${i})"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><div class="sos-opt-info"><p>${escapeHtml(h.name)}</p><span>${escapeHtml(h.sub)}</span></div></div>`;
     }).join('')
-    :`<div class="sos-sub" style="padding:14px 0 8px">Nothing matched in the guide.</div>
-       <div class="sos-opt" onclick="askFriendlyFromHelp()"><i class="ti ti-message-circle" style="color:var(--accent)"></i><div class="sos-opt-info"><p>Ask Friendly instead</p><span>Sends your question straight to her — she knows every feature in the app</span></div></div>`;
+    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word like <em>lesson</em>, <em>voice</em>, or <em>pro</em>.</div>';
 }
 
 // Erase absolutely everything: account + synced data on the server, plus every

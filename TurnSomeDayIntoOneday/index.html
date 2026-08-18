@@ -779,10 +779,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
        screen on a phone, which is space the conversation needed. Jacques, 18 Aug. -->
   <div class="quick-chips" id="quickChips">
     <div class="qc-drop good" onclick="openQuickPick('good')">
-      <span>I'm doing okay</span><i class="ti ti-chevron-down"></i>
+      <span>I'm steady</span><i class="ti ti-chevron-down"></i>
     </div>
     <div class="qc-drop rough" onclick="openQuickPick('rough')">
-      <span>Not feeling good</span><i class="ti ti-chevron-down"></i>
+      <span>I'm struggling</span><i class="ti ti-chevron-down"></i>
     </div>
   </div>
   <div class="chat-area" id="chatArea"></div>
@@ -9256,23 +9256,30 @@ function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeig
 // Two openers, each with real sentences under it. Seven always-on chips used a
 // third of a phone screen; this gives that space back to the conversation while
 // keeping a starting point for anyone who does not know how to begin.
+// Two openers, and they have to be genuinely OPPOSITE states, not two shades of
+// "how's your mood" - the first version said "I'm doing okay" / "Not feeling
+// good", which is the same question asked twice. The real split is whether the
+// person is on solid ground or in it right now, because those need opposite
+// things from Friendly: one wants reflection and building, the other wants help
+// this minute. Same words the daily check-in already uses (Good/Shaky/Struggling),
+// so the app speaks one language. Both sides work for a supporter too.
 const QUICK_PICKS={
-  good:{title:"Good to hear \u2014 what's true right now?",items:[
-    "I'm feeling proud",
+  good:{title:"Good. What do you want to look at?",items:[
+    "I'm proud of where I am right now",
     "I had a good day",
-    "I need motivation to keep going",
-    "I want to stay on track",
+    "I want to keep this going",
+    "Help me get ready for the hard days",
     "What patterns do you see in me?",
-    "What should I watch out for?"
+    "Something good happened and I want to tell someone"
   ]},
-  rough:{title:"I'm here. What's going on?",items:[
-    "I'm struggling today",
-    "I had a craving",
+  rough:{title:"I'm here. What's happening?",items:[
+    "I'm having a craving right now",
     "I slipped",
-    "I can't sleep",
+    "I can't stop thinking about it",
+    "Something happened today",
     "I feel alone",
-    "I feel like giving up",
-    "Tell me about PAWS"
+    "I can't sleep",
+    "I feel like giving up"
   ]}
 };
 function openQuickPick(kind){
@@ -10515,7 +10522,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8.1';
+const APP_VERSION='5.8.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

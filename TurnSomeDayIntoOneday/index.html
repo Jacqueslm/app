@@ -174,7 +174,7 @@ body{display:flex;justify-content:center}
 .divider{height:0.5px;background:var(--bdr)}
 .sdiv{height:8px;background:var(--s0);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr)}/* NOVA */
 .nova-hdr{background:var(--brand);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(255,255,255,0.08)}
-.nova-voice-toggle{margin-left:auto;flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.25);color:#dfe4ff;cursor:pointer;font-size:19px}
+.nova-voice-toggle{margin-left:auto;flex-shrink:0;border-radius:20px;gap:6px;padding:8px 12px;font-size:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.25);color:#dfe4ff;cursor:pointer;font-size:19px}
 .nova-voice-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .nova-av{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0}
 .nova-name{font-size:15px;font-weight:500;color:#fff}
@@ -207,6 +207,11 @@ body{display:flex;justify-content:center}
 .quick-chips{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px}
 /* A bare grey glyph was invisible to the person it was built for - Jacques
    could not find it on his own phone. It is a labelled pill now. */
+.bub-wrap{display:flex;flex-direction:column;max-width:86%}
+.bub-wrap.user{align-self:flex-end;align-items:flex-end}
+.bub-wrap.nova{align-self:flex-start;align-items:flex-start}
+.bub-wrap .bub{max-width:100%}
+.bub-time{font-size:10.5px;color:var(--tm);margin:4px 4px 0;opacity:.85}
 .bub-speak{display:flex;width:fit-content;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.22);border-radius:20px;padding:6px 12px;color:#dfe4ff;cursor:pointer;font-size:12.5px;font-family:inherit;line-height:1}
 .bub-speak i{font-size:15px}
 .bub-speak.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -4406,7 +4411,7 @@ function initApp(){
     }
     addBubble('nova',greeting);
     if(S.chatHistory.length>0){
-      S.chatHistory.forEach(m=>{if(m.role!=='system')addBubble(m.role==='assistant'?'nova':'user',m.content);});
+      S.chatHistory.forEach(m=>{if(m.role!=='system')addBubble(m.role==='assistant'?'nova':'user',m.content,m.at||null);});
     }
   }
   // pledge state
@@ -9107,8 +9112,10 @@ function setNovaMode(isLive){
   else{chip.textContent='';chip.style.display='none';chip.classList.remove('live');}
 }
 
-function addBubble(who,text){
+function addBubble(who,text,when){
   const area=document.getElementById('chatArea');
+  const wrap=document.createElement('div');
+  wrap.className='bub-wrap '+who;
   const d=document.createElement('div');
   d.className='bub '+who;
   d.style.whiteSpace='pre-wrap';
@@ -9126,7 +9133,16 @@ function addBubble(who,text){
     b.onclick=(ev)=>{ev.stopPropagation();speakBubble(text,b);};
     d.appendChild(b);
   }
-  area.appendChild(d);
+  wrap.appendChild(d);
+  // When each message landed. Without it a conversation held across a whole day
+  // reads as one blur - you cannot tell last night's 3am from this morning.
+  const stamp=document.createElement('div');
+  stamp.className='bub-time';
+  if(when!==null){
+    stamp.textContent=formatChatTime(when||Date.now());
+    wrap.appendChild(stamp);
+  }
+  area.appendChild(wrap);
   // Icons are drawn from ICON_PATHS by renderIcons(); anything created after
   // page load has to be rendered explicitly or it stays an empty <i>.
   try{renderIcons(d);}catch(e){}
@@ -9188,9 +9204,19 @@ function updateNovaVoiceToggle(){
   if(!el)return;
   const on=novaVoiceOn();
   el.classList.toggle('on',on);
-  el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i>`;
+  el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i><span>${on?'Voice on':'Voice off'}</span>`;
   el.setAttribute('title',on?"Friendly reads her replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
   try{renderIcons(el);}catch(e){}
+}
+// "7:15 AM" for today, "Yesterday 11:40 PM", then the date beyond that.
+function formatChatTime(ts){
+  const d=new Date(ts),now=new Date();
+  const t=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const sameDay=d.toDateString()===now.toDateString();
+  if(sameDay)return t;
+  const y=new Date(now);y.setDate(y.getDate()-1);
+  if(d.toDateString()===y.toDateString())return 'Yesterday '+t;
+  return d.toLocaleDateString([], {month:'short',day:'numeric'})+' '+t;
 }
 // One speaking bubble at a time; tapping the one that is talking stops it.
 let speakingBtn=null;
@@ -9296,7 +9322,7 @@ function updateNotifPermissionRow(){
 }
 function novaNudge(text){
   addBubble('nova',text);
-  S.chatHistory.push({role:'assistant',content:text});
+  S.chatHistory.push({role:'assistant',content:text,at:Date.now()});
   if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
   save();
   systemNotify('Friendly',text);
@@ -9384,7 +9410,7 @@ async function sendMsg(){
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
   inp.value='';inp.style.height='auto';
   addBubble('user',text);
-  S.chatHistory.push({role:'user',content:text});
+  S.chatHistory.push({role:'user',content:text,at:Date.now()});
   save();
 
   // Crisis language always gets full support, regardless of tier - never gated.
@@ -9439,7 +9465,7 @@ Address the interactions of their unique blueprint and assign structured daily r
       const reply=S.isPro
         ?"Looks like you've reached today's 30-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
         :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. If you need something right now, the SOS tools on Home are free and always open: guided breathing, grounding, and \"Talk me through it\". 💜";
-      S.chatHistory.push({role:'assistant',content:reply});
+      S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
       if(!S.isPro){
         S.chatsLeft=0;
         document.getElementById('chatsLeft').textContent=0;
@@ -9447,7 +9473,18 @@ Address the interactions of their unique blueprint and assign structured daily r
       save();showTyping(false);addBubble('nova',reply);
       return;
     }
-    if(!res.ok)throw new Error('api-unavailable');
+    if(!res.ok){
+      // Owner-only: surface WHY the AI refused, right here, instead of making
+      // the operator go hunting in Profile > Diagnostics for it.
+      try{
+        const errData=await res.clone().json();
+        if(errData&&errData.ownerError){
+          showTyping(false);
+          addBubble('nova','⚠️ AI not answering — '+errData.ownerError+'\n\n(Only you see this. Everyone else just gets the offline reply.)');
+        }
+      }catch(e){}
+      throw new Error('api-unavailable');
+    }
     const data=await res.json();
     const liveText=data.content&&data.content[0]&&data.content[0].text;
     const reply=liveText||withMemory(localFallbackReply(text));
@@ -9455,7 +9492,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     // A real AI reply consumed one of the day's chats server-side - refresh the
     // Pro meter so it ticks down live. (Guided-mode fallbacks don't count.)
     if(S.isPro&&liveText)updateChatMeter();
-    S.chatHistory.push({role:'assistant',content:reply});
+    S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
   }catch(e){
@@ -9466,7 +9503,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     // (A 429 real-limit hit returns earlier and never reaches here.)
     if(!S.isPro){S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;}
     const reply=localFallbackReply(text);
-    S.chatHistory.push({role:'assistant',content:reply});
+    S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
   }
@@ -10586,7 +10623,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.2';
+const APP_VERSION='5.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

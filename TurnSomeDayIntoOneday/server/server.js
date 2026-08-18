@@ -988,7 +988,17 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       // A failing key/model here degrades every chat into the client's canned
       // fallback with no visible symptom except repetitive replies - put the
       // real reason where Profile diagnostics can show it.
-      try { db.logError('ai-chat', `HTTP ${res2.status}: ${(data && data.error && (data.error.message || data.error.status)) || 'unknown error'}`); } catch (_) {}
+      const why = `HTTP ${res2.status}: ${(data && data.error && (data.error.message || data.error.status)) || 'unknown error'}`;
+      try { db.logError('ai-chat', why); } catch (_) {}
+      // Hand the reason straight back to the OWNER so a broken key shows up in
+      // the chat itself instead of only in a diagnostics list nobody thinks to
+      // open. Never to anyone else - provider errors can echo config details.
+      try {
+        const u = db.getUserById(req.userId);
+        if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) {
+          data = Object.assign({}, data, { ownerError: why });
+        }
+      } catch (_) {}
     }
     res.status(res2.status).json(data);
   } catch (err) {

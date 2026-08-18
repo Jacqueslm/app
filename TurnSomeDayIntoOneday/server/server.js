@@ -40,6 +40,10 @@ const ANTHROPIC_MAX_TOKENS = 1000;
 // because it is the better recovery companion.
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+// Gemini counts thinking against the output budget, so it needs its own number
+// rather than borrowing Anthropic's. Friendly's replies are short; the room is
+// headroom, not length.
+const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 2048);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 const PRO_CHAT_LIMIT = 30;
@@ -955,7 +959,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   }
 
   try {
-    let res2, data;
+    let res2, data, geminiEmptyReason = '';
     if (GEMINI_API_KEY) {
       const sysText = Array.isArray(system)
         ? system.map((b) => (b && b.text) || '').join('\n\n')
@@ -977,13 +981,34 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
               : String(m.content || '');
             return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: c }] };
           }),
-          generationConfig: { maxOutputTokens: ANTHROPIC_MAX_TOKENS },
+          generationConfig: {
+            maxOutputTokens: GEMINI_MAX_TOKENS,
+            // gemini-2.5-flash thinks before it answers, and thinking tokens
+            // are spent out of maxOutputTokens. At the old 1000 shared with
+            // Anthropic, a reply to anything with feeling in it could burn the
+            // whole budget on thinking and come back finishReason MAX_TOKENS
+            // with ZERO text parts - an HTTP 200 carrying nothing. The client
+            // sees an empty answer, falls back to its canned reply, and
+            // nothing anywhere reports a problem. Friendly sounding robotic
+            // with a perfectly good key was this. Thinking off, budget raised.
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       });
       const gd = await gemRes.json();
       if (gemRes.ok) {
-        const parts = (gd.candidates && gd.candidates[0] && gd.candidates[0].content && gd.candidates[0].content.parts) || [];
+        const cand = (gd.candidates && gd.candidates[0]) || null;
+        const parts = (cand && cand.content && cand.content.parts) || [];
         const text = parts.map((p) => p.text || '').join('').trim();
+        if (!text) {
+          // A 200 with no words in it is still a failure - it just used to be
+          // an invisible one. Say why (MAX_TOKENS, SAFETY, RECITATION...) so it
+          // lands in diagnostics and in the owner's chat like any other break.
+          const reason = (cand && cand.finishReason)
+            || (gd.promptFeedback && gd.promptFeedback.blockReason)
+            || 'no reason given';
+          geminiEmptyReason = `Gemini returned an empty answer (finishReason: ${reason}).`;
+        }
         // Same shape the client already parses (data.content[0].text).
         data = { content: [{ type: 'text', text }] };
       } else {
@@ -1010,6 +1035,19 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     }
     // Only spend the user's daily quota on a response that actually succeeded - a bad server
     // config or a transient provider outage shouldn't cost them one of their free chats.
+    if (res2.ok && geminiEmptyReason) {
+      // 200, but no words came back. Don't charge a chat for silence, and
+      // report it exactly like a hard failure - this is the shape of break
+      // that hid the longest precisely because it looked like success.
+      try { db.logError('ai-chat', geminiEmptyReason); } catch (_) {}
+      try {
+        const u = db.getUserById(req.userId);
+        if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) {
+          data = Object.assign({}, data, { ownerError: geminiEmptyReason });
+        }
+      } catch (_) {}
+      return res.status(502).json(data);
+    }
     if (res2.ok) {
       db.incrementChatCount(req.userId, todayUTC());
     } else {

@@ -998,6 +998,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <span style="font-size:12.5px;color:var(--tm)">Focus: <span id="lesson-track-switch-lbl" style="color:var(--tp);font-weight:600"></span></span>
           <span style="font-size:12.5px;color:var(--accent);font-weight:600">Switch lesson</span>
         </div>
+        <!-- Shown only when two tracks that share a mechanism are both being
+             worked. The whole point is that these are one person, not two
+             unrelated courses. -->
+        <div id="track-link-note" style="display:none;font-size:12px;color:var(--tm);line-height:1.5;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--green);border-radius:10px;padding:10px 12px;margin-bottom:12px"></div>
         <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleLessonList()">
           <span>Today's lesson</span>
           <span id="lesson-list-toggle-lbl" style="font-size:12px;color:var(--accent);font-weight:400">View all lessons</span>
@@ -2976,6 +2980,22 @@ function updateLessonPromo(){
   }
 }
 
+// The one line that says these two tracks are the same person. Only shown for
+// the track being read, only when its partner track is also being worked, and
+// only about the shared mechanism - never "this one causes that one".
+function renderTrackLinkNote(){
+  const el=document.getElementById('track-link-note');
+  if(!el)return;
+  const cur=S.currentAddiction;
+  const link=activeTrackLinks().find(l=>l.a===cur||l.b===cur);
+  if(!cur||!link){el.style.display='none';return;}
+  const other=link.a===cur?link.b:link.a;
+  el.innerHTML='<strong style="color:var(--tp)">This connects to your '+other+' track.</strong><br>'
+    +'You\u2019re working both, and they\u2019re not separate problems \u2014 '+link.why+'. '
+    +'What you learn here tends to show up there too.';
+  el.style.display='block';
+}
+
 function renderTodayLesson(){
   updateHomeFaithCard();
   const switchRow=document.getElementById('lesson-track-switch-row');
@@ -2984,6 +3004,7 @@ function renderTodayLesson(){
     const lbl=document.getElementById('lesson-track-switch-lbl');
     if(lbl)lbl.textContent=S.currentAddiction||'';
   }
+  renderTrackLinkNote();
   const day=viewingDay||getLessonDayFor(S.currentAddiction);
   const normalEl=document.getElementById('lesson-normal');
   const lockedEl=document.getElementById('lesson-locked');
@@ -8749,6 +8770,41 @@ You are running in Friendly Pro mode - the user has unlocked full coaching. In t
 - The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, risk indicators, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
 Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
 
+// ─── HOW THE TRACKS RELATE ───────────────────────────────────────────────────
+// Every track is its own 30 days and none of them mention each other, so
+// someone working Porn and Food is handed two unrelated courses about one
+// person. They are not unrelated: the object differs, the machinery does not.
+//
+// This names the machinery two tracks share, in plain words, once. It is used
+// two ways - shown on the lesson screen, and given to Friendly so she can say
+// "you told me the food thing spikes on the same nights" instead of treating
+// each track as a stranger.
+//
+// The line is deliberately about the SHARED MECHANISM, never causation. These
+// behaviours travel together; saying one causes another is a claim this app has
+// no business making, and would be wrong as often as right.
+const TRACK_LINKS=[
+  {a:'Porn & Sex',         b:'Food / Binging',      why:'both run on escalation - the same amount stops working, so the amount goes up'},
+  {a:'Porn & Sex',         b:'Social media',        why:'both are endless scroll on a screen, alone, usually late'},
+  {a:'Alcohol',            b:'Smoking',             why:'they cue each other - one hand reaches, the other follows'},
+  {a:'Alcohol',            b:'Food / Binging',      why:'both are how the evening gets softened after a day held together'},
+  {a:'Gambling',           b:'Shopping / Spending', why:'both are money spent chasing a feeling, then hidden'},
+  {a:'Gambling',           b:'Gaming',              why:'both are near-misses and one-more-go, engineered to feel almost won'},
+  {a:'Gaming',             b:'Social media',        why:'both fill the same empty hours and both are designed not to end'},
+  {a:'Food / Binging',     b:'Shopping / Spending', why:'both are relief bought quickly and regretted privately'},
+  {a:'Work',               b:'Alcohol',             why:'one earns the other - the drink is the permission to stop working'},
+  {a:'Work',               b:'Anger & Control',     why:'both are control held too tight, in different rooms'},
+  {a:'Anger & Control',    b:'Alcohol',             why:'one lowers the brake the other needs'},
+  {a:'Substances',         b:'Alcohol',             why:'the same night, the same reach, usually the same company'},
+  {a:'Social media',       b:'Shopping / Spending', why:'the feed sells, and the buying is the scroll finishing its sentence'},
+];
+// The links that apply to the tracks this person actually picked.
+function activeTrackLinks(tracks){
+  const t=tracks||S.selectedAddictions||[];
+  if(t.length<2)return [];
+  return TRACK_LINKS.filter(l=>t.includes(l.a)&&t.includes(l.b));
+}
+
 function buildSystemPrompt(){
   return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
 }
@@ -9440,6 +9496,15 @@ ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')
 ${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
 ${S.userType==='partner'&&S.partnerRelation==='minor-child'?`CRITICAL - THE LOVED ONE IS A MINOR: keep ALL guidance at the parental/household level (how the parent responds, boundaries at home, the parent's own wellbeing). NEVER discuss the minor's behavior in explicit detail, especially anything sexual - hard refusal, redirect to the parental level. Recommend adolescent-specialized professional support (family therapist, pediatrician) as the primary path for the child, alongside supporting the parent themselves.`:''}
 Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
+${(()=>{
+  const t=S.selectedAddictions||[];
+  if(t.length<2)return '';
+  const where=t.map(a=>`${a} day ${getLessonDayFor(a)}`).join(', ');
+  const links=activeTrackLinks(t);
+  return `Working MORE THAN ONE track at once: ${where}.`
+    +(links.length?`\nThese overlap: ${links.map(l=>`${l.a} + ${l.b} (${l.why})`).join('; ')}.`:'')
+    +`\nTreat these as ONE person with one pattern showing up in different places - if they mention one, you may connect it to the other when it genuinely fits. Never claim one CAUSES another, and never bring it up to be clever; only when it helps them see something.`;
+})()}
 Friendly Voice Selection: ${(S.novaVoice||'neutral').toUpperCase()}
 Resource Costs: Losing $${S.dailySpend||0}/day and ${S.dailyHoursLost||0} hours/day to this loop.
 

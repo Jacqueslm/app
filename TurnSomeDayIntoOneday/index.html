@@ -790,7 +790,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="limit-bar" id="limitBar">
     <i class="ti ti-info-circle" style="font-size:16px;color:#854F0B;flex-shrink:0"></i>
     <span id="limitBarText"><strong id="chatsLeft">3</strong> free sessions left today</span>
-    <button class="up-sm" id="limitBarUpgrade" onclick="switchTo('plans');actBn('bn-plans')">Go Pro</button>
+    <!-- No "Go Pro" button here. This is the screen people open at 3am when
+         they are struggling, and the AI's own instructions forbid it from
+         mentioning Pro to someone in distress - a permanent sales button on the
+         same screen did exactly what the AI was banned from doing. The counter
+         stays because knowing your limit is information, not a pitch. -->
   </div>
   <div>
     <div style="text-align:center;font-size:10px;color:var(--tm);padding:4px 16px;background:var(--s0);border-top:0.5px solid var(--bdr)">Friendly is here to support your journey — not replace real human help</div>
@@ -9313,7 +9317,7 @@ async function sendMsg(){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
       ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
-      :"You've used your 3 free sessions for today. I'll be here tomorrow — and if you need support right now, you can also text 988.\n\nUpgrade to Pro for up to 30 sessions a day with me. 💜");
+      :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. The SOS tools on Home are free and always open if you need something before then: guided breathing, grounding, and \"Talk me through it\". 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
@@ -9373,7 +9377,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     if(res.status===429){
       const reply=S.isPro
         ?"Looks like you've reached today's 30-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"Looks like you've reached today's Friendly AI limit on your account. I'll be here again tomorrow — or upgrade to Pro for up to 30 chats a day. 💜";
+        :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. If you need something right now, the SOS tools on Home are free and always open: guided breathing, grounding, and \"Talk me through it\". 💜";
       S.chatHistory.push({role:'assistant',content:reply});
       if(!S.isPro){
         S.chatsLeft=0;
@@ -9920,7 +9924,6 @@ function updateTierUI(){
     // Pro now sees a live "X of 30 left today" meter too (no upgrade button).
     // The actual number comes from the server via updateChatMeter().
     if(limitBar)limitBar.style.display='flex';
-    const upg=document.getElementById('limitBarUpgrade');if(upg)upg.style.display='none';
     updateChatMeter();
     if(subLbl)subLbl.textContent='Pro plan';
     if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
@@ -9930,8 +9933,7 @@ function updateTierUI(){
     badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
     if(novaLbl)novaLbl.textContent='Free · 3/day';
     if(limitBar)limitBar.style.display='flex';
-    // Restore the free meter text + upgrade button (Pro rewrites both).
-    const upg=document.getElementById('limitBarUpgrade');if(upg)upg.style.display='';
+    // Restore the free meter text (Pro rewrites it). No upgrade button here.
     const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='<strong id="chatsLeft">'+S.chatsLeft+'</strong> free sessions left today';
     if(subLbl)subLbl.textContent='Free plan';
     if(profChip){profChip.textContent='Free plan';profChip.style.color='var(--green)';profChip.style.borderColor='rgba(126,232,162,0.3)';profChip.style.background='var(--green-dim)';}
@@ -10522,7 +10524,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8.2';
+const APP_VERSION='5.8.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

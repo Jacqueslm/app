@@ -39,11 +39,15 @@ const ANTHROPIC_MAX_TOKENS = 1000;
 // wins only when GEMINI_FIRST is set, otherwise Anthropic stays the default
 // because it is the better recovery companion.
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+// gemini-2.5-flash was retired to new callers: Google answered every single
+// chat with HTTP 404 "no longer available to new users ... use
+// models/gemini-3.6-flash". That 404 is what had Friendly canned. Overridable
+// by env so the next retirement is a Railway variable, not a redeploy.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 // Gemini counts thinking against the output budget, so it needs its own number
 // rather than borrowing Anthropic's. Friendly's replies are short; the room is
 // headroom, not length.
-const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 2048);
+const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const FREE_CHAT_LIMIT = 3;
 const PRO_CHAT_LIMIT = 30;
@@ -964,37 +968,43 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
       const sysText = Array.isArray(system)
         ? system.map((b) => (b && b.text) || '').join('\n\n')
         : String(system || '');
-      const gemRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
-        method: 'POST',
+      const gemUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+      const gemBody = (withThinkingOff) => JSON.stringify({
+        systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
+        contents: (messages || []).map((m) => {
+          const c = Array.isArray(m.content)
+            ? m.content.map((b) => (b && b.text) || '').join('')
+            : String(m.content || '');
+          return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: c }] };
+        }),
+        generationConfig: Object.assign(
+          { maxOutputTokens: GEMINI_MAX_TOKENS },
+          // Gemini spends thinking tokens out of maxOutputTokens, so a model
+          // left thinking freely can use the whole budget and return no words
+          // at all. Turning it off is right for a short, warm reply - but the
+          // field's shape has changed between model generations, so if this
+          // model rejects it we drop it and ask again rather than letting a
+          // config detail take the whole chat down.
+          withThinkingOff ? { thinkingConfig: { thinkingBudget: 0 } } : {}
+        ),
+      });
+      const gemHeaders = {
         // The key goes in x-goog-api-key. Without it Google answers every call
         // with 403 "Method doesn't allow unregistered callers", the request
         // never reaches a model, and the app quietly falls back to its canned
-        // replies - which is exactly how Friendly shipped sounding robotic with
-        // a perfectly good key sitting in the environment. Header, not ?key=,
-        // so the secret stays out of URLs, proxy logs and error messages.
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-        body: JSON.stringify({
-          systemInstruction: sysText ? { parts: [{ text: sysText }] } : undefined,
-          contents: (messages || []).map((m) => {
-            const c = Array.isArray(m.content)
-              ? m.content.map((b) => (b && b.text) || '').join('')
-              : String(m.content || '');
-            return { role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: c }] };
-          }),
-          generationConfig: {
-            maxOutputTokens: GEMINI_MAX_TOKENS,
-            // gemini-2.5-flash thinks before it answers, and thinking tokens
-            // are spent out of maxOutputTokens. At the old 1000 shared with
-            // Anthropic, a reply to anything with feeling in it could burn the
-            // whole budget on thinking and come back finishReason MAX_TOKENS
-            // with ZERO text parts - an HTTP 200 carrying nothing. The client
-            // sees an empty answer, falls back to its canned reply, and
-            // nothing anywhere reports a problem. Friendly sounding robotic
-            // with a perfectly good key was this. Thinking off, budget raised.
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-      });
+        // replies. Header, not ?key=, so the secret stays out of URLs, proxy
+        // logs and error messages.
+        'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY,
+      };
+      let gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(true) });
+      if (gemRes.status === 400) {
+        const probe = await gemRes.clone().json().catch(() => null);
+        const msg = (probe && probe.error && probe.error.message) || '';
+        if (/thinking/i.test(msg)) {
+          try { db.logError('ai-chat', `Model rejected thinkingConfig, retried without it: ${msg}`); } catch (_) {}
+          gemRes = await fetch(gemUrl, { method: 'POST', headers: gemHeaders, body: gemBody(false) });
+        }
+      }
       const gd = await gemRes.json();
       if (gemRes.ok) {
         const cand = (gd.candidates && gd.candidates[0]) || null;

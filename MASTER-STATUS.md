@@ -223,3 +223,13 @@ lessons through Studio's Chatterbox cloner (MIT, sellable) unattended — one
 voice per run, resume-safe, refuses the paid path. A 25-30s clean reference
 clip is the single biggest quality lever. Note: YourTTS (the quick-test route)
 is CC BY-NC-ND - never shippable in a paid app.
+
+## House rule 13 — the ask-me-anything bot is updated with EVERY change (Jacques, 18 Aug 2026)
+
+Friendly is the app's ask-me-anything bot. Her app knowledge lives in
+`SYSTEM_APP_MAP` in TurnSomeDayIntoOneday/index.html, right above
+SYSTEM_FREE_ADDENDUM. **Any commit that ships, changes or removes a feature
+updates that block in the same commit.** No exceptions, no "later". A feature
+she doesn't know about is a feature she will deny exists - to the face of the
+person paying for it. She should know the app in and out, better than Jacques
+does.

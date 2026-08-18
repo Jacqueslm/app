@@ -2495,19 +2495,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="sos-title" style="color:var(--accent)">Friendly's presence</div>
     <div class="sos-sub">You can change this any time.</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
-      <div class="voice-card" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-female" onclick="chooseVoice('female')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👩‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Female Presence)</div><div style="font-size:11px;color:var(--tm)">Deeply perceptive, warm, and protective therapeutic tone.</div></div>
       </div>
-      <div class="voice-card" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-male" onclick="chooseVoice('male')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">👨‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Male Presence)</div><div style="font-size:11px;color:var(--tm)">Grounding, steady, and firmly analytical protective tone.</div></div>
       </div>
-      <div class="voice-card" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
+      <div class="voice-card" id="vp-neutral" onclick="chooseVoice('neutral')" style="display:flex;align-items:center;gap:14px;padding:12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;cursor:pointer;">
         <div style="font-size:24px">🧑‍💼</div>
         <div style="text-align:left"><div style="font-size:13px;font-weight:600;color:var(--tp)">Friendly (Neutral Presence)</div><div style="font-size:11px;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
       </div>
     </div>
+    <div id="voice-device-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-top:12px;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;text-align:left"></div>
     <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
   </div>
 </div>
@@ -10728,13 +10729,54 @@ function chooseGender(g){
   closeGenderModal();
 }
 
-function openVoiceModal(){document.getElementById('voice-modal').classList.add('open');}
+function openVoiceModal(){
+  document.getElementById('voice-modal').classList.add('open');
+  markChosenVoice();
+  describeVoiceSupport();
+}
+// The picker used to give no sign at all which one was chosen - you tapped, the
+// sheet closed, and nothing looked different. That alone made a working setting
+// feel broken.
+function markChosenVoice(){
+  const want=S.novaVoice||'neutral';
+  ['female','male','neutral'].forEach(v=>{
+    const el=document.getElementById('vp-'+v);
+    if(!el)return;
+    const on=(v===want);
+    el.style.borderColor=on?'var(--green)':'var(--bdr)';
+    el.style.background=on?'var(--green-dim)':'var(--s1)';
+    el.setAttribute('aria-selected',on?'true':'false');
+  });
+}
+// Say what the phone can actually do. Most Android phones ship exactly one
+// installed voice, and then all three presences come out sounding identical -
+// the app was offering a choice the device could not honour and saying nothing,
+// which reads as a broken setting rather than a missing voice.
+function describeVoiceSupport(){
+  const note=document.getElementById('voice-device-note');
+  if(!note)return;
+  let voices=[];
+  try{ voices=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }catch(e){}
+  if(!('speechSynthesis' in window)){
+    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes how she writes.';
+  }else if(voices.length<2){
+    note.textContent='Heads up: this phone has only one English voice installed, so all three will sound the same out loud. The presence you pick still shapes how Friendly writes to you. Adding more voices in your phone\u2019s text-to-speech settings gives her something to switch to.';
+  }else{
+    const kinds=new Set(voices.map(v=>novaVoiceGender(v.name)));
+    note.textContent=(kinds.has('female')&&kinds.has('male'))
+      ? 'This phone has '+voices.length+' English voices, so all three presences sound different out loud.'
+      : 'This phone has '+voices.length+' English voices, but they are hard to tell apart by presence - some may sound alike out loud. The presence still shapes how Friendly writes.';
+  }
+  note.style.display='block';
+}
 function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
 function chooseVoice(v){
   S.novaVoice=v;
   save();
+  markChosenVoice();
   updateProfileEditUI();
-  closeVoiceModal();
+  // Let the mark land before the sheet goes, so the tap visibly registers.
+  setTimeout(closeVoiceModal,180);
 }
 
 // Wipes what the user wrote, keeps who they are. The case this exists for is

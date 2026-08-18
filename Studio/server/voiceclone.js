@@ -183,6 +183,14 @@ async function install(onProgress) {
     }
 
     fs.mkdirSync(ROOT, { recursive: true });
+    // Start from nothing every time. `venv` happily reuses an existing folder,
+    // so an install interrupted partway (closed laptop, dropped wifi, killed
+    // app) leaves a half-written torch behind - and the next attempt dies on
+    // "Cannot uninstall torch None ... no RECORD file was found", which reads
+    // like a broken app and cannot be escaped by pressing the button again.
+    // The one thing a retry must do is actually retry.
+    step(4, 'Clearing anything left from a previous attempt…');
+    try { fs.rmSync(VENV, { recursive: true, force: true }); } catch (_) {}
     step(6, `Found Python ${py.version} — making a private workspace…`);
     await run(py.cmd, [...py.args, '-m', 'venv', VENV]);
 
@@ -195,12 +203,16 @@ async function install(onProgress) {
     // networks block it) fall back to the ordinary one rather than failing —
     // the CUDA build works on CPU, it is just a much bigger download.
     step(20, 'Downloading the speech engine (this is the big one — several minutes)…');
+    // --ignore-installed is pip's own advice for the no-RECORD-file case: don't
+    // try to uninstall what's there, just write over it. Harmless in a fresh
+    // venv, and the difference between recovering and being stuck if a broken
+    // torch is visible for any other reason (a system-wide one on PATH, say).
+    const TORCH = ['-m', 'pip', 'install', '--quiet', '--ignore-installed', 'torch', 'torchaudio'];
     try {
-      await run(pip, ['-m', 'pip', 'install', '--quiet', 'torch', 'torchaudio',
-        '--index-url', 'https://download.pytorch.org/whl/cpu']);
+      await run(pip, [...TORCH, '--index-url', 'https://download.pytorch.org/whl/cpu']);
     } catch (e) {
       step(24, 'Falling back to the standard download (bigger, still fine)…');
-      await run(pip, ['-m', 'pip', 'install', '--quiet', 'torch', 'torchaudio']);
+      await run(pip, TORCH);
     }
 
     step(70, 'Installing the voice cloner…');

@@ -8,19 +8,24 @@ Usage:
 Output: cards-png/*.png (1080x1920)
 Fonts:  tools/fonts/Lato-Regular.ttf, tools/fonts/Lato-Bold.ttf
 """
+import io
 import os
 from PIL import Image, ImageDraw, ImageFont
 
 W, H = 1080, 1920
 MAX_WIDTH = 900
 
-# palette
-C0 = (10, 18, 40)      # 0a1228
-C1 = (13, 28, 58)      # 0d1c3a
-C2 = (19, 41, 75)      # 13294b
+# The app's own palette, straight out of index.html:31. The first version of
+# these cards was navy and gold with a generic circle-dot mark - neither of which
+# appears anywhere in the product, so the card and the app someone lands in
+# looked like two different companies.
+C0 = (15, 12, 41)      # 0f0c29  --brand, the app's own near-black
+C1 = (26, 20, 60)
+C2 = (42, 34, 92)
 WHITE = (255, 255, 255)
-GOLD = (229, 193, 88)  # e5c158
-GREY = (91, 101, 119)  # 5b6577
+GREEN = (126, 232, 162)  # 7ee8a2  --green, the accent used throughout the app
+ACCENT = (83, 74, 183)   # 534AB7  --accent, the purple behind the app's mark
+GREY = (120, 126, 160)
 
 REGULAR = "tools/fonts/Lato-Regular.ttf"
 BOLD = "tools/fonts/Lato-Bold.ttf"
@@ -115,16 +120,55 @@ def draw_centered(draw, lines, font, center_y, fill, gap=1.25):
         draw.text((x, y + i * lh * gap), ln, font=font, fill=fill)
 
 
-def draw_card(draw, big, turn):
-    # logo mark
-    cx = W // 2
-    draw.ellipse([cx - 24, 150 - 24, cx + 24, 150 + 24], outline=WHITE, width=4)
-    draw.ellipse([cx - 9, 150 - 9, cx + 9, 150 + 9], fill=WHITE)
+# The app's own icon, rendered from the exact path in index.html's ICON_PATHS
+# ('ti-handshake') rather than redrawn. Two hands clasped - it is the whole
+# "you and the one that supports you" idea in one glyph, and approximating it by
+# hand produced something that read as a squiggle. Same source as the app draws,
+# so the card and the app can never drift apart.
+HANDSHAKE = (
+    '<path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/>'
+    '<path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/>'
+    '<path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/>'
+    '<path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/>'
+)
+
+
+def handshake_glyph(px):
+    """Rasterise the icon at px, white, transparent background."""
+    import cairosvg
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
+        'stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" '
+        'stroke-linejoin="round">' + HANDSHAKE + '</svg>'
+    )
+    buf = cairosvg.svg2png(bytestring=svg.encode(), output_width=px, output_height=px)
+    return Image.open(io.BytesIO(buf)).convert("RGBA")
+
+
+def draw_mark(img, cx, cy, size=112):
+    """The icon on the purple accent square with the green border - the same
+    square, corner radius and border the onboarding logo uses."""
+    S = 4                       # supersample, then downscale so the edges are clean
+    pad = int(size * 0.5)
+    box = size + pad * 2
+    tile = Image.new("RGBA", (box * S, box * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(tile)
+    o, n = pad * S, size * S
+    d.rounded_rectangle([o, o, o + n, o + n], radius=int(n * 0.30),
+                        fill=ACCENT, outline=GREEN, width=max(1, int(n * 0.045)))
+    g = handshake_glyph(int(n * 0.66))
+    tile.paste(g, (int(o + (n - g.width) / 2), int(o + (n - g.height) / 2)), g)
+    tile = tile.resize((box, box), Image.LANCZOS)
+    img.paste(tile, (int(cx - box / 2), int(cy - box / 2)), tile)
+
+
+def draw_card(draw, big, turn, img):
+    draw_mark(img, W // 2, 168)
 
     # tagline
     tf = ImageFont.truetype(BOLD, 28)
     tw = draw.textlength(TAGLINE, font=tf)
-    draw.text(((W - tw) / 2, 224), TAGLINE, font=tf, fill=WHITE)
+    draw.text(((W - tw) / 2, 252), TAGLINE, font=tf, fill=WHITE)
 
     # big line (single line, auto-shrink)
     bf, blines = fit_font(big, BOLD, draw, MAX_WIDTH, 1, 72)
@@ -132,12 +176,12 @@ def draw_card(draw, big, turn):
 
     # turn line (up to 2 lines)
     yf, ylines = fit_font(turn, BOLD, draw, MAX_WIDTH, 2, 46)
-    draw_centered(draw, ylines, yf, 900, GOLD)
+    draw_centered(draw, ylines, yf, 900, GREEN)
 
     # footer
     ff = ImageFont.truetype(BOLD, 34)
     fw = draw.textlength(FOOTER_1, font=ff)
-    draw.text(((W - fw) / 2, 1710), FOOTER_1, font=ff, fill=GOLD)
+    draw.text(((W - fw) / 2, 1710), FOOTER_1, font=ff, fill=GREEN)
 
     sf = ImageFont.truetype(REGULAR, 24)
     sw = draw.textlength(FOOTER_2, font=sf)
@@ -148,7 +192,7 @@ def main():
     os.makedirs("cards-png", exist_ok=True)
     for i, (big, turn) in enumerate(CARDS, start=1):
         img = background()
-        draw_card(ImageDraw.Draw(img), big, turn)
+        draw_card(ImageDraw.Draw(img), big, turn, img)
         name = f"cards-png/{i:02d}-{slug(big)}.png"
         img.save(name)
         print("wrote", name)

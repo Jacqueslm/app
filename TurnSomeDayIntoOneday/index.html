@@ -212,9 +212,6 @@ body{display:flex;justify-content:center}
 .bub-wrap.nova{align-self:flex-start;align-items:flex-start}
 .bub-wrap .bub{max-width:100%}
 .bub-time{font-size:10.5px;color:var(--tm);margin:4px 4px 0;opacity:.85}
-.bub-speak{display:flex;width:fit-content;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.22);border-radius:20px;padding:6px 12px;color:#dfe4ff;cursor:pointer;font-size:12.5px;font-family:inherit;line-height:1}
-.bub-speak i{font-size:15px}
-.bub-speak.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .qc{border:0.5px solid var(--bdr2);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--ts);cursor:pointer;background:var(--s2);user-select:none;white-space:nowrap}
 .qc-drop{flex:1 1 0px;display:flex;align-items:center;justify-content:space-between;gap:6px;border:0.5px solid var(--bdr2);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--tp);cursor:pointer;background:var(--s2);user-select:none;min-width:0}
 .qc-drop span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -9120,19 +9117,9 @@ function addBubble(who,text,when){
   d.className='bub '+who;
   d.style.whiteSpace='pre-wrap';
   d.textContent=text;
-  // Friendly can be heard, not just read. Her replies are written fresh every
-  // time so they can't be pre-recorded like the lessons and SOS guide are -
-  // this uses the phone's own voice, which costs nothing and works offline.
-  // Tap to hear, tap again to stop. Nothing plays unless asked.
-  if(who==='nova'&&'speechSynthesis' in window){
-    const b=document.createElement('button');
-    b.className='bub-speak';
-    b.type='button';
-    b.setAttribute('aria-label','Read this out loud');
-    b.innerHTML='<i class="ti ti-volume"></i><span>Listen</span>';
-    b.onclick=(ev)=>{ev.stopPropagation();speakBubble(text,b);};
-    d.appendChild(b);
-  }
+  // No Listen button on the message itself. One switch in the header decides
+  // whether Friendly speaks, and then she just speaks - a button on every
+  // reply meant tapping the same thing over and over to hear a conversation.
   wrap.appendChild(d);
   // When each message landed. Without it a conversation held across a whole day
   // reads as one blur - you cannot tell last night's 3am from this morning.
@@ -9146,10 +9133,7 @@ function addBubble(who,text,when){
   // Icons are drawn from ICON_PATHS by renderIcons(); anything created after
   // page load has to be rendered explicitly or it stays an empty <i>.
   try{renderIcons(d);}catch(e){}
-  if(who==='nova'&&novaVoiceOn()){
-    const btn=d.querySelector('.bub-speak');
-    if(btn)speakBubble(text,btn);
-  }
+  if(who==='nova'&&novaVoiceOn())speakBubble(text);
   setTimeout(()=>{const area=document.getElementById('chatArea');if(area)area.scrollTop=area.scrollHeight;},50);
 }
 // Picks a system voice matching Friendly's chosen presence. Voice names differ
@@ -9193,18 +9177,14 @@ function toggleNovaVoice(){
   if(!S.novaSpeakReplies){stopSpeaking();return;}
   // Turning it on says so out loud, so you immediately hear what you switched on.
   const last=[...document.querySelectorAll('.bub.nova')].pop();
-  const btn=last?last.querySelector('.bub-speak'):null;
-  if(last&&btn){
-    const t=[...last.childNodes].filter(x=>x.nodeType===3).map(x=>x.textContent).join('').trim();
-    if(t)speakBubble(t,btn);
-  }
+  if(last){const t=last.textContent.trim();if(t)speakBubble(t);}
 }
 function updateNovaVoiceToggle(){
   const el=document.getElementById('nova-voice-toggle');
   if(!el)return;
   const on=novaVoiceOn();
   el.classList.toggle('on',on);
-  el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i><span>${on?'Voice on':'Voice off'}</span>`;
+  el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i><span>AI voice ${on?'on':'off'}</span>`;
   el.setAttribute('title',on?"Friendly reads her replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
   try{renderIcons(el);}catch(e){}
 }
@@ -9219,10 +9199,9 @@ function formatChatTime(ts){
   return d.toLocaleDateString([], {month:'short',day:'numeric'})+' '+t;
 }
 // One speaking bubble at a time; tapping the one that is talking stops it.
-let speakingBtn=null;
-function speakBubble(text,btn){
+let speaking=false;
+function speakBubble(text){
   try{
-    if(speakingBtn===btn){stopSpeaking();return;}
     stopSpeaking();
     const u=new SpeechSynthesisUtterance(text);
     u.rate=0.95;u.pitch=1;
@@ -9231,21 +9210,14 @@ function speakBubble(text,btn){
     // narrator, which is a separate choice. Hearing a man when you picked a
     // female presence breaks the one relationship this screen is built on.
     try{ if(typeof applyNovaVoice==='function')applyNovaVoice(u); }catch(e){}
-    const restore=()=>{speakingBtn=null;btn.classList.remove('on');btn.innerHTML='<i class="ti ti-volume"></i><span>Listen</span>';try{renderIcons(btn);}catch(e){}};
-    u.onend=restore;u.onerror=restore;
-    speakingBtn=btn;btn.classList.add('on');
-    btn.innerHTML='<i class="ti ti-volume-off"></i><span>Stop</span>';try{renderIcons(btn);}catch(e){}
+    u.onend=stopSpeaking;u.onerror=stopSpeaking;
+    speaking=true;
     speechSynthesis.speak(u);
   }catch(e){}
 }
 function stopSpeaking(){
   try{speechSynthesis.cancel();}catch(e){}
-  if(speakingBtn){
-    speakingBtn.classList.remove('on');
-    speakingBtn.innerHTML='<i class="ti ti-volume"></i><span>Listen</span>';
-    try{renderIcons(speakingBtn);}catch(e){}
-  }
-  speakingBtn=null;
+  speaking=false;
 }
 
 // ─── NOVA PRO GATING ────────────────────────────────────────────────────────
@@ -10623,7 +10595,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.6';
+const APP_VERSION='5.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -242,4 +242,7 @@ Every talking-head and AI script from now on is built in this order:
 2. **Hook in the first 3 seconds.**
 3. **Call to action carries the rest** — the remainder of the video moves the
    viewer toward the app (link, follow, download), not just to the end.
-The 18 Aug script batch was eliminated; any new batch follows this rule.
+**The style (his words):** the images are outrageously enticing — a scroller has
+to want to look. The message is hard, cold, cut-throat, straight to the point.
+No soft openers, no warm-up. The 18 Aug script batch was eliminated; any new
+batch follows this rule.

@@ -209,3 +209,17 @@ Three faults, all fixed:
 probably still works - but nobody has tested a real purchase since. Worth one
 test buy before the Play release goes live, because if it is broken, nobody can
 buy Pro at all.
+
+## Voice cloning — tried and closed (18 Aug 2026, Jacques's call)
+
+Cloning was proven end to end: Jacques's Suno clip cloned into full lesson
+narration (YourTTS, run on the cloud box), hiss traced to the reference clip and
+cleaned. He compared against the app's existing narrators and decided it does
+not sound better. **Voices stay as they are.** The five shipped narrators are
+public-domain/CC0 and licence-clean.
+
+If this is ever reopened: `Studio/narrate-lessons.mjs` batch-records all 425
+lessons through Studio's Chatterbox cloner (MIT, sellable) unattended — one
+voice per run, resume-safe, refuses the paid path. A 25-30s clean reference
+clip is the single biggest quality lever. Note: YourTTS (the quick-test route)
+is CC BY-NC-ND - never shippable in a paid app.

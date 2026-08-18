@@ -981,6 +981,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p id="room-title">Room</p><span id="room-sub"></span></div>
         </div>
       </div>
+      <!-- LIVE ROOM: real people, one moderated feed. Posts only - no replies,
+           no DMs, no profiles. Every post passes the AI moderator before anyone
+           sees it, and the room keeps Jacques's hours. -->
+      <div class="sec" style="padding-top:0;padding-bottom:0">
+        <div id="live-room-banner" style="border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5;display:none"></div>
+        <div class="compose" id="live-compose" style="display:none;margin:0 0 10px">
+          <input id="liveInput" maxlength="500" placeholder="Say it to the room…" onkeydown="if(event.key==='Enter'){submitLivePost();event.preventDefault()}">
+          <button onclick="submitLivePost()"><i class="ti ti-send" style="font-size:15px"></i></button>
+        </div>
+        <div id="live-room-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-bottom:10px"></div>
+        <div id="live-feed"></div>
+        <div id="mod-queue-wrap" style="display:none;margin-top:14px">
+          <div class="sec-hd" style="margin-bottom:8px">Moderation (only you see this)</div>
+          <div id="mod-queue"></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:6px;padding-bottom:0"><div class="sec-hd">Your private reflections</div></div>
       <div class="compose">
         <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:12px">J</div>
         <input id="postInput" placeholder="Write a private reflection..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
@@ -992,7 +1009,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div id="userPostList"></div>
         <div class="sec-hd" style="margin:18px 0 8px">Today's stories</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts from other users, and the names aren't real people.<br><br><strong>There's no commenting, replying or messaging here, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts, and the names aren't real people. (The live posts are up top.)<br><br><strong>There's no commenting, replying or messaging anywhere in Rooms, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
         <div id="postList"></div>
       </div>
     </div>
@@ -6437,10 +6454,118 @@ function renderRoomsList(){
   renderIcons(document.getElementById('s-rooms'));
 }
 
+// ─── LIVE ROOM ───────────────────────────────────────────────────────────────
+// Real people, one moderated feed, posts only. Every post is judged by the AI
+// moderator BEFORE anyone can see it (the server fails closed if the moderator
+// is unreachable), the room keeps Jacques's hours, and two reports hide a live
+// post until a human looks. No replies, no DMs, no profiles - a post stands
+// alone, so nobody can be piled on and nobody can be preyed on.
+async function loadLiveRoom(){
+  const banner=document.getElementById('live-room-banner');
+  const compose=document.getElementById('live-compose');
+  const note=document.getElementById('live-room-note');
+  const feed=document.getElementById('live-feed');
+  if(!banner)return;
+  if(!S.accountEmail){
+    banner.style.display='block';
+    banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+    banner.textContent='The live room is for signed-in members — sign in from Profile and you can read and post here.';
+    compose.style.display='none';feed.innerHTML='';return;
+  }
+  try{
+    const res=await fetch('/api/rooms/feed?room='+encodeURIComponent(currentRoom||'Other'));
+    if(!res.ok)throw new Error('feed');
+    const data=await res.json();
+    banner.style.display='block';
+    if(data.open){
+      banner.style.background='var(--green-dim)';banner.style.color='var(--green)';
+      banner.innerHTML='<strong>The room is open.</strong> Real people, one feed, no replies — say it and let it stand. Open '+data.hours+'. Every post is checked before it appears.';
+      compose.style.display='flex';
+    }else{
+      banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+      banner.innerHTML='<strong>The room is closed overnight</strong> (open '+data.hours+'). You can still read. The SOS tools on Home never close — and if tonight is heavier than an urge, call or text 988, free, 24/7.';
+      compose.style.display='none';
+    }
+    note.style.display='block';
+    note.textContent='Posts show a first name and day count only. See something wrong? Tap Report — two reports hide a post until a human reviews it.';
+    feed.innerHTML=(data.posts||[]).map(p=>
+      '<div class="card" style="padding:12px 14px;margin-bottom:8px">'
+      +'<div style="font-size:11.5px;color:var(--tm);margin-bottom:5px;display:flex;justify-content:space-between"><span>'+escapeHtml(p.display_name)+'</span>'
+      +'<span style="cursor:pointer" onclick="reportLivePost('+p.id+')" title="Report this post">Report</span></div>'
+      +'<div style="font-size:13.5px;line-height:1.55;color:var(--tp);white-space:pre-wrap">'+escapeHtml(p.body)+'</div></div>'
+    ).join('')||'<div style="font-size:12.5px;color:var(--tm);padding:8px 2px">Nothing here yet today. Someone has to go first.</div>';
+    loadModQueue();
+  }catch(e){
+    banner.style.display='block';banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+    banner.textContent='The live room is not reachable right now — your private reflections below still work.';
+    compose.style.display='none';
+  }
+}
+function liveDisplayName(){
+  const first=(S.name||'Someone').trim().split(/\s+/)[0];
+  return first+' \u00b7 day '+getDays();
+}
+async function submitLivePost(){
+  const inp=document.getElementById('liveInput');
+  const text=(inp.value||'').trim();
+  if(!text)return;
+  // The client-side language gate runs first - same rule as private posts.
+  if(typeof roomTextBlocked==='function'&&roomTextBlocked(text))return;
+  inp.disabled=true;
+  try{
+    const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({room:currentRoom||'Other',body:text,displayName:liveDisplayName()})});
+    const d=await res.json().catch(()=>({}));
+    if(d.crisis){appInfo("Before anything else",d.message);inp.value='';}
+    else if(d.blocked){appInfo("That one can't go up",d.message);}
+    else if(d.held){appInfo('Almost there',d.message);inp.value='';}
+    else if(res.ok){inp.value='';loadLiveRoom();}
+    else{appInfo('The room',d.error||'That did not go through — try again.');}
+  }catch(e){appInfo('The room','No connection right now — your words are still in the box.');}
+  inp.disabled=false;
+}
+async function reportLivePost(id){
+  try{
+    await fetch('/api/rooms/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id})});
+    appInfo('Reported','Thank you. Two reports hide a post until a human looks at it.');
+  }catch(e){}
+}
+// Owner-only: the held/reported queue, right inside the room.
+async function loadModQueue(){
+  const wrap=document.getElementById('mod-queue-wrap');
+  if(!wrap)return;
+  try{await appIsOwnerReady;}catch(e){}
+  if(!window.appIsOwner){wrap.style.display='none';return;}
+  try{
+    const res=await fetch('/api/rooms/mod-queue');
+    if(!res.ok){wrap.style.display='none';return;}
+    const {queue=[]}=await res.json();
+    wrap.style.display=queue.length?'block':'none';
+    document.getElementById('mod-queue').innerHTML=queue.map(q=>
+      '<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid '+(q.crisis?'#E24B4A':'var(--accent)')+'">'
+      +'<div style="font-size:11px;color:var(--tm);margin-bottom:4px">'+escapeHtml(q.room)+' \u00b7 '+escapeHtml(q.display_name)+' \u00b7 '+escapeHtml(q.status)+(q.report_count?' \u00b7 '+q.report_count+' reports':'')+'</div>'
+      +'<div style="font-size:13px;color:var(--tp);white-space:pre-wrap;margin-bottom:6px">'+escapeHtml(q.body)+'</div>'
+      +(q.ai_reason?'<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Moderator: '+escapeHtml(q.ai_reason)+'</div>':'')
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto" onclick="modAct('+q.id+',\'approve\')">Approve</button>'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'remove\')">Remove</button>'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'ban\')">Ban</button>'
+      +'</div></div>'
+    ).join('');
+  }catch(e){wrap.style.display='none';}
+}
+async function modAct(id,action){
+  try{
+    await fetch('/api/rooms/mod-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id,action})});
+    loadLiveRoom();
+  }catch(e){}
+}
+
 function openRoom(category){
   currentRoom=category;
   switchTo('community');
   actBn('bn-plans');
+  loadLiveRoom();
 }
 
 // Rooms stay safe by design: a post that attacks, hates, or discriminates
@@ -8907,7 +9032,7 @@ const SYSTEM_APP_MAP=`
 The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
 - LESSONS: 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples), 30 days each (Supporting Someone 35). Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
-- TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (daily written reflections; reading, no messaging), withdrawal timeline, letters.
+- TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): free 3 chats/day, Pro 30/day. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
 - PRICING, the truth: FREE is everything above except lesson days 16-30. PRO is exactly two things - lesson days 16-30 of every track and pack, and 30 Friendly chats/day. $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
@@ -11328,7 +11453,7 @@ const HELP_INDEX=[
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
   // reference this entry by its original name after applySupporterUI() renames it.
   {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
-  {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-tools');}},
+  {name:'Rooms',sub:'Live community feed (6am-10pm Central) plus daily written reflections. No comments, no messaging.',k:'rooms community stories others people live feed post',go:()=>{switchTo('rooms');actBn('bn-tools');}},
   {name:'Spiritual Path',sub:'30 days on faith and recovery — God as you understand God',k:'spiritual god faith prayer pray religious religion church higher power spirit',go:()=>openPack('spiritual')},
   {name:'Lesson Packs',sub:'Relationships, trauma, anxiety, confidence — or build your own',k:'lesson packs pack custom deeper relationships trauma anxiety confidence build your own',go:()=>openLessonPacksScreen()},
   {name:'Share my milestone',sub:'A card for your day count — nothing names the habit',k:'share milestone card post day count image proud show',go:()=>shareMyMilestone()},

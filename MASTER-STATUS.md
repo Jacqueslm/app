@@ -167,3 +167,15 @@ doesn't cost a chat, and `GET /api/ai-status` reports config health in one line.
 Profile → Diagnostics. The reason will be there. Model is overridable with the
 `GEMINI_MODEL` variable in Railway — the next retirement is a variable change,
 not a redeploy.
+
+## House rule 12 — write it down before the session ends (Jacques, 18 Aug 2026)
+
+After any working session — a fix, an answer, a decision, an audit — update the
+memory files before signing off. What was found, what was decided, what is still
+open. Not a summary of the chat: the things a person picking this up cold would
+otherwise have to rediscover.
+
+The Gemini hunt is the argument for this rule. Three stacked faults took weeks,
+and the reason each one cost days was that nothing was written down when it was
+learned. Everything found in that hunt is recorded above, including where to
+look first if it happens again.

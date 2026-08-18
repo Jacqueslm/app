@@ -173,8 +173,9 @@ body{display:flex;justify-content:center}
 .badge-dim{background:var(--s1);color:var(--tm);border:0.5px solid var(--bdr)}
 .divider{height:0.5px;background:var(--bdr)}
 .sdiv{height:8px;background:var(--s0);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr)}/* NOVA */
-.nova-hdr{background:var(--brand);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid rgba(255,255,255,0.08)}
-.nova-voice-toggle{margin-left:auto;flex-shrink:0;border-radius:20px;gap:6px;padding:8px 12px;font-size:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.25);color:#dfe4ff;cursor:pointer;font-size:19px}
+.nova-hdr{background:var(--brand);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:0.5px solid rgba(255,255,255,0.08)}
+.nova-voice-toggle{margin-left:auto;flex-shrink:0;border-radius:20px;gap:6px;padding:8px 12px;display:flex;align-items:center;justify-content:center;white-space:nowrap;background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.25);color:#dfe4ff;cursor:pointer;font-size:13px}
+.nova-voice-toggle i{font-size:16px}
 .nova-voice-toggle.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .nova-av{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;border:2px solid var(--green);flex-shrink:0}
 .nova-name{font-size:15px;font-weight:500;color:#fff}
@@ -10595,7 +10596,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.7';
+const APP_VERSION='5.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

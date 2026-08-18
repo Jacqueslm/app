@@ -985,7 +985,13 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
           // field's shape has changed between model generations, so if this
           // model rejects it we drop it and ask again rather than letting a
           // config detail take the whole chat down.
-          withThinkingOff ? { thinkingConfig: { thinkingBudget: 0 } } : {}
+          // CONFIRMED against the live API, 18 Aug: gemini-3.6-flash rejects
+          // thinkingConfig outright - HTTP 400 "Request contains an invalid
+          // argument" - so don't send it to a 3.x model at all. The retry below
+          // still exists as a net, but paying for a failed round-trip on every
+          // single message just to have it dropped is not a fix.
+          (withThinkingOff && /^gemini-2\./.test(GEMINI_MODEL))
+            ? { thinkingConfig: { thinkingBudget: 0 } } : {}
         ),
       });
       const gemHeaders = {

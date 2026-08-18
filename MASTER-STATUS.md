@@ -145,3 +145,25 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 13. **LANE SPLIT:** recovery-app AI owns `TurnSomeDayIntoOneday/`; Studio AI owns `Studio/`, `reference/`, `START-HERE.md`. Don't edit the other lane.
 14. **Token lives in BOTH servers' envs:** `Studio/server/.env` AND `TurnSomeDayIntoOneday/server/.env` each need `APP_UPDATE_TOKEN` — the recovery app runs on Railway, so that one goes in Railway's env vars. Owner email `APP_OWNER_EMAIL` too. (As of Aug 16 the repo is PUBLIC again, so no token is currently needed.)
 15. **Railway auto-deploys on push to `claude/vibe-code-uwxxlk`** (Aug 17, Jacques's correction) — do NOT ask Jacques to redeploy Railway. It watches the branch and deploys itself. "Still broken on the phone" means the fix isn't on `origin/claude/vibe-code-uwxxlk` yet, not that a redeploy is pending.
+
+## Friendly's AI — fixed 18 Aug 2026 (v5.8)
+
+Friendly gave canned replies for weeks with a perfectly good Gemini key. It was
+three separate faults stacked, each hiding the next:
+
+1. The API key was never sent (no `x-goog-api-key` header) — fixed in 5.8.6.
+2. `gemini-2.5-flash` was retired by Google to new callers. Every chat came back
+   HTTP 404 "no longer available to new users … use models/gemini-3.6-flash".
+3. `gemini-3.6-flash` rejects `thinkingConfig` outright — HTTP 400 "Request
+   contains an invalid argument". It is no longer sent to 3.x models.
+
+What made this take weeks was that **none of it was visible**. A failed AI call
+falls back to a canned reply, so the app looked like it was working. Now: every
+provider failure is logged to Diagnostics with `error.details`, the owner sees
+the reason in the chat itself, a 200 with no text in it counts as a failure and
+doesn't cost a chat, and `GET /api/ai-status` reports config health in one line.
+
+**If Friendly ever goes robotic again:** open `/api/ai-status` signed in, then
+Profile → Diagnostics. The reason will be there. Model is overridable with the
+`GEMINI_MODEL` variable in Railway — the next retirement is a variable change,
+not a redeploy.

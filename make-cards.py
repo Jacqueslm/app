@@ -14,13 +14,17 @@ from PIL import Image, ImageDraw, ImageFont
 W, H = 1080, 1920
 MAX_WIDTH = 900
 
-# palette
-C0 = (10, 18, 40)      # 0a1228
-C1 = (13, 28, 58)      # 0d1c3a
-C2 = (19, 41, 75)      # 13294b
+# The app's own palette, straight out of index.html:31. The first version of
+# these cards was navy and gold with a generic circle-dot mark - neither of which
+# appears anywhere in the product, so the card and the app someone lands in
+# looked like two different companies.
+C0 = (15, 12, 41)      # 0f0c29  --brand, the app's own near-black
+C1 = (26, 20, 60)
+C2 = (42, 34, 92)
 WHITE = (255, 255, 255)
-GOLD = (229, 193, 88)  # e5c158
-GREY = (91, 101, 119)  # 5b6577
+GREEN = (126, 232, 162)  # 7ee8a2  --green, the accent used throughout the app
+ACCENT = (83, 74, 183)   # 534AB7  --accent, the purple behind the app's mark
+GREY = (120, 126, 160)
 
 REGULAR = "tools/fonts/Lato-Regular.ttf"
 BOLD = "tools/fonts/Lato-Bold.ttf"
@@ -115,16 +119,42 @@ def draw_centered(draw, lines, font, center_y, fill, gap=1.25):
         draw.text((x, y + i * lh * gap), ln, font=font, fill=fill)
 
 
-def draw_card(draw, big, turn):
-    # logo mark
-    cx = W // 2
-    draw.ellipse([cx - 24, 150 - 24, cx + 24, 150 + 24], outline=WHITE, width=4)
-    draw.ellipse([cx - 9, 150 - 9, cx + 9, 150 + 9], fill=WHITE)
+def draw_mark(img, cx, cy, size=112):
+    """The app's mark: two interlocking rings on the purple accent square with the
+    green border - the same square, radius and border as the onboarding logo.
+
+    Two rings, not a dot. The whole product is one person and the person holding
+    them up, and the mark should say that at 40px in a feed. A hand-drawn
+    handshake was tried first and read as a squiggle at this size; two linked
+    rings survive the shrink, which is the only test a social mark has to pass."""
+    S = 4                                    # supersample, then downscale for clean edges
+    pad = int(size * 0.5)
+    box = size + pad * 2
+    tile = Image.new("RGBA", (box * S, box * S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(tile)
+    o = pad * S
+    n = size * S
+    d.rounded_rectangle([o, o, o + n, o + n], radius=int(n * 0.30),
+                        fill=ACCENT, outline=GREEN, width=max(1, int(n * 0.045)))
+    # Two rings, overlapping in the middle.
+    lw = max(2, int(n * 0.070))
+    r = n * 0.185
+    gap = r * 0.78
+    mid = o + n / 2
+    for dx in (-gap, gap):
+        d.ellipse([mid + dx - r, mid - r, mid + dx + r, mid + r],
+                  outline=WHITE, width=lw)
+    tile = tile.resize((box, box), Image.LANCZOS)
+    img.paste(tile, (int(cx - box / 2), int(cy - box / 2)), tile)
+
+
+def draw_card(draw, big, turn, img):
+    draw_mark(img, W // 2, 168)
 
     # tagline
     tf = ImageFont.truetype(BOLD, 28)
     tw = draw.textlength(TAGLINE, font=tf)
-    draw.text(((W - tw) / 2, 224), TAGLINE, font=tf, fill=WHITE)
+    draw.text(((W - tw) / 2, 252), TAGLINE, font=tf, fill=WHITE)
 
     # big line (single line, auto-shrink)
     bf, blines = fit_font(big, BOLD, draw, MAX_WIDTH, 1, 72)
@@ -132,12 +162,12 @@ def draw_card(draw, big, turn):
 
     # turn line (up to 2 lines)
     yf, ylines = fit_font(turn, BOLD, draw, MAX_WIDTH, 2, 46)
-    draw_centered(draw, ylines, yf, 900, GOLD)
+    draw_centered(draw, ylines, yf, 900, GREEN)
 
     # footer
     ff = ImageFont.truetype(BOLD, 34)
     fw = draw.textlength(FOOTER_1, font=ff)
-    draw.text(((W - fw) / 2, 1710), FOOTER_1, font=ff, fill=GOLD)
+    draw.text(((W - fw) / 2, 1710), FOOTER_1, font=ff, fill=GREEN)
 
     sf = ImageFont.truetype(REGULAR, 24)
     sw = draw.textlength(FOOTER_2, font=sf)
@@ -148,7 +178,7 @@ def main():
     os.makedirs("cards-png", exist_ok=True)
     for i, (big, turn) in enumerate(CARDS, start=1):
         img = background()
-        draw_card(ImageDraw.Draw(img), big, turn)
+        draw_card(ImageDraw.Draw(img), big, turn, img)
         name = f"cards-png/{i:02d}-{slug(big)}.png"
         img.save(name)
         print("wrote", name)

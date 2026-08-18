@@ -209,3 +209,40 @@ Three faults, all fixed:
 probably still works - but nobody has tested a real purchase since. Worth one
 test buy before the Play release goes live, because if it is broken, nobody can
 buy Pro at all.
+
+## Voice cloning — tried and closed (18 Aug 2026, Jacques's call)
+
+Cloning was proven end to end: Jacques's Suno clip cloned into full lesson
+narration (YourTTS, run on the cloud box), hiss traced to the reference clip and
+cleaned. He compared against the app's existing narrators and decided it does
+not sound better. **Voices stay as they are.** The five shipped narrators are
+public-domain/CC0 and licence-clean.
+
+If this is ever reopened: `Studio/narrate-lessons.mjs` batch-records all 425
+lessons through Studio's Chatterbox cloner (MIT, sellable) unattended — one
+voice per run, resume-safe, refuses the paid path. A 25-30s clean reference
+clip is the single biggest quality lever. Note: YourTTS (the quick-test route)
+is CC BY-NC-ND - never shippable in a paid app.
+
+## House rule 13 — the ask-me-anything bot is updated with EVERY change (Jacques, 18 Aug 2026)
+
+Friendly is the app's ask-me-anything bot. Her app knowledge lives in
+`SYSTEM_APP_MAP` in TurnSomeDayIntoOneday/index.html, right above
+SYSTEM_FREE_ADDENDUM. **Any commit that ships, changes or removes a feature
+updates that block in the same commit.** No exceptions, no "later". A feature
+she doesn't know about is a feature she will deny exists - to the face of the
+person paying for it. She should know the app in and out, better than Jacques
+does.
+
+## House rule 14 — video format (Jacques, 18 Aug 2026)
+
+Every talking-head and AI script from now on is built in this order:
+1. **Dramatic thumbnail at the very beginning** — the first frame is a designed
+   scroll-stopper, not a mid-sentence face.
+2. **Hook in the first 3 seconds.**
+3. **Call to action carries the rest** — the remainder of the video moves the
+   viewer toward the app (link, follow, download), not just to the end.
+**The style (his words):** the images are outrageously enticing — a scroller has
+to want to look. The message is hard, cold, cut-throat, straight to the point.
+No soft openers, no warm-up. The 18 Aug script batch was eliminated; any new
+batch follows this rule.

@@ -1766,11 +1766,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0" id="owner-diag-sec"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
-      <div class="sec">
-        <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
-        <div id="diag-list"></div>
-        <button class="ob-btn outline" style="margin-top:4px;color:var(--ts);border-color:var(--bdr)" onclick="loadDiagnostics()">Refresh</button>
+      <!-- Heading AND body live inside #owner-diag-sec. They used to be two
+           separate blocks with only the heading gated, so a non-owner saw an
+           orphaned "If something breaks..." panel with no title, and the owner
+           gate looked broken from both sides. -->
+      <div id="owner-diag-sec">
+        <div class="sec" style="padding-bottom:0"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
+        <div class="sec">
+          <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
+          <div id="diag-list"></div>
+          <button class="ob-btn outline" style="margin-top:4px;color:var(--ts);border-color:var(--bdr)" onclick="loadDiagnostics()">Refresh</button>
+        </div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
@@ -10537,7 +10543,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8.4';
+const APP_VERSION='5.8.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

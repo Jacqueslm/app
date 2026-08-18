@@ -179,3 +179,33 @@ The Gemini hunt is the argument for this rule. Three stacked faults took weeks,
 and the reason each one cost days was that nothing was written down when it was
 learned. Everything found in that hunt is recorded above, including where to
 look first if it happens again.
+
+## Pro lockout — found and fixed 18 Aug 2026 (v5.9 / v6.0)
+
+Jacques deleted everything in the app and lost his own Pro with no way back.
+Stripe confirmed it exactly: subscription killed 18 Aug 17:28 UTC, the same
+second he pressed delete, on a plan paid through 6 Sep. **18.8 days he had
+already bought, gone.** An earlier account lost 4.9 days the same way.
+
+Three faults, all fixed:
+
+1. Deleting an account cancelled the subscription INSTANTLY instead of at the
+   end of the paid period. Now `cancel_at_period_end` - no further charge, and
+   the time already owned stays owned.
+2. "Restore purchases" could not recover anything once a user row lost its
+   `stripe_customer_id` - which is what a delete-then-resignup produces. A
+   LIFETIME purchase was unrecoverable that way. `relinkCustomerByEmail` now
+   finds the Stripe customer by the email that paid, and refuses to take one
+   another account already owns.
+3. The owner was paying $9.99/month to look at his own product. `APP_OWNER_EMAIL`
+   now grants Pro on its own, env-only like the comp list, so it writes nothing
+   to the database, cannot take a Founding Lifetime seat, and never shows up in
+   revenue. A real purchase still wins over the comp.
+
+**Confirmed working by Jacques, 18 Aug.** 11/11 tests pass.
+
+**Still open from that investigation:** both Stripe price objects read
+`active: false`. The code creates prices from PLANS on the fly so checkout
+probably still works - but nobody has tested a real purchase since. Worth one
+test buy before the Play release goes live, because if it is broken, nobody can
+buy Pro at all.

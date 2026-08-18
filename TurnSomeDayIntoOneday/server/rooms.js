@@ -19,6 +19,7 @@
 // they consume nobody's daily chat quota and never appear in anyone's history.
 
 const db = require('./db');
+const billing = require('./billing');
 
 const ROOM_OPEN_HOUR = 6;    // 6am Central
 const ROOM_CLOSE_HOUR = 22;  // 10pm Central
@@ -92,6 +93,16 @@ async function aiVerdict(text, deps) {
 }
 
 function register(app, { requireAuth, isOwnerRequest, GEMINI_API_KEY_REF, GEMINI_MODEL }) {
+  // The live rooms are Pro (Jacques, 18 Aug) - alongside lessons 16-30 and the
+  // 30-chat day, this is the third thing Pro actually buys. Server-verified,
+  // same as the chat cap: the client's isPro flag is decoration, this is the
+  // rule. The owner and comp-list accounts pass through getBillingStatus.
+  function requirePro(req, res) {
+    const user = db.getUserById(req.userId);
+    if (user && billing.getBillingStatus(user).isPro) return true;
+    res.status(403).json({ proRequired: true, error: 'The live rooms are part of Pro.' });
+    return false;
+  }
   // Open/closed and the rules, for the room screen to render honestly.
   app.get('/api/rooms/status', (req, res) => {
     res.json({
@@ -103,12 +114,14 @@ function register(app, { requireAuth, isOwnerRequest, GEMINI_API_KEY_REF, GEMINI
   });
 
   app.get('/api/rooms/feed', requireAuth, (req, res) => {
+    if (!requirePro(req, res)) return;
     const room = String(req.query.room || '').slice(0, 60);
     if (!room) return res.status(400).json({ error: 'Which room?' });
     res.json({ open: roomsOpen(), hours: hoursLabel(), posts: db.getRoomFeed(room, 50) });
   });
 
   app.post('/api/rooms/post', requireAuth, async (req, res) => {
+    if (!requirePro(req, res)) return;
     if (db.isRoomBanned(req.userId)) {
       // The same shape as success, so a banned scraper learns nothing.
       return res.status(403).json({ error: 'Posting is not available for this account.' });

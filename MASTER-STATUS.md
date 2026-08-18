@@ -30,20 +30,14 @@ retry only fired when the message contained the word "thinking").
   `details` field — exactly his symptom.
 - Replacement is **`thinkingLevel`** (discrete levels, not a token budget).
   `gemini-3.6-flash` supports `MINIMAL | LOW | MEDIUM | HIGH`, default `MEDIUM`.
-- So: `thinkingConfig: {thinkingLevel: "LOW"}` — or omit `thinkingConfig`
-  entirely and it defaults to MEDIUM. His "retry without thinkingConfig" will
-  therefore succeed.
-- **Also deprecated on Gemini 3.x: `temperature`, `top_p`, `top_k`.** His body
-  doesn't send them, but strip them anywhere else Friendly sets them.
+- **Also deprecated on Gemini 3.x: `temperature`, `top_p`, `top_k`.**
 - `maxOutputTokens: 4096` and `systemInstruction` are fine — not the problem.
 
-**The one thing his retry does NOT restore — his intent.** He set
-`thinkingBudget: 0` to **turn thinking off** (cheap/fast). On Gemini 3 thinking
-is **on by default and cannot be fully disabled**. Closest to off is
-`thinkingLevel: "MINIMAL"` — but MINIMAL still requires **thought signatures**
-(or it 400s again). **`LOW` is the safer mostly-off choice** unless thought
-signatures are wired up. If Friendly should stay cheap/fast, set
-`thinkingLevel: "LOW"` explicitly rather than letting it fall back to MEDIUM.
+**Diagnostic note on his intent.** He set `thinkingBudget: 0` to **turn thinking
+off** (cheap/fast). On Gemini 3 thinking is **on by default and cannot be fully
+disabled**, so that intent has no Gemini 3 equivalent — the closest value is
+`thinkingLevel: "MINIMAL"`, which still requires **thought signatures** (or the
+request 400s again).
 
 **Sources:** dgtlmoon/changedetection.io#4283 (identical bare-400 repro on
 Gemini 3.x); Google Cloud "Thinking" model doc (`thinking_level` vs `thinking_budget`).

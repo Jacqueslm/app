@@ -246,3 +246,12 @@ Every talking-head and AI script from now on is built in this order:
 to want to look. The message is hard, cold, cut-throat, straight to the point.
 No soft openers, no warm-up. The 18 Aug script batch was eliminated; any new
 batch follows this rule.
+
+**Amended (Jacques, 18 Aug, later):** in addition —
+4. **15 seconds.** Not 20–25. ~40 spoken words maximum.
+5. **Every piece answers all five: WHAT / WHO / WHEN / WHERE / HOW** — in the
+   piece itself where it fits, always in the caption.
+6. **Arrogant and bold.** Not humble, not gentle-brave — the voice of a man who
+   beat 38 years and knows it. Confidence is the hook.
+7. **No two pieces built the same.** Different structure, rhythm and angle every
+   time — a formula repeated is a formula scrolled past.

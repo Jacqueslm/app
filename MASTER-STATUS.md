@@ -233,3 +233,13 @@ updates that block in the same commit.** No exceptions, no "later". A feature
 she doesn't know about is a feature she will deny exists - to the face of the
 person paying for it. She should know the app in and out, better than Jacques
 does.
+
+## House rule 14 — video format (Jacques, 18 Aug 2026)
+
+Every talking-head and AI script from now on is built in this order:
+1. **Dramatic thumbnail at the very beginning** — the first frame is a designed
+   scroll-stopper, not a mid-sentence face.
+2. **Hook in the first 3 seconds.**
+3. **Call to action carries the rest** — the remainder of the video moves the
+   viewer toward the app (link, follow, download), not just to the end.
+The 18 Aug script batch was eliminated; any new batch follows this rule.

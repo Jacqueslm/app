@@ -920,6 +920,16 @@ app.get('/api/chat/usage', requireAuth, (req, res) => {
 // anyone) are both INVISIBLE from the app: the chat just falls back to canned
 // replies and the diagnostics panel 403s. Signed-in only; open it in a phone
 // browser to see in one line which of the two it is.
+// Live rooms - AI-moderated community, Jacques's curfew, owner override.
+require('./rooms').register(app, {
+  requireAuth,
+  isOwnerRequest,
+  // A ref, not the value: the key can be rotated in the env without the rooms
+  // module holding a stale copy.
+  GEMINI_API_KEY_REF: () => GEMINI_API_KEY,
+  GEMINI_MODEL,
+});
+
 app.get('/api/ai-status', requireAuth, (req, res) => {
   const provider = GEMINI_API_KEY ? 'gemini' : (ANTHROPIC_API_KEY ? 'anthropic' : 'none');
   const user = db.getUserById(req.userId);

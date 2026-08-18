@@ -981,6 +981,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p id="room-title">Room</p><span id="room-sub"></span></div>
         </div>
       </div>
+      <!-- LIVE ROOM: real people, one moderated feed. Posts only - no replies,
+           no DMs, no profiles. Every post passes the AI moderator before anyone
+           sees it, and the room keeps Jacques's hours. -->
+      <div class="sec" style="padding-top:0;padding-bottom:0">
+        <div id="live-room-banner" style="border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5;display:none"></div>
+        <div class="compose" id="live-compose" style="display:none;margin:0 0 10px">
+          <input id="liveInput" maxlength="500" placeholder="Say it to the room…" onkeydown="if(event.key==='Enter'){submitLivePost();event.preventDefault()}">
+          <button onclick="submitLivePost()"><i class="ti ti-send" style="font-size:15px"></i></button>
+        </div>
+        <div id="live-room-note" style="display:none;font-size:11.5px;color:var(--tm);line-height:1.5;margin-bottom:10px"></div>
+        <div id="live-feed"></div>
+        <div id="mod-queue-wrap" style="display:none;margin-top:14px">
+          <div class="sec-hd" style="margin-bottom:8px">Moderation (only you see this)</div>
+          <div id="mod-queue"></div>
+        </div>
+      </div>
+      <div class="sec" style="padding-top:6px;padding-bottom:0"><div class="sec-hd">Your private reflections</div></div>
       <div class="compose">
         <div class="av av-p" id="compose-av" style="width:32px;height:32px;font-size:12px">J</div>
         <input id="postInput" placeholder="Write a private reflection..." onkeydown="if(event.key==='Enter'){submitPost();event.preventDefault()}">
@@ -992,7 +1009,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div id="userPostList"></div>
         <div class="sec-hd" style="margin:18px 0 8px">Today's stories</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts from other users, and the names aren't real people.<br><br><strong>There's no commenting, replying or messaging here, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.6">A new set every day. These are <strong>written reflections</strong> — the things people in this room live through most often, put into words. They're not live posts, and the names aren't real people. (The live posts are up top.)<br><br><strong>There's no commenting, replying or messaging anywhere in Rooms, and there won't be.</strong> That's deliberate. Recovery spaces online turn toxic fast — pile-ons, comparison, people preying on someone at their lowest. You can like a story to keep it. Nothing is sent to anyone, and nobody can reach you here.</div>
         <div id="postList"></div>
       </div>
     </div>
@@ -1542,10 +1559,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:12.5px;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds two things: the second half of your program — Days 16–30 — and 30 Friendly chats a day instead of 3. There's no pressure either way.</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the second half of your program — Days 16–30 — 30 Friendly chats a day instead of 3, and the live rooms, where real people working the same thing you are post into one moderated feed. There's no pressure either way.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Days 16–30 of every track and pack</div>
           <div>✓ 30 Friendly chats a day instead of 3</div>
+          <div>✓ The live rooms — real people on your road, one moderated feed</div>
           <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
@@ -1597,6 +1615,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of every track and pack</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
             <div class="feat y"><i class="ti ti-check"></i>30 Friendly chats a day instead of 3</div>
+            <div class="feat y"><i class="ti ti-check"></i>Live rooms — post with people working the same thing</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
           </div>
           <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
@@ -1608,7 +1627,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30 and 30 Friendly chats a day.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30, 30 Friendly chats a day, and the live rooms.</div>
     </div>
 
     <!-- PROFILE -->
@@ -2538,6 +2557,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- GENERIC CONFIRM MODAL -->
+<!-- ROOM TOUR - once, on first opening a live room -->
+<div class="sos-modal" id="room-tour-modal" onclick="if(event.target===this)closeRoomTour()">
+  <div class="sos-sheet">
+    <div class="sos-title" style="color:var(--accent)">How this room works</div>
+    <div style="text-align:left;font-size:13px;line-height:1.65;color:var(--ts);margin-top:6px">
+      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Real people, one feed.</strong> Everyone here is working the same thing you are. You post, it stands. No replies, no DMs, no profiles — nobody can pile on and nobody can reach you.</p>
+      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Every post is checked first.</strong> A moderator reads every post before the room sees it. Honest struggle, anger, relapse — all welcome. Selling, cruelty, and graphic detail never make it in.</p>
+      <p style="margin:0 0 10px"><strong style="color:var(--tp)">You're a first name and a day count.</strong> That's all the room knows about you.</p>
+      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Open 6am–10pm Central.</strong> Overnight the room sleeps — the SOS tools never do, and 988 is there any hour.</p>
+      <p style="margin:0"><strong style="color:var(--tp)">See something wrong?</strong> Tap Report. Two reports hide a post until a human looks.</p>
+    </div>
+    <button class="ob-btn" style="margin-top:14px" onclick="closeRoomTour()">Got it</button>
+  </div>
+</div>
+
 <!-- LESSON READER (library) -->
 <div class="sos-modal" id="lesson-reader-modal" onclick="if(event.target===this)closeLibraryReader()">
   <div class="sos-sheet" style="max-height:84vh">
@@ -6437,10 +6471,143 @@ function renderRoomsList(){
   renderIcons(document.getElementById('s-rooms'));
 }
 
+// ─── LIVE ROOM ───────────────────────────────────────────────────────────────
+// Real people, one moderated feed, posts only. Every post is judged by the AI
+// moderator BEFORE anyone can see it (the server fails closed if the moderator
+// is unreachable), the room keeps Jacques's hours, and two reports hide a live
+// post until a human looks. No replies, no DMs, no profiles - a post stands
+// alone, so nobody can be piled on and nobody can be preyed on.
+async function loadLiveRoom(){
+  const banner=document.getElementById('live-room-banner');
+  const compose=document.getElementById('live-compose');
+  const note=document.getElementById('live-room-note');
+  const feed=document.getElementById('live-feed');
+  if(!banner)return;
+  if(!S.accountEmail){
+    banner.style.display='block';
+    banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+    banner.textContent='The live room is for signed-in members — sign in from Profile and you can read and post here.';
+    compose.style.display='none';feed.innerHTML='';return;
+  }
+  // The live rooms are Pro. The pitch names what's actually behind the door -
+  // real people on the same road - because that, not "advanced tools", is what
+  // someone at day 12 would pay for. The server enforces this regardless.
+  if(!S.isPro){
+    banner.style.display='block';
+    banner.style.background='var(--s1)';banner.style.color='var(--ts)';
+    banner.innerHTML='<strong>The live room is part of Pro.</strong> Real people working the same thing you are — one moderated feed, open 6am–10pm Central, no replies, no DMs, nobody can reach you. <span style="color:var(--accent);font-weight:600;cursor:pointer" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</span>';
+    compose.style.display='none';note.style.display='none';feed.innerHTML='';return;
+  }
+  // First open: say how the room works BEFORE the first post, once.
+  if(!S.roomTourDone){maybeShowRoomTour();}
+  try{
+    const res=await fetch('/api/rooms/feed?room='+encodeURIComponent(currentRoom||'Other'));
+    if(res.status===403){S.isPro=false;save();loadLiveRoom();return;}
+    if(!res.ok)throw new Error('feed');
+    const data=await res.json();
+    banner.style.display='block';
+    if(data.open){
+      banner.style.background='var(--green-dim)';banner.style.color='var(--green)';
+      banner.innerHTML='<strong>The room is open.</strong> Real people, one feed, no replies — say it and let it stand. Open '+data.hours+'. Every post is checked before it appears.';
+      compose.style.display='flex';
+    }else{
+      banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+      banner.innerHTML='<strong>The room is closed overnight</strong> (open '+data.hours+'). You can still read. The SOS tools on Home never close — and if tonight is heavier than an urge, call or text 988, free, 24/7.';
+      compose.style.display='none';
+    }
+    note.style.display='block';
+    note.textContent='Posts show a first name and day count only. See something wrong? Tap Report — two reports hide a post until a human reviews it.';
+    feed.innerHTML=(data.posts||[]).map(p=>
+      '<div class="card" style="padding:12px 14px;margin-bottom:8px">'
+      +'<div style="font-size:11.5px;color:var(--tm);margin-bottom:5px;display:flex;justify-content:space-between"><span>'+escapeHtml(p.display_name)+'</span>'
+      +'<span style="cursor:pointer" onclick="reportLivePost('+p.id+')" title="Report this post">Report</span></div>'
+      +'<div style="font-size:13.5px;line-height:1.55;color:var(--tp);white-space:pre-wrap">'+escapeHtml(p.body)+'</div></div>'
+    ).join('')||'<div style="font-size:12.5px;color:var(--tm);padding:8px 2px">Nothing here yet today. Someone has to go first.</div>';
+    loadModQueue();
+  }catch(e){
+    banner.style.display='block';banner.style.background='var(--s1)';banner.style.color='var(--tm)';
+    banner.textContent='The live room is not reachable right now — your private reflections below still work.';
+    compose.style.display='none';
+  }
+}
+// ─── ROOM TOUR ───────────────────────────────────────────────────────────────
+// Shown once, the first time a Pro member opens a live room. The rules are the
+// feature: someone who knows nobody can reply or DM them will say things they
+// would never say in a comment section.
+function maybeShowRoomTour(){
+  const el=document.getElementById('room-tour-modal');
+  if(!el)return;
+  el.classList.add('open');
+}
+function closeRoomTour(){
+  S.roomTourDone=true;save();
+  document.getElementById('room-tour-modal').classList.remove('open');
+}
+function liveDisplayName(){
+  const first=(S.name||'Someone').trim().split(/\s+/)[0];
+  return first+' \u00b7 day '+getDays();
+}
+async function submitLivePost(){
+  const inp=document.getElementById('liveInput');
+  const text=(inp.value||'').trim();
+  if(!text)return;
+  // The client-side language gate runs first - same rule as private posts.
+  if(typeof roomTextBlocked==='function'&&roomTextBlocked(text))return;
+  inp.disabled=true;
+  try{
+    const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({room:currentRoom||'Other',body:text,displayName:liveDisplayName()})});
+    const d=await res.json().catch(()=>({}));
+    if(d.crisis){appInfo("Before anything else",d.message);inp.value='';}
+    else if(d.blocked){appInfo("That one can't go up",d.message);}
+    else if(d.held){appInfo('Almost there',d.message);inp.value='';}
+    else if(res.ok){inp.value='';loadLiveRoom();}
+    else{appInfo('The room',d.error||'That did not go through — try again.');}
+  }catch(e){appInfo('The room','No connection right now — your words are still in the box.');}
+  inp.disabled=false;
+}
+async function reportLivePost(id){
+  try{
+    await fetch('/api/rooms/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id})});
+    appInfo('Reported','Thank you. Two reports hide a post until a human looks at it.');
+  }catch(e){}
+}
+// Owner-only: the held/reported queue, right inside the room.
+async function loadModQueue(){
+  const wrap=document.getElementById('mod-queue-wrap');
+  if(!wrap)return;
+  try{await appIsOwnerReady;}catch(e){}
+  if(!window.appIsOwner){wrap.style.display='none';return;}
+  try{
+    const res=await fetch('/api/rooms/mod-queue');
+    if(!res.ok){wrap.style.display='none';return;}
+    const {queue=[]}=await res.json();
+    wrap.style.display=queue.length?'block':'none';
+    document.getElementById('mod-queue').innerHTML=queue.map(q=>
+      '<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid '+(q.crisis?'#E24B4A':'var(--accent)')+'">'
+      +'<div style="font-size:11px;color:var(--tm);margin-bottom:4px">'+escapeHtml(q.room)+' \u00b7 '+escapeHtml(q.display_name)+' \u00b7 '+escapeHtml(q.status)+(q.report_count?' \u00b7 '+q.report_count+' reports':'')+'</div>'
+      +'<div style="font-size:13px;color:var(--tp);white-space:pre-wrap;margin-bottom:6px">'+escapeHtml(q.body)+'</div>'
+      +(q.ai_reason?'<div style="font-size:11px;color:var(--tm);margin-bottom:8px">Moderator: '+escapeHtml(q.ai_reason)+'</div>':'')
+      +'<div style="display:flex;gap:8px">'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto" onclick="modAct('+q.id+',\'approve\')">Approve</button>'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'remove\')">Remove</button>'
+      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:12px;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'ban\')">Ban</button>'
+      +'</div></div>'
+    ).join('');
+  }catch(e){wrap.style.display='none';}
+}
+async function modAct(id,action){
+  try{
+    await fetch('/api/rooms/mod-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id,action})});
+    loadLiveRoom();
+  }catch(e){}
+}
+
 function openRoom(category){
   currentRoom=category;
   switchTo('community');
   actBn('bn-plans');
+  loadLiveRoom();
 }
 
 // Rooms stay safe by design: a post that attacks, hates, or discriminates
@@ -8896,6 +9063,23 @@ Core traits:
 - If a user describes a pattern of control, intimidation, gaslighting, or physical harm, do not frame it as an addiction symptom to be understood. Name that it sounds serious, and mention: "National Domestic Violence Hotline — 1-800-799-7233, or text START to 88788, free and confidential, 24/7." Addiction never excuses abuse.
 - Some users are working the "Anger & Control" track — they are the one whose outbursts hurt other people. Meet them with zero shame for showing up, and zero softening of what they did. Never help them build a case against the other person, never accept "they pushed my buttons" or "my father was worse" as a reason, and never let self-hatred stand in for repair. Their tools are: name the feeling under the anger, leave the room at a 6, come back in 20 minutes, apologize with the specific action and no "because". If they describe having been physical with anyone, ever, or frightening a child, tell them plainly that this is past what an app can carry and to look for a certified Batterer Intervention Program (their county's domestic violence agency has the list). If they fear they are about to hurt someone, tell them to leave the house now and call 988.`;
 
+// ─── THE BOT'S APP MAP ───────────────────────────────────────────────────────
+// HOUSE RULE (Jacques, 18 Aug 2026): every time a feature ships, changes or
+// dies, THIS BLOCK CHANGES IN THE SAME COMMIT. Friendly is the ask-me-anything
+// bot; she must know the app in and out - better than the owner does. A feature
+// she doesn't know about is a feature she'll deny exists, straight to the face
+// of the person paying for it.
+const SYSTEM_APP_MAP=`
+
+The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
+- TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
+- LESSONS: 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples), 30 days each (Supporting Someone 35). Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
+- TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
+- FRIENDLY tab (you): free 3 chats/day, Pro 30/day. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
+- PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
+- PRICING, the truth: FREE is everything above except lesson days 16-30 and the live rooms. PRO is exactly three things - lesson days 16-30 of every track and pack, 30 Friendly chats/day, and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
+
 const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Friendly Free mode. In this mode:
@@ -8951,7 +9135,7 @@ function activeTrackLinks(tracks){
 }
 
 function buildSystemPrompt(){
-  return SYSTEM_BASE+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
+  return SYSTEM_BASE+SYSTEM_APP_MAP+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
 }
 
 // What Friendly already knows about this person: recent journal entries,
@@ -10836,7 +11020,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.1';
+const APP_VERSION='6.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -11311,7 +11495,7 @@ const HELP_INDEX=[
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
   // reference this entry by its original name after applySupporterUI() renames it.
   {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
-  {name:'Rooms',sub:'A new set of written reflections every day. No comments, no messaging.',k:'rooms community stories others people',go:()=>{switchTo('rooms');actBn('bn-tools');}},
+  {name:'Rooms',sub:'Live community feed (6am-10pm Central) plus daily written reflections. No comments, no messaging.',k:'rooms community stories others people live feed post',go:()=>{switchTo('rooms');actBn('bn-tools');}},
   {name:'Spiritual Path',sub:'30 days on faith and recovery — God as you understand God',k:'spiritual god faith prayer pray religious religion church higher power spirit',go:()=>openPack('spiritual')},
   {name:'Lesson Packs',sub:'Relationships, trauma, anxiety, confidence — or build your own',k:'lesson packs pack custom deeper relationships trauma anxiety confidence build your own',go:()=>openLessonPacksScreen()},
   {name:'Share my milestone',sub:'A card for your day count — nothing names the habit',k:'share milestone card post day count image proud show',go:()=>shareMyMilestone()},
@@ -11747,7 +11931,7 @@ function buildGuideIndex(){
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Two things, and that's it: <b>Days 16–30</b> of every track and pack (including the Together couples program), and <b>30 Friendly chats a day</b> instead of 3. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>Days 16–30</b> of every track and pack (including the Together couples program), <b>30 Friendly chats a day</b> instead of 3, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
@@ -11855,19 +12039,6 @@ function guideSend(){
   }
 }
 
-// A guide search that finds nothing used to dead-end with "ask Friendly on the
-// Friendly tab" - walk there yourself, retype the question. The FAQ list will
-// always lag behind new features (it is hand-written), but Friendly's system
-// prompt is updated with every release, so she is the guide that stays current.
-// Hand the question over, already sent.
-function askFriendlyFromHelp(){
-  const q=(document.getElementById('help-search')||{}).value||'';
-  closeHelpFinder();
-  switchTo('nova');actBn('bn-nova');
-  const inp=document.getElementById('chatInput');
-  if(inp){inp.value=q?`Quick app question: ${q.trim()}`:'Can you explain what this app can do?';}
-  try{sendMsg();}catch(e){}
-}
 function openHelpFinder(){
   buildGuideIndex();
   document.getElementById('help-modal').classList.add('open');
@@ -11889,8 +12060,7 @@ function renderHelpResults(){
       const i=HELP_INDEX.indexOf(h);
       return `<div class="sos-opt" onclick="helpGo(${i})"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><div class="sos-opt-info"><p>${escapeHtml(h.name)}</p><span>${escapeHtml(h.sub)}</span></div></div>`;
     }).join('')
-    :`<div class="sos-sub" style="padding:14px 0 8px">Nothing matched in the guide.</div>
-       <div class="sos-opt" onclick="askFriendlyFromHelp()"><i class="ti ti-message-circle" style="color:var(--accent)"></i><div class="sos-opt-info"><p>Ask Friendly instead</p><span>Sends your question straight to her — she knows every feature in the app</span></div></div>`;
+    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word like <em>lesson</em>, <em>voice</em>, or <em>pro</em>.</div>';
 }
 
 // Erase absolutely everything: account + synced data on the server, plus every

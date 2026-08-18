@@ -902,11 +902,39 @@ app.get('/api/chat/usage', requireAuth, (req, res) => {
   res.json({ used, limit, remaining: Math.max(0, limit - used), isPro });
 });
 
+// Config health for the AI, with no secrets in it - booleans and a model name
+// only. This exists because the two ways Friendly goes quiet (no key on the
+// server, or APP_OWNER_EMAIL unset so the owner-only error never reaches
+// anyone) are both INVISIBLE from the app: the chat just falls back to canned
+// replies and the diagnostics panel 403s. Signed-in only; open it in a phone
+// browser to see in one line which of the two it is.
+app.get('/api/ai-status', requireAuth, (req, res) => {
+  const provider = GEMINI_API_KEY ? 'gemini' : (ANTHROPIC_API_KEY ? 'anthropic' : 'none');
+  const user = db.getUserById(req.userId);
+  res.json({
+    provider,
+    keyConfigured: !!(GEMINI_API_KEY || ANTHROPIC_API_KEY),
+    model: provider === 'gemini' ? GEMINI_MODEL : (provider === 'anthropic' ? ANTHROPIC_MODEL : null),
+    ownerEmailConfigured: !!DIAG_OWNER_EMAIL,
+    youAreOwner: !!(DIAG_OWNER_EMAIL && user && user.email === DIAG_OWNER_EMAIL),
+  });
+});
+
 app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   if (!ANTHROPIC_API_KEY && !GEMINI_API_KEY) {
-    // No key configured (e.g. running without the API wired up yet) - the client falls back to
-    // its offline local-reply mode whenever this endpoint isn't a 2xx, so this is a normal state.
-    return res.status(503).json({ error: 'AI chat is not available on this server right now.' });
+    // No key on the server. This used to return a bare 503 and nothing else,
+    // which is the one AI failure the app could not show anybody: the client
+    // silently drops to canned replies, the chat counter never moves, and
+    // because nothing was logged, Profile > Diagnostics stayed empty too. Log
+    // it, and tell the owner in the chat itself.
+    const why = 'No AI key on the server (GEMINI_API_KEY / ANTHROPIC_API_KEY are both unset).';
+    try { db.logError('ai-chat', why); } catch (_) {}
+    const body = { error: 'AI chat is not available on this server right now.' };
+    try {
+      const u = db.getUserById(req.userId);
+      if (DIAG_OWNER_EMAIL && u && u.email === DIAG_OWNER_EMAIL) body.ownerError = why;
+    } catch (_) {}
+    return res.status(503).json(body);
   }
 
   const { system, messages } = req.body || {};

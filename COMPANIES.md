@@ -266,7 +266,46 @@ The employer lane's problem was always that companies don't publish a benefits
 address. These solve it from the other side: **directories that HR people search
 when they need a vendor.** Get listed and the employer finds you.
 
-### 12. SHRM Vendor Directory — [ ] sent
+### 12. SHRM Vendor Directory — [x] DONE. CALL TAKEN 17 AUG, ON THE LIST.
+
+**Jacques took the MediaBrains call and it played out exactly as predicted
+below.** Follow-up email from **Judith Gaa** arrived Mon 17 Aug 3:55pm with the
+paid tiers: **Featured Listing $4,995/yr, Optimized Listing $1,995/yr.** Their
+own claim for Featured: 10-20 clicks per category per month, 60-80 leads over a
+12-month run.
+
+**That is $62-83 per lead, paid a year in advance, before the app has taken a
+single dollar.** House rule stands (OUTREACH.md): never pay for placement. The
+decline is written below - it keeps the door open rather than closing it.
+
+**⚠️ VERIFY THE FREE LISTING ACTUALLY EXISTS.** The email is a sales follow-up
+and never confirms a basic listing was created. Search the directory for
+"Turn Someday Into Day One" and check. If it is not there, that one line in the
+reply is the whole point of the reply.
+
+**The reply to send (keeps the relationship, ends the pitch):**
+
+> Subject: Re: SHRM Human Resource Vendor Directory
+>
+> Hi Judith,
+>
+> Thank you for the call and for sending the detail through.
+>
+> I have to be straight with you: I'm a solo founder, the app is free to use,
+> and there's no marketing budget at all this year - so the Featured and
+> Optimized tiers aren't something I can consider right now.
+>
+> What I would like is to be on the free basic listing. Could you confirm it's
+> live and send me the link? If it sends anyone my way, you'll be the first
+> call I make when there is a budget.
+>
+> Thanks again for your time,
+>
+> Jacques Malone
+> Turn Someday Into Day One
+> www.turnsomedayintodayone.com
+
+
 
 **Start at:** https://vendordirectory.shrm.org/category/benefits-health-welfare/employee-assistance-programs-eaps
 SHRM is the largest HR professional body in the world and this directory is

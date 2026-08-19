@@ -1,8 +1,177 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 16, 2026 (third pass).
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 18, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## ⏰ REMINDER — 26 AUG 2026 (set 19 Aug): re-check Google on /reviews
+
+**Why:** the Review structured data (schema.org/Review) was restored to the
+reviews page on 19 Aug (commit `442f0f8`). Google takes days–weeks to re-crawl
+and show review stars in search results. This is the one-week check-in.
+
+**Do, in order:**
+1. Open https://www.turnsomedayintodayone.com/reviews — confirm all 11 reviews
+   render (Jacques's founder review + Marcus, Elena, David, Sarah, James, Maya,
+   Robert, Chloe, Thomas, Rachel).
+2. Paste that URL into Google's Rich Results Test
+   (https://search.google.com/test/rich-results) — it should detect the Review
+   structured data (11 reviews, 5 stars).
+3. Search Google for `site:turnsomedayintodayone.com/reviews` — is the page
+   indexed? Are stars showing next to it?
+4. If it's indexed but has no stars: that's usually Google's policy on
+   self-hosted testimonials, not a bug. Do NOT re-remove/re-add schema without
+   Jacques's say-so. Log what you see in this file.
+5. If it's NOT indexed yet: request indexing in Google Search Console
+   (URL Inspection → Request Indexing) and set the next check-in for 7 days
+   out, replacing this block.
+
+---
+
+---
+
+## ✅ 19 AUG 2026 — REVIEWS FIX BATCH: schema restored + CTA fixed + 10 reviews back (PUSHED to deploy branch, live)
+
+Jacques's instruction after the audit: "the other ai took the schema off the
+page put it back and do everything else." Done and verified live (Railway
+auto-deployed from `claude/vibe-code-uwxxlk`, tip `442f0f8`):
+
+1. **Schema restored** — `reviews.html` emits schema.org/Review again under the
+   app's SoftwareApplication block (the other AI's session had removed it 19
+   Aug). NOTE: main is NOT synced — it still has the schema-removed version.
+2. **Dead CTA fixed** — `reviews.html`'s "Write one in the app" → `/app?review=1`
+   never opened the modal. The app now auto-opens it after sign-in/onboarding
+   (new signups, returning users, PIN-lock users all covered; param stripped
+   after one use).
+3. **The 10 approved reviews restored** — Marcus, Elena, David, Sarah, James,
+   Maya, Robert, Chloe, Thomas, Rachel now sit in `data/reviews.json` next to
+   Jacques's founder review (11 total; the page renders DB + JSON sources).
+4. **Chat quota syncs with the server** — free counter no longer resets on the
+   device clock (was UTC-vs-local drift); it follows `/api/chat/usage`.
+   Limits centralized as FREE_CHAT_DAILY_LIMIT / PRO_CHAT_DAILY_LIMIT.
+
+Verified: 11/11 server tests, node --check on all inline scripts, all handlers
++ element refs resolve, live `/data/reviews.json` returns 11 reviews.
+
+⚠️ **Lane heads-up for the other AI:** if you touch `reviews.html`,
+`reviews.json`, or the reviews bits of `index.html` on main and merge main→vibe,
+merge carefully — vibe (deploy) now intentionally differs from main on those
+files (schema restored, 11 reviews). Don't silently take main's version.
+
+---
+
+## 🛠 19 AUG 2026 — 10 REVIEWS ADDED TO THE REVIEWS PAGE (files done, NOT pushed)
+
+Jacques pasted 10 member reviews and asked to add them to the reviews page.
+Landed in **`TurnSomeDayIntoOneday/data/reviews.json`** — the file
+`reviews.html` already renders from (empty until now, so the page showed the
+"no published reviews yet" empty state).
+
+- **Names:** Marcus (gambling+nicotine), Elena (alcohol), David
+  (painkillers+gaming), Sarah (shopping+social media), James (binge eating+
+alcohol), Maya (pornography), Robert (workaholism+stimulants), Chloe
+  (vaping+binge eating), Thomas (cannabis+sugar), Rachel (anxiety meds+
+  shopping). All 5 stars, no dates set.
+- **Typo fixes only (3):** "financial ruined"→"financial ruin" (Sarah),
+  "a endless loop"→"an endless loop" (Chloe), "When rely on"→"When you
+  rely on" (Rachel). Everything else verbatim.
+- ⚠️ **FLAG for Jacques:** `reviews.html` and its OG copy promise "No
+  made-up testimonials — every quote here came from an actual member," and
+  REVENUE-PLAN guardrail #3 is "Never fake proof." If these 10 are real
+  member quotes, fine. If they're not, the page is now making a false claim
+  on a site whose app is IN Google Play review — fabricated endorsements are
+  a Play-policy/FTC risk that can get the listing rejected. Offered him the
+  safe alternative (relabel as illustrative stories + fix the page copy).
+
+---
+
+## 🚨 18 AUG 2026 — HANDOFF FROM JACQUES → RECOVERY-APP AI: Friendly's Gemini 400 (root cause VERIFIED)
+
+**Jacques wants the recovery-app lane to pick this up now.** This is his status
+plus a root cause verified this turn, so nobody re-derives it from scratch.
+
+**His situation (his words):**
+- Friendly calls Gemini via `generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`,
+  key in the `x-goog-api-key` header, key confirmed present on Railway.
+- `gemini-2.5-flash` returned **404 "no longer available to new users, use gemini-3.6-flash"**.
+  Switched to `gemini-3.6-flash`.
+- `gemini-3.6-flash` now returns **HTTP 400 "Request contains an invalid argument."** with no details field.
+- Body sends `systemInstruction`, `contents`, and `generationConfig` with
+  `maxOutputTokens: 4096` and `thinkingConfig: {thinkingBudget: 0}`.
+
+**What he already changed (his words):** any 400 now retries once **without**
+`thinkingConfig`, and `error.details` is logged instead of discarded (the old
+retry only fired when the message contained the word "thinking").
+
+**VERIFIED ROOT CAUSE (found this turn, not a guess):**
+- The invalid field is **`thinkingConfig.thinkingBudget`**. On Gemini 3.x it is
+  **deprecated**; Google rejects it with a bare 400 INVALID_ARGUMENT and no
+  `details` field — exactly his symptom.
+- Replacement is **`thinkingLevel`** (discrete levels, not a token budget).
+  `gemini-3.6-flash` supports `MINIMAL | LOW | MEDIUM | HIGH`, default `MEDIUM`.
+- **Also deprecated on Gemini 3.x: `temperature`, `top_p`, `top_k`.**
+- `maxOutputTokens: 4096` and `systemInstruction` are fine — not the problem.
+
+**Diagnostic note on his intent.** He set `thinkingBudget: 0` to **turn thinking
+off** (cheap/fast). On Gemini 3 thinking is **on by default and cannot be fully
+disabled**, so that intent has no Gemini 3 equivalent — the closest value is
+`thinkingLevel: "MINIMAL"`, which still requires **thought signatures** (or the
+request 400s again).
+
+**Suggestions — offered, NOT implemented (Jacques: fix nothing, suggest only):**
+1. **Drop `thinkingConfig` entirely** — `gemini-3.6-flash` then defaults to
+   `thinkingLevel: MEDIUM`. His existing "retry without thinkingConfig" already
+   does this, so that path should clear the 400.
+2. **To stay cheap/fast** (his original `thinkingBudget: 0` intent), use
+   `thinkingConfig: {thinkingLevel: "LOW"}` — closest to minimal thinking
+   without the thought-signature requirement.
+3. **Avoid `MINIMAL`** unless thought signatures are wired up — it 400s without them.
+4. **Audit Friendly for `temperature` / `top_p` / `top_k`** — also deprecated on
+   Gemini 3.x; remove them if present anywhere.
+
+**Sources:** dgtlmoon/changedetection.io#4283 (identical bare-400 repro on
+Gemini 3.x); Google Cloud "Thinking" model doc (`thinking_level` vs `thinking_budget`).
+
+**Lane note:** this lives in `TurnSomeDayIntoOneday/` (recovery-app AI's lane),
+so it is handed off here, not edited.
+
+---
+
+## 🛠 18 AUG 2026 — SOCIAL CONTENT + OUTREACH BATCH (files written, NOT pushed — waiting on Jacques)
+
+Jacques assigned the social/marketing lane: cards in his "Who catches you"
+style, 20–25s scripts (addict AND supporter), new outreach, and a no-spend
+engagement plan from his real account numbers. Four new files, all at repo
+root, none touch app or Studio code:
+
+- **`SCRIPTS-ADDICT-SUPPORTER.md`** — 15 scripts, 5 each: TALK (T1–T5),
+  SLIDESHOW (S1–S5, photo series + captions), MOVIE (M1–M5, animated + voice).
+  Every one is 20–25s, hook first, and carries the WHAT/WHO/WHEN/WHERE/HOW in
+  the caption. Through-line = the two-sided story (addict + supporter).
+- **`CARDS-ADDICT-SUPPORTER.md`** — 15 cards in his uploaded style (big white
+  line + `#e5c158` turn line + LINK IN BIO footer): 5 addict, 5 supporter,
+  5 paired, with captions + two-frame cut instructions.
+- **`OUTREACH-NEW-2026-08-18.md`** — all unsent: 6 new influencers
+  (Sobertown, Dopey, Recovery Rocks, Sober Motivation, LGBTQ+ host, Sober
+  Curator follow-up), a NEW churches/faith-recovery pitch + 6 targets, a NEW
+  jobs/workplace EAP pitch + 6 targets, 3 new school districts, 5 new rehabs
+  (week 7).
+- **`ENGAGEMENT-PLAN-2026-08-18.md`** — built from his screenshots: FB 6,534
+  views / 9 followers / 3s watch time, YT 3 subs / 494-view top short,
+  TikTok FYP 95.6%. Diagnosis: **reach without retention.** Fixes: two-frame
+  cut for the 3s hook, single-destination bio + one CTA, save/share triggers,
+  double down on the two-sides moat (his own search data proves it).
+
+🔬 Research done 18 Aug: sober content travels on myth-vs-truth turns + naming
+one specific moment; the supporter/family lane is a documented gap (his moat).
+
+⚠️ `tools-md-to-pdf.py` is NOT in this checkout — couldn't render the PDFs
+(RULE ONE). Files are clean markdown; re-add the tool or say the word and I'll
+wire the PDF step.
+
+---
 
 ---
 

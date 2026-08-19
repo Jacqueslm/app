@@ -1569,11 +1569,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:12.5px;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the second half of your program — Days 16–30 — 30 Friendly chats a day instead of 3, and the live rooms, where real people working the same thing you are post into one moderated feed. There's no pressure either way.</div>
+        <div style="font-size:13.5px;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the second half of every program — Days 16–30, including the Spiritual Path and Together — 30 Friendly chats a day instead of 3, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Days 16–30 of every track and pack</div>
+          <div>✓ Days 16–30 of the Spiritual Path</div>
           <div>✓ 30 Friendly chats a day instead of 3</div>
-          <div>✓ The live rooms — real people on your road, one moderated feed</div>
+          <div>✓ Live rooms — a moderated community, open daily</div>
+          <div>✓ Days 16–35 of Supporting Someone</div>
           <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
@@ -1606,7 +1609,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
             <div class="feat y"><i class="ti ti-check"></i>Guided journal prompts &amp; insights</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced streaks &amp; Build Your Own Pack</div>
-            <div class="feat y"><i class="ti ti-check"></i>Together for couples &amp; partner self-check (Days 1–15)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Supporting Someone — a 35-day track for the person who loves them (Days 1–15)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Together — the program you work as a couple (Days 1–15)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Partner self-check</div>
+            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-letter">Partner letter — help them understand</span></div>
+            <div class="feat y"><i class="ti ti-check"></i>Spiritual Path — faith and recovery (Days 1–15)</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>Meditation room with 11 sounds &amp; tracks</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
@@ -1614,7 +1621,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-counter">Sobriety counter &amp; milestones</span></div>
             <div class="feat y"><i class="ti ti-check"></i>Journal (plain text + mood)</div>
             <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-tracker">Craving tracker &amp; withdrawal timeline</span></div>
-            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-letter">Partner letter — help them understand</span></div>
             <div class="feat y"><i class="ti ti-check"></i>Shareable progress cards</div>
             <div class="feat y"><i class="ti ti-check"></i>App lock (PIN) &amp; in-app guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lesson history, reminders, restart &amp; switch categories</div>
@@ -1630,9 +1636,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of every track and pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
             <div class="feat y"><i class="ti ti-check"></i>30 Friendly chats a day instead of 3</div>
-            <div class="feat y"><i class="ti ti-check"></i>Live rooms — post with people working the same thing</div>
+            <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
           </div>
           <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
@@ -1644,7 +1652,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30, 30 Friendly chats a day, and the live rooms.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30 of every program, 30 Friendly chats a day, and the live rooms.</div>
     </div>
 
     <!-- PROFILE -->

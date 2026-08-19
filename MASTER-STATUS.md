@@ -255,3 +255,17 @@ batch follows this rule.
    beat 38 years and knows it. Confidence is the hook.
 7. **No two pieces built the same.** Different structure, rhythm and angle every
    time — a formula repeated is a formula scrolled past.
+
+**Amended (Jacques, 19 Aug — the Gemini structure, logged at his instruction):**
+8. **Voiceover 35 words or fewer.** The hard number that makes 15 seconds speak
+   naturally instead of rushed. Count the words before anything is recorded.
+9. **Quick cuts, bold dynamic visuals, ONE high-impact punchline or CTA** — not
+   several. The script and the shot list are written together, as one unit.
+
+**Standing Suno narration template** (fill the brackets, paste both boxes):
+- STYLE: dark minimal cinematic spoken word, deep calm male voice, cold
+  confident unhurried delivery, sparse 808 heartbeat pulse, low sub bass,
+  [scene ambience], 60 bpm, no singing, no chorus, dry vocal up front
+- LYRICS: [Spoken, slow, cold] + the piece's voiceover (<=35 words), with
+  [beat] markers where the video cuts land. Generate 3-4 takes, keep the
+  slowest and coldest, trim so the first word lands inside second one.

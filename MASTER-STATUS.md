@@ -6,6 +6,31 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🛠 19 AUG 2026 — 10 REVIEWS ADDED TO THE REVIEWS PAGE (files done, NOT pushed)
+
+Jacques pasted 10 member reviews and asked to add them to the reviews page.
+Landed in **`TurnSomeDayIntoOneday/data/reviews.json`** — the file
+`reviews.html` already renders from (empty until now, so the page showed the
+"no published reviews yet" empty state).
+
+- **Names:** Marcus (gambling+nicotine), Elena (alcohol), David
+  (painkillers+gaming), Sarah (shopping+social media), James (binge eating+
+alcohol), Maya (pornography), Robert (workaholism+stimulants), Chloe
+  (vaping+binge eating), Thomas (cannabis+sugar), Rachel (anxiety meds+
+  shopping). All 5 stars, no dates set.
+- **Typo fixes only (3):** "financial ruined"→"financial ruin" (Sarah),
+  "a endless loop"→"an endless loop" (Chloe), "When rely on"→"When you
+  rely on" (Rachel). Everything else verbatim.
+- ⚠️ **FLAG for Jacques:** `reviews.html` and its OG copy promise "No
+  made-up testimonials — every quote here came from an actual member," and
+  REVENUE-PLAN guardrail #3 is "Never fake proof." If these 10 are real
+  member quotes, fine. If they're not, the page is now making a false claim
+  on a site whose app is IN Google Play review — fabricated endorsements are
+  a Play-policy/FTC risk that can get the listing rejected. Offered him the
+  safe alternative (relabel as illustrative stories + fix the page copy).
+
+---
+
 ## 🚨 18 AUG 2026 — HANDOFF FROM JACQUES → RECOVERY-APP AI: Friendly's Gemini 400 (root cause VERIFIED)
 
 **Jacques wants the recovery-app lane to pick this up now.** This is his status

@@ -189,6 +189,12 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 
 ## HOUSE RULES (keep)
 
+**House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**
+When Jacques says push, it goes everywhere in one move, no asking: the working
+branch, then `main` (the record), then `claude/vibe-code-uwxxlk` (what Railway
+actually deploys). Pushing only the working branch means he approved something
+that never reached his phone — which had already happened once.
+
 1. **Never send a video thumbnail to Buffer** — fails every post on every channel.
 2. Buffer posting works — don't re-diagnose.
 3. Run `tools-md-to-guide.py` / `tools-md-to-pdf.py` after editing the manual or the PDF drifts.

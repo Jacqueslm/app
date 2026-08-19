@@ -4556,18 +4556,19 @@ function maybeStartNavTour(){
 // "Silence" button is worse than no row, and the timer works fine in silence.
 //   {k:'file-name-without-extension', label:'What The Button Says', cat:'Music'}
 const MED_SOUNDS=[
-  {k:'rain',        label:'Rain',           cat:'Nature'},
-  {k:'ocean',       label:'Ocean',          cat:'Nature'},
-  {k:'stream',      label:'Stream',         cat:'Nature'},
-  {k:'wind',        label:'Wind',           cat:'Nature'},
-  {k:'night',       label:'Night',          cat:'Nature'},
-  {k:'brown-noise', label:'Deep noise',     cat:'Tones'},
-  {k:'warm-hum',    label:'Warm hum',       cat:'Tones'},
-  {k:'deep-drone',  label:'Low drone',      cat:'Tones'},
-  {k:'singing-bowl',label:'Singing bowl',   cat:'Tones'},
-  {k:'breathe',     label:'Breathe with it',cat:'Tones'},
+  {k:'rain',                  label:'Rain',                   cat:'Nature'},
+  {k:'ocean',                 label:'Ocean',                  cat:'Nature'},
+  {k:'night',                 label:'Night',                  cat:'Nature'},
+  {k:'whispers-in-the-forest',label:'Whispers in the Forest', cat:'Music'},
+  {k:'cozy-storm',            label:'Cozy Storm',             cat:'Music'},
+  {k:'fading-into-the-night', label:'Fading into the Night',  cat:'Music'},
+  {k:'midnight-lullaby',      label:'Midnight Lullaby',       cat:'Music'},
+  {k:'himalayan-still',       label:'Himalayan Still',        cat:'Music'},
+  {k:'night-fade',            label:'Night Fade',             cat:'Music'},
+  {k:'deep-focus',            label:'Deep Focus',             cat:'Music'},
+  {k:'still-waters',          label:'Still Waters',           cat:'Music'},
 ];
-const MED_CATS=['Nature','Tones','Music'];
+const MED_CATS=['Nature','Music'];
 let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0,medAudio=null;
 function medChip(k,label,on){
   return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:12.5px;border-radius:20px;cursor:pointer;font-family:var(--f);

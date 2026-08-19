@@ -41,20 +41,28 @@ override it. Resume-on-return is the real fix available.
 - og/share images: ours.
 Nothing in the app carries a non-commercial or attribution-required licence.
 
-**Meditation sound — Jacques's music, not mine.** I generated ten ambient beds
-from scratch with ffmpeg; he listened and said delete them. They were removed
-before they ever reached the remote, history rewritten, so the repo never
-carries the 28MB (`.git` is already 1.6GB — audio is the only thing in here big
-enough to matter). `MED_SOUNDS` is now an EMPTY ARRAY and an empty array hides
-the picker completely — a row with one dead "Silence" button is worse than no
-row, and the timer works fine in silence.
-
-**How his music gets added:** he sends CATEGORY + TRACK. **The category is the
-button label, word for word.** Drop the files in `audio/meditation/` and add one
-line each to `MED_SOUNDS`; the row, the 2s fade-in and stop-on-close all size
-themselves off that array. Past ~16 tracks, render as categories with tracks
-under each instead of a wall of chips. Ceiling is ~24 tracks (~65MB) before the
-repo starts paying for it permanently; past 40, move audio to a bucket first.
+**Meditation sound — 11 tracks, Nature and Music.**
+- **Nature (3):** Rain, Ocean, Night — synthesised from scratch with ffmpeg for
+  this app. Original work, so no licence question is possible. Jacques listened
+  to all ten I made and kept these three; the other seven were deleted.
+- **Music (8):** Jacques's own Suno tracks, 2:26–3:35 each: Whispers in the
+  Forest, Cozy Storm, Fading into the Night, Midnight Lullaby, Himalayan Still,
+  Night Fade, Deep Focus, Still Waters. Suno commercial plan, already logged.
+- **What every incoming track gets:** the silent head and tail trimmed (Suno
+  leaves 0.5–2.2s, which becomes a hole of dead air at the loop point); a 2.5s
+  crossfade wrapping the tail over the head so it repeats without a cut; and
+  one loudness for everything (-20 LUFS, -3dB true peak) so no track is buried
+  behind another. Jacques's originals peaked at 0.0dB, dead on the ceiling.
+- **Suno cannot make beds.** Its sound effects come out 5–12 seconds long — a
+  clip, not something you can sit inside for ten minutes. Rain at 4.8s repeats
+  62 times a minute and the ear locks onto it. That is why the nature beds are
+  synthesised and the music is his.
+- **Adding a track is one line** in `MED_SOUNDS`: file key, the label the button
+  says word for word, and its category. A category with no tracks never draws;
+  an empty array hides the picker completely.
+- **I cannot hear any of it.** Every judgement above is a meter reading. Jacques
+  caught the singing bowl being inaudible when the numbers said it was fine —
+  the ear is his job, and levels are mine.
 
 Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
 

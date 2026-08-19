@@ -2777,6 +2777,13 @@ function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 // ─── STATE ───────────────────────────────────────────────────────────────────
+// Daily chat quotas - client mirror of FREE_CHAT_LIMIT / PRO_CHAT_LIMIT in
+// server/server.js; keep both files in step.
+const FREE_CHAT_DAILY_LIMIT=3;
+const PRO_CHAT_DAILY_LIMIT=30;
+// The reviews page's "Write one in the app" button lands here as ?review=1;
+// the modal opens once the user is signed in and past onboarding.
+let pendingReviewOpen=!!(new URLSearchParams(window.location.search).get('review')==='1');
 let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
   selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
@@ -2788,7 +2795,7 @@ let S = {
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
-  chatsLeft:3,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
+  chatsLeft:FREE_CHAT_DAILY_LIMIT,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
@@ -4490,6 +4497,7 @@ function finishOnboard(){
   // leave a different screen (e.g. Profile) still marked active.
   switchTo('home');actBn('bn-home');
   initApp();
+  maybeOpenPendingReview();
 }
 
 // ─── APP TOUR (navigation walkthrough) ────────────────────────────────────────
@@ -4673,6 +4681,16 @@ function renderReviewStars(){
   if(!el)return;
   el.innerHTML=[1,2,3,4,5].map(n=>`<span onclick="reviewStars=${n};renderReviewStars()" style="color:${n<=reviewStars?'var(--green)':'var(--tm)'}">${n<=reviewStars?'★':'☆'}</span>`).join('');
 }
+function maybeOpenPendingReview(){
+  if(!pendingReviewOpen)return;
+  pendingReviewOpen=false;
+  // One-shot CTA: drop ?review=1 so a reload or back-gesture doesn't re-open
+  // the modal on every visit.
+  try{history.replaceState(null,'',window.location.pathname);}catch(e){}
+  setTimeout(function(){
+    if(S.startDate&&document.getElementById('main-app').style.display==='flex')openReviewModal();
+  },500);
+}
 async function openReviewModal(){
   document.getElementById('review-modal').style.display='flex';
   document.getElementById('review-msg').style.display='none';
@@ -4834,8 +4852,8 @@ function initApp(){
   renderTodayMood();
   // reset daily chat limit
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;save();}
-  document.getElementById('chatsLeft').textContent=S.chatsLeft;
+  if(S.chatDate!==today){S.chatsLeft=FREE_CHAT_DAILY_LIMIT;S.chatDate=today;save();}
+  document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();
   // init Friendly welcome - voiced for who's actually sitting there: the person in
   // recovery, the one carrying someone else's, or the one doing both.
   renderQuickChips();
@@ -10125,7 +10143,7 @@ async function sendMsg(){
   const inp=document.getElementById('chatInput');
   const text=inp.value.trim();if(!text)return;
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=3;S.chatDate=today;}
+  if(S.chatDate!==today){S.chatsLeft=FREE_CHAT_DAILY_LIMIT;S.chatDate=today;}
   if(!S.isPro&&S.chatsLeft<=0){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
@@ -10133,7 +10151,7 @@ async function sendMsg(){
       :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. The SOS tools on Home are free and always open if you need something before then: guided breathing, grounding, and \"Talk me through it\". 💜");
     return;
   }
-  if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;save();}
+  if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();save();}
   inp.value='';inp.style.height='auto';
   addBubble('user',text);
   S.chatHistory.push({role:'user',content:text,at:Date.now()});
@@ -10226,7 +10244,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     setNovaMode(!!liveText);
     // A real AI reply consumed one of the day's chats server-side - refresh the
     // Pro meter so it ticks down live. (Guided-mode fallbacks don't count.)
-    if(S.isPro&&liveText)updateChatMeter();
+    if(liveText)updateChatMeter();
     S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
     save();showTyping(false);addBubble('nova',reply);
@@ -10236,7 +10254,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     // session happened - only a canned local reply. Refund it so three flaky
     // attempts at 2am don't burn the day's free chats without a single answer.
     // (A 429 real-limit hit returns earlier and never reaches here.)
-    if(!S.isPro){S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;}
+    if(!S.isPro){S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();}
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
@@ -10572,7 +10590,7 @@ function stayFreeForNow(){
 }
 function selectFree(){
   if(S.isPro){cancelProSubscription();return;}
-  S.isPro=false;S.chatsLeft=3;save();updateTierUI();
+  S.isPro=false;S.chatsLeft=FREE_CHAT_DAILY_LIMIT;save();updateTierUI();
   stayFreeForNow();
 }
 async function becomePro(plan){
@@ -10732,7 +10750,6 @@ function handleSubStatusAction(){
 // Only Pro uses this - Free is counted on the client. If the fetch fails
 // (offline), the bar just shows the daily cap rather than a wrong number.
 async function updateChatMeter(){
-  if(!S.isPro)return;
   const barTxt=document.getElementById('limitBarText');
   if(!barTxt)return;
   try{
@@ -10740,9 +10757,17 @@ async function updateChatMeter(){
     if(!r.ok)throw new Error();
     const d=await r.json();
     const left=Math.max(0,d.remaining);
-    barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' Friendly chats left today';
+    if(S.isPro){
+      barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' Friendly chats left today';
+    }else{
+      // The server owns the daily quota (it resets at UTC midnight, not the
+      // device clock) - so the free meter follows the server, never local time.
+      S.chatsLeft=left;S.chatDate=new Date().toDateString();
+      const el=document.getElementById('chatsLeft');if(el)el.textContent=left;
+      save();
+    }
   }catch(e){
-    barTxt.innerHTML='Up to <strong>30</strong> Friendly chats a day';
+    if(S.isPro)barTxt.innerHTML='Up to <strong>'+PRO_CHAT_DAILY_LIMIT+'</strong> Friendly chats a day';
   }
 }
 function updateTierUI(){
@@ -10755,7 +10780,7 @@ function updateTierUI(){
   const proCta=document.getElementById('pro-cta');
   if(S.isPro){
     badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
-    if(novaLbl)novaLbl.textContent='Pro · 30/day';
+    if(novaLbl)novaLbl.textContent='Pro · '+PRO_CHAT_DAILY_LIMIT+'/day';
     // Pro now sees a live "X of 30 left today" meter too (no upgrade button).
     // The actual number comes from the server via updateChatMeter().
     if(limitBar)limitBar.style.display='flex';
@@ -10994,6 +11019,7 @@ async function submitPinEntry(){
   document.getElementById('pin-lock').style.display='none';
   document.getElementById('main-app').style.display='flex';
   if(wasUnlock)initApp();
+  maybeOpenPendingReview();
 }
 
 // ─── PROFILE / SETTINGS ──────────────────────────────────────────────────────
@@ -12663,6 +12689,7 @@ function enterApp(){
     }else{
       document.getElementById('main-app').style.display='flex';
       initApp();
+      maybeOpenPendingReview();
     }
   }else{
     document.getElementById('onboarding').style.display='flex';

@@ -961,7 +961,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
          one door to all of it. -->
     <div id="s-lesson-library" class="scr">
       <div class="sec">
-        <input id="lesson-lib-search" type="search" placeholder="Search every lesson\u2026"
+        <input id="lesson-lib-search" type="search" placeholder="Search every lesson…"
                oninput="renderLessonLibrary()" autocomplete="off"
                style="width:100%;box-sizing:border-box;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--tp);font-family:inherit;margin-bottom:6px">
         <div id="lesson-lib-count" style="font-size:11.5px;color:var(--tm);margin:0 2px 12px"></div>
@@ -1418,7 +1418,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="setting-row" onclick="openLessonLibrary()">
         <i class="ti ti-book"></i>
-        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app \u2014 all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
+        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app — all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -10273,7 +10273,13 @@ const SCREEN_MAP={
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
   analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
-  'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner'
+  'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner',
+  // The Lesson Library was in TITLES but never here, so switchTo looked up
+  // getElementById(undefined), found nothing, and added 'on' to no screen -
+  // while still stripping 'on' off every other one. The header said "Lesson
+  // Library" over a completely blank page, with all 518 lessons built and
+  // sitting in memory behind it.
+  'lesson-library':'s-lesson-library'
 };
 const TITLES={
   'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
@@ -11389,7 +11395,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.4';
+const APP_VERSION='6.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

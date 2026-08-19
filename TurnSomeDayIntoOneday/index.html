@@ -4537,32 +4537,54 @@ function maybeStartNavTour(){
   if(!S.navTourDone)setTimeout(startNavTour,300);
 }
 // ─── MEDITATION ROOM ─────────────────────────────────────────────────────────
-// The sound beds live here. Jacques is supplying the music himself, sent as
-// CATEGORY + TRACK - the category is the label the button shows, word for word.
-// Until those land this list is empty, and an empty list hides the picker
-// entirely rather than showing a row with one dead "Silence" button on it.
+// The sound beds live here. Jacques is supplying the audio himself: 11 tracks -
+// three nature beds (rain, thunder, ocean) and eight pieces of music.
 //
-// To add music: drop the files in audio/meditation/ and add one line each
-// below. Nothing else has to change - the row, the fade-in and the stop-on-
-// close all size themselves off this array.
+// Eleven loose buttons wrap into a block on a phone and nobody reads past the
+// first line, so they render under headings instead. `cat` is the heading;
+// `label` is what the button says, word for word as Jacques names it.
+//
+// TO ADD A TRACK: drop the file in audio/meditation/ and add one line below.
+// Nothing else changes - the headings, the fade-in and the stop-on-close all
+// size themselves off this array, and a category with no tracks in it never
+// draws. An empty array hides the whole picker: a row offering one dead
+// "Silence" button is worse than no row, and the timer works fine in silence.
+//   {k:'file-name-without-extension', label:'What The Button Says', cat:'Music'}
 const MED_SOUNDS=[];
+const MED_CATS=['Nature','Music'];
 let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0,medAudio=null;
+function medChip(k,label,on){
+  return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:12.5px;border-radius:20px;cursor:pointer;font-family:var(--f);
+    background:${on?'rgba(126,232,162,.22)':'rgba(255,255,255,.08)'};
+    border:1px solid ${on?'var(--green)':'rgba(255,255,255,.25)'};
+    color:${on?'var(--green)':'#fff'}">${label}</button>`;
+}
 function renderMedSounds(){
   const row=document.getElementById('med-sound-row');
   if(!row)return;
-  // No music loaded yet: no row. A picker offering nothing is worse than no
-  // picker, and the timer works fine in silence.
   const wrap=document.getElementById('med-sound-wrap');
   if(!MED_SOUNDS.length){row.innerHTML='';if(wrap)wrap.style.display='none';return;}
   if(wrap)wrap.style.display='';
   const cur=S.medSound||'none';
-  row.innerHTML=[{k:'none',label:'Silence'}].concat(MED_SOUNDS).map(sd=>{
-    const on=sd.k===cur;
-    return `<button onclick="pickMedSound('${sd.k}')" style="margin:0;padding:8px 13px;font-size:12.5px;border-radius:20px;cursor:pointer;font-family:var(--f);
-      background:${on?'rgba(126,232,162,.22)':'rgba(255,255,255,.08)'};
-      border:1px solid ${on?'var(--green)':'rgba(255,255,255,.25)'};
-      color:${on?'var(--green)':'#fff'}">${sd.label}</button>`;
-  }).join('');
+  // Silence sits on its own above the categories - it is not a track, it is the
+  // way out of whichever one is playing.
+  let html=`<div style="width:100%;display:flex;justify-content:center">${medChip('none','Silence',cur==='none')}</div>`;
+  // Any category named in MED_CATS first, in that order, then anything with a
+  // category nobody listed - so a typo in `cat` still shows its track instead
+  // of silently swallowing it.
+  const seen=[];
+  const cats=MED_CATS.concat(MED_SOUNDS.map(s=>s.cat).filter(c=>c&&MED_CATS.indexOf(c)<0));
+  for(const cat of cats){
+    if(seen.indexOf(cat)>=0)continue;
+    seen.push(cat);
+    const inCat=MED_SOUNDS.filter(sd=>(sd.cat||'Music')===cat);
+    if(!inCat.length)continue;
+    html+=`<div style="width:100%;margin-top:14px">
+      <div style="font-size:10.5px;letter-spacing:1.4px;opacity:.6;margin-bottom:7px;text-transform:uppercase">${cat}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${inCat.map(sd=>medChip(sd.k,sd.label,sd.k===cur)).join('')}</div>
+    </div>`;
+  }
+  row.innerHTML=html;
 }
 function pickMedSound(k){
   S.medSound=k;save();

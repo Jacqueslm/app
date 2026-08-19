@@ -337,8 +337,9 @@ edit the timeline, re-render, new video.
 "Big brands don't change, so we don't either." These are not per-video choices.
 Every AI-built video carries all of them, identically, every time:
 
-1. **Corner watermark.** The handshake symbol sits in the TOP-RIGHT corner of
-   every frame of every video, start to finish - not just the end card. It is
+1. **Corner watermark.** The handshake symbol sits in the BOTTOM-RIGHT corner of
+   every frame of every video, start to finish - not just the end card. Lifted
+   ~210px off the bottom edge so TikTok's caption and buttons never cover it. It is
    the branding: someone who scrolls past ten of these should recognise the
    eleventh before they read a word.
 2. **The brand line.** "An app for YOU and the one who SUPPORTS YOU" - "you" and

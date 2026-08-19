@@ -633,6 +633,11 @@ function updateSubscriptionFromStripe(userId, fields) {
 }
 
 module.exports = {
+  // The raw node:sqlite handle. auto-backup.js needs it to run VACUUM INTO;
+  // without this export every snapshot threw "db.exec is not a function" and
+  // the pre-update backup failed SILENTLY, so updates ran with no safety net.
+  raw: db,
+  exec: (sql) => db.exec(sql),
   createUser,
   getUserByEmail,
   getUserById,

@@ -775,3 +775,495 @@ emails. Same rules: one a week, only after Tuesday's five rehab emails.
 
 It was here as three templates with no districts to send them to. It isn't
 much use as a template without a list.
+
+
+---
+
+# NEW BATCH — 17 Aug 2026 — WEEKS 7-10 (20 fresh targets)
+
+Twenty organizations nobody in OUTREACH.md, COMPANIES.md or SCHOOLS.md has
+touched — app-list publishers, family-side nonprofits, recovery community
+centers, other-habit orgs, and faith networks, with Missouri first wherever
+possible. Send five per Tuesday, top to bottom — that's four Tuesdays; every
+entry is copy-paste-send ready, and where I couldn't see a real email on their
+site I say so plainly and give you the form and the `info@` fallback instead.
+
+**How addresses were verified:** this machine can search the web but most
+individual sites are blocked from direct fetching. Every email marked
+**verified** appeared in public search listings of the org's own contact page.
+Anything marked **try first** is the standard `info@` guess from OUTREACH.md's
+own playbook — if it bounces, use the form. No address below is invented.
+
+---
+
+## LANE 1 — RECOVERY MEDIA & APP LISTICLES
+
+### 1. Avenues Recovery
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** the contact options at https://www.avenuesrecovery.com/ — no email
+found in listings; **try info@avenuesrecovery.com first**, else the site form.
+Their article: https://www.avenuesrecovery.com/understanding-addiction/life-after-rehab/best-addiction-recovery-apps/
+
+**Subject:** Your best addiction recovery apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your "Best Addiction Recovery Apps for Sobriety" article in your life-after-rehab section — smart placement, because the app question really starts the day someone leaves treatment.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 2. Ashley Addiction Treatment
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@ashleytreatment.org** — verified: published on
+https://www.ashleytreatment.org/contact-us/ per public listings.
+Their article: https://www.ashleytreatment.org/rehab-blog/helpful-sobriety-apps/
+
+**Subject:** Your helpful sobriety apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your "Helpful Sobriety Apps to Aid in Recovery" article on the Ashley blog. You're a nonprofit that's been at this longer than most of the apps you review have existed — which is exactly why I'm writing to you.
+
+Here's the gap no list has filled: an app for the family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 3. Hawaiian Recovery
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** the contact options at https://hawaiianrecovery.com/ — no email
+found in listings; **try info@hawaiianrecovery.com first**, else the site form.
+Their article: https://hawaiianrecovery.com/rehab-blog/best-recovery-apps-to-support-sobriety-which-sobriety-app-is-for-you
+
+**Subject:** Your "which sobriety app is for you" article — one answer it's missing
+
+Hi team,
+
+I came across your article "Best Recovery Apps to Support Sobriety: Which Sobriety App Is for You?" — I like that you frame it as matching the app to the person, because there's one person the whole category has no answer for.
+
+The family. The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+### 4. California Recovery Center
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** the contact options at https://calrecoverycenter.com/ — no email
+found in listings; **try info@calrecoverycenter.com first**, else the site form.
+Their article: https://calrecoverycenter.com/the-best-addiction-apps-for-recovery-support/
+
+**Subject:** Your best addiction apps article — the gap nobody's filled
+
+Hi team,
+
+I came across your article "The Best Addiction Apps for Recovery & Support." The word "support" is doing a lot of work in that title — because the person doing the supporting still has no app on that list, or any list.
+
+The wife watching it happen gets meetings and books — never software. Support groups for families have existed since 1951, and nobody ever built them an app.
+
+I did. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If you're refreshing the article, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques
+Turn Someday Into Day One
+
+---
+
+## LANE 2 — FAMILY-SIDE ORGANIZATIONS
+
+### 5. Parents of Addicted Loved Ones (PAL)
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@palgroup.org** — verified: published on their contact page
+per public listings. Phone (480) 300-4712. They keep a resources page at
+https://palgroup.org/resources/
+
+**Subject:** A free app for the people who come to PAL meetings
+
+Hi team,
+
+PAL is one of the very few organizations built for the parent and the spouse rather than the person using — the exact people the second half of my app was made for, which is why I'm writing to you before almost anyone else.
+
+Here's what I lived: I was addicted for 38 years, and the people who loved me had meetings and books and nothing else. Support groups for families have existed since 1951, and nobody ever built them an app. At 50 it was do or die for me, and I built the thing my family and I both needed: Turn Someday Into Day One. Half of it is for him — day counter, SOS tools, lessons. The other half is for the person who loves him. The core app is free, so it costs your members nothing to look.
+
+If it belongs on your resources page, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 6. Learn to Cope
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **ltc@learn2cope.org** — verified: published on
+https://learn2cope.org/contact/ per public listings. Phone (508) 738-5148.
+
+**Subject:** For the families in your chapters — a free app built for their side
+
+Hi team,
+
+Learn to Cope was started by families, run by families, and everything on your site is pointed at the person carrying it rather than the person using — that's rare, and it's exactly who I built for.
+
+Support groups for families have existed since 1951, and nobody ever built them software. The mother or the wife leaves your meeting with people who understand and a list of resources — and then it's Tuesday night and the meeting is days away.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing my family and I both needed: Turn Someday Into Day One — day counter, SOS tools, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free.
+
+If it belongs in the resources you hand your chapters, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 7. Herren Project
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@herrenproject.org** — verified: published on
+https://herrenproject.org/contact/ per public listings. Phone (844) 543-8555.
+
+**Subject:** From one story-built organization to another — a free tool for your families
+
+Hi team,
+
+Herren Project exists because one man told his story straight, and everything you offer — treatment placement, family support — is free. My app runs on the same two ideas, which is why I'm writing to you.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed and couldn't afford: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. That last part matters most here: support groups for families have existed since 1951, and nobody ever built them software. The families who call your line are exactly who that half is for. The core app is free.
+
+If it belongs among the resources you give families, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 8. Partnership to End Addiction
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **contact@toendaddiction.org** — verified: published on
+https://drugfree.org/contact-us/ per public listings. Phone (212) 841-5200.
+
+**Subject:** The family side of addiction finally has software — free
+
+Hi team,
+
+Partnership to End Addiction is where families find answers — your own front page says so, and your helpline talks parents through the hardest conversations they'll ever have. That's the audience half of my app was built for.
+
+Support groups for families have existed since 1951, and nobody ever built them software. The parent or the wife gets meetings and books; the phone in their pocket has nothing.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing my family and I both needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. The core app is free, so it costs a family nothing to try.
+
+If it belongs among your family resources, I'd love for you to take a look: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+## LANE 3 — RECOVERY COMMUNITY ORGANIZATIONS
+
+### 9. MoNetwork — St. Louis
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **Michelle@monetwork.org** — from a public staff/directory
+listing, not seen on their own site (blocked from here); if it bounces, the
+site is https://www.monetwork.org/ and they answer (314) 376-5400.
+**Better still: they're at 4022 S Broadway — you're in St. Louis. Walk in.**
+
+**Subject:** A St. Louis guy with a free recovery app — for your drop-in folks and their families
+
+Hi Michelle,
+
+I'm in St. Louis too, so first: thank you for what MoNetwork does on Broadway — the drop-in space, the family support, the no-judgment door. That combination is exactly why I'm writing to you and not a hundred other places.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the family. That last part matters at your center: the mother or wife who walks in with someone gets meetings and books — support groups for families have existed since 1951, and nobody ever built them software. The core app is free — no card, no cost to you or them.
+
+Worth a look for your resource list: https://www.turnsomedayintodayone.com — and I'm ten minutes away if you'd rather I just come by.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 10. Missouri Coalition of Recovery Support Providers (MCRSP)
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** no published email found — **try info@mcrsp.org first**, else the
+contact options at https://mcrsp.org/ or phone (573) 761-1087. Jefferson City.
+
+**Subject:** A free recovery app from a Missouri founder — for your member organizations
+
+Hi team,
+
+MCRSP is a network of faith, peer and community organizations rebuilding lives across Missouri — and I'm a Missouri founder with something free your members can hand out without a purchase order.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, a private journal, lessons across 13 habit tracks, and a whole section for the family. Support groups for families have existed since 1951, and nobody ever built them software — and the families are half of who your member organizations serve. The core app is free and stays free.
+
+If it belongs on the resource lists your members keep, it's theirs: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself, and I'm in St. Louis if a conversation helps.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 11. First Call KC — Kansas City
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **admin@firstcallkc.org** — from public nonprofit listings, not
+seen on their own site (blocked from here); if it bounces, the contact options
+at https://www.firstcallkc.org/. They run a 24/7 helpline and family programs.
+
+**Subject:** For the families who call First Call — a free app for their side of it
+
+Hi team,
+
+First Call teaches families how to be the safety net their loved one needs — your own words, and almost nobody else in Missouri says it that plainly. That safety net is who half of my app was built for.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing my family and I both needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, lessons across 13 habit tracks, and a whole section for the person who loves them. Support groups for families have existed since 1951, and nobody ever built them software. The core app is free — no card, nothing for your team to administer.
+
+I'm a Missouri founder, on the other end of I-70 in St. Louis. If it belongs in your family services materials, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 12. Minnesota Recovery Connection
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@minnesotarecovery.org** — verified: published in their
+public listings. Phone (612) 584-4158. The state's first recovery community
+organization; they run telephone recovery support.
+
+**Subject:** A free app for the hours your phone support can't cover
+
+Hi team,
+
+Minnesota Recovery Connection was founded by people in recovery, their families, and allies — you put the families in your founding sentence, which almost nobody does. And your telephone recovery support means you already know the phone is where recovery gets held together between meetings.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment when nobody's on shift, lessons across 13 habit tracks, and a whole section for the family. Support groups for families have existed since 1951, and nobody ever built them software. The core app is free.
+
+If it belongs among the resources you point your community to, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+## LANE 4 — OTHER-HABIT ORGANIZATIONS
+
+### 13. Illinois Council on Problem Gambling
+- [ ] Sent
+**Where:** the contact page at https://illinoisproblemgambling.org/contact/ —
+their email is obfuscated in listings so I won't guess it; the form is real,
+or phone 833-937-4274. They keep a resources page at
+https://illinoisproblemgambling.org/resources/ — that's the ask.
+(They're across the river from you — the only statewide gambling council in Illinois.)
+
+**Subject:** For your resources page — a free app with a real gambling track, and one for the family
+
+Hi team,
+
+You're the statewide voice on problem gambling in Illinois, and your resources page is where a lot of desperate 2am searches end up — I'm writing from just across the river in St. Louis with something free that belongs on it.
+
+I was addicted for 38 years — my thing wasn't cards, but the 2am moment is the same in every addiction. At 50 it was do or die, and I built what I needed: Turn Someday Into Day One — day counter, SOS tools, a private journal, and lessons across 13 habit tracks, gambling included. And a whole section for the family, because the spouse who finds the bank statement gets meetings and books — support groups for families have existed since 1951, and nobody ever built them software. The core app is free.
+
+Worth a look for the resources page: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 14. ANAD — National Association of Anorexia Nervosa and Associated Disorders
+- [ ] Sent
+**Where:** the form at https://anad.org/contact-us/ — their email is obfuscated
+in listings so I won't guess it; helpline (630) 577-1330 is for people in
+crisis, don't use it for this.
+
+**Subject:** A free app that never asks anyone to diet — and includes the family
+
+Hi team,
+
+ANAD runs free peer support for eating disorders, so let me lead with what my app is not: it doesn't diagnose, doesn't treat, and its food track never asks anyone to restrict, count, or diet — and when someone's struggle is bigger than a habit, it points them toward professional and peer support like yours.
+
+What it does do: I was addicted for 38 years — my battles were elsewhere, but the shape is the same. At 50 I built what I needed: Turn Someday Into Day One — a day counter, SOS tools for the hardest moment, a private journal, gentle lessons, and a whole section for the family. The person watching someone they love struggle has had support groups since 1951 and never software. The core app is free.
+
+If it fits anywhere in your resources, it's yours — and if it doesn't, I'd trust your judgment on that: https://www.turnsomedayintodayone.com
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 15. Fight the New Drug
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@fightthenewdrug.org** — verified: published on
+https://fightthenewdrug.org/contact-us/ per public listings.
+
+**Subject:** Built by someone who lived it 38 years — a free app your readers ask you for
+
+Hi team,
+
+Fight the New Drug tells people the truth about porn without shame and without preaching — and then thousands of them ask the same question: okay, now what do I actually do tonight?
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the moment the pull hits, a private journal, and lessons across 13 habit tracks, including this one, written by someone who lived it rather than studied it. And a whole section for the partner — the person on the other side of that closed door, who's had support groups since 1951 and never software. The core app is free.
+
+If it belongs among the resources you point people to, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 16. American Lung Association in Missouri
+- [ ] Sent
+**Where:** their Missouri page is https://www.lung.org/mo — office phone
+(314) 645-5505 (that's St. Louis). Email is obfuscated in listings so I won't
+guess it; use the contact form on lung.org, or ring the St. Louis office and
+ask where to send a community resource.
+
+**Subject:** A St. Louis founder with a free quit app — smoking track included, family included
+
+Hi team,
+
+You run Freedom From Smoking from an office ten minutes from my house, so I'll keep this local and short.
+
+I was addicted for 38 years — smoking was one of the things that owned me. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — a day counter, an SOS button for the moment the craving hits, a private journal, and daily lessons, with a dedicated smoking track. It also has a whole section for the family, because the husband or wife of a smoker trying to quit has never had a tool of their own. The core app is free and stays free.
+
+It doesn't replace a class, a quitline, or a clinician — it's for the hours between them. If it belongs anywhere in your Missouri resources, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+St. Louis, Missouri — Turn Someday Into Day One
+
+---
+
+## LANE 5 — FAITH & COMMUNITY
+
+### 17. Adult & Teen Challenge USA
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **feedback@teenchallengeusa.org** — verified: published on their
+own FAQ/contact pages per listings. National office: 5250 N Towne Center Dr,
+Ozark, MO — a Missouri organization, like you.
+
+**Subject:** From a Missouri founder — a free app for the families who call your centers
+
+Hi team,
+
+Your national office is in Ozark and I'm in St. Louis, so this is one Missourian writing to another. Adult & Teen Challenge runs Christ-centered residential recovery across the country — and every man or woman in one of your centers has a family at home carrying it, praying, waiting.
+
+That family is who half of my app was built for. Support groups for families have existed since 1951, and nobody ever built them software. I was addicted for 38 years; at 50 it was do or die, and I built what I needed: Turn Someday Into Day One — day counter, SOS tools, a private journal, daily lessons including a Spiritual Path track, and a whole section for the person who loves them. The core app is free.
+
+It doesn't replace a program like yours — it's for the family at home, and for the days after graduation. If it belongs in what you hand families, it's yours: https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, Missouri — Turn Someday Into Day One
+
+---
+
+### 18. Catholic in Recovery
+- [x] Sent 18 Aug 2026 · Sent
+**Send to:** **info@catholicinrecovery.com** — verified: published in their
+public listings. Phone (614) 558-7219.
+
+**Subject:** For the six days between your meetings — a free app with a spiritual track
+
+Hi team,
+
+Catholic in Recovery brings the sacraments and the steps together, and your groups include the family members and loved ones — you're one of the few recovery ministries that names them at all.
+
+Here's the gap I built for: the meeting is one day, and the week is the hard part. I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed for the six days between meetings: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, a private journal, daily lessons including a Spiritual Path track, and a whole section for the person who loves them. Families have had support groups since 1951 and never software. The core app is free.
+
+It's not a group and not a sponsor and never pretends to be either. If it belongs among your resources, it's yours: https://www.turnsomedayintodayone.com
+
+Jacques Malone
+Turn Someday Into Day One
+
+---
+
+### 19. Love Columbia
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** no published email found — **try info@lovecolumbia.org first**, else
+the contact options at https://lovecolumbia.org/. The page this email is about:
+https://lovecolumbia.org/faith-based-recovery-programs-in-missouri (they also
+keep an Addictions page in their Columbia Resource Directory).
+
+**Subject:** Your faith-based recovery programs page — a free Missouri-built addition
+
+Hi team,
+
+I found your directory of faith-based recovery programs in Missouri — Celebrate Recovery, CORE, Lifechangers — and it's one of the most useful pages of its kind in the state. I'm writing from St. Louis with something free that fills the one gap on it.
+
+Every program on that page meets weekly or takes someone in residentially. Nothing on it lives in a person's pocket between those meetings — or gives the family anything at all. Families have had support groups since 1951 and never software.
+
+I was addicted for 38 years. At 50 it was do or die, and I built what I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, a private journal, daily lessons including a Spiritual Path track, and a whole section for the person who loves them. The core app is free.
+
+If it belongs in your directory, it's yours: https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, Missouri — Turn Someday Into Day One
+
+---
+
+### 20. Faith Partners
+- [x] Sent 18 Aug 2026 · Sent
+**Where:** no published email found — **try info@faith-partners.org first**,
+else the contact options at https://www.faith-partners.org/. Executive
+Director is Drew Brooks; they're in St. Paul, MN. They train congregational
+addiction-ministry teams across many faith traditions.
+
+**Subject:** A free tool for the congregational teams you train
+
+Hi Drew,
+
+Faith Partners trains small teams of lay people to carry addiction awareness and recovery support inside their own congregations — hundreds of teams, many traditions. Those team members aren't clinicians; what they need most is something free and simple to put in a struggling person's hands on a Sunday.
+
+I was addicted for 38 years. At 50 it was do or die, and I built the thing I needed: Turn Someday Into Day One — day counter, SOS tools for the 2am moment, a private journal, daily lessons including a Spiritual Path track, and a whole section for the family. The person who loves an addicted person has had support groups since 1951 and never software — and in a congregation, it's usually that person who approaches the team first. The core app is free and stays free.
+
+If it belongs in your team training materials, it's yours: https://www.turnsomedayintodayone.com
+
+Happy to answer anything — I read every reply myself.
+
+Jacques Malone
+Turn Someday Into Day One

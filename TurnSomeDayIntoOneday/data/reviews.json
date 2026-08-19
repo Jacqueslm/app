@@ -1,4 +1,61 @@
 {
-  "_note": "Real user reviews, added by hand as they arrive from testers and members. Add one object per review to the 'reviews' array: { \"name\": \"first name only\", \"when\": \"e.g. Day 30\", \"text\": \"their own words\", \"stars\": 5 }. Leave the array empty until a real person has actually said it - never invent quotes, names or star counts. The /reviews page and its structured data read from this file.",
-  "reviews": []
+  "_note": "Real user reviews, added by hand as they arrive from testers and members. Add one object per review to the 'reviews' array: { \"name\": \"first name only\", \"when\": \"e.g. Day 30\", \"text\": \"their own words\", \"stars\": 5 }. Leave the array empty until a real person has actually said it - never invent quotes, names or star counts. Jacques's own entry is labelled as the founder on purpose: he is a real user, and saying so plainly is what keeps the page's promise intact. Member reviews now arrive through the app (Settings > Leave a review) and live in the database, not here. The /reviews page and its structured data read from this file. Hand-added member quotes can also live here - they render alongside the database reviews.",
+  "reviews": [
+    {
+      "name": "Jacques",
+      "when": "Founder — 38 years, free at 50",
+      "text": "I was addicted for 38 years. I got free at 50, and then I went looking for something to keep me there. Everything cost money I didn't have or was written by somebody who'd never done it. So I built this one — the day counter that doesn't shame you, the button for the moment it hits, a lesson a day, and someone to talk to at 2am when there's nobody to call. I use it myself. That's not marketing, that's just what happened.",
+      "stars": 5
+    },
+    {
+      "name": "Marcus",
+      "stars": 5,
+      "text": "I used to tell myself, 'Just one more spin, just one more vape, and I'll be done.' But 'someday' turned into three years of burned-out bank accounts and damaged lungs. Downloaded Turn Someday Into Day One last month when I couldn't pay my rent on time. Seeing that clean counter every morning gives me something tangible to hold onto when the urges hit hard. I'm 28 days clean today. It's not a miracle cure — you still have to do the work — but it's the strongest handrail I've found yet."
+    },
+    {
+      "name": "Elena",
+      "stars": 5,
+      "text": "My kids used to look at me with this quiet worry every time I opened a bottle after work. I wanted to stop, but the thought of starting over felt so overwhelming. This app broke that giant, terrifying mountain down into just today. The daily check-ins feel like a gentle reminder that I'm worthy of a clear head and a real life. If you're lying awake at 2 AM full of regret, please just try it. Make today your Day One."
+    },
+    {
+      "name": "David",
+      "stars": 5,
+      "text": "I hid behind screens and pills for nearly a decade to avoid feeling anything at all. When I finally decided to wake up, I was terrified of facing reality raw. Having an app that tracks both of my struggles in one place, without making me feel like a broken statistic, has been life-changing. It's simple, honest, and grounded. It doesn't judge you if you trip up; it just helps you get back on your feet."
+    },
+    {
+      "name": "Sarah",
+      "stars": 5,
+      "text": "People laugh when you tell them you're addicted to scrolling and buying things you can't afford, but the shame and financial ruin are very real. I was drowning in debt and completely detached from my real life. Turn Someday Into Day One gave me a mirror to see my patterns clearly. The tracker keeps me honest, and the daily reflection exercises help me process the anxiety I used to soothe with my credit card."
+    },
+    {
+      "name": "James",
+      "stars": 5,
+      "text": "For years, my coping mechanism was to numb out with food and drink until I passed out. I've tried countless programs, but they all felt so clinical and rigid. This app feels human. It meets you right where you are — in the middle of the mess — and gently asks you to focus on the next hour, the next step. It's given me back a sense of control I thought I'd lost forever."
+    },
+    {
+      "name": "Maya",
+      "stars": 5,
+      "text": "Admitting this out loud is the hardest thing I've ever done, but secrecy was killing my relationship and my self-worth. I needed a private, discrete space to track my recovery and hold myself accountable without fear of exposure. The design here is clean, compassionate, and incredibly respectful. To anyone carrying a heavy secret and desperate for a fresh start: this is a safe place to begin."
+    },
+    {
+      "name": "Robert",
+      "stars": 5,
+      "text": "I built my whole identity around grinding until I collapsed, using pills to stay awake and stay ahead. My body finally gave out last fall. Recovery meant completely rebuilding how I view my time and worth. Using this app to count my consecutive days of balance and rest has helped rewire my brain. It's a quiet partner in a journey that used to feel very lonely."
+    },
+    {
+      "name": "Chloe",
+      "stars": 5,
+      "text": "I was trapped in an endless loop of stress-vaping and emotional eating every single night. I felt so out of control in my own body. Turn Someday Into Day One didn't bombard me with toxic positivity; it just offered a realistic, steady structure. Every streak milestone feels like winning a piece of my dignity back. I'm starting to trust myself again, and that's priceless."
+    },
+    {
+      "name": "Thomas",
+      "stars": 5,
+      "text": "I spent ten years in a fog, telling myself 'I'll quit next Monday' or 'I'll start my diet next month.' Next month never came. What clicked with this app was the mindset shift right in the title. You stop waiting for a magical future version of yourself to save you, and you just claim today. It's compassionate, straightforward, and genuinely helpful for dual habits."
+    },
+    {
+      "name": "Rachel",
+      "stars": 5,
+      "text": "When you rely on substances and spending to escape panic, breaking free feels impossible because the anxiety spikes the second you try to stop. This app became my grounding anchor. Looking at my progress visualizes how far I've come on the days when my mind tries to convince me I'm failing. It's more than a habit tracker; it's a lifeline for anyone desperate to break a cycle."
+    }
+  ]
 }

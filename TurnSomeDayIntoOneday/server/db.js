@@ -126,6 +126,52 @@ db.exec(`
     last_sent_date TEXT,
     fail_count INTEGER NOT NULL DEFAULT 0
   );
+  -- Live community rooms. Every post passes through the AI moderator BEFORE it
+  -- can be seen (status starts 'held' and only the moderator or the owner can
+  -- make it 'live'), because in a recovery space one predatory or triggering
+  -- post reaching the feed is worse than every honest post arriving a few
+  -- seconds late. ai_reason keeps the moderator's stated reason so the owner
+  -- can audit every call it made.
+  CREATE TABLE IF NOT EXISTS room_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    room TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'held',
+    ai_reason TEXT,
+    crisis INTEGER NOT NULL DEFAULT 0,
+    report_count INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS room_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    reason TEXT,
+    created_at TEXT NOT NULL,
+    UNIQUE(post_id, user_id)
+  );
+  CREATE TABLE IF NOT EXISTS room_bans (
+    user_id INTEGER PRIMARY KEY,
+    reason TEXT,
+    created_at TEXT NOT NULL
+  );
+  -- Reviews written by members. The /reviews page used to read a JSON file that
+  -- only Jacques could edit by hand, so in practice nobody could leave one and
+  -- the page said "no reviews yet" forever. These arrive from inside the app,
+  -- sit as 'pending' until the owner approves them, and only approved rows are
+  -- ever served publicly. One review per person: re-submitting edits theirs.
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    when_label TEXT,
+    body TEXT NOT NULL,
+    stars INTEGER NOT NULL DEFAULT 5,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TEXT NOT NULL
+  );
   -- Small key/value store. Holds the VAPID keypair so push works with no
   -- manual environment setup: generated once on first boot, reused forever.
   CREATE TABLE IF NOT EXISTS app_settings (
@@ -714,7 +760,89 @@ function getAdminStats(opts) {
   };
 }
 
+// ─── ROOMS ───────────────────────────────────────────────────────────────────
+function createRoomPost(userId, room, displayName, body) {
+  const r = db.prepare(
+    'INSERT INTO room_posts (user_id, room, display_name, body, status, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(userId, room, displayName, body, 'held', new Date().toISOString());
+  return r.lastInsertRowid;
+}
+function setRoomPostVerdict(id, status, aiReason, crisis) {
+  db.prepare('UPDATE room_posts SET status = ?, ai_reason = ?, crisis = ? WHERE id = ?')
+    .run(status, aiReason || null, crisis ? 1 : 0, id);
+}
+function getRoomFeed(room, limit) {
+  return db.prepare(
+    "SELECT id, display_name, body, created_at FROM room_posts WHERE room = ? AND status = 'live' ORDER BY id DESC LIMIT ?"
+  ).all(room, limit || 50);
+}
+function getRoomPost(id) {
+  return db.prepare('SELECT * FROM room_posts WHERE id = ?').get(id);
+}
+function countRoomPostsToday(userId, dayIso) {
+  return db.prepare("SELECT COUNT(*) AS n FROM room_posts WHERE user_id = ? AND created_at >= ?").get(userId, dayIso).n;
+}
+function addRoomReport(postId, userId, reason) {
+  // One report per person per post; a second tap is not a second vote.
+  db.prepare('INSERT OR IGNORE INTO room_reports (post_id, user_id, reason, created_at) VALUES (?, ?, ?, ?)')
+    .run(postId, userId, reason || null, new Date().toISOString());
+  const n = db.prepare('SELECT COUNT(*) AS n FROM room_reports WHERE post_id = ?').get(postId).n;
+  db.prepare('UPDATE room_posts SET report_count = ? WHERE id = ?').run(n, postId);
+  return n;
+}
+function hideRoomPost(id, why) {
+  db.prepare("UPDATE room_posts SET status = 'held', ai_reason = COALESCE(ai_reason,'') || ' | ' || ? WHERE id = ?").run(why, id);
+}
+function getModQueue() {
+  return db.prepare(
+    "SELECT id, user_id, room, display_name, body, status, ai_reason, crisis, report_count, created_at FROM room_posts WHERE status != 'live' OR report_count > 0 ORDER BY id DESC LIMIT 100"
+  ).all();
+}
+function setRoomPostStatus(id, status) {
+  db.prepare('UPDATE room_posts SET status = ? WHERE id = ?').run(status, id);
+}
+function banRoomUser(userId, reason) {
+  db.prepare('INSERT OR REPLACE INTO room_bans (user_id, reason, created_at) VALUES (?, ?, ?)')
+    .run(userId, reason || null, new Date().toISOString());
+}
+function isRoomBanned(userId) {
+  return !!db.prepare('SELECT 1 FROM room_bans WHERE user_id = ?').get(userId);
+}
+
+
+// ── Reviews ──────────────────────────────────────────────────────────────────
+// A member gets exactly one review. Writing a second one replaces the first and
+// sends it back to pending, so an edited review is never published unread.
+function upsertReview(userId, name, whenLabel, body, stars) {
+  db.prepare(
+    `INSERT INTO reviews (user_id, name, when_label, body, stars, status, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?)
+     ON CONFLICT(user_id) DO UPDATE SET
+       name = excluded.name, when_label = excluded.when_label, body = excluded.body,
+       stars = excluded.stars, status = 'pending', created_at = excluded.created_at`
+  ).run(userId, name, whenLabel || null, body, stars, new Date().toISOString());
+}
+function getMyReview(userId) {
+  return db.prepare('SELECT * FROM reviews WHERE user_id = ?').get(userId) || null;
+}
+function getPublishedReviews(limit) {
+  return db.prepare(
+    "SELECT name, when_label, body, stars, created_at FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT ?"
+  ).all(limit || 50);
+}
+function getReviewQueue() {
+  return db.prepare("SELECT * FROM reviews WHERE status = 'pending' ORDER BY id DESC LIMIT 100").all();
+}
+function setReviewStatus(id, status) {
+  db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, id);
+}
+
 module.exports = {
+  upsertReview,
+  getMyReview,
+  getPublishedReviews,
+  getReviewQueue,
+  setReviewStatus,
   createUser,
   setUserUtm,
   getAdminStats,
@@ -768,5 +896,7 @@ module.exports = {
   setStripeCustomerId,
   updateSubscriptionFromStripe,
   logError,
+  createRoomPost, setRoomPostVerdict, getRoomFeed, getRoomPost, countRoomPostsToday,
+  addRoomReport, hideRoomPost, getModQueue, setRoomPostStatus, banRoomUser, isRoomBanned,
   getRecentErrors,
 };

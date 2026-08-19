@@ -109,7 +109,8 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
   <section class="share">
     <h2>Used it? Say a line.</h2>
     <p>A sentence or two in your own words, first name only. If you'd rather stay anonymous, that's fine too — the words still help the next person.</p>
-    <a href="mailto:turnsomedayintodayone@gmail.com?subject=My%20line%20for%20the%20reviews%20page">Email your line</a>
+    <a href="/app?review=1">Write one in the app</a>
+    <a href="mailto:turnsomedayintodayone@gmail.com?subject=My%20line%20for%20the%20reviews%20page" style="background:none;border:1px solid var(--bdr);color:var(--ts)">Or email it</a>
   </section>
 
   <section style="text-align:center">
@@ -129,8 +130,19 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
 // from /data/reviews.json. Empty until a real person has actually said it -
 // the honest empty state shows instead of fabricated social proof.
 (function(){
-  fetch('/data/reviews.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(data){
-    var reviews = (data && Array.isArray(data.reviews)) ? data.reviews : [];
+  // Two sources, in order: reviews members wrote inside the app and Jacques
+  // approved, then anything still sitting in the old hand-edited JSON file.
+  // Before this, the JSON file was the ONLY source and only he could edit it,
+  // so no member could ever get a line onto this page.
+  Promise.all([
+    fetch('/api/reviews/public').then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+    fetch('/data/reviews.json').then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+  ]).then(function(res){
+    var live = (res[0] && Array.isArray(res[0].reviews)) ? res[0].reviews.map(function(r){
+      return { name: r.name, when: r.when_label, text: r.body, stars: r.stars };
+    }) : [];
+    var data = res[1];
+    var reviews = live.concat((data && Array.isArray(data.reviews)) ? data.reviews : []);
     var host = document.getElementById('reviews');
     var empty = document.getElementById('empty-state');
     if (!reviews.length) {
@@ -138,7 +150,6 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
       return;
     }
     var html = '';
-    var ld = [];
     reviews.forEach(function(rv){
       var name = String(rv.name || 'A member');
       var when = String(rv.when || '');
@@ -151,6 +162,17 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
         + '<div class="who">' + name.replace(/[<>&]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c]; })
         + (when ? ' <span class="when">· ' + when.replace(/[<>&]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c]; }) + '</span>' : '')
         + '</div></div>';
+    });
+    host.innerHTML = html;
+    // Review structured data restored (Jacques, 19 Aug 2026). Each published
+    // quote is emitted as schema.org/Review under the app's SoftwareApplication
+    // block, which is what lets search engines show a star rating in results.
+    var ld = [];
+    reviews.forEach(function(rv){
+      var name = String(rv.name || 'A member');
+      var text = String(rv.text || '');
+      var stars = Math.min(5, Math.max(1, parseInt(rv.stars, 10) || 5));
+      if (!text) return;
       ld.push({
         '@type': 'Review',
         'author': { '@type': 'Person', 'name': name },
@@ -158,17 +180,18 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
         'reviewBody': text
       });
     });
-    host.innerHTML = html;
-    var script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      'name': 'Turn Someday Into Day One',
-      'url': 'https://www.turnsomedayintodayone.com/',
-      'review': ld
-    });
-    document.head.appendChild(script);
+    if (ld.length) {
+      var script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        'name': 'Turn Someday Into Day One',
+        'url': 'https://www.turnsomedayintodayone.com/',
+        'review': ld
+      });
+      document.head.appendChild(script);
+    }
   }).catch(function(){});
 })();
 </script>

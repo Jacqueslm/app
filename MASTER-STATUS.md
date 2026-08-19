@@ -304,6 +304,21 @@ document. Proven on "Clear All" (18 Aug) and "She Came Back" (19 Aug).
 service. Manus stills and Suno audio are on plans Jacques already has; every
 other step is code.
 
+**DEADLINE: Manus is free only until 25 Aug 2026.** After that the photoreal
+stills in step 2 have no source. Do NOT let this arrive unplanned:
+- **Bank stills before the 25th.** Every story worth telling for the next few
+  months, generated while it is free. A character block that already holds
+  (the porch women) can be reused across many stories - same two people, new
+  situations - so the batch is worth more than the images in it.
+- **Code-built pieces are unaffected** - lockscreens, chat threads, app-store
+  reviews, counters, anything that is interface rather than photography. That
+  lane stays free forever and should carry more of the load after the 25th.
+- **Replacements to price when the time comes** (nothing chosen yet): Creen
+  (face lock, free credits), ChatGPT image credits, Microsoft Copilot (holds a
+  face from one reference photo) - all three are already in Jacques's tested
+  toolchain in START-HERE. Studio's own paid stills are the fallback of last
+  resort because they cost per image.
+
 **Where the pieces live:** finished videos in `content/`, and the source page
 for each code-built animation beside it (e.g. `content/clear-all-source.html`) -
 edit the timeline, re-render, new video.

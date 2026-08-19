@@ -1577,7 +1577,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
-        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:var(--ts);border-color:var(--bdr)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
+        <!-- This button sits on the tier banner, which is the brand navy in BOTH
+             themes. var(--ts)/var(--bdr) are theme tokens: in light mode they
+             resolve to dark grey on 10%-black, so the button rendered as
+             rgb(74,74,70) on navy and read as blank space - the free option was
+             effectively hidden on the pricing screen. Fixed light-on-dark
+             values, because the surface under it never changes. -->
+        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:#c0caff;border-color:rgba(255,255,255,0.35)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
         <div class="tier-toggle">
           <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
           <button id="abtn" onclick="setBill('a')">Yearly · save 50%</button>
@@ -1602,6 +1608,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Advanced streaks &amp; Build Your Own Pack</div>
             <div class="feat y"><i class="ti ti-check"></i>Together for couples &amp; partner self-check (Days 1–15)</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
+            <div class="feat y"><i class="ti ti-check"></i>Meditation room with 11 sounds &amp; tracks</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
             <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
             <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-counter">Sobriety counter &amp; milestones</span></div>

@@ -1707,6 +1707,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Restore purchases</p><span>Sync your Pro status from your account</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" onclick="openReviewModal()">
+        <i class="ti ti-message-2"></i>
+        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line about whether this helped — it goes on the reviews page</span></div>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+      </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Focus areas</div></div>
       <div class="setting-row" onclick="openCategorySwitcher()">
@@ -2643,6 +2648,25 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- BREATHE OVERLAY -->
+<!-- The reviews page promised real quotes from real people, but there was no
+     way for a real person to leave one: it read a JSON file only Jacques could
+     edit by hand. This is the missing half. Nothing publishes itself - a review
+     waits for his approval, so the page keeps its promise AND can fill up. -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--s2);border:1px solid var(--bdr);border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:90vh;overflow:auto">
+    <div style="font-size:17px;font-weight:600;color:var(--tp);margin-bottom:6px">Say a line</div>
+    <div style="font-size:12.5px;color:var(--tm);line-height:1.55;margin-bottom:14px">In your own words, whatever's true. It goes to Jacques first — nothing appears on the site until he's read it.</div>
+    <div style="font-size:12px;color:var(--ts);margin-bottom:6px">How honest was it, out of five?</div>
+    <div id="review-stars" style="font-size:30px;letter-spacing:6px;margin-bottom:14px;cursor:pointer"></div>
+    <input id="review-name" class="ob-input" maxlength="40" placeholder="First name (or leave blank to stay anonymous)" style="color:var(--tp);background:var(--s1);border-color:var(--bdr)">
+    <input id="review-when" class="ob-input" maxlength="40" placeholder="Where you are — e.g. Day 47, or Supporting my husband" style="color:var(--tp);background:var(--s1);border-color:var(--bdr);margin-top:8px">
+    <textarea id="review-body" maxlength="600" rows="5" oninput="updateReviewCount()" placeholder="What it actually did, or didn't do." style="width:100%;margin-top:8px;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--tp);font-family:var(--f);resize:vertical"></textarea>
+    <div id="review-count" style="font-size:11px;color:var(--tm);text-align:right;margin-top:4px">0 / 600</div>
+    <div id="review-msg" style="font-size:12.5px;color:var(--green);line-height:1.5;margin-top:8px;display:none"></div>
+    <button class="ob-btn" style="margin-top:12px" onclick="submitReview()" id="review-send">Send it to Jacques</button>
+    <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
+  </div>
+</div>
 <div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
     <div id="med-timer" style="font-size:40px;font-weight:700;letter-spacing:1px">5:00</div>
     <div id="med-phase" style="font-size:15px;opacity:.92;margin-top:6px">Settle in — eyes closed or a soft gaze</div>
@@ -4639,6 +4663,65 @@ function startMedSound(){
 }
 function stopMedSound(){
   if(medAudio){try{medAudio.pause();}catch(e){}medAudio=null;}
+}
+// ─── REVIEWS ─────────────────────────────────────────────────────────────────
+// A member writes one line; it goes to the owner as 'pending' and only appears
+// on /reviews once he approves it. Never auto-published, never invented.
+let reviewStars=5;
+function renderReviewStars(){
+  const el=document.getElementById('review-stars');
+  if(!el)return;
+  el.innerHTML=[1,2,3,4,5].map(n=>`<span onclick="reviewStars=${n};renderReviewStars()" style="color:${n<=reviewStars?'var(--green)':'var(--tm)'}">${n<=reviewStars?'★':'☆'}</span>`).join('');
+}
+async function openReviewModal(){
+  document.getElementById('review-modal').style.display='flex';
+  document.getElementById('review-msg').style.display='none';
+  renderReviewStars();
+  // If they already wrote one, show it back so this edits rather than duplicates.
+  try{
+    const r=await fetch('/api/reviews/mine');
+    if(r.ok){
+      const {review}=await r.json();
+      if(review){
+        document.getElementById('review-name').value=review.name==='Anonymous'?'':review.name;
+        document.getElementById('review-when').value=review.when_label||'';
+        document.getElementById('review-body').value=review.body||'';
+        reviewStars=review.stars||5;renderReviewStars();
+        const m=document.getElementById('review-msg');
+        m.textContent=review.status==='published'?'Your review is live on the site. Editing it sends it back for a read.'
+          :review.status==='pending'?'Your review is with Jacques, waiting to be read.':'';
+        m.style.display=m.textContent?'':'none';
+      }
+    }
+  }catch(e){}
+  updateReviewCount();
+}
+function closeReviewModal(){document.getElementById('review-modal').style.display='none';}
+function updateReviewCount(){
+  const t=document.getElementById('review-body');
+  const c=document.getElementById('review-count');
+  if(t&&c)c.textContent=`${t.value.length} / 600`;
+}
+async function submitReview(){
+  const body=document.getElementById('review-body').value.trim();
+  const msg=document.getElementById('review-msg');
+  if(body.length<10){msg.style.color='#E24B4A';msg.textContent='A little more than that — one real sentence.';msg.style.display='';return;}
+  const btn=document.getElementById('review-send');
+  btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const r=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({body,name:document.getElementById('review-name').value.trim(),
+        when:document.getElementById('review-when').value.trim(),stars:reviewStars})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||'That did not send.');
+    msg.style.color='var(--green)';
+    msg.textContent='Sent. Thank you — it goes up once Jacques has read it.';
+    msg.style.display='';
+    setTimeout(closeReviewModal,2200);
+  }catch(e){
+    msg.style.color='#E24B4A';msg.textContent=e.message;msg.style.display='';
+  }
+  btn.disabled=false;btn.textContent='Send it to Jacques';
 }
 function openMeditation(){
   document.getElementById('meditation-overlay').style.display='flex';

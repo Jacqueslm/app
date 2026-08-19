@@ -157,6 +157,21 @@ db.exec(`
     reason TEXT,
     created_at TEXT NOT NULL
   );
+  -- Reviews written by members. The /reviews page used to read a JSON file that
+  -- only Jacques could edit by hand, so in practice nobody could leave one and
+  -- the page said "no reviews yet" forever. These arrive from inside the app,
+  -- sit as 'pending' until the owner approves them, and only approved rows are
+  -- ever served publicly. One review per person: re-submitting edits theirs.
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    when_label TEXT,
+    body TEXT NOT NULL,
+    stars INTEGER NOT NULL DEFAULT 5,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TEXT NOT NULL
+  );
   -- Small key/value store. Holds the VAPID keypair so push works with no
   -- manual environment setup: generated once on first boot, reused forever.
   CREATE TABLE IF NOT EXISTS app_settings (
@@ -794,7 +809,40 @@ function isRoomBanned(userId) {
   return !!db.prepare('SELECT 1 FROM room_bans WHERE user_id = ?').get(userId);
 }
 
+
+// ── Reviews ──────────────────────────────────────────────────────────────────
+// A member gets exactly one review. Writing a second one replaces the first and
+// sends it back to pending, so an edited review is never published unread.
+function upsertReview(userId, name, whenLabel, body, stars) {
+  db.prepare(
+    `INSERT INTO reviews (user_id, name, when_label, body, stars, status, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?)
+     ON CONFLICT(user_id) DO UPDATE SET
+       name = excluded.name, when_label = excluded.when_label, body = excluded.body,
+       stars = excluded.stars, status = 'pending', created_at = excluded.created_at`
+  ).run(userId, name, whenLabel || null, body, stars, new Date().toISOString());
+}
+function getMyReview(userId) {
+  return db.prepare('SELECT * FROM reviews WHERE user_id = ?').get(userId) || null;
+}
+function getPublishedReviews(limit) {
+  return db.prepare(
+    "SELECT name, when_label, body, stars, created_at FROM reviews WHERE status = 'published' ORDER BY id DESC LIMIT ?"
+  ).all(limit || 50);
+}
+function getReviewQueue() {
+  return db.prepare("SELECT * FROM reviews WHERE status = 'pending' ORDER BY id DESC LIMIT 100").all();
+}
+function setReviewStatus(id, status) {
+  db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, id);
+}
+
 module.exports = {
+  upsertReview,
+  getMyReview,
+  getPublishedReviews,
+  getReviewQueue,
+  setReviewStatus,
   createUser,
   setUserUtm,
   getAdminStats,

@@ -1863,7 +1863,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec">
           <p class="usage" style="margin-bottom:8px">If something breaks, the error is logged here automatically — screenshot this and send it along when asking for help.</p>
           <div id="diag-list"></div>
-          <button class="ob-btn outline" style="margin-top:4px;color:var(--ts);border-color:var(--bdr)" onclick="loadDiagnostics()">Refresh</button>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="ob-btn outline" style="margin-top:0;flex:1;color:var(--ts);border-color:var(--bdr)" onclick="loadDiagnostics()">Refresh</button>
+            <button class="ob-btn outline" style="margin-top:0;flex:1;color:#E24B4A;border-color:rgba(226,75,74,.45)" onclick="clearDiagnostics()">Clear</button>
+          </div>
+          <div id="diag-msg" style="font-size:12px;color:var(--green);margin-top:8px;display:none"></div>
         </div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -11385,7 +11389,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.3';
+const APP_VERSION='6.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12462,6 +12466,26 @@ async function hardResetApp(){
   },{okText:'Erase everything',cancelText:'Keep my data'});
 }
 
+// Clearing wipes the log for good, so it asks first. There was no clear at all
+// before this - once something was fixed its error sat in the panel forever,
+// which made the panel useless for spotting what broke today.
+async function clearDiagnostics(){
+  if(!confirm('Clear the whole diagnostics log? This cannot be undone.'))return;
+  const msg=document.getElementById('diag-msg');
+  try{
+    const res=await fetch('/api/diagnostics/clear',{method:'POST'});
+    const d=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(d.error||'Could not clear the log.');
+    msg.style.color='var(--green)';
+    msg.textContent=d.cleared===0?'Nothing to clear — the log was already empty.'
+      :`Cleared ${d.cleared} entr${d.cleared===1?'y':'ies'}.`;
+    msg.style.display='';
+    loadDiagnostics();
+  }catch(e){
+    msg.style.color='#E24B4A';msg.textContent=e.message;msg.style.display='';
+  }
+  setTimeout(()=>{msg.style.display='none';},4000);
+}
 async function loadDiagnostics(){
   const countEl=document.getElementById('diag-count');
   const listEl=document.getElementById('diag-list');

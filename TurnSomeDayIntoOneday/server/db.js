@@ -204,6 +204,13 @@ function logError(scope, message, detail) {
   db.prepare('DELETE FROM error_log WHERE id NOT IN (SELECT id FROM error_log ORDER BY id DESC LIMIT 200)').run();
 }
 
+// Diagnostics had a Refresh button and no way to empty the list, so once an
+// error was fixed it sat there forever and the panel stopped being readable.
+function clearErrors() {
+  const n = db.prepare('SELECT COUNT(*) AS c FROM error_log').get().c;
+  db.prepare('DELETE FROM error_log').run();
+  return n;
+}
 function getRecentErrors(limit) {
   return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
 }
@@ -899,4 +906,5 @@ module.exports = {
   createRoomPost, setRoomPostVerdict, getRoomFeed, getRoomPost, countRoomPostsToday,
   addRoomReport, hideRoomPost, getModQueue, setRoomPostStatus, banRoomUser, isRoomBanned,
   getRecentErrors,
+  clearErrors,
 };

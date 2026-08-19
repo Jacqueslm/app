@@ -1,5 +1,5 @@
 {
-  "_note": "Real user reviews, added by hand as they arrive from testers and members. Add one object per review to the 'reviews' array: { \"name\": \"first name only\", \"when\": \"e.g. Day 30\", \"text\": \"their own words\", \"stars\": 5 }. Leave the array empty until a real person has actually said it - never invent quotes, names or star counts. The /reviews page and its structured data read from this file.",
+  "_note": "Real user reviews, added by hand as they arrive from testers and members. Add one object per review to the 'reviews' array: { \"name\": \"first name only\", \"when\": \"e.g. Day 30\", \"text\": \"their own words\", \"stars\": 5 }. Leave the array empty until a real person has actually said it - never invent quotes, names or star counts. Jacques's own entry is labelled as the founder on purpose: he is a real user, and saying so plainly is what keeps the page's promise intact. Member reviews now arrive through the app (Settings > Leave a review) and live in the database, not here. The /reviews page and its structured data read from this file. Hand-added member quotes can also live here - they render alongside the database reviews.",
   "reviews": [
     {
       "name": "Jacques",

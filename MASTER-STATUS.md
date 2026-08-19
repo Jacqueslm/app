@@ -187,6 +187,46 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 - AA / more voices (African-American male + female) — the 5 current voices are public-domain; adding 2 more AA voices = a recording-generation job (~2 GB, needs the audio pipeline). Ready when you say go.
 - Show me your socials — you said you'd share them so we improve the creator content. Waiting on links.
 
+## 🔎 SEO / INDEXING — the standing record (19 Aug 2026)
+
+**Read this before touching SEO again. Do not re-derive it.**
+
+**Where it stands.** Search Console, 19 Aug (its data was last refreshed 8/13):
+**24 indexed, 20 not indexed across 4 reasons.** An earlier export this same day
+showed 12 not indexed (11 "Discovered – currently not indexed", 1 "Crawled –
+currently not indexed") — that was a narrower slice, and Jacques was right to
+push back when I quoted it as the whole picture.
+
+**What I cannot do, so stop trying.**
+- The live site is unreachable from this environment: the agent proxy 403s
+  `turnsomedayintodayone.com` (CONNECT tunnel failed). No curl, no fetch, no
+  crawling our own pages. Do not report a page broken or fine on my say-so.
+- **The CSV export does not name individual URLs** — it gives counts per reason.
+  Only the Search Console SCREEN lists the actual pages. Asking Jacques to click
+  the grey "Not indexed" box → a reason row → EXPORT is the ONLY way to get them.
+  I sent him a wrong list once by guessing; do not repeat that.
+
+**The highest-value fix, offered and still not started.** Four alternative pages
+rank **page one, positions 8–10, with 0% click-through**: blockerx-alternative,
+i-am-sober-alternative, ever-accountable-alternative, hangxiety. Their titles
+and meta descriptions are all the same template — "X Alternative (2026) — free,
+no card, honest comparison." Google is already showing them to people and nobody
+clicks. Rewriting those titles beats every indexing request combined, because
+those pages are ALREADY indexed and ALREADY ranking.
+
+**Two of the four "not indexed" reasons usually need no action** — "Alternate
+page with proper canonical" and "Page with redirect" are normal. The ones worth
+acting on are "Discovered – currently not indexed" and "Crawled – currently not
+indexed": inspect the URL, hit REQUEST INDEXING, ~10-12 a day is the quota.
+
+**Dead ends already walked (do not repeat):** duplicate content was NOT the
+cause (those pages rank 8–10, so Google likes them fine); orphan pages were NOT
+the cause (exactly one orphan, and it is intentional).
+
+**The sitemap holds 36 URLs.** A generated file of one-tap Search Console
+inspect links for all 36, grouped by priority, is in the session scratchpad as
+`inspect-links.md` — regenerate it from `sitemap.xml` rather than typing URLs.
+
 ## HOUSE RULES (keep)
 
 **House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**

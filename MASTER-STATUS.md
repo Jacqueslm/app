@@ -273,6 +273,14 @@ batch follows this rule.
 
 ## House rule 15 — THE CONTENT WORKFLOW (Jacques, 19 Aug 2026)
 
+**Scope, corrected 19 Aug:** rules 14 and 15 govern content BUILT HERE from
+scratch. Jacques's existing finished videos - already written, shot and rendered
+in Studio - are not subject to them. Nothing about a finished video gets
+rewritten, retimed or "checked" against the 15-second rule. For those the job is
+only: commit to content/ for a public URL, write the per-platform captions,
+show him, queue to Buffer on his word.
+
+
 This is now how every AI script, card and talking head gets made. It replaces
 "write scripts, hand them over" - the deliverable is a finished video, not a
 document. Proven on "Clear All" (18 Aug) and "She Came Back" (19 Aug).

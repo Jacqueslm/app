@@ -6,6 +6,30 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ⏰ REMINDER — 26 AUG 2026 (set 19 Aug): re-check Google on /reviews
+
+**Why:** the Review structured data (schema.org/Review) was restored to the
+reviews page on 19 Aug (commit `442f0f8`). Google takes days–weeks to re-crawl
+and show review stars in search results. This is the one-week check-in.
+
+**Do, in order:**
+1. Open https://www.turnsomedayintodayone.com/reviews — confirm all 11 reviews
+   render (Jacques's founder review + Marcus, Elena, David, Sarah, James, Maya,
+   Robert, Chloe, Thomas, Rachel).
+2. Paste that URL into Google's Rich Results Test
+   (https://search.google.com/test/rich-results) — it should detect the Review
+   structured data (11 reviews, 5 stars).
+3. Search Google for `site:turnsomedayintodayone.com/reviews` — is the page
+   indexed? Are stars showing next to it?
+4. If it's indexed but has no stars: that's usually Google's policy on
+   self-hosted testimonials, not a bug. Do NOT re-remove/re-add schema without
+   Jacques's say-so. Log what you see in this file.
+5. If it's NOT indexed yet: request indexing in Google Search Console
+   (URL Inspection → Request Indexing) and set the next check-in for 7 days
+   out, replacing this block.
+
+---
+
 ---
 
 ## ✅ 19 AUG 2026 — REVIEWS FIX BATCH: schema restored + CTA fixed + 10 reviews back (PUSHED to deploy branch, live)

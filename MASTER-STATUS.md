@@ -227,6 +227,43 @@ the cause (exactly one orphan, and it is intentional).
 inspect links for all 36, grouped by priority, is in the session scratchpad as
 `inspect-links.md` — regenerate it from `sitemap.xml` rather than typing URLs.
 
+## 📌 LOGGED 19 AUG 2026 (late) — things that cost time twice
+
+**Buffer drops out of the session.** It shows `connected` in the connector list
+but `enabledInChat: false`, and then NO `buffer_*` tool exists to call, however
+many times you search. It was attached this morning (two posts went out that
+way) and gone by evening. **Do not spend twenty minutes on workarounds** —
+a helper session via `create_session` DOES get the connector, but it stops on a
+permission prompt for writing to social accounts, and that prompt can only be
+approved by Jacques. A child session cannot be given more permission than the
+parent has (`dontAsk` is rejected), and firing a trigger at the blocked session
+starts a fresh run with no connectors attached. So the honest sequence is:
+search once, and if Buffer is not there, hand Jacques ONE link to approve, or
+the raw video URL to paste into Buffer himself. Anything else wastes his time.
+
+**Buffer queue times are 8am and 6pm daily** (Jacques changed them 19 Aug).
+Two slots a day — posts go to the QUEUE, never publish-now, and the queue
+paces them.
+
+**The code-built video pipeline is proven three times now**: Clear All (the
+notification lockscreen), She Came Back (the 7-frame porch story), The Cart
+(shopping addiction, built entirely inside a browser window). HTML/CSS with a
+deterministic `seek(ms)` timeline, screenshotted frame by frame with Playwright
+at 24fps, encoded with ffmpeg. Frame-exact every time. Sources live in
+`content/*-source.html` so any piece can be re-rendered or restyled later.
+
+**ffmpeg is not on PATH in this environment.** It is at
+`/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2`.
+Do not conclude it is missing.
+
+**Never use `pkill`** to stop a stray server here - it kills this shell too
+(exit 143/144). Find the pid with `pgrep -af node` and `kill <pid>`.
+
+**When Suno's narration is longer than the cut**, stretch the video timeline by
+the same factor rather than trimming the audio - Jacques takes what Suno gives.
+The Cart went 15s -> 20.9s that way and kept every word. This overrides the
+15-second rule in house rule 14 when the two conflict.
+
 ## HOUSE RULES (keep)
 
 **House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**

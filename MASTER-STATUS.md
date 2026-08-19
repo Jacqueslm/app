@@ -6,6 +6,58 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🧘 19 AUG 2026 — APP 6.3: daily line, lesson reward, journal mic, licence audit
+
+**1. One line a day on Home.** Jacques: "i dont see the daily motivational
+quotes when you open the app i see set your intentions." He was right — the
+word "quote" appeared nowhere in the app; what he was seeing was the morning
+check-in, a different feature. Home now opens with one line, changing at local
+midnight and holding all day (`DAILY_LINES`, 60 of them). Every line was
+written for this app: quote sites carry attribution requirements and
+misattributed text, and the licence audit below would be worthless if the first
+thing on Home came from one.
+
+**2. Finishing a lesson is now worth something.** It used to change a button to
+"Nice work ✓" and nothing else — no reward at all for the one thing the whole
+program is built on. Now every finished lesson fires a confetti burst and says
+the count out loud, with a bigger burst on 1, 7, 15, 30 and every 25th. No
+points, no coins, no fake currency: the number is the reward, because it is true.
+
+**3. Journal dictation stops when you hit Save.** `saveEntry()` calls
+`stopVoiceJournal()` first, so the mic never keeps listening after the entry is in.
+
+**4. Friendly's voice when you leave the app.** `visibilitychange` resumes
+speech on return. Honest limit: the phone SUSPENDS speech synthesis the moment
+the app is backgrounded — that is the browser's rule and no web app can
+override it. Resume-on-return is the real fix available.
+
+**5. Licence audit — clean, nothing non-commercial ships.**
+- 5 SOS recordings + 523 lesson narrations: Piper voices, CC0/public domain,
+  deliberately chosen. The better-sounding Piper voices (hfc_female, hfc_male,
+  ryan, lessac) are non-commercial and are NOT used.
+- 353 icons: hand-maintained SVG paths in this repo, ours.
+- Fonts: system font stack only — nothing downloaded, nothing licensed.
+- **Zero third-party JavaScript.** No CDN, no analytics library, no framework.
+- og/share images: ours.
+Nothing in the app carries a non-commercial or attribution-required licence.
+
+**Meditation sound — Jacques's music, not mine.** I generated ten ambient beds
+from scratch with ffmpeg; he listened and said delete them. They were removed
+before they ever reached the remote, history rewritten, so the repo never
+carries the 28MB (`.git` is already 1.6GB — audio is the only thing in here big
+enough to matter). `MED_SOUNDS` is now an EMPTY ARRAY and an empty array hides
+the picker completely — a row with one dead "Silence" button is worse than no
+row, and the timer works fine in silence.
+
+**How his music gets added:** he sends CATEGORY + TRACK. **The category is the
+button label, word for word.** Drop the files in `audio/meditation/` and add one
+line each to `MED_SOUNDS`; the row, the 2s fade-in and stop-on-close all size
+themselves off that array. Past ~16 tracks, render as categories with tracks
+under each instead of a wall of chips. Ceiling is ~24 tracks (~65MB) before the
+repo starts paying for it permanently; past 40, move audio to a bucket first.
+
+Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
+
 ## 🔧 17 AUG 2026 (later) — APP 5.7.0 + STUDIO b0877: onboarding freeze, Pro opened up, backups fixed
 
 **App 5.7.0 — shipped to main + deploy branch (Railway auto-deploys).**

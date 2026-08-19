@@ -1073,6 +1073,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <button class="log-btn" style="margin:0" onclick="saveLessonReflection('lesson-reflect-input','lesson-reflect-saved')">Save to my journal</button>
               <div id="lesson-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-top:8px">Saved to your journal ✓</div>
             </div>
+            <!-- Faith is part of the day, not a second program. Somebody who said
+                 it matters used to get a card on Home pointing at a separate
+                 30-day track they had to keep up with on the side; now that
+                 day's Spiritual Path lesson sits inside the day's lesson, same
+                 day number, same screen. Anyone who said no never sees it. -->
+            <div id="lesson-faith-box" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;margin-top:10px">
+              <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px" id="lesson-faith-hd">Spiritual Path</div>
+              <div style="font-size:14px;font-weight:600;color:var(--tp);margin-bottom:6px" id="lesson-faith-title"></div>
+              <div style="font-size:13.5px;color:var(--ts);line-height:1.65" id="lesson-faith-body"></div>
+              <div id="lesson-faith-action-wrap" style="margin-top:10px;display:none">
+                <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:4px">Today</div>
+                <div style="font-size:13.5px;color:var(--ts);line-height:1.6" id="lesson-faith-action"></div>
+              </div>
+            </div>
             <button class="log-btn" id="lessonCompleteBtn" style="margin-top:18px" onclick="completeLessonForToday()">Mark as done</button>
             <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
           </div>
@@ -3239,6 +3253,25 @@ function renderTrackLinkNote(){
   el.style.display='block';
 }
 
+// Draws the day's Spiritual Path lesson into the daily lesson for anyone who
+// chose faith. Matched by day number, so day 12 of the program carries day 12
+// of the Spiritual Path - the two move together instead of drifting apart.
+function renderLessonFaithSection(day){
+  const box=document.getElementById('lesson-faith-box');
+  if(!box)return;
+  const pack=(typeof PREDEFINED_PACKS!=='undefined'&&PREDEFINED_PACKS.spiritual)||null;
+  const list=pack?(pack.lessons||pack.days||[]):[];
+  const l=faithOn()?list.find(x=>(x.day||0)===day):null;
+  if(!l){box.style.display='none';return;}
+  box.style.display='block';
+  document.getElementById('lesson-faith-hd').textContent=`Spiritual Path · Day ${l.day}`;
+  document.getElementById('lesson-faith-title').textContent=l.title||'';
+  document.getElementById('lesson-faith-body').textContent=l.content||'';
+  const aw=document.getElementById('lesson-faith-action-wrap');
+  const a=document.getElementById('lesson-faith-action');
+  if(l.action){a.textContent=l.action;aw.style.display='block';}
+  else aw.style.display='none';
+}
 function renderTodayLesson(){
   updateHomeFaithCard();
   const switchRow=document.getElementById('lesson-track-switch-row');
@@ -3294,6 +3327,7 @@ function renderTodayLesson(){
     return;
   }
 
+  renderLessonFaithSection(lesson.day);
   titleEl.textContent=lesson.title;
   metaEl.textContent=`${S.currentAddiction||'Lesson'} · Day ${lesson.day}`;
   bodyEl.textContent=lesson.content;
@@ -11395,7 +11429,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.5';
+const APP_VERSION='6.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

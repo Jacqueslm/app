@@ -722,6 +722,16 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
   </div>
 
+  <!-- One line a day. Written for this app - not scraped quote sites, so there
+       is no attribution or licence attached to any of them, and no recovery
+       slogan is put in a stranger's mouth. The same line all day, changing at
+       midnight: a quote that reshuffles on every render is decoration, one that
+       holds for the day is something you can carry. -->
+  <div id="daily-quote" style="margin:12px 16px 0;background:var(--s2);border:1px solid var(--bdr);border-left:3px solid var(--green);border-radius:12px;padding:14px 16px">
+    <div style="font-size:10.5px;letter-spacing:1.4px;color:var(--tm);font-weight:600;margin-bottom:6px">TODAY</div>
+    <div id="daily-quote-txt" style="font-size:14.5px;line-height:1.5;color:var(--tp)"></div>
+  </div>
+
   <!-- Milestone offer: appears on the day a milestone is reached and on later
        visits until it is shared or dismissed. An offer, never an interruption -
        no modal, no blocking, and "Not now" means never for that milestone. -->
@@ -2624,6 +2634,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="med-circle" style="width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.14);margin:26px auto 0;display:flex;align-items:center;justify-content:center;transition:transform 4s ease-in-out">
       <div id="med-circle-txt" style="font-size:13px;letter-spacing:2px;text-transform:uppercase">Breathe in</div>
     </div>
+    <div id="med-sound-wrap" style="margin-top:24px;width:100%;max-width:420px;display:none">
+      <div style="font-size:12px;opacity:.7;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Sound</div>
+      <div id="med-sound-row" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center"></div>
+    </div>
     <div id="med-dur-row" style="display:flex;gap:10px;margin-top:28px">
       <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(5)">5 min</button>
       <button class="ob-btn outline" style="margin:0;padding:9px 14px;font-size:13px;color:#fff;border-color:rgba(255,255,255,.5)" onclick="startMeditation(10)">10 min</button>
@@ -3319,6 +3333,12 @@ function completeLessonForToday(){
   btn.textContent='Nice work — day complete ✓';
   btn.disabled=true;
   updateLessonPromo();
+  // Finishing a lesson used to change a button's text and nothing else, which
+  // is no kind of reward for the one thing the whole program is built on.
+  // Now every day earns a burst and a count said out loud, and the counts that
+  // actually mean something get a bigger one. No points, no coins, no fake
+  // currency - the number IS the reward, because it is true.
+  rewardForLesson(lesson.day,S.lessonsCompletedCount);
   if(justHitLessonConsistency)novaNudge("Seven lessons done — that consistency is exactly what builds lasting change.");
   if(justHitFreeCap){
     setTimeout(()=>{openDay15Overlay();},1200);
@@ -3331,6 +3351,36 @@ function completeLessonForToday(){
 // After "Mark as done": snap back to the top and open what's next - the next
 // day here, or, when several focus areas are active, hop to the next area's
 // lesson so the day's round continues by itself.
+// How big a finished lesson gets to feel. First one, first week, the free-tier
+// line and the end of a 30-day track are the ones worth a real burst.
+const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'medium',21:'medium',50:'large',100:'large'};
+function rewardForLesson(day,total){
+  const tier=LESSON_MARKS[total]||(total%25===0?'large':(day%10===0?'medium':'small'));
+  try{celebrationBurst(tier);}catch(e){}
+  let line;
+  if(total===1)line='First lesson done. That is day one of the part nobody sees.';
+  else if(total===7)line='Seven lessons. A week of showing up — that is the whole trick.';
+  else if(total===30)line='Thirty lessons in. Most people never get past three.';
+  else if(total%25===0)line=total+' lessons done. Look at that number.';
+  else line='Day '+day+' done — '+total+' lesson'+(total===1?'':'s')+' in.';
+  rewardToast(line);
+}
+// Same shape as the exit toast, so the app has one way of saying something
+// small rather than three.
+let rewardToastEl=null,rewardToastTimer=null;
+function rewardToast(text){
+  try{
+    if(!rewardToastEl){
+      rewardToastEl=document.createElement('div');
+      rewardToastEl.style.cssText='position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--s2);color:var(--tp);border:1px solid var(--green);padding:11px 18px;border-radius:99px;font-size:13px;z-index:2000;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:opacity .3s;max-width:90vw;text-align:center;pointer-events:none';
+      document.body.appendChild(rewardToastEl);
+    }
+    rewardToastEl.textContent=text;
+    rewardToastEl.style.opacity='1';
+    clearTimeout(rewardToastTimer);
+    rewardToastTimer=setTimeout(()=>{if(rewardToastEl)rewardToastEl.style.opacity='0';},3200);
+  }catch(e){}
+}
 function advanceAfterLessonDone(){
   const tracks=S.selectedAddictions||[];
   if(tracks.length>1){
@@ -4487,9 +4537,98 @@ function maybeStartNavTour(){
   if(!S.navTourDone)setTimeout(startNavTour,300);
 }
 // ─── MEDITATION ROOM ─────────────────────────────────────────────────────────
-let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0;
+// The sound beds live here. Ten of them, every one synthesised from scratch for
+// this app with ffmpeg - no samples, no downloads, no stock library. That is
+// deliberate: original work cannot carry a licence question, and a licence
+// question on audio inside a paid app is the kind of thing that surfaces years
+// later. Suno's clips run 5-12 seconds, which is a sound effect, not a bed you
+// can sit inside for ten minutes - so these stayed. Jacques's music lands under
+// the 'Music' heading when it is ready; nothing here has to move for it.
+//
+// Eleven loose buttons wrap into a block on a phone and nobody reads past the
+// first line, so they render under headings instead. `cat` is the heading;
+// `label` is what the button says, word for word as Jacques names it.
+//
+// TO ADD A TRACK: drop the file in audio/meditation/ and add one line below.
+// Nothing else changes - the headings, the fade-in and the stop-on-close all
+// size themselves off this array, and a category with no tracks in it never
+// draws. An empty array hides the whole picker: a row offering one dead
+// "Silence" button is worse than no row, and the timer works fine in silence.
+//   {k:'file-name-without-extension', label:'What The Button Says', cat:'Music'}
+const MED_SOUNDS=[
+  {k:'rain',                  label:'Rain',                   cat:'Nature'},
+  {k:'ocean',                 label:'Ocean',                  cat:'Nature'},
+  {k:'night',                 label:'Night',                  cat:'Nature'},
+  {k:'whispers-in-the-forest',label:'Forest Whispers',       cat:'Music'},
+  {k:'cozy-storm',            label:'Cozy Storm',             cat:'Music'},
+  {k:'fading-into-the-night', label:'Fading Night',          cat:'Music'},
+  {k:'midnight-lullaby',      label:'Midnight Lullaby',       cat:'Music'},
+  {k:'himalayan-still',       label:'Himalayan Still',        cat:'Music'},
+  {k:'night-fade',            label:'Night Fade',             cat:'Music'},
+  {k:'deep-focus',            label:'Deep Focus',             cat:'Music'},
+  {k:'still-waters',          label:'Still Waters',           cat:'Music'},
+];
+const MED_CATS=['Nature','Music'];
+let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0,medAudio=null;
+function medChip(k,label,on){
+  return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:12.5px;border-radius:20px;cursor:pointer;font-family:var(--f);
+    background:${on?'rgba(126,232,162,.22)':'rgba(255,255,255,.08)'};
+    border:1px solid ${on?'var(--green)':'rgba(255,255,255,.25)'};
+    color:${on?'var(--green)':'#fff'}">${label}</button>`;
+}
+function renderMedSounds(){
+  const row=document.getElementById('med-sound-row');
+  if(!row)return;
+  const wrap=document.getElementById('med-sound-wrap');
+  if(!MED_SOUNDS.length){row.innerHTML='';if(wrap)wrap.style.display='none';return;}
+  if(wrap)wrap.style.display='';
+  const cur=S.medSound||'none';
+  // Silence sits on its own above the categories - it is not a track, it is the
+  // way out of whichever one is playing.
+  let html=`<div style="width:100%;display:flex;justify-content:center">${medChip('none','Silence',cur==='none')}</div>`;
+  // Any category named in MED_CATS first, in that order, then anything with a
+  // category nobody listed - so a typo in `cat` still shows its track instead
+  // of silently swallowing it.
+  const seen=[];
+  const cats=MED_CATS.concat(MED_SOUNDS.map(s=>s.cat).filter(c=>c&&MED_CATS.indexOf(c)<0));
+  for(const cat of cats){
+    if(seen.indexOf(cat)>=0)continue;
+    seen.push(cat);
+    const inCat=MED_SOUNDS.filter(sd=>(sd.cat||'Music')===cat);
+    if(!inCat.length)continue;
+    html+=`<div style="width:100%;margin-top:14px">
+      <div style="font-size:10.5px;letter-spacing:1.4px;opacity:.6;margin-bottom:7px;text-transform:uppercase">${cat}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${inCat.map(sd=>medChip(sd.k,sd.label,sd.k===cur)).join('')}</div>
+    </div>`;
+  }
+  row.innerHTML=html;
+}
+function pickMedSound(k){
+  S.medSound=k;save();
+  renderMedSounds();
+  startMedSound();
+}
+function startMedSound(){
+  stopMedSound();
+  const k=S.medSound||'none';
+  if(k==='none')return;
+  try{
+    medAudio=new Audio('audio/meditation/'+k+'.mp3');
+    medAudio.loop=true;medAudio.volume=0;
+    medAudio.play().then(()=>{
+      // Fade in over 2s - a bed that starts at full volume is a jolt, which is
+      // the opposite of the point.
+      let v=0;const t=setInterval(()=>{v=Math.min(0.7,v+0.035);if(medAudio)medAudio.volume=v;if(v>=0.7)clearInterval(t);},100);
+    }).catch(()=>{});
+  }catch(e){}
+}
+function stopMedSound(){
+  if(medAudio){try{medAudio.pause();}catch(e){}medAudio=null;}
+}
 function openMeditation(){
   document.getElementById('meditation-overlay').style.display='flex';
+  renderMedSounds();
+  startMedSound();
   wakeLockAcquire('meditation');
 }
 function startMeditation(min){
@@ -4515,6 +4654,9 @@ function medTick(){
   document.getElementById('med-phase').textContent=inPhase?'Breathe in — soften the shoulders':'Breathe out — let it go';
 }
 function medPauseToggle(){
+  // Pausing the session pauses the sound too - a bed playing over a stopped
+  // clock reads as broken.
+  try{ if(medAudio){ medPaused ? medAudio.play().catch(()=>{}) : medAudio.pause(); } }catch(e){}
   medPaused=!medPaused;
   const btn=document.getElementById('med-pause-btn');
   if(medPaused){medRemainMs=Math.max(0,medEndsAt-Date.now());btn.textContent='Resume';}
@@ -4533,6 +4675,9 @@ function medFinish(){
 }
 function closeMeditation(){
   if(medTimer){clearInterval(medTimer);medTimer=null;}
+  // The bed must die with the session. A loop left running after "End session"
+  // plays forever behind a closed overlay and drains the battery silently.
+  stopMedSound();
   calmSoundOff();updateCalmToggles();
   wakeLockRelease('meditation');
   document.getElementById('meditation-overlay').style.display='none';
@@ -4546,6 +4691,7 @@ function initApp(){
   // spiritual question promises quietly vanished on the next app open, which
   // read as "the God thing doesn't work."
   updateHomeFaithCard();
+  renderDailyQuote();
   handleCheckoutReturn();
   syncBillingStatus(true);
   document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
@@ -4996,6 +5142,10 @@ function useGuidedPrompt(){
   ta.focus();
 }
 function saveEntry(){
+  // Hitting Save ends dictation. Anything already transcribed is in the box;
+  // leaving the recogniser running would keep a live microphone open on a
+  // closed journal, which is the opposite of what this app promises.
+  if(S.voiceJournalActive){try{stopVoiceJournal();}catch(e){}}
   const txt=document.getElementById('jourText').value.trim();
   if(!txt)return;
   const title=document.getElementById('jourTitle').value.trim();
@@ -7332,6 +7482,18 @@ function closeVoiceGuide(){
   document.getElementById('voiceguide-overlay').style.display='none';
 }
 document.addEventListener('visibilitychange',()=>{
+  // Friendly reading a reply aloud gets suspended by the phone the moment the
+  // app goes to the background - that is the browser's rule, not ours, and
+  // nothing in a web app can keep speech running while it is hidden. What we
+  // CAN do is pick it back up the instant you return, instead of leaving her
+  // mid-sentence forever.
+  // Phones sit open for days at a time. Without this, the line on Home stays on
+  // whatever day the app was last cold-started - so "today" quietly means last
+  // Tuesday.
+  if(!document.hidden)renderDailyQuote();
+  if(!document.hidden && speaking){
+    try{ if(window.speechSynthesis&&speechSynthesis.paused)speechSynthesis.resume(); }catch(e){}
+  }
   if(!vgActive||document.hidden)return;
   // Back in the app. A recording that something paused while we were away is
   // restarted here; the phone's-own voice is nudged out of its paused state.
@@ -7989,6 +8151,85 @@ function chooseFaith(v){
   updateHomeFaithCard();
   renderFaithLead();
   save();
+}
+// ─── ONE LINE A DAY ──────────────────────────────────────────────────────────
+// Every line here was written for this app. That is not vanity: quote sites
+// carry attribution requirements and misattributed text, and the licence audit
+// we just did would be worthless if the first thing on Home came from one. It
+// also means nothing here promises an outcome or diagnoses anybody - the same
+// rule the lessons follow.
+const DAILY_LINES=[
+  "You are not starting over. You are starting from experience.",
+  "The urge is loud because it is losing. Quiet things do not have to shout.",
+  "Nobody gets a day one by accident. You decided something.",
+  "Today does not have to be good. It has to be yours.",
+  "The hardest part is already behind you: you admitted it out loud.",
+  "You have survived every worst day so far. That is not luck. That is a record.",
+  "A craving is a wave, not a wall. Waves end whether you fight them or float.",
+  "Small and boring beats big and dramatic. Boring is what lasts.",
+  "You do not owe anyone the old version of you.",
+  "Being tired of it is not weakness. It is the beginning.",
+  "The thing you are avoiding takes ten minutes. The avoiding takes all day.",
+  "Progress that nobody claps for still counts.",
+  "You can be proud and still be scared. Both fit in one chest.",
+  "Ask for help early, when it is a question. Not late, when it is a rescue.",
+  "You are allowed to want your life back.",
+  "One honest sentence beats a week of pretending.",
+  "The person you are becoming needs today more than yesterday needs an excuse.",
+  "Relapse is information, not a verdict. Read it, do not move into it.",
+  "The habit promised to fix a feeling. It never once did.",
+  "Rest is not a reward for finishing. It is part of the work.",
+  "You do not have to feel strong to act strong.",
+  "Say the number out loud. However small it is, it is real.",
+  "Somebody in your life is quietly relieved today. They may never say it.",
+  "The urge wants a decision right now. That is the tell. Wait it out.",
+  "You are not behind. There was never a schedule.",
+  "Some days you build. Some days you just do not burn it down. Both count.",
+  "Shame says you are the problem. Honesty says you have one. Only one of those can be worked on.",
+  "You have already done the impossible part more than once.",
+  "The first ten minutes lie. Give it eleven.",
+  "There is no version of this where quitting on yourself helps.",
+  "The story is not over just because this chapter was ugly.",
+  "You do not need to explain your recovery to anyone who has not lived it.",
+  "Discipline is just remembering what you actually want.",
+  "Do the next right thing. Just the next one.",
+  "Loneliness is a craving too. Answer it with a person, not a substance.",
+  "You can put it down today without swearing off forever. Today is enough.",
+  "The best day to start was years ago. The second best is the one you are in.",
+  "You are not too far gone. Nobody who reads this ever was.",
+  "A bad hour is not a bad day unless you hand it the rest.",
+  "Count what you kept, not only what you lost.",
+  "Willpower runs out. Plans do not. Make the plan while you are calm.",
+  "You are worth the inconvenience of getting better.",
+  "Recovery is not one decision. It is the same decision, made again.",
+  "Nothing you do today has to be perfect to be enough.",
+  "The people who love you are not keeping score the way you are.",
+  "Anger is allowed. What you do next is the part that matters.",
+  "You are not the worst thing you ever did while you were using.",
+  "Do not negotiate with a voice that has lied to you every single time.",
+  "Being clear-headed is uncomfortable at first. So is a light after a dark room.",
+  "You survived it. Now you get to live past it.",
+  "Not every day gets a milestone. Every day gets counted.",
+  "Boredom is not an emergency, no matter how it feels tonight.",
+  "The plan does not care how you feel about it at 9pm. Follow it anyway.",
+  "You are building somebody who will not need this conversation one day.",
+  "If today was only survival, then survival was the win.",
+  "The apology that matters most is the one made with time, not words.",
+  "Doubt shows up in everybody who is actually changing.",
+  "You do not have to be ready. You have to be willing.",
+  "One year from now this week will be a sentence in a longer story.",
+  "The counter did not blink. Neither should you.",
+];
+// Same line all day, everywhere in the app, changing at local midnight.
+function dailyLineIndex(){
+  const d=new Date();
+  const key=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+  return key%DAILY_LINES.length;
+}
+function renderDailyQuote(){
+  const el=document.getElementById('daily-quote-txt');
+  if(!el)return;
+  el.textContent=DAILY_LINES[dailyLineIndex()];
 }
 function updateHomeFaithCard(){
   const el=document.getElementById('home-faith-card');
@@ -11020,7 +11261,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.2';
+const APP_VERSION='6.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

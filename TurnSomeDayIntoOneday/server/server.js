@@ -704,6 +704,19 @@ app.get('/api/diagnostics', requireAuth, (req, res) => {
   }
   res.json({ errors: db.getRecentErrors(50) });
 });
+// Same owner gate as reading them. Clearing is not undoable, which is fine -
+// the log is a scratchpad for whatever broke most recently, not a record.
+app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
+  if (!DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Diagnostics are unavailable: APP_OWNER_EMAIL is not configured.' });
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    return res.status(403).json({ error: 'Only the app owner can clear diagnostics.' });
+  }
+  const cleared = db.clearErrors();
+  res.json({ ok: true, cleared });
+});
 
 // Funnel numbers are business data, so unlike diagnostics this gate has no
 // open fallback: with APP_OWNER_EMAIL unset, nobody gets in.

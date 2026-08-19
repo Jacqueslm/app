@@ -496,3 +496,317 @@ Turn Someday Into Day One · St. Louis
 | Instagram | 3 new | | |
 | YouTube | 6 | | |
 | Partner | 1 + hashtags | | |
+
+---
+
+# NEW INFLUENCERS — 20 names, researched 17 Aug 2026
+
+This is the batch INFLUENCERS.md Batch 3 couldn't finish: partner-side creators
+first (the lane nobody serves and the one you own), then the other habits, then
+storytellers — including men 40+ and one Spanish-language voice. Every name here
+came out of a real search result; nothing is invented. Where I found a working
+email I say exactly where it came from; where I couldn't, it says DM only or not
+found — I did not guess. **Honest count: 5 of 20 have a verified email** (this
+machine is blocked from fetching most creator sites directly, so the rest are
+DM or contact-form routes — which is normal on TikTok/IG anyway). Follower
+counts are as-of the page that published them; a few entries have none because
+none was published — look for ten seconds before you send. **The Batch 1 rule
+holds: watch two of their videos (or listen to ten minutes of one episode)
+before sending. One line proving you looked beats three paragraphs.** Templates
+referenced are the ones already in INFLUENCERS.md Batch 2.
+
+---
+
+## LANE 1 — PARTNER-SIDE (the gap, send these first)
+
+### 1. Andrea Ashley — Adult Child podcast — podcast + IG/TikTok @adultchildpod
+- [ ] Sent
+**Size:** one of the biggest ACOA (adult child of an alcoholic) podcasts going —
+calls itself the leading podcast on growing up in an alcoholic family. Bigger
+than the sweet spot but it's one woman, 17 years sober, running her own show.
+**Who:** grew up in an alcoholic home, got sober herself, now unpacks what the
+family carries. Her whole audience is people who loved an addict before they
+could spell the word.
+**Contact route:** no public email found — website contact form at
+adultchildpodcast.com plus IG DM @adultchildpod (ad inquiries route through
+RedCircle, which is the wrong door for this). *Source: her site + PodPitch
+outreach listing, both via search.*
+**Template:** podcast interview pitch — she does interview guests.
+**Opener:** "Your show is the first place I've heard the family's side treated
+as the main story instead of the footnote — that's exactly why half my app is
+built for the person who loved the addict."
+
+### 2. Brandi Mac — Do What You Can Live With — podcast + Substack
+- [ ] Sent
+**Size:** niche podcast, count not published — reads her own inbox.
+**Who:** critical care nurse practitioner and mother of a daughter with
+substance use disorder. Did a raw mother-daughter episode at Brooke's 15 months
+sober. Family lived experience, harm-reduction honest, no program for sale.
+**Contact route:** **brandi@brandimac.com — verified, listed on her own contact
+page at brandimac.com/contact-brandi** (backup: collateraldamagesucks@gmail.com
+for podcast inquiries, same page).
+**Template:** podcast interview pitch.
+**Opener:** "The mother-daughter episode you did at Brooke's 15 months is the
+most honest thing I've heard on a recovery podcast — both chairs at the same
+table, which is exactly how I built my app."
+
+### 3. Andrea Seydel — Saving You Is Killing Me — podcast + book + community
+- [ ] Sent
+**Size:** long-running show, 190+ episodes, count not published.
+**Who:** author of "Saving You Is Killing Me: Loving Someone With an
+Addiction" — built the whole platform for the person doing the loving, not the
+person using. Her day job is book publishing, not recovery coaching, so no
+program conflict.
+**Contact route:** no direct email found — contact form at
+savingyouiskillingme.com. *Source: her About page via search.*
+**Template:** podcast interview pitch.
+**Opener:** "Your episode title 'Navigating the I-didn't-sign-up-for-this
+reality' is the sentence my wife said out loud somewhere around year twenty."
+
+### 4. Ashley Rakes — Codependent N' Sh*t — podcast + IG @codependentnshit
+- [ ] Sent
+**Size:** small indie podcast — exactly the reads-her-own-messages size.
+**Who:** tells her own codependency recovery story, invites listener rants and
+success stories. No coaching offer found.
+**Contact route:** **codependentnshit@gmail.com — verified, published on her
+Spotify for Creators / podnews podcast profile** (she invites listener email).
+**Template:** podcast interview pitch — or the short DM on IG if no reply.
+**Opener:** "You ask listeners to send you their stories — here's mine from the
+other chair: I was the addict for 38 years, and the codependent in my house was
+my wife."
+
+### 5. Alyssa Zander — Codependency Alchemy — Substack
+- [ ] Sent
+**Size:** Substack newsletter, count not published.
+**Who:** writes first-person about codependency recovery — essays, not a
+course. The codependency audience is the biggest search segment you have
+(TARGET-MARKET.md: 33,100/mo) and almost nobody writes to it in plain first
+person.
+**Contact route:** DM only — Substack direct message / reply-to-newsletter at
+alyssaaazander.substack.com. No email found.
+**Template:** YouTube email template wording, sent as a Substack message.
+**Opener:** "Codependency Alchemy is the only thing I've read that treats
+codependency recovery as its own story instead of a chapter in the addict's."
+
+### 6. Angie Q — "Dealing with someone we love, with addiction." — podcast
+- [ ] Sent — lowest priority in this lane
+**Size:** small Apple Podcasts show, count not published.
+**Who:** built the show specifically for the daily struggle of loving someone
+with addiction — your exact lane, told from lived experience.
+**Contact route:** **not found.** No website, no email surfaced — only the
+Apple Podcasts listing. If the show's Spotify page has a Q&A/message option,
+use that; otherwise park it. Do not guess an address.
+**Template:** podcast interview pitch, if a route appears.
+**Opener:** "Your show title is the whole problem in one line — nobody teaches
+you how to deal with someone you love, with addiction. My wife did it for 38
+years with no software and no map."
+
+---
+
+## LANE 2 — OTHER HABITS (gambling, porn, food, nicotine)
+
+### 7. Christina Cook — The Broke Girl Society — podcast + community (gambling)
+- [ ] Sent
+**Size:** the main women's gambling-recovery podcast; small enough that the
+founder answers her own email.
+**Who:** woman in gambling recovery who built the community she needed —
+reframing women's gambling addiction, which almost nobody covers. Story-first,
+not a treatment program.
+**Contact route:** **christina@thebrokegirlsociety.com — verified, published
+contact for thebrokegirlsociety.com** (surfaced in search alongside her site).
+**Template:** podcast interview pitch.
+**Opener:** "You built The Broke Girl Society because nobody was talking to
+women who gamble — I built a gambling track into my app for the same reason
+nobody else has one next to the alcohol track."
+
+### 8. Rob Minnick — Rob ODAAT / ODAAT Gambling Awareness — TikTok, YouTube, IG
+- [ ] Sent
+**Size:** big — reported ~15M monthly reach across platforms. Over the sweet
+spot, but it's one guy who made his last bet 12 Nov 2022 and runs it all
+himself; he answers as part of his own recovery.
+**Who:** six years of sports betting, financial ruin, now daily one-day-at-a-
+time content. Advocacy, not a paid program.
+**Contact route:** no email found — website form at odaatgamblingawareness.com
+or TikTok/IG DM (@rob.odaat is the name he posts under — confirm the exact
+handle on the app before sending). *Source: his founder-story page +
+GamFin/Gateway Foundation profiles via search.*
+**Template:** TikTok/IG DM.
+**Opener:** "Last bet November 12, 2022 and you say the videos keep you
+accountable — my app's day counter exists for exactly that reason, and it has a
+gambling track, which almost none do."
+
+### 9. Porn Free Millennial — Substack + podcast + YouTube (porn recovery)
+- [ ] Sent
+**Size:** small, count not published.
+**Who:** a millennial documenting his own quitting-porn recovery in numbered
+first-person posts — story and check-ins, no course, no reboot coaching. The
+rarest thing in this niche: a storyteller, not a salesman.
+**Contact route:** DM only — Substack message via
+pornfreemillennial.substack.com. No email found.
+**Template:** YouTube email wording, sent as a Substack message. Porn stays in
+the app and in the DM — never on the public sign.
+**Opener:** "Your post 'why i am doing this' says out loud what most men only
+type into a search bar at 2am — I was one of them for longer than you've been
+alive, and I got free at 50."
+
+### 10. Kelsey Grennan — @kelssjourney — TikTok (binge eating recovery)
+- [ ] Sent
+**Size:** count not verified — check the profile, she posts under #kelssjourney.
+**Who:** documents binge eating recovery day by day — celebrated two weeks
+binge-free on camera, kept posting through a bad car accident. Raw, real-time,
+no product.
+**Contact route:** DM only — TikTok @kelssjourney. No email found.
+**Template:** TikTok/IG DM.
+**Opener:** "You posted 'almost 2 weeks binge free, first time in years' — that
+exact almost-two-weeks moment is why my app has a food track with a counter
+that doesn't shame you when it resets."
+
+### 11. Jesse Sulli — @jessesulli — TikTok (quit vaping/smoking)
+- [ ] Sent
+**Size:** count not verified — check the profile.
+**Who:** posted daily check-ins through quitting, celebrated 500+ days free
+from smoking and vaping. Pure documentation, the format your day counter was
+built for.
+**Contact route:** DM only — TikTok @jessesulli. No email found.
+**Template:** TikTok/IG DM.
+**Opener:** "500 days of daily check-ins is the whole method — I built an app
+around exactly that after 38 years addicted, and the nicotine track is free."
+
+### 12. McCall Mirabella — YouTube + TikTok (quit vaping)
+- [ ] Sent — last in this lane
+**Size:** larger, and she has partnered with Truth Initiative since 2022 — so
+she does read partnership messages, but a brand relationship already exists.
+**Who:** went viral documenting her quit-vaping journey, now shares triggers
+(concerts) and coping honestly.
+**Contact route:** DM only — TikTok/IG. No email found; don't pitch through
+Truth Initiative, that's an org channel.
+**Template:** TikTok/IG DM.
+**Opener:** "You telling your audience that concerts are still a trigger years
+in is more useful than any quit-guide — that honest middle part is what my
+app's daily lessons are written from."
+
+---
+
+## LANE 3 — SOBRIETY STORYTELLERS (men 40+, midlife, Spanish)
+
+### 13. Julia Rangiheuea — Soberly Speaking — podcast (interviews, Australia)
+- [ ] Sent
+**Size:** small interview show — she reads her own inbox and asks people to
+share their stories.
+**Who:** sober host who interviews across the whole map — including a full
+episode on loving your partner through addiction, so the partner angle lands
+here too.
+**Contact route:** **hello@soberlyspeaking.com.au — verified, published on the
+show's own listing pages** ("if you'd like to share your story").
+**Template:** podcast interview pitch.
+**Opener:** "You gave a whole episode to loving a partner in addiction — I can
+give you both halves in one chair: 38 years addicted, and the wife who stayed,
+which is why half the app I built is hers."
+
+### 14. Laura Van Antwerp — Your Sober Pal — IG/TikTok @yoursoberpal
+- [ ] Sent
+**Size:** mid-size across IG and TikTok — eight years sober, runs it herself.
+**Who:** humor-first sobriety content, author of the Your Sober Pal affirmation
+deck, runs sober outdoor adventures. Products, not a coaching program.
+**Contact route:** **yoursoberpal@gmail.com — verified, published on her
+contact page at yoursoberpal.com.**
+**Template:** YouTube email template (she's email-first for her business).
+**Opener:** "Your whole feed says sobriety doesn't have to be a funeral — mine
+started at 50 and it's the funniest I've been in 38 years."
+
+### 15. Jon Gustin — The Tired Dad — IG + book
+- [ ] Sent
+**Size:** larger — popular account, book out, lots of podcast appearances. But
+it's one dad, three-plus years sober, self-run.
+**Who:** sobriety, marriage, and fatherhood without the guru voice. His
+audience is men who won't call themselves alcoholics — your secondary audience
+exactly.
+**Contact route:** no email found — contact via tireddad.com or IG DM
+@the.tired.dad. *Source: his About page via search.*
+**Template:** TikTok/IG DM.
+**Opener:** "You talk about choosing presence over hiding — I hid for 38 years,
+got present at 50, and built the app I needed so my kids' dad stayed present."
+
+### 16. Clayton Townsend — @YourTexasRoofer — TikTok (sober dad, faith)
+- [ ] Sent
+**Size:** count not verified — check the profile.
+**Who:** Texas roofer, father, recovery advocate — faith, family, and hard work
+content. A working man's recovery story; the audience your talking-heads are
+aimed at.
+**Contact route:** DM only — TikTok @YourTexasRoofer. No email found.
+**Template:** TikTok/IG DM.
+**Opener:** "A roofer talking recovery reaches men no therapist ever will — I
+was one of them for 38 years, and I built the app for guys who'd never walk
+into a meeting."
+
+### 17. Michael Sargood — @happywithoutthehooch — Instagram (UK)
+- [ ] Sent
+**Size:** mid-size IG — featured on Love Sober, Over The Influence, and other
+sober podcasts.
+**Who:** "sober silliness and serious content" — got sober, rebuilt his life,
+founded Sober Socials (free meetups) and is an Alcohol Change UK ambassador. No
+paid program.
+**Contact route:** DM only — IG @happywithoutthehooch, or via sobersocials.co.uk.
+No email found.
+**Template:** TikTok/IG DM.
+**Opener:** "Happy without the hooch is the whole pitch nobody makes — sobriety
+sold as a better life, not a punishment. That's the voice I write my app's
+lessons in."
+
+### 18. Kelz — @kelz_living_well — TikTok (midlife sobriety)
+- [ ] Sent
+**Size:** count not verified — check the profile.
+**Who:** bio reads "living sober 7.28.19, midst of midlife, raising a girl" —
+midlife sobriety told daily, the closest thing to your demographic on TikTok.
+**Contact route:** DM only — TikTok @kelz_living_well. No email found.
+**Template:** TikTok/IG DM.
+**Opener:** "Sober since 7.28.19 in the middle of midlife — I got free at 50
+after 38 years, so I know exactly how much heavier that counter is when you
+start late."
+
+### 19. William Porter — Alcohol Explained — author + IG @alcoholexplained (UK)
+- [ ] Sent
+**Size:** big book, modest self-run Instagram.
+**Who:** London solicitor who drank hard, quit, and wrote "Alcohol Explained" —
+widely called a sober bible. An author who happens to have a book, not a coach
+with a program.
+**Contact route:** no email found — contact page at alcoholexplained.com or IG
+DM @alcoholexplained.
+**Template:** YouTube email wording, via the site contact form.
+**Opener:** "Alcohol Explained gave people the why — I lived the why for 38
+years and built the app for the 2am moment when understanding it isn't enough."
+
+### 20. Alfonso Ortega — Cocituber — IG/TikTok @cocituber (Spanish, Spain)
+- [ ] Sent — the one big-account exception in this batch
+**Size:** ~630K Instagram (as-of press coverage) — way over the sweet spot, but
+he runs it himself and talks about his alcoholism unprompted, on principle.
+**Who:** gastro creator who films tapas bars — sober in the one place sobriety
+is hardest. Started drinking at 14, quit at 38, five-plus years sober, says on
+record "cuando eres adicto, lo eres para siempre." His arc is yours in Spanish:
+started young, got free late. Note: he's Spain-based, not US Latino — the reach
+is the Spanish language, not the US market.
+**Contact route:** DM only — IG @cocituber. No email found in press or profiles.
+**Template:** TikTok/IG DM — send it in Spanish if you can, or lead with
+"Empecé a los 12, paré a los 50."
+**Opener:** "Tú empezaste a los 14 y paraste a los 38 — yo empecé de niño y
+paré a los 50, después de 38 años. Construí la app que necesitaba todo ese
+tiempo, y es gratis."
+
+---
+
+## Log
+
+| Lane | Found | Verified email | DM/form only |
+|---|---|---|---|
+| Partner-side | 6 | 2 (Brandi Mac, Ashley Rakes) | 4 |
+| Other habits | 6 | 1 (Christina Cook) | 5 |
+| Storytellers | 8 | 2 (Julia Rangiheuea, Laura Van Antwerp) | 6 |
+
+**Skipped on purpose (so nobody re-finds them):** Kylene Terhune/RecoverU,
+Anne Blythe/BTR, Julie Sanford/Married to Addiction, Michelle Anderson/Love
+Over Addiction, Wife On The Rocks, Lisa Limehouse, D.J. Burr — all sell a
+coaching program or paid circle in the partner lane (which is itself proof the
+lane pays and nobody built software). Matt & Sheri Salis/Untoxicated — run
+enrollment programs (SHOUT Sobriety / Echoes of Recovery). Luc Zoratto and
+Andy Ramage — sober coaches. Matt Pink — co-founded a competing app. Tegan De
+Vil — 455K, and a fraud conviction; not the brand. Scott Freda — 1.5M, too big.

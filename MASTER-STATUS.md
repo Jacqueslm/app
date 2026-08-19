@@ -6,6 +6,8 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+---
+
 ## ✅ 19 AUG 2026 — REVIEWS FIX BATCH: schema restored + CTA fixed + 10 reviews back (PUSHED to deploy branch, live)
 
 Jacques's instruction after the audit: "the other ai took the schema off the
@@ -147,6 +149,103 @@ wire the PDF step.
 
 ---
 
+---
+
+## 🧘 19 AUG 2026 — APP 6.3: daily line, lesson reward, journal mic, licence audit
+
+**1. One line a day on Home.** Jacques: "i dont see the daily motivational
+quotes when you open the app i see set your intentions." He was right — the
+word "quote" appeared nowhere in the app; what he was seeing was the morning
+check-in, a different feature. Home now opens with one line, changing at local
+midnight and holding all day (`DAILY_LINES`, 60 of them). Every line was
+written for this app: quote sites carry attribution requirements and
+misattributed text, and the licence audit below would be worthless if the first
+thing on Home came from one.
+
+**2. Finishing a lesson is now worth something.** It used to change a button to
+"Nice work ✓" and nothing else — no reward at all for the one thing the whole
+program is built on. Now every finished lesson fires a confetti burst and says
+the count out loud, with a bigger burst on 1, 7, 15, 30 and every 25th. No
+points, no coins, no fake currency: the number is the reward, because it is true.
+
+**3. Journal dictation stops when you hit Save.** `saveEntry()` calls
+`stopVoiceJournal()` first, so the mic never keeps listening after the entry is in.
+
+**4. Friendly's voice when you leave the app.** `visibilitychange` resumes
+speech on return. Honest limit: the phone SUSPENDS speech synthesis the moment
+the app is backgrounded — that is the browser's rule and no web app can
+override it. Resume-on-return is the real fix available.
+
+**5. Licence audit — clean, nothing non-commercial ships.**
+- 5 SOS recordings + 523 lesson narrations: Piper voices, CC0/public domain,
+  deliberately chosen. The better-sounding Piper voices (hfc_female, hfc_male,
+  ryan, lessac) are non-commercial and are NOT used.
+- 353 icons: hand-maintained SVG paths in this repo, ours.
+- Fonts: system font stack only — nothing downloaded, nothing licensed.
+- **Zero third-party JavaScript.** No CDN, no analytics library, no framework.
+- og/share images: ours.
+Nothing in the app carries a non-commercial or attribution-required licence.
+
+**Meditation sound — 11 tracks, Nature and Music.**
+- **Nature (3):** Rain, Ocean, Night — synthesised from scratch with ffmpeg for
+  this app. Original work, so no licence question is possible. Jacques listened
+  to all ten I made and kept these three; the other seven were deleted.
+- **Music (8):** Jacques's own Suno tracks, 2:26–3:35 each: Whispers in the
+  Forest, Cozy Storm, Fading into the Night, Midnight Lullaby, Himalayan Still,
+  Night Fade, Deep Focus, Still Waters. Suno commercial plan, already logged.
+- **What every incoming track gets:** the silent head and tail trimmed (Suno
+  leaves 0.5–2.2s, which becomes a hole of dead air at the loop point); a 2.5s
+  crossfade wrapping the tail over the head so it repeats without a cut; and
+  one loudness for everything (-20 LUFS, -3dB true peak) so no track is buried
+  behind another. Jacques's originals peaked at 0.0dB, dead on the ceiling.
+- **Suno cannot make beds.** Its sound effects come out 5–12 seconds long — a
+  clip, not something you can sit inside for ten minutes. Rain at 4.8s repeats
+  62 times a minute and the ear locks onto it. That is why the nature beds are
+  synthesised and the music is his.
+- **Adding a track is one line** in `MED_SOUNDS`: file key, the label the button
+  says word for word, and its category. A category with no tracks never draws;
+  an empty array hides the picker completely.
+- **I cannot hear any of it.** Every judgement above is a meter reading. Jacques
+  caught the singing bowl being inaudible when the numbers said it was fine —
+  the ear is his job, and levels are mine.
+
+Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
+
+## 🔧 17 AUG 2026 (later) — APP 5.7.0 + STUDIO b0877: onboarding freeze, Pro opened up, backups fixed
+
+**App 5.7.0 — shipped to main + deploy branch (Railway auto-deploys).**
+1. **THE ONBOARDING FREEZE (blocked every new user).** Continue on the spiritual
+   question did nothing. Today's concurrent merge left `obNext()` calling
+   `buildBehavioralStep()` on the way in while that function still ended by calling
+   `obNext(2)` back — infinite mutual recursion, "Maximum call stack size exceeded"
+   thrown inside the click handler, killing it silently. Reproduced in a real browser
+   on all three answers. Fix: the builder only builds; `obNext` navigates. **Never put
+   `obNext(2)` back at the end of `buildBehavioralStep()`.**
+2. **Faith card survives reload** — it only painted at the moment of choosing;
+   `initApp()` now repaints it, so the spiritual choice persists visibly.
+3. **PRO IS NOW EXACTLY TWO THINGS (Jacques's call):** lesson/pack **days 16-30**, and
+   **30 Friendly chats/day vs 3**. Everything else is free. `openProTool()` gates nothing
+   (16 tools freed). Also freed: smart reminders now actually fire, weekly reports
+   generate, guided journal prompts + mood tags, habit coaching/celebration nudges,
+   craving suggestions. **Biggest hidden gate removed:** Friendly used to intercept a
+   free user asking about their own patterns/reports/journal/streaks and answer with an
+   upsell — in live chat AND the offline fallback — and the AI's free-mode instructions
+   told it to withhold that analysis. All of it now answers. Copy across the pricing
+   screen, both plan cards, the FAQ, the trial email and every stale Pro badge rewritten
+   to the true offer. **Verified: 28 headless-Chromium checks pass, zero page errors.**
+
+**Studio b0877 — auto-backup had NEVER worked.** `auto-backup.js` calls `db.exec()`, but
+both callers pass the `db.js` module object, which exposed no `exec` and no raw handle —
+every snapshot threw. The **pre-update** snapshot (the one guarding `data.sqlite` before
+an update overlays the code) swallowed it with `catch(_){}`, so every "Update my app" ran
+with no backup. `db.js` now exports `raw` + `exec`; the pre-update failure logs to
+Diagnostics. Verified live: a real snapshot file now appears at boot. Two new tests
+exercise `snapshot()` for real — **48/48 pass** (was 46; the old test only checked
+filename helpers, which is how this shipped broken). Also removed a hardcoded `$0.35`
+fallback in the auto-captions confirm dialog (violated the b0870 no-invented-prices rule).
+
+---
+
 ## 🚀 17 AUG 2026 — PLAY RELEASE SESSION HANDOFF (from the TWA/release session)
 
 **The app is IN GOOGLE REVIEW, worldwide, confirmed on screen.** Full detail in
@@ -231,9 +330,55 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 - Friendly learns from journal entries + SOS events — discussed, not coded
 - Every lesson answers Who/What/Why/When/Where/How — discussed
 - AA / more voices (African-American male + female) — the 5 current voices are public-domain; adding 2 more AA voices = a recording-generation job (~2 GB, needs the audio pipeline). Ready when you say go.
-- Show me your socials — DONE (18 Aug): screenshots received (FB, YT, TikTok Studio). Analyzed in `ENGAGEMENT-PLAN-2026-08-18.md`.
+- Show me your socials — you said you'd share them so we improve the creator content. Waiting on links.
+
+## 🔎 SEO / INDEXING — the standing record (19 Aug 2026)
+
+**Read this before touching SEO again. Do not re-derive it.**
+
+**Where it stands.** Search Console, 19 Aug (its data was last refreshed 8/13):
+**24 indexed, 20 not indexed across 4 reasons.** An earlier export this same day
+showed 12 not indexed (11 "Discovered – currently not indexed", 1 "Crawled –
+currently not indexed") — that was a narrower slice, and Jacques was right to
+push back when I quoted it as the whole picture.
+
+**What I cannot do, so stop trying.**
+- The live site is unreachable from this environment: the agent proxy 403s
+  `turnsomedayintodayone.com` (CONNECT tunnel failed). No curl, no fetch, no
+  crawling our own pages. Do not report a page broken or fine on my say-so.
+- **The CSV export does not name individual URLs** — it gives counts per reason.
+  Only the Search Console SCREEN lists the actual pages. Asking Jacques to click
+  the grey "Not indexed" box → a reason row → EXPORT is the ONLY way to get them.
+  I sent him a wrong list once by guessing; do not repeat that.
+
+**The highest-value fix, offered and still not started.** Four alternative pages
+rank **page one, positions 8–10, with 0% click-through**: blockerx-alternative,
+i-am-sober-alternative, ever-accountable-alternative, hangxiety. Their titles
+and meta descriptions are all the same template — "X Alternative (2026) — free,
+no card, honest comparison." Google is already showing them to people and nobody
+clicks. Rewriting those titles beats every indexing request combined, because
+those pages are ALREADY indexed and ALREADY ranking.
+
+**Two of the four "not indexed" reasons usually need no action** — "Alternate
+page with proper canonical" and "Page with redirect" are normal. The ones worth
+acting on are "Discovered – currently not indexed" and "Crawled – currently not
+indexed": inspect the URL, hit REQUEST INDEXING, ~10-12 a day is the quota.
+
+**Dead ends already walked (do not repeat):** duplicate content was NOT the
+cause (those pages rank 8–10, so Google likes them fine); orphan pages were NOT
+the cause (exactly one orphan, and it is intentional).
+
+**The sitemap holds 36 URLs.** A generated file of one-tap Search Console
+inspect links for all 36, grouped by priority, is in the session scratchpad as
+`inspect-links.md` — regenerate it from `sitemap.xml` rather than typing URLs.
 
 ## HOUSE RULES (keep)
+
+**House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**
+When Jacques says push, it goes everywhere in one move, no asking: the working
+branch, then `main` (the record), then `claude/vibe-code-uwxxlk` (what Railway
+actually deploys). Pushing only the working branch means he approved something
+that never reached his phone — which had already happened once.
 
 1. **Never send a video thumbnail to Buffer** — fails every post on every channel.
 2. Buffer posting works — don't re-diagnose.
@@ -251,3 +396,245 @@ START-HERE.md (the 17 Aug handoff block) and TurnSomeDayIntoOneday/PLAY-CHECKLIS
 13. **LANE SPLIT:** recovery-app AI owns `TurnSomeDayIntoOneday/`; Studio AI owns `Studio/`, `reference/`, `START-HERE.md`. Don't edit the other lane.
 14. **Token lives in BOTH servers' envs:** `Studio/server/.env` AND `TurnSomeDayIntoOneday/server/.env` each need `APP_UPDATE_TOKEN` — the recovery app runs on Railway, so that one goes in Railway's env vars. Owner email `APP_OWNER_EMAIL` too. (As of Aug 16 the repo is PUBLIC again, so no token is currently needed.)
 15. **Railway auto-deploys on push to `claude/vibe-code-uwxxlk`** (Aug 17, Jacques's correction) — do NOT ask Jacques to redeploy Railway. It watches the branch and deploys itself. "Still broken on the phone" means the fix isn't on `origin/claude/vibe-code-uwxxlk` yet, not that a redeploy is pending.
+
+## Friendly's AI — fixed 18 Aug 2026 (v5.8)
+
+Friendly gave canned replies for weeks with a perfectly good Gemini key. It was
+three separate faults stacked, each hiding the next:
+
+1. The API key was never sent (no `x-goog-api-key` header) — fixed in 5.8.6.
+2. `gemini-2.5-flash` was retired by Google to new callers. Every chat came back
+   HTTP 404 "no longer available to new users … use models/gemini-3.6-flash".
+3. `gemini-3.6-flash` rejects `thinkingConfig` outright — HTTP 400 "Request
+   contains an invalid argument". It is no longer sent to 3.x models.
+
+What made this take weeks was that **none of it was visible**. A failed AI call
+falls back to a canned reply, so the app looked like it was working. Now: every
+provider failure is logged to Diagnostics with `error.details`, the owner sees
+the reason in the chat itself, a 200 with no text in it counts as a failure and
+doesn't cost a chat, and `GET /api/ai-status` reports config health in one line.
+
+**If Friendly ever goes robotic again:** open `/api/ai-status` signed in, then
+Profile → Diagnostics. The reason will be there. Model is overridable with the
+`GEMINI_MODEL` variable in Railway — the next retirement is a variable change,
+not a redeploy.
+
+## House rule 12 — write it down before the session ends (Jacques, 18 Aug 2026)
+
+After any working session — a fix, an answer, a decision, an audit — update the
+memory files before signing off. What was found, what was decided, what is still
+open. Not a summary of the chat: the things a person picking this up cold would
+otherwise have to rediscover.
+
+The Gemini hunt is the argument for this rule. Three stacked faults took weeks,
+and the reason each one cost days was that nothing was written down when it was
+learned. Everything found in that hunt is recorded above, including where to
+look first if it happens again.
+
+## Pro lockout — found and fixed 18 Aug 2026 (v5.9 / v6.0)
+
+Jacques deleted everything in the app and lost his own Pro with no way back.
+Stripe confirmed it exactly: subscription killed 18 Aug 17:28 UTC, the same
+second he pressed delete, on a plan paid through 6 Sep. **18.8 days he had
+already bought, gone.** An earlier account lost 4.9 days the same way.
+
+Three faults, all fixed:
+
+1. Deleting an account cancelled the subscription INSTANTLY instead of at the
+   end of the paid period. Now `cancel_at_period_end` - no further charge, and
+   the time already owned stays owned.
+2. "Restore purchases" could not recover anything once a user row lost its
+   `stripe_customer_id` - which is what a delete-then-resignup produces. A
+   LIFETIME purchase was unrecoverable that way. `relinkCustomerByEmail` now
+   finds the Stripe customer by the email that paid, and refuses to take one
+   another account already owns.
+3. The owner was paying $9.99/month to look at his own product. `APP_OWNER_EMAIL`
+   now grants Pro on its own, env-only like the comp list, so it writes nothing
+   to the database, cannot take a Founding Lifetime seat, and never shows up in
+   revenue. A real purchase still wins over the comp.
+
+**Confirmed working by Jacques, 18 Aug.** 11/11 tests pass.
+
+**Still open from that investigation:** both Stripe price objects read
+`active: false`. The code creates prices from PLANS on the fly so checkout
+probably still works - but nobody has tested a real purchase since. Worth one
+test buy before the Play release goes live, because if it is broken, nobody can
+buy Pro at all.
+
+## Voice cloning — tried and closed (18 Aug 2026, Jacques's call)
+
+Cloning was proven end to end: Jacques's Suno clip cloned into full lesson
+narration (YourTTS, run on the cloud box), hiss traced to the reference clip and
+cleaned. He compared against the app's existing narrators and decided it does
+not sound better. **Voices stay as they are.** The five shipped narrators are
+public-domain/CC0 and licence-clean.
+
+If this is ever reopened: `Studio/narrate-lessons.mjs` batch-records all 425
+lessons through Studio's Chatterbox cloner (MIT, sellable) unattended — one
+voice per run, resume-safe, refuses the paid path. A 25-30s clean reference
+clip is the single biggest quality lever. Note: YourTTS (the quick-test route)
+is CC BY-NC-ND - never shippable in a paid app.
+
+## House rule 13 — the ask-me-anything bot is updated with EVERY change (Jacques, 18 Aug 2026)
+
+Friendly is the app's ask-me-anything bot. Her app knowledge lives in
+`SYSTEM_APP_MAP` in TurnSomeDayIntoOneday/index.html, right above
+SYSTEM_FREE_ADDENDUM. **Any commit that ships, changes or removes a feature
+updates that block in the same commit.** No exceptions, no "later". A feature
+she doesn't know about is a feature she will deny exists - to the face of the
+person paying for it. She should know the app in and out, better than Jacques
+does.
+
+## House rule 14 — video format (Jacques, 18 Aug 2026)
+
+Every talking-head and AI script from now on is built in this order:
+1. **Dramatic thumbnail at the very beginning** — the first frame is a designed
+   scroll-stopper, not a mid-sentence face.
+2. **Hook in the first 3 seconds.**
+3. **Call to action carries the rest** — the remainder of the video moves the
+   viewer toward the app (link, follow, download), not just to the end.
+**The style (his words):** the images are outrageously enticing — a scroller has
+to want to look. The message is hard, cold, cut-throat, straight to the point.
+No soft openers, no warm-up. The 18 Aug script batch was eliminated; any new
+batch follows this rule.
+
+**Amended (Jacques, 18 Aug, later):** in addition —
+4. **15 seconds.** Not 20–25. ~40 spoken words maximum.
+5. **Every piece answers all five: WHAT / WHO / WHEN / WHERE / HOW** — in the
+   piece itself where it fits, always in the caption.
+6. **Arrogant and bold.** Not humble, not gentle-brave — the voice of a man who
+   beat 38 years and knows it. Confidence is the hook.
+7. **No two pieces built the same.** Different structure, rhythm and angle every
+   time — a formula repeated is a formula scrolled past.
+
+**Amended (Jacques, 19 Aug — the Gemini structure, logged at his instruction):**
+8. **Voiceover 35 words or fewer.** The hard number that makes 15 seconds speak
+   naturally instead of rushed. Count the words before anything is recorded.
+9. **Quick cuts, bold dynamic visuals, ONE high-impact punchline or CTA** — not
+   several. The script and the shot list are written together, as one unit.
+
+**Standing Suno narration template** (fill the brackets, paste both boxes):
+- STYLE: dark minimal cinematic spoken word, deep calm male voice, cold
+  confident unhurried delivery, sparse 808 heartbeat pulse, low sub bass,
+  [scene ambience], 60 bpm, no singing, no chorus, dry vocal up front
+- LYRICS: [Spoken, slow, cold] + the piece's voiceover (<=35 words), with
+  [beat] markers where the video cuts land. Generate 3-4 takes, keep the
+  slowest and coldest, trim so the first word lands inside second one.
+
+
+## House rule 15 — THE CONTENT WORKFLOW (Jacques, 19 Aug 2026)
+
+**Scope, corrected 19 Aug:** rules 14 and 15 govern content BUILT HERE from
+scratch. Jacques's existing finished videos - already written, shot and rendered
+in Studio - are not subject to them. Nothing about a finished video gets
+rewritten, retimed or "checked" against the 15-second rule. For those the job is
+only: commit to content/ for a public URL, write the per-platform captions,
+show him, queue to Buffer on his word.
+
+
+This is now how every AI script, card and talking head gets made. It replaces
+"write scripts, hand them over" - the deliverable is a finished video, not a
+document. Proven on "Clear All" (18 Aug) and "She Came Back" (19 Aug).
+
+**The pipeline, in order:**
+1. **Claude writes the piece as ONE unit** - shot list + voiceover (<=35 words,
+   rule 14) + the Suno prompt pre-filled. Never a script alone.
+2. **Images**: Manus for anything photoreal (people, places). The character
+   block is pasted word-for-word into every prompt with "apply to all" so faces
+   hold across frames. Captions can be burned in by Manus OR added by Claude -
+   Manus doing it has worked well. NO drug use shown in frame, ever: no pipes,
+   no smoke, no using. The platforms suppress it and the story is harder without
+   it. For anything that is UI rather than photography (lockscreens, chat
+   threads, app-store reviews), Claude builds the frames in code - no image AI
+   needed at all.
+3. **Narration**: Jacques generates the voiceover in Suno from Claude's prompt.
+   3-4 takes, keep the coldest. Takes run ~20s rather than 15 - that is fine,
+   see step 4.
+4. **Assembly**: Claude renders the video in code - Ken Burns push-ins on stills,
+   motion graphics for UI pieces, brand end card - and retimes the WHOLE
+   timeline to the narration's real length. The video bends to the voice; the
+   voice is never chopped to fit the video.
+5. **Approval**: Jacques watches. Nothing is queued until he says so.
+6. **Publish**: Claude commits the mp4 to content/ (gives it a public URL), then
+   queues it to TikTok, Facebook and YouTube via Buffer - TikTok caption says
+   "link in bio", Facebook and YouTube carry the real URL.
+
+**What this costs: nothing.** No Studio credits, no animation service, no voice
+service. Manus stills and Suno audio are on plans Jacques already has; every
+other step is code.
+
+**DEADLINE: Manus is free only until 25 Aug 2026.** After that the photoreal
+stills in step 2 have no source. Do NOT let this arrive unplanned:
+- **Bank stills before the 25th.** Every story worth telling for the next few
+  months, generated while it is free. A character block that already holds
+  (the porch women) can be reused across many stories - same two people, new
+  situations - so the batch is worth more than the images in it.
+- **Code-built pieces are unaffected** - lockscreens, chat threads, app-store
+  reviews, counters, anything that is interface rather than photography. That
+  lane stays free forever and should carry more of the load after the 25th.
+- **Replacements to price when the time comes** (nothing chosen yet): Creen
+  (face lock, free credits), ChatGPT image credits, Microsoft Copilot (holds a
+  face from one reference photo) - all three are already in Jacques's tested
+  toolchain in START-HERE. Studio's own paid stills are the fallback of last
+  resort because they cost per image.
+
+**Where the pieces live:** finished videos in `content/`, and the source page
+for each code-built animation beside it (e.g. `content/clear-all-source.html`) -
+edit the timeline, re-render, new video.
+
+
+## House rule 16 — BRANDING, FIXED (Jacques, 19 Aug 2026)
+
+"Big brands don't change, so we don't either." These are not per-video choices.
+Every AI-built video carries all of them, identically, every time:
+
+1. **Corner watermark.** The handshake symbol sits in the BOTTOM-RIGHT corner of
+   every frame of every video, start to finish - not just the end card. Lifted
+   ~210px off the bottom edge so TikTok's caption and buttons never cover it. It is
+   the branding: someone who scrolls past ten of these should recognise the
+   eleventh before they read a word.
+2. **The brand line.** "An app for YOU and the one who SUPPORTS YOU" - "you" and
+   "supports you" in green (#7ee8a2), the rest white. This is the new standing
+   line; it replaces "Recovery app for you and the one that supports you".
+3. **End card layout, fixed.** Symbol near the TOP, brand line directly beneath
+   it, a short green rule, then the piece's message and "It's free. Link in
+   bio." Brand name in letter-spaced grey at the bottom. Nothing about this
+   arrangement is re-decided per video.
+4. **Music covers the whole video.** If the track is shorter than the cut, the
+   video is retimed so it ends on the last note - never a silent tail.
+
+The end card is built from a single source page so it cannot drift. Any change
+to the branding is a change to that page, and then to every video after it.
+
+
+## House rule 17 — TEST, DON'T ASSUME (Jacques, 19 Aug 2026)
+
+Jacques called this out and he is right. Three times in two days Claude said
+"can't", and three times it turned out to be "didn't check":
+
+- **Buffer** - reported no connector existed. It existed; the wrong registry was
+  searched. Jacques found it himself.
+- **Voice cloning** - sent him to do 518 lessons by hand in Studio. It ran here
+  in the end, in minutes, once actually attempted.
+- **Animation** - said Claude Design cannot animate, therefore no animation.
+  Full motion-graphics video turned out to be available all along, in code.
+
+**The rule: never report a capability as missing without testing it in this
+session.** "I don't think I can" is not an answer - run the command, hit the
+endpoint, install the package, and THEN say what happened. A wrong "no" costs
+Jacques hours of work he should never have touched.
+
+### What is actually available here (tested 19 Aug, not assumed)
+- **Video**: ffmpeg (full encode, overlay, filters) + headless Chromium. Any
+  HTML/CSS/JS renders to frames = motion graphics, animated UI, charts,
+  Ken Burns, watermarks, end cards. Complete videos, start to finish, free.
+- **Audio**: 110 ffmpeg filters - mix, fade, tempo, pitch, EQ, loudness,
+  silence detection. Music beds and edits, yes. Cannot HEAR the result.
+- **Images**: Pillow + cairosvg - cards, diagrams, text art, anything drawn or
+  laid out. Cannot generate photoreal images.
+- **Browser**: real Chromium - test the live app, fill forms, screenshot.
+- **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
+  Replicate and fal.ai are BLOCKED by the environment's network policy - that
+  is why no AI model can be called from here for images, video or voice.
+- **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
+  the ear and the eye on every piece of media. That one never changes.

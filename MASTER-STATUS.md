@@ -269,3 +269,41 @@ batch follows this rule.
 - LYRICS: [Spoken, slow, cold] + the piece's voiceover (<=35 words), with
   [beat] markers where the video cuts land. Generate 3-4 takes, keep the
   slowest and coldest, trim so the first word lands inside second one.
+
+
+## House rule 15 — THE CONTENT WORKFLOW (Jacques, 19 Aug 2026)
+
+This is now how every AI script, card and talking head gets made. It replaces
+"write scripts, hand them over" - the deliverable is a finished video, not a
+document. Proven on "Clear All" (18 Aug) and "She Came Back" (19 Aug).
+
+**The pipeline, in order:**
+1. **Claude writes the piece as ONE unit** - shot list + voiceover (<=35 words,
+   rule 14) + the Suno prompt pre-filled. Never a script alone.
+2. **Images**: Manus for anything photoreal (people, places). The character
+   block is pasted word-for-word into every prompt with "apply to all" so faces
+   hold across frames. Captions can be burned in by Manus OR added by Claude -
+   Manus doing it has worked well. NO drug use shown in frame, ever: no pipes,
+   no smoke, no using. The platforms suppress it and the story is harder without
+   it. For anything that is UI rather than photography (lockscreens, chat
+   threads, app-store reviews), Claude builds the frames in code - no image AI
+   needed at all.
+3. **Narration**: Jacques generates the voiceover in Suno from Claude's prompt.
+   3-4 takes, keep the coldest. Takes run ~20s rather than 15 - that is fine,
+   see step 4.
+4. **Assembly**: Claude renders the video in code - Ken Burns push-ins on stills,
+   motion graphics for UI pieces, brand end card - and retimes the WHOLE
+   timeline to the narration's real length. The video bends to the voice; the
+   voice is never chopped to fit the video.
+5. **Approval**: Jacques watches. Nothing is queued until he says so.
+6. **Publish**: Claude commits the mp4 to content/ (gives it a public URL), then
+   queues it to TikTok, Facebook and YouTube via Buffer - TikTok caption says
+   "link in bio", Facebook and YouTube carry the real URL.
+
+**What this costs: nothing.** No Studio credits, no animation service, no voice
+service. Manus stills and Suno audio are on plans Jacques already has; every
+other step is code.
+
+**Where the pieces live:** finished videos in `content/`, and the source page
+for each code-built animation beside it (e.g. `content/clear-all-source.html`) -
+edit the timeline, re-render, new video.

@@ -6,6 +6,66 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🧘 19 AUG 2026 — APP 6.3: daily line, lesson reward, journal mic, licence audit
+
+**1. One line a day on Home.** Jacques: "i dont see the daily motivational
+quotes when you open the app i see set your intentions." He was right — the
+word "quote" appeared nowhere in the app; what he was seeing was the morning
+check-in, a different feature. Home now opens with one line, changing at local
+midnight and holding all day (`DAILY_LINES`, 60 of them). Every line was
+written for this app: quote sites carry attribution requirements and
+misattributed text, and the licence audit below would be worthless if the first
+thing on Home came from one.
+
+**2. Finishing a lesson is now worth something.** It used to change a button to
+"Nice work ✓" and nothing else — no reward at all for the one thing the whole
+program is built on. Now every finished lesson fires a confetti burst and says
+the count out loud, with a bigger burst on 1, 7, 15, 30 and every 25th. No
+points, no coins, no fake currency: the number is the reward, because it is true.
+
+**3. Journal dictation stops when you hit Save.** `saveEntry()` calls
+`stopVoiceJournal()` first, so the mic never keeps listening after the entry is in.
+
+**4. Friendly's voice when you leave the app.** `visibilitychange` resumes
+speech on return. Honest limit: the phone SUSPENDS speech synthesis the moment
+the app is backgrounded — that is the browser's rule and no web app can
+override it. Resume-on-return is the real fix available.
+
+**5. Licence audit — clean, nothing non-commercial ships.**
+- 5 SOS recordings + 523 lesson narrations: Piper voices, CC0/public domain,
+  deliberately chosen. The better-sounding Piper voices (hfc_female, hfc_male,
+  ryan, lessac) are non-commercial and are NOT used.
+- 353 icons: hand-maintained SVG paths in this repo, ours.
+- Fonts: system font stack only — nothing downloaded, nothing licensed.
+- **Zero third-party JavaScript.** No CDN, no analytics library, no framework.
+- og/share images: ours.
+Nothing in the app carries a non-commercial or attribution-required licence.
+
+**Meditation sound — 11 tracks, Nature and Music.**
+- **Nature (3):** Rain, Ocean, Night — synthesised from scratch with ffmpeg for
+  this app. Original work, so no licence question is possible. Jacques listened
+  to all ten I made and kept these three; the other seven were deleted.
+- **Music (8):** Jacques's own Suno tracks, 2:26–3:35 each: Whispers in the
+  Forest, Cozy Storm, Fading into the Night, Midnight Lullaby, Himalayan Still,
+  Night Fade, Deep Focus, Still Waters. Suno commercial plan, already logged.
+- **What every incoming track gets:** the silent head and tail trimmed (Suno
+  leaves 0.5–2.2s, which becomes a hole of dead air at the loop point); a 2.5s
+  crossfade wrapping the tail over the head so it repeats without a cut; and
+  one loudness for everything (-20 LUFS, -3dB true peak) so no track is buried
+  behind another. Jacques's originals peaked at 0.0dB, dead on the ceiling.
+- **Suno cannot make beds.** Its sound effects come out 5–12 seconds long — a
+  clip, not something you can sit inside for ten minutes. Rain at 4.8s repeats
+  62 times a minute and the ear locks onto it. That is why the nature beds are
+  synthesised and the music is his.
+- **Adding a track is one line** in `MED_SOUNDS`: file key, the label the button
+  says word for word, and its category. A category with no tracks never draws;
+  an empty array hides the picker completely.
+- **I cannot hear any of it.** Every judgement above is a meter reading. Jacques
+  caught the singing bowl being inaudible when the numbers said it was fine —
+  the ear is his job, and levels are mine.
+
+Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
+
 ## 🔧 17 AUG 2026 (later) — APP 5.7.0 + STUDIO b0877: onboarding freeze, Pro opened up, backups fixed
 
 **App 5.7.0 — shipped to main + deploy branch (Railway auto-deploys).**
@@ -246,3 +306,144 @@ Every talking-head and AI script from now on is built in this order:
 to want to look. The message is hard, cold, cut-throat, straight to the point.
 No soft openers, no warm-up. The 18 Aug script batch was eliminated; any new
 batch follows this rule.
+
+**Amended (Jacques, 18 Aug, later):** in addition —
+4. **15 seconds.** Not 20–25. ~40 spoken words maximum.
+5. **Every piece answers all five: WHAT / WHO / WHEN / WHERE / HOW** — in the
+   piece itself where it fits, always in the caption.
+6. **Arrogant and bold.** Not humble, not gentle-brave — the voice of a man who
+   beat 38 years and knows it. Confidence is the hook.
+7. **No two pieces built the same.** Different structure, rhythm and angle every
+   time — a formula repeated is a formula scrolled past.
+
+**Amended (Jacques, 19 Aug — the Gemini structure, logged at his instruction):**
+8. **Voiceover 35 words or fewer.** The hard number that makes 15 seconds speak
+   naturally instead of rushed. Count the words before anything is recorded.
+9. **Quick cuts, bold dynamic visuals, ONE high-impact punchline or CTA** — not
+   several. The script and the shot list are written together, as one unit.
+
+**Standing Suno narration template** (fill the brackets, paste both boxes):
+- STYLE: dark minimal cinematic spoken word, deep calm male voice, cold
+  confident unhurried delivery, sparse 808 heartbeat pulse, low sub bass,
+  [scene ambience], 60 bpm, no singing, no chorus, dry vocal up front
+- LYRICS: [Spoken, slow, cold] + the piece's voiceover (<=35 words), with
+  [beat] markers where the video cuts land. Generate 3-4 takes, keep the
+  slowest and coldest, trim so the first word lands inside second one.
+
+
+## House rule 15 — THE CONTENT WORKFLOW (Jacques, 19 Aug 2026)
+
+**Scope, corrected 19 Aug:** rules 14 and 15 govern content BUILT HERE from
+scratch. Jacques's existing finished videos - already written, shot and rendered
+in Studio - are not subject to them. Nothing about a finished video gets
+rewritten, retimed or "checked" against the 15-second rule. For those the job is
+only: commit to content/ for a public URL, write the per-platform captions,
+show him, queue to Buffer on his word.
+
+
+This is now how every AI script, card and talking head gets made. It replaces
+"write scripts, hand them over" - the deliverable is a finished video, not a
+document. Proven on "Clear All" (18 Aug) and "She Came Back" (19 Aug).
+
+**The pipeline, in order:**
+1. **Claude writes the piece as ONE unit** - shot list + voiceover (<=35 words,
+   rule 14) + the Suno prompt pre-filled. Never a script alone.
+2. **Images**: Manus for anything photoreal (people, places). The character
+   block is pasted word-for-word into every prompt with "apply to all" so faces
+   hold across frames. Captions can be burned in by Manus OR added by Claude -
+   Manus doing it has worked well. NO drug use shown in frame, ever: no pipes,
+   no smoke, no using. The platforms suppress it and the story is harder without
+   it. For anything that is UI rather than photography (lockscreens, chat
+   threads, app-store reviews), Claude builds the frames in code - no image AI
+   needed at all.
+3. **Narration**: Jacques generates the voiceover in Suno from Claude's prompt.
+   3-4 takes, keep the coldest. Takes run ~20s rather than 15 - that is fine,
+   see step 4.
+4. **Assembly**: Claude renders the video in code - Ken Burns push-ins on stills,
+   motion graphics for UI pieces, brand end card - and retimes the WHOLE
+   timeline to the narration's real length. The video bends to the voice; the
+   voice is never chopped to fit the video.
+5. **Approval**: Jacques watches. Nothing is queued until he says so.
+6. **Publish**: Claude commits the mp4 to content/ (gives it a public URL), then
+   queues it to TikTok, Facebook and YouTube via Buffer - TikTok caption says
+   "link in bio", Facebook and YouTube carry the real URL.
+
+**What this costs: nothing.** No Studio credits, no animation service, no voice
+service. Manus stills and Suno audio are on plans Jacques already has; every
+other step is code.
+
+**DEADLINE: Manus is free only until 25 Aug 2026.** After that the photoreal
+stills in step 2 have no source. Do NOT let this arrive unplanned:
+- **Bank stills before the 25th.** Every story worth telling for the next few
+  months, generated while it is free. A character block that already holds
+  (the porch women) can be reused across many stories - same two people, new
+  situations - so the batch is worth more than the images in it.
+- **Code-built pieces are unaffected** - lockscreens, chat threads, app-store
+  reviews, counters, anything that is interface rather than photography. That
+  lane stays free forever and should carry more of the load after the 25th.
+- **Replacements to price when the time comes** (nothing chosen yet): Creen
+  (face lock, free credits), ChatGPT image credits, Microsoft Copilot (holds a
+  face from one reference photo) - all three are already in Jacques's tested
+  toolchain in START-HERE. Studio's own paid stills are the fallback of last
+  resort because they cost per image.
+
+**Where the pieces live:** finished videos in `content/`, and the source page
+for each code-built animation beside it (e.g. `content/clear-all-source.html`) -
+edit the timeline, re-render, new video.
+
+
+## House rule 16 — BRANDING, FIXED (Jacques, 19 Aug 2026)
+
+"Big brands don't change, so we don't either." These are not per-video choices.
+Every AI-built video carries all of them, identically, every time:
+
+1. **Corner watermark.** The handshake symbol sits in the BOTTOM-RIGHT corner of
+   every frame of every video, start to finish - not just the end card. Lifted
+   ~210px off the bottom edge so TikTok's caption and buttons never cover it. It is
+   the branding: someone who scrolls past ten of these should recognise the
+   eleventh before they read a word.
+2. **The brand line.** "An app for YOU and the one who SUPPORTS YOU" - "you" and
+   "supports you" in green (#7ee8a2), the rest white. This is the new standing
+   line; it replaces "Recovery app for you and the one that supports you".
+3. **End card layout, fixed.** Symbol near the TOP, brand line directly beneath
+   it, a short green rule, then the piece's message and "It's free. Link in
+   bio." Brand name in letter-spaced grey at the bottom. Nothing about this
+   arrangement is re-decided per video.
+4. **Music covers the whole video.** If the track is shorter than the cut, the
+   video is retimed so it ends on the last note - never a silent tail.
+
+The end card is built from a single source page so it cannot drift. Any change
+to the branding is a change to that page, and then to every video after it.
+
+
+## House rule 17 — TEST, DON'T ASSUME (Jacques, 19 Aug 2026)
+
+Jacques called this out and he is right. Three times in two days Claude said
+"can't", and three times it turned out to be "didn't check":
+
+- **Buffer** - reported no connector existed. It existed; the wrong registry was
+  searched. Jacques found it himself.
+- **Voice cloning** - sent him to do 518 lessons by hand in Studio. It ran here
+  in the end, in minutes, once actually attempted.
+- **Animation** - said Claude Design cannot animate, therefore no animation.
+  Full motion-graphics video turned out to be available all along, in code.
+
+**The rule: never report a capability as missing without testing it in this
+session.** "I don't think I can" is not an answer - run the command, hit the
+endpoint, install the package, and THEN say what happened. A wrong "no" costs
+Jacques hours of work he should never have touched.
+
+### What is actually available here (tested 19 Aug, not assumed)
+- **Video**: ffmpeg (full encode, overlay, filters) + headless Chromium. Any
+  HTML/CSS/JS renders to frames = motion graphics, animated UI, charts,
+  Ken Burns, watermarks, end cards. Complete videos, start to finish, free.
+- **Audio**: 110 ffmpeg filters - mix, fade, tempo, pitch, EQ, loudness,
+  silence detection. Music beds and edits, yes. Cannot HEAR the result.
+- **Images**: Pillow + cairosvg - cards, diagrams, text art, anything drawn or
+  laid out. Cannot generate photoreal images.
+- **Browser**: real Chromium - test the live app, fill forms, screenshot.
+- **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
+  Replicate and fal.ai are BLOCKED by the environment's network policy - that
+  is why no AI model can be called from here for images, video or voice.
+- **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
+  the ear and the eye on every piece of media. That one never changes.

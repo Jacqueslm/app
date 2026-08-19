@@ -1073,20 +1073,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <button class="log-btn" style="margin:0" onclick="saveLessonReflection('lesson-reflect-input','lesson-reflect-saved')">Save to my journal</button>
               <div id="lesson-reflect-saved" style="display:none;font-size:12px;color:var(--green);margin-top:8px">Saved to your journal ✓</div>
             </div>
-            <!-- Faith is part of the day, not a second program. Somebody who said
-                 it matters used to get a card on Home pointing at a separate
-                 30-day track they had to keep up with on the side; now that
-                 day's Spiritual Path lesson sits inside the day's lesson, same
-                 day number, same screen. Anyone who said no never sees it. -->
-            <div id="lesson-faith-box" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;margin-top:10px">
-              <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px" id="lesson-faith-hd">Spiritual Path</div>
-              <div style="font-size:14px;font-weight:600;color:var(--tp);margin-bottom:6px" id="lesson-faith-title"></div>
-              <div style="font-size:13.5px;color:var(--ts);line-height:1.65" id="lesson-faith-body"></div>
-              <div id="lesson-faith-action-wrap" style="margin-top:10px;display:none">
-                <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:4px">Today</div>
-                <div style="font-size:13.5px;color:var(--ts);line-height:1.6" id="lesson-faith-action"></div>
-              </div>
-            </div>
+            <!-- Packs are part of the day, not a second program. Anything a
+                 person has turned on - faith, sleep, anxiety, whatever - shows
+                 up inside the day's lesson at the matching day number, instead
+                 of being another 30-day track to keep up with on the side. -->
+            <div id="lesson-extras"></div>
             <button class="log-btn" id="lessonCompleteBtn" style="margin-top:18px" onclick="completeLessonForToday()">Mark as done</button>
             <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
           </div>
@@ -1529,55 +1520,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
-    <div id="s-pack-wizard" class="scr">
-      <div class="sec">
-        <div class="sec-hd" style="margin-top:0">Build your own pack</div>
-        <div class="ob-label" style="text-align:left;color:var(--tm)">Pack name (optional)</div>
-        <input id="wiz-pack-name" type="text" placeholder="e.g. My focus pack" style="width:100%;border:0.5px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--tp);background:var(--s2);margin-bottom:14px;font-family:var(--f)">
-
-        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Length</div>
-        <div class="tc-wrap" id="wiz-length-wrap" style="margin-bottom:16px">
-          <div class="tc" data-len="7" onclick="wizSelectSingle(this,'wiz-length-wrap')">7 days</div>
-          <div class="tc" data-len="14" onclick="wizSelectSingle(this,'wiz-length-wrap')">14 days</div>
-          <div class="tc" data-len="30" onclick="wizSelectSingle(this,'wiz-length-wrap')">30 days</div>
-        </div>
-
-        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Focus areas (choose one or more)</div>
-        <div class="tc-wrap" id="wiz-focus-wrap" style="margin-bottom:16px">
-          <div class="tc" onclick="wizToggleFocus(this,'emotional regulation')">Emotional regulation</div>
-          <div class="tc" onclick="wizToggleFocus(this,'triggers')">Triggers</div>
-          <div class="tc" onclick="wizToggleFocus(this,'relationships')">Relationships</div>
-          <div class="tc" onclick="wizToggleFocus(this,'trauma')">Trauma</div>
-          <div class="tc" onclick="wizToggleFocus(this,'confidence')">Confidence</div>
-          <div class="tc" onclick="wizToggleFocus(this,'discipline')">Discipline</div>
-          <div class="tc" onclick="wizToggleFocus(this,'relapse-proofing')">Long-term stability</div>
-          <div class="tc" onclick="wizToggleFocus(this,'anxiety')">Anxiety</div>
-          <div class="tc" onclick="wizToggleFocus(this,'depression')">Depression</div>
-          <div class="tc" onclick="wizToggleFocus(this,'sleep')">Sleep</div>
-          <div class="tc" onclick="wizToggleFocus(this,'identity')">Identity</div>
-          <div class="tc" onclick="wizToggleFocus(this,'self-worth')">Self-worth</div>
-        </div>
-
-        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Lesson style</div>
-        <div class="tc-wrap" id="wiz-style-wrap" style="margin-bottom:16px">
-          <div class="tc" data-style="educational" onclick="wizSelectSingle(this,'wiz-style-wrap')">Educational</div>
-          <div class="tc" data-style="reflective" onclick="wizSelectSingle(this,'wiz-style-wrap')">Reflective</div>
-          <div class="tc" data-style="practical" onclick="wizSelectSingle(this,'wiz-style-wrap')">Practical</div>
-          <div class="tc" data-style="emotional" onclick="wizSelectSingle(this,'wiz-style-wrap')">Emotional</div>
-          <div class="tc" data-style="behavioral" onclick="wizSelectSingle(this,'wiz-style-wrap')">Behavioral</div>
-        </div>
-
-        <div style="font-size:13px;color:var(--ts);margin-bottom:8px">Difficulty</div>
-        <div class="tc-wrap" id="wiz-difficulty-wrap" style="margin-bottom:20px">
-          <div class="tc" data-diff="beginner" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Beginner</div>
-          <div class="tc" data-diff="intermediate" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Intermediate</div>
-          <div class="tc" data-diff="advanced" onclick="wizSelectSingle(this,'wiz-difficulty-wrap')">Advanced</div>
-        </div>
-
-        <button class="log-btn" onclick="saveBuiltPack()">Build my pack</button>
-        <button class="cancel-btn" style="width:100%;margin-top:8px" onclick="openLessonPacksScreen()">Cancel</button>
-      </div>
-    </div>
     <!-- PLANS -->
     <div id="s-plans" class="scr">
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:12.5px;line-height:1.6"></div>
@@ -1622,7 +1564,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
             <div class="feat y"><i class="ti ti-check"></i>Guided journal prompts &amp; insights</div>
-            <div class="feat y"><i class="ti ti-check"></i>Advanced streaks &amp; Build Your Own Pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Advanced streaks</div>
             <div class="feat y"><i class="ti ti-check"></i>Supporting Someone — a 35-day track for the person who loves them (Days 1–15)</div>
             <div class="feat y"><i class="ti ti-check"></i>Together — the program you work as a couple (Days 1–15)</div>
             <div class="feat y"><i class="ti ti-check"></i>Partner self-check</div>
@@ -3253,24 +3195,44 @@ function renderTrackLinkNote(){
   el.style.display='block';
 }
 
-// Draws the day's Spiritual Path lesson into the daily lesson for anyone who
-// chose faith. Matched by day number, so day 12 of the program carries day 12
-// of the Spiritual Path - the two move together instead of drifting apart.
-function renderLessonFaithSection(day){
-  const box=document.getElementById('lesson-faith-box');
-  if(!box)return;
-  const pack=(typeof PREDEFINED_PACKS!=='undefined'&&PREDEFINED_PACKS.spiritual)||null;
-  const list=pack?(pack.lessons||pack.days||[]):[];
-  const l=faithOn()?list.find(x=>(x.day||0)===day):null;
-  if(!l){box.style.display='none';return;}
-  box.style.display='block';
-  document.getElementById('lesson-faith-hd').textContent=`Spiritual Path · Day ${l.day}`;
-  document.getElementById('lesson-faith-title').textContent=l.title||'';
-  document.getElementById('lesson-faith-body').textContent=l.content||'';
-  const aw=document.getElementById('lesson-faith-action-wrap');
-  const a=document.getElementById('lesson-faith-action');
-  if(l.action){a.textContent=l.action;aw.style.display='block';}
-  else aw.style.display='none';
+// Draws every pack the person has turned on into the day's lesson, matched by
+// day number - so day 12 of the program carries day 12 of each pack and they
+// can never drift apart. Faith is driven by the onboarding answer; the rest are
+// whatever they have started from Lesson Packs. Somebody who chose 'no' to
+// faith never sees the spiritual one.
+function activeExtraPacks(){
+  const packs=(typeof PREDEFINED_PACKS!=='undefined'&&PREDEFINED_PACKS)||{};
+  const keys=[];
+  if(faithOn()&&packs.spiritual)keys.push('spiritual');
+  Object.keys(S.customPackProgress||{}).forEach(k=>{
+    if(k!=='spiritual'&&packs[k]&&keys.indexOf(k)<0)keys.push(k);
+  });
+  return keys;
+}
+function esc(t){return String(t||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+function renderLessonExtras(day){
+  const host=document.getElementById('lesson-extras');
+  if(!host)return;
+  const packs=(typeof PREDEFINED_PACKS!=='undefined'&&PREDEFINED_PACKS)||{};
+  let html='';
+  for(const key of activeExtraPacks()){
+    const pk=packs[key];
+    const list=pk.lessons||pk.days||[];
+    const l=list.find(x=>(x.day||0)===day);
+    if(!l)continue;
+    html+=`<div style="background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;margin-top:10px">
+      <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:6px">${esc(pk.title||key)} · Day ${l.day}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--tp);margin-bottom:6px">${esc(l.title)}</div>
+      <div style="font-size:13.5px;color:var(--ts);line-height:1.65">${esc(l.content)}</div>`;
+    if(l.action){
+      html+=`<div style="margin-top:10px">
+        <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:4px">Today</div>
+        <div style="font-size:13.5px;color:var(--ts);line-height:1.6">${esc(l.action)}</div>
+      </div>`;
+    }
+    html+='</div>';
+  }
+  host.innerHTML=html;
 }
 function renderTodayLesson(){
   updateHomeFaithCard();
@@ -3327,7 +3289,7 @@ function renderTodayLesson(){
     return;
   }
 
-  renderLessonFaithSection(lesson.day);
+  renderLessonExtras(lesson.day);
   titleEl.textContent=lesson.title;
   metaEl.textContent=`${S.currentAddiction||'Lesson'} · Day ${lesson.day}`;
   bodyEl.textContent=lesson.content;
@@ -3875,20 +3837,24 @@ function renderPackList(){
       <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
     </div>`;
   });
-  html+='<div style="height:8px"></div><div class="sec-hd">Your custom packs</div>';
-  if(!(S.userBuiltPacks||[]).length){
-    html+='<div style="font-size:13px;color:var(--tm);padding:8px 0">You haven\'t built a custom pack yet.</div>';
-  }else{
+  // "Your custom packs" section removed with the builder (19 Aug 2026). Packs
+  // a person turns on now appear inside their daily lesson, so a separate
+  // shelf of stand-alone tracks is exactly the thing that was cut. Anything
+  // already built stays listed below so nobody loses work they did.
+  if((S.userBuiltPacks||[]).length){
+    html+='<div style="height:8px"></div><div class="sec-hd">Packs you built earlier</div>';
     S.userBuiltPacks.forEach(p=>{
       const day=getPackDay(p.id);
       html+=`<div class="setting-row" onclick="openPack('${p.id}')">
         <i class="ti ti-notebook" style="color:var(--accent)"></i>
         <div class="setting-row-txt"><p>${p.name}</p><span>Day ${day} of ${p.lengthDays} · ${p.focusAreas.join(', ')}</span></div>
-        <button onclick="event.stopPropagation();deleteCustomPack('${p.id}')" title="Delete pack" style="background:none;border:none;cursor:pointer;color:var(--tm);font-size:16px;line-height:1;padding:0 8px">×</button>
+        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>`;
     });
   }
-  html+='<button class="log-btn" style="margin-top:14px" onclick="openBuildPackWizard()">Build your own pack</button>';
+  // Build Your Own Pack removed (Jacques, 19 Aug 2026). Packs are woven into
+  // the daily lesson now, so a separate builder that produced yet another
+  // stand-alone 30-day track was the exact thing he asked to get rid of.
   wrap.innerHTML=html;
   renderIcons(wrap);
 }
@@ -3990,45 +3956,9 @@ function discussPackLessonWithNova(){
   sendMsg();
 }
 
-// Build Your Own Pack wizard
-let wizardFocusSel=[];
-function openBuildPackWizard(){
-  // Free for everyone (17 Aug 2026).
-  wizardFocusSel=[];
-  document.getElementById('wiz-pack-name').value='';
-  document.querySelectorAll('#wiz-length-wrap .tc').forEach(c=>c.classList.remove('sel'));
-  document.querySelectorAll('#wiz-focus-wrap .tc').forEach(c=>c.classList.remove('sel'));
-  document.querySelectorAll('#wiz-style-wrap .tc').forEach(c=>c.classList.remove('sel'));
-  document.querySelectorAll('#wiz-difficulty-wrap .tc').forEach(c=>c.classList.remove('sel'));
-  const first=document.querySelector('#wiz-length-wrap .tc');if(first)first.classList.add('sel');
-  const firstStyle=document.querySelector('#wiz-style-wrap .tc');if(firstStyle)firstStyle.classList.add('sel');
-  const firstDiff=document.querySelector('#wiz-difficulty-wrap .tc');if(firstDiff)firstDiff.classList.add('sel');
-  switchTo('pack-wizard');actBn('bn-plans');
-}
-function wizSelectSingle(el,wrapId){
-  document.querySelectorAll('#'+wrapId+' .tc').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function wizToggleFocus(el,area){
-  const sel=el.classList.toggle('sel');
-  if(sel)wizardFocusSel.push(area);
-  else wizardFocusSel=wizardFocusSel.filter(a=>a!==area);
-}
-function saveBuiltPack(){
-  const name=document.getElementById('wiz-pack-name').value.trim()||'My Custom Pack';
-  const lengthEl=document.querySelector('#wiz-length-wrap .tc.sel');
-  const styleEl=document.querySelector('#wiz-style-wrap .tc.sel');
-  const diffEl=document.querySelector('#wiz-difficulty-wrap .tc.sel');
-  const lengthDays=lengthEl?Number(lengthEl.getAttribute('data-len')):7;
-  const style=styleEl?styleEl.getAttribute('data-style'):'educational';
-  const difficulty=diffEl?diffEl.getAttribute('data-diff'):'beginner';
-  if(!wizardFocusSel.length){appConfirm('Pick at least one focus area before building your pack.',()=>{});return;}
-  const lessons=generateCustomPackLessons(wizardFocusSel,style,difficulty,lengthDays);
-  const pack={id:'custom_'+Date.now(),name,lengthDays,focusAreas:wizardFocusSel.slice(),style,difficulty,createdAt:new Date().toISOString(),lessons};
-  S.userBuiltPacks=(S.userBuiltPacks||[]).concat([pack]);
-  save();
-  backToPackList();
-}
+// The Build Your Own Pack wizard lived here until 19 Aug 2026. It produced yet
+// another stand-alone 30-day track, which is the thing Jacques asked to remove -
+// packs now render inside the daily lesson instead of beside it.
 function openLessonPacksScreen(){
   switchTo('pack-list');actBn('bn-plans');
 }
@@ -9877,12 +9807,6 @@ const PRO_TOOLS={
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Strongest trigger: ●●●●●●●●<br>Vulnerable time: ●●pm<br>Emotional trend: ●●●●●●●●</div>',
     open:'openAnalyticsScreen'
   },
-  buildOwnPack:{
-    title:'Build Your Own Pack',
-    teaser:'Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more — choose your own topics, style, and difficulty, generated just for you.',
-    mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Length: ●● days<br>Focus: ●●●●●●●●, ●●●●●●●●<br>Style: ●●●●●●●● · Difficulty: ●●●●●●●●</div>',
-    open:'openBuildPackWizard'
-  },
   habitCoach:{
     title:'Habit Coach',
     teaser:'Pro helps you build stronger habits with personalized guidance — consistency insights, vulnerability windows, and habit suggestions built from what you\'ve actually logged.',
@@ -10306,7 +10230,7 @@ const SCREEN_MAP={
   rooms:'s-rooms',community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
-  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson','pack-wizard':'s-pack-wizard',
+  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
@@ -10316,8 +10240,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','pack-wizard':'Build Your Own Pack','habit-coach':'Habit Coach',tools:'Tools'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','pack-wizard':'bn-plans','reminder-settings':'bn-plans'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Habit Coach',tools:'Tools'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -10343,7 +10267,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'pack-wizard':'bn-tools','habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
 function switchTo(id,opts){
   // Record the leaving screen unless we're already walking backward.
   const from=currentScreenId();
@@ -11429,7 +11353,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.6';
+const APP_VERSION='6.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

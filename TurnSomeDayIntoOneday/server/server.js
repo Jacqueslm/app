@@ -253,6 +253,43 @@ app.get('/reviews', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'reviews.html'));
 });
 
+// ── Reviews members can actually leave ───────────────────────────────────────
+// The page used to read data/reviews.json, a file only Jacques could edit by
+// hand. So there was no path from "this helped me" to a published review, and
+// the page said "no reviews yet" indefinitely. These four routes are that path.
+// Nothing is published automatically: a review sits pending until the owner
+// approves it, which keeps the page's promise - every quote from a real person,
+// none invented - while making it possible for the quotes to exist at all.
+app.get('/api/reviews/public', (req, res) => {
+  res.json({ reviews: db.getPublishedReviews(50) });
+});
+app.get('/api/reviews/mine', requireAuth, (req, res) => {
+  res.json({ review: db.getMyReview(req.userId) });
+});
+app.post('/api/reviews', requireAuth, (req, res) => {
+  const body = String(req.body?.body || '').trim();
+  const name = String(req.body?.name || '').trim().slice(0, 40) || 'Anonymous';
+  const whenLabel = String(req.body?.when || '').trim().slice(0, 40) || null;
+  let stars = Number(req.body?.stars);
+  if (!Number.isFinite(stars) || stars < 1 || stars > 5) stars = 5;
+  if (body.length < 10) return res.status(400).json({ error: 'Tell us a little more than that.' });
+  if (body.length > 600) return res.status(400).json({ error: 'Keep it under 600 characters.' });
+  db.upsertReview(req.userId, name, whenLabel, body, Math.round(stars));
+  res.json({ ok: true, pending: true });
+});
+app.get('/api/reviews/queue', requireAuth, (req, res) => {
+  if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });
+  res.json({ queue: db.getReviewQueue() });
+});
+app.post('/api/reviews/action', requireAuth, (req, res) => {
+  if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });
+  const id = Number(req.body?.id);
+  const action = String(req.body?.action || '');
+  if (!id || !['published', 'rejected'].includes(action)) return res.status(400).json({ error: 'Unknown action.' });
+  db.setReviewStatus(id, action);
+  res.json({ ok: true });
+});
+
 // "Dry drunk" - about 11,700 searches a month across six phrasings, all at
 // difficulty 30-34, and one page answers the lot: what is a dry drunk / dry
 // drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.

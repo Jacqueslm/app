@@ -164,13 +164,34 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
         + '</div></div>';
     });
     host.innerHTML = html;
-    // Review structured data removed on purpose (Jacques, 19 Aug 2026). It used
-    // to emit schema.org/Review for every quote, which is what feeds star
-    // ratings into Google's results and turns anything on this page into a
-    // published customer review in Google's eyes. The quotes still show here as
-    // plain text on our own site; they no longer make a machine-readable claim
-    // to Google about verified customer ratings. The SoftwareApplication block
-    // in the head stays - that describes the app and its price, not reviews.
+    // Review structured data restored (Jacques, 19 Aug 2026). Each published
+    // quote is emitted as schema.org/Review under the app's SoftwareApplication
+    // block, which is what lets search engines show a star rating in results.
+    var ld = [];
+    reviews.forEach(function(rv){
+      var name = String(rv.name || 'A member');
+      var text = String(rv.text || '');
+      var stars = Math.min(5, Math.max(1, parseInt(rv.stars, 10) || 5));
+      if (!text) return;
+      ld.push({
+        '@type': 'Review',
+        'author': { '@type': 'Person', 'name': name },
+        'reviewRating': { '@type': 'Rating', 'ratingValue': String(stars), 'bestRating': '5', 'worstRating': '1' },
+        'reviewBody': text
+      });
+    });
+    if (ld.length) {
+      var script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        'name': 'Turn Someday Into Day One',
+        'url': 'https://www.turnsomedayintodayone.com/',
+        'review': ld
+      });
+      document.head.appendChild(script);
+    }
   }).catch(function(){});
 })();
 </script>

@@ -6,6 +6,36 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 19 AUG 2026 — REVIEWS FIX BATCH: schema restored + CTA fixed + 10 reviews back (PUSHED to deploy branch, live)
+
+Jacques's instruction after the audit: "the other ai took the schema off the
+page put it back and do everything else." Done and verified live (Railway
+auto-deployed from `claude/vibe-code-uwxxlk`, tip `442f0f8`):
+
+1. **Schema restored** — `reviews.html` emits schema.org/Review again under the
+   app's SoftwareApplication block (the other AI's session had removed it 19
+   Aug). NOTE: main is NOT synced — it still has the schema-removed version.
+2. **Dead CTA fixed** — `reviews.html`'s "Write one in the app" → `/app?review=1`
+   never opened the modal. The app now auto-opens it after sign-in/onboarding
+   (new signups, returning users, PIN-lock users all covered; param stripped
+   after one use).
+3. **The 10 approved reviews restored** — Marcus, Elena, David, Sarah, James,
+   Maya, Robert, Chloe, Thomas, Rachel now sit in `data/reviews.json` next to
+   Jacques's founder review (11 total; the page renders DB + JSON sources).
+4. **Chat quota syncs with the server** — free counter no longer resets on the
+   device clock (was UTC-vs-local drift); it follows `/api/chat/usage`.
+   Limits centralized as FREE_CHAT_DAILY_LIMIT / PRO_CHAT_DAILY_LIMIT.
+
+Verified: 11/11 server tests, node --check on all inline scripts, all handlers
++ element refs resolve, live `/data/reviews.json` returns 11 reviews.
+
+⚠️ **Lane heads-up for the other AI:** if you touch `reviews.html`,
+`reviews.json`, or the reviews bits of `index.html` on main and merge main→vibe,
+merge carefully — vibe (deploy) now intentionally differs from main on those
+files (schema restored, 11 reviews). Don't silently take main's version.
+
+---
+
 ## 🛠 19 AUG 2026 — 10 REVIEWS ADDED TO THE REVIEWS PAGE (files done, NOT pushed)
 
 Jacques pasted 10 member reviews and asked to add them to the reviews page.

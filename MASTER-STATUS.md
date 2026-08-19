@@ -353,3 +353,36 @@ Every AI-built video carries all of them, identically, every time:
 
 The end card is built from a single source page so it cannot drift. Any change
 to the branding is a change to that page, and then to every video after it.
+
+
+## House rule 17 — TEST, DON'T ASSUME (Jacques, 19 Aug 2026)
+
+Jacques called this out and he is right. Three times in two days Claude said
+"can't", and three times it turned out to be "didn't check":
+
+- **Buffer** - reported no connector existed. It existed; the wrong registry was
+  searched. Jacques found it himself.
+- **Voice cloning** - sent him to do 518 lessons by hand in Studio. It ran here
+  in the end, in minutes, once actually attempted.
+- **Animation** - said Claude Design cannot animate, therefore no animation.
+  Full motion-graphics video turned out to be available all along, in code.
+
+**The rule: never report a capability as missing without testing it in this
+session.** "I don't think I can" is not an answer - run the command, hit the
+endpoint, install the package, and THEN say what happened. A wrong "no" costs
+Jacques hours of work he should never have touched.
+
+### What is actually available here (tested 19 Aug, not assumed)
+- **Video**: ffmpeg (full encode, overlay, filters) + headless Chromium. Any
+  HTML/CSS/JS renders to frames = motion graphics, animated UI, charts,
+  Ken Burns, watermarks, end cards. Complete videos, start to finish, free.
+- **Audio**: 110 ffmpeg filters - mix, fade, tempo, pitch, EQ, loudness,
+  silence detection. Music beds and edits, yes. Cannot HEAR the result.
+- **Images**: Pillow + cairosvg - cards, diagrams, text art, anything drawn or
+  laid out. Cannot generate photoreal images.
+- **Browser**: real Chromium - test the live app, fill forms, screenshot.
+- **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
+  Replicate and fal.ai are BLOCKED by the environment's network policy - that
+  is why no AI model can be called from here for images, video or voice.
+- **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
+  the ear and the eye on every piece of media. That one never changes.

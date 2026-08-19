@@ -4537,8 +4537,13 @@ function maybeStartNavTour(){
   if(!S.navTourDone)setTimeout(startNavTour,300);
 }
 // ─── MEDITATION ROOM ─────────────────────────────────────────────────────────
-// The sound beds live here. Jacques is supplying the audio himself: 11 tracks -
-// three nature beds (rain, thunder, ocean) and eight pieces of music.
+// The sound beds live here. Ten of them, every one synthesised from scratch for
+// this app with ffmpeg - no samples, no downloads, no stock library. That is
+// deliberate: original work cannot carry a licence question, and a licence
+// question on audio inside a paid app is the kind of thing that surfaces years
+// later. Suno's clips run 5-12 seconds, which is a sound effect, not a bed you
+// can sit inside for ten minutes - so these stayed. Jacques's music lands under
+// the 'Music' heading when it is ready; nothing here has to move for it.
 //
 // Eleven loose buttons wrap into a block on a phone and nobody reads past the
 // first line, so they render under headings instead. `cat` is the heading;
@@ -4550,8 +4555,19 @@ function maybeStartNavTour(){
 // draws. An empty array hides the whole picker: a row offering one dead
 // "Silence" button is worse than no row, and the timer works fine in silence.
 //   {k:'file-name-without-extension', label:'What The Button Says', cat:'Music'}
-const MED_SOUNDS=[];
-const MED_CATS=['Nature','Music'];
+const MED_SOUNDS=[
+  {k:'rain',        label:'Rain',           cat:'Nature'},
+  {k:'ocean',       label:'Ocean',          cat:'Nature'},
+  {k:'stream',      label:'Stream',         cat:'Nature'},
+  {k:'wind',        label:'Wind',           cat:'Nature'},
+  {k:'night',       label:'Night',          cat:'Nature'},
+  {k:'brown-noise', label:'Deep noise',     cat:'Tones'},
+  {k:'warm-hum',    label:'Warm hum',       cat:'Tones'},
+  {k:'deep-drone',  label:'Low drone',      cat:'Tones'},
+  {k:'singing-bowl',label:'Singing bowl',   cat:'Tones'},
+  {k:'breathe',     label:'Breathe with it',cat:'Tones'},
+];
+const MED_CATS=['Nature','Tones','Music'];
 let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0,medAudio=null;
 function medChip(k,label,on){
   return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:12.5px;border-radius:20px;cursor:pointer;font-family:var(--f);

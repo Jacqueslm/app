@@ -330,3 +330,26 @@ stills in step 2 have no source. Do NOT let this arrive unplanned:
 **Where the pieces live:** finished videos in `content/`, and the source page
 for each code-built animation beside it (e.g. `content/clear-all-source.html`) -
 edit the timeline, re-render, new video.
+
+
+## House rule 16 — BRANDING, FIXED (Jacques, 19 Aug 2026)
+
+"Big brands don't change, so we don't either." These are not per-video choices.
+Every AI-built video carries all of them, identically, every time:
+
+1. **Corner watermark.** The handshake symbol sits in the TOP-RIGHT corner of
+   every frame of every video, start to finish - not just the end card. It is
+   the branding: someone who scrolls past ten of these should recognise the
+   eleventh before they read a word.
+2. **The brand line.** "An app for YOU and the one who SUPPORTS YOU" - "you" and
+   "supports you" in green (#7ee8a2), the rest white. This is the new standing
+   line; it replaces "Recovery app for you and the one that supports you".
+3. **End card layout, fixed.** Symbol near the TOP, brand line directly beneath
+   it, a short green rule, then the piece's message and "It's free. Link in
+   bio." Brand name in letter-spaced grey at the bottom. Nothing about this
+   arrangement is re-decided per video.
+4. **Music covers the whole video.** If the track is shorter than the cut, the
+   video is retimed so it ends on the last note - never a silent tail.
+
+The end card is built from a single source page so it cannot drift. Any change
+to the branding is a change to that page, and then to every video after it.

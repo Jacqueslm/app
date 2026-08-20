@@ -5668,6 +5668,10 @@ function closeDailyWin(){document.getElementById('daily-win-modal').classList.re
 // Reflection without leaving the lesson - nobody keeps a pen handy or wants to
 // bounce between screens mid-thought. Writes a real journal entry in place.
 function saveLessonReflection(inputId,savedId){
+  // Saving ends the dictation. The mic used to keep listening after "Save to
+  // my journal" - the button still said "Listening… tap to finish" and the
+  // next thing said typed itself into the box that had just been cleared.
+  stopDictation();
   const el=document.getElementById(inputId);
   const text=el?el.value.trim():'';
   if(!text){appInfo('Journal','Write a line or two first — even one honest sentence counts.');return;}
@@ -5681,6 +5685,7 @@ function saveLessonReflection(inputId,savedId){
 }
 
 function saveMilestoneReflection(){
+  stopDictation();
   const text=document.getElementById('mc-reflection-input').value.trim();
   if(text){
     S.journals.unshift({date:new Date().toISOString(),mood:'🎉',moodLabel:'Milestone Reflection',body:text});
@@ -6267,14 +6272,26 @@ function markVoiceJourBtn(on){
 // mainly. Jacques's note: needing to speak a reflection and finding only a
 // keyboard "was an inconvenience when I needed it." One dictation at a time;
 // tapping the button again (or starting another) stops it.
-let dictState=null; // {id, rec}
+let dictState=null; // {id, rec, restartTimer}
+
+// Stop whatever is currently dictating and put the button back. Handlers are
+// detached first: rec.stop() is asynchronous, and a final transcript landing
+// after the person has hit save used to type itself into the box they had
+// just cleared.
+function stopDictation(){
+  const st=dictState;
+  if(!st)return;
+  dictState=null;
+  clearTimeout(st.restartTimer);
+  st.rec.onresult=null;st.rec.onerror=null;st.rec.onend=null;
+  try{st.rec.stop();}catch(e){}
+  markDictateBtn(st.id,false);
+}
+
 function toggleDictation(inputId){
-  const btn=document.getElementById('dictate-'+inputId);
   if(dictState){
     const wasThis=dictState.id===inputId;
-    const rec=dictState.rec;
-    dictState=null;
-    try{rec.stop();}catch(e){}
+    stopDictation();
     if(wasThis)return; // tapped the same mic: just stop
   }
   const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -6288,7 +6305,7 @@ function toggleDictation(inputId){
   rec.lang='en-US';
   rec.continuous=true;
   rec.interimResults=false;
-  dictState={id:inputId,rec};
+  dictState={id:inputId,rec,restartTimer:null};
   rec.onresult=e=>{
     for(let i=e.resultIndex;i<e.results.length;i++){
       if(!e.results[i].isFinal)continue;
@@ -6302,18 +6319,41 @@ function toggleDictation(inputId){
     markDictateBtn(inputId,false);
   };
   rec.onend=()=>{
-    // browsers self-stop after silence; keep going until the person taps stop
+    // Android Chrome ends recognition after every utterance even with
+    // continuous:true, so onend fires constantly while someone is talking.
+    // Calling start() straight back from inside onend throws InvalidStateError
+    // - that is what made the button flick back to "Speak it instead"
+    // mid-sentence and quietly drop the rest of what was being said. Restart
+    // on a tick instead, and leave the label alone while we do it.
     if(dictState&&dictState.rec===rec){
-      try{rec.start();return;}catch(e){dictState=null;}
+      const restart=tries=>{
+        if(!dictState||dictState.rec!==rec)return;
+        try{rec.start();}
+        catch(e){
+          // Still winding down. Give it one more go before giving up, rather
+          // than ending the entry on a race the person can't see.
+          if(tries>0){dictState.restartTimer=setTimeout(()=>restart(tries-1),400);return;}
+          dictState=null;markDictateBtn(inputId,false);
+        }
+      };
+      dictState.restartTimer=setTimeout(()=>restart(1),200);
+      return;
     }
     markDictateBtn(inputId,false);
   };
   rec.start();
   markDictateBtn(inputId,true);
 }
+
 function markDictateBtn(inputId,on){
   const b=document.getElementById('dictate-'+inputId);
   if(!b)return;
+  // Only touch the DOM when the state actually changes. Recognition restarts
+  // many times a minute; rewriting identical innerHTML each time is what the
+  // eye reads as flicker.
+  const want=on?'1':'0';
+  if(b.getAttribute('data-listening')===want)return;
+  b.setAttribute('data-listening',want);
   b.innerHTML=on
     ?'<i class="ti ti-player-stop" style="color:#e5484d"></i> Listening… tap to finish'
     :'<i class="ti ti-microphone"></i> Speak it instead';
@@ -10254,6 +10294,9 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
   'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
 function switchTo(id,opts){
+  // Leaving the screen ends any dictation on it. A mic left listening in the
+  // background is both a battery drain and a privacy problem.
+  try{stopDictation();}catch(e){}
   // Record the leaving screen unless we're already walking backward.
   const from=currentScreenId();
   if(!(opts&&opts.fromBack)&&from&&from!==id){

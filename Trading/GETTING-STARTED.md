@@ -30,7 +30,7 @@ the names are usually still close. Jump to [Troubleshooting](#troubleshooting) a
 ### Step 2. Copy the indicator code
 
 1. Open this link: **[MSB-Indicator.pine](pine/MSB-Indicator.pine)**
-   (on GitHub: `Trading/pine/MSB-Indicator.pine` on the `claude/day-trading-market-structure-8kzz7w` branch)
+   (on GitHub: `Trading/pine/MSB-Indicator.pine` on the `main` branch)
 2. Click the **Raw** button (top right of the file).
 3. Click anywhere in the text, then **Ctrl+A** (Cmd+A on Mac) to select all, **Ctrl+C** to copy.
 

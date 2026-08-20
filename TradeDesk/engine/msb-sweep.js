@@ -292,4 +292,4 @@ function prep(pvList, useAlign){
           span: `${new Date(exec[0].t).toISOString().slice(0,10)} → ${new Date(exec[exec.length-1].t).toISOString().slice(0,10)}`};
 }
 
-module.exports = {run, prep, structure};
+module.exports = {run, prep, structure, alignIndex, etStamp, HOUR};

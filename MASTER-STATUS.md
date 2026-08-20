@@ -433,6 +433,24 @@ the same factor rather than trimming the audio - Jacques takes what Suno gives.
 The Cart went 15s -> 20.9s that way and kept every word. This overrides the
 15-second rule in house rule 14 when the two conflict.
 
+## House rule 19 — DECLARE AI ON EVERY VIDEO (Jacques, 20 Aug 2026)
+
+Every video queued to Buffer gets the **AI-generated content toggle switched
+on**. No exceptions, no judgement call per video.
+
+TikTok requires AI-generated content to be disclosed. Meta labels it whether
+you declare it or not - and a platform-applied label after the fact suppresses
+reach, where a self-declared one does not. Declaring it is both the honest
+thing and the one that performs better.
+
+This applies to the code-built pieces (Clear All, The Cart, Fifteen Boxes, You
+Up?), the Manus-still slideshows, and the Studio renders. If a video was made
+with any AI tool anywhere in the chain, the toggle goes on.
+
+If the Buffer API being used cannot set that flag, SAY SO in the queue report
+rather than posting undeclared - the fix is then a manual toggle in Buffer
+before the post goes out, not silence.
+
 ## HOUSE RULES (keep)
 
 **House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**

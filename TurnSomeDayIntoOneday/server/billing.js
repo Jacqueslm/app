@@ -51,7 +51,10 @@ function isComped(user) {
 // since launch, so this is a commitment being kept, not a marketing device.
 const LIFETIME_CAP = 50;
 // Shown once the cap is reached, and returned verbatim as the checkout refusal.
-const LIFETIME_SOLD_OUT_MESSAGE = 'Founding Lifetime — sold out. Lifetime returns at $249.';
+// Jacques, 20 Aug 2026: after the 50 there is no Lifetime, at any price. The
+// old copy promised it returned at $249, which made the cap a sales tactic
+// instead of the honest thing it is - fifty seats, then the door closes.
+const LIFETIME_SOLD_OUT_MESSAGE = 'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
 // The remaining count stays private until it is low enough to be worth stating.
 const LIFETIME_COUNT_VISIBLE_BELOW = 25;
 

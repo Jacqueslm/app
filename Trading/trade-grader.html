@@ -91,7 +91,7 @@
 
     <!-- ── Score points ── -->
     <div class="card">
-      <h2>Quality points — 13 available</h2>
+      <h2>Quality points — 6 available</h2>
       <div id="softList"></div>
     </div>
 
@@ -121,7 +121,7 @@
         <div><label>Account $</label><input id="acct" type="number" step="any" value="25000"></div>
       </div>
       <div class="row3">
-        <div><label>Risk %</label><input id="riskPct" type="number" step="0.1" value="1"></div>
+        <div><label>Risk %</label><input id="riskPct" type="number" step="0.1" value="10"></div>
         <div><label>Next HTF level</label><input id="htf" type="number" step="any" placeholder="price"></div>
         <div><label>Notes</label><input id="notes" type="text" placeholder="MNQ long off 20,450"></div>
       </div>
@@ -216,30 +216,19 @@ const HARD = [
   ["align",  "All four timeframes aligned — D · 4H · 1H · 15m", "The thing that makes this strategy a go. If the four don't agree, executing is off the table — no score overrides this."],
   ["daily",  "Daily bias agrees with the direction",     "No exceptions. A 1H setup against the Daily is not a setup."],
   ["bridge", "4H bridge agrees — not broken against me", "The 4H is what says the pullback is finished."],
-  ["chop",   "Fewer than 2 chop measures firing",        "ER ≥ 0.30, range/ATR ≥ 3.0, ADX ≥ 18 on the 1H and 15m."],
+  ["lower",  "Lower TF agrees too — 15m with the 1H",   "The execution pair. A 1H setup the 15m is fighting is the disagreement, and that disagreement IS the chop."],
   ["prot",   "Protected low / high still intact",        "One close beyond it and the setup is dead, not 'deeper'."],
-  ["closed", "Trigger is a CLOSED 1H candle",            "Not a live one. Wicks and live candles lie."],
-  ["vwap",   "On the correct side of VWAP",              "Long above, short below. Otherwise you're fighting the session's control."],
-  ["ext",    "NOT stretched past the 2σ VWAP band",      "That's where benchmark algos turn into sellers. Don't buy their exit."],
-  ["budget", "Day's range budget not spent",             "Price hasn't already travelled 85%+ of the daily ATR in my direction. The perfect setup at 1:30pm fails here."],
-  ["trap",   "Not buying a breakout of a ranging 4H",    "If the 4H is in balance and price is beyond its range edge without 3+ closes of acceptance, that break is suspected — most fake-outs live exactly there."],
-  ["news",   "NEWS — clear of red-folder reports",  "CPI, NFP, FOMC. Structure after the news, never through it. The indicator blocks your Thu/Fri 7:30 window on its own; FOMC days use its toggle."],
+  ["closed", "Trigger is a CLOSED candle",               "Not a live one. Wicks and live candles lie."],
+  ["news",   "NEWS — clear of red-folder reports",  "CPI, NFP, FOMC. Structure after the news, never through it. Nothing in the software watches the calendar — this box is yours alone."],
   ["room",   "At least 2R of clear air to the next HTF level", "If T1 sits under a wall, there is no trade here."]
 ];
 const SOFT = [
   ["first",  "First retest of this level",         "Third touch is a magnet, not an edge."],
   ["hold",   "Acceptance — held 2+ bars after the reclaim", "The information you waited for. One close back through = rejection."],
-  ["disp",   "Displacement on the trigger candle", "Body ≥ 1.2× the 20-bar average. A doji is a coin flip."],
-  ["rvol",   "RVOL ≥ 1.2 for this hour of day",    "Is anyone actually there? Below 0.8 is noise, not flow."],
   ["sweep",  "Pullback swept liquidity and reclaimed", "Dipped under the recent low, closed back above. Supply absorbed."],
-  ["ref",    "Level sits on a reference level or your zone", "Prior day H/L, settlement, overnight H/L, initial balance — or inside a Daily/4H demand (long) / supply (short) zone."],
-  ["corr",   "Correlated instrument agrees",       "MNQ ↔ MES. Disagreement means one chart's noise, not market flow."],
-  ["sess",   "Inside the session window",          "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
-  ["chop0",  "Zero chop measures firing",          "Not just under the limit — actually clean."],
-  ["room3",  "3R+ to the next opposing level",     "Room for the runner, not just T1."],
-  ["daytype","Day type agrees — not a balance day", "2+ closes accepted beyond yesterday's value in my direction. A continuation setup on a balance day is the losing pattern in the winning one's clothes."],
-  ["value",  "Trading beyond yesterday's value",   "Initiative territory. The middle of yesterday's value is 'fair' — fair means no edge."],
-  ["fuel",   "Opposite range edge was swept (fuel)","The far edge of the HTF range was raided and failed — those stops are collected, fuel for the move toward me."]
+  ["ref",    "Level sits on a prior-day high/low or your zone", "Yesterday's high or low, or inside a Daily/4H demand (long) / supply (short) zone you drew. Price levels, not readings."],
+  ["sess",   "Inside the prime hours",             "MNQ/MES 09:30–11:30. MGC 08:00–12:00 ET."],
+  ["room3",  "3R+ to the next opposing swing",     "Room for the runner, not just T1."]
 ];
 
 const $ = id => document.getElementById(id);
@@ -343,12 +332,7 @@ function evaluate(){
   const missed = HARD.filter(([k]) => !boxes().find(b => b.dataset.k === k && b.dataset.cls === "hard").checked);
   let score = checkedOf("soft").length;
   let denom = 13;
-  let grade = score >= 10 ? "A+" : score >= 8 ? "B" : "C";
-  if (typeof machineInfo !== "undefined" && machineInfo) {
-    score = machineInfo.score;
-    denom = machineInfo.denom;
-    grade = machineInfo.grade;
-  }
+  let grade = score >= 5 ? "A+" : score >= 4 ? "B" : "C";
   const v = $("verdict"), big = v.querySelector(".big"), why = v.querySelector(".why");
   v.className = "verdict";
 
@@ -381,11 +365,11 @@ function evaluate(){
     } else if (grade === "B") {
       v.classList.add("v-half");
       big.textContent = "HALF SIZE · B";
-      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + (machineInfo ? " — scored by the indicator at fire time." : ".") + ` Reduced size — and with one bullet a day, consider passing.` + wrTxt;
+      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + "." + ` Reduced size — and with one bullet a day, consider passing.` + wrTxt;
     } else {
       v.classList.add("v-take");
       big.textContent = "TAKE IT · A+";
-      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + (machineInfo ? " — scored by the indicator at fire time, news gate included." : ", all hard filters clear.") + ` Full size.` + wrTxt;
+      why.textContent = `${score}/${denom} points · ${qualPct}% quality` + ", all hard filters clear." + ` Full size.` + wrTxt;
     }
   }
   // Planned R: what this trade returns if you follow the plan. Logged so the journal can
@@ -576,7 +560,6 @@ $("save").onclick = () => {
 };
 
 $("reset").onclick = () => {
-  machineInfo = null;
   boxes().forEach(b => b.checked = false);
   ["entry","stop","resR","notes","htf","alertPaste"].forEach(id => $(id).value = "");
   evaluate();
@@ -605,8 +588,8 @@ $("csv").onclick = () => {
 };
 
 // ── Fill the form from a pasted alert ──────────────────────────────────────
-// Both alert formats carry everything: "MNQ1! LONG A+ (11/13 · 85% quality) — HOLD
-// \nentry 20450.00 | stop 20410.00 | risk 40.00 pts\nT1 ... | T2 ... | room 5.0R ..."
+// "MNQ1! MSB PURE dir 1 | entry 20450.00 | stop 20410.00 | risk 40.00 pts
+//  | T1 20490.00 | T2 20610.00 | room 4.0R | qty 3"
 function parseAlert(text){
   const t = text.replace(/\s+/g, " ").trim();
   const num = re => { const m = t.match(re); return m ? parseFloat(m[1]) : null; };
@@ -618,44 +601,23 @@ function parseAlert(text){
   const risk  = num(/risk\s+([\d.]+)\s*pts/i);
   const room  = num(/room\s+([\d.]+)\s*R/i);
   const t2    = num(/T2\s+([\d.]+)/);
-  // A real MSB alert carries the machine's verdict: "A+ (11/13 · 85% quality)".
-  // Test/manual alerts don't — those stay fully manual.
-  let machine = null;
-  const mg = t.match(/\b(A\+|B)\s*\((\d+)\/(\d+)/);
-  if (mg) machine = { grade: mg[1], score: +mg[2], denom: +mg[3], newsClear: /news ✓/.test(t) };
-  // Placeholder-format alerts ("MSB dir 1 | score 11/13 | ..."): grade derived from score.
-  const ms = t.match(/score\s+(\d+)(?:\.0+)?\/(\d+)/i);
-  if (!machine && ms) {
-    const sc = +ms[1], dn = +ms[2];
-    const gr = dn === 11 ? (sc >= 9 ? "A+" : sc >= 7 ? "B" : "C") : (sc >= 10 ? "A+" : sc >= 8 ? "B" : "C");
-    // The indicator only fires when its news gate is clear, so the alert's
-    // existence IS the news check. FOMC days still rely on the indicator toggle.
-    machine = { grade: gr, score: sc, denom: dn, newsClear: true };
-  }
+  // The bot reads structure and nothing else — it has no opinion on quality and
+  // never sees the calendar. So an alert is numbers, never a verdict, and every
+  // box on this page stays yours to tick. Anything that filled the checklist for
+  // you would be inventing the part of the judgement that is actually the point.
+  const qty = num(/qty\s+([\d.]+)/i);
   if (!entry || !stop || !dir) return null;
   // The wall: rebuild from room × risk (exact — it's how the indicator computed it),
   // falling back to T2 for STANDARD/HOLD alerts.
   let htf = null;
   if (risk && room) htf = dir === "LONG" ? entry + risk * room : entry - risk * room;
   else if (t2) htf = t2;
-  return { sym, dir, entry, stop, htf, machine };
+  return { sym, dir, entry, stop, htf, qty };
 }
 
-let machineInfo = null;
 $("alertPaste").addEventListener("input", () => {
   const a = parseAlert($("alertPaste").value);
   const note = $("pasteNote");
-  machineInfo = a ? a.machine : null;
-  if (machineInfo) {
-    // The indicator verified every gate before it fired — re-ticking them is busywork.
-    // That includes news: the Thu/Fri blackout runs on the clock inside the indicator,
-    // and it refuses to fire during the window. FOMC days rely on its toggle.
-    boxes().forEach(b => {
-      if (b.dataset.cls !== "hard") return;
-      if (b.dataset.k === "news") { if (machineInfo.newsClear) b.checked = true; return; }
-      b.checked = true;
-    });
-  }
   if (!a) {
     if ($("alertPaste").value.trim())
       note.innerHTML = '<span class="neg">Could not read that — paste the whole alert message, including the entry/stop line.</span>';
@@ -666,13 +628,10 @@ $("alertPaste").addEventListener("input", () => {
   $("entry").value = a.entry;
   $("stop").value = a.stop;
   if (a.htf) $("htf").value = +a.htf.toFixed(2);
-  note.innerHTML = machineInfo
-    ? `<span class="pos"><b>Machine-verified ${machineInfo.grade} · ${machineInfo.score}/${machineInfo.denom}.</b></span> ` +
-      (machineInfo.newsClear
-        ? `Every gate checked, including your Thu/Fri report blackout. Look at the chart, read the verdict, decide. (FOMC days rely on the toggle in the indicator — that one is on you.)`
-        : `The indicator checked every gate before firing. Your two jobs: tick the NEWS box (only you can see the calendar) and look at the chart.`)
-    : `<span class="pos">Filled: ${a.sym ?? "?"} ${a.dir} · entry ${a.entry} · stop ${a.stop}` +
-      (a.htf ? ` · HTF ${(+a.htf.toFixed(2))}` : "") + `.</span> Now tick the checklist yourself — that part is the point.`;
+  note.innerHTML = `<span class="pos">Filled: ${a.sym ?? "?"} ${a.dir} · entry ${a.entry} · stop ${a.stop}` +
+    (a.htf ? ` · HTF ${(+a.htf.toFixed(2))}` : "") +
+    (a.qty ? ` · bot size ${a.qty}` : "") +
+    `.</span> The numbers came from the alert. The checklist is yours — nothing ticked itself, because nothing in the software judges quality.`;
   evaluate();
 });
 

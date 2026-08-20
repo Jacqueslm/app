@@ -11,16 +11,11 @@ Read them in this order.
 | **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
 | **[DAILY-USE.md](DAILY-USE.md)** | Already set up? The morning routine, what to do when an alert fires, and the phone workflow |
 | **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
-| **[INSTITUTIONAL.md](INSTITUTIONAL.md)** | How large participants actually trade — and why the setup works. Read it second. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
-| **[PRO-ANALYSIS.md](PRO-ANALYSIS.md)** | Reading the day top-down like a desk: value, day type, range budget. Includes the pre-market prep sheet. |
 | **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
-| **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Structure only. Backtests in one click. |
-| **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | Structure only — no VWAP, no RVOL, no ADX, no scoring. The sequence and the higher timeframes, nothing else. |
-| **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Same pure logic as an indicator: dashboard, chart labels, and the alert that fires the trade plan. |
-| **[pine/MSB-Indicator.pine](pine/MSB-Indicator.pine)** | TradingView indicator — watches the charts, grades setups, alerts you |
-| **[pine/MSB-Scout.pine](pine/MSB-Scout.pine)** | The 5m/15m scalping companion — same sequence, anchored to the 4H. A+ only. |
-| **[pine/MSB-Strategy.pine](pine/MSB-Strategy.pine)** | Backtester — check the rules against history before trusting them |
+| **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Backtests in one click, and it is the only path that can move a stop to break-even. |
+| **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Dashboard, chart labels, and the alert that carries the trade plan. |
+| **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | **The backtester.** Same rules as the watcher, run against history. |
 | **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |
 | **[Start Trade Grader.bat](Start%20Trade%20Grader.bat)** + `relay/` | Hands-free mode: TradingView webhooks fill the grader automatically (paid TV plan + ngrok) |
 
@@ -32,14 +27,15 @@ approve anything that fails a hard filter, and it will tell you what you forgot 
 
 ## Setting up TradingView (once, ~10 minutes)
 
-1. Open a **1-hour chart** of `MNQ1!` (or MES1! / MGC1!).
+1. Open a **1-hour chart** of `MNQ1!` (or MES1! / MGC1!). For scalp mode, use the **15-minute**.
 2. **Pine Editor** at the bottom → **Open** → **New indicator** → delete the sample code.
-3. Open `pine/MSB-Indicator.pine` in Notepad/TextEdit, copy **all** of it, paste it in.
-4. **Save** (name it "Market Structure Bridge") → **Add to chart**.
-5. Do the same for `MSB-Strategy.pine` as a **New strategy** if you want the backtest.
+3. Open `pine/MSB-Pure-Alerts.pine` in Notepad/TextEdit, copy **all** of it, paste it in.
+4. **Save** (name it "MSB Pure") → **Add to chart**.
+5. Do the same for `MSB-Pure.pine` as a **New strategy** if you want the backtest.
 
-You'll see a dashboard top-right: Daily bias, 4H bridge, 1H structure, the chop reading, and
-which step of the sequence price is currently on.
+You'll see a dashboard top-right: the four timeframes with an arrow each, whether all four are
+ALIGNED, which step of the retest sequence price is on, the session, and your bullets left. If
+the Exec row shows a ⚠, the script is on the wrong chart timeframe for the mode it's in.
 
 ### Settings per instrument
 
@@ -92,8 +88,8 @@ same screen: connect the broker in the **Trading Panel** at the bottom of the ch
 order from the chart itself. No second platform, no retyping levels under time pressure.
 
 **Place the whole bracket in one action — entry, stop and target together.** Never enter first and
-"add the stop in a second." That second is exactly when price moves against you and a 1% loss
-becomes whatever you can stomach. The grader gives you all three numbers before you click.
+"add the stop in a second." That second is exactly when price moves against you and a planned
+loss becomes whatever you can stomach. The grader gives you all three numbers before you click.
 
 **The connection still doesn't place trades for you, and that's deliberate.** The indicator alerts,
 the grader approves, you click. Keep it that way until the journal says the system works.
@@ -124,7 +120,7 @@ you can follow a rule that says no when you want it to say yes.
 
 ### Stage 1 — Backtest (this week, ~2 hours)
 
-Load `MSB-Strategy.pine` on MNQ 1H, two years of data. Then MES, then MGC with the `0800-1200`
+Load `MSB-Pure.pine` as a strategy on MNQ 1H, two years of data. Then MES, then MGC with the `0800-1200`
 session. For each one write down: **expectancy in R, max drawdown, number of trades, win rate.**
 
 Look at expectancy and drawdown, never net profit. A system with 60 trades and +0.3R expectancy
@@ -176,25 +172,32 @@ confirms a few bars late by design, which is realistic — but treat backtest nu
 
 ---
 
-## Structure alone is not enough
+## Why there is no context layer any more
 
-An indicator that only reads structure tells you **where**. It cannot tell you **whether anyone
-is there** — and a textbook retest with nobody behind it is how you get chopped up.
+There used to be one: VWAP and its 2σ bands, relative volume by hour, an ADX/efficiency-ratio
+chop filter, yesterday's value area, a day-type classifier, a range budget, a correlation check.
+Twelve filters on top of the sequence.
 
-So there's a second layer on top of the structure engine:
+They are gone. Two reasons, and the second is the one that matters.
 
-| Check | What it answers |
-|---|---|
-| **VWAP + 2σ bands** *(hard gate)* | Which side of the session's auction are you on, and are you already stretched? |
-| **RVOL by hour of day** | Is participation unusual for *this hour*, or is nobody home? |
-| **Liquidity sweep** | Did the pullback take out stops and reclaim — absorption you can actually see? |
-| **Reference levels** | Prior day H/L, settlement, overnight H/L, initial balance — is the whole market watching this price? |
-| **Acceptance** | Did the reclaim *hold* for 2+ closes, or was it rejection in disguise? |
-| **Correlation** | Does MES agree with MNQ, or is this one chart's noise? |
+**The gate diagnostic.** With the stack switched on, roughly 800 completed sequences a year came
+out the other side as about two trades. A filter set that rejects 99% of setups isn't selective,
+it's broken — and the thing being rejected was your actual read of the market.
 
-**All of it is switchable**, and the backtester has a master toggle. I'm claiming this layer
-improves your results; you should make it prove that on your own data before believing it.
-[INSTITUTIONAL.md](INSTITUTIONAL.md) explains the mechanism behind each one.
+**They are readings about price, not price.** VWAP is an average, RVOL is a ratio of averages,
+ADX is a smoothed average of smoothed averages. Every one of them is a number derived from the
+chart and then treated as though it were evidence from the market. A swing high is not like that.
+A swing high is a place where price actually turned — it happened, it is on the record, and it
+needs no parameters to exist.
+
+What replaces the twelve filters is the four-timeframe alignment rule, which does the same job
+with things that are real: a market in a range cannot make higher highs and higher lows on four
+timeframes at once, so chop fails the test by construction rather than by threshold.
+
+**What was genuinely lost, and you should know it:** the news blackout lived in the old
+indicator, and there is no replacement. Nothing in this system watches the calendar now. That box
+in the grader is yours, every day — and on FOMC days it is the only thing standing between you
+and a structurally perfect trade into a Fed statement.
 
 ## Built around you, not a hypothetical trader
 
@@ -219,9 +222,9 @@ arithmetic and the fix.
   and it also fires on the ones that fail.
 - **The grade is a filter, not a prediction.** An A+ still loses plenty of the time. The grade
   is about whether the trade was *worth taking*, which is a different question from whether it won.
-- **The chop numbers are a starting point.** ER 0.30, range/ATR 3.0, ADX 18 are reasonable
-  defaults, not laws of nature. After 30+ trades, look at whether your losers cluster near the
-  thresholds and adjust *one* of them, once, with the date written down.
+- **Two entries, very different frequencies.** The pullback fires far more often than the retest
+  sequence. The dashboard counts them separately for exactly that reason — after 30+ trades, check
+  whether both are actually paying, and switch one off if it isn't.
 - **Nothing here knows about news, halts, or a Fed governor talking at 2pm.** That's your job.
 
 None of this is financial advice — it's your own strategy written down as rules a computer can

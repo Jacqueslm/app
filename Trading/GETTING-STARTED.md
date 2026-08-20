@@ -29,8 +29,8 @@ the names are usually still close. Jump to [Troubleshooting](#troubleshooting) a
 
 ### Step 2. Copy the indicator code
 
-1. Open this link: **[MSB-Indicator.pine](pine/MSB-Indicator.pine)**
-   (on GitHub: `Trading/pine/MSB-Indicator.pine` on the `main` branch)
+1. Open this link: **[MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)**
+   (on GitHub: `Trading/pine/MSB-Pure-Alerts.pine` on the `main` branch)
 2. Click the **Raw** button (top right of the file).
 3. Click anywhere in the text, then **Ctrl+A** (Cmd+A on Mac) to select all, **Ctrl+C** to copy.
 
@@ -45,22 +45,31 @@ the names are usually still close. Jump to [Troubleshooting](#troubleshooting) a
 6. Click **Add to chart**.
 
 **Check:** you should now see a table in the top-right of the chart showing `Bias D`,
-`Bridge 240`, `Exec 60`, `Chop`, `VWAP`, `RVOL`, `Day type`, `Range budget`, `Vol regime`,
-`Setup`, `Session`, and `Bullets left`. Little `H` and `L` labels appear on the swings, triangles
-mark breaks of structure, the orange line is VWAP, and the dotted aqua lines are yesterday's
-value area. If the table shows `—` in places, scroll left to load more history.
+`Bias D`, `Bridge 240`, `Exec 60`, `Lower 15`, `All four`, `Retest`, `Session` and
+`Bullets left`.
 
-If you got a red error instead, see [Troubleshooting](#troubleshooting).
+The four timeframe rows each show an arrow: ▲ making higher highs and higher lows,
+▼ making lower highs and lower lows, – neither. **When all four arrows point the
+same way, `All four` reads ALIGNED** and a trigger can fire. Any other state and
+it reads *mixed*, which is the system telling you there is no trend to trade.
+
+On the chart, small triangles mark breaks of structure. If the `Exec` row shows a
+⚠, the script is on the wrong chart timeframe — 1H for standard mode, 15m for
+scalp. If rows show `–`, scroll left to load more history.
 
 ### Step 4. Set the per-symbol settings
 
 1. Hover the indicator name at the top-left of the chart → click the **gear** (Settings).
-2. In **Session — New York only**: MNQ and MES are already right (tradeable `0930-1500`,
-   prime `0930-1130`). For MGC change them to tradeable **`0800-1300`**, prime **`0800-1200`**.
-3. In **Institutional context → Correlated symbol**: trading MNQ, leave it (`CME_MINI:MES1!`).
-   Trading MES, change it to `CME_MINI:MNQ1!`. Trading MGC, either set `COMEX:SI1!` or untick
-   **Correlated instrument must agree**.
-4. Click **OK**. Leave everything else at defaults — they encode the playbook.
+2. In **Your rules → Tradeable window**: MNQ and MES are already right (`0930-1500`).
+   For MGC change it to **`0800-1300`**.
+3. In **Size → Account size ($)**: put your real account balance in. An indicator cannot see
+   your broker, so this is the one number it has to be told, and a stale one makes every
+   contract count in every alert wrong in the same direction.
+4. In **Size → Risk per trade (%)**: the percentage of the account a single loss may cost.
+   Contracts are computed from this and the stop distance. Read
+   [YOUR-RULES.md §9](YOUR-RULES.md) before you raise it — it is the number that decides
+   what a five-loss streak does to you.
+5. Click **OK**. Leave everything else at defaults — they encode the playbook.
 
 ### Step 5. Repeat for your other two symbols
 
@@ -93,7 +102,7 @@ Do this on each of the three charts.
 
 - **"Level reclaimed — waiting on the trigger"** → the setup is at step ④. Go look, get ready.
   Do **not** enter on this one.
-- **The full alert** — grade, **SCALP / STANDARD / HOLD**, day type, budget used, entry, stop,
+- **The full alert** — direction, entry, stop, risk in points, T1, T2, room and contract count. No grade: the software doesn't judge, you do, on
   T1, T2 → this is the actionable one. It still isn't permission to buy. It's permission to open
   the grader. And it's your one bullet: after it fires, the system goes quiet until tomorrow.
 
@@ -180,30 +189,25 @@ memory.
 
 ---
 
-## Part 4½ — The Scout: your 5m/15m scalping companion (10 min, optional)
+## Part 4½ — Scalp mode: the same system, one rung down (5 min, optional)
 
-The Scout (`Trading/pine/MSB-Scout.pine`) is the same system one rung down the ladder:
-**4H is the anchor, 1H is the bridge, the 5m or 15m chart is execution.** Same sequence, same
-gates, compressed clock. Its alert is always a SCALP — one target at 1R, full exit, done.
+There is no separate scalping script any more. The same MSB Pure has a **Scalp
+mode** toggle, and it slides the whole timeframe stack down a rung:
 
-Setup is identical to Part 1: open a **15-minute** chart of the same symbol, paste
-`MSB-Scout.pine` as a new indicator, add the same *Any alert() function call / Once Per Bar
-Close* alert. Set the MGC window to `0800-1200` if you trade gold. **Start on the 15m, not the
-5m** — earn your way down.
+| | Bias pair | Execution pair | Put the script on |
+|---|---|---|---|
+| Standard | Daily + 4H | 1H + 15m | the 1H chart |
+| **Scalp** | 4H + 1H | 15m + 5m | the **15-minute** chart |
 
-Three things about the Scout that are different on purpose:
+Same sequence, same alignment rule, same sizing — a faster clock and nothing else.
+It is not a looser version of the system and it does not get relaxed filters.
 
-- **It only alerts on A+.** The low timeframe makes far more offers than the 1H; you take fewer
-  of them, not more. Don't change this setting until 30 logged scalps say otherwise.
-- **Prime hours only.** Low-timeframe structure outside 09:30–11:30 is mostly noise in a costume.
-- **The one-bullet rule is one trade TOTAL per day, across both systems.** TradingView scripts
-  can't see each other, so this rule lives with you: if the 1H system fired today, the Scout's
-  alert is tomorrow's — and the other way round. The Scout's alert text reminds you every time.
+To use it: open a 15-minute chart, add MSB Pure, tick **Scalp mode** in the
+settings, and set the alert the same way you did in Part 2. The dashboard will
+show `Bias 240 · Bridge 60 · Exec 15 · Lower 5`.
 
-When both fire on the same morning, the 1H setup wins — it's the bigger, better-tested trade.
-The Scout earns its place on days the 1H system is quiet but the 4H is trending.
-
----
+**One bullet a day still means one bullet a day.** A scalp is not a free extra
+trade — if you take it, that was the day's trade.
 
 ## Part 5 — Stage 1: the backtest (about 2 hours)
 
@@ -214,7 +218,7 @@ This is your actual next task. You are trying to find out whether these rules ha
 
 1. Open your **MNQ 1H** chart.
 2. **Pine Editor** → **Open** → **New strategy** → clear the sample code.
-3. Paste the contents of `Trading/pine/MSB-Strategy.pine` (same Raw → Ctrl+A → Ctrl+C routine).
+3. Paste the contents of `Trading/pine/MSB-Pure.pine` (same Raw → Ctrl+A → Ctrl+C routine).
 4. **Save** as `MSB Backtester` → **Add to chart**.
 5. Click the **Strategy Tester** tab at the bottom.
 
@@ -227,38 +231,28 @@ Strategy Tester only measures what's loaded on the chart.
 > get 6–12 months, that's workable — just note the shorter sample and hold your conclusions more
 > loosely. Fewer than ~40 trades tells you almost nothing.
 
-### First: does the context layer actually help?
+### First: which entry is actually paying?
 
-Before anything else, settle this — it's the most valuable two minutes of the whole backtest.
+There is no context layer to test any more — the filters are gone and the
+[README](README.md#why-there-is-no-context-layer-any-more) explains why. The
+question that replaced it is more useful, because the answer changes what you do
+tomorrow: **is the pullback entry or the retest sequence carrying the account?**
 
-1. Open the strategy's **settings gear**.
-2. Run it three ways, writing the numbers down each time:
-   - **Structure only** — untick **Apply context layer** (this also disables the day read)
-   - **+ Context** — tick it back on, but untick the three toggles in **Professional read**
-   - **+ Day read** — everything on (the default)
+The dashboard counts them separately. Run the backtest three times:
 
-| | Trades | Win rate | Profit factor | Max drawdown |
-|---|---|---|---|---|
-| Structure only | | | | |
-| + Context (VWAP, RVOL, sweeps…) | | | | |
-| + Day read (day type, value, budget) | | | | |
+| Run | Pullback entries | Retest sequence entries |
+|---|---|---|
+| 1 | on | on |
+| 2 | **on** | off |
+| 3 | off | **on** |
 
-Expect the context layer to take **fewer trades** — that's the point of a filter. What you want to
-see is better *expectancy per trade* and a smaller drawdown. If it takes half the trades and
-produces a materially better profit factor, it earns its place. If it barely changes anything,
-turn it off and keep the system simpler.
+Write down expectancy in R, max drawdown and trade count for each. You are looking
+for one specific thing: whether the rarer retest sequence has enough of an edge to
+justify how few trades it produces, and whether the pullback's much higher
+frequency is edge or noise.
 
-I've told you this layer helps. Don't take my word for it — this is the test that settles it on
-your data, and the answer might be no.
-
-### Set the correlated symbol per instrument
-
-In the same settings group, **Correlated symbol** defaults to `CME_MINI:MES1!`.
-
-- Trading **MNQ** → leave it (MES is the right partner).
-- Trading **MES** → change it to `CME_MINI:MNQ1!`.
-- Trading **MGC** → either point it at `COMEX:SI1!` (silver) or untick **Correlated instrument
-  agrees**. Comparing gold to the S&P is meaningless and will just cost you a point at random.
+If run 2 and run 3 both beat run 1, the two entries are interfering — take the
+better one and switch the other off.
 
 ### Record the numbers
 

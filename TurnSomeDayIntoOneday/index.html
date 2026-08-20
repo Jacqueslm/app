@@ -677,10 +677,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <p style="margin-bottom:8px">Paid plans are billed through Stripe on a recurring basis until cancelled. You can manage or cancel your subscription from Profile.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Refunds</h3>
-      <p style="margin-bottom:8px"><strong>All sales are final.</strong> Monthly and yearly plans include a 7-day free trial — your card is not charged until the trial ends, and you can cancel at any point during it. Because you get to try it before paying, payments are non-refundable.</p>
-      <p style="margin-bottom:8px">Founding Lifetime is a one-time purchase with no trial, and is final at the moment of purchase.</p>
-      <p style="margin-bottom:8px">Cancelling a subscription stops all future billing and you keep Pro until the period you already paid for runs out — nothing is taken back early.</p>
-      <p style="margin-bottom:8px">Purchases made through Google Play or the App Store are handled under those stores' own refund policies, not this one.</p>
+      <p style="margin-bottom:8px">Monthly and yearly plans include 7 days free — you are not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</p>
+      <p style="margin-bottom:8px">Purchases made through Google Play or the App Store follow their refund policies, not this one.</p>
+      <p style="margin-bottom:8px">Founding Lifetime is limited to 50 purchases. Once those are gone it is not offered again, at any price.</p>
       <p style="margin-bottom:8px">Every tool in this app is free to use without paying anything. Days 1&ndash;15 of every program, the SOS toolkit, the journal, the partner track and the meditation room cost nothing and never will.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Acceptable use</h3>
@@ -1616,7 +1615,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is Days 16–30 of every program, 30 Friendly chats a day, and the live rooms.</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:11.5px;color:var(--tm);line-height:1.6">Monthly and yearly start with 7 days free — you're not charged until the trial ends. <strong>All sales are final.</strong> Founding Lifetime has no trial and is final at purchase. Cancel any time and you keep Pro until the period you paid for ends.</div>
+      <div style="padding:0 16px 24px;text-align:center;font-size:11.5px;color:var(--tm);line-height:1.6">Monthly and yearly include 7 days free — you're not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again after that. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</div>
     </div>
 
     <!-- PROFILE -->
@@ -11361,7 +11360,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.8';
+const APP_VERSION='6.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12275,7 +12274,7 @@ const GUIDE_FAQ=[
   {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>Days 16–30</b> of every track and pack (including the Together couples program), <b>30 Friendly chats a day</b> instead of 3, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
-  {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final. Monthly and yearly give you 7 days free first, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime has no trial and is final at purchase. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},
+  {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},

@@ -50,12 +50,25 @@ function levelsFrom(c, pv, tfMs){
    means when you say it. */
 function runRejection(exec, execET, levels, opt){
   const pv = opt.pv ?? 3, buf = (opt.stopTicks ?? 4) * 0.25;
+  /* Geometry, held separately from the entry rule so the two can be tested
+     apart. The entry never changes here — only where the stop goes, where the
+     target goes, and whether half comes off at 1R.
+       stopMode  bar   just past the rejection bar's extreme (the safe read)
+                 mid   halfway between the level and that extreme (tighter)
+       tgtMode   swing the next previous high or low
+                 rr    a fixed multiple of the risk
+       useT1     half off at 1R with the stop to break-even, or let it all ride */
+  const stopMode = opt.stopMode ?? 'bar';
+  const tgtMode  = opt.tgtMode  ?? 'swing';
+  const rrMult   = opt.rrMult   ?? 2;
+  const useT1    = opt.useT1 !== false;
+  const useBE    = opt.useBE !== false;
   const S = structure(exec, pv, pv);
   const maxPerDay = opt.maxPerDay ?? 2, minR = opt.minR ?? 1.0;
   const sessFrom = opt.sessFrom ?? 930, sessTo = opt.sessTo ?? 1500;
   const trades = [];
   let live = [], li = 0, day = '', took = 0, open = null;
-  const g = {touch: 0, reject: 0, noTarget: 0, thinR: 0, rejDay: 0, rejSess: 0, taken: 0};
+  const g = {touch: 0, reject: 0, noTarget: 0, thinR: 0, rejDay: 0, rejSess: 0, taken: 0, roomSum: 0};
 
   for(let i = 0; i < exec.length; i++){
     const c = exec[i], et = execET[i], tClose = c.t + (opt.tfMs || 15 * MIN);
@@ -82,18 +95,33 @@ function runRejection(exec, execET, levels, opt){
     if(took >= maxPerDay){ g.rejDay++; continue; }
     if(et.hm < sessFrom || et.hm > sessTo){ g.rejSess++; continue; }
 
-    const {dir} = rejects[0];
+    const {dir, L: lvl} = rejects[0];
     const entry = c.c;
-    const stop = dir === 1 ? c.l - buf : c.h + buf;
+    const ext = dir === 1 ? c.l : c.h;                   // how far the rejection poked
+    // 'bar' clears the whole rejection wick. 'mid' splits the wick. 'level'
+    // sits just the other side of the level itself — the tightest structural
+    // stop available, and the one that stops a 5m entry risking a 1H swing.
+    const mid = (ext + lvl.p) / 2;
+    const stop = stopMode === 'level' ? (dir === 1 ? lvl.p - buf : lvl.p + buf)
+               : stopMode === 'mid'   ? (dir === 1 ? mid - buf   : mid + buf)
+               :                        (dir === 1 ? ext - buf   : ext + buf);
     const risk = Math.abs(entry - stop);
-    // Target: the previous swing the other way, on THIS timeframe.
-    const tgt = dir === 1 ? S.pivHi[i] : S.pivLo[i];
-    if(!(risk > 0) || isNaN(tgt) || (dir === 1 ? tgt <= entry : tgt >= entry)){ g.noTarget++; continue; }
-    const room = Math.abs(tgt - entry) / risk;
+    if(!(risk > 0)){ g.noTarget++; continue; }
+
+    let tgt, room;
+    if(tgtMode === 'rr'){
+      room = rrMult;
+      tgt = dir === 1 ? entry + rrMult * risk : entry - rrMult * risk;
+    } else {
+      tgt = dir === 1 ? S.pivHi[i] : S.pivLo[i];          // the next previous high or low
+      if(isNaN(tgt) || (dir === 1 ? tgt <= entry : tgt >= entry)){ g.noTarget++; continue; }
+      room = Math.abs(tgt - entry) / risk;
+    }
     if(room < minR){ g.thinR++; continue; }
 
-    g.taken++; took++;
-    open = {dir, entry, stop, risk, room, T1: dir === 1 ? entry + risk : entry - risk, T2: tgt, t1: false, R: 0};
+    g.taken++; took++; g.roomSum += room;
+    open = {dir, entry, stop, risk, room, useT1, useBE,
+            T1: dir === 1 ? entry + risk : entry - risk, T2: tgt, t1: false, R: 0};
   }
   return {trades, g};
 }
@@ -164,17 +192,22 @@ function runBreakout(exec, execET, opt){
    first — the pessimistic reading, because the other one flatters everything. */
 function step(o, c){
   const L = o.dir === 1;
-  if(L ? c.l <= o.stop : c.h >= o.stop){ o.R += o.t1 ? 0 : -1; return {R: o.R, how: o.t1 ? 'BE' : 'stop'}; }
-  const hitT1 = !o.t1 && (L ? c.h >= o.T1 : c.l <= o.T1);
+  const half = o.useT1 === false ? 0 : 0.5;              // 0 = the whole position rides to target
+  if(L ? c.l <= o.stop : c.h >= o.stop){
+    o.R += o.t1 ? 0 : -1;
+    return {R: o.R, how: o.t1 ? 'BE' : 'stop'};
+  }
+  const hitT1 = half && !o.t1 && (L ? c.h >= o.T1 : c.l <= o.T1);
   const hitT2 = L ? c.h >= o.T2 : c.l <= o.T2;
-  if(hitT1 && hitT2){ o.R += 0.5 + 0.5 * o.room; return {R: o.R, how: 'T2'}; }
-  if(hitT1){ o.t1 = true; o.R += 0.5; o.stop = o.entry; }
-  if(hitT2 && o.t1){ o.R += 0.5 * o.room; return {R: o.R, how: 'T2'}; }
+  if(hitT1 && hitT2){ o.R += half + (1 - half) * o.room; return {R: o.R, how: 'T2'}; }
+  if(hitT1){ o.t1 = true; o.R += half; if(o.useBE !== false) o.stop = o.entry; }
+  if(hitT2 && (o.t1 || !half)){ o.R += (o.t1 ? 1 - half : 1) * o.room; return {R: o.R, how: 'T2'}; }
   return null;
 }
 const closeAt = (o, px) => {
   const r = (o.dir === 1 ? px - o.entry : o.entry - px) / o.risk;
-  o.R += (o.t1 ? 0.5 : 1) * r; return {R: o.R, how: 'EOD'};
+  const half = o.useT1 === false ? 0 : 0.5;
+  o.R += (o.t1 ? 1 - half : 1) * r; return {R: o.R, how: 'EOD'};
 };
 
 function stats(trades, months, riskPct){

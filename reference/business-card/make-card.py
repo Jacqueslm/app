@@ -1,9 +1,18 @@
-from PIL import Image, ImageDraw, ImageFont
-import segno, os, math
+#!/usr/bin/env python3
+"""Business card in the same house style as the partner cards.
 
-F="/mnt/skills/examples/canvas-design/canvas-fonts/"
-def f(n,s): return ImageFont.truetype(F+n,s)
-BOLD="WorkSans-Bold.ttf"; REG="WorkSans-Regular.ttf"
+Same gradient, same real app icon, same Liberation Sans, same
+FREE · NO CARD / TURN SOMEDAY INTO DAY ONE foot. The front carries the
+line from card 15; the back is card 16 broken out into the list of what
+costs nothing, plus a QR to the site.
+
+3.5 x 2in trim, 0.125in bleed, 300dpi.
+"""
+import os, segno
+from PIL import Image, ImageDraw, ImageFont
+
+HERE=os.path.dirname(os.path.abspath(__file__))
+ICON=os.path.join(HERE,"icon-512.png")
 
 DPI=300
 TRIM_W,TRIM_H=int(3.5*DPI),int(2*DPI)
@@ -11,33 +20,35 @@ BLEED=int(0.125*DPI)
 W,H=TRIM_W+2*BLEED,TRIM_H+2*BLEED
 SAFE=BLEED+int(0.125*DPI)
 
-BRAND=(15,12,41); ACCENT=(83,74,183); GREEN=(126,232,162)
-WHITE=(255,255,255); MUTED=(150,147,178)
-PAPER=(250,249,247); INK=(24,22,45); GREY=(100,97,120)
+# straight from make-partner-cards.py
+BG_TOP=(26,20,62); BG_BOT=(12,10,32)
+INK=(255,255,255); SUB=(168,160,208); FOOT=(110,104,150); FREE=(150,214,176)
+BOLD="/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+REG="/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+def fb(s): return ImageFont.truetype(BOLD,s)
+def fr(s): return ImageFont.truetype(REG,s)
 
-SS=4  # supersample the logo for clean curves
+def grad(w,h):
+    im=Image.new("RGB",(w,h)); d=ImageDraw.Draw(im)
+    for y in range(h):
+        t=y/(h-1)
+        d.line([(0,y),(w,y)],fill=tuple(round(BG_TOP[i]+(BG_BOT[i]-BG_TOP[i])*t) for i in range(3)))
+    return im
 
-def tracked(d,y,text,font,fill,track,cx):
+def tracked(d,text,font,tracking,cx,y,fill):
     ws=[d.textlength(c,font=font) for c in text]
-    x=cx-(sum(ws)+track*(len(text)-1))/2
+    x=cx-(sum(ws)+tracking*(len(text)-1))/2
     for c,w in zip(text,ws):
-        d.text((x,y),c,font=font,fill=fill); x+=w+track
+        d.text((x,y),c,font=font,fill=fill); x+=w+tracking
 
-def logo(base,cx,cy,size):
-    """App mark: rounded square, green keyline, white lemniscate."""
-    S=size*SS
-    tile=Image.new("RGBA",(int(S),int(S)),(0,0,0,0))
-    d=ImageDraw.Draw(tile)
-    d.rounded_rectangle([0,0,S-1,S-1],radius=S*0.30,fill=ACCENT,
-                        outline=GREEN,width=max(4,int(S*0.045)))
-    # Lemniscate of Gerono, stroked by stamping discs along the path.
-    a=S*0.255; b=S*0.175; lw=S*0.085; ccx=ccy=S/2
-    for i in range(900):
-        t=2*math.pi*i/900
-        x=ccx+a*math.cos(t); y=ccy+b*math.sin(2*t)/1.0
-        d.ellipse([x-lw/2,y-lw/2,x+lw/2,y+lw/2],fill=WHITE)
-    tile=tile.resize((int(size),int(size)),Image.LANCZOS)
-    base.paste(tile,(int(cx-size/2),int(cy-size/2)),tile)
+def icon(im,cx,cy,size):
+    ic=Image.open(ICON).convert("RGBA").resize((size,size),Image.LANCZOS)
+    im.paste(ic,(int(cx-size/2),int(cy-size/2)),ic)
+
+def foot(im,d):
+    """The same two lines that close every card we make."""
+    tracked(d,"FREE  ·  NO CARD",fb(21),5.5,W/2,H-SAFE-58,FREE)
+    tracked(d,"TURN SOMEDAY INTO DAY ONE",fr(18),4.5,W/2,H-SAFE-26,FOOT)
 
 def guides(img,name):
     g=img.copy(); d=ImageDraw.Draw(g)
@@ -45,37 +56,40 @@ def guides(img,name):
     d.rectangle([SAFE,SAFE,W-SAFE-1,H-SAFE-1],outline=(0,200,255),width=2)
     g.save(name)
 
-# ── FRONT ──
-front=Image.new("RGB",(W,H),BRAND); d=ImageDraw.Draw(front); cx=W//2
-logo(front,cx,BLEED+158,124); d=ImageDraw.Draw(front)
-tracked(d,BLEED+244,"TURN SOMEDAY INTO DAY ONE",f(BOLD,25),GREEN,4.5,cx)
-d.text((cx,BLEED+312),"No pressure. No worries.",font=f(BOLD,47),fill=WHITE,anchor="ma")
-d.text((cx,BLEED+373),"Just progress.",font=f(BOLD,47),fill=WHITE,anchor="ma")
-d.text((cx,BLEED+464),"turnsomedayintodayone.com",font=f(REG,28),fill=MUTED,anchor="ma")
+# ─── FRONT: card 15, the line that says who made it and why ───
+front=grad(W,H); d=ImageDraw.Draw(front)
+icon(front,W/2,SAFE+74,76); d=ImageDraw.Draw(front)
+y=SAFE+146
+for ln in ["Built by someone who was","addicted for 38 years."]:
+    d.text((W/2,y),ln,font=fb(44),fill=INK,anchor="ma"); y+=54
+y+=26
+d.text((W/2,y),"Free, because that's what I needed",font=fr(24),fill=SUB,anchor="ma"); y+=32
+d.text((W/2,y),"and couldn't afford.",font=fr(24),fill=SUB,anchor="ma")
+foot(front,d)
 front.save("card-front.png"); guides(front,"card-front-GUIDES.png")
 
-# ── BACK ──
-back=Image.new("RGB",(W,H),PAPER); d=ImageDraw.Draw(back)
-QS=292; QZ=4
+# ─── BACK: card 16, broken out — what costs nothing, and the QR ───
+back=grad(W,H); d=ImageDraw.Draw(back)
+QS=252; PAD=18
 segno.make("https://www.turnsomedayintodayone.com",error='h')\
-     .save("_qr.png",scale=20,border=QZ,dark="#0f0c29",light="#faf9f7")
+     .save("_qr.png",scale=20,border=4,dark="#0c0a20",light="#ffffff")
 qi=Image.open("_qr.png").convert("RGB").resize((QS,QS),Image.LANCZOS)
-qx,qy=SAFE-4,SAFE+52
-back.paste(qi,(qx,qy))
-d.text((qx+QS//2,qy+QS+8),"Scan it",font=f(BOLD,25),fill=GREY,anchor="ma")
+tile=Image.new("RGB",(QS+PAD*2,QS+PAD*2),(255,255,255))
+tile.paste(qi,(PAD,PAD))
+qx,qy=SAFE+6,SAFE+46
+back.paste(tile,(qx,qy))
+d.text((qx+tile.width/2,qy+tile.height+14),"Scan to open it",font=fr(21),fill=SUB,anchor="ma")
 
-tx=qx+QS+50
-d.text((tx,SAFE+58),"Free to start.",font=f(BOLD,45),fill=INK)
-d.text((tx,SAFE+112),"No card, no trial.",font=f(BOLD,45),fill=INK)
-y=SAFE+190
-for line in ["A day counter that doesn't shame you.",
-             "A button for the worst ten minutes.",
-             "A lesson a day. A private journal.",
-             "Someone to talk to at 2am."]:
-    d.text((tx,y),line,font=f(REG,25),fill=GREY); y+=37
-d.line([tx,y+14,W-SAFE-14,y+14],fill=(220,217,229),width=2)
-d.text((tx,y+32),"Jacques Malone  ·  St. Louis, MO",font=f(BOLD,24),fill=INK)
-d.text((tx,y+66),"turnsomedayintodayone.com",font=f(REG,24),fill=GREY)
+tx=qx+tile.width+52
+d.text((tx,SAFE+42),"What costs nothing:",font=fb(30),fill=INK)
+y=SAFE+92
+for ln in ["The day counter.","The panic button.","The daily lessons.","The private journal.",
+           "Someone to talk to at 2am."]:
+    d.text((tx,y),ln,font=fr(25),fill=SUB); y+=34
+d.line([tx,y+16,W-SAFE-10,y+16],fill=(58,50,102),width=2)
+d.text((tx,y+34),"Jacques Malone  ·  Founder",font=fb(23),fill=INK)
+d.text((tx,y+66),"turnsomedayintodayone.com",font=fr(23),fill=SUB)
+foot(back,d)
 back.save("card-back.png"); guides(back,"card-back-GUIDES.png")
 os.remove("_qr.png")
-print("OK",front.size)
+print("built",front.size)

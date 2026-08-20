@@ -7800,15 +7800,21 @@ function updateSpeedBtns(){
   ['lessonSpeedBtn','pack-speed-btn','la-ov-speed'].forEach(id=>{const b=document.getElementById(id);if(b)b.textContent=l;});
 }
 function updateListenBtn(){
-  // The mini player follows the audio, not the screen - the lesson keeps
-  // playing wherever you navigate, and it stays one tap from pause, stop, or
-  // the full read-along player. First time it appears, say what it is.
-  const mp=document.getElementById('mini-player');
   const playing=lessonAudioState==='playing';
-  if(mp)mp.style.display=playing?'block':'none';
+  // One transport at a time. The lesson card already has full controls, so a
+  // floating pill on top of it was the same player twice - and it sat over the
+  // paragraph being read. The pill's actual job is to follow the audio when
+  // you walk away from the lesson, so it only appears once the card that
+  // started it is off screen. offsetParent goes null when its screen loses
+  // .on, which is exactly "you've navigated away".
+  const starter=lessonAudioBtnId&&document.getElementById(lessonAudioBtnId);
+  const onLessonScreen=!!(starter&&starter.offsetParent!==null);
+  const showMini=playing&&!onLessonScreen;
+  const mp=document.getElementById('mini-player');
+  if(mp)mp.style.display=showMini?'block':'none';
   // The pill sits above the tab bar, so the screens need room underneath it
   // while it's up - otherwise it covers the last few lines of the lesson.
-  document.body.classList.toggle('mini-on',playing);
+  document.body.classList.toggle('mini-on',showMini);
   const sub=document.getElementById('mini-sub');
   if(sub)sub.textContent=S.audioPillExplained
     ?'Playing on any screen — tap for the big player'
@@ -7816,18 +7822,32 @@ function updateListenBtn(){
   ['lessonPauseBtn','pack-pause-btn'].forEach(id=>{
     const p=document.getElementById(id);
     if(!p)return;
-    p.style.display=lessonAudioState==='playing'?'':'none';
+    p.style.display=playing?'':'none';
     p.innerHTML='<i class="ti ti-player-'+(laPausedByUser?'play':'pause')+'"></i>';
     renderIcons(p);
   });
+  // Narrator voice is a set-it-once choice, and four buttons plus a full-width
+  // one wrapped onto three lines mid-lesson. While the audio runs the row
+  // shrinks to stop / pause / speed; the voice button comes back when it ends,
+  // and it's in the big player throughout.
+  ['lessonVoiceBtn','pack-voice-btn'].forEach(id=>{
+    const v=document.getElementById(id);
+    if(v)v.style.display=playing?'none':'';
+  });
   const opb=document.getElementById('lessonOpenPlayerBtn');
-  if(opb)opb.style.display=(lessonAudioState==='playing'&&lessonAudioBtnId==='lessonListenBtn')?'':'none';
+  if(opb)opb.style.display=(playing&&lessonAudioBtnId==='lessonListenBtn')?'':'none';
   updateLessonVoiceBtns();
   updateLessonPlayerUI();
-  const b=lessonAudioBtnId&&document.getElementById(lessonAudioBtnId);
+  const b=starter;
   if(!b)return;
-  b.innerHTML=lessonAudioState==='playing'
-    ?'<i class="ti ti-x"></i> Stop listening'
+  // Stretched to fill the row when it's the single call to action; sized to
+  // its own text once it's one control among several. The width override
+  // matters: .ob-btn is width:100%, so flex-basis:auto alone would still
+  // resolve to the full row and shove the pause chip outside the card.
+  b.style.flex=playing?'0 0 auto':'1';
+  b.style.width=playing?'auto':'';
+  b.innerHTML=playing
+    ?'<i class="ti ti-x"></i> Stop'
     :'<i class="ti ti-headphones"></i> Listen to this lesson';
   renderIcons(b);
 }
@@ -10318,6 +10338,9 @@ function switchTo(id,opts){
   const el=document.getElementById(SCREEN_MAP[id]);
   if(el)el.classList.add('on');
   if(id==='nova'){clearNovaBadge();updateChatMeter();}
+  // The mini player shows or hides based on whether the lesson that started
+  // the audio is still on screen, so it has to be re-decided on every move.
+  try{updateListenBtn();}catch(e){}
   document.getElementById('scr-title').textContent=titleFor(id);
   const screensEl=document.getElementById('screens');
   screensEl.scrollTop=0;
@@ -11381,7 +11404,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.0';
+const APP_VERSION='7.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

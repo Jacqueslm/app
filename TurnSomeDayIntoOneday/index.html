@@ -6272,7 +6272,7 @@ function markVoiceJourBtn(on){
 // mainly. Jacques's note: needing to speak a reflection and finding only a
 // keyboard "was an inconvenience when I needed it." One dictation at a time;
 // tapping the button again (or starting another) stops it.
-let dictState=null; // {id, rec, restartTimer}
+let dictState=null; // {id, rec, restartTimer, quiet, gotAny}
 
 // Stop whatever is currently dictating and put the button back. Handlers are
 // detached first: rec.stop() is asynchronous, and a final transcript landing
@@ -6287,6 +6287,14 @@ function stopDictation(){
   try{st.rec.stop();}catch(e){}
   markDictateBtn(st.id,false);
 }
+
+// How many silent restarts to allow before dictation gives up on its own.
+// Android plays a system chime every time recognition starts, and that chime
+// is the browser's, not ours - nothing on a web page can mute it. What we can
+// do is start recognition far less often: keep one session alive as long as
+// possible, and stop entirely once someone has clearly stopped talking rather
+// than beeping at them indefinitely.
+const DICT_QUIET_LIMIT=3;
 
 function toggleDictation(inputId){
   if(dictState){
@@ -6304,42 +6312,49 @@ function toggleDictation(inputId){
   const rec=new SpeechRecognition();
   rec.lang='en-US';
   rec.continuous=true;
-  rec.interimResults=false;
-  dictState={id:inputId,rec,restartTimer:null};
+  // Interim results keep the session streaming through the short pauses
+  // between sentences. With them off, Android closed the session at every
+  // breath and we restarted it - which is what made it chime over and over
+  // while someone was still mid-thought. Only final results get written.
+  rec.interimResults=true;
+  dictState={id:inputId,rec,restartTimer:null,quiet:0,gotAny:false};
   rec.onresult=e=>{
     for(let i=e.resultIndex;i<e.results.length;i++){
       if(!e.results[i].isFinal)continue;
       const piece=e.results[i][0].transcript.trim();
-      if(piece)el.value=(el.value.trim()?el.value.trim()+' ':'')+piece;
+      if(!piece)continue;
+      el.value=(el.value.trim()?el.value.trim()+' ':'')+piece;
+      // Words are still coming, so this is not a person who has finished.
+      if(dictState&&dictState.rec===rec){dictState.quiet=0;dictState.gotAny=true;}
     }
   };
   rec.onerror=ev=>{
-    if(ev.error==='no-speech')return;
+    // 'no-speech' is a silent stretch, not a failure - onend decides whether
+    // that silence has gone on long enough to stop.
+    if(ev.error==='no-speech'){if(dictState&&dictState.rec===rec)dictState.quiet++;return;}
+    if(ev.error==='aborted')return;
     if(dictState&&dictState.rec===rec)dictState=null;
     markDictateBtn(inputId,false);
   };
   rec.onend=()=>{
-    // Android Chrome ends recognition after every utterance even with
-    // continuous:true, so onend fires constantly while someone is talking.
+    if(!dictState||dictState.rec!==rec){markDictateBtn(inputId,false);return;}
+    // Someone who has said nothing for several stretches running has finished.
+    // Stopping here is the difference between one last chime and a chime every
+    // few seconds for as long as the box is open.
+    if(dictState.quiet>=DICT_QUIET_LIMIT){stopDictation();return;}
     // Calling start() straight back from inside onend throws InvalidStateError
     // - that is what made the button flick back to "Speak it instead"
     // mid-sentence and quietly drop the rest of what was being said. Restart
     // on a tick instead, and leave the label alone while we do it.
-    if(dictState&&dictState.rec===rec){
-      const restart=tries=>{
-        if(!dictState||dictState.rec!==rec)return;
-        try{rec.start();}
-        catch(e){
-          // Still winding down. Give it one more go before giving up, rather
-          // than ending the entry on a race the person can't see.
-          if(tries>0){dictState.restartTimer=setTimeout(()=>restart(tries-1),400);return;}
-          dictState=null;markDictateBtn(inputId,false);
-        }
-      };
-      dictState.restartTimer=setTimeout(()=>restart(1),200);
-      return;
-    }
-    markDictateBtn(inputId,false);
+    const restart=tries=>{
+      if(!dictState||dictState.rec!==rec)return;
+      try{rec.start();}
+      catch(e){
+        if(tries>0){dictState.restartTimer=setTimeout(()=>restart(tries-1),400);return;}
+        dictState=null;markDictateBtn(inputId,false);
+      }
+    };
+    dictState.restartTimer=setTimeout(()=>restart(1),200);
   };
   rec.start();
   markDictateBtn(inputId,true);
@@ -11404,7 +11419,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.1';
+const APP_VERSION='7.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

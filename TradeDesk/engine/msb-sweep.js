@@ -93,6 +93,11 @@ function run(D, opt){
   const setupTO = opt.setupTO ?? 40, freshBrk = opt.freshBrk ?? true;
   const minRoom = opt.minRoom ?? 1.0, stopBuf = (opt.stopTicks ?? 4) * 0.25;
   const maxPerDay = opt.maxPerDay ?? 1, riskPct = opt.riskPct ?? 10;
+  // Target either the next opposing swing ('wall') or a fixed multiple of the
+  // risk ('rr'). A fixed multiple under 1R has no room for a 1R partial, so
+  // the partial is switched off there rather than silently ignored.
+  const tgtMode = opt.tgtMode ?? 'wall', rrMult = opt.rrMult ?? 2;
+  const useT1 = tgtMode === 'rr' && rrMult <= 1 ? false : (opt.useT1 !== false);
   const sessFrom = opt.sessFrom ?? 930, sessTo = opt.sessTo ?? 1500;
 
   const X = S.exec[pv], B4 = S.b4[pv], BD = S.bd[pv], B15 = S.a15[pv];
@@ -118,8 +123,9 @@ function run(D, opt){
     // ── manage an open position first: this bar's range decides its fate ────
     if(open){
       const L = open.dir === 1;
+      const half = useT1 ? 0.5 : 0;
       const hitStop = L ? c.l <= open.stop : c.h >= open.stop;
-      const hitT1   = !open.t1 && (L ? c.h >= open.T1 : c.l <= open.T1);
+      const hitT1   = half && !open.t1 && (L ? c.h >= open.T1 : c.l <= open.T1);
       const hitT2   = L ? c.h >= open.T2 : c.l <= open.T2;
       // Both touched inside one bar: assume the stop went first. Pessimistic on
       // purpose — the alternative flatters every result that matters.
@@ -128,18 +134,22 @@ function run(D, opt){
         trades.push(finish(open, open.t1 ? 'BE after T1' : 'stop'));
         open = null;
       } else if(hitT1 && hitT2 && open.T2 !== open.T1){
-        open.R += 0.5 + 0.5 * open.room;
+        open.R += half + (1 - half) * open.room;
+        trades.push(finish(open, 'T2'));
+        open = null;
+      } else if(!half && hitT2){
+        open.R += open.room;
         trades.push(finish(open, 'T2'));
         open = null;
       } else {
-        if(hitT1){ open.t1 = true; open.R += 0.5; open.stop = open.entry;
+        if(hitT1){ open.t1 = true; open.R += half; open.stop = open.entry;
                    if(open.T2 === open.T1){ trades.push(finish(open, 'scalp T1')); open = null; } }
-        if(open && hitT2 && open.t1){ open.R += 0.5 * open.room; trades.push(finish(open, 'T2')); open = null; }
+        if(open && hitT2 && open.t1){ open.R += (1 - half) * open.room; trades.push(finish(open, 'T2')); open = null; }
       }
       // Flatten at the session close — the bot does, so the test must.
       if(open && et.hm >= sessTo){
         const px = c.c, r = (L ? px - open.entry : open.entry - px) / open.risk;
-        open.R += (open.t1 ? 0.5 : 1) * r;
+        open.R += (open.t1 ? 1 - half : 1) * r;
         trades.push(finish(open, 'EOD'));
         open = null;
       }
@@ -219,6 +229,13 @@ function run(D, opt){
     // Target: the nearest opposing swing on the 4H or Daily. In open air, the
     // measured move of the leg that built the setup. Structure projects
     // structure — nothing is invented.
+    if(tgtMode === 'rr'){
+      const tgt = tL ? entry + rrMult * risk : entry - rrMult * risk;
+      g.taken++; took++; g.riskSum = (g.riskSum||0) + risk;
+      open = {dir, entry, stop, risk, room: rrMult, t1: false, R: 0,
+              T1: tL ? entry + risk : entry - risk, T2: tgt, tIn: c.t};
+      continue;
+    }
     const walls = tL ? [B4.pivHi[i4], BD.pivHi[id]].filter(v => v > entry)
                      : [B4.pivLo[i4], BD.pivLo[id]].filter(v => v < entry);
     let target = walls.length ? (tL ? Math.min(...walls) : Math.max(...walls)) : NaN;

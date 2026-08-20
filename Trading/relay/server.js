@@ -61,18 +61,27 @@ const AUTO_FILE = path.join(__dirname, "autotrade.json");
 const AUTO_DEFAULT = {
   enabled: false,
   account: "Sim101",
-  contracts: 2,
+  // Size is COMPUTED, not fixed: contracts = floor( (balance x riskPct%) /
+  // (stop points x dollars per point) ). The stop distance comes from the
+  // alert, so a wide-stop trade automatically gets fewer contracts and the
+  // dollars at risk stay the same. Keep `balance` current — it is the one
+  // number here the relay cannot look up for itself, and a stale balance
+  // makes every contract count wrong in the same direction.
+  balance: 25000,
+  riskPct: 10,
+  maxContracts: 50,       // a hard ceiling no arithmetic can talk its way past
   maxPerDay: 1,           // the bot's bullet count — same rule as yours
   dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
     "Documents", "NinjaTrader 8", "incoming"),
   // TradingView ticker → the actual contract NinjaTrader trades. Update at rollover.
   // session = the ET window orders are allowed; maxRiskPts = a stop wider than
-  // this is treated as a bad alert, not a big trade.
+  // this is treated as a bad alert, not a big trade; perPoint = dollars per
+  // whole point of price, which is what turns a stop distance into a size.
   instruments: {
-    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 120 },
-    "MES1!": { name: "MES 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 40 },
-    "MGC1!": { name: "MGC 12-26", tick: 0.10, session: "0800-1300", maxRiskPts: 20 }
+    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, perPoint: 2,  session: "0930-1500", maxRiskPts: 120 },
+    "MES1!": { name: "MES 09-26", tick: 0.25, perPoint: 5,  session: "0930-1500", maxRiskPts: 40 },
+    "MGC1!": { name: "MGC 12-26", tick: 0.10, perPoint: 10, session: "0800-1300", maxRiskPts: 20 }
   }
 };
 let auto = AUTO_DEFAULT;
@@ -199,8 +208,30 @@ function tryAutotrade(text) {
     }
   }
 
+  // ── size, from the stop distance ───────────────────────────────────────────
+  // The alert measured the stop; the config holds the money. Multiply out and
+  // the dollars at risk are the same whether the stop is 12 points or 90.
+  const riskPts = Math.abs(entry - stop);
+  const perPt   = inst.perPoint > 0 ? inst.perPoint : 0;
+  if (!(perPt > 0)) { decide(false, "no perPoint set for " + m[1] + " in autotrade.json — cannot size the trade"); return; }
+  const riskUsd = (auto.balance || 0) * (auto.riskPct || 0) / 100;
+  const qty = Math.min(auto.maxContracts || 50, Math.floor(riskUsd / (riskPts * perPt)));
+
+  // Zero contracts means the stop is too wide for the account at this risk.
+  // The answer to that is to skip the trade, never to shrink the stop to fit.
+  if (qty < 1) {
+    decide(false, "0 contracts — a " + riskPts.toFixed(2) + " pt stop on " + m[1] +
+      " costs $" + (riskPts * perPt).toFixed(0) + " per contract, over the $" +
+      riskUsd.toFixed(0) + " this trade is allowed to risk. Stop too wide for the account.");
+    return;
+  }
+
   // ── the order ──────────────────────────────────────────────────────────────
-  const qty  = Math.max(2, auto.contracts);
+  // Two contracts or more: half comes off at 1R, the rest runs to T2.
+  // One contract cannot be halved, and this relay has no way to move a stop to
+  // break-even (it writes an order file and never hears about the fill), so a
+  // single contract takes the 1R and is done rather than riding a trade that
+  // reached +1R all the way back to -1R.
   const half = Math.floor(qty / 2);
   const rest = qty - half;
   const buy  = entrySide ? "BUY" : "SELL";
@@ -210,20 +241,25 @@ function tryAutotrade(text) {
 
   // ATI order-instruction format:
   // COMMAND;ACCOUNT;INSTRUMENT;ACTION;QTY;ORDER TYPE;LIMIT;STOP;TIF;OCO ID;ORDER ID;;
-  const lines = [
-    `PLACE;${auto.account};${inst.name};${buy};${qty};MARKET;;;GTC;;${id}E;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${half};LIMIT;${P1};;GTC;${id}A;${id}T1;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${half};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${rest};LIMIT;${P2};;GTC;${id}B;${id}T2;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${rest};STOPMARKET;;${S};GTC;${id}B;${id}S2;;`
-  ];
+  const lines = [`PLACE;${auto.account};${inst.name};${buy};${qty};MARKET;;;GTC;;${id}E;;`];
+  if (half > 0) {
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${half};LIMIT;${P1};;GTC;${id}A;${id}T1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${half};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${rest};LIMIT;${P2};;GTC;${id}B;${id}T2;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${rest};STOPMARKET;;${S};GTC;${id}B;${id}S2;;`);
+  } else {
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};LIMIT;${P1};;GTC;${id}A;${id}T1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`);
+  }
   const file = path.join(auto.incoming, "oif" + (++oifSeq) + "." + id + ".txt");
   try {
     fs.writeFileSync(file, lines.join("\r\n") + "\r\n");
     state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty });
     saveState();
     decide(true, "AUTOTRADE → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
-      "  stop " + S + "  T1 " + P1 + "  T2 " + P2 +
+      "  stop " + S + "  T1 " + P1 + (half > 0 ? "  T2 " + P2 : "  (1 lot — full exit at 1R)") +
+      "   risking $" + (qty * riskPts * perPt).toFixed(0) +
+      " of $" + riskUsd.toFixed(0) + " (" + (auto.riskPct || 0) + "% of " + (auto.balance || 0) + ")" +
       (cs === "rollover" ? "   ⚠ rollover month — update the contract soon" : ""));
   } catch (e) {
     decide(false, "could not write to " + auto.incoming +
@@ -260,6 +296,13 @@ ${armed ? "ARMED" : state.killed ? "KILLED" : "OFF (autotrade.json)"}</div>
 <p>Account: <span class="pill" style="background:${live ? "rgba(239,83,80,.25);color:#ef5350" : "rgba(38,166,154,.25);color:#26a69a"}">
 ${auto.account}${live ? " — REAL MONEY" : " — sim"}</span>
 &nbsp; Bullets: <b>${Math.max(0, (auto.maxPerDay || 1) - used)} / ${auto.maxPerDay || 1}</b> left today</p>
+<p>Risk: <b>${auto.riskPct || 0}%</b> of <b>$${(auto.balance || 0).toLocaleString()}</b>
+= <b>$${Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100).toLocaleString()}</b> per trade.
+Contracts are computed from that and the stop distance in the alert.</p>
+<p style="font-size:13px;color:#f0a020">⚠ This path cannot move a stop to break-even — it writes an
+order file and never hears about the fill. Trades of 2+ contracts take half at 1R and let the rest
+run to T2 against the <i>original</i> stop. For break-even after 1R, run the NinjaScript
+(ninjatrader/MSBPure.cs) instead, which sees its own fills.</p>
 <form method="POST" action="/bot/${secret}/toggle">
 <button style="background:${state.killed ? "#26a69a" : "#ef5350"};color:#fff">
 ${state.killed ? "RE-ARM THE BOT" : "KILL — stop placing orders"}</button></form>
@@ -359,6 +402,10 @@ server.listen(PORT, () => {
   console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
                                              : state.killed ? "🔴 KILLED — re-arm on the /bot page"
                                              : "⚪ off (relay/autotrade.json)"));
+  console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +
+              " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
+              "   (contracts computed from the stop distance)");
+  if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);
     if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — update autotrade.json before trading.");

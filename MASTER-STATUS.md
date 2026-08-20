@@ -732,3 +732,27 @@ Jacques hours of work he should never have touched.
   is why no AI model can be called from here for images, video or voice.
 - **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
   the ear and the eye on every piece of media. That one never changes.
+
+
+## Outreach record — collegiate recovery (ARHE list), 20 Aug 2026
+
+The ARHE member directory Jacques uploaded (xlsx) was extracted to
+`reference/crp-contacts.csv` — **113 unique programmes** across 40+ states,
+Canada and the UK, with a named contact and email for each.
+
+**All 113 are now sitting in Gmail as drafts**, one per programme, each
+personalised with the contact's first name and their programme's own name
+(Gamecock Recovery, Cougs for Recovery, Roos in Recovery, and so on). Subject:
+*"Free recovery app for your students — no cost, no card, ever."* Nothing was
+sent — Jacques reads and sends.
+
+The pitch is deliberately narrow and checkable: students are broke and every
+app in this space charges; days 1–15 of every programme and every tool are free
+with no card and no trial; porn, gaming, vaping, scrolling and spending are
+full 30-day programmes, not footnotes; and there's a separate track for a
+student carrying a parent's or partner's addiction. It asks for a resource
+listing, not money, and asks for the reason if the answer is no.
+
+**Still open on outreach:** four template emails (unions, first responders,
+Celebrate Recovery, gambling councils) are written but need named recipients
+before they can be drafted.

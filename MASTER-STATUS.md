@@ -451,6 +451,21 @@ If the Buffer API being used cannot set that flag, SAY SO in the queue report
 rather than posting undeclared - the fix is then a manual toggle in Buffer
 before the post goes out, not silence.
 
+## House rule 20 — EMAILS GO STRAIGHT INTO GMAIL AS DRAFTS (Jacques, 20 Aug 2026)
+
+Any outreach email that has a real address goes into his Gmail as a **draft**,
+via the Gmail connector, the moment it is written. He opens Drafts, reads it,
+hits send. He does not copy text out of a markdown file into Gmail - that is
+work handed back to him for no reason.
+
+Write the email into the relevant file too (OUTREACH.md, NEW-SPACES.md and so
+on) so there is a record and nothing gets sent twice - but the file is the
+record, the draft is the delivery.
+
+Templates with no named recipient stay in the file only. Ask which specific
+person or local to target, then draft it. A named local beats a generic
+national address every time.
+
 ## HOUSE RULES (keep)
 
 **House rule 18 — "push" means all three branches (Jacques, 19 Aug 2026).**

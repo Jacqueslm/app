@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Business card. Two finishes, same words.
+"""Business card.
 
 The line is the positioning: a recovery app for you AND the one who
 supports you. Nothing else in this category says that, so it leads.
@@ -7,7 +7,7 @@ supports you. Nothing else in this category says that, so it leads.
 Back proves it - two columns, FOR YOU and FOR THEM - which is the
 "tells everything" the cards do, in the shape of the brand.
 
-3.5 x 2in trim, 0.125in bleed, 300dpi. Writes light-* and dark-*.
+3.5 x 2in trim, 0.125in bleed, 300dpi.
 """
 import os, segno
 from PIL import Image, ImageDraw, ImageFont
@@ -28,9 +28,6 @@ THEMES={
  "dark": dict(top=(26,20,62),bot=(12,10,32),ink=(255,255,255),sub=(168,160,208),
               foot=(110,104,150),green=(150,214,176),rule=(58,50,102),
               qr_dark="#0c0a20",qr_light="#ffffff",tile=(255,255,255)),
- "light":dict(top=(253,252,250),bot=(244,242,247),ink=(20,17,44),sub=(92,88,116),
-              foot=(140,136,162),green=(46,138,90),rule=(219,215,228),
-              qr_dark="#14112c",qr_light="#ffffff",tile=None),
 }
 
 def grad(t):
@@ -109,14 +106,12 @@ def build(key):
         f"business-card-{key}.pdf",save_all=True,
         append_images=[Image.open(f"{key}-back.png").convert("RGB")],resolution=300.0)
 
-for k in THEMES: build(k)
+build("dark")
 
-# side-by-side preview sheet
+# front over back, for looking at before it goes to a printer
 pad=34
-tiles=[Image.open(f"{k}-{s}.png") for k in ("light","dark") for s in ("front","back")]
-sheet=Image.new("RGB",(W*2+pad*3,H*2+pad*3),(206,203,214))
-for i,im in enumerate(tiles):
-    r,c=divmod(i,2)
-    sheet.paste(im,(pad+c*(W+pad),pad+r*(H+pad)))
+f=Image.open("dark-front.png"); b=Image.open("dark-back.png")
+sheet=Image.new("RGB",(W+pad*2,H*2+pad*3),(206,203,214))
+sheet.paste(f,(pad,pad)); sheet.paste(b,(pad,H+pad*2))
 sheet.save("card-preview.png")
-print("built light + dark")
+print("built")

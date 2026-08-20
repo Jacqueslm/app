@@ -828,7 +828,7 @@ app.post('/api/billing/store/verify', billingLimiter, requireAuth, async (req, r
     if (mapping && mapping.plan === 'lifetime' && user.plan !== 'lifetime'
         && db.countLifetimeSold() >= billing.LIFETIME_CAP) {
       return res.status(409).json({
-        error: 'Founding Lifetime — sold out. Lifetime returns at $249.',
+        error: 'Founding Lifetime — all 50 are gone. Lifetime is closed for good.',
         soldOut: true,
       });
     }

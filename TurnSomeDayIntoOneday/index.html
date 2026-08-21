@@ -717,6 +717,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
     <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="program-lbl">The 90-day program — continuous support</div>
     <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="focus-lbl"></div>
+    <div id="clock-chips" style="display:none;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
     <div style="font-size:11px;color:#6672a0;margin-top:4px" id="next-milestone-lbl"></div>
     <div style="font-size:10.5px;color:var(--tm);margin-top:2px" id="journey-phase-lbl"></div>
@@ -2082,8 +2083,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       2. Reach out to one person you trust — even just to say what happened.<br>
       3. Reset your date when you're ready. No rush, no shame.
     </div>
+    <div id="slip-which" style="display:none;margin:0 0 14px"></div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-tools');openJour()">Write about it in your journal</button>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp(true)">Reset my date &amp; restart</button>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp(true,slipPick)">Reset my date &amp; restart</button>
     <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Friendly</button>
     <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
   </div>
@@ -4980,10 +4982,50 @@ function getDays(){
   return Math.max(0,Math.floor(diff/86400000));
 }
 
+// ─── PER-ADDICTION CLOCKS ────────────────────────────────────────────────────
+// One slip used to zero the single clock for every track at once - somebody
+// 47 days off alcohol who slipped on porn lost the 47 on screen. Each track
+// now keeps its own start date. S.startDate stays the master clock and always
+// equals the YOUNGEST per-track clock, so "Days sober" still means sober,
+// full stop - and everything downstream of it (milestones, money saved,
+// share cards) stays conservative rather than inflated.
+function addictionClocks(){
+  S.addictionClocks=S.addictionClocks||{};
+  (S.selectedAddictions||[]).forEach(a=>{
+    if(!S.addictionClocks[a])S.addictionClocks[a]=S.startDate||new Date().toISOString();
+  });
+  return S.addictionClocks;
+}
+function daysFor(addiction){
+  const c=addictionClocks()[addiction];
+  if(!c)return getDays();
+  return Math.max(0,Math.floor((Date.now()-new Date(c).getTime())/86400000));
+}
+function syncMasterClock(){
+  const times=(S.selectedAddictions||[])
+    .map(a=>addictionClocks()[a]).filter(Boolean)
+    .map(c=>new Date(c).getTime());
+  if(times.length)S.startDate=new Date(Math.max(...times)).toISOString();
+}
+function renderClockChips(){
+  const el=document.getElementById('clock-chips');
+  if(!el)return;
+  const list=S.selectedAddictions||[];
+  if(list.length<2||S.userType==='partner'){el.style.display='none';return;}
+  el.style.display='flex';
+  el.innerHTML=list.map(a=>{
+    const d=daysFor(a);
+    return '<span style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);'
+      +'border-radius:999px;padding:3px 11px;font-size:11.5px;color:#aeb6dd;white-space:nowrap">'
+      +a+' \u00b7 <strong style="color:#7ee8a2">'+d+'d</strong></span>';
+  }).join('');
+}
+
 function updateStats(){
   updateRecoveryTermLabels();
   applySupporterUI();
   evaluateProSubscription();
+  renderClockChips();
   const start=S.startDate?new Date(S.startDate):new Date();
   const diff=Date.now()-start.getTime();
   const days=Math.max(0,Math.floor(diff/86400000));
@@ -6613,7 +6655,29 @@ function finishTriggeredFlow(){
 }
 
 // ─── SLIPPED FLOW (Free) ──────────────────────────────────────────────────────
+// Which track slipped. null means everything - the only option there was
+// before tracks kept their own clocks. Single-track users never see the picker.
+let slipPick=null;
+function renderSlipPicker(){
+  const box=document.getElementById('slip-which');
+  if(!box)return;
+  const list=S.selectedAddictions||[];
+  if(list.length<2){slipPick=null;box.style.display='none';return;}
+  box.style.display='block';
+  const opts=[null].concat(list);
+  box.innerHTML='<div style="font-size:12px;color:var(--tm);margin-bottom:8px;text-align:left">Which one? Only that clock resets - the others keep their days.</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +opts.map(o=>{
+      const sel=(o===null&&slipPick===null)||(o!==null&&slipPick===o);
+      return '<button onclick="slipPick='+(o===null?'null':"'"+o.replace(/'/g,"\\'")+"'")+';renderSlipPicker()" '
+        +'style="border-radius:999px;padding:6px 13px;font-size:12.5px;cursor:pointer;border:1px solid '
+        +(sel?'var(--accent);background:var(--accent);color:#fff':'var(--bdr);background:transparent;color:var(--ts)')
+        +'">'+(o===null?'Everything':o)+'</button>';
+    }).join('')+'</div>';
+}
 function openSlippedFlow(){
+  slipPick=null;
+  renderSlipPicker();
   closeSOS();
   // Lead with the numbers that never reset - the "back to zero" shame spiral is
   // the single most-cited reason people abandon streak apps after a slip.
@@ -11196,13 +11260,18 @@ function localTimeValue(d){
 // old start date there asked someone at their lowest to do date arithmetic
 // before they could restart. Correcting a start date from Settings still opens
 // on the date being corrected, because that's the one you're editing.
-function resetApp(fromSlip){
-  const current=fromSlip||!S.startDate?new Date():new Date(S.startDate);
+let resetTarget=null; // one track name, or null for every clock at once
+function resetApp(fromSlip,target){
+  resetTarget=target||null;
+  const baseIso=resetTarget?addictionClocks()[resetTarget]:S.startDate;
+  const current=fromSlip||!baseIso?new Date():new Date(baseIso);
   document.getElementById('reset-date-input').value=localDateValue(current);
   document.getElementById('reset-time-input').value=localTimeValue(current);
   document.getElementById('reset-date-error').textContent=' ';
   const t=document.getElementById('reset-date-title');
-  if(t)t.textContent=fromSlip?'Start over from now':'Reset Recovery';
+  if(t)t.textContent=resetTarget
+    ?(fromSlip?'Start over - '+resetTarget:'Reset '+resetTarget)
+    :(fromSlip?'Start over from now':'Reset Recovery');
   document.getElementById('reset-date-modal').classList.add('open');
 }
 function closeResetDate(){
@@ -11239,15 +11308,28 @@ function confirmResetDate(){
   // streak again every time - inflating the lifetime total and the streak
   // history - while the day count on screen never moved, which is exactly what
   // "it doesn't reset" looks like from the outside.
-  if(S.startDate&&Math.abs(chosen.getTime()-new Date(S.startDate).getTime())<60000){
+  const guardIso=resetTarget?addictionClocks()[resetTarget]:S.startDate;
+  if(guardIso&&Math.abs(chosen.getTime()-new Date(guardIso).getTime())<60000){
     errEl.textContent='That is already your start date — nothing to reset. Use "Start over from right now" above.';
     return;
   }
   const priorStreakLength=getDays();
-  S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
-  S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
-  if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
-  S.startDate=chosen.toISOString();
+  const prevStart=S.startDate;
+  const clocks=addictionClocks();
+  if(resetTarget){
+    clocks[resetTarget]=chosen.toISOString();
+  }else{
+    Object.keys(clocks).forEach(a=>{clocks[a]=chosen.toISOString();});
+    S.startDate=chosen.toISOString();
+  }
+  syncMasterClock();
+  // Bank the ended streak only when the master clock actually moved forward -
+  // correcting a date backwards is a correction, not a relapse.
+  if(prevStart&&new Date(S.startDate).getTime()>new Date(prevStart).getTime()){
+    S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
+    S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
+    if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
+  }
   S.pledged=false;
   logActivity('relapse_reset');
   // Suppress today's generic habit-consistency alert and smart-reminder dispatch (the
@@ -11419,7 +11501,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.2';
+const APP_VERSION='7.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

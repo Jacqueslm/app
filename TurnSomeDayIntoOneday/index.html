@@ -715,7 +715,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:13px;color:#8892c0;margin-bottom:4px" id="days-term-lbl">Days sober</div>
     <div class="days-big" id="dayCount">0</div>
     <div style="font-size:13px;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
-    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="program-lbl">The 90-day program — continuous support</div>
+    <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="program-lbl">The 90-Day Bootcamp — continuous support</div>
     <div style="font-size:11px;color:#8a93bd;margin-top:2px" id="focus-lbl"></div>
     <div id="clock-chips" style="display:none;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:10px"></div>
     <div class="streak-bar"><div class="streak-fill" id="streak-fill" style="width:0%"></div></div>
@@ -1097,7 +1097,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <div id="lockedTeaser" style="font-size:13px;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none"></div>
               <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
             </div>
-            <div style="font-size:13px;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">Days 16–30 are part of the Pro program. Upgrade to keep going deeper into patterns, triggers, and long-term change.</div>
+            <div style="font-size:13px;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">Days 16–90 are part of the Pro bootcamp — BREAK IT finishes, then REBUILD (days 31–60) and KEEP IT (days 61–90). Upgrade to keep going.</div>
             <div class="mini-pricing-row" style="font-size:11.5px;color:var(--tm);text-align:center;margin-top:10px"></div>
             <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
             <button class="ob-btn outline" style="margin-top:8px" onclick="viewLessonDay(15)">Back to Day 15</button>
@@ -1122,7 +1122,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="text-align:left;margin-bottom:28px">
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:13px;color:#c0caff;line-height:2">
-            <div>✓ Days 16–30, the rest of your program</div>
+            <div>✓ Days 16–90, the rest of the bootcamp</div>
             <div>✓ 30 Friendly AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
@@ -1138,9 +1138,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="day30-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;overflow-y:auto;padding:32px 24px;color:#fff">
       <div style="max-width:400px;margin:0 auto;text-align:center">
         <div style="font-size:40px;margin-bottom:12px">🏆</div>
-        <h1 style="margin-bottom:10px">You've completed the core program.</h1>
-        <p style="color:#c0caff;margin-bottom:24px">30 days of real, hard-won work. This is a lasting achievement.</p>
-        <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:left;font-size:13px;line-height:1.6;color:#c0caff;margin-bottom:28px">You've built the foundation and done the deeper work. What comes next isn't more lessons — it's making this stick for good. That's what long-term recovery is about.</div>
+        <h1 style="margin-bottom:10px">Ninety days. Bootcamp complete.</h1>
+        <p style="color:#c0caff;margin-bottom:24px">BREAK IT. REBUILD. KEEP IT. Ninety days of real, hard-won work — and the last lesson stands: what you give away, you get to keep.</p>
+        <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:left;font-size:13px;line-height:1.6;color:#c0caff;margin-bottom:28px">You've built the foundation and armored it. What comes next isn't more lessons — it's the weekly honesty ritual, your forever rules, the card in your pocket, and passing the door to somebody still stuck. The counter keeps counting.</div>
 
         <div style="text-align:left;margin-bottom:16px">
           <div class="ob-label">Your long-term tools</div>
@@ -1535,10 +1535,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
         <div style="font-size:13.5px;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
-        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the second half of every program — Days 16–30, including the Spiritual Path and Together — 30 Friendly chats a day instead of 3, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — 30 Friendly chats a day instead of 3, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Days 16–30 of every track and pack</div>
-          <div>✓ Days 16–30 of the Spiritual Path</div>
+          <div>✓ Days 16–90 of every track — the full bootcamp</div>
+          <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
           <div>✓ 30 Friendly chats a day instead of 3</div>
           <div>✓ Live rooms — a moderated community, open daily</div>
           <div>✓ Days 16–35 of Supporting Someone</div>
@@ -1600,7 +1600,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div style="font-size:11.5px;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 — the rest of every track and pack</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–90 — the full 90-Day Bootcamp on every track</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
@@ -1980,7 +1980,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:44px;margin-bottom:14px">🌅</div>
     <div style="font-size:20px;font-weight:700;color:var(--tp);line-height:1.45;max-width:340px">Welcome. You made a difficult decision — and it's the bravest one you've made in a long time.</div>
     <div style="font-size:15px;color:var(--ts);line-height:1.75;margin-top:14px;max-width:340px">You're on a path now — to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going. Don't give up. It's in the dark where the work is done — and in the light where it's shown.</div>
-    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is a 90-day program with continuous support — a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and Friendly beside you at any hour. You don't have to do this perfectly. You just have to do today.</div>
+    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is the 90-Day Bootcamp — an addiction program with continuous support: a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and Friendly beside you at any hour. You don't have to do this perfectly. You just have to do today.</div>
     <button class="ob-btn" style="margin-top:18px;padding:12px 26px;font-size:15px" onclick="closeWelcomeOverlay()">Begin Day One — I'm ready</button>
   </div>
 
@@ -2995,12 +2995,39 @@ function renderIcons(root){
 // entirely rather than synced/duplicated into every user's saved state blob.
 let LESSON_PACKS={};
 let lessonPacksLoaded=false;
+// Days 31-90 of the bootcamp: two shared phases (REBUILD, KEEP IT) written
+// once and personalised per track, because by day 31 the work is the same
+// work whatever the habit was. Loaded separately so a fetch failure here
+// never takes down days 1-30.
+let PHASE_LESSONS=[];
 async function loadLessonPacks(){
   try{
     const res=await fetch('data/lessons.json');
     if(res.ok){LESSON_PACKS=await res.json();lessonPacksLoaded=true;}
   }catch(e){/* offline - lesson screen will show a friendly message */}
+  try{
+    const pr=await fetch('data/phases.json');
+    if(pr.ok)PHASE_LESSONS=(await pr.json()).lessons||[];
+  }catch(e){}
   updateLessonPromo();
+}
+// How each track reads mid-sentence in a shared lesson. "Your Porn & Sex"
+// is a label, not a sentence - these are the words a person would say.
+const HABIT_WORDS={'Alcohol':'drinking','Porn & Sex':'porn','Smoking':'smoking',
+  'Substances':'using','Gambling':'gambling','Social media':'the scroll',
+  'Gaming':'gaming','Food / Binging':'binging','Shopping / Spending':'the spending',
+  'Work':'overworking','Anger & Control':'the anger','Other':'the habit'};
+function phaseLessonFor(day){
+  // Supporters run their own 35-day track and are never addressed as the
+  // person recovering, so the shared phases don't apply to them.
+  if(S.userType==='partner'||S.currentAddiction==='Supporting Someone')return null;
+  if(day<31||day>90)return null;
+  if(!(LESSON_PACKS[S.currentAddiction]||[]).length)return null;
+  const l=PHASE_LESSONS.find(x=>x.day===day);
+  if(!l)return null;
+  const word=HABIT_WORDS[S.currentAddiction]||'the habit';
+  const sub=t=>String(t||'').split('{{habit}}').join(word);
+  return {day:l.day,title:l.title,content:sub(l.content),action:sub(l.action),reflection:sub(l.reflection)};
 }
 
 // ─── LESSON LIBRARY ──────────────────────────────────────────────────────────
@@ -3138,7 +3165,7 @@ function isLessonLocked(day){
 
 function getLessonForDay(day){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
-  const lesson=pack.find(l=>l.day===day)||null;
+  const lesson=pack.find(l=>l.day===day)||phaseLessonFor(day);
   return applyRelationshipVariant(lesson);
 }
 
@@ -3220,11 +3247,83 @@ function activeExtraPacks(){
   return keys;
 }
 function esc(t){return String(t||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+// One faith line per day, keyed to the day's theme and cycled through the
+// phases, woven INSIDE the lesson rather than bolted on after it. Only people
+// who said yes or open to the spiritual question ever see a word of this.
+const FAITH_LINES=[
+"You didn't get this far alone. Before today starts, say thank you to whoever you believe carried you here.",
+"Ask for one day of strength. Not a lifetime - just today. That prayer has never once been too big.",
+"The urge will lie to you today. Ask for eyes that see through it.",
+"When the wave comes, you don't have to fight it alone. 'Help me ride this one' is a complete prayer.",
+"Somebody has been praying for you longer than you know. Today, live one hour like their prayer is working.",
+"Rest is holy too. Tonight, hand the day back and sleep like it's answered.",
+"A week of showing up is a week of grace meeting effort. Both were required. Both showed up.",
+"Ask today for honesty - the courage to see yourself clearly and not look away.",
+"Forgiveness starts as a decision, not a feeling. Make the decision; let the feeling catch up.",
+"You are not what you did. Ask to see yourself the way you're seen from above.",
+"Temptation isn't proof you're failing. Even the strongest were tempted. Ask for the exit - there's always an exit.",
+"Say thank you out loud for one small thing today. Gratitude starves the hunger that fed the habit.",
+"The people who hurt you are carrying their own weight. Ask for the strength to set yours down first.",
+"Ask for patience with the people who don't trust you yet. Their healing has its own clock too.",
+"Halfway is a place to kneel, not a place to coast. Say thank you for the distance already covered.",
+"You were built on purpose, for a purpose. The habit interrupted the story - it never rewrote it.",
+"Work with open hands today. What you're building was never only yours to hold.",
+"Joy is not a reward for finishing - it's provision for the road. Take today's share.",
+"Loneliness is a door. It can open toward the old life or toward prayer. Same door, your hand.",
+"Ask for wisdom to know the difference between a real need and an old echo.",
+"Speak the hard truth today and trust that the truth carries its own protection.",
+"An evening handed over is an evening defended. End tonight on purpose, with thanks.",
+"Money tells you what you worship. Point it somewhere worth kneeling.",
+"You are not behind. You are exactly at the point in the story where the turn happens.",
+"Being doubted is a chance to be faithful without applause - the most honest kind.",
+"Name the feeling, then hand it up. You were never meant to carry every emotion to the end alone.",
+"Perfection was never the assignment. Faithfulness was. Today, be faithful, not flawless.",
+"The person still stuck needs what you've been given. Freely received, freely given.",
+"Sweep the corners today. What you keep hidden keeps you. What you bring to light loses its grip.",
+"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it."
+];
+// One paragraph per linked pair: today's skill, applied to the other track.
+// Written per PAIR, not per day - the mechanism is what's shared.
+const TRACK_LINK_APPLY={
+ 'Porn & Sex|Food / Binging':"Whatever today's lesson taught you, it works on both. The urge for the screen and the urge for the second plate are the same wave with a different name - ride one, and you've practiced riding the other.",
+ 'Porn & Sex|Social media':"The scroll and the search are the same motion. Every tool from today that interrupts one - the pause, the named feeling, the ten-minute walk - lands on the other for free.",
+ 'Alcohol|Smoking':"These two cue each other - one hand reaches and the other follows. Today's skill applied at the FIRST reach usually cancels both, because the second one rarely shows up alone.",
+ 'Alcohol|Food / Binging':"Both of these soften the evening after a day held together. Whatever today taught you about the drink hour, run it at the kitchen hour too - same hour, same hunger, same fix.",
+ 'Gambling|Shopping / Spending':"Both are money chasing a feeling, then hidden. Today's lesson works on both wallets - and the money repair you're doing counts double here.",
+ 'Gambling|Gaming':"Near-misses and one-more-go are engineered into both. When today's skill breaks the 'almost won' spell in one, notice it's the identical spell in the other.",
+ 'Gaming|Social media':"Both are built to never end and both fill the same empty hours. Today's lesson about those hours applies to every screen in the house, not just one.",
+ 'Food / Binging|Shopping / Spending':"Relief bought quickly and regretted privately - that's both of these. Whatever slowed one down today slows the other down the same way.",
+ 'Work|Alcohol':"One earns the other - the drink is the permission slip to stop working. Today's skill applied to the overwork removes the 'earned it' that the drink runs on.",
+ 'Work|Anger & Control':"Both are control held too tight in different rooms. Today's loosening - whatever it was - belongs in both rooms.",
+ 'Anger & Control|Alcohol':"One lowers the brake the other needs. Practice today's skill on the anger while sober and you're defending both fronts at once.",
+ 'Substances|Alcohol':"Same night, same reach, usually the same company. Every boundary today's lesson built stands between you and both.",
+ 'Social media|Shopping / Spending':"The feed sells, and the buying is the scroll finishing its sentence. Interrupt the scroll with today's skill and the spending loses its opening line."
+};
 function renderLessonExtras(day){
   const host=document.getElementById('lesson-extras');
   if(!host)return;
   const packs=(typeof PREDEFINED_PACKS!=='undefined'&&PREDEFINED_PACKS)||{};
   let html='';
+  // Faith, woven in first - a line for the day, not a second lesson.
+  if(typeof faithOn==='function'&&faithOn()&&day>=1){
+    const line=FAITH_LINES[(day-1)%FAITH_LINES.length];
+    html+=`<div style="background:var(--s1);border:1px solid var(--bdr);border-left:3px solid #7ee8a2;border-radius:12px;padding:12px 16px;margin-top:10px">
+      <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:#5cae7e;font-weight:700;margin-bottom:5px">Faith · woven in</div>
+      <div style="font-size:13.5px;color:var(--ts);line-height:1.65">${esc(line)}</div>
+    </div>`;
+  }
+  // Cross-link: today's skill, pointed at the other track being worked.
+  const links=(typeof activeTrackLinks==='function')?activeTrackLinks():[];
+  const link=links.find(l=>l.a===S.currentAddiction||l.b===S.currentAddiction);
+  if(link){
+    const other=link.a===S.currentAddiction?link.b:link.a;
+    const key=link.a+'|'+link.b;
+    const applyTxt=TRACK_LINK_APPLY[key]||("Different habit, same escape hatch. Whatever today's lesson taught you here, try it on "+other+" too - the mechanism is shared, so the skill is too.");
+    html+=`<div style="background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:12px;padding:12px 16px;margin-top:10px">
+      <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:5px">For your ${esc(other)} track too</div>
+      <div style="font-size:13.5px;color:var(--ts);line-height:1.65">${esc(applyTxt)}</div>
+    </div>`;
+  }
   for(const key of activeExtraPacks()){
     const pk=packs[key];
     const list=pk.lessons||pk.days||[];
@@ -3281,11 +3380,11 @@ function renderTodayLesson(){
   const lesson=getLessonForDay(day);
   if(!lesson){
     const hasTrack=(LESSON_PACKS[S.currentAddiction]||[]).length>0;
-    const programDone=hasTrack&&day>30;
+    const programDone=hasTrack&&day>90;
     titleEl.textContent=programDone?"You've completed the program":hasTrack?"You're all caught up":'Lessons coming soon';
     metaEl.textContent=S.currentAddiction||'';
     bodyEl.textContent=programDone
-      ?"You've finished all 30 days. This is where long-term recovery takes over — the Habit Coach, Advanced Streaks, and Long-Term Stability Pack (in Lesson Packs) are built for exactly this stage."
+      ?"Ninety days. The bootcamp is complete. From here the program is the weekly honesty ritual, your forever rules, and the card in your pocket — plus the Habit Coach, Advanced Streaks, and Long-Term Stability Pack whenever you want them."
       :hasTrack
         ?"You've completed every lesson available for this focus area so far. Check back soon for more."
         :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. In the meantime, Friendly AI and your other tools are ready whenever you need them.`;
@@ -3371,7 +3470,8 @@ function completeLessonForToday(){
   const lesson=getTodayLesson();
   if(!lesson)return;
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
-  const justFinishedProgram=lesson.day===30&&!S.notifiedDay30Tracks.includes(S.currentAddiction);
+  const phaseHandoff=(lesson.day===30||lesson.day===60)&&!!phaseLessonFor(lesson.day+1);
+  const justFinishedProgram=(lesson.day===90||(lesson.day===30&&!phaseLessonFor(31)))&&!S.notifiedDay30Tracks.includes(S.currentAddiction);
   setLessonDayFor(S.currentAddiction,getLessonDayFor(S.currentAddiction)+1);
   S.lessonsCompletedCount=(S.lessonsCompletedCount||0)+1;
   logActivity('lesson_completed',{day:lesson.day,track:S.currentAddiction});
@@ -3400,6 +3500,13 @@ function completeLessonForToday(){
     setTimeout(()=>{openDay15Overlay();},1200);
   }else if(justFinishedProgram){
     setTimeout(()=>{openDay30Overlay();},1200);
+  }else if(phaseHandoff){
+    setTimeout(()=>{
+      rewardToast(lesson.day===30
+        ?'Phase 1 done - BREAK IT is behind you. Tomorrow: REBUILD.'
+        :'Phase 2 done - the life is rebuilt. Tomorrow: KEEP IT.');
+      advanceAfterLessonDone();
+    },1200);
   }else{
     setTimeout(()=>{advanceAfterLessonDone();},1200);
   }
@@ -5058,7 +5165,7 @@ function updateStats(){
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const progLbl=document.getElementById('program-lbl');
-  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-day program — support continues past day 90`:'90 days done — continuous support continues';
+  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
   const focusLbl=document.getElementById('focus-lbl');
   if(focusLbl){
     const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
@@ -11501,7 +11608,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.3';
+const APP_VERSION='7.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

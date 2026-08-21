@@ -756,3 +756,31 @@ listing, not money, and asks for the reason if the answer is no.
 **Still open on outreach:** four template emails (unions, first responders,
 Celebrate Recovery, gambling councils) are written but need named recipients
 before they can be drafted.
+
+
+## v7.4 — The 90-Day Bootcamp (21 Aug 2026)
+
+The brand is now **The 90-Day Bootcamp — an addiction program with continuous
+support, for you and the one who supports you.** Jacques named it; everything
+follows it.
+
+What shipped, all verified in a real browser before push:
+
+- **Days 31–90 exist.** Two shared phases in `data/phases.json` — REBUILD
+  (31–60: sleep, meals, money, trust-by-pattern, the evening script) and
+  KEEP IT & GIVE IT (61–90: relapse signature, worst-day plan, forever rules,
+  the weekly honesty ritual, day 90 = give it away). Written once, personalised
+  per track via {{habit}} words ("drinking", "the scroll"…). Supporters keep
+  their own 35-day track and are never routed into the phases.
+- **Faith woven in, not bolted on.** 30 themed lines cycling across all 90
+  days, inside every lesson on every track — only for people who answered yes
+  or open. "No" users never see a word.
+- **Cross-links between tracks.** All 13 authored pairs now carry an "apply"
+  paragraph — today's skill pointed at the other active track — plus an honest
+  generic for unlinked pairs.
+- Day 30/60 = phase-handoff toasts; day 90 = graduation overlay (rewritten).
+  Free tier = days 1–15; Pro = days 16–90. Plans copy updated everywhere.
+- **Class handout** in `reference/bootcamp/` (PDF + PNG + generator), house
+  style, QR verified by decoding.
+
+Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.

@@ -53,7 +53,8 @@ record videos nobody searches for.
 ## The business
 
 **Positioning — Jacques named this himself, use his words (do not drift):**
-> A recovery app for you and the one who supports you.
+> The 90-Day Bootcamp — an addiction program with continuous support,
+> for you and the one who supports you.
 
 The market is the household, not the addict. The supporter — the wife, the
 mother, the husband searching at 1am — is the lead audience; the supporter

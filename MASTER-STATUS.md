@@ -784,3 +784,27 @@ What shipped, all verified in a real browser before push:
   style, QR verified by decoding.
 
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
+
+
+## House rule 21 — videos are 15 to 20 seconds (Jacques, 22 Aug 2026)
+
+**Every video is 15-20 seconds. Twenty is the ceiling, not the target.**
+
+Jacques called this after a 31-second piece: too long for how people actually
+watch. In practice that is about **four beats**, not seven - roughly 3.5 to 4.5
+seconds a line including its fade. Every line has to earn its place, and the
+end card is 2 seconds inside the budget, not on top of it.
+
+Existing longer pieces stay as they are. This governs everything new.
+
+## The score library is Jacques's own music
+
+`TurnSomeDayIntoOneday/audio/meditation/` is 11 tracks - the 8 Suno tracks
+Jacques made plus the Rain / Ocean / Night beds. He is on a paid Suno plan and
+has confirmed permission for every track (see
+`reference/asset-licenses-2026-08-08.md`; settled, do not re-raise).
+
+So the meditation library doubles as the **royalty-free score library for every
+video**: no third-party music, no YouTube claims, no takedowns. Score from here
+and nowhere else. Fading Night and Night Fade suit the sombre pieces; Still
+Waters and Himalayan Still are calmer.

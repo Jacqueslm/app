@@ -11608,7 +11608,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.6';
+const APP_VERSION='7.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12362,13 +12362,86 @@ function openCouplesExercises(){
   renderCouples();
   document.getElementById('couples-modal').classList.add('open');
 }
+// ─── Couple link: both partners in the app, one shared Together table ────────
+// Carries ONLY Together progress and a nudge. Nothing else crosses accounts -
+// no clocks, no journals, no slips. Fixing the connection, not surveillance.
+let coupleInfo=null,coupleFetchedAt=0;
+async function fetchCoupleStatus(force){
+  if(!force&&Date.now()-coupleFetchedAt<60000)return coupleInfo;
+  try{
+    const r=await fetch('/api/couple');
+    if(r.ok){
+      const prev=JSON.stringify(coupleInfo);
+      coupleInfo=await r.json();coupleFetchedAt=Date.now();
+      if(coupleInfo.linked){
+        if((coupleInfo.togetherDone||0)>(S.togetherDone||0)){
+          S.togetherDone=coupleInfo.togetherDone;save();
+        }
+        if(coupleInfo.nudgeFromPartner&&coupleInfo.nudgeAt&&coupleInfo.nudgeAt!==S.coupleNudgeSeen){
+          S.coupleNudgeSeen=coupleInfo.nudgeAt;save();
+          try{novaNudge(`${coupleInfo.partnerName} is asking for today's ten minutes at the table — when you're both ready.`);}catch(e){}
+        }
+      }
+      if(prev!==JSON.stringify(coupleInfo)&&document.getElementById('couples-modal').classList.contains('open'))renderCouples();
+    }else if(r.status===401){coupleInfo={signedOut:true};coupleFetchedAt=Date.now();}
+  }catch(e){}
+  return coupleInfo;
+}
+async function coupleCreate(){
+  const r=await fetch('/api/couple/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:S.name||''})});
+  if(r.ok){coupleInfo=await r.json();coupleFetchedAt=Date.now();renderCouples();}
+}
+async function coupleJoin(){
+  const inp=document.getElementById('couple-code-input');
+  const code=(inp&&inp.value||'').trim();
+  if(!code)return;
+  const r=await fetch('/api/couple/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,name:S.name||''})});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok){coupleInfo=j;coupleFetchedAt=Date.now();renderCouples();}
+  else appInfo('Linking',j.error||"That didn't work — check the code and try again.");
+}
+async function coupleNudge(){
+  const r=await fetch('/api/couple/nudge',{method:'POST'});
+  if(r.ok)appInfo('Sent',"They'll get it as a gentle ask — today's ten minutes, when you're both ready.");
+  else appInfo('Nudge',"Couldn't send right now — a few an hour is the limit, so the ask stays gentle.");
+}
+function coupleUnlink(){
+  appConfirm('Unlink from your partner? Your Together progress stays on both phones — you just stop sharing it.',async()=>{
+    await fetch('/api/couple/unlink',{method:'POST'});
+    coupleInfo=null;coupleFetchedAt=0;renderCouples();
+  });
+}
+function coupleSectionHtml(){
+  const c=coupleInfo;
+  const box=(inner)=>`<div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">${inner}</div>`;
+  if(!c)return box(`<div style="font-size:12.5px;color:var(--tm)">Checking your link…</div>`);
+  if(c.signedOut)return box(`<div style="font-size:12.5px;color:var(--ts);line-height:1.6"><b style="color:var(--tp)">Do it as two phones, one table.</b> Sign in to link with your partner — you'll share the day count and can nudge each other for the ten minutes. Nothing else is shared.</div>`);
+  if(c.linked)return box(
+    `<div style="font-size:13px;color:var(--tp);font-weight:600">Linked with ${escapeHtml(c.partnerName||'your partner')}</div>`
+    +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">You share the Together day count and nudges — nothing else. Marking a day done marks it for both of you.</div>`
+    +`<div style="display:flex;gap:8px;margin-top:10px">`
+    +`<button class="sos-close" style="flex:1;background:var(--accent);color:#fff" onclick="coupleNudge()">Ask for tonight's ten minutes</button>`
+    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleUnlink()">Unlink</button></div>`);
+  if(c.pending)return box(
+    `<div style="font-size:13px;color:var(--tp);font-weight:600">Your link code: <span style="letter-spacing:3px;color:#7ee8a2">${escapeHtml(c.code||'')}</span></div>`
+    +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">Have your partner open Together on their phone and enter it. The code links the day count and nudges — nothing else.</div>`);
+  return box(
+    `<div style="font-size:13px;color:var(--tp);font-weight:600">Two phones, one table</div>`
+    +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">Link with your partner: share the day count, nudge each other for the ten minutes. No journals, no clocks, no checking — just the table.</div>`
+    +`<div style="display:flex;gap:8px;margin-top:10px">`
+    +`<button class="sos-close" style="width:auto;padding:0 14px;background:var(--accent);color:#fff" onclick="coupleCreate()">Get a code</button>`
+    +`<input id="couple-code-input" class="ob-input" placeholder="Enter their code" style="flex:1;margin:0;text-transform:uppercase" maxlength="6">`
+    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`);
+}
 function renderCouples(){
+  fetchCoupleStatus();
   const pack=togetherPack();
   const done=Math.min(S.togetherDone||0,pack.length);
   const el=document.getElementById('couples-list');
   let html='';
   if(pack.length){
     html+=`<div style="font-size:12.5px;color:var(--ts);line-height:1.6;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">Thirty real lessons, one a day, about the relationship itself — the check-ins, the hard conversations, the repair. Ten minutes together. Not a one-time assignment: a 30-day program for the two of you.</div>`;
+    html+=coupleSectionHtml();
     const finished=done>=pack.length;
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
@@ -12419,6 +12492,10 @@ function markTogetherDone(){
   S.togetherDone=Math.min((S.togetherDone||0)+1,pack.length);
   logActivity('together_day',{day:S.togetherDone});
   save();
+  // Done at one table means done for both phones.
+  if(coupleInfo&&coupleInfo.linked){
+    fetch('/api/couple/done',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({day:S.togetherDone})}).catch(()=>{});
+  }
   couplesViewDay=null;
   renderCouples();
   document.getElementById('couples-list').scrollTop=0;

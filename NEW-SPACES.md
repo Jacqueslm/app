@@ -241,7 +241,7 @@ St. Louis, MO
 
 ---
 
-## [ ] 3. Union Member Assistance Program — template
+## [x] 3. Union MAP — DRAFTED 22 Aug: Chris Carlough, SMART MAP (ccarlough@smart-union.org)
 
 **To:** `[  MAP or EAP coordinator  ]`
 **Subject:** Free, discreet recovery tool for members — built by someone who was in it 38 years
@@ -279,7 +279,7 @@ St. Louis, MO
 
 ---
 
-## [ ] 4. Fire / EMS / police peer support — template
+## [x] 4. First responders — DRAFTED 22 Aug: First Responder Support Network (info@frsn.org)
 
 **To:** `[  peer support coordinator  ]`
 **Subject:** Something for the ones who won't ask — free, no name required
@@ -312,7 +312,7 @@ St. Louis, MO
 
 ---
 
-## [ ] 5. Celebrate Recovery ministry leader — template
+## [x] 5. Celebrate Recovery — DRAFTED 22 Aug: national contact (info@celebraterecovery.community); local STL groups are phone-only, best approached in person
 
 **To:** `[  local CR ministry leader  ]`
 **Subject:** Free recovery app with a faith track — God as you understand God
@@ -347,7 +347,7 @@ St. Louis, MO
 
 ---
 
-## [ ] 6. State problem gambling council — template
+## [x] 6. Gambling councils — DRAFTED 22 Aug: Missouri (Keith Spare, keith.spare@tmcmed.org), Illinois (info@illinoisproblemgambling.org), Oklahoma (Wiley Harwell, wharwell@oapgg.org)
 
 **To:** `[  state NCPG affiliate  ]`
 **Subject:** Free app that treats gambling as a full programme, not a footnote
@@ -355,7 +355,7 @@ St. Louis, MO
 Hi,
 
 Most recovery apps treat gambling as a checkbox next to alcohol. This one gives
-it a full 30-day programme, a craving tracker, tools for the moment it hits,
+it a full track in a 90-day programme, a craving tracker, tools for the moment it hits,
 and a separate track for the person who found out.
 
 I was addicted for 38 years and got free at 50. I built it free because

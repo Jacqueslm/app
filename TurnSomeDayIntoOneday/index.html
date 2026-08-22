@@ -11608,7 +11608,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.5';
+const APP_VERSION='7.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12397,6 +12397,7 @@ function renderCouples(){
       <div style="font-size:13px;color:var(--ts);line-height:1.65;margin-top:8px">${escapeHtml(l.content)}</div>
       <div style="font-size:12.5px;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> ${escapeHtml(l.action)}</div>
       <div style="font-size:12.5px;color:var(--ts);line-height:1.6;margin-top:6px"><b style="color:var(--accent)">Ask each other:</b> ${escapeHtml(l.reflection)}</div>
+      ${(typeof faithOn==='function'&&faithOn())?`<div style="font-size:12.5px;color:var(--ts);line-height:1.6;margin-top:8px;border-left:3px solid #7ee8a2;padding-left:10px"><b style="color:#5cae7e">Faith:</b> ${escapeHtml(FAITH_LINES[(l.day-1)%FAITH_LINES.length])}</div>`:''}
       ${isCurrent?`<button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="markTogetherDone()">We did this one — mark day ${l.day} done</button>`:''}
       ${couplesViewDay?`<button class="sos-close" style="margin-top:10px" onclick="couplesViewDay=null;renderCouples()">Back to ${finished?'the last day':'today'}</button>`:''}
     </div>`;
@@ -12421,8 +12422,19 @@ function markTogetherDone(){
   couplesViewDay=null;
   renderCouples();
   document.getElementById('couples-list').scrollTop=0;
+  // A day done TOGETHER earns at least what a solo day earns. Weeks get the
+  // big burst; day 30 keeps the congrats card as the renewal moment.
+  const d=S.togetherDone;
+  const week={7:'One week at the table together. Most couples never sit down once.',
+              14:'Two weeks. The ten minutes are becoming yours.',
+              21:'Three weeks together. This is what rebuilding actually looks like.'}[d];
+  try{
+    if(week){celebrationBurst('large');rewardToast(week);}
+    else if(d<pack.length){celebrationBurst('small');rewardToast('Day '+d+' — done together.');}
+  }catch(e){}
   if(pack.length&&S.togetherDone>=pack.length){
-    setTimeout(()=>openCongratsCard('You finished all 30 days of the Together program — as a team.'),400);
+    try{celebrationBurst('large');}catch(e){}
+    setTimeout(()=>openCongratsCard('Thirty days at the same table, as a team. That was your renewal — the promises from day 30 are the program now.'),400);
   }
 }
 function closeCouplesExercises(){document.getElementById('couples-modal').classList.remove('open');}

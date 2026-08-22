@@ -71,6 +71,11 @@ body{display:flex;justify-content:center}
 /* overlays get bottom clearance so the last button clears the fold at bigger text */
 .app.fs-bigger #day30-overlay,.app.fs-bigger #day15-overlay,
 .app.fs-bigger #lesson-player-overlay{padding-bottom:140px}
+/* At 1.18x zoom the scroll container runs ~180px past the visible window, so
+   the tail of every screen - including the lesson's "Mark as done" button -
+   could never scroll into view. Extra bottom padding puts it back in reach. */
+.app.fs-bigger .screens{padding-bottom:260px}
+body.mini-on .app.fs-bigger .screens{padding-bottom:330px}
 @supports not (zoom: 1){
   .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
@@ -11655,7 +11660,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.0';
+const APP_VERSION='8.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

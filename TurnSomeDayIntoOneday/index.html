@@ -6466,15 +6466,35 @@ function toggleDictation(inputId){
   // breath and we restarted it - which is what made it chime over and over
   // while someone was still mid-thought. Only final results get written.
   rec.interimResults=true;
-  dictState={id:inputId,rec,restartTimer:null,quiet:0,gotAny:false};
+  // base = whatever was in the box before this session started. Each result
+  // event REBUILDS the session's text from the recognizer's full results
+  // array instead of appending increments. Appending was the Android bug
+  // Jacques hit live: Chrome on Android re-emits the growing transcript as
+  // repeated finals ("when", "when I", "when I seem"...), and append-only
+  // turned three spoken words into a page of stutter.
+  dictState={id:inputId,rec,restartTimer:null,quiet:0,gotAny:false,base:(el.value||'').trim()};
   rec.onresult=e=>{
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(!e.results[i].isFinal)continue;
-      const piece=e.results[i][0].transcript.trim();
-      if(!piece)continue;
-      el.value=(el.value.trim()?el.value.trim()+' ':'')+piece;
-      // Words are still coming, so this is not a person who has finished.
-      if(dictState&&dictState.rec===rec){dictState.quiet=0;dictState.gotAny=true;}
+    if(!dictState||dictState.rec!==rec)return;
+    const finals=[];
+    for(let i=0;i<e.results.length;i++){
+      if(e.results[i].isFinal){
+        const t=e.results[i][0].transcript.trim();
+        if(t)finals.push(t);
+      }
+    }
+    // Collapse the growing-prefix chain Android emits: keep a final only if
+    // the next one doesn't already contain it from the start.
+    const kept=finals.filter((t,i)=>!(i+1<finals.length&&finals[i+1].toLowerCase().startsWith(t.toLowerCase())));
+    const text=kept.join(' ').trim();
+    if(text){
+      // Deterministic write on every event: base plus this session's text -
+      // unless base already ends with it (a restarted session re-delivering
+      // what was folded in), in which case the box is set BACK to base so a
+      // partial from the same replay can't leave junk behind.
+      el.value=dictState.base.toLowerCase().endsWith(text.toLowerCase())
+        ?dictState.base
+        :(dictState.base?dictState.base+' ':'')+text;
+      dictState.quiet=0;dictState.gotAny=true;
     }
   };
   rec.onerror=ev=>{
@@ -6497,6 +6517,7 @@ function toggleDictation(inputId){
     // on a tick instead, and leave the label alone while we do it.
     const restart=tries=>{
       if(!dictState||dictState.rec!==rec)return;
+      dictState.base=(el.value||'').trim();
       try{rec.start();}
       catch(e){
         if(tries>0){dictState.restartTimer=setTimeout(()=>restart(tries-1),400);return;}
@@ -11608,7 +11629,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.7';
+const APP_VERSION='7.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

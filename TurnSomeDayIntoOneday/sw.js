@@ -2,7 +2,7 @@
 // slower and softer. The filenames never change, so every audio rebuild needs
 // a new cache name here or existing installs keep the old audio and pair it
 // with the new caption timings, drifting further out with every step.
-const CACHE_NAME = 'tsid-shell-v7.4';
+const CACHE_NAME = 'tsid-shell-v7.5';
 const SHELL_FILES = [
   '/',
   '/app',

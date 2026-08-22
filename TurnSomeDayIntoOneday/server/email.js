@@ -225,7 +225,7 @@ const TRIAL_DAY7_CHARGED = { subject: "You're Pro. Here's what that means.", tex
 
 Three things:
 
-Days 16-30 of every track and pack unlock, plus 30 Friendly chats a day instead of 3. Everything else in the app is already free.
+Days 16-90 of every track unlock - the whole 90-Day Bootcamp - plus 30 Friendly chats a day instead of 3, and the live rooms. Everything else in the app is already free.
 Cancel any time, two clicks, no phone call, no retention trap.
 Reply to this email whenever you want. I read them. It's still just me.
 

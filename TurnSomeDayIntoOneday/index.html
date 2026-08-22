@@ -68,6 +68,9 @@ body{display:flex;justify-content:center}
 .app.fs-bigger .sos-sheet{max-height:calc(100dvh/1.18);overflow-y:auto}
 .app.fs-bigger .sos-sheet .ob-btn{flex:0 0 auto}
 .app.fs-bigger #screens{overflow-y:auto}
+/* overlays get bottom clearance so the last button clears the fold at bigger text */
+.app.fs-bigger #day30-overlay,.app.fs-bigger #day15-overlay,
+.app.fs-bigger #lesson-player-overlay{padding-bottom:140px}
 @supports not (zoom: 1){
   .app.fs-smaller{transform:scale(0.88);transform-origin:top center}
   .app.fs-bigger{transform:scale(1.18);transform-origin:top center}
@@ -11629,7 +11632,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.8';
+const APP_VERSION='7.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -99,7 +99,10 @@ captions, 9:16 reframe, audio remaster, post scheduler.
 - **Spoken, not written.** Contractions. Short lines. The way a man actually
   talks at a kitchen table.
 - **The hook is the first line**, said straight to the lens. No "hey guys."
-- **One idea per video.** 15–35 seconds.
+- **One idea per video.** **15-20 seconds, hard ceiling 20** (house rule 21,
+  22 Aug 2026) - about four beats. Scripts written longer get cut, not squeezed.
+- **Score only from `TurnSomeDayIntoOneday/audio/meditation/`** - 11 tracks,
+  Jacques's own Suno music on a paid plan. No third-party music, ever.
 - **Never explicit.** For the porn angle the tell is the blue glow, the closed
   laptop, her face — never a screen's content.
 - **Soft CTA only.** App name on the end card; "link in bio" in the caption,

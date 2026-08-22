@@ -178,6 +178,18 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS couple_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_a INTEGER NOT NULL REFERENCES users(id),
+    user_b INTEGER REFERENCES users(id),
+    name_a TEXT NOT NULL DEFAULT '',
+    name_b TEXT NOT NULL DEFAULT '',
+    code TEXT UNIQUE NOT NULL,
+    together_done INTEGER NOT NULL DEFAULT 0,
+    nudge_from INTEGER,
+    nudge_at TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Nova conversations are never persisted - the client stopped syncing them,
@@ -844,6 +856,62 @@ function setReviewStatus(id, status) {
   db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, id);
 }
 
+// ─── Couple links (the Together program, two accounts, one table) ────────────
+// Deliberately minimal: the link carries ONLY the shared Together progress and
+// a nudge. No clocks, no journals, no slips - partners cannot see any of that.
+function coupleRowFor(userId) {
+  return db.prepare('SELECT * FROM couple_links WHERE user_a = ? OR user_b = ?').get(userId, userId) || null;
+}
+function createCoupleLink(userId, name) {
+  const existing = coupleRowFor(userId);
+  if (existing) return existing;
+  // Unambiguous alphabet: no 0/O or 1/I to misread off a partner's screen.
+  const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code;
+  do {
+    code = Array.from({ length: 6 }, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join('');
+  } while (db.prepare('SELECT 1 FROM couple_links WHERE code = ?').get(code));
+  db.prepare('INSERT INTO couple_links (user_a, name_a, code, created_at) VALUES (?,?,?,?)')
+    .run(userId, String(name || '').slice(0, 40), code, new Date().toISOString());
+  return coupleRowFor(userId);
+}
+function joinCoupleLink(userId, code, name) {
+  if (coupleRowFor(userId)) return { error: 'already-linked' };
+  const row = db.prepare('SELECT * FROM couple_links WHERE code = ?').get(String(code || '').trim().toUpperCase());
+  if (!row) return { error: 'bad-code' };
+  if (row.user_b) return { error: 'code-used' };
+  if (row.user_a === userId) return { error: 'own-code' };
+  db.prepare('UPDATE couple_links SET user_b = ?, name_b = ? WHERE id = ?')
+    .run(userId, String(name || '').slice(0, 40), row.id);
+  return { row: coupleRowFor(userId) };
+}
+function unlinkCouple(userId) {
+  const row = coupleRowFor(userId);
+  if (row) db.prepare('DELETE FROM couple_links WHERE id = ?').run(row.id);
+  return !!row;
+}
+function setCoupleTogetherDone(userId, day) {
+  const row = coupleRowFor(userId);
+  if (!row) return null;
+  const d = Math.max(row.together_done, Math.min(Math.max(0, day | 0), 90));
+  db.prepare('UPDATE couple_links SET together_done = ? WHERE id = ?').run(d, row.id);
+  return d;
+}
+function setCoupleNudge(userId) {
+  const row = coupleRowFor(userId);
+  if (!row || !row.user_b) return null;
+  db.prepare('UPDATE couple_links SET nudge_from = ?, nudge_at = ? WHERE id = ?')
+    .run(userId, new Date().toISOString(), row.id);
+  return coupleRowFor(userId);
+}
+function couplePartnerOf(userId) {
+  const row = coupleRowFor(userId);
+  if (!row || !row.user_b) return null;
+  return row.user_a === userId
+    ? { id: row.user_b, name: row.name_b }
+    : { id: row.user_a, name: row.name_a };
+}
+
 module.exports = {
   upsertReview,
   getMyReview,
@@ -907,4 +975,11 @@ module.exports = {
   addRoomReport, hideRoomPost, getModQueue, setRoomPostStatus, banRoomUser, isRoomBanned,
   getRecentErrors,
   clearErrors,
+  coupleRowFor,
+  createCoupleLink,
+  joinCoupleLink,
+  unlinkCouple,
+  setCoupleTogetherDone,
+  setCoupleNudge,
+  couplePartnerOf,
 };

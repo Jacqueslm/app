@@ -754,6 +754,76 @@ app.get('/admin/stats', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin-stats.html'));
 });
 
+// ─── Couple link: two accounts, one Together table ───────────────────────────
+// The link carries ONLY the shared Together progress and a nudge - by design
+// there is no way to see a partner's clock, journal, slips, or anything else.
+function coupleStatusFor(userId) {
+  const row = db.coupleRowFor(userId);
+  if (!row) return { linked: false, pending: false };
+  if (!row.user_b) return { linked: false, pending: true, code: row.code, togetherDone: row.together_done };
+  const partner = db.couplePartnerOf(userId);
+  return {
+    linked: true,
+    pending: false,
+    partnerName: (partner && partner.name) || 'your partner',
+    togetherDone: row.together_done,
+    nudgeAt: row.nudge_at || null,
+    nudgeFromPartner: !!(row.nudge_from && row.nudge_from !== userId),
+  };
+}
+app.get('/api/couple', requireAuth, (req, res) => {
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/create', requireAuth, (req, res) => {
+  db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/join', requireAuth, (req, res) => {
+  const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
+  if (out.error) {
+    const msg = {
+      'already-linked': "You're already linked. Unlink first if this is a new start.",
+      'bad-code': "That code doesn't match anything. Check it with your partner - letters only, no zeros.",
+      'code-used': 'That code has already been used.',
+      'own-code': "That's your own code - your partner enters it on their phone.",
+    }[out.error];
+    return res.status(400).json({ error: msg });
+  }
+  const partner = db.couplePartnerOf(req.userId);
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'You two are linked',
+      body: `${(req.body && req.body.name) || 'Your partner'} joined your Together table. Ten minutes a day - same table, both phones.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/unlink', requireAuth, (req, res) => {
+  db.unlinkCouple(req.userId);
+  res.json({ ok: true });
+});
+app.post('/api/couple/done', requireAuth, (req, res) => {
+  const d = db.setCoupleTogetherDone(req.userId, req.body && req.body.day);
+  if (d === null) return res.status(400).json({ error: 'Not linked.' });
+  res.json({ togetherDone: d });
+});
+const coupleNudgeLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 6, standardHeaders: true, legacyHeaders: false });
+app.post('/api/couple/nudge', requireAuth, coupleNudgeLimiter, (req, res) => {
+  const row = db.setCoupleNudge(req.userId);
+  if (!row) return res.status(400).json({ error: 'Not linked yet.' });
+  const partner = db.couplePartnerOf(req.userId);
+  const me = row.user_a === req.userId ? row.name_a : row.name_b;
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'Ten minutes at the table?',
+      body: `${me || 'Your partner'} is asking for today's ten minutes together - when you're both ready.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json({ ok: true });
+});
+
 app.get('/api/account/export', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });

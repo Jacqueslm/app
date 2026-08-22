@@ -164,12 +164,15 @@ files.** Respect that or the work is useless.
   their name and their organisation's own programme name. Jacques reads and
   sends; never send on his behalf. Check `list_drafts` before drafting a
   contact again — duplicates waste his review time.
-- **Always pass BOTH `body` and `htmlBody`, with the site link as a real
-  anchor** (`<a href="https://www.turnsomedayintodayone.com">…</a>`) in the
-  HTML. Plain-text-only mail makes Gmail route the click through its
-  google.com/url phishing checker, which pauses on a "Redirect Notice" page
-  for young domains — one extra suspicious-looking tap for every recipient.
-  Discovered live on the CRP batch, 21 Aug 2026.
+- **Always pass BOTH `body` and `htmlBody`**, with the site link as a real
+  anchor in the HTML — it reads as more professional than a bare URL.
+- **Gmail's "Redirect Notice" interstitial is NOT fixable from the email.**
+  Tested 22 Aug 2026: an HTML anchor made no difference. The google.com/url
+  wrapper arrives with `ust` but no `psig` signature, which is Google's own
+  trust decision about a young destination domain. The site itself is clean
+  (canonical www, correct 301). It fades as the domain ages. Never "fix" it
+  with a link shortener — that looks MORE like phishing to the same filter.
+  Do not raise this with Jacques again as though it were solvable.
 - **Contact assets that already exist — build on, don't redo:**
   `reference/crp-contacts.csv` (113 collegiate recovery contacts — all already
   drafted 20 Aug 2026), `NEW-SPACES.md` (researched outreach spaces),

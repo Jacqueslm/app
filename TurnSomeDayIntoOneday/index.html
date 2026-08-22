@@ -6485,16 +6485,39 @@ function toggleDictation(inputId){
         if(t)finals.push(t);
       }
     }
-    // Collapse the growing-prefix chain Android emits: keep a final only if
-    // the next one doesn't already contain it from the start.
-    const kept=finals.filter((t,i)=>!(i+1<finals.length&&finals[i+1].toLowerCase().startsWith(t.toLowerCase())));
-    const text=kept.join(' ').trim();
+    // Collapse Android's replays. The engine re-emits the growing transcript
+    // as repeated finals, and its revisions aren't always exact prefixes -
+    // "the food more" can come back later as "food more and yeah break".
+    // Prefix-only matching kept both and spliced them into a sentence nobody
+    // said. So: normalize away case/punctuation, drop any final that appears
+    // inside a LATER final, then word-overlap-merge what's left.
+    const norm=t=>t.toLowerCase().replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim();
+    const kept=finals.filter((t,i)=>{
+      const n=norm(t);
+      for(let j=i+1;j<finals.length;j++){ if(norm(finals[j]).includes(n))return false; }
+      return true;
+    });
+    let text='';
+    kept.forEach(t=>{
+      if(!text){text=t;return;}
+      // If the tail of what we have already starts the next chunk, keep only
+      // the part of the next chunk past the overlap.
+      const a=norm(text).split(' '),b=norm(t).split(' ');
+      let ov=0;
+      for(let k=Math.min(a.length,b.length);k>0;k--){
+        if(a.slice(-k).join(' ')===b.slice(0,k).join(' ')){ov=k;break;}
+      }
+      const bw=t.split(/\s+/);
+      const rest=bw.slice(ov).join(' ');
+      if(rest)text+=' '+rest;
+    });
+    text=text.trim();
     if(text){
       // Deterministic write on every event: base plus this session's text -
       // unless base already ends with it (a restarted session re-delivering
       // what was folded in), in which case the box is set BACK to base so a
       // partial from the same replay can't leave junk behind.
-      el.value=dictState.base.toLowerCase().endsWith(text.toLowerCase())
+      el.value=norm(dictState.base).endsWith(norm(text))
         ?dictState.base
         :(dictState.base?dictState.base+' ':'')+text;
       dictState.quiet=0;dictState.gotAny=true;
@@ -11632,7 +11655,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.9';
+const APP_VERSION='8.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

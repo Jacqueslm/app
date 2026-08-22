@@ -808,3 +808,23 @@ So the meditation library doubles as the **royalty-free score library for every
 video**: no third-party music, no YouTube claims, no takedowns. Score from here
 and nowhere else. Fading Night and Night Fade suit the sombre pieces; Still
 Waters and Himalayan Still are calmer.
+
+
+## v7.5–7.7 shipped together (22 Aug 2026)
+
+- **v7.5 Alignment audit** — every surface tells the same 90-day story:
+  Friendly's system prompt (was still teaching a 30-day program in three
+  places), the Guide (now opens with "How does the program work? — a 90-day
+  system"), the day-15 upsell, plans footer, FAQs, the welcome-to-Pro email,
+  and landing.html (Free card had been underselling the real free tier).
+- **v7.6 Together: faith + celebrations** — the faith weave now reaches the
+  couples screen (it never had), and marking a day done together celebrates:
+  burst every day, big burst + words at weeks 1–3, renewal card at 30.
+  Together verified gender-neutral: zero gendered words.
+- **v7.7 Couple link** — two phones, one Together table. Code pairing,
+  shared day count (server keeps the max), "Ask for tonight's ten minutes"
+  as a real push, six-an-hour limit. The link stores ONLY the day count and
+  the nudge — no clocks, journals, or slips, enforced by the schema.
+  Tested end to end with two live accounts.
+
+All three went to main + vibe-code in one push; Railway deployed v7.7.

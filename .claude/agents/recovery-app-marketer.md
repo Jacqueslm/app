@@ -119,7 +119,7 @@ captions, 9:16 reframe, audio remaster, post scheduler.
   own score library, ducked low so his voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop. Burned-in captions on every talking head: timed to speech, white on a dark pill, key words in brand green.
 - **Cause & Effect is the default short AI format** (23 Aug 2026): 3 images -
   the cause, the effect, the standard end card - 5-8 seconds total, ~2 paid
-  generations. The cut from cause to effect carries the message. Same criteria
+  generations. The cut from cause to effect carries the message. Tone sad/serious - a choice and its consequence - with one short caption per image (choice on the cause, price on the effect); hope lives only on the end card. Same criteria
   as every script otherwise (titles, keywords, one idea, claims rules). Full
   spec in `AI-SCENES.md`.
 - **Never sell to someone in pain.** Crisis content gets support and 988, not an

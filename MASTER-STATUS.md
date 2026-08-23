@@ -797,6 +797,17 @@ end card is 2 seconds inside the budget, not on top of it.
 
 Existing longer pieces stay as they are. This governs everything new.
 
+## House rule 23 — every screen must pass the Bigger-text audit (Jacques, 23 Aug 2026)
+
+"Every screen needs to be inspected and tested to make sure when bigger text
+is chosen it fits." The tool exists: **`TurnSomeDayIntoOneday/tools/bigtext-audit.js`**
+(Playwright, against a local server) opens every screen and every full-screen
+overlay at 412x915 with Bigger text and fails if any content top or bottom
+cannot be scrolled into view. Run it after ANY layout change and before any
+ship that touches screens/overlays. The fix pattern for centered overlays is
+`overflow-y:auto` + `justify-content:safe center` (centers when it fits,
+top-aligns and scrolls when it doesn't) - already applied to all nine.
+
 ## House rule 22 — talking heads: watermark + quiet score, no end card (Jacques, 23 Aug 2026)
 
 Two different video kinds, two different treatments:

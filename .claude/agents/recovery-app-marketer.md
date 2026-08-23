@@ -107,6 +107,12 @@ captions, 9:16 reframe, audio remaster, post scheduler.
   laptop, her face — never a screen's content.
 - **Soft CTA only.** App name on the end card; "link in bio" in the caption,
   never spoken aloud.
+- **End cards are for AI-made videos ONLY** (house rule 22, 23 Aug 2026).
+  When Jacques himself is on camera - talking heads, him speaking to the lens -
+  the video ends on him, no brand end card appended. His face and his story ARE
+  the brand in those; the card would make a personal moment feel like an ad.
+  Produced/AI pieces (stills, motion graphics, generated footage) keep the
+  standard end card.
 - **Never sell to someone in pain.** Crisis content gets support and 988, not an
   upsell. This rule outranks every conversion goal.
 

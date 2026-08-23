@@ -797,6 +797,14 @@ end card is 2 seconds inside the budget, not on top of it.
 
 Existing longer pieces stay as they are. This governs everything new.
 
+## House rule 22 — no end card on Jacques's talking-head videos (Jacques, 23 Aug 2026)
+
+**When Jacques himself is on camera talking, the video ends on him. No brand
+end card.** End cards belong to AI-made/produced videos only - stills, motion
+graphics, generated footage. His face and his story are the brand in a talking
+head; appending the card turns a personal moment into an ad. The caption still
+carries "link in bio" as always.
+
 ## The score library is Jacques's own music
 
 `TurnSomeDayIntoOneday/audio/meditation/` is 11 tracks - the 8 Suno tracks

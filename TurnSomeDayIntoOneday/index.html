@@ -80,7 +80,7 @@ body{display:flex;justify-content:center}
    !important because these overlays set justify-content inline. */
 #meditation-overlay,#breathe-overlay,#voiceguide-overlay,#urgesurf-overlay,
 #grounding54321-overlay,#welcome-overlay,#panic-overlay,#nova-disclaimer-flash,
-#review-modal{overflow-y:auto !important;justify-content:safe center !important}
+#review-modal,#rebuild-overlay{overflow-y:auto !important;justify-content:safe center !important}
 /* At 1.18x zoom the scroll container runs ~180px past the visible window, so
    the tail of every screen - including the lesson's "Mark as done" button -
    could never scroll into view. Extra bottom padding puts it back in reach. */
@@ -786,6 +786,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="sos-btn" id="home-sos-btn" onclick="openSOS()"><i class="ti ti-alert-triangle"></i> I'm having a craving — SOS</div>
   </div>
 
+  <!-- THE REBUILD: the recovery so far, drawn as a street being rebuilt.
+       Every clean day, lesson, survived craving and pledge adds something
+       visible. A slip darkens the sky for a day but demolishes nothing. -->
+  <div class="nova-promo" onclick="openRebuild()" style="margin-top:12px;background:var(--s2);border:1px solid var(--bdr);flex-direction:column;align-items:stretch;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--tp)">The Rebuild</div><div style="font-size:12px;color:var(--ts)" id="rebuild-sub">Your street, built one day at a time</div></div>
+      <i class="ti ti-arrow-right" style="font-size:18px;color:var(--tm)"></i>
+    </div>
+    <div id="rebuild-preview" style="border-radius:12px;overflow:hidden;line-height:0"></div>
+  </div>
+
   <div class="nova-promo" onclick="switchTo('lesson')" style="margin-top:12px;background:var(--ok)">
     <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-notebook" style="font-size:20px;color:#fff"></i></div>
     <div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--ok-t)" id="lesson-promo-title">Today's lesson</div><div style="font-size:12px;color:#0F6E56" id="lesson-promo-sub">Loading your program…</div></div>
@@ -1243,6 +1254,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row" onclick="breathe()">
           <i class="ti ti-wind" style="color:#1D9E75"></i>
           <div class="setting-row-txt"><p>Breathing exercise</p><span>4-7-8 calm-down technique</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openRebuild()">
+          <i class="ti ti-building-community" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>The Rebuild</p><span>Your recovery drawn as a street coming back to life</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openMeditation()">
@@ -2655,6 +2671,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
   </div>
 </div>
+<div id="rebuild-overlay" style="display:none;position:fixed;inset:0;background:var(--s0);z-index:999;flex-direction:column;align-items:center;text-align:center;color:var(--tp);padding:24px 20px 40px;overflow-y:auto">
+  <div style="display:flex;width:100%;max-width:430px;align-items:center;justify-content:space-between">
+    <div style="font-size:20px;font-weight:700">The Rebuild</div>
+    <button class="pill" onclick="closeRebuild()" style="background:var(--s2);color:var(--tp)">Close</button>
+  </div>
+  <div id="rebuild-scene" style="width:100%;max-width:430px;margin-top:14px;border-radius:16px;overflow:hidden;line-height:0"></div>
+  <div id="rebuild-legend" style="max-width:430px;margin-top:14px;font-size:14px;color:var(--ts);line-height:1.6;text-align:left"></div>
+  <div style="max-width:430px;margin-top:14px;font-size:13px;color:var(--tm);line-height:1.6;text-align:left">Every day you show up lays another piece. Lessons plant trees. Cravings you ride out light the streetlamps. A pledge warms the windows tonight. And a hard day only darkens the sky — nothing you have built here can ever be torn down.</div>
+</div>
 <div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
     <div id="med-timer" style="font-size:40px;font-weight:700;letter-spacing:1px">5:00</div>
     <div id="med-phase" style="font-size:15px;opacity:.92;margin-top:6px">Settle in — eyes closed or a soft gaze</div>
@@ -2782,7 +2807,7 @@ let S = {
   novaDisclaimerDismissed:false,fontSize:'default',
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
-  pledged:false,pledgeDate:'',
+  pledged:false,pledgeDate:'',rebuildDays:0,rebuildLastTick:'',
   chatsLeft:FREE_CHAT_DAILY_LIMIT,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
@@ -4376,7 +4401,7 @@ function handleAppPopstate(){
   //    it through its own close path instead of leaving the app underneath it.
   const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
     ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
-    ['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
+    ['rebuild-overlay',closeRebuild],['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
     ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
   for(const [id,close] of overlays){
     const el=document.getElementById(id);
@@ -5157,6 +5182,7 @@ function renderClockChips(){
 }
 
 function updateStats(){
+  rebuildTick();renderRebuildPreview();
   updateRecoveryTermLabels();
   applySupporterUI();
   evaluateProSubscription();
@@ -5826,6 +5852,88 @@ function buildMilestoneEncouragement(days){
 function closeMilestoneCelebration(){
   document.getElementById('milestone-celebration-modal').classList.remove('open');
 }
+// ─── THE REBUILD ─────────────────────────────────────────────────────────────
+// The recovery drawn as a street being rebuilt. rebuildDays only ever counts
+// up - one tick per calendar day the app is opened - so a streak reset never
+// demolishes anything. The scene is derived, never stored: houses from days,
+// trees from lessons, lamps from survived cravings, warm windows from today's
+// pledge, and a slip in the last 24h darkens the sky without removing a brick.
+function rebuildTick(){
+  const today=new Date().toDateString();
+  if(S.rebuildLastTick!==today){
+    if(!S.rebuildDays){
+      const start=S.startDate?Math.floor((Date.now()-new Date(S.startDate).getTime())/86400000):0;
+      S.rebuildDays=Math.max(start,S.longestStreak||0,0);
+    }
+    S.rebuildDays=(S.rebuildDays||0)+ (S.rebuildLastTick?1:0);
+    S.rebuildLastTick=today;save();
+  }
+}
+function rebuildStats(){
+  const lessons=Object.values(S.lessonProgress||{}).reduce((a,b)=>a+(Number(b)||0),0);
+  const lamps=S.cravingsSurvivedCount||0;
+  const slipRecent=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<86400000);
+  const pledgedToday=!!(S.pledged&&S.pledgeDate===new Date().toDateString());
+  return {days:S.rebuildDays||0,lessons,lamps,slipRecent,pledgedToday,stars:(S.notifiedMilestones||[]).length};
+}
+function rebuildSVG(compact){
+  const st=rebuildStats();
+  const W=430,H=compact?150:260,ground=H-26;
+  const nightSky=st.slipRecent;
+  const sky1=nightSky?'#0b0b18':'#232055',sky2=nightSky?'#141428':'#3d3780';
+  const houses=Math.min(13,Math.floor(st.days/7)),stage=st.days%7;
+  const winGlow=st.pledgedToday?'#FFD98A':'#E8C468';
+  let e='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">';
+  e+='<defs><linearGradient id="rbsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+sky1+'"/><stop offset="1" stop-color="'+sky2+'"/></linearGradient></defs>';
+  e+='<rect width="'+W+'" height="'+H+'" fill="url(#rbsky)"/>';
+  for(let i=0;i<Math.min(9,st.stars*2+1);i++){const sx=30+((i*97)%(W-60)),sy=14+((i*53)%Math.max(20,ground-140));e+='<circle cx="'+sx+'" cy="'+sy+'" r="1.6" fill="#fff" opacity="0.85"/>';}
+  e+='<circle cx="'+(W-52)+'" cy="34" r="14" fill="#F5EFD8" opacity="'+(nightSky?'0.35':'0.9')+'"/>';
+  e+='<rect y="'+ground+'" width="'+W+'" height="'+(H-ground)+'" fill="'+(nightSky?'#151318':'#2A2438')+'"/>';
+  e+='<rect y="'+ground+'" width="'+W+'" height="3" fill="#534AB7" opacity="0.6"/>';
+  const slot=W/7;
+  for(let h=0;h<Math.min(7,houses+1);h++){
+    const done=h<houses,stg=done?7:stage;
+    if(stg===0)continue;
+    const x=14+h*slot,bw=slot-18,bh=Math.min(64,12+stg*8),y=ground-bh;
+    if(stg>=1)e+='<rect x="'+x+'" y="'+(ground-8)+'" width="'+bw+'" height="8" fill="#4A4458"/>';
+    if(stg>=3)e+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" fill="'+(nightSky?'#241f33':'#3A3450')+'" stroke="#534AB7" stroke-width="1"/>';
+    else if(stg===2)e+='<path d="M'+x+' '+ground+' L'+x+' '+y+' M'+(x+bw)+' '+ground+' L'+(x+bw)+' '+y+' M'+x+' '+y+' L'+(x+bw)+' '+y+'" stroke="#534AB7" stroke-width="2" fill="none"/>';
+    if(stg>=5)e+='<rect x="'+(x+bw/2-7)+'" y="'+(ground-22)+'" width="14" height="22" rx="2" fill="#221d30" stroke="#534AB7" stroke-width="0.8"/>';
+    if(stg>=6)e+='<path d="M'+(x-5)+' '+y+' L'+(x+bw/2)+' '+(y-16)+' L'+(x+bw+5)+' '+y+' Z" fill="#534AB7"/>';
+    if(stg>=7)e+='<rect x="'+(x+6)+'" y="'+(y+9)+'" width="11" height="11" rx="2" fill="'+winGlow+'" opacity="'+(nightSky?'0.25':'1')+'"/>';
+  }
+  const trees=Math.min(24,st.lessons);
+  for(let t=0;t<trees;t++){const tx=10+((t*61)%(W-20)),th=10+(t%3)*4;
+    e+='<rect x="'+(tx-1.5)+'" y="'+(ground-th)+'" width="3" height="'+th+'" fill="#5A4632"/><circle cx="'+tx+'" cy="'+(ground-th-6)+'" r="7" fill="'+(nightSky?'#1e3326':'#2F6B45')+'"/>';}
+  const lamps=Math.min(12,st.lamps);
+  for(let l=0;l<lamps;l++){const lx=28+l*((W-56)/Math.max(1,11));
+    e+='<rect x="'+(lx-1)+'" y="'+(ground-34)+'" width="2" height="34" fill="#6B6580"/><circle cx="'+lx+'" cy="'+(ground-36)+'" r="4" fill="#FFD98A" opacity="'+(nightSky?'0.9':'0.8')+'"/>';}
+  e+='</svg>';return e;
+}
+function renderRebuildPreview(){
+  const el=document.getElementById('rebuild-preview');
+  if(el)el.innerHTML=rebuildSVG(true);
+  const sub=document.getElementById('rebuild-sub');
+  const st=rebuildStats();
+  if(sub)sub.textContent=st.slipRecent?'A dark night — nothing you built is gone':'Day '+st.days+' of building';
+}
+function openRebuild(){
+  rebuildTick();
+  document.getElementById('rebuild-scene').innerHTML=rebuildSVG(false);
+  const st=rebuildStats();
+  const houses=Math.floor(st.days/7);
+  document.getElementById('rebuild-legend').innerHTML=
+    '<b style="color:var(--tp)">Day '+st.days+' of the rebuild.</b> '
+    +houses+' house'+(houses===1?'':'s')+' standing'+(st.days%7?' and one under construction':'')
+    +' · '+Math.min(24,st.lessons)+' tree'+(st.lessons===1?'':'s')+' planted (lessons)'
+    +' · '+st.lamps+' lamp'+(st.lamps===1?'':'s')+' lit (cravings you outlasted)'
+    +(st.stars?' · '+st.stars+' star'+(st.stars===1?'':'s')+' out (milestones)':'')
+    +(st.pledgedToday?' · windows warm tonight (pledged)':'')
+    +(st.slipRecent?'<br><b style="color:var(--tp)">The sky is dark today.</b> Every brick is still yours. It lights back up tomorrow.':'');
+  document.getElementById('rebuild-overlay').style.display='flex';
+  logActivity('rebuild_open',{});
+}
+function closeRebuild(){document.getElementById('rebuild-overlay').style.display='none';}
 // A sheet or overlay that is already open wins: celebrations and smart
 // reminders wait their turn instead of stacking on top of whatever the user
 // is actually doing (QA found the daily-win sheet covering the welcome
@@ -11714,7 +11822,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.8';
+const APP_VERSION='8.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

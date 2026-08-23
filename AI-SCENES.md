@@ -50,6 +50,25 @@ risk — put those on YouTube first. Lean TikTok and Facebook on A2, A3, A4.
 
 ---
 
+## THE CAUSE & EFFECT FORMAT (Jacques, 23 Aug 2026) — the new default for short AI videos
+
+Three shots, **5-8 seconds total**. Cheapest and fastest format there is
+(~2 paid generations), and it still follows the same script criteria as
+everything else — the hook-first titles, the KEYWORDS.md rule, one idea per
+video, no medical claims:
+
+1. **Image 1 — THE CAUSE.** The habit in one frame. No text needed.
+2. **Image 2 — THE EFFECT.** What it costs, in one frame. The cut from 1 to 2
+   IS the message - no narration required to explain it.
+3. **Image 3 — the standard end card** (house rule 16 layout, unchanged).
+
+Timing inside 5-8s: roughly 2-3s cause, 2-3s effect, 2s end card. Music from
+the score library covers the whole thing and ends on the last note. Scripts
+in this format still get the full four fields (both titles, SAY/prompts,
+caption) and a number in this file.
+
+---
+
 ## A1 — "The door" · 5 shots · 25s · ~$2.45
 
 **Title:** The moment she finds out

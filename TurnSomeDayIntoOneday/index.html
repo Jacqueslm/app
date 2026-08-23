@@ -68,7 +68,9 @@ body{display:flex;justify-content:center}
 .app.fs-bigger .sos-sheet{max-height:calc(100dvh/1.18);overflow-y:auto}
 .app.fs-bigger .sos-sheet .ob-btn{flex:0 0 auto}
 .app.fs-bigger #screens{overflow-y:auto}
-/* overlays get bottom clearance so the last button clears the fold at bigger text */
+/* overlays get bottom clearance so the last button clears the fold at bigger text
+   (they inherit the .app zoom - verified 23 Aug: adding their own scale
+   double-zooms them, so don't) */
 .app.fs-bigger #day30-overlay,.app.fs-bigger #day15-overlay,
 .app.fs-bigger #lesson-player-overlay{padding-bottom:140px}
 /* At 1.18x zoom the scroll container runs ~180px past the visible window, so
@@ -3322,11 +3324,21 @@ function renderLessonExtras(day){
   }
   // Cross-link: today's skill, pointed at the other track being worked.
   const links=(typeof activeTrackLinks==='function')?activeTrackLinks():[];
-  const link=links.find(l=>l.a===S.currentAddiction||l.b===S.currentAddiction);
+  // Working several tracks at once means several pairs - rotate by day so the
+  // card features a different partner track each day instead of the same one
+  // every lesson, and cycle the fallback wording so it never reads copy-pasted.
+  const mine=links.filter(l=>l.a===S.currentAddiction||l.b===S.currentAddiction);
+  const link=mine.length?mine[(day-1)%mine.length]:null;
   if(link){
     const other=link.a===S.currentAddiction?link.b:link.a;
     const key=link.a+'|'+link.b;
-    const applyTxt=TRACK_LINK_APPLY[key]||("Different habit, same escape hatch. Whatever today's lesson taught you here, try it on "+other+" too - the mechanism is shared, so the skill is too.");
+    const XFALL=[
+      "Different habit, same escape hatch. Whatever today's lesson taught you here, try it on "+other+" too - the mechanism is shared, so the skill is too.",
+      "Today's skill doesn't care which habit it faces. The next time the "+other+" urge shows up, run the exact same play.",
+      "One lesson, two fronts. What you practiced here is the same move your "+other+" track needs - use it there before the day ends.",
+      "The urges dress differently and work identically. Catch the "+other+" one at the same early point today's lesson showed you here.",
+    ];
+    const applyTxt=TRACK_LINK_APPLY[key]||XFALL[(day-1)%XFALL.length];
     html+=`<div style="background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:12px;padding:12px 16px;margin-top:10px">
       <div style="font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:5px">For your ${esc(other)} track too</div>
       <div style="font-size:13.5px;color:var(--ts);line-height:1.65">${esc(applyTxt)}</div>
@@ -11661,7 +11673,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.3';
+const APP_VERSION='8.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -133,8 +133,11 @@ async function runPushReminders() {
     if (state.pushRemindersEnabled === false) continue;
     const now = localNow(state);
     if (!now) continue; // unknown timezone - never guess and wake someone at 3am
-    const startHour = hourOf(state.reminderStartHour, 9);
-    const endHour = hourOf(state.reminderEndHour, 21);
+    // The dedicated columns win: they only ever hold an explicit choice,
+    // while the blob can be a stale copy pushed by another device.
+    const winRow = db.getReminderWindow(userId);
+    const startHour = winRow ? winRow.start : hourOf(state.reminderStartHour, 9);
+    const endHour = winRow ? winRow.end : hourOf(state.reminderEndHour, 21);
     const hour = now.getHours();
     // Fire at the start of their window; if the app was never opened that day
     // the last hour of the window gets one final, gentler nudge.

@@ -677,7 +677,20 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   // isOwner lets the client skip owner-only calls (update check, diagnostics)
   // for everyone else, instead of probing them and logging 403s in every
   // regular user's console.
-  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL) });
+  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL),
+    reminderWindow: db.getReminderWindow(req.userId) });
+});
+
+// The reminder window as its own setting: written only on an explicit change,
+// adopted by every device at boot, read by the push scheduler ahead of the
+// state blob - so no stale sync can reset it.
+app.post('/api/reminder-window', requireAuth, (req, res) => {
+  const s = Number(req.body?.start), e = Number(req.body?.end);
+  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 0 || s > 23 || e < 0 || e > 23) {
+    return res.status(400).json({ error: 'Hours must be 0-23.' });
+  }
+  db.setReminderWindow(req.userId, s, e);
+  res.json({ ok: true });
 });
 
 app.get('/api/state', requireAuth, (req, res) => {

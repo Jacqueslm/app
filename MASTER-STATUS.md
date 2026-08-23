@@ -809,7 +809,15 @@ Two different video kinds, two different treatments:
   16.1) so the branding is present without turning a personal moment into an
   ad. And every talking head gets **background music underneath the speech** -
   a track from his own score library (`audio/meditation/`), ducked low so his
-  voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop. The caption still carries "link in bio" as always.
+  voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop. And every talking head gets burned-in captions - timed to his speech, white on a dark pill, key words in brand green (#7ee8a2) - transcribed in-session (see the transcription note below).
+
+**Transcription works in this environment now (23 Aug 2026).** Whisper via pip
+is blocked (HuggingFace unreachable), but **sherpa-onnx from PyPI + models from
+the k2-fsa/sherpa-onnx GitHub releases** (same host as the Piper voices) works:
+whisper tiny.en for clean text, zipformer-en-2023-06-26 for word timestamps.
+Models live in scratchpad/. Never again report speech-to-text as unavailable
+here - captioning talking heads is now a standard step.
+ The caption still carries "link in bio" as always.
 
 ## The score library is Jacques's own music
 

@@ -970,17 +970,14 @@ than feels right; the pictures need air. Leave the silence in after shot 2.
 
 **Say this:**
 
-> While you were chasing it,
-> somebody was covering for you.
+> Somebody covered for you.
 > Your shifts. Your lies. Your rent.
 >
-> They never got high once —
-> and they paid every day.
+> They never got high. They still paid.
 >
 > I was you. Thirty-eight years.
 >
-> Today, look at the one who stayed —
-> and thank them out loud.
+> Thank the one who stayed. Out loud.
 
 **Caption:** They never got high — and they paid every day. This one's for the ones who stayed. Link in bio.
 

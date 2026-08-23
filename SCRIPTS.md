@@ -961,3 +961,30 @@ than feels right; the pictures need air. Leave the silence in after shot 2.
 - Should I stay or leave?
 - How to quit drinking on your own when willpower keeps failing
 - Why sobriety feels worse before it feels better
+
+## 40. TALK — "To the one still using"
+
+**Title (TikTok / Facebook):** Somebody finally needs to say this to your face
+
+**Title (YouTube):** Wife of an alcoholic — somebody finally said it (140/mo, KD 29)
+
+**Say this:**
+
+> This one's not for the supporters. This one's for you — the one still using.
+>
+> While you were chasing it,
+> somebody was covering for you.
+> Your shifts. Your lies. Your rent.
+>
+> They never got high. Not once.
+> And they paid for it every single day —
+> no day off, no applause, no thank you.
+>
+> I was you. Thirty-eight years.
+>
+> So today — before anything else —
+> look at the one who stayed
+> and thank them out loud.
+
+**Caption:** They never got high — and they paid every day. This one's for the ones who stayed. Link in bio.
+

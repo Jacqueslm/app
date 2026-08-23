@@ -59,7 +59,7 @@ def speakable(text):
     """YourTTS drops digits from its vocabulary; spell numbers out. Piper
     handles digits, but the same spoken form keeps all narrators consistent."""
     from num2words import num2words
-    text = text.replace('—', ',').replace('–', ',').replace('%', ' percent')
+    text = text.replace('—', ',').replace('–', ',').replace('%', ' percent').replace('&', ' and ')
     def am_pm(m):
         return num2words(int(m.group(1))) + ' ' + ('a m' if m.group(2).lower().startswith('a') else 'p m')
     text = re.sub(r'\b(\d{1,2})\s*(am|pm|AM|PM)\b', am_pm, text)

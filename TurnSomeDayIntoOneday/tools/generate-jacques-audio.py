@@ -63,7 +63,7 @@ def speakable(text):
     becomes 'am'). Spell numbers out before synthesis. Hashing stays on the
     raw lesson text, so this never changes file names."""
     from num2words import num2words
-    text = text.replace('—', ',').replace('–', ',').replace('%', ' percent')
+    text = text.replace('—', ',').replace('–', ',').replace('%', ' percent').replace('&', ' and ')
     def am_pm(m):
         return num2words(int(m.group(1))) + ' ' + ('a m' if m.group(2).lower().startswith('a') else 'p m')
     text = re.sub(r'\b(\d{1,2})\s*(am|pm|AM|PM)\b', am_pm, text)

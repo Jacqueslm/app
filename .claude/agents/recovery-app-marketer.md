@@ -113,6 +113,10 @@ captions, 9:16 reframe, audio remaster, post scheduler.
   the brand in those; the card would make a personal moment feel like an ad.
   Produced/AI pieces (stills, motion graphics, generated footage) keep the
   standard end card.
+- **Talking heads still carry the brand**: the corner watermark (handshake,
+  bottom-right, ~210px up, every frame) goes on them like on everything else,
+  and each one gets **background music under the speech** - a track from his
+  own score library, ducked low so his voice always leads.
 - **Never sell to someone in pain.** Crisis content gets support and 988, not an
   upsell. This rule outranks every conversion goal.
 

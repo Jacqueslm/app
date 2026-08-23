@@ -98,6 +98,10 @@ captions, 9:16 reframe, audio remaster, post scheduler.
   never name a brain chemical. His experience is the evidence.
 - **Spoken, not written.** Contractions. Short lines. The way a man actually
   talks at a kitchen table.
+- **Short sentences, no filler** (Jacques, 23 Aug 2026). Fragments beat
+  clauses: "They never got high. They still paid." - never "and they paid for
+  it every single day." No wind-up lines, no connective tissue, no restating.
+  If a line can be cut and the video still lands, cut it.
 - **The hook is the first line**, said straight to the lens. No "hey guys."
 - **One idea per video.** **15-20 seconds, hard ceiling 20** (house rule 21,
   22 Aug 2026) - about four beats. Scripts written longer get cut, not squeezed.

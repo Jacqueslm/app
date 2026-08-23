@@ -116,7 +116,7 @@ captions, 9:16 reframe, audio remaster, post scheduler.
 - **Talking heads still carry the brand**: the corner watermark (handshake,
   bottom-right, ~210px up, every frame) goes on them like on everything else,
   and each one gets **background music under the speech** - a track from his
-  own score library, ducked low so his voice always leads.
+  own score library, ducked low so his voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop.
 - **Never sell to someone in pain.** Crisis content gets support and 988, not an
   upsell. This rule outranks every conversion goal.
 

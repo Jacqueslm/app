@@ -11344,6 +11344,10 @@ function renderReminderWindow(){
         const v=Number(sel.value);
         if(id==='reminder-start')S.reminderStartHour=v;else S.reminderEndHour=v;
         save();
+        // Also written as its own server setting - the state blob can be
+        // overwritten by another device's stale copy, this cannot.
+        if(S.accountEmail)fetch('/api/reminder-window',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({start:reminderHour('start'),end:reminderHour('end')})}).catch(()=>{});
         renderReminderWindow();
       };
     }
@@ -11681,7 +11685,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.5';
+const APP_VERSION='8.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13203,6 +13207,12 @@ async function boot(){
       const me=await meRes.json();
       S.accountEmail=me.email;
       appIsOwner=!!me.isOwner;appIsOwnerResolve();applyOwnerUI();
+      // The server's copy of the reminder window is the explicit one - adopt
+      // it so every device shows the hours that are actually in effect.
+      if(me.reminderWindow){
+        S.reminderStartHour=me.reminderWindow.start;
+        S.reminderEndHour=me.reminderWindow.end;
+      }
       // A pin-reset flag only counts when it's followed by a fresh credential
       // sign-in. Landing here means the old session survived (e.g. the logout
       // request failed offline) - drop the flag so it can't unlock anything.

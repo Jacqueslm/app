@@ -223,6 +223,14 @@ function clearErrors() {
   db.prepare('DELETE FROM error_log').run();
   return n;
 }
+function setReminderWindow(userId, startHour, endHour) {
+  db.prepare('UPDATE users SET reminder_start_hour = ?, reminder_end_hour = ? WHERE id = ?')
+    .run(startHour, endHour, userId);
+}
+function getReminderWindow(userId) {
+  const r = db.prepare('SELECT reminder_start_hour AS s, reminder_end_hour AS e FROM users WHERE id = ?').get(userId);
+  return r && Number.isInteger(r.s) && Number.isInteger(r.e) ? { start: r.s, end: r.e } : null;
+}
 function getRecentErrors(limit) {
   return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
 }
@@ -243,6 +251,11 @@ addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NUL
 // Bumping this number invalidates every session token issued before the bump -
 // that's how "log out on all devices" works without tracking sessions server-side.
 addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
+// The reminder window is a real setting, not derived data - kept in its own
+// columns written only by an explicit change, so a second device syncing a
+// stale state blob can never quietly reset it (Jacques hit exactly that).
+addColumnIfMissing('reminder_start_hour', 'reminder_start_hour INTEGER');
+addColumnIfMissing('reminder_end_hour', 'reminder_end_hour INTEGER');
 addColumnIfMissing('unsubscribed', 'unsubscribed INTEGER NOT NULL DEFAULT 0');
 addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
 // Columns land now (Task 7 schema); the capture logic ships in Task 9.
@@ -918,6 +931,8 @@ function couplePartnerOf(userId) {
 }
 
 module.exports = {
+  setReminderWindow,
+  getReminderWindow,
   upsertReview,
   getMyReview,
   getPublishedReviews,

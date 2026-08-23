@@ -830,15 +830,20 @@ function isRoomBanned(userId) {
 
 
 // ── Reviews ──────────────────────────────────────────────────────────────────
-// A member gets exactly one review. Writing a second one replaces the first and
-// sends it back to pending, so an edited review is never published unread.
+// A member gets exactly one review; re-submitting replaces theirs. Reviews
+// publish straight to /reviews (Jacques, 23 Aug 2026) - he gets an email on
+// each arrival and can hide anything abusive from the admin page after the
+// fact. A rejected (hidden) review STAYS hidden through edits: quietly
+// republishing yourself after the owner pulled your review is not a thing.
 function upsertReview(userId, name, whenLabel, body, stars) {
   db.prepare(
     `INSERT INTO reviews (user_id, name, when_label, body, stars, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?)
+     VALUES (?, ?, ?, ?, ?, 'published', ?)
      ON CONFLICT(user_id) DO UPDATE SET
        name = excluded.name, when_label = excluded.when_label, body = excluded.body,
-       stars = excluded.stars, status = 'pending', created_at = excluded.created_at`
+       stars = excluded.stars,
+       status = CASE WHEN reviews.status = 'rejected' THEN 'rejected' ELSE 'published' END,
+       created_at = excluded.created_at`
   ).run(userId, name, whenLabel || null, body, stars, new Date().toISOString());
 }
 function getMyReview(userId) {
@@ -850,7 +855,7 @@ function getPublishedReviews(limit) {
   ).all(limit || 50);
 }
 function getReviewQueue() {
-  return db.prepare("SELECT * FROM reviews WHERE status = 'pending' ORDER BY id DESC LIMIT 100").all();
+  return db.prepare("SELECT * FROM reviews ORDER BY id DESC LIMIT 100").all();
 }
 function setReviewStatus(id, status) {
   db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, id);

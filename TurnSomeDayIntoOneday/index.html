@@ -8600,11 +8600,19 @@ const DAILY_LINES=[
   "One year from now this week will be a sentence in a longer story.",
   "The counter did not blink. Neither should you.",
 ];
-// Same line all day, everywhere in the app, changing at local midnight.
+// A fresh line every time the app opens (Jacques, 23 Aug 2026 - the same
+// line all day read as a broken card to anyone opening the app twice).
+// Stable within one session so every surface shows the same line, and never
+// the same line twice in a row across opens.
+let sessionLineIdx=null;
 function dailyLineIndex(){
-  const d=new Date();
-  const key=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  return key%DAILY_LINES.length;
+  if(sessionLineIdx!==null)return sessionLineIdx;
+  let i=Math.floor(Math.random()*DAILY_LINES.length);
+  if(i===S.lastDailyLineIdx)i=(i+1)%DAILY_LINES.length;
+  S.lastDailyLineIdx=i;
+  sessionLineIdx=i;
+  try{save();}catch(e){}
+  return i;
 }
 function renderDailyQuote(){
   const el=document.getElementById('daily-quote-txt');
@@ -11673,7 +11681,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.4';
+const APP_VERSION='8.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

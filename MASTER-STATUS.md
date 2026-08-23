@@ -809,7 +809,7 @@ Two different video kinds, two different treatments:
   16.1) so the branding is present without turning a personal moment into an
   ad. And every talking head gets **background music underneath the speech** -
   a track from his own score library (`audio/meditation/`), ducked low so his
-  voice always leads. The caption still carries "link in bio" as always.
+  voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop. The caption still carries "link in bio" as always.
 
 ## The score library is Jacques's own music
 

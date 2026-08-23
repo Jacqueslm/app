@@ -2641,7 +2641,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <textarea id="review-body" maxlength="600" rows="5" oninput="updateReviewCount()" placeholder="What it actually did, or didn't do." style="width:100%;margin-top:8px;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--tp);font-family:var(--f);resize:vertical"></textarea>
     <div id="review-count" style="font-size:11px;color:var(--tm);text-align:right;margin-top:4px">0 / 600</div>
     <div id="review-msg" style="font-size:12.5px;color:var(--green);line-height:1.5;margin-top:8px;display:none"></div>
-    <button class="ob-btn" style="margin-top:12px" onclick="submitReview()" id="review-send">Send it to Jacques</button>
+    <button class="ob-btn" style="margin-top:12px" onclick="submitReview()" id="review-send">Put it on the site</button>
     <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
   </div>
 </div>
@@ -4767,7 +4767,7 @@ function stopMedSound(){
 }
 // ─── REVIEWS ─────────────────────────────────────────────────────────────────
 // A member writes one line; it goes to the owner as 'pending' and only appears
-// on /reviews once he approves it. Never auto-published, never invented.
+// on /reviews the moment they save it (Jacques, 23 Aug 2026). Never invented.
 let reviewStars=5;
 function renderReviewStars(){
   const el=document.getElementById('review-stars');
@@ -4799,7 +4799,7 @@ async function openReviewModal(){
         document.getElementById('review-body').value=review.body||'';
         reviewStars=review.stars||5;renderReviewStars();
         const m=document.getElementById('review-msg');
-        m.textContent=review.status==='published'?'Your review is live on the site. Editing it sends it back for a read.'
+        m.textContent=review.status==='published'?'Your review is live on the site. Editing it updates it right away.'
           :review.status==='pending'?'Your review is with Jacques, waiting to be read.':'';
         m.style.display=m.textContent?'':'none';
       }
@@ -4826,7 +4826,7 @@ async function submitReview(){
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||'That did not send.');
     msg.style.color='var(--green)';
-    msg.textContent='Sent. Thank you — it goes up once Jacques has read it.';
+    msg.textContent='It\'s live. Thank you — see it at turnsomedayintodayone.com/reviews.';
     msg.style.display='';
     setTimeout(closeReviewModal,2200);
   }catch(e){
@@ -11661,7 +11661,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.2';
+const APP_VERSION='8.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

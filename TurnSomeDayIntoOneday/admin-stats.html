@@ -105,10 +105,31 @@ fetch('/api/admin/stats').then(async r=>{
       .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
     `<div class="note">Last ${esc(u.cap_window_days)} days. Current free limit is <b>${esc(u.free_chat_limit)}</b>/day. The average divides total chats by user-days with activity, not calendar days, so someone who chats twice a week is not averaged down by their quiet days.</div>`;
   document.getElementById('out').innerHTML=h;
+  loadReviews();
 }).catch(()=>{
   document.getElementById('meta').textContent='';
   document.getElementById('out').innerHTML='<div class="err">Could not reach the stats endpoint.</div>';
 });
+
+// Reviews land on /reviews the moment a member writes one; this list is the
+// after-the-fact control - Hide pulls one off the page, Restore puts it back.
+function loadReviews(){
+  fetch('/api/reviews/queue').then(r=>r.json()).then(d=>{
+    const q=(d&&d.queue)||[];
+    let h='<h2>Reviews ('+q.length+' recent)</h2>';
+    if(!q.length){h+='<div class="note">None yet. They publish straight to /reviews and you get an email each time.</div>';}
+    else h+=q.map(r=>`<div class="card" style="text-align:left;max-width:none;margin-bottom:8px">
+      <div><b>${esc(r.name)}</b> · ${esc(r.stars)}★ · ${esc(r.when_label||'')} · <i>${esc(r.status)}</i></div>
+      <div style="margin:6px 0">${esc(r.body)}</div>
+      <button onclick="reviewAction(${r.id},'${r.status==='rejected'?'published':'rejected'}')">${r.status==='rejected'?'Restore':'Hide'}</button>
+    </div>`).join('');
+    const el=document.createElement('div');el.innerHTML=h;document.getElementById('out').appendChild(el);
+  }).catch(()=>{});
+}
+function reviewAction(id,action){
+  fetch('/api/reviews/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action})})
+    .then(()=>{location.reload();});
+}
 </script>
 </body>
 </html>

@@ -257,7 +257,7 @@ app.get('/reviews', (req, res) => {
 // The page used to read data/reviews.json, a file only Jacques could edit by
 // hand. So there was no path from "this helped me" to a published review, and
 // the page said "no reviews yet" indefinitely. These four routes are that path.
-// Nothing is published automatically: a review sits pending until the owner
+// Reviews publish immediately (Jacques, 23 Aug 2026); the owner is emailed
 // approves it, which keeps the page's promise - every quote from a real person,
 // none invented - while making it possible for the quotes to exist at all.
 app.get('/api/reviews/public', (req, res) => {
@@ -275,7 +275,22 @@ app.post('/api/reviews', requireAuth, (req, res) => {
   if (body.length < 10) return res.status(400).json({ error: 'Tell us a little more than that.' });
   if (body.length > 600) return res.status(400).json({ error: 'Keep it under 600 characters.' });
   db.upsertReview(req.userId, name, whenLabel, body, Math.round(stars));
-  res.json({ ok: true, pending: true });
+  // Straight to the site (Jacques, 23 Aug 2026) - and straight to his inbox,
+  // so a bad one can be pulled from the admin page the same hour it lands.
+  if (DIAG_OWNER_EMAIL) {
+    emailer.sendEmail({
+      to: DIAG_OWNER_EMAIL,
+      subject: `New review on /reviews: ${stars}★ from ${name}`,
+      text: `${name}${whenLabel ? ' (' + whenLabel + ')' : ''} - ${stars} stars
+
+${body}
+
+It is already live at ${process.env.APP_URL || 'https://www.turnsomedayintodayone.com'}/reviews
+Hide it from the admin page if it doesn't belong.`,
+      force: true,
+    }).catch(() => {});
+  }
+  res.json({ ok: true, pending: false });
 });
 app.get('/api/reviews/queue', requireAuth, (req, res) => {
   if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });

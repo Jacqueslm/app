@@ -62,6 +62,13 @@ video, no medical claims:
    IS the message - no narration required to explain it.
 3. **Image 3 — the standard end card** (house rule 16 layout, unchanged).
 
+**Tone: sad and serious.** The frame is always a CHOICE leading to a messed-up
+consequence - the two seconds it took against what it cost. **One short caption
+on each image** (white on a dark strip, top of frame): the cause caption names
+the choice, the effect caption names the price. Example pair:
+"The choice took two seconds." / "The road back takes everything."
+No jokes, no hope-copy on shots 1-2 - the hope lives on the end card.
+
 Timing inside 5-8s: roughly 2-3s cause, 2-3s effect, 2s end card. Music from
 the score library covers the whole thing and ends on the last note. Scripts
 in this format still get the full four fields (both titles, SAY/prompts,

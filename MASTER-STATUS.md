@@ -797,6 +797,15 @@ end card is 2 seconds inside the budget, not on top of it.
 
 Existing longer pieces stay as they are. This governs everything new.
 
+## House rule 24 — new features get shown and discussed BEFORE they ship (Jacques, 23 Aug 2026)
+
+"Before you push anything you build - discuss." Born from The Rebuild (v8.9,
+reverted same day: "looks cheap"). New features and anything visual: build it,
+show him screenshots or a video IN CHAT, get his reaction, only then push.
+Bug fixes for things he reported still ship immediately - this rule is about
+new ideas, not repairs. Never let a feature reach his phone before it has
+reached this conversation.
+
 ## House rule 23 — every screen must pass the Bigger-text audit (Jacques, 23 Aug 2026)
 
 "Every screen needs to be inspected and tested to make sure when bigger text

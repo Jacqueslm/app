@@ -1265,12 +1265,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>I slipped</p><span>No judgment — here's what's next</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" id="toolkit-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
-          <i class="ti ti-activity" style="color:#BA7517"></i>
-          <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
-          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
+                <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
           <i class="ti ti-heart" style="color:#E24B4A"></i>
           <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help your partner understand — and fight this together</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1293,12 +1288,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>Emergency Plan</p><span>Your contact and steps, ready when it's hard</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="openProTool('patterns')">
-          <i class="ti ti-chart-line" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Pattern Detection</p><span>A real report from your own logged data</span></div>
-          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="openProTool('scripts')">
+                <div class="setting-row" onclick="openProTool('scripts')">
           <i class="ti ti-notebook" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Category-Specific Recovery Scripts</p><span>Prevention steps written for your focus area</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1317,14 +1307,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- WEEKLY RECOVERY REPORTS (Pro) -->
-    <div id="s-weekly-reports" class="scr">
-      <div class="sec">
-        <div class="sec-hd" style="margin-top:0">Your weekly reports</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">A new report generates automatically every 7 days, built entirely from what you've actually logged. You can also generate one early for a snapshot of this week so far.</div>
-        <button class="log-btn" style="margin-bottom:18px" onclick="manualGenerateWeeklyReport();renderWeeklyReports()">Generate report now</button>
-        <div id="weekly-reports-list"></div>
-      </div>
-    </div>
 
     <!-- SMART REMINDER SETTINGS (Pro) -->
     <div id="s-reminder-settings" class="scr">
@@ -1404,29 +1386,24 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- ADVANCED STREAKS (Pro) -->
-    <div id="s-streaks" class="scr">
+        <!-- INSIGHTS - one screen for everything the app reads out of the logs.
+         Was five separate screens (Analytics, Weekly Reports, Habit Coach,
+         Advanced Streaks, Pattern Detection) with near-identical subtitles;
+         merged 24 Aug 2026 ("delete duplicates" - Jacques). The old screen
+         ids still route here so every existing link keeps working. -->
+    <div id="s-insights" class="scr">
       <div class="sec">
-        <div class="sec-hd" style="margin-top:0">Advanced streaks</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Built entirely from what you've actually logged — insights, milestones, and patterns behind your streak.</div>
-        <div id="streaks-content"></div>
-      </div>
-    </div>
-
-    <!-- ANALYTICS (Pro) -->
-    <div id="s-analytics" class="scr">
-      <div class="sec">
-        <div class="sec-hd" style="margin-top:0">Analytics</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Simple, calm insights from what you've actually logged this week — no charts, no dashboards.</div>
+        <div class="sec-hd" style="margin-top:0">This week</div>
         <div id="analytics-content"></div>
-      </div>
-    </div>
-
-    <!-- HABIT COACH (Pro) -->
-    <div id="s-habit-coach" class="scr">
-      <div class="sec">
-        <div class="sec-hd" style="margin-top:0">Habit Coach</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Consistency insights, vulnerability windows, and personalized habit suggestions — built from what you've actually logged.</div>
+        <div class="sec-hd">Patterns &amp; habits</div>
+        <button class="log-btn" style="margin-bottom:12px" onclick="openPatternReport()">Pattern report — triggers, risky times, strategy</button>
         <div id="habit-coach-content"></div>
+        <div class="sec-hd">Streaks</div>
+        <div id="streaks-content"></div>
+        <div class="sec-hd">Weekly reports</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:12px;line-height:1.5">A new report generates automatically every 7 days. You can also generate one early.</div>
+        <button class="log-btn" style="margin-bottom:18px" onclick="manualGenerateWeeklyReport();renderWeeklyReports()">Generate report now</button>
+        <div id="weekly-reports-list"></div>
       </div>
     </div>
 
@@ -1466,32 +1443,20 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Custom packs</div></div>
-      <div class="setting-row" onclick="openLessonPacksScreen()">
-        <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Lesson Packs</p><span>Relationships, trauma, anxiety, confidence, and more — the first 15 days of every pack are free; days 16+ are Pro</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Spiritual</div></div>
-      <div class="setting-row" onclick="openPack('spiritual')">
-        <i class="ti ti-sun-high" style="color:var(--accent)"></i>
-        <div class="setting-row-txt"><p>Spiritual Path</p><span>30 days on faith and recovery — God as you understand God. No particular religion; for the devout, the doubting, and the 2am pray-ers — the first 15 days are free</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Streak</div></div>
+            <div style="height:8px;background:var(--s0)"></div>
+            <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Progress &amp; insights</div></div>
       <div class="setting-row" onclick="switchTo('progress');actBn('bn-tools')">
         <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Progress &amp; insights</p><span>Hours, savings, and streak history</span></div>
+        <div class="setting-row-txt"><p>Progress</p><span>Hours, savings, and streak history</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openProTool('streaks')">
-        <i class="ti ti-flame"></i>
-        <div class="setting-row-txt"><p>Advanced Streaks</p><span>Streak insights, milestones, and comeback tracking</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="shareMyMilestone()">
+        <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
+          <i class="ti ti-chart-dots" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Insights &amp; reports</p><span>Patterns, habits, streak insights, and weekly reports — one place</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
+            <div class="setting-row" onclick="shareMyMilestone()">
         <i class="ti ti-share"></i>
         <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Inspire someone else</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -1505,22 +1470,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Understand your patterns</div></div>
-      <div class="setting-row" onclick="openProTool('analytics')">
-        <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Analytics</p><span>Simple insights on your triggers, patterns, and emotional trends</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openProTool('weeklyReports')">
-        <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Weekly Reports</p><span>Your emotional patterns, triggers, and progress each week</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="openProTool('habitCoach')">
-        <i class="ti ti-flame"></i>
-        <div class="setting-row-txt"><p>Habit Coach</p><span>Consistency insights, vulnerability windows, and personalized habit suggestions</span></div>
-        <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
+                        <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
         <i class="ti ti-clock"></i>
         <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
@@ -10559,9 +10509,9 @@ const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   rooms:'s-rooms',community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
-  'weekly-reports':'s-weekly-reports','reminder-settings':'s-reminder-settings',streaks:'s-streaks',
-  analytics:'s-analytics','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
-  'habit-coach':'s-habit-coach',tools:'s-tools',partner:'s-partner',
+  'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
+  insights:'s-insights','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
+  'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -10570,7 +10520,7 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Weekly Reports','reminder-settings':'Reminder Settings',streaks:'Advanced Streaks',analytics:'Analytics','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Habit Coach',tools:'Tools'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -10599,6 +10549,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
   'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
 function switchTo(id,opts){
+  if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
   // background is both a battery drain and a privacy problem.
   try{stopDictation();}catch(e){}
@@ -10643,16 +10594,13 @@ function switchTo(id,opts){
   if(id==='rooms'){renderRoomsList();}
   if(id==='nova'){maybeShowNovaDisclaimer();}
   if(id==='community'){renderCommunityPosts();}
-  if(id==='weekly-reports'){maybeAutoGenerateWeeklyReport();renderWeeklyReports();}
+  if(id==='insights'){renderAnalytics();maybeAutoGenerateWeeklyReport();renderWeeklyReports();renderHabitCoach();renderAdvancedStreaks();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
   if(id==='profile'){loadDiagnostics();}
   if(id==='nova'){try{updateNovaVoiceToggle();}catch(e){}}
-  if(id==='streaks'){renderAdvancedStreaks();}
-  if(id==='analytics'){renderAnalytics();}
   if(id==='pack-list'){renderPackList();}
   if(id==='pack-lesson'){renderPackLesson();}
   if(id==='plans'){renderPlansScreen();}
-  if(id==='habit-coach'){renderHabitCoach();}
   if(id==='tools'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
 }
@@ -11714,7 +11662,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.10';
+const APP_VERSION='8.11';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

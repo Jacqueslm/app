@@ -63,6 +63,93 @@ Do not steer him off these; work with them:
 
 ---
 
+## ⭐ CURRENT STATUS (24 Aug 2026) — newest, read this first
+
+App is at **v8.13**, live on all three branches (start-here = working, main +
+vibe-code = deploy). Everything below shipped 22-24 Aug and is DONE.
+
+### Jacques is the sixth narrator — the whole app speaks in his voice
+- His voice was cloned on THIS machine (XTTS v2, refs in scratchpad
+  `voice/jacques-ref2.wav` + `jacques-ref.wav`) from his real recording.
+- **All 90 days × 12 tracks** narrated in his voice (1,150 recordings), plus
+  the SOS "Talk me through it" with synced captions. Voice button in the
+  lesson player and SOS cycles: Warm, Soft, Gentle, Clear, Calm male,
+  **Jacques (founder)**.
+- The five stock Piper narrators also cover days 31-90 now (1,243 files
+  each). Audio CDN = the `lesson-audio` branch; manifest =
+  `data/lesson-audio-manifest.json`. Generators:
+  `tools/generate-jacques-audio.py`, `tools/generate-phase-audio.py`,
+  `tools/generate-jacques-sos.py`. Lesson text changes = regenerate (hash in
+  filename). Known gotcha: two generators writing the manifest concurrently
+  race — re-run one at the end (files exist → manifest-only pass, seconds).
+
+### Three new experiences (all Jacques-approved via the rule-24 flow)
+- **The Climb** (Today + Tools): back-view hiker climbs 90 carved steps up a
+  mountain. Step earned by finishing today's lesson; spring-hop, lit stone,
+  chime, haptics, personal line; milestone light-floods at 7/15/30/45/60/75/90.
+  Avatar sheet: 3 builds, 6 skin tones, 6 jacket colors. Slip = campfire, the
+  mountain NEVER takes back a step; past 90 the ridge continues. Personal
+  photos (his call): on-device only, share cards only — never uploaded.
+- **Ride the Wave** (SOS sheet + Recovery Toolkit): 2.5-min breathing game —
+  hold on the inhale, release on the exhale; the urge-wave rises, peaks,
+  always passes; ends "That was the wave. You're still standing." and logs a
+  survived craving.
+- **Stories** (Tools): 10 original ~8-min first-person narrated stories (5
+  addict-POV: alcohol/porn/meth/gambling/food; 5 supporter-POV carrying the
+  boundaries doctrine). Shelf shows 5, rotates every ISO week (odd weeks lean
+  user, even lean supporter). Pool: `data/audio-stories.json`; audio on the
+  CDN branch under `stories/`; narrate new ones with
+  `tools/generate-stories-audio.py`. To add a weekly batch: append stories
+  to the JSON, run the tool, push audio + JSON.
+
+### Business: Friendly is Pro-only now (his call: "no pressure" upsell)
+- v8.12: zero free chats, enforced server-side. Free = days 1-15 + every
+  recovery tool + journal + insights + reminders + partner side + stories +
+  Climb. Pro = days 16-90, Friendly (≤30 chats/day), live rooms.
+- Full tier-claim audit ran 24 Aug across app, landing, all 14 alternative
+  pages, emails, FAQ, Friendly's prompt, Play listing (was wrong both
+  directions). House rule 25 in MASTER-STATUS = the no-pressure doctrine +
+  the canonical FREE/PRO list. **ACTION when Google approves: paste the
+  corrected `store-listing/02-full-description.md` into Play Console — the
+  submitted listing still has the old wording.**
+
+### App quality (his bug reports, all fixed + shipped)
+- Reviews go straight to /reviews + email him on arrival; hide/restore from
+  admin-stats; hidden stays hidden through edits (v8.3).
+- Reminder window is its own server setting — survives stale-device sync,
+  wipes, re-login; scheduler reads it first (v8.6).
+- Motivation card: fresh line every app open, never twice running (v8.5).
+- Cross-link card rotates partner tracks + varies wording (v8.4).
+- Bigger text fits EVERYWHERE: 9 centered overlays got safe-center+scroll;
+  `tools/bigtext-audit.js` sweeps every screen/overlay — house rule 23 says
+  run it before any layout ship (v8.7).
+- Tools decluttered 28→10 rows; Analytics/Weekly/Habit Coach/Streaks/Pattern
+  merged into ONE Insights screen, old ids still route (v8.11).
+- Celebrations/nudges never stack over active flows, quiet on day one; state
+  sync debounced; app-lock confirm is brand not red (v8.8).
+
+### House rules added (full text in MASTER-STATUS)
+- **23**: every layout change passes tools/bigtext-audit.js before shipping.
+- **24**: new features get shown IN CHAT (screenshots/video) and discussed
+  BEFORE they ship. Born from The Rebuild (built, shipped, "looks cheap",
+  reverted same day). Bug fixes he reported still ship immediately.
+- **25**: Pro sells itself quietly — the I Am Sober constant-upsell style is
+  explicitly rejected.
+
+### Content & marketing (22-24 Aug)
+- SCRIPTS.md #40 "To the one still using" (fragments style — logged rule:
+  short sentences, no filler). His take was produced and delivered finished.
+- AI-SCENES: **Cause & Effect format** is the default short AI video — 3
+  images (cause/effect/end card), 5-8s, sad/serious, one caption per image
+  (choice on the cause, price on the effect), hope only on the end card.
+  Produced: pills cause/effect, hangxiety cause/effect, hangxiety heart.
+- Talking-head pipeline (rule 22) ran 5 finished videos this stretch.
+
+### Play release (open)
+- Day 8 of Google silence on production review (submitted 17 Aug). Daily
+  check-in trigger runs; if silent through 27 Aug, draft a status inquiry on
+  Google's own email thread for him to send.
+
 ## 🚀 17 AUG 2026 — THE APP IS IN GOOGLE REVIEW, WORLDWIDE. FULL SESSION HANDOFF.
 
 **Read this block before doing ANYTHING Play-related. Every item is verified

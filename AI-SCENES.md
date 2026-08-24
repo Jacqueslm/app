@@ -492,3 +492,23 @@ supporter's side.
 **Reach flag:** visible child distress can get throttled or age-gated on
 TikTok/Facebook even when the message is clearly a PSA. If this one
 underperforms next to the others, that's the reason - not the writing.
+
+## A13 — "I only raised my voice" · anger, mother's side · 8s · BUILT 24 Aug 2026
+
+The supporter-facing companion to A12, and the first piece built from a
+supplied VIDEO clip rather than stills.
+
+1. **3s** Jacques's 5s kitchen clip (trimmed to 3s), letterboxed band — *I only raised my voice.*
+2. **3s** the teenage daughter alone on her bed, headphones on, door closed —
+   FULL BLEED (the still is vertical) — *She stopped telling me things.*
+3. **2s** end card — **Anger is a habit. It can be broken.**
+
+Scored with `content/score/silent-impact-3.mp3`; the clip's own audio is muted
+(offered to Jacques as an option: his shouting under shot 1, cutting to
+silence on the girl, would sharpen the contrast).
+File: `content/mother-anger.mp4`.
+
+**Title (TikTok / Facebook):** I only raised my voice
+**Title (YouTube):** Why am I so angry all the time — what the kids remember (2,900/mo, KD 27)
+
+**Caption:** It lasted a minute. She'll carry it for years. Anger is a habit, and habits can be broken. It's free. Link in bio.

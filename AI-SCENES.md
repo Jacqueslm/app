@@ -465,3 +465,30 @@ score tracks are wrong for this one). File: `content/after-recovery.mp4`.
 cost. This is the only one that shows the payoff, and it is the proof the
 whole app is selling. Post it after a run of heavy pieces, never in the same
 week as another "after" video - it works because it is rare.
+
+## A12 — "Ten seconds" · anger · 3 shots · 10s · BUILT 24 Aug 2026
+
+Cause & Effect with a twist that suits anger: ONE cause, TWO prices - what it
+did to them, and what it did to him. Built from Jacques's stills.
+
+1. **3s** the hallway, both kids running, him raging behind them — *It lasted ten seconds.*
+2. **3s** the kids' faces, close, clinging to each other — *They'll carry it for thirty years.*
+3. **2s** him alone on the bunk in a cell — *And it cost me everything after.*
+4. **2s** end card — **Anger is a habit. It can be broken.**
+
+Scored with `content/score/silent-impact-3.mp3`. File: `content/anger-cause-effect.mp4`.
+
+**Title (TikTok / Facebook):** It lasted ten seconds
+**Title (YouTube):** Why am I so angry all the time — what ten seconds costs (2,900/mo, KD 27)
+
+**Caption:** Ten seconds of rage. They carry it for thirty years. Anger is a habit, and habits can be broken — the app has a whole track for it. It's free. Link in bio.
+
+**Ties to the app:** the Anger & Control track is already in the Bootcamp, so
+this video has somewhere real to send people. KEYWORDS.md also has
+`how to help a man whos always mad` (1,900/mo, **KD 11**) - the cheapest
+supporter term in the whole file, and the natural follow-up video from the
+supporter's side.
+
+**Reach flag:** visible child distress can get throttled or age-gated on
+TikTok/Facebook even when the message is clearly a PSA. If this one
+underperforms next to the others, that's the reason - not the writing.

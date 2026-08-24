@@ -248,7 +248,7 @@ Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
 2. **Faith card survives reload** — it only painted at the moment of choosing;
    `initApp()` now repaints it, so the spiritual choice persists visibly.
 3. **PRO IS NOW EXACTLY TWO THINGS (Jacques's call):** lesson/pack **days 16-30**, and
-   **30 Friendly chats/day vs 3**. Everything else is free. `openProTool()` gates nothing
+   **Friendly itself (Pro-only since 24 Aug 2026, up to 30 chats/day)**. The recovery tools are free. `openProTool()` gates nothing
    (16 tools freed). Also freed: smart reminders now actually fire, weekly reports
    generate, guided journal prompts + mood tags, habit coaching/celebration nudges,
    craving suggestions. **Biggest hidden gate removed:** Friendly used to intercept a
@@ -796,6 +796,21 @@ seconds a line including its fade. Every line has to earn its place, and the
 end card is 2 seconds inside the budget, not on top of it.
 
 Existing longer pieces stay as they are. This governs everything new.
+
+## House rule 25 — Pro sells itself quietly (Jacques, 24 Aug 2026)
+
+He studied I Am Sober's constant upgrade pushing and rejected it: "not my
+style, keep it no pressure." The doctrine: state what Pro is ONCE where
+pricing naturally lives (Plans page, locked lesson, Friendly's own tab),
+factually, then stop. No popups, no countdown offers, no upsell after
+milestones or slips, and NEVER a pitch to someone in distress (Friendly's
+system prompt enforces this). Current truth everywhere: FREE = days 1-15 of
+every track/pack, all SOS + recovery tools, journal, insights, reminders,
+partner side, meditation, stories, the Climb. PRO ($9.99/mo, $59.99/yr,
+7-day trial, $149.99 founding lifetime) = days 16-90, Friendly (up to 30
+chats/day), live rooms. Any new copy touching tiers must match this list -
+tier-claim audit ran 24 Aug across app, landing, 14 alternative pages,
+emails, FAQ, Friendly prompt.
 
 ## House rule 24 — new features get shown and discussed BEFORE they ship (Jacques, 23 Aug 2026)
 

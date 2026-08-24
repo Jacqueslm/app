@@ -2605,6 +2605,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
   </div>
 </div>
+<div id="climb-overlay" style="display:none;position:fixed;inset:0;background:#0b0e1a;z-index:999;overflow:hidden">
+  <canvas id="climb-canvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
+  <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;pointer-events:none">
+    <div style="color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)"><div style="font-size:18px;font-weight:700">The Climb</div><div style="font-size:12px;opacity:.8" id="climb-sub"></div></div>
+    <button class="pill" onclick="closeClimb()" style="pointer-events:auto;background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(4px)">Close</button>
+  </div>
+  <div id="climb-line" style="position:absolute;left:24px;right:24px;bottom:118px;text-align:center;color:#fff;font-size:15px;line-height:1.5;text-shadow:0 1px 10px rgba(0,0,0,.65);opacity:0;transition:opacity .5s"></div>
+  <div style="position:absolute;left:20px;right:20px;bottom:34px">
+    <button class="ob-btn" id="climb-cta" onclick="climbStep()" style="width:100%">Take today's step</button>
+  </div>
+</div>
 <div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
     <div id="med-timer" style="font-size:40px;font-weight:700;letter-spacing:1px">5:00</div>
     <div id="med-phase" style="font-size:15px;opacity:.92;margin-top:6px">Settle in — eyes closed or a soft gaze</div>
@@ -3445,6 +3456,7 @@ function restartLessonProgram(){
 }
 
 function completeLessonForToday(){
+  (S.lessonDoneDates=S.lessonDoneDates||{})[new Date().toDateString()]=true;// earns today's Climb step
   const lesson=getTodayLesson();
   if(!lesson)return;
   const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
@@ -5789,6 +5801,181 @@ function anyBlockingUIOpen(){
   }
   return false;
 }
+// ─── THE CLIMB ───────────────────────────────────────────────────────────────
+// Jacques's design (24 Aug 2026): your avatar climbs 90 carved steps up a
+// mountain. Every earned step is a moment - spring-hop, lit stone, a personal
+// line, your own pace. A slip sits you at a campfire; the mountain never
+// takes back a step. Past 90 the ridge keeps going. Interactive: swipe to
+// look up/down the trail, tap a conquered stone to relive its day.
+let climbAnim=null,climbCam=0,climbCamTarget=0,climbHop=0,climbCelebrate=0,climbDrag=null;
+function climbSteps(){return Math.min(999,S.climbSteps||0);}
+function climbEarnable(){
+  // one step per calendar day the app was opened AND today's lesson done
+  const today=new Date().toDateString();
+  if(S.climbLastStep===today)return {ok:false,why:"Today's step is taken. Tomorrow's stone is waiting."};
+  const focus=S.currentAddiction,doneToday=(S.lessonDoneDates||{})[today];
+  if(!doneToday)return {ok:false,why:"Finish today's lesson to earn this step."};
+  return {ok:true};
+}
+function openClimb(){
+  document.getElementById('climb-overlay').style.display='block';
+  const c=document.getElementById('climb-canvas');
+  c.width=c.clientWidth*devicePixelRatio;c.height=c.clientHeight*devicePixelRatio;
+  climbCam=climbCamTarget=climbSteps();
+  bindClimbGestures(c);
+  updateClimbCTA();
+  cancelAnimationFrame(climbAnim);
+  const loop=()=>{drawClimb();climbAnim=requestAnimationFrame(loop);};loop();
+  logActivity('climb_open',{});
+}
+function closeClimb(){cancelAnimationFrame(climbAnim);document.getElementById('climb-overlay').style.display='none';}
+function updateClimbCTA(){
+  const b=document.getElementById('climb-cta'),e=climbEarnable();
+  const n=climbSteps();
+  document.getElementById('climb-sub').textContent=n>=90?('Summit reached — the ridge continues · step '+n):('Step '+n+' of 90 · your pace');
+  if(e.ok){b.disabled=false;b.textContent='Take today\'s step';b.style.opacity=1;}
+  else{b.disabled=true;b.textContent=e.why;b.style.opacity=.75;}
+}
+function climbStep(){
+  const e=climbEarnable();if(!e.ok)return;
+  S.climbSteps=(S.climbSteps||0)+1;S.climbLastStep=new Date().toDateString();save();
+  climbHop=1;climbCelebrate=([7,15,30,45,60,75,90].includes(S.climbSteps))?2:1;
+  climbCamTarget=S.climbSteps;
+  climbChime(climbCelebrate>1);
+  showClimbLine(climbLineFor(S.climbSteps));
+  if(navigator.vibrate)try{navigator.vibrate(climbCelebrate>1?[30,40,80]:20);}catch(x){}
+  setTimeout(()=>{climbCelebrate=0;updateClimbCTA();},climbCelebrate>1?3500:1800);
+}
+function climbLineFor(n){
+  if(n>=90)return "The summit. And the ridge keeps going — so do you.";
+  const M={7:"One week of stone underfoot. It holds.",15:"Base camp. Look how small the start looks from here.",30:"Thirty stones. Each one a day you chose.",45:"Halfway. The mountain believes you now.",60:"Sixty. The air is clearer up here.",75:"Fifteen from the top. Don't rush — just don't stop."};
+  if(M[n])return M[n];
+  const c=(S.cravings||[]).length,alt=["Day "+n+" — carved, lit, yours.","Step "+n+". Nobody took this one for you.","Another stone behind you. It stays behind you.","Day "+n+" — the view is earned, not given."];
+  return alt[n%alt.length];
+}
+function showClimbLine(t){const el=document.getElementById('climb-line');el.textContent=t;el.style.opacity=1;clearTimeout(el._t);el._t=setTimeout(()=>el.style.opacity=0,3400);}
+function climbChime(big){
+  try{
+    const ac=window._climbAC||(window._climbAC=new (window.AudioContext||window.webkitAudioContext)());
+    const notes=big?[523.25,659.25,783.99,1046.5]:[523.25,783.99];
+    notes.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='sine';
+      g.gain.setValueAtTime(0,ac.currentTime+i*.12);g.gain.linearRampToValueAtTime(.18,ac.currentTime+i*.12+.02);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+i*.12+.9);
+      o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+i*.12);o.stop(ac.currentTime+i*.12+1);});
+  }catch(e){}
+}
+function bindClimbGestures(c){
+  if(c._bound)return;c._bound=true;
+  c.addEventListener('pointerdown',ev=>{climbDrag={y:ev.clientY,cam:climbCamTarget};});
+  c.addEventListener('pointermove',ev=>{if(!climbDrag)return;climbCamTarget=Math.max(0,Math.min(Math.max(95,climbSteps()+5),climbDrag.cam+(ev.clientY-climbDrag.y)/28));});
+  c.addEventListener('pointerup',ev=>{
+    if(climbDrag&&Math.abs(ev.clientY-climbDrag.y)<6){
+      // tap: if a conquered stone is near the tap point, relive its line
+      const r=c.getBoundingClientRect(),k=Math.round(climbCam+((r.height/2-(ev.clientY-r.top))/64));
+      if(k>0&&k<=climbSteps())showClimbLine(climbLineFor(k));
+      else climbCamTarget=climbSteps();
+    }
+    climbDrag=null;
+    setTimeout(()=>{if(!climbDrag)climbCamTarget=Math.max(0,Math.min(climbCamTarget,climbSteps()));},2600);
+  });
+}
+function drawClimb(){
+  const c=document.getElementById('climb-canvas'),x=c.getContext('2d');
+  const W=c.width,H=c.height,dp=devicePixelRatio;
+  climbCam+=(climbCamTarget-climbCam)*.12;
+  if(climbHop>0)climbHop=Math.max(0,climbHop-.045);
+  const n=climbSteps(),prog=Math.min(1,n/90),T=Date.now();
+  const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+  // ── sky: dawn -> alpine, stars fade out as you rise ──
+  const g=x.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'rgb('+mix([16,14,44],[64,118,196],prog).join(',')+')');
+  g.addColorStop(.55,'rgb('+mix([64,36,84],[132,182,226],prog).join(',')+')');
+  g.addColorStop(1,'rgb('+mix([140,74,92],[196,222,240],prog).join(',')+')');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  if(prog<.6)for(let i=0;i<26;i++){const sx=(i*137)%W,sy=((i*211)%Math.floor(H*.5));
+    x.fillStyle='rgba(255,255,255,'+((.5-prog*.8)*(.4+.6*Math.abs(Math.sin(T/1400+i))))+')';x.fillRect(sx,sy,1.6*dp,1.6*dp);}
+  // sun with soft bloom
+  const sunY=H*(0.5-prog*.33);
+  const sb=x.createRadialGradient(W*.78,sunY,4*dp,W*.78,sunY,90*dp);
+  sb.addColorStop(0,'rgba(255,238,190,.95)');sb.addColorStop(.25,'rgba(255,214,150,.45)');sb.addColorStop(1,'rgba(255,214,150,0)');
+  x.fillStyle=sb;x.fillRect(0,0,W,H);
+  x.beginPath();x.arc(W*.78,sunY,20*dp,0,7);x.fillStyle='#ffeec2';x.fill();
+  // ── parallax ridgelines (3 layers, smooth) ──
+  const stepH=64*dp,cx=W/2,midY=H*.52,yFor=k=>midY+(climbCam-k)*stepH;
+  const ridge=(base,amp,speed,col)=>{
+    x.fillStyle=col;x.beginPath();x.moveTo(0,H);
+    for(let px=0;px<=W;px+=W/60){
+      const u=px/W*6.28;
+      const y=base+Math.sin(u*1.7+climbCam*speed)*amp+Math.sin(u*3.3+climbCam*speed*.6)*amp*.5+Math.sin(u*7.1)*amp*.22;
+      x.lineTo(px,y);
+    }
+    x.lineTo(W,H);x.closePath();x.fill();
+  };
+  ridge(H*.46,26*dp,.05,'rgba(40,40,86,'+(.5-prog*.15)+')');
+  ridge(H*.58,34*dp,.09,'rgba(33,32,70,'+(.68-prog*.18)+')');
+  // mist band
+  const mist=x.createLinearGradient(0,H*.5,0,H*.75);
+  mist.addColorStop(0,'rgba(226,224,244,0)');mist.addColorStop(.5,'rgba(226,224,244,'+(.16-prog*.08)+')');mist.addColorStop(1,'rgba(226,224,244,0)');
+  x.fillStyle=mist;x.fillRect(0,H*.5,W,H*.25);
+  ridge(H*.72,44*dp,.16,'rgba(26,24,54,'+(.85-prog*.2)+')');
+  // ── trail stones ──
+  for(let k=Math.floor(climbCam)-7;k<=Math.floor(climbCam)+9;k++){
+    if(k<0)continue;
+    const y=yFor(k);if(y<-stepH||y>H+stepH)continue;
+    const sx=cx+Math.sin(k*.7)*W*.22;
+    const conquered=k<=n&&k>0,current=k===n;
+    x.save();x.translate(sx,y);
+    x.fillStyle='rgba(10,8,24,.35)';x.beginPath();x.ellipse(2*dp,6*dp,47*dp,13*dp,0,0,7);x.fill(); // shadow
+    const sg=x.createLinearGradient(0,-14*dp,0,12*dp);
+    if(conquered){sg.addColorStop(0,'#8f84e0');sg.addColorStop(1,'#4c4390');}
+    else{sg.addColorStop(0,'rgba(96,96,128,.6)');sg.addColorStop(1,'rgba(52,52,80,.6)');}
+    x.fillStyle=sg;x.beginPath();x.ellipse(0,0,46*dp,14*dp,0,0,7);x.fill();
+    x.strokeStyle=conquered?'rgba(255,236,180,.8)':'rgba(255,255,255,.12)';x.lineWidth=1.4*dp;
+    x.beginPath();x.ellipse(0,-2*dp,44*dp,12*dp,0,Math.PI,0);x.stroke(); // rim light
+    if(conquered){
+      const glow=current?(.6+.2*Math.sin(T/300)):.35;
+      const gg=x.createRadialGradient(0,-3*dp,2*dp,0,-3*dp,40*dp);
+      gg.addColorStop(0,'rgba(255,230,160,'+glow+')');gg.addColorStop(1,'rgba(255,230,160,0)');
+      x.fillStyle=gg;x.beginPath();x.ellipse(0,-3*dp,40*dp,11*dp,0,0,7);x.fill();
+      x.fillStyle=current?'#241e3e':'rgba(30,24,56,.85)';x.font='600 '+(11*dp)+'px Arial';x.textAlign='center';x.fillText(k,0,2*dp);
+    }
+    x.restore();
+  }
+  // ── avatar: hooded climber silhouette with pack ──
+  const slip=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<86400000);
+  const ax=cx+Math.sin(n*.7)*W*.22, ay=yFor(n)-6*dp-(Math.sin((1-climbHop)*Math.PI)*(climbHop>0?30*dp:0));
+  const av=S.avatar||{skin:'#b07b52',hue:'#534AB7'};
+  x.save();x.translate(ax,ay);x.scale(dp,dp);
+  const bob=Math.sin(T/650)*1.5;
+  x.translate(0,bob);
+  x.fillStyle='rgba(10,8,24,.4)';x.beginPath();x.ellipse(0,4-bob,14,4,0,0,7);x.fill(); // contact shadow
+  if(slip){
+    // seated by a campfire
+    const f=Math.sin(T/120);
+    x.fillStyle='#ff9a3c';x.beginPath();x.moveTo(20,0);x.quadraticCurveTo(26+f*2,-16,20,-24);x.quadraticCurveTo(16,-12,13,-17);x.quadraticCurveTo(11,-6,20,0);x.fill();
+    x.fillStyle='#ffd27a';x.beginPath();x.moveTo(20,0);x.quadraticCurveTo(23,-9,20,-13);x.quadraticCurveTo(18,-7,17,-9);x.quadraticCurveTo(16,-4,20,0);x.fill();
+    x.fillStyle=av.hue;x.beginPath();x.moveTo(-14,2);x.quadraticCurveTo(-16,-16,-6,-20);x.quadraticCurveTo(2,-22,2,-12);x.lineTo(4,2);x.closePath();x.fill(); // seated body
+    x.fillStyle=av.skin;x.beginPath();x.arc(-6,-26,7,0,7);x.fill();
+    x.fillStyle=av.hue;x.beginPath();x.arc(-6,-28,7.5,Math.PI*1.05,Math.PI*1.95);x.fill(); // hood
+  }else{
+    // standing climber: legs, body, pack, head+hood
+    x.fillStyle='#2c2648';x.beginPath();x.roundRect(-7,-16,5.5,17,2);x.roundRect(2,-16,5.5,15,2);x.fill(); // legs
+    const bg=x.createLinearGradient(-9,-42,9,-14);bg.addColorStop(0,av.hue);bg.addColorStop(1,'#352e60');
+    x.fillStyle=bg;x.beginPath();x.roundRect(-9,-42,18,28,7);x.fill(); // torso
+    x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.roundRect(-14,-40,7,20,3);x.fill(); // pack
+    x.fillStyle=av.hue;x.beginPath();x.roundRect(6,-38,5,20,2.5);x.fill(); // near arm
+    x.fillStyle=av.skin;x.beginPath();x.arc(0,-49,7.5,0,7);x.fill(); // head
+    x.fillStyle=av.hue;x.beginPath();x.arc(0,-51,8.2,Math.PI*1.02,Math.PI*1.98);x.fill(); // hood
+    x.strokeStyle='#8f88c8';x.lineWidth=2;x.beginPath();x.moveTo(12,-36);x.lineTo(12,2);x.stroke(); // trekking pole
+  }
+  x.restore();
+  // milestone flood + particles
+  if(climbCelebrate>1){x.fillStyle='rgba(255,220,140,'+(0.10+0.07*Math.sin(T/150))+')';x.fillRect(0,0,W,H);}
+  if(climbCelebrate>0){for(let p=0;p<26;p++){const t=(T/900+p*.13)%1;
+    x.fillStyle='hsla('+(40+p*11)+',85%,'+(60+p%3*10)+'%,'+(1-t)+')';
+    x.beginPath();x.arc(ax-60*dp+((p*53)%120)*dp, ay-30*dp-t*110*dp, (2.4-t*1.4)*dp,0,7);x.fill();}}
+}
+
 // ─── DAILY WIN MOMENT ────────────────────────────────────────────────────────
 // Every new day gets its own quiet celebration - a burst and one honest line.
 // Milestones mark the big numbers; this marks the ordinary showing-up that

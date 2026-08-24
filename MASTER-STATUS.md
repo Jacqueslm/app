@@ -415,6 +415,17 @@ from 19 Aug). One post daily — posts go to the QUEUE, never publish-now, and
 the queue paces them. Plan content volume around one slot: a new script or
 video queued today publishes on the next free day, not the same day.
 
+**Queue reset + channel reality (Jacques, 24 Aug 2026):**
+- Everything queued up to 24 Aug he has ALREADY POSTED MANUALLY — the old
+  queue contents are dead history. Do not re-queue, re-send, or count any
+  pre-24-Aug piece as pending; treat the queue as empty from here.
+- **TikTok: manual only.** Buffer's TikTok connection keeps rejecting posts,
+  so he posts TikTok himself, natively (which is better anyway - in-app
+  sounds). Never plan TikTok through Buffer.
+- **Buffer carries exactly two channels: Facebook + YouTube (Shorts).**
+- **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
+  only for the short vertical pieces.
+
 **The code-built video pipeline is proven three times now**: Clear All (the
 notification lockscreen), She Came Back (the 7-frame porch story), The Cart
 (shopping addiction, built entirely inside a browser window). HTML/CSS with a

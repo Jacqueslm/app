@@ -410,9 +410,10 @@ starts a fresh run with no connectors attached. So the honest sequence is:
 search once, and if Buffer is not there, hand Jacques ONE link to approve, or
 the raw video URL to paste into Buffer himself. Anything else wastes his time.
 
-**Buffer queue times are 8am and 6pm daily** (Jacques changed them 19 Aug).
-Two slots a day — posts go to the QUEUE, never publish-now, and the queue
-paces them.
+**Buffer queue is ONE slot a day** (Jacques changed it 24 Aug; was 8am+6pm
+from 19 Aug). One post daily — posts go to the QUEUE, never publish-now, and
+the queue paces them. Plan content volume around one slot: a new script or
+video queued today publishes on the next free day, not the same day.
 
 **The code-built video pipeline is proven three times now**: Clear All (the
 notification lockscreen), She Came Back (the 7-frame porch story), The Cart

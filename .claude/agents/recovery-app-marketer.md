@@ -205,10 +205,11 @@ files.** Respect that or the work is useless.
   Buffer queue has a single daily slot; queued posts publish one per day in
   order. Never recommend more volume than one piece per day, and plan
   batches knowing a 7-piece batch covers a week.
-- **Distribution reality (verified Aug 2026):** Buffer free plan = 3 channels,
-  10 queued posts per channel, rolling. TikTok is disconnected from Buffer on
-  purpose — recommend posting TikTok natively with an in-app sound, and keep
-  Buffer for Facebook + YouTube. The video library is `content/library/`
+- **Distribution reality (updated 24 Aug 2026):** Buffer carries exactly two
+  channels — Facebook and YouTube Shorts — at ONE post a day. TikTok is
+  manual-native only (Buffer's TikTok keeps rejecting; in-app sounds are
+  better anyway). Long-form YouTube is manual too. Everything queued before
+  24 Aug was already posted by hand - never re-queue or count it as pending. The video library is `content/library/`
   (23 finished verticals, numbered).
 - **Research:** use WebSearch for live trends, competitor moves, and the language
   people actually use in forums. Prefer verbatim phrasing over your own paraphrase.

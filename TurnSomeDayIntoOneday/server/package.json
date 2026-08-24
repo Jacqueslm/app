@@ -1,6 +1,6 @@
 {
   "name": "turn-someday-into-oneday-server",
-  "version": "8.16",
+  "version": "5.0",
   "private": true,
   "type": "commonjs",
   "scripts": {

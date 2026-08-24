@@ -226,6 +226,15 @@ Nothing in the app carries a non-commercial or attribution-required licence.
   clip, not something you can sit inside for ten minutes. Rain at 4.8s repeats
   62 times a minute and the ear locks onto it. That is why the nature beds are
   synthesised and the music is his.
+**Video score library — `content/score/` (added 24 Aug 2026).** Separate from
+the meditation beds on purpose: these are 12-15 second stings, the right length
+to score an 8-10s Cause & Effect video and far too short to sit inside for ten
+minutes. Four to date, all Jacques's own Suno tracks on his commercial plan:
+Silent Impact 2, Silent Impact 3, The Last Breath, The Last Breath 2. Same
+incoming treatment as the beds (silence trimmed both ends, normalised to
+-20 LUFS / -3dB TP). Score videos from here; score meditation from
+`audio/meditation/`.
+
 - **Adding a track is one line** in `MED_SOUNDS`: file key, the label the button
   says word for word, and its category. A category with no tracks never draws;
   an empty array hides the picker completely.

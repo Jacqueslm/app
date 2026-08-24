@@ -1407,6 +1407,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
+    <!-- STORIES: narrated first-person recovery stories, 5 on the shelf at a
+         time, rotating weekly from the pool in data/audio-stories.json.
+         Audio lives on the lesson-audio CDN branch under stories/. -->
+    <div id="s-stories" class="scr">
+      <div class="sec">
+        <div class="sec-hd" style="margin-top:0">Stories</div>
+        <div style="font-size:12px;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. About ten minutes each. Five on the shelf; new ones arrive every week.</div>
+        <div id="stories-list"></div>
+      </div>
+    </div>
+
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
@@ -1430,6 +1441,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app — all tracks, the Spiritual Path, Together, and every pack. Search it, or read any day you like.</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+        <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
+          <i class="ti ti-headphones" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Stories</p><span>Ten-minute narrated stories of falling and coming back — five each week</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
         <i class="ti ti-users"></i>
         <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging.</span></div>
@@ -5805,6 +5821,73 @@ function anyBlockingUIOpen(){
   }
   return false;
 }
+// ─── STORIES ─────────────────────────────────────────────────────────────────
+// Five narrated stories on the shelf at a time, rotated weekly from the pool.
+// The rotation is deterministic from the ISO week, so every phone shows the
+// same shelf with no server involved, and a new set appears each Monday.
+let STORIES_POOL=null,storyAudio=null,storyPlayingId=null;
+function isoWeek(){const d=new Date();const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);
+  const f=new Date(Date.UTC(t.getUTCFullYear(),0,4));
+  return t.getUTCFullYear()*100+Math.round(((t-f)/86400000-3+((f.getUTCDay()+6)%7))/7)+1;}
+function storyShelf(pool){
+  const wk=isoWeek();
+  const users=pool.filter(x=>x.perspective==='user'),sups=pool.filter(x=>x.perspective==='supporter');
+  const pick=(arr,n,seed)=>{const out=[];for(let i=0;i<n&&arr.length;i++)out.push(arr[(seed+i*2)%arr.length]);return out;};
+  // alternate the balance weekly so supporters get their week too
+  return wk%2?pick(users,3,wk).concat(pick(sups,2,wk)):pick(users,2,wk).concat(pick(sups,3,wk));
+}
+async function renderStories(){
+  const el=document.getElementById('stories-list');
+  if(!STORIES_POOL){
+    el.innerHTML='<div style="color:var(--tm);font-size:13px">Loading the shelf…</div>';
+    try{STORIES_POOL=(await (await fetch('data/audio-stories.json')).json()).stories;}
+    catch(e){el.innerHTML='<div style="color:var(--tm);font-size:13px">Stories need a connection the first time. They\'ll be here when you\'re back online.</div>';return;}
+  }
+  const shelf=storyShelf(STORIES_POOL);
+  el.innerHTML=shelf.map(st=>`
+    <div class="card" style="text-align:left;max-width:none;margin-bottom:12px;padding:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span class="pill" style="font-size:11px;padding:3px 10px;background:${st.perspective==='supporter'?'var(--green-dim)':'rgba(83,74,183,.18)'};color:${st.perspective==='supporter'?'var(--green)':'var(--accent)'}">${st.perspective==='supporter'?'For the supporter':'From the fight'}</span>
+        <span style="font-size:11px;color:var(--tm)">${escapeHtml(st.topic)} · ~${st.minutes} min</span>
+      </div>
+      <div style="font-size:16px;font-weight:700;color:var(--tp)">${escapeHtml(st.title)}</div>
+      <div style="font-size:12px;color:var(--ts);margin:4px 0 10px">${escapeHtml(st.narrator)}'s story</div>
+      <button class="log-btn" style="margin:0" id="story-btn-${st.id}" onclick="toggleStory('${st.id}')">▶ Listen</button>
+      <div id="story-prog-${st.id}" style="display:none;margin-top:10px">
+        <input type="range" min="0" max="100" value="0" style="width:100%" oninput="seekStory(this.value)">
+        <div style="font-size:11px;color:var(--tm);text-align:right" id="story-time-${st.id}"></div>
+      </div>
+      <details style="margin-top:10px"><summary style="font-size:12px;color:var(--ts);cursor:pointer">Read along</summary>
+        <div style="font-size:14px;line-height:1.7;color:var(--ts);margin-top:8px;white-space:pre-line">${escapeHtml(st.text)}</div></details>
+    </div>`).join('');
+}
+async function toggleStory(id){
+  if(storyPlayingId===id&&storyAudio){storyAudio.paused?storyAudio.play():storyAudio.pause();updateStoryBtn(id);return;}
+  stopStory();
+  const m=await ensureLessonAudioManifest();
+  const base=(m&&m.base)||'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+  const a=new Audio(base+'stories/'+id+'.mp3');
+  storyAudio=a;storyPlayingId=id;a.preload='auto';
+  a.onerror=()=>{stopStory();appInfo('Stories',"This story's recording isn't available right now — check your connection and try again.");};
+  a.ontimeupdate=()=>{const p=document.querySelector('#story-prog-'+CSS.escape(id)+' input');
+    if(p&&a.duration){p.value=a.currentTime/a.duration*100;
+      const t=document.getElementById('story-time-'+id);
+      const f=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
+      if(t)t.textContent=f(a.currentTime)+' / '+f(a.duration);}};
+  a.onended=()=>{updateStoryBtn(id);logActivity('story_finished',{id});};
+  a.onplay=()=>updateStoryBtn(id);a.onpause=()=>updateStoryBtn(id);
+  if('mediaSession' in navigator){try{const st=(STORIES_POOL||[]).find(x=>x.id===id);
+    navigator.mediaSession.metadata=new MediaMetadata({title:st?st.title:'Story',artist:'Turn Someday Into Day One'});}catch(e){}}
+  const prog=document.getElementById('story-prog-'+id);if(prog)prog.style.display='block';
+  a.play().catch(()=>{});
+  logActivity('story_play',{id});
+}
+function seekStory(v){if(storyAudio&&storyAudio.duration)storyAudio.currentTime=v/100*storyAudio.duration;}
+function updateStoryBtn(id){const b=document.getElementById('story-btn-'+id);
+  if(b)b.textContent=(storyAudio&&storyPlayingId===id&&!storyAudio.paused)?'❚❚ Pause':'▶ Listen';}
+function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=storyPlayingId;storyAudio=null;storyPlayingId=null;if(old)updateStoryBtn(old);}}
+
 // ─── THE CLIMB ───────────────────────────────────────────────────────────────
 // Jacques's design (24 Aug 2026): your avatar climbs 90 carved steps up a
 // mountain. Every earned step is a moment - spring-hop, lit stone, a personal
@@ -10701,7 +10784,7 @@ const SCREEN_MAP={
   rooms:'s-rooms',community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
-  insights:'s-insights','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
+  insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
@@ -10711,8 +10794,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -10785,6 +10868,7 @@ function switchTo(id,opts){
   if(id==='rooms'){renderRoomsList();}
   if(id==='nova'){maybeShowNovaDisclaimer();}
   if(id==='community'){renderCommunityPosts();}
+  if(id==='stories'){renderStories();}
   if(id==='insights'){renderAnalytics();maybeAutoGenerateWeeklyReport();renderWeeklyReports();renderHabitCoach();renderAdvancedStreaks();}
   if(id==='reminder-settings'){renderSmartReminderSettings();}
   if(id==='profile'){loadDiagnostics();}

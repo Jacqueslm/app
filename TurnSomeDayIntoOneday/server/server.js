@@ -53,7 +53,9 @@ const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 // without them. Overridable if Friendly ever needs to think harder.
 const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FREE_CHAT_LIMIT = 3;
+// Friendly is Pro-only (Jacques, 24 Aug 2026). Zero free chats server-side -
+// the client copy points free users to the always-free SOS tools and 988.
+const FREE_CHAT_LIMIT = 0;
 const PRO_CHAT_LIMIT = 30;
 
 // Stripe webhook signature verification needs the raw request body, so this route is
@@ -1118,7 +1120,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   const isPro = user && billing.getBillingStatus(user).isPro;
   const used = db.getChatCount(req.userId, todayUTC());
   if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: `Daily Friendly chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
+    return res.status(429).json({ error: `Friendly is a Pro feature. Upgrade for up to ${PRO_CHAT_LIMIT} chats a day.` });
   }
   if (isPro && used >= PRO_CHAT_LIMIT) {
     return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });

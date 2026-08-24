@@ -399,3 +399,37 @@ blurred-and-darkened blowup of the same photo** - keeps the photo sharp
 (1.28x upscale instead of 5.6x) and reads as a deliberate film-still layout.
 File: `content/keys-cause-effect.mp4`.
 
+
+## A10 — "The mail" · Cause & Effect · 3 shots · 10s · both sides
+
+Gambling, told from both seats: his choice in shot 1, her price in shot 2.
+Sad, quiet, no shouting. The whole idea is that the effect shot doesn't show
+what HE lost — it shows what it cost HER.
+
+**Title (TikTok / Facebook):** She's the one who opened the mail
+
+**Title (YouTube):** same as above — no matching search term (KEYWORDS.md has no honest gambling-supporter term; the head terms are all "Too hard")
+
+**Paste at the end of every image prompt (house consistency line):**
+> cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16 composition
+
+**SHOT 1 — 01_cause · slow push in · 3s · hard cut**
+IMAGE: a man in his forties sitting on the edge of a bed at 2am in a dark bedroom, lit only by the phone in his hands, a sports betting app glowing on the screen, his face lit from below, tense and hopeful at the same time, his wife asleep behind him turned away under the covers, alarm clock reading 2:14 on the nightstand
+CAPTION (burn in, upper left): **One more bet to win it back.**
+
+**SHOT 2 — 02_effect · slow push in · 3s · hard cut**
+IMAGE: a woman in her forties alone at a kitchen table in flat grey morning light, an opened envelope and a stack of overdue notices in front of her, one hand over her mouth, laptop showing an empty bank balance, two cold cups of coffee, an empty chair across from her, kids' cereal bowls still on the counter behind
+CAPTION (burn in, upper left): **She's the one who opened the mail.**
+
+**SHOT 3 — 03_end · still · 2s**
+IMAGE: a phone lying face down on the same kitchen table beside a set of house keys and the unopened stack of bills, early light coming through the window, two chairs, nobody in frame
+CAPTION (burn in, upper left): **It doesn't have to cost her too.**
+
+**SHOT 4 — brand end card · still · 2s**
+Standard end card. Big line: **You can both stop carrying this alone.**
+Green line: It's free. Link in bio.
+
+**Say this:** nothing — the cuts carry it.
+
+**Caption:** He made the bet. She opened the mail. There's a way out for both of you. It's free. Link in bio.
+

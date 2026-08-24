@@ -1278,6 +1278,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>Urge Surfing Timer</p><span>Guided countdown to ride out an urge</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
+        <div class="setting-row" onclick="closeSOS&&closeSOS();openWave()">
+          <i class="ti ti-ripple" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Ride the wave</p><span>A 3-minute breathing game — the urge rises, peaks, and passes</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="openProTool('panic')">
           <i class="ti ti-alert-triangle" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Panic Mode</p><span>Rapid stabilization + advanced breathing coach</span></div>
@@ -1999,6 +2004,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <i class="ti ti-headphones" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Talk me through it</p><span>Hands-free — a calm voice guides you, nothing to read</span></div>
     </div>
+        <div class="setting-row" onclick="closeSOS&&closeSOS();openWave()">
+          <i class="ti ti-ripple" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Ride the wave</p><span>A 3-minute breathing game — the urge rises, peaks, and passes</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
     <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Friendly</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
@@ -2625,11 +2635,41 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <canvas id="climb-canvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
   <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;pointer-events:none">
     <div style="color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)"><div style="font-size:18px;font-weight:700">The Climb</div><div style="font-size:12px;opacity:.8" id="climb-sub"></div></div>
-    <button class="pill" onclick="closeClimb()" style="pointer-events:auto;background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(4px)">Close</button>
+    <div style="display:flex;gap:8px;pointer-events:auto">
+      <button class="pill" onclick="openAvatarSheet()" style="background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(4px)">Avatar</button>
+      <button class="pill" onclick="closeClimb()" style="background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(4px)">Close</button>
+    </div>
   </div>
   <div id="climb-line" style="position:absolute;left:24px;right:24px;bottom:118px;text-align:center;color:#fff;font-size:15px;line-height:1.5;text-shadow:0 1px 10px rgba(0,0,0,.65);opacity:0;transition:opacity .5s"></div>
   <div style="position:absolute;left:20px;right:20px;bottom:34px">
     <button class="ob-btn" id="climb-cta" onclick="climbStep()" style="width:100%">Take today's step</button>
+  </div>
+</div>
+<div class="sos-modal" id="avatar-sheet" onclick="if(event.target===this)closeAvatarSheet()">
+  <div class="sos-sheet" style="max-height:82dvh;overflow-y:auto">
+    <div class="sos-title">Your climber</div>
+    <canvas id="avatar-preview" width="220" height="260" style="display:block;margin:6px auto 10px;width:110px;height:130px"></canvas>
+    <div style="font-size:12px;color:var(--ts);margin:6px 0 4px">Build</div>
+    <div style="display:flex;gap:8px" id="av-body"></div>
+    <div style="font-size:12px;color:var(--ts);margin:12px 0 4px">Skin tone</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="av-skin"></div>
+    <div style="font-size:12px;color:var(--ts);margin:12px 0 4px">Jacket</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="av-hue"></div>
+    <button class="ob-btn" style="margin-top:16px" onclick="closeAvatarSheet()">That's me</button>
+  </div>
+</div>
+<div id="wave-overlay" style="display:none;position:fixed;inset:0;background:#050810;z-index:1001;overflow:hidden">
+  <canvas id="wave-canvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
+  <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;pointer-events:none">
+    <div style="color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.6)"><div style="font-size:18px;font-weight:700">Ride the wave</div><div style="font-size:12px;opacity:.8" id="wave-phase">It rises. It peaks. It always passes.</div></div>
+    <button class="pill" onclick="closeWave()" style="pointer-events:auto;background:rgba(255,255,255,.14);color:#fff">Close</button>
+  </div>
+  <div id="wave-breath" style="position:absolute;left:0;right:0;bottom:96px;text-align:center;color:#fff;font-size:17px;font-weight:600;text-shadow:0 1px 10px rgba(0,0,0,.7)">Breathe in</div>
+  <div style="position:absolute;left:24px;right:24px;bottom:40px;text-align:center;color:rgba(255,255,255,.65);font-size:12px">Hold the screen as you breathe in · let go as you breathe out</div>
+  <div id="wave-done" style="display:none;position:absolute;inset:0;background:rgba(5,8,16,.72);z-index:2;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center">
+    <div style="color:#fff;font-size:22px;font-weight:700;line-height:1.4">That was the wave.<br>You're still standing.</div>
+    <div style="color:rgba(255,255,255,.75);font-size:14px;margin-top:10px">Logged as a craving you outlasted.</div>
+    <button class="ob-btn" style="margin-top:22px;max-width:280px" onclick="closeWave()">Back to solid ground</button>
   </div>
 </div>
 <div id="meditation-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:999;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
@@ -4358,7 +4398,7 @@ function handleAppPopstate(){
   //    it through its own close path instead of leaving the app underneath it.
   const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
     ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
-    ['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
+    ['wave-overlay',closeWave],['climb-overlay',closeClimb],['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
     ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
   for(const [id,close] of overlays){
     const el=document.getElementById(id);
@@ -5821,6 +5861,184 @@ function anyBlockingUIOpen(){
   }
   return false;
 }
+// ─── HIKER RENDERER + AVATAR ─────────────────────────────────────────────────
+const AV_SKINS=['#f1c9a5','#d9a978','#b07b52','#8d5a3b','#6b4226','#4a2c17'];
+const AV_HUES=['#534AB7','#2F6B45','#B7434A','#C98B2D','#2B7CA8','#444B66'];
+const AV_BODIES=[['broad',1.14,1.0],['slim',0.92,1.04],['round',1.2,0.94]];
+function avatarCfg(){const a=S.avatar||{};return{skin:a.skin||AV_SKINS[2],hue:a.hue||AV_HUES[0],
+  body:AV_BODIES.find(b=>b[0]===a.body)||AV_BODIES[0]};}
+function shade(hex,f){const v=parseInt(hex.slice(1),16);
+  const r=Math.min(255,Math.max(0,(v>>16)*f)),g=Math.min(255,Math.max(0,((v>>8)&255)*f)),b=Math.min(255,Math.max(0,(v&255)*f));
+  return 'rgb('+[r,g,b].map(Math.round).join(',')+')';}
+function drawHiker(x,ax,ay,dp,hop,slip,T){
+  const {skin,hue,body}=avatarCfg();
+  const wS=body[1],hS=body[2];
+  x.save();x.translate(ax,ay);x.scale(dp*1.05,dp*1.05);
+  const bob=slip?0:Math.sin(T/640)*1.2;
+  x.translate(0,bob);
+  x.fillStyle='rgba(8,6,20,.38)';x.beginPath();x.ellipse(0,4-bob,15*wS,4,0,0,7);x.fill();
+  if(slip){
+    const f=Math.sin(T/120),f2=Math.sin(T/90+2);
+    x.fillStyle='#3a3350';x.beginPath();x.ellipse(21,1,9,3,0,0,7);x.fill();
+    x.fillStyle='#e8843a';x.beginPath();x.moveTo(21,0);x.quadraticCurveTo(27+f*2,-15,21,-23);x.quadraticCurveTo(17,-11,14+f2,-16);x.quadraticCurveTo(12,-6,21,0);x.fill();
+    x.fillStyle='#ffd27a';x.beginPath();x.moveTo(21,0);x.quadraticCurveTo(24,-8,21,-12);x.quadraticCurveTo(19,-6,18,-8);x.quadraticCurveTo(17,-3,21,0);x.fill();
+    x.fillStyle=shade(hue,.7);x.beginPath();x.roundRect(-16*wS,-14,14*wS,15,4);x.fill(); // seated legs
+    const jg=x.createLinearGradient(-14,-34,0,-12);jg.addColorStop(0,hue);jg.addColorStop(1,shade(hue,.55));
+    x.fillStyle=jg;x.beginPath();x.roundRect(-17*wS,-32*hS,15*wS,20*hS,6);x.fill(); // hunched torso
+    x.fillStyle=skin;x.beginPath();x.arc(-10*wS,-38*hS,6.4,0,7);x.fill();
+    x.fillStyle=shade(hue,1.25);x.beginPath();x.arc(-10*wS,-40*hS,6.8,Math.PI,Math.PI*2);x.fill(); // beanie
+    x.restore();return;
+  }
+  const stride=hop>0?Math.sin(hop*Math.PI*2)*4:0;
+  // legs: tapered trousers + boots
+  x.fillStyle='#2b2544';
+  x.beginPath();x.moveTo(-7*wS,-18*hS);x.lineTo(-2*wS,-18*hS);x.lineTo(-3*wS-stride*.4,-2);x.lineTo(-8*wS-stride*.4,-2);x.closePath();x.fill();
+  x.beginPath();x.moveTo(2*wS,-18*hS);x.lineTo(7*wS,-18*hS);x.lineTo(8*wS+stride*.4,-3);x.lineTo(3*wS+stride*.4,-3);x.closePath();x.fill();
+  x.fillStyle='#1c1830';
+  x.beginPath();x.roundRect(-9.5*wS-stride*.4,-3,8,4.4,2);x.fill();
+  x.beginPath();x.roundRect(1.5*wS+stride*.4,-4,8,4.4,2);x.fill();
+  // torso: jacket, gradient + hem + center seam
+  const jg=x.createLinearGradient(-10,-46,10,-16);jg.addColorStop(0,shade(hue,1.12));jg.addColorStop(1,shade(hue,.6));
+  x.fillStyle=jg;x.beginPath();x.roundRect(-11*wS,-45*hS,22*wS,29*hS,8);x.fill();
+  x.strokeStyle='rgba(0,0,0,.25)';x.lineWidth=1.1;x.beginPath();x.moveTo(0,-44*hS);x.lineTo(0,-17*hS);x.stroke();
+  x.fillStyle=shade(hue,.5);x.beginPath();x.roundRect(-11*wS,-19*hS,22*wS,3,2);x.fill();
+  // backpack: body + top flap + bedroll
+  x.fillStyle='#3b3358';x.beginPath();x.roundRect(-8*wS,-43*hS,16*wS,17,5);x.fill();
+  x.fillStyle='#463d68';x.beginPath();x.roundRect(-8*wS,-46*hS,16*wS,6,3);x.fill();
+  x.fillStyle='#5a5180';x.beginPath();x.roundRect(-9.5*wS,-50*hS,19*wS,5,2.5);x.fill(); // bedroll
+  x.strokeStyle='rgba(0,0,0,.3)';x.lineWidth=1.4;
+  x.beginPath();x.moveTo(-5*wS,-43*hS);x.lineTo(-5*wS,-27*hS);x.moveTo(5*wS,-43*hS);x.lineTo(5*wS,-27*hS);x.stroke(); // straps
+  // arms: sleeves + hands
+  x.fillStyle=shade(hue,.85);
+  x.beginPath();x.roundRect(-14.5*wS,-42*hS,5.5,20*hS,3);x.fill();
+  x.beginPath();x.roundRect(9*wS,-42*hS,5.5,18*hS,3);x.fill();
+  x.fillStyle=skin;
+  x.beginPath();x.arc(-11.8*wS,-21*hS,2.6,0,7);x.fill();
+  x.beginPath();x.arc(11.8*wS,-23*hS,2.6,0,7);x.fill();
+  // trekking pole in right hand
+  x.strokeStyle='#9a93c8';x.lineWidth=1.8;x.beginPath();x.moveTo(11.8*wS,-23*hS);x.lineTo(13.5*wS,2);x.stroke();
+  // neck + head + beanie with fold
+  x.fillStyle=skin;x.beginPath();x.roundRect(-2.6,-49*hS,5.2,5,2);x.fill();
+  x.beginPath();x.arc(0,-54*hS,7,0,7);x.fill();
+  x.fillStyle=shade(hue,1.3);x.beginPath();x.arc(0,-55.5*hS,7.4,Math.PI*.98,Math.PI*2.02);x.fill();
+  x.fillStyle=shade(hue,1.05);x.beginPath();x.roundRect(-7.4,-56.5*hS,14.8,3.4,1.6);x.fill();
+  x.restore();
+}
+// ── avatar picker ──
+function openAvatarSheet(){
+  const sheet=document.getElementById('avatar-sheet');sheet.classList.add('open');
+  const a=S.avatar=S.avatar||{};
+  const mk=(host,items,key,render)=>{
+    const el=document.getElementById(host);el.innerHTML='';
+    items.forEach(v=>{const val=Array.isArray(v)?v[0]:v;
+      const b=document.createElement('button');
+      b.style.cssText='width:44px;height:44px;border-radius:12px;border:2px solid '+((a[key]||items[0]&&(Array.isArray(items[0])?items[0][0]:items[0]))===val?'var(--accent)':'var(--bdr)')+';cursor:pointer;'+render(val);
+      if(key==='body'){b.style.width='auto';b.style.padding='0 14px';b.style.height='38px';b.textContent=val;b.style.background='var(--s1)';b.style.color='var(--tp)';b.style.fontSize='13px';}
+      b.onclick=()=>{a[key]=val;save();openAvatarSheet();};
+      el.appendChild(b);});
+  };
+  mk('av-body',AV_BODIES,'body',()=>'' );
+  mk('av-skin',AV_SKINS,'skin',v=>'background:'+v);
+  mk('av-hue',AV_HUES,'hue',v=>'background:'+v);
+  const c=document.getElementById('avatar-preview'),x=c.getContext('2d');
+  x.clearRect(0,0,c.width,c.height);
+  const g=x.createLinearGradient(0,0,0,260);g.addColorStop(0,'#232055');g.addColorStop(1,'#4c4390');
+  x.fillStyle=g;x.fillRect(0,0,220,260);
+  drawHiker(x,110,225,2,0,false,0);
+}
+function closeAvatarSheet(){document.getElementById('avatar-sheet').classList.remove('open');}
+// ─── RIDE THE WAVE (SOS) ─────────────────────────────────────────────────────
+// A craving, drawn honestly: it rises, it peaks, it always passes. Hold the
+// screen breathing in, release breathing out; the rider stays up when the
+// breath does. No fail state - drifting off the breath just asks you back.
+// ~2.5 minutes, then it logs a survived craving.
+let waveAnim=null,waveT0=0,waveHold=false,waveScore=0,waveEnded=false;
+const WAVE_DUR=150,BREATH=[4,1,6];// in, hold, out (seconds)
+function openWave(){
+  const ov=document.getElementById('wave-overlay');ov.style.display='block';
+  document.getElementById('wave-done').style.display='none';
+  const c=document.getElementById('wave-canvas');
+  c.width=c.clientWidth*devicePixelRatio;c.height=c.clientHeight*devicePixelRatio;
+  if(!c._bound){c._bound=true;
+    c.addEventListener('pointerdown',()=>waveHold=true);
+    c.addEventListener('pointerup',()=>waveHold=false);
+    c.addEventListener('pointercancel',()=>waveHold=false);}
+  waveT0=Date.now();waveScore=0;waveEnded=false;
+  cancelAnimationFrame(waveAnim);
+  const loop=()=>{drawWave();waveAnim=requestAnimationFrame(loop);};loop();
+  logActivity('wave_start',{});
+}
+function closeWave(){cancelAnimationFrame(waveAnim);document.getElementById('wave-overlay').style.display='none';waveHold=false;}
+function drawWave(){
+  const c=document.getElementById('wave-canvas'),x=c.getContext('2d');
+  const W=c.width,H=c.height,dp=devicePixelRatio;
+  const t=(Date.now()-waveT0)/1000,T=Date.now();
+  const prog=Math.min(1,t/WAVE_DUR);
+  // urge envelope: rise to peak at 40%, long fall
+  const env=prog<.4?Math.sin(prog/.4*Math.PI/2):Math.cos((prog-.4)/.6*Math.PI/2);
+  // breath cycle
+  const cyc=BREATH[0]+BREATH[1]+BREATH[2],ph=t%cyc;
+  const phase=ph<BREATH[0]?'in':(ph<BREATH[0]+BREATH[1]?'hold':'out');
+  const bEl=document.getElementById('wave-breath');
+  if(bEl)bEl.textContent=waveEnded?'':'Breathe '+(phase==='in'?'in…':(phase==='hold'?'— hold —':'out…'));
+  const pEl=document.getElementById('wave-phase');
+  if(pEl&&!waveEnded)pEl.textContent=prog<.4?'It\'s rising — stay with it':(prog<.55?'The peak. This is the worst it gets':'It\'s passing. It always passes');
+  // sky
+  const g=x.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#060a18');g.addColorStop(.6,'#0b1430');g.addColorStop(1,'#123');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  for(let i=0;i<18;i++){x.fillStyle='rgba(255,255,255,'+(.25+.3*Math.abs(Math.sin(T/1600+i)))+')';
+    x.fillRect((i*173)%W,(i*97)%Math.floor(H*.35),1.6*dp,1.6*dp);}
+  x.beginPath();x.arc(W*.82,H*.16,16*dp,0,7);x.fillStyle='rgba(240,240,255,.7)';x.fill();
+  // wave stack
+  const midY=H*.62,amp=(20+env*70)*dp;
+  const waveY=px=>{const u=px/W*6.28;
+    return midY+Math.sin(u*1.5-t*1.4)*amp+Math.sin(u*3.1-t*2.2)*amp*.35+Math.sin(u*6.7-t*3.1)*amp*.12;};
+  for(let L=2;L>=0;L--){
+    x.fillStyle=['rgba(20,50,90,.9)','rgba(28,70,120,.9)','rgba(40,95,150,.95)'][L];
+    x.beginPath();x.moveTo(0,H);
+    for(let px=0;px<=W;px+=W/70)x.lineTo(px,waveY(px)+L*26*dp+Math.sin(px/W*9+t*(1.1+L*.3))*6*dp);
+    x.lineTo(W,H);x.closePath();x.fill();
+  }
+  // foam on crest
+  x.strokeStyle='rgba(220,240,255,.5)';x.lineWidth=2*dp;x.beginPath();
+  for(let px=0;px<=W;px+=W/70){const y=waveY(px);px===0?x.moveTo(px,y):x.lineTo(px,y);}x.stroke();
+  // rider: breath-following altitude
+  const rx=W*.38;
+  const targetLift=phase==='in'?1:(phase==='hold'?.85:.25);
+  const lift=waveHold?1:.25;
+  waveRider=(window.waveRider??.5)+(((lift+targetLift)/2)-(window.waveRider??.5))*.05;window.waveRider=waveRider;
+  const onBreath=Math.abs(lift-targetLift)<.5;
+  if(onBreath&&!waveEnded)waveScore++;
+  const ry=waveY(rx)-(10+waveRider*26)*dp;
+  x.save();x.translate(rx,ry);
+  const tilt=Math.sin(t*1.4)*.12+(waveRider-.5)*.3;
+  x.rotate(tilt);
+  x.fillStyle='#1a1626';x.beginPath();x.ellipse(0,6*dp,16*dp,3*dp,0,0,7);x.fill(); // board
+  x.strokeStyle=onBreath?'#7ee8a2':'#c9d4ff';x.lineWidth=2.6*dp;x.lineCap='round';
+  x.beginPath();x.moveTo(-4*dp,4*dp);x.lineTo(-2*dp,-6*dp);x.lineTo(2*dp,-14*dp);x.stroke(); // body lean
+  x.beginPath();x.moveTo(2*dp,-14*dp);x.lineTo(8*dp,-8*dp);x.moveTo(2*dp,-14*dp);x.lineTo(-6*dp,-10*dp);x.stroke();
+  x.beginPath();x.moveTo(-4*dp,4*dp);x.lineTo(6*dp,4*dp);x.stroke();
+  x.fillStyle=onBreath?'#7ee8a2':'#c9d4ff';x.beginPath();x.arc(3*dp,-19*dp,4*dp,0,7);x.fill();
+  x.restore();
+  // glow halo when on breath
+  if(onBreath){const hg=x.createRadialGradient(rx,ry,4*dp,rx,ry,44*dp);
+    hg.addColorStop(0,'rgba(126,232,162,.28)');hg.addColorStop(1,'rgba(126,232,162,0)');
+    x.fillStyle=hg;x.beginPath();x.arc(rx,ry,44*dp,0,7);x.fill();}
+  // breath ring
+  const brY=H-170*dp/devicePixelRatio*dp, brR=(26+(phase==='in'?(ph/BREATH[0]):(phase==='hold'?1:(1-(ph-BREATH[0]-BREATH[1])/BREATH[2])))*18)*dp;
+  x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=2*dp;
+  x.beginPath();x.arc(W/2,H-150*dp,brR,0,7);x.stroke();
+  x.strokeStyle='rgba(255,255,255,.18)';x.beginPath();x.arc(W/2,H-150*dp,46*dp,0,7);x.stroke();
+  // end
+  if(prog>=1&&!waveEnded){
+    waveEnded=true;
+    S.cravingsSurvivedCount=(S.cravingsSurvivedCount||0)+1;
+    logActivity('wave_survived',{});save();
+    const d=document.getElementById('wave-done');d.style.display='flex';
+  }
+}
+
 // ─── STORIES ─────────────────────────────────────────────────────────────────
 // Five narrated stories on the shelf at a time, rotated weekly from the pool.
 // The rotation is deterministic from the ISO week, so every phone shows the
@@ -6028,34 +6246,11 @@ function drawClimb(){
     }
     x.restore();
   }
-  // ── avatar: hooded climber silhouette with pack ──
+  // ── avatar: back-view hiker - face-free reads premium, and the back view
+  //    is honest: this person is walking AWAY from it, upward. ──
   const slip=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<86400000);
   const ax=cx+Math.sin(n*.7)*W*.22, ay=yFor(n)-6*dp-(Math.sin((1-climbHop)*Math.PI)*(climbHop>0?30*dp:0));
-  const av=S.avatar||{skin:'#b07b52',hue:'#534AB7'};
-  x.save();x.translate(ax,ay);x.scale(dp,dp);
-  const bob=Math.sin(T/650)*1.5;
-  x.translate(0,bob);
-  x.fillStyle='rgba(10,8,24,.4)';x.beginPath();x.ellipse(0,4-bob,14,4,0,0,7);x.fill(); // contact shadow
-  if(slip){
-    // seated by a campfire
-    const f=Math.sin(T/120);
-    x.fillStyle='#ff9a3c';x.beginPath();x.moveTo(20,0);x.quadraticCurveTo(26+f*2,-16,20,-24);x.quadraticCurveTo(16,-12,13,-17);x.quadraticCurveTo(11,-6,20,0);x.fill();
-    x.fillStyle='#ffd27a';x.beginPath();x.moveTo(20,0);x.quadraticCurveTo(23,-9,20,-13);x.quadraticCurveTo(18,-7,17,-9);x.quadraticCurveTo(16,-4,20,0);x.fill();
-    x.fillStyle=av.hue;x.beginPath();x.moveTo(-14,2);x.quadraticCurveTo(-16,-16,-6,-20);x.quadraticCurveTo(2,-22,2,-12);x.lineTo(4,2);x.closePath();x.fill(); // seated body
-    x.fillStyle=av.skin;x.beginPath();x.arc(-6,-26,7,0,7);x.fill();
-    x.fillStyle=av.hue;x.beginPath();x.arc(-6,-28,7.5,Math.PI*1.05,Math.PI*1.95);x.fill(); // hood
-  }else{
-    // standing climber: legs, body, pack, head+hood
-    x.fillStyle='#2c2648';x.beginPath();x.roundRect(-7,-16,5.5,17,2);x.roundRect(2,-16,5.5,15,2);x.fill(); // legs
-    const bg=x.createLinearGradient(-9,-42,9,-14);bg.addColorStop(0,av.hue);bg.addColorStop(1,'#352e60');
-    x.fillStyle=bg;x.beginPath();x.roundRect(-9,-42,18,28,7);x.fill(); // torso
-    x.fillStyle='rgba(0,0,0,.28)';x.beginPath();x.roundRect(-14,-40,7,20,3);x.fill(); // pack
-    x.fillStyle=av.hue;x.beginPath();x.roundRect(6,-38,5,20,2.5);x.fill(); // near arm
-    x.fillStyle=av.skin;x.beginPath();x.arc(0,-49,7.5,0,7);x.fill(); // head
-    x.fillStyle=av.hue;x.beginPath();x.arc(0,-51,8.2,Math.PI*1.02,Math.PI*1.98);x.fill(); // hood
-    x.strokeStyle='#8f88c8';x.lineWidth=2;x.beginPath();x.moveTo(12,-36);x.lineTo(12,2);x.stroke(); // trekking pole
-  }
-  x.restore();
+  drawHiker(x,ax,ay,dp,climbHop,slip,T);
   // milestone flood + particles
   if(climbCelebrate>1){x.fillStyle='rgba(255,220,140,'+(0.10+0.07*Math.sin(T/150))+')';x.fillRect(0,0,W,H);}
   if(climbCelebrate>0){for(let p=0;p<26;p++){const t=(T/900+p*.13)%1;
@@ -11937,7 +12132,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.12';
+const APP_VERSION='8.13';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

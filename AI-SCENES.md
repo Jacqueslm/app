@@ -438,3 +438,30 @@ Green line: It's free. Link in bio.
 house strip style (his sheet came without burned-in text this time), scored
 with `content/score/the-last-breath.mp3`. File: `content/mail-cause-effect.mp4`.
 
+
+## A11 — "The other side" · after recovery · 3 shots · 10s · BUILT 24 Aug 2026
+
+The counter-piece to the Cause & Effect videos: same house treatment, but the
+arc runs mystery → confession → hope instead of choice → consequence. Built
+from Jacques's own gala/community-center stills.
+
+1. **3s** ballroom walk, slow push in — *Nobody in this room would guess.*
+2. **2.5s** full-body portrait, FULL BLEED (this still is vertical, so it
+   fills the frame instead of sitting in the band) — *Thirty-eight years. I
+   couldn't stop.*
+3. **2.5s** walking past the Recovery Works community center at golden hour,
+   slow pull back — *This is what the other side looks like.*
+4. **2s** end card — **Your day one is still available.**
+
+Scored with `audio/meditation/still-waters.mp3` (warm, not heavy - the sad
+score tracks are wrong for this one). File: `content/after-recovery.mp4`.
+
+**Title (TikTok / Facebook):** Nobody in this room would guess
+**Title (YouTube):** same as above — no matching search term
+
+**Caption:** Thirty-eight years I couldn't stop. This is what the other side looks like. Your day one is still available. It's free. Link in bio.
+
+**Why this one matters in the mix:** every other video in this file shows the
+cost. This is the only one that shows the payoff, and it is the proof the
+whole app is selling. Post it after a run of heavy pieces, never in the same
+week as another "after" video - it works because it is rare.

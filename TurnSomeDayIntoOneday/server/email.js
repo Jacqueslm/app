@@ -175,7 +175,7 @@ The old way — the way I did it for decades — a slip erased everything. Back 
 
 In this app you reset the number and you keep everything else. What you learned. What you noticed. The plan you wrote. Those don't go to zero, because they didn't.
 
-If it happens this week, open Friendly and say what happened. That's what it's there for at that hour.
+If it happens this week, open the app and hit SOS - the breathing, the grounding, and "Talk me through it" are free and awake at that hour.
 
 — Jacques` },
   { step: 4, subject: '"I\'ve tried before"', text: `Someone emailed me this week: I've quit six times. Why would an app change that?
@@ -225,7 +225,7 @@ const TRIAL_DAY7_CHARGED = { subject: "You're Pro. Here's what that means.", tex
 
 Three things:
 
-Days 16-90 of every track unlock - the whole 90-Day Bootcamp - plus 30 Friendly chats a day instead of 3, and the live rooms. Everything else in the app is already free.
+Days 16-90 of every track unlock - the whole 90-Day Bootcamp - plus Friendly, your AI companion (up to 30 chats a day), and the live rooms. The recovery tools stay free either way.
 Cancel any time, two clicks, no phone call, no retention trap.
 Reply to this email whenever you want. I read them. It's still just me.
 

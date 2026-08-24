@@ -1606,7 +1606,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--tm)">Every tool in this app is free, always. Pro is days 16–90 of the Bootcamp on every track, 30 Friendly chats a day, and the live rooms.</div>
+      <div style="padding:0 16px 10px;text-align:center;font-size:12px;color:var(--tm)">The recovery tools are free, always. Pro is days 16–90 of the Bootcamp on every track, Friendly (up to 30 chats a day), and the live rooms.</div>
       <div style="padding:0 16px 24px;text-align:center;font-size:11.5px;color:var(--tm);line-height:1.6">Monthly and yearly include 7 days free — you're not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again after that. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</div>
     </div>
 
@@ -1969,7 +1969,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:44px;margin-bottom:14px">🌅</div>
     <div style="font-size:20px;font-weight:700;color:var(--tp);line-height:1.45;max-width:340px">Welcome. You made a difficult decision — and it's the bravest one you've made in a long time.</div>
     <div style="font-size:15px;color:var(--ts);line-height:1.75;margin-top:14px;max-width:340px">You're on a path now — to better yourself, your life, and everything connected to it. Everyone who ever got free started exactly where you are: day one. If you slip, you keep going. Don't give up. It's in the dark where the work is done — and in the light where it's shown.</div>
-    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is the 90-Day Bootcamp — an addiction program with continuous support: a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and Friendly beside you at any hour. You don't have to do this perfectly. You just have to do today.</div>
+    <div style="font-size:12px;color:var(--tm);margin-top:16px;max-width:320px">This is the 90-Day Bootcamp — an addiction program with continuous support: a counter that celebrates every milestone, lessons that meet you where you are, tools for the worst ten minutes, and real voices that read every lesson to you. You don't have to do this perfectly. You just have to do today.</div>
     <button class="ob-btn" style="margin-top:18px;padding:12px 26px;font-size:15px" onclick="closeWelcomeOverlay()">Begin Day One — I'm ready</button>
   </div>
 
@@ -3167,7 +3167,7 @@ function openLibraryLesson(group,day){
   if(isLessonLocked(day)){
     // Same gate as everywhere else. Say what it is, do not pretend it is broken.
     appConfirm(
-      `\u201c${l.title}\u201d is day ${day}, which is part of Pro. Days 1\u201315 of every track and pack are free; Pro opens 16\u201330, and 30 Friendly chats a day.`,
+      `\u201c${l.title}\u201d is day ${day}, which is part of Pro. Days 1\u201315 of every track and pack are free; Pro opens the rest, plus Friendly and the live rooms.`,
       ()=>{switchTo('plans');actBn('bn-plans');},
       {okText:'See Pro',cancelText:'Not now'}
     );
@@ -10540,7 +10540,7 @@ const PRO_TOOLS={
   },
   proJournal:{
     title:'Pro Journal',
-    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and Friendly analysing your own entries.',
+    teaser:'Guided prompts and emotional insights — free, tap to use — category-specific and slip-aware prompts, mood tracking, and insights drawn from your own entries.',
     mock:'<div style="font-size:13px;line-height:1.9;text-align:left">Prompt: "Did social pressure affect you today?"<br>Mood: ●●●●●●<br>Insight: You\'ve been feeling ●●●●●● lately.</div>',
     open:'openProJournalWhenPro'
   },

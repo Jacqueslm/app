@@ -45,9 +45,9 @@ This app is not an emergency service. If you are in danger or thinking about har
 
 WHAT COSTS MONEY
 
-The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the journal you can type or speak into, and the companion. There is no card required to start and no time limit on the free version.
+The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the reminders, insights and weekly reports, and the journal you can type or speak into. There is no card required to start and no time limit on the free version.
 
-Pro is an optional in-app subscription that unlocks the rest: the second half of every program, more daily conversations, weekly reports, reminders and the advanced pattern tools. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
+Pro is an optional subscription that unlocks the rest: the second half of every program, Friendly — an AI companion to talk to at any hour — and the live community rooms. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time in two taps.
 
 WHO MADE THIS
 

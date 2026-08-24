@@ -125,7 +125,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                 UseExecAlign       = true;
                 UsePullback        = true;
                 UseRetest          = true;
-                RiskPercent        = 10.0;
+                RiskPercent        = 1.0;
                 AccountSize        = 25000;
                 UseLiveBalance     = true;
                 MaxContracts       = 50;

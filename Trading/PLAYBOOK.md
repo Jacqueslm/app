@@ -316,6 +316,11 @@ percentage you can watch a five-streak happen at without overriding a rule —
 because overriding one is what actually ends accounts, and the size that makes
 you override is too big regardless of what the arithmetic says.
 
+**Everything ships at 1%.** That is not a guess: the paper record from 7-20 Aug
+2026 averaged $1,214 of planned risk on a ~$140,000 account, which is 0.87% a
+trade. The software now matches what the trader already does, rather than a
+number nobody has ever actually traded.
+
 ### Contract specs
 
 | | MNQ | MES | MGC |
@@ -328,8 +333,8 @@ you override is too big regardless of what the arithmetic says.
 
 **Contracts = floor( (account × 1%) ÷ (stop in points × $ per point) )**
 
-Example: $25,000 account at 10% = $2,500 risk. MNQ setup with a 40-point stop.
-40 × $2 = $80 per contract. $2,500 ÷ $80 = 31.2 → **31 contracts**, $2,480 actual risk.
+Example: $25,000 account at 1% = $250 risk. MNQ setup with a 40-point stop.
+40 × $2 = $80 per contract. $250 ÷ $80 = 3.1 → **3 contracts**, $240 actual risk.
 
 If the answer is 0 contracts, the stop is too wide for the account. **Skip the trade.**
 Do not shrink the stop to fit the size — that's how a good setup becomes a bad loss.

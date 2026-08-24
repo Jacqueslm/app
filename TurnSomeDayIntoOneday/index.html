@@ -5913,15 +5913,15 @@ function drawHiker(x,ax,ay,dp,hop,slip,T){
   x.beginPath();x.roundRect(-14.5*wS,-42*hS,5.5,20*hS,3);x.fill();
   x.beginPath();x.roundRect(9*wS,-42*hS,5.5,18*hS,3);x.fill();
   x.fillStyle=skin;
-  x.beginPath();x.arc(-11.8*wS,-21*hS,2.6,0,7);x.fill();
-  x.beginPath();x.arc(11.8*wS,-23*hS,2.6,0,7);x.fill();
+  x.beginPath();x.arc(-11.8*wS,-21*hS,3.4,0,7);x.fill();
+  x.beginPath();x.arc(11.8*wS,-23*hS,3.4,0,7);x.fill();
   // trekking pole in right hand
   x.strokeStyle='#9a93c8';x.lineWidth=1.8;x.beginPath();x.moveTo(11.8*wS,-23*hS);x.lineTo(13.5*wS,2);x.stroke();
   // neck + head + beanie with fold
-  x.fillStyle=skin;x.beginPath();x.roundRect(-2.6,-49*hS,5.2,5,2);x.fill();
-  x.beginPath();x.arc(0,-54*hS,7,0,7);x.fill();
-  x.fillStyle=shade(hue,1.3);x.beginPath();x.arc(0,-55.5*hS,7.4,Math.PI*.98,Math.PI*2.02);x.fill();
-  x.fillStyle=shade(hue,1.05);x.beginPath();x.roundRect(-7.4,-56.5*hS,14.8,3.4,1.6);x.fill();
+  x.fillStyle=skin;x.beginPath();x.roundRect(-3,-49*hS,6,5.5,2);x.fill();
+  x.beginPath();x.arc(0,-54*hS,7.4,0,7);x.fill();
+  x.fillStyle=shade(hue,1.3);x.beginPath();x.arc(0,-57.5*hS,7.2,Math.PI*1.02,Math.PI*1.98);x.fill();
+  x.fillStyle=shade(hue,1.05);x.beginPath();x.roundRect(-7.2,-57*hS,14.4,2.8,1.4);x.fill();
   x.restore();
 }
 // ── avatar picker ──
@@ -6124,6 +6124,9 @@ function climbEarnable(){
 }
 function openClimb(){
   document.getElementById('climb-overlay').style.display='block';
+  // Nobody gets a default body. First visit, the sheet opens and YOU say who
+  // is climbing - skin tone, build, jacket - before the mountain draws you.
+  if(!S.avatar||!S.avatar.skin){setTimeout(openAvatarSheet,400);}
   const c=document.getElementById('climb-canvas');
   c.width=c.clientWidth*devicePixelRatio;c.height=c.clientHeight*devicePixelRatio;
   climbCam=climbCamTarget=climbSteps();
@@ -12132,7 +12135,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.13';
+const APP_VERSION='8.14';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

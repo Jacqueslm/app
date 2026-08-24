@@ -433,3 +433,8 @@ Green line: It's free. Link in bio.
 
 **Caption:** He made the bet. She opened the mail. There's a way out for both of you. It's free. Link in bio.
 
+**BUILT 24 Aug 2026** from Jacques's three stills. Final cut 10s: 3s cause /
+3s effect / 2s empty table / 2s end card, hard cuts, captions overlaid in the
+house strip style (his sheet came without burned-in text this time), scored
+with `content/score/the-last-breath.mp3`. File: `content/mail-cause-effect.mp4`.
+

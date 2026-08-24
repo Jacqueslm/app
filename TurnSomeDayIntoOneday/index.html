@@ -6263,7 +6263,11 @@ function drawClimb(){
   }
   // ── avatar: back-view hiker - face-free reads premium, and the back view
   //    is honest: this person is walking AWAY from it, upward. ──
-  const slip=(S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<86400000);
+  // A slip anywhere darkens the sky for 24h - one person, one mountain - but
+  // it never costs a step, and with several tracks the line names the one it
+  // happened on so a hard day on Alcohol doesn't read as failing at everything.
+  const slipEntry=(S.activityLog||[]).find(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&(Date.now()-new Date(a.ts).getTime())<86400000);
+  const slip=!!slipEntry;
   const ax=cx+Math.sin(n*.7)*W*.22, ay=yFor(n)-6*dp-(Math.sin((1-climbHop)*Math.PI)*(climbHop>0?30*dp:0));
   drawHiker(x,ax,ay,dp,climbHop,slip,T);
   // milestone flood + particles
@@ -7312,7 +7316,7 @@ function openSlippedFlow(){
   const lifetimeNote=totalEver>0?` Your lifetime total — ${totalEver} day${totalEver===1?'':'s'} — and your longest run of ${longest} never reset.`:'';
   document.getElementById('slipped-sub').textContent=`However this happened, it doesn't erase the ${getDays()} day${getDays()===1?'':'s'} you already put in.${lifetimeNote}${categoryFallbackNote()} The days you already won are yours forever — and the next 24 hours are where the comeback starts.`;
   document.getElementById('slipped-modal').classList.add('open');
-  logActivity('slip_reported');
+  logActivity('slip_reported',{track:S.currentAddiction||''});
   novaNudge("I saw you check in after a slip. I'm not here to judge you — a slip is data, not a verdict. Whenever you're ready, I'm here to talk through what happened.");
 }
 function closeSlippedFlow(){
@@ -12147,7 +12151,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.16';
+const APP_VERSION='5.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

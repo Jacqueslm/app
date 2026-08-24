@@ -391,3 +391,11 @@ Green line: It's free. Link in bio.
 
 **Caption:** Two seconds to turn the key. You can still put them down. It's free. Link in bio.
 
+**BUILT 24 Aug 2026** from Jacques's own three photoreal stills (he supplied
+them; my code-drawn attempt was rejected - "wack"). Final cut is **10s**:
+3s cause / 3s effect / 2s keys-on-asphalt / 2s end card, hard cuts. Because
+the source stills are wide landscape, the frame is a **sharp photo band on a
+blurred-and-darkened blowup of the same photo** - keeps the photo sharp
+(1.28x upscale instead of 5.6x) and reads as a deliberate film-still layout.
+File: `content/keys-cause-effect.mp4`.
+

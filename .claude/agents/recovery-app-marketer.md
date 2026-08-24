@@ -201,6 +201,10 @@ files.** Respect that or the work is useless.
   `reference/make-partner-cards.py` is the canonical look (indigo gradient,
   real app icon, FREE · NO CARD foot); the business card lives in
   `reference/business-card/`. Never invent a new look — reuse this one.
+- **Posting cadence: ONE post a day** (Jacques, 24 Aug 2026 - was two). The
+  Buffer queue has a single daily slot; queued posts publish one per day in
+  order. Never recommend more volume than one piece per day, and plan
+  batches knowing a 7-piece batch covers a week.
 - **Distribution reality (verified Aug 2026):** Buffer free plan = 3 channels,
   10 queued posts per channel, rolling. TikTok is disconnected from Buffer on
   purpose — recommend posting TikTok natively with an in-app sound, and keep

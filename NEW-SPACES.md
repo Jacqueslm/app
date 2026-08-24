@@ -62,7 +62,18 @@ in the app requires a name, a card or a referral, and the SOS tools work at
 each one a staffed collegiate recovery programme with students already
 identified as in recovery. There is a
 [public directory](https://collegiaterecovery.org/collegiate-recovery-directory/),
-and membership enquiries go to **mack@collegiaterecovery.org**.
+and membership enquiries go to **mack@collegiaterecovery.org**. The 2025–26
+counts sit at 180–184 member institutions (ARHE's own map and the 2025 CRP
+getting-started guide), and ARHE runs an annual conference — the
+[2026 conference](https://collegiaterecovery.org/2026conference/) is the
+single room where most CRP directors in the country gather.
+
+**The two-sided play:** students are the ARHE door (mack@ — the email in
+NEW-SPACES #2 below). Colleges are also *employers* — the same staff-wellness
+pitch that works on school districts (SCHOOLS.md) works on a university's HR
+office, and a college campus has both halves of the app's audience in one
+place. Do ARHE first; a university HR office after, using the SCHOOLS.md
+master email.
 
 **Why they're reachable:** unlike a rehab, a CRP has no product to protect. A
 free tool for their students is a straight win, and CRP directors talk to each
@@ -128,6 +139,36 @@ procurement, no committee, and a straight yes or no.
 **How:** individual ministry leaders, found through celebraterecovery.com's
 group finder. Start with St. Louis. This is a slow, one-at-a-time pile — but
 the fit is the closest of anything in this file.
+
+**The praise-and-worship note:** CR meetings are not just small groups — the
+meeting format is a full service: dinner, **praise and worship**, teaching,
+then small groups. The worship audience and the recovery audience are the
+same people in the same room every week, which is exactly the register the
+app's faith track speaks (God as you understand God, no denomination).
+
+**The rest of the faith-based map (researched 24 Aug 2026) — the same
+one-at-a-time local play, other networks:**
+
+- **Overcomers Outreach** (overcomersoutreach.org) — "Christian Recovery
+  Support Groups using 12 Steps and Scriptures." Positions itself as the
+  bridge between 12-step groups and churches. Same volunteer-leader door.
+- **RU Recovery / Reformers Unanimous** (rurecovery.com) — faith-based
+  recovery with chapters worldwide; their site literally has "Find a Chapter
+  / Start Your RU Chapter." A chapter leader is a volunteer who answers.
+- **Alcoholics Victorious** (alcoholicsvictorious.org) — Christian AA; their
+  NACR page keeps a directory of Christian recovery networks (including
+  Alcoholics for Christ), which is a list of lists — one pitch, many doors.
+- **The porn-track ministries** — the app's porn track plus the faith track
+  is the exact lane these exist for: **Pure Desire Ministries**
+  (puredesire.org, church sexual-recovery groups, the 7 Pillars), **The
+  Nathan Project** (nathanproject.net, porn-recovery ministry for men and
+  women), and **Covenant Eyes** (covenanteyes.com — "the #1 quit porn app for
+  Christians," runs church small-group programs and a podcast). These reach
+  the men a general recovery pitch never will.
+
+Every one of these has the same shape: a national office (slow) and a local
+chapter leader (fast). Local first, St. Louis first, one at a time — the CR
+play in `THE EMAILS` below, with the network's name swapped in.
 
 ---
 
@@ -372,3 +413,209 @@ https://www.turnsomedayintodayone.com
 
 Jacques Malone
 St. Louis, MO
+
+---
+
+## [ ] 7. Overcomers Outreach — the bridge network
+
+**Send to:** `[  confirm on overcomersoutreach.org — contact form, or the info@
+rule; a national office, expect slow  ]`
+**Subject:** Free recovery app for the six days between your meetings
+
+Hi team,
+
+Overcomers sits exactly where this app does: between the 12 steps and the
+church. So this is a complement question, not a competition one.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One. There's a faith track woven into the daily lessons for anyone who
+chooses it — God as you understand God, no denomination, nothing argued. Free,
+private, no card. It also has a section for the person who loves someone using,
+which almost nothing else has.
+
+Your groups meet weekly; the app lives in the six days between. If it's worth
+a line in your resources, use it. If something in it would put your people
+off, tell me and I'll change it.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+---
+
+## [ ] 8. RU Recovery / Reformers Unanimous — the chapter network
+
+**Send to:** `[  confirm on rurecovery.com — "Find a Chapter / Start Your RU
+Chapter" pages; a chapter leader answers faster than the national office  ]`
+**Subject:** A free recovery app your chapter leaders can hand out
+
+Hi team,
+
+RU exists to bring transformation to hurting people — and a chapter leader
+needs tools that cost nothing and ask nothing.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One. Free, private, no card, no account needed to start. A day counter,
+tools for the worst ten minutes, a lesson a day, a faith track (God as you
+understand God — no denomination), and a section for the person who loves
+someone using.
+
+A chapter can hand it out with no budget line and no paperwork. If it's worth
+a mention to your chapter network, take it; if it isn't, tell me what a
+chapter member would need that it doesn't do.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+---
+
+## [ ] 9. Alcoholics Victorious — the list of lists
+
+**Send to:** `[  confirm on alcoholicsvictorious.org — they keep the NACR
+directory of Christian recovery networks  ]`
+**Subject:** A Christian recovery app for your network directory
+
+Hi,
+
+Your NACR page is one of the only lists of Christian recovery networks
+anywhere — which makes you the right person to ask this of.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One. It has a faith track in the daily lessons (God as you understand God,
+no denomination) and a section for the person who loves someone using, which
+almost nothing else has. Free, private, no card.
+
+If it belongs on a list your network keeps, take it. If it doesn't, tell me
+why — that's more useful to me than a polite no.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+---
+
+## [ ] 10. Pure Desire Ministries — the porn track
+
+**Send to:** `[  confirm on puredesire.org — contact page  ]`
+**Subject:** A free app for the hours between your groups
+
+Hi team,
+
+Pure Desire runs church groups for sexual recovery, and group leaders need
+take-home tools that cost nothing and ask nothing.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One. It has a full track for quitting porn — private, free, no card, no
+account needed to start — a day counter, tools for the worst ten minutes, a
+faith track (God as you understand God), and a section for the spouse, which
+almost nothing else has. Nothing in it requires a name.
+
+Your groups meet weekly; the app lives in the six days between. If it's worth
+a mention in your resources, take it. If something would put your people off,
+tell me and I'll change it.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+---
+
+## [ ] 11. The Nathan Project — smaller door, same letter
+
+**Send to:** `[  confirm on nathanproject.net  ]`
+**Subject:** A free app for men and women quitting porn
+
+Hi,
+
+The Nathan Project serves the exact person this app was built for: someone
+quitting porn who wants it to be between them and God, not them and an app
+company.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One. A full porn track, free, private, no account needed. Daily lessons, a
+day counter, tools for the worst ten minutes, a faith track, and a section for
+the spouse — which almost nothing else has.
+
+If it's worth a line in your resources or a mention to your small groups, take
+it. If not, tell me why.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+---
+
+## [ ] 12. Covenant Eyes — the complement, carefully
+
+**Send to:** `[  confirm on covenanteyes.com — read the note below before sending  ]`
+**Subject:** A free companion app — you monitor, we companion
+
+Hi team,
+
+You are the #1 quit-porn app for Christians, and this isn't a pitch to compete.
+Different job.
+
+I was addicted for 38 years and got free at 50, then built Turn Someday Into
+Day One — free, private, no card. Covenant Eyes holds someone accountable;
+this is what they open at 2am between check-ins: a day counter, tools for the
+worst ten minutes, daily lessons, a faith track (God as you understand God),
+and a section for the spouse, which almost nothing else has.
+
+Two honest questions: is there room on your resources page for a free
+companion tool, and would your podcast ever feature someone with a 38-year
+story? Either way, thank you for what you do.
+
+https://www.turnsomedayintodayone.com
+
+Jacques Malone
+St. Louis, MO
+
+**Note:** Covenant Eyes charges for its own app, so the pitch is only ever the
+complement framing above — "you monitor, we companion." Never a "free
+alternative" framing, which would be both false and a dead end.
+
+---
+
+## [ ] 13. A university HR office — the two-sided play, staff side
+
+**Where:** `[  name + address from the university's HR/benefits page — the
+SCHOOLS.md master email is the pattern  ]`
+**Subject:** A free wellbeing resource for [University] staff
+
+Hi,
+
+I'm an app builder in St. Louis, and I'll keep this short because I know your
+inbox.
+
+I built a private recovery-and-wellbeing app called Turn Someday Into Day One
+— a day counter, SOS tools for the hard ten minutes, 90-day programs across 13
+habit tracks (alcohol, food, gambling, social media, anger and more), and a
+whole section for the person worried about someone they love. That second part
+doesn't exist in any other app, and in any staff room it's the bigger group.
+
+I was addicted for 38 years. At 50 I got free and built the thing I'd needed.
+That's the whole company — me.
+
+Free for staff to start, completely private (nobody sees anyone's data — not
+us, not the university, not a spouse), opt-in, nothing for your office to run.
+If you'd consider it for a staff wellness email or benefits materials, I'll
+write the paragraph for you.
+
+That's the whole ask: https://www.turnsomedayintodayone.com
+
+Jacques
+Turn Someday Into Day One · St. Louis
+
+---
+
+**Order for this batch:** 7 and 8 first (Overcomers, RU — the closest fits).
+10–12 are the porn-track doors: same letter, most sensitive audience, one at a
+time. 9 is the cheapest send (a directory keeper). 13 waits for a named HR
+contact, exactly like SCHOOLS.md. National offices are slow; a local chapter
+leader is fast — local first, St. Louis first.

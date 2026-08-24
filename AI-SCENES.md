@@ -512,3 +512,46 @@ File: `content/mother-anger.mp4`.
 **Title (YouTube):** Why am I so angry all the time — what the kids remember (2,900/mo, KD 27)
 
 **Caption:** It lasted a minute. She'll carry it for years. Anger is a habit, and habits can be broken. It's free. Link in bio.
+
+---
+
+## A9b — "The two seconds" (alternate take, UNBUILT — Codebuff draft 24 Aug) · CAUSE & EFFECT · 3 shots · 6s
+
+*(Cause & Effect format, 23 Aug 2026 — the cut IS the message. No narration
+needed to explain it.)*
+
+**YouTube title:** Drinking and driving — the two seconds nobody plans for
+**TikTok / Facebook:** The choice took two seconds
+
+**SHOT 1 — THE CAUSE (2.5s)**
+IMAGE: `A bald bearded Black man in his late 40s standing beside his car in a dim parking lot at night, one hand on the driver's door handle, keys in the other hand, warm light from the bar behind him on his face, jaw set, not opening the door yet`
+MOTION: `Very slow push in on his hand on the handle, he hesitates, the keys catch the light`
+CAPTION: *"The choice took two seconds."*
+SAY: *(optional — the cut carries it)* *"Two seconds."*
+
+**SHOT 2 — THE EFFECT (2.5s)**
+IMAGE: `The same car at night nose-down off a dark country road, headlights still on pointing up into bare trees, dust settling in the beams, the driver's door open, taillights facing the wrong way, empty road behind, no one visible`
+MOTION: `Slow drift in, dust drifts through the headlight beams, nothing moves`
+CAPTION: *"The road home took everything."*
+SAY: *(optional)* *"That's what it cost."*
+
+**SHOT 3 — END CARD (2s)** — house rule 16 layout, unchanged
+BIG LINE: *"You can still put the keys down."*
+GREEN LINE: *"It's free. Link in bio."*
+
+**Paste block (Quick Video):**
+```
+1. 01_cause  Hover above  3s  cut  The choice took two seconds
+2. 02_effect Zoom in      3s  cut  The road home took everything
+3. 03_end    Still        2s  cut  You can still put the keys down
+```
+
+**Music:** score library — **Night Fade** (or Fading into the Night), covers
+all three shots and ends on the last note.
+
+**Posting:** YouTube + Facebook first — drunk-driving frames carry suppression
+risk on TikTok. AI-generated toggle ON everywhere (house rule 19).
+
+**Buffer caption:** Two seconds to get in. A lifetime to walk back. Link in bio.
+
+**Money:** ~2 paid generations (~$1). Draft or Standard animate, never Best.

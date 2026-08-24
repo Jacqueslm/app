@@ -841,7 +841,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="typing" id="novaTyping"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
   <div class="limit-bar" id="limitBar">
     <i class="ti ti-info-circle" style="font-size:16px;color:#854F0B;flex-shrink:0"></i>
-    <span id="limitBarText"><strong id="chatsLeft">3</strong> free sessions left today</span>
+    <span id="limitBarText">Friendly is a <strong>Pro</strong> feature</span><strong id="chatsLeft" style="display:none">0</strong>
     <!-- No "Go Pro" button here. This is the screen people open at 3am when
          they are struggling, and the AI's own instructions forbid it from
          mentioning Pro to someone in distress - a permanent sales button on the
@@ -1503,7 +1503,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="tier-banner">
         <div style="font-size:20px;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
         <div style="font-size:13.5px;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
-        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Every tool in this app is free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — 30 Friendly chats a day instead of 3, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:13px;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:13px;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Days 16–90 of every track — the full bootcamp</div>
           <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
@@ -1536,7 +1536,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat y"><i class="ti ti-check"></i>Friendly, 3 chats a day</div>
+            <div class="feat n"><i class="ti ti-x"></i>Friendly (Pro feature)</div>
             <div class="feat y"><i class="ti ti-check"></i>Every tool: Urge Surfing, Panic Mode &amp; Emergency Plan</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
@@ -2728,7 +2728,11 @@ function escapeHtml(s){
 // ─── STATE ───────────────────────────────────────────────────────────────────
 // Daily chat quotas - client mirror of FREE_CHAT_LIMIT / PRO_CHAT_LIMIT in
 // server/server.js; keep both files in step.
-const FREE_CHAT_DAILY_LIMIT=3;
+// Friendly is Pro-only (Jacques, 24 Aug 2026): "not a good marketing
+// strategy if everyone stays free." The always-free door stays the SOS set -
+// breathing, grounding, Talk me through it, 988 - never a chatbot paywall in
+// a crisis: the zero-chat replies below name those and the crisis line.
+const FREE_CHAT_DAILY_LIMIT=0;
 const PRO_CHAT_DAILY_LIMIT=30;
 // The reviews page's "Write one in the app" button lands here as ?review=1;
 // the modal opens once the user is signed in and past onboarding.
@@ -9867,9 +9871,9 @@ The app, screen by screen (answer questions about it precisely - never invent fe
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
 - LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering); Together is 30 days. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
-- FRIENDLY tab (you): free 3 chats/day, Pro 30/day. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
+- FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above except lesson days 16-90 and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and Together), 30 Friendly chats/day, and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
 const SYSTEM_FREE_ADDENDUM=`
@@ -9877,7 +9881,7 @@ const SYSTEM_FREE_ADDENDUM=`
 You are running in Friendly Free mode. In this mode:
 - Everything in the app is available to this person EXCEPT Days 16-90 of the lesson program (the Bootcamp beyond day 15). Pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching, analytics - all of that is FREE now. Answer those questions fully and warmly; never withhold them, never treat them as a paid extra.
 - Do NOT describe or reference the content of Days 16-90 of the lesson program - those are the one thing that is part of Pro.
-- The only other Pro difference is the number of chats a day (3 free, 30 with Pro). Do not bring it up unless they ask.
+- Friendly itself is Pro-only (up to 30 chats a day). Do not bring pricing up unless they ask.
 - EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
 
 const SYSTEM_PRO_ADDENDUM=`
@@ -10576,8 +10580,8 @@ async function sendMsg(){
   if(!S.isPro&&S.chatsLeft<=0){
     // Never answer distress with a price. The free door stays open and named.
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
-      ?"You've used your 3 free sessions for today, but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7.\n\nI'll be here tomorrow."
-      :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. The SOS tools on Home are free and always open if you need something before then: guided breathing, grounding, and \"Talk me through it\". 💜");
+      ?"Friendly conversations are part of Pro — but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7."
+      :"Friendly is part of Pro — upgrade on the Plans page to talk any time. Everything on the SOS button stays free and always open: guided breathing, grounding, and \"Talk me through it\". 💜");
     return;
   }
   if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();save();}
@@ -10646,7 +10650,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     if(res.status===429){
       const reply=S.isPro
         ?"Looks like you've reached today's 30-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"That's your three Friendly chats for today — I'll be here again tomorrow, same as always. If you need something right now, the SOS tools on Home are free and always open: guided breathing, grounding, and \"Talk me through it\". 💜";
+        :"Friendly is part of Pro — upgrade on the Plans page to talk any time. If you need something right now, the SOS tools on Home are free and always open: guided breathing, grounding, and \"Talk me through it\". 💜";
       S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
       if(!S.isPro){
         S.chatsLeft=0;
@@ -11233,7 +11237,7 @@ function updateTierUI(){
     if(novaLbl)novaLbl.textContent='Free · 3/day';
     if(limitBar)limitBar.style.display='flex';
     // Restore the free meter text (Pro rewrites it). No upgrade button here.
-    const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='<strong id="chatsLeft">'+S.chatsLeft+'</strong> free sessions left today';
+    const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='Friendly is a <strong>Pro</strong> feature — <a href="#" onclick="switchTo(\'plans\');actBn(\'bn-plans\');return false" style="color:var(--accent)">upgrade to talk</a>';
     if(subLbl)subLbl.textContent='Free plan';
     if(profChip){profChip.textContent='Free plan';profChip.style.color='var(--green)';profChip.style.borderColor='rgba(126,232,162,0.3)';profChip.style.background='var(--green-dim)';}
     if(freeCta)freeCta.textContent='Current plan';
@@ -11849,7 +11853,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.11';
+const APP_VERSION='8.12';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12867,7 +12871,7 @@ const GUIDE_FAQ=[
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
-  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Free accounts get <b>3 Friendly chats a day</b>; Pro gets up to <b>30 a day</b>. The counter resets every day at midnight.",go:'Talk to Friendly'},
+  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},

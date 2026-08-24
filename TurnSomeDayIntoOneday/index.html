@@ -6122,7 +6122,19 @@ function climbEarnable(){
   if(!doneToday)return {ok:false,why:"Finish today's lesson to earn this step."};
   return {ok:true};
 }
+function climbSeed(){
+  // Nobody arrives at the mountain on step zero. An existing member has
+  // already done the work, so the first open credits every day they have
+  // actually banked - days clean, longest streak, or lessons finished,
+  // whichever is kindest - and the climb continues from there. Runs once.
+  if(S.climbSeeded)return;
+  const days=S.startDate?Math.floor((Date.now()-new Date(S.startDate).getTime())/86400000):0;
+  const lessons=Object.values(S.lessonProgress||{}).reduce((a,b)=>Math.max(a,Number(b)||0),0);
+  S.climbSteps=Math.max(S.climbSteps||0,days,S.longestStreak||0,lessons);
+  S.climbSeeded=true;save();
+}
 function openClimb(){
+  climbSeed();
   document.getElementById('climb-overlay').style.display='block';
   // Nobody gets a default body. First visit, the sheet opens and YOU say who
   // is climbing - skin tone, build, jacket - before the mountain draws you.
@@ -12135,7 +12147,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.15';
+const APP_VERSION='8.16';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

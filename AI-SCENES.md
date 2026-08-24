@@ -362,3 +362,32 @@ CAPTION: *"That exhaustion has a name. It isn't nagging"*
 ```
 
 **Buffer caption:** You're not overreacting. You're just the only one keeping track. Link in bio.
+
+## A9 — "The keys" · Cause & Effect · 3 shots · 8s · ~$1
+
+**Title (TikTok / Facebook):** The choice took two seconds
+
+**Title (YouTube):** same as above — no matching search term (nothing in KEYWORDS.md covers drunk driving; don't invent one)
+
+**Format:** Cause & Effect (the standard 3-shot). Hard cuts between every shot — the cut IS the message. Music from the score library end to end, watermark every frame, standard end card layout.
+
+**SHOT 1 — 01_cause · hover above · 3s · hard cut**
+IMAGE: overhead shot looking straight down on a man getting into the driver's seat of a parked car at night, car door open, interior dome light the only warm light, an empty whiskey glass on the roof of the car, empty dark parking lot around him, his hand on the door frame
+> cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16 composition
+MOTION: slow drift hover from directly above, camera very slightly descending toward the open car door, nothing else moves
+CAPTION (top strip): **The choice took two seconds.**
+
+**SHOT 2 — 02_effect · zoom in · 3s · hard cut**
+IMAGE: a car run off a rural road at night, resting crooked in the grass ditch, headlights still on and pointing wrong into the trees, skid marks leaving the asphalt, one hubcap in the road, no people visible, distant single streetlight
+> cinematic photograph, shot on 35mm, shallow depth of field, moody realistic lighting, muted color grade, documentary realism, vertical 9:16 composition
+MOTION: slow zoom in toward the crooked headlights in the ditch
+CAPTION (top strip): **The road home took everything.**
+
+**SHOT 3 — 03_end · still · 2s**
+The standard end card, big line: **You can still put the keys down.**
+Green line: It's free. Link in bio.
+
+**Say this:** nothing — the cuts carry it.
+
+**Caption:** Two seconds to turn the key. You can still put them down. It's free. Link in bio.
+

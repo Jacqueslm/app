@@ -32,8 +32,8 @@ maxQty   = input.int(50, "Contract cap", minval = 1, group = grpZ)
 stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpZ)
 use15    = input.bool(true, "15m stop — the last 15m swing when tighter", group = grpZ,
      tooltip = "This is what turned the pattern positive in the backtest. OFF = stop at the shakeout extreme.")
-minRoom  = input.float(0.0, "Reject if room below this (R)", minval = 0.0, step = 0.25, group = grpZ,
-     tooltip = "The raw pattern averages ~0.36R of room at the door, so a 1R filter rejects nearly every trade. 0 = take the pattern as it comes.")
+minRoom  = input.float(1.0, "Reject if room below this (R)", minval = 0.0, step = 0.25, group = grpZ,
+     tooltip = "Measured across 845 trades in three markets (MES futures 43mo, NAS100 16y, XAU 15y): taking EVERY occurrence is dead break-even (~52% wins, 0.00R). Only the trades with at least 1R of room to the target made money (+0.13R at 47-60% wins on NAS100/XAU). The filter IS the edge; 0 = the break-even version.")
 
 grpM = "Management"
 tgtPct = input.int(80, "Exit at this % of the way to the HH", minval = 40, maxval = 100, step = 10, group = grpM)

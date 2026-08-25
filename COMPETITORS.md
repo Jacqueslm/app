@@ -160,3 +160,49 @@ This is research on a computer, not time in the feeds. Open a profile, record
 the numbers, close the tab. If a platform starts pulling you sideways, stop —
 one month of missing data costs nothing. Your wife can do this pass instead if
 it's easier; the columns don't require knowing the app.
+
+## What 2,500 scraped Play Store reviews prove (25 apps, pulled 25 Aug 2026)
+
+Source: `scraper-output/reviews-top25.csv` (raw), `apps-metadata.csv` (160 apps).
+581 of the 2,500 reviews are 1-2 star. Their complaints, counted:
+
+| Complaint | Share of 1-2★ |
+|---|---|
+| **Paywall / price** | **28%** |
+| Ads | 7% |
+| Forced signup before you can see anything | 7% |
+| Bugs / crashes | 5% |
+| No support / ignored | 4% |
+| Hard to cancel | 2% |
+
+**One in three furious reviews in this entire category is about money.** Nothing
+else comes close. That is the market's open wound, and it is exactly where this
+app is built differently: the recovery tools are free, no card to start, no ads
+ever, cancel in two taps.
+
+Worst offenders on price complaints: Calm (31), Screen Time Parental Control
+(21), BetterHelp (17), **Unchaind: Quit Porn with Faith (16)**, MindDoc (10),
+MyFitnessPal (9), BetterMe (9), Rootd (8).
+
+**Real quotes to aim at (all public Play Store reviews, quote them as such):**
+- *"I was looking for a free sound therapy app... immediately hit by a very expensive pay wall. immediately uninstalled."* — Calm, 1★
+- *"If 90 percent of the app is unusable without purchasing a subscription just make the app paid instead. Otherwise, it just feels exploitative."* — MindDoc, 1★
+- *"They ask for way too much personal information only to tell you to pay. Very deceiving."* — MindDoc, 1★
+- *"the app is super bare bones on the unpaid plan... anything that aids in helping you learn to cope or calm down is behind a paywall."* — Rootd, 2★
+- *"Expensive and prey on people with mental health issues."* — BetterHelp, 1★
+- *"the developer literally locked up the personal data... it force you to buy premium"* — Quitzilla, 1★
+
+**I Am Sober (the closest competitor), 15 of 100 reviews at 3★ or below.** Their
+own users' complaints, and what we already do differently:
+- Auto-moderation deleting people's vents — *"no me saying 'my crab died' is not
+  encouraging self harm. please let me vent in my only safe space."* → our journal
+  is private and never moderated; Rooms has no comments to police.
+- *"Obnoxious unskippable onboarding questions, just let me set up basic timers."*
+  → ours can be skipped straight to a day counter.
+- Broken reminders that don't open the app when tapped → ours are tested, and the
+  window is now its own server setting.
+- *"costly."*
+
+**What 5-star reviews across the category actually praise** (word frequency):
+helpful, simple, track, daily, progress, recommend. Not features - *simplicity
+and momentum*. Lead marketing with those two words, not with a feature list.

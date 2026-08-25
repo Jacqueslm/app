@@ -2326,6 +2326,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <button class="ob-btn outline" id="dictate-mc-reflection-input" style="margin:8px 0 0;padding:9px;font-size:13px;color:var(--ts);border-color:var(--bdr)" onclick="toggleDictation('mc-reflection-input')"><i class="ti ti-microphone"></i> Speak it instead</button>
     <button class="ob-btn" style="margin-top:4px" onclick="saveMilestoneReflection()">Save &amp; close</button>
     <button class="ob-btn outline" style="margin-top:8px;color:var(--ts);border-color:var(--bdr)" onclick="shareProgressCard()"><i class="ti ti-share" style="font-size:13px"></i> Share this milestone</button>
+    <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="closeMilestoneCelebration();openFilm()"><i class="ti ti-movie" style="font-size:13px"></i> Make my <span id="mc-film-days">30</span>-day film</button>
     <button class="sos-close" onclick="closeMilestoneCelebration()">Close</button>
   </div>
 </div>
@@ -2643,7 +2644,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
   <canvas id="film-canvas" width="1080" height="1920" style="width:100%;max-width:300px;margin-top:14px;border-radius:14px;display:block"></canvas>
   <div id="film-status" style="color:rgba(255,255,255,.72);font-size:13px;margin-top:12px;text-align:center;min-height:20px"></div>
-  <div style="width:100%;max-width:430px;margin-top:12px;display:flex;flex-direction:column;gap:10px">
+  <div style="width:100%;max-width:430px;margin-top:14px">
+    <div style="color:rgba(255,255,255,.55);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">Music</div>
+    <div id="film-tracks" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+  <div style="width:100%;max-width:430px;margin-top:14px;display:flex;flex-direction:column;gap:10px">
     <button class="ob-btn" id="film-make" onclick="makeFilm()">Make my film</button>
     <a id="film-save" class="log-btn" style="display:none;text-align:center;text-decoration:none" download="my-film.webm">Save the video</a>
     <button class="log-btn" id="film-share" style="display:none" onclick="shareFilm()">Share it</button>
@@ -5859,6 +5864,7 @@ function openMilestoneCelebration(days){
   document.getElementById('mc-days').textContent=days;
   document.getElementById('mc-message').textContent=buildMilestoneEncouragement(days);
   document.getElementById('mc-reflection-input').value='';
+  const fd=document.getElementById('mc-film-days');if(fd)fd.textContent=getDays();
   document.getElementById('milestone-celebration-modal').classList.add('open');
 }
 function buildMilestoneEncouragement(days){
@@ -6144,6 +6150,24 @@ function drawFilmFrame(X,ms,D){
   X.globalAlpha=1;
 }
 let filmBlob=null,filmPreviewRAF=null;
+// His own Suno tracks - the same library the meditation room draws from.
+const FILM_TRACKS=[
+  ['still-waters','Still Waters'],['fading-into-the-night','Fading Into the Night'],
+  ['midnight-lullaby','Midnight Lullaby'],['whispers-in-the-forest','Whispers in the Forest'],
+  ['himalayan-still','Himalayan Still'],['deep-focus','Deep Focus'],['night-fade','Night Fade']
+];
+function renderFilmTracks(){
+  const host=document.getElementById('film-tracks');if(!host)return;
+  const cur=S.filmTrack||'still-waters';
+  host.innerHTML=FILM_TRACKS.map(function(t){
+    var k=t[0],label=t[1],on=(k===cur);
+    return '<button onclick="pickFilmTrack(\''+k+'\')" style="padding:9px 14px;border-radius:999px;font-size:13px;cursor:pointer;'
+      +'background:'+(on?'rgba(126,232,162,.16)':'rgba(255,255,255,.06)')+';'
+      +'color:'+(on?'#7ee8a2':'rgba(255,255,255,.75)')+';'
+      +'border:1px solid '+(on?'#7ee8a2':'rgba(255,255,255,.14)')+'">'+label+'</button>';
+  }).join('');
+}
+function pickFilmTrack(k){S.filmTrack=k;save();renderFilmTracks();}
 function openFilm(){
   const ov=document.getElementById('film-overlay');ov.style.display='flex';
   filmBlob=null;
@@ -6151,6 +6175,7 @@ function openFilm(){
   document.getElementById('film-share').style.display='none';
   document.getElementById('film-make').style.display='';
   document.getElementById('film-status').textContent='A short film of your own numbers. Tap to make it.';
+  renderFilmTracks();
   const c=document.getElementById('film-canvas'),X=c.getContext('2d'),D=filmData();
   const len=filmLength(D),t0=Date.now();
   cancelAnimationFrame(filmPreviewRAF);
@@ -6176,7 +6201,7 @@ async function makeFilm(){
   // Music, mixed in live so the saved file has sound.
   let ac=null;
   try{
-    const audio=new Audio('audio/meditation/still-waters.mp3');
+    const audio=new Audio('audio/meditation/'+(S.filmTrack||'still-waters')+'.mp3');
     audio.crossOrigin='anonymous';audio.loop=true;
     ac=new (window.AudioContext||window.webkitAudioContext)();
     const src=ac.createMediaElementSource(audio),gain=ac.createGain();
@@ -12332,7 +12357,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.0';
+const APP_VERSION='5.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

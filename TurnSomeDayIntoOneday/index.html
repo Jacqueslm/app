@@ -1472,6 +1472,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Progress</p><span>Hours, savings, and streak history</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+        <div class="setting-row" onclick="openFilm()">
+          <i class="ti ti-movie" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>Your film</p><span>A short video of your own numbers, made on this phone — post it or keep it</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
           <i class="ti ti-chart-dots" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>Insights &amp; reports</p><span>Patterns, habits, streak insights, and weekly reports — one place</span></div>
@@ -2629,6 +2634,22 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="review-msg" style="font-size:12.5px;color:var(--green);line-height:1.5;margin-top:8px;display:none"></div>
     <button class="ob-btn" style="margin-top:12px" onclick="submitReview()" id="review-send">Put it on the site</button>
     <button class="ob-btn outline" style="margin-top:8px" onclick="closeReviewModal()">Not now</button>
+  </div>
+</div>
+<div id="film-overlay" style="display:none;position:fixed;inset:0;background:#07060f;z-index:1002;overflow-y:auto;flex-direction:column;align-items:center;padding:18px 16px 34px">
+  <div style="display:flex;width:100%;max-width:430px;align-items:center;justify-content:space-between">
+    <div style="color:#fff;font-size:19px;font-weight:700">Your film</div>
+    <button class="pill" onclick="closeFilm()" style="background:rgba(255,255,255,.14);color:#fff">Close</button>
+  </div>
+  <canvas id="film-canvas" width="1080" height="1920" style="width:100%;max-width:300px;margin-top:14px;border-radius:14px;display:block"></canvas>
+  <div id="film-status" style="color:rgba(255,255,255,.72);font-size:13px;margin-top:12px;text-align:center;min-height:20px"></div>
+  <div style="width:100%;max-width:430px;margin-top:12px;display:flex;flex-direction:column;gap:10px">
+    <button class="ob-btn" id="film-make" onclick="makeFilm()">Make my film</button>
+    <a id="film-save" class="log-btn" style="display:none;text-align:center;text-decoration:none" download="my-film.webm">Save the video</a>
+    <button class="log-btn" id="film-share" style="display:none" onclick="shareFilm()">Share it</button>
+  </div>
+  <div style="max-width:430px;margin-top:16px;font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;text-align:center">
+    Made on this phone from your own numbers. Nothing is uploaded, and nobody sees it unless you share it.
   </div>
 </div>
 <div id="climb-overlay" style="display:none;position:fixed;inset:0;background:#0b0e1a;z-index:999;overflow:hidden">
@@ -4398,7 +4419,7 @@ function handleAppPopstate(){
   //    it through its own close path instead of leaving the app underneath it.
   const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
     ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
-    ['wave-overlay',closeWave],['climb-overlay',closeClimb],['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
+    ['film-overlay',closeFilm],    ['wave-overlay',closeWave],['climb-overlay',closeClimb],['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
     ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
   for(const [id,close] of overlays){
     const el=document.getElementById(id);
@@ -6037,6 +6058,166 @@ function drawWave(){
     logActivity('wave_survived',{});save();
     const d=document.getElementById('wave-done');d.style.display='flex';
   }
+}
+
+// ─── YOUR FILM ───────────────────────────────────────────────────────────────
+// A short film built on the member's own phone from their own numbers, and
+// rendered to a real video file they can post. Canvas + MediaRecorder, so it
+// works offline and nothing ever leaves the device. Same visual language as
+// the app: violet ground, green accent, ridgelines, one big honest number.
+function filmData(){
+  const days=getDays();
+  const hours=Math.round(days*24);
+  const lessons=Object.values(S.lessonProgress||{}).reduce((a,b)=>a+(Number(b)||0),0);
+  const saved=Math.round(days*(S.dailySpend||0));
+  const beats=[];
+  beats.push({v:hours.toLocaleString(),k:'hours clean',sub:'every one of them chosen'});
+  if((S.cravingsSurvivedCount||0)>0)beats.push({v:String(S.cravingsSurvivedCount),k:'cravings you outlasted',sub:'each one passed, exactly like they said'});
+  if(lessons>0)beats.push({v:String(lessons),k:'lessons you sat down for',sub:'on days you did not feel like it'});
+  if(saved>0)beats.push({v:'$'+saved.toLocaleString(),k:'kept in your pocket',sub:'that used to disappear'});
+  return {
+    kicker:((S.name||'').trim()?String(S.name).trim().toUpperCase()+' · DAY':'DAY'),
+    big:String(days), bigLabel:'day'+(days===1?'':'s')+' you did not quit',
+    beats:beats.slice(0,3),
+    close:'Nobody handed you these days.|You took them, one at a time.',
+    cta:'turnsomedayintodayone.com'
+  };
+}
+function filmLength(D){return (3.6+D.beats.length*1.55+2.6)*1000;}
+function drawFilmFrame(X,ms,D){
+  const W=1080,H=1920,t=ms/1000;
+  const ease=x=>x<0?0:x>1?1:1-Math.pow(1-x,3);
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#141034');g.addColorStop(.55,'#0e0b24');g.addColorStop(1,'#080614');
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  const gg=X.createRadialGradient(W*.5,H*(.36-t*.02),40,W*.5,H*.36,760);
+  gg.addColorStop(0,'rgba(126,232,162,.10)');gg.addColorStop(1,'rgba(126,232,162,0)');
+  X.fillStyle=gg;X.fillRect(0,0,W,H);
+  for(let L=0;L<3;L++){
+    X.fillStyle=['rgba(38,32,86,.55)','rgba(28,24,64,.7)','rgba(18,16,44,.9)'][L];
+    X.beginPath();X.moveTo(0,H);
+    const base=H*(.70+L*.07),amp=70-L*16;
+    for(let px=0;px<=W;px+=W/40){const u=px/W*6.28;
+      X.lineTo(px,base+Math.sin(u*1.6+L)*amp+Math.sin(u*3.4+L*2)*amp*.4);}
+    X.lineTo(W,H);X.closePath();X.fill();
+  }
+  const txt=(str,y,size,color,weight,alpha)=>{
+    X.globalAlpha=alpha===undefined?1:Math.max(0,Math.min(1,alpha));
+    X.fillStyle=color||'#fff';X.textAlign='center';
+    X.font=(weight||600)+' '+size+'px Arial, Helvetica, sans-serif';
+    X.fillText(str,W/2,y);X.globalAlpha=1;
+  };
+  const a1=ease((t-0.25)/0.9);
+  if(t<3.6){
+    const y=720+(1-a1)*40;
+    txt(D.big,y,300,'#fff',800,a1);
+    txt(D.bigLabel,y+96,46,'#7ee8a2',700,ease((t-0.8)/0.8));
+    txt(D.kicker,500,40,'rgba(255,255,255,.62)',600,ease((t-0.45)/0.8));
+  }
+  D.beats.forEach((b,i)=>{
+    const st=3.6+i*1.55,en=st+1.55;
+    if(t<st||t>en+0.25)return;
+    const a=ease((t-st)/0.45)*(1-ease((t-(en-0.2))/0.35));
+    txt(b.v,840,210,'#fff',800,a);txt(b.k,960,42,'#7ee8a2',700,a);
+    if(b.sub)txt(b.sub,1030,34,'rgba(255,255,255,.55)',500,a);
+  });
+  const cl=3.6+D.beats.length*1.55;
+  if(t>cl-0.1){
+    const a=ease((t-cl)/0.7);
+    X.save();X.translate(W/2,700);X.scale(1.5*a+0.001,1.5*a+0.001);
+    X.fillStyle='#534AB7';X.strokeStyle='#7ee8a2';X.lineWidth=4;
+    X.beginPath();X.roundRect(-52,-52,104,104,30);X.fill();X.stroke();
+    X.strokeStyle='#fff';X.lineWidth=3.4;X.lineCap='round';X.lineJoin='round';
+    X.beginPath();
+    X.moveTo(-30,2);X.lineTo(-21,-5.5);X.quadraticCurveTo(-16,-9,-11,-5);
+    X.moveTo(30,2);X.lineTo(21,-5.5);X.quadraticCurveTo(16,-9,11,-5);
+    X.lineTo(3,2);X.quadraticCurveTo(-1,6,3,10);
+    X.moveTo(-12,-2);X.lineTo(-5,4);X.quadraticCurveTo(-1,9,-6,12);
+    X.stroke();X.restore();
+    (D.close||'').split('|').forEach((line,i)=>{
+      txt(line,940+i*74,56,'#fff',700,ease((t-cl-0.25-i*0.18)/0.6));});
+    txt(D.cta,1180,42,'#7ee8a2',700,ease((t-cl-0.8)/0.6));
+    txt('TURN SOMEDAY INTO DAY ONE',1700,30,'rgba(255,255,255,.42)',700,a);
+  }
+  X.globalAlpha=.05;
+  for(let i=0;i<600;i++){X.fillStyle=i%2?'#fff':'#000';X.fillRect((i*173)%W,(i*397)%H,2,2);}
+  X.globalAlpha=1;
+}
+let filmBlob=null,filmPreviewRAF=null;
+function openFilm(){
+  const ov=document.getElementById('film-overlay');ov.style.display='flex';
+  filmBlob=null;
+  document.getElementById('film-save').style.display='none';
+  document.getElementById('film-share').style.display='none';
+  document.getElementById('film-make').style.display='';
+  document.getElementById('film-status').textContent='A short film of your own numbers. Tap to make it.';
+  const c=document.getElementById('film-canvas'),X=c.getContext('2d'),D=filmData();
+  const len=filmLength(D),t0=Date.now();
+  cancelAnimationFrame(filmPreviewRAF);
+  const loop=()=>{drawFilmFrame(X,(Date.now()-t0)%len,D);filmPreviewRAF=requestAnimationFrame(loop);};loop();
+  logActivity('film_open',{});
+}
+function closeFilm(){cancelAnimationFrame(filmPreviewRAF);document.getElementById('film-overlay').style.display='none';}
+async function makeFilm(){
+  const c=document.getElementById('film-canvas'),X=c.getContext('2d'),D=filmData();
+  const len=filmLength(D),status=document.getElementById('film-status');
+  const btn=document.getElementById('film-make');
+  if(!c.captureStream||typeof MediaRecorder==='undefined'){
+    // No recorder on this browser: give them a still card instead of nothing.
+    drawFilmFrame(X,1200,D);
+    c.toBlob(b=>{const a=document.getElementById('film-save');
+      a.href=URL.createObjectURL(b);a.download='my-day.png';a.textContent='Save the picture';a.style.display='';
+      status.textContent="This browser can't record video, so here's your card as a picture.";},'image/png');
+    btn.style.display='none';return;
+  }
+  cancelAnimationFrame(filmPreviewRAF);
+  btn.style.display='none';
+  const stream=c.captureStream(30);
+  // Music, mixed in live so the saved file has sound.
+  let ac=null;
+  try{
+    const audio=new Audio('audio/meditation/still-waters.mp3');
+    audio.crossOrigin='anonymous';audio.loop=true;
+    ac=new (window.AudioContext||window.webkitAudioContext)();
+    const src=ac.createMediaElementSource(audio),gain=ac.createGain();
+    gain.gain.value=0.55;
+    const dest=ac.createMediaStreamDestination();
+    src.connect(gain);gain.connect(dest);
+    await audio.play();
+    dest.stream.getAudioTracks().forEach(tr=>stream.addTrack(tr));
+  }catch(e){/* silent film beats no film */}
+  let mime='video/webm;codecs=vp9,opus';
+  if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000});
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+  rec.onstop=()=>{
+    try{if(ac)ac.close();}catch(e){}
+    filmBlob=new Blob(chunks,{type:'video/webm'});
+    const url=URL.createObjectURL(filmBlob);
+    const a=document.getElementById('film-save');
+    a.href=url;a.download='my-day-'+getDays()+'.webm';a.style.display='';
+    if(navigator.canShare&&navigator.canShare({files:[new File([filmBlob],'f.webm',{type:'video/webm'})]}))
+      document.getElementById('film-share').style.display='';
+    status.textContent='Done. It plays on your phone, and it posts anywhere.';
+    logActivity('film_made',{days:getDays()});
+    const t0=Date.now();
+    const loop=()=>{drawFilmFrame(X,(Date.now()-t0)%len,D);filmPreviewRAF=requestAnimationFrame(loop);};loop();
+  };
+  rec.start();
+  const start=Date.now();
+  const tick=()=>{
+    const el=Date.now()-start;
+    drawFilmFrame(X,Math.min(el,len-1),D);
+    status.textContent='Making your film… '+Math.ceil((len-el)/1000)+'s';
+    if(el<len)requestAnimationFrame(tick);else rec.stop();
+  };
+  tick();
+}
+async function shareFilm(){
+  if(!filmBlob)return;
+  const file=new File([filmBlob],'my-day-'+getDays()+'.webm',{type:'video/webm'});
+  try{await navigator.share({files:[file],text:'Day '+getDays()+'. One day at a time.'});}catch(e){}
 }
 
 // ─── STORIES ─────────────────────────────────────────────────────────────────

@@ -1472,6 +1472,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Progress</p><span>Hours, savings, and streak history</span></div>
         <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
       </div>
+        <div class="setting-row" onclick="openClimb()">
+          <i class="ti ti-mountain" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
+          <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
+        </div>
         <div class="setting-row" onclick="openFilm()">
           <i class="ti ti-movie" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>Your film</p><span>A short video of your own numbers, made on this phone — post it or keep it</span></div>
@@ -12357,7 +12362,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.1';
+const APP_VERSION='5.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

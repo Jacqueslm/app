@@ -312,6 +312,13 @@ app.post('/api/reviews/action', requireAuth, (req, res) => {
 // drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.
 // Sober and still the same person. Both audiences search it - the one who
 // stopped and the one living with them - so the page carries a CTA for each.
+// The partner-program page for treatment centers and sober living homes. A real
+// page on his own domain beats a PDF attachment in a cold email: nothing to
+// open, it survives forwarding, and a director who Googles him lands here.
+app.get('/for-programs', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'for-programs.html'));
+});
+
 app.get('/dry-drunk', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dry-drunk.html'));
 });

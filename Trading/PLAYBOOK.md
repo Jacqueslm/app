@@ -316,10 +316,14 @@ percentage you can watch a five-streak happen at without overriding a rule —
 because overriding one is what actually ends accounts, and the size that makes
 you override is too big regardless of what the arithmetic says.
 
-**Everything ships at 1%.** That is not a guess: the paper record from 7-20 Aug
-2026 averaged $1,214 of planned risk on a ~$140,000 account, which is 0.87% a
-trade. The software now matches what the trader already does, rather than a
-number nobody has ever actually traded.
+**Everything ships at 10%, set deliberately.** Two numbers to keep next to that
+choice. The paper record from 7-20 Aug 2026 averaged $1,214 of planned risk on
+a ~$140,000 account - 0.87% a trade, so the setting is roughly eleven times
+what the trader actually does by hand. And in the sweeps, a 10% setting turned
+every positive edge found into a 30-99% drawdown on the way to it.
+
+It is one number in one box and it changes nothing about which trades fire.
+Lower it whenever the drawdown stops being worth watching.
 
 ### Contract specs
 

@@ -107,8 +107,8 @@ tgtR    = input.float(0.4, "Fixed R multiple", minval = 0.1, maxval = 10, step =
      tooltip = "0.40 measured 60% wins. 0.20 measured 71% wins but a fifth of the money. 0.75 made the most money at 57%.")
 
 grpZ = "Size"
-riskPct = input.float(1.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.25, group = grpZ,
-     tooltip = "Contracts = floor( (account x this%) / (stop in points x dollars per point) ). Zero contracts means the stop is too wide for the account and the trade is skipped, never shrunk.\n\nYour own paper record averages 0.87% of the account per trade. The sweeps showed 10% turning every positive edge into a 30-99% drawdown, so this ships at 1%.")
+riskPct = input.float(10.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.25, group = grpZ,
+     tooltip = "Contracts = floor( (account x this%) / (stop in points x dollars per point) ). Zero contracts means the stop is too wide for the account and the trade is skipped, never shrunk.\n\nSet to 10% by choice. For reference: the paper record averages 0.87% a trade, and the sweeps put a 10% setting at a 30-99% drawdown on the same edge.")
 maxQty  = input.int(50, "Contract cap", minval = 1, group = grpZ)
 
 grpM = "Management"

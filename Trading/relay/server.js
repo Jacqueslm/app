@@ -68,7 +68,8 @@ const AUTO_DEFAULT = {
   // number here the relay cannot look up for itself, and a stale balance
   // makes every contract count wrong in the same direction.
   balance: 25000,
-  riskPct: 1,          // your paper record averages 0.87% a trade; 10% wiped every backtest
+  riskPct: 10,         // set by choice. Reference: the paper record averages 0.87% a
+                       // trade, and the sweeps put 10% at a 30-99% drawdown on the same edge.
   maxContracts: 50,       // a hard ceiling no arithmetic can talk its way past
   maxPerDay: 1,           // the bot's bullet count — same rule as yours
   dupWindowMin: 10,       // identical alert text inside this window trades once

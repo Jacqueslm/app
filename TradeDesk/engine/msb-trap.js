@@ -28,6 +28,8 @@ function run(D, opt) {
   const tgtPct = opt.tgtPct ?? 0.7;              // 0.6-0.8 of the way to the HH; 1.0 = the HH itself
   const entryRetest = opt.entryRetest === true;  // enter on the retest of the LH, not the reclaim close
   const expireBars = opt.expireBars ?? 400;
+  const contOK = opt.cont !== false;             // the continuation branch
+  const gate15 = opt.gate15 !== false;           // 15m must agree at the continuation
   const minRoom = opt.minRoom ?? 1.0;
   const S = D.S;                                  // big-swing structure on the exec chart
 
@@ -79,13 +81,13 @@ function run(D, opt) {
         const [Hd, HH, LH] = hist.H.slice(-3);
         const [pL, HL] = hist.L.slice(-2);
         if (HH > Hd && HL > pL && LH < HH && LH > HL)
-          { arm.L = {HH, LH, HL}; g.arm++; }
+          { arm.L = {HH, LH, HL, pL}; g.arm++; }
       }
       if (e.t === 'L' && hist.L.length >= 3 && hist.H.length >= 2) {
         const [Ld, LL, HL2] = hist.L.slice(-3);
         const [pH, LH2] = hist.H.slice(-2);
         if (LL < Ld && LH2 < pH && HL2 > LL && HL2 < LH2)
-          { arm.S = {HH: LL, LH: HL2, HL: LH2}; g.arm++; }
+          { arm.S = {HH: LL, LH: HL2, HL: LH2, pL: pH}; g.arm++; }
       }
     }
 
@@ -101,7 +103,8 @@ function run(D, opt) {
         // the shakeout: price breaks the higher low
         if (up ? c.l < a.HL : c.h > a.HL) {
           g.break_++;
-          s.on = 1; s.HH = a.HH; s.LH = a.LH; s.HL = a.HL;
+          s.on = 1; s.HH = a.HH; s.LH = a.LH; s.HL = a.HL; s.pL = a.pL;
+          s.bounced = 0; s.bounceExt = NaN;
           s.ext = up ? c.l : c.h; s.age = 0;
           if (up) arm.L = null; else arm.S = null;
         }
@@ -123,6 +126,43 @@ function run(D, opt) {
           }
         }
         return;
+      }
+
+      // the bounce: price gets back over the broken level and builds a lower high
+      if (up ? c.c > s.HL : c.c < s.HL) {
+        s.bounced = 1;
+        s.bounceExt = isNaN(s.bounceExt) ? (up ? c.h : c.l) : (up ? Math.max(s.bounceExt, c.h) : Math.min(s.bounceExt, c.l));
+      }
+
+      // CONTINUATION: the bounce failed - price is back below the higher low.
+      // Trade WITH the break, down to the previous low, 60-100% of the way.
+      // The 15m must agree: it has to be making lower lows (mirror for longs).
+      if (contOK && s.bounced && (up ? c.c < s.HL : c.c > s.HL) && !isNaN(s.pL)) {
+        if (!open && took < maxPerDay && et.hm >= sessFrom && et.hm <= sessTo) {
+          let gate = true;
+          if (gate15 && D.m15) {
+            const mj = D.m15.map[i];
+            gate = mj >= 0 && (up
+              ? (!isNaN(D.m15.S.pivLo[mj]) && !isNaN(D.m15.S.pivLo2[mj]) && D.m15.S.pivLo[mj] < D.m15.S.pivLo2[mj])
+              : (!isNaN(D.m15.S.pivHi[mj]) && !isNaN(D.m15.S.pivHi2[mj]) && D.m15.S.pivHi[mj] > D.m15.S.pivHi2[mj]));
+          }
+          if (gate && (up ? s.pL < c.c : s.pL > c.c)) {
+            const d = up ? -1 : 1;                       // WITH the break: against this side's trend
+            const entry = c.c;
+            const stop = up ? s.bounceExt + buf : s.bounceExt - buf;
+            const risk = Math.abs(entry - stop);
+            const tgt = up ? entry - tgtPct * (entry - s.pL) : entry + tgtPct * (s.pL - entry);
+            const room = risk > 0 ? Math.abs(tgt - entry) / risk : 0;
+            if (risk > 0 && room >= minRoom) {
+              took++; g.entered++;
+              open = {dir: d, entry, stop, risk, room, t1: false, R: 0, tIn: c.t,
+                      feat: {branch: 'cont', bars: s.age, room, hr: Math.floor(et.hm / 100)},
+                      T1: d === 1 ? entry + risk : entry - risk, T2: tgt};
+              s.on = 0;
+              return;
+            }
+          }
+        }
       }
 
       if (up ? c.c > s.LH : c.c < s.LH) {
@@ -161,7 +201,7 @@ function run(D, opt) {
         // the shakeout went relative to the wave, and when it fired (ET hour)
         const depth = Math.abs(s2.HH - s2.LH) > 0 ? Math.abs(s2.LH - s2.ext) / Math.abs(s2.HH - s2.ext) : NaN;
         open = {dir: d, entry, stop, risk, room, t1: false, R: 0, tIn: c.t,
-                feat: {bars: s2.age, depth, hr: Math.floor(et.hm / 100), room},
+                feat: {branch: 'rev', bars: s2.age, depth, hr: Math.floor(et.hm / 100), room},
                 T1: u ? entry + risk : entry - risk, T2: tgt};
       }
     }

@@ -101,7 +101,7 @@ useMM     = input.bool(true, "Open air: use the measured move of the leg", group
 //
 // So 71% is available and it earns a fifth of what 57% earns. Pick knowingly.
 // Re-measure with: node engine/msb-winrate.js  in the TradeDesk folder.
-tgtMode = input.string("Fixed R", "Target", options = ["Fixed R", "Next opposing swing"], group = grpE,
+tgtMode = input.string("Next opposing swing", "Target", options = ["Fixed R", "Next opposing swing"], group = grpE,
      tooltip = "Fixed R sets the target at a multiple of the stop, which is what makes the win rate predictable. Next opposing swing is the structural target and hits far less often because it is usually a long way away.")
 tgtR    = input.float(0.4, "Fixed R multiple", minval = 0.1, maxval = 10, step = 0.05, group = grpE,
      tooltip = "0.40 measured 60% wins. 0.20 measured 71% wins but a fifth of the money. 0.75 made the most money at 57%.")

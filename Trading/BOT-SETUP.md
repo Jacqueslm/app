@@ -29,7 +29,7 @@ you flip it.
    `Start Trade Grader.bat` again. Start the phone link too
    (`Start Phone Link.bat`).
 
-5. **Create the alert** — on the MNQ chart: Alt+A → Condition **MSB Pure** →
+5. **Create the alert** — on the MNQ chart: Alt+A → Condition **MSB Trap** (or MSB Pure if you run that one) →
    **TRADE SIGNAL — the full alert** → Trigger **Once per bar close** →
    don't touch the Message → Notifications → Webhook URL:
    `https://explicit-sprung-produce.ngrok-free.dev/hook/f033aaa171b113d6`

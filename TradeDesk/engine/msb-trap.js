@@ -30,7 +30,10 @@ function run(D, opt) {
   const maxPerDay = opt.maxPerDay ?? 1;
   const sessFrom = opt.sessFrom ?? 930, sessTo = opt.sessTo ?? 1500;
   const useT1 = opt.useT1 !== false;
-  const need4hFlat = opt.need4hFlat !== false;   // 4H must not trend against
+  const useDaily = opt.useDaily === true;        // OFF by default - the trader took it off
+  const gate4h = opt.gate4h ?? 'none';           // 'none' | 'notAgainst' | 'flatOnly'
+  const stop15 = opt.stop15 === true;            // tighten the stop to 15m structure
+  const mode = opt.mode ?? 'trap';               // 'trap' = poke+fail first · 'sweep' = any swept 1H swing
   const expireBars = opt.expireBars ?? 400;      // trigger-chart bars a trap stays live
 
   // state per direction:
@@ -71,13 +74,17 @@ function run(D, opt) {
 
     // structure known at this bar's close
     const j = i1h[i]; if (j < 0) continue;
-    const dj = d1.map[i], fj = i4[i]; if (dj < 0 || fj < 0) continue;
-    const dT = d1.S.trend[dj], fT = b4.S.trend[fj];
+    const fj = i4[i]; if (fj < 0) continue;
+    const dj = d1.map[i];
+    const dT = dj >= 0 ? d1.S.trend[dj] : 0, fT = b4.S.trend[fj];
+
+    const okD = d => !useDaily || dT === d;
+    const ok4 = d => gate4h === 'none' ? true : gate4h === 'flatOnly' ? fT === 0 : (d === 1 ? fT >= 0 : fT <= 0);
 
     // ── LONG side ──────────────────────────────────────────────────────────
-    stepSide(S.L, 1, dT === 1 && (!need4hFlat || fT >= 0));
+    stepSide(S.L, 1, okD(1) && ok4(1));
     // ── SHORT side ─────────────────────────────────────────────────────────
-    stepSide(S.S, -1, dT === -1 && (!need4hFlat || fT <= 0));
+    stepSide(S.S, -1, okD(-1) && ok4(-1));
 
     function stepSide(s, dir, allowed) {
       const up = dir === 1;
@@ -89,6 +96,23 @@ function run(D, opt) {
       if (s.st > 0 && ++s.age > expireBars) { s.st = 0; return; }
 
       if (s.st === 0) {
+        if (mode === 'sweep') {
+          // The simpler read of the drawing: the sweep of a 1H swing IS the
+          // setup. Price takes out the last 1H swing low; the reclaim and the
+          // flip decide whether it becomes a trade.
+          const lvl = up ? loNow : hiNow;
+          if (isNaN(lvl)) return;
+          if (up ? c.l <= lvl : c.h >= lvl) {
+            const A = up ? hiNow : loNow, A2 = up ? hi2 : lo2;
+            // target: the 1H swing on the far side - and when a lower high
+            // sits in front of it, the one BEFORE that, per the drawing
+            s.H1 = up ? (!isNaN(A2) && A < A2 ? A2 : A) : (!isNaN(A2) && A > A2 ? A2 : A);
+            s.LH = A;
+            s.Lstar = lvl; s.sweepExt = up ? c.l : c.h;
+            s.st = 3; s.age = 0;
+          }
+          return;
+        }
         // need: previous swing (H1) and a LOWER one after it (LH), for longs.
         // pivHi = most recent confirmed 1H swing high, pivHi2 = the one before.
         const A = up ? hi2 : lo2;     // H1  (the big one, earlier)
@@ -144,7 +168,18 @@ function run(D, opt) {
           if (open || took >= maxPerDay) { s.st = 0; return; }
           if (et.hm < sessFrom || et.hm > sessTo) return;   // wait for the session, setup stays live
           const entry = c.c;
-          const stop = up ? s.sweepExt - buf : s.sweepExt + buf;
+          // The stop: the sweep extreme - or, when 15m data is loaded, the last
+          // confirmed 15m swing on our side of the trade, whichever is TIGHTER.
+          // That is the whole job the 15m has: better stop placement.
+          let anchor = s.sweepExt;
+          if (stop15 && D.m15) {
+            const mj = D.m15.map[i];
+            if (mj >= 0) {
+              const p15 = up ? D.m15.S.pivLo[mj] : D.m15.S.pivHi[mj];
+              if (!isNaN(p15) && (up ? (p15 > anchor && p15 < entry) : (p15 < anchor && p15 > entry))) anchor = p15;
+            }
+          }
+          const stop = up ? anchor - buf : anchor + buf;
           const risk = Math.abs(entry - stop);
           const tgt = s.H1;                       // the high BEFORE the lower high
           const room = risk > 0 ? Math.abs(tgt - entry) / risk : 0;
@@ -188,8 +223,13 @@ function prep(files, opt) {
   const closeT = ex.map(c => c.t + execTfMs);
   const b4c = resample(h1, 4 * HOUR), d1c = resampleDaily(h1);
   const pv = opt.pv ?? 3, pvH = opt.pvHtf ?? pv;
+  let m15 = null;
+  if (files.m15) {
+    const m = load(path.join(dir, files.m15));
+    m15 = {S: structure2(m, opt.pv15 ?? 3), map: alignIndex(closeT, m, 15 * 60e3)};
+  }
   return {
-    exec: ex, execET,
+    exec: ex, execET, m15,
     X: structure2(ex, pv),
     H1S: structure2(h1, pvH),
     i1h: alignIndex(closeT, h1, HOUR),

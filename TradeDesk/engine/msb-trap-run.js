@@ -1,41 +1,48 @@
 'use strict';
+/* The trap, as corrected: no Daily. 4H is the range, the 1H is the trade,
+   the 15m only tightens the stop. Trigger chart = 1H. */
 const {run, prep} = require('./msb-trap');
-const MIN = 60e3, HOUR = 3600e3;
+const HOUR = 3600e3;
 
 function stats(trades, months, riskPct) {
   const n = trades.length;
   if (!n) return {n: 0};
   let sum = 0, wins = 0, eq = 1, peak = 1, dd = 0, streak = 0, maxStreak = 0;
-  const by = {};
   for (const t of trades) {
     sum += t.R; if (t.R > 0) wins++;
     if (t.R < 0) { streak++; maxStreak = Math.max(maxStreak, streak); } else streak = 0;
     eq *= (1 + riskPct / 100 * t.R); peak = Math.max(peak, eq); dd = Math.max(dd, (peak - eq) / peak);
-    by[t.how] = (by[t.how] || 0) + 1;
   }
-  return {n, win: wins / n * 100, exp: sum / n, totR: sum, perMo: n / months,
-          eq, ddPct: dd * 100, maxStreak, by};
+  return {n, win: wins / n * 100, exp: sum / n, totR: sum, perWk: n / (months * 4.345),
+          eq, ddPct: dd * 100, maxStreak};
 }
 
-const CONFIGS = [
-  {name: '15m trigger', files: {h1: 'MES-1h.csv', exec: 'MES-15m.csv'}, execTfMs: 15 * MIN},
-  {name: '1H trigger ', files: {h1: 'MES-1h.csv', exec: 'MES-1h.csv'},  execTfMs: HOUR},
-];
-
-console.log('\nTHE TRAP — MES, the setup from the drawing\n');
 const rows = [];
-for (const cfg of CONFIGS) {
-  for (const pv of [3, 5]) for (const pvH of [3, 5, 7]) for (const flat of [true, false]) {
-    const D = prep(cfg.files, {execTfMs: cfg.execTfMs, pv, pvHtf: pvH});
-    const tr = run(D, {maxPerDay: 1, useT1: true, need4hFlat: flat, tick: 0.25});
-    const s = stats(tr, D.months, 10);
-    rows.push({cfg: cfg.name, span: D.span, mo: D.months, pv, pvH, flat, ...s});
+for (const [label, files] of [
+  ['43mo, sweep stop', {h1: 'MES-1h.csv', exec: 'MES-1h.csv'}],
+  ['10mo, 15m stop  ', {h1: 'MES-1h.csv', exec: 'MES-1h.csv', m15: 'MES-15m.csv'}],
+]) {
+  // the 15m-stop run only spans the 15m data
+  for (const mode of ['trap', 'sweep']) for (const pv of [2, 3]) for (const pvH of [3, 5]) for (const gate4h of ['none']) {
+    const D = prep(files, {execTfMs: HOUR, pv, pvHtf: pvH});
+    if (files.m15) {   // clip to the 15m window so the comparison is honest
+      const from = require('./csv').load(require('path').join(__dirname, '..', 'data', files.m15))[0].t;
+      const keep = D.exec.map((c, i) => c.t >= from);
+      // simplest: rerun prep is heavy; instead run full and filter trades by time
+    }
+    const tr = run(D, {maxPerDay: 2, useT1: true, gate4h, mode, stop15: !!files.m15, tick: 0.25});
+    const cut = files.m15 ? Date.parse('2025-09-30') : 0;
+    const use = tr.filter(t => t.t >= cut);
+    const months = files.m15 ? 10.4 : D.months;
+    const s = stats(use, months, 10);
+    rows.push({label, pv, pvH, gate4h: mode, ...s});
   }
 }
-const H = ['trigger', 'trigSw', '1H-sw', '4Hflat', 'n', '/mo', 'win%', 'expR', 'totR', 'lossRun', 'x@10%', 'DD%'];
+
+const H = ['run', 'sw1H', 'sw4H', 'mode', 'n', '/week', 'win%', 'expR', 'totR', 'lossRun', 'x@10%', 'DD%'];
 const T = [H, ...rows.map(r => r.n
-  ? [r.cfg, r.pv, r.pvH, r.flat ? 'y' : 'n', r.n, r.perMo.toFixed(2), r.win.toFixed(0), r.exp.toFixed(3), r.totR.toFixed(1), r.maxStreak, r.eq < 0.01 ? '~0' : r.eq.toFixed(2), r.ddPct.toFixed(0)]
-  : [r.cfg, r.pv, r.pvH, r.flat ? 'y' : 'n', 0, '-', '-', '-', '-', '-', '-', '-'])].map(r => r.map(String));
+  ? [r.label, r.pv, r.pvH, r.gate4h, r.n, r.perWk.toFixed(2), r.win.toFixed(0), r.exp.toFixed(3), r.totR.toFixed(1), r.maxStreak, r.eq < 0.01 ? '~0' : r.eq.toFixed(2), r.ddPct.toFixed(0)]
+  : [r.label, r.pv, r.pvH, r.gate4h, 0, '-', '-', '-', '-', '-', '-', '-'])].map(r => r.map(String));
 const w = H.map((_, i) => Math.max(...T.map(r => r[i].length)));
-T.forEach((r, i) => { console.log(r.map((c, j) => j < 1 ? c.padEnd(w[j]) : c.padStart(w[j])).join('  ')); if (!i) console.log(w.map(x => '-'.repeat(x)).join('  ')); });
-console.log('\nspans:', [...new Set(rows.map(r => r.cfg + '  ' + r.span + '  (' + r.mo.toFixed(1) + ' mo)'))].join('\n       '));
+console.log('\nTHE TRAP v2 — no Daily · 4H range · trade the 1H · 15m tightens the stop\n');
+T.forEach((r, i) => { console.log(r.map((c, j) => j < 4 ? c.padEnd(w[j]) : c.padStart(w[j])).join('  ')); if (!i) console.log(w.map(x => '-'.repeat(x)).join('  ')); });

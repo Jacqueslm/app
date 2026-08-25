@@ -80,9 +80,9 @@ const AUTO_DEFAULT = {
   // this is treated as a bad alert, not a big trade; perPoint = dollars per
   // whole point of price, which is what turns a stop distance into a size.
   instruments: {
-    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, perPoint: 2,  session: "0930-1500", maxRiskPts: 120 },
-    "MES1!": { name: "MES 09-26", tick: 0.25, perPoint: 5,  session: "0930-1500", maxRiskPts: 40 },
-    "MGC1!": { name: "MGC 12-26", tick: 0.10, perPoint: 10, session: "0800-1300", maxRiskPts: 20 }
+    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, perPoint: 2,  session: "0930-1500", maxRiskPts: 250 },
+    "MES1!": { name: "MES 09-26", tick: 0.25, perPoint: 5,  session: "0930-1500", maxRiskPts: 90 },
+    "MGC1!": { name: "MGC 12-26", tick: 0.10, perPoint: 10, session: "0800-1300", maxRiskPts: 35 }
   }
 };
 let auto = AUTO_DEFAULT;

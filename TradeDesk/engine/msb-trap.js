@@ -51,20 +51,20 @@ function run(D, opt) {
       const L = open.dir === 1, half = useT1 ? 0.5 : 0;
       if (L ? c.l <= open.stop : c.h >= open.stop) {
         open.R += open.t1 ? 0 : -1;
-        trades.push({R: open.R, how: open.t1 ? 'BE' : 'stop', t: open.tIn}); open = null;
+        trades.push({R: open.R, how: open.t1 ? 'BE' : 'stop', t: open.tIn, feat: open.feat}); open = null;
       } else {
         const hitT1 = half && !open.t1 && (L ? c.h >= open.T1 : c.l <= open.T1);
         const hitT2 = L ? c.h >= open.T2 : c.l <= open.T2;
-        if (hitT1 && hitT2) { open.R += half + (1 - half) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn}); open = null; }
+        if (hitT1 && hitT2) { open.R += half + (1 - half) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat}); open = null; }
         else {
           if (hitT1) { open.t1 = true; open.R += half; open.stop = open.entry; }
-          if (open && hitT2 && (open.t1 || !half)) { open.R += (open.t1 ? 1 - half : 1) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn}); open = null; }
+          if (open && hitT2 && (open.t1 || !half)) { open.R += (open.t1 ? 1 - half : 1) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat}); open = null; }
         }
       }
       if (open && et.hm >= sessTo) {
         const px = c.c, r = (open.dir === 1 ? px - open.entry : open.entry - px) / open.risk;
         open.R += (open.t1 ? (useT1 ? 0.5 : 1) : 1) * r;
-        trades.push({R: open.R, how: 'EOD', t: open.tIn}); open = null;
+        trades.push({R: open.R, how: 'EOD', t: open.tIn, feat: open.feat}); open = null;
       }
     }
 
@@ -157,7 +157,11 @@ function run(D, opt) {
         g.roomSum += room; g.roomN++;
         if (room < minRoom) { g.rejRoom++; return; }
         took++; g.entered++;
+        // features for the analysis layer: how fast the reclaim came, how deep
+        // the shakeout went relative to the wave, and when it fired (ET hour)
+        const depth = Math.abs(s2.HH - s2.LH) > 0 ? Math.abs(s2.LH - s2.ext) / Math.abs(s2.HH - s2.ext) : NaN;
         open = {dir: d, entry, stop, risk, room, t1: false, R: 0, tIn: c.t,
+                feat: {bars: s2.age, depth, hr: Math.floor(et.hm / 100), room},
                 T1: u ? entry + risk : entry - risk, T2: tgt};
       }
     }

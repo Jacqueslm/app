@@ -36,12 +36,13 @@ maxQty   = input.int(50, "Contract cap", minval = 1, group = grpZ)
 stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpZ)
 use15    = input.bool(true, "15m stop — the last 15m swing when tighter", group = grpZ,
      tooltip = "This is what turned the pattern positive in the backtest. OFF = stop at the shakeout extreme.")
-minRoom  = input.float(1.0, "Reject if room below this (R)", minval = 0.0, step = 0.25, group = grpZ,
+minRoom  = input.float(1.5, "Reject if room below this (R)", minval = 0.0, step = 0.25, group = grpZ,
      tooltip = "Measured across 845 trades in three markets (MES futures 43mo, NAS100 16y, XAU 15y): taking EVERY occurrence is dead break-even (~52% wins, 0.00R). Only the trades with at least 1R of room to the target made money (+0.13R at 47-60% wins on NAS100/XAU). The filter IS the edge; 0 = the break-even version.")
 
 grpM = "Management"
 tgtPct = input.int(80, "Exit at this % of the way to the HH", minval = 40, maxval = 100, step = 10, group = grpM)
-useT1  = input.bool(true, "Half off at 1R, stop to break-even (only if the target is past 1R)", group = grpM)
+useT1  = input.bool(false, "Half off at 1R, stop to break-even", group = grpM,
+     tooltip = "Measured across every configuration: the partial halves the expectancy (e.g. +0.39R falls to +0.18R) while the win rate stays identical. It buys comfort, not money. ON only if you need the comfort.")
 
 grpR = "Your rules"
 maxPerDay = input.int(2, "Max trades per day", minval = 1, maxval = 10, group = grpR)

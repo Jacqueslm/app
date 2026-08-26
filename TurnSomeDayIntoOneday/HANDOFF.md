@@ -145,8 +145,8 @@ Opt-in link (closed test — only works for addresses already on the tester list
 ### Play Billing Library 8 deadline (policy warning, July 2026)
 
 Play Console flags: "App must use Google Play Billing Library version 8.0.0 or
-later" — the console tile says fix by **Aug 30, 2026** (docs say Aug 31; treat
-the earlier date as real). After that date new `.aab` uploads are rejected.
+later" — the console tile said fix by **Aug 30, 2026**; the extension moved it to
+**Oct 31, 2026** (confirmed in the console 26 Aug). After that date new `.aab` uploads are rejected.
 Nothing installed breaks, the tester clock keeps running, and the server is
 unaffected — the Billing Library lives only inside the Android shell.
 
@@ -161,9 +161,12 @@ APIs the 1.1.0 wrapper was built against. Real money runs through this path.
 
 What to do instead:
 
-1. **Extension filed** (or to file): Play Console → Policy status → open the
-   Billing Library issue → request the extension to **Nov 1, 2026**. A form on
-   that page; granted routinely last cycle.
+1. **Extension GRANTED — confirmed 26 Aug 2026.** The console tile now reads
+   **"Fix by Oct 31"**, up from the original Aug 30. Nothing further to file.
+   Do not re-request it and do not treat this warning as new: it is the same
+   July item, extended. The app went live on Production the same morning
+   (26 Aug, 7:59 AM) with this warning standing, which is proof it does not
+   block a release — only future `.aab` uploads after 31 Oct.
 2. **Watch** https://github.com/GoogleChrome/android-browser-helper/releases
    for `billing-1.2.0` (last cycle Google shipped the v7 wrapper ahead of the
    deadline, announced on chromeos.dev).

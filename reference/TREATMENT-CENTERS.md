@@ -167,3 +167,36 @@ real help and I won't write again.
 - **Never mention Pro pricing in the first email.** The offer is free.
 - **One follow-up, then stop.** These are clinicians, not leads.
 - **Log every send** so nobody gets emailed twice from two sessions.
+
+---
+
+## ARCA — Assisted Recovery Centers of America (added 26 Aug 2026)
+
+No email published anywhere. Contact form only: arcamidwest.com/contact-us
+
+- St. Louis City — 1430 Olive Street, St. Louis, MO 63103 — 314-645-6840
+- North County — Refuge & Restoration Marketplace, 10208 W Florissant Ave, St. Louis, MO 63136
+
+They run a Veteran & First Responder Care line and Housing Programs, which is
+the angle: their housing residents are exactly the after-discharge 90 days
+this app is built for.
+
+**Form message (paste into the Message box, use malonejkjaj@gmail.com as the email):**
+
+I'm local — St. Louis — and I built a free recovery app called Turn Someday
+Into Day One. It's free for your patients permanently: no card, no ads, works
+with no account and no name, so there's no data coming to you or to me and
+nothing for your compliance people to review.
+
+I was addicted for 38 years and got free at 50. The app is built for the
+stretch your housing residents are in: a 90-day program, tools for the worst
+ten minutes, a private journal nobody moderates, and a day counter that
+doesn't shame a slip. There's also a whole side built for the family, which
+I checked — none of the other 160 recovery apps on the Play Store have that.
+
+I'd like to give ARCA 90 days free with your name on it. No contract, nothing
+to administer. Details: turnsomedayintodayone.com/for-programs — or just
+download it and press the SOS button, that's the whole pitch and it takes
+four minutes. Happy to come to Olive Street in person.
+
+Jacques Malone — malonejkjaj@gmail.com

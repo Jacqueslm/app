@@ -6,6 +6,42 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🗑 26 AUG 2026 — ALL SCRIPTS REMOVED FROM THE REPO (Jacques's instruction)
+
+**"remove all scripts from repo" — both kinds, his call, confirmed.** 47 files
+deleted:
+
+- **The 7 written scripts:** `SCRIPTS.md`, `AI-SCENES.md`, `LAUNCH-SCRIPTS.md`,
+  `EPISODE-2.md`, `EPISODE-2-PROMPTS.md`, `EPISODE-3.md`, `EPISODE-3-PROMPTS.md`.
+- **All 40 code/tool scripts** (`.py`, `.sh`, `.bat`, `.command`) — including
+  `tools-md-to-pdf.py`, `tools/make-film.py`, the `TurnSomeDayIntoOneday/tools/`
+  audio generators, `store-listing/make-captioned-screenshots.py`, the
+  `reference/` card makers, the Studio workers and the Start-app launchers.
+
+**What this costs, so no session is surprised by it:**
+- **RULE ONE's PDF tool is gone.** `python3 tools-md-to-pdf.py` no longer
+  exists. PDFs already built stay in the repo; new ones need the tool back.
+- **Lesson/story audio cannot be regenerated** without the generators.
+- **The Start-app / Start-Studio launchers are gone** from the repo.
+
+**Nothing is lost — git keeps all of it.** Everything above is intact in commit
+`118bf7a`. To bring any single file back:
+
+```
+git checkout 118bf7a -- tools-md-to-pdf.py
+```
+
+To bring all 47 back at once:
+
+```
+git checkout 118bf7a -- $(git diff --name-only 118bf7a HEAD --diff-filter=D)
+```
+
+Do not re-ask Jacques whether he meant this. He was shown the consequence and
+chose it.
+
+---
+
 ## ✅ 26 AUG 2026 — BILLING LIBRARY 8: ALREADY UPDATED. THERE WAS NO EXTENSION.
 
 **Jacques, 26 Aug 2026: "it's already updated, no extension."** The Android

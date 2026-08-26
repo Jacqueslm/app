@@ -65,7 +65,72 @@ for(const id of overlays){
   },id);
   if(p)problems.push(p);
 }
-console.log(problems.length?JSON.stringify(problems,null,1):'ALL CLEAR - every screen and overlay fits at Bigger text');
+// 3) Android font-scale mode: the OS "Font size" accessibility setting reaches
+// a TWA as a larger root font size. Text sized in px ignores it; text in
+// rem/em follows it. Set html to 130%, then flag every visible text element
+// whose computed font-size did not move - those are the px holdouts a user
+// with large system fonts cannot read. Findings are grouped by tag+class so
+// 600 identical declarations read as one line, not six hundred.
+const fontScale=await pg.evaluate(()=>{
+  const sample=()=>{
+    const m=new Map();
+    document.querySelectorAll('body *').forEach(e=>{
+      if(!e.offsetParent&&e.offsetParent!==document.body)return;
+      const hasText=[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim());
+      if(!hasText)return;
+      const key=e.tagName.toLowerCase()+(e.className&&typeof e.className==='string'?'.'+e.className.trim().split(/\s+/).slice(0,2).join('.'):'' )+(e.id?'#'+e.id:'');
+      m.set(key,parseFloat(getComputedStyle(e).fontSize));
+    });
+    return m;
+  };
+  const before=sample();
+  document.documentElement.style.fontSize='130%';
+  const after=sample();
+  document.documentElement.style.fontSize='';
+  const frozen=[];
+  for(const [k,v] of before){
+    const a=after.get(k);
+    if(a!==undefined&&Math.abs(a-v)<0.5)frozen.push({sel:k,px:v});
+  }
+  return frozen;
+});
+if(fontScale.length){
+  problems.push({kind:'px-font-ignores-android-font-scale',count:fontScale.length,
+    examples:fontScale.slice(0,12)});
+}
+// 4) overflow / truncation: at 130% root font, walk every visible element and
+// flag text that spills or is clipped by its own box. Scroll containers
+// (overflow auto/scroll) are fine - clipping is what they are for.
+await pg.evaluate(()=>{document.documentElement.style.fontSize='130%';});
+await pg.waitForTimeout(400);
+for(const id of screens){
+  const found=await pg.evaluate((id)=>{
+    try{switchTo(id.replace(/^scr-/,''));}catch(e){}
+    const el=document.getElementById(id);
+    if(!el||el.offsetParent===null)return [];
+    const bad=[];
+    el.querySelectorAll('*').forEach(e=>{
+      if(e.offsetParent===null)return;
+      const cs=getComputedStyle(e);
+      if(/(auto|scroll)/.test(cs.overflowY)||/(auto|scroll)/.test(cs.overflowX))return;
+      const hasText=[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.trim());
+      if(!hasText)return;
+      const xOver=e.scrollWidth>e.clientWidth+2;
+      const yOver=e.scrollHeight>e.clientHeight+2&&cs.overflowY!=='visible';
+      const clipped=(cs.overflow==='hidden'||cs.overflowX==='hidden'||cs.textOverflow==='ellipsis');
+      if((xOver&&clipped)||yOver){
+        bad.push({screen:id,sel:e.tagName.toLowerCase()+(e.id?'#'+e.id:'')+(typeof e.className==='string'&&e.className?'.'+e.className.trim().split(/\s+/)[0]:''),
+          text:(e.textContent||'').trim().slice(0,40),
+          sw:e.scrollWidth,cw:e.clientWidth,sh:e.scrollHeight,ch:e.clientHeight});
+      }
+    });
+    return bad.slice(0,10);
+  },id);
+  found.forEach(f=>problems.push({kind:'text-overflow',...f}));
+}
+await pg.evaluate(()=>{document.documentElement.style.fontSize='';});
+
+console.log(problems.length?JSON.stringify(problems,null,1):'ALL CLEAR - every screen and overlay fits at Bigger text, scales with Android font size, and nothing overflows');
 await b.close();
 process.exit(problems.length?1:0);
 })();

@@ -6,6 +6,35 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — APP v5.4: TEXT SCALES WITH THE ANDROID FONT-SIZE SETTING
+
+Jacques's instruction: extend tools/bigtext-audit.js with an Android font-scale
+mode and an overflow detector, fix everything found, ship.
+
+**What the audit found.** The tool now sets the root font to 130% (how the OS
+"Font size" accessibility setting reaches a TWA) and flags any text that does
+not move. First run: 32 frozen element groups on the visible screens — because
+**every one of the app's 638 font-size declarations was in px**, which ignores
+the OS setting entirely. A user with large system fonts got no larger text
+anywhere except via our own in-app Bigger toggle.
+
+**The fix.** All 638 (629 terse + 9 spaced + 1 dynamic) converted px → rem at
+exact 1/16 fractions, so rendering at the default root is pixel-identical and
+the whole app now follows the OS font scale. Canvas draw code (share cards,
+climb) untouched — canvas does not use CSS units. The in-app Bigger toggle
+(zoom on .app) is independent and still works on top.
+
+**The audit now has four passes** (house rule 23 tool): screen bottoms
+reachable at Bigger, overlay tops/bottoms reachable, px-that-ignores-font-scale
+(grouped so 600 identical hits read as one line), and text overflow/truncation
+at 130% root (scroll containers exempt — clipping is what they are for).
+
+Verified: ALL CLEAR on all four passes after the conversion, zero overflow at
+130%, 11/11 server tests, all inline scripts parse. Version quadruple bumped
+5.3 → 5.4.
+
+---
+
 ## ✅ 26 AUG 2026 — LIVE ON GOOGLE PLAY
 
 **Turn Someday Into Day One, release 2 (1.0.1), went Available on Google Play at

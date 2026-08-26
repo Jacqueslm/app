@@ -73,17 +73,17 @@ Also refreshed: the lesson caption now says "listen in a real voice" (six
 narrators shipped, including Jacques reading all ninety days), and the journal
 caption is now the privacy promise rather than a feature description.
 
-### 3b. ⏳ Re-capture the Friendly screenshot, then add it back
-`screenshots/05-chat.png` is from 9 Aug and shows **"Free · 3/day"** and
-**"3 free sessions left today"** on screen. Friendly has had zero free chats
-since v8.12, so the picture is untrue, not just the caption.
+### 3b. DONE - Friendly screenshot re-captured (26 Aug)
+`screenshots/05-chat.png` was from 9 Aug and showed **"Free - 3/day"** and
+**"3 free sessions left today"** - untrue since v8.12. Re-shot from a real Pro
+session: the header now reads **Pro - 30/day** and the footer **30 of 30
+Friendly chats left today**.
 
-Removing it entirely (first pass, 26 Aug) was the wrong fix — Jacques pushed
-back and he was right. Friendly is a real feature and the main reason anyone
-buys Pro; hiding it sells nothing. The fix is a fresh capture from a Pro
-session plus an honest caption that says "in Pro". The panel is written and
-commented out in `make-captioned-screenshots.py` — re-enable it once the source
-is re-shot. Play allows 8 panels and only 6 are used, so it costs nothing.
+Pulling Friendly out of the set entirely (first pass) was the wrong fix, and
+Jacques said so. It is a real feature and the main reason anybody buys Pro;
+hiding it sells nothing. The caption says **"Friendly, in Pro"** so nobody
+downloads expecting it free. Output is `screenshots-captioned/07-chat.png` -
+upload as panel 7. Play allows 8.
 
 ### 4. ⏳ Buy Pro on a real phone, from the real listing
 Never done. Closed testing is not the same billing path as a live Production

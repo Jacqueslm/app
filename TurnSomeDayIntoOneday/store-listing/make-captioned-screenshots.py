@@ -46,12 +46,12 @@ PANELS = [
     # Pro. The problem was never the screenshot, it was a caption that read as
     # though Friendly came with the free app. Say "in Pro" on the panel and it
     # both tells the truth and sells the thing. Play allows 8 panels; this is 7.
-    # ⚠️ BLOCKED - do not upload the output of this panel yet. The source
-    # screenshots/05-chat.png is from 9 Aug and still shows "Free · 3/day" and
-    # "3 free sessions left today" on screen. Friendly has had ZERO free chats
-    # since v8.12, so the image itself is untrue, not just its caption. It needs
-    # re-capturing from a Pro session before this line is enabled.
-    # ("05-chat.png",   "Someone to talk to at 3am",      "Friendly, in Pro — no judgment, any hour"),
+    # Re-captured 26 Aug from a real Pro session: the header now reads
+    # "Pro - 30/day" and the footer "30 of 30 Friendly chats left today", which
+    # is the truth since v8.12. The 9 Aug source showed "Free - 3/day", which is
+    # why this panel was pulled. Removing Friendly entirely was the wrong fix -
+    # it is the main reason anybody buys Pro. Honest caption instead.
+    ("05-chat.png",     "Someone to talk to at 3am",      "Friendly, in Pro - no judgment, any hour"),
 ]
 
 

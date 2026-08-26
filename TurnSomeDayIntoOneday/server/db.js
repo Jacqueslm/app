@@ -178,6 +178,29 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+  -- The letter IS the invite. Someone writes the hardest thing they have to say,
+  -- and the link that carries it is the same link that makes the other person an
+  -- account. Nothing about the recipient is known until they choose to be known:
+  -- the row holds the letter and a token, never an address or a phone number.
+  -- Tokens expire so a link forwarded on months later cannot open a private
+  -- letter to somebody it was never written for.
+  CREATE TABLE IF NOT EXISTS letters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    sender_type TEXT NOT NULL,
+    sender_name TEXT NOT NULL DEFAULT '',
+    recipient_name TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    revoked INTEGER NOT NULL DEFAULT 0,
+    opened_at TEXT,
+    open_count INTEGER NOT NULL DEFAULT 0,
+    accepted_at TEXT,
+    accepted_user_id INTEGER REFERENCES users(id)
+  );
+
   CREATE TABLE IF NOT EXISTS couple_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_a INTEGER NOT NULL REFERENCES users(id),
@@ -781,6 +804,10 @@ function getAdminStats(opts) {
     retention,
     by_utm_source,
     by_week,
+    // The letter funnel. Its own block because it answers a different question
+    // from the signup funnel: not "did somebody find us", but "did somebody
+    // hand this to a person they love, and did that person take it".
+    letters: getLetterStats(),
     usage: {
       avg_chats_per_active_free_user_per_day:
         freeUsage.user_days ? Math.round((freeUsage.chats / freeUsage.user_days) * 100) / 100 : 0,
@@ -930,9 +957,113 @@ function couplePartnerOf(userId) {
     : { id: row.user_a, name: row.name_a };
 }
 
+// ─── Letters as invitations ──────────────────────────────────────────────────
+// The old flow asked somebody to invite their partner to an app, which is a
+// request to install software. This one asks them to send a letter they already
+// wrote, and the account is what happens after the letter is read. The letter
+// does the persuading; nothing else has to.
+const LETTER_TTL_DAYS = 30;
+
+// Opposite side, always. A person in recovery sends to somebody supporting them;
+// a supporter sends to the person they are carrying this with. The "both" path
+// carries both, and the safe default for a stranger opening that link is the
+// supporter side - it asks less of them.
+const LETTER_OPPOSITE = { recovering: 'partner', partner: 'recovering', both: 'partner' };
+
+function createLetter(userId, token, senderType, senderName, recipientName, body) {
+  const now = new Date();
+  const expires = new Date(now.getTime() + LETTER_TTL_DAYS * 86400000);
+  // One live letter per person per side. Re-sending replaces the old link
+  // rather than leaving a trail of readable copies behind.
+  db.prepare('UPDATE letters SET revoked = 1 WHERE user_id = ? AND sender_type = ? AND revoked = 0 AND accepted_at IS NULL')
+    .run(userId, senderType);
+  db.prepare(`INSERT INTO letters
+      (token, user_id, sender_type, sender_name, recipient_name, body, created_at, expires_at)
+      VALUES (?,?,?,?,?,?,?,?)`)
+    .run(token, userId, senderType,
+      String(senderName || '').slice(0, 40),
+      String(recipientName || '').slice(0, 40),
+      String(body || '').slice(0, 20000),
+      now.toISOString(), expires.toISOString());
+  return db.prepare('SELECT * FROM letters WHERE token = ?').get(token);
+}
+
+// Returns null for anything the recipient should not see: unknown, revoked, or
+// past its date. The caller cannot tell those three apart, on purpose.
+function getLetterByToken(token) {
+  const row = db.prepare('SELECT * FROM letters WHERE token = ?').get(String(token || ''));
+  if (!row || row.revoked) return null;
+  if (new Date(row.expires_at).getTime() < Date.now()) return null;
+  return row;
+}
+
+// First open is the one that means something - that is the moment the letter
+// was actually read by somebody. Later opens still count, separately.
+function markLetterOpened(token) {
+  const row = getLetterByToken(token);
+  if (!row) return null;
+  const now = new Date().toISOString();
+  db.prepare('UPDATE letters SET open_count = open_count + 1, opened_at = COALESCE(opened_at, ?) WHERE id = ?')
+    .run(now, row.id);
+  return { first: !row.opened_at };
+}
+
+function markLetterAccepted(token, newUserId) {
+  const row = getLetterByToken(token);
+  if (!row || row.accepted_at) return null;
+  db.prepare('UPDATE letters SET accepted_at = ?, accepted_user_id = ? WHERE id = ?')
+    .run(new Date().toISOString(), newUserId, row.id);
+  return row;
+}
+
+function revokeLetters(userId) {
+  return db.prepare('UPDATE letters SET revoked = 1 WHERE user_id = ? AND accepted_at IS NULL').run(userId).changes;
+}
+
+function getMyLetter(userId, senderType) {
+  return db.prepare('SELECT * FROM letters WHERE user_id = ? AND sender_type = ? AND revoked = 0 ORDER BY id DESC')
+    .get(userId, senderType) || null;
+}
+
+// The whole funnel in one row: sent, opened, joined. Kept separate from
+// getAdminStats' own queries so the letters block can be read on its own.
+function getLetterStats() {
+  const t = db.prepare(`SELECT
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters`).get();
+  const by_side = db.prepare(`SELECT sender_type AS side,
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters GROUP BY 1 ORDER BY letter_sent DESC`).all();
+  const by_week = db.prepare(`SELECT date(created_at, 'weekday 0', '-6 days') AS week,
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters GROUP BY 1 ORDER BY week DESC LIMIT 12`).all();
+  return {
+    letter_sent: t.letter_sent || 0,
+    letter_opened: t.letter_opened || 0,
+    account_created_from_letter: t.account_created_from_letter || 0,
+    by_side,
+    by_week,
+  };
+}
+
 module.exports = {
   setReminderWindow,
   getReminderWindow,
+  createLetter,
+  getLetterByToken,
+  markLetterOpened,
+  markLetterAccepted,
+  revokeLetters,
+  getMyLetter,
+  getLetterStats,
+  LETTER_OPPOSITE,
+  LETTER_TTL_DAYS,
   upsertReview,
   getMyReview,
   getPublishedReviews,

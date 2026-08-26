@@ -877,6 +877,118 @@ app.post('/api/couple/nudge', requireAuth, coupleNudgeLimiter, (req, res) => {
   res.json({ ok: true });
 });
 
+// ─── The letter is the invitation ────────────────────────────────────────────
+// Nobody installs a recovery app because a friend asked them to. They open a
+// letter because somebody they love wrote it. So the share link carries the
+// letter, and the account offer only appears after it has been read.
+//
+// Privacy shape: the sender's account is never exposed through the token, the
+// letter body never leaves the row, and the recipient stays anonymous until the
+// moment they choose to make an account. Tokens are 128-bit and expire.
+const letterCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'That is a lot of letters in one hour. Try again shortly.' },
+});
+
+function letterOrigin(req) {
+  const env = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
+  if (env) return env;
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
+  return `${proto}://${req.get('host')}`;
+}
+
+app.post('/api/letter/share', letterCreateLimiter, requireAuth, (req, res) => {
+  const { body, senderType, senderName, recipientName } = req.body || {};
+  const text = typeof body === 'string' ? body.trim() : '';
+  if (text.length < 40) {
+    return res.status(400).json({ error: 'There is not enough of the letter here to send yet.' });
+  }
+  const side = ['recovering', 'partner', 'both'].includes(senderType) ? senderType : 'recovering';
+  const token = crypto.randomBytes(16).toString('hex');
+  const row = db.createLetter(req.userId, token, side, senderName, recipientName, text);
+  analytics.event(req, 'LetterSent', { side });
+  res.status(201).json({
+    url: `${letterOrigin(req)}/l/${row.token}`,
+    token: row.token,
+    expiresAt: row.expires_at,
+    expiresInDays: db.LETTER_TTL_DAYS,
+  });
+});
+
+// Revoking is one call and it is absolute: a letter shared in a moment of
+// courage has to be retractable in a moment of regret.
+app.post('/api/letter/revoke', requireAuth, (req, res) => {
+  res.json({ revoked: db.revokeLetters(req.userId) });
+});
+
+// The reader's endpoint. Public by necessity - the recipient has no account
+// yet, that is the entire point - so it returns only what the page renders and
+// nothing that identifies the sender's account.
+app.get('/api/letter/:token', (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'gone' });
+  const open = db.markLetterOpened(req.params.token);
+  if (open && open.first) analytics.event(req, 'LetterOpened', { side: row.sender_type });
+  res.json({
+    body: row.body,
+    senderName: row.sender_name,
+    recipientName: row.recipient_name,
+    senderType: row.sender_type,
+    youAre: db.LETTER_OPPOSITE[row.sender_type] || 'partner',
+    alreadyJoined: !!row.accepted_at,
+  });
+});
+
+// One tap: the account is created on the opposite side of whoever wrote the
+// letter, and if the sender has a Together table open, the two are linked on
+// the spot. No code to type, no second screen.
+app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'This letter is no longer available.' });
+  if (row.accepted_at) return res.status(409).json({ error: 'This letter has already been used to start an account.' });
+  const { email, password, name } = req.body || {};
+  if (!email || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  if (!validCredential(password)) {
+    return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  if (db.getUserByEmail(normalizedEmail)) {
+    return res.status(409).json({ error: 'An account with that email already exists. Sign in instead.' });
+  }
+  const userId = db.createUser(normalizedEmail, hashPassword(password), null);
+  try { db.setUserUtm(userId, { utm_source: 'letter', utm_medium: 'invite', utm_campaign: row.sender_type }); } catch (_) {}
+  db.markLetterAccepted(req.params.token, userId);
+  // Link the two Together tables if the sender already has one waiting. A
+  // failure here must never cost the account that was just created.
+  try {
+    const link = db.createCoupleLink(row.user_id, row.sender_name || '');
+    if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
+  } catch (_) {}
+  setSessionCookie(res, userId);
+  const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
+  res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
+  analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });
+  try {
+    push.sendToUser(row.user_id, {
+      title: 'They read your letter',
+      body: `${String(name || '').slice(0, 40) || 'They'} opened it and made an account. You are not carrying this alone now.`,
+      url: '/app',
+    }).catch(() => {});
+  } catch (_) {}
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// The reader's page. Short URL on purpose - it gets pasted into a text message.
+app.get('/l/:token', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'letter.html'));
+});
+
 app.get('/api/account/export', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });

@@ -41,10 +41,17 @@ PANELS = [
     ("02-lessons.png",  "A new lesson every day",         "Read it, or listen in a real voice"),
     ("03-journal.png",  "Write it down, keep it private", "Nobody reads it. Not us, not anyone."),
     ("04-progress.png", "Progress that never resets",     "A setback doesn't erase what you've already done"),
-    # Friendly was dropped from this set on 26 Aug. It is Pro-only now (zero
-    # free chats), and a store screenshot implying it is included is the exact
-    # oversell the 24 Aug tier audit went through the whole product to remove.
-    # The Climb took its slot: it is free, it is new, and no competitor has it.
+    # Friendly stays, with an honest caption. Removing it (26 Aug, first pass)
+    # was the wrong fix: it is a real feature and the main reason anyone buys
+    # Pro. The problem was never the screenshot, it was a caption that read as
+    # though Friendly came with the free app. Say "in Pro" on the panel and it
+    # both tells the truth and sells the thing. Play allows 8 panels; this is 7.
+    # ⚠️ BLOCKED - do not upload the output of this panel yet. The source
+    # screenshots/05-chat.png is from 9 Aug and still shows "Free · 3/day" and
+    # "3 free sessions left today" on screen. Friendly has had ZERO free chats
+    # since v8.12, so the image itself is untrue, not just its caption. It needs
+    # re-capturing from a Pro session before this line is enabled.
+    # ("05-chat.png",   "Someone to talk to at 3am",      "Friendly, in Pro — no judgment, any hour"),
 ]
 
 

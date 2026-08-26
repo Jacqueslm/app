@@ -6,6 +6,38 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — CONTENT RATING RE-DONE AND SAVED
+
+**Jacques re-did the full IARC questionnaire and saved it.** Closed. Do not
+re-walk it, do not ask him to check it again.
+
+The full answer set — every section, with the code evidence behind the Rooms
+answers — is recorded in `TurnSomeDayIntoOneday/store-listing/00-STATUS.md`
+item 3. Anyone touching the content rating again reads that table first.
+
+**A correction I have to record against myself.** Earlier today I told him the
+July certificate had the two user-interaction questions answered No. I read
+that from them being absent from the IARC Summary. It is wrong: **the Summary
+does not display the User Content Sharing answers at all.** Proved on screen —
+the answer was set to Yes and the Summary still showed nothing. Never infer
+those answers from the Summary.
+
+**The real trap, and it is a live one.** A new IARC questionnaire starts
+**blank**. Nothing carries over. The first pass silently left Online Content,
+the Controlled-Substance access lines and "Can purchase digital goods" as No —
+all three were on the July certificate. Saving it would have produced a
+*worse* certificate than the one it replaced, which is the direction Google's
+own warning on that page calls misrepresentation. **Compare the new Summary
+against the previous certificate before saving.** Caught before saving.
+
+**Ratings unchanged:** ESRB Teen / 14+, PEGI 12, USK 12, IARC 12+, ClassInd 14.
+
+**Play items still open:** buy Pro on a real phone from the live listing
+(never tested on the live billing path — needs a second email, his own account
+is comped), and the developer-name change sitting in Google review.
+
+---
+
 ## ✅ 26 AUG 2026 — STORE LISTING: BOTH UPLOADS DONE, VIDEO DONE
 
 **Jacques, 26 Aug 2026: "uploads are done."** The Play review cleared and both

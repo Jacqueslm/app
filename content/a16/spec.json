@@ -1,0 +1,22 @@
+{
+  "shots": [
+    {
+      "src": "../supporter-husband/02-door.jpg",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "He said he'd wait up."
+    },
+    {
+      "src": "../supporter-husband/03-table.jpg",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "He always does."
+    }
+  ],
+  "endcard": {
+    "big": "Waiting up is not the same as helping.",
+    "green": "It's free. Link in bio."
+  },
+  "music": "content/score/fading-light.mp3",
+  "music_volume": 0.85
+}

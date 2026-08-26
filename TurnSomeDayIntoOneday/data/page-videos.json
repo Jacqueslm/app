@@ -26,5 +26,32 @@
     "duration": "PT6M0S",
     "heading": "Watch: what actually happens at a meeting",
     "blurb": "If the not-knowing is what's stopping you walking in, this is the room described plainly before you go."
+  },
+  "alcohol-withdrawal-timeline": {
+    "id": "p9FeowIwB0U",
+    "title": "Alcohol Withdrawal Timeline: Hour by Hour (And When It's Dangerous)",
+    "description": "What actually happens in the hours and days after your last drink, and the signs that mean you need a doctor.",
+    "date": "2026-08-26",
+    "duration": "PT6M22S",
+    "heading": "Watch: hour by hour, what to expect",
+    "blurb": "Six minutes on the timeline, including the part most articles bury — hour 24 is the worst, and it does end."
+  },
+  "quit-vaping": {
+    "id": "sjKwRG3pN-s",
+    "title": "What Vaping Is Actually Doing To You (No Scare Stories)",
+    "description": "Somebody will tell you vaping is harmless. Somebody else will tell you it'll kill you by Thursday. Both are wrong.",
+    "date": "2026-08-28",
+    "duration": "PT5M50S",
+    "heading": "Watch: the honest version",
+    "blurb": "Six minutes without the scare stories and without the “it's basically water” line either."
+  },
+  "how-to-stop-watching-porn": {
+    "id": "Lj4JHNsVqoY",
+    "title": "How to Stop Watching Porn: What Actually Works (38 Years Sober)",
+    "description": "You've promised yourself before. Probably recently. The gap between meaning it completely and doing it again days later is what makes this grind.",
+    "date": "2026-08-29",
+    "duration": "PT5M13S",
+    "heading": "Watch: why the promise keeps breaking",
+    "blurb": "Five minutes on the gap between meaning it and doing it again, and how to close it."
   }
 }

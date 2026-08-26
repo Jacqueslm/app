@@ -33,23 +33,17 @@ re-walk it.
 the description was confirmed "done" before it was checked, then rewritten and
 re-pasted. It is right now.
 
-### ⛔ BLOCKED UNTIL THE CURRENT REVIEW CLEARS
-**Google greys out the asset Upload button while a submission is in review**
-("Changes in review" shows at the top of the Default store listing page).
-Confirmed on screen 26 Aug, 11:30. Both uploads below are blocked by this —
-it is not a broken button and there is no workaround. Wait for the review to
-clear, then upload. Do not send Jacques round this loop again.
+### ✅ 1 + 2. Both uploads DONE — Jacques, 26 Aug 2026
+**"uploads are done."** The review cleared and both went up:
+- `07-chat.png` — the re-shot Friendly panel (header **Pro · 30/day**, footer
+  **30 of 30 chats left**, caption says "in Pro"), added as panel 7.
+- `screenshots/feature-graphic-1024x500.png` — the rebuilt feature graphic that
+  says what the app is, not just its name.
 
-### 1. ⏳ Upload `07-chat.png` (optional)
-The re-shot Friendly panel — header reads **Pro · 30/day**, footer **30 of 30
-chats left**, caption says "in Pro". Add as panel 7; Play allows 8 and 6 are
-used. Not urgent: nothing currently on the listing is untrue without it.
-
-### 2. ⏳ Upload the new feature graphic (optional)
-`screenshots/feature-graphic-1024x500.png`, rebuilt 26 Aug. The old one said
-the app's name and nothing else — no category, no reason to install. The new
-one adds: *"Addiction recovery, one day at a time — with a whole side for the
-one who loves you."*
+**Do not ask him to upload either again, and do not re-check the console for
+them.** The earlier note here said Google greys out the asset Upload button
+while a submission is in review — that was true at 11:30 on 26 Aug and is now
+history, not a live blocker.
 
 ### 2b. ✅ Store listing video — DONE
 `content/store-video.mp4` — 26s, 1080x1920, a real screen recording of the live

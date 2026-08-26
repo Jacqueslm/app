@@ -604,3 +604,60 @@ the age this actually happens at. Buffer AI toggle ON (house rule 19).
 
 **Do NOT** pair this with a female-supporter piece in the same week. The point
 of it is that it is the one nobody makes.
+
+---
+
+## A15 — "The relief" · trauma bonding · 4 beats · 15.2s · $0 (built in code)
+
+**The biggest untapped term in KEYWORDS.md.** `trauma bonding` is 33,100/mo —
+more than every other partner-side term in the file combined — and the file's
+own note says it: *"Too hard as a page. Real as video — biggest untapped term
+for her."* Nothing in AI-SCENES.md or SCRIPTS.md had ever touched it. This is
+the first.
+
+**No photos, and that's the point.** There is no still that shows a trauma
+bond, because the bond isn't a moment — it's a shape over time. So the video
+draws the shape: a tension line, zoomed in close, where the white spikes of a
+bad night collapse into a long calm stretch that glows brand green. Beat 3
+pulls the camera back and the reveal is that the line does it over and over.
+The mechanism IS the visual, which is why this one didn't need a camera.
+
+1. **4.2s** in tight on the line — the spikes end, the calm goes green —
+   *The bad night ends. They're sorry. They're gentle again.*
+2. **4.2s** sitting inside the calm stretch — *And the relief feels exactly
+   like **love**.*
+3. **4.2s** camera pulls back to four cycles, all identical — *That's the bond.
+   Not the good days — the **relief** after the bad ones.*
+4. **2.6s** end card — **You're not crazy. It's a trauma bond.**
+
+**Title (TikTok / Facebook):** The relief feels exactly like love
+**Title (YouTube):** Trauma bonding — why the relief feels like love (33,100/mo, KD 62)
+
+**Caption:** The bad night ends, they're sorry, they're gentle again — and the
+relief feels exactly like love. That's the bond. Not the good days, the relief
+after the bad ones. It has a name and you're not crazy. The app has a whole
+side for the person holding it together. Free. No card, no ads, works with no
+account. Link in bio.
+#traumabonding #recovery #alcoholrecovery #codependency #supportsystem
+
+**Score:** `content/score/silent-impact-2.mp3` at 0.85.
+**Files:** `content/trauma-bond.mp4`, source `content/trauma-bond-source.html`.
+**Build:** `NODE_PATH=/opt/node22/lib/node_modules node tools/render-film.js content/trauma-bond-source.html FRAMES 30`
+then encode the frames with the score (exact ffmpeg line in the commit).
+
+**It never tells her to leave, or to stay.** KEYWORDS.md sets that rule on the
+partner-side terms and this piece holds to it — it names what's happening and
+stops. Naming it IS the payload; the search volume exists because nobody has
+told her the thing has a name.
+
+**One thing for your ear (I can't hear it).** The score library's longest sting
+is 14.35s and this cut is 15.2s, so the track is stretched 5.6% with `atempo`
+to land exactly on the last note instead of leaving a silent tail (house rule:
+music covers the whole video). 5.6% should be inaudible on an ambient sting and
+the pitch is unchanged, but you're the ear. If it sounds sludgy, say so and the
+fallback is to retime the film to 14.35s and re-render.
+
+**Where to post:** all three. No suppression risk in the frames — no faces, no
+substances, nothing to age-gate — which makes it the safest piece in this file
+and the one worth putting real reach behind. Buffer AI toggle ON (house rule
+19 names the code-built pieces explicitly).

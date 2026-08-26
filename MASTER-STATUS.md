@@ -6,6 +6,72 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🔬 26 AUG 2026 — WHY TWO PAGES AREN'T INDEXED: THE ALTERNATIVE PAGES ARE 95% THE SAME PAGE
+
+**Search Console, 26 Aug.** 40 URLs in the sitemap, **32 indexed**. The 13
+"not indexed" break down as: 7 blocked by robots.txt (all deliberate — admin,
+api, server, go, unsubscribe, and the private letters), 1 alternate-canonical,
+3 discovered-not-indexed, 2 crawled-not-indexed.
+
+**The 7 robots.txt blocks are NOT a bug.** All 40 sitemap URLs were checked
+against the robots rules: none is blocked. Nobody should "fix" this — `/l/`
+and `/letter.html` are meant to be uncrawlable.
+
+**Crawled – currently not indexed (2):** `/fortify-app-alternative` and
+`/best-recovery-apps`, both last crawled 19 Aug.
+
+### The measurement
+
+The 14 alternative pages average **95.3% identical text** to each other.
+Per page, only about a third of the words are unique:
+
+| Page | Words | Unique | Unique % |
+|---|---|---|---|
+| i-am-sober-alternative | 680 | 231 | 34.0% |
+| betblocker-alternative | 642 | 221 | 34.4% |
+| covenant-eyes-alternative | 669 | 226 | 33.8% |
+| ever-accountable-alternative | 645 | 216 | 33.5% |
+| blockerx-alternative | 658 | 220 | 33.4% |
+| **fortify-app-alternative** | **671** | **219** | **32.6%** |
+| quitnow-app-alternative | 641 | 203 | 31.7% |
+| nomo-app-alternative | 619 | 194 | 31.3% |
+| brainbuddy-alternative | 638 | 194 | 30.4% |
+| loosid-app-alternative | 632 | 191 | 30.2% |
+| reframe-app-alternative | 647 | 195 | 30.1% |
+| sunnyside-app-alternative | 620 | 184 | 29.7% |
+| quittr-app-alternative | 624 | 176 | 28.2% |
+| sober-time-alternative | 643 | 174 | 27.1% |
+
+Each page carries roughly 200 words of real competitor-specific writing —
+which is good writing, genuinely different per competitor — wrapped in ~450
+words of identical template. Google indexed 13 of the 14 and dropped one.
+
+**Fortify is not the weak one.** At 32.6% it is mid-pack. The choice of which
+page to drop is close to arbitrary, which means **the other 13 sit on the same
+foundation**. `sober-time` (27.1%) and `quittr` (28.2%) are the most exposed.
+
+### The fix, when it is worth doing
+
+Raise the unique share, don't add more pages. Per competitor: real current
+price, what it actually does well, the specific gap, who should pick it over
+this app, and one honest line where the competitor wins. Roughly 500 unique
+words per page flips the ratio. Trimming shared boilerplate helps as much as
+adding words.
+
+`/best-recovery-apps` (739 words) is a separate problem — a listicle head term
+contested by sites running 3,000-word comparisons.
+
+### Also worth correcting
+
+The 26 Aug handover says 10–15 search impressions a day. The export for
+1–20 Aug averages **6.7/day** (last four days: 7, 10, 5, 10). Still up from
+zero four weeks ago; the handover overstates it.
+
+**17 August was the breakthrough** — indexed 24 → 32 and not-indexed 21 → 13
+in a single day.
+
+---
+
 ## ✅ 26 AUG 2026 — CONTENT RATING RE-DONE AND SAVED
 
 **Jacques re-did the full IARC questionnaire, saved it and sent it for review.**

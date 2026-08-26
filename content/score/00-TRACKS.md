@@ -5,7 +5,7 @@ Every track available for the videos. Drop a file in this folder and add a row.
 **Naming:** lowercase, hyphens. A second take of the same track keeps the base
 name plus the number it arrived with (`fading-light.mp3` / `fading-light-1.mp3`).
 
-## Added 26 Aug 2026 — 10 new tracks
+## Added 26 Aug 2026 — 11 new tracks
 
 Longer and higher-bitrate than the original five. These are the ones that cover
 a 15–20s piece without looping.
@@ -15,6 +15,7 @@ a 15–20s piece without looping.
 | `weisser-schnee.mp3` | 22.7s |
 | `fading-light-1.mp3` | 20.6s |
 | `neon-rain-1.mp3` | 20.4s |
+| `fading-hymns.mp3` | 20.4s |
 | `paper-kites-in-the-rain.mp3` | 20.2s |
 | `fading-light.mp3` | 19.8s |
 | `neon-rain.mp3` | 19.8s |
@@ -23,8 +24,8 @@ a 15–20s piece without looping.
 | `static-in-the-rain.mp3` | 18.9s |
 | `fading-hymns-1.mp3` | 17.9s |
 
-`fading-hymns-1.mp3` arrived without a base version — the `-1` is kept in case
-one follows.
+Both takes of Fading Hymns are here: `fading-hymns.mp3` (20.4s) and
+`fading-hymns-1.mp3` (17.9s).
 
 ## The original five
 

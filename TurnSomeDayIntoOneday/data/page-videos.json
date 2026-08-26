@@ -1,0 +1,30 @@
+{
+  "_note": "Page slug -> the YouTube video that belongs on it. Adding an entry here is all it takes; run tools/embed-videos.py to inject the player and the VideoObject schema. Titles must match YouTube exactly - Google cross-checks them.",
+  "hangxiety": {
+    "id": "GRg1tdeH8PQ",
+    "title": "Hangxiety: Why You Wake Up at 4AM Terrified After Drinking",
+    "description": "You wake at four in the morning, heart going, certain you've ruined something - before you've even remembered what you did. What causes it, how long it lasts, and what actually helps.",
+    "date": "2026-08-27",
+    "duration": "PT6M29S",
+    "heading": "Watch: why the 4am dread happens",
+    "blurb": "Six minutes on what alcohol is actually doing to your brain overnight, and why the panic lifts on its own schedule."
+  },
+  "is-my-husband-an-alcoholic": {
+    "id": "2A4KU2OjnP0",
+    "title": "Living With an Alcoholic Husband: How to Tell, and What Actually Helps",
+    "description": "Is my husband an alcoholic? How much is too much? How do I help him? When do I stop trying? Honest answers for the person who has been carrying it alone.",
+    "date": "2026-08-25",
+    "duration": "PT6M6S",
+    "heading": "Watch: how to tell, and what actually helps",
+    "blurb": "Six minutes for the person who has been asking this quietly for a long time and has nobody safe to ask out loud."
+  },
+  "what-is-al-anon": {
+    "id": "cjfWPylqRDk",
+    "title": "Al-Anon: What Actually Happens at a Meeting (From Someone Who Went)",
+    "description": "If someone in your life is drinking and you have run out of things to try, this is what walking into an Al-Anon meeting is actually like - what is said, what is not, and what it costs.",
+    "date": "2026-08-24",
+    "duration": "PT6M0S",
+    "heading": "Watch: what actually happens at a meeting",
+    "blurb": "If the not-knowing is what's stopping you walking in, this is the room described plainly before you go."
+  }
+}

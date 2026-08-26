@@ -661,3 +661,76 @@ fallback is to retime the film to 14.35s and re-render.
 substances, nothing to age-gate — which makes it the safest piece in this file
 and the one worth putting real reach behind. Buffer AI toggle ON (house rule
 19 names the code-built pieces explicitly).
+
+---
+
+## A16 — "Nobody saw you do it" · binge eating at night · 3 beats · 15.0s · $0 (photo supplied)
+
+**Lane 5, the anchor.** `how to stop binge eating` is 9,900/mo and KEYWORDS.md
+calls it *"the biggest winnable term in the whole file"* and — the part that
+matters for money — *"Ad-safe lane."* The long-tail this is titled for,
+`how to stop binge eating at night` (880/mo, KD 33), is a night-time kitchen
+scene, which is exactly the still Jacques supplied.
+
+**Source still:** `content/binge-night/01-after.png` (Jacques's, 26 Aug).
+One frame, held for the whole cut, on a slow 7% push. No cutaway — the piece is
+about being stuck in a chair, so the camera never leaves it.
+
+1. **4.1s** — *Nobody saw you do it. That's the worst part.*
+2. **4.1s** — *You'll promise tomorrow is different. You mean it every time.*
+3. **3.7s** — *The shame isn't the punishment. It's the **setup** for the next one.*
+4. **2.2s** end card — **It's a cycle, not a character flaw.**
+
+**Title (TikTok / Facebook):** Nobody saw you do it
+**Title (YouTube):** How to stop binge eating at night — why the shame sets up the next one (880/mo, KD 33)
+
+**Caption:** Nobody saw you do it. That's the worst part — the promise that
+tomorrow is different, meant every time. The shame isn't the punishment, it's
+the setup for the next one. It's a cycle, not a character flaw, and there's a
+quiz on the site that tells you plainly whether this is a problem. Free. No
+card, no ads, works with no account. Link in bio.
+#bingeeating #bingeeatingrecovery #emotionaleating #recovery #foodfreedom
+
+**Score:** `content/score/silent-impact-2.mp3` at 0.85, stretched 4.5%
+(`atempo=0.95665`) so it lands on the last note — same treatment as A15.
+**Files:** `content/binge-night.mp4`, source `content/binge-night-source.html`.
+
+**Where it sends them:** `/how-to-stop-binge-eating` is live, and so is
+`/do-i-have-a-binge-eating-problem-quiz` (720/mo at **KD 15** — the cheapest
+quiz term in the file). This is one of the few videos in here with two real
+landing pages already built. Worth adding to `data/page-videos.json` when the
+YouTube cut exists.
+
+**Nothing repeats from SCRIPTS.md 13–15.** Those three own "nine in the
+morning," "it was never about the food," and "the ten minutes of quiet the food
+bought me." This one owns the shame-is-the-setup mechanism, which none of them
+say.
+
+### The second still is held, not used — read this before overruling it
+
+Jacques supplied a second frame (`02-bathroom-HELD.png`, kneeling over a bin)
+and named the pair cause/effect. It is not in the cut, for four reasons that
+are all about reach and lane rather than taste:
+
+1. **It changes the disorder.** Lane 5 is binge eating disorder. BED does not
+   involve purging — purging is bulimia, clinically a different thing. The
+   frame moves the piece off the lane the keywords were researched for.
+2. **The app can't catch who it calls.** `/how-to-stop-binge-eating` and the
+   quiz are BED content. There is no bulimia material anywhere in the app and
+   no eating-disorder helpline on that page. A purge-framed video brings in
+   someone the app currently has nothing for.
+3. **It burns the ad-safe lane.** This is the one lane KEYWORDS.md flags as
+   safe to put money behind. Content depicting purging can't be advertised on
+   Meta or TikTok, and both name depiction of eating-disorder behaviours as a
+   removal / age-restrict category — not ordinary suppression risk like the
+   drunk-driving frames, a named category.
+4. **It breaks house rule "never show anything explicit."** The rule at the top
+   of this file says the story is told by the glow, the closed door, the
+   posture, her face — never the act. A1 never shows the screen. A9b never
+   shows the crash, only the car after. The aftermath frame IS the house
+   treatment of this subject, and it's the one that was already supplied.
+
+**If Jacques wants it anyway, it's his call and it's one command** — say so and
+it gets built. The version I'd argue for even then: use it as beat 2 framed as
+the bathroom floor rather than the act (crop off the bin, hold on the posture),
+keep the piece on the BED lane in the captions, and post it to YouTube only.

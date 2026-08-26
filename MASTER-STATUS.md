@@ -6,6 +6,24 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — BILLING LIBRARY 8: ALREADY UPDATED. THERE WAS NO EXTENSION.
+
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The Android
+shell is on a current Google Play Billing Library. There is nothing to fix,
+nothing to watch for on Maven, and no Oct 31 date to work towards.
+
+**The extension that was granted was the Android 16 target-SDK one** (31 Aug →
+1 Nov, requested by Jacques 17 Aug). Earlier notes in this file, in
+`TurnSomeDayIntoOneday/HANDOFF.md` and in `store-listing/00-STATUS.md` attached
+that extension to Billing 8 instead. That was wrong. All three are corrected.
+
+**Any session that sees a Billing Library warning in Play Console:** it is
+stale console text, not work. Do not raise it with Jacques as news, do not plan
+a bubblewrap rebuild around it, and do not tell him to request an extension he
+never needed.
+
+---
+
 ## ✅ 26 AUG 2026 — END OF DAY: LIVE ON PLAY, STORE LISTING FINISHED
 
 **The app went live on Google Play at 7:59 AM.** Production, full rollout, 177
@@ -93,16 +111,20 @@ Verified: ALL CLEAR on all four passes after the conversion, zero overflow at
 - IARC content rating went live the same day. Global Rating ID
   `d0b9a237-57f4-80e0-88d0-3f837bdfd04f` — reusable on any other IARC storefront
   (Microsoft, Amazon, Xbox; Apple does not use IARC).
-- **The Billing Library 8 warning is NOT new and needs nothing done.** It is the
-  same July policy item; the extension was granted and the deadline moved from
-  Aug 30 to **Oct 31 2026**. The app shipped to Production with the warning
-  standing, which proves it blocks only future `.aab` uploads, never a release.
-  Full detail and the exact fix in `HANDOFF.md`. Any session that finds this
-  warning: read HANDOFF first, do not re-explain it to Jacques as news.
+- **The Billing Library 8 warning needs nothing done — the library is already
+  updated.** Corrected by Jacques 26 Aug: it is already on a current version and
+  **there was no extension** for it. (The extension that was granted was the
+  Android 16 target-SDK one, 31 Aug → 1 Nov.) The app shipped to Production with
+  the console warning standing, which proves it never blocked a release. Do not
+  re-explain this to Jacques as news and do not plan a rebuild around it.
 - **Remember the shape of this app.** The Android build is a TWA shell that
   loads the website. Everything shipped through Railway (`claude/vibe-code-uwxxlk`)
   reaches Play users with no new bundle and no review. A Play upload is only
   needed for shell-level changes — billing library, icon, package config.
+
+**Store listing video — DONE (Jacques, 26 Aug 2026).** `content/store-video.mp4`
+is on the channel and the listing's Video field is handled. Do not ask him to
+upload it again.
 
 **ACTION still open:** paste the corrected `store-listing/02-full-description.md`
 into Play Console. The submitted listing still carries the old tier wording.

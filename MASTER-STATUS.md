@@ -19,8 +19,8 @@ deleted:
   `reference/` card makers, the Studio workers and the Start-app launchers.
 
 **What this costs, so no session is surprised by it:**
-- **RULE ONE's PDF tool is gone.** `python3 tools-md-to-pdf.py` no longer
-  exists. PDFs already built stay in the repo; new ones need the tool back.
+- **RULE ONE's PDF tool was restored the same day, at his instruction** — `tools-md-to-pdf.py` is back in the repo and working. It is the one script that survives.
+- **`--png` page images need `pip install pypdfium2`** on a fresh machine, and the tool itself needs `pip install reportlab`. Neither is vendored.
 - **Lesson/story audio cannot be regenerated** without the generators.
 - **The Start-app / Start-Studio launchers are gone** from the repo.
 

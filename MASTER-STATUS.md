@@ -6,6 +6,52 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — END OF DAY: LIVE ON PLAY, STORE LISTING FINISHED
+
+**The app went live on Google Play at 7:59 AM.** Production, full rollout, 177
+countries, 20,237 devices, `com.turnsomedayintodayone.app`.
+
+### Shipped today
+- **v5.3** — the letter is the invitation. Both letters mint a private expiring
+  link; the reader sees the letter first, then one tap creates their account on
+  the opposite side and links the two Together tables with no code typed.
+  "Get a code" is no longer the front door.
+- **v5.4** — text follows the Android system font-size setting. The audit's new
+  130%-root pass found all 638 font sizes were px, so the OS accessibility
+  setting did nothing. All converted to rem; pixel-identical at default.
+- **v5.5** — one-time Play rating ask after the day-7+ lesson (never on a slip
+  day, "not now" is permanent), plus a feature graphic that says what the app
+  is instead of only its name.
+- **Four thin web pages rebuilt** (codependency-test, the binge quiz, for-her,
+  when-he-drinks) from ~250-440 words to ~1000. Two were quizzes whose content
+  lived inside `display:none` steps — a crawler saw the intro and stopped.
+- **Three new pages** around videos that had nowhere to live:
+  /alcohol-withdrawal-timeline, /quit-vaping, /how-to-stop-watching-porn.
+- **Videos on their matching pages** — the channel and the site had never been
+  connected; none of the 37 pages linked to a single video.
+- **A14** "The sound of her car" — the male supporter piece, 15.2s.
+- **Play store listing** — full description rewritten with the category words
+  it was missing entirely (recovery ×6, sober/sobriety ×5, addiction ×2), new
+  short description, Climb screenshot in, stale Friendly screenshot out.
+- **Developer name** changed from "Jacques Malone" to "Turn Someday Into Day
+  One" — in Google review, 1–2 days.
+
+### Two loops that wasted his time today — do not repeat
+1. **The description was confirmed "done" before it was checked.** It went live
+   in the morning, then a keyword audit found it contained ZERO instances of
+   recovery/sober/addiction/quit — and he had to paste a second version over
+   the first. **Audit content against its purpose BEFORE calling it finished.**
+2. **The Friendly screenshot was removed, then restored.** Removing a real
+   feature is not how you fix a misleading caption. He was right; the caption
+   was the problem, and the underlying image was also stale.
+
+### What is actually left
+See `TurnSomeDayIntoOneday/store-listing/00-STATUS.md` — 2 optional uploads,
+1 content-rating check, 1 real-phone purchase test. Nothing is urgent and
+nothing has a deadline this week.
+
+---
+
 ## ✅ 26 AUG 2026 — APP v5.4: TEXT SCALES WITH THE ANDROID FONT-SIZE SETTING
 
 Jacques's instruction: extend tools/bigtext-audit.js with an Android font-scale

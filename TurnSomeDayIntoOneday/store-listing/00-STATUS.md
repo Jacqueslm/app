@@ -17,95 +17,56 @@ re-walk it.
 
 ---
 
-## Open — the whole list, 26 Aug 2026
+## Open — 26 Aug 2026, 11:20 AM
 
-### 1. ✅ DONE — full description is live (confirmed 26 Aug)
-`02-full-description.md`, the text between the fences. 3,768 of 4,000
-characters. **Play Console → Main store listing → Full description.**
+### ✅ CLOSED TODAY (confirmed in the console, not assumed)
 
-**Confirmed in the console 26 Aug:** the character counter reads 3768/4000,
-matching this text exactly, and the visible ending matches word for word. The
-corrected, post-audit description is live. Nothing to do.
+| What | Evidence |
+|---|---|
+| Full description (keyword pass) | Box reads **3925/4000**, ends "addicted for 38 years and free at 50" |
+| Short description | Box reads **78/80**, "Addiction recovery: sober day counter, 90-day program, and support for family." |
+| Screenshots — Climb added, stale Friendly removed | 6 panels live |
+| Everything sent + published | Publishing overview empty, "Last published August 26, 2026" |
+| Developer name → "Turn Someday Into Day One" | Banner: *"Your new developer name is being reviewed"* — Jacques's own name comes off the listing when Google approves, 1–2 days |
 
-**The first paragraph is not optional.** Play rejects updates from
-non-regulated health apps that bury or drop the "not a medical device" line.
+**Do not re-walk any of the above.** Two separate loops happened today because
+the description was confirmed "done" before it was checked, then rewritten and
+re-pasted. It is right now.
 
-### 2. ⏳ Content rating — confirm the user-interaction answers
+### 1. ⏳ Upload `07-chat.png` (optional)
+The re-shot Friendly panel — header reads **Pro · 30/day**, footer **30 of 30
+chats left**, caption says "in Pro". Add as panel 7; Play allows 8 and 6 are
+used. Not urgent: nothing currently on the listing is untrue without it.
+
+### 2. ⏳ Upload the new feature graphic (optional)
+`screenshots/feature-graphic-1024x500.png`, rebuilt 26 Aug. The old one said
+the app's name and nothing else — no category, no reason to install. The new
+one adds: *"Addiction recovery, one day at a time — with a whole side for the
+one who loves you."*
+
+### 3. ⏳ Content rating — confirm the user-interaction answers
 **Policy and programs → App content → Content rating → Manage.**
+Rooms means "users interact" and "users share content" must both be **Yes**
+(moderation: yes, AI-checked before posting). Friendly is an AI, not a user —
+not user-to-user; answer yes only to an AI-generated-content question.
+If already answered that way, close the tab. Fixing it is not a release.
 
-The IARC rating went live 26 Aug (Global Rating ID
-`d0b9a237-57f4-80e0-88d0-3f837bdfd04f`). IARC's terms require the answers to
-account for **all** content in the app, and this app has two things the
-questionnaire asks about:
-
-- **Rooms** — users post and read each other's writing. "Does the app allow
-  users to interact?" and "Can users share content?" must both be **Yes**.
-  Moderation follow-up: yes — every post is held and AI-checked before it
-  appears, with report and ban paths.
-- **Friendly** — an AI, not another user, so it is **not** user-to-user
-  interaction. If there is an AI-generated-content question, answer **yes**
-  for Friendly.
-
-If they are already answered that way: close the tab, nothing to do.
-If not: fix and resubmit the questionnaire. That is **not** a release. Nothing
-live is touched and nothing re-enters review.
-
-### 3. ⏳ Upload the refreshed screenshots
-`screenshots-captioned/` — six 1080×1920 panels, rebuilt 26 Aug.
-**Main store listing → Phone screenshots.** Replace all, keep the order.
-
-| # | File | Caption |
-|---|---|---|
-| 1 | `01-home.png` | Every sober day, counted |
-| 2 | `02-sos.png` | One tap when the craving hits |
-| 3 | `03-climb.png` | **NEW** — Ninety steps, at your pace |
-| 4 | `04-lessons.png` | A new lesson every day |
-| 5 | `05-journal.png` | Write it down, keep it private |
-| 6 | `06-progress.png` | Progress that never resets |
-
-**The Friendly panel was removed on purpose.** Friendly is Pro-only now (zero
-free chats). A store screenshot captioned "An AI companion at 3am" implies it
-is included, which is exactly the oversell the 24 Aug tier audit went through
-the entire product to remove. The Climb took the slot: it is free, it is new,
-and no competitor in the category has anything like it.
-
-Also refreshed: the lesson caption now says "listen in a real voice" (six
-narrators shipped, including Jacques reading all ninety days), and the journal
-caption is now the privacy promise rather than a feature description.
-
-### 3b. DONE - Friendly screenshot re-captured (26 Aug)
-`screenshots/05-chat.png` was from 9 Aug and showed **"Free - 3/day"** and
-**"3 free sessions left today"** - untrue since v8.12. Re-shot from a real Pro
-session: the header now reads **Pro - 30/day** and the footer **30 of 30
-Friendly chats left today**.
-
-Pulling Friendly out of the set entirely (first pass) was the wrong fix, and
-Jacques said so. It is a real feature and the main reason anybody buys Pro;
-hiding it sells nothing. The caption says **"Friendly, in Pro"** so nobody
-downloads expecting it free. Output is `screenshots-captioned/07-chat.png` -
-upload as panel 7. Play allows 8.
-
-### 4. ⏳ Buy Pro on a real phone, from the real listing
-Never done. Closed testing is not the same billing path as a live Production
-listing. Install from Play, buy Pro, confirm days 16+ unlock and Friendly
-opens, then cancel. Better that Jacques finds a broken purchase than a
-stranger does.
+### 4. ⏳ Buy Pro on a real phone, from the live listing
+Never tested. Closed testing is a different billing path. Install from Play,
+buy, confirm days 16+ unlock and Friendly opens, cancel.
 
 ### 5. 🕐 Billing Library 8 — nothing to do until Google ships
-Console says **fix by Oct 31 2026**. This is the July policy item; the
-extension was **granted** (it originally said Aug 30). The app shipped to
-Production with the warning standing, which proves it blocks only future
-`.aab` uploads, never a release.
+**Fix by Oct 31 2026.** July item, extension **granted** (was Aug 30). The app
+shipped to Production with the warning standing — it blocks only future `.aab`
+uploads, never a release. Detail in `HANDOFF.md`. **Do not re-request the
+extension and do not present it to Jacques as news.**
 
-The fix does not exist yet: the shell pulls its billing library from
-`androidbrowserhelper:billing`, newest published is 1.1.0, and forcing
-BillingClient 8 crashes at purchase time. Full detail and the exact steps in
-`HANDOFF.md`. **Do not re-request the extension and do not present this to
-Jacques as news.**
-
-### 6. ✅ Nothing else
-Title, short description, feature graphic, data safety, health declaration,
-privacy policy, developer verification — all done and live.
+### 6. 🕐 Title keyword — decided against, revisit only if installs climb
+`Turn Someday Into Day One` (25/30) carries no search term, and the title is
+Play's heaviest ranking field. Kept anyway: that name is on the business cards,
+the domain, the YouTube channel and the end card of every video. Splitting the
+store name off from all of it to chase a head term he cannot win yet is a bad
+trade. `Day One: Sober & Recovery` (25) is the alternative if he ever wants it.
 
 ---
 

@@ -19,7 +19,9 @@ WHAT IS INSIDE
 
 • A day counter that shows how long you have been at this, and a lifetime total that never resets — because a hard day should not erase a hard year.
 
-• A 30-day guided program, written in plain language, one short lesson a day. There are separate tracks depending on what you are working on, including a track written specifically for people supporting someone else.
+• A 90-day guided program, written in plain language, one short lesson a day. There are separate tracks depending on what you are working on, including a track written specifically for people supporting someone else.
+
+• Every lesson read aloud, in a real voice. Six narrators, including the founder reading all ninety days himself. Listen with the screen off, on the drive, or when reading is too much.
 
 • A companion you can talk to, any hour, that responds to what you actually typed rather than a menu.
 
@@ -28,6 +30,10 @@ WHAT IS INSIDE
 • A private journal with mood, and prompts if you do not know where to start.
 
 • Progress you can see — streaks, hours, and shareable milestone cards that show a number and nothing else, so what you are working on stays yours.
+
+• A climb up ninety carved steps, one for every day you show up. A hard day dims the sky and never takes a step back.
+
+• Ten-minute narrated stories from people who have been in it — five on the shelf, new ones every week, from both sides: the person using and the person who loves them.
 
 • An app lock and a discreet mode: you can change the app's name and icon on your home screen so nothing on your phone announces what this is.
 

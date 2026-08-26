@@ -49,6 +49,21 @@ h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
 .crisis a{color:var(--green);font-weight:600;text-decoration:none}
 .free{color:var(--green);font-weight:650}
 @media (prefers-reduced-motion: reduce){.bar>div{transition:none}}
+
+/* Reading section below the check-in. It sits OUTSIDE .step on purpose: the
+   steps are display:none until reached, so anything inside them is invisible
+   to a reader who has not started and thin to a crawler. This page was 258
+   words of indexable text, which is why Google crawled it and declined to
+   index it. */
+.read{width:100%;max-width:430px;margin:0 auto;padding:0 22px calc(46px + env(safe-area-inset-bottom));color:var(--ts)}
+.read hr{border:0;border-top:1px solid var(--bdr);margin:0 0 26px}
+.read h2{font-size:19px;line-height:1.3;color:var(--tp);font-weight:700;margin:26px 0 10px}
+.read h3{font-size:15px;line-height:1.35;color:var(--tp);font-weight:650;margin:20px 0 6px}
+.read p{font-size:14px;line-height:1.7;margin-bottom:13px}
+.read strong{color:var(--tp)}
+.read ul{list-style:none;padding:0;margin:0 0 14px}
+.read li{font-size:14px;line-height:1.6;padding-left:18px;position:relative;margin-bottom:9px}
+.read li::before{content:'—';position:absolute;left:0;color:var(--accent)}
 </style>
 <script>
 (function(){try{
@@ -201,5 +216,88 @@ function showResult(){
   show('st-result');
 }
 </script>
+
+<article class="read">
+<hr>
+
+<h2>What "codependent" actually means</h2>
+<p>The word gets used as an insult, which is a shame, because underneath it is
+something quite specific and quite common: <strong>you have been managing
+somebody else's life so closely that you have lost track of your own.</strong>
+Not because you are weak. Usually because at some point it worked — you smoothed
+something over, the house stayed calm, and you learned that keeping the peace was
+your job.</p>
+
+<p>It is not a diagnosis. No doctor hands it out, there is no test that makes it
+official, and anyone selling you a definitive result is selling you something.
+What it is, is a pattern with a name — and a pattern with a name is a lot easier
+to put down than a vague sense that something is wrong with you.</p>
+
+<h2>The signs people actually describe</h2>
+<p>When people talk about this in their own words rather than a textbook's, the
+same things come up:</p>
+<ul>
+  <li>You can read their mood from the sound of the front door, and you adjust
+  your whole evening around what you hear.</li>
+  <li>Saying no costs more than saying yes, so you have mostly stopped saying it.</li>
+  <li>You have covered for them — to their work, to their family, to your own.</li>
+  <li>Somebody asks how you are and you give them an update on the other person.</li>
+  <li>Calm at home does not feel like calm. It feels like the gap before the next
+  thing.</li>
+  <li>You handle the consequences of choices you did not make, and then wonder
+  why nothing changes.</li>
+  <li>You could not easily say what you enjoy doing anymore.</li>
+</ul>
+<p>None of those on its own means very much. Several of them together usually
+means you have been carrying two lives and calling it love.</p>
+
+<h2>Why helping stopped helping</h2>
+<p>Here is the part that is genuinely hard to hear. Consequences are how people
+change. When you smooth them over — the call to their boss, the rent, the lift
+home, the story you keep straight — you are not stopping the fall. You are
+paying for it, so it can keep happening.</p>
+<p>That is not an accusation. Anybody who loves someone does this. But it is the
+reason the effort has not worked, and it is the reason trying harder will not
+work either.</p>
+
+<h2>What is yours and what is not</h2>
+<p>A short version that people find useful at 2am:</p>
+<ul>
+  <li><strong>Theirs:</strong> whether they stop, when they stop, what they do
+  about it, and how they feel about you asking.</li>
+  <li><strong>Yours:</strong> what you will and will not be in the room for, what
+  you say yes to, where your money goes, whether you sleep, and who you tell the
+  truth to.</li>
+</ul>
+<p>A boundary is not a punishment and it is not an ultimatum. It is a sentence
+about what <em>you</em> will do — "I am not driving you home from there anymore"
+— not a demand about what they will do. It works whether or not they agree with
+it, which is exactly why it is the only kind that holds.</p>
+
+<h2>Is this the same as Al-Anon?</h2>
+<p>Overlapping, not identical. Al-Anon is a free, in-person and online fellowship
+for people affected by someone else's drinking, and for a lot of people it is the
+single most useful thing on this page. It is not religious in the way people fear
+and it costs nothing. <a href="/what-is-al-anon">Here is what actually happens at
+a meeting</a>, if the not-knowing is what is stopping you walking in.</p>
+
+<h2>Where to start, if you start anywhere</h2>
+<p>Not with them. With one thing that is only yours — a friendship you dropped,
+an evening you stopped taking, a doctor's appointment you keep moving. It sounds
+far too small to matter. It is the only part of this you actually control, which
+is what makes it the part that moves.</p>
+<p>If it helps to have something structured, the app has a whole side written for
+the person supporting somebody else — what to say, what not to carry, and how to
+help without disappearing. It is free, it works with no account and no name, and
+nothing you write in it is visible to them.</p>
+
+<h3>One honest caveat</h3>
+<p>If you are afraid of the person you live with — not hurt, not exhausted,
+<strong>afraid</strong> — none of this is the right tool. Call the National
+Domestic Violence Hotline on <a href="tel:18007997233">1-800-799-7233</a> or text
+START to 88788. You are allowed to call just to ask whether what you are living
+with is normal.</p>
+</article>
+
 </body>
 </html>

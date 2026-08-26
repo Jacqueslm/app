@@ -1,21 +1,33 @@
-# A15 — "Nobody saw the second half"
+# A15 — "Nobody saw the second half" · BUILT 26 Aug 2026
 
-Cause & Effect, 3 shots, 8s. Binge → purge.
+Cause & Effect, 3 shots, 8s. Binge → the bathroom after.
+File: `content/a15/binge-purge.mp4` (1080x1920, 8.0s).
 
-**To render:**
+| Shot | Source | Caption |
+|---|---|---|
+| 1 — CAUSE, 3s, push in | `01-cause.png` | *Nobody saw her eat it.* |
+| 2 — EFFECT, 3s, push in | `02-effect.png` | *Nobody saw this either.* |
+| 3 — END CARD, 2s | house rule 16 | **This cycle can be broken.** / *It's free. Link in bio.* |
+
+**Music:** `content/score/weisser-schnee.mp3` (22.7s), one of the 26 Aug tracks.
+
+**Titles**
+- YouTube: How to stop binge eating at night — what happens after everyone's asleep *(880/mo, KD 33)*
+- TikTok / Facebook: Nobody saw the second half
+
+**Buffer caption:** The binge isn't the end of it. There's a second half nobody
+talks about, and doing it alone is the reason it keeps happening. It's free.
+Link in bio.
+
+**Posting:** YouTube + Facebook first. TikTok and Instagram both restrict
+content about purging even in a recovery frame — this cut helps, because the
+act is never shown, only the moment after. AI-generated toggle ON everywhere
+(house rule 19).
+
+**Rebuild:**
 ```
 export NODE_PATH=/opt/node22/lib/node_modules
 python3 tools/make-film.py content/a15/spec.json content/a15/binge-purge.mp4
 ```
-
-**Waiting on:** the two source stills, which must be saved here as
-`01-cause.png` (the kitchen table, empty containers) and `02-effect.png`
-(the bathroom floor, the bin). Jacques pasted them into chat on 26 Aug —
-pasted images do not reach disk, so they have to arrive as files.
-
-**Music:** `weisser-schnee.mp3` (22.7s) covers the 8s cut with room to spare.
-`fading-light.mp3` is the alternative.
-
-**Posting:** YouTube + Facebook first. TikTok and Instagram both restrict
-content showing purging even in a recovery frame. AI-generated toggle ON
-everywhere (house rule 19).
+Note: shot `src` paths are relative to this spec file; `music` is relative to
+the repo root.

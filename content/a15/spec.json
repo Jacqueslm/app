@@ -1,9 +1,17 @@
 {
   "shots": [
-    {"src": "content/a15/01-cause.png",  "seconds": 3, "motion": "in",
-     "caption": "Nobody saw her eat it."},
-    {"src": "content/a15/02-effect.png", "seconds": 3, "motion": "in",
-     "caption": "Nobody saw this either."}
+    {
+      "src": "01-cause.png",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "Nobody saw her eat it."
+    },
+    {
+      "src": "02-effect.png",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "Nobody saw this either."
+    }
   ],
   "endcard": {
     "big": "This cycle can be broken.",

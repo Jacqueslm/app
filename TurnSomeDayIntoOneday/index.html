@@ -1865,7 +1865,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd">Free — start here</div>
         <div class="setting-row" onclick="openPartnerLetter()">
           <i class="ti ti-pencil" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p id="partner-letter-row-title">A letter to the person who loves me</p><span id="partner-letter-row-sub">Written from your journey — share it with one tap</span></div>
+          <div class="setting-row-txt"><p id="partner-letter-row-title">A letter to the person who loves me</p><span id="partner-letter-row-sub">Written from your journey — send it and it opens their side too</span></div>
           <i class="ti ti-chevron-right" style="font-size:18px;color:var(--tm)"></i>
         </div>
         <div class="card" style="padding:16px 18px;margin-top:10px">
@@ -2757,7 +2757,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div style="font-size:12.5px;color:var(--tm);line-height:1.55;margin-bottom:10px">Not sure where to start? Tap below for a draft you can keep, cut, or replace entirely.</div>
       <button class="log-btn" style="margin:0" onclick="startBothLetterDraft()">Start me off</button>
     </div>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="sharePartnerLetter()">Share this letter</button>
+    <!-- Their name is optional and it is not admin. It changes what the letter
+         link says when it lands, and it puts them on the milestone card later. -->
+    <!-- Deliberately NOT .ob-input: that class is white text on white-8%, which
+         is invisible inside this modal in light mode. Same tokens as the letter
+         field above it instead. -->
+    <input id="letter-recipient" placeholder="Their first name (optional)" maxlength="40"
+      style="width:100%;margin:0 0 10px;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:13px 14px;font-size:14px;color:var(--tp);font-family:var(--f)"
+      oninput="S.partnerName=this.value.trim();save()">
+    <button class="ob-btn" id="letter-send-btn" style="margin-bottom:8px" onclick="sharePartnerLetter()">Send them your letter</button>
     <button class="sos-close" onclick="closePartnerLetter()">Close</button>
   </div>
 </div>
@@ -2842,6 +2850,7 @@ let S = {
   activeCustomPack:'',customPackProgress:{},userBuiltPacks:[],
   pinHash:null,pinEnabled:false,discretionMode:false,audioPillExplained:false,navTourDone:false,welcomeShown:false,
   userType:'recovering',likedStories:[],partnerFocus:[],partnerRelation:'',supporterLetterDraft:'',
+  partnerName:'',letterLink:'',letterSentAt:'',cameFromLetter:'',
   bothLetterDraft:'',bothLetterSavedAt:'',bothLetterRelation:'',
   totalSoberDaysEver:0,lessonsCompletedCount:0,cravingsSurvivedCount:0,
   emergencyPlan:{contactName:'',contactPhone:'',steps:''},
@@ -7331,6 +7340,16 @@ function buildShareCardCanvas(day){
     stats.forEach((s,i)=>x.fillText(s,540,970+i*70));
   }else{
     x.fillText('Every day is a win.',540,970);
+  }
+  // Addressed to them when there is a them. A day count is a private number
+  // until it is a gift - and the person who held the line with you should see
+  // their own name on it. First name only: this image lands in other people's
+  // feeds, and a full name there is not ours to publish.
+  const forWhom=String(S.partnerName||'').trim().split(/\s+/)[0];
+  if(forWhom){
+    x.fillStyle='#7ee8a2';
+    x.font=`600 40px ${F}`;
+    x.fillText(`For ${forWhom}.`,540,1180);
   }
   x.fillStyle='#8f98c6';
   x.font=`500 38px ${F}`;
@@ -12362,7 +12381,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.2';
+const APP_VERSION='5.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13038,13 +13057,24 @@ function openBothLetter(){
     }
   }
 }
+function setLetterSendVisible(on){
+  const b=document.getElementById('letter-send-btn');
+  const r=document.getElementById('letter-recipient');
+  if(b)b.style.display=on?'':'none';
+  if(r)r.style.display=on?'':'none';
+}
 function openPartnerLetter(){
   logActivity('partner_letter',{});
   if(isBothLetter()){
     openBothLetter();
+    // This one is addressed to the version of you who needs it, and the note
+    // under it promises nobody else sees it. A send button here would make the
+    // app a liar, so the sharing controls are hidden on this path only.
+    setLetterSendVisible(false);
     document.getElementById('partner-letter-modal').classList.add('open');
     return;
   }
+  setLetterSendVisible(true);
   const supporter=isSupporterLetter();
   const readEl=document.getElementById('partner-letter-text');
   const editEl=document.getElementById('partner-letter-edit');
@@ -13060,6 +13090,8 @@ function openPartnerLetter(){
   noteEl.style.display=supporter?'':'none';
   if(supporter)editEl.value=buildPartnerLetter();
   else readEl.textContent=buildPartnerLetter();
+  const rcp=document.getElementById('letter-recipient');
+  if(rcp)rcp.value=S.partnerName||'';
   document.getElementById('partner-letter-modal').classList.add('open');
 }
 // She may work at this across days, so an edited draft survives closing. An untouched
@@ -13093,15 +13125,83 @@ function closePartnerLetter(){
   persistSupporterLetterDraft();
   document.getElementById('partner-letter-modal').classList.remove('open');
 }
-function sharePartnerLetter(){
+// ─── The letter IS the invitation ────────────────────────────────────────────
+// Sending raw text meant the letter landed and stopped there. Now the same tap
+// mints a private, expiring link: they read the letter first, and only then are
+// they offered their own side of the app, already set to the opposite role.
+// Nobody installs a recovery app because a friend asked. They open a letter
+// because somebody they love wrote it.
+function letterSideForShare(){
+  // 'both' senders are carrying their own recovery AND somebody else's, so the
+  // person they're writing to is a supporter either way.
+  return S.userType==='partner'?'partner':(S.userType==='both'?'both':'recovering');
+}
+async function mintLetterLink(){
+  const body=buildPartnerLetter();
+  const r=await fetch('/api/letter/share',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({body,senderType:letterSideForShare(),senderName:S.name||'',recipientName:S.partnerName||''})
+  });
+  if(r.status===401){const e=new Error('signed-out');e.signedOut=true;throw e;}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error||"That didn't send. Try again in a moment.");
+  S.letterLink=j.url;S.letterSentAt=new Date().toISOString();save();
+  logActivity('letter_sent',{side:letterSideForShare()});
+  return j;
+}
+// The one line that rides with the link. Deliberately says almost nothing —
+// the letter is the message, and a summary in the text bubble would spoil it.
+function letterShareNote(url){
+  const who=(S.partnerName||'').trim();
+  return `${who?who+', I':'I'} wrote something I've never been able to say out loud. It's here:\n\n${url}`;
+}
+async function sharePartnerLetter(){
   // Share what she actually wrote, not the template she edited away from.
   persistBothLetterDraft();
   persistSupporterLetterDraft();
   const text=buildPartnerLetter();
-  if(navigator.share){navigator.share({text}).catch(()=>{});return;}
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>appInfo('Copied','The letter is on your clipboard — paste it into a text, email, or note to them.')).catch(()=>appInfo('Share','Could not copy automatically — select the letter text and copy it by hand.'));
+  if(!text||text.trim().length<40){
+    appInfo('Not yet',"There isn't enough of the letter here to send. Write a little more first — even badly.");
+    return;
   }
+  let out=null;
+  try{ out=await mintLetterLink(); }
+  catch(e){
+    // Signed out, or the server is unreachable. The letter still goes — as text,
+    // the way it always did. Losing the link is worth less than losing the moment.
+    if(navigator.share){navigator.share({text}).catch(()=>{});return;}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>appInfo('Copied',
+        e&&e.signedOut
+          ?"The letter is on your clipboard. Sign in and send it again to get a link that opens their side of the app too."
+          :"The letter is on your clipboard — paste it into a text, email, or note to them."
+      )).catch(()=>appInfo('Share','Could not copy automatically — select the letter text and copy it by hand.'));
+    }
+    return;
+  }
+  const note=letterShareNote(out.url);
+  const days=out.expiresInDays||30;
+  if(navigator.share){
+    navigator.share({text:note}).catch(()=>{});
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(note)
+      .then(()=>appInfo('Ready to send',`Copied. Paste it into a text or an email to them. The link works for ${days} days and you can take it back any time.`))
+      .catch(()=>appInfo('Ready to send',out.url));
+    return;
+  }
+  appInfo('Ready to send',out.url);
+}
+// A letter shared in a moment of courage has to be retractable in a moment of
+// regret, without asking anybody's permission.
+function revokeLetterLink(){
+  appConfirm('Take the link back? They will not be able to open the letter again.',async()=>{
+    try{await fetch('/api/letter/revoke',{method:'POST'});}catch(e){}
+    S.letterLink='';S.letterSentAt='';save();
+    appInfo('Taken back','The link is dead. Nothing they already read can be unread, but nobody new can open it.');
+    if(document.getElementById('couples-modal').classList.contains('open'))renderCouples();
+  });
 }
 
 const COUPLES_EXERCISES=[
@@ -13136,6 +13236,9 @@ async function fetchCoupleStatus(force){
       const prev=JSON.stringify(coupleInfo);
       coupleInfo=await r.json();coupleFetchedAt=Date.now();
       if(coupleInfo.linked){
+        // Remembered so a milestone card can be addressed to them by name even
+        // when the app is offline and coupleInfo hasn't loaded.
+        if(coupleInfo.partnerName&&coupleInfo.partnerName!==S.partnerName){S.partnerName=coupleInfo.partnerName;save();}
         if((coupleInfo.togetherDone||0)>(S.togetherDone||0)){
           S.togetherDone=coupleInfo.togetherDone;save();
         }
@@ -13149,10 +13252,9 @@ async function fetchCoupleStatus(force){
   }catch(e){}
   return coupleInfo;
 }
-async function coupleCreate(){
-  const r=await fetch('/api/couple/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:S.name||''})});
-  if(r.ok){coupleInfo=await r.json();coupleFetchedAt=Date.now();renderCouples();}
-}
+// NOTE: there is no longer a "get a code" button. The couple link is created
+// server-side the moment somebody accepts a letter (see /api/letter/:token/accept),
+// so the code exists without anybody ever having to read one out.
 async function coupleJoin(){
   const inp=document.getElementById('couple-code-input');
   const code=(inp&&inp.value||'').trim();
@@ -13187,12 +13289,20 @@ function coupleSectionHtml(){
   if(c.pending)return box(
     `<div style="font-size:13px;color:var(--tp);font-weight:600">Your link code: <span style="letter-spacing:3px;color:#7ee8a2">${escapeHtml(c.code||'')}</span></div>`
     +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">Have your partner open Together on their phone and enter it. The code links the day count and nudges — nothing else.</div>`);
+  // Nobody has ever been talked into a recovery app by an invitation. The way in
+  // is the letter: they read the hardest thing you had to say, and their side of
+  // the app is what's waiting on the other end of it. The code is still here for
+  // the person who was handed one, but it is no longer the front door.
+  const sent=S.letterLink&&S.letterSentAt;
+  const sentWhen=sent?new Date(S.letterSentAt):null;
   return box(
     `<div style="font-size:13px;color:var(--tp);font-weight:600">Two phones, one table</div>`
-    +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">Link with your partner: share the day count, nudge each other for the ten minutes. No journals, no clocks, no checking — just the table.</div>`
-    +`<div style="display:flex;gap:8px;margin-top:10px">`
-    +`<button class="sos-close" style="width:auto;padding:0 14px;background:var(--accent);color:#fff" onclick="coupleCreate()">Get a code</button>`
-    +`<input id="couple-code-input" class="ob-input" placeholder="Enter their code" style="flex:1;margin:0;text-transform:uppercase" maxlength="6">`
+    +`<div style="font-size:12px;color:var(--tm);line-height:1.55;margin-top:4px">Send them the letter you wrote. When they open it, their side of the app opens with it — no code to type, nothing for them to work out. You'll share the day count and the nudge, and nothing else: no journals, no clocks, no checking.</div>`
+    +(sent&&!isNaN(sentWhen)?`<div style="font-size:11.5px;color:var(--tm);line-height:1.5;margin-top:8px">Sent ${sentWhen.toLocaleDateString(undefined,{month:'long',day:'numeric'})}. The link lasts 30 days. <span onclick="revokeLetterLink()" style="color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline">Take it back</span></div>`:'')
+    +`<button class="sos-close" style="margin-top:10px;background:var(--accent);color:#fff" onclick="closeCouplesExercises();openPartnerLetter()">${sent?'Send it again':'Send them your letter'}</button>`
+    +`<div style="font-size:11.5px;color:var(--tm);line-height:1.5;margin-top:12px;text-align:center">Were you handed a code instead?</div>`
+    +`<div style="display:flex;gap:8px;margin-top:8px">`
+    +`<input id="couple-code-input" placeholder="Enter their code" style="flex:1;margin:0;text-transform:uppercase;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:0 12px;font-size:14px;color:var(--tp);font-family:var(--f)" maxlength="6">`
     +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`);
 }
 function renderCouples(){
@@ -13878,8 +13988,33 @@ async function submitGateAuth(){
   }
 }
 
+// Somebody who arrived through a letter has already answered the only question
+// onboarding really asks - which side of this they are on - by the act of
+// opening it. Re-asking would be the app not listening on the first screen.
+// The flag is written by letter.html on the same origin and read exactly once.
+function adoptLetterHandoff(){
+  let raw=null;
+  try{raw=localStorage.getItem('tsid_from_letter');localStorage.removeItem('tsid_from_letter');}catch(e){return;}
+  if(!raw)return;
+  let d=null;
+  try{d=JSON.parse(raw);}catch(e){return;}
+  if(!d||S.startDate)return;   // never overwrite somebody's existing account
+  S.cameFromLetter=d.youAre==='partner'?'partner':'recovering';
+  S.partnerName=String(d.from||'').slice(0,40);
+  if(d.name)S.name=String(d.name).slice(0,40);
+  if(typeof chooseUserType==='function'&&d.youAre==='partner'){
+    // Supporter side, pre-set. They still pick what their person is struggling
+    // with - that is a real question, not a formality.
+    S.userType='partner';
+    S.selectedAddictions=['Supporting Someone'];
+    if(!S.partnerRelation)S.partnerRelation='partner';
+  }
+  save();
+}
+
 async function boot(){
   load();
+  adoptLetterHandoff();
   applyFontSize();
   applyDiscretionMode();
   // Guard the gates too: back on sign-in / preview must not close the app

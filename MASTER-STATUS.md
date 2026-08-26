@@ -1,8 +1,76 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 18, 2026.
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 26, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## ✅ 26 AUG 2026 — APP v5.3: THE LETTER IS THE INVITATION
+
+Jacques's instruction: turn both letters into the invite mechanism. Shipped as
+one version bump (5.2 → 5.3) across `APP_VERSION`, `sw.js` CACHE_NAME and both
+`package.json` files.
+
+**The idea.** Nobody installs a recovery app because a friend asked them to.
+They open a letter because somebody they love wrote it. So the letter now
+carries the invitation, and the account offer only appears *after* it has been
+read.
+
+**What ships:**
+
+1. **Both letters mint a private, expiring share link.** "Send them your letter"
+   posts the letter to `POST /api/letter/share`, which returns
+   `https://.../l/<32-hex-token>`. Tokens are 128-bit, live 30 days, and one live
+   letter per person per side — re-sending revokes the old link rather than
+   leaving readable copies around.
+2. **`/l/<token>` shows the letter first.** New page `letter.html`: brand, the
+   letter in full, the sender's name, and *then* the account offer. The reader
+   needs no account to read it. Copy is written twice — once for somebody being
+   handed a letter by a person in recovery (you are being asked to understand),
+   once for somebody handed one by a supporter (you are loved, and it has cost
+   something).
+3. **One tap creates the account on the opposite side.** `POST
+   /api/letter/:token/accept` creates the user, pre-sets them as supporter or
+   recovering (opposite of the sender), links the two Together tables server-side
+   so **no code is ever typed**, pushes "They read your letter" to the sender,
+   and drops a handoff flag the app reads on first boot (`adoptLetterHandoff()`)
+   so onboarding never re-asks a question the letter already answered.
+4. **"Invite partner" is gone.** The couples box no longer leads with "Get a
+   code" — the primary action is now **Send them your letter**, with the code
+   field demoted to "Were you handed a code instead?" `coupleCreate()` was
+   deleted; the link is created server-side on acceptance.
+5. **Milestone share cards are addressed.** If a partner name exists, the card
+   carries `For <first name>.` in green above the sign-off. First name only —
+   these images land in other people's feeds.
+6. **`/admin/stats` has a Letters block:** `letter_sent`, `letter_opened`,
+   `account_created_from_letter`, split by side and by week.
+
+**Judgement calls, flagged rather than buried:**
+
+- **The "both" letter has no send button.** That one is addressed to *the
+  version of you who needs it* and the note under it promises nobody else sees
+  it. Shipping "Send them your letter" there would make the app a liar, so the
+  send button and recipient field are hidden on that path only
+  (`setLetterSendVisible(false)`).
+- **`.ob-input` was invisible in this modal** — white text on white-8%, unusable
+  in light mode. The recipient field and the couple code field both now use the
+  same tokens as the letter field beside them.
+- **Offline / signed-out still sends.** If the link cannot be minted, the letter
+  goes as plain text exactly as it always did. Losing the link is worth less
+  than losing the moment.
+- **Revoke is one tap and absolute.** A letter shared in a moment of courage has
+  to be retractable in a moment of regret. Accepted letters stay readable so the
+  history stays honest.
+- **`robots.txt` now disallows `/l/` and `/letter.html`**, and the page carries
+  `noindex,nofollow,noarchive,nosnippet` plus `referrer: no-referrer`.
+
+**Verified, not assumed (house rule 17):** full flow run against a live server —
+signup → share → open → accept → both sides linked with no code. Re-accept 409s,
+unknown token 404s, short letter 400s, signed-out mint 401s, revoke kills a live
+link and leaves an accepted one. 11/11 server tests pass. `tools/bigtext-audit.js`
+reports ALL CLEAR (house rule 23). Zero console errors on the reader page and in
+the app. Screenshots went in the chat before pushing (house rule 24).
 
 ---
 

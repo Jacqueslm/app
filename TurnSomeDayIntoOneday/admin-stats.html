@@ -55,6 +55,31 @@ fetch('/api/admin/stats').then(async r=>{
       .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
     '<div class="note">Paid counts Stripe status <code>active</code> only. Trialing is shown separately — a trial that has not converted is not revenue.</div>';
 
+  // The letter funnel. Three numbers, in the order they happen: somebody sent
+  // the hardest thing they had to say, somebody read it, somebody came in
+  // because of it. The last one is the only referral number in the app that
+  // means anything.
+  if(d.letters){
+    const L=d.letters;
+    h+='<h2>Letters</h2><div class="cards">'+
+      [['Letters sent',L.letter_sent],['Opened',L.letter_opened],['Accounts from a letter',L.account_created_from_letter]]
+        .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>';
+    h+='<div class="note">Opened counts a letter a real person actually opened at least once. '+
+       'Accounts counts the recipient making their own side — the only referral that costs nobody anything.</div>';
+    if(L.by_side&&L.by_side.length){
+      h+=table([{key:'side',label:'Sent by'},{key:'letter_sent',label:'Sent',n:1},
+                {key:'letter_opened',label:'Opened',n:1},{key:'account_created_from_letter',label:'Accounts',n:1}],
+        L.by_side.map(r=>({side:{recovering:'Person in recovery',partner:'Supporter',both:'Carrying both'}[r.side]||r.side,
+          letter_sent:r.letter_sent,letter_opened:r.letter_opened,account_created_from_letter:r.account_created_from_letter})),
+        {side:'All',letter_sent:sum(L.by_side,'letter_sent'),letter_opened:sum(L.by_side,'letter_opened'),
+         account_created_from_letter:sum(L.by_side,'account_created_from_letter')});
+    }
+    if(L.by_week&&L.by_week.length){
+      h+=table([{key:'week',label:'Week of'},{key:'letter_sent',label:'Sent',n:1},
+                {key:'letter_opened',label:'Opened',n:1},{key:'account_created_from_letter',label:'Accounts',n:1}],L.by_week);
+    }
+  }
+
   // Funnel and retention. Both deliberately print "—" rather than a percentage
   // until the sample is big enough to mean anything: one paying customer out of
   // three is not "33% conversion", and a number that precise invites decisions

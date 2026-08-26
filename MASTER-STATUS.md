@@ -8,8 +8,8 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ## ✅ 26 AUG 2026 — CONTENT RATING RE-DONE AND SAVED
 
-**Jacques re-did the full IARC questionnaire and saved it.** Closed. Do not
-re-walk it, do not ask him to check it again.
+**Jacques re-did the full IARC questionnaire, saved it and sent it for review.**
+Fully closed. Do not re-walk it, do not ask him to check it again.
 
 The full answer set — every section, with the code evidence behind the Rooms
 answers — is recorded in `TurnSomeDayIntoOneday/store-listing/00-STATUS.md`
@@ -32,9 +32,12 @@ against the previous certificate before saving.** Caught before saving.
 
 **Ratings unchanged:** ESRB Teen / 14+, PEGI 12, USK 12, IARC 12+, ClassInd 14.
 
-**Play items still open:** buy Pro on a real phone from the live listing
-(never tested on the live billing path — needs a second email, his own account
-is comped), and the developer-name change sitting in Google review.
+**Everything on the Play listing is now finished.** Description, short
+description, screenshots, feature graphic, video, content rating — all done and
+submitted. Only two things remain on Play at all:
+1. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+2. The developer-name change, sitting in Google's review. Nothing to do but wait.
 
 ---
 

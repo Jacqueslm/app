@@ -19,13 +19,13 @@ re-walk it.
 
 ## Open — the whole list, 26 Aug 2026
 
-### 1. ⏳ Paste the corrected full description
+### 1. ✅ DONE — full description is live (confirmed 26 Aug)
 `02-full-description.md`, the text between the fences. 3,768 of 4,000
 characters. **Play Console → Main store listing → Full description.**
 
-The live listing may still carry pre-audit wording that oversold the paywall.
-Jacques believes this is done; nobody has confirmed it in the console. Two
-minutes to check, and it needs no review and no new bundle.
+**Confirmed in the console 26 Aug:** the character counter reads 3768/4000,
+matching this text exactly, and the visible ending matches word for word. The
+corrected, post-audit description is live. Nothing to do.
 
 **The first paragraph is not optional.** Play rejects updates from
 non-regulated health apps that bury or drop the "not a medical device" line.

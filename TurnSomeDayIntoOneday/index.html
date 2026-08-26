@@ -2730,6 +2730,18 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <button class="calm-toggle" onclick="toggleSosMusic()">♪ Calm sound: on</button>
 </div>
 
+<!-- RATING ASK - shown once, ever, after the day-7+ lesson -->
+<div class="sos-modal" id="rating-ask-modal" onclick="if(event.target===this)closeRatingAsk()">
+  <div class="sos-sheet">
+    <div style="font-size:2rem;margin-bottom:8px">⛰️</div>
+    <div class="sos-title">Seven days of showing up.</div>
+    <div class="sos-sub" style="margin-bottom:16px">If this app is helping, a rating on Google Play helps the next person find it — the one still searching at 2am.</div>
+    <button class="ob-btn" style="margin-bottom:8px" onclick="goRateApp()">Rate it on Google Play</button>
+    <button class="sos-close" onclick="closeRatingAsk()">Not now</button>
+    <div style="font-size:.6875rem;color:var(--tm);margin-top:10px">We'll never ask again either way.</div>
+  </div>
+</div>
+
 <!-- PARTNER LETTER -->
 <div class="sos-modal" id="partner-letter-modal" onclick="if(event.target===this)closePartnerLetter()">
   <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
@@ -3585,6 +3597,10 @@ function completeLessonForToday(){
   // actually mean something get a bigger one. No points, no coins, no fake
   // currency - the number IS the reward, because it is true.
   rewardForLesson(lesson.day,S.lessonsCompletedCount);
+  // The one and only rating ask. The ASO guide's rule is right: ask after a
+  // positive action, never cold. Day 7+ of showing up is the earned moment.
+  // Once, ever - a dismissal is an answer, not an opening bid (house rule 25).
+  if(!justHitFreeCap&&!justFinishedProgram)maybeAskForRating();
   if(justHitLessonConsistency)novaNudge("Seven lessons done — that consistency is exactly what builds lasting change.");
   if(justHitFreeCap){
     setTimeout(()=>{openDay15Overlay();},1200);
@@ -3607,6 +3623,34 @@ function completeLessonForToday(){
 // How big a finished lesson gets to feel. First one, first week, the free-tier
 // line and the end of a 30-day track are the ones worth a real burst.
 const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'medium',21:'medium',50:'large',100:'large'};
+// ─── The rating ask ──────────────────────────────────────────────────────────
+// A 4.0+ star average decides whether Play ever shows this app to strangers,
+// and the people most likely to rate it well are the ones on a streak. So the
+// ask happens exactly once, after the day-7-or-later lesson is finished - a
+// moment of earned pride - and never on a day with a slip logged. "Not now" is
+// permanent. No nagging: the same quiet register as everything else here.
+function maybeAskForRating(){
+  if(S.ratingAsked)return;
+  if(getDays()<7)return;
+  if((S.lessonsCompletedCount||0)<7)return;
+  const today=new Date().toDateString();
+  if((S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today))return;
+  S.ratingAsked=true;save();
+  setTimeout(()=>{
+    if(typeof anyBlockingUIOpen==='function'&&anyBlockingUIOpen())return;
+    const m=document.getElementById('rating-ask-modal');
+    if(m)m.classList.add('open');
+  },2600);
+}
+function closeRatingAsk(){
+  const m=document.getElementById('rating-ask-modal');
+  if(m)m.classList.remove('open');
+}
+function goRateApp(){
+  closeRatingAsk();
+  logActivity('rating_ask_accepted',{});
+  window.open('https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app','_blank','noopener');
+}
 function rewardForLesson(day,total){
   const tier=LESSON_MARKS[total]||(total%25===0?'large':(day%10===0?'medium':'small'));
   try{celebrationBurst(tier);}catch(e){}
@@ -12381,7 +12425,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.4';
+const APP_VERSION='5.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

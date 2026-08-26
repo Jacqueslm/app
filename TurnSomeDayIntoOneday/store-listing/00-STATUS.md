@@ -61,12 +61,34 @@ seeded Pro account against a local server, then captions are overlaid. NOTE:
 this ffmpeg build has **no drawtext filter** - captions must be rendered as
 transparent PNGs and overlaid, the same way `tools/make-film.py` does it.
 
-### 3. ⏳ Content rating — confirm the user-interaction answers
-**Policy and programs → App content → Content rating → Manage.**
-Rooms means "users interact" and "users share content" must both be **Yes**
-(moderation: yes, AI-checked before posting). Friendly is an AI, not a user —
-not user-to-user; answer yes only to an AI-generated-content question.
-If already answered that way, close the tab. Fixing it is not a release.
+### 3. 🔴 Content rating — CHECKED 26 Aug: the interaction answers are WRONG
+
+**Confirmed on screen, 26 Aug 2026.** The live IARC certificate
+(`d0b9a237-57f4-80e0-88d0-3f837bdfd04f`, submitted **28 July 2026, 10:28 AM`)
+was read via Content ratings → Previous questionnaires → View summary.
+
+The summary lists, in full: Category (All Other App Types), Downloaded App,
+Suggestive/Sexual Themes, Controlled Substance (drugs, alcohol, tobacco),
+Online Content ("App features or promotes online content"), Controlled
+Substance (access to products), Miscellaneous ("Can purchase digital goods").
+
+**There is no "users interact" line and no "users share content" line.** Both
+were answered No. That questionnaire predates Rooms, and Rooms lets people post
+and read each other's writing — so both should be **Yes**.
+
+Current ratings off the wrong answers: ESRB 14, Teen, PEGI 12, USK 12, IARC 12+.
+
+**The fix:** Content ratings → **Start new questionnaire** (blue button, top
+right of the page — it is above "Your current ratings", not at the bottom).
+It re-uses the existing answers, so it is a short pass. It is **not** a release
+and it does not hold anything up; the current rating stands until the new one
+is submitted.
+
+**Friendly is an AI, not a user** — it is not user-to-user interaction. Answer
+Yes only to an AI-generated-content question, not to the interaction ones on
+Friendly's account. Rooms is what makes the interaction answers Yes.
+
+Moderation answer: yes, AI-checked before posting.
 
 ### 4. ⏳ Buy Pro on a real phone, from the live listing
 Never tested. Closed testing is a different billing path. Install from Play,

@@ -51,6 +51,20 @@ the app's name and nothing else — no category, no reason to install. The new
 one adds: *"Addiction recovery, one day at a time — with a whole side for the
 one who loves you."*
 
+### 2b. ⏳ Store listing video — MADE, needs a YouTube upload
+`content/store-video.mp4` — 26s, 1080x1920, a real screen recording of the live
+app (not stills): day counter -> SOS sheet -> The Climb -> Tools -> Friendly ->
+home, five captions, brand end card, scored.
+
+Play's Video field takes a **YouTube URL only** - public or unlisted, ads off,
+not age restricted. So: upload it to the channel as **unlisted**, then paste the
+watch URL into Default store listing -> Video.
+
+How it was built (for the next rebuild): Playwright `recordVideo` drives a
+seeded Pro account against a local server, then captions are overlaid. NOTE:
+this ffmpeg build has **no drawtext filter** - captions must be rendered as
+transparent PNGs and overlaid, the same way `tools/make-film.py` does it.
+
 ### 3. ⏳ Content rating — confirm the user-interaction answers
 **Policy and programs → App content → Content rating → Manage.**
 Rooms means "users interact" and "users share content" must both be **Yes**

@@ -418,7 +418,7 @@ a week, tick the log below as they go.
 | r/stopdrinking wiki | | | |
 | r/NoFap resources | | | |
 | In The Rooms | | | |
-| The Phoenix | | | |
+| The Phoenix | Sent 25 Aug | **UNSUBSCRIBED** — do not contact again (see reference/DO-NOT-CONTACT.md) | Closed |
 | Sober Grid / Loosid | | | |
 | SMART Recovery | | | |
 | Recovery Dharma / LifeRing / WFS | | | |

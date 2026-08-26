@@ -66,7 +66,10 @@ One person, who needed it first and could not find it. It is not a clinic and do
 > It has been free since 5.5.0, and the first fifteen days of *every* lesson pack
 > are free (not one pack). A listing that oversells the paywall is both wrong and
 > the wrong way round — it hides the thing that makes people stay.
-> **The live listing in Play Console still has the old wording. Paste this one in.**
+>
+> **✅ LIVE IN PLAY CONSOLE — confirmed 26 Aug 2026.** The console's own counter
+> reads 3768/4000, which matches this text exactly, and the visible ending matches
+> word for word. Nothing to paste. Do not tell Jacques this is outstanding again.
 
 ---
 

@@ -6,6 +6,27 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — STORE LISTING: BOTH UPLOADS DONE, VIDEO DONE
+
+**Jacques, 26 Aug 2026: "uploads are done."** The Play review cleared and both
+optional assets went up: `07-chat.png` (the re-shot Friendly panel, added as
+screenshot 7) and the rebuilt `feature-graphic-1024x500.png`. The store listing
+video is done too — on the channel, Video field handled.
+
+**The store listing is now finished.** Description, short description,
+screenshots, feature graphic, video: all live and correct. Do not re-check any
+of it and do not ask him to upload anything again.
+
+**Still open on Play, and only these:**
+1. Content rating — confirm the two user-interaction answers say Yes (Rooms
+   lets people post and read each other's writing). Not a release.
+2. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+3. Developer name → "Turn Someday Into Day One" — in Google review, 1–2 days
+   from 26 Aug. Nothing to do but wait.
+
+---
+
 ## 🗑 26 AUG 2026 — ALL SCRIPTS REMOVED FROM THE REPO (Jacques's instruction)
 
 **"remove all scripts from repo" — both kinds, his call, confirmed.** 47 files

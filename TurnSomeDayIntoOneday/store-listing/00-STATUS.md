@@ -51,14 +51,16 @@ the app's name and nothing else — no category, no reason to install. The new
 one adds: *"Addiction recovery, one day at a time — with a whole side for the
 one who loves you."*
 
-### 2b. ⏳ Store listing video — MADE, needs a YouTube upload
+### 2b. ✅ Store listing video — DONE
 `content/store-video.mp4` — 26s, 1080x1920, a real screen recording of the live
 app (not stills): day counter -> SOS sheet -> The Climb -> Tools -> Friendly ->
 home, five captions, brand end card, scored.
 
-Play's Video field takes a **YouTube URL only** - public or unlisted, ads off,
-not age restricted. So: upload it to the channel as **unlisted**, then paste the
-watch URL into Default store listing -> Video.
+**Jacques confirmed 26 Aug 2026: the video is done.** It is on the channel and
+the listing's Video field is handled. Do not ask him to upload it again.
+
+(For reference only, if it is ever replaced: Play's Video field takes a
+**YouTube URL only** - public or unlisted, ads off, not age restricted.)
 
 How it was built (for the next rebuild): Playwright `recordVideo` drives a
 seeded Pro account against a local server, then captions are overlaid. NOTE:
@@ -76,11 +78,13 @@ If already answered that way, close the tab. Fixing it is not a release.
 Never tested. Closed testing is a different billing path. Install from Play,
 buy, confirm days 16+ unlock and Friendly opens, cancel.
 
-### 5. 🕐 Billing Library 8 — nothing to do until Google ships
-**Fix by Oct 31 2026.** July item, extension **granted** (was Aug 30). The app
-shipped to Production with the warning standing — it blocks only future `.aab`
-uploads, never a release. Detail in `HANDOFF.md`. **Do not re-request the
-extension and do not present it to Jacques as news.**
+### 5. ✅ Billing Library 8 — CLOSED, already updated
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on
+a current Billing Library. There is no Oct 31 deadline — the extension that was
+granted was the **Android 16 target-SDK** one (31 Aug → 1 Nov). The app shipped
+to Production with the console warning standing, which proves it never blocked a
+release. Detail in `HANDOFF.md`. **Do not request an extension, do not plan a
+rebuild for it, and do not present it to Jacques as news.**
 
 ### 6. 🕐 Title keyword — decided against, revisit only if installs climb
 `Turn Someday Into Day One` (25/30) carries no search term, and the title is

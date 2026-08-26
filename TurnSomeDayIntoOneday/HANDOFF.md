@@ -142,45 +142,25 @@ Opt-in link (closed test — only works for addresses already on the tester list
 
     https://play.google.com/apps/testing/com.turnsomedayintodayone.app
 
-### Play Billing Library 8 deadline (policy warning, July 2026)
+### Play Billing Library 8 — CLOSED. Already updated, no extension.
 
-Play Console flags: "App must use Google Play Billing Library version 8.0.0 or
-later" — the console tile said fix by **Aug 30, 2026**; the extension moved it to
-**Oct 31, 2026** (confirmed in the console 26 Aug). After that date new `.aab` uploads are rejected.
-Nothing installed breaks, the tester clock keeps running, and the server is
-unaffected — the Billing Library lives only inside the Android shell.
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on
+a current Google Play Billing Library. Nothing to do here. Do not re-open it.
 
-**The fix does not exist yet.** The shell gets its Billing Library from
-`com.google.androidbrowserhelper:billing`, and the latest **published** version
-is 1.1.0 (bundles BillingClient 7.1.1). The v8 bump (wrapper 1.2.0,
-BillingClient 8.3.0) is merged on android-browser-helper's `main` but not
-released to Maven. Do **not** pin `billing:1.2.0` (fails to resolve) and do
-**not** force `com.android.billingclient:billing:8.x` alongside wrapper 1.1.0 —
-it compiles, then crashes at purchase time, because PBL 8 removed deprecated
-APIs the 1.1.0 wrapper was built against. Real money runs through this path.
+**The extension was for Android 16 target SDK, not for Billing.** Jacques
+requested that one on 17 Aug and it moved 31 Aug → 1 Nov. Earlier versions of
+this file attached that extension to Billing 8 and invented an "Oct 31 Billing
+deadline" from it. There is no such deadline.
 
-What to do instead:
+If Play Console still shows a Billing Library tile, treat it as stale console
+text. Do NOT tell Jacques it is new, do NOT request an extension, and do NOT
+schedule a bubblewrap rebuild for it.
 
-1. **Extension GRANTED — confirmed 26 Aug 2026.** The console tile now reads
-   **"Fix by Oct 31"**, up from the original Aug 30. Nothing further to file.
-   Do not re-request it and do not treat this warning as new: it is the same
-   July item, extended. The app went live on Production the same morning
-   (26 Aug, 7:59 AM) with this warning standing, which is proof it does not
-   block a release — only future `.aab` uploads after 31 Oct.
-2. **Watch** https://github.com/GoogleChrome/android-browser-helper/releases
-   for `billing-1.2.0` (last cycle Google shipped the v7 wrapper ahead of the
-   deadline, announced on chromeos.dev).
-3. When it ships, the whole fix is: bump `appVersionCode` in
-   `twa-manifest.json`, then `npm install -g @bubblewrap/cli`,
-   `bubblewrap update`, `bubblewrap build`, upload to the closed-testing track.
-   No manual gradle edit — the updated Bubblewrap template will pull the new
-   wrapper. Verify `app/build.gradle` shows `billing:1.2.0` (or later) before
-   uploading; if it still says 1.1.0, the template hasn't caught up yet and the
-   one-line edit to the published 1.2.0 is then safe.
+**Still true about the shape of the thing:** the Billing Library lives only
+inside the Android shell. The website and the server are unaffected by anything
+in this section, and a Play upload is only ever needed for shell-level changes
+(icon, package config, target SDK).
 
-Until then keep uploading to closed testing normally — the deadline only bites
-uploads after it passes, and the 12-tester/14-day clock remains the actual
-launch blocker.
 
 ## Open bug
 

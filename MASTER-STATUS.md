@@ -6,6 +6,34 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 26 AUG 2026 — LIVE ON GOOGLE PLAY
+
+**Turn Someday Into Day One, release 2 (1.0.1), went Available on Google Play at
+7:59 AM on 26 Aug 2026.** Production track, full rollout, 177 of 177 countries,
+20,237 supported devices. `com.turnsomedayintodayone.app`.
+
+- Install base on 1.0.1 reads 0.00% because the 8 existing installs are still on
+  the July closed-test build (version code 1). They auto-update; this is not a
+  fault.
+- IARC content rating went live the same day. Global Rating ID
+  `d0b9a237-57f4-80e0-88d0-3f837bdfd04f` — reusable on any other IARC storefront
+  (Microsoft, Amazon, Xbox; Apple does not use IARC).
+- **The Billing Library 8 warning is NOT new and needs nothing done.** It is the
+  same July policy item; the extension was granted and the deadline moved from
+  Aug 30 to **Oct 31 2026**. The app shipped to Production with the warning
+  standing, which proves it blocks only future `.aab` uploads, never a release.
+  Full detail and the exact fix in `HANDOFF.md`. Any session that finds this
+  warning: read HANDOFF first, do not re-explain it to Jacques as news.
+- **Remember the shape of this app.** The Android build is a TWA shell that
+  loads the website. Everything shipped through Railway (`claude/vibe-code-uwxxlk`)
+  reaches Play users with no new bundle and no review. A Play upload is only
+  needed for shell-level changes — billing library, icon, package config.
+
+**ACTION still open:** paste the corrected `store-listing/02-full-description.md`
+into Play Console. The submitted listing still carries the old tier wording.
+
+---
+
 ## ✅ 26 AUG 2026 — APP v5.3: THE LETTER IS THE INVITATION
 
 Jacques's instruction: turn both letters into the invite mechanism. Shipped as

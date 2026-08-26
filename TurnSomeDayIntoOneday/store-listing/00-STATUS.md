@@ -61,34 +61,65 @@ seeded Pro account against a local server, then captions are overlaid. NOTE:
 this ffmpeg build has **no drawtext filter** - captions must be rendered as
 transparent PNGs and overlaid, the same way `tools/make-film.py` does it.
 
-### 3. 🔴 Content rating — CHECKED 26 Aug: the interaction answers are WRONG
+### 3. ✅ Content rating — DONE 26 Aug 2026. New questionnaire submitted.
 
-**Confirmed on screen, 26 Aug 2026.** The live IARC certificate
-(`d0b9a237-57f4-80e0-88d0-3f837bdfd04f`, submitted **28 July 2026, 10:28 AM`)
-was read via Content ratings → Previous questionnaires → View summary.
+**Jacques re-did the whole IARC questionnaire on 26 Aug and saved it.** Do not
+re-walk it and do not ask him to check it again.
 
-The summary lists, in full: Category (All Other App Types), Downloaded App,
-Suggestive/Sexual Themes, Controlled Substance (drugs, alcohol, tobacco),
-Online Content ("App features or promotes online content"), Controlled
-Substance (access to products), Miscellaneous ("Can purchase digital goods").
+**READ THIS BEFORE YOU EVER "AUDIT" THE CONTENT RATING AGAIN.**
+The IARC **Summary does not display the User Content Sharing answers.** Earlier
+today this file claimed the interaction questions had been answered No, because
+they were absent from the July summary. That conclusion was wrong — absence from
+the summary proves nothing. It was disproved on screen: User Content Sharing was
+set to **Yes**, and the summary still showed no interaction line. Never infer
+those answers from the summary again.
 
-**There is no "users interact" line and no "users share content" line.** Both
-were answered No. That questionnaire predates Rooms, and Rooms lets people post
-and read each other's writing — so both should be **Yes**.
+**Where the button is:** Content ratings → **Start new questionnaire**, a blue
+button at the **top right**, above "Your current ratings". It is not at the
+bottom of the page.
 
-Current ratings off the wrong answers: ESRB 14, Teen, PEGI 12, USK 12, IARC 12+.
+**The answers, so nobody re-derives them.** A new questionnaire starts blank —
+nothing carries over from the previous one.
 
-**The fix:** Content ratings → **Start new questionnaire** (blue button, top
-right of the page — it is above "Your current ratings", not at the bottom).
-It re-uses the existing answers, so it is a short pass. It is **not** a release
-and it does not hold anything up; the current rating stands until the new one
-is submitted.
+| Section | Answer |
+|---|---|
+| Category | All Other App Types |
+| Downloaded App | Yes |
+| Violence / Fear / Gambling / Crude Humor | No |
+| Sexuality | Yes → Suggestive/Sexual Themes → *References to sexual activity without descriptive detail* |
+| Language | **No** — verified in code: the only profanity in the repo is the Rooms blocklist at `index.html:7890` |
+| Controlled Substance | Yes → Illegal/Recreational **Reference**, Medical **Reference**, Alcohol **Reference + Often**, Tobacco **Reference + Often**. Not Fantasy Drugs. No "Use", no "Encourages/Glamorizes". |
+| **User Content Sharing** | **Yes** — Rooms is native in-app text between users |
+| ↳ UGC the primary source of content? | No |
+| ↳ Public sharing of nudity / graphic violence? | No — Rooms is text only |
+| ↳ Block users or content? | **No** — verified: no block/mute/ignore exists anywhere in the app |
+| ↳ Report users or content? | **Yes** — `index.html:7969` `reportPost()`; line 7791 "two reports hide a post until a human reviews it" |
+| ↳ Chat moderation? | **Yes** — `index.html:2571` a moderator reads every post before the room sees it |
+| ↳ Limited to invited friends only? | No — no friends-only mode exists |
+| Online Content | **Yes** — the app is a TWA that loads the website, embeds YouTube, and Friendly generates AI content |
+| ↳ Is this content the focus? | No |
+| ↳ Visual depictions of illegal/recreational drugs? | Yes |
+| ↳ Referred to in text or spoken? | Yes |
+| Promotion or Sale of Age-Restricted Products | No — the app helps people quit, it does not promote or sell |
+| Miscellaneous — shares precise location with other users? | No |
+| Miscellaneous — allow users to purchase digital goods? | **Yes** — Pro |
+| ↳ Loot boxes / chance-based purchases? | No |
+| ↳ Cash rewards, crypto, NFTs? | No |
+| ↳ Web browser or search engine? | No |
+| ↳ Primarily a news or educational product? | No |
 
-**Friendly is an AI, not a user** — it is not user-to-user interaction. Answer
-Yes only to an AI-generated-content question, not to the interaction ones on
-Friendly's account. Rooms is what makes the interaction answers Yes.
+**Two traps found while doing it, both caught before saving:**
+1. A fresh questionnaire silently answers the later sections **No**. The first
+   pass dropped Online Content, the Controlled-Substance access lines and
+   "Can purchase digital goods" — all of which the July certificate carried.
+   Saving that would have made the certificate *less* accurate than before.
+   **Always compare the new Summary against the previous certificate before
+   saving.**
+2. "Medical drugs" frequency defaulted to **Often**; July recorded **Rarely**.
+   It does not change the resulting ratings either way.
 
-Moderation answer: yes, AI-checked before posting.
+**Ratings are unchanged by this pass:** ESRB Teen / 14+, PEGI 12, USK 12,
+IARC 12+, ClassInd 14.
 
 ### 4. ⏳ Buy Pro on a real phone, from the live listing
 Never tested. Closed testing is a different billing path. Install from Play,

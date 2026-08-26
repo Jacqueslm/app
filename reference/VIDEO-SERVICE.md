@@ -5,7 +5,14 @@ Runs entirely on `tools/make-film.py` — a finished, captioned, scored,
 watermarked film takes under a minute of compute, so the margin is his time on
 the script, not production.
 
-**Sales page (artifact, private until he shares it):**
+**Sales page (artifact, private until he shares it) — the five films PLAY on the
+page, they are not stills.** Each is embedded twice, H.264/AAC for Safari/iOS and
+VP9/Opus for Chromium/Firefox, decoded into Blob URLs at load because Chrome will
+not play a multi-megabyte data: URI in a video src. Page weight 3.2MB. Source
+kept at `reference/pitch/video-service.html`; rebuild by re-encoding at 480px
+wide and re-embedding.
+
+**Sales page:**
 https://claude.ai/code/artifact/96d9ff30-6c44-4c12-9ce3-f3f7d280f35d
 
 ## The offer

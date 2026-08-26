@@ -63,8 +63,9 @@ transparent PNGs and overlaid, the same way `tools/make-film.py` does it.
 
 ### 3. ✅ Content rating — DONE 26 Aug 2026. New questionnaire submitted.
 
-**Jacques re-did the whole IARC questionnaire on 26 Aug and saved it.** Do not
-re-walk it and do not ask him to check it again.
+**Jacques re-did the whole IARC questionnaire on 26 Aug, saved it, and sent it
+for review.** Fully closed. Do not re-walk it and do not ask him to check it
+again.
 
 **READ THIS BEFORE YOU EVER "AUDIT" THE CONTENT RATING AGAIN.**
 The IARC **Summary does not display the User Content Sharing answers.** Earlier

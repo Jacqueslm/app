@@ -37,10 +37,14 @@ REG = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
 PANELS = [
     ("01-home.png",     "Every sober day, counted",       "Days, hours and money back — on one screen"),
     ("06-sos.png",      "One tap when the craving hits",  "Breathe, talk it through, or reach 988 — instantly"),
-    ("05-chat.png",     "An AI companion at 3am",         "Friendly listens. No judgment, any hour."),
-    ("02-lessons.png",  "A new lesson every day",         "Read it, or listen hands-free"),
-    ("03-journal.png",  "Write it down, keep it private", "A daily entry and a mood, in your account"),
+    ("07-climb.png",    "Ninety steps, at your pace",     "A hard day dims the sky. It never takes a step back."),
+    ("02-lessons.png",  "A new lesson every day",         "Read it, or listen in a real voice"),
+    ("03-journal.png",  "Write it down, keep it private", "Nobody reads it. Not us, not anyone."),
     ("04-progress.png", "Progress that never resets",     "A setback doesn't erase what you've already done"),
+    # Friendly was dropped from this set on 26 Aug. It is Pro-only now (zero
+    # free chats), and a store screenshot implying it is included is the exact
+    # oversell the 24 Aug tier audit went through the whole product to remove.
+    # The Climb took its slot: it is free, it is new, and no competitor has it.
 ]
 
 

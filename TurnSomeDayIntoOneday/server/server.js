@@ -231,6 +231,22 @@ app.get('/hangxiety', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'hangxiety.html'));
 });
 
+// Three pages built 26 Aug around long-form videos that already existed and had
+// nowhere to live. Each one is written for the winnable long tail, not the head
+// term - the head terms here (alcohol withdrawal, quit vaping) belong to
+// treatment chains with medical review boards and we are not going to take them.
+app.get('/alcohol-withdrawal-timeline', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'alcohol-withdrawal-timeline.html'));
+});
+
+app.get('/quit-vaping', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'quit-vaping.html'));
+});
+
+app.get('/how-to-stop-watching-porn', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-watching-porn.html'));
+});
+
 // The partner audience's two biggest search terms, added 2026-08-12 after a
 // live Semrush pull: `codependency` (33,100/mo) and `al anon` (33,100/mo)
 // together outweigh anything else this side of the door, and the site had no

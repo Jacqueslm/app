@@ -33,6 +33,13 @@ re-walk it.
 the description was confirmed "done" before it was checked, then rewritten and
 re-pasted. It is right now.
 
+### ⛔ BLOCKED UNTIL THE CURRENT REVIEW CLEARS
+**Google greys out the asset Upload button while a submission is in review**
+("Changes in review" shows at the top of the Default store listing page).
+Confirmed on screen 26 Aug, 11:30. Both uploads below are blocked by this —
+it is not a broken button and there is no workaround. Wait for the review to
+clear, then upload. Do not send Jacques round this loop again.
+
 ### 1. ⏳ Upload `07-chat.png` (optional)
 The re-shot Friendly panel — header reads **Pro · 30/day**, footer **30 of 30
 chats left**, caption says "in Pro". Add as panel 7; Play allows 8 and 6 are

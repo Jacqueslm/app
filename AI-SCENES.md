@@ -555,3 +555,52 @@ risk on TikTok. AI-generated toggle ON everywhere (house rule 19).
 **Buffer caption:** Two seconds to get in. A lifetime to walk back. Link in bio.
 
 **Money:** ~2 paid generations (~$1). Draft or Standard animate, never Best.
+
+---
+
+## A14 — "The sound of her car" · 3 stills + end card · 15.2s · $0 (photos supplied)
+
+**The supporter side, male.** Every version of this story on the internet is a
+wife waiting up for a husband. This one is the other way round, which is the
+half nobody makes content for — and the half that has no idea the app has a
+whole side for them.
+
+Not Cause & Effect: there is no cause frame here, because he did not cause it.
+Three beats of the same weight instead, at the 15-20s length (house rule 21).
+
+**Source stills:** `content/supporter-husband/01-window.jpg`, `02-door.jpg`,
+`03-table.jpg` (Jacques's, 26 Aug). Same man in all three — series, not clips.
+
+**Shot 1 — the window, 4.4s, slow push in.**
+CAPTION: `You know the sound of her car.`
+
+**Shot 2 — the doorway, 4.4s, slow pull out.**
+CAPTION: `And what it means when it doesn't come.`
+
+**Shot 3 — the kitchen table, coffee, head down, 4.4s, slow push in.**
+CAPTION: `Nobody ever asks how you're doing.`
+
+**End card** (house rule 16 layout):
+BIG: `You're not the one drinking. You're still carrying it.`
+GREEN: `It's free. Link in bio.`
+
+**Score:** `content/score/the-last-breath.mp3` at 0.85.
+
+**Build:** `python3 tools/make-film.py content/supporter-husband/spec.json content/supporter-husband/husband-supporting.mp4`
+
+**Caption for the post:**
+> He is not the one drinking. He still lost the evenings, the sleep, and the
+> version of himself that used to be easy to be around.
+>
+> There are 160 recovery apps and not one of them was built for him. This one
+> has a whole side for the person holding it together — what to say, what not
+> to carry, and how to help without disappearing.
+>
+> Free. No card, no ads, works with no account.
+> #recovery #alcoholrecovery #sober #soberliving #family #supportsystem
+
+**Where to post:** Facebook and YouTube Shorts first — the audience skews to
+the age this actually happens at. Buffer AI toggle ON (house rule 19).
+
+**Do NOT** pair this with a female-supporter piece in the same week. The point
+of it is that it is the one nobody makes.

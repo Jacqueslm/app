@@ -63,7 +63,105 @@ Do not steer him off these; work with them:
 
 ---
 
-## ⭐ CURRENT STATUS (24 Aug 2026) — newest, read this first
+## ⭐ CURRENT STATUS (26 Aug 2026) — newest, read this first
+
+### 🟢 THE APP IS LIVE ON GOOGLE PLAY
+
+**Released to Production 26 Aug 2026 at 7:59 AM.** Full rollout, 177 of 177
+countries, 20,237 supported devices. `com.turnsomedayintodayone.app`.
+Release 2 (1.0.1). Eight installs at launch, still on the July closed-test
+build — they auto-update.
+
+**Do not re-open the launch.** Closed testing, production access, data safety,
+the health declaration and IARC content rating are all closed. Full detail and
+what is genuinely still open: `TurnSomeDayIntoOneday/store-listing/00-STATUS.md`.
+
+### ⚠️ VERSION NUMBERING — READ BEFORE YOU BUMP ANYTHING
+The recovery app is on **v5.6** (`APP_VERSION` in `index.html`). Older notes
+further down this file say v8.13 — that came from a different lane's numbering
+and is **not** what the app reports. Jacques reset the line to 5.0 on 25 Aug.
+Trust `grep APP_VERSION index.html`, nothing else.
+
+Every ship bumps the **quadruple**: `APP_VERSION`, `sw.js` CACHE_NAME, and both
+`package.json` files. Then all three branches (house rule 18).
+
+### Shipped 26 Aug
+- **v5.3 — the letter is the invitation.** Both letters mint a private,
+  expiring share link. The recipient reads the letter first, then one tap
+  creates their account **on the opposite side** (supporter ↔ recovering) and
+  links the two Together tables server-side, so no code is ever typed.
+  "Get a code" is no longer the front door. Tokens are 128-bit, live 30 days,
+  revocable in one tap. `/admin/stats` gained letter_sent / letter_opened /
+  account_created_from_letter. The "both" letter deliberately has **no** send
+  button — it is addressed to yourself and promises nobody else sees it.
+- **v5.4 — text follows the Android system font-size setting.** The audit's new
+  130%-root pass found **all 638 font sizes were px**, so the OS accessibility
+  setting did nothing at all. Every one converted to rem at exact 1/16
+  fractions: pixel-identical at the default root, scales properly now. Canvas
+  draw code untouched (canvas does not use CSS units).
+- **v5.5 — one-time Play rating ask** after the day-7+ lesson. Never on a slip
+  day, "not now" is permanent, gated behind `anyBlockingUIOpen()`.
+- **v5.6 — two bugs in that ask**, both caught by Jacques on a real screen: it
+  used `.sos-title` (the emergency red) on a moment of pride, and it set
+  `S.ratingAsked` when the ask was *scheduled* rather than when it opened — so
+  on any day the daily celebration was already up, the single lifetime ask was
+  burned without the user ever seeing it.
+
+### Website, 26 Aug
+- **Four thin pages rebuilt** — codependency-test (258→1007 words), the binge
+  quiz (284→918), for-her (392→1032), when-he-drinks (438→1005). Two are
+  quizzes whose entire content sat inside `display:none` steps: a crawler saw
+  the intro and stopped. That is almost certainly the "Crawled — currently not
+  indexed" in Search Console.
+- **Three new pages** built around videos that had nowhere to live:
+  `/alcohol-withdrawal-timeline`, `/quit-vaping`, `/how-to-stop-watching-porn`.
+- **Videos joined to the site.** None of the 37 pages linked to a single
+  YouTube video before today. Six now carry a click-to-load player plus
+  VideoObject schema, driven by `data/page-videos.json` — adding the rest is a
+  one-line change, then run `tools/embed-videos.py`.
+- **A crisis line that dialled the wrong number** — the binge page displayed
+  1-866-662-1235 with a `tel:` href of 18664628010. Fixed.
+
+### The Play listing was rewritten because it carried no search words
+The live full description contained **zero** instances of recovery, sober,
+addiction or quit — the exact words Play indexes. Rewritten (recovery ×6,
+sober/sobriety ×5, addiction ×2), plus a new short description:
+`Addiction recovery: sober day counter, 90-day program, and support for family.`
+Both live. Screenshots refreshed, feature graphic now says what the app is,
+developer name changed from "Jacques Malone" to "Turn Someday Into Day One"
+(in Google review, 1–2 days).
+
+**Title deliberately NOT changed.** `Turn Someday Into Day One` carries no
+keyword and the title is Play's heaviest ranking field — but that name is on
+the business cards, the domain, the YouTube channel and every video end card.
+`Day One: Sober & Recovery` is the alternative if installs ever justify it.
+
+### Two loops that cost Jacques an hour today — do not repeat them
+1. **The description was confirmed "done" before it was checked.** It went live
+   in the morning; a keyword audit hours later found it had none of the words
+   it exists to carry, and he had to paste a second version over the first.
+   **Audit content against its purpose BEFORE calling it finished.**
+2. **The Friendly screenshot was removed, then restored.** Removing a real
+   feature is not how you fix a misleading caption. He pushed back and he was
+   right. (The underlying image was also stale — it still said "Free · 3/day"
+   after Friendly went Pro-only. Re-shot from a real Pro session.)
+
+### A standing delivery problem
+Files sent through chat often do not reach him, and images he pastes inline do
+not always land on disk for the agent. When a file has to change hands, publish
+it to a page he can open and save from — that worked when nothing else did.
+
+### Written but NOT built: A15 and A16
+Two Cause & Effect videos are fully scripted in `AI-SCENES.md` (captions,
+timings, end cards, scores, post captions) — binge eating, and pills →
+hospital. The source images never reached disk. Each is one `make-film.py` run
+once they do.
+
+**Two hard rules live with those scripts:** A15 never depicts a method and its
+post caption always carries the eating-disorder helpline; A16 never names a
+substance, a dose or a combination.
+
+## 24 AUG 2026 — previous status (history, still accurate on its own subjects)
 
 App is at **v8.13**, live on all three branches (start-here = working, main +
 vibe-code = deploy). Everything below shipped 22-24 Aug and is DONE.

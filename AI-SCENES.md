@@ -604,3 +604,88 @@ the age this actually happens at. Buffer AI toggle ON (house rule 19).
 
 **Do NOT** pair this with a female-supporter piece in the same week. The point
 of it is that it is the one nobody makes.
+
+---
+
+## A15 — "It was never hunger" · 2 stills + end card · ~9s · $0 (photos supplied)
+
+Cause & Effect, binge-eating side. **Images supplied by Jacques 26 Aug** —
+1: woman at a table surrounded by empty takeout containers, head in her hand.
+2: same woman kneeling on a bathroom floor over a bin.
+
+**Shot 1 — the table, 3.5s, slow push in.**
+CAPTION: `It was never hunger.`
+
+**Shot 2 — the bathroom, 3.5s, slow pull out.**
+CAPTION: `And the shame is what starts it again.`
+
+**End card:**
+BIG: `It's a cycle, not a character flaw. Cycles can be broken.`
+GREEN: `It's free. Link in bio.`
+
+**Score:** `content/score/silent-impact-3.mp3` at 0.85.
+
+**Two hard rules on this one, and they are not negotiable.**
+1. **Never name or show a method.** The captions carry the cycle, not the
+   behaviour. Shot 2 is posture and a bin — nothing explicit, and it stays that
+   way. Every platform restricts content depicting compensatory behaviour, and
+   more to the point the audience for this video is the exact group it could
+   hurt.
+2. **The post caption carries a helpline.** Not optional on this subject.
+
+**Caption for the post:**
+> It is not greed and it is not a discipline problem. Shame is not the brake on
+> this — it is the fuel. The bad feeling afterwards is the exact feeling the
+> next one exists to switch off.
+>
+> There is a whole track for this in the app. Free, private, no account needed.
+>
+> If any of this is yours: the National Alliance for Eating Disorders helpline is
+> 1-866-662-1235, staffed by licensed clinicians. In crisis, call or text 988.
+> #bingeeating #eatingdisorderrecovery #recovery #edrecovery
+
+**Where to post:** YouTube first. Meta and TikTok both restrict this subject
+harder than any other in the catalogue. Buffer AI toggle ON (house rule 19).
+
+---
+
+## A16 — "You only meant to take the edge off" · 2 stills + end card · ~9s · $0
+
+Cause & Effect, pills. **Images supplied by Jacques 26 Aug** —
+1: young man sitting on hospital steps at dusk, spilled prescription bottle on
+the step beside him. 2: a forearm on a hospital bed, IV line and ID wristband.
+
+**Shot 1 — the steps, 3.5s, slow push in.**
+CAPTION: `You only meant to take the edge off.`
+
+**Shot 2 — the hospital bed, 3.5s, hold.**
+CAPTION: `You woke up with a barcode on your wrist.`
+
+**End card:**
+BIG: `You get to start again from right here.`
+GREEN: `It's free. Link in bio.`
+
+**Score:** `content/score/the-last-breath.mp3` at 0.85.
+
+**Rule:** never name a substance, a dose, or a combination. The story is the
+gap between "taking the edge off" and a wristband, and that gap needs no
+specifics to land. Specifics are what get an overdose video pulled.
+
+**Caption for the post:**
+> Nobody plans it. It starts as taking the edge off after a shift, or after a
+> back injury, or after a night you did not want to be awake for.
+>
+> The day counter in this app does not shame a slip and it does not reset your
+> life. Free, no card, works with no account.
+>
+> In crisis, call or text 988 — free, confidential, 24/7.
+> #recovery #opioidrecovery #sober #addictionrecovery
+
+**Where to post:** Facebook and YouTube Shorts. Buffer AI toggle ON.
+
+---
+
+### ⚠️ BOTH A15 AND A16 ARE WRITTEN BUT NOT BUILT
+The images arrived inline in chat on 26 Aug and never landed on disk, so there
+were no files to cut. Everything above is final — when the images are re-sent,
+each is one `tools/make-film.py` run against a 3-shot spec and takes a minute.

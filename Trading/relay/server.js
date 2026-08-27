@@ -65,6 +65,29 @@ function recordSignal(text) {
   try { fs.writeFileSync(SIGNALS_FILE, JSON.stringify(signals, null, 1)); } catch {}
 }
 
+// The journal page keeps itself current: at every relay start, fetch the
+// latest journal.html from the repo (the same place Update System.bat pulls
+// from) and write it next to the grader. Best-effort — offline, the copy on
+// disk keeps working. Your trades are never in this file: they live in the
+// browser's own storage, so refreshing the page file can't touch them.
+const JOURNAL_FILE = path.join(__dirname, "..", "journal.html");
+function refreshJournal() {
+  require("https").get(
+    "https://raw.githubusercontent.com/Jacqueslm/app/main/Trading/journal.html",
+    res => {
+      if (res.statusCode !== 200) { res.resume(); return; }
+      let body = "";
+      res.on("data", c => { body += c; });
+      res.on("end", () => {
+        if (body.includes("Trade Journal") && body.includes("</html>")) {
+          try { fs.writeFileSync(JOURNAL_FILE, body); } catch {}
+        }
+      });
+    }
+  ).on("error", () => {});
+}
+refreshJournal();
+
 // ═══ AUTOTRADE — the TradingView bot ═════════════════════════════════════════
 // When an "MSB PURE" alert arrives, write an order file into NinjaTrader's
 // incoming folder (the ATI). NinjaTrader places the bracket: market entry,
@@ -372,7 +395,7 @@ const server = http.createServer((req, res) => {
 
   // The journal, served fresh — same folder, second doorway.
   if (req.method === "GET" && url === "/journal") {
-    fs.readFile(path.join(__dirname, "..", "journal.html"), (err, html) => {
+    fs.readFile(JOURNAL_FILE, (err, html) => {
       if (err) {
         res.writeHead(500, { "Content-Type": "text/plain" });
         res.end("Could not find journal.html one folder up from relay/. Keep the Trading folder together.");

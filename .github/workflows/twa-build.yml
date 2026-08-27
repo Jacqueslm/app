@@ -31,6 +31,21 @@ jobs:
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME_17_X64" "$ANDROID_HOME" > ~/.bubblewrap/config.json
           cat ~/.bubblewrap/config.json
 
+      # Every run before this step existed died with "The provided androidSdk
+      # isn't correct" - bubblewrap's check is existsSync(androidSdkPath +
+      # /build-tools), and the runner image stopped shipping build-tools
+      # preinstalled. Install one and the check passes; gradle fetches the rest
+      # itself once the licenses are accepted. The ls lines are there so the
+      # next failure of this kind names itself instead of costing four runs.
+      - name: Install the Android build-tools bubblewrap checks for
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" || true
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "build-tools;34.0.0" "platforms;android-35" > /dev/null
+          ls "$ANDROID_HOME/build-tools"
+
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa
         # --skipVersionUpgrade: CI has no keyboard; use the version already in

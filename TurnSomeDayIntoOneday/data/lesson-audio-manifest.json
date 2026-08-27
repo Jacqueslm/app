@@ -3447,651 +3447,744 @@
    "soft": "soft/spiritual-d1-2f9448ed4a.mp3",
    "gentle": "gentle/spiritual-d1-2f9448ed4a.mp3",
    "clear": "clear/spiritual-d1-2f9448ed4a.mp3",
-   "male": "male/spiritual-d1-2f9448ed4a.mp3"
+   "male": "male/spiritual-d1-2f9448ed4a.mp3",
+   "deep": "deep/spiritual-d1-bca6e95672.mp3"
   },
   "pack:spiritual|2|base": {
    "warm": "warm/spiritual-d2-c2f3bba4fa.mp3",
    "soft": "soft/spiritual-d2-c2f3bba4fa.mp3",
    "gentle": "gentle/spiritual-d2-c2f3bba4fa.mp3",
    "clear": "clear/spiritual-d2-c2f3bba4fa.mp3",
-   "male": "male/spiritual-d2-c2f3bba4fa.mp3"
+   "male": "male/spiritual-d2-c2f3bba4fa.mp3",
+   "deep": "deep/spiritual-d2-439a73cb6d.mp3"
   },
   "pack:spiritual|3|base": {
    "warm": "warm/spiritual-d3-8af416e833.mp3",
    "soft": "soft/spiritual-d3-8af416e833.mp3",
    "gentle": "gentle/spiritual-d3-8af416e833.mp3",
    "clear": "clear/spiritual-d3-8af416e833.mp3",
-   "male": "male/spiritual-d3-8af416e833.mp3"
+   "male": "male/spiritual-d3-8af416e833.mp3",
+   "deep": "deep/spiritual-d3-f36a43e691.mp3"
   },
   "pack:spiritual|4|base": {
    "warm": "warm/spiritual-d4-5f59321f96.mp3",
    "soft": "soft/spiritual-d4-5f59321f96.mp3",
    "gentle": "gentle/spiritual-d4-5f59321f96.mp3",
    "clear": "clear/spiritual-d4-5f59321f96.mp3",
-   "male": "male/spiritual-d4-5f59321f96.mp3"
+   "male": "male/spiritual-d4-5f59321f96.mp3",
+   "deep": "deep/spiritual-d4-6f2ddd3502.mp3"
   },
   "pack:spiritual|5|base": {
    "warm": "warm/spiritual-d5-006884701d.mp3",
    "soft": "soft/spiritual-d5-006884701d.mp3",
    "gentle": "gentle/spiritual-d5-006884701d.mp3",
    "clear": "clear/spiritual-d5-006884701d.mp3",
-   "male": "male/spiritual-d5-006884701d.mp3"
+   "male": "male/spiritual-d5-006884701d.mp3",
+   "deep": "deep/spiritual-d5-c914f38702.mp3"
   },
   "pack:spiritual|6|base": {
    "warm": "warm/spiritual-d6-c6b3a7c356.mp3",
    "soft": "soft/spiritual-d6-c6b3a7c356.mp3",
    "gentle": "gentle/spiritual-d6-c6b3a7c356.mp3",
    "clear": "clear/spiritual-d6-c6b3a7c356.mp3",
-   "male": "male/spiritual-d6-c6b3a7c356.mp3"
+   "male": "male/spiritual-d6-c6b3a7c356.mp3",
+   "deep": "deep/spiritual-d6-d2645a00f3.mp3"
   },
   "pack:spiritual|7|base": {
    "warm": "warm/spiritual-d7-e29ef2cf34.mp3",
    "soft": "soft/spiritual-d7-e29ef2cf34.mp3",
    "gentle": "gentle/spiritual-d7-e29ef2cf34.mp3",
    "clear": "clear/spiritual-d7-e29ef2cf34.mp3",
-   "male": "male/spiritual-d7-e29ef2cf34.mp3"
+   "male": "male/spiritual-d7-e29ef2cf34.mp3",
+   "deep": "deep/spiritual-d7-f9d36fa556.mp3"
   },
   "pack:spiritual|8|base": {
    "warm": "warm/spiritual-d8-5ba74735a9.mp3",
    "soft": "soft/spiritual-d8-5ba74735a9.mp3",
    "gentle": "gentle/spiritual-d8-5ba74735a9.mp3",
    "clear": "clear/spiritual-d8-5ba74735a9.mp3",
-   "male": "male/spiritual-d8-5ba74735a9.mp3"
+   "male": "male/spiritual-d8-5ba74735a9.mp3",
+   "deep": "deep/spiritual-d8-fb591da9b3.mp3"
   },
   "pack:spiritual|9|base": {
    "warm": "warm/spiritual-d9-ac512afc6c.mp3",
    "soft": "soft/spiritual-d9-ac512afc6c.mp3",
    "gentle": "gentle/spiritual-d9-ac512afc6c.mp3",
    "clear": "clear/spiritual-d9-ac512afc6c.mp3",
-   "male": "male/spiritual-d9-ac512afc6c.mp3"
+   "male": "male/spiritual-d9-ac512afc6c.mp3",
+   "deep": "deep/spiritual-d9-c750d2c801.mp3"
   },
   "pack:spiritual|10|base": {
    "warm": "warm/spiritual-d10-06401f2c8e.mp3",
    "soft": "soft/spiritual-d10-06401f2c8e.mp3",
    "gentle": "gentle/spiritual-d10-06401f2c8e.mp3",
    "clear": "clear/spiritual-d10-06401f2c8e.mp3",
-   "male": "male/spiritual-d10-06401f2c8e.mp3"
+   "male": "male/spiritual-d10-06401f2c8e.mp3",
+   "deep": "deep/spiritual-d10-f7b45552f0.mp3"
   },
   "pack:spiritual|11|base": {
    "warm": "warm/spiritual-d11-0b3d54a940.mp3",
    "soft": "soft/spiritual-d11-0b3d54a940.mp3",
    "gentle": "gentle/spiritual-d11-0b3d54a940.mp3",
    "clear": "clear/spiritual-d11-0b3d54a940.mp3",
-   "male": "male/spiritual-d11-0b3d54a940.mp3"
+   "male": "male/spiritual-d11-0b3d54a940.mp3",
+   "deep": "deep/spiritual-d11-881b220292.mp3"
   },
   "pack:spiritual|12|base": {
    "warm": "warm/spiritual-d12-8658fd6f04.mp3",
    "soft": "soft/spiritual-d12-8658fd6f04.mp3",
    "gentle": "gentle/spiritual-d12-8658fd6f04.mp3",
    "clear": "clear/spiritual-d12-8658fd6f04.mp3",
-   "male": "male/spiritual-d12-8658fd6f04.mp3"
+   "male": "male/spiritual-d12-8658fd6f04.mp3",
+   "deep": "deep/spiritual-d12-01d1d2664d.mp3"
   },
   "pack:spiritual|13|base": {
    "warm": "warm/spiritual-d13-512d153463.mp3",
    "soft": "soft/spiritual-d13-512d153463.mp3",
    "gentle": "gentle/spiritual-d13-512d153463.mp3",
    "clear": "clear/spiritual-d13-512d153463.mp3",
-   "male": "male/spiritual-d13-512d153463.mp3"
+   "male": "male/spiritual-d13-512d153463.mp3",
+   "deep": "deep/spiritual-d13-f93053c63c.mp3"
   },
   "pack:spiritual|14|base": {
    "warm": "warm/spiritual-d14-9de7f3e91e.mp3",
    "soft": "soft/spiritual-d14-9de7f3e91e.mp3",
    "gentle": "gentle/spiritual-d14-9de7f3e91e.mp3",
    "clear": "clear/spiritual-d14-9de7f3e91e.mp3",
-   "male": "male/spiritual-d14-9de7f3e91e.mp3"
+   "male": "male/spiritual-d14-9de7f3e91e.mp3",
+   "deep": "deep/spiritual-d14-6ed9ffe0b9.mp3"
   },
   "pack:spiritual|15|base": {
    "warm": "warm/spiritual-d15-f977199272.mp3",
    "soft": "soft/spiritual-d15-f977199272.mp3",
    "gentle": "gentle/spiritual-d15-f977199272.mp3",
    "clear": "clear/spiritual-d15-f977199272.mp3",
-   "male": "male/spiritual-d15-f977199272.mp3"
+   "male": "male/spiritual-d15-f977199272.mp3",
+   "deep": "deep/spiritual-d15-9729e0bf48.mp3"
   },
   "pack:spiritual|16|base": {
    "warm": "warm/spiritual-d16-4492583f59.mp3",
    "soft": "soft/spiritual-d16-4492583f59.mp3",
    "gentle": "gentle/spiritual-d16-4492583f59.mp3",
    "clear": "clear/spiritual-d16-4492583f59.mp3",
-   "male": "male/spiritual-d16-4492583f59.mp3"
+   "male": "male/spiritual-d16-4492583f59.mp3",
+   "deep": "deep/spiritual-d16-4fd045db2a.mp3"
   },
   "pack:spiritual|17|base": {
    "warm": "warm/spiritual-d17-47dffc7b29.mp3",
    "soft": "soft/spiritual-d17-47dffc7b29.mp3",
    "gentle": "gentle/spiritual-d17-47dffc7b29.mp3",
    "clear": "clear/spiritual-d17-47dffc7b29.mp3",
-   "male": "male/spiritual-d17-47dffc7b29.mp3"
+   "male": "male/spiritual-d17-47dffc7b29.mp3",
+   "deep": "deep/spiritual-d17-42baa51e28.mp3"
   },
   "pack:spiritual|18|base": {
    "warm": "warm/spiritual-d18-6dde9dee32.mp3",
    "soft": "soft/spiritual-d18-6dde9dee32.mp3",
    "gentle": "gentle/spiritual-d18-6dde9dee32.mp3",
    "clear": "clear/spiritual-d18-6dde9dee32.mp3",
-   "male": "male/spiritual-d18-6dde9dee32.mp3"
+   "male": "male/spiritual-d18-6dde9dee32.mp3",
+   "deep": "deep/spiritual-d18-1bb2b5a9ad.mp3"
   },
   "pack:spiritual|19|base": {
    "warm": "warm/spiritual-d19-ba90b131f8.mp3",
    "soft": "soft/spiritual-d19-ba90b131f8.mp3",
    "gentle": "gentle/spiritual-d19-ba90b131f8.mp3",
    "clear": "clear/spiritual-d19-ba90b131f8.mp3",
-   "male": "male/spiritual-d19-ba90b131f8.mp3"
+   "male": "male/spiritual-d19-ba90b131f8.mp3",
+   "deep": "deep/spiritual-d19-24efd6833e.mp3"
   },
   "pack:spiritual|20|base": {
    "warm": "warm/spiritual-d20-4de14f586c.mp3",
    "soft": "soft/spiritual-d20-4de14f586c.mp3",
    "gentle": "gentle/spiritual-d20-4de14f586c.mp3",
    "clear": "clear/spiritual-d20-4de14f586c.mp3",
-   "male": "male/spiritual-d20-4de14f586c.mp3"
+   "male": "male/spiritual-d20-4de14f586c.mp3",
+   "deep": "deep/spiritual-d20-ed74101106.mp3"
   },
   "pack:spiritual|21|base": {
    "warm": "warm/spiritual-d21-551bd7a2d5.mp3",
    "soft": "soft/spiritual-d21-551bd7a2d5.mp3",
    "gentle": "gentle/spiritual-d21-551bd7a2d5.mp3",
    "clear": "clear/spiritual-d21-551bd7a2d5.mp3",
-   "male": "male/spiritual-d21-551bd7a2d5.mp3"
+   "male": "male/spiritual-d21-551bd7a2d5.mp3",
+   "deep": "deep/spiritual-d21-4a63c38d52.mp3"
   },
   "pack:spiritual|22|base": {
    "warm": "warm/spiritual-d22-d55c526385.mp3",
    "soft": "soft/spiritual-d22-d55c526385.mp3",
    "gentle": "gentle/spiritual-d22-d55c526385.mp3",
    "clear": "clear/spiritual-d22-d55c526385.mp3",
-   "male": "male/spiritual-d22-d55c526385.mp3"
+   "male": "male/spiritual-d22-d55c526385.mp3",
+   "deep": "deep/spiritual-d22-eb099d88b3.mp3"
   },
   "pack:spiritual|23|base": {
    "warm": "warm/spiritual-d23-24f4ee3a21.mp3",
    "soft": "soft/spiritual-d23-24f4ee3a21.mp3",
    "gentle": "gentle/spiritual-d23-24f4ee3a21.mp3",
    "clear": "clear/spiritual-d23-24f4ee3a21.mp3",
-   "male": "male/spiritual-d23-24f4ee3a21.mp3"
+   "male": "male/spiritual-d23-24f4ee3a21.mp3",
+   "deep": "deep/spiritual-d23-a50b006876.mp3"
   },
   "pack:spiritual|24|base": {
    "warm": "warm/spiritual-d24-d196f0ea54.mp3",
    "soft": "soft/spiritual-d24-d196f0ea54.mp3",
    "gentle": "gentle/spiritual-d24-d196f0ea54.mp3",
    "clear": "clear/spiritual-d24-d196f0ea54.mp3",
-   "male": "male/spiritual-d24-d196f0ea54.mp3"
+   "male": "male/spiritual-d24-d196f0ea54.mp3",
+   "deep": "deep/spiritual-d24-357d3efa6f.mp3"
   },
   "pack:spiritual|25|base": {
    "warm": "warm/spiritual-d25-e7c71e83eb.mp3",
    "soft": "soft/spiritual-d25-e7c71e83eb.mp3",
    "gentle": "gentle/spiritual-d25-e7c71e83eb.mp3",
    "clear": "clear/spiritual-d25-e7c71e83eb.mp3",
-   "male": "male/spiritual-d25-e7c71e83eb.mp3"
+   "male": "male/spiritual-d25-e7c71e83eb.mp3",
+   "deep": "deep/spiritual-d25-fbb84e2b48.mp3"
   },
   "pack:spiritual|26|base": {
    "warm": "warm/spiritual-d26-3fa0b5667a.mp3",
    "soft": "soft/spiritual-d26-3fa0b5667a.mp3",
    "gentle": "gentle/spiritual-d26-3fa0b5667a.mp3",
    "clear": "clear/spiritual-d26-3fa0b5667a.mp3",
-   "male": "male/spiritual-d26-3fa0b5667a.mp3"
+   "male": "male/spiritual-d26-3fa0b5667a.mp3",
+   "deep": "deep/spiritual-d26-a3eed91c93.mp3"
   },
   "pack:spiritual|27|base": {
    "warm": "warm/spiritual-d27-b46178ca29.mp3",
    "soft": "soft/spiritual-d27-b46178ca29.mp3",
    "gentle": "gentle/spiritual-d27-b46178ca29.mp3",
    "clear": "clear/spiritual-d27-b46178ca29.mp3",
-   "male": "male/spiritual-d27-b46178ca29.mp3"
+   "male": "male/spiritual-d27-b46178ca29.mp3",
+   "deep": "deep/spiritual-d27-c3efa7da79.mp3"
   },
   "pack:spiritual|28|base": {
    "warm": "warm/spiritual-d28-3023316a1c.mp3",
    "soft": "soft/spiritual-d28-3023316a1c.mp3",
    "gentle": "gentle/spiritual-d28-3023316a1c.mp3",
    "clear": "clear/spiritual-d28-3023316a1c.mp3",
-   "male": "male/spiritual-d28-3023316a1c.mp3"
+   "male": "male/spiritual-d28-3023316a1c.mp3",
+   "deep": "deep/spiritual-d28-aada75a33c.mp3"
   },
   "pack:spiritual|29|base": {
    "warm": "warm/spiritual-d29-a192fdc43c.mp3",
    "soft": "soft/spiritual-d29-a192fdc43c.mp3",
    "gentle": "gentle/spiritual-d29-a192fdc43c.mp3",
    "clear": "clear/spiritual-d29-a192fdc43c.mp3",
-   "male": "male/spiritual-d29-a192fdc43c.mp3"
+   "male": "male/spiritual-d29-a192fdc43c.mp3",
+   "deep": "deep/spiritual-d29-cf9c218a92.mp3"
   },
   "pack:spiritual|30|base": {
    "warm": "warm/spiritual-d30-ab35ec3cbe.mp3",
    "soft": "soft/spiritual-d30-ab35ec3cbe.mp3",
    "gentle": "gentle/spiritual-d30-ab35ec3cbe.mp3",
    "clear": "clear/spiritual-d30-ab35ec3cbe.mp3",
-   "male": "male/spiritual-d30-ab35ec3cbe.mp3"
+   "male": "male/spiritual-d30-ab35ec3cbe.mp3",
+   "deep": "deep/spiritual-d30-67e7ae7468.mp3"
   },
   "pack:relationships|1|base": {
    "warm": "warm/relationships-d1-a90d98172d.mp3",
    "soft": "soft/relationships-d1-a90d98172d.mp3",
    "gentle": "gentle/relationships-d1-a90d98172d.mp3",
    "clear": "clear/relationships-d1-a90d98172d.mp3",
-   "male": "male/relationships-d1-a90d98172d.mp3"
+   "male": "male/relationships-d1-a90d98172d.mp3",
+   "deep": "deep/relationships-d1-335a0d043f.mp3"
   },
   "pack:relationships|2|base": {
    "warm": "warm/relationships-d2-6b3833a87b.mp3",
    "soft": "soft/relationships-d2-6b3833a87b.mp3",
    "gentle": "gentle/relationships-d2-6b3833a87b.mp3",
    "clear": "clear/relationships-d2-6b3833a87b.mp3",
-   "male": "male/relationships-d2-6b3833a87b.mp3"
+   "male": "male/relationships-d2-6b3833a87b.mp3",
+   "deep": "deep/relationships-d2-01d4ef07cd.mp3"
   },
   "pack:relationships|3|base": {
    "warm": "warm/relationships-d3-a0725ef502.mp3",
    "soft": "soft/relationships-d3-a0725ef502.mp3",
    "gentle": "gentle/relationships-d3-a0725ef502.mp3",
    "clear": "clear/relationships-d3-a0725ef502.mp3",
-   "male": "male/relationships-d3-a0725ef502.mp3"
+   "male": "male/relationships-d3-a0725ef502.mp3",
+   "deep": "deep/relationships-d3-d6e7371a86.mp3"
   },
   "pack:relationships|4|base": {
    "warm": "warm/relationships-d4-a971aa9f01.mp3",
    "soft": "soft/relationships-d4-a971aa9f01.mp3",
    "gentle": "gentle/relationships-d4-a971aa9f01.mp3",
    "clear": "clear/relationships-d4-a971aa9f01.mp3",
-   "male": "male/relationships-d4-a971aa9f01.mp3"
+   "male": "male/relationships-d4-a971aa9f01.mp3",
+   "deep": "deep/relationships-d4-5f75b12983.mp3"
   },
   "pack:relationships|5|base": {
    "warm": "warm/relationships-d5-874125ad2d.mp3",
    "soft": "soft/relationships-d5-874125ad2d.mp3",
    "gentle": "gentle/relationships-d5-874125ad2d.mp3",
    "clear": "clear/relationships-d5-874125ad2d.mp3",
-   "male": "male/relationships-d5-874125ad2d.mp3"
+   "male": "male/relationships-d5-874125ad2d.mp3",
+   "deep": "deep/relationships-d5-4c25a16030.mp3"
   },
   "pack:relationships|6|base": {
    "warm": "warm/relationships-d6-5c0d76125f.mp3",
    "soft": "soft/relationships-d6-5c0d76125f.mp3",
    "gentle": "gentle/relationships-d6-5c0d76125f.mp3",
    "clear": "clear/relationships-d6-5c0d76125f.mp3",
-   "male": "male/relationships-d6-5c0d76125f.mp3"
+   "male": "male/relationships-d6-5c0d76125f.mp3",
+   "deep": "deep/relationships-d6-caea3187d6.mp3"
   },
   "pack:relationships|7|base": {
    "warm": "warm/relationships-d7-c2f76e1f4e.mp3",
    "soft": "soft/relationships-d7-c2f76e1f4e.mp3",
    "gentle": "gentle/relationships-d7-c2f76e1f4e.mp3",
    "clear": "clear/relationships-d7-c2f76e1f4e.mp3",
-   "male": "male/relationships-d7-c2f76e1f4e.mp3"
+   "male": "male/relationships-d7-c2f76e1f4e.mp3",
+   "deep": "deep/relationships-d7-df95826c19.mp3"
   },
   "pack:trauma|1|base": {
    "warm": "warm/trauma-d1-b71efdf5be.mp3",
    "soft": "soft/trauma-d1-b71efdf5be.mp3",
    "gentle": "gentle/trauma-d1-b71efdf5be.mp3",
    "clear": "clear/trauma-d1-b71efdf5be.mp3",
-   "male": "male/trauma-d1-b71efdf5be.mp3"
+   "male": "male/trauma-d1-b71efdf5be.mp3",
+   "deep": "deep/trauma-d1-c564f1115b.mp3"
   },
   "pack:trauma|2|base": {
    "warm": "warm/trauma-d2-d5497c2c19.mp3",
    "soft": "soft/trauma-d2-d5497c2c19.mp3",
    "gentle": "gentle/trauma-d2-d5497c2c19.mp3",
    "clear": "clear/trauma-d2-d5497c2c19.mp3",
-   "male": "male/trauma-d2-d5497c2c19.mp3"
+   "male": "male/trauma-d2-d5497c2c19.mp3",
+   "deep": "deep/trauma-d2-66c1ca5c52.mp3"
   },
   "pack:trauma|3|base": {
    "warm": "warm/trauma-d3-d78aa15f06.mp3",
    "soft": "soft/trauma-d3-d78aa15f06.mp3",
    "gentle": "gentle/trauma-d3-d78aa15f06.mp3",
    "clear": "clear/trauma-d3-d78aa15f06.mp3",
-   "male": "male/trauma-d3-d78aa15f06.mp3"
+   "male": "male/trauma-d3-d78aa15f06.mp3",
+   "deep": "deep/trauma-d3-1cd4ad9aad.mp3"
   },
   "pack:trauma|4|base": {
    "warm": "warm/trauma-d4-ce9d314218.mp3",
    "soft": "soft/trauma-d4-ce9d314218.mp3",
    "gentle": "gentle/trauma-d4-ce9d314218.mp3",
    "clear": "clear/trauma-d4-ce9d314218.mp3",
-   "male": "male/trauma-d4-ce9d314218.mp3"
+   "male": "male/trauma-d4-ce9d314218.mp3",
+   "deep": "deep/trauma-d4-2b6622e23b.mp3"
   },
   "pack:trauma|5|base": {
    "warm": "warm/trauma-d5-e3e0d333b9.mp3",
    "soft": "soft/trauma-d5-e3e0d333b9.mp3",
    "gentle": "gentle/trauma-d5-e3e0d333b9.mp3",
    "clear": "clear/trauma-d5-e3e0d333b9.mp3",
-   "male": "male/trauma-d5-e3e0d333b9.mp3"
+   "male": "male/trauma-d5-e3e0d333b9.mp3",
+   "deep": "deep/trauma-d5-47ff5db88d.mp3"
   },
   "pack:trauma|6|base": {
    "warm": "warm/trauma-d6-a7b7f79daf.mp3",
    "soft": "soft/trauma-d6-a7b7f79daf.mp3",
    "gentle": "gentle/trauma-d6-a7b7f79daf.mp3",
    "clear": "clear/trauma-d6-a7b7f79daf.mp3",
-   "male": "male/trauma-d6-a7b7f79daf.mp3"
+   "male": "male/trauma-d6-a7b7f79daf.mp3",
+   "deep": "deep/trauma-d6-742f2390e8.mp3"
   },
   "pack:trauma|7|base": {
    "warm": "warm/trauma-d7-12c21bad24.mp3",
    "soft": "soft/trauma-d7-12c21bad24.mp3",
    "gentle": "gentle/trauma-d7-12c21bad24.mp3",
    "clear": "clear/trauma-d7-12c21bad24.mp3",
-   "male": "male/trauma-d7-12c21bad24.mp3"
+   "male": "male/trauma-d7-12c21bad24.mp3",
+   "deep": "deep/trauma-d7-52ab9b4eb0.mp3"
   },
   "pack:anxiety|1|base": {
    "warm": "warm/anxiety-d1-aedf5d5c9d.mp3",
    "soft": "soft/anxiety-d1-aedf5d5c9d.mp3",
    "gentle": "gentle/anxiety-d1-aedf5d5c9d.mp3",
    "clear": "clear/anxiety-d1-aedf5d5c9d.mp3",
-   "male": "male/anxiety-d1-aedf5d5c9d.mp3"
+   "male": "male/anxiety-d1-aedf5d5c9d.mp3",
+   "deep": "deep/anxiety-d1-35948df11f.mp3"
   },
   "pack:anxiety|2|base": {
    "warm": "warm/anxiety-d2-0e0cb5d0ed.mp3",
    "soft": "soft/anxiety-d2-0e0cb5d0ed.mp3",
    "gentle": "gentle/anxiety-d2-0e0cb5d0ed.mp3",
    "clear": "clear/anxiety-d2-0e0cb5d0ed.mp3",
-   "male": "male/anxiety-d2-0e0cb5d0ed.mp3"
+   "male": "male/anxiety-d2-0e0cb5d0ed.mp3",
+   "deep": "deep/anxiety-d2-19ef57c9f6.mp3"
   },
   "pack:anxiety|3|base": {
    "warm": "warm/anxiety-d3-a1003bd79e.mp3",
    "soft": "soft/anxiety-d3-a1003bd79e.mp3",
    "gentle": "gentle/anxiety-d3-a1003bd79e.mp3",
    "clear": "clear/anxiety-d3-a1003bd79e.mp3",
-   "male": "male/anxiety-d3-a1003bd79e.mp3"
+   "male": "male/anxiety-d3-a1003bd79e.mp3",
+   "deep": "deep/anxiety-d3-5b10fb4056.mp3"
   },
   "pack:anxiety|4|base": {
    "warm": "warm/anxiety-d4-c986fe6dff.mp3",
    "soft": "soft/anxiety-d4-c986fe6dff.mp3",
    "gentle": "gentle/anxiety-d4-c986fe6dff.mp3",
    "clear": "clear/anxiety-d4-c986fe6dff.mp3",
-   "male": "male/anxiety-d4-c986fe6dff.mp3"
+   "male": "male/anxiety-d4-c986fe6dff.mp3",
+   "deep": "deep/anxiety-d4-afdba3092a.mp3"
   },
   "pack:anxiety|5|base": {
    "warm": "warm/anxiety-d5-2cd00ccb96.mp3",
    "soft": "soft/anxiety-d5-2cd00ccb96.mp3",
    "gentle": "gentle/anxiety-d5-2cd00ccb96.mp3",
    "clear": "clear/anxiety-d5-2cd00ccb96.mp3",
-   "male": "male/anxiety-d5-2cd00ccb96.mp3"
+   "male": "male/anxiety-d5-2cd00ccb96.mp3",
+   "deep": "deep/anxiety-d5-f9aa16b3e7.mp3"
   },
   "pack:anxiety|6|base": {
    "warm": "warm/anxiety-d6-98e0fd1590.mp3",
    "soft": "soft/anxiety-d6-98e0fd1590.mp3",
    "gentle": "gentle/anxiety-d6-98e0fd1590.mp3",
    "clear": "clear/anxiety-d6-98e0fd1590.mp3",
-   "male": "male/anxiety-d6-98e0fd1590.mp3"
+   "male": "male/anxiety-d6-98e0fd1590.mp3",
+   "deep": "deep/anxiety-d6-35775fa606.mp3"
   },
   "pack:anxiety|7|base": {
    "warm": "warm/anxiety-d7-d189bde08c.mp3",
    "soft": "soft/anxiety-d7-d189bde08c.mp3",
    "gentle": "gentle/anxiety-d7-d189bde08c.mp3",
    "clear": "clear/anxiety-d7-d189bde08c.mp3",
-   "male": "male/anxiety-d7-d189bde08c.mp3"
+   "male": "male/anxiety-d7-d189bde08c.mp3",
+   "deep": "deep/anxiety-d7-bd1a2cb7c4.mp3"
   },
   "pack:depression|1|base": {
    "warm": "warm/depression-d1-6b4a9d3bf5.mp3",
    "soft": "soft/depression-d1-6b4a9d3bf5.mp3",
    "gentle": "gentle/depression-d1-6b4a9d3bf5.mp3",
    "clear": "clear/depression-d1-6b4a9d3bf5.mp3",
-   "male": "male/depression-d1-6b4a9d3bf5.mp3"
+   "male": "male/depression-d1-6b4a9d3bf5.mp3",
+   "deep": "deep/depression-d1-c837a5b220.mp3"
   },
   "pack:depression|2|base": {
    "warm": "warm/depression-d2-2bcb711d67.mp3",
    "soft": "soft/depression-d2-2bcb711d67.mp3",
    "gentle": "gentle/depression-d2-2bcb711d67.mp3",
    "clear": "clear/depression-d2-2bcb711d67.mp3",
-   "male": "male/depression-d2-2bcb711d67.mp3"
+   "male": "male/depression-d2-2bcb711d67.mp3",
+   "deep": "deep/depression-d2-92a8cbfa59.mp3"
   },
   "pack:depression|3|base": {
    "warm": "warm/depression-d3-2878bb42a6.mp3",
    "soft": "soft/depression-d3-2878bb42a6.mp3",
    "gentle": "gentle/depression-d3-2878bb42a6.mp3",
    "clear": "clear/depression-d3-2878bb42a6.mp3",
-   "male": "male/depression-d3-2878bb42a6.mp3"
+   "male": "male/depression-d3-2878bb42a6.mp3",
+   "deep": "deep/depression-d3-1df67611e6.mp3"
   },
   "pack:depression|4|base": {
    "warm": "warm/depression-d4-2fd5eb9589.mp3",
    "soft": "soft/depression-d4-2fd5eb9589.mp3",
    "gentle": "gentle/depression-d4-2fd5eb9589.mp3",
    "clear": "clear/depression-d4-2fd5eb9589.mp3",
-   "male": "male/depression-d4-2fd5eb9589.mp3"
+   "male": "male/depression-d4-2fd5eb9589.mp3",
+   "deep": "deep/depression-d4-8167deac40.mp3"
   },
   "pack:depression|5|base": {
    "warm": "warm/depression-d5-58d2649d3d.mp3",
    "soft": "soft/depression-d5-58d2649d3d.mp3",
    "gentle": "gentle/depression-d5-58d2649d3d.mp3",
    "clear": "clear/depression-d5-58d2649d3d.mp3",
-   "male": "male/depression-d5-58d2649d3d.mp3"
+   "male": "male/depression-d5-58d2649d3d.mp3",
+   "deep": "deep/depression-d5-a81aea09e2.mp3"
   },
   "pack:depression|6|base": {
    "warm": "warm/depression-d6-32140d9b7e.mp3",
    "soft": "soft/depression-d6-32140d9b7e.mp3",
    "gentle": "gentle/depression-d6-32140d9b7e.mp3",
    "clear": "clear/depression-d6-32140d9b7e.mp3",
-   "male": "male/depression-d6-32140d9b7e.mp3"
+   "male": "male/depression-d6-32140d9b7e.mp3",
+   "deep": "deep/depression-d6-02ec0df80f.mp3"
   },
   "pack:depression|7|base": {
    "warm": "warm/depression-d7-abd2a63347.mp3",
    "soft": "soft/depression-d7-abd2a63347.mp3",
    "gentle": "gentle/depression-d7-abd2a63347.mp3",
    "clear": "clear/depression-d7-abd2a63347.mp3",
-   "male": "male/depression-d7-abd2a63347.mp3"
+   "male": "male/depression-d7-abd2a63347.mp3",
+   "deep": "deep/depression-d7-dc7aaac34f.mp3"
   },
   "pack:confidence|1|base": {
    "warm": "warm/confidence-d1-29fa32b73b.mp3",
    "soft": "soft/confidence-d1-29fa32b73b.mp3",
    "gentle": "gentle/confidence-d1-29fa32b73b.mp3",
    "clear": "clear/confidence-d1-29fa32b73b.mp3",
-   "male": "male/confidence-d1-29fa32b73b.mp3"
+   "male": "male/confidence-d1-29fa32b73b.mp3",
+   "deep": "deep/confidence-d1-a88cb09fef.mp3"
   },
   "pack:confidence|2|base": {
    "warm": "warm/confidence-d2-1043f4f51a.mp3",
    "soft": "soft/confidence-d2-1043f4f51a.mp3",
    "gentle": "gentle/confidence-d2-1043f4f51a.mp3",
    "clear": "clear/confidence-d2-1043f4f51a.mp3",
-   "male": "male/confidence-d2-1043f4f51a.mp3"
+   "male": "male/confidence-d2-1043f4f51a.mp3",
+   "deep": "deep/confidence-d2-afb8fcfcf4.mp3"
   },
   "pack:confidence|3|base": {
    "warm": "warm/confidence-d3-ebeda2c085.mp3",
    "soft": "soft/confidence-d3-ebeda2c085.mp3",
    "gentle": "gentle/confidence-d3-ebeda2c085.mp3",
    "clear": "clear/confidence-d3-ebeda2c085.mp3",
-   "male": "male/confidence-d3-ebeda2c085.mp3"
+   "male": "male/confidence-d3-ebeda2c085.mp3",
+   "deep": "deep/confidence-d3-7d7df3269e.mp3"
   },
   "pack:confidence|4|base": {
    "warm": "warm/confidence-d4-dba434b852.mp3",
    "soft": "soft/confidence-d4-dba434b852.mp3",
    "gentle": "gentle/confidence-d4-dba434b852.mp3",
    "clear": "clear/confidence-d4-dba434b852.mp3",
-   "male": "male/confidence-d4-dba434b852.mp3"
+   "male": "male/confidence-d4-dba434b852.mp3",
+   "deep": "deep/confidence-d4-3482db5223.mp3"
   },
   "pack:confidence|5|base": {
    "warm": "warm/confidence-d5-a8678b8504.mp3",
    "soft": "soft/confidence-d5-a8678b8504.mp3",
    "gentle": "gentle/confidence-d5-a8678b8504.mp3",
    "clear": "clear/confidence-d5-a8678b8504.mp3",
-   "male": "male/confidence-d5-a8678b8504.mp3"
+   "male": "male/confidence-d5-a8678b8504.mp3",
+   "deep": "deep/confidence-d5-c99090e6e9.mp3"
   },
   "pack:confidence|6|base": {
    "warm": "warm/confidence-d6-5e106205da.mp3",
    "soft": "soft/confidence-d6-5e106205da.mp3",
    "gentle": "gentle/confidence-d6-5e106205da.mp3",
    "clear": "clear/confidence-d6-5e106205da.mp3",
-   "male": "male/confidence-d6-5e106205da.mp3"
+   "male": "male/confidence-d6-5e106205da.mp3",
+   "deep": "deep/confidence-d6-6d34c0fd03.mp3"
   },
   "pack:confidence|7|base": {
    "warm": "warm/confidence-d7-563ddf949e.mp3",
    "soft": "soft/confidence-d7-563ddf949e.mp3",
    "gentle": "gentle/confidence-d7-563ddf949e.mp3",
    "clear": "clear/confidence-d7-563ddf949e.mp3",
-   "male": "male/confidence-d7-563ddf949e.mp3"
+   "male": "male/confidence-d7-563ddf949e.mp3",
+   "deep": "deep/confidence-d7-587331ae93.mp3"
   },
   "pack:intimacy|1|base": {
    "warm": "warm/intimacy-d1-2159731562.mp3",
    "soft": "soft/intimacy-d1-2159731562.mp3",
    "gentle": "gentle/intimacy-d1-2159731562.mp3",
    "clear": "clear/intimacy-d1-2159731562.mp3",
-   "male": "male/intimacy-d1-2159731562.mp3"
+   "male": "male/intimacy-d1-2159731562.mp3",
+   "deep": "deep/intimacy-d1-05a1da504b.mp3"
   },
   "pack:intimacy|2|base": {
    "warm": "warm/intimacy-d2-17c1e7292e.mp3",
    "soft": "soft/intimacy-d2-17c1e7292e.mp3",
    "gentle": "gentle/intimacy-d2-17c1e7292e.mp3",
    "clear": "clear/intimacy-d2-17c1e7292e.mp3",
-   "male": "male/intimacy-d2-17c1e7292e.mp3"
+   "male": "male/intimacy-d2-17c1e7292e.mp3",
+   "deep": "deep/intimacy-d2-42879e6bf3.mp3"
   },
   "pack:intimacy|3|base": {
    "warm": "warm/intimacy-d3-1003ca9c00.mp3",
    "soft": "soft/intimacy-d3-1003ca9c00.mp3",
    "gentle": "gentle/intimacy-d3-1003ca9c00.mp3",
    "clear": "clear/intimacy-d3-1003ca9c00.mp3",
-   "male": "male/intimacy-d3-1003ca9c00.mp3"
+   "male": "male/intimacy-d3-1003ca9c00.mp3",
+   "deep": "deep/intimacy-d3-e82d31beae.mp3"
   },
   "pack:intimacy|4|base": {
    "warm": "warm/intimacy-d4-41a647e00c.mp3",
    "soft": "soft/intimacy-d4-41a647e00c.mp3",
    "gentle": "gentle/intimacy-d4-41a647e00c.mp3",
    "clear": "clear/intimacy-d4-41a647e00c.mp3",
-   "male": "male/intimacy-d4-41a647e00c.mp3"
+   "male": "male/intimacy-d4-41a647e00c.mp3",
+   "deep": "deep/intimacy-d4-434edc1b7b.mp3"
   },
   "pack:intimacy|5|base": {
    "warm": "warm/intimacy-d5-8d768c76d8.mp3",
    "soft": "soft/intimacy-d5-8d768c76d8.mp3",
    "gentle": "gentle/intimacy-d5-8d768c76d8.mp3",
    "clear": "clear/intimacy-d5-8d768c76d8.mp3",
-   "male": "male/intimacy-d5-8d768c76d8.mp3"
+   "male": "male/intimacy-d5-8d768c76d8.mp3",
+   "deep": "deep/intimacy-d5-a642af66bb.mp3"
   },
   "pack:intimacy|6|base": {
    "warm": "warm/intimacy-d6-156d14dcb8.mp3",
    "soft": "soft/intimacy-d6-156d14dcb8.mp3",
    "gentle": "gentle/intimacy-d6-156d14dcb8.mp3",
    "clear": "clear/intimacy-d6-156d14dcb8.mp3",
-   "male": "male/intimacy-d6-156d14dcb8.mp3"
+   "male": "male/intimacy-d6-156d14dcb8.mp3",
+   "deep": "deep/intimacy-d6-8198a162c2.mp3"
   },
   "pack:intimacy|7|base": {
    "warm": "warm/intimacy-d7-c820227d16.mp3",
    "soft": "soft/intimacy-d7-c820227d16.mp3",
    "gentle": "gentle/intimacy-d7-c820227d16.mp3",
    "clear": "clear/intimacy-d7-c820227d16.mp3",
-   "male": "male/intimacy-d7-c820227d16.mp3"
+   "male": "male/intimacy-d7-c820227d16.mp3",
+   "deep": "deep/intimacy-d7-7b22bc2ad1.mp3"
   },
   "pack:discipline|1|base": {
    "warm": "warm/discipline-d1-35b57e75c8.mp3",
    "soft": "soft/discipline-d1-35b57e75c8.mp3",
    "gentle": "gentle/discipline-d1-35b57e75c8.mp3",
    "clear": "clear/discipline-d1-35b57e75c8.mp3",
-   "male": "male/discipline-d1-35b57e75c8.mp3"
+   "male": "male/discipline-d1-35b57e75c8.mp3",
+   "deep": "deep/discipline-d1-b0ce42d637.mp3"
   },
   "pack:discipline|2|base": {
    "warm": "warm/discipline-d2-24a6c1d707.mp3",
    "soft": "soft/discipline-d2-24a6c1d707.mp3",
    "gentle": "gentle/discipline-d2-24a6c1d707.mp3",
    "clear": "clear/discipline-d2-24a6c1d707.mp3",
-   "male": "male/discipline-d2-24a6c1d707.mp3"
+   "male": "male/discipline-d2-24a6c1d707.mp3",
+   "deep": "deep/discipline-d2-377de9d76f.mp3"
   },
   "pack:discipline|3|base": {
    "warm": "warm/discipline-d3-2d3770b3ef.mp3",
    "soft": "soft/discipline-d3-2d3770b3ef.mp3",
    "gentle": "gentle/discipline-d3-2d3770b3ef.mp3",
    "clear": "clear/discipline-d3-2d3770b3ef.mp3",
-   "male": "male/discipline-d3-2d3770b3ef.mp3"
+   "male": "male/discipline-d3-2d3770b3ef.mp3",
+   "deep": "deep/discipline-d3-d9ac017eac.mp3"
   },
   "pack:discipline|4|base": {
    "warm": "warm/discipline-d4-6db1c436fa.mp3",
    "soft": "soft/discipline-d4-6db1c436fa.mp3",
    "gentle": "gentle/discipline-d4-6db1c436fa.mp3",
    "clear": "clear/discipline-d4-6db1c436fa.mp3",
-   "male": "male/discipline-d4-6db1c436fa.mp3"
+   "male": "male/discipline-d4-6db1c436fa.mp3",
+   "deep": "deep/discipline-d4-f213de09d0.mp3"
   },
   "pack:discipline|5|base": {
    "warm": "warm/discipline-d5-bfc552062d.mp3",
    "soft": "soft/discipline-d5-bfc552062d.mp3",
    "gentle": "gentle/discipline-d5-bfc552062d.mp3",
    "clear": "clear/discipline-d5-bfc552062d.mp3",
-   "male": "male/discipline-d5-bfc552062d.mp3"
+   "male": "male/discipline-d5-bfc552062d.mp3",
+   "deep": "deep/discipline-d5-bdd01a8989.mp3"
   },
   "pack:discipline|6|base": {
    "warm": "warm/discipline-d6-0aa67e9366.mp3",
    "soft": "soft/discipline-d6-0aa67e9366.mp3",
    "gentle": "gentle/discipline-d6-0aa67e9366.mp3",
    "clear": "clear/discipline-d6-0aa67e9366.mp3",
-   "male": "male/discipline-d6-0aa67e9366.mp3"
+   "male": "male/discipline-d6-0aa67e9366.mp3",
+   "deep": "deep/discipline-d6-656964a385.mp3"
   },
   "pack:discipline|7|base": {
    "warm": "warm/discipline-d7-7fc08a3e2a.mp3",
    "soft": "soft/discipline-d7-7fc08a3e2a.mp3",
    "gentle": "gentle/discipline-d7-7fc08a3e2a.mp3",
    "clear": "clear/discipline-d7-7fc08a3e2a.mp3",
-   "male": "male/discipline-d7-7fc08a3e2a.mp3"
+   "male": "male/discipline-d7-7fc08a3e2a.mp3",
+   "deep": "deep/discipline-d7-a9d860f6cb.mp3"
   },
   "pack:sleep|1|base": {
    "warm": "warm/sleep-d1-27bb79177e.mp3",
    "soft": "soft/sleep-d1-27bb79177e.mp3",
    "gentle": "gentle/sleep-d1-27bb79177e.mp3",
    "clear": "clear/sleep-d1-27bb79177e.mp3",
-   "male": "male/sleep-d1-27bb79177e.mp3"
+   "male": "male/sleep-d1-27bb79177e.mp3",
+   "deep": "deep/sleep-d1-522bb227e9.mp3"
   },
   "pack:sleep|2|base": {
    "warm": "warm/sleep-d2-1fa72e5689.mp3",
    "soft": "soft/sleep-d2-1fa72e5689.mp3",
    "gentle": "gentle/sleep-d2-1fa72e5689.mp3",
    "clear": "clear/sleep-d2-1fa72e5689.mp3",
-   "male": "male/sleep-d2-1fa72e5689.mp3"
+   "male": "male/sleep-d2-1fa72e5689.mp3",
+   "deep": "deep/sleep-d2-fec0958070.mp3"
   },
   "pack:sleep|3|base": {
    "warm": "warm/sleep-d3-71859a208a.mp3",
    "soft": "soft/sleep-d3-71859a208a.mp3",
    "gentle": "gentle/sleep-d3-71859a208a.mp3",
    "clear": "clear/sleep-d3-71859a208a.mp3",
-   "male": "male/sleep-d3-71859a208a.mp3"
+   "male": "male/sleep-d3-71859a208a.mp3",
+   "deep": "deep/sleep-d3-7b634762c9.mp3"
   },
   "pack:sleep|4|base": {
    "warm": "warm/sleep-d4-25a60107ff.mp3",
    "soft": "soft/sleep-d4-25a60107ff.mp3",
    "gentle": "gentle/sleep-d4-25a60107ff.mp3",
    "clear": "clear/sleep-d4-25a60107ff.mp3",
-   "male": "male/sleep-d4-25a60107ff.mp3"
+   "male": "male/sleep-d4-25a60107ff.mp3",
+   "deep": "deep/sleep-d4-480d3588ff.mp3"
   },
   "pack:sleep|5|base": {
    "warm": "warm/sleep-d5-ab70c63388.mp3",
    "soft": "soft/sleep-d5-ab70c63388.mp3",
    "gentle": "gentle/sleep-d5-ab70c63388.mp3",
    "clear": "clear/sleep-d5-ab70c63388.mp3",
-   "male": "male/sleep-d5-ab70c63388.mp3"
+   "male": "male/sleep-d5-ab70c63388.mp3",
+   "deep": "deep/sleep-d5-ccdbc1572d.mp3"
   },
   "pack:sleep|6|base": {
    "warm": "warm/sleep-d6-d66933ffe5.mp3",
    "soft": "soft/sleep-d6-d66933ffe5.mp3",
    "gentle": "gentle/sleep-d6-d66933ffe5.mp3",
    "clear": "clear/sleep-d6-d66933ffe5.mp3",
-   "male": "male/sleep-d6-d66933ffe5.mp3"
+   "male": "male/sleep-d6-d66933ffe5.mp3",
+   "deep": "deep/sleep-d6-4041ff35f5.mp3"
   },
   "pack:sleep|7|base": {
    "warm": "warm/sleep-d7-b20bad1628.mp3",
    "soft": "soft/sleep-d7-b20bad1628.mp3",
    "gentle": "gentle/sleep-d7-b20bad1628.mp3",
    "clear": "clear/sleep-d7-b20bad1628.mp3",
-   "male": "male/sleep-d7-b20bad1628.mp3"
+   "male": "male/sleep-d7-b20bad1628.mp3",
+   "deep": "deep/sleep-d7-c239a875bf.mp3"
   },
   "pack:relapseProofing|1|base": {
    "warm": "warm/relapseproofing-d1-8397aea762.mp3",
    "soft": "soft/relapseproofing-d1-8397aea762.mp3",
    "gentle": "gentle/relapseproofing-d1-8397aea762.mp3",
    "clear": "clear/relapseproofing-d1-8397aea762.mp3",
-   "male": "male/relapseproofing-d1-8397aea762.mp3"
+   "male": "male/relapseproofing-d1-8397aea762.mp3",
+   "deep": "deep/relapseproofing-d1-1fde7fb039.mp3"
   },
   "pack:relapseProofing|2|base": {
    "warm": "warm/relapseproofing-d2-5e0299dffd.mp3",
    "soft": "soft/relapseproofing-d2-5e0299dffd.mp3",
    "gentle": "gentle/relapseproofing-d2-5e0299dffd.mp3",
    "clear": "clear/relapseproofing-d2-5e0299dffd.mp3",
-   "male": "male/relapseproofing-d2-5e0299dffd.mp3"
+   "male": "male/relapseproofing-d2-5e0299dffd.mp3",
+   "deep": "deep/relapseproofing-d2-beadcae20f.mp3"
   },
   "pack:relapseProofing|3|base": {
    "warm": "warm/relapseproofing-d3-f8347fba80.mp3",
    "soft": "soft/relapseproofing-d3-f8347fba80.mp3",
    "gentle": "gentle/relapseproofing-d3-f8347fba80.mp3",
    "clear": "clear/relapseproofing-d3-f8347fba80.mp3",
-   "male": "male/relapseproofing-d3-f8347fba80.mp3"
+   "male": "male/relapseproofing-d3-f8347fba80.mp3",
+   "deep": "deep/relapseproofing-d3-f9392050a5.mp3"
   },
   "pack:relapseProofing|4|base": {
    "warm": "warm/relapseproofing-d4-6cc97590ea.mp3",
    "soft": "soft/relapseproofing-d4-6cc97590ea.mp3",
    "gentle": "gentle/relapseproofing-d4-6cc97590ea.mp3",
    "clear": "clear/relapseproofing-d4-6cc97590ea.mp3",
-   "male": "male/relapseproofing-d4-6cc97590ea.mp3"
+   "male": "male/relapseproofing-d4-6cc97590ea.mp3",
+   "deep": "deep/relapseproofing-d4-5a77934713.mp3"
   },
   "pack:relapseProofing|5|base": {
    "warm": "warm/relapseproofing-d5-f5927fbb09.mp3",
    "soft": "soft/relapseproofing-d5-f5927fbb09.mp3",
    "gentle": "gentle/relapseproofing-d5-f5927fbb09.mp3",
    "clear": "clear/relapseproofing-d5-f5927fbb09.mp3",
-   "male": "male/relapseproofing-d5-f5927fbb09.mp3"
+   "male": "male/relapseproofing-d5-f5927fbb09.mp3",
+   "deep": "deep/relapseproofing-d5-47139f1ff7.mp3"
   },
   "pack:relapseProofing|6|base": {
    "warm": "warm/relapseproofing-d6-6eeb72e033.mp3",
    "soft": "soft/relapseproofing-d6-6eeb72e033.mp3",
    "gentle": "gentle/relapseproofing-d6-6eeb72e033.mp3",
    "clear": "clear/relapseproofing-d6-6eeb72e033.mp3",
-   "male": "male/relapseproofing-d6-6eeb72e033.mp3"
+   "male": "male/relapseproofing-d6-6eeb72e033.mp3",
+   "deep": "deep/relapseproofing-d6-9d27189626.mp3"
   },
   "pack:relapseProofing|7|base": {
    "warm": "warm/relapseproofing-d7-4e1813a83c.mp3",
    "soft": "soft/relapseproofing-d7-4e1813a83c.mp3",
    "gentle": "gentle/relapseproofing-d7-4e1813a83c.mp3",
    "clear": "clear/relapseproofing-d7-4e1813a83c.mp3",
-   "male": "male/relapseproofing-d7-4e1813a83c.mp3"
+   "male": "male/relapseproofing-d7-4e1813a83c.mp3",
+   "deep": "deep/relapseproofing-d7-c4ca51b1b8.mp3"
   },
   "Alcohol|31|base": {
    "warm": "warm/alcohol-d31-89ec036596.mp3",

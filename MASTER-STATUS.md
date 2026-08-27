@@ -816,6 +816,77 @@ video queued today publishes on the next free day, not the same day.
 - **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
   only for the short vertical pieces.
 
+**PUSH EVERYTHING, ALWAYS (Jacques, 27 Aug 2026).** Do not ask whether to
+push, and do not leave commits sitting locally. Every commit goes to all three
+branches the same way house rule 18 has always said: the working branch, then
+`main` (the record), then `claude/vibe-code-uwxxlk` (what Railway deploys).
+This replaces the "notify me, don't push anything" instruction from earlier the
+same day — that one was for a single read-only audit, not standing. A local
+commit dies with the container; that is how the 18 Aug marketing batch was lost.
+
+**Videos are handed over, not committed — music stays (Jacques, 27 Aug 2026).**
+
+- **Finished .mp4s go to him in chat, not into git.** He keeps them in his own
+  file and they live on social media, so the repo is not their home and a copy
+  in git is dead weight in a public repo that stores every version forever.
+- **Music and audio DO stay in the repo** — `content/score/`, `audio/`, and
+  anything else that gets uploaded here keeps being uploaded here. The videos
+  are the only exception.
+- **Everything needed to rebuild a video stays too**: the `*-source.html`, the
+  spec JSON, the stills, and `tools/render-film.js` / `tools/make-film.py`. Any
+  piece can be re-rendered from the repo without the .mp4 being in it.
+- **ALL 39 videos were purged from tracking on 27 Aug** — the whole
+  `content/library/` run (01–23 plus the alternates and cards), the top-level
+  pieces (Clear All, The Cart, She Came Back, Fifteen Boxes, the store video,
+  the film-engine samples, the day-30 preview), `supporter-husband/`, and the
+  three built this session. **246 MB gone from HEAD.** Talking heads, AI
+  pieces, samples — everything, at Jacques's instruction.
+- **They are still in git history**, so the repo's *size on disk* is unchanged.
+  Any one comes back with `git checkout 4ba9614 -- <path>`. Actually shrinking
+  the repo needs a history rewrite (filter-repo / BFG) and a force-push across
+  all 23 branches — a separate, riskier job that has NOT been done.
+- **`.gitignore` now blocks `*.mp4 *.mov *.webm *.m4v *.avi *.mkv` repo-wide**,
+  so no future session can commit one by accident.
+
+**Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
+
+1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and
+   handed over; the queue is his. This is standing, not a one-off — do not
+   queue, schedule, or publish to any channel without him asking for it in
+   those words.
+2. **If he ever does ask: name it and tag it.** Both, every post, every
+   channel. A post with a null title or an empty tag list is not finished.
+   - **Title** goes on every channel, Facebook included:
+     `metadata.facebook.title`, `metadata.youtube.title`,
+     `metadata.tiktok.title`. Facebook's is easy to miss because the API
+     accepts the post without it and stores `title: null`.
+   - **Tags** — the org has exactly three, and they are reused, not invented:
+     | Tag | ID |
+     |---|---|
+     | addictions | `6a7d83e66879491fb50f6dfe` |
+     | recovery | `6a7d83f50881078c2c08bba7` |
+     | partner support | `6a7d8404c9e06c5e050eae3a` |
+     Pass them as `tagIds`. Free plan caps tags at 3, so there are no others
+     to add.
+3. **TikTok through Buffer works again** (tested 27 Aug — two posts accepted
+   with no error). The 24 Aug "never plan TikTok through Buffer" rule is dead.
+   All three channels are connected: Facebook page, YouTube, TikTok.
+4. **The schedule is 3 slots a day**, every day, all three channels:
+   08:15 / 12:15 / 18:15 America/Chicago. Not one a day as the 24 Aug note says.
+5. **Facebook cannot carry the AI-generated flag through the API.** TikTok and
+   YouTube both accept `isAiGenerated: true` and it sticks (verified on the
+   saved post). Facebook's post metadata has no such field — only
+   `type/title/firstComment/linkAttachment`. Per house rule 19, say so in the
+   queue report; the flag has to be set by hand in Buffer.
+6. **Free plan caps scheduled posts at 10 per channel.** 3 slots a day means a
+   channel runs dry in about three days, so the bottleneck is content supply,
+   not scheduling.
+7. **Never hand Buffer a `raw.githubusercontent.com` URL for a video.** Buffer
+   does not re-host it — it stores the raw link and fetches at publish time, so
+   the post breaks if the branch is renamed, merged away or deleted. Upload the
+   file, or point at something permanent.
+
+
 **The code-built video pipeline is proven three times now**: Clear All (the
 notification lockscreen), She Came Back (the 7-frame porch story), The Cart
 (shopping addiction, built entirely inside a browser window). HTML/CSS with a

@@ -235,28 +235,52 @@ Play app. A Chrome-installed PWA is also not a TWA, so it fails identically.
   redirect error, but nothing launches the apex. Ignore it.
 - **Not Samsung Internet.** `engine=Chrome 151`.
 
-### The one thing left to check, and nobody has checked it
+### Signing is ruled out — do not look there again
 
-Chrome matches the **signing certificate of the installed app** against the
-fingerprints in the served file. The file lists two:
+Jacques read both SHA-256 values off Play Console → App signing (direct link:
+`.../app/4972165923818128065/keymanagement`) on 27 Aug 2026. Both match
+`.well-known/assetlinks.json` character for character:
 
-    99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5
-    91:7B:4C:99:B1:13:F3:EC:27:E1:EB:87:3B:04:49:11:4C:FB:9E:04:1B:C3:B4:94:A2:D4:55:8D:73:E4:D4:F4
+    99:D2:75:… app signing key (classical)   — present in the file
+    91:7B:4C:… upload key                     — present in the file
 
-`twa-manifest.json` signs with a local **upload** key
-(`android-upload.keystore`, alias `upload`), and that keystore is not in this
-repo. But an app installed from Play is not signed with the upload key —
-**Play App Signing re-signs it with the app signing key**, and it is that
-fingerprint Chrome sees. If the app signing key is not one of the two above,
-verification fails exactly like this, no matter how correct the file looks.
+The "Quantum-ready (beta)" badge and the *Previous app signing keys* row dated
+28 Jul 2026 look alarming and are a red herring; the classical fingerprint in
+use is the one already listed. Ignore the post-quantum column entirely —
+Chrome's asset-link check does not use it.
 
-**Get it from Play Console → Test and release → Setup → App integrity → App
-signing key certificate → SHA-256.** Compare it character for character with
-the two values above. If it is missing, add it to
-`TurnSomeDayIntoOneday/.well-known/assetlinks.json`, deploy, then on the phone
-clear Chrome's cached verification by uninstalling and reinstalling the app.
+### What is actually still open
 
-Until that is confirmed, do not write any more code for this bug.
+**Nothing in this repo proves what the shell in the Play Store contains.**
+`twa/twa-manifest.json` was added on 24 Aug 2026 (commit `614864e`) as a
+reconstruction. The `.aab` that is live was built on Jacques's PC well before
+that, and `git ls-remote` shows **no `twa-build` branch**, so the CI workflow
+that would build from this manifest has never produced an artifact. Two
+settings that the live shell may therefore lack, either of which alone causes
+what we see:
+
+1. **`features.playBilling.enabled`** — the repo manifest has it true. Bubblewrap
+   does **not** enable it by default. Without it the Android shell omits the
+   Play Billing delegation and `getDigitalGoodsService()` rejects with exactly
+   `unsupported context`, even inside a perfectly verified TWA.
+2. **`host`** — the repo manifest says `www.turnsomedayintodayone.com`. If the
+   live shell declares the **apex** instead, Chrome fetched
+   `https://turnsomedayintodayone.com/.well-known/assetlinks.json`, got the
+   301 to www, and failed: asset-link fetches do not follow redirects. Google's
+   validator returns `ERROR_CODE_REDIRECT` for the apex and full statements for
+   www. That would explain the address bar as well.
+
+**Fixed here (27 Aug):** `server.js` now serves `/.well-known/assetlinks.json`
+before the apex→www redirect, so both hosts return it with a 200. Verified by
+replaying both middlewares in registration order against real `Host` headers —
+apex and www both 200 `application/json`, and every other apex path still 301s
+to www. This removes cause 2 without a Play upload.
+
+**Still needs Jacques:** rebuild the shell from `twa/twa-manifest.json`, sign it
+with the upload key, and upload it. That is the only way to settle cause 1.
+Run the `Build the Play app (.aab)` workflow (`workflow_dispatch`), take the
+unsigned bundle off the `twa-build` branch, sign, upload, then reinstall on the
+phone. Bump `appVersionCode` past whatever is live before building.
 
 Install, use, the 14-day tester clock and reviews all work. Purchases do not.
 Do not call this cosmetic.

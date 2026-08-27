@@ -53,6 +53,20 @@ jobs:
             || sudo ln -sfn "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
           ls "$ANDROID_HOME" "$ANDROID_HOME/tools/bin" | head -30
 
+      # bubblewrap update fetches manifest.json from the live site, and a push
+      # to the deploy branch minutes before a build - the natural sequence -
+      # restarts the site for ~a minute. Runs 5 and 8 both died in exactly that
+      # window with a 502. Wait for the site instead of racing it.
+      - name: Wait for the live site to answer (a fresh deploy 502s briefly)
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://www.turnsomedayintodayone.com/manifest.json)
+            [ "$code" = "200" ] && { echo "site is up (attempt $i)"; exit 0; }
+            echo "attempt $i: got $code, waiting 10s"
+            sleep 10
+          done
+          echo "site did not come up within 5 minutes"; exit 1
+
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa
         # --skipVersionUpgrade: CI has no keyboard; use the version already in

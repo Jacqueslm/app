@@ -183,8 +183,31 @@ engine. Beyond that it needs `adb logcat` over USB to read Chrome's actual
 rejection reason; platform-tools are already on the owner's PC under
 `C:\Users\<user>\.bubblewrap\`.
 
-**Impact: cosmetic only.** Install, use, the 14-day clock, purchases and review
-all work with the bar present.
+**Impact: NOT cosmetic. It blocks every purchase.** Corrected 27 Aug 2026 —
+Jacques hit "Upgrade unavailable · Could not complete that purchase" on his own
+phone, with the address bar visible in the screenshot.
+
+Why it follows: the upgrade path calls `window.getDigitalGoodsService(...)` at
+`index.html:11515`. That function is exposed **only inside a verified TWA**. In
+Custom Tabs it is undefined, the call throws, and the catch at the bottom of
+`startStorePurchase` shows exactly the message he saw. Nothing is charged, and
+nothing can be.
+
+So the chain is: Digital Asset Links verification fails → the app falls back to
+Custom Tabs → the Digital Goods API is absent → **nobody can buy Pro on Android
+at all.** That is why the live billing path has never produced a sale. It was
+never an untested path; it was a broken one.
+
+Install, use, the 14-day clock and reviews genuinely do work with the bar
+present. Purchases do not. Do not repeat the "cosmetic" line.
+
+**Strongest untested lead, and it fits both symptoms.** Both devices are
+Samsung. A TWA is hosted by the device's default browser, and the Digital Goods
+/ Play Billing bridge is a **Chrome** feature — Samsung Internet does not
+provide it. If Samsung Internet is the default browser, you would get the
+address bar *and* a dead purchase button, which is exactly the pair observed.
+**Try first: set Chrome as the default browser on the device, force-stop the
+app, reopen.** That is a 30-second test and it costs nothing.
 
 ## Marketing pages (SEO surface)
 

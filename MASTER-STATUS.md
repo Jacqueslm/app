@@ -43,6 +43,22 @@ actual rejection reason; platform-tools are already on his PC under
 
 **Do not describe this as cosmetic again.**
 
+**Checked 27 Aug: "I bought Pro with the Stripe when I tested it 3 weeks ago."**
+True, and verified against the live Stripe account rather than taken on trust.
+Charge `ch_3U1RLwCDHXSEg3rL0Ju6KvMj` — $9.99, 6 Aug 2026, Visa debit ...8776,
+succeeded, never refunded. Trial opened 30 Jul, converted 6 Aug, cancelled
+18 Aug. Two live subscriptions total (`app_user_id` 11 and 18), both his own
+accounts. **Stripe checkout, the webhook, and the entitlement flip all work.**
+
+It does not clear the Android bug, and it is important not to let it feel like
+it does. The two paths split at `becomePro()` and share no code afterwards —
+web goes to `/api/billing/create-checkout-session`, Play goes to
+`becomeProViaStore()` → `getDigitalGoodsService`. A Play install is refused
+Stripe outright; that refusal is the policy line. So a card purchase could only
+have happened in a plain browser, which is the path that already worked. The
+one that has never taken a cent is still the one in the installed app, and the
+Chrome-default test below is still the next thing to run.
+
 ---
 
 ## 🗑 26 AUG 2026 — THE FOUNDER VOICE IS REMOVED FROM THE APP

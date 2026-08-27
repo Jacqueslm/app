@@ -625,13 +625,18 @@ commit dies with the container; that is how the 18 Aug marketing batch was lost.
 - **Everything needed to rebuild a video stays too**: the `*-source.html`, the
   spec JSON, the stills, and `tools/render-film.js` / `tools/make-film.py`. Any
   piece can be re-rendered from the repo without the .mp4 being in it.
-- **The three built this session were removed from tracking on 27 Aug** —
-  `trauma-bond.mp4`, `binge-night.mp4`, `binge-cause-effect.mp4`. They were
-  committed before the rule existed and were handed to Jacques in chat; taking
-  them out of HEAD keeps them from landing on `main`. They remain in the branch
-  history and can be restored with `git checkout 80b9349 -- <path>`.
-- **Pre-existing videos in `content/` and `content/library/` were left alone.**
-  That is ~215 MB from before this rule and removing it was not asked for.
+- **ALL 39 videos were purged from tracking on 27 Aug** — the whole
+  `content/library/` run (01–23 plus the alternates and cards), the top-level
+  pieces (Clear All, The Cart, She Came Back, Fifteen Boxes, the store video,
+  the film-engine samples, the day-30 preview), `supporter-husband/`, and the
+  three built this session. **246 MB gone from HEAD.** Talking heads, AI
+  pieces, samples — everything, at Jacques's instruction.
+- **They are still in git history**, so the repo's *size on disk* is unchanged.
+  Any one comes back with `git checkout 4ba9614 -- <path>`. Actually shrinking
+  the repo needs a history rewrite (filter-repo / BFG) and a force-push across
+  all 23 branches — a separate, riskier job that has NOT been done.
+- **`.gitignore` now blocks `*.mp4 *.mov *.webm *.m4v *.avi *.mkv` repo-wide**,
+  so no future session can commit one by accident.
 
 **Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
 

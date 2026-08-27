@@ -39,6 +39,32 @@ try {
 let alerts = [];
 let nextId = 1;
 
+// ═══ SIGNALS FOR THE JOURNAL ═════════════════════════════════════════════════
+// Every "MSB PURE" alert that arrives is parsed and saved to signals.json,
+// whether autotrade is on or not. The journal page pulls this file, so a
+// signal writes itself into the journal with no typing. The fills and P&L
+// still come from the TradingView export — the bot only knows what it said,
+// the account knows what actually happened; the journal merges the two.
+const SIGNALS_FILE = path.join(__dirname, "signals.json");
+let signals = [];
+try {
+  signals = JSON.parse(fs.readFileSync(SIGNALS_FILE, "utf8"));
+  if (!Array.isArray(signals)) signals = [];
+} catch {}
+function recordSignal(text) {
+  const m = text.match(/^(\S+)\s+MSB PURE dir (-?1)(?:\.0+)?\s*\|/);
+  if (!m) return;
+  const num = re => { const g = text.match(re); return g ? parseFloat(g[1]) : null; };
+  signals.push({
+    t: Date.now(), tk: m[1], dir: +m[2],
+    entry: num(/entry\s+([\d.]+)/i), stop: num(/stop\s+([\d.]+)/i),
+    t1: num(/T1\s+([\d.]+)/), t2: num(/T2\s+([\d.]+)/),
+    room: num(/room\s+([\d.]+)/i), qty: num(/qty\s+([\d.]+)/i)
+  });
+  if (signals.length > 500) signals = signals.slice(-500);
+  try { fs.writeFileSync(SIGNALS_FILE, JSON.stringify(signals, null, 1)); } catch {}
+}
+
 // ═══ AUTOTRADE — the TradingView bot ═════════════════════════════════════════
 // When an "MSB PURE" alert arrives, write an order file into NinjaTrader's
 // incoming folder (the ATI). NinjaTrader places the bracket: market entry,
@@ -344,6 +370,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // The journal, served fresh — same folder, second doorway.
+  if (req.method === "GET" && url === "/journal") {
+    fs.readFile(path.join(__dirname, "..", "journal.html"), (err, html) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Could not find journal.html one folder up from relay/. Keep the Trading folder together.");
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, must-revalidate" });
+      res.end(html);
+    });
+    return;
+  }
+
+  // The journal pulls signals here. The open CORS header is deliberate:
+  // journal.html opened straight from the folder (file://) still gets to read
+  // this list. It only ever exposes the bot's own signal history, nothing else.
+  if (req.method === "GET" && url === "/signals.json") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify({ signals }));
+    return;
+  }
+
   // Bot status + kill switch. Same secret as the webhook — the page is yours alone.
   if (req.method === "GET" && url === "/bot/" + secret) {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
@@ -371,6 +424,7 @@ const server = http.createServer((req, res) => {
         if (alerts.length > 20) alerts = alerts.slice(-20);
         fs.appendFile(LOG_FILE, new Date().toISOString() + "  " + text.replace(/\n/g, " | ") + "\n", () => {});
         console.log("⚡ Alert received " + new Date().toLocaleTimeString() + " — " + text.split("\n")[0]);
+        recordSignal(text);
         tryAutotrade(text);
       }
       res.writeHead(200, { "Content-Type": "text/plain" });
@@ -397,6 +451,7 @@ server.listen(PORT, () => {
   console.log("  └─────────────────────────────────────────────────────────────┘");
   console.log("");
   console.log("  Your grader:      http://localhost:" + PORT);
+  console.log("  Your journal:     http://localhost:" + PORT + "/journal   (bot signals save themselves here)");
   console.log("  Webhook path:     /hook/" + secret);
   console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
   console.log("");

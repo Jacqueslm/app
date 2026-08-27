@@ -26,6 +26,7 @@ details{margin-bottom:12px}summary{cursor:pointer;color:#8b96a5}
 Screenshots: attached to your latest trade, and numbers are read where possible to prefill a new entry.<br>
 Re-drop anytime — duplicates are skipped.</span></div>
 <div id="ocr" class="small" style="display:none;margin:-6px 0 12px;color:#d29922"></div>
+<div class="row"><button id="pull">⚡ Pull bot signals</button><span id="pmsg" class="small" style="align-self:center"></span></div>
 <input type="file" id="pick" multiple accept=".csv,image/*" style="display:none">
 
 <details><summary>Add one by hand (optional)</summary>
@@ -167,10 +168,51 @@ function ingest(bal,ord){
     if(J.some(x=>x.key===key)) continue;
     t.key=key; J.push(t); added++;
   }
+  mergeSignals();
   matchStops();
   J.sort((a,b)=>(a.tms||0)-(b.tms||0)); save(); render();
   alert(added+' trades imported'+(pendingOrders?', stops matched where found':'')+'. Re-drop anytime — duplicates skip.');
 }
+
+// ── the wire to the bot ─────────────────────────────────────────────────────
+// The bot lives on TradingView's servers and cannot write files on your PC.
+// The relay (relay/server.js) is the bridge: every alert the bot fires gets
+// saved to relay/signals.json, and this page pulls that list — automatically
+// on open, or with the ⚡ button. A signal arrives as a "waiting" row; when
+// you later drop the TradingView export, the real fill/exit/P&L merges into
+// that same row instead of making a second one.
+const tol=px=>Math.max(1,px*0.0005);
+function mergeSignals(){
+  for(let i=J.length-1;i>=0;i--){
+    const p=J[i];if(!p.pending)continue;
+    const m=J.find(t=>t.kind==='import'&&t.sym===p.sym&&t.dir===p.dir
+      &&Math.abs(t.entry-p.entry)<=tol(p.entry)
+      &&(t.etms??t.tms)>=p.tms-15*60*1000&&(t.etms??t.tms)<=p.tms+6*60*60*1000);
+    if(m){m.kind='bot signal';if(m.stop==null)m.stop=p.stop;m.skey=p.skey;J.splice(i,1)}
+  }
+}
+async function pullSignals(quiet){
+  const urls=location.protocol.startsWith('http')?['/signals.json']:['http://localhost:4410/signals.json'];
+  let data=null;
+  for(const u of urls){try{const r=await fetch(u,{cache:'no-store'});if(r.ok){data=await r.json();break}}catch(e){}}
+  const box=$('pmsg');
+  if(!data){if(!quiet)box.textContent='relay not running — start "Start Trade Grader.bat" first, then try again.';return}
+  let added=0;
+  for(const s of (data.signals||[])){
+    const skey='s'+s.t+'|'+s.tk;
+    if(J.some(t=>t.skey===skey||t.key===skey))continue;
+    J.push({ts:new Date(s.t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      tms:s.t,sym:root(s.tk),dir:s.dir===1?'L':'S',kind:'bot signal',qty:s.qty||'',
+      entry:s.entry,stop:s.stop,exit:null,pnl:null,
+      note:'signal — waiting for the close'+(s.t2?' · target '+s.t2:''),
+      key:skey,skey:skey,pending:true});
+    added++;
+  }
+  if(added){mergeSignals();J.sort((a,b)=>(a.tms||0)-(b.tms||0));save();render()}
+  if(!quiet)box.textContent=added?added+' new signal(s) pulled from the bot.':'connected — no new signals.';
+}
+$('pull').onclick=()=>pullSignals(false);
+pullSignals(true);
 
 function matchStops(){
   if(!pendingOrders) return;
@@ -184,7 +226,7 @@ function matchStops(){
 }
 
 const rOf=t=>{
-  if(t.stop==null||!t.entry)return null;
+  if(t.stop==null||!t.entry||t.exit==null)return null;
   const d=t.dir==='L'?1:-1,risk=d*(t.entry-t.stop);
   return risk>0?d*(t.exit-t.entry)/risk:null;
 };

@@ -789,6 +789,21 @@ app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
   res.json({ ok: true, cleared });
 });
 
+// The purchase failures happening inside phones were invisible from here -
+// every diagnosis ran on screenshots Jacques had to take himself, and on
+// 27 Aug he said he is done doing that. So the app now reports them: signed-in
+// users only, capped fields, and it lands in the same owner-only error log the
+// diagnostics screen already reads. Writing is deliberately not owner-gated -
+// the failures worth seeing are other people's.
+app.post('/api/diagnostics/report', requireAuth, (req, res) => {
+  const b = req.body || {};
+  const message = String(b.message || '').slice(0, 300);
+  const detail = String(b.detail || '').slice(0, 600);
+  if (!message) return res.status(400).json({ error: 'Nothing to report.' });
+  try { db.logError('client', message, detail); } catch (_) {}
+  res.json({ ok: true });
+});
+
 // Funnel numbers are business data, so unlike diagnostics this gate has no
 // open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
 function isOwnerRequest(req) {

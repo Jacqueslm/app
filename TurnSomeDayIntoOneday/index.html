@@ -249,6 +249,10 @@ body.mini-on .app.fs-bigger .screens{padding-bottom:330px}
 .sos-sheet{background:var(--s2);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:430px;max-height:calc(100dvh/1.18);overflow-y:auto;overscroll-behavior:contain}
 .sos-title{font-size:1.125rem;font-weight:600;color:#E24B4A;margin-bottom:6px;text-align:center}
 .sos-sub{font-size:.8125rem;color:var(--tm);text-align:center;margin-bottom:20px}
+/* The info dialog is the one place that carries a support diagnostic, and it
+   is written as separate lines on purpose. Scoped to this id so every other
+   .sos-sub on the page keeps collapsing whitespace as before. */
+#info-modal-msg{white-space:pre-line}
 .sos-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s1);border-radius:12px;margin-bottom:10px;cursor:pointer;border:0.5px solid var(--bdr)}
 .sos-opt-crisis{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.4)}
 .crisis-bar{display:flex;align-items:center;gap:12px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.35);border-radius:12px;padding:12px 14px;text-decoration:none;margin:0 16px 4px}
@@ -11510,16 +11514,31 @@ async function becomeProViaStore(plan){
     appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
     return;
   }
+  // Every step below is labelled because this whole block used to end in one
+  // generic "could not complete that purchase". That message told Jacques
+  // nothing and told us less: it is thrown by the store handshake, by a
+  // missing product, by the payment sheet and by the network alike, so a
+  // screenshot of it could not be acted on and the bug sat open for weeks
+  // while two conversations guessed at different causes. The step name and
+  // the real error now travel with the message so one screenshot is enough.
+  let step='opening the store connection';
   try{
     const service=await window.getDigitalGoodsService('https://play.google.com/billing');
+    step='asking the store about '+productId;
     const details=await service.getDetails([productId]);
-    if(!details||!details.length){appInfo('Upgrade unavailable','That plan is not available in the store right now.');return;}
+    if(!details||!details.length){
+      appInfo('Upgrade unavailable','That plan is not in the store yet.\n\nDetails for support: getDetails returned nothing for '+productId+'. Usually the product is not active in Play Console, or this Google account is not on the tester list.');
+      return;
+    }
     const item=details[0];
+    step='building the payment sheet';
     const request=new PaymentRequest(
       [{supportedMethods:'https://play.google.com/billing',data:{sku:productId}}],
       {total:{label:item.title||'Pro',amount:{currency:item.price.currency,value:item.price.value}}}
     );
+    step='showing the payment sheet';
     const response=await request.show();
+    step='confirming with our server';
     const purchaseToken=response.details&&response.details.purchaseToken;
     // The store says it took the money; the server still asks the store itself
     // before granting anything, because a token from a device proves nothing.
@@ -11539,8 +11558,24 @@ async function becomeProViaStore(plan){
   }catch(e){
     // A user dismissing the store sheet lands here too - say nothing then.
     if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
-    appInfo('Upgrade unavailable','Could not complete that purchase. Please try again in a moment.');
+    const why=((e&&e.name)?e.name+': ':'')+((e&&e.message)||String(e));
+    appInfo('Upgrade unavailable','Could not complete that purchase, and nothing has been charged.\n\nDetails for support: failed while '+step+'.\n'+why+'\n\n'+storeDiagnostics());
   }
+}
+// Read verbatim into the failure dialog so a photo of the screen is a usable
+// bug report. Nothing here is private - it is which browser is underneath the
+// app and whether the Play bridge answered.
+function storeDiagnostics(){
+  const bits=[];
+  try{
+    bits.push('bridge='+(('getDigitalGoodsService'in window)?'present':'missing'));
+    bits.push('playBuild='+(isPlayBuild()?'yes':'no'));
+    bits.push('display='+((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)?'standalone':'browser'));
+    const m=(navigator.userAgent||'').match(/(SamsungBrowser|EdgA|OPR|Chrome)\/([0-9]+)/);
+    bits.push('engine='+(m?m[1]+' '+m[2]:'unknown'));
+    bits.push('app='+APP_VERSION);
+  }catch(e){}
+  return bits.join(' · ');
 }
 
 // ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
@@ -12455,7 +12490,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.7';
+const APP_VERSION='5.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -133,10 +133,27 @@ enrolment, service account wired up.
 - **12 testers, opted in for 14 continuous days.** Currently 2 (both the owner's
   own accounts). The clock has not started. Production access needs this *and* a
   written account of how testers were recruited and what feedback they gave.
-- **No real purchase has ever been made.** Everything up to Google's servers is
-  tested; the last mile is not. After the first test purchase, **check three days
-  later that it was not refunded** — that is the only proof acknowledgement works.
-  Look for `ACKNOWLEDGE FAILED` in the error log.
+- **No real *Play* purchase has ever been made.** Everything up to Google's
+  servers is tested; the last mile is not. After the first test purchase,
+  **check three days later that it was not refunded** — that is the only proof
+  acknowledgement works. Look for `ACKNOWLEDGE FAILED` in the error log.
+
+  Do not let the Stripe side confuse this. **Stripe is proven and works.**
+  Confirmed against the live account (`acct_1TvjcJCDHXSEg3rL`) on 27 Aug 2026:
+  two live subscriptions, `app_user_id` 11 and 18, both Jacques's own accounts,
+  and one real settled charge — `ch_3U1RLwCDHXSEg3rL0Ju6KvMj`, $9.99, 6 Aug
+  2026, Visa debit ...8776, `status: succeeded`, never refunded. Trial started
+  30 Jul, converted 6 Aug, cancelled 18 Aug. So checkout, the webhook, and the
+  entitlement flip all work end to end on the web path.
+
+  That proves nothing about Play. The two paths do not share code past
+  `becomePro()`: the web path posts to `/api/billing/create-checkout-session`
+  (`billing.js`), the Play path calls `becomeProViaStore()` →
+  `getDigitalGoodsService` (`store-billing.js`). A Stripe purchase cannot even
+  be *made* from inside the Play app — `becomePro()` refuses it as the policy
+  line. So the fact that Jacques bought Pro with a card means he was in a plain
+  browser at the time, not in the installed app. The broken path is still
+  untested by that purchase.
 
 Opt-in link (closed test — only works for addresses already on the tester list):
 
@@ -164,49 +181,87 @@ in this section, and a Play upload is only ever needed for shell-level changes
 
 ## Open bug
 
-**The Android app shows a browser address bar instead of running full screen.**
-It falls back to Custom Tabs because Digital Asset Links verification fails.
+**The Android app is not running as a verified Trusted Web Activity, and that
+is why nobody can buy Pro.** Settled 27 Aug 2026 by the app's own error text.
+Read this whole section before changing anything — the cause was correctly
+identified weeks ago, then talked out of by me on the same day, then confirmed
+again. Do not restart that loop.
 
-Verified correct and ruled out:
-- The app declares `https://www.turnsomedayintodayone.com` (`assetStatements` in
-  the generated `strings.xml`).
-- The server serves both certificate fingerprints — app signing key and upload
-  key — confirmed live through Google's own validator:
+### The proof, in Jacques's own screenshot
+
+The failure dialog (app 5.8, which prints the real error) reads:
+
+    failed while opening the store connection.
+    OperationError: unsupported context
+    bridge=present · playBuild=yes · display=standalone · engine=Chrome 151 · app=5.8
+
+`unsupported context` is not a generic failure. It is Chromium's
+`kUnsupportedContext` from `DigitalGoodsFactoryImpl`, surfaced as an
+`OperationError`, and it has exactly one meaning: **the document calling
+`getDigitalGoodsService()` is not inside a Trusted Web Activity.** The address
+bar across the top of that same screenshot says the same thing visually.
+
+### The trap that cost a day — do not fall in it
+
+`bridge=present` does **not** mean the billing bridge works.
+`storeBillingAvailable()` only tests `'getDigitalGoodsService' in window`, and
+that function exists in ordinary Chrome on Android. It is there, it is
+callable, and outside a TWA it rejects. So:
+
+- The purchase sails past the `storeBillingAvailable()` guard and its message
+  ("In-app purchases are not available on this device") never appears.
+- It dies in the deepest catch instead, which used to print only "Could not
+  complete that purchase."
+- On 27 Aug I read that message as proof the bridge was working and **wrongly
+  retired the Digital Asset Links diagnosis.** It was right. `display=standalone`
+  misleads the same way — Chrome reports standalone here even with a visible
+  address bar.
+
+The 12:39 screenshots with no address bar were a **separate installed PWA**
+(he had just used Chrome's "Install and create shortcut" at 12:38), not the
+Play app. A Chrome-installed PWA is also not a TWA, so it fails identically.
+
+### Where the fault is not
+
+- **The served file is correct and reachable.** Google's own validator returns
+  both statements cleanly for the host the TWA launches:
 
       curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
 
-- Uninstall/reinstall, and Chrome cache clear, on two devices.
+- **The host matches.** `twa/twa-manifest.json` has
+  `host: www.turnsomedayintodayone.com`, `startUrl: /app?src=play`, and
+  `.well-known/assetlinks.json` declares `com.turnsomedayintodayone.app`.
+- **Not the apex.** `turnsomedayintodayone.com` does fail the validator with a
+  redirect error, but nothing launches the apex. Ignore it.
+- **Not Samsung Internet.** `engine=Chrome 151`.
 
-Still fails. **Untested leads:** both devices are Samsung — if Samsung Internet
-rather than Chrome is the default browser, verification runs through a different
-engine. Beyond that it needs `adb logcat` over USB to read Chrome's actual
-rejection reason; platform-tools are already on the owner's PC under
-`C:\Users\<user>\.bubblewrap\`.
+### The one thing left to check, and nobody has checked it
 
-**Impact: NOT cosmetic. It blocks every purchase.** Corrected 27 Aug 2026 —
-Jacques hit "Upgrade unavailable · Could not complete that purchase" on his own
-phone, with the address bar visible in the screenshot.
+Chrome matches the **signing certificate of the installed app** against the
+fingerprints in the served file. The file lists two:
 
-Why it follows: the upgrade path calls `window.getDigitalGoodsService(...)` at
-`index.html:11515`. That function is exposed **only inside a verified TWA**. In
-Custom Tabs it is undefined, the call throws, and the catch at the bottom of
-`startStorePurchase` shows exactly the message he saw. Nothing is charged, and
-nothing can be.
+    99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5
+    91:7B:4C:99:B1:13:F3:EC:27:E1:EB:87:3B:04:49:11:4C:FB:9E:04:1B:C3:B4:94:A2:D4:55:8D:73:E4:D4:F4
 
-So the chain is: Digital Asset Links verification fails → the app falls back to
-Custom Tabs → the Digital Goods API is absent → **nobody can buy Pro on Android
-at all.** That is why the live billing path has never produced a sale. It was
-never an untested path; it was a broken one.
+`twa-manifest.json` signs with a local **upload** key
+(`android-upload.keystore`, alias `upload`), and that keystore is not in this
+repo. But an app installed from Play is not signed with the upload key —
+**Play App Signing re-signs it with the app signing key**, and it is that
+fingerprint Chrome sees. If the app signing key is not one of the two above,
+verification fails exactly like this, no matter how correct the file looks.
 
-Install, use, the 14-day clock and reviews genuinely do work with the bar
-present. Purchases do not. Do not repeat the "cosmetic" line.
+**Get it from Play Console → Test and release → Setup → App integrity → App
+signing key certificate → SHA-256.** Compare it character for character with
+the two values above. If it is missing, add it to
+`TurnSomeDayIntoOneday/.well-known/assetlinks.json`, deploy, then on the phone
+clear Chrome's cached verification by uninstalling and reinstalling the app.
 
-**Strongest untested lead, and it fits both symptoms.** Both devices are
-Samsung. A TWA is hosted by the device's default browser, and the Digital Goods
-/ Play Billing bridge is a **Chrome** feature — Samsung Internet does not
-provide it. If Samsung Internet is the default browser, you would get the
-address bar *and* a dead purchase button, which is exactly the pair observed.
-**Try first: set Chrome as the default browser on the device, force-stop the
+Until that is confirmed, do not write any more code for this bug.
+
+Install, use, the 14-day tester clock and reviews all work. Purchases do not.
+Do not call this cosmetic.
+
+
 app, reopen.** That is a 30-second test and it costs nothing.
 
 ## Marketing pages (SEO surface)

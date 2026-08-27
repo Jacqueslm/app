@@ -76,6 +76,33 @@ caption) and a number in this file.
 
 ---
 
+---
+
+## ⚠️ NUMBERING — READ BEFORE YOU NAME A NEW PIECE (27 Aug 2026)
+
+Two sessions built videos on the same day and collided twice. A15, A16 and A17
+were each claimed by two different pieces before anyone noticed.
+
+**Taken as of 27 Aug:** A1–A17 and A9b, plus **A18** and **A19** reserved below.
+
+**A18 — "He said he'd wait up."** · supporter side · 8s Cause & Effect · BUILT
+Door → kitchen table. *He said he'd wait up. / He always does.*
+End card: **Waiting up is not the same as helping.**
+Spec and stills: `content/a18/`. Scored with `content/score/fading-light.mp3`.
+
+**A19 — "Nobody saw the second half"** · binge → after · 8s Cause & Effect · BUILT
+Bed → bathroom. *Nobody saw her eat it. / Nobody saw this either.*
+End card: **This cycle can be broken.**
+Spec and stills: `content/a19/`. Scored with `content/score/weisser-schnee.mp3`.
+Note: A16 covers binge-eating-at-night from a different angle — check both
+before posting them close together.
+
+**Before you claim a number:** grep this file for the highest `## A` heading and
+take the next one. If you are building alongside another session, write the
+heading in here FIRST, then build.
+
+---
+
 ## A1 — "The door" · 5 shots · 25s · ~$2.45
 
 **Title:** The moment she finds out

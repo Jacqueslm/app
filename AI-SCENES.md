@@ -753,7 +753,7 @@ alternates, not a series — do not post both.
 
 ---
 
-## A17 — "Nobody starts this on purpose" · pills · CAUSE & EFFECT · 15.0s · AWAITING STILLS
+## A17 — "Nobody starts this on purpose" · pills · CAUSE & EFFECT · 15.0s · BUILT 27 Aug 2026
 
 **The lane with nothing in it.** Pills appear exactly once in the entire script
 library — a list in SCRIPTS.md line 603 — and **KEYWORDS.md has no pill, opioid,
@@ -803,7 +803,12 @@ as `01-steps.jpg` and `02-hospital.jpg`. The .mp4 is handed over, not committed
 timeline or an outcome. The hospital frame carries the cost; the words stay on
 what it feels like from the inside, which is also what keeps it postable.
 
-**Status:** script, timing and source are done. Blocked only on the two stills
-being uploaded as files — chat images do not reach the filesystem. Once
-`content/pills/01-steps.jpg` and `02-hospital.jpg` exist it is one render and
-one encode.
+**BUILT.** Stills came in as .webp at 1170x2048, converted to jpg on the way in.
+Worth noting for next time: **the filenames were in the reverse order to the
+scenes** — the earlier timestamp was the hospital, not the steps — so they were
+identified by looking at them, not by sorting. Do that every time.
+
+**One fix during the build:** on the effect beat the caption wrapped and left
+"was." orphaned on its own line. Rewritten as three short lines instead of two
+long ones, and the bottom scrim lifted from .55 to .62/.96 because the hospital
+frame is nearly white where the type sits. Both are in the source.

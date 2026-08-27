@@ -606,6 +606,45 @@ video queued today publishes on the next free day, not the same day.
 - **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
   only for the short vertical pieces.
 
+**Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
+
+1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and
+   handed over; the queue is his. This is standing, not a one-off — do not
+   queue, schedule, or publish to any channel without him asking for it in
+   those words.
+2. **If he ever does ask: name it and tag it.** Both, every post, every
+   channel. A post with a null title or an empty tag list is not finished.
+   - **Title** goes on every channel, Facebook included:
+     `metadata.facebook.title`, `metadata.youtube.title`,
+     `metadata.tiktok.title`. Facebook's is easy to miss because the API
+     accepts the post without it and stores `title: null`.
+   - **Tags** — the org has exactly three, and they are reused, not invented:
+     | Tag | ID |
+     |---|---|
+     | addictions | `6a7d83e66879491fb50f6dfe` |
+     | recovery | `6a7d83f50881078c2c08bba7` |
+     | partner support | `6a7d8404c9e06c5e050eae3a` |
+     Pass them as `tagIds`. Free plan caps tags at 3, so there are no others
+     to add.
+3. **TikTok through Buffer works again** (tested 27 Aug — two posts accepted
+   with no error). The 24 Aug "never plan TikTok through Buffer" rule is dead.
+   All three channels are connected: Facebook page, YouTube, TikTok.
+4. **The schedule is 3 slots a day**, every day, all three channels:
+   08:15 / 12:15 / 18:15 America/Chicago. Not one a day as the 24 Aug note says.
+5. **Facebook cannot carry the AI-generated flag through the API.** TikTok and
+   YouTube both accept `isAiGenerated: true` and it sticks (verified on the
+   saved post). Facebook's post metadata has no such field — only
+   `type/title/firstComment/linkAttachment`. Per house rule 19, say so in the
+   queue report; the flag has to be set by hand in Buffer.
+6. **Free plan caps scheduled posts at 10 per channel.** 3 slots a day means a
+   channel runs dry in about three days, so the bottleneck is content supply,
+   not scheduling.
+7. **Never hand Buffer a `raw.githubusercontent.com` URL for a video.** Buffer
+   does not re-host it — it stores the raw link and fetches at publish time, so
+   the post breaks if the branch is renamed, merged away or deleted. Upload the
+   file, or point at something permanent.
+
+
 **The code-built video pipeline is proven three times now**: Clear All (the
 notification lockscreen), She Came Back (the 7-frame porch story), The Cart
 (shopping addiction, built entirely inside a browser window). HTML/CSS with a

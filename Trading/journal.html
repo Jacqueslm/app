@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Journal</title>
+<style>
+body{background:#0e1116;color:#e6edf3;font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;padding:18px}
+h1{font-size:19px;margin:0 0 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+input,select,button{background:#161b22;color:#e6edf3;border:1px solid #2a3341;border-radius:8px;padding:10px;font-size:15px}
+input{width:100px}#note{flex:1;min-width:160px}
+button{cursor:pointer;font-weight:700}
+#save{background:#238636;border-color:#238636;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:7px 6px;border-bottom:1px solid #2a3341;text-align:right}
+td:first-child,th:first-child,td:nth-child(2),th:nth-child(2),td:last-child,th:last-child{text-align:left}
+.g{color:#3fb950}.r{color:#f85149}.y{color:#d29922}
+#stats{margin:10px 0 16px;font-size:15px}
+.small{font-size:12px;color:#8b96a5}
+</style></head><body>
+<h1>Trade Journal <span class="small">— saves in this browser · export CSV for backup</span></h1>
+<div class="row">
+  <input id="sym" placeholder="MES" list="syms" style="width:80px">
+  <datalist id="syms"><option>MES</option><option>MNQ</option><option>MGC</option></datalist>
+  <select id="dir"><option value="L">LONG</option><option value="S">SHORT</option></select>
+  <select id="kind"><option>bot signal</option><option>scalp hand-off</option><option>my own</option></select>
+  <input id="entry" placeholder="entry" type="number" step="any">
+  <input id="stop" placeholder="stop" type="number" step="any">
+  <input id="exit" placeholder="exit" type="number" step="any">
+  <input id="note" placeholder="note (optional — e.g. bot said caution, took it anyway)">
+  <button id="save">Save</button>
+  <button id="csv">CSV</button>
+</div>
+<div id="stats"></div>
+<table><thead><tr><th>time</th><th>sym</th><th>dir</th><th>type</th><th>entry</th><th>stop</th><th>exit</th><th>R</th><th>note</th><th></th></tr></thead>
+<tbody id="rows"></tbody></table>
+<p class="small">R = (exit − entry) ÷ (entry − stop), sign-adjusted. Losses bigger than −1R mean the stop moved — that's the number to watch.</p>
+<script>
+const K='msb_journal';
+let J=[];try{J=JSON.parse(localStorage.getItem(K))||[]}catch(e){}
+const $=id=>document.getElementById(id);
+const rOf=t=>{const d=t.dir==='L'?1:-1,risk=d*(t.entry-t.stop);return risk>0?d*(t.exit-t.entry)/risk:null};
+function render(){
+  const tb=$('rows');tb.innerHTML='';
+  let n=0,w=0,sum=0,big=0;
+  J.slice().reverse().forEach((t,ri)=>{
+    const i=J.length-1-ri,r=rOf(t);
+    if(r!==null){n++;sum+=r;if(r>0)w++;if(r<-1.05)big++;}
+    const cls=r===null?'':r>0?'g':'r';
+    tb.insertAdjacentHTML('beforeend',`<tr><td>${t.ts}</td><td>${t.sym}</td>
+      <td class="${t.dir==='L'?'g':'r'}">${t.dir}</td><td>${t.kind||''}</td>
+      <td>${t.entry}</td><td>${t.stop}</td><td>${t.exit}</td>
+      <td class="${cls}">${r===null?'—':r.toFixed(2)}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${t.note||''}</td>
+      <td><button onclick="del(${i})" style="padding:2px 8px">×</button></td></tr>`);
+  });
+  $('stats').innerHTML=n?`<b>${n}</b> trades · <b class="${w/n>=.5?'g':'r'}">${(100*w/n).toFixed(0)}%</b> wins ·
+    avg <b class="${sum/n>=0?'g':'r'}">${(sum/n).toFixed(2)}R</b> · total <b>${sum.toFixed(1)}R</b>`+
+    (big?` · <b class="y">⚠ ${big} loss${big>1?'es':''} worse than −1R — a stop moved</b>`:''):'No trades yet.';
+}
+window.del=i=>{if(confirm('Delete this trade?')){J.splice(i,1);localStorage.setItem(K,JSON.stringify(J));render()}};
+$('save').onclick=()=>{
+  const t={ts:new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    sym:($('sym').value||'MES').toUpperCase(),dir:$('dir').value,kind:$('kind').value,
+    entry:+$('entry').value,stop:+$('stop').value,exit:+$('exit').value,note:$('note').value};
+  if(!(t.entry&&t.stop&&t.exit)){alert('entry, stop and exit are needed');return}
+  J.push(t);localStorage.setItem(K,JSON.stringify(J));
+  ['entry','stop','exit','note'].forEach(id=>$(id).value='');render();
+};
+$('csv').onclick=()=>{
+  const rows=[['time','sym','dir','type','entry','stop','exit','R','note'],
+    ...J.map(t=>[t.ts,t.sym,t.dir,t.kind||'',t.entry,t.stop,t.exit,(rOf(t)??'').toString(),(t.note||'').replace(/,/g,';')])];
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
+  a.download='journal.csv';a.click();
+};
+render();
+</script></body></html>

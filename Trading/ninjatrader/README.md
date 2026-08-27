@@ -24,7 +24,7 @@ Structure only: swing highs and swing lows. Nothing else is read.
 1. **New → Strategy Analyzer**
 2. Left panel: pick **MNQ 06-26** (or MES), set the date range to a couple of years
 3. Strategy: **MSBPure**
-4. Data series: **1 Minute → 60** (this is your execution timeframe)
+4. Data series: **1 Minute → 60** (this is your execution timeframe; use 15 for scalp mode)
 5. Click **Run**
 
 You get trades, win rate, profit factor, drawdown and an equity curve in one
@@ -61,8 +61,15 @@ the rules work and you've watched it behave for a few weeks.
 | Require the fresh break | true | Step 5 of your sequence. Off = enter on the reclaim itself. |
 | Daily bias must agree | true | Permission from the higher structure. |
 | Bridge must agree | true | The 4H at the moment of the trigger. |
+| Lower TF must agree | true | The 15m pointing with the 1H. This is the chop filter. |
+| This chart must agree | true | The execution timeframe's own structure. |
+| Scalp mode | false | Slides the stack down a rung: 4H+1H bias, run it on a 15-minute chart, 5m alignment. |
+| Pullback entries | true | The short way in — pullback prints a swing, price closes back through it. Fires often. |
+| Retest sequence entries | true | The long way in — break, back through, reclaim, hold, fresh break. Rare. |
 | Reject if room below this (R) | 1.0 | No trade if the next opposing swing is closer than one stop. |
-| Contracts | 2 | Even number. Half comes off at 1R and the stop moves to break-even. |
+| Risk per trade (%) | 10 | Contracts are computed from this and the stop distance. Read §"What it does not do" before raising it. |
+| Read the live account balance | true | Uses the real balance when there is one; falls back to Account size in the Strategy Analyzer. |
+| Contract cap | 50 | A ceiling no arithmetic gets past. |
 | Max trades per day | 1 | Your rule. Raise it temporarily to see what the rules alone produce. |
 | Session start / end | 093000 / 150000 | Chart time. For MGC use 080000 / 130000. |
 
@@ -74,7 +81,11 @@ you nothing.
 ## What it does not do
 
 - It does not read news, and it does not know when the Fed speaks. Disable it on
-  FOMC days yourself.
+  FOMC days yourself. Nothing anywhere in this system watches the calendar.
 - It does not know about your prop firm's drawdown. Size it yourself.
+- **It has no weekly stop.** The −3R weekly limit in the playbook is not enforced
+  anywhere in the software — you count it in the journal and switch the bot off.
+  At a high risk percentage that rule is doing most of the work of keeping the
+  account alive, and it is running on your honesty alone.
 - It trades on **closed bars only**. It will never chase an intrabar spike, and
   it will sometimes enter later than you would by hand. That is deliberate.

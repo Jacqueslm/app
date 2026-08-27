@@ -1,9 +1,13 @@
 # Daily Use — computer and phone
 
-The system in one line: the MSB indicator watches MNQ and MES all day, and when a
-real setup completes it fires an alert carrying the whole trade plan — direction,
-entry, stop, T1, T2, room, and its grade. Your job is not to find trades. Your job
-is to review the one it hands you and say yes or no.
+The system in one line: MSB Pure watches MNQ and MES all day, and when the structure
+completes it fires an alert carrying the numbers — direction, entry, stop, T1, T2,
+room and the contract count. Your job is not to find trades. Your job is to review
+the one it hands you and say yes or no.
+
+**The alert has no opinion.** It is not graded and it is not verified — the software
+reads swing highs and swing lows, and quality is your call, made on the checklist
+before you click. Nothing on the grader ticks itself.
 
 ---
 
@@ -24,10 +28,12 @@ self-fill until you start them again.
 
 ## When an alert fires — at the computer
 
-1. The grader tab flashes **⚡ ALERT** and fills itself: symbol, direction, entry,
-   stop, targets, and *Machine-verified A+ or B* with every box ticked except one.
-2. **Tick the NEWS box yourself** — the machine runs your Thu/Fri 7:30am blackout
-   on the clock, but only you can see today's calendar. FOMC day? Don't tick it.
+1. The grader tab flashes **⚡ ALERT** and fills itself with the numbers: symbol,
+   direction, entry, stop, targets and the bot's contract count. The checklist stays
+   blank — that part is the point of it.
+2. **Tick the boxes honestly, including NEWS.** Nothing in the software watches the
+   calendar any more, so the news box is entirely yours. FOMC day? Don't tick it,
+   and don't trade.
 3. Read the verdict. **TAKE IT** → look at the chart for 30 seconds. Does the story
    on the screen match the plan? Then place the bracket in NinjaTrader as ONE
    action: entry + stop + targets together, sized by the grader's contract count.
@@ -97,4 +103,5 @@ with no grader: that IS your answer. Pass.
 | Grader doesn't self-fill | Are both black windows running? Restart both .bat files. |
 | Phone page won't load | Computer asleep/off, or ngrok window closed. |
 | Alert fired but grader says "Could not read that" | Paste the full message including the entry/stop line. |
-| No alerts for many days | Normal in chop — check the dashboard: Setup row will say IDLE and Align will show mixed arrows. The market is the reason, not the system. |
+| No alerts for many days | Normal in chop — check the dashboard: "All four" will read *mixed* rather than ALIGNED. The market is the reason, not the system. |
+| Dashboard shows ⚠ next to Exec | The script is on the wrong chart timeframe: 1H for standard mode, 15m for scalp. |

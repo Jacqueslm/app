@@ -39,6 +39,55 @@ try {
 let alerts = [];
 let nextId = 1;
 
+// ═══ SIGNALS FOR THE JOURNAL ═════════════════════════════════════════════════
+// Every "MSB PURE" alert that arrives is parsed and saved to signals.json,
+// whether autotrade is on or not. The journal page pulls this file, so a
+// signal writes itself into the journal with no typing. The fills and P&L
+// still come from the TradingView export — the bot only knows what it said,
+// the account knows what actually happened; the journal merges the two.
+const SIGNALS_FILE = path.join(__dirname, "signals.json");
+let signals = [];
+try {
+  signals = JSON.parse(fs.readFileSync(SIGNALS_FILE, "utf8"));
+  if (!Array.isArray(signals)) signals = [];
+} catch {}
+function recordSignal(text) {
+  const m = text.match(/^(\S+)\s+MSB PURE dir (-?1)(?:\.0+)?\s*\|/);
+  if (!m) return;
+  const num = re => { const g = text.match(re); return g ? parseFloat(g[1]) : null; };
+  signals.push({
+    t: Date.now(), tk: m[1], dir: +m[2],
+    entry: num(/entry\s+([\d.]+)/i), stop: num(/stop\s+([\d.]+)/i),
+    t1: num(/T1\s+([\d.]+)/), t2: num(/T2\s+([\d.]+)/),
+    room: num(/room\s+([\d.]+)/i), qty: num(/qty\s+([\d.]+)/i)
+  });
+  if (signals.length > 500) signals = signals.slice(-500);
+  try { fs.writeFileSync(SIGNALS_FILE, JSON.stringify(signals, null, 1)); } catch {}
+}
+
+// The journal page keeps itself current: at every relay start, fetch the
+// latest journal.html from the repo (the same place Update System.bat pulls
+// from) and write it next to the grader. Best-effort — offline, the copy on
+// disk keeps working. Your trades are never in this file: they live in the
+// browser's own storage, so refreshing the page file can't touch them.
+const JOURNAL_FILE = path.join(__dirname, "..", "journal.html");
+function refreshJournal() {
+  require("https").get(
+    "https://raw.githubusercontent.com/Jacqueslm/app/main/Trading/journal.html",
+    res => {
+      if (res.statusCode !== 200) { res.resume(); return; }
+      let body = "";
+      res.on("data", c => { body += c; });
+      res.on("end", () => {
+        if (body.includes("Trade Journal") && body.includes("</html>")) {
+          try { fs.writeFileSync(JOURNAL_FILE, body); } catch {}
+        }
+      });
+    }
+  ).on("error", () => {});
+}
+refreshJournal();
+
 // ═══ AUTOTRADE — the TradingView bot ═════════════════════════════════════════
 // When an "MSB PURE" alert arrives, write an order file into NinjaTrader's
 // incoming folder (the ATI). NinjaTrader places the bracket: market entry,
@@ -61,18 +110,28 @@ const AUTO_FILE = path.join(__dirname, "autotrade.json");
 const AUTO_DEFAULT = {
   enabled: false,
   account: "Sim101",
-  contracts: 2,
+  // Size is COMPUTED, not fixed: contracts = floor( (balance x riskPct%) /
+  // (stop points x dollars per point) ). The stop distance comes from the
+  // alert, so a wide-stop trade automatically gets fewer contracts and the
+  // dollars at risk stay the same. Keep `balance` current — it is the one
+  // number here the relay cannot look up for itself, and a stale balance
+  // makes every contract count wrong in the same direction.
+  balance: 25000,
+  riskPct: 10,         // set by choice. Reference: the paper record averages 0.87% a
+                       // trade, and the sweeps put 10% at a 30-99% drawdown on the same edge.
+  maxContracts: 50,       // a hard ceiling no arithmetic can talk its way past
   maxPerDay: 1,           // the bot's bullet count — same rule as yours
   dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
     "Documents", "NinjaTrader 8", "incoming"),
   // TradingView ticker → the actual contract NinjaTrader trades. Update at rollover.
   // session = the ET window orders are allowed; maxRiskPts = a stop wider than
-  // this is treated as a bad alert, not a big trade.
+  // this is treated as a bad alert, not a big trade; perPoint = dollars per
+  // whole point of price, which is what turns a stop distance into a size.
   instruments: {
-    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 120 },
-    "MES1!": { name: "MES 09-26", tick: 0.25, session: "0930-1500", maxRiskPts: 40 },
-    "MGC1!": { name: "MGC 12-26", tick: 0.10, session: "0800-1300", maxRiskPts: 20 }
+    "MNQ1!": { name: "MNQ 09-26", tick: 0.25, perPoint: 2,  session: "0930-1500", maxRiskPts: 250 },
+    "MES1!": { name: "MES 09-26", tick: 0.25, perPoint: 5,  session: "0930-1500", maxRiskPts: 90 },
+    "MGC1!": { name: "MGC 12-26", tick: 0.10, perPoint: 10, session: "0800-1300", maxRiskPts: 35 }
   }
 };
 let auto = AUTO_DEFAULT;
@@ -199,8 +258,30 @@ function tryAutotrade(text) {
     }
   }
 
+  // ── size, from the stop distance ───────────────────────────────────────────
+  // The alert measured the stop; the config holds the money. Multiply out and
+  // the dollars at risk are the same whether the stop is 12 points or 90.
+  const riskPts = Math.abs(entry - stop);
+  const perPt   = inst.perPoint > 0 ? inst.perPoint : 0;
+  if (!(perPt > 0)) { decide(false, "no perPoint set for " + m[1] + " in autotrade.json — cannot size the trade"); return; }
+  const riskUsd = (auto.balance || 0) * (auto.riskPct || 0) / 100;
+  const qty = Math.min(auto.maxContracts || 50, Math.floor(riskUsd / (riskPts * perPt)));
+
+  // Zero contracts means the stop is too wide for the account at this risk.
+  // The answer to that is to skip the trade, never to shrink the stop to fit.
+  if (qty < 1) {
+    decide(false, "0 contracts — a " + riskPts.toFixed(2) + " pt stop on " + m[1] +
+      " costs $" + (riskPts * perPt).toFixed(0) + " per contract, over the $" +
+      riskUsd.toFixed(0) + " this trade is allowed to risk. Stop too wide for the account.");
+    return;
+  }
+
   // ── the order ──────────────────────────────────────────────────────────────
-  const qty  = Math.max(2, auto.contracts);
+  // Two contracts or more: half comes off at 1R, the rest runs to T2.
+  // One contract cannot be halved, and this relay has no way to move a stop to
+  // break-even (it writes an order file and never hears about the fill), so a
+  // single contract takes the 1R and is done rather than riding a trade that
+  // reached +1R all the way back to -1R.
   const half = Math.floor(qty / 2);
   const rest = qty - half;
   const buy  = entrySide ? "BUY" : "SELL";
@@ -210,20 +291,25 @@ function tryAutotrade(text) {
 
   // ATI order-instruction format:
   // COMMAND;ACCOUNT;INSTRUMENT;ACTION;QTY;ORDER TYPE;LIMIT;STOP;TIF;OCO ID;ORDER ID;;
-  const lines = [
-    `PLACE;${auto.account};${inst.name};${buy};${qty};MARKET;;;GTC;;${id}E;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${half};LIMIT;${P1};;GTC;${id}A;${id}T1;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${half};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${rest};LIMIT;${P2};;GTC;${id}B;${id}T2;;`,
-    `PLACE;${auto.account};${inst.name};${sell};${rest};STOPMARKET;;${S};GTC;${id}B;${id}S2;;`
-  ];
+  const lines = [`PLACE;${auto.account};${inst.name};${buy};${qty};MARKET;;;GTC;;${id}E;;`];
+  if (half > 0) {
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${half};LIMIT;${P1};;GTC;${id}A;${id}T1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${half};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${rest};LIMIT;${P2};;GTC;${id}B;${id}T2;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${rest};STOPMARKET;;${S};GTC;${id}B;${id}S2;;`);
+  } else {
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};LIMIT;${P1};;GTC;${id}A;${id}T1;;`);
+    lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`);
+  }
   const file = path.join(auto.incoming, "oif" + (++oifSeq) + "." + id + ".txt");
   try {
     fs.writeFileSync(file, lines.join("\r\n") + "\r\n");
     state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty });
     saveState();
     decide(true, "AUTOTRADE → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
-      "  stop " + S + "  T1 " + P1 + "  T2 " + P2 +
+      "  stop " + S + "  T1 " + P1 + (half > 0 ? "  T2 " + P2 : "  (1 lot — full exit at 1R)") +
+      "   risking $" + (qty * riskPts * perPt).toFixed(0) +
+      " of $" + riskUsd.toFixed(0) + " (" + (auto.riskPct || 0) + "% of " + (auto.balance || 0) + ")" +
       (cs === "rollover" ? "   ⚠ rollover month — update the contract soon" : ""));
   } catch (e) {
     decide(false, "could not write to " + auto.incoming +
@@ -260,6 +346,13 @@ ${armed ? "ARMED" : state.killed ? "KILLED" : "OFF (autotrade.json)"}</div>
 <p>Account: <span class="pill" style="background:${live ? "rgba(239,83,80,.25);color:#ef5350" : "rgba(38,166,154,.25);color:#26a69a"}">
 ${auto.account}${live ? " — REAL MONEY" : " — sim"}</span>
 &nbsp; Bullets: <b>${Math.max(0, (auto.maxPerDay || 1) - used)} / ${auto.maxPerDay || 1}</b> left today</p>
+<p>Risk: <b>${auto.riskPct || 0}%</b> of <b>$${(auto.balance || 0).toLocaleString()}</b>
+= <b>$${Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100).toLocaleString()}</b> per trade.
+Contracts are computed from that and the stop distance in the alert.</p>
+<p style="font-size:13px;color:#f0a020">⚠ This path cannot move a stop to break-even — it writes an
+order file and never hears about the fill. Trades of 2+ contracts take half at 1R and let the rest
+run to T2 against the <i>original</i> stop. For break-even after 1R, run the NinjaScript
+(ninjatrader/MSBPure.cs) instead, which sees its own fills.</p>
 <form method="POST" action="/bot/${secret}/toggle">
 <button style="background:${state.killed ? "#26a69a" : "#ef5350"};color:#fff">
 ${state.killed ? "RE-ARM THE BOT" : "KILL — stop placing orders"}</button></form>
@@ -300,6 +393,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // The journal, served fresh — same folder, second doorway.
+  if (req.method === "GET" && url === "/journal") {
+    fs.readFile(JOURNAL_FILE, (err, html) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "text/plain" });
+        res.end("Could not find journal.html one folder up from relay/. Keep the Trading folder together.");
+        return;
+      }
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, must-revalidate" });
+      res.end(html);
+    });
+    return;
+  }
+
+  // The journal pulls signals here. The open CORS header is deliberate:
+  // journal.html opened straight from the folder (file://) still gets to read
+  // this list. It only ever exposes the bot's own signal history, nothing else.
+  if (req.method === "GET" && url === "/signals.json") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-store"
+    });
+    res.end(JSON.stringify({ signals }));
+    return;
+  }
+
   // Bot status + kill switch. Same secret as the webhook — the page is yours alone.
   if (req.method === "GET" && url === "/bot/" + secret) {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
@@ -327,6 +447,7 @@ const server = http.createServer((req, res) => {
         if (alerts.length > 20) alerts = alerts.slice(-20);
         fs.appendFile(LOG_FILE, new Date().toISOString() + "  " + text.replace(/\n/g, " | ") + "\n", () => {});
         console.log("⚡ Alert received " + new Date().toLocaleTimeString() + " — " + text.split("\n")[0]);
+        recordSignal(text);
         tryAutotrade(text);
       }
       res.writeHead(200, { "Content-Type": "text/plain" });
@@ -353,12 +474,17 @@ server.listen(PORT, () => {
   console.log("  └─────────────────────────────────────────────────────────────┘");
   console.log("");
   console.log("  Your grader:      http://localhost:" + PORT);
+  console.log("  Your journal:     http://localhost:" + PORT + "/journal   (bot signals save themselves here)");
   console.log("  Webhook path:     /hook/" + secret);
   console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
   console.log("");
   console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
                                              : state.killed ? "🔴 KILLED — re-arm on the /bot page"
                                              : "⚪ off (relay/autotrade.json)"));
+  console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +
+              " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
+              "   (contracts computed from the stop distance)");
+  if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);
     if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — update autotrade.json before trading.");

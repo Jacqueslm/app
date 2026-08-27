@@ -1,0 +1,228 @@
+//@version=6
+// =============================================================================
+//  MSB — HOW HE SEES PRICE  (the watcher: dashboard + alerts)
+//
+//  One pattern. Long (short is the mirror):
+//    1  a high, a HIGHER LOW, then a HIGHER HIGH     - the up leg on record
+//    2  pullback prints a LOWER HIGH under the HH
+//    3  price BREAKS the higher low                  - the shakeout
+//    4  price closes BACK ABOVE the lower high       -> ENTER
+//    5  stop: the last 15m swing when tighter, else the shakeout low
+//    6  target: 60-100% of the way back to the HH
+//
+//  Run it on the 1H chart. Pure structure - swings and closes, nothing else.
+//
+//  Measured on MES (43 months): the pattern fires ~0.5x/week and, entered at
+//  the reclaim with the shakeout stop, carries ~0.36R of room - which is
+//  break-even geometry (49% wins, 0.00R). The 15m stop is what turned it
+//  positive in the recent window (62% wins, +0.15R over 21 trades). Small
+//  samples; treat the fresh demo as the real test.
+// =============================================================================
+
+indicator("MSB Price — alerts", "MSB-PRICE", overlay = true, max_lines_count = 500, max_labels_count = 500)
+
+grpS = "Structure"
+pvB = input.int(3, "Swing strength (the 1H waves)", minval = 1, maxval = 20, group = grpS)
+expBars = input.int(400, "Setup expires after N bars", minval = 20, group = grpS)
+
+grpZ = "Size & stop"
+riskPct  = input.float(10.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.5, group = grpZ)
+acctSize = input.float(100000, "Account size ($)", minval = 100, step = 500, group = grpZ)
+maxQty   = input.int(50, "Contract cap", minval = 1, group = grpZ)
+stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpZ)
+use15    = input.bool(true, "15m stop — the last 15m swing when tighter", group = grpZ,
+     tooltip = "This is what turned the pattern positive in the backtest. OFF = stop at the shakeout extreme.")
+minRoom  = input.float(1.5, "Reject if room below this (R)", minval = 0.0, step = 0.25, group = grpZ,
+     tooltip = "Measured across 845 trades in three markets (MES futures 43mo, NAS100 16y, XAU 15y): taking EVERY occurrence is dead break-even (~52% wins, 0.00R). Only the trades with at least 1R of room to the target made money (+0.13R at 47-60% wins on NAS100/XAU). The filter IS the edge; 0 = the break-even version.")
+
+grpM = "Management"
+tgtPct = input.int(80, "Exit at this % of the way to the HH", minval = 40, maxval = 100, step = 10, group = grpM)
+useT1  = input.bool(false, "Half off at 1R, stop to break-even", group = grpM,
+     tooltip = "Measured across every configuration: the partial halves the expectancy (e.g. +0.39R falls to +0.18R) while the win rate stays identical. It buys comfort, not money. ON only if you need the comfort.")
+
+grpR = "Your rules"
+maxPerDay = input.int(2, "Max trades per day", minval = 1, maxval = 10, group = grpR)
+useSess = input.bool(true, "Only trade the New York session", group = grpR)
+sessStr = input.session("0930-1500", "Tradeable window", group = grpR)
+sessTZ  = input.string("America/New_York", "Timezone", group = grpR)
+
+// ─── The wave record ─────────────────────────────────────────────────────────
+ph = ta.pivothigh(pvB, pvB)
+pl = ta.pivotlow(pvB, pvB)
+var float h1 = na
+var float h2 = na
+var float h3 = na
+var float l1 = na
+var float l2 = na
+newH = not na(ph)
+newL = not na(pl)
+if newH
+    h3 := h2
+    h2 := h1
+    h1 := ph
+if newL
+    l2 := l1
+    l1 := pl
+
+// the 15m swing, for the stop only
+f_pl() =>
+    var float p = na
+    x = ta.pivotlow(3, 3)
+    if not na(x)
+        p := x
+    p
+f_ph() =>
+    var float p = na
+    x = ta.pivothigh(3, 3)
+    if not na(x)
+        p := x
+    p
+lo15 = request.security(syminfo.tickerid, "15", f_pl(), lookahead = barmerge.lookahead_off)
+hi15 = request.security(syminfo.tickerid, "15", f_ph(), lookahead = barmerge.lookahead_off)
+
+inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+var int tookToday = 0
+var int lastDay = na
+if na(lastDay) or dayofmonth != lastDay
+    tookToday := 0
+    lastDay := dayofmonth
+
+// ─── Arm: the pattern appears on the tape ────────────────────────────────────
+// Long: highs read Hd < HH > LH (a higher high then a lower high), lows read
+// pL < HL (a higher low), and the LH sits above the HL. Mirror for shorts.
+var float aL_HH = na
+var float aL_LH = na
+var float aL_HL = na
+var float aS_LL = na
+var float aS_HL = na
+var float aS_LH = na
+if newH and not na(h3) and not na(l2) and h2 > h3 and l1 > l2 and h1 < h2 and h1 > l1
+    aL_HH := h2
+    aL_LH := h1
+    aL_HL := l1
+// short arm, the mirror: lows read Ld > LL, then a HIGHER low; highs read a
+// lower high. LL3 holds the third low back at the moment a new low confirms.
+var float LL3 = na
+if newL
+    LL3 := l2[1]
+if newL and not na(LL3) and not na(h2) and l2 < LL3 and h1 < h2 and l1 > l2 and l1 < h1
+    aS_LL := l2
+    aS_HL := l1
+    aS_LH := h1
+
+// ─── The shakeout and the reclaim ────────────────────────────────────────────
+var int   Lon = 0
+var float LHH = na
+var float LLH = na
+var float Lext = na
+var int   Lage = 0
+if Lon == 1
+    Lage += 1
+    if Lage > expBars
+        Lon := 0
+if Lon == 0 and not na(aL_HL) and low < aL_HL
+    Lon := 1
+    LHH := aL_HH
+    LLH := aL_LH
+    Lext := low
+    Lage := 0
+    aL_HH := na
+    aL_LH := na
+    aL_HL := na
+else if Lon == 1
+    Lext := math.min(Lext, low)
+    if close > LHH
+        Lon := 0
+
+var int   Son = 0
+var float SLL = na
+var float SHL = na
+var float Sext = na
+var int   Sage = 0
+if Son == 1
+    Sage += 1
+    if Sage > expBars
+        Son := 0
+if Son == 0 and not na(aS_LH) and high > aS_LH
+    Son := 1
+    SLL := aS_LL
+    SHL := aS_HL
+    Sext := high
+    Sage := 0
+    aS_LL := na
+    aS_HL := na
+    aS_LH := na
+else if Son == 1
+    Sext := math.max(Sext, high)
+    if close < SLL
+        Son := 0
+
+trigLong  = Lon == 1 and close > LLH
+trigShort = Son == 1 and close < SHL
+
+entry = close
+buf   = syminfo.mintick * stopTicks
+anchL = trigLong  and use15 and not na(lo15) and lo15 > Lext and lo15 < entry ? lo15 : Lext
+anchS = trigShort and use15 and not na(hi15) and hi15 < Sext and hi15 > entry ? hi15 : Sext
+stopRaw = trigLong ? anchL - buf : trigShort ? anchS + buf : na
+riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
+target  = trigLong ? entry + tgtPct / 100.0 * (LHH - entry) :
+          trigShort ? entry - tgtPct / 100.0 * (entry - SLL) : na
+roomR   = not na(riskPts) and riskPts > 0 and not na(target) ? math.abs(target - entry) / riskPts : 0.0
+
+ptVal   = syminfo.pointvalue
+riskUsd = acctSize * riskPct / 100.0
+qty     = not na(riskPts) and riskPts > 0 and ptVal > 0 ? math.min(maxQty, math.floor(riskUsd / (riskPts * ptVal))) : 0
+
+okToTrade = roomR >= minRoom and inSess and tookToday < maxPerDay and
+     not na(riskPts) and riskPts > 0 and qty > 0 and
+     (trigLong ? target > entry : target < entry)
+fire = (trigLong or trigShort) and okToTrade
+if fire
+    tookToday += 1
+    if trigLong
+        Lon := 0
+    else
+        Son := 0
+
+t1 = na(riskPts) ? na : trigLong ? entry + riskPts : entry - riskPts
+t2 = target
+
+if fire
+    label.new(bar_index, trigLong ? low : high,
+         (trigLong ? "▲ RECLAIM LONG" : "▼ RECLAIM SHORT") + "  " + str.tostring(roomR, "#.0") + "R  " + str.tostring(qty) + "x",
+         style = trigLong ? label.style_label_up : label.style_label_down,
+         color = trigLong ? #26a69a : #ef5350, textcolor = color.white, size = size.small)
+    line.new(bar_index, entry,   bar_index + 10, entry,   color = color.blue,  width = 1)
+    line.new(bar_index, stopRaw, bar_index + 10, stopRaw, color = #ef5350, width = 1, style = line.style_dashed)
+    line.new(bar_index, t2,      bar_index + 10, t2,      color = #26a69a, width = 1, style = line.style_dashed)
+
+var table dash = table.new(position.top_right, 2, 4, bgcolor = color.new(#0e1116, 10),
+     frame_color = color.new(color.gray, 60), frame_width = 1)
+if barstate.islast
+    table.cell(dash, 0, 0, "MSB PRICE", text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
+    table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
+    table.cell(dash, 0, 1, "Long side", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 1, Lon == 1 ? "shakeout live — waiting the reclaim" : not na(aL_HL) ? "armed — waiting the break" : "watching",
+         text_color = Lon == 1 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 2, "Short side", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 2, Son == 1 ? "shakeout live — waiting the reclaim" : not na(aS_LH) ? "armed — waiting the break" : "watching",
+         text_color = Son == 1 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 3, "Bullets left", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 3, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
+         text_color = tookToday < maxPerDay ? color.silver : color.gray, text_size = size.small)
+
+plot(fire ? (trigLong ? 1 : -1) : na, "aDir",   display = display.none, editable = false)
+plot(fire ? entry   : na,             "aEntry", display = display.none, editable = false)
+plot(fire ? stopRaw : na,             "aStop",  display = display.none, editable = false)
+plot(fire ? riskPts : na,             "aRisk",  display = display.none, editable = false)
+plot(fire ? t1      : na,             "aT1",    display = display.none, editable = false)
+plot(fire ? t2      : na,             "aT2",    display = display.none, editable = false)
+plot(fire ? roomR   : na,             "aRoom",  display = display.none, editable = false)
+plot(fire ? qty     : na,             "aQty",   display = display.none, editable = false)
+
+alertcondition(fire, "TRADE SIGNAL — the full alert",
+     "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R | qty {{plot(\"aQty\")}}")
+
+alertcondition((Lon == 1 and Lon[1] != 1) or (Son == 1 and Son[1] != 1), "Shakeout — the reclaim is next",
+     "{{ticker}} broke the higher low. If it closes back above the lower high, that is the trade.")

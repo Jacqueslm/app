@@ -250,13 +250,29 @@ repo. But an app installed from Play is not signed with the upload key —
 fingerprint Chrome sees. If the app signing key is not one of the two above,
 verification fails exactly like this, no matter how correct the file looks.
 
-**Get it from Play Console → Test and release → Setup → App integrity → App
-signing key certificate → SHA-256.** Compare it character for character with
-the two values above. If it is missing, add it to
-`TurnSomeDayIntoOneday/.well-known/assetlinks.json`, deploy, then on the phone
-clear Chrome's cached verification by uninstalling and reinstalling the app.
+**The App signing page is at
+`https://play.google.com/console/u/0/developers/4619499919117466586/app/4972165923818128065/keymanagement`**
+— go straight there. The left nav's "Protected with Play" is a different page
+about fraud protection and does not show fingerprints.
 
-Until that is confirmed, do not write any more code for this bug.
+**And that page, opened 27 Aug 2026, shows the likely answer: the app signing
+key was rotated.** It carries a "Quantum-ready (beta)" badge, an offer to
+upgrade again from 28 July 2027, and a **"Previous app signing keys" row first
+used 28 July 2026**. So Play now signs installs with a key that did not exist
+when `assetlinks.json` was written. The two fingerprints in that file are
+almost certainly the *old* app signing key and the upload key, and the current
+one is simply absent — which is precisely how verification fails while the
+served file, the host and Google's validator all look correct.
+
+Read the SHA-256 under **Classical key** (not the post-quantum column — Chrome
+does not use it), and the upload key certificate further down the same page.
+Add every fingerprint that is missing to
+`TurnSomeDayIntoOneday/.well-known/assetlinks.json` — keep the old ones too, so
+devices that installed before the rotation keep working — deploy, then
+uninstall and reinstall the app on the phone to clear Chrome's cached
+verification.
+
+Until those values are in hand, do not write any more code for this bug.
 
 Install, use, the 14-day tester clock and reviews all work. Purchases do not.
 Do not call this cosmetic.

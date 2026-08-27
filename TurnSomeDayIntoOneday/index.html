@@ -12673,6 +12673,40 @@ function novaVoicesAvailable(){
   try{ return (speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }
   catch(e){ return []; }
 }
+// Jacques, 26 Aug 2026: "I'm in America, I don't want no UK voice." Right - a
+// British voice on an American phone is not a choice, it is noise in the list.
+// So the phone's OWN region leads, which also means a British user is not
+// handed a wall of American ones. Everything else stays reachable behind a
+// line rather than deleted: a phone whose only English voice is en-GB must
+// still be able to speak, and this app is live in 177 countries.
+let novaShowOtherVoices=false;
+function novaHomeRegion(){
+  const l=String((navigator.languages&&navigator.languages[0])||navigator.language||'en-US');
+  const m=l.match(/^[a-z]{2}[-_]([A-Za-z]{2})/);
+  return m?m[1].toUpperCase():'US';
+}
+function novaVoiceRegion(v){
+  const m=String(v.lang||'').match(/^[a-z]{2}[-_]([A-Za-z]{2})/i);
+  return m?m[1].toUpperCase():'';
+}
+function novaSplitVoices(){
+  const all=novaVoicesAvailable();
+  const home=novaHomeRegion();
+  let mine=all.filter(v=>novaVoiceRegion(v)===home);
+  let rest=all.filter(v=>novaVoiceRegion(v)!==home);
+  // Nothing local: show everything rather than an empty list.
+  if(!mine.length){mine=rest;rest=[];}
+  // A voice already chosen is never hidden from its owner.
+  if(S.novaVoiceName && rest.some(v=>v.name===S.novaVoiceName)){
+    mine=mine.concat(rest.filter(v=>v.name===S.novaVoiceName));
+    rest=rest.filter(v=>v.name!==S.novaVoiceName);
+  }
+  return {mine:mine,rest:rest};
+}
+function toggleOtherNovaVoices(){
+  novaShowOtherVoices=!novaShowOtherVoices;
+  renderNovaVoiceList();
+}
 function renderNovaVoiceList(){
   const box=document.getElementById('nova-voice-list');
   if(!box)return;
@@ -12681,8 +12715,10 @@ function renderNovaVoiceList(){
     box.innerHTML='<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;text-align:left">This phone has not reported any voices yet. Open this again in a moment, or add voices in your phone\u2019s text-to-speech settings.</div>';
     return;
   }
+  const split=novaSplitVoices();
+  const shown=split.mine.concat(novaShowOtherVoices?split.rest:[]);
   const rows=[{name:'',label:'Let the app choose',sub:'Matches the presence above'}]
-    .concat(vs.map(v=>({name:v.name,label:novaVoiceLabel(v),sub:v.lang||''})));
+    .concat(shown.map(v=>({name:v.name,label:novaVoiceLabel(v),sub:novaVoiceSub(v)})));
   box.innerHTML=rows.map(r=>{
     const on=(S.novaVoiceName||'')===r.name;
     return '<div class="nova-voice-row" data-voice="'+escapeHtml(r.name)+'" '+
@@ -12700,6 +12736,12 @@ function renderNovaVoiceList(){
         '<i class="ti ti-player-play"></i></button>':'')+
     '</div>';
   }).join('');
+  if(split.rest.length){
+    box.innerHTML+='<div onclick="toggleOtherNovaVoices()" style="text-align:left;cursor:pointer;'+
+      'padding:8px 12px;font-size:.71875rem;color:var(--tm);border-top:1px solid var(--bdr);margin-top:2px">'+
+      (novaShowOtherVoices?'Hide':'Show')+' '+split.rest.length+' voice'+(split.rest.length===1?'':'s')+
+      ' from other English-speaking countries</div>';
+  }
   try{renderIcons(box);}catch(e){}
   // Bring the chosen one into view. Without this a voice picked from the
   // bottom of a long list looks unset every time the sheet is reopened.
@@ -12710,6 +12752,14 @@ function renderNovaVoiceList(){
 }
 // Device voice names are machine-ish ("Google UK English Female", "en-US-x-sfg#female_1").
 // Show something a person can read, without inventing a name that is not theirs.
+// A voice with localService false is synthesised on someone else's server,
+// which means the text of Friendly's reply leaves the phone to be spoken.
+// In an app where that reply can name a relapse or a marriage, the person
+// deserves to see which ones do that before choosing one.
+function novaVoiceSub(v){
+  const lang=v.lang||'';
+  return (v.localService===false)?(lang+' \u00b7 spoken online'):lang;
+}
 function novaVoiceLabel(v){
   let s=String(v.name||'').replace(/^Microsoft\s+/i,'').replace(/\s*-\s*English.*$/i,'');
   s=s.replace(/^Google\s+/i,'Google ').replace(/_/g,' ').trim();

@@ -1,7 +1,7 @@
-# A17 — "Nobody saw the second half" · BUILT 26 Aug 2026
+# A19 — "Nobody saw the second half" · BUILT 26 Aug 2026
 
 Cause & Effect, 3 shots, 8s. Binge → the bathroom after.
-File: `content/a17/binge-purge.mp4  (handed over in chat, not in the repo)` (1080x1920, 8.0s).
+File: `content/a19/binge-purge.mp4  (handed over in chat, not in the repo)` (1080x1920, 8.0s).
 
 | Shot | Source | Caption |
 |---|---|---|
@@ -27,13 +27,14 @@ act is never shown, only the moment after. AI-generated toggle ON everywhere
 **Rebuild:**
 ```
 export NODE_PATH=/opt/node22/lib/node_modules
-python3 tools/make-film.py content/a17/spec.json content/a17/binge-purge.mp4  (handed over in chat, not in the repo)
+python3 tools/make-film.py content/a19/spec.json content/a19/binge-purge.mp4  (handed over in chat, not in the repo)
 ```
 Note: shot `src` paths are relative to this spec file; `music` is relative to
 the repo root.
 
 
-**Renumbered 27 Aug 2026.** Another session had already used A15 and A16 for
-different films on `main`, so this one moved up. The .mp4 is not in the repo -
-videos are handed over in chat (rule, 27 Aug). Everything needed to re-render
-it is here: the spec, the stills, and `tools/make-film.py`.
+**Renumbered twice, 27 Aug 2026.** Another session on `main` claimed A15, A16, A16b
+and A17 while this was being built, so this piece moved to A19. The .mp4 is handed
+over in chat, not committed (rule, 27 Aug); the spec, the stills and
+`tools/make-film.py` are all here to re-render it.
+

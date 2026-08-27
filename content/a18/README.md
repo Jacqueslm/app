@@ -22,5 +22,6 @@ python3 tools/make-film.py content/a18/spec.json content/a18/wait-up.mp4
 Shot `src` paths resolve relative to this spec file; `music` resolves relative
 to the repo root.
 
-**Renumbered 27 Aug 2026** — another session had already used A16 on `main`.
-The .mp4 is handed over in chat, not committed (rule, 27 Aug).
+**Renumbered twice, 27 Aug 2026** as another session claimed A16 and A17 on `main`.
+The .mp4 is handed over in chat, not committed.
+

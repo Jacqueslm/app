@@ -606,6 +606,21 @@ video queued today publishes on the next free day, not the same day.
 - **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
   only for the short vertical pieces.
 
+**Videos do NOT go in the repo (Jacques, 27 Aug 2026).**
+
+Finished videos are **handed to him directly in chat**, not committed. The repo
+carries the *source* — the `*-source.html`, the spec JSON, the stills, the
+render tooling — so any piece can be rebuilt, but the .mp4 itself does not get
+pushed. Reasons it matters beyond his preference: the library is already ~215 MB
+of binaries in a public repo, git stores every version of a binary forever, and
+a video committed to a working branch is one branch-delete away from breaking
+anything pointing at it.
+
+Already-pushed videos (A15 `trauma-bond.mp4`, A16 `binge-night.mp4`, A16b
+`binge-cause-effect.mp4` on `claude/video-creation-6rh8la`) were pushed before
+this rule existed and are still there — removing them is a history rewrite and
+needs his say-so.
+
 **Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
 
 1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and

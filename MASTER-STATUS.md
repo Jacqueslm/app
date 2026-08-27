@@ -64,6 +64,39 @@ If that is not it, the next step is `adb logcat` over USB to read Chrome's
 actual rejection reason; platform-tools are already on his PC under
 `C:\Users\<user>\.bubblewrap\`.
 
+**SETTLED, later the same day. The app is not running as a verified TWA, and
+that is the whole bug.** The 5.8 dialog printed the real error:
+
+    failed while opening the store connection.
+    OperationError: unsupported context
+    bridge=present · playBuild=yes · display=standalone · engine=Chrome 151
+
+`unsupported context` is Chromium's one specific way of saying *this page is
+not inside a Trusted Web Activity*. So the original Digital Asset Links
+diagnosis was right all along.
+
+**I retired it earlier today and I was wrong to.** My reasoning was that
+reaching the deepest catch proved the bridge existed. It does exist —
+`getDigitalGoodsService` is present in ordinary Chrome on Android — it just
+refuses to work outside a TWA. `bridge=present` and `display=standalone` both
+read as good news and are not. The 12:39 screenshots with no address bar were
+an installed PWA he had just created from Chrome's menu, not the Play app.
+Jacques has now had this called broken, then fixed, then broken again; that is
+on me, and the file records it so nobody restarts the loop.
+
+**Ruled out for good:** Samsung Internet (`engine=Chrome 151`), the served
+file (Google's validator returns both statements cleanly), the host (the TWA
+launches `www`, which is the host the file is under), the apex redirect
+(nothing launches the apex).
+
+**The one unchecked thing:** Chrome matches the *installed* app's signing
+certificate against the two fingerprints in the file. An app installed from
+Play is re-signed by **Play App Signing**, not with the upload key the TWA
+manifest signs with. If that app signing SHA-256 is not one of the two listed,
+verification fails exactly like this while every file looks perfect.
+**Needed from Jacques: Play Console → Test and release → Setup → App integrity
+→ App signing key certificate → SHA-256.** No more code until that is compared.
+
 **Do not describe this as cosmetic again.**
 
 **Checked 27 Aug: "I bought Pro with the Stripe when I tested it 3 weeks ago."**

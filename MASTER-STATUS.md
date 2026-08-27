@@ -6,6 +6,27 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🛠 27 AUG 2026 — THE 1.0.2 FIX BUILD EXISTS. THE CLOUD BUILD WORKS FOR THE FIRST TIME EVER.
+
+The GitHub build workflow had failed all ten runs of its life — three on
+17 Aug (why the release was built by hand on the PC), and seven today, each
+failure a different real bug, each fixed in turn: the build machine stopped
+shipping a folder bubblewrap checks for (found by reading bubblewrap's own
+source: it validates the pre-2021 SDK layout — fixed with one symlink); the
+icon and manifest fetches raced the site's own redeploys (fixed by pulling the
+icon from the repo and gating the build on a full minute of healthy answers);
+and the publish step looked for the unsigned bundle in the signed bundle's
+folder.
+
+**Run 10 succeeded.** `app-release.aab` — 1.0.2, versionCode 3, `www` host,
+Play Billing on — sits on the `twa-build` branch. `Sign-Play-App.bat`
+(in `TurnSomeDayIntoOneday/twa/`) downloads it, signs it with the upload key
+on Jacques's PC, and names the upload steps. His part is: download the .bat,
+double-click, type the keystore password, upload in Play Console. Steps are at
+the top of PLAY-CHECKLIST.md. Waiting on him, on his schedule — do not nag.
+
+---
+
 ## ✅ 27 AUG 2026 — SHRM DIRECTORY: CATEGORY FIX AGREED, BALL IS JUDITH'S
 
 The free SHRM Human Resource Vendor Directory listing (MediaBrains, contact

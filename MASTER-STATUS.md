@@ -606,20 +606,32 @@ video queued today publishes on the next free day, not the same day.
 - **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
   only for the short vertical pieces.
 
-**Videos do NOT go in the repo (Jacques, 27 Aug 2026).**
+**PUSH EVERYTHING, ALWAYS (Jacques, 27 Aug 2026).** Do not ask whether to
+push, and do not leave commits sitting locally. Every commit goes to all three
+branches the same way house rule 18 has always said: the working branch, then
+`main` (the record), then `claude/vibe-code-uwxxlk` (what Railway deploys).
+This replaces the "notify me, don't push anything" instruction from earlier the
+same day — that one was for a single read-only audit, not standing. A local
+commit dies with the container; that is how the 18 Aug marketing batch was lost.
 
-Finished videos are **handed to him directly in chat**, not committed. The repo
-carries the *source* — the `*-source.html`, the spec JSON, the stills, the
-render tooling — so any piece can be rebuilt, but the .mp4 itself does not get
-pushed. Reasons it matters beyond his preference: the library is already ~215 MB
-of binaries in a public repo, git stores every version of a binary forever, and
-a video committed to a working branch is one branch-delete away from breaking
-anything pointing at it.
+**Videos are handed over, not committed — music stays (Jacques, 27 Aug 2026).**
 
-Already-pushed videos (A15 `trauma-bond.mp4`, A16 `binge-night.mp4`, A16b
-`binge-cause-effect.mp4` on `claude/video-creation-6rh8la`) were pushed before
-this rule existed and are still there — removing them is a history rewrite and
-needs his say-so.
+- **Finished .mp4s go to him in chat, not into git.** He keeps them in his own
+  file and they live on social media, so the repo is not their home and a copy
+  in git is dead weight in a public repo that stores every version forever.
+- **Music and audio DO stay in the repo** — `content/score/`, `audio/`, and
+  anything else that gets uploaded here keeps being uploaded here. The videos
+  are the only exception.
+- **Everything needed to rebuild a video stays too**: the `*-source.html`, the
+  spec JSON, the stills, and `tools/render-film.js` / `tools/make-film.py`. Any
+  piece can be re-rendered from the repo without the .mp4 being in it.
+- **The three built this session were removed from tracking on 27 Aug** —
+  `trauma-bond.mp4`, `binge-night.mp4`, `binge-cause-effect.mp4`. They were
+  committed before the rule existed and were handed to Jacques in chat; taking
+  them out of HEAD keeps them from landing on `main`. They remain in the branch
+  history and can be restored with `git checkout 80b9349 -- <path>`.
+- **Pre-existing videos in `content/` and `content/library/` were left alone.**
+  That is ~215 MB from before this rule and removing it was not asked for.
 
 **Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
 

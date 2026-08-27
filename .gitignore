@@ -28,3 +28,10 @@ __pycache__/
 # Page images built by tools-md-to-pdf.py --png. Regenerate them, don't commit
 # them — 95 PNGs of documents that are already in the repo as markdown.
 *-pages/
+
+# Videos are handed to Jacques in chat, not committed (rule, 27 Aug 2026).
+# He keeps them in his own file and on social media. Music/audio DO stay in
+# the repo - see content/score/ and audio/. Sources and stills stay too, so
+# any piece can be re-rendered without the .mp4 living here.
+# Pre-existing tracked videos are unaffected; git ignores this for tracked files.
+/content/*.mp4

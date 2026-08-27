@@ -31,20 +31,27 @@ jobs:
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME_17_X64" "$ANDROID_HOME" > ~/.bubblewrap/config.json
           cat ~/.bubblewrap/config.json
 
-      # Every run before this step existed died with "The provided androidSdk
-      # isn't correct" - bubblewrap's check is existsSync(androidSdkPath +
-      # /build-tools), and the runner image stopped shipping build-tools
-      # preinstalled. Install one and the check passes; gradle fetches the rest
-      # itself once the licenses are accepted. The ls lines are there so the
-      # next failure of this kind names itself instead of costing four runs.
-      - name: Install the Android build-tools bubblewrap checks for
+      # Every run of this workflow ever - six, counting three on 17 Aug - died
+      # with "The provided androidSdk isn't correct". Read from bubblewrap's own
+      # source (core/lib/androidSdk/AndroidSdkTools.js): validatePath demands a
+      # `tools/` or `bin/` folder directly under androidSdkPath, the pre-2021
+      # command-line-tools layout, and installBuildTools later looks for
+      # `tools/bin/sdkmanager`. The runner's SDK keeps sdkmanager under
+      # `cmdline-tools/latest/bin`, so the check can never pass on a stock
+      # ANDROID_HOME. One symlink gives bubblewrap the old name for the new
+      # place and satisfies every path it builds. Licenses are accepted so
+      # gradle may fetch anything else; build-tools 36.1.0 is what this
+      # bubblewrap pins (BUILD_TOOLS_VERSION) and the image already ships it -
+      # the install is a no-op safety net for future slimmer images.
+      - name: Give bubblewrap the legacy SDK layout it validates
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
-          ls "$ANDROID_HOME" || true
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           yes | "$SDKMANAGER" --licenses > /dev/null || true
-          "$SDKMANAGER" --install "build-tools;34.0.0" "platforms;android-35" > /dev/null
-          ls "$ANDROID_HOME/build-tools"
+          "$SDKMANAGER" --install "build-tools;36.1.0" > /dev/null
+          ln -sfn "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools" \
+            || sudo ln -sfn "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
+          ls "$ANDROID_HOME" "$ANDROID_HOME/tools/bin" | head -30
 
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa

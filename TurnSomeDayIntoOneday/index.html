@@ -11445,16 +11445,48 @@ function setBill(type){
 // latches, and one that already latched (from the earlier build) is cleaned up
 // and put back on the web path.
 const PLAY_PACKAGE='com.turnsomedayintodayone.app';
+// How the Play flag came to be set is recorded alongside it, because the two
+// ways of setting it mean very different things and the old '1' could not tell
+// them apart. An `android-app://` referrer is proof the Android shell launched
+// this page. `?src=play` is not proof of anything - it is a query string, and
+// it survives being shared, pasted or bookmarked. When a purchase later fails,
+// knowing which one latched is the difference between "the Play app is broken"
+// and "this is an ordinary browser wearing the Play app's flag".
+// The legacy '1' is honoured but reports its provenance as unknown; it is never
+// silently upgraded to 'referrer', because that would invent evidence.
+const PLAY_LATCH_KEY='tsid_play_build';
+let playLatch=null;
+function readPlayLatch(){
+  try{
+    const raw=localStorage.getItem(PLAY_LATCH_KEY);
+    if(!raw)return null;
+    if(raw==='1')return {how:'unknown',at:''};
+    const v=JSON.parse(raw);
+    return (v&&v.how)?v:{how:'unknown',at:''};
+  }catch(e){return {how:'unknown',at:''};}
+}
+function writePlayLatch(how){
+  const v={how:how,at:new Date().toISOString().slice(0,16)};
+  try{localStorage.setItem(PLAY_LATCH_KEY,JSON.stringify(v));}catch(e){}
+  return v;
+}
+// The launch signals only exist on the very first navigation, so they are read
+// once here and kept for the life of the page. In-app navigation drops the
+// query string, which is the whole reason the latch exists.
+const launchReferrer=(function(){try{return document.referrer||'';}catch(e){return '';}})();
+const launchFromParam=(function(){try{return new URLSearchParams(location.search).get('src')==='play';}catch(e){return false;}})();
+const launchFromShell=launchReferrer.startsWith('android-app://'+PLAY_PACKAGE);
 function detectPlayBuild(){
   try{
     if(!/\bAndroid\b/.test(navigator.userAgent||'')){
-      localStorage.removeItem('tsid_play_build');
+      localStorage.removeItem(PLAY_LATCH_KEY);
+      playLatch=null;
       return false;
     }
-    if(localStorage.getItem('tsid_play_build')==='1')return true;
-    const fromParam=new URLSearchParams(location.search).get('src')==='play';
-    const fromReferrer=(document.referrer||'').startsWith('android-app://'+PLAY_PACKAGE);
-    if(fromParam||fromReferrer){localStorage.setItem('tsid_play_build','1');return true;}
+    if(launchFromShell){playLatch=writePlayLatch('referrer');return true;}
+    const stored=readPlayLatch();
+    if(stored){playLatch=stored;return true;}
+    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
   }catch(e){}
   return false;
 }
@@ -11569,7 +11601,16 @@ function storeDiagnostics(){
   const bits=[];
   try{
     bits.push('bridge='+(('getDigitalGoodsService'in window)?'present':'missing'));
-    bits.push('playBuild='+(isPlayBuild()?'yes':'no'));
+    // Which host is answering matters: assetlinks.json is only honoured on the
+    // exact origin the shell declares, and a redirect between them is a
+    // verification failure rather than a detour.
+    bits.push('host='+location.host);
+    // The decisive one. launch=shell means the Android app opened this page and
+    // any failure after it is the app's. launch=param or launch=stored means
+    // nothing proves the Play app is involved at all, and a purchase failure
+    // here says nothing about whether Play billing works.
+    bits.push('launch='+(launchFromShell?'shell':(launchFromParam?'param':'none')));
+    bits.push('latch='+(playLatch?(playLatch.how+(playLatch.at?'@'+playLatch.at:'')):'none'));
     bits.push('display='+((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)?'standalone':'browser'));
     const m=(navigator.userAgent||'').match(/(SamsungBrowser|EdgA|OPR|Chrome)\/([0-9]+)/);
     bits.push('engine='+(m?m[1]+' '+m[2]:'unknown'));
@@ -12490,7 +12531,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8';
+const APP_VERSION='5.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

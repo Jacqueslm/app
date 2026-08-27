@@ -13488,6 +13488,19 @@ async function coupleJoin(){
   if(r.ok){coupleInfo=j;coupleFetchedAt=Date.now();renderCouples();}
   else appInfo('Linking',j.error||"That didn't work — check the code and try again.");
 }
+// Mint this account's link code so a partner who ALREADY has an account can
+// join it. The server has always had /api/couple/create; nothing in the app
+// called it once the letter became the front door.
+async function coupleCreate(){
+  const r=await fetch('/api/couple/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:S.name||''})});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok){
+    coupleInfo=j;coupleFetchedAt=Date.now();renderCouples();
+    if(j.code)appInfo('Your code is '+j.code,"Read it out to them, or send it however you like. They open Together on their phone, type it in, and you're linked. It carries the day count and the nudge - nothing else.");
+  }else{
+    appInfo('Couldn\u2019t make a code',j.error||"That didn't work. If you're already linked, unlink first.");
+  }
+}
 async function coupleNudge(){
   const r=await fetch('/api/couple/nudge',{method:'POST'});
   if(r.ok)appInfo('Sent',"They'll get it as a gentle ask — today's ten minutes, when you're both ready.");
@@ -13524,10 +13537,17 @@ function coupleSectionHtml(){
     +`<div style="font-size:.75rem;color:var(--tm);line-height:1.55;margin-top:4px">Send them the letter you wrote. When they open it, their side of the app opens with it — no code to type, nothing for them to work out. You'll share the day count and the nudge, and nothing else: no journals, no clocks, no checking.</div>`
     +(sent&&!isNaN(sentWhen)?`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:8px">Sent ${sentWhen.toLocaleDateString(undefined,{month:'long',day:'numeric'})}. The link lasts 30 days. <span onclick="revokeLetterLink()" style="color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline">Take it back</span></div>`:'')
     +`<button class="sos-close" style="margin-top:10px;background:var(--accent);color:#fff" onclick="closeCouplesExercises();openPartnerLetter()">${sent?'Send it again':'Send them your letter'}</button>`
-    +`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;text-align:center">Were you handed a code instead?</div>`
+    +`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;text-align:center">Already both in the app?</div>`
     +`<div style="display:flex;gap:8px;margin-top:8px">`
     +`<input id="couple-code-input" placeholder="Enter their code" style="flex:1;margin:0;text-transform:uppercase;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:0 12px;font-size:.875rem;color:var(--tp);font-family:var(--f)" maxlength="6">`
-    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`);
+    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`
+    // The letter mints a code server-side when somebody accepts it, which left
+    // two people who BOTH already had accounts with no way to link at all: the
+    // field above could take a code, but nothing in the app could produce one.
+    // Jacques hit this with his wife - her on an iPhone from the web, him on
+    // Android from Play - and it looked like a platform bug. It was not. This
+    // is the missing half.
+    +`<div onclick="coupleCreate()" style="font-size:.71875rem;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-align:center;margin-top:10px">Get a code to give them instead</div>`);
 }
 function renderCouples(){
   fetchCoupleStatus();

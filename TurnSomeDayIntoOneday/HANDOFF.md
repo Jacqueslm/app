@@ -296,7 +296,23 @@ which proves nothing), or `unknown` (the legacy `'1'`, never upgraded to
 `referrer` because that would invent evidence). The diagnostic line adds
 `host=`, `launch=` and `latch=`.
 
-Read the next screenshot's `launch=` field first:
+**The answer came back at 14:06 on 27 Aug, and it is `launch=shell`:**
+
+    bridge=present · host=www.turnsomedayintodayone.com ·
+    launch=shell · latch=referrer@2026-08-27T19:05 ·
+    display=standalone · engine=Chrome 151 · app=5.9
+
+`launch=shell` means `document.referrer` was `android-app://com.turnsomedayintodayone.app`
+— the Android shell itself opened this page. Not a stale flag, not the PWA, not
+a browser tab. `host=` is the exact host the file is served under. And the
+address bar is still across the top.
+
+**So this is now established, not inferred: the Play app launches, on the right
+host, and Chrome refuses to run it as a verified TWA.** Everything on the
+server side checks out, so the fault is in the installed shell or in Chrome's
+verification of it — the one component nothing in this repo can inspect.
+
+Historical read of the field, kept because the reasoning still holds:
 - `launch=shell` → the Android app really did open this page, the shell is at
   fault, and a rebuild is then justified.
 - `launch=param` or `launch=none` with `latch=unknown` → this is not the Play

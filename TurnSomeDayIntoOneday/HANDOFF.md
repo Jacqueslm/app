@@ -133,10 +133,27 @@ enrolment, service account wired up.
 - **12 testers, opted in for 14 continuous days.** Currently 2 (both the owner's
   own accounts). The clock has not started. Production access needs this *and* a
   written account of how testers were recruited and what feedback they gave.
-- **No real purchase has ever been made.** Everything up to Google's servers is
-  tested; the last mile is not. After the first test purchase, **check three days
-  later that it was not refunded** — that is the only proof acknowledgement works.
-  Look for `ACKNOWLEDGE FAILED` in the error log.
+- **No real *Play* purchase has ever been made.** Everything up to Google's
+  servers is tested; the last mile is not. After the first test purchase,
+  **check three days later that it was not refunded** — that is the only proof
+  acknowledgement works. Look for `ACKNOWLEDGE FAILED` in the error log.
+
+  Do not let the Stripe side confuse this. **Stripe is proven and works.**
+  Confirmed against the live account (`acct_1TvjcJCDHXSEg3rL`) on 27 Aug 2026:
+  two live subscriptions, `app_user_id` 11 and 18, both Jacques's own accounts,
+  and one real settled charge — `ch_3U1RLwCDHXSEg3rL0Ju6KvMj`, $9.99, 6 Aug
+  2026, Visa debit ...8776, `status: succeeded`, never refunded. Trial started
+  30 Jul, converted 6 Aug, cancelled 18 Aug. So checkout, the webhook, and the
+  entitlement flip all work end to end on the web path.
+
+  That proves nothing about Play. The two paths do not share code past
+  `becomePro()`: the web path posts to `/api/billing/create-checkout-session`
+  (`billing.js`), the Play path calls `becomeProViaStore()` →
+  `getDigitalGoodsService` (`store-billing.js`). A Stripe purchase cannot even
+  be *made* from inside the Play app — `becomePro()` refuses it as the policy
+  line. So the fact that Jacques bought Pro with a card means he was in a plain
+  browser at the time, not in the installed app. The broken path is still
+  untested by that purchase.
 
 Opt-in link (closed test — only works for addresses already on the tester list):
 

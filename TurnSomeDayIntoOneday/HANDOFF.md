@@ -276,6 +276,33 @@ replaying both middlewares in registration order against real `Host` headers —
 apex and www both 200 `application/json`, and every other apex path still 301s
 to www. This removes cause 2 without a Play upload.
 
+**Cause 1 is also weaker than it looks.** `PLAY-CHECKLIST.md` records that the
+live 1.0.1 / code 2 bundle was built on 17 Aug from this very manifest, with
+"Play Billing on, notifications on, Android 16, Billing 8". So the live shell
+probably does carry the billing feature and the `www` host. Do not order a
+rebuild as the first move; it is a real cost to Jacques and may change nothing.
+
+**What app 5.9 adds, and why it is the next step instead.** One thing has never
+been established: whether the failing window is the Play shell at all. The
+`playBuild` flag latches into `localStorage` and, on Android, is permanent — a
+single visit to `/app?src=play` in ordinary Chrome latches it forever, after
+which every Upgrade tap routes to Play billing and fails exactly like a broken
+shell. Jacques also installed a PWA from Chrome's menu on 27 Aug, which is a
+third context that looks like the app and is not.
+
+So the latch now records **how** it was set — `referrer` (an `android-app://`
+launch, which is proof the shell opened the page), `param` (a query string,
+which proves nothing), or `unknown` (the legacy `'1'`, never upgraded to
+`referrer` because that would invent evidence). The diagnostic line adds
+`host=`, `launch=` and `latch=`.
+
+Read the next screenshot's `launch=` field first:
+- `launch=shell` → the Android app really did open this page, the shell is at
+  fault, and a rebuild is then justified.
+- `launch=param` or `launch=none` with `latch=unknown` → this is not the Play
+  app. Nothing about Play billing has been tested yet, and the rebuild would
+  have been wasted.
+
 **Still needs Jacques:** rebuild the shell from `twa/twa-manifest.json`, sign it
 with the upload key, and upload it. That is the only way to settle cause 1.
 Run the `Build the Play app (.aab)` workflow (`workflow_dispatch`), take the

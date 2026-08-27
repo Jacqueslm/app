@@ -27,7 +27,7 @@ re-walk it.
 | Short description | Box reads **78/80**, "Addiction recovery: sober day counter, 90-day program, and support for family." |
 | Screenshots — Climb added, stale Friendly removed | 6 panels live |
 | Everything sent + published | Publishing overview empty, "Last published August 26, 2026" |
-| Developer name → "Turn Someday Into Day One" | Banner: *"Your new developer name is being reviewed"* — Jacques's own name comes off the listing when Google approves, 1–2 days |
+| Developer name | **KEPT AS IS — Jacques, 27 Aug 2026: "kept developer the same, nothing change."** The change to "Turn Someday Into Day One" was not gone through with. His own name stays on the listing. Do not raise this again. |
 
 **Do not re-walk any of the above.** Two separate loops happened today because
 the description was confirmed "done" before it was checked, then rewritten and

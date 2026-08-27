@@ -750,3 +750,65 @@ alternates, not a series — do not post both.
 **Title (TikTok / Facebook):** Nobody saw you do it
 **Title (YouTube):** How to stop binge eating at night — the part nobody sees (880/mo, KD 33)
 **Caption:** as A16 above.
+
+---
+
+## A17 — "Nobody starts this on purpose" · pills · CAUSE & EFFECT · 15.0s · BUILT 27 Aug 2026
+
+**The lane with nothing in it.** Pills appear exactly once in the entire script
+library — a list in SCRIPTS.md line 603 — and **KEYWORDS.md has no pill, opioid,
+painkiller or prescription term anywhere in it.** That is not an oversight to
+route around: the Semrush subscription ended 15 Aug and the file is final, so
+there is no volume or KD for this lane and none can be pulled. This piece is
+content-led, not keyword-led. Do not invent a number for it.
+
+**It has somewhere real to send people:** the app's **Substances** track is
+live (one of the 14 in `lessons.json`).
+
+**The angle nobody else takes.** Every other piece in this file is about a
+choice that got out of hand. Pills are the one where there was no choice to
+begin with — it started with a signature on a prescription pad. That is the
+whole hook, and it is why this doesn't reuse a single line from the file.
+
+**Both stills are natively 9:16**, so this is the first piece built FULL BLEED —
+no letterboxed band, no blurred blowup. It gets its own bottom scrim instead,
+since there is no dark band for the captions to sit on.
+
+1. **4.2s** the steps outside the pharmacy at dusk, bottle spilled, slow push —
+   *Nobody starts this on purpose. It was a prescription.*
+2. **4.0s** same frame, push continues — *Then it was a Tuesday. Then it was
+   every day.*
+3. **3.4s** dissolve at 8.9s to the hospital bed, wristband, line in; slow pull
+   back — *Nobody tells you where the line was. You wake up **past it**.*
+4. **2.2s** end card — **You didn't choose this. You can still choose what's next.**
+
+**Title (TikTok / Facebook):** Nobody starts this on purpose
+**Title (YouTube):** How pill addiction actually starts — nobody chooses it
+*(no Semrush figure available for this lane, by the rule above)*
+
+**Caption:** Nobody starts this on purpose. It was a prescription — someone
+signed for it. Then it was a Tuesday. Then it was every day. Nobody tells you
+where the line was; you just wake up past it. You didn't choose the start. You
+can still choose what comes next. Free, no card, no ads, works with no account.
+Link in bio.
+#pillrecovery #prescriptionpills #recovery #soberlife #dayone
+
+**Score:** `content/score/silent-impact-2.mp3` at 0.85, stretched 4.5%
+(`atempo=0.95665`) to land on the last note — same as A15 and A16.
+**Files:** source `content/pills-source.html`; stills go in `content/pills/`
+as `01-steps.jpg` and `02-hospital.jpg`. The .mp4 is handed over, not committed
+(27 Aug rule).
+
+**No medical claims** — house rule 9. Nothing here names a drug, a dose, a
+timeline or an outcome. The hospital frame carries the cost; the words stay on
+what it feels like from the inside, which is also what keeps it postable.
+
+**BUILT.** Stills came in as .webp at 1170x2048, converted to jpg on the way in.
+Worth noting for next time: **the filenames were in the reverse order to the
+scenes** — the earlier timestamp was the hospital, not the steps — so they were
+identified by looking at them, not by sorting. Do that every time.
+
+**One fix during the build:** on the effect beat the caption wrapped and left
+"was." orphaned on its own line. Rewritten as three short lines instead of two
+long ones, and the bottom scrim lifted from .55 to .62/.96 because the hospital
+frame is nearly white where the type sits. Both are in the source.

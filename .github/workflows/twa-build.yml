@@ -57,15 +57,28 @@ jobs:
       # to the deploy branch minutes before a build - the natural sequence -
       # restarts the site for ~a minute. Runs 5 and 8 both died in exactly that
       # window with a 502. Wait for the site instead of racing it.
-      - name: Wait for the live site to answer (a fresh deploy 502s briefly)
+      # One healthy answer is not enough: run 9's curl got a 200 and bubblewrap
+      # got a 502 from the same URL seventeen seconds later, because a push to
+      # the deploy branch (any push - workflow-only changes included) rebuilds
+      # the site and the cutover lands minutes after the commit. Demand a full
+      # minute of consecutive 200s so a cutover in progress cannot sneak one
+      # good answer past the gate.
+      - name: Wait for the live site to be stable (deploys 502 during cutover)
         run: |
-          for i in $(seq 1 30); do
+          ok=0
+          for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w '%{http_code}' https://www.turnsomedayintodayone.com/manifest.json)
-            [ "$code" = "200" ] && { echo "site is up (attempt $i)"; exit 0; }
-            echo "attempt $i: got $code, waiting 10s"
+            if [ "$code" = "200" ]; then
+              ok=$((ok+1))
+              echo "attempt $i: 200 ($ok/6 consecutive)"
+              [ "$ok" -ge 6 ] && { echo "site stable"; exit 0; }
+            else
+              ok=0
+              echo "attempt $i: got $code, streak reset"
+            fi
             sleep 10
           done
-          echo "site did not come up within 5 minutes"; exit 1
+          echo "site never stayed up for a minute"; exit 1
 
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa

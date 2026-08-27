@@ -181,49 +181,56 @@ in this section, and a Play upload is only ever needed for shell-level changes
 
 ## Open bug
 
-**The Android app shows a browser address bar instead of running full screen.**
-It falls back to Custom Tabs because Digital Asset Links verification fails.
+**Nobody has ever bought Pro through Google Play.** That is the bug. The
+address bar it used to be filed under was a different thing, and chasing it
+cost weeks — read the next two paragraphs before you touch anything.
 
-Verified correct and ruled out:
-- The app declares `https://www.turnsomedayintodayone.com` (`assetStatements` in
-  the generated `strings.xml`).
-- The server serves both certificate fingerprints — app signing key and upload
-  key — confirmed live through Google's own validator:
+**What the address bar turned out to be.** Four screenshots on 27 Aug 2026
+settled it. The app at 12:39 had **no address bar at all** — it runs full
+screen, so the TWA is verified and Digital Asset Links is working. Google's
+validator agrees; the statement list for the host in `twa/twa-manifest.json`
+(`www.turnsomedayintodayone.com`) returns both fingerprints with no error:
 
-      curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
+    curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
 
-- Uninstall/reinstall, and Chrome cache clear, on two devices.
+The bar in the earlier screenshot came from a **separate Chrome Custom Tab**
+open on the same site at 12:38 — the same shots show Chrome's "Install and
+create shortcut" sheet over it. Two windows, one minute apart, read as one.
+Note for whoever tries the same curl: the **apex** host does fail, with
+`ERROR_CODE_REDIRECT`, because `turnsomedayintodayone.com` redirects to `www`
+and asset-link fetches do not follow redirects. It is not the cause — nothing
+launches the apex — but it will mislead you if you check the wrong host.
 
-Still fails. **Untested leads:** both devices are Samsung — if Samsung Internet
-rather than Chrome is the default browser, verification runs through a different
-engine. Beyond that it needs `adb logcat` over USB to read Chrome's actual
-rejection reason; platform-tools are already on the owner's PC under
+**The Samsung-Internet theory is dead.** The dialog Jacques photographed said
+*"Could not complete that purchase"*, which is the deepest catch in
+`becomeProViaStore`. Reaching it means `storeBillingAvailable()` already passed
+— that guard fails with a different sentence, "In-app purchases are not
+available on this device." **So `getDigitalGoodsService` exists on his phone**,
+and `/api/billing/status` returned `storeBillingReady: true`. The bridge is
+present; something inside the handshake rejects.
+
+**Which step, we do not know yet.** Four candidates all produced that one
+sentence: `getDigitalGoodsService()` rejecting, `getDetails()` throwing,
+`PaymentRequest` construction, or `request.show()`. Most likely by far is that
+the products or the tester account are not set up so the store will actually
+sell — a closed test only sells to Google accounts on the tester list, from a
+build downloaded from Play.
+
+**What was done instead of a fifth guess (app 5.8).** `becomeProViaStore` now
+labels every step and the catch reports it: the step name, the real
+`name: message`, and a diagnostic line from `storeDiagnostics()` — bridge
+present/missing, play-build flag, standalone vs browser, browser engine and
+version, app version. `#info-modal-msg` got `white-space:pre-line` so it reads
+as lines. **One photo of that dialog now identifies the failure.** Get that
+photo before doing anything else.
+
+If it still is not obvious after that, `adb logcat` over USB reads Chrome's own
+rejection; platform-tools are on the owner's PC under
 `C:\Users\<user>\.bubblewrap\`.
 
-**Impact: NOT cosmetic. It blocks every purchase.** Corrected 27 Aug 2026 —
-Jacques hit "Upgrade unavailable · Could not complete that purchase" on his own
-phone, with the address bar visible in the screenshot.
+Install, use, the 14-day clock and reviews all work. Purchases do not. Do not
+call this cosmetic, and do not re-open the address bar as a cause.
 
-Why it follows: the upgrade path calls `window.getDigitalGoodsService(...)` at
-`index.html:11515`. That function is exposed **only inside a verified TWA**. In
-Custom Tabs it is undefined, the call throws, and the catch at the bottom of
-`startStorePurchase` shows exactly the message he saw. Nothing is charged, and
-nothing can be.
-
-So the chain is: Digital Asset Links verification fails → the app falls back to
-Custom Tabs → the Digital Goods API is absent → **nobody can buy Pro on Android
-at all.** That is why the live billing path has never produced a sale. It was
-never an untested path; it was a broken one.
-
-Install, use, the 14-day clock and reviews genuinely do work with the bar
-present. Purchases do not. Do not repeat the "cosmetic" line.
-
-**Strongest untested lead, and it fits both symptoms.** Both devices are
-Samsung. A TWA is hosted by the device's default browser, and the Digital Goods
-/ Play Billing bridge is a **Chrome** feature — Samsung Internet does not
-provide it. If Samsung Internet is the default browser, you would get the
-address bar *and* a dead purchase button, which is exactly the pair observed.
-**Try first: set Chrome as the default browser on the device, force-stop the
 app, reopen.** That is a 30-second test and it costs nothing.
 
 ## Marketing pages (SEO surface)

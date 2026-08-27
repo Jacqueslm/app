@@ -672,7 +672,8 @@ matters for money — *"Ad-safe lane."* The long-tail this is titled for,
 `how to stop binge eating at night` (880/mo, KD 33), is a night-time kitchen
 scene, which is exactly the still Jacques supplied.
 
-**Source still:** `content/binge-night/01-after.png` (Jacques's, 26 Aug).
+**Source stills:** `content/binge-night/01-after.png` and `02-bathroom.png`
+(Jacques's, 26 Aug). This cut uses the first only; A16b below uses both.
 One frame, held for the whole cut, on a slow 7% push. No cutaway — the piece is
 about being stuck in a chair, so the camera never leaves it.
 
@@ -706,31 +707,46 @@ morning," "it was never about the food," and "the ten minutes of quiet the food
 bought me." This one owns the shame-is-the-setup mechanism, which none of them
 say.
 
-### The second still is held, not used — read this before overruling it
+### A16b — the CAUSE & EFFECT cut, both stills (Jacques's call, 27 Aug)
 
-Jacques supplied a second frame (`02-bathroom-HELD.png`, kneeling over a bin)
-and named the pair cause/effect. It is not in the cut, for four reasons that
-are all about reach and lane rather than taste:
+Jacques asked for the second frame in. It is in, and this is the cut to post.
 
-1. **It changes the disorder.** Lane 5 is binge eating disorder. BED does not
-   involve purging — purging is bulimia, clinically a different thing. The
-   frame moves the piece off the lane the keywords were researched for.
-2. **The app can't catch who it calls.** `/how-to-stop-binge-eating` and the
-   quiz are BED content. There is no bulimia material anywhere in the app and
-   no eating-disorder helpline on that page. A purge-framed video brings in
-   someone the app currently has nothing for.
-3. **It burns the ad-safe lane.** This is the one lane KEYWORDS.md flags as
-   safe to put money behind. Content depicting purging can't be advertised on
-   Meta or TikTok, and both name depiction of eating-disorder behaviours as a
-   removal / age-restrict category — not ordinary suppression risk like the
-   drunk-driving frames, a named category.
-4. **It breaks house rule "never show anything explicit."** The rule at the top
-   of this file says the story is told by the glow, the closed door, the
-   posture, her face — never the act. A1 never shows the screen. A9b never
-   shows the crash, only the car after. The aftermath frame IS the house
-   treatment of this subject, and it's the one that was already supplied.
+**Cause** — the table, 6.3s, slow push.
+CAPTION: `Nobody saw you do it. That's the worst part.`
+**Effect** — the bathroom floor, dissolve at 6.3s, 6.5s, slow push.
+CAPTION: `Nobody sees this either. That's what keeps it going.`
+CAPTION: `The shame isn't the punishment. It's the setup for the next one.`
+**End card** — **It's a cycle, not a character flaw.**
 
-**If Jacques wants it anyway, it's his call and it's one command** — say so and
-it gets built. The version I'd argue for even then: use it as beat 2 framed as
-the bathroom floor rather than the act (crop off the bin, hold on the posture),
-keep the piece on the BED lane in the captions, and post it to YouTube only.
+The two captions are built as a pair on purpose: *nobody saw / nobody sees* is
+what makes it one cycle instead of two events, and it keeps the piece on the
+shame mechanism rather than on the behaviour.
+
+**File:** `content/binge-cause-effect.mp4`, source
+`content/binge-cause-effect-source.html`. Same score and treatment as A16.
+
+**Both cuts are in the repo.** `binge-night.mp4` (table only, 15.0s) and
+`binge-cause-effect.mp4` (both frames, 15.0s). Same script spine, so they are
+alternates, not a series — do not post both.
+
+**Posting notes for the two-frame cut, so nothing is a surprise:**
+
+- **Title it on the binge lane, not the purge.** The keywords researched for
+  this are binge eating disorder (`how to stop binge eating`, 9,900/mo;
+  `how to stop binge eating at night`, 880/mo KD 33), and both landing pages
+  (`/how-to-stop-binge-eating`, `/do-i-have-a-binge-eating-problem-quiz`) are
+  BED content. The captions above keep it there.
+- **YouTube first.** Meta and TikTok both treat depiction of eating-disorder
+  behaviour as a removal / age-restrict category rather than ordinary
+  suppression, so this cut is the one most likely to be actioned. If it goes
+  anywhere on TikTok or Facebook, `binge-night.mp4` is the version to use.
+- **Don't put ad spend behind this cut.** Lane 5 is the one lane KEYWORDS.md
+  flags as ad-safe; that applies to the table-only version. Paid placement on
+  the two-frame cut will get rejected.
+- **Worth adding to the app before this runs wide:** there is currently no
+  eating-disorder helpline anywhere on the binge page. Both cuts call in people
+  in a rough spot and a referral line costs one paragraph.
+
+**Title (TikTok / Facebook):** Nobody saw you do it
+**Title (YouTube):** How to stop binge eating at night — the part nobody sees (880/mo, KD 33)
+**Caption:** as A16 above.

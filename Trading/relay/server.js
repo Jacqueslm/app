@@ -88,6 +88,58 @@ function refreshJournal() {
 }
 refreshJournal();
 
+// ═══ THE TUNNEL, STARTED FOR YOU ═════════════════════════════════════════════
+// TradingView's servers live on the internet and cannot see a PC behind a
+// router, so a tunnel gives this relay one public address. That address is
+// reserved to this machine, which is why the webhook URL never changes once it
+// has been pasted into an alert.
+//
+// Starting it here means one button does everything: the relay comes up, the
+// tunnel comes up with it, and the address shows on the page that opens. If
+// ngrok is missing or already running this fails quietly — the relay itself
+// keeps working; only the auto-writing needs the tunnel.
+const TUNNEL_HOST = "explicit-sprung-produce.ngrok-free.dev";
+function startTunnel() {
+  try {
+    const ng = require("child_process").spawn(
+      "ngrok", ["http", "--url=" + TUNNEL_HOST, String(PORT)],
+      { detached: true, stdio: "ignore", windowsHide: true });
+    ng.on("error", () => {});
+    ng.unref();
+  } catch {}
+}
+startTunnel();
+
+const hookUrl = () => "https://" + TUNNEL_HOST + "/hook/" + secret;
+
+// The one line a person still has to move by hand is the webhook address, so
+// put it where it cannot be missed: the top of whatever page the relay serves,
+// with a button that copies it. Injected at serve time so it rides along with
+// pages this file does not own.
+function banner() {
+  return '<div style="font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;' +
+    'background:#0b2b22;border-bottom:2px solid #26a69a;color:#e6edf3;' +
+    'padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">' +
+    '<b style="color:#26a69a">AUTO IS ON</b>' +
+    '<span style="color:#8b96a5">paste this once into your TradingView alert &rarr; ' +
+    'Notifications &rarr; Webhook URL:</span>' +
+    '<code id="msbHook" style="background:#161b22;padding:5px 9px;border-radius:6px;' +
+    'font-size:13px">' + hookUrl() + '</code>' +
+    '<button onclick="navigator.clipboard.writeText(' +
+    "document.getElementById('msbHook').textContent);this.textContent='copied';" +
+    "this.style.background='#26a69a'" + '" ' +
+    'style="background:#238636;color:#fff;border:0;border-radius:6px;padding:7px 14px;' +
+    'font-weight:700;cursor:pointer">copy</button>' +
+    '<a href="/journal" style="color:#8ab4ff;margin-left:auto">open the journal &rarr;</a>' +
+    '</div>';
+}
+function withBanner(html) {
+  const page = html.toString();
+  return /<body[^>]*>/i.test(page)
+    ? page.replace(/<body[^>]*>/i, m => m + banner())
+    : banner() + page;
+}
+
 // ═══ AUTOTRADE — the TradingView bot ═════════════════════════════════════════
 // When an "MSB PURE" alert arrives, write an order file into NinjaTrader's
 // incoming folder (the ATI). NinjaTrader places the bracket: market entry,
@@ -381,7 +433,7 @@ const server = http.createServer((req, res) => {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "no-store, must-revalidate",
       });
-      res.end(html);
+      res.end(withBanner(html));
     });
     return;
   }
@@ -402,7 +454,7 @@ const server = http.createServer((req, res) => {
         return;
       }
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, must-revalidate" });
-      res.end(html);
+      res.end(withBanner(html));
     });
     return;
   }
@@ -491,10 +543,11 @@ server.listen(PORT, () => {
     else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — update it soon.");
   }
   console.log("");
-  console.log("  To let TradingView reach it, run your tunnel in another window:");
-  console.log("      ngrok http " + PORT);
-  console.log("  then in the TradingView alert's Notifications tab, set Webhook URL to:");
-  console.log("      https://YOUR-NGROK-DOMAIN/hook/" + secret);
+  console.log("  ── PASTE THIS ONCE, then auto runs itself ──────────────────");
+  console.log("      " + hookUrl());
+  console.log("  In TradingView: open the TRADE SIGNAL alert, Notifications tab,");
+  console.log("  tick Webhook URL, paste, Save. The same address is on screen");
+  console.log("  with a copy button at the top of the page that just opened.");
   console.log("");
   console.log("  Keep this window open during the session. Ctrl+C to stop.");
   console.log("");

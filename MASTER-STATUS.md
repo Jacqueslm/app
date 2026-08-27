@@ -97,6 +97,20 @@ verification fails exactly like this while every file looks perfect.
 **Needed from Jacques: Play Console → Test and release → Setup → App integrity
 → App signing key certificate → SHA-256.** No more code until that is compared.
 
+**27 Aug, 2:06pm — `launch=shell`. The Play app itself is what fails.** The
+5.9 diagnostic proved the Android shell opened the page (referrer was
+`android-app://com.turnsomedayintodayone.app`), on the right host, bridge
+present — and Chrome still refuses to run it verified. Every server-side piece
+checks out, so the fault is in the installed bundle or Chrome's verification of
+it on the device.
+
+**In flight:** shell bumped to 1.0.2 (code 3) and the CI build
+(`twa-build.yml`, run on `main`) queued 27 Aug — a known-good unsigned bundle
+from the repo manifest (www host, billing on) will sit on the `twa-build`
+branch ready to sign and upload if the installed shell turns out to be the
+fault. Next free test asked of Jacques: Settings → Apps → Day One → Open by
+default, which shows Android's own verdict on the same verification.
+
 **Do not describe this as cosmetic again.**
 
 **Checked 27 Aug: "I bought Pro with the Stripe when I tested it 3 weeks ago."**

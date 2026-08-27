@@ -6,6 +6,19 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ✅ 27 AUG 2026 — SHRM DIRECTORY: CATEGORY FIX AGREED, BALL IS JUDITH'S
+
+The free SHRM Human Resource Vendor Directory listing (MediaBrains, contact
+Judith Gaa) is moving from "Health & Wellness Incentives" — the wrong shelf,
+gym-rewards territory — to **Addiction Services**, her suggestion after
+reading the description. Jacques closed it himself, 27 Aug 8:08am: "Yes, I
+agree. Thank you." Description is added, login works, everything on the
+listing is done and free. Nothing is owed and nobody needs to reply further.
+If no confirmation arrives by ~3 Sep, one line to Judith asking whether the
+move went through is the only follow-up.
+
+---
+
 ## 🔴 27 AUG 2026 — NOBODY CAN BUY PRO ON ANDROID. THE "COSMETIC" BUG IS A REVENUE BUG.
 
 **Jacques hit "Upgrade unavailable — Could not complete that purchase" on his

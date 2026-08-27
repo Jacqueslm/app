@@ -68,20 +68,36 @@ Do not steer him off these; work with them:
 App is at **v8.13**, live on all three branches (start-here = working, main +
 vibe-code = deploy). Everything below shipped 22-24 Aug and is DONE.
 
-### Jacques is the sixth narrator — the whole app speaks in his voice
-- His voice was cloned on THIS machine (XTTS v2, refs in scratchpad
-  `voice/jacques-ref2.wav` + `jacques-ref.wav`) from his real recording.
-- **All 90 days × 12 tracks** narrated in his voice (1,150 recordings), plus
-  the SOS "Talk me through it" with synced captions. Voice button in the
-  lesson player and SOS cycles: Warm, Soft, Gentle, Clear, Calm male,
-  **Jacques (founder)**.
-- The five stock Piper narrators also cover days 31-90 now (1,243 files
-  each). Audio CDN = the `lesson-audio` branch; manifest =
-  `data/lesson-audio-manifest.json`. Generators:
-  `tools/generate-jacques-audio.py`, `tools/generate-phase-audio.py`,
-  `tools/generate-jacques-sos.py`. Lesson text changes = regenerate (hash in
-  filename). Known gotcha: two generators writing the manifest concurrently
-  race — re-run one at the end (files exist → manifest-only pass, seconds).
+### ~~Jacques is the sixth narrator~~ — REMOVED 26 Aug 2026
+
+**The founder voice is gone from the app, at his instruction.** Not a quality
+problem — a licence one. The clone was made with Coqui **YourTTS**
+(`tts_models/multilingual/multi-dataset/your_tts`), and Coqui's own model
+registry lists that model as **CC BY-NC-ND 4.0** — non-commercial, no
+derivatives. The app charges money, so by the rule in
+`reference/asset-licenses-2026-08-08.md` it could not stay.
+
+The recording was his and always was. The restriction is on the software that
+copied it, not on his voice.
+
+Removed: the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, and 1,150 manifest entries. Anyone whose phone
+still remembers the setting falls back to Warm automatically — `vgVoiceKey()`
+and `lessonVoiceKey()` both do that already, verified.
+
+**Still on the `lesson-audio` branch:** the 1,150 mp3 files themselves. Nothing
+in the app points at them any more, but they have not been deleted from that
+branch.
+
+**Do not re-add a founder voice with YourTTS or XTTS v2.** Both are
+non-commercial. Piper, fine-tuned on his own recordings, is the clean route if
+he ever wants it back.
+
+**Everything else from that pass stands:** the five stock narrators (Warm,
+Soft, Gentle, Clear, Calm male) are public domain / CC0 and cover days 1-90.
+Audio CDN = the `lesson-audio` branch; manifest = `data/lesson-audio-manifest.json`.
+Lesson text changes = regenerate (hash in filename). Known gotcha: two
+generators writing the manifest concurrently race — re-run one at the end.
 
 ### Three new experiences (all Jacques-approved via the rule-24 flow)
 - **The Climb** (Today + Tools): back-view hiker climbs 90 carved steps up a

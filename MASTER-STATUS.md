@@ -6,6 +6,36 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🗑 26 AUG 2026 — THE FOUNDER VOICE IS REMOVED FROM THE APP
+
+**Jacques's instruction: "dispose of jacques voice."** Done.
+
+**The one conflict, in plain terms.** The five narrator voices are public
+domain and have been fine since 8 Aug. His own cloned voice was a different
+thing: the recording is his, but the software that turned it into 1,150 new
+sentences — Coqui **YourTTS** — is licensed **CC BY-NC-ND 4.0**,
+non-commercial. The app charges money. That is the whole issue, and it is the
+reason two conversations could disagree: one was talking about the five
+narrators (fixed), the other about the founder voice (not).
+
+**Removed:** the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, 1,150 entries from
+`data/lesson-audio-manifest.json`. Manifest now reads 1,243 × 5 voices.
+
+**Nobody is left stranded.** `vgVoiceKey()` and `lessonVoiceKey()` already fall
+back to Warm for an unknown key — verified in a browser, both return `warm`
+when the saved setting is `jacques`. Zero page errors, both inline scripts
+parse.
+
+**Left alone on purpose:** the 1,150 mp3 files on the `lesson-audio` branch.
+Orphaned, nothing points at them, not deleted.
+
+**Never re-add a founder voice with YourTTS or XTTS v2.** Piper fine-tuned on
+his own recordings is the clean route. Detail in
+`reference/asset-licenses-2026-08-08.md`.
+
+---
+
 ## 🔬 26 AUG 2026 — WHY TWO PAGES AREN'T INDEXED: THE ALTERNATIVE PAGES ARE 95% THE SAME PAGE
 
 **Search Console, 26 Aug.** 40 URLs in the sitemap, **32 indexed**. The 13

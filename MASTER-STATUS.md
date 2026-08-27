@@ -6,6 +6,45 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🔴 27 AUG 2026 — NOBODY CAN BUY PRO ON ANDROID. THE "COSMETIC" BUG IS A REVENUE BUG.
+
+**Jacques hit "Upgrade unavailable — Could not complete that purchase" on his
+own phone.** His screenshot shows the browser address bar at the top, which is
+the whole story.
+
+**The chain, and it is not a guess:**
+1. Digital Asset Links verification fails (the long-standing open bug in
+   `TurnSomeDayIntoOneday/HANDOFF.md`).
+2. So the Android app falls back to **Custom Tabs** instead of running as a
+   verified TWA — that is the address bar.
+3. The upgrade path calls `window.getDigitalGoodsService('https://play.google.com/billing')`
+   at `index.html:11515`. **That function exists only inside a verified TWA.**
+4. In Custom Tabs it is undefined, the call throws, and the catch at the end of
+   `startStorePurchase` prints the exact words he saw.
+
+**Nothing is charged and nothing can be.** Every Android purchase has been
+failing this way since launch.
+
+**HANDOFF.md said this bug was "cosmetic only" and listed purchases among the
+things that still work.** That line was wrong and is now corrected. It is the
+reason "buy Pro on a real phone" sat on the open list for weeks looking like an
+untested path rather than a broken one.
+
+**Strongest lead, untested, fits both symptoms:** both devices are Samsung. A
+TWA is hosted by the device's default browser, and the Play Billing bridge is a
+**Chrome** feature — Samsung Internet does not provide it. Samsung Internet as
+default would produce the address bar *and* the dead purchase button together.
+**First test: make Chrome the default browser, force-stop the app, reopen.**
+Thirty seconds, costs nothing.
+
+If that is not it, the next step is `adb logcat` over USB to read Chrome's
+actual rejection reason; platform-tools are already on his PC under
+`C:\Users\<user>\.bubblewrap\`.
+
+**Do not describe this as cosmetic again.**
+
+---
+
 ## 🗑 26 AUG 2026 — THE FOUNDER VOICE IS REMOVED FROM THE APP
 
 **Jacques's instruction: "dispose of jacques voice."** Done.

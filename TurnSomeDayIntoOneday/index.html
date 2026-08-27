@@ -11591,6 +11591,10 @@ async function becomeProViaStore(plan){
     // A user dismissing the store sheet lands here too - say nothing then.
     if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
     const why=((e&&e.name)?e.name+': ':'')+((e&&e.message)||String(e));
+    // Reported before it is shown, so the owner's error log sees every failed
+    // purchase without anyone photographing their screen. Fire-and-forget: a
+    // dead network must not add a second failure on top of the first.
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Store purchase failed while '+step,detail:why+' \u00b7 '+storeDiagnostics()})}).catch(()=>{});}catch(_){}
     appInfo('Upgrade unavailable','Could not complete that purchase, and nothing has been charged.\n\nDetails for support: failed while '+step+'.\n'+why+'\n\n'+storeDiagnostics());
   }
 }
@@ -12531,7 +12535,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.9';
+const APP_VERSION='6.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

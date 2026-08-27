@@ -30,12 +30,35 @@ things that still work.** That line was wrong and is now corrected. It is the
 reason "buy Pro on a real phone" sat on the open list for weeks looking like an
 untested path rather than a broken one.
 
-**Strongest lead, untested, fits both symptoms:** both devices are Samsung. A
-TWA is hosted by the device's default browser, and the Play Billing bridge is a
-**Chrome** feature — Samsung Internet does not provide it. Samsung Internet as
-default would produce the address bar *and* the dead purchase button together.
-**First test: make Chrome the default browser, force-stop the app, reopen.**
-Thirty seconds, costs nothing.
+**~~Strongest lead: Samsung Internet as the default browser.~~ RULED OUT
+27 Aug, and it was my lead, so I am the one retiring it.** Jacques sent four
+screenshots. Read together they kill it:
+
+1. The app at 12:39 has **no address bar** — so the TWA is verified and running
+   properly. Digital Asset Links is fine. Google's own checker agrees: the
+   statement list for `https://www.turnsomedayintodayone.com` returns both
+   fingerprints cleanly, and `twa-manifest.json` uses that exact host.
+2. The words on his dialog were **"Could not complete that purchase"** — the
+   deepest catch in `becomeProViaStore`. To reach it the code must already have
+   passed `storeBillingAvailable()`, which fails with a *different* sentence
+   ("In-app purchases are not available on this device"). **So
+   `getDigitalGoodsService` exists on his phone.** The bridge is there.
+3. It also passed `/api/billing/status`, so `storeBillingReady` was true.
+
+The address bar in the earlier screenshot was a **separate Custom Tab** he had
+open at 12:38 — the same shots show Chrome's "Install and create shortcut"
+menu over it. Two different windows, one minute apart, mistaken for one.
+
+**So the failure is inside the store handshake itself, and we still do not know
+which step.** Four candidates, all producing that identical sentence:
+`getDigitalGoodsService()` rejecting, `getDetails()` throwing, `PaymentRequest`
+construction, or `request.show()`.
+
+**Fixed the thing that made this unanswerable rather than guessing a fifth
+time.** The dialog now names the step that failed, prints the real error, and
+carries a one-line diagnostic — bridge present/missing, play-build flag,
+standalone vs browser, browser engine and version, app version. One photo of
+that screen now settles it. App bumped to 5.8.
 
 If that is not it, the next step is `adb logcat` over USB to read Chrome's
 actual rejection reason; platform-tools are already on his PC under

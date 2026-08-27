@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Do I Have a Binge Eating Problem? Free Quiz — No Card, No Signup</title>
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
-<meta name="description" content="Free to use — no card, no signup. A private 2-minute check-in on binge eating: eight honest questions, results worked out on your device, and what a next step could look like. Not a diagnosis.">
+<meta name="description" content="Free to use — no card, no signup. A private 1-minute check-in on binge eating: five honest questions, results worked out on your device, and what a next step could look like. Not a diagnosis.">
 <link rel="canonical" href="https://www.turnsomedayintodayone.com/do-i-have-a-binge-eating-problem-quiz">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Turn Someday Into Day One">
 <meta property="og:url" content="https://www.turnsomedayintodayone.com/do-i-have-a-binge-eating-problem-quiz">
-<meta property="og:title" content="Do I have a binge eating problem? A free, private 2-minute check-in.">
-<meta property="og:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta property="og:title" content="Do I have a binge eating problem? A free, private 1-minute check-in.">
+<meta property="og:description" content="Five honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
 <meta property="og:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Do I have a binge eating problem? A free, private 2-minute check-in.">
-<meta name="twitter:description" content="Eight honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
+<meta name="twitter:title" content="Do I have a binge eating problem? A free, private 1-minute check-in.">
+<meta name="twitter:description" content="Five honest questions. Nothing stored, nothing sent. Free — no card, no signup.">
 <meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
 <style>
 :root{
@@ -54,6 +54,19 @@ input:focus{outline:2px solid var(--accent);outline-offset:1px}
 .crisis{background:var(--s1);border:1px solid var(--bdr);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--ts);line-height:1.5;margin-top:14px;text-align:center}
 .free{color:var(--green);font-weight:650}
 @media (prefers-reduced-motion: reduce){.bar>div{transition:none}}
+
+/* Reading section below the quiz. Outside .step on purpose - the steps are
+   display:none until reached, so their text is invisible to a reader who has
+   not started and thin to a crawler. This page was 284 indexable words. */
+.read{width:100%;max-width:430px;margin:0 auto;padding:0 22px calc(46px + env(safe-area-inset-bottom));color:var(--ts)}
+.read hr{border:0;border-top:1px solid var(--bdr);margin:0 0 26px}
+.read h2{font-size:19px;line-height:1.3;color:var(--tp);font-weight:700;margin:26px 0 10px}
+.read h3{font-size:15px;line-height:1.35;color:var(--tp);font-weight:650;margin:20px 0 6px}
+.read p{font-size:14px;line-height:1.7;margin-bottom:13px}
+.read strong{color:var(--tp)}
+.read ul{list-style:none;padding:0;margin:0 0 14px}
+.read li{font-size:14px;line-height:1.6;padding-left:18px;position:relative;margin-bottom:9px}
+.read li::before{content:'—';position:absolute;left:0;color:var(--accent)}
 </style>
 <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
@@ -72,7 +85,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <!-- INTRO -->
   <div class="step on" id="st-intro">
     <h1>Do I have a binge eating problem?</h1>
-    <p class="sub">Eight honest questions, about two minutes. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
+    <p class="sub">Five honest questions, about two minutes. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
     <p class="sub"><strong>This is not a diagnosis.</strong> Binge eating disorder is a real medical condition and only a doctor or therapist can diagnose it. What this can do is help you say out loud what has been going on — which is usually the part that's been stuck.</p>
     <button class="btn" onclick="startQ()">Start the check-in</button>
     <div class="crisis">If you're in crisis right now, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline) — free, confidential, 24/7.</div>
@@ -135,12 +148,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 // claims to diagnose anything, and the top band sends people to a professional
 // rather than to the app.
 const QUESTIONS=[
-  {t:'When it happens, how much food is it?',o:[['A normal amount, I just wish I hadn\'t',0],['More than I meant to',1],['A lot more than most people would eat',2],['An amount I would not want anyone to know about',3]]},
+  // Cut from eight to five, 27 Aug 2026 (Jacques). Loss of control is the
+  // core marker, so these five keep it: control during, stopping when full,
+  // hunger or not, secrecy, and the feeling after. The three dropped (how
+  // much, how fast, what time) describe the episode without scoring it.
   {t:'While it\'s happening, how in control do you feel?',o:[['Fully in control',0],['I could stop if I really wanted to',1],['Not much — it\'s sort of driving',2],['None. I\'m watching myself do it',3]]},
-  {t:'How fast does it go?',o:[['Normal speed',0],['Quicker than usual',1],['Fast, barely tasting it',2],['So fast I don\'t remember most of it',3]]},
   {t:'Do you stop when you\'re full?',o:[['Usually, yes',0],['A bit past full',1],['Well past full, most times',2],['I stop when it hurts or it\'s gone',3]]},
   {t:'Is it hunger?',o:[['Usually, yes',0],['Sometimes',1],['Rarely — it\'s more of a feeling',2],['Almost never. Hunger has nothing to do with it',3]]},
-  {t:'When does it mostly happen?',o:[['Around normal meals, with people',0],['Whenever, no pattern',1],['Alone, when the house is quiet',2],['At night, after everyone else has gone to bed',3]]},
   {t:'Does anyone else know how often it happens?',o:[['Yes, it\'s not a secret',0],['One person, roughly',1],['I\'ve played it down',2],['Nobody. There\'s a whole system for that',3]]},
   {t:'How do you feel afterwards?',o:[['Fine',0],['A bit annoyed at myself',1],['Ashamed, and it lasts a while',2],['Disgusted with myself. It sets the tone for the next day',3]]}
 ];
@@ -188,17 +202,17 @@ function showResult(){
   // Max score is 24. Bands are deliberately gentle at the bottom and honest at
   // the top — the point is recognition, never a label.
   let seg,title,body,close,pro='';
-  if(score<=5){
+  if(score<=3){
     seg='Not what this describes';
     title="What you described doesn't sound like bingeing.";
     body="Eating more than you meant to happens to everybody, and feeling a bit off about it afterwards is normal. Nothing in your answers points at the pattern this check-in looks for.";
     close="If something still feels wrong, trust that over a quiz. You know your own life better than eight questions do.";
-  }else if(score<=11){
+  }else if(score<=7){
     seg='Something is starting';
     title="It's not nothing, and you already knew that.";
     body="Some of what you described is the shape bingeing takes early — eating past full, eating when it isn't hunger, feeling worse afterwards than the food was worth. It's not a crisis. It's a pattern with a beginning, which is the cheapest time to look at it.";
     close="Naming it is most of the work at this stage. A daily lesson, a private journal and one button for the moment it hits are enough — and all three are free.";
-  }else if(score<=17){
+  }else if(score<=11){
     seg='The loop is running';
     title="This isn't willpower. It's a loop.";
     body="What you described has all of it: the speed, the eating past full, the hiding, and the shame afterwards that sets up the next one. That's not weakness and it isn't greed — it's a loop that closes on itself, and shame is the part that keeps it turning.";
@@ -225,5 +239,74 @@ function showResult(){
   show('st-result');
 }
 </script>
+
+<article class="read">
+<hr>
+
+<h2>Is it binge eating, or did I just overeat?</h2>
+<p>Everybody overeats. Christmas exists. The difference people describe is not
+the amount — it is <strong>the feeling of not being able to stop once it has
+started</strong>, and what happens in your head afterwards.</p>
+<p>Overeating is uncomfortable and then it is over. A binge tends to come with
+three other things: it is usually done alone or hidden, it is faster than normal
+eating, and it is followed by shame rather than just a full stomach. If you have
+ever eaten something and then got rid of the packaging so nobody would know,
+you already understand the difference.</p>
+
+<h2>What it usually is not</h2>
+<p>It is not greed, and it is not a discipline problem. That framing is almost
+universal among people who do this, and it is the single thing that keeps it
+going — because shame is not a brake, it is the fuel. The unpleasant feeling that
+follows a binge is exactly the feeling the next binge is there to switch off.</p>
+<p>It is also not usually about hunger. Ask honestly what the twenty minutes
+before looked like and it is nearly always one of four things: exhausted, bored,
+lonely, or holding a feeling you did not want to sit in.</p>
+
+<h2>Why restriction makes it worse</h2>
+<p>The most common cycle people describe runs like this: a binge, then shame,
+then a strict plan on Monday — cutting out food groups, skipping meals, starting
+again properly. That plan holds for a few days, and the deprivation itself sets
+up the next binge, which arrives with more shame than the last one.</p>
+<p>If every attempt to fix this has been a stricter rule, and every stricter rule
+has ended the same way, the rules are not failing because you are weak. They are
+part of the machine.</p>
+
+<h2>What tends to actually help</h2>
+<ul>
+  <li><strong>Eat regularly, including breakfast.</strong> Dull advice, and the
+  one that moves this most. A body that has not eaten since morning is not making
+  a free choice at nine at night.</li>
+  <li><strong>Stop the rules that trigger the cycle.</strong> Foods you have
+  labelled forbidden are usually the ones a binge is built from.</li>
+  <li><strong>Name your window.</strong> Nearly everyone has one — a time of day
+  and a set of conditions. Yours is probably specific and predictable, and once
+  you can name it you can put something else in it.</li>
+  <li><strong>Do not skip the next meal to compensate.</strong> That is the move
+  that guarantees a repeat, and it feels like the responsible thing, which is
+  what makes it so hard to give up.</li>
+  <li><strong>Tell one person.</strong> Secrecy is not a side effect of this. It
+  is load-bearing.</li>
+</ul>
+
+<h2>When to talk to somebody in person</h2>
+<p>This page is not a diagnosis and neither is the check-in above. Please talk to
+a doctor — not an app — if you are making yourself sick, using laxatives or
+diet pills, exercising to make up for eating, if your weight is changing fast in
+either direction, or if any of this has your day organised around it. Those are
+treatable and there are people who do nothing else. Going is not an
+overreaction.</p>
+<p>In the US, the National Alliance for Eating Disorders helpline is
+<a href="tel:18666621235">1-866-662-1235</a>, staffed by licensed clinicians. If
+you are in crisis, call or text <strong>988</strong>.</p>
+
+<h2>If you want something to use tonight</h2>
+<p>The app has a track for this — a day counter that never shames a slip, tools
+for the twenty minutes when it builds, and a private journal nobody reads. Free,
+no card, and it works with no account and no name. And if the person you are
+worried about is somebody else, there is
+<a href="/for-her">a whole side built for you instead</a>.</p>
+<p>More reading: <a href="/how-to-stop-binge-eating">how to stop binge eating</a>.</p>
+</article>
+
 </body>
 </html>

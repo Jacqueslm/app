@@ -53,7 +53,9 @@ const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 // without them. Overridable if Friendly ever needs to think harder.
 const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const FREE_CHAT_LIMIT = 3;
+// Friendly is Pro-only (Jacques, 24 Aug 2026). Zero free chats server-side -
+// the client copy points free users to the always-free SOS tools and 988.
+const FREE_CHAT_LIMIT = 0;
 const PRO_CHAT_LIMIT = 30;
 
 // Stripe webhook signature verification needs the raw request body, so this route is
@@ -229,6 +231,22 @@ app.get('/hangxiety', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'hangxiety.html'));
 });
 
+// Three pages built 26 Aug around long-form videos that already existed and had
+// nowhere to live. Each one is written for the winnable long tail, not the head
+// term - the head terms here (alcohol withdrawal, quit vaping) belong to
+// treatment chains with medical review boards and we are not going to take them.
+app.get('/alcohol-withdrawal-timeline', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'alcohol-withdrawal-timeline.html'));
+});
+
+app.get('/quit-vaping', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'quit-vaping.html'));
+});
+
+app.get('/how-to-stop-watching-porn', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'how-to-stop-watching-porn.html'));
+});
+
 // The partner audience's two biggest search terms, added 2026-08-12 after a
 // live Semrush pull: `codependency` (33,100/mo) and `al anon` (33,100/mo)
 // together outweigh anything else this side of the door, and the site had no
@@ -257,7 +275,7 @@ app.get('/reviews', (req, res) => {
 // The page used to read data/reviews.json, a file only Jacques could edit by
 // hand. So there was no path from "this helped me" to a published review, and
 // the page said "no reviews yet" indefinitely. These four routes are that path.
-// Nothing is published automatically: a review sits pending until the owner
+// Reviews publish immediately (Jacques, 23 Aug 2026); the owner is emailed
 // approves it, which keeps the page's promise - every quote from a real person,
 // none invented - while making it possible for the quotes to exist at all.
 app.get('/api/reviews/public', (req, res) => {
@@ -275,7 +293,22 @@ app.post('/api/reviews', requireAuth, (req, res) => {
   if (body.length < 10) return res.status(400).json({ error: 'Tell us a little more than that.' });
   if (body.length > 600) return res.status(400).json({ error: 'Keep it under 600 characters.' });
   db.upsertReview(req.userId, name, whenLabel, body, Math.round(stars));
-  res.json({ ok: true, pending: true });
+  // Straight to the site (Jacques, 23 Aug 2026) - and straight to his inbox,
+  // so a bad one can be pulled from the admin page the same hour it lands.
+  if (DIAG_OWNER_EMAIL) {
+    emailer.sendEmail({
+      to: DIAG_OWNER_EMAIL,
+      subject: `New review on /reviews: ${stars}★ from ${name}`,
+      text: `${name}${whenLabel ? ' (' + whenLabel + ')' : ''} - ${stars} stars
+
+${body}
+
+It is already live at ${process.env.APP_URL || 'https://www.turnsomedayintodayone.com'}/reviews
+Hide it from the admin page if it doesn't belong.`,
+      force: true,
+    }).catch(() => {});
+  }
+  res.json({ ok: true, pending: false });
 });
 app.get('/api/reviews/queue', requireAuth, (req, res) => {
   if (!isOwnerRequest(req)) return res.status(403).json({ error: 'Not available.' });
@@ -295,6 +328,13 @@ app.post('/api/reviews/action', requireAuth, (req, res) => {
 // drunk meaning / definition / syndrome / alcoholic dry drunk / dry drunkenness.
 // Sober and still the same person. Both audiences search it - the one who
 // stopped and the one living with them - so the page carries a CTA for each.
+// The partner-program page for treatment centers and sober living homes. A real
+// page on his own domain beats a PDF attachment in a cold email: nothing to
+// open, it survives forwarding, and a director who Googles him lands here.
+app.get('/for-programs', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'for-programs.html'));
+});
+
 app.get('/dry-drunk', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dry-drunk.html'));
 });
@@ -662,7 +702,20 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
   // isOwner lets the client skip owner-only calls (update check, diagnostics)
   // for everyone else, instead of probing them and logging 403s in every
   // regular user's console.
-  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL) });
+  res.json({ email: user.email, isOwner: !!(DIAG_OWNER_EMAIL && user.email === DIAG_OWNER_EMAIL),
+    reminderWindow: db.getReminderWindow(req.userId) });
+});
+
+// The reminder window as its own setting: written only on an explicit change,
+// adopted by every device at boot, read by the push scheduler ahead of the
+// state blob - so no stale sync can reset it.
+app.post('/api/reminder-window', requireAuth, (req, res) => {
+  const s = Number(req.body?.start), e = Number(req.body?.end);
+  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 0 || s > 23 || e < 0 || e > 23) {
+    return res.status(400).json({ error: 'Hours must be 0-23.' });
+  }
+  db.setReminderWindow(req.userId, s, e);
+  res.json({ ok: true });
 });
 
 app.get('/api/state', requireAuth, (req, res) => {
@@ -752,6 +805,188 @@ app.get('/admin/stats', (req, res) => {
     return res.status(403).type('text/plain').send('Only the app owner can view stats.');
   }
   res.sendFile(path.join(__dirname, '..', 'admin-stats.html'));
+});
+
+// ─── Couple link: two accounts, one Together table ───────────────────────────
+// The link carries ONLY the shared Together progress and a nudge - by design
+// there is no way to see a partner's clock, journal, slips, or anything else.
+function coupleStatusFor(userId) {
+  const row = db.coupleRowFor(userId);
+  if (!row) return { linked: false, pending: false };
+  if (!row.user_b) return { linked: false, pending: true, code: row.code, togetherDone: row.together_done };
+  const partner = db.couplePartnerOf(userId);
+  return {
+    linked: true,
+    pending: false,
+    partnerName: (partner && partner.name) || 'your partner',
+    togetherDone: row.together_done,
+    nudgeAt: row.nudge_at || null,
+    nudgeFromPartner: !!(row.nudge_from && row.nudge_from !== userId),
+  };
+}
+app.get('/api/couple', requireAuth, (req, res) => {
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/create', requireAuth, (req, res) => {
+  db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/join', requireAuth, (req, res) => {
+  const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
+  if (out.error) {
+    const msg = {
+      'already-linked': "You're already linked. Unlink first if this is a new start.",
+      'bad-code': "That code doesn't match anything. Check it with your partner - letters only, no zeros.",
+      'code-used': 'That code has already been used.',
+      'own-code': "That's your own code - your partner enters it on their phone.",
+    }[out.error];
+    return res.status(400).json({ error: msg });
+  }
+  const partner = db.couplePartnerOf(req.userId);
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'You two are linked',
+      body: `${(req.body && req.body.name) || 'Your partner'} joined your Together table. Ten minutes a day - same table, both phones.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json(coupleStatusFor(req.userId));
+});
+app.post('/api/couple/unlink', requireAuth, (req, res) => {
+  db.unlinkCouple(req.userId);
+  res.json({ ok: true });
+});
+app.post('/api/couple/done', requireAuth, (req, res) => {
+  const d = db.setCoupleTogetherDone(req.userId, req.body && req.body.day);
+  if (d === null) return res.status(400).json({ error: 'Not linked.' });
+  res.json({ togetherDone: d });
+});
+const coupleNudgeLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 6, standardHeaders: true, legacyHeaders: false });
+app.post('/api/couple/nudge', requireAuth, coupleNudgeLimiter, (req, res) => {
+  const row = db.setCoupleNudge(req.userId);
+  if (!row) return res.status(400).json({ error: 'Not linked yet.' });
+  const partner = db.couplePartnerOf(req.userId);
+  const me = row.user_a === req.userId ? row.name_a : row.name_b;
+  if (partner) {
+    push.sendToUser(partner.id, {
+      title: 'Ten minutes at the table?',
+      body: `${me || 'Your partner'} is asking for today's ten minutes together - when you're both ready.`,
+      url: '/app',
+    }).catch(() => {});
+  }
+  res.json({ ok: true });
+});
+
+// ─── The letter is the invitation ────────────────────────────────────────────
+// Nobody installs a recovery app because a friend asked them to. They open a
+// letter because somebody they love wrote it. So the share link carries the
+// letter, and the account offer only appears after it has been read.
+//
+// Privacy shape: the sender's account is never exposed through the token, the
+// letter body never leaves the row, and the recipient stays anonymous until the
+// moment they choose to make an account. Tokens are 128-bit and expire.
+const letterCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'That is a lot of letters in one hour. Try again shortly.' },
+});
+
+function letterOrigin(req) {
+  const env = (process.env.PUBLIC_ORIGIN || '').replace(/\/$/, '');
+  if (env) return env;
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'https').split(',')[0].trim();
+  return `${proto}://${req.get('host')}`;
+}
+
+app.post('/api/letter/share', letterCreateLimiter, requireAuth, (req, res) => {
+  const { body, senderType, senderName, recipientName } = req.body || {};
+  const text = typeof body === 'string' ? body.trim() : '';
+  if (text.length < 40) {
+    return res.status(400).json({ error: 'There is not enough of the letter here to send yet.' });
+  }
+  const side = ['recovering', 'partner', 'both'].includes(senderType) ? senderType : 'recovering';
+  const token = crypto.randomBytes(16).toString('hex');
+  const row = db.createLetter(req.userId, token, side, senderName, recipientName, text);
+  analytics.event(req, 'LetterSent', { side });
+  res.status(201).json({
+    url: `${letterOrigin(req)}/l/${row.token}`,
+    token: row.token,
+    expiresAt: row.expires_at,
+    expiresInDays: db.LETTER_TTL_DAYS,
+  });
+});
+
+// Revoking is one call and it is absolute: a letter shared in a moment of
+// courage has to be retractable in a moment of regret.
+app.post('/api/letter/revoke', requireAuth, (req, res) => {
+  res.json({ revoked: db.revokeLetters(req.userId) });
+});
+
+// The reader's endpoint. Public by necessity - the recipient has no account
+// yet, that is the entire point - so it returns only what the page renders and
+// nothing that identifies the sender's account.
+app.get('/api/letter/:token', (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'gone' });
+  const open = db.markLetterOpened(req.params.token);
+  if (open && open.first) analytics.event(req, 'LetterOpened', { side: row.sender_type });
+  res.json({
+    body: row.body,
+    senderName: row.sender_name,
+    recipientName: row.recipient_name,
+    senderType: row.sender_type,
+    youAre: db.LETTER_OPPOSITE[row.sender_type] || 'partner',
+    alreadyJoined: !!row.accepted_at,
+  });
+});
+
+// One tap: the account is created on the opposite side of whoever wrote the
+// letter, and if the sender has a Together table open, the two are linked on
+// the spot. No code to type, no second screen.
+app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
+  const row = db.getLetterByToken(req.params.token);
+  if (!row) return res.status(404).json({ error: 'This letter is no longer available.' });
+  if (row.accepted_at) return res.status(409).json({ error: 'This letter has already been used to start an account.' });
+  const { email, password, name } = req.body || {};
+  if (!email || !EMAIL_RE.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address.' });
+  }
+  if (!validCredential(password)) {
+    return res.status(400).json({ error: 'Use a password of at least 8 characters, or a 4-6 digit PIN.' });
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  if (db.getUserByEmail(normalizedEmail)) {
+    return res.status(409).json({ error: 'An account with that email already exists. Sign in instead.' });
+  }
+  const userId = db.createUser(normalizedEmail, hashPassword(password), null);
+  try { db.setUserUtm(userId, { utm_source: 'letter', utm_medium: 'invite', utm_campaign: row.sender_type }); } catch (_) {}
+  db.markLetterAccepted(req.params.token, userId);
+  // Link the two Together tables if the sender already has one waiting. A
+  // failure here must never cost the account that was just created.
+  try {
+    const link = db.createCoupleLink(row.user_id, row.sender_name || '');
+    if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
+  } catch (_) {}
+  setSessionCookie(res, userId);
+  const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
+  res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
+  analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });
+  try {
+    push.sendToUser(row.user_id, {
+      title: 'They read your letter',
+      body: `${String(name || '').slice(0, 40) || 'They'} opened it and made an account. You are not carrying this alone now.`,
+      url: '/app',
+    }).catch(() => {});
+  } catch (_) {}
+  const user = db.getUserById(userId);
+  if (user) {
+    const w = emailer.welcomeEmail();
+    emailer.sendSequenceEmail(user, 'transactional', 1, w.subject, w.text).catch(() => {});
+  }
+});
+
+// The reader's page. Short URL on purpose - it gets pasted into a text message.
+app.get('/l/:token', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'letter.html'));
 });
 
 app.get('/api/account/export', requireAuth, (req, res) => {
@@ -1020,7 +1255,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   const isPro = user && billing.getBillingStatus(user).isPro;
   const used = db.getChatCount(req.userId, todayUTC());
   if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: `Daily Friendly chat limit reached. Upgrade to Pro for up to ${PRO_CHAT_LIMIT} chats a day.` });
+    return res.status(429).json({ error: `Friendly is a Pro feature. Upgrade for up to ${PRO_CHAT_LIMIT} chats a day.` });
   }
   if (isPro && used >= PRO_CHAT_LIMIT) {
     return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });

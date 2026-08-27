@@ -11,33 +11,37 @@ rejects updates from non-regulated health apps that bury or omit it.
 ```
 This app is not a medical device and does not diagnose, treat, cure, or prevent any medical condition. It is a wellness and habit-support tool. If you are struggling with your health, please consult a qualified healthcare professional.
 
-Turn Someday Into Day One is a private daily companion for anyone trying to build a steadier relationship with a habit — and for the people who love them.
+Turn Someday Into Day One is a private daily companion for addiction recovery — for anyone working on drinking, vaping, gambling, porn, food, or any habit that has been running the show — and for the people who love them.
 
-It is built around one idea: the hardest part is rarely knowing what to do. It is the moment at 11pm when you are alone with it. So the app is designed for that moment, not for a spreadsheet.
+It is built around one idea: the hardest part of recovery is rarely knowing what to do. It is the moment at 11pm when you are alone with it. So the app is designed for that moment, not for a spreadsheet.
 
 WHAT IS INSIDE
 
-• A day counter that shows how long you have been at this, and a lifetime total that never resets — because a hard day should not erase a hard year.
+• A sober day counter that shows how long you have been at this, and a lifetime total that never resets — because a hard day should not erase a hard year of sobriety.
 
-• A 30-day guided program, written in plain language, one short lesson a day. There are separate tracks depending on what you are working on, including a track written specifically for people supporting someone else.
+• A 90-day recovery program, written in plain language, one short lesson a day. Separate tracks for quitting drinking, vaping, gambling, porn and more — including a track written specifically for people supporting someone else.
 
-• A companion you can talk to, any hour, that responds to what you actually typed rather than a menu.
+• Every lesson read aloud, in a real voice. Six narrators, including the founder reading all ninety days himself. Listen with the screen off, on the drive, or when reading is too much.
 
-• An SOS screen for the moment itself: guided breathing, grounding, and a hands-free "talk me through it" walkthrough for when reading is too much.
+• An SOS screen for the craving itself: guided breathing, grounding, and a hands-free "talk me through it" walkthrough for the worst ten minutes.
 
 • A private journal with mood, and prompts if you do not know where to start.
 
-• Progress you can see — streaks, hours, and shareable milestone cards that show a number and nothing else, so what you are working on stays yours.
+• Progress you can see — sober streaks, hours won back, and shareable milestone cards that show a number and nothing else, so what you are working on stays yours.
+
+• A climb up ninety carved steps, one for every day you show up. A slip dims the sky and never takes a step back.
+
+• Ten-minute narrated stories from people who have lived it — addiction and recovery from both sides: the person using and the person who loves them. New ones every week.
 
 • An app lock and a discreet mode: you can change the app's name and icon on your home screen so nothing on your phone announces what this is.
 
 FOR THE PERSON SUPPORTING SOMEONE
 
-If you are not the one struggling but you love someone who is, this app is not an afterthought for you. There is a track written for you, in your voice, about the things that are actually yours to carry — the anger you learned to predict, boundaries, and getting your own life back. It does not ask you to fix anyone.
+If you are not the one struggling but you love someone who is, this app is not an afterthought for you. Almost nothing in the sobriety space is built for the family — the wife, husband, parent or friend. Here you get your own track, in your own voice, about the things that are actually yours to carry — boundaries, the anger you learned to predict, and getting your own life back. It does not ask you to fix anyone.
 
 PRIVACY
 
-Your journal, your notes, and what you say to the companion are yours. There are no ads, no trackers following you around the internet, and nothing about your progress is sold or shared. The full policy is in plain language, in the app and at the link on this listing.
+Your journal, your notes, and what you say to the companion are yours. There are no ads, no trackers following you around the internet, and nothing about your recovery is sold or shared. The full policy is in plain language, in the app and at the link on this listing.
 
 IF YOU ARE IN CRISIS
 
@@ -45,13 +49,13 @@ This app is not an emergency service. If you are in danger or thinking about har
 
 WHAT COSTS MONEY
 
-The app is free to download and the core of it is free to keep using — the day counter, the first half of every program, the SOS tools, the journal you can type or speak into, and the companion. There is no card required to start and no time limit on the free version.
+The app is free to download and the core of it is free to keep using — the sober day counter, the first half of every program, the SOS tools, reminders, insights and weekly reports, and the journal you can type or speak into. No card required to start and no time limit on the free version.
 
-Pro is an optional in-app subscription that unlocks the rest: the second half of every program, more daily conversations, weekly reports, reminders and the advanced pattern tools. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time from your Google account in two taps.
+Pro is an optional subscription that unlocks the rest: the second half of every recovery program, Friendly — an AI companion to talk to at any hour — and the live community rooms. Monthly and yearly plans both begin with a 7-day free trial, and there is a one-time lifetime option. You can cancel any time in two taps.
 
 WHO MADE THIS
 
-One person, who needed it first and could not find it. It is not a clinic and does not pretend to be. It is the thing I wanted at 2am, built properly.
+One person, addicted for 38 years and free at 50, who needed this first and could not find it. It is not a clinic and does not pretend to be. It is the thing I wanted at 2am, built properly.
 ```
 
 **Character count is checked in `_char-counts.txt` in this folder.**
@@ -60,7 +64,13 @@ One person, who needed it first and could not find it. It is not a clinic and do
 > It has been free since 5.5.0, and the first fifteen days of *every* lesson pack
 > are free (not one pack). A listing that oversells the paywall is both wrong and
 > the wrong way round — it hides the thing that makes people stay.
-> **The live listing in Play Console still has the old wording. Paste this one in.**
+>
+> **Revised again 26 Aug (evening), NOT yet pasted.** The 3768-char version went
+> live that morning — then a keyword audit found it contained ZERO instances of
+> recovery, sober, addiction or quit, the exact words Play indexes. This version
+> (3,918 chars) weaves them in naturally: recovery 6, sober/sobriety 5,
+> addiction 2, quit 1, family named once. Same structure, same disclaimer first,
+> still no outcome claims. **Paste this one over the morning version.**
 
 ---
 

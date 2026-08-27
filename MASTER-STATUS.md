@@ -1,8 +1,428 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 18, 2026.
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 26, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## 🔴 27 AUG 2026 — NOBODY CAN BUY PRO ON ANDROID. THE "COSMETIC" BUG IS A REVENUE BUG.
+
+**Jacques hit "Upgrade unavailable — Could not complete that purchase" on his
+own phone.** His screenshot shows the browser address bar at the top, which is
+the whole story.
+
+**The chain, and it is not a guess:**
+1. Digital Asset Links verification fails (the long-standing open bug in
+   `TurnSomeDayIntoOneday/HANDOFF.md`).
+2. So the Android app falls back to **Custom Tabs** instead of running as a
+   verified TWA — that is the address bar.
+3. The upgrade path calls `window.getDigitalGoodsService('https://play.google.com/billing')`
+   at `index.html:11515`. **That function exists only inside a verified TWA.**
+4. In Custom Tabs it is undefined, the call throws, and the catch at the end of
+   `startStorePurchase` prints the exact words he saw.
+
+**Nothing is charged and nothing can be.** Every Android purchase has been
+failing this way since launch.
+
+**HANDOFF.md said this bug was "cosmetic only" and listed purchases among the
+things that still work.** That line was wrong and is now corrected. It is the
+reason "buy Pro on a real phone" sat on the open list for weeks looking like an
+untested path rather than a broken one.
+
+**Strongest lead, untested, fits both symptoms:** both devices are Samsung. A
+TWA is hosted by the device's default browser, and the Play Billing bridge is a
+**Chrome** feature — Samsung Internet does not provide it. Samsung Internet as
+default would produce the address bar *and* the dead purchase button together.
+**First test: make Chrome the default browser, force-stop the app, reopen.**
+Thirty seconds, costs nothing.
+
+If that is not it, the next step is `adb logcat` over USB to read Chrome's
+actual rejection reason; platform-tools are already on his PC under
+`C:\Users\<user>\.bubblewrap\`.
+
+**Do not describe this as cosmetic again.**
+
+---
+
+## 🗑 26 AUG 2026 — THE FOUNDER VOICE IS REMOVED FROM THE APP
+
+**Jacques's instruction: "dispose of jacques voice."** Done.
+
+**The one conflict, in plain terms.** The five narrator voices are public
+domain and have been fine since 8 Aug. His own cloned voice was a different
+thing: the recording is his, but the software that turned it into 1,150 new
+sentences — Coqui **YourTTS** — is licensed **CC BY-NC-ND 4.0**,
+non-commercial. The app charges money. That is the whole issue, and it is the
+reason two conversations could disagree: one was talking about the five
+narrators (fixed), the other about the founder voice (not).
+
+**Removed:** the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, 1,150 entries from
+`data/lesson-audio-manifest.json`. Manifest now reads 1,243 × 5 voices.
+
+**Nobody is left stranded.** `vgVoiceKey()` and `lessonVoiceKey()` already fall
+back to Warm for an unknown key — verified in a browser, both return `warm`
+when the saved setting is `jacques`. Zero page errors, both inline scripts
+parse.
+
+**Left alone on purpose:** the 1,150 mp3 files on the `lesson-audio` branch.
+Orphaned, nothing points at them, not deleted.
+
+**Never re-add a founder voice with YourTTS or XTTS v2.** Piper fine-tuned on
+his own recordings is the clean route. Detail in
+`reference/asset-licenses-2026-08-08.md`.
+
+---
+
+## 🔬 26 AUG 2026 — WHY TWO PAGES AREN'T INDEXED: THE ALTERNATIVE PAGES ARE 95% THE SAME PAGE
+
+**Search Console, 26 Aug.** 40 URLs in the sitemap, **32 indexed**. The 13
+"not indexed" break down as: 7 blocked by robots.txt (all deliberate — admin,
+api, server, go, unsubscribe, and the private letters), 1 alternate-canonical,
+3 discovered-not-indexed, 2 crawled-not-indexed.
+
+**The 7 robots.txt blocks are NOT a bug.** All 40 sitemap URLs were checked
+against the robots rules: none is blocked. Nobody should "fix" this — `/l/`
+and `/letter.html` are meant to be uncrawlable.
+
+**Crawled – currently not indexed (2):** `/fortify-app-alternative` and
+`/best-recovery-apps`, both last crawled 19 Aug.
+
+### The measurement
+
+The 14 alternative pages average **95.3% identical text** to each other.
+Per page, only about a third of the words are unique:
+
+| Page | Words | Unique | Unique % |
+|---|---|---|---|
+| i-am-sober-alternative | 680 | 231 | 34.0% |
+| betblocker-alternative | 642 | 221 | 34.4% |
+| covenant-eyes-alternative | 669 | 226 | 33.8% |
+| ever-accountable-alternative | 645 | 216 | 33.5% |
+| blockerx-alternative | 658 | 220 | 33.4% |
+| **fortify-app-alternative** | **671** | **219** | **32.6%** |
+| quitnow-app-alternative | 641 | 203 | 31.7% |
+| nomo-app-alternative | 619 | 194 | 31.3% |
+| brainbuddy-alternative | 638 | 194 | 30.4% |
+| loosid-app-alternative | 632 | 191 | 30.2% |
+| reframe-app-alternative | 647 | 195 | 30.1% |
+| sunnyside-app-alternative | 620 | 184 | 29.7% |
+| quittr-app-alternative | 624 | 176 | 28.2% |
+| sober-time-alternative | 643 | 174 | 27.1% |
+
+Each page carries roughly 200 words of real competitor-specific writing —
+which is good writing, genuinely different per competitor — wrapped in ~450
+words of identical template. Google indexed 13 of the 14 and dropped one.
+
+**Fortify is not the weak one.** At 32.6% it is mid-pack. The choice of which
+page to drop is close to arbitrary, which means **the other 13 sit on the same
+foundation**. `sober-time` (27.1%) and `quittr` (28.2%) are the most exposed.
+
+### The fix, when it is worth doing
+
+Raise the unique share, don't add more pages. Per competitor: real current
+price, what it actually does well, the specific gap, who should pick it over
+this app, and one honest line where the competitor wins. Roughly 500 unique
+words per page flips the ratio. Trimming shared boilerplate helps as much as
+adding words.
+
+`/best-recovery-apps` (739 words) is a separate problem — a listicle head term
+contested by sites running 3,000-word comparisons.
+
+### Also worth correcting
+
+The 26 Aug handover says 10–15 search impressions a day. The export for
+1–20 Aug averages **6.7/day** (last four days: 7, 10, 5, 10). Still up from
+zero four weeks ago; the handover overstates it.
+
+**17 August was the breakthrough** — indexed 24 → 32 and not-indexed 21 → 13
+in a single day.
+
+---
+
+## ✅ 26 AUG 2026 — CONTENT RATING RE-DONE AND SAVED
+
+**Jacques re-did the full IARC questionnaire, saved it and sent it for review.**
+Fully closed. Do not re-walk it, do not ask him to check it again.
+
+The full answer set — every section, with the code evidence behind the Rooms
+answers — is recorded in `TurnSomeDayIntoOneday/store-listing/00-STATUS.md`
+item 3. Anyone touching the content rating again reads that table first.
+
+**A correction I have to record against myself.** Earlier today I told him the
+July certificate had the two user-interaction questions answered No. I read
+that from them being absent from the IARC Summary. It is wrong: **the Summary
+does not display the User Content Sharing answers at all.** Proved on screen —
+the answer was set to Yes and the Summary still showed nothing. Never infer
+those answers from the Summary.
+
+**The real trap, and it is a live one.** A new IARC questionnaire starts
+**blank**. Nothing carries over. The first pass silently left Online Content,
+the Controlled-Substance access lines and "Can purchase digital goods" as No —
+all three were on the July certificate. Saving it would have produced a
+*worse* certificate than the one it replaced, which is the direction Google's
+own warning on that page calls misrepresentation. **Compare the new Summary
+against the previous certificate before saving.** Caught before saving.
+
+**Ratings unchanged:** ESRB Teen / 14+, PEGI 12, USK 12, IARC 12+, ClassInd 14.
+
+**Everything on the Play listing is now finished.** Description, short
+description, screenshots, feature graphic, video, content rating — all done and
+submitted. Only two things remain on Play at all:
+1. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+2. The developer-name change, sitting in Google's review. Nothing to do but wait.
+
+---
+
+## ✅ 26 AUG 2026 — STORE LISTING: BOTH UPLOADS DONE, VIDEO DONE
+
+**Jacques, 26 Aug 2026: "uploads are done."** The Play review cleared and both
+optional assets went up: `07-chat.png` (the re-shot Friendly panel, added as
+screenshot 7) and the rebuilt `feature-graphic-1024x500.png`. The store listing
+video is done too — on the channel, Video field handled.
+
+**The store listing is now finished.** Description, short description,
+screenshots, feature graphic, video: all live and correct. Do not re-check any
+of it and do not ask him to upload anything again.
+
+**Still open on Play, and only these:**
+1. Content rating — confirm the two user-interaction answers say Yes (Rooms
+   lets people post and read each other's writing). Not a release.
+2. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+3. Developer name → "Turn Someday Into Day One" — in Google review, 1–2 days
+   from 26 Aug. Nothing to do but wait.
+
+---
+
+## 🗑 26 AUG 2026 — ALL SCRIPTS REMOVED FROM THE REPO (Jacques's instruction)
+
+**"remove all scripts from repo" — both kinds, his call, confirmed.** 47 files
+deleted:
+
+- **The 7 written scripts:** `SCRIPTS.md`, `AI-SCENES.md`, `LAUNCH-SCRIPTS.md`,
+  `EPISODE-2.md`, `EPISODE-2-PROMPTS.md`, `EPISODE-3.md`, `EPISODE-3-PROMPTS.md`.
+- **All 40 code/tool scripts** (`.py`, `.sh`, `.bat`, `.command`) — including
+  `tools-md-to-pdf.py`, `tools/make-film.py`, the `TurnSomeDayIntoOneday/tools/`
+  audio generators, `store-listing/make-captioned-screenshots.py`, the
+  `reference/` card makers, the Studio workers and the Start-app launchers.
+
+**What this costs, so no session is surprised by it:**
+- **RULE ONE's PDF tool was restored the same day, at his instruction** — `tools-md-to-pdf.py` is back in the repo and working. It is the one script that survives.
+- **`--png` page images need `pip install pypdfium2`** on a fresh machine, and the tool itself needs `pip install reportlab`. Neither is vendored.
+- **Lesson/story audio cannot be regenerated** without the generators.
+- **The Start-app / Start-Studio launchers are gone** from the repo.
+
+**Nothing is lost — git keeps all of it.** Everything above is intact in commit
+`118bf7a`. To bring any single file back:
+
+```
+git checkout 118bf7a -- tools-md-to-pdf.py
+```
+
+To bring all 47 back at once:
+
+```
+git checkout 118bf7a -- $(git diff --name-only 118bf7a HEAD --diff-filter=D)
+```
+
+Do not re-ask Jacques whether he meant this. He was shown the consequence and
+chose it.
+
+---
+
+## ✅ 26 AUG 2026 — BILLING LIBRARY 8: ALREADY UPDATED. THERE WAS NO EXTENSION.
+
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The Android
+shell is on a current Google Play Billing Library. There is nothing to fix,
+nothing to watch for on Maven, and no Oct 31 date to work towards.
+
+**The extension that was granted was the Android 16 target-SDK one** (31 Aug →
+1 Nov, requested by Jacques 17 Aug). Earlier notes in this file, in
+`TurnSomeDayIntoOneday/HANDOFF.md` and in `store-listing/00-STATUS.md` attached
+that extension to Billing 8 instead. That was wrong. All three are corrected.
+
+**Any session that sees a Billing Library warning in Play Console:** it is
+stale console text, not work. Do not raise it with Jacques as news, do not plan
+a bubblewrap rebuild around it, and do not tell him to request an extension he
+never needed.
+
+---
+
+## ✅ 26 AUG 2026 — END OF DAY: LIVE ON PLAY, STORE LISTING FINISHED
+
+**The app went live on Google Play at 7:59 AM.** Production, full rollout, 177
+countries, 20,237 devices, `com.turnsomedayintodayone.app`.
+
+### Shipped today
+- **v5.3** — the letter is the invitation. Both letters mint a private expiring
+  link; the reader sees the letter first, then one tap creates their account on
+  the opposite side and links the two Together tables with no code typed.
+  "Get a code" is no longer the front door.
+- **v5.4** — text follows the Android system font-size setting. The audit's new
+  130%-root pass found all 638 font sizes were px, so the OS accessibility
+  setting did nothing. All converted to rem; pixel-identical at default.
+- **v5.5** — one-time Play rating ask after the day-7+ lesson (never on a slip
+  day, "not now" is permanent), plus a feature graphic that says what the app
+  is instead of only its name.
+- **Four thin web pages rebuilt** (codependency-test, the binge quiz, for-her,
+  when-he-drinks) from ~250-440 words to ~1000. Two were quizzes whose content
+  lived inside `display:none` steps — a crawler saw the intro and stopped.
+- **Three new pages** around videos that had nowhere to live:
+  /alcohol-withdrawal-timeline, /quit-vaping, /how-to-stop-watching-porn.
+- **Videos on their matching pages** — the channel and the site had never been
+  connected; none of the 37 pages linked to a single video.
+- **A14** "The sound of her car" — the male supporter piece, 15.2s.
+- **Play store listing** — full description rewritten with the category words
+  it was missing entirely (recovery ×6, sober/sobriety ×5, addiction ×2), new
+  short description, Climb screenshot in, stale Friendly screenshot out.
+- **Developer name** changed from "Jacques Malone" to "Turn Someday Into Day
+  One" — in Google review, 1–2 days.
+
+### Two loops that wasted his time today — do not repeat
+1. **The description was confirmed "done" before it was checked.** It went live
+   in the morning, then a keyword audit found it contained ZERO instances of
+   recovery/sober/addiction/quit — and he had to paste a second version over
+   the first. **Audit content against its purpose BEFORE calling it finished.**
+2. **The Friendly screenshot was removed, then restored.** Removing a real
+   feature is not how you fix a misleading caption. He was right; the caption
+   was the problem, and the underlying image was also stale.
+
+### What is actually left
+See `TurnSomeDayIntoOneday/store-listing/00-STATUS.md` — 2 optional uploads,
+1 content-rating check, 1 real-phone purchase test. Nothing is urgent and
+nothing has a deadline this week.
+
+---
+
+## ✅ 26 AUG 2026 — APP v5.4: TEXT SCALES WITH THE ANDROID FONT-SIZE SETTING
+
+Jacques's instruction: extend tools/bigtext-audit.js with an Android font-scale
+mode and an overflow detector, fix everything found, ship.
+
+**What the audit found.** The tool now sets the root font to 130% (how the OS
+"Font size" accessibility setting reaches a TWA) and flags any text that does
+not move. First run: 32 frozen element groups on the visible screens — because
+**every one of the app's 638 font-size declarations was in px**, which ignores
+the OS setting entirely. A user with large system fonts got no larger text
+anywhere except via our own in-app Bigger toggle.
+
+**The fix.** All 638 (629 terse + 9 spaced + 1 dynamic) converted px → rem at
+exact 1/16 fractions, so rendering at the default root is pixel-identical and
+the whole app now follows the OS font scale. Canvas draw code (share cards,
+climb) untouched — canvas does not use CSS units. The in-app Bigger toggle
+(zoom on .app) is independent and still works on top.
+
+**The audit now has four passes** (house rule 23 tool): screen bottoms
+reachable at Bigger, overlay tops/bottoms reachable, px-that-ignores-font-scale
+(grouped so 600 identical hits read as one line), and text overflow/truncation
+at 130% root (scroll containers exempt — clipping is what they are for).
+
+Verified: ALL CLEAR on all four passes after the conversion, zero overflow at
+130%, 11/11 server tests, all inline scripts parse. Version quadruple bumped
+5.3 → 5.4.
+
+---
+
+## ✅ 26 AUG 2026 — LIVE ON GOOGLE PLAY
+
+**Turn Someday Into Day One, release 2 (1.0.1), went Available on Google Play at
+7:59 AM on 26 Aug 2026.** Production track, full rollout, 177 of 177 countries,
+20,237 supported devices. `com.turnsomedayintodayone.app`.
+
+- Install base on 1.0.1 reads 0.00% because the 8 existing installs are still on
+  the July closed-test build (version code 1). They auto-update; this is not a
+  fault.
+- IARC content rating went live the same day. Global Rating ID
+  `d0b9a237-57f4-80e0-88d0-3f837bdfd04f` — reusable on any other IARC storefront
+  (Microsoft, Amazon, Xbox; Apple does not use IARC).
+- **The Billing Library 8 warning needs nothing done — the library is already
+  updated.** Corrected by Jacques 26 Aug: it is already on a current version and
+  **there was no extension** for it. (The extension that was granted was the
+  Android 16 target-SDK one, 31 Aug → 1 Nov.) The app shipped to Production with
+  the console warning standing, which proves it never blocked a release. Do not
+  re-explain this to Jacques as news and do not plan a rebuild around it.
+- **Remember the shape of this app.** The Android build is a TWA shell that
+  loads the website. Everything shipped through Railway (`claude/vibe-code-uwxxlk`)
+  reaches Play users with no new bundle and no review. A Play upload is only
+  needed for shell-level changes — billing library, icon, package config.
+
+**Store listing video — DONE (Jacques, 26 Aug 2026).** `content/store-video.mp4`
+is on the channel and the listing's Video field is handled. Do not ask him to
+upload it again.
+
+**ACTION still open:** paste the corrected `store-listing/02-full-description.md`
+into Play Console. The submitted listing still carries the old tier wording.
+
+---
+
+## ✅ 26 AUG 2026 — APP v5.3: THE LETTER IS THE INVITATION
+
+Jacques's instruction: turn both letters into the invite mechanism. Shipped as
+one version bump (5.2 → 5.3) across `APP_VERSION`, `sw.js` CACHE_NAME and both
+`package.json` files.
+
+**The idea.** Nobody installs a recovery app because a friend asked them to.
+They open a letter because somebody they love wrote it. So the letter now
+carries the invitation, and the account offer only appears *after* it has been
+read.
+
+**What ships:**
+
+1. **Both letters mint a private, expiring share link.** "Send them your letter"
+   posts the letter to `POST /api/letter/share`, which returns
+   `https://.../l/<32-hex-token>`. Tokens are 128-bit, live 30 days, and one live
+   letter per person per side — re-sending revokes the old link rather than
+   leaving readable copies around.
+2. **`/l/<token>` shows the letter first.** New page `letter.html`: brand, the
+   letter in full, the sender's name, and *then* the account offer. The reader
+   needs no account to read it. Copy is written twice — once for somebody being
+   handed a letter by a person in recovery (you are being asked to understand),
+   once for somebody handed one by a supporter (you are loved, and it has cost
+   something).
+3. **One tap creates the account on the opposite side.** `POST
+   /api/letter/:token/accept` creates the user, pre-sets them as supporter or
+   recovering (opposite of the sender), links the two Together tables server-side
+   so **no code is ever typed**, pushes "They read your letter" to the sender,
+   and drops a handoff flag the app reads on first boot (`adoptLetterHandoff()`)
+   so onboarding never re-asks a question the letter already answered.
+4. **"Invite partner" is gone.** The couples box no longer leads with "Get a
+   code" — the primary action is now **Send them your letter**, with the code
+   field demoted to "Were you handed a code instead?" `coupleCreate()` was
+   deleted; the link is created server-side on acceptance.
+5. **Milestone share cards are addressed.** If a partner name exists, the card
+   carries `For <first name>.` in green above the sign-off. First name only —
+   these images land in other people's feeds.
+6. **`/admin/stats` has a Letters block:** `letter_sent`, `letter_opened`,
+   `account_created_from_letter`, split by side and by week.
+
+**Judgement calls, flagged rather than buried:**
+
+- **The "both" letter has no send button.** That one is addressed to *the
+  version of you who needs it* and the note under it promises nobody else sees
+  it. Shipping "Send them your letter" there would make the app a liar, so the
+  send button and recipient field are hidden on that path only
+  (`setLetterSendVisible(false)`).
+- **`.ob-input` was invisible in this modal** — white text on white-8%, unusable
+  in light mode. The recipient field and the couple code field both now use the
+  same tokens as the letter field beside them.
+- **Offline / signed-out still sends.** If the link cannot be minted, the letter
+  goes as plain text exactly as it always did. Losing the link is worth less
+  than losing the moment.
+- **Revoke is one tap and absolute.** A letter shared in a moment of courage has
+  to be retractable in a moment of regret. Accepted letters stay readable so the
+  history stays honest.
+- **`robots.txt` now disallows `/l/` and `/letter.html`**, and the page carries
+  `noindex,nofollow,noarchive,nosnippet` plus `referrer: no-referrer`.
+
+**Verified, not assumed (house rule 17):** full flow run against a live server —
+signup → share → open → accept → both sides linked with no code. Re-accept 409s,
+unknown token 404s, short letter 400s, signed-out mint 401s, revoke kills a live
+link and leaves an accepted one. 11/11 server tests pass. `tools/bigtext-audit.js`
+reports ALL CLEAR (house rule 23). Zero console errors on the reader page and in
+the app. Screenshots went in the chat before pushing (house rule 24).
 
 ---
 
@@ -226,6 +646,15 @@ Nothing in the app carries a non-commercial or attribution-required licence.
   clip, not something you can sit inside for ten minutes. Rain at 4.8s repeats
   62 times a minute and the ear locks onto it. That is why the nature beds are
   synthesised and the music is his.
+**Video score library — `content/score/` (added 24 Aug 2026).** Separate from
+the meditation beds on purpose: these are 12-15 second stings, the right length
+to score an 8-10s Cause & Effect video and far too short to sit inside for ten
+minutes. Four to date, all Jacques's own Suno tracks on his commercial plan:
+Silent Impact 2, Silent Impact 3, The Last Breath, The Last Breath 2. Same
+incoming treatment as the beds (silence trimmed both ends, normalised to
+-20 LUFS / -3dB TP). Score videos from here; score meditation from
+`audio/meditation/`.
+
 - **Adding a track is one line** in `MED_SOUNDS`: file key, the label the button
   says word for word, and its category. A category with no tracks never draws;
   an empty array hides the picker completely.
@@ -248,7 +677,7 @@ Version quadruple 6.2 → 6.3 (index.html, sw.js, both package.json).
 2. **Faith card survives reload** — it only painted at the moment of choosing;
    `initApp()` now repaints it, so the spiritual choice persists visibly.
 3. **PRO IS NOW EXACTLY TWO THINGS (Jacques's call):** lesson/pack **days 16-30**, and
-   **30 Friendly chats/day vs 3**. Everything else is free. `openProTool()` gates nothing
+   **Friendly itself (Pro-only since 24 Aug 2026, up to 30 chats/day)**. The recovery tools are free. `openProTool()` gates nothing
    (16 tools freed). Also freed: smart reminders now actually fire, weekly reports
    generate, guided journal prompts + mood tags, habit coaching/celebration nudges,
    craving suggestions. **Biggest hidden gate removed:** Friendly used to intercept a
@@ -410,9 +839,92 @@ starts a fresh run with no connectors attached. So the honest sequence is:
 search once, and if Buffer is not there, hand Jacques ONE link to approve, or
 the raw video URL to paste into Buffer himself. Anything else wastes his time.
 
-**Buffer queue times are 8am and 6pm daily** (Jacques changed them 19 Aug).
-Two slots a day — posts go to the QUEUE, never publish-now, and the queue
-paces them.
+**Buffer queue is ONE slot a day** (Jacques changed it 24 Aug; was 8am+6pm
+from 19 Aug). One post daily — posts go to the QUEUE, never publish-now, and
+the queue paces them. Plan content volume around one slot: a new script or
+video queued today publishes on the next free day, not the same day.
+
+**Queue reset + channel reality (Jacques, 24 Aug 2026):**
+- Everything queued up to 24 Aug he has ALREADY POSTED MANUALLY — the old
+  queue contents are dead history. Do not re-queue, re-send, or count any
+  pre-24-Aug piece as pending; treat the queue as empty from here.
+- **TikTok: manual only.** Buffer's TikTok connection keeps rejecting posts,
+  so he posts TikTok himself, natively (which is better anyway - in-app
+  sounds). Never plan TikTok through Buffer.
+- **Buffer carries exactly two channels: Facebook + YouTube (Shorts).**
+- **Long-form YouTube: manual only.** He uploads long-form himself; Buffer is
+  only for the short vertical pieces.
+
+**PUSH EVERYTHING, ALWAYS (Jacques, 27 Aug 2026).** Do not ask whether to
+push, and do not leave commits sitting locally. Every commit goes to all three
+branches the same way house rule 18 has always said: the working branch, then
+`main` (the record), then `claude/vibe-code-uwxxlk` (what Railway deploys).
+This replaces the "notify me, don't push anything" instruction from earlier the
+same day — that one was for a single read-only audit, not standing. A local
+commit dies with the container; that is how the 18 Aug marketing batch was lost.
+
+**Videos are handed over, not committed — music stays (Jacques, 27 Aug 2026).**
+
+- **Finished .mp4s go to him in chat, not into git.** He keeps them in his own
+  file and they live on social media, so the repo is not their home and a copy
+  in git is dead weight in a public repo that stores every version forever.
+- **Music and audio DO stay in the repo** — `content/score/`, `audio/`, and
+  anything else that gets uploaded here keeps being uploaded here. The videos
+  are the only exception.
+- **Everything needed to rebuild a video stays too**: the `*-source.html`, the
+  spec JSON, the stills, and `tools/render-film.js` / `tools/make-film.py`. Any
+  piece can be re-rendered from the repo without the .mp4 being in it.
+- **ALL 39 videos were purged from tracking on 27 Aug** — the whole
+  `content/library/` run (01–23 plus the alternates and cards), the top-level
+  pieces (Clear All, The Cart, She Came Back, Fifteen Boxes, the store video,
+  the film-engine samples, the day-30 preview), `supporter-husband/`, and the
+  three built this session. **246 MB gone from HEAD.** Talking heads, AI
+  pieces, samples — everything, at Jacques's instruction.
+- **They are still in git history**, so the repo's *size on disk* is unchanged.
+  Any one comes back with `git checkout 4ba9614 -- <path>`. Actually shrinking
+  the repo needs a history rewrite (filter-repo / BFG) and a force-push across
+  all 23 branches — a separate, riskier job that has NOT been done.
+- **`.gitignore` now blocks `*.mp4 *.mov *.webm *.m4v *.avi *.mkv` repo-wide**,
+  so no future session can commit one by accident.
+
+**Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
+
+1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and
+   handed over; the queue is his. This is standing, not a one-off — do not
+   queue, schedule, or publish to any channel without him asking for it in
+   those words.
+2. **If he ever does ask: name it and tag it.** Both, every post, every
+   channel. A post with a null title or an empty tag list is not finished.
+   - **Title** goes on every channel, Facebook included:
+     `metadata.facebook.title`, `metadata.youtube.title`,
+     `metadata.tiktok.title`. Facebook's is easy to miss because the API
+     accepts the post without it and stores `title: null`.
+   - **Tags** — the org has exactly three, and they are reused, not invented:
+     | Tag | ID |
+     |---|---|
+     | addictions | `6a7d83e66879491fb50f6dfe` |
+     | recovery | `6a7d83f50881078c2c08bba7` |
+     | partner support | `6a7d8404c9e06c5e050eae3a` |
+     Pass them as `tagIds`. Free plan caps tags at 3, so there are no others
+     to add.
+3. **TikTok through Buffer works again** (tested 27 Aug — two posts accepted
+   with no error). The 24 Aug "never plan TikTok through Buffer" rule is dead.
+   All three channels are connected: Facebook page, YouTube, TikTok.
+4. **The schedule is 3 slots a day**, every day, all three channels:
+   08:15 / 12:15 / 18:15 America/Chicago. Not one a day as the 24 Aug note says.
+5. **Facebook cannot carry the AI-generated flag through the API.** TikTok and
+   YouTube both accept `isAiGenerated: true` and it sticks (verified on the
+   saved post). Facebook's post metadata has no such field — only
+   `type/title/firstComment/linkAttachment`. Per house rule 19, say so in the
+   queue report; the flag has to be set by hand in Buffer.
+6. **Free plan caps scheduled posts at 10 per channel.** 3 slots a day means a
+   channel runs dry in about three days, so the bottleneck is content supply,
+   not scheduling.
+7. **Never hand Buffer a `raw.githubusercontent.com` URL for a video.** Buffer
+   does not re-host it — it stores the raw link and fetches at publish time, so
+   the post breaks if the branch is renamed, merged away or deleted. Upload the
+   file, or point at something permanent.
+
 
 **The code-built video pipeline is proven three times now**: Clear All (the
 notification lockscreen), She Came Back (the 7-frame porch story), The Cart
@@ -732,3 +1244,156 @@ Jacques hours of work he should never have touched.
   is why no AI model can be called from here for images, video or voice.
 - **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
   the ear and the eye on every piece of media. That one never changes.
+
+
+## Outreach record — collegiate recovery (ARHE list), 20 Aug 2026
+
+The ARHE member directory Jacques uploaded (xlsx) was extracted to
+`reference/crp-contacts.csv` — **113 unique programmes** across 40+ states,
+Canada and the UK, with a named contact and email for each.
+
+**All 113 are now sitting in Gmail as drafts**, one per programme, each
+personalised with the contact's first name and their programme's own name
+(Gamecock Recovery, Cougs for Recovery, Roos in Recovery, and so on). Subject:
+*"Free recovery app for your students — no cost, no card, ever."* Nothing was
+sent — Jacques reads and sends.
+
+The pitch is deliberately narrow and checkable: students are broke and every
+app in this space charges; days 1–15 of every programme and every tool are free
+with no card and no trial; porn, gaming, vaping, scrolling and spending are
+full 30-day programmes, not footnotes; and there's a separate track for a
+student carrying a parent's or partner's addiction. It asks for a resource
+listing, not money, and asks for the reason if the answer is no.
+
+**Still open on outreach:** four template emails (unions, first responders,
+Celebrate Recovery, gambling councils) are written but need named recipients
+before they can be drafted.
+
+
+## v7.4 — The 90-Day Bootcamp (21 Aug 2026)
+
+The brand is now **The 90-Day Bootcamp — an addiction program with continuous
+support, for you and the one who supports you.** Jacques named it; everything
+follows it.
+
+What shipped, all verified in a real browser before push:
+
+- **Days 31–90 exist.** Two shared phases in `data/phases.json` — REBUILD
+  (31–60: sleep, meals, money, trust-by-pattern, the evening script) and
+  KEEP IT & GIVE IT (61–90: relapse signature, worst-day plan, forever rules,
+  the weekly honesty ritual, day 90 = give it away). Written once, personalised
+  per track via {{habit}} words ("drinking", "the scroll"…). Supporters keep
+  their own 35-day track and are never routed into the phases.
+- **Faith woven in, not bolted on.** 30 themed lines cycling across all 90
+  days, inside every lesson on every track — only for people who answered yes
+  or open. "No" users never see a word.
+- **Cross-links between tracks.** All 13 authored pairs now carry an "apply"
+  paragraph — today's skill pointed at the other active track — plus an honest
+  generic for unlinked pairs.
+- Day 30/60 = phase-handoff toasts; day 90 = graduation overlay (rewritten).
+  Free tier = days 1–15; Pro = days 16–90. Plans copy updated everywhere.
+- **Class handout** in `reference/bootcamp/` (PDF + PNG + generator), house
+  style, QR verified by decoding.
+
+Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
+
+
+## House rule 21 — videos are 15 to 20 seconds (Jacques, 22 Aug 2026)
+
+**Every video is 15-20 seconds. Twenty is the ceiling, not the target.**
+
+Jacques called this after a 31-second piece: too long for how people actually
+watch. In practice that is about **four beats**, not seven - roughly 3.5 to 4.5
+seconds a line including its fade. Every line has to earn its place, and the
+end card is 2 seconds inside the budget, not on top of it.
+
+Existing longer pieces stay as they are. This governs everything new.
+
+## House rule 25 — Pro sells itself quietly (Jacques, 24 Aug 2026)
+
+He studied I Am Sober's constant upgrade pushing and rejected it: "not my
+style, keep it no pressure." The doctrine: state what Pro is ONCE where
+pricing naturally lives (Plans page, locked lesson, Friendly's own tab),
+factually, then stop. No popups, no countdown offers, no upsell after
+milestones or slips, and NEVER a pitch to someone in distress (Friendly's
+system prompt enforces this). Current truth everywhere: FREE = days 1-15 of
+every track/pack, all SOS + recovery tools, journal, insights, reminders,
+partner side, meditation, stories, the Climb. PRO ($9.99/mo, $59.99/yr,
+7-day trial, $149.99 founding lifetime) = days 16-90, Friendly (up to 30
+chats/day), live rooms. Any new copy touching tiers must match this list -
+tier-claim audit ran 24 Aug across app, landing, 14 alternative pages,
+emails, FAQ, Friendly prompt.
+
+## House rule 24 — new features get shown and discussed BEFORE they ship (Jacques, 23 Aug 2026)
+
+"Before you push anything you build - discuss." Born from The Rebuild (v8.9,
+reverted same day: "looks cheap"). New features and anything visual: build it,
+show him screenshots or a video IN CHAT, get his reaction, only then push.
+Bug fixes for things he reported still ship immediately - this rule is about
+new ideas, not repairs. Never let a feature reach his phone before it has
+reached this conversation.
+
+## House rule 23 — every screen must pass the Bigger-text audit (Jacques, 23 Aug 2026)
+
+"Every screen needs to be inspected and tested to make sure when bigger text
+is chosen it fits." The tool exists: **`TurnSomeDayIntoOneday/tools/bigtext-audit.js`**
+(Playwright, against a local server) opens every screen and every full-screen
+overlay at 412x915 with Bigger text and fails if any content top or bottom
+cannot be scrolled into view. Run it after ANY layout change and before any
+ship that touches screens/overlays. The fix pattern for centered overlays is
+`overflow-y:auto` + `justify-content:safe center` (centers when it fits,
+top-aligns and scrolls when it doesn't) - already applied to all nine.
+
+## House rule 22 — talking heads: watermark + quiet score, no end card (Jacques, 23 Aug 2026)
+
+Two different video kinds, two different treatments:
+
+- **AI-made/produced videos** (stills, motion graphics, generated footage):
+  end with the standard brand end card, exactly as house rule 16 lays out.
+- **Everything else - above all Jacques on camera talking:** NO end card; the
+  video ends on him. Instead it carries the **corner watermark** (handshake
+  symbol, bottom-right, ~210px off the bottom, whole video - same spec as rule
+  16.1) so the branding is present without turning a personal moment into an
+  ad. And every talking head gets **background music underneath the speech** -
+  a track from his own score library (`audio/meditation/`), ducked low so his
+  voice always leads. Every talking head ends with a short fade to black (~0.8s) - the video closes, it doesn't just stop. And every talking head gets burned-in captions - timed to his speech, white on a dark pill, key words in brand green (#7ee8a2) - transcribed in-session (see the transcription note below).
+
+**Transcription works in this environment now (23 Aug 2026).** Whisper via pip
+is blocked (HuggingFace unreachable), but **sherpa-onnx from PyPI + models from
+the k2-fsa/sherpa-onnx GitHub releases** (same host as the Piper voices) works:
+whisper tiny.en for clean text, zipformer-en-2023-06-26 for word timestamps.
+Models live in scratchpad/. Never again report speech-to-text as unavailable
+here - captioning talking heads is now a standard step.
+ The caption still carries "link in bio" as always.
+
+## The score library is Jacques's own music
+
+`TurnSomeDayIntoOneday/audio/meditation/` is 11 tracks - the 8 Suno tracks
+Jacques made plus the Rain / Ocean / Night beds. He is on a paid Suno plan and
+has confirmed permission for every track (see
+`reference/asset-licenses-2026-08-08.md`; settled, do not re-raise).
+
+So the meditation library doubles as the **royalty-free score library for every
+video**: no third-party music, no YouTube claims, no takedowns. Score from here
+and nowhere else. Fading Night and Night Fade suit the sombre pieces; Still
+Waters and Himalayan Still are calmer.
+
+
+## v7.5–7.7 shipped together (22 Aug 2026)
+
+- **v7.5 Alignment audit** — every surface tells the same 90-day story:
+  Friendly's system prompt (was still teaching a 30-day program in three
+  places), the Guide (now opens with "How does the program work? — a 90-day
+  system"), the day-15 upsell, plans footer, FAQs, the welcome-to-Pro email,
+  and landing.html (Free card had been underselling the real free tier).
+- **v7.6 Together: faith + celebrations** — the faith weave now reaches the
+  couples screen (it never had), and marking a day done together celebrates:
+  burst every day, big burst + words at weeks 1–3, renewal card at 30.
+  Together verified gender-neutral: zero gendered words.
+- **v7.7 Couple link** — two phones, one Together table. Code pairing,
+  shared day count (server keeps the max), "Ask for tonight's ten minutes"
+  as a real push, six-an-hour limit. The link stores ONLY the day count and
+  the nudge — no clocks, journals, or slips, enforced by the schema.
+  Tested end to end with two live accounts.
+
+All three went to main + vibe-code in one push; Railway deployed v7.7.

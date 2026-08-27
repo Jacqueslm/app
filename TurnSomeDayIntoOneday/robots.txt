@@ -5,5 +5,9 @@ Disallow: /api/
 Disallow: /server/
 Disallow: /go/
 Disallow: /unsubscribe
+# Private letters. Never crawl, never index, never archive - each one is the
+# most personal thing anybody writes in this app.
+Disallow: /l/
+Disallow: /letter.html
 
 Sitemap: https://www.turnsomedayintodayone.com/sitemap.xml

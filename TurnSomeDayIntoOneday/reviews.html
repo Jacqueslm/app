@@ -115,7 +115,7 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
 
   <section style="text-align:center">
     <a class="btn" href="/app">Start your 7 days</a>
-    <a class="btn" href="/quiz" style="background:none;border:1px solid var(--bdr);color:var(--ts)">Take the free 2-minute check-in</a>
+    <a class="btn" href="/quiz" style="background:none;border:1px solid var(--bdr);color:var(--ts)">Take the free 1-minute check-in</a>
   </section>
 
   <div class="foot">Turn Someday Into Day One<br>
@@ -177,19 +177,43 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
         '@type': 'Review',
         'author': { '@type': 'Person', 'name': name },
         'reviewRating': { '@type': 'Rating', 'ratingValue': String(stars), 'bestRating': '5', 'worstRating': '1' },
-        'reviewBody': text
+        'reviewBody': text,
+        'datePublished': String(rv.created_at || rv.date || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
       });
     });
     if (ld.length) {
-      var script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.textContent = JSON.stringify({
+      // Search Console flagged 11 invalid review snippets (24 Aug 2026): a
+      // SoftwareApplication needs applicationCategory, operatingSystem and
+      // offers before Google will accept reviews attached to it, and every
+      // Review needs a datePublished. The aggregate below is computed from
+      // the real published reviews - never a number we made up.
+      var sum = 0, n = 0;
+      reviews.forEach(function(rv){
+        var st = parseInt(rv.stars, 10);
+        if (st >= 1 && st <= 5 && String(rv.text || '')) { sum += st; n++; }
+      });
+      var app = {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
         'name': 'Turn Someday Into Day One',
         'url': 'https://www.turnsomedayintodayone.com/',
+        'applicationCategory': 'HealthApplication',
+        'operatingSystem': 'Android, iOS, Web',
+        'offers': { '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' },
         'review': ld
-      });
+      };
+      if (n > 0) {
+        app.aggregateRating = {
+          '@type': 'AggregateRating',
+          'ratingValue': (Math.round((sum / n) * 10) / 10).toFixed(1),
+          'reviewCount': String(n),
+          'bestRating': '5',
+          'worstRating': '1'
+        };
+      }
+      var script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.textContent = JSON.stringify(app);
       document.head.appendChild(script);
     }
   }).catch(function(){});

@@ -66,6 +66,30 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
   if(u.source||u.medium||u.campaign)sessionStorage.setItem('tsid_utm',JSON.stringify(u));
 }catch(e){}})();
 </script>
+
+
+<!-- video-ld:start -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Al-Anon: What Actually Happens at a Meeting (From Someone Who Went)",
+  "description": "If someone in your life is drinking and you have run out of things to try, this is what walking into an Al-Anon meeting is actually like - what is said, what is not, and what it costs.",
+  "thumbnailUrl": [
+    "https://i.ytimg.com/vi/cjfWPylqRDk/maxresdefault.jpg"
+  ],
+  "uploadDate": "2026-08-24",
+  "duration": "PT6M0S",
+  "embedUrl": "https://www.youtube.com/embed/cjfWPylqRDk",
+  "contentUrl": "https://www.youtube.com/watch?v=cjfWPylqRDk",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Turn Someday Into Day One",
+    "url": "https://www.turnsomedayintodayone.com"
+  }
+}
+</script>
+<!-- video-ld:end -->
 </head>
 <body>
 <div class="wrap">
@@ -80,7 +104,57 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
     <div class="trust">That link goes to Al-Anon, not to us. We're not affiliated with them, and we don't get anything if you go.</div>
   </section>
 
-  <section class="partner">
+  
+
+
+
+
+
+
+<!-- video:start -->
+
+<style>
+/* click-to-load video facade - nothing loads from YouTube until tapped */
+.vid{margin:0 0 40px}
+.vid h2{margin-bottom:10px}
+.vid p.vid-blurb{font-size:15px;color:var(--ts,#c3c1e0);line-height:1.6;margin-bottom:16px}
+.vid-frame{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+  background:#0b0a1c;border:1px solid var(--bdr,#302c58);cursor:pointer;display:block;padding:0}
+.vid-frame img{width:100%;height:100%;object-fit:cover;display:block;border:0}
+.vid-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,rgba(8,7,26,.15),rgba(8,7,26,.55))}
+.vid-play svg{width:66px;height:66px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+.vid-frame:hover .vid-play svg,.vid-frame:focus-visible .vid-play svg{transform:scale(1.06)}
+.vid-play svg{transition:transform .18s ease}
+@media (prefers-reduced-motion:reduce){.vid-play svg{transition:none}}
+.vid-frame:focus-visible{outline:2px solid var(--green,#7ee8a2);outline-offset:3px}
+.vid-more{display:inline-block;margin-top:12px;font-size:14px;color:var(--tm,#8b89ad);text-decoration:underline}
+</style>
+  <section class="partner vid">
+    <h2>Watch: what actually happens at a meeting</h2>
+    <p class="vid-blurb">If the not-knowing is what's stopping you walking in, this is the room described plainly before you go.</p>
+    <button class="vid-frame" type="button" data-yt="cjfWPylqRDk" aria-label="Play: Al-Anon: What Actually Happens at a Meeting (From Someone Who Went)">
+      <img src="https://i.ytimg.com/vi/cjfWPylqRDk/hqdefault.jpg" alt="" width="480" height="360" loading="lazy">
+      <span class="vid-play"><svg viewBox="0 0 68 48" aria-hidden="true"><path d="M66.5 7.7a8.6 8.6 0 0 0-6-6C55.2 0 34 0 34 0S12.8 0 7.5 1.6a8.6 8.6 0 0 0-6 6.1A90 90 0 0 0 0 24a90 90 0 0 0 1.5 16.3 8.6 8.6 0 0 0 6 6C12.8 48 34 48 34 48s21.2 0 26.5-1.6a8.6 8.6 0 0 0 6-6.1A90 90 0 0 0 68 24a90 90 0 0 0-1.5-16.3z" fill="#f00"/><path d="M27 34.3 44.8 24 27 13.7z" fill="#fff"/></svg></span>
+    </button>
+    <a class="vid-more" href="https://www.youtube.com/watch?v=cjfWPylqRDk" target="_blank" rel="noopener">Watch on YouTube instead →</a>
+  </section>
+<script>
+document.querySelectorAll('.vid-frame').forEach(function(b){
+  b.addEventListener('click', function(){
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + b.dataset.yt + '?autoplay=1&rel=0';
+    f.title = b.getAttribute('aria-label').replace(/^Play: /, '');
+    f.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    b.replaceChildren(f);
+  }, {once:true});
+});
+</script>
+<!-- video:end -->
+
+<section class="partner">
     <h2>What actually happens at a meeting</h2>
     <p>Far less than people brace for. You turn up, usually to a church hall, a community room, or a video call. Somebody reads a few opening lines. People take turns talking about their own week — what happened, what they did with it — and nobody interrupts, gives advice, or tells anyone to leave their marriage.</p>
     <p class="lead">You do not have to speak. You can say "I'll just listen today" and that is a completely normal thing to say.</p>
@@ -119,7 +193,7 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
     </ul>
     <p>It's not a replacement for a room full of people who've lived it, and it isn't trying to be. Go to the meeting. This is for the six days in between.</p>
     <a class="btn" href="/for-her">Show me the part built for me</a>
-    <a class="btn-link" href="/quiz">Or take the private 2-minute check-in →</a>
+    <a class="btn-link" href="/quiz">Or take the private 1-minute check-in →</a>
   </section>
 
   <section class="partner">
@@ -165,7 +239,7 @@ h2{font-size:22px;line-height:1.28;font-weight:700;margin-bottom:14px}
     <a href="/is-my-husband-an-alcoholic" style="color:var(--green);text-decoration:none">Is my husband an alcoholic?</a> &middot;
     <a href="/betrayal-trauma-recovery" style="color:var(--green);text-decoration:none">Betrayal trauma recovery</a> &middot;
     <a href="/for-her" style="color:var(--green);text-decoration:none">For the partner</a> &middot;
-    <a href="/quiz" style="color:var(--green);text-decoration:none">The free 2-minute check-in</a>
+    <a href="/quiz" style="color:var(--green);text-decoration:none">The free 1-minute check-in</a>
   </nav>
 
   <div class="foot">Turn Someday Into Day One</div>

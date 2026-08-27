@@ -810,3 +810,74 @@ lane pays and nobody built software). Matt & Sheri Salis/Untoxicated — run
 enrollment programs (SHOUT Sobriety / Echoes of Recovery). Luc Zoratto and
 Andy Ramage — sober coaches. Matt Pink — co-founded a competing app. Tegan De
 Vil — 455K, and a fraud conviction; not the brand. Scott Freda — 1.5M, too big.
+
+---
+
+# BATCH 4 — 2026 DIRECTORY ROUND-UP + THE FAITH LANE (researched 24 Aug 2026)
+
+Two published 2026 directories surfaced a fresh set of names — Feedspot's
+"Top 100 Sober TikTok Influencers" and ChoicePoint's "Top 12 Recovery &
+Mental Health Instagram Accounts" (Dec 2025). **The Batch 3 honesty rule
+still holds and is now the whole point:** these came out of directories, not
+from me opening the apps, so follower counts are as-of the page that
+published them and **the handle is the thing to confirm** — look each one up
+for ten seconds before sending, watch two videos first, and stay inside the
+5–80K sweet spot (skip anyone who sells a coaching program). Names already in
+this file are not repeated below.
+
+## From the directories — the new names
+
+| Name | Where | Why they're on the list |
+|---|---|---|
+| **Brittany Jade** | TikTok (Feedspot top-100) | Recovery storytelling, top of the 2026 list — confirm count |
+| **Tina Tsakonas** | TikTok (Feedspot) | Same list, same verify-first rule |
+| **Mr Impulsive** | TikTok (Feedspot) | Same |
+| **Eddie** | TikTok (Feedspot) | Same — confirm which Eddie before sending |
+| **Dr Alex** | TikTok (Feedspot) | Likely a clinician-creator; the co-sign value (see THE CO-SIGN ASK) |
+| **Jordan Wilson** | TikTok (Feedspot) | Same list |
+| **Mistena Elliott** | TikTok (Feedspot) | Same list |
+| **Mocktail Mom** | Instagram (ChoicePoint) | Sober lifestyle without the funeral tone — "what's gained, not lost" |
+| **Corneliazz** | Instagram (ChoicePoint) | Lived-experience storytelling, guilt-free education |
+| **Danica** | Instagram (ChoicePoint) | Emotional-regulation education — the skill-teaching lane |
+| **Yung Pueblo** | Instagram (ChoicePoint) | Huge (millions) — over the sweet spot; the exception rule applies (self-run, no manager? unlikely — park it) |
+| **Kier** | Instagram (ChoicePoint) | Psychology/masculinity/emotional healing — the men 40+ lane |
+| **That Sober Glow** | Instagram (ChoicePoint) | Gentle encouragement for the fragile middle — your daily-lesson voice |
+| **Creative Sobriety** | Instagram (ChoicePoint) | Evidence-based education — the "why" behind addiction |
+| **She Stays Sober** | Instagram (ChoicePoint) | Recovery + mental health together |
+| **Annie Elainey** | Instagram (ChoicePoint) | Mental health + access/equity; trauma-aware, systemic lens |
+| **Hannah Viney** | TikTok/IG (Class A People) | Went viral documenting getting sober; built a recovery platform — the UK big-sister version of you |
+
+None of these have verified emails in this file — directory listings don't
+carry them. DM or contact-form route, same as Batch 3. If one of them is
+already in Batch 1–3 under a different name, that's the same person — don't
+pitch twice in one week.
+
+## The faith lane — new, and it belongs to the porn track
+
+These are the creators and ministries the app's porn track + faith track were
+built for. Most are organisations or speaker-creators, so the pitch is the
+INFLUENCERS email template pointed at the person, and the COMPANIES template
+pointed at the org:
+
+- **Covenant Eyes** — the #1 quit-porn app for Christians; runs church
+  small-group programs, a blog and a podcast (The Covenant Eyes Podcast on
+  Spotify). They are the biggest name in Christian porn recovery — a mention
+  there is worth more than any single creator in this file. Org pitch + the
+  "no ask attached" creator pitch to the podcast.
+- **Pure Desire Ministries** (puredesire.org) — sexual-addiction recovery
+  with church groups (the 7 Pillars). Their podcast and their church-group
+  network are two separate doors.
+- **Craig Gross** — XXXChurch founder, author, speaker; the best-known
+  Christian voice against porn use. Verify current handles/email before
+  sending — he is the one name here with a public presence to confirm.
+- **Joshua Broome** — former adult actor turned Christian speaker/author;
+  his story (in it, out, now helping men out) is the closest mirror to
+  Jacques's arc in the faith lane. Verify handles first.
+- **The Nathan Project** (nathanproject.net) — porn-recovery ministry for
+  men and women; runs small groups that need materials.
+
+**Why the faith lane matters now:** the Spiritual Path is woven into the
+app's daily lessons, and the porn track is one of the biggest. These rooms
+are the one place where both fit at once, and no competitor app is welcome in
+church small groups the way a free, faith-registered one is. Same rule as
+everywhere: watch/listen first, one line proving you did, no ask attached.

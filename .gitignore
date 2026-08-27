@@ -28,3 +28,18 @@ __pycache__/
 # Page images built by tools-md-to-pdf.py --png. Regenerate them, don't commit
 # them — 95 PNGs of documents that are already in the repo as markdown.
 *-pages/
+
+# NO VIDEO FILES IN THIS REPO (rule, 27 Aug 2026). All 39 were purged from
+# tracking - talking heads, AI pieces, samples, the whole library, 246 MB.
+# Jacques keeps them in his own file and on social media; they are handed to
+# him in chat instead.
+#
+# MUSIC AND AUDIO STAY - content/score/, TurnSomeDayIntoOneday/audio/. So do
+# the sources and stills (*-source.html, spec.json, the jpgs and pngs) and the
+# render tooling, so any piece can be rebuilt without the video living here.
+*.mp4
+*.mov
+*.webm
+*.m4v
+*.avi
+*.mkv

@@ -178,6 +178,41 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+  -- The letter IS the invite. Someone writes the hardest thing they have to say,
+  -- and the link that carries it is the same link that makes the other person an
+  -- account. Nothing about the recipient is known until they choose to be known:
+  -- the row holds the letter and a token, never an address or a phone number.
+  -- Tokens expire so a link forwarded on months later cannot open a private
+  -- letter to somebody it was never written for.
+  CREATE TABLE IF NOT EXISTS letters (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token TEXT UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    sender_type TEXT NOT NULL,
+    sender_name TEXT NOT NULL DEFAULT '',
+    recipient_name TEXT NOT NULL DEFAULT '',
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    revoked INTEGER NOT NULL DEFAULT 0,
+    opened_at TEXT,
+    open_count INTEGER NOT NULL DEFAULT 0,
+    accepted_at TEXT,
+    accepted_user_id INTEGER REFERENCES users(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS couple_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_a INTEGER NOT NULL REFERENCES users(id),
+    user_b INTEGER REFERENCES users(id),
+    name_a TEXT NOT NULL DEFAULT '',
+    name_b TEXT NOT NULL DEFAULT '',
+    code TEXT UNIQUE NOT NULL,
+    together_done INTEGER NOT NULL DEFAULT 0,
+    nudge_from INTEGER,
+    nudge_at TEXT,
+    created_at TEXT NOT NULL
+  );
 `);
 
 // Nova conversations are never persisted - the client stopped syncing them,
@@ -211,6 +246,14 @@ function clearErrors() {
   db.prepare('DELETE FROM error_log').run();
   return n;
 }
+function setReminderWindow(userId, startHour, endHour) {
+  db.prepare('UPDATE users SET reminder_start_hour = ?, reminder_end_hour = ? WHERE id = ?')
+    .run(startHour, endHour, userId);
+}
+function getReminderWindow(userId) {
+  const r = db.prepare('SELECT reminder_start_hour AS s, reminder_end_hour AS e FROM users WHERE id = ?').get(userId);
+  return r && Number.isInteger(r.s) && Number.isInteger(r.e) ? { start: r.s, end: r.e } : null;
+}
 function getRecentErrors(limit) {
   return db.prepare('SELECT * FROM error_log ORDER BY id DESC LIMIT ?').all(limit || 50);
 }
@@ -231,6 +274,11 @@ addColumnIfMissing('cancel_at_period_end', 'cancel_at_period_end INTEGER NOT NUL
 // Bumping this number invalidates every session token issued before the bump -
 // that's how "log out on all devices" works without tracking sessions server-side.
 addColumnIfMissing('session_version', 'session_version INTEGER NOT NULL DEFAULT 1');
+// The reminder window is a real setting, not derived data - kept in its own
+// columns written only by an explicit change, so a second device syncing a
+// stale state blob can never quietly reset it (Jacques hit exactly that).
+addColumnIfMissing('reminder_start_hour', 'reminder_start_hour INTEGER');
+addColumnIfMissing('reminder_end_hour', 'reminder_end_hour INTEGER');
 addColumnIfMissing('unsubscribed', 'unsubscribed INTEGER NOT NULL DEFAULT 0');
 addColumnIfMissing('trial_started_at', 'trial_started_at TEXT');
 // Columns land now (Task 7 schema); the capture logic ships in Task 9.
@@ -756,6 +804,10 @@ function getAdminStats(opts) {
     retention,
     by_utm_source,
     by_week,
+    // The letter funnel. Its own block because it answers a different question
+    // from the signup funnel: not "did somebody find us", but "did somebody
+    // hand this to a person they love, and did that person take it".
+    letters: getLetterStats(),
     usage: {
       avg_chats_per_active_free_user_per_day:
         freeUsage.user_days ? Math.round((freeUsage.chats / freeUsage.user_days) * 100) / 100 : 0,
@@ -818,15 +870,20 @@ function isRoomBanned(userId) {
 
 
 // ── Reviews ──────────────────────────────────────────────────────────────────
-// A member gets exactly one review. Writing a second one replaces the first and
-// sends it back to pending, so an edited review is never published unread.
+// A member gets exactly one review; re-submitting replaces theirs. Reviews
+// publish straight to /reviews (Jacques, 23 Aug 2026) - he gets an email on
+// each arrival and can hide anything abusive from the admin page after the
+// fact. A rejected (hidden) review STAYS hidden through edits: quietly
+// republishing yourself after the owner pulled your review is not a thing.
 function upsertReview(userId, name, whenLabel, body, stars) {
   db.prepare(
     `INSERT INTO reviews (user_id, name, when_label, body, stars, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?)
+     VALUES (?, ?, ?, ?, ?, 'published', ?)
      ON CONFLICT(user_id) DO UPDATE SET
        name = excluded.name, when_label = excluded.when_label, body = excluded.body,
-       stars = excluded.stars, status = 'pending', created_at = excluded.created_at`
+       stars = excluded.stars,
+       status = CASE WHEN reviews.status = 'rejected' THEN 'rejected' ELSE 'published' END,
+       created_at = excluded.created_at`
   ).run(userId, name, whenLabel || null, body, stars, new Date().toISOString());
 }
 function getMyReview(userId) {
@@ -838,13 +895,175 @@ function getPublishedReviews(limit) {
   ).all(limit || 50);
 }
 function getReviewQueue() {
-  return db.prepare("SELECT * FROM reviews WHERE status = 'pending' ORDER BY id DESC LIMIT 100").all();
+  return db.prepare("SELECT * FROM reviews ORDER BY id DESC LIMIT 100").all();
 }
 function setReviewStatus(id, status) {
   db.prepare('UPDATE reviews SET status = ? WHERE id = ?').run(status, id);
 }
 
+// ─── Couple links (the Together program, two accounts, one table) ────────────
+// Deliberately minimal: the link carries ONLY the shared Together progress and
+// a nudge. No clocks, no journals, no slips - partners cannot see any of that.
+function coupleRowFor(userId) {
+  return db.prepare('SELECT * FROM couple_links WHERE user_a = ? OR user_b = ?').get(userId, userId) || null;
+}
+function createCoupleLink(userId, name) {
+  const existing = coupleRowFor(userId);
+  if (existing) return existing;
+  // Unambiguous alphabet: no 0/O or 1/I to misread off a partner's screen.
+  const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code;
+  do {
+    code = Array.from({ length: 6 }, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join('');
+  } while (db.prepare('SELECT 1 FROM couple_links WHERE code = ?').get(code));
+  db.prepare('INSERT INTO couple_links (user_a, name_a, code, created_at) VALUES (?,?,?,?)')
+    .run(userId, String(name || '').slice(0, 40), code, new Date().toISOString());
+  return coupleRowFor(userId);
+}
+function joinCoupleLink(userId, code, name) {
+  if (coupleRowFor(userId)) return { error: 'already-linked' };
+  const row = db.prepare('SELECT * FROM couple_links WHERE code = ?').get(String(code || '').trim().toUpperCase());
+  if (!row) return { error: 'bad-code' };
+  if (row.user_b) return { error: 'code-used' };
+  if (row.user_a === userId) return { error: 'own-code' };
+  db.prepare('UPDATE couple_links SET user_b = ?, name_b = ? WHERE id = ?')
+    .run(userId, String(name || '').slice(0, 40), row.id);
+  return { row: coupleRowFor(userId) };
+}
+function unlinkCouple(userId) {
+  const row = coupleRowFor(userId);
+  if (row) db.prepare('DELETE FROM couple_links WHERE id = ?').run(row.id);
+  return !!row;
+}
+function setCoupleTogetherDone(userId, day) {
+  const row = coupleRowFor(userId);
+  if (!row) return null;
+  const d = Math.max(row.together_done, Math.min(Math.max(0, day | 0), 90));
+  db.prepare('UPDATE couple_links SET together_done = ? WHERE id = ?').run(d, row.id);
+  return d;
+}
+function setCoupleNudge(userId) {
+  const row = coupleRowFor(userId);
+  if (!row || !row.user_b) return null;
+  db.prepare('UPDATE couple_links SET nudge_from = ?, nudge_at = ? WHERE id = ?')
+    .run(userId, new Date().toISOString(), row.id);
+  return coupleRowFor(userId);
+}
+function couplePartnerOf(userId) {
+  const row = coupleRowFor(userId);
+  if (!row || !row.user_b) return null;
+  return row.user_a === userId
+    ? { id: row.user_b, name: row.name_b }
+    : { id: row.user_a, name: row.name_a };
+}
+
+// ─── Letters as invitations ──────────────────────────────────────────────────
+// The old flow asked somebody to invite their partner to an app, which is a
+// request to install software. This one asks them to send a letter they already
+// wrote, and the account is what happens after the letter is read. The letter
+// does the persuading; nothing else has to.
+const LETTER_TTL_DAYS = 30;
+
+// Opposite side, always. A person in recovery sends to somebody supporting them;
+// a supporter sends to the person they are carrying this with. The "both" path
+// carries both, and the safe default for a stranger opening that link is the
+// supporter side - it asks less of them.
+const LETTER_OPPOSITE = { recovering: 'partner', partner: 'recovering', both: 'partner' };
+
+function createLetter(userId, token, senderType, senderName, recipientName, body) {
+  const now = new Date();
+  const expires = new Date(now.getTime() + LETTER_TTL_DAYS * 86400000);
+  // One live letter per person per side. Re-sending replaces the old link
+  // rather than leaving a trail of readable copies behind.
+  db.prepare('UPDATE letters SET revoked = 1 WHERE user_id = ? AND sender_type = ? AND revoked = 0 AND accepted_at IS NULL')
+    .run(userId, senderType);
+  db.prepare(`INSERT INTO letters
+      (token, user_id, sender_type, sender_name, recipient_name, body, created_at, expires_at)
+      VALUES (?,?,?,?,?,?,?,?)`)
+    .run(token, userId, senderType,
+      String(senderName || '').slice(0, 40),
+      String(recipientName || '').slice(0, 40),
+      String(body || '').slice(0, 20000),
+      now.toISOString(), expires.toISOString());
+  return db.prepare('SELECT * FROM letters WHERE token = ?').get(token);
+}
+
+// Returns null for anything the recipient should not see: unknown, revoked, or
+// past its date. The caller cannot tell those three apart, on purpose.
+function getLetterByToken(token) {
+  const row = db.prepare('SELECT * FROM letters WHERE token = ?').get(String(token || ''));
+  if (!row || row.revoked) return null;
+  if (new Date(row.expires_at).getTime() < Date.now()) return null;
+  return row;
+}
+
+// First open is the one that means something - that is the moment the letter
+// was actually read by somebody. Later opens still count, separately.
+function markLetterOpened(token) {
+  const row = getLetterByToken(token);
+  if (!row) return null;
+  const now = new Date().toISOString();
+  db.prepare('UPDATE letters SET open_count = open_count + 1, opened_at = COALESCE(opened_at, ?) WHERE id = ?')
+    .run(now, row.id);
+  return { first: !row.opened_at };
+}
+
+function markLetterAccepted(token, newUserId) {
+  const row = getLetterByToken(token);
+  if (!row || row.accepted_at) return null;
+  db.prepare('UPDATE letters SET accepted_at = ?, accepted_user_id = ? WHERE id = ?')
+    .run(new Date().toISOString(), newUserId, row.id);
+  return row;
+}
+
+function revokeLetters(userId) {
+  return db.prepare('UPDATE letters SET revoked = 1 WHERE user_id = ? AND accepted_at IS NULL').run(userId).changes;
+}
+
+function getMyLetter(userId, senderType) {
+  return db.prepare('SELECT * FROM letters WHERE user_id = ? AND sender_type = ? AND revoked = 0 ORDER BY id DESC')
+    .get(userId, senderType) || null;
+}
+
+// The whole funnel in one row: sent, opened, joined. Kept separate from
+// getAdminStats' own queries so the letters block can be read on its own.
+function getLetterStats() {
+  const t = db.prepare(`SELECT
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters`).get();
+  const by_side = db.prepare(`SELECT sender_type AS side,
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters GROUP BY 1 ORDER BY letter_sent DESC`).all();
+  const by_week = db.prepare(`SELECT date(created_at, 'weekday 0', '-6 days') AS week,
+      COUNT(*) AS letter_sent,
+      SUM(CASE WHEN opened_at IS NOT NULL THEN 1 ELSE 0 END) AS letter_opened,
+      SUM(CASE WHEN accepted_at IS NOT NULL THEN 1 ELSE 0 END) AS account_created_from_letter
+    FROM letters GROUP BY 1 ORDER BY week DESC LIMIT 12`).all();
+  return {
+    letter_sent: t.letter_sent || 0,
+    letter_opened: t.letter_opened || 0,
+    account_created_from_letter: t.account_created_from_letter || 0,
+    by_side,
+    by_week,
+  };
+}
+
 module.exports = {
+  setReminderWindow,
+  getReminderWindow,
+  createLetter,
+  getLetterByToken,
+  markLetterOpened,
+  markLetterAccepted,
+  revokeLetters,
+  getMyLetter,
+  getLetterStats,
+  LETTER_OPPOSITE,
+  LETTER_TTL_DAYS,
   upsertReview,
   getMyReview,
   getPublishedReviews,
@@ -907,4 +1126,11 @@ module.exports = {
   addRoomReport, hideRoomPost, getModQueue, setRoomPostStatus, banRoomUser, isRoomBanned,
   getRecentErrors,
   clearErrors,
+  coupleRowFor,
+  createCoupleLink,
+  joinCoupleLink,
+  unlinkCouple,
+  setCoupleTogetherDone,
+  setCoupleNudge,
+  couplePartnerOf,
 };

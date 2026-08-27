@@ -14,8 +14,8 @@
   "backgroundColor": "#0f0c29",
   "enableNotifications": true,
   "startUrl": "/app?src=play",
-  "iconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",
-  "maskableIconUrl": "https://www.turnsomedayintodayone.com/icons/icon-512.png",
+  "iconUrl": "https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/icons/icon-512.png",
+  "maskableIconUrl": "https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android-upload.keystore",

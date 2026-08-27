@@ -181,55 +181,86 @@ in this section, and a Play upload is only ever needed for shell-level changes
 
 ## Open bug
 
-**Nobody has ever bought Pro through Google Play.** That is the bug. The
-address bar it used to be filed under was a different thing, and chasing it
-cost weeks — read the next two paragraphs before you touch anything.
+**The Android app is not running as a verified Trusted Web Activity, and that
+is why nobody can buy Pro.** Settled 27 Aug 2026 by the app's own error text.
+Read this whole section before changing anything — the cause was correctly
+identified weeks ago, then talked out of by me on the same day, then confirmed
+again. Do not restart that loop.
 
-**What the address bar turned out to be.** Four screenshots on 27 Aug 2026
-settled it. The app at 12:39 had **no address bar at all** — it runs full
-screen, so the TWA is verified and Digital Asset Links is working. Google's
-validator agrees; the statement list for the host in `twa/twa-manifest.json`
-(`www.turnsomedayintodayone.com`) returns both fingerprints with no error:
+### The proof, in Jacques's own screenshot
 
-    curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
+The failure dialog (app 5.8, which prints the real error) reads:
 
-The bar in the earlier screenshot came from a **separate Chrome Custom Tab**
-open on the same site at 12:38 — the same shots show Chrome's "Install and
-create shortcut" sheet over it. Two windows, one minute apart, read as one.
-Note for whoever tries the same curl: the **apex** host does fail, with
-`ERROR_CODE_REDIRECT`, because `turnsomedayintodayone.com` redirects to `www`
-and asset-link fetches do not follow redirects. It is not the cause — nothing
-launches the apex — but it will mislead you if you check the wrong host.
+    failed while opening the store connection.
+    OperationError: unsupported context
+    bridge=present · playBuild=yes · display=standalone · engine=Chrome 151 · app=5.8
 
-**The Samsung-Internet theory is dead.** The dialog Jacques photographed said
-*"Could not complete that purchase"*, which is the deepest catch in
-`becomeProViaStore`. Reaching it means `storeBillingAvailable()` already passed
-— that guard fails with a different sentence, "In-app purchases are not
-available on this device." **So `getDigitalGoodsService` exists on his phone**,
-and `/api/billing/status` returned `storeBillingReady: true`. The bridge is
-present; something inside the handshake rejects.
+`unsupported context` is not a generic failure. It is Chromium's
+`kUnsupportedContext` from `DigitalGoodsFactoryImpl`, surfaced as an
+`OperationError`, and it has exactly one meaning: **the document calling
+`getDigitalGoodsService()` is not inside a Trusted Web Activity.** The address
+bar across the top of that same screenshot says the same thing visually.
 
-**Which step, we do not know yet.** Four candidates all produced that one
-sentence: `getDigitalGoodsService()` rejecting, `getDetails()` throwing,
-`PaymentRequest` construction, or `request.show()`. Most likely by far is that
-the products or the tester account are not set up so the store will actually
-sell — a closed test only sells to Google accounts on the tester list, from a
-build downloaded from Play.
+### The trap that cost a day — do not fall in it
 
-**What was done instead of a fifth guess (app 5.8).** `becomeProViaStore` now
-labels every step and the catch reports it: the step name, the real
-`name: message`, and a diagnostic line from `storeDiagnostics()` — bridge
-present/missing, play-build flag, standalone vs browser, browser engine and
-version, app version. `#info-modal-msg` got `white-space:pre-line` so it reads
-as lines. **One photo of that dialog now identifies the failure.** Get that
-photo before doing anything else.
+`bridge=present` does **not** mean the billing bridge works.
+`storeBillingAvailable()` only tests `'getDigitalGoodsService' in window`, and
+that function exists in ordinary Chrome on Android. It is there, it is
+callable, and outside a TWA it rejects. So:
 
-If it still is not obvious after that, `adb logcat` over USB reads Chrome's own
-rejection; platform-tools are on the owner's PC under
-`C:\Users\<user>\.bubblewrap\`.
+- The purchase sails past the `storeBillingAvailable()` guard and its message
+  ("In-app purchases are not available on this device") never appears.
+- It dies in the deepest catch instead, which used to print only "Could not
+  complete that purchase."
+- On 27 Aug I read that message as proof the bridge was working and **wrongly
+  retired the Digital Asset Links diagnosis.** It was right. `display=standalone`
+  misleads the same way — Chrome reports standalone here even with a visible
+  address bar.
 
-Install, use, the 14-day clock and reviews all work. Purchases do not. Do not
-call this cosmetic, and do not re-open the address bar as a cause.
+The 12:39 screenshots with no address bar were a **separate installed PWA**
+(he had just used Chrome's "Install and create shortcut" at 12:38), not the
+Play app. A Chrome-installed PWA is also not a TWA, so it fails identically.
+
+### Where the fault is not
+
+- **The served file is correct and reachable.** Google's own validator returns
+  both statements cleanly for the host the TWA launches:
+
+      curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
+
+- **The host matches.** `twa/twa-manifest.json` has
+  `host: www.turnsomedayintodayone.com`, `startUrl: /app?src=play`, and
+  `.well-known/assetlinks.json` declares `com.turnsomedayintodayone.app`.
+- **Not the apex.** `turnsomedayintodayone.com` does fail the validator with a
+  redirect error, but nothing launches the apex. Ignore it.
+- **Not Samsung Internet.** `engine=Chrome 151`.
+
+### The one thing left to check, and nobody has checked it
+
+Chrome matches the **signing certificate of the installed app** against the
+fingerprints in the served file. The file lists two:
+
+    99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5
+    91:7B:4C:99:B1:13:F3:EC:27:E1:EB:87:3B:04:49:11:4C:FB:9E:04:1B:C3:B4:94:A2:D4:55:8D:73:E4:D4:F4
+
+`twa-manifest.json` signs with a local **upload** key
+(`android-upload.keystore`, alias `upload`), and that keystore is not in this
+repo. But an app installed from Play is not signed with the upload key —
+**Play App Signing re-signs it with the app signing key**, and it is that
+fingerprint Chrome sees. If the app signing key is not one of the two above,
+verification fails exactly like this, no matter how correct the file looks.
+
+**Get it from Play Console → Test and release → Setup → App integrity → App
+signing key certificate → SHA-256.** Compare it character for character with
+the two values above. If it is missing, add it to
+`TurnSomeDayIntoOneday/.well-known/assetlinks.json`, deploy, then on the phone
+clear Chrome's cached verification by uninstalling and reinstalling the app.
+
+Until that is confirmed, do not write any more code for this bug.
+
+Install, use, the 14-day tester clock and reviews all work. Purchases do not.
+Do not call this cosmetic.
+
 
 app, reopen.** That is a 30-second test and it costs nothing.
 

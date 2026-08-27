@@ -68,7 +68,10 @@ jobs:
       - name: Push the bundle to the twa-build branch
         run: |
           set -e
-          AAB=$(ls TurnSomeDayIntoOneday/twa/*.aab | head -1)
+          # A signed build drops the .aab in the project root; --skipSigning
+          # leaves it where gradle wrote it. Look in both, root first.
+          AAB=$(ls TurnSomeDayIntoOneday/twa/*.aab 2>/dev/null | head -1)
+          test -n "$AAB" || AAB=$(ls TurnSomeDayIntoOneday/twa/app/build/outputs/bundle/release/*.aab | head -1)
           test -n "$AAB"
           mkdir -p /tmp/out && cp "$AAB" /tmp/out/
           cp TurnSomeDayIntoOneday/twa/twa-manifest.json /tmp/out/

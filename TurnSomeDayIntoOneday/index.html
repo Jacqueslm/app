@@ -2556,6 +2556,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="text-align:left"><div style="font-size:.8125rem;font-weight:600;color:var(--tp)">Friendly (Neutral Presence)</div><div style="font-size:.6875rem;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
       </div>
     </div>
+    <div style="margin-top:18px;text-align:left">
+      <div style="font-size:.75rem;font-weight:600;color:var(--tp);letter-spacing:.02em">Her voice on this phone</div>
+      <div style="font-size:.6875rem;color:var(--tm);line-height:1.5;margin-top:2px">Tap the play button to hear one before you keep it.</div>
+    </div>
+    <div id="nova-voice-list" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:30vh;overflow-y:auto;padding:8px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px"></div>
     <div id="voice-device-note" style="display:none;font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;text-align:left"></div>
     <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
   </div>
@@ -2848,7 +2853,7 @@ const PRO_CHAT_DAILY_LIMIT=30;
 let pendingReviewOpen=!!(new URLSearchParams(window.location.search).get('review')==='1');
 let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
-  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
+  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',novaVoiceName:'',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   // Hours (0-23) the daily lesson reminder is allowed to speak up. Defaults to
   // a civilised 9am-9pm rather than "whenever the app happens to be opened".
@@ -10937,6 +10942,16 @@ function applyNovaVoice(u){
   const want=S.novaVoice||'neutral';
   const vs=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||''));
   if(!vs.length)return;
+  // An exact voice the person chose and heard beats any guess we make from a
+  // name. This exists because the app used to pick FOR people - first voice on
+  // the phone matching a gender - and a voice you did not choose and cannot
+  // change is the fastest way to stop using a companion. If that voice is gone
+  // (new phone, uninstalled language pack) we fall through to the old guess
+  // rather than going silent.
+  if(S.novaVoiceName){
+    const exactPick=vs.find(v=>v.name===S.novaVoiceName);
+    if(exactPick){u.voice=exactPick;return;}
+  }
   if(want==='neutral'){
     const def=vs.find(v=>v.default)||vs[0];
     if(def)u.voice=def;
@@ -12419,7 +12434,15 @@ function updateProfileEditUI(){
   const voiceEl=document.getElementById('voice-row-sub');
   if(voiceEl){
     const labels={female:'Female',male:'Male',neutral:'Neutral'};
-    voiceEl.textContent=labels[S.novaVoice]||'Neutral';
+    const base=labels[S.novaVoice]||'Neutral';
+    // Name the voice she will actually hear, not just the presence - the whole
+    // point of the picker is that those two were never the same thing.
+    let picked='';
+    if(S.novaVoiceName){
+      const v=(typeof novaVoicesAvailable==='function'?novaVoicesAvailable():[]).find(x=>x.name===S.novaVoiceName);
+      if(v)picked=novaVoiceLabel(v);
+    }
+    voiceEl.textContent=picked?base+' \u00b7 '+picked:base;
   }
   const catEl=document.getElementById('category-row-sub');
   if(catEl)catEl.textContent=S.selectedAddictions.length?S.selectedAddictions.join(', '):'Not set';
@@ -12568,6 +12591,18 @@ function openVoiceModal(){
   document.getElementById('voice-modal').classList.add('open');
   markChosenVoice();
   describeVoiceSupport();
+  renderNovaVoiceList();
+  // Chrome and Android load the voice list lazily; an empty list on first open
+  // is the normal case, not an error. Redraw once it arrives.
+  try{
+    if(window.speechSynthesis && !speechSynthesis.getVoices().length){
+      speechSynthesis.onvoiceschanged=()=>{
+        speechSynthesis.onvoiceschanged=null;
+        renderNovaVoiceList();
+        describeVoiceSupport();
+      };
+    }
+  }catch(e){}
 }
 // The picker used to give no sign at all which one was chosen - you tapped, the
 // sheet closed, and nothing looked different. That alone made a working setting
@@ -12604,14 +12639,101 @@ function describeVoiceSupport(){
   }
   note.style.display='block';
 }
-function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
+function closeVoiceModal(){
+  document.getElementById('voice-modal').classList.remove('open');
+  stopSpeaking();
+}
 function chooseVoice(v){
   S.novaVoice=v;
+  // The presence is who she is; the voice is how she sounds. Changing the
+  // presence must not silently keep a voice chosen for the old one - a female
+  // presence speaking in the male voice you picked last week is the exact
+  // mismatch the picker exists to prevent.
+  const kept=(speechSynthesis.getVoices&&S.novaVoiceName)
+    ? (speechSynthesis.getVoices()||[]).find(x=>x.name===S.novaVoiceName) : null;
+  if(kept && v!=='neutral' && novaVoiceGender(kept.name)!=='unknown' && novaVoiceGender(kept.name)!==v){
+    S.novaVoiceName='';
+  }
   save();
   markChosenVoice();
+  renderNovaVoiceList();
   updateProfileEditUI();
-  // Let the mark land before the sheet goes, so the tap visibly registers.
-  setTimeout(closeVoiceModal,180);
+}
+
+// ─── FRIENDLY'S VOICE, CHOSEN BY EAR ─────────────────────────────────────────
+// Jacques, 26 Aug 2026: his wife did not like the voice the app picked for her.
+// It was never her choice - applyNovaVoice took the first voice on the phone
+// matching a gender and that was that. The lesson narrators (Warm, Soft,
+// Gentle, Clear, Calm male, Jacques) are pre-recorded mp3s of a fixed script,
+// so Friendly cannot use them: every reply she writes is new. What she CAN
+// have is every voice the phone actually owns, each one previewable, so the
+// choice is made by ear instead of by guess.
+const NOVA_PREVIEW_LINE = "I'm here. Tell me what's going on tonight.";
+function novaVoicesAvailable(){
+  try{ return (speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }
+  catch(e){ return []; }
+}
+function renderNovaVoiceList(){
+  const box=document.getElementById('nova-voice-list');
+  if(!box)return;
+  const vs=novaVoicesAvailable();
+  if(!vs.length){
+    box.innerHTML='<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;text-align:left">This phone has not reported any voices yet. Open this again in a moment, or add voices in your phone\u2019s text-to-speech settings.</div>';
+    return;
+  }
+  const rows=[{name:'',label:'Let the app choose',sub:'Matches the presence above'}]
+    .concat(vs.map(v=>({name:v.name,label:novaVoiceLabel(v),sub:v.lang||''})));
+  box.innerHTML=rows.map(r=>{
+    const on=(S.novaVoiceName||'')===r.name;
+    return '<div class="nova-voice-row" data-voice="'+escapeHtml(r.name)+'" '+
+      'style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;'+
+      'background:'+(on?'var(--green-dim)':'var(--s1)')+';border:1px solid '+(on?'var(--green)':'var(--bdr)')+'">'+
+      '<div onclick="chooseNovaVoiceName(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\')" '+
+        'style="flex:1;text-align:left;cursor:pointer;min-width:0">'+
+        '<div style="font-size:.78125rem;font-weight:600;color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(r.label)+'</div>'+
+        '<div style="font-size:.6875rem;color:var(--tm)">'+escapeHtml(r.sub)+'</div>'+
+      '</div>'+
+      (r.name?'<button onclick="previewNovaVoice(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\')" '+
+        'aria-label="Hear this voice" title="Hear this voice" '+
+        'style="flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr);'+
+        'background:var(--s2);color:var(--tp);cursor:pointer;display:flex;align-items:center;justify-content:center">'+
+        '<i class="ti ti-player-play"></i></button>':'')+
+    '</div>';
+  }).join('');
+  try{renderIcons(box);}catch(e){}
+  // Bring the chosen one into view. Without this a voice picked from the
+  // bottom of a long list looks unset every time the sheet is reopened.
+  if(S.novaVoiceName){
+    const sel=box.querySelector('.nova-voice-row[data-voice="'+(window.CSS&&CSS.escape?CSS.escape(S.novaVoiceName):S.novaVoiceName)+'"]');
+    if(sel)try{sel.scrollIntoView({block:'nearest'});}catch(e){}
+  }
+}
+// Device voice names are machine-ish ("Google UK English Female", "en-US-x-sfg#female_1").
+// Show something a person can read, without inventing a name that is not theirs.
+function novaVoiceLabel(v){
+  let s=String(v.name||'').replace(/^Microsoft\s+/i,'').replace(/\s*-\s*English.*$/i,'');
+  s=s.replace(/^Google\s+/i,'Google ').replace(/_/g,' ').trim();
+  return s||v.name||'Voice';
+}
+function chooseNovaVoiceName(name){
+  S.novaVoiceName=name||'';
+  save();
+  renderNovaVoiceList();
+  // Say something in it straight away, so the choice is confirmed by ear.
+  if(name)previewNovaVoice(name);
+}
+function previewNovaVoice(name){
+  try{
+    stopSpeaking();
+    if(!('speechSynthesis' in window))return;
+    const u=new SpeechSynthesisUtterance(NOVA_PREVIEW_LINE);
+    u.rate=0.95;u.pitch=1;
+    const v=novaVoicesAvailable().find(x=>x.name===name);
+    if(v)u.voice=v;
+    u.onend=stopSpeaking;u.onerror=stopSpeaking;
+    speaking=true;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
 
 // Wipes what the user wrote, keeps who they are. The case this exists for is
@@ -12676,6 +12798,7 @@ function restartOnboarding(){
     S.selectedAddictions=[];
     S.behavioralBlueprint={};
     S.novaVoice='neutral';
+    S.novaVoiceName='';
     S.startDate=null;
     S.currentAddiction='';
     // These are all day-count/journey-dependent and would otherwise leave stale traces of

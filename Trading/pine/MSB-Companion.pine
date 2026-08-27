@@ -1,16 +1,18 @@
 //@version=6
-//  MSB COMPANION (quiet) — lines and three labels, nothing else.
-//  Same brain as the bot. Run on the 1H chart next to it.
+//  MSB COMPANION v3 — green long · red short · yellow caution
+//  The talk-to-the-bot layer: the SCALP CHECK panel answers, live, the trade
+//  YOU want to take (up to the next 15m high / down to the next 15m low),
+//  and every yellow triangle carries its reason. Trades nothing, ever.
 
-indicator("MSB Companion — quiet", "MSB-EYES", overlay = true,
-     max_lines_count = 200, max_labels_count = 60, max_boxes_count = 30)
+indicator("MSB Companion — talk to the bot", "MSB-EYES", overlay = true,
+     max_lines_count = 200, max_labels_count = 60)
 
 pvB = input.int(3, "Swing strength (match the bot)", minval = 1, maxval = 20)
 expBars = input.int(400, "Setup expires after N bars", minval = 20)
-showEQ  = input.bool(true, "Mark equal highs/lows (small)")
-maxLbl  = input.int(9, "Keep at most this many labels", minval = 3, maxval = 30)
+scalpTF = input.timeframe("15", "Scalp timeframe for the hand-off levels")
+maxLbl  = input.int(8, "Keep at most this many labels", minval = 3, maxval = 30)
 
-// ─── wave record ─────────────────────────────────────────────────────────────
+// ─── wave record (the bot's brain) ───────────────────────────────────────────
 ph = ta.pivothigh(pvB, pvB)
 pl = ta.pivotlow(pvB, pvB)
 var float h1 = na
@@ -46,16 +48,15 @@ if newL and not na(LL3) and not na(h2) and l2 < LL3 and h1 < h2 and l1 > l2 and 
     aS_HL := l1
     aS_LH := h1
 
-// keep the chart clean: a rolling bin of labels
 var label[] bin = array.new_label()
 f_note(float y, string txt, color col, bool up2) =>
     l = label.new(bar_index, y, txt, style = up2 ? label.style_label_up : label.style_label_down,
-         color = col, textcolor = color.white, size = size.small)
+         color = col, textcolor = color.black, size = size.small)
     array.push(bin, l)
     if array.size(bin) > maxLbl
         label.delete(array.shift(bin))
 
-// ─── long side ───────────────────────────────────────────────────────────────
+// ─── long side state ─────────────────────────────────────────────────────────
 var int   Lon = 0
 var float LHH = na
 var float LLH = na
@@ -65,11 +66,14 @@ var int   Lb = 0
 var line  lnHH = na
 var line  lnLH = na
 var line  lnHL = na
+bool evSRL = false
+bool evClkL = false
+bool fireL = false
 
 if Lon == 0 and not na(aL_HL) and na(lnHL)
-    lnHH := line.new(bar_index, aL_HH, bar_index + 60, aL_HH, color = color.new(#26a69a, 30), width = 2)
-    lnLH := line.new(bar_index, aL_LH, bar_index + 60, aL_LH, color = color.new(#f0a020, 30), style = line.style_dashed)
-    lnHL := line.new(bar_index, aL_HL, bar_index + 60, aL_HL, color = color.new(#ef5350, 30), width = 2)
+    lnHH := line.new(bar_index, aL_HH, bar_index + 60, aL_HH, color = color.new(color.green, 30), width = 2)
+    lnLH := line.new(bar_index, aL_LH, bar_index + 60, aL_LH, color = color.new(color.yellow, 40), style = line.style_dashed)
+    lnHL := line.new(bar_index, aL_HL, bar_index + 60, aL_HL, color = color.new(color.red, 30), width = 2)
 if Lon == 1
     Lage += 1
     if Lage > expBars or close > LHH
@@ -84,15 +88,15 @@ if Lon == 0 and not na(aL_HL) and low < aL_HL
     aL_HH := na
     aL_LH := na
     aL_HL := na
-    f_note(low, "⚡ stop run — wait", color.new(#ef5350, 10), true)
+    evSRL := true
 else if Lon == 1
     if close > LHL and Lb == 0
         Lb := 1
     if Lb == 1 and close < LHL
         Lb := 2
-        f_note(high, "⛔ crowd's short — stand aside", color.new(#ef5350, 40), false)
+        evClkL := true
     if close > LLH
-        f_note(low, "✅ trap sprung — bot longs", color.new(#26a69a, 0), true)
+        fireL := true
         Lon := 0
 if Lon == 0 and not na(lnHL) and na(aL_HL)
     line.delete(lnHH)
@@ -102,13 +106,24 @@ if Lon == 0 and not na(lnHL) and na(aL_HL)
     lnLH := na
     lnHL := na
 
-// ─── short side ──────────────────────────────────────────────────────────────
+// ─── short side state ────────────────────────────────────────────────────────
 var int   Son = 0
 var float SLL = na
 var float SHL = na
 var float SLH = na
 var int   Sage = 0
 var int   Sb = 0
+var line  lnLL = na
+var line  lnHL2 = na
+var line  lnLH2 = na
+bool evSRS = false
+bool evClkS = false
+bool fireS = false
+
+if Son == 0 and not na(aS_LH) and na(lnLH2)
+    lnLL := line.new(bar_index, aS_LL, bar_index + 60, aS_LL, color = color.new(color.red, 30), width = 2)
+    lnHL2 := line.new(bar_index, aS_HL, bar_index + 60, aS_HL, color = color.new(color.yellow, 40), style = line.style_dashed)
+    lnLH2 := line.new(bar_index, aS_LH, bar_index + 60, aS_LH, color = color.new(color.green, 30), width = 2)
 if Son == 1
     Sage += 1
     if Sage > expBars or close < SLL
@@ -123,39 +138,95 @@ if Son == 0 and not na(aS_LH) and high > aS_LH
     aS_LL := na
     aS_HL := na
     aS_LH := na
-    f_note(high, "⚡ stop run — wait", color.new(#ef5350, 10), false)
+    evSRS := true
 else if Son == 1
     if close < SLH and Sb == 0
         Sb := 1
     if Sb == 1 and close > SLH
         Sb := 2
-        f_note(low, "⛔ crowd's long — stand aside", color.new(#ef5350, 40), true)
+        evClkS := true
     if close < SHL
-        f_note(high, "✅ trap sprung — bot shorts", color.new(#26a69a, 0), false)
+        fireS := true
         Son := 0
+if Son == 0 and not na(lnLH2) and na(aS_LH)
+    line.delete(lnLL)
+    line.delete(lnHL2)
+    line.delete(lnLH2)
+    lnLL := na
+    lnHL2 := na
+    lnLH2 := na
 
-// ─── equal highs/lows: tiny marks, no paragraphs ─────────────────────────────
-tol = math.abs(nz(h1, close) - nz(l1, close)) * 0.12
-if showEQ and newH and not na(h2) and math.abs(h1 - h2) <= tol and h1 > close
-    line.new(bar_index - pvB, h1, bar_index + 30, h1, color = color.new(#c084fc, 55), style = line.style_dotted)
-if showEQ and newL and not na(l2) and math.abs(l1 - l2) <= tol and l1 < close
-    line.new(bar_index - pvB, l1, bar_index + 30, l1, color = color.new(#c084fc, 55), style = line.style_dotted)
+// ─── the color code ──────────────────────────────────────────────────────────
+// YELLOW TRIANGLES = caution, reason attached · GREEN = long · RED = short
+plotshape(evSRL, "caution: stop run below", shape.triangleup, location.belowbar, color.new(color.yellow, 0), size = size.small, text = "stops run\nwait", textcolor = color.yellow)
+plotshape(evSRS, "caution: stop run above", shape.triangledown, location.abovebar, color.new(color.yellow, 0), size = size.small, text = "stops run\nwait", textcolor = color.yellow)
+plotshape(evClkL, "caution: trap loading (crowd short)", shape.triangledown, location.abovebar, color.new(color.yellow, 0), size = size.small, text = "trap loading\nno shorts", textcolor = color.yellow)
+plotshape(evClkS, "caution: trap loading (crowd long)", shape.triangleup, location.belowbar, color.new(color.yellow, 0), size = size.small, text = "trap loading\nno longs", textcolor = color.yellow)
+if fireL
+    f_note(low, "LONG — trap sprung", color.new(color.green, 0), true)
+if fireS
+    f_note(high, "SHORT — trap sprung", color.new(color.red, 0), false)
+
+// ─── SCALP CHECK: the trade YOU want, answered live ──────────────────────────
+// Hand-off scalps: up to the next 15m swing high (best when it is a LOWER
+// high - trade TO it, never through it), or down to the next 15m swing low.
+f_sw() =>
+    xh = ta.pivothigh(3, 3)
+    xl = ta.pivotlow(3, 3)
+    var float ha = na
+    var float hb = na
+    var float la = na
+    var float lb = na
+    if not na(xh)
+        hb := ha
+        ha := xh
+    if not na(xl)
+        lb := la
+        la := xl
+    [ha, hb, la, lb]
+[sh1, sh2, sl1, sl2] = request.security(syminfo.tickerid, scalpTF, f_sw(), lookahead = barmerge.lookahead_off)
+
+// long scalp: target the 15m high above, stop under the 15m low below
+upTgt  = not na(sh1) and sh1 > close ? sh1 : na
+upRisk = not na(sl1) and sl1 < close ? close - sl1 : na
+upR    = not na(upTgt) and not na(upRisk) and upRisk > 0 ? (upTgt - close) / upRisk : na
+upLH   = not na(sh1) and not na(sh2) and sh1 < sh2       // it's a lower high: the hand-off
+// short scalp mirror
+dnTgt  = not na(sl1) and sl1 < close ? sl1 : na
+dnRisk = not na(sh1) and sh1 > close ? sh1 - close : na
+dnR    = not na(dnTgt) and not na(dnRisk) and dnRisk > 0 ? (close - dnTgt) / dnRisk : na
+dnHL   = not na(sl1) and not na(sl2) and sl1 > sl2       // it's a higher low: the hand-off
+
+// why the bot would caution each direction
+longWhy  = Son == 1 and Sb == 2 ? "trap loading — crowd longs are bait" :
+     Son == 1 ? "stops just ran above — that high may be bait" :
+     Lon == 1 and Lb < 2 ? "flush in progress — wait for the reclaim" : ""
+shortWhy = Lon == 1 and Lb == 2 ? "trap loading — crowd shorts are bait" :
+     Lon == 1 ? "stops just ran below — that low may be bait" :
+     Son == 1 and Sb < 2 ? "flush in progress — wait for the reclaim" : ""
+
+f_verdict(float r, bool handoff, string why) =>
+    why != "" ? "⚠ " + why :
+     na(r) ? "no clean level" :
+     r < 0.8 ? "⚠ thin — " + str.tostring(r, "#.0") + "R to the level" :
+     (handoff ? "OK — " : "OK (level may break) — ") + str.tostring(r, "#.0") + "R"
+f_vcol(float r, string why) => why != "" ? color.yellow : na(r) or r < 0.8 ? color.yellow : color.lime
 
 // ─── dashboard ───────────────────────────────────────────────────────────────
-stTx(int on, int b, bool armed) => on == 1 ? (b == 2 ? "④ crowd in — trap loading" : b == 1 ? "③ bounced" : "② stops running") : armed ? "① level armed" : "watching"
-crowd = Lon == 1 ? (Lb == 2 ? "sure it breaks (the trap)" : Lb == 1 ? "arguing" : "panic") :
-     Son == 1 ? (Sb == 2 ? "sure it breaks (the trap)" : Sb == 1 ? "arguing" : "panic") : "quiet"
-you = (Lon == 1 and Lb == 2) or (Son == 1 and Sb == 2) ? "wait for the reclaim ONLY" :
-     Lon == 1 or Son == 1 ? "hands off" : "wait"
+stTx(int on, int b, bool armed) => on == 1 ? (b == 2 ? "trap loading" : b == 1 ? "bounced" : "stops running") : armed ? "level armed" : "watching"
 
-var table dash = table.new(position.top_right, 2, 4, bgcolor = color.new(#0e1116, 8),
+var table dash = table.new(position.top_right, 2, 6, bgcolor = color.new(#0e1116, 8),
      frame_color = color.new(color.gray, 60), frame_width = 1)
 if barstate.islast
     table.cell(dash, 0, 0, "MSB EYES", text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
     table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 0, 1, "Long", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 0, 1, "Long setup", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 1, stTx(Lon, Lb, not na(aL_HL)), text_color = Lon == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 2, "Short", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 0, 2, "Short setup", text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 2, stTx(Son, Sb, not na(aS_LH)), text_color = Son == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 3, "Crowd / you", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 3, crowd + " / " + you, text_color = #26a69a, text_size = size.small)
+    table.cell(dash, 0, 3, "Scalp ▲ " + (na(upTgt) ? "—" : str.tostring(upTgt, format.mintick)), text_color = color.lime, text_size = size.small)
+    table.cell(dash, 1, 3, f_verdict(upR, upLH, longWhy), text_color = f_vcol(upR, longWhy), text_size = size.small)
+    table.cell(dash, 0, 4, "Scalp ▼ " + (na(dnTgt) ? "—" : str.tostring(dnTgt, format.mintick)), text_color = color.red, text_size = size.small)
+    table.cell(dash, 1, 4, f_verdict(dnR, dnHL, shortWhy), text_color = f_vcol(dnR, shortWhy), text_size = size.small)
+    table.cell(dash, 0, 5, "Hand-off", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 5, (upLH ? "▲ lower high ✓  " : "") + (dnHL ? "▼ higher low ✓" : "") + (not upLH and not dnHL ? "none clean" : ""), text_color = color.silver, text_size = size.small)

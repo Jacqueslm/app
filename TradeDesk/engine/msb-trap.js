@@ -29,6 +29,12 @@ function run(D, opt) {
   const entryRetest = opt.entryRetest === true;  // enter on the retest of the LH, not the reclaim close
   const expireBars = opt.expireBars ?? 400;
   const contOK = opt.cont !== false;             // the continuation branch
+  // entryMode: how early to get in. 'confirm' = close back above the LOWER
+  // HIGH (latest, most certain). 'early' = first close back above the broken
+  // HIGHER LOW (one level sooner). 'anticipate' = fill AT the level on the
+  // flush bar itself, stop under the previous low (before the move - the
+  // catching-the-knife tier).
+  const entryMode = opt.entryMode ?? 'confirm';
   const gate15 = opt.gate15 !== false;           // 15m must agree at the continuation
   const minRoom = opt.minRoom ?? 1.0;
   const S = D.S;                                  // big-swing structure on the exec chart
@@ -107,6 +113,23 @@ function run(D, opt) {
           s.bounced = 0; s.bounceExt = NaN;
           s.ext = up ? c.l : c.h; s.age = 0;
           if (up) arm.L = null; else arm.S = null;
+          if (entryMode === 'anticipate' && !open && took < maxPerDay &&
+              et.hm >= sessFrom && et.hm <= sessTo && !isNaN(s.pL)) {
+            const entry = s.HL;                       // limit fill AT the level
+            const stop = up ? s.pL - buf : s.pL + buf;
+            const risk = Math.abs(entry - stop);
+            const tgt = up ? entry + tgtPct * (s.HH - entry) : entry - tgtPct * (entry - s.HH);
+            const room = risk > 0 ? Math.abs(tgt - entry) / risk : 0;
+            if (risk > 0 && (up ? stop < entry : stop > entry) && room >= minRoom) {
+              took++; g.entered++;
+              open = {dir, entry, stop, risk, room, t1: false, R: 0, tIn: c.t,
+                      feat: {branch: 'rev', mode: 'anticipate', room, hr: Math.floor(et.hm / 100)},
+                      T1: up ? entry + risk : entry - risk, T2: tgt};
+              s.on = 0;
+              // the flush bar itself can hit the stop after filling us
+              if (up ? c.l <= stop : c.h >= stop) { open.R = -1; trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat}); open = null; }
+            }
+          }
         }
         return;
       }
@@ -130,6 +153,13 @@ function run(D, opt) {
 
       // the bounce: price gets back over the broken level and builds a lower high
       if (up ? c.c > s.HL : c.c < s.HL) {
+        if (entryMode === 'early' && s.bounced === 0 && !open && took < maxPerDay &&
+            et.hm >= sessFrom && et.hm <= sessTo) {
+          s.bounced = 1;
+          s.on = 0;
+          enter(dir, c.c, s);
+          return;
+        }
         s.bounced = 1;
         s.bounceExt = isNaN(s.bounceExt) ? (up ? c.h : c.l) : (up ? Math.max(s.bounceExt, c.h) : Math.min(s.bounceExt, c.l));
       }

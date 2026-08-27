@@ -130,11 +130,23 @@ answer, but the note was wrong. Corrected.
 **Still outstanding:** the 1,150 mp3 files on the `lesson-audio` branch are
 orphaned, not deleted. Nothing references them.
 
-**Not verified:** `generate-phase-audio.py` uses `en_US-john-medium` for the
-male narrator, while the table above lists `norman-medium`. John is not in this
-audit. Search suggests MIT over a LibriVox public-domain dataset; the
-MODEL_CARD could not be read (huggingface.co is blocked from the build
-container). **Read it before treating john as cleared.**
+**All six narrators verified 27 Aug 2026 — every one is clear.** Read from the
+`MODEL_CARD` inside each model tarball (huggingface.co is blocked from the
+build container; the same files mirror to sherpa-onnx's GitHub releases, which
+is where these came from):
+
+| App voice | Model | Dataset | Licence |
+|---|---|---|---|
+| Warm | `en_US-kristin-medium` | librivox.org | public domain |
+| Soft | `en_GB-cori-medium` | librivox.org | public domain |
+| Gentle | `en_US-kathleen-low` | rhasspy/dataset-voice-kathleen | **CC0** |
+| Clear | `en_US-ljspeech-high` | LJ Speech | public domain |
+| Calm male | `en_US-john-medium` | librivox.org | public domain |
+| **Deep male** | `en_US-joe-medium` | NabuCasa/voice-datasets | **CC0** |
+
+That closes the john question left open earlier the same day - it is public
+domain, not merely "probably MIT". Nothing in the app's audio carries a
+non-commercial, attribution or no-derivatives licence.
 
 **Landmine:** `tools/generate-lesson-audio.py` (in git at `118bf7a`, deleted
 from the tree 26 Aug) still points at hfc_female, amy, hfc_male and lessac —

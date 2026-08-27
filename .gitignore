@@ -29,9 +29,17 @@ __pycache__/
 # them — 95 PNGs of documents that are already in the repo as markdown.
 *-pages/
 
-# Videos are handed to Jacques in chat, not committed (rule, 27 Aug 2026).
-# He keeps them in his own file and on social media. Music/audio DO stay in
-# the repo - see content/score/ and audio/. Sources and stills stay too, so
-# any piece can be re-rendered without the .mp4 living here.
-# Pre-existing tracked videos are unaffected; git ignores this for tracked files.
-/content/*.mp4
+# NO VIDEO FILES IN THIS REPO (rule, 27 Aug 2026). All 39 were purged from
+# tracking - talking heads, AI pieces, samples, the whole library, 246 MB.
+# Jacques keeps them in his own file and on social media; they are handed to
+# him in chat instead.
+#
+# MUSIC AND AUDIO STAY - content/score/, TurnSomeDayIntoOneday/audio/. So do
+# the sources and stills (*-source.html, spec.json, the jpgs and pngs) and the
+# render tooling, so any piece can be rebuilt without the video living here.
+*.mp4
+*.mov
+*.webm
+*.m4v
+*.avi
+*.mkv

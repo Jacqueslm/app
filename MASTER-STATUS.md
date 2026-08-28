@@ -1543,6 +1543,29 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
+## House rule 27 — a video is not finished until it has a title and tags (Jacques, 27 Aug 2026)
+
+**Handing over an .mp4 on its own is an unfinished job.** Every finished video
+is delivered with all of the following, in the chat message that carries the
+file — not buried in AI-SCENES for him to go dig out:
+
+1. **Social title** — the hook-first one, for TikTok and Facebook. Short enough
+   to read at a glance. This is the line that stops the scroll.
+2. **YouTube title** — the search-shaped one. Carries the keyword where
+   KEYWORDS.md actually has a term for the lane. **Where it has none (pills,
+   worry), say so instead of inventing a volume.** KEYWORDS.md is final.
+3. **Hashtags** — 4-6, specific to the lane, not generic recovery filler.
+4. **Buffer tags** — from the three the org actually has, reused not invented:
+   `addictions` · `recovery` · `partner support`. See the Buffer rules above
+   for the IDs.
+5. **The AI-generated flag reminder** (house rule 19), because Facebook cannot
+   take it through the API and it has to be set by hand.
+
+Same four fields already go in the AI-SCENES entry. The rule is that they also
+go **in the handover**, so he can post straight from the message without
+opening the repo. He posts from his phone; making him cross-reference a
+markdown file to find a caption is the thing this rule exists to stop.
+
 ## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
 
 **Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**

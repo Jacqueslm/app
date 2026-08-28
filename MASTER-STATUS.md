@@ -1049,16 +1049,39 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
-## House rule 21 — videos are 15 to 20 seconds (Jacques, 22 Aug 2026)
+## House rule 21 — videos are 6 to 10 seconds (Jacques, 27 Aug 2026)
 
-**Every video is 15-20 seconds. Twenty is the ceiling, not the target.**
+**Every video is 6-10 seconds. Ten is the ceiling, not the target.**
 
-Jacques called this after a 31-second piece: too long for how people actually
-watch. In practice that is about **four beats**, not seven - roughly 3.5 to 4.5
-seconds a line including its fade. Every line has to earn its place, and the
-end card is 2 seconds inside the budget, not on top of it.
+**This replaces the 15-20 second version of this rule (22 Aug).** Same reason,
+pushed further: too long for how people actually watch. The 27 Aug call brings
+the whole library in line with the Cause & Effect format, which was already
+running at this length - A12 was 10s, A13 was 8s. The 15-20s rule was the
+outlier, not the C&E pieces.
 
-Existing longer pieces stay as they are. This governs everything new.
+**What 6-10 seconds actually buys you: two beats and an end card.** Not four.
+Roughly 2.5-3.5s a caption including its fade, and the end card is ~2s *inside*
+the budget, not on top of it. A third caption only fits at the 10s ceiling and
+usually shouldn't - cut the line instead of shaving the others.
+
+**The score problem this creates, and the fix.** Every track in
+`content/score/` is 12-14s, which is now LONGER than the cut, so the old
+treatment inverts:
+- At 15s the tracks were too short and got stretched with `atempo` (~4.5%) to
+  land on the last note.
+- At 6-10s stretching is impossible - fitting 14.35s into 9s is a 60% speed-up
+  and would wreck the track. So the score gets **trimmed with a fade-out**
+  instead, which means **it cannot end on the last note at this length.**
+- That is a real, knowing exception to "music covers the whole video and ends
+  on the last note." Either accept the fade, or Jacques cuts 6-10s stings in
+  Suno and the rule holds again. His call, not one to make silently.
+
+**The four pieces built 26-27 Aug are all off-spec at ~15s** (A15 trauma bond,
+A16 / A16b binge, A17 pills). They were built to the old rule. Each has its
+source in `content/*-source.html` with the beat timings in one `SUBS` array, so
+recutting any of them to 6-10s is an edit and a re-render, not a rebuild.
+
+Existing longer pieces stay as they are unless asked. This governs everything new.
 
 ## House rule 25 — Pro sells itself quietly (Jacques, 24 Aug 2026)
 

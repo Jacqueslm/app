@@ -10,7 +10,13 @@
 // That is invisible in code review and invisible in the browser unless you
 // happen to click the exact link. It is not invisible here.
 //
-// Run:  node --test TurnSomeDayIntoOneday/server/test/
+// Run:  cd TurnSomeDayIntoOneday/server && npm test
+//
+// NOT `node --test test/`. On Node 22 that tries to LOAD a module called
+// `test` instead of globbing the folder, and reports a single mysterious
+// "not ok 1 - test / ERR_TEST_FAILURE" while every real test passes. It cost a
+// session a scare on 28 Aug 2026. `npm test` runs `node --test test/*.test.js`,
+// which is the form that actually works.
 const { test } = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');

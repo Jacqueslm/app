@@ -7929,8 +7929,19 @@ async function submitLivePost(){
   const inp=document.getElementById('liveInput');
   const text=(inp.value||'').trim();
   if(!text)return;
-  // The client-side language gate runs first - same rule as private posts.
-  if(typeof roomTextBlocked==='function'&&roomTextBlocked(text))return;
+  // Moderation is server-side and always has been: /api/rooms/post runs every
+  // post past the AI moderator in server/rooms.js before anyone sees it, and
+  // answers with crisis / blocked / held, each handled below.
+  //
+  // A `typeof roomTextBlocked === 'function'` guard used to sit here, above a
+  // comment claiming a client-side language gate ran first "same rule as
+  // private posts". Neither existed - roomTextBlocked is defined nowhere in
+  // this file and there is no private-post path at all; both are leftovers from
+  // a removed feature. The guard could therefore never be true, so it changed
+  // nothing, but the comment claimed protection the code did not provide.
+  // Removed 28 Aug 2026. Do not add a word filter here: the moderator prompt
+  // deliberately allows profanity, anger and despair, and a crude local
+  // blocklist would silence exactly the people this room is for.
   inp.disabled=true;
   try{
     const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},

@@ -879,7 +879,13 @@ app.post('/api/couple/create', requireAuth, (req, res) => {
   db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
   res.json(coupleStatusFor(req.userId));
 });
-app.post('/api/couple/join', requireAuth, (req, res) => {
+// Six characters is a code a partner can read off a screen, not a password, so
+// the guessing has to be stopped at the door rather than by the code's length.
+const coupleJoinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many code attempts. Try again in a little while.' },
+});
+app.post('/api/couple/join', requireAuth, coupleJoinLimiter, (req, res) => {
   const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
   if (out.error) {
     const msg = {

@@ -465,12 +465,27 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // five emails written to the person who LOVES somebody with a habit. Both are
   // kept away from the quiz nurture, which is written in his voice to the person
   // struggling and would land badly on her.
-  // Anything unrecognised still collapses to 'quiz', so a new page cannot start
-  // sending her his emails by forgetting to declare itself.
+  //
+  // 'binge-quiz' added 28 Aug. The binge check-in had been sending it all
+  // along, but it was not listed here, so it fell through to 'quiz' and was
+  // written into the leads table as 'quiz'. The emails were right - a binge
+  // check-in taker IS the person struggling - but the admin dashboard groups
+  // leads by this column ("which page each lead came in through"), so every
+  // binge signup was indistinguishable from a main-quiz signup and the page
+  // could never be judged on its own numbers.
+  //
+  // The fallback is 'quiz', which is HIS voice. An earlier comment here claimed
+  // the opposite - that collapsing to 'quiz' stopped a new page sending her his
+  // emails - and it is exactly backwards: a new PARTNER page that forgets to
+  // declare source:'partner' will send her his sequence. Declare every new page
+  // here, and check `isSelfQuiz` below when adding another self-facing one.
   const src = source === 'brainreset' ? 'brainreset'
     : source === 'for-her' ? 'for-her'
     : source === 'partner' ? 'partner'
+    : source === 'binge-quiz' ? 'binge-quiz'
     : 'quiz';
+  // Sources written to the person struggling: same nurture, separate reporting.
+  const isSelfQuiz = src === 'quiz' || src === 'binge-quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
   const cleanUtm = readUtm(req.body);
 
@@ -486,12 +501,12 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
     }
-    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : src === 'partner' ? "You're all set." : 'Check your email — the PDF is on the way.' });
+    return res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? "You're all set." : 'Check your email — the PDF is on the way.' });
   }
 
-  const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
+  const leadId = db.createLead(addr, isSelfQuiz ? cleanResult : null, src, cleanUtm);
   const lead = db.getLeadById(leadId);
-  if (src === 'quiz') {
+  if (isSelfQuiz) {
     emailer.startQuizNurture(lead).catch(() => {});
   } else if (src === 'partner') {
     // Her day 1 goes immediately; the hourly runner picks up days 2-5.
@@ -510,7 +525,7 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // New-lead funnel event, tagged with the door they came through (quiz,
   // partner, for-her or brainreset) - no email, no result, no PII.
   analytics.event(req, 'Lead', { source: src });
-  res.json({ ok: true, message: (src === 'quiz' || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
+  res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
 const loginLimiter = rateLimit({

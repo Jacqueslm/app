@@ -179,6 +179,23 @@ in this section, and a Play upload is only ever needed for shell-level changes
 (icon, package config, target SDK).
 
 
+## Testing purchases: never use the owner account
+
+`isComped()` in `server/billing.js` grants Pro to `APP_OWNER_EMAIL` — and to
+every address in `COMP_PRO_EMAILS` — with no payment. So a Pro badge on
+Jacques's own account proves nothing about billing, and on 28 Aug it very
+nearly went into the log as "payment system proven end to end". He caught it:
+*"i already got all time pro on my owner account."*
+
+**Test on a fresh address that is neither.** If you must use his, read
+Profile → the subscription line, which distinguishes the two cases because
+`getBillingStatus` resolves `paid` before `comped`:
+
+- `Pro plan — Monthly` / `Yearly` / `Lifetime` → a real `user.plan`, written
+  only by the Stripe webhook. The chain worked.
+- `Pro plan — Complimentary` → `plan: 'comp'`, no payment involved. Whatever
+  you were testing is still untested.
+
 ## The Play latch: why it is sessionStorage, and do not "fix" it back
 
 A Trusted Web Activity **is** Chrome, sharing one storage jar with the browser

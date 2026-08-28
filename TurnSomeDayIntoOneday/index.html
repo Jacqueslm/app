@@ -5315,7 +5315,15 @@ function updateStats(){
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const progLbl=document.getElementById('program-lbl');
-  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
+  // Position in the Bootcamp is LESSON progress, not the calendar. This line
+  // used to read `days` - time since the quit date - which put "Day 9 of the
+  // 90-Day Bootcamp" four lines above "Foundation phase · Day 1 of 30" on
+  // Jacques's own screen, 28 Aug: same program, same screen, two numbers.
+  // Lessons advance only when one is finished (`getLessonDayFor`), so someone
+  // who backdates their quit date has not done nine lessons. Overstating it
+  // also misleads about Pro, which starts at lesson 16.
+  const bootcampDay=getLessonDayFor(S.currentAddiction);
+  if(progLbl)progLbl.textContent=bootcampDay<=90?`Day ${bootcampDay} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
   const focusLbl=document.getElementById('focus-lbl');
   if(focusLbl){
     const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);

@@ -20,12 +20,23 @@ live subscription created. Stripe's "this service will no longer be available
 after September 4" is its normal wording for a trial that is set to cancel —
 not an error.
 
-**The one link still unconfirmed is the last one: did the app itself flip him
-to Pro?** That is the webhook → `getBillingStatus()` → `isPro` path. It has
-worked before (the 6 Aug charge), but nobody has watched it happen since.
-Until someone confirms the app showed Pro, treat "customer pays and stays on
-Free" as an open possibility — it is the worst failure mode there is, and it
-is invisible from Stripe's side.
+**CONFIRMED — the app flipped to Pro.** Jacques's screenshot, 3:32pm: the
+badge reads **Pro** and the pill reads **Pro plan**. So the last link holds:
+checkout → subscription → webhook → `isPro`. **The payment system is proven
+end to end for the first time since launch.** Close the long-standing "no real
+purchase has ever been made" worry for the web path; only the Play path is
+still unproven, and it is waiting on the 1.0.2 upload.
+
+**Found on that same screenshot: the Bootcamp day was calendar-driven.** The
+Today screen said "Day 9 of the 90-Day Bootcamp" four lines above "Foundation
+phase · Day 1 of 30" — same program, same screen, two numbers. `program-lbl`
+read `days` (time since the quit date) while the phase line read
+`getLessonDayFor`, which only advances when a lesson is finished. Anyone who
+backdates their quit date got a Bootcamp position they had not worked, and it
+misleads about Pro too, since Pro starts at lesson 16. `program-lbl` now reads
+the lesson day. Reproduced his exact case in headless Chrome — quit date nine
+days back, lesson 1 — and both lines now say Day 1 while the big counter
+correctly stays 9.
 
 ---
 

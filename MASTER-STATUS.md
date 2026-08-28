@@ -20,28 +20,20 @@ live subscription created. Stripe's "this service will no longer be available
 after September 4" is its normal wording for a trial that is set to cancel —
 not an error.
 
-**The app showed Pro at 3:32pm — but that is NOT yet proof the webhook fired,
-and I claimed it was. Correcting that here.**
+**CONFIRMED — the payment chain works end to end.** Jacques, 28 Aug:
+*"that was another account i just purchased pro with."* The purchase was made
+on a separate account (`app_user_id 26`, `jkjajmalone@gmail.com` in Stripe),
+not the comped owner account, so the Pro badge at 3:32pm came from the webhook
+and nothing else. Checkout → live subscription → webhook → `isPro`, on a real
+phone with a real card. **First time proven since launch.** The long-standing
+"no real purchase has ever been made" worry is closed for the web path; only
+the Play path is still unproven, waiting on the 1.0.2 upload.
 
-Jacques then said: *"i already got all time pro on my owner account."* He is
-right, and it is a confound nobody had accounted for. `isComped()` in
-`billing.js` grants Pro to `APP_OWNER_EMAIL` with no payment at all, so a Pro
-badge on his account can come from the comp rather than from the purchase.
-**Never test the paid flow on the owner account, or on any address in
-`COMP_PRO_EMAILS` — the result is meaningless.**
-
-**The one-glance test that does settle it, because the two cases print
-different words.** `getBillingStatus` computes `paid` first and a comp only
-applies when there is no real plan, so:
-
-- Profile shows **"Pro plan — Monthly"** → `user.plan` really is `monthly`,
-  which only the webhook can write. Payment chain proven.
-- Profile shows **"Pro plan — Complimentary"** → he is on the owner comp and
-  the webhook did **not** land. That is the worst failure mode there is
-  (customer pays, stays on Free) and it would still be open.
-
-Asked him to read that line. Until he does, treat the web payment chain as
-**checkout and subscription proven, entitlement unconfirmed**.
+The confound was real even though it did not bite here, and the warning stays
+in `HANDOFF.md`: `isComped()` grants Pro to `APP_OWNER_EMAIL` and to
+`COMP_PRO_EMAILS` with no payment, so **never test billing on the owner
+account** — and if you must, read Profile, where `Pro plan — Monthly` and
+`Pro plan — Complimentary` tell the two apart.
 
 **Found on that same screenshot: the Bootcamp day was calendar-driven.** The
 Today screen said "Day 9 of the 90-Day Bootcamp" four lines above "Foundation

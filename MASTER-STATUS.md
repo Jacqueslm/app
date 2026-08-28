@@ -38,8 +38,18 @@ holds); a separate tab on the same phone reads `play=false` and gets Stripe;
 desktop unaffected; the legacy key is gone in all cases. 11/11 server tests
 pass.
 
-**So Android web purchases work again right now**, without waiting on the Play
-upload. The 1.0.2 shell is still what fixes in-app purchases.
+**CONFIRMED BY JACQUES on his own phone, 28 Aug: "yes stripe working again."**
+Android web purchases are live. The 1.0.2 shell is still what fixes purchases
+*inside* the app.
+
+**Worth remembering how this was found.** It was invisible from every angle we
+had been looking from: the app said `unsupported context`, which is a Google
+Play error, so both the Play path and this one pointed at the same screen. It
+only surfaced because Jacques tried the other route and said it was broken
+too. When he reports something that contradicts the current theory, check it
+against the payment processor's own records before explaining it away — the
+30 July gap in Stripe's checkout sessions was the whole answer, and it took
+one query.
 
 ---
 

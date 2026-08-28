@@ -31,7 +31,7 @@ WHAT IS INSIDE
 
 • A climb up ninety carved steps, one for every day you show up. A slip dims the sky and never takes a step back.
 
-• Ten-minute narrated stories from people who have lived it — addiction and recovery from both sides: the person using and the person who loves them. New ones every week.
+• Ten-minute narrated stories from people who have lived it — addiction and recovery from both sides: the person using and the person who loves them. Five on the shelf, rotating weekly.
 
 • An app lock and a discreet mode: you can change the app's name and icon on your home screen so nothing on your phone announces what this is.
 
@@ -59,6 +59,18 @@ One person, addicted for 38 years and free at 50, who needed this first and coul
 ```
 
 **Character count is checked in `_char-counts.txt` in this folder.**
+
+> **Second false claim found 28 Aug, NOT yet pasted — see the queue note below.**
+> This text promised story audio "New ones every week." The pool is **ten**
+> stories (`data/audio-stories.json`) and the shelf shows five, so the whole
+> library repeats every fortnight — a user three weeks in sees reruns of a
+> promise of new material. Corrected here to "Five on the shelf, rotating
+> weekly", which is true and still sells the feature. The same wording was
+> fixed inside the app immediately (6.2).
+>
+> **Why it is queued and not pasted:** the founder-voice correction is in
+> review in the console right now. Do not stack a second edit on top of a live
+> review. Once that one publishes, paste this block — it contains both fixes.
 
 > **Corrected 28 Aug 2026 — a false claim was live on the store.** This text
 > sold "Six narrators, including the founder reading all ninety days himself."

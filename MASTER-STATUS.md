@@ -6,6 +6,29 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 💳 28 AUG 2026 — A REAL SUBSCRIPTION WENT THROUGH ON ANDROID, END TO END
+
+Jacques bought Pro Monthly from his phone minutes after the latch fix, in the
+Chrome-installed shortcut. Verified in the live Stripe account, not taken on
+trust: `sub_1U9L9YCDHXSEg3rLLab9Ahve`, `status: trialing`, `app_user_id 26`,
+Visa ...8776, 7-day trial to **4 Sep**. He cancelled it 68 seconds after
+creating it (`canceled_at` 68s after `created`, `cancel_at` = trial end), so
+**nothing will ever be charged** and Pro stays active until 4 Sep.
+
+So on Android the whole chain works again: Upgrade → Stripe checkout →
+live subscription created. Stripe's "this service will no longer be available
+after September 4" is its normal wording for a trial that is set to cancel —
+not an error.
+
+**The one link still unconfirmed is the last one: did the app itself flip him
+to Pro?** That is the webhook → `getBillingStatus()` → `isPro` path. It has
+worked before (the 6 Aug charge), but nobody has watched it happen since.
+Until someone confirms the app showed Pro, treat "customer pays and stays on
+Free" as an open possibility — it is the worst failure mode there is, and it
+is invisible from Stripe's side.
+
+---
+
 ## 🔴→✅ 28 AUG 2026 — INSTALLING THE APP WAS SWITCHING OFF STRIPE FOR THAT WHOLE PHONE
 
 **Jacques: "cant even purchase pro through stripe."** He was right, and this

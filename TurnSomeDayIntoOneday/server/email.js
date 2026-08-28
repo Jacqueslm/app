@@ -374,15 +374,20 @@ Day one is a decision, not a date.
 ];
 
 // The lead-magnet delivery mail (subject and body approved by Jacques).
-function brainresetPdfEmail() {
-  return {
-    subject: 'The 90-Day Brain Reset (your PDF)',
-    text: `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
+// It carries an unsubscribe link like everything else that goes to a lead: a
+// for-her lead is promised exactly one email and never enters a sequence, so
+// this is the only message she ever gets - and it was the only one with no way
+// out of the list at the bottom of it.
+function brainresetPdfEmail(lead) {
+  let text = `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
 
 ${APP_URL}/The90DayBrainReset.pdf
 
-— Jacques`,
-  };
+— Jacques`;
+  if (lead && lead.id && lead.email) {
+    text += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
+  }
+  return { subject: 'The 90-Day Brain Reset (your PDF)', text };
 }
 
 // Same contract as sendSequenceEmail, but for leads: guard keys on the email

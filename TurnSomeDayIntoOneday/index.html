@@ -10952,10 +10952,15 @@ const PRO_TOOLS={
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
-  // things and nothing else: lesson/pack days 16-30, and Friendly, which is
-  // Pro-only at 30 chats a day (FREE_CHAT_DAILY_LIMIT is 0, not 3 - Jacques
-  // made Friendly Pro-only on 24 Aug). Those gates live where they belong -
-  // renderPackLesson, renderCouples, and the chat cap - not here.
+  // things and nothing else. First, every lesson past day 15 - isLessonLocked
+  // is simply `day > FREE_LESSON_CAP`, so that means days 16-90 on a recovery
+  // track, 16-35 on Supporting Someone, and 16-30 on Together, the Spiritual
+  // Path and the 7-day packs. (This comment said "16-30" flat, which quietly
+  // understated the paid half of a 90-day program by sixty days.) Second,
+  // Friendly, which is Pro-only at 30 chats a day - FREE_CHAT_DAILY_LIMIT is
+  // 0, not 3; Jacques made Friendly Pro-only on 24 Aug. Those gates live where
+  // they belong - isLessonLocked, renderPackLesson, renderCouples and the chat
+  // cap - not here.
   // The name openProTool is kept only because a dozen onclick handlers use it.
   window[PRO_TOOLS[key].open]();
 }

@@ -179,6 +179,37 @@ in this section, and a Play upload is only ever needed for shell-level changes
 (icon, package config, target SDK).
 
 
+## The Play latch: why it is sessionStorage, and do not "fix" it back
+
+A Trusted Web Activity **is** Chrome, sharing one storage jar with the browser
+for this origin. So the old `localStorage` flag written by the Android shell
+was read back by every ordinary Chrome tab and every Chrome-installed shortcut
+on that phone, permanently — the site believed it was the Play build, routed
+Upgrade to Google billing, and `create-checkout-session` refused Stripe by
+policy (403 on `X-TSID-Client: play`). Combined with the broken shell, **every
+Android owner of the app was unable to pay by any route.** Stripe had created
+no checkout session between 30 July and 28 Aug.
+
+The flag now lives in `sessionStorage` (one browsing context), and the legacy
+`localStorage` key is deleted wherever found.
+
+**Both directions are covered, and both were tested in headless Chrome on an
+Android user agent — rerun these before touching `detectPlayBuild`:**
+
+| Context | `isPlayBuild()` | Why it must be that |
+|---|---|---|
+| Play app launch (`?src=play`) | `true` | Play policy: never Stripe in the shell |
+| Play app after a reload with no query | `true` | sessionStorage carries it |
+| Play app returning from a redirect | `true` | same |
+| Chrome-installed shortcut / plain tab | `false` | not Play-distributed; Stripe is correct and is revenue |
+
+**Do not add a `display-mode: standalone` test as a backstop.** It looks
+tempting and it is wrong: a Chrome-installed shortcut reports `standalone` too
+(Jacques's 27 Aug screenshots show exactly that), so it would re-break the very
+case this fixed. The honest discriminator once the shell is healthy is
+`getDigitalGoodsService()` actually resolving; it cannot be used while the
+shell is broken, because it rejects there too.
+
 ## Open bug
 
 **The Android app is not running as a verified Trusted Web Activity, and that

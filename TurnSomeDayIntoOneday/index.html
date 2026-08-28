@@ -11445,48 +11445,65 @@ function setBill(type){
 // latches, and one that already latched (from the earlier build) is cleaned up
 // and put back on the web path.
 const PLAY_PACKAGE='com.turnsomedayintodayone.app';
-// How the Play flag came to be set is recorded alongside it, because the two
-// ways of setting it mean very different things and the old '1' could not tell
-// them apart. An `android-app://` referrer is proof the Android shell launched
-// this page. `?src=play` is not proof of anything - it is a query string, and
-// it survives being shared, pasted or bookmarked. When a purchase later fails,
-// knowing which one latched is the difference between "the Play app is broken"
-// and "this is an ordinary browser wearing the Play app's flag".
-// The legacy '1' is honoured but reports its provenance as unknown; it is never
-// silently upgraded to 'referrer', because that would invent evidence.
-const PLAY_LATCH_KEY='tsid_play_build';
+// THE LATCH MUST NOT OUTLIVE THE APP SESSION, and this is why.
+//
+// A Trusted Web Activity is Chrome. It shares one storage jar with the browser
+// for this origin, so a flag the Android shell wrote into localStorage is read
+// back by every ordinary Chrome tab on that phone, for good. That turned one
+// launch of the Play app into a permanent verdict: the site decided it was the
+// Play build, routed Upgrade to Google billing, and `create-checkout-session`
+// refused Stripe by policy. On 28 Aug Jacques could not buy Pro on his phone by
+// any route - not in the app, not on the website - and Stripe's dashboard
+// showed no checkout session had been created since 30 July. Every Android
+// owner of this app was in the same position: install once, and the website
+// stops selling to you.
+//
+// So the latch now lives in sessionStorage, which is scoped to one browsing
+// context. The shell's own window keeps it for as long as the app is open; a
+// separate Chrome tab starts clean and gets Stripe. The legacy localStorage key
+// is deleted wherever it is found, because it is the poison.
+//
+// Policy is still safe. The shell's start URL carries ?src=play and its launch
+// sets an `android-app://` referrer, so a real app launch always presents a
+// signal at the very first navigation - it never has to rely on remembering.
+const PLAY_LATCH_KEY='tsid_play_build';      // legacy, localStorage - only ever deleted now
+const PLAY_SESSION_KEY='tsid_play_session';  // current, sessionStorage
 let playLatch=null;
+function forgetLegacyPlayLatch(){
+  try{localStorage.removeItem(PLAY_LATCH_KEY);}catch(e){}
+}
 function readPlayLatch(){
   try{
-    const raw=localStorage.getItem(PLAY_LATCH_KEY);
+    const raw=sessionStorage.getItem(PLAY_SESSION_KEY);
     if(!raw)return null;
-    if(raw==='1')return {how:'unknown',at:''};
     const v=JSON.parse(raw);
-    return (v&&v.how)?v:{how:'unknown',at:''};
-  }catch(e){return {how:'unknown',at:''};}
+    return (v&&v.how)?v:null;
+  }catch(e){return null;}
 }
 function writePlayLatch(how){
   const v={how:how,at:new Date().toISOString().slice(0,16)};
-  try{localStorage.setItem(PLAY_LATCH_KEY,JSON.stringify(v));}catch(e){}
+  // Kept in memory too: a private window can throw on write, and the flag still
+  // has to hold for the rest of this page's life.
+  try{sessionStorage.setItem(PLAY_SESSION_KEY,JSON.stringify(v));}catch(e){}
   return v;
 }
 // The launch signals only exist on the very first navigation, so they are read
-// once here and kept for the life of the page. In-app navigation drops the
-// query string, which is the whole reason the latch exists.
+// once here and kept for the life of the page.
 const launchReferrer=(function(){try{return document.referrer||'';}catch(e){return '';}})();
 const launchFromParam=(function(){try{return new URLSearchParams(location.search).get('src')==='play';}catch(e){return false;}})();
 const launchFromShell=launchReferrer.startsWith('android-app://'+PLAY_PACKAGE);
 function detectPlayBuild(){
+  forgetLegacyPlayLatch();
   try{
     if(!/\bAndroid\b/.test(navigator.userAgent||'')){
-      localStorage.removeItem(PLAY_LATCH_KEY);
       playLatch=null;
       return false;
     }
+    // Signals from this navigation outrank anything remembered.
     if(launchFromShell){playLatch=writePlayLatch('referrer');return true;}
+    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
     const stored=readPlayLatch();
     if(stored){playLatch=stored;return true;}
-    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
   }catch(e){}
   return false;
 }
@@ -12535,7 +12552,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.0';
+const APP_VERSION='6.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

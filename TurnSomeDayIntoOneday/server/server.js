@@ -593,11 +593,17 @@ const billingLimiter = rateLimit({
   message: { error: 'Too many billing checks — try again in a few minutes.' },
 });
 
-function setSessionCookie(res, userId, sessionVersion) {
+// Secure comes off the request, not off NODE_ENV. The host sets NODE_ENV, and
+// if it ever stops doing so, every session cookie quietly starts going out
+// without the Secure flag - which is the sort of thing nobody notices until a
+// session leaks over a plain http link. 'trust proxy' is on above, so req.secure
+// is the real answer; the NODE_ENV check stays as a belt-and-braces fallback,
+// and plain-http localhost still gets a working cookie in development.
+function setSessionCookie(req, res, userId, sessionVersion) {
   res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: !!(req && req.secure) || process.env.NODE_ENV === 'production',
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 }
@@ -628,7 +634,7 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   // Attribution must never be able to fail a signup - a malformed tag is worth
   // losing, an account is not.
   try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   res.status(201).json({ email: normalizedEmail });
   // Funnel event - fire-and-forget, and it carries only the plan level, never
   // anything that could identify the person who just signed up.
@@ -694,7 +700,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
-  setSessionCookie(res, user.id, user.session_version || 1);
+  setSessionCookie(req, res, user.id, user.session_version || 1);
   res.json({ email: user.email });
 });
 
@@ -707,7 +713,7 @@ app.post('/api/auth/logout', (req, res) => {
 // existing token, then this device immediately gets a fresh cookie at the new version.
 app.post('/api/auth/logout-all', requireAuth, (req, res) => {
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -725,7 +731,7 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
   // person may have access - so invalidate every existing session, then
   // immediately re-cookie this device at the new version (same as logout-all).
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -810,7 +816,15 @@ app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
 // users only, capped fields, and it lands in the same owner-only error log the
 // diagnostics screen already reads. Writing is deliberately not owner-gated -
 // the failures worth seeing are other people's.
-app.post('/api/diagnostics/report', requireAuth, (req, res) => {
+// The log only holds the last 200 rows, so an app stuck in a retry loop - or
+// anybody signed in who felt like it - could push the real failures out of the
+// window before they were ever read. A handful an hour is all a genuine break
+// needs.
+const diagReportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many reports.' },
+});
+app.post('/api/diagnostics/report', requireAuth, diagReportLimiter, (req, res) => {
   const b = req.body || {};
   const message = String(b.message || '').slice(0, 300);
   const detail = String(b.detail || '').slice(0, 600);
@@ -1020,7 +1034,7 @@ app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
     const link = db.createCoupleLink(row.user_id, row.sender_name || '');
     if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
   } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
   res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
   analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });

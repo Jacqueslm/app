@@ -9,7 +9,7 @@
 // gone. Anyone who chose Deep had the one voice that goes silent offline.
 // Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
 // cannot drift apart unnoticed again.
-const CACHE_NAME = 'tsid-shell-v6.6';
+const CACHE_NAME = 'tsid-shell-v6.7';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -23,6 +23,7 @@ const SHELL_FILES = [
   '/audio/sos-talk-deep.mp3',
   '/data/lessons.json',
   '/data/stories.json',
+  '/data/audio-stories.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-discrete-192.png',

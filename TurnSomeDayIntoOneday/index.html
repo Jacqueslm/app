@@ -6440,7 +6440,11 @@ async function renderStories(){
 async function toggleStory(id){
   if(storyPlayingId===id&&storyAudio){storyAudio.paused?storyAudio.play():storyAudio.pause();updateStoryBtn(id);return;}
   stopStory();
-  const m=await ensureLessonAudioManifest();
+  // loadLessonAudioManifest, not ensureLessonAudioManifest - the latter has
+  // never existed. Every Listen press threw a ReferenceError here before the
+  // audio element was ever built, so no story has ever played and no error
+  // dialog appeared either: the throw happened above the onerror handler.
+  const m=await loadLessonAudioManifest();
   const base=(m&&m.base)||'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
   const a=new Audio(base+'stories/'+id+'.mp3');
   storyAudio=a;storyPlayingId=id;a.preload='auto';
@@ -12635,7 +12639,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.6';
+const APP_VERSION='6.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

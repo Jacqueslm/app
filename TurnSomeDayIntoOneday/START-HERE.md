@@ -55,3 +55,16 @@ Spiritual Path and Together**". Those two are 30-day programs, and the Pro card
 directly below it already said so correctly. Fixed to "day 16 onward on every
 track, all the way to day 90 on the recovery tracks", which is true of all of
 them.
+
+### Stories audit (28 Aug) — app 7.0
+
+Downloaded all ten story recordings and timed them. Every one was labelled
+**"~10 min" in the app and none of them is** — they run 6.9 to 8.5 minutes.
+Each story now shows its own real length (7, 8 or 9), and the shelf blurb says
+"seven to nine minutes each" instead of "about ten minutes each".
+
+Also confirmed: all ten stories have a recording on the `lesson-audio` branch,
+there are no orphan files, and no story in the app is missing audio.
+
+Service worker cache bumped to v6.8 so the corrected lengths reach people who
+already have the app open.

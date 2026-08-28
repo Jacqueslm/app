@@ -1487,6 +1487,41 @@ Jacques hours of work he should never have touched.
 - **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
   Replicate and fal.ai are BLOCKED by the environment's network policy - that
   is why no AI model can be called from here for images, video or voice.
+
+**IMAGE GENERATION - properly tested 28 Aug, not assumed (Jacques asked for a
+real attempt rather than a prediction).** The answer is still no, but the
+reason is now precise:
+
+- **The software side works.** `torch 2.13.0` plus `diffusers`, `transformers`,
+  `accelerate` and `safetensors` all install fine from PyPI into a venv. (Note:
+  installing into system site-packages fails on a broken
+  `setuptools-84.0.0.dist-info` - use a venv.)
+- **The weights are the wall.** A real
+  `StableDiffusionPipeline.from_pretrained(...)` call fails with
+  **`ProxyError: 403 Forbidden`** - the gateway refuses the CONNECT. Same 403
+  for huggingface.co, cdn-lfs.huggingface.co, hf.co, hf-mirror.com,
+  modelscope.cn, gitee.com, civitai.com, api.openai.com, fal.run,
+  api.replicate.com, api.stability.ai, storage.googleapis.com and
+  download.pytorch.org.
+- **What IS reachable**: pypi.org, files.pythonhosted.org, github.com,
+  raw.githubusercontent.com, GitHub *release assets* (tested, real download),
+  and s3.amazonaws.com. So weights mirrored on a GitHub release could
+  physically come in - but no mainstream photoreal model is distributed that
+  way.
+- **Even if weights arrived, the hardware kills it**: 4 CPU cores, 15 GB RAM,
+  **no GPU** (`torch.cuda.is_available()` is False). SDXL on 4 CPU cores is
+  minutes per image, and matching a series face needs IP-Adapter/LoRA on top.
+- **Shutterstock MCP: search works, download does not.** The connector returns
+  real photoreal stock with IDs and descriptions, but `image.shutterstock.com`
+  is blocked, so nothing can be fetched here. Usable as **a way to propose
+  specific stock IDs for Jacques to license and send back** - not as an asset
+  pipeline.
+
+**Conclusion that holds until the network policy changes:** Jacques generates
+the stills and sends them (a zip works; chat images do not always reach the
+filesystem). That loop is faster than anything that could be stood up in here.
+**Do not re-litigate this without re-running the tests** - and if the policy is
+ever opened, image generation works the same day, because the stack is proven.
 - **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
   the ear and the eye on every piece of media. That one never changes.
 

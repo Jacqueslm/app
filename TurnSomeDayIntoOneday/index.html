@@ -6437,15 +6437,22 @@ async function renderStories(){
         <div style="font-size:.875rem;line-height:1.7;color:var(--ts);margin-top:8px;white-space:pre-line">${escapeHtml(st.text)}</div></details>
     </div>`).join('');
 }
-async function toggleStory(id){
+// NOTHING MAY BE AWAITED BETWEEN THE TAP AND play(). A phone grants audio
+// playback only inside the gesture that asked for it, and an await spends that
+// permission: play() then rejects with NotAllowedError and the story is silent.
+// This function used to be async and awaited the lesson-audio manifest first,
+// purely to read a base URL it already had a constant for - so it failed on
+// every phone while working on desktop, where the rule is not enforced.
+// startLessonMp3 is the model: build the element and call play() synchronously.
+// (It also called a function that never existed, ensureLessonAudioManifest,
+// which threw above the point where onerror was attached - two separate faults
+// on one line, both silent. Fixed 28 Aug 2026.)
+const STORY_AUDIO_BASE='https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+function toggleStory(id){
   if(storyPlayingId===id&&storyAudio){storyAudio.paused?storyAudio.play():storyAudio.pause();updateStoryBtn(id);return;}
   stopStory();
-  // loadLessonAudioManifest, not ensureLessonAudioManifest - the latter has
-  // never existed. Every Listen press threw a ReferenceError here before the
-  // audio element was ever built, so no story has ever played and no error
-  // dialog appeared either: the throw happened above the onerror handler.
-  const m=await loadLessonAudioManifest();
-  const base=(m&&m.base)||'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+  // Read the manifest only if it is already in memory; never wait for it.
+  const base=(typeof LESSON_AUDIO_MANIFEST!=='undefined'&&LESSON_AUDIO_MANIFEST&&LESSON_AUDIO_MANIFEST.base)||STORY_AUDIO_BASE;
   const a=new Audio(base+'stories/'+id+'.mp3');
   storyAudio=a;storyPlayingId=id;a.preload='auto';
   a.onerror=()=>{stopStory();appInfo('Stories',"This story's recording isn't available right now — check your connection and try again.");};
@@ -6459,7 +6466,16 @@ async function toggleStory(id){
   if('mediaSession' in navigator){try{const st=(STORIES_POOL||[]).find(x=>x.id===id);
     navigator.mediaSession.metadata=new MediaMetadata({title:st?st.title:'Story',artist:'Turn Someday Into Day One'});}catch(e){}}
   const prog=document.getElementById('story-prog-'+id);if(prog)prog.style.display='block';
-  a.play().catch(()=>{});
+  // Never swallow this. A rejected play() is the difference between "the file
+  // is missing" and "the phone refused" - the second is a bug in this function,
+  // and silence is what let it hide for so long.
+  const pl=a.play();
+  if(pl&&pl.catch)pl.catch(err=>{
+    if(storyPlayingId!==id)return;
+    stopStory();
+    appInfo('Stories',"That story wouldn't start ("+((err&&err.name)||'unknown')+"). Tap Listen again — and if it keeps happening, tell Jacques and it will land in the error log.");
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Story playback refused',detail:((err&&err.name)||'?')+': '+((err&&err.message)||'')+' · id='+id})}).catch(()=>{});}catch(_){}
+  });
   logActivity('story_play',{id});
 }
 function seekStory(v){if(storyAudio&&storyAudio.duration)storyAudio.currentTime=v/100*storyAudio.duration;}
@@ -12639,7 +12655,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.7';
+const APP_VERSION='6.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

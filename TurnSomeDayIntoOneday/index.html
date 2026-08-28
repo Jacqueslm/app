@@ -1537,7 +1537,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:.78125rem;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
+        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
         <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Days 16–90 of every track — the full bootcamp</div>
@@ -12561,7 +12561,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.3';
+const APP_VERSION='6.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13848,7 +13848,7 @@ const GUIDE_FAQ=[
   {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Focus areas'},
   {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
-  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all 14 tracks, the Spiritual Path, Together, and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
+  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
   {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in her header. Off by default so nothing talks unasked; switched on, she reads every reply out loud by herself. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},

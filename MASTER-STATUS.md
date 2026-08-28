@@ -1543,6 +1543,33 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
+## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
+
+**Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**
+
+**The one carve-out is YouTube long-form, and it is not ours.** Jacques has a
+different AI making those; nothing in this repo's pipeline should ever output
+16:9. If a request here seems to want landscape, it is the wrong lane - say so
+rather than building it.
+
+**What this changes in practice: ask for the stills in 9:16 up front.** The
+treatment follows the source, and there are only two:
+
+- **Source is natively 9:16 → FULL BLEED.** The frame fills 1080x1920, no
+  band, no blurred blowup. Captions need their own bottom scrim because there
+  is no dark band under them. A17 (pills) and A18 (worry) are built this way.
+- **Source is 4:3 or landscape → the letterboxed band**: the photo sits in a
+  1080x810 band on a blurred, darkened blowup of itself. This is the fallback,
+  not the goal - it wastes roughly a third of the frame. A16 (binge) is the
+  example.
+
+Full bleed is better every time: more picture, no dead bars, and it is what the
+feed actually shows. **A 4:3 still is a compromise, so ask for 9:16 before the
+image is generated rather than banding it afterwards.**
+
+Both treatments already exist in `content/*-source.html` - copy whichever
+matches the stills rather than writing a new one.
+
 ## House rule 21 — videos are 5 to 8 seconds (Jacques, 27 Aug 2026)
 
 **Every video is 5-8 seconds. Eight is the ceiling, not the target.**

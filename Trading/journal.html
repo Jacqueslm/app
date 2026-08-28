@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trade Journal</title>
+<style>
+body{background:#0e1116;color:#e6edf3;font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;max-width:960px;margin:0 auto;padding:18px}
+h1{font-size:19px;margin:0 0 10px}
+#drop{border:2px dashed #2a6feb;border-radius:12px;padding:22px;text-align:center;color:#8ab4ff;margin-bottom:14px;cursor:pointer}
+#drop.hot{background:#12203a}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+input,select,button{background:#161b22;color:#e6edf3;border:1px solid #2a3341;border-radius:8px;padding:9px;font-size:14px}
+input{width:92px}#note{flex:1;min-width:150px}
+button{cursor:pointer;font-weight:700}
+#save{background:#238636;border-color:#238636;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td,th{padding:6px 5px;border-bottom:1px solid #2a3341;text-align:right}
+td:first-child,th:first-child,td:nth-child(2),th:nth-child(2),td:last-child,th:last-child{text-align:left}
+.g{color:#3fb950}.r{color:#f85149}.y{color:#d29922}
+#stats{margin:8px 0 14px;font-size:15px}
+.small{font-size:12px;color:#8b96a5}
+details{margin-bottom:12px}summary{cursor:pointer;color:#8b96a5}
+</style></head><body>
+<h1>Trade Journal <span class="small">— no typing needed: drop your TradingView exports below</span></h1>
+
+<div id="drop">⬇ Drop TradingView exports OR screenshots here (or click)<br>
+<span class="small">CSV: Trading Panel → Export data… → <b>Balance history</b> (trades) + <b>Order history</b> (stops → real R).<br>
+Screenshots: attached to your latest trade, and numbers are read where possible to prefill a new entry.<br>
+Re-drop anytime — duplicates are skipped.</span></div>
+<div id="ocr" class="small" style="display:none;margin:-6px 0 12px;color:#d29922"></div>
+<div class="row"><button id="pull">⚡ Pull bot signals</button><span id="pmsg" class="small" style="align-self:center"></span></div>
+<input type="file" id="pick" multiple accept=".csv,image/*" style="display:none">
+
+<details><summary>Add one by hand (optional)</summary>
+<div class="row">
+  <input id="sym" placeholder="MES" style="width:70px">
+  <select id="dir"><option value="L">LONG</option><option value="S">SHORT</option></select>
+  <select id="kind"><option>bot signal</option><option>scalp hand-off</option><option>my own</option></select>
+  <input id="entry" placeholder="entry" type="number" step="any">
+  <input id="stop" placeholder="stop" type="number" step="any">
+  <input id="exit" placeholder="exit" type="number" step="any">
+  <input id="note" placeholder="note">
+  <button id="save">Save</button>
+</div></details>
+
+<div id="stats"></div>
+<div class="row"><button id="csv">Export CSV</button><button id="wipe">Clear all</button></div>
+<table><thead><tr><th>time</th><th>sym</th><th>dir</th><th>type</th><th>qty</th><th>entry</th><th>exit</th><th>P&L $</th><th>R</th><th>note</th><th></th></tr></thead>
+<tbody id="rows"></tbody></table>
+<p class="small">R needs a stop — drop the Order history file too and stops are matched automatically.
+Losses worse than −1R are flagged: that's a moved stop.</p>
+
+<script>
+const K='msb_journal2';
+const PT={MES:5,MNQ:2,MGC:10,ES:50,NQ:20,GC:100,MYM:0.5,M2K:5};
+let J=[];try{J=JSON.parse(localStorage.getItem(K))||[]}catch(e){}
+const $=id=>document.getElementById(id);
+const save=()=>localStorage.setItem(K,JSON.stringify(J));
+const root=s=>{const m=/:?([A-Z]+?)[0-9!]/.exec(s||'');return m?m[1]:(s||'')};
+
+// tiny CSV parser that respects quotes
+function csv(text){
+  const out=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const c=text[i];
+    if(q){ if(c=='"'){ if(text[i+1]=='"'){cur+='"';i++} else q=false } else cur+=c; }
+    else if(c=='"')q=true;
+    else if(c==','){row.push(cur);cur=''}
+    else if(c=='\n'||c=='\r'){ if(cur!==''||row.length){row.push(cur);out.push(row);row=[];cur=''} }
+    else cur+=c;
+  }
+  if(cur!==''||row.length){row.push(cur);out.push(row)}
+  return out;
+}
+
+let pendingOrders=null;   // stop orders from an order-history file, kept for matching
+// ── screenshots: attach + best-effort number reading ────────────────────────
+function shrink(file,cb){
+  const img=new Image();
+  img.onload=()=>{
+    const w=Math.min(900,img.width),h=Math.round(img.height*w/img.width);
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    cv.getContext('2d').drawImage(img,0,0,w,h);
+    cb(cv.toDataURL('image/jpeg',0.55));
+  };
+  img.src=URL.createObjectURL(file);
+}
+function totalShotBytes(){let n=0;for(const t of J)if(t.shots)for(const s of t.shots)n+=s.length;return n}
+function attachShot(data){
+  const t=J[J.length-1];
+  if(!t){alert('No trade yet to attach the screenshot to — import or add one first.');return}
+  t.shots=t.shots||[];t.shots.push(data);
+  while(totalShotBytes()>3800000){         // keep localStorage happy: evict oldest image
+    const o=J.find(x=>x.shots&&x.shots.length);if(!o)break;o.shots.shift();
+  }
+  try{save()}catch(e){t.shots.pop();alert('Storage full — screenshot not saved. Export CSV and clear old trades.')}
+  render();
+}
+function ocrShot(file){
+  const box=$('ocr');box.style.display='block';box.textContent='reading screenshot…';
+  const go=()=>Tesseract.recognize(file,'eng').then(r=>{
+    const txt=r.data.text||'';
+    const sym=(txt.match(/\b(MNQ|MES|MGC|ES|NQ|GC)\b/i)||[])[1];
+    const nums=[...txt.matchAll(/\b\d{1,3}(?:,\d{3})*(?:\.\d+)?\b/g)].map(m=>+m[0].replace(/,/g,''))
+      .filter(n=>n>500&&n<100000);
+    if(sym)$('sym').value=sym.toUpperCase();
+    if(nums.length>=2){
+      const s2=[...new Set(nums)].slice(0,3);
+      $('entry').value=s2[0]??'';$('exit').value=s2[1]??'';$('stop').value=s2[2]??'';
+      document.querySelector('details').open=true;
+      box.textContent='read: '+(sym?sym.toUpperCase()+' ':'')+s2.join(' / ')+' — check the prefilled row below, fix anything wrong, then Save. Screenshot attached to your latest trade.';
+    } else box.textContent='could not read numbers from that image — attached it to your latest trade instead.';
+  }).catch(()=>box.textContent='reader unavailable (offline?) — screenshot attached to your latest trade.');
+  if(window.Tesseract)go();
+  else{
+    const sc=document.createElement('script');
+    sc.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    sc.onload=go;sc.onerror=()=>box.textContent='reader unavailable (offline) — screenshot attached to your latest trade.';
+    document.head.appendChild(sc);
+  }
+}
+function importFiles(files){
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  files=[...files].filter(f=>!f.type.startsWith('image/'));
+  for(const f of imgs){shrink(f,attachShot);ocrShot(f)}
+  if(!files.length)return;
+  let bal=null,ord=null;
+  let done=0;
+  for(const f of files){
+    const r=new FileReader();
+    r.onload=()=>{
+      const rows=csv(r.result);
+      const head=rows[0].map(s=>s.toLowerCase());
+      if(head.includes('action')&&head.some(h=>h.includes('realized'))) bal=rows;
+      else if(head.includes('stop price')&&head.includes('placing time')) ord=rows;
+      if(++done===files.length) ingest(bal,ord);
+    };
+    r.readAsText(f);
+  }
+}
+
+function ingest(bal,ord){
+  if(ord){
+    const h=ord[0].map(s=>s.toLowerCase());
+    const iS=h.indexOf('symbol'),iT=h.indexOf('type'),iSP=h.indexOf('stop price'),iPT=h.indexOf('placing time');
+    pendingOrders=ord.slice(1).filter(r=>r[iT]==='Stop'&&r[iSP])
+      .map(r=>({sym:root(r[iS]),stop:+r[iSP],t:Date.parse(r[iPT])}));
+  }
+  if(!bal){ if(ord){matchStops();render();alert('Stops loaded and matched where possible.')} return }
+  const h=bal[0].map(s=>s.toLowerCase());
+  const iT=h.findIndex(x=>x.includes('time')),iP=h.findIndex(x=>x.includes('realized pnl (value)')),iA=h.indexOf('action');
+  // entry times: "Commission for: Enter position for symbol X at price E"
+  const entries=[];
+  for(const r of bal.slice(1)){
+    const a=r[iA]||'';
+    const em=/Enter position for symbol (\S+) at price ([\d.]+)/.exec(a);
+    if(em) entries.push({sym:root(em[1]),px:+em[2],t:Date.parse(r[iT])});
+  }
+  let added=0;
+  for(const r of bal.slice(1)){
+    const a=r[iA]||'';
+    if(!a.startsWith('Close')) continue;
+    const m=/Close (long|short) position for symbol (\S+) at price ([\d.]+) for (\d+) units\. Position AVG Price was ([\d.]+)/.exec(a);
+    if(!m) continue;
+    const t={ts:new Date(Date.parse(r[iT])).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      tms:Date.parse(r[iT]),sym:root(m[2]),dir:m[1]==='long'?'L':'S',kind:'import',
+      qty:+m[4],exit:+m[3],entry:+m[5],pnl:+r[iP],stop:null,note:''};
+    const e=entries.filter(e=>e.sym===t.sym&&Math.abs(e.px-t.entry)<1e-6&&e.t<=t.tms).sort((a,b)=>b.t-a.t)[0];
+    t.etms=e?e.t:null;
+    const key=t.tms+'|'+t.sym+'|'+t.pnl;
+    if(J.some(x=>x.key===key)) continue;
+    t.key=key; J.push(t); added++;
+  }
+  mergeSignals();
+  matchStops();
+  J.sort((a,b)=>(a.tms||0)-(b.tms||0)); save(); render();
+  alert(added+' trades imported'+(pendingOrders?', stops matched where found':'')+'. Re-drop anytime — duplicates skip.');
+}
+
+// ── the wire to the bot ─────────────────────────────────────────────────────
+// The bot lives on TradingView's servers and cannot write files on your PC.
+// The relay (relay/server.js) is the bridge: every alert the bot fires gets
+// saved to relay/signals.json, and this page pulls that list — automatically
+// on open, or with the ⚡ button. A signal arrives as a "waiting" row; when
+// you later drop the TradingView export, the real fill/exit/P&L merges into
+// that same row instead of making a second one.
+const tol=px=>Math.max(1,px*0.0005);
+function mergeSignals(){
+  for(let i=J.length-1;i>=0;i--){
+    const p=J[i];if(!p.pending)continue;
+    const m=J.find(t=>t.kind==='import'&&t.sym===p.sym&&t.dir===p.dir
+      &&Math.abs(t.entry-p.entry)<=tol(p.entry)
+      &&(t.etms??t.tms)>=p.tms-15*60*1000&&(t.etms??t.tms)<=p.tms+6*60*60*1000);
+    if(m){m.kind='bot signal';if(m.stop==null)m.stop=p.stop;m.skey=p.skey;J.splice(i,1)}
+  }
+}
+async function pullSignals(quiet){
+  const urls=location.protocol.startsWith('http')?['/signals.json']:['http://localhost:4410/signals.json'];
+  let data=null;
+  for(const u of urls){try{const r=await fetch(u,{cache:'no-store'});if(r.ok){data=await r.json();break}}catch(e){}}
+  const box=$('pmsg');
+  if(!data){if(!quiet)box.textContent='relay not running — start "Start Trade Grader.bat" first, then try again.';return}
+  let added=0;
+  for(const s of (data.signals||[])){
+    const skey='s'+s.t+'|'+s.tk;
+    if(J.some(t=>t.skey===skey||t.key===skey))continue;
+    J.push({ts:new Date(s.t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+      tms:s.t,sym:root(s.tk),dir:s.dir===1?'L':'S',kind:'bot signal',qty:s.qty||'',
+      entry:s.entry,stop:s.stop,exit:null,pnl:null,
+      note:'signal — waiting for the close'+(s.t2?' · target '+s.t2:''),
+      key:skey,skey:skey,pending:true});
+    added++;
+  }
+  if(added){mergeSignals();J.sort((a,b)=>(a.tms||0)-(b.tms||0));save();render()}
+  if(!quiet)box.textContent=added?added+' new signal(s) pulled from the bot.':'connected — no new signals.';
+}
+$('pull').onclick=()=>pullSignals(false);
+pullSignals(true);
+
+function matchStops(){
+  if(!pendingOrders) return;
+  for(const t of J){
+    if(t.kind!=='import'||t.stop||!t.etms) continue;
+    const c=pendingOrders.filter(o=>o.sym===t.sym&&Math.abs(o.t-t.etms)<10*60*1000)
+      .sort((a,b)=>Math.abs(a.t-t.etms)-Math.abs(b.t-t.etms))[0];
+    if(c) t.stop=c.stop;
+  }
+  save();
+}
+
+const rOf=t=>{
+  if(t.stop==null||!t.entry||t.exit==null)return null;
+  const d=t.dir==='L'?1:-1,risk=d*(t.entry-t.stop);
+  return risk>0?d*(t.exit-t.entry)/risk:null;
+};
+
+function render(){
+  const tb=$('rows');tb.innerHTML='';
+  let n=0,w=0,sumR=0,nR=0,big=0,pnl=0;
+  J.slice().reverse().forEach((t,ri)=>{
+    const i=J.length-1-ri,r=rOf(t);
+    const win=t.pnl!=null?t.pnl>0:(r!=null?r>0:null);
+    if(win!=null){n++;if(win)w++}
+    if(t.pnl!=null)pnl+=t.pnl;
+    if(r!=null){sumR+=r;nR++;if(r<-1.05)big++}
+    tb.insertAdjacentHTML('beforeend',`<tr><td>${t.ts}</td><td>${t.sym}</td>
+      <td class="${t.dir==='L'?'g':'r'}">${t.dir}</td><td>${t.kind||''}</td><td>${t.qty||''}</td>
+      <td>${t.entry??''}</td><td>${t.exit??''}</td>
+      <td class="${t.pnl>0?'g':t.pnl<0?'r':''}">${t.pnl!=null?t.pnl.toFixed(0):''}</td>
+      <td class="${r>0?'g':r<0?'r':''}">${r!=null?r.toFixed(2):'—'}</td>
+      <td style="max-width:170px;overflow:hidden;text-overflow:ellipsis">${t.note||''} ${t.shots&&t.shots.length?`<a href="#" onclick="view(${i});return false">📷${t.shots.length}</a>`:''}</td>
+      <td><button onclick="del(${i})" style="padding:1px 7px">×</button></td></tr>`);
+  });
+  $('stats').innerHTML=n?`<b>${n}</b> trades · <b class="${w/n>=.5?'g':'r'}">${(100*w/n).toFixed(0)}%</b> wins ·
+    P&L <b class="${pnl>=0?'g':'r'}">$${pnl.toFixed(0)}</b>`+
+    (nR?` · avg <b class="${sumR/nR>=0?'g':'r'}">${(sumR/nR).toFixed(2)}R</b> over ${nR} with stops`:'')+
+    (big?` · <b class="y">⚠ ${big} worse than −1R — a stop moved</b>`:''):'No trades yet — drop your exports above.';
+}
+window.del=i=>{if(confirm('Delete?')){J.splice(i,1);save();render()}};
+window.view=i=>{
+  const t=J[i];if(!t.shots||!t.shots.length)return;
+  const o=document.createElement('div');
+  o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9;overflow:auto;padding:20px;text-align:center';
+  o.onclick=()=>o.remove();
+  for(const s of t.shots)o.insertAdjacentHTML('beforeend','<img src="'+s+'" style="max-width:95%;margin:8px;border-radius:8px">');
+  document.body.appendChild(o);
+};
+
+$('drop').onclick=()=>$('pick').click();
+$('pick').onchange=e=>importFiles([...e.target.files]);
+$('drop').ondragover=e=>{e.preventDefault();$('drop').classList.add('hot')};
+$('drop').ondragleave=()=>$('drop').classList.remove('hot');
+$('drop').ondrop=e=>{e.preventDefault();$('drop').classList.remove('hot');importFiles([...e.dataTransfer.files])};
+
+$('save').onclick=()=>{
+  const t={ts:new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+    tms:Date.now(),sym:($('sym').value||'MES').toUpperCase(),dir:$('dir').value,kind:$('kind').value,
+    entry:+$('entry').value,stop:+$('stop').value||null,exit:+$('exit').value,note:$('note').value,
+    pnl:null,key:'m'+Date.now()};
+  if(!(t.entry&&t.exit)){alert('entry and exit needed');return}
+  if(t.stop&&t.entry){const d=t.dir==='L'?1:-1;t.pnl=d*(t.exit-t.entry)*(PT[t.sym]||1)*1}
+  J.push(t);save();['entry','stop','exit','note'].forEach(id=>$(id).value='');render();
+};
+$('csv').onclick=()=>{
+  const rows=[['time','sym','dir','type','qty','entry','stop','exit','pnl','R','note'],
+    ...J.map(t=>[t.ts,t.sym,t.dir,t.kind||'',t.qty||'',t.entry??'',t.stop??'',t.exit??'',t.pnl??'',(rOf(t)??'').toString(),(t.note||'').replace(/,/g,';')])];
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
+  a.download='journal.csv';a.click();
+};
+$('wipe').onclick=()=>{if(confirm('Delete ALL journal entries?')){J=[];save();render()}};
+render();
+</script></body></html>

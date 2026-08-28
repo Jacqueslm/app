@@ -22,12 +22,12 @@ go, from the bigger context down.**
 
 The two are separate questions, and every rule in this playbook belongs to one of them:
 
-- **Where is it trying to go?** — the bigger context. Daily and 4H structure, yesterday's value,
-  the day type. This is the market's *intent*, already visible in what it has done. Higher
+- **Where is it trying to go?** — the bigger context. Daily and 4H structure: the bias pair.
+  This is the market's *intent*, already visible in what it has done. Higher
   highs on the Daily aren't a prediction that price rises — they're the record that buyers have
   been in control and haven't stopped. You don't guess intent; you read it.
-- **What is it saying right now?** — the evidence. Acceptance or rejection at the level, RVOL,
-  the sweep, displacement. A touch of your level is a question; the market's answer arrives in
+- **What is it saying right now?** — the evidence. The 1H and 15m: acceptance or rejection at
+  the level, the sweep, the resumption close. A touch of your level is a question; the market's answer arrives in
   the bars that follow. You don't assume the answer; you wait for it.
 
 **The trigger is nothing more than the moment those two agree** — what the market is saying
@@ -36,7 +36,7 @@ system. No step in the sequence ever claims to know the future; every step is th
 *already said* something, on record, in a closed candle.
 
 This is also why the entries are "late" by design — the swing that confirms 3 bars after the
-fact, the 2-close acceptance wait, the day type that misses the first hour of some trends.
+fact, the 2-close acceptance wait, the pullback that has to finish before it counts.
 A predictor gets the better price and pays for it at the stop when the guess is wrong. A
 listener pays a worse price for the certainty of evidence — and gets to be wrong far less
 often. You are always paying one of those two prices. This system chooses the second one,
@@ -57,19 +57,20 @@ system is a fixed number.
 
 | What changes daily | How the system re-measures it |
 |---|---|
-| Volatility | Everything is scaled by ATR — stops, buffers, displacement, tolerances. A 40-point day and a 400-point day get proportionally identical rules, automatically. |
-| What "normal volume" means | RVOL compares each hour to *that hour's own history* — a baseline that updates itself every day it runs. |
-| The map | Yesterday's value area, the day's open location, reference levels — redrawn from scratch each morning. Zones delete themselves when broken. |
-| The day's character | The day-type classifier reads trend vs balance *live*, and a different rule set applies to each: balance day → breakout entries banned, continuation penalised; trend day → continuation allowed. That IS "same market, different environment, different rules." |
-| The bridge's character | Ranging 4H → range-trap rules active, edges treated as raids-in-waiting. Trending 4H → breaks trusted normally. |
-| The day's fuel | Range budget recomputed from the daily ATR every session. |
+| Volatility | Nothing is a fixed number of points. Stops come from the swing that actually formed, so a 40-point day and a 400-point day get proportionally identical rules without anything being scaled. |
+| Position size | Recomputed every trade from that stop distance, so the dollars at risk stay flat while the point distance does whatever the day requires. |
+| The map | The swing highs and lows are re-read every bar. Levels that break stop being levels. |
+| The day's character | Read off the four timeframes directly: if they align, there is a trend to trade; if they don't, there isn't. That IS the environment check, and it needs no classifier. |
+| The bridge's character | A ranging 4H cannot make higher highs and higher lows, so it fails alignment on its own. |
 | Each trade's plan | Scalp / standard / hold decided per trade from measured room — not one exit rule for all conditions. |
 | What actually works for YOU | The grader's win-rate-per-grade is computed from your own journal and sharpens every week. |
 
-So the system doesn't "think" the market is trending — it counts the closes beyond value and
-reports what it counted. It doesn't "think" volume is high — it divides today's 10am by every
-previous 10am. **Knowing what is actually going on, instead of what it thinks, is precisely what
-"measured, not assumed" means — and every gate in this playbook is a measurement.**
+So the system doesn't "think" the market is trending — it compares the last two swing highs and
+the last two swing lows on four timeframes and reports what it found. It doesn't "think" a target
+is reachable — it measures the distance to the next opposing swing and divides by the stop.
+**Knowing what is actually going on, instead of what it thinks, is precisely what "measured, not
+assumed" means — and every gate in this playbook is a measurement of price itself, never a
+reading derived from it.**
 
 ### The one way it refuses to adapt — on purpose
 
@@ -95,18 +96,39 @@ but only *measured* simplicity. Simple and unmeasured is just a hunch with confi
 
 ---
 
-## 2. Timeframe roles — each one has exactly one job
+## 2. Timeframe roles — four timeframes, two pairs
 
-| TF | Role | Question it answers | It does NOT |
+The four split into a **bias pair** (where is it trying to go) and an
+**execution pair** (is it going there right now). Both pairs have to agree with
+the trade, and with each other.
+
+| | Bias pair | Execution pair | Runs on |
+|---|---|---|---|
+| **Standard** | Daily + 4H | 1H + 15m | the 1H chart |
+| **Scalp** | 4H + 1H | 15m + 5m | the 15m chart |
+
+Scalp mode is the same rule slid down one rung. It is not a different system and
+it does not get looser filters — it gets a faster clock.
+
+| TF (standard) | Role | Question it answers | It does NOT |
 |---|---|---|---|
 | **Daily** | Bias | Which direction am I allowed to trade today? | give entries |
 | **4H** | The bridge | Has the pullback finished, or is it still going? | give entries |
 | **1H** | Execution | Where exactly do I get in, and where's my stop? | set direction |
-| **15m** | Management | Is the trade behaving? Where do I trail / take partials? | give entries |
+| **15m** | Alignment | Is the fast money pointing the same way? | give entries |
+
+"Aligned" means one specific, countable thing: **all four are making higher
+highs and higher lows** (long), or lower highs and lower lows (short). Not "look
+bullish" — making them, on closed bars, on the record.
 
 The single most common way this system loses money is letting a lower timeframe
-answer a higher timeframe's question. A beautiful 1H setup against a bearish Daily is
-not a setup. It's a donation.
+answer a higher timeframe's question. A beautiful 1H setup against a bearish
+Daily is not a setup. It's a donation.
+
+And the 15m earns its place by being the thing that catches chop without any
+chop indicator: **if the 15m won't line up with the 1H, that disagreement IS the
+consolidation.** You don't need an ADX reading to tell you the two timeframes
+disagree — you can just check whether they disagree.
 
 ---
 
@@ -150,7 +172,7 @@ And there's a concrete reason the wait works, not just a disciplinary one. A tou
 a **question**; the market answering it takes time. Price holding above the level for two closes
 is **acceptance** — the market agreeing the level is support. Price closing back through it is
 **rejection**. At step ④ that information does not exist yet. You are not waiting to be patient.
-You are waiting for data. (See [INSTITUTIONAL.md §3](INSTITUTIONAL.md).)
+You are waiting for data.
 
 Watch for one thing during step ③: if the pullback **dips below the recent low and snaps back
 above it**, that's a liquidity sweep — stops were triggered and something absorbed all of them.
@@ -159,123 +181,149 @@ level, and the system scores it accordingly.
 
 ### What the trigger at ⑦ must look like
 
-All three, no exceptions:
+Both, no exceptions:
 1. A 1H **close** above the swing high formed during the pullback (a fresh mini-BOS).
 2. The protected low is still intact — no 1H close below it at any point since ②.
-3. The trigger candle has **displacement**: body ≥ 1.2× the average body of the last 20 bars.
-   A doji reclaim is not a trigger, it's a coin flip.
 
----
+### 4½. The pullback entry — the shorter way in
 
-## 5. The consolidation filter — your "I don't trade chop" rule, made objective
+The sequence above is the patient version. There is a second entry, and it is
+the one that actually fires most days:
 
-You said you don't trade consolidation, especially inside the 1H range. "It looks choppy"
-is not a rule you can follow at 9:47am with money on the line, so here it is as numbers.
+```
+   ① all four timeframes aligned                    ← permission
+   ② price pulls back far enough to print a
+      confirmed swing against the trend             ← the pullback happened AND finished
+   ③ price closes back through the swing it
+      came from                                      ← the resumption. ENTER.
+```
 
-Three measures, computed on the 1H (and cross-checked on the 15m):
+The stop is the pullback swing. If that goes, it wasn't a pullback, it was a
+reversal, and you find that out for one R.
 
-| Measure | What it catches | Chop when |
-|---|---|---|
-| **Efficiency Ratio** (Kaufman, 20 bars)<br>`\|close − close[20]\| ÷ Σ\|close − close[1]\|` | Price travelling a lot but going nowhere | **< 0.30** |
-| **Range ÷ ATR** — 20-bar high-low range divided by ATR(14) | A tight box | **< 3.0** |
-| **ADX(14)** | Absence of trend | **< 18** |
+**Why both exist.** The retest sequence waits for a level to be broken, given
+back, reclaimed and held — four events. The pullback waits for two. The retest
+is the higher-quality entry and it is rare; the pullback is the ordinary one and
+it is what makes the system tradeable at one trade a day. Both are switchable
+independently, and the backtest counts them separately, so you can find out
+which one is actually carrying the account instead of assuming.
 
-**If two or more fire, the setup is rejected.** No override, no "but it looks like it's about
-to break." The market is inside somebody's range and you are the liquidity.
+The thing they have in common is the thing that matters: **neither one predicts.**
+Both wait for a close that already happened.
+
+## 5. Chop — caught by structure, not by an oscillator
+
+You don't trade consolidation. The old version of this playbook enforced that
+with three computed measures — Kaufman efficiency ratio, range ÷ ATR, ADX. They
+are gone, along with every other indicator, because they are readings *about*
+price rather than price, and because the gate diagnostic showed the filter stack
+rejecting roughly 99% of otherwise valid sequences.
+
+What replaces them is already in the rules and costs nothing:
+
+- **Four-timeframe alignment.** A market in a range cannot produce higher highs
+  and higher lows on the Daily, 4H, 1H and 15m at the same time. Chop fails this
+  test by construction — that is what chop *is*.
+- **Room to the next opposing swing.** Inside a range, the opposing swing is
+  close, so room comes out under 1R and the trade is rejected for having nothing
+  in it. The range's own edges do the filtering.
+- **The protected swing.** Range trades die on it quickly and cheaply.
 
 Two more chop rules that are yours to hold, not the software's:
-- **No trades inside a level you've already been chopped in today.** One loss at a level
-  means that level is now a magnet, not an edge.
-- **If the 15m and 1H disagree about direction for more than 3 bars, stand down.** That
-  disagreement *is* the consolidation.
-
----
+- **No trades at a level you've already been chopped in today.** One loss at a
+  level means that level is now a magnet, not an edge.
+- **If the 15m and 1H disagree about direction, stand down.** That disagreement
+  *is* the consolidation, and it is now a hard gate rather than an instruction.
 
 ## 6. Grading — how a setup becomes A+, B, or a pass
 
-Structure decides **where**. Context decides **whether anyone is there**. Both must pass.
-The reasoning behind every context item is in **[INSTITUTIONAL.md](INSTITUTIONAL.md)** — read it
-once and these stop feeling like arbitrary boxes.
+Structure decides **where**. The grade decides **whether this one is worth the
+day's only bullet**. The software does neither — it reads swing highs and swing
+lows and hands you numbers. **Every box below is ticked by you**, in the grader,
+before you click. Nothing auto-ticks, because the judgement is the part that
+can't be automated without inventing it.
 
 ### Hard filters (any failure = REJECT, no score, no discussion)
 
-- [ ] **All four timeframes aligned — Daily · 4H · 1H · 15m.** The thing that makes this
-      strategy a go. If the four don't agree, executing is off the table; no score overrides it.
-- [ ] Daily bias agrees with the trade direction
-- [ ] 4H bridge agrees — 4H structure not broken against you
-- [ ] Consolidation filter clear (fewer than 2 chop measures firing)
+- [ ] **All four timeframes aligned.** Daily · 4H · 1H · 15m — or 4H · 1H · 15m ·
+      5m in scalp mode. This is the whole permission system. No score overrides it.
+- [ ] **Lower TF agrees with the execution TF** — the 15m pointing with the 1H.
+      Their disagreement is the chop filter.
 - [ ] Protected low/high intact
-- [ ] Trigger is a **closed** 1H candle, not a live one
-- [ ] **On the correct side of VWAP** — long above, short below
-- [ ] **Not stretched beyond the 2σ VWAP band** — that's where benchmark algos become sellers
-- [ ] **The day's range budget isn't spent** — price hasn't already travelled ≥85% of the daily
-      ATR in your direction ([PRO-ANALYSIS.md §4](PRO-ANALYSIS.md))
-- [ ] **Not buying a breakout of a ranging 4H** — if the 4H is in balance and price is beyond
-      its range edge without 3+ closes of acceptance, that break is the trap, not the move
-      ([INSTITUTIONAL.md — the range trap](INSTITUTIONAL.md))
-- [ ] Stop distance ≤ your max ($ risk still within 1% at 1 contract)
-- [ ] Clear of news — **machine-gated on your schedule**: the indicator blocks Thu/Fri
-      08:00–09:00 ET (the 7:30am Central weekly reports) automatically. FOMC days are the one
-      manual piece: tick "FOMC today" in the indicator settings on the ~8 Fed Wednesdays a year.
-- [ ] Room to run: ≥ 2R of clear air before the next opposing HTF level
+- [ ] Trigger is a **closed** candle, not a live one
+- [ ] Stop distance leaves at least 1 contract at your risk % — if the answer is
+      zero contracts, the stop is too wide for the account. Skip it; never shrink it.
+- [ ] **Clear of news.** CPI, NFP, FOMC. **Nothing in the software watches the
+      calendar** — this one is entirely yours, every single day.
+- [ ] Room to run: at least the minimum R of clear air to the next opposing swing
 
-### Score points (one each, 13 available)
+### Score points (one each, 6 available)
 
-**Structure**
 1. **First retest** of the level — not the third
 2. **Acceptance** — price held above/below the level for 2+ closes after the reclaim
-3. **Displacement** on the trigger candle (body ≥ 1.2× avg)
-4. **≥ 3R** to the next opposing level, not just 2R
+3. **Liquidity sweep** on the pullback — took out the recent low and reclaimed it
+4. **Prior-day high/low or one of your drawn zones** sits on the level
+5. **In the prime hours** (see §8)
+6. **3R+** to the next opposing swing, not just the minimum
 
-**Context**
-5. **RVOL ≥ 1.2** for this hour of day — is anyone actually there
-6. **Liquidity sweep** on the pullback — took out the recent low and reclaimed it
-7. **Reference-level confluence** — prior day H/L, settlement, overnight H/L, initial balance, **or one of your Daily/4H supply-demand zones** (drawn on the chart: green demand, red supply)
-8. **Correlated instrument agrees** — MNQ ↔ MES
-9. **In the prime hours** (see §8)
-10. **Zero chop measures firing** — not merely under the limit
+| Score | Grade | Action |
+|---|---|---|
+| 5–6 | **A+** | Full size |
+| 4 | **B** | Half size — and with one bullet a day, strongly consider passing |
+| 0–3 | **C** | **No trade.** Log it, screenshot it, move on. |
 
-**The day** ([PRO-ANALYSIS.md](PRO-ANALYSIS.md))
-11. **Day type agrees** — 2+ closes accepted beyond yesterday's value in your direction.
-    A continuation setup on a balance day is the losing pattern in the winning one's clothes.
-12. **Beyond yesterday's value** — initiative territory, not the fair-price middle.
-13. **Liquidity fuel** — the far edge of the 4H range was raided and failed. Those stops are
-    collected; the tank is fuller in your direction.
+**A grade is not a win probability, and this system will never print one.** The
+score counts how many things line up; it says nothing about what happens next.
+The only honest probability is your own record — the grader computes your actual
+win rate per grade from your journal and shows it beside the verdict once you
+have 10+ trades logged at that grade. Until then it shows nothing, because until
+then nothing is known. Any tool that displays a win rate before you have traded
+it is showing you a number somebody made up.
 
-| Score | Grade | Quality | Action |
-|---|---|---|---|
-| 10–13 | **A+** | 77–100% | Full size |
-| 8–9 | **B** | 62–69% | Half size — and with one bullet a day, strongly consider passing |
-| 0–7 | **C** | ≤ 54% | **No trade.** Log it, screenshot it, move on. |
-
-**On percentages, so it's written down:** the quality % is confluence — how many boxes the setup
-ticks — and it is **not** a win probability. No indicator can print a real win probability; any
-tool that claims "90% win rate" on a signal is inventing the number. The only honest probability
-is your own record: the grader computes your **actual win rate per grade** from the journal and
-shows it next to the verdict once you have 10+ logged trades at that grade. That number is real,
-it's yours, and it sharpens every week you log. Trust it over any percentage a chart gives you —
-including this system's.
-
-**Every context filter is a switch in the indicator.** That's deliberate — nobody, including me,
-gets to assert that a filter helps. Backtest with the context layer off, then on, and keep what
-your own data supports.
-
-The C-grade log is not busywork. After 100 of them you'll know whether your C's actually
-lose — and that's the only honest way to ever loosen a rule.
-
----
+The C-grade log is not busywork. After 100 of them you'll know whether your C's
+actually lose — and that's the only honest way to ever loosen a rule.
 
 ## 7. Risk and position sizing
 
-- **Risk per trade: 1% of account.** Not 1% "unless it's a really good one."
-- **In a prop evaluation: cushion ÷ 8 caps every trade**, and A+ only. The eval trap and the
-  full math are in [PROP-FIRMS.md](PROP-FIRMS.md) — read it before paying any firm a fee.
-- **One trade per day.** Win or lose. When it's done, close the platform. Zero-trade days are
-  correct outcomes — "if an entry shows itself" means sometimes it doesn't.
-- **Weekly stop: −3R.** Done for the week. This is the rule that keeps you in the game through
-  the bad stretch that is coming whether you plan for it or not.
-- **Never MNQ + MES together** — they are the same trade wearing different hats. You'd be taking
-  2% risk on one idea while believing you took 1%.
+- **Risk per trade: a fixed percentage of the account** — set in one place and
+  applied to every trade, good ones included. The software computes the contract
+  count from it; you never choose a size under pressure.
+- **One trade per day.** Win or lose. When it's done, close the platform. Zero-trade
+  days are correct outcomes — "if an entry shows itself" means sometimes it doesn't.
+- **Weekly stop: −3R.** Done for the week. This is the rule that keeps you in the
+  game through the bad stretch that is coming whether you plan for it or not, and
+  the higher the risk percentage, the more load-bearing it is. **Nothing in the
+  software enforces this yet** — it is counted by you, in the journal.
+- **Never MNQ + MES together** — they are the same trade wearing different hats.
+  You'd be taking double risk on one idea while believing you took single.
+
+### What the risk percentage actually costs
+
+Sizing is `floor( (account × risk%) ÷ (stop points × $ per point) )`, so the
+dollars risked stay flat whatever the stop distance. That part is solved. What
+the percentage decides is how a losing streak feels:
+
+| Consecutive losses | At 1% | At 5% | At 10% |
+|---|---|---|---|
+| 3 | −3% | −14% | −27% |
+| 5 | −5% | −23% | −41% |
+| 7 | −7% | −30% | −52% |
+| 10 | −10% | −40% | −65% |
+
+Streaks are not the bad case, they're the base case: even at a 60% win rate,
+over 100 trades you will very likely see five in a row somewhere. Pick the
+percentage you can watch a five-streak happen at without overriding a rule —
+because overriding one is what actually ends accounts, and the size that makes
+you override is too big regardless of what the arithmetic says.
+
+**Everything ships at 10%, set deliberately.** Two numbers to keep next to that
+choice. The paper record from 7-20 Aug 2026 averaged $1,214 of planned risk on
+a ~$140,000 account - 0.87% a trade, so the setting is roughly eleven times
+what the trader actually does by hand. And in the sweeps, a 10% setting turned
+every positive edge found into a 30-99% drawdown on the way to it.
+
+It is one number in one box and it changes nothing about which trades fire.
+Lower it whenever the drawdown stops being worth watching.
 
 ### Contract specs
 
@@ -289,7 +337,7 @@ lose — and that's the only honest way to ever loosen a rule.
 
 **Contracts = floor( (account × 1%) ÷ (stop in points × $ per point) )**
 
-Example: $25,000 account, 1% = $250 risk. MNQ setup with a 40-point stop.
+Example: $25,000 account at 1% = $250 risk. MNQ setup with a 40-point stop.
 40 × $2 = $80 per contract. $250 ÷ $80 = 3.1 → **3 contracts**, $240 actual risk.
 
 If the answer is 0 contracts, the stop is too wide for the account. **Skip the trade.**

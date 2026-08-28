@@ -3,24 +3,29 @@
 //  MARKET STRUCTURE BRIDGE — PURE  (the watcher: dashboard + alerts)
 //
 //  Structure and nothing else. No VWAP, no RVOL, no ADX, no efficiency ratio,
-//  no value area, no day type, no range budget, no correlation, no scoring.
-//  Every number this thing looks at is a swing high or a swing low.
+//  no ATR, no value area, no day type, no range budget, no correlation, no
+//  scoring. Every number this thing looks at is a swing high or a swing low.
 //
-//  Why it exists: the loaded version stacked twelve filters on top of the
-//  sequence and the gate diagnostic showed they killed ~99% of valid setups —
-//  about 800 completed sequences a year became 2 trades. The trader was right
-//  and the filters were the problem.
+//  ALIGNMENT — four timeframes, and all four must agree with the trade:
+//    Standard   Daily + 4H  (the bias pair)   ·  1H + 15m  (the execution pair)
+//    Scalp      4H    + 1H  (the bias pair)   ·  15m + 5m  (the execution pair)
 //
-//  THE SEQUENCE (all of it, on the execution chart):
-//    ① price closes through a swing high  (break of structure — the direction)
-//    ② price trades back through that level  (the retest starts)
-//    ③ price closes back above it  (the reclaim)
-//    ④ it HOLDS for N closed bars  (the wait — this is the whole edge)
-//    ⑤ price closes above the reclaim bar's high  (the fresh break — entry)
+//  Put the script on the EXECUTION chart: the 1H in standard mode, the 15m in
+//  scalp mode. The other three timeframes are read from it.
 //
-//  PERMISSION comes from higher structure: the bias timeframe must be making
-//  higher highs and higher lows for a long, and the bridge timeframe must agree
-//  at the moment of the trigger. That is all "alignment" means here.
+//  TWO WAYS IN, both pure structure, both switchable:
+//
+//    PULLBACK  — the trend is aligned, price pulls back far enough to print a
+//                swing against it, then closes back through the swing it came
+//                from. You are buying the resumption of a trend that never
+//                stopped being a trend.
+//
+//    RETEST    — the longer sequence:
+//                (1) price closes through a swing high      break of structure
+//                (2) price trades back through that level   the retest starts
+//                (3) price closes back above it             the reclaim
+//                (4) it HOLDS for N closed bars             the wait
+//                (5) price closes past the reclaim bar      the fresh break
 //
 //  DEATH: a close beyond the protected swing, the bias flipping, or the setup
 //  running out of bars.
@@ -29,34 +34,84 @@
 //  is none — price in open air — the measured move of the leg that built the
 //  setup. Structure projects structure; nothing else is invented.
 //
-//  Apply to your execution chart (1H, or 15m if that is where you pull triggers).
-//  It never predicts. It waits for all five steps and then tells you the numbers.
+//  SIZE: a fixed percentage of the account, computed from the stop distance
+//  and the instrument's dollars-per-point. If the stop is so wide that the
+//  answer is zero contracts, the trade is skipped rather than shrunk.
+//
+//  This is the WATCHER: dashboard, chart labels, and the alert that carries
+//  the whole trade plan. It never predicts. It waits for the structure and
+//  then tells you the numbers.
 // =============================================================================
 
 indicator("MSB Pure — alerts", "MSB-PURE", overlay = true,
      max_lines_count = 500, max_labels_count = 500)
 
-// ─── Inputs ──────────────────────────────────────────────────────────────────
+// ─── Alignment: the four timeframes ──────────────────────────────────────────
+grpA = "Alignment"
+useScalp = input.bool(false, "Scalp mode", group = grpA,
+     tooltip = "OFF — standard: Daily+4H bias, trigger on the 1H, 15m must agree. Run it on the 1H chart.\nON — scalp: 4H+1H bias, trigger on the 15m, 5m must agree. Run it on the 15m chart.")
+biasIn   = input.timeframe("D",   "Bias TF   (scalp mode forces 4H)",  group = grpA)
+bridgeIn = input.timeframe("240", "Bridge TF (scalp mode forces 1H)",  group = grpA)
+alignIn  = input.timeframe("15",  "Lower TF  (scalp mode forces 5m)",  group = grpA)
+useBias   = input.bool(true, "Bias TF must agree",   group = grpA)
+useBridge = input.bool(true, "Bridge TF must agree", group = grpA)
+useAlign  = input.bool(true, "Lower TF must agree",  group = grpA)
+useExec   = input.bool(true, "This chart must agree", group = grpA,
+     tooltip = "The execution chart's own structure has to point the same way. This plus the lower TF is the '1H and 15m alignment' half of the rule.")
+
+biasTF   = useScalp ? "240" : biasIn
+bridgeTF = useScalp ? "60"  : bridgeIn
+alignTF  = useScalp ? "5"   : alignIn
+wantTF   = useScalp ? "15"  : "60"
+
 grpS = "Structure"
-pvL      = input.int(3, "Swing strength (left)",  minval = 1, maxval = 20, group = grpS)
-pvR      = input.int(3, "Swing strength (right)", minval = 1, maxval = 20, group = grpS)
-biasTF   = input.timeframe("D",   "Bias timeframe (permission)", group = grpS)
-bridgeTF = input.timeframe("240", "Bridge timeframe (must agree at the trigger)", group = grpS)
-useBias  = input.bool(true, "Bias timeframe must agree", group = grpS)
-useBridge = input.bool(true, "Bridge timeframe must agree", group = grpS)
+pvL = input.int(7, "Swing strength (left)",  minval = 1, maxval = 20, group = grpS)
+pvR = input.int(7, "Swing strength (right)", minval = 1, maxval = 20, group = grpS)
 
-grpQ = "The sequence"
-holdBars = input.int(1, "Bars the reclaim must hold (the wait)", minval = 0, maxval = 10, group = grpQ,
-     tooltip = "Your rule is 'wait again' after the reclaim. 1 = one closed bar of holding. Raise it to demand more patience and watch the trade count fall.")
-setupTO  = input.int(40, "Setup expires after N bars", minval = 5, group = grpQ)
-freshBrk = input.bool(true, "Require the fresh break (close past the reclaim bar)", group = grpQ,
-     tooltip = "OFF = enter on the reclaim itself. ON = wait for a close beyond the reclaim bar's extreme. This is step 5 of your sequence.")
+// ─── The two ways in ─────────────────────────────────────────────────────────
+grpQ = "Entries"
+usePB  = input.bool(true, "Pullback entry", group = grpQ,
+     tooltip = "Aligned trend, price pulls back far enough to print a swing against it, then closes back through the swing it came from.")
+useSeq = input.bool(true, "Retest sequence entry", group = grpQ,
+     tooltip = "The long version: break, back through, reclaim, hold, fresh break.")
+holdBars = input.int(1, "Bars the reclaim must hold (the wait)", minval = 0, maxval = 10, group = grpQ)
+setupTO  = input.int(40, "Retest setup expires after N bars", minval = 5, group = grpQ)
+freshBrk = input.bool(true, "Require the fresh break (close past the reclaim bar)", group = grpQ)
 
+// ─── Stop, target, size ──────────────────────────────────────────────────────
 grpE = "Stop & target — structural only"
 stopTicks = input.int(4, "Stop buffer (ticks beyond the swing)", minval = 0, group = grpE)
-minRoom   = input.float(1.0, "Reject if room below this (R)", minval = 0.0, step = 0.5, group = grpE)
-useMM     = input.bool(true, "Open air: use the measured move of the leg", group = grpE,
-     tooltip = "When no opposing swing exists above (long) or below (short), project the height of the leg that built the setup. Structure projecting structure - nothing invented.")
+minRoom   = input.float(0.0, "Reject if room below this (R)", minval = 0.0, step = 0.5, group = grpE)
+useMM     = input.bool(true, "Open air: use the measured move of the leg", group = grpE)
+
+// The target decides the win rate, and it does so mechanically: a nearer target
+// is hit more often. That is not an edge, it is arithmetic, and the money moves
+// the other way. Measured on MES 1H, swing 7, 72 trades over 43 months, net of
+// $0.78 commission and a tick of slippage each way:
+//
+//     target    win rate    net expectancy    total over 43 months
+//     0.20R       71%          +0.011R              +1.8R
+//     0.25R       64%          -0.010R              +0.3R
+//     0.40R       60%          +0.013R              +1.9R
+//     0.50R       58%          +0.025R              +2.8R
+//     0.75R       57%          +0.055R              +5.0R   <- most money
+//     1.00R       57%          +0.048R              +4.4R
+//     2.00R       56%          +0.053R              +4.8R
+//     structure   varies       see the sweep        varies
+//
+// So 71% is available and it earns a fifth of what 57% earns. Pick knowingly.
+// Re-measure with: node engine/msb-winrate.js  in the TradeDesk folder.
+tgtMode = input.string("Next opposing swing", "Target", options = ["Fixed R", "Next opposing swing"], group = grpE,
+     tooltip = "Fixed R sets the target at a multiple of the stop, which is what makes the win rate predictable. Next opposing swing is the structural target and hits far less often because it is usually a long way away.")
+tgtR    = input.float(0.4, "Fixed R multiple", minval = 0.1, maxval = 10, step = 0.05, group = grpE,
+     tooltip = "0.40 measured 60% wins. 0.20 measured 71% wins but a fifth of the money. 0.75 made the most money at 57%.")
+
+grpZ = "Size"
+riskPct = input.float(10.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.25, group = grpZ,
+     tooltip = "Contracts = floor( (account x this%) / (stop in points x dollars per point) ). Zero contracts means the stop is too wide for the account and the trade is skipped, never shrunk.\n\nSet to 10% by choice. For reference: the paper record averages 0.87% a trade, and the sweeps put a 10% setting at a 30-99% drawdown on the same edge.")
+maxQty  = input.int(50, "Contract cap", minval = 1, group = grpZ)
+acctSize = input.float(25000, "Account size ($)", minval = 100, step = 500, group = grpZ,
+     tooltip = "An indicator cannot see your broker balance, so tell it. Keep this current or the contract count in the alert is fiction.")
 
 grpM = "Management"
 partialR = input.float(1.0, "T1 at R multiple (take half here)", minval = 0.5, step = 0.5, group = grpM)
@@ -64,8 +119,7 @@ t1Pct    = input.int(50, "% off at T1", minval = 0, maxval = 100, group = grpM)
 beAtT1   = input.bool(true, "Move stop to break-even at T1", group = grpM)
 
 grpR = "Your rules"
-maxPerDay = input.int(1, "Max trades per day", minval = 1, maxval = 10, group = grpR,
-     tooltip = "Set high to see what the rules alone produce, then bring it back to your real limit and compare.")
+maxPerDay = input.int(1, "Max trades per day", minval = 1, maxval = 10, group = grpR)
 useSess = input.bool(true, "Only trade the New York session", group = grpR)
 sessStr = input.session("0930-1500", "Tradeable window", group = grpR)
 sessTZ  = input.string("America/New_York", "Timezone", group = grpR)
@@ -111,44 +165,56 @@ f_pivLo() =>
 
 biasT   = request.security(syminfo.tickerid, biasTF,   f_trend(), lookahead = barmerge.lookahead_off)
 bridgeT = request.security(syminfo.tickerid, bridgeTF, f_trend(), lookahead = barmerge.lookahead_off)
+alignT  = request.security(syminfo.tickerid, alignTF,  f_trend(), lookahead = barmerge.lookahead_off)
+execT   = f_trend()
 
 bridgeHi = request.security(syminfo.tickerid, bridgeTF, f_pivHi(), lookahead = barmerge.lookahead_off)
 bridgeLo = request.security(syminfo.tickerid, bridgeTF, f_pivLo(), lookahead = barmerge.lookahead_off)
 biasHi   = request.security(syminfo.tickerid, biasTF,   f_pivHi(), lookahead = barmerge.lookahead_off)
 biasLo   = request.security(syminfo.tickerid, biasTF,   f_pivLo(), lookahead = barmerge.lookahead_off)
 
-// Swings on the execution chart
+// All four must point the same way as the trade. This is the whole of
+// "Daily and 4H aligned, 1H and 15m aligned" — nothing else is consulted.
+alignedL = (not useBias   or biasT   ==  1) and (not useBridge or bridgeT ==  1) and
+           (not useAlign  or alignT  ==  1) and (not useExec   or execT   ==  1)
+alignedS = (not useBias   or biasT   == -1) and (not useBridge or bridgeT == -1) and
+           (not useAlign  or alignT  == -1) and (not useExec   or execT   == -1)
+
+// Swings on the execution chart, and WHEN each one was put on the record.
+// The bar indices are what tell a pullback apart from a fresh break.
 phC = ta.pivothigh(pvL, pvR)
 plC = ta.pivotlow(pvL, pvR)
-var float swHi = na
-var float swLo = na
+var float swHi    = na
+var float swLo    = na
+var int   swHiBar = na
+var int   swLoBar = na
 if not na(phC)
-    swHi := phC
+    swHi    := phC
+    swHiBar := bar_index - pvR
 if not na(plC)
-    swLo := plC
+    swLo    := plC
+    swLoBar := bar_index - pvR
 
 bosUp = not na(swHi) and close > swHi and close[1] <= swHi
 bosDn = not na(swLo) and close < swLo and close[1] >= swLo
 
-// ─── The sequence ────────────────────────────────────────────────────────────
+// ─── The retest sequence ─────────────────────────────────────────────────────
 var int   st      = 0     // 0 idle · 1 armed · 2 back through · 3 reclaimed & holding
 var int   stDir   = 0
 var float zone    = na    // the broken level — the whole setup pivots on this
 var float prot    = na    // protected swing; a close beyond it kills the setup
-var float trigLvl = na    // the reclaim bar's extreme — step ⑤ must close past it
+var float trigLvl = na    // the reclaim bar's extreme — step 5 must close past it
 var float pullExt = na    // deepest point of the pullback — where the stop lives
 var float legLo   = na    // the leg that built the setup, for the measured move
 var float legHi   = na
 var int   heldBars = 0
 var int   stBars   = 0
 
-biasOKL   = not useBias or biasT ==  1
-biasOKS   = not useBias or biasT == -1
-bridgeOKL = not useBridge or bridgeT ==  1
-bridgeOKS = not useBridge or bridgeT == -1
+biasOKL = not useBias or biasT ==  1
+biasOKS = not useBias or biasT == -1
 
 armedNow = false
-if st == 0
+if st == 0 and useSeq
     if bosUp and biasOKL
         st       := 1
         stDir    := 1
@@ -173,7 +239,7 @@ if st == 0
         heldBars := 0
         stBars   := 0
         armedNow := true
-else
+else if st > 0
     stBars += 1
 
 // Longs
@@ -221,17 +287,31 @@ if invalid
     prot    := na
     trigLvl := na
 
-// ─── Trigger ─────────────────────────────────────────────────────────────────
-heldOK  = heldBars >= holdBars
-breakL  = not freshBrk or (not na(trigLvl) and close > trigLvl)
-breakS  = not freshBrk or (not na(trigLvl) and close < trigLvl)
-trigLong  = st == 3 and stDir ==  1 and heldOK and breakL and bridgeOKL
-trigShort = st == 3 and stDir == -1 and heldOK and breakS and bridgeOKS
+// ─── Triggers ────────────────────────────────────────────────────────────────
+// Retest: the sequence completed.
+heldOK = heldBars >= holdBars
+breakL = not freshBrk or (not na(trigLvl) and close > trigLvl)
+breakS = not freshBrk or (not na(trigLvl) and close < trigLvl)
+seqL   = useSeq and st == 3 and stDir ==  1 and heldOK and breakL
+seqS   = useSeq and st == 3 and stDir == -1 and heldOK and breakS
 
-entry   = close
-buf     = syminfo.mintick * stopTicks
-stopRaw = trigLong  ? math.min(nz(pullExt, low),  nz(zone, low))  - buf :
-          trigShort ? math.max(nz(pullExt, high), nz(zone, high)) + buf : na
+// Pullback: a swing against the trend is on the record (the pullback happened
+// and finished), and price has just closed back through the swing it came from.
+// The pullback low IS the stop — if it goes, the pullback was a reversal.
+pbL = usePB and bosUp and not na(swLoBar) and not na(swHiBar) and swLoBar > swHiBar and close > nz(swLo, low)
+pbS = usePB and bosDn and not na(swHiBar) and not na(swLoBar) and swHiBar > swLoBar and close < nz(swHi, high)
+
+trigLong  = (seqL or pbL) and alignedL
+trigShort = (seqS or pbS) and alignedS
+
+entry = close
+buf   = syminfo.mintick * stopTicks
+
+// The stop sits under whatever structure the entry was built on: the retest's
+// pullback extreme, or the pullback low itself.
+stopL = seqL ? math.min(nz(pullExt, low),  nz(zone, low))  - buf : nz(swLo, low)  - buf
+stopS = seqS ? math.max(nz(pullExt, high), nz(zone, high)) + buf : nz(swHi, high) + buf
+stopRaw = trigLong ? stopL : trigShort ? stopS : na
 riskPts = na(stopRaw) ? na : math.abs(entry - stopRaw)
 
 // Target: the next opposing swing on the bridge or bias timeframe.
@@ -249,8 +329,19 @@ wallDn := f_below(wallDn, biasLo, entry)
 legSize = nz(legHi, high) - nz(legLo, low)
 mmUp    = useMM and legSize > 0 ? entry + legSize : na
 mmDn    = useMM and legSize > 0 ? entry - legSize : na
-target  = trigLong ? nz(wallUp, mmUp) : nz(wallDn, mmDn)
-roomR   = not na(riskPts) and riskPts > 0 and not na(target) ? math.abs(target - entry) / riskPts : 0.0
+structTgt = trigLong ? nz(wallUp, mmUp) : nz(wallDn, mmDn)
+fixedTgt  = na(riskPts) ? na : trigLong ? entry + riskPts * tgtR : entry - riskPts * tgtR
+target    = tgtMode == "Fixed R" ? fixedTgt : structTgt
+roomR     = not na(riskPts) and riskPts > 0 and not na(target) ? math.abs(target - entry) / riskPts : 0.0
+
+// ─── Size: percent of account, from the stop distance ────────────────────────
+// Contracts = floor( (account x risk%) / (stop points x dollars per point) ).
+// Zero means the stop is too wide for the account, and the answer to that is
+// to skip the trade — never to shrink the stop to fit the size.
+ptVal   = syminfo.pointvalue
+riskUsd = acctSize * riskPct / 100.0
+qtyRaw  = not na(riskPts) and riskPts > 0 and ptVal > 0 ? math.floor(riskUsd / (riskPts * ptVal)) : 0
+qty     = math.min(maxQty, qtyRaw)
 
 // ─── Your rules ──────────────────────────────────────────────────────────────
 inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
@@ -261,15 +352,28 @@ if na(lastDay) or dayofmonth != lastDay
     lastDay   := dayofmonth
 
 okToTrade = roomR >= minRoom and inSess and tookToday < maxPerDay and
-     not na(riskPts) and riskPts > 0
+     not na(riskPts) and riskPts > 0 and qty > 0
+
+// ─── The plan: room decides scalp, standard or hold ──────────────────────────
+// Measured, not chosen. Distance to the next opposing swing divided by the
+// stop. Under 1R there is nothing to win; over 3.5R the runner is worth
+// trailing. Nothing here is an indicator - it is two swing levels and a stop.
+scalpMax = input.float(2.0,  "SCALP below this room (R)", minval = 1.0, step = 0.5, group = grpM)
+holdMin  = input.float(3.5,  "HOLD above this room (R)",  minval = 2.0, step = 0.5, group = grpM)
+// With a fixed target inside 1R there is no runner and no partial: the plan is
+// one exit at the target. Only a target beyond 1R can be split.
+splitOK = not na(target) and not na(riskPts) and riskPts > 0 and
+     math.abs(target - entry) > riskPts * partialR
+plan = not splitOK      ? "SCALP"    :
+       roomR < scalpMax ? "SCALP"    :
+       roomR < holdMin  ? "STANDARD" : "HOLD"
 
 // ─── Fire ────────────────────────────────────────────────────────────────────
 fire = (trigLong or trigShort) and okToTrade
 if fire
     tookToday += 1
-    // The trade consumes the sequence — same as the bot. Without this, the
-    // day counter resets overnight and the SAME stale setup fires again
-    // tomorrow at whatever price the open happens to be.
+    // The trade consumes the sequence, or the day counter resets overnight and
+    // the SAME stale setup fires again tomorrow at whatever the open happens to be.
     st       := 0
     stDir    := 0
     zone     := na
@@ -278,18 +382,20 @@ if fire
     heldBars := 0
     stBars   := 0
 
-t1 = na(riskPts) ? na : trigLong ? entry + riskPts * partialR : entry - riskPts * partialR
-t2 = target
+// A scalp exits in full at the target — there is no runner to leave behind, so
+// T1 and T2 are the same price and the bot places one bracket, not two.
+t1 = not splitOK ? target : na(riskPts) ? na :
+     trigLong ? entry + riskPts * partialR : entry - riskPts * partialR
+t2 = plan == "SCALP" ? t1 : target
 
 // ─── What you see ────────────────────────────────────────────────────────────
-execT = f_trend()
-
 plotshape(bosUp, "BOS up",   shape.triangleup,   location.belowbar, color.new(#26a69a, 65), size = size.tiny)
 plotshape(bosDn, "BOS down", shape.triangledown, location.abovebar, color.new(#ef5350, 65), size = size.tiny)
 
 if fire
     label.new(bar_index, trigLong ? low : high,
-         (trigLong ? "▲ LONG" : "▼ SHORT") + "  " + str.tostring(roomR, "#.0") + "R room",
+         (trigLong ? "▲ LONG" : "▼ SHORT") + "  " + plan + "  " +
+         str.tostring(roomR, "#.0") + "R  " + str.tostring(qty) + "x",
          style = trigLong ? label.style_label_up : label.style_label_down,
          color = trigLong ? #26a69a : #ef5350, textcolor = color.white, size = size.small)
     line.new(bar_index, entry,   bar_index + 10, entry,   color = color.blue,  width = 1)
@@ -299,31 +405,42 @@ if fire
 f_arrow(int t) => t == 1 ? "▲" : t == -1 ? "▼" : "–"
 f_col(int t)   => t == 1 ? #26a69a : t == -1 ? #ef5350 : color.gray
 
-stepTxt = st == 0 ? "IDLE" :
+stepTxt = not useSeq ? "pullback only" :
+     st == 0 ? "IDLE" :
      st == 1 ? "① broke — waiting for the retest" :
      st == 2 ? "② back through — waiting for the reclaim" :
      "③ reclaimed · held " + str.tostring(heldBars) + "/" + str.tostring(holdBars)
 
-var table dash = table.new(position.top_right, 2, 7, bgcolor = color.new(#0e1116, 10),
+// The four timeframes, in the order the rule reads them: the bias pair on top,
+// the execution pair underneath. Four arrows the same way = permission.
+var table dash = table.new(position.top_right, 2, 9, bgcolor = color.new(#0e1116, 10),
      frame_color = color.new(color.gray, 60), frame_width = 1, border_color = color.new(color.gray, 85), border_width = 1)
 
 if barstate.islast
     table.cell(dash, 0, 0, "MSB PURE", text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
+    table.cell(dash, 1, 0, syminfo.ticker + "  " + (useScalp ? "scalp" : "std"), text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
 
     table.cell(dash, 0, 1, "Bias " + biasTF, text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 1, f_arrow(biasT), text_color = f_col(biasT), text_size = size.small)
     table.cell(dash, 0, 2, "Bridge " + bridgeTF, text_color = color.gray, text_size = size.small)
     table.cell(dash, 1, 2, f_arrow(bridgeT), text_color = f_col(bridgeT), text_size = size.small)
-    table.cell(dash, 0, 3, "This chart", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 0, 3, "Exec " + timeframe.period + (timeframe.period == wantTF ? "" : " ⚠"),
+         text_color = timeframe.period == wantTF ? color.gray : color.orange, text_size = size.small)
     table.cell(dash, 1, 3, f_arrow(execT), text_color = f_col(execT), text_size = size.small)
+    table.cell(dash, 0, 4, "Lower " + alignTF, text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 4, f_arrow(alignT), text_color = f_col(alignT), text_size = size.small)
 
-    table.cell(dash, 0, 4, "Setup", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 4, stepTxt, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 5, "Session", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 5, inSess ? "open" : "closed", text_color = inSess ? color.silver : color.gray, text_size = size.small)
-    table.cell(dash, 0, 6, "Bullets left", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 6, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
+    aligned = alignedL or alignedS
+    table.cell(dash, 0, 5, "All four", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 5, aligned ? "ALIGNED" : "mixed",
+         text_color = aligned ? #26a69a : color.gray, text_size = size.small)
+
+    table.cell(dash, 0, 6, "Retest", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 6, stepTxt, text_color = st == 3 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 7, "Session", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 7, inSess ? "open" : "closed", text_color = inSess ? color.silver : color.gray, text_size = size.small)
+    table.cell(dash, 0, 8, "Bullets left", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 8, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
          text_color = tookToday < maxPerDay ? color.silver : color.gray, text_size = size.small)
 
 // ─── Alerts ──────────────────────────────────────────────────────────────────
@@ -337,9 +454,10 @@ plot(fire ? riskPts : na,             "aRisk",  display = display.none, editable
 plot(fire ? t1      : na,             "aT1",    display = display.none, editable = false)
 plot(fire ? t2      : na,             "aT2",    display = display.none, editable = false)
 plot(fire ? roomR   : na,             "aRoom",  display = display.none, editable = false)
+plot(fire ? qty     : na,             "aQty",   display = display.none, editable = false)
 
 alertcondition(fire, "TRADE SIGNAL — the full alert",
-     "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R")
+     "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R | qty {{plot(\"aQty\")}}")
 
 alertcondition(st == 3 and st[1] != 3, "Level reclaimed — the wait begins",
      "{{ticker}} reclaimed the level. Now it has to hold. Go look at the chart.")

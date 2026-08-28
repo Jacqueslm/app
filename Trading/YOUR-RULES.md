@@ -209,3 +209,29 @@ A system you follow at one micro beats a better system you abandon at five.
 The other thing that helps more than people expect: trade a size where a full −1R day is genuinely
 boring. If a loss ruins your evening, the position is too big, regardless of what the percentage
 says.
+
+---
+
+## 9. On the risk percentage
+
+The bot now sizes every trade from one number: the percentage of the account a single loss is
+allowed to cost. It's set in three places — the Pine input, the NinjaScript property, and
+`relay/autotrade.json` — and it should be the same number in all three.
+
+Everything above is about not overriding a rule under pressure. **The risk percentage is what
+decides how much pressure there is.** They are the same subject.
+
+| Consecutive losses | At 1% | At 5% | At 10% |
+|---|---|---|---|
+| 3 | −3% | −14% | −27% |
+| 5 | −5% | −23% | −41% |
+| 7 | −7% | −30% | −52% |
+
+A five-loss streak is not the disaster case — at a 50% win rate it's close to certain inside 100
+trades, and even at 60% it's more likely than not. So the honest question isn't "what's my edge
+worth", it's: **at what size can I watch five losses in a row and still place the sixth trade by
+the rules?** Because rule 3 — never move a stop away from price — is the one that ends accounts,
+and the thing that makes anyone break it is a position big enough to matter.
+
+That number is yours to choose. Just choose it on a quiet evening, in advance, like every other
+decision in this document — not on the afternoon of the fourth loss.

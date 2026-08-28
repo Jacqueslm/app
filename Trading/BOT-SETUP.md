@@ -15,14 +15,21 @@ you flip it.
    Tools → Options → Automated trading interface → tick **AT interface** → OK.
 
 3. **Flip the switch** — open `relay\autotrade.json` in Notepad. Change
-   `"enabled": false` to `"enabled": true`. Check the contract months are
-   current (MNQ 09-26 etc. — update them each quarter at rollover). Save.
+   `"enabled": false` to `"enabled": true`. Check three things while you're in
+   there: the contract months are current (MNQ 09-26 etc. — update them each
+   quarter at rollover), `"balance"` matches your actual account, and
+   `"riskPct"` is the number you meant. Save.
+
+   Size is computed, not fixed: `floor( (balance × riskPct%) ÷ (stop points ×
+   dollars per point) )`, using the stop distance from the alert. So the dollars
+   at risk are the same on a tight stop and a wide one — but **a stale `balance`
+   makes every trade the wrong size in the same direction**, so keep it current.
 
 4. **Restart the relay** — close the MSB Alert Relay window, double-click
    `Start Trade Grader.bat` again. Start the phone link too
    (`Start Phone Link.bat`).
 
-5. **Create the alert** — on the MNQ chart: Alt+A → Condition **MSB Pure** →
+5. **Create the alert** — on the MNQ chart: Alt+A → Condition **MSB Trap** (or MSB Pure if you run that one) →
    **TRADE SIGNAL — the full alert** → Trigger **Once per bar close** →
    don't touch the Message → Notifications → Webhook URL:
    `https://explicit-sprung-produce.ngrok-free.dev/hook/f033aaa171b113d6`
@@ -36,6 +43,26 @@ relay window and the position appears in NinjaTrader — on Sim101.
 Open `relay\autotrade.json`, change `"Sim101"` to your funded account's name
 (shown in NinjaTrader's account dropdown), save, restart the relay. That one
 word is the difference between practice and real money.
+
+## The one thing this path cannot do
+
+The relay writes an order file into NinjaTrader's incoming folder and never hears
+back. It doesn't know when T1 filled, so **it cannot move your stop to break-even
+after 1R** — the runner keeps the original stop all the way to T2. A trade that
+reaches +1R can still come back and lose the full R.
+
+That is the exact pattern YOUR-RULES was written to stop, so:
+
+- **2+ contracts** — half comes off at 1R, and that much is banked whatever happens.
+- **1 contract** — it takes the full 1R and is done, rather than riding to T2
+  against the original stop.
+
+If you want break-even after 1R, run **`ninjatrader/MSBPure.cs`** instead. It lives
+inside NinjaTrader, sees its own fills, and moves the stop itself. TradingView and
+the relay drop out of the order path entirely — fewer things that have to be
+running at 09:30.
+
+---
 
 ## What has to be true for it to trade
 

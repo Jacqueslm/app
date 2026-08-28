@@ -103,6 +103,60 @@ retroactively covering anything made earlier on the free plan.
 
 ---
 
+## The founder voice — FOUND 26 Aug 2026, REMOVED SAME DAY
+
+The five narrator voices were fixed on 8 Aug and stayed fixed. **The founder's
+cloned voice was added later (22-24 Aug) and nobody checked the model behind
+it.** That is why one conversation could say "it's fixed" and another "it's
+not" and both be right — they were talking about different voices.
+
+`tools/generate-jacques-audio.py` loaded
+`tts_models/multilingual/multi-dataset/your_tts`. Coqui's own model registry
+(`TTS/.models.json`) carries a licence field per model:
+
+| Model | Licence |
+|---|---|
+| `your_tts` | **CC BY-NC-ND 4.0** — non-commercial, no derivatives |
+| `xtts_v2` | **CPML** — non-commercial |
+
+Both fail the rule at the top of this file. **Jacques's instruction, 26 Aug:
+dispose of it.** Removed from `VG_VOICES`, `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, and 1,150 manifest entries. Existing users fall
+back to Warm.
+
+**START-HERE said XTTS v2; the generator used YourTTS.** Different model, same
+answer, but the note was wrong. Corrected.
+
+**Still outstanding:** the 1,150 mp3 files on the `lesson-audio` branch are
+orphaned, not deleted. Nothing references them.
+
+**All six narrators verified 27 Aug 2026 — every one is clear.** Read from the
+`MODEL_CARD` inside each model tarball (huggingface.co is blocked from the
+build container; the same files mirror to sherpa-onnx's GitHub releases, which
+is where these came from):
+
+| App voice | Model | Dataset | Licence |
+|---|---|---|---|
+| Warm | `en_US-kristin-medium` | librivox.org | public domain |
+| Soft | `en_GB-cori-medium` | librivox.org | public domain |
+| Gentle | `en_US-kathleen-low` | rhasspy/dataset-voice-kathleen | **CC0** |
+| Clear | `en_US-ljspeech-high` | LJ Speech | public domain |
+| Calm male | `en_US-john-medium` | librivox.org | public domain |
+| **Deep male** | `en_US-joe-medium` | NabuCasa/voice-datasets | **CC0** |
+
+That closes the john question left open earlier the same day - it is public
+domain, not merely "probably MIT". Nothing in the app's audio carries a
+non-commercial, attribution or no-derivatives licence.
+
+**Landmine:** `tools/generate-lesson-audio.py` (in git at `118bf7a`, deleted
+from the tree 26 Aug) still points at hfc_female, amy, hfc_male and lessac —
+the four voices banned above. If it is ever restored, fix its VOICES map first.
+
+**If a founder voice is ever wanted again:** Piper, fine-tuned on his own
+recordings. Never YourTTS, never XTTS v2.
+
+---
+
 ## Rule going forward
 
 Before any third-party asset goes into either product — a voice, a font, an

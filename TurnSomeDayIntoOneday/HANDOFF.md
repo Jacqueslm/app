@@ -133,78 +133,251 @@ enrolment, service account wired up.
 - **12 testers, opted in for 14 continuous days.** Currently 2 (both the owner's
   own accounts). The clock has not started. Production access needs this *and* a
   written account of how testers were recruited and what feedback they gave.
-- **No real purchase has ever been made.** Everything up to Google's servers is
-  tested; the last mile is not. After the first test purchase, **check three days
-  later that it was not refunded** — that is the only proof acknowledgement works.
-  Look for `ACKNOWLEDGE FAILED` in the error log.
+- **No real *Play* purchase has ever been made.** Everything up to Google's
+  servers is tested; the last mile is not. After the first test purchase,
+  **check three days later that it was not refunded** — that is the only proof
+  acknowledgement works. Look for `ACKNOWLEDGE FAILED` in the error log.
+
+  Do not let the Stripe side confuse this. **Stripe is proven and works.**
+  Confirmed against the live account (`acct_1TvjcJCDHXSEg3rL`) on 27 Aug 2026:
+  two live subscriptions, `app_user_id` 11 and 18, both Jacques's own accounts,
+  and one real settled charge — `ch_3U1RLwCDHXSEg3rL0Ju6KvMj`, $9.99, 6 Aug
+  2026, Visa debit ...8776, `status: succeeded`, never refunded. Trial started
+  30 Jul, converted 6 Aug, cancelled 18 Aug. So checkout, the webhook, and the
+  entitlement flip all work end to end on the web path.
+
+  That proves nothing about Play. The two paths do not share code past
+  `becomePro()`: the web path posts to `/api/billing/create-checkout-session`
+  (`billing.js`), the Play path calls `becomeProViaStore()` →
+  `getDigitalGoodsService` (`store-billing.js`). A Stripe purchase cannot even
+  be *made* from inside the Play app — `becomePro()` refuses it as the policy
+  line. So the fact that Jacques bought Pro with a card means he was in a plain
+  browser at the time, not in the installed app. The broken path is still
+  untested by that purchase.
 
 Opt-in link (closed test — only works for addresses already on the tester list):
 
     https://play.google.com/apps/testing/com.turnsomedayintodayone.app
 
-### Play Billing Library 8 deadline (policy warning, July 2026)
+### Play Billing Library 8 — CLOSED. Already updated, no extension.
 
-Play Console flags: "App must use Google Play Billing Library version 8.0.0 or
-later" — the console tile said fix by **Aug 30, 2026**; the extension moved it to
-**Oct 31, 2026** (confirmed in the console 26 Aug). After that date new `.aab` uploads are rejected.
-Nothing installed breaks, the tester clock keeps running, and the server is
-unaffected — the Billing Library lives only inside the Android shell.
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on
+a current Google Play Billing Library. Nothing to do here. Do not re-open it.
 
-**The fix does not exist yet.** The shell gets its Billing Library from
-`com.google.androidbrowserhelper:billing`, and the latest **published** version
-is 1.1.0 (bundles BillingClient 7.1.1). The v8 bump (wrapper 1.2.0,
-BillingClient 8.3.0) is merged on android-browser-helper's `main` but not
-released to Maven. Do **not** pin `billing:1.2.0` (fails to resolve) and do
-**not** force `com.android.billingclient:billing:8.x` alongside wrapper 1.1.0 —
-it compiles, then crashes at purchase time, because PBL 8 removed deprecated
-APIs the 1.1.0 wrapper was built against. Real money runs through this path.
+**The extension was for Android 16 target SDK, not for Billing.** Jacques
+requested that one on 17 Aug and it moved 31 Aug → 1 Nov. Earlier versions of
+this file attached that extension to Billing 8 and invented an "Oct 31 Billing
+deadline" from it. There is no such deadline.
 
-What to do instead:
+If Play Console still shows a Billing Library tile, treat it as stale console
+text. Do NOT tell Jacques it is new, do NOT request an extension, and do NOT
+schedule a bubblewrap rebuild for it.
 
-1. **Extension GRANTED — confirmed 26 Aug 2026.** The console tile now reads
-   **"Fix by Oct 31"**, up from the original Aug 30. Nothing further to file.
-   Do not re-request it and do not treat this warning as new: it is the same
-   July item, extended. The app went live on Production the same morning
-   (26 Aug, 7:59 AM) with this warning standing, which is proof it does not
-   block a release — only future `.aab` uploads after 31 Oct.
-2. **Watch** https://github.com/GoogleChrome/android-browser-helper/releases
-   for `billing-1.2.0` (last cycle Google shipped the v7 wrapper ahead of the
-   deadline, announced on chromeos.dev).
-3. When it ships, the whole fix is: bump `appVersionCode` in
-   `twa-manifest.json`, then `npm install -g @bubblewrap/cli`,
-   `bubblewrap update`, `bubblewrap build`, upload to the closed-testing track.
-   No manual gradle edit — the updated Bubblewrap template will pull the new
-   wrapper. Verify `app/build.gradle` shows `billing:1.2.0` (or later) before
-   uploading; if it still says 1.1.0, the template hasn't caught up yet and the
-   one-line edit to the published 1.2.0 is then safe.
+**Still true about the shape of the thing:** the Billing Library lives only
+inside the Android shell. The website and the server are unaffected by anything
+in this section, and a Play upload is only ever needed for shell-level changes
+(icon, package config, target SDK).
 
-Until then keep uploading to closed testing normally — the deadline only bites
-uploads after it passes, and the 12-tester/14-day clock remains the actual
-launch blocker.
+
+## Testing purchases: never use the owner account
+
+`isComped()` in `server/billing.js` grants Pro to `APP_OWNER_EMAIL` — and to
+every address in `COMP_PRO_EMAILS` — with no payment. So a Pro badge on
+Jacques's own account proves nothing about billing, and on 28 Aug it very
+nearly went into the log as "payment system proven end to end". He caught it:
+*"i already got all time pro on my owner account."*
+
+**Test on a fresh address that is neither.** If you must use his, read
+Profile → the subscription line, which distinguishes the two cases because
+`getBillingStatus` resolves `paid` before `comped`:
+
+- `Pro plan — Monthly` / `Yearly` / `Lifetime` → a real `user.plan`, written
+  only by the Stripe webhook. The chain worked.
+- `Pro plan — Complimentary` → `plan: 'comp'`, no payment involved. Whatever
+  you were testing is still untested.
+
+## The Play latch: why it is sessionStorage, and do not "fix" it back
+
+A Trusted Web Activity **is** Chrome, sharing one storage jar with the browser
+for this origin. So the old `localStorage` flag written by the Android shell
+was read back by every ordinary Chrome tab and every Chrome-installed shortcut
+on that phone, permanently — the site believed it was the Play build, routed
+Upgrade to Google billing, and `create-checkout-session` refused Stripe by
+policy (403 on `X-TSID-Client: play`). Combined with the broken shell, **every
+Android owner of the app was unable to pay by any route.** Stripe had created
+no checkout session between 30 July and 28 Aug.
+
+The flag now lives in `sessionStorage` (one browsing context), and the legacy
+`localStorage` key is deleted wherever found.
+
+**Both directions are covered, and both were tested in headless Chrome on an
+Android user agent — rerun these before touching `detectPlayBuild`:**
+
+| Context | `isPlayBuild()` | Why it must be that |
+|---|---|---|
+| Play app launch (`?src=play`) | `true` | Play policy: never Stripe in the shell |
+| Play app after a reload with no query | `true` | sessionStorage carries it |
+| Play app returning from a redirect | `true` | same |
+| Chrome-installed shortcut / plain tab | `false` | not Play-distributed; Stripe is correct and is revenue |
+
+**Do not add a `display-mode: standalone` test as a backstop.** It looks
+tempting and it is wrong: a Chrome-installed shortcut reports `standalone` too
+(Jacques's 27 Aug screenshots show exactly that), so it would re-break the very
+case this fixed. The honest discriminator once the shell is healthy is
+`getDigitalGoodsService()` actually resolving; it cannot be used while the
+shell is broken, because it rejects there too.
 
 ## Open bug
 
-**The Android app shows a browser address bar instead of running full screen.**
-It falls back to Custom Tabs because Digital Asset Links verification fails.
+**The Android app is not running as a verified Trusted Web Activity, and that
+is why nobody can buy Pro.** Settled 27 Aug 2026 by the app's own error text.
+Read this whole section before changing anything — the cause was correctly
+identified weeks ago, then talked out of by me on the same day, then confirmed
+again. Do not restart that loop.
 
-Verified correct and ruled out:
-- The app declares `https://www.turnsomedayintodayone.com` (`assetStatements` in
-  the generated `strings.xml`).
-- The server serves both certificate fingerprints — app signing key and upload
-  key — confirmed live through Google's own validator:
+### The proof, in Jacques's own screenshot
+
+The failure dialog (app 5.8, which prints the real error) reads:
+
+    failed while opening the store connection.
+    OperationError: unsupported context
+    bridge=present · playBuild=yes · display=standalone · engine=Chrome 151 · app=5.8
+
+`unsupported context` is not a generic failure. It is Chromium's
+`kUnsupportedContext` from `DigitalGoodsFactoryImpl`, surfaced as an
+`OperationError`, and it has exactly one meaning: **the document calling
+`getDigitalGoodsService()` is not inside a Trusted Web Activity.** The address
+bar across the top of that same screenshot says the same thing visually.
+
+### The trap that cost a day — do not fall in it
+
+`bridge=present` does **not** mean the billing bridge works.
+`storeBillingAvailable()` only tests `'getDigitalGoodsService' in window`, and
+that function exists in ordinary Chrome on Android. It is there, it is
+callable, and outside a TWA it rejects. So:
+
+- The purchase sails past the `storeBillingAvailable()` guard and its message
+  ("In-app purchases are not available on this device") never appears.
+- It dies in the deepest catch instead, which used to print only "Could not
+  complete that purchase."
+- On 27 Aug I read that message as proof the bridge was working and **wrongly
+  retired the Digital Asset Links diagnosis.** It was right. `display=standalone`
+  misleads the same way — Chrome reports standalone here even with a visible
+  address bar.
+
+The 12:39 screenshots with no address bar were a **separate installed PWA**
+(he had just used Chrome's "Install and create shortcut" at 12:38), not the
+Play app. A Chrome-installed PWA is also not a TWA, so it fails identically.
+
+### Where the fault is not
+
+- **The served file is correct and reachable.** Google's own validator returns
+  both statements cleanly for the host the TWA launches:
 
       curl "https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.turnsomedayintodayone.com&relation=delegate_permission/common.handle_all_urls"
 
-- Uninstall/reinstall, and Chrome cache clear, on two devices.
+- **The host matches.** `twa/twa-manifest.json` has
+  `host: www.turnsomedayintodayone.com`, `startUrl: /app?src=play`, and
+  `.well-known/assetlinks.json` declares `com.turnsomedayintodayone.app`.
+- **Not the apex.** `turnsomedayintodayone.com` does fail the validator with a
+  redirect error, but nothing launches the apex. Ignore it.
+- **Not Samsung Internet.** `engine=Chrome 151`.
 
-Still fails. **Untested leads:** both devices are Samsung — if Samsung Internet
-rather than Chrome is the default browser, verification runs through a different
-engine. Beyond that it needs `adb logcat` over USB to read Chrome's actual
-rejection reason; platform-tools are already on the owner's PC under
-`C:\Users\<user>\.bubblewrap\`.
+### Signing is ruled out — do not look there again
 
-**Impact: cosmetic only.** Install, use, the 14-day clock, purchases and review
-all work with the bar present.
+Jacques read both SHA-256 values off Play Console → App signing (direct link:
+`.../app/4972165923818128065/keymanagement`) on 27 Aug 2026. Both match
+`.well-known/assetlinks.json` character for character:
+
+    99:D2:75:… app signing key (classical)   — present in the file
+    91:7B:4C:… upload key                     — present in the file
+
+The "Quantum-ready (beta)" badge and the *Previous app signing keys* row dated
+28 Jul 2026 look alarming and are a red herring; the classical fingerprint in
+use is the one already listed. Ignore the post-quantum column entirely —
+Chrome's asset-link check does not use it.
+
+### What is actually still open
+
+**Nothing in this repo proves what the shell in the Play Store contains.**
+`twa/twa-manifest.json` was added on 24 Aug 2026 (commit `614864e`) as a
+reconstruction. The `.aab` that is live was built on Jacques's PC well before
+that, and `git ls-remote` shows **no `twa-build` branch**, so the CI workflow
+that would build from this manifest has never produced an artifact. Two
+settings that the live shell may therefore lack, either of which alone causes
+what we see:
+
+1. **`features.playBilling.enabled`** — the repo manifest has it true. Bubblewrap
+   does **not** enable it by default. Without it the Android shell omits the
+   Play Billing delegation and `getDigitalGoodsService()` rejects with exactly
+   `unsupported context`, even inside a perfectly verified TWA.
+2. **`host`** — the repo manifest says `www.turnsomedayintodayone.com`. If the
+   live shell declares the **apex** instead, Chrome fetched
+   `https://turnsomedayintodayone.com/.well-known/assetlinks.json`, got the
+   301 to www, and failed: asset-link fetches do not follow redirects. Google's
+   validator returns `ERROR_CODE_REDIRECT` for the apex and full statements for
+   www. That would explain the address bar as well.
+
+**Fixed here (27 Aug):** `server.js` now serves `/.well-known/assetlinks.json`
+before the apex→www redirect, so both hosts return it with a 200. Verified by
+replaying both middlewares in registration order against real `Host` headers —
+apex and www both 200 `application/json`, and every other apex path still 301s
+to www. This removes cause 2 without a Play upload.
+
+**Cause 1 is also weaker than it looks.** `PLAY-CHECKLIST.md` records that the
+live 1.0.1 / code 2 bundle was built on 17 Aug from this very manifest, with
+"Play Billing on, notifications on, Android 16, Billing 8". So the live shell
+probably does carry the billing feature and the `www` host. Do not order a
+rebuild as the first move; it is a real cost to Jacques and may change nothing.
+
+**What app 5.9 adds, and why it is the next step instead.** One thing has never
+been established: whether the failing window is the Play shell at all. The
+`playBuild` flag latches into `localStorage` and, on Android, is permanent — a
+single visit to `/app?src=play` in ordinary Chrome latches it forever, after
+which every Upgrade tap routes to Play billing and fails exactly like a broken
+shell. Jacques also installed a PWA from Chrome's menu on 27 Aug, which is a
+third context that looks like the app and is not.
+
+So the latch now records **how** it was set — `referrer` (an `android-app://`
+launch, which is proof the shell opened the page), `param` (a query string,
+which proves nothing), or `unknown` (the legacy `'1'`, never upgraded to
+`referrer` because that would invent evidence). The diagnostic line adds
+`host=`, `launch=` and `latch=`.
+
+**The answer came back at 14:06 on 27 Aug, and it is `launch=shell`:**
+
+    bridge=present · host=www.turnsomedayintodayone.com ·
+    launch=shell · latch=referrer@2026-08-27T19:05 ·
+    display=standalone · engine=Chrome 151 · app=5.9
+
+`launch=shell` means `document.referrer` was `android-app://com.turnsomedayintodayone.app`
+— the Android shell itself opened this page. Not a stale flag, not the PWA, not
+a browser tab. `host=` is the exact host the file is served under. And the
+address bar is still across the top.
+
+**So this is now established, not inferred: the Play app launches, on the right
+host, and Chrome refuses to run it as a verified TWA.** Everything on the
+server side checks out, so the fault is in the installed shell or in Chrome's
+verification of it — the one component nothing in this repo can inspect.
+
+Historical read of the field, kept because the reasoning still holds:
+- `launch=shell` → the Android app really did open this page, the shell is at
+  fault, and a rebuild is then justified.
+- `launch=param` or `launch=none` with `latch=unknown` → this is not the Play
+  app. Nothing about Play billing has been tested yet, and the rebuild would
+  have been wasted.
+
+**Still needs Jacques:** rebuild the shell from `twa/twa-manifest.json`, sign it
+with the upload key, and upload it. That is the only way to settle cause 1.
+Run the `Build the Play app (.aab)` workflow (`workflow_dispatch`), take the
+unsigned bundle off the `twa-build` branch, sign, upload, then reinstall on the
+phone. Bump `appVersionCode` past whatever is live before building.
+
+Install, use, the 14-day tester clock and reviews all work. Purchases do not.
+Do not call this cosmetic.
+
+
+app, reopen.** That is a 30-second test and it costs nothing.
 
 ## Marketing pages (SEO surface)
 

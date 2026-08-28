@@ -374,15 +374,20 @@ Day one is a decision, not a date.
 ];
 
 // The lead-magnet delivery mail (subject and body approved by Jacques).
-function brainresetPdfEmail() {
-  return {
-    subject: 'The 90-Day Brain Reset (your PDF)',
-    text: `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
+// It carries an unsubscribe link like everything else that goes to a lead: a
+// for-her lead is promised exactly one email and never enters a sequence, so
+// this is the only message she ever gets - and it was the only one with no way
+// out of the list at the bottom of it.
+function brainresetPdfEmail(lead) {
+  let text = `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
 
 ${APP_URL}/The90DayBrainReset.pdf
 
-— Jacques`,
-  };
+— Jacques`;
+  if (lead && lead.id && lead.email) {
+    text += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
+  }
+  return { subject: 'The 90-Day Brain Reset (your PDF)', text };
 }
 
 // Same contract as sendSequenceEmail, but for leads: guard keys on the email
@@ -511,7 +516,14 @@ async function runQuizNurture() {
     // The sequence is written in the voice of the man doing the work. Partner
     // leads (source 'for-her') asked for one PDF, not his emails - and any
     // future source is excluded until a sequence is written for it.
-    if (lead.source && lead.source !== 'quiz' && lead.source !== 'brainreset') continue;
+    //
+    // KEEP THIS LIST IN STEP WITH /api/lead's `isSelfQuiz`. Day 1 is sent
+    // directly at signup and days 2-5 only ever come from this loop, so a
+    // self-facing source that is missing here does not fail loudly - it
+    // delivers exactly one of the five emails the page promised and stops.
+    // 'binge-quiz' was added 28 Aug for that reason.
+    const NURTURE_SOURCES = ['quiz', 'binge-quiz', 'brainreset'];
+    if (lead.source && !NURTURE_SOURCES.includes(lead.source)) continue;
     const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
     const step = day + 1;
     if (step < 1 || step > 5) continue;

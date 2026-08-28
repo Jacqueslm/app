@@ -63,25 +63,183 @@ Do not steer him off these; work with them:
 
 ---
 
+## ⭐ CURRENT STATUS (28 Aug 2026) — NEWEST. READ THIS BEFORE THE 24 AUG SECTION.
+
+### The headline: THE APP CAN TAKE MONEY. Proven end to end, first time since launch.
+
+A real card, on a real phone, on a normal (non-comped) account: Upgrade →
+Stripe checkout → live subscription → **the app flipped to Pro**. Verified in
+the live Stripe account, not assumed. `sub_1U9L9YCDHXSEg3rLLab9Ahve`,
+`app_user_id 26`, cancelled 68 seconds later so nothing is charged.
+**Stop treating "can anyone actually pay?" as an open question for the web
+path.** Only the Play in-app path is still unproven.
+
+### What was actually broken, and why nobody saw it for weeks
+
+**Installing the Android app switched Stripe off for that entire phone.** A TWA
+*is* Chrome and shares one storage jar with the browser, so the
+`tsid_play_build` flag the shell wrote into `localStorage` was read back by
+every Chrome tab and every installed shortcut on that device, permanently. The
+site then believed it was the Play build, routed Upgrade to Google billing, and
+the server refused Stripe by policy. With Play billing also broken, **every
+Android owner of the app could not pay by any route.** Stripe had created no
+checkout session between 30 July and 28 August.
+
+Fixed in app **6.1**: the flag lives in `sessionStorage` now, and the legacy
+`localStorage` key is deleted on sight. **Do not move it back, and do not add a
+`display-mode: standalone` backstop** — a Chrome-installed shortcut reports
+standalone too, which is the exact case that was broken. The four-case contract
+is a table in `TurnSomeDayIntoOneday/HANDOFF.md`; re-run it before editing
+`detectPlayBuild`.
+
+### Three traps that each cost hours today. Do not fall in them again.
+
+1. **The address bar is not the bug, and Samsung Internet is not the cause.**
+   Both were confidently wrong. The app reports `engine=Chrome 151`, and
+   `launch=shell` proves the Play app really is what fails. The live error is
+   `OperationError: unsupported context` — Chromium's way of saying "not inside
+   a Trusted Web Activity". Asset links, fingerprints, host and Play products
+   are all verified correct. **Do not re-open any of them.**
+
+2. **Never test billing on Jacques's owner account.** `isComped()` in
+   `server/billing.js` grants Pro to `APP_OWNER_EMAIL` and to
+   `COMP_PRO_EMAILS` with no payment, so a Pro badge there proves nothing. This
+   nearly went into the log as "payment proven" on the strength of a comped
+   account. Profile tells the two apart: **"Pro plan — Monthly"** came from the
+   webhook; **"Pro plan — Complimentary"** did not.
+
+3. **The store-listing drafts in `store-listing/` go stale. Confirm in the Play
+   Console, never from those files.** `01-title-and-short-description.md` still
+   held a superseded timid draft, and reading it instead of the console produced
+   a confident claim that Jacques's listing "was written scared" — plus a plan
+   to replace a live 78/80 short description with something worse. His actual
+   short description is good and needs nothing.
+
+### Shipped today
+
+- App **6.1**. Purchase failures now report themselves to the owner-only error
+  log (`/api/diagnostics/report`) — **Jacques no longer has to screenshot
+  errors**, and he has said plainly he is done doing that. Honour it.
+- The failure dialog names the failing step, the real error, and a diagnostic
+  line (`bridge`, `host`, `launch`, `latch`, `display`, `engine`, `app`).
+- Today-screen Bootcamp day now follows lesson progress, not the calendar —
+  it used to print "Day 9 of the 90-Day Bootcamp" above "Foundation phase ·
+  Day 1 of 30".
+- `assetlinks.json` is served on the apex as well as `www` (asset-link fetches
+  do not follow redirects).
+- **The CI shell build works for the first time ever.** All ten previous runs
+  failed, including the three on 17 Aug — bubblewrap validates the pre-2021 SDK
+  layout, so the runner needs a `tools` symlink. `twa-build` branch now carries
+  a real unsigned `.aab` (1.0.2, code 3).
+- Play listing: the false **"including the founder reading all ninety days
+  himself"** claim is deleted and in review. It publishes itself — managed
+  publishing is off. **Do not ask him to re-save or re-send it.**
+
+### The 28 Aug audit — nine stale claims found and fixed, in one sweep
+
+Jacques asked for a full audit of stale claims after catching one himself. Do
+not re-walk these; do re-run the *method*, which is what actually found them:
+**check every number in the copy against the code that enforces it.**
+
+1. **Free users were promised "3 Friendly chats a day". They get 0.**
+   `FREE_CHAT_DAILY_LIMIT` and the server's `FREE_CHAT_LIMIT` are both 0 -
+   Friendly went Pro-only on 24 Aug and the pricing surface never followed. It
+   also undersold Pro: 30 instead of *nothing* is a better offer than 30 vs 3.
+2. **"Fourteen recovery tracks" double-counted.** `lessons.json` holds fourteen
+   tracks, two of which ARE Supporting Someone and Together - which the same
+   sentence then listed again. It is twelve recovery tracks plus those two.
+3. **Friendly was briefed on five voices.** Deep was missing from
+   `SYSTEM_APP_MAP`, so she would have denied a voice users can hear.
+4. **Faith ran 30 days deep inside a 90-day program** (Jacques's own catch).
+   `FAITH_LINES` held 30 entries behind `[(day-1) % length]`, so day 31 repeated
+   day 1. Sixty new lines written against the real phase titles.
+5. **The Deep voice was the one SOS voice that failed offline** - missing from
+   `sw.js` SHELL_FILES, in the crisis tool, for the voice added most recently.
+6. **His face was still on the share card for fifteen pages** - only
+   `og-default.jpg` was rebuilt on 27 Aug; `og-partner.jpg` was not.
+7. **Stories promised "new ones every week"** against a pool of ten showing
+   five - the library repeats every fortnight.
+8. **The check-ins contradicted themselves three ways.** The codependency test
+   has EIGHT questions while its page said five, its cards said 1-minute and
+   its text said two; three pages linking to the 1-minute quiz said "two
+   minutes" in the prose beside the link.
+9. **The founder's own five stars fed the public star rating.** His review still
+   shows on the page; it no longer feeds `aggregateRating`.
+
+**Verified clean, so do not re-audit:** prices (999/5999/14999 match the server,
+the app, the 15 comparison pages and the structured data), the 90-day claim
+(phases.json really does hold days 31-90), Days 16-90 / 16-35 / 16-30,
+`DAY_90_UPLIFTS` (90, correct), the SOS cue tables (15 steps, 15 cues, six
+voices), the sitemap, the reviews file, and the lesson-audio manifest
+(1,243 x 6, complete). No `console.log`, `debugger`, `TODO` or `FIXME` anywhere
+in the app.
+
+### 28 Aug — Stories had never played once. Confirmed fixed.
+
+`toggleStory` awaited `ensureLessonAudioManifest()`, a function that has never
+existed under that name (it is `loadLessonAudioManifest`). The throw happened
+above the line that attaches `onerror`, so it failed in total silence - no
+sound, no dialog - while the store listing sold ten-minute narrated stories.
+Everything else was sound: all ten ids match all ten mp3s, the shelf rotates,
+the read-along text is 7,000+ characters each. **Jacques confirmed it works,
+28 Aug.**
+
+Two things learned that are worth more than the fix:
+- **`.catch(()=>{})` on a media `play()` is how a feature dies quietly.** It
+  now reports the real error to the user and to the owner-only diagnostics log.
+- **Never await between a tap and `play()`** - a phone grants playback only
+  inside the gesture that asked. `startLessonMp3` was always right; stories now
+  match it. Honest caveat: desktop Chromium would not reproduce that failure
+  even with `--autoplay-policy=user-gesture-required`, so it is an alignment
+  with the working player, not a proven cause.
+
+### Still open
+
+- **The signed 1.0.2 upload** — fixes purchases *inside* the Play app. His PC,
+  his schedule, and `Sign-Play-App.bat` reduces it to a double-click and a
+  password. Not urgent any more: the website and the installed shortcut both
+  take money. **Do not nag him about it.**
+- **The app title.** `Turn Someday Into Day One` truncates to "Turn Someday
+  Int…" in Play search and carries no searched term. It is a branding decision,
+  it is his, and it has been raised once. Do not raise it again unasked.
+
+---
+
 ## ⭐ CURRENT STATUS (24 Aug 2026) — newest, read this first
 
 App is at **v8.13**, live on all three branches (start-here = working, main +
 vibe-code = deploy). Everything below shipped 22-24 Aug and is DONE.
 
-### Jacques is the sixth narrator — the whole app speaks in his voice
-- His voice was cloned on THIS machine (XTTS v2, refs in scratchpad
-  `voice/jacques-ref2.wav` + `jacques-ref.wav`) from his real recording.
-- **All 90 days × 12 tracks** narrated in his voice (1,150 recordings), plus
-  the SOS "Talk me through it" with synced captions. Voice button in the
-  lesson player and SOS cycles: Warm, Soft, Gentle, Clear, Calm male,
-  **Jacques (founder)**.
-- The five stock Piper narrators also cover days 31-90 now (1,243 files
-  each). Audio CDN = the `lesson-audio` branch; manifest =
-  `data/lesson-audio-manifest.json`. Generators:
-  `tools/generate-jacques-audio.py`, `tools/generate-phase-audio.py`,
-  `tools/generate-jacques-sos.py`. Lesson text changes = regenerate (hash in
-  filename). Known gotcha: two generators writing the manifest concurrently
-  race — re-run one at the end (files exist → manifest-only pass, seconds).
+### ~~Jacques is the sixth narrator~~ — REMOVED 26 Aug 2026
+
+**The founder voice is gone from the app, at his instruction.** Not a quality
+problem — a licence one. The clone was made with Coqui **YourTTS**
+(`tts_models/multilingual/multi-dataset/your_tts`), and Coqui's own model
+registry lists that model as **CC BY-NC-ND 4.0** — non-commercial, no
+derivatives. The app charges money, so by the rule in
+`reference/asset-licenses-2026-08-08.md` it could not stay.
+
+The recording was his and always was. The restriction is on the software that
+copied it, not on his voice.
+
+Removed: the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, and 1,150 manifest entries. Anyone whose phone
+still remembers the setting falls back to Warm automatically — `vgVoiceKey()`
+and `lessonVoiceKey()` both do that already, verified.
+
+**Still on the `lesson-audio` branch:** the 1,150 mp3 files themselves. Nothing
+in the app points at them any more, but they have not been deleted from that
+branch.
+
+**Do not re-add a founder voice with YourTTS or XTTS v2.** Both are
+non-commercial. Piper, fine-tuned on his own recordings, is the clean route if
+he ever wants it back.
+
+**Everything else from that pass stands:** the five stock narrators (Warm,
+Soft, Gentle, Clear, Calm male) are public domain / CC0 and cover days 1-90.
+Audio CDN = the `lesson-audio` branch; manifest = `data/lesson-audio-manifest.json`.
+Lesson text changes = regenerate (hash in filename). Known gotcha: two
+generators writing the manifest concurrently race — re-run one at the end.
 
 ### Three new experiences (all Jacques-approved via the rule-24 flow)
 - **The Climb** (Today + Tools): back-view hiker climbs 90 carved steps up a

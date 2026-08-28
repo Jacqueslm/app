@@ -10,12 +10,15 @@ app change needed.
 
 Voices are the license-clean Piper set (public domain / CC0 - the same set the
 SOS talk was rebuilt with on 8 Aug; check MODEL_CARD before ever changing one),
-plus 'jacques' cloned with YourTTS from his approved reference recordings.
+all public domain or CC0.
 
-Piper narrators:
     python3 tools/generate-phase-audio.py piper <voices-folder> <output-folder>
-Jacques:
-    python3 tools/generate-phase-audio.py jacques <ref1.wav> <ref2.wav> <output-folder>
+    PHASE_ONLY=deep python3 tools/generate-phase-audio.py piper <voices> <out>
+
+The 'jacques' YourTTS path was REMOVED 26 Aug 2026: that model is licensed
+CC BY-NC-ND 4.0 (non-commercial) and the app charges money. Do not re-add it,
+and do not reach for XTTS v2 either - same problem. See
+reference/asset-licenses-2026-08-08.md.
 
 Then commit the output folder to the `lesson-audio` branch and the updated
 manifest to main in the same change.
@@ -48,7 +51,19 @@ PIPER_VOICES = {
     'gentle': 'vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx',
     'clear':  'vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx',
     'male':   'vits-piper-en_US-john-medium/en_US-john-medium.onnx',
+    # Added 27 Aug 2026 at Jacques's request: a deep male American voice.
+    # joe is CC0 (Nabu Casa voice-datasets) and, measured across a real lesson
+    # line, the deepest male in Piper's licence-clean set - median pitch 99 Hz
+    # against norman's 103 and bryce's 130.
+    'deep':   'vits-piper-en_US-joe-medium/en_US-joe-medium.onnx',
 }
+
+# Regenerating all six voices to add one is six times the work for nothing.
+# PHASE_ONLY=deep restricts the run to a single voice; existing files are
+# skipped anyway, but this skips even the pool spin-up.
+def wanted(voices):
+    only = os.environ.get('PHASE_ONLY', '').strip()
+    return {k: v for k, v in voices.items() if k == only} if only else voices
 
 
 def slug(s):
@@ -130,29 +145,6 @@ def _synth_piper(args):
     return (track, day, voice_key, rel)
 
 
-def _init_jacques(refs):
-    global _engine, _rate, _refs
-    from TTS.api import TTS
-    _engine = TTS('tts_models/multilingual/multi-dataset/your_tts', progress_bar=False)
-    _rate = _engine.synthesizer.output_sample_rate
-    _refs = refs
-
-
-def _synth_jacques(args):
-    import numpy as np
-    voice_key, track, day, text, out_dir = args
-    rel = rel_path(voice_key, track, day, text)
-    path = os.path.join(out_dir, rel)
-    if os.path.exists(path):
-        return (track, day, voice_key, rel)
-    wav = _engine.tts(text=speakable(text), speaker_wav=_refs, language='en')
-    audio = np.clip(np.array(wav) * 32767, -32768, 32767).astype(np.int16)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'wb') as f:
-        f.write(encode_mp3(audio, _rate))
-    return (track, day, voice_key, rel)
-
-
 def run_pool(voice_key, jobs, out_dir, workers, init, initargs, synth):
     manifest = json.load(open(MANIFEST, encoding='utf-8'))
     items = manifest['items']
@@ -175,14 +167,11 @@ def main():
     workers = int(os.environ.get('PHASE_WORKERS', '2'))
     if mode == 'piper' and len(sys.argv) == 4:
         base, out_dir = sys.argv[2], sys.argv[3]
-        for vk, rel_model in PIPER_VOICES.items():
+        for vk, rel_model in wanted(PIPER_VOICES).items():
             run_pool(vk, jobs, out_dir, workers, _init_piper,
                      (os.path.join(base, rel_model),), _synth_piper)
-    elif mode == 'jacques' and len(sys.argv) == 5:
-        refs, out_dir = [sys.argv[2], sys.argv[3]], sys.argv[4]
-        run_pool('jacques', jobs, out_dir, workers, _init_jacques, (refs,), _synth_jacques)
     else:
-        sys.exit('usage: generate-phase-audio.py piper <voices-folder> <out> | jacques <ref1> <ref2> <out>')
+        sys.exit('usage: generate-phase-audio.py piper <voices-folder> <out>')
 
 
 if __name__ == '__main__':

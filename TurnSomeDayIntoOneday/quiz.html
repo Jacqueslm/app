@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>The 2-Minute Check-In — Turn Someday Into Day One</title>
+<title>The 1-Minute Check-In — Turn Someday Into Day One</title>
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
-<meta name="description" content="A free, private 2-minute check-in on your relationship with a habit you've been thinking about — no signup needed, honest results, and what your next step could look like.">
+<meta name="description" content="A free, private 1-minute check-in on your relationship with a habit you've been thinking about — no signup needed, honest results, and what your next step could look like.">
 <link rel="canonical" href="https://www.turnsomedayintodayone.com/quiz">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Turn Someday Into Day One">
 <meta property="og:url" content="https://www.turnsomedayintodayone.com/quiz">
-<meta property="og:title" content="The 2-minute check-in. Free, private, no signup.">
-<meta property="og:description" content="A free, private 2-minute check-in. No signup needed. Honest results.">
+<meta property="og:title" content="The 1-minute check-in. Free, private, no signup.">
+<meta property="og:description" content="A free, private 1-minute check-in. No signup needed. Honest results.">
 <meta property="og:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="The 2-minute check-in. Free, private, no signup.">
-<meta name="twitter:description" content="A free, private 2-minute check-in. No signup needed. Honest results.">
+<meta name="twitter:title" content="The 1-minute check-in. Free, private, no signup.">
+<meta name="twitter:description" content="A free, private 1-minute check-in. No signup needed. Honest results.">
 <meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-quiz.jpg">
 <style>
 :root{
@@ -80,7 +80,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <!-- INTRO -->
   <div class="step on" id="st-intro">
     <h1>What's your relationship with the habit you've been thinking about?</h1>
-    <p class="sub">The habit is rarely the root — it's the symptom of something deeper. This private 2-minute check-in looks at both. Nothing you answer is stored or sent anywhere. (If you choose to get your 5-day plan by email at the end, we keep your email and your result — nothing else.) The results are computed on your device, for you. No signup needed to see them.</p>
+    <p class="sub">The habit is rarely the root — it's the symptom of something deeper. This private 1-minute check-in looks at both. Nothing you answer is stored or sent anywhere. (If you choose to get your 5-day plan by email at the end, we keep your email and your result — nothing else.) The results are computed on your device, for you. No signup needed to see them.</p>
     <button class="btn" onclick="start()">Start the check-in</button>
     <div class="crisis">This isn't a medical assessment. If you're in crisis right now, call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline) — free, confidential, 24/7.</div>
   </div>
@@ -152,14 +152,16 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <script>
 const FOCUS=['Alcohol','Smoking','Substances','Gambling','Social media','Gaming','Porn & Sex','Food / Binging','Shopping / Spending','Work','Something else'];
 const QUESTIONS=[
+  // Cut from eight to five, 27 Aug 2026 (Jacques): the check-in was billed at
+  // two minutes and people were not finishing it. These five carry the
+  // diagnosis - frequency, control, concealment, history, and what happens
+  // after a break. The three dropped (morning-after regret, what 'better'
+  // looks like, what is stopping you) read as intent, not evidence.
   {t:'How often does it happen lately?',o:[['Once in a while',0],['Most weeks',1],['Most days',2],['Every day, pretty much automatically',3]]},
   {t:'When you decide "not today" or "just one" — how does that usually go?',o:[['I stick to it fine',0],['I stick to it, but it takes real effort',1],['It works maybe half the time',2],['It almost never holds',3]]},
-  {t:'The morning after a heavy one, how do you feel about it?',o:[['Fine — it was a choice',0],['A little regret, then I move on',1],['Real regret that hangs around',2],['Dread. I try not to think about it',3]]},
   {t:'Have you downplayed or hidden it from someone who matters?',o:[['Never needed to',0],['Once or twice',1],['More than I like to admit',2],['It has its own hiding system at this point',3]]},
   {t:'Have you tried to quit or cut back before?',o:[['No — this is my first serious look at it',1],['Once',1],['A few times',2],['Many times. The restart is the hard part',3]]},
   {t:'When a streak breaks, what happens next?',o:[['I just start again',0],['I restart within a few days',1],['I spiral for a while first',2],['I usually give up on trying for a long time',3]]},
-  {t:'What would "better" look like for you?',o:[['Understanding it before deciding anything',0],['Cutting way back',1],['Quitting fully',2],['Getting my life back. All of it',2]]},
-  {t:"What's stopping you from starting today?",o:[["I'm honestly just curious",0],['Fear of failing again',2],['My social life / environment',1],["Nothing. I'm ready",1]]}
 ];
 let focus='',score=0,qi=0;
 const $=id=>document.getElementById(id);
@@ -218,19 +220,20 @@ function showResult(){
   const spend=Math.max(0,parseFloat($('in-spend').value)||0);
   const hours=Math.min(24,Math.max(0,parseFloat($('in-hours').value)||0));
   const yearSpend=spend*365,yearHours=hours*365,workWeeks=yearHours/40;
-  // Max score is 22. Bands tuned so honest middling answers land in the middle.
+  // Max score is 15 across five questions. Bands scaled from the old
+  // eight-question version so the same honest answers land in the same band.
   let seg,title,body,close;
-  if(score<=5){
+  if(score<=3){
     seg='Curious & early';
     title="You're paying attention before it costs you. That's rare.";
     body=`Most people only look at their relationship with ${focus.toLowerCase()} after it's already expensive. You're looking now — which means you have the easiest version of this available: building awareness while the stakes are still low.`;
     close='A daily 3-minute lesson and a private journal are exactly the right tools for this stage — no pressure, just clarity.';
-  }else if(score<=11){
+  }else if(score<=7){
     seg='The gray area';
     title="It's not a crisis. But it's not nothing, and you know it.";
     body=`This is the gray area — where ${focus.toLowerCase()} still looks casual from the outside but has started making some of your decisions for you. The honest answers you just gave are the proof.`;
     close="The gray area is where change is cheapest. A structured daily practice — lessons, a private journal, a streak you can actually see — is usually all this stage takes.";
-  }else if(score<=17){
+  }else if(score<=11){
     seg='The loop is running';
     title="The loop is doing your deciding. Time to take it back.";
     body=`What you described isn't a habit anymore — it's a loop: trigger, ritual, regret, repeat. Loops don't break through willpower alone; they break through structure, honesty, and knowing your own patterns better than the loop does.`;

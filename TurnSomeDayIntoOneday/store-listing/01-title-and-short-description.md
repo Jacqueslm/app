@@ -1,91 +1,68 @@
-# Title and short description
+# Title and short description — WHAT IS ACTUALLY LIVE
 
-## The problem, in Jacques's words (28 Aug 2026)
+**Read this before proposing any change. This file was stale on 28 Aug and it
+misled a whole session.**
 
-He looked at his own Play listing and said: **"doesn't really say what this app
-is for."** He is right, and it was self-inflicted.
+## Short description — LIVE, CORRECT, DO NOT CHANGE
 
-The short description read *"Daily habit support, a private journal, and a
-companion for hard moments."* It contains no word anyone searches for. Someone
-scrolling past learns nothing about what the app does.
+Confirmed in the console 28 Aug 2026, on screen:
 
-**The caution that produced it was wrong.** An earlier note here banned
-"recovery" and "addiction" as medical claims. But the **full description has
-said "a private daily companion for addiction recovery" since launch, it is
-live in 177 countries, and Play approved it.** So the register was never the
-problem — the two documents simply disagreed, and the timid one won the slot
-that matters most. Play's medical-claims rule is about *cure*, *treat*,
-*diagnose*, *clinically proven*. Naming the category is not a claim: I Am
-Sober, Nomo, Sober Time, Quittr and Reframe all say it plainly.
+```
+Addiction recovery: sober day counter, 90-day program, and support for family.
+```
+**78 / 80 characters.**
+
+It names the category in the first two words, carries the terms Play indexes
+(recovery, sober, program), and names the family angle. It is good. Leave it.
+
+**How this file went wrong.** Until 28 Aug it still held an old timid draft —
+*"Daily habit support, a private journal, and a companion for hard moments"* —
+plus a note banning the words "addiction" and "recovery" as medical claims.
+Both were obsolete: the real text had been replaced on 26 Aug and the console
+shows it live. A session read this file instead of the console, concluded the
+listing "was written scared", and was about to walk Jacques through pasting a
+replacement for text that was already better than the replacement.
+
+The lesson is the same one `00-STATUS.md` states two sections down: **confirm
+in the console, not in these drafts.** These files are working notes and they
+go stale the moment Jacques edits anything himself.
+
+For the record, the medical-claims worry was also wrong on its merits. Play's
+rule targets *cure*, *treat*, *diagnose*, *clinically proven*. Naming a
+category is not a claim — I Am Sober, Nomo, Sober Time and Reframe all do it.
 
 ---
 
-## Short description — limit 80 characters
+## App title — LIVE `Turn Someday Into Day One` (25 / 30)
 
-**Recommended. Paste this:**
+**His name, his call. Do not change it without asking, and do not keep
+re-raising it.**
 
-```
-Addiction recovery, one day at a time — and a side for the one who loves you.
-```
-**77 / 80 characters.**
+One fact worth recording once, because it is measurable: in Play search results
+the title truncates to **"Turn Someday Int…"** (his screenshot, 28 Aug), and it
+contains no term anyone searches. Play search shows only title, developer and
+category — not the short description — so the title is the *only* place a
+search result can say what the app is.
 
-Why this one: it says the category in the first two words, and it leads with
-the differentiator nothing else in the category has — the supporter side. That
-is also the angle that drew the only real engagement on Facebook (a like on
-"Supporting someone who binge eats but…"), and it already matches the promo
-video on the listing, which reads *"Addiction recovery, one day at a time —
-with a whole side for the one who loves you."* Listing, video and marketing
-finally say one thing.
-
-Alternates, all measured:
-
-```
-Quit drinking, porn, vaping or gambling — one day at a time, privately.
-```
-**71 / 80.** Leads with the specific habits people type into the search box.
-Pick this one if search traffic matters more than the supporter angle.
-
-```
-Sobriety counter, 90-day recovery program, SOS tools for the craving, journal.
-```
-**78 / 80.** Feature-first, densest in keywords, coldest to read.
-
----
-
-## App title — limit 30 characters
-
-**Currently `Turn Someday Into Day One` — 25 / 30. Jacques's call, not a
-technical one.**
-
-The honest trade-off, stated once:
-
-- The name is good and it is his. Changing it costs the recognition already
-  built with 20,000+ installs.
-- But it truncates to **"Turn Someday Int…"** in Play search results — his own
-  screenshot, 28 Aug — and it contains no word anyone searches for. A keyword
-  in the title is the single strongest ranking signal Play has.
-
-If he ever wants to trade the name for reach:
+If he ever decides reach is worth the rename, these fit:
 
 ```
 Day One: Addiction Recovery
 ```
-**27 / 30.** Keeps "Day One", which is what the launcher icon already says, and
-puts the search term in the strongest position on the page.
+**27 / 30.** Keeps "Day One", which is already the launcher label.
 
 ```
 Day One — Sobriety & Recovery
 ```
 **29 / 30.**
 
-**Do not change the title without asking him.** Do not raise the developer name
-again either — settled 27 Aug, his name stays.
+Developer name: settled 27 Aug, stays as it is. Do not raise it again.
 
 ---
 
-## The rule that keeps these documents honest
+## The rule
 
 The short description, the full description and the health declaration must
-describe the same app in the same register. When they drift, the listing either
-undersells (what happened here) or overpromises. Any edit to one is an edit to
-all three.
+describe the same app in the same register. Any edit to one is an edit to all
+three — and every one of them is verified in the console, never from this
+folder.

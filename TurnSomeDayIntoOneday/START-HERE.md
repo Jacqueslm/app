@@ -41,3 +41,17 @@ One fix: **the free PDF email now carries an unsubscribe link.** Everything
 else that goes to a lead already had one. The partner page (`/when-he-drinks`)
 promises exactly one email and no sequence, and it kept that promise — but that
 one email was the only thing you send with no way out of the list at the bottom.
+
+### Lesson and pricing-claim audit (28 Aug) — app 6.9
+
+Counted every lesson day in the app. **All 90 days are there on all 14 tracks**
+— days 1–30 written per track, days 31–90 shared and personalised, no gaps, no
+blank days. Supporting Someone runs its own 35 and Together its own 30, exactly
+as the Pro card says.
+
+One claim was wrong and it was on the screen where people decide to pay. The
+plans screen said Pro gives you "days 16–90 of every track, **including the
+Spiritual Path and Together**". Those two are 30-day programs, and the Pro card
+directly below it already said so correctly. Fixed to "day 16 onward on every
+track, all the way to day 90 on the recovery tracks", which is true of all of
+them.

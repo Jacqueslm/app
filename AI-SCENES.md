@@ -840,3 +840,57 @@ identified by looking at them, not by sorting. Do that every time.
 "was." orphaned on its own line. Rewritten as three short lines instead of two
 long ones, and the bottom scrim lifted from .55 to .62/.96 because the hospital
 frame is nearly white where the type sits. Both are in the source.
+
+---
+
+## A18 — "Worrying feels like control" · compulsive worry · CAUSE & EFFECT · 7.6s · BUILT 27 Aug 2026
+
+**First piece built to both new rules:** house rule 21 at **5-8 seconds** and
+house rule 26 at **9:16 full bleed**. Two beats and an end card — three beats
+genuinely do not fit at this length, which is the point of the rule.
+
+1. **2.9s** the kitchen table at night, slow push — *Worrying feels like
+   **control**.*
+2. **2.0s** dissolve at 3.3s to the room it ends up in, slow push — *This is
+   where it actually ends up.*
+3. **2.0s** end card — **Worry is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** Worrying feels like control
+**Title (YouTube):** Compulsive worrying — why it feels like you're doing something
+
+**Caption:** Worrying feels like control. Like if you run it through enough
+times, you can stop the thing from happening. You can't — and this is where the
+nights actually end up. Worry is a habit, and habits can be broken. Free, no
+card, no ads, works with no account. Link in bio.
+#overthinking #worry #anxietyrelief #recovery #dayone
+
+**Score:** `content/score/the-last-breath.mp3` — the shortest track there is
+(12.36s) — **trimmed to 7.6s with a 1.45s fade, NOT stretched.** It does not end
+on the last note, and at this length nothing can. See house rule 21: all 16
+tracks in `content/score/` run 12.36-22.66s, so trimming is the only option
+until there are 5-8s stings.
+**Files:** source `content/worry-source.html`, stills `content/worry/`
+(`01-kitchen.png`, `02-clinic.png`, both natively 1440x2560). The .mp4 is
+handed over, not committed.
+
+**No medical claim, deliberately.** The clinic frame shows her being *looked
+after* — a hand held, a form being filled in — and the caption says "this is
+where it ends up," not that worry caused an illness. That distinction is house
+rule 9 and it is the whole reason the line is worded that way. Do not tighten it
+into cause-and-effect about health.
+
+### Two things to know before this one goes out
+
+- **There is no worry or anxiety term anywhere in KEYWORDS.md**, same as pills.
+  The file is final (Semrush ended 15 Aug), so there is no volume for this lane
+  and none can be pulled. Content-led. Do not invent a number.
+- **The app has no worry track.** The 14 in `lessons.json` are Porn & Sex,
+  Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging,
+  Shopping/Spending, Work, Other, Supporting Someone, Anger & Control, Together.
+  The honest destination is the SOS tools and the journal, or **Supporting
+  Someone** — which is where this piece is strongest anyway. The person who
+  cannot stop worrying about somebody else's drinking is the supporter lane,
+  Jacques's moat, and it already has pages built (`/for-her`,
+  `/when-he-drinks`, `/partner-drinks`). **Aim the caption at her when posting
+  and it has somewhere real to land; post it as general anxiety content and it
+  does not.**

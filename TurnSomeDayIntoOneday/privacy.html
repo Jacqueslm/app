@@ -24,23 +24,31 @@
 <main>
 <a class="back" href="/">&larr; Turn Someday Into Day One</a>
 <h1>Privacy Policy</h1>
-      <p>Last updated: July 16, 2026</p>
+      <p>Last updated: August 28, 2026</p>
 
       <p>Turn Someday Into Day One ("the app") is a recovery companion. This page explains, in plain language, what information the app collects, where it lives, and who else ever sees it.</p>
 
       <h3>What we collect</h3>
       <p>When you create an account: your email address, a phone number if you choose to add one, and a password or PIN (stored as an irreversible hash — never in plain text, and never visible to us).</p>
-      <p>As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, milestone history, and messages you send to Friendly (the AI companion). All of this exists so the app can function — to show your streak, resume your lessons, and let Friendly respond with real context.</p>
+      <p>As you use the app: your recovery start date, journal entries, craving logs, mood check-ins, lesson progress, and milestone history. All of this exists so the app can function — to show your streak and resume your lessons.</p>
+      <p>Things you choose to write for other people are stored differently, because they have to leave your own account to work:</p>
+      <p>• <b>Live room posts.</b> If you post in a room, the text is stored on the server and shown to other members under the display name you choose. Every post is checked by an automated moderator before anyone sees it.</p>
+      <p>• <b>Letters.</b> A letter you write to a partner is stored on the server behind a private link so the person you send it to can open it. You can revoke a letter at any time, and letters expire on their own.</p>
+      <p>• <b>Reviews.</b> If you leave a review, the text, your first name and your star rating are stored and may be shown publicly on the reviews page.</p>
+      <p><b>Messages to Friendly are not stored.</b> They are sent to the AI provider to generate a reply and are not written to the database or kept on the server; the app only counts how many chats you have used that day. They are cleared from the app when you close it.</p>
 
       <h3>Where it lives</h3>
-      <p>This app is self-hosted: your data is stored in a local database on the server you (or whoever runs this instance) is running — not in a shared cloud service we control. If you're using an instance someone else operates, they are the ones storing your data, on their own server.</p>
+      <p>Your data is stored in a database on the server that runs this app, operated by Turn Someday Into Day One and hosted in the United States. It is not sold, and it is not placed in any advertising or data-broker system.</p>
+      <p>The recorded lesson and story audio is served from a public file host. Playing it sends no account information — the request is for an audio file and nothing else.</p>
 
       <h3>Who else sees it</h3>
-      <p>Two outside services are used, and only for the specific job each does:</p>
-      <p>• <b>Anthropic</b> processes the messages you send to Friendly, in order to generate Friendly's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Friendly is only available when the app operator has configured this connection.</p>
+      <p>A small number of outside services are used, each for one specific job and nothing else:</p>
+      <p>• <b>Google</b> processes the messages you send to Friendly, in order to generate Friendly's replies, and also checks live room posts against the moderation rules before anyone sees them. Only the message or the post is sent. (If the app is ever configured to use <b>Anthropic</b> instead for Friendly's replies, the same limit applies.)</p>
       <p>• <b>Stripe</b> processes payment if you subscribe on the website, and <b>Google Play</b> processes it if you subscribe inside the Android app. Your card details go directly to whichever one you used — this app never sees or stores your full card number. After a Play purchase the app receives only a receipt token, which it checks with Google to confirm the purchase is real.</p>
-      <p>Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Friendly yourself.</p>
-      <p>We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
+      <p>• <b>Resend</b> delivers the emails this app sends you — your reset link, and any sequence you asked for. It receives your email address and the message itself.</p>
+      <p>• <b>Plausible</b> counts page visits so we can see which pages people find useful. It is cookieless and does not follow you across other websites. It receives the page address, and your IP address and browser type are passed to it so a visit can be counted once; it does not keep your IP address and we never send it your name, your email or your account.</p>
+      <p>Your journal, craving logs, and personal notes are never sent to any of these services unless you paste them into a message to Friendly yourself.</p>
+      <p>We do not sell data. There is no advertising network, and nothing here follows you around other websites.</p>
 
       <h3>Your controls</h3>
       <p>From Profile, at any time: <b>Export my data</b> downloads everything as a file. <b>Delete my account</b> permanently removes your account and all associated data from the server — this cannot be undone once confirmed. Step-by-step instructions, and exactly what is deleted and what the payment providers keep, are on the <a href="/delete-account">delete your account</a> page.</p>

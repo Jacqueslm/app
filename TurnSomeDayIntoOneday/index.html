@@ -16,7 +16,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="You don't quit at noon. You quit at 2am.">
-<meta name="twitter:description" content="38 years, then day one at 50. Free 2-minute check-in.">
+<meta name="twitter:description" content="38 years, then day one at 50. Free 1-minute check-in.">
 <meta name="twitter:image" content="https://www.turnsomedayintodayone.com/og/og-default.jpg">
 <link rel="manifest" href="manifest.json" id="manifest-link">
 <meta name="theme-color" content="#0f0c29" id="theme-color-meta">
@@ -246,9 +246,13 @@ body.mini-on .app.fs-bigger .screens{padding-bottom:330px}
 .sos-btn i{font-size:1.375rem}
 .sos-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;justify-content:center;max-width:430px;margin:auto}
 .sos-modal.open{display:flex}
-.sos-sheet{background:var(--s2);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:430px}
+.sos-sheet{background:var(--s2);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;max-width:430px;max-height:calc(100dvh/1.18);overflow-y:auto;overscroll-behavior:contain}
 .sos-title{font-size:1.125rem;font-weight:600;color:#E24B4A;margin-bottom:6px;text-align:center}
 .sos-sub{font-size:.8125rem;color:var(--tm);text-align:center;margin-bottom:20px}
+/* The info dialog is the one place that carries a support diagnostic, and it
+   is written as separate lines on purpose. Scoped to this id so every other
+   .sos-sub on the page keeps collapsing whitespace as before. */
+#info-modal-msg{white-space:pre-line}
 .sos-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s1);border-radius:12px;margin-bottom:10px;cursor:pointer;border:0.5px solid var(--bdr)}
 .sos-opt-crisis{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.4)}
 .crisis-bar{display:flex;align-items:center;gap:12px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.35);border-radius:12px;padding:12px 14px;text-decoration:none;margin:0 16px 4px}
@@ -455,7 +459,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <p>No Pressure. No Worries. Just Progress. One Day At A Time.</p>
   <button class="ob-btn" onclick="proceedFromPreview('signup')">Sign Up</button>
   <button class="ob-btn outline" onclick="proceedFromPreview('login')">I already have an account</button>
-  <p style="margin-top:14px;font-size:.78125rem"><a href="/quiz" style="color:var(--ts);text-decoration:underline">Not sure yet? Take the private 2-minute check-in</a></p>
+  <p style="margin-top:14px;font-size:.78125rem"><a href="/quiz" style="color:var(--ts);text-decoration:underline">Not sure yet? Take the private 1-minute check-in</a></p>
 </div>
 
 <!-- MANDATORY ACCOUNT GATE -->
@@ -1418,7 +1422,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="s-stories" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0">Stories</div>
-        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. About ten minutes each. Five on the shelf; new ones arrive every week.</div>
+        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Seven to nine minutes each. Five on the shelf, rotating every week.</div>
         <div id="stories-list"></div>
       </div>
     </div>
@@ -1448,7 +1452,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
         <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
           <i class="ti ti-headphones" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Stories</p><span>Ten-minute narrated stories of falling and coming back — five each week</span></div>
+          <div class="setting-row-txt"><p>Stories</p><span>Ten-minute narrated stories of falling and coming back — five, rotating weekly</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -1533,12 +1537,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:.78125rem;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
-        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
+        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — day 16 onward on every track, all the way to day 90 on the recovery tracks — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Days 16–90 of every track — the full bootcamp</div>
+          <div>✓ Days 16–90 of every recovery track — the full bootcamp</div>
           <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
-          <div>✓ 30 Friendly chats a day instead of 3</div>
+          <div>✓ Friendly, your AI companion — 30 chats a day</div>
           <div>✓ Live rooms — a moderated community, open daily</div>
           <div>✓ Days 16–35 of Supporting Someone</div>
           <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
@@ -1603,7 +1607,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
-            <div class="feat y"><i class="ti ti-check"></i>30 Friendly chats a day instead of 3</div>
+            <div class="feat y"><i class="ti ti-check"></i>Friendly, your AI companion — 30 chats a day</div>
             <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
           </div>
@@ -2556,6 +2560,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="text-align:left"><div style="font-size:.8125rem;font-weight:600;color:var(--tp)">Friendly (Neutral Presence)</div><div style="font-size:.6875rem;color:var(--tm)">Blended, objective, hyper-focused environmental coach.</div></div>
       </div>
     </div>
+    <div style="margin-top:18px;text-align:left">
+      <div style="font-size:.75rem;font-weight:600;color:var(--tp);letter-spacing:.02em">Her voice on this phone</div>
+      <div style="font-size:.6875rem;color:var(--tm);line-height:1.5;margin-top:2px">Tap the play button to hear one before you keep it.</div>
+    </div>
+    <div id="nova-voice-list" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:30vh;overflow-y:auto;padding:8px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px"></div>
     <div id="voice-device-note" style="display:none;font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;padding:10px 12px;background:var(--s1);border:1px solid var(--bdr);border-radius:10px;text-align:left"></div>
     <button class="sos-close" style="margin-top:12px" onclick="closeVoiceModal()">Cancel</button>
   </div>
@@ -2848,7 +2857,7 @@ const PRO_CHAT_DAILY_LIMIT=30;
 let pendingReviewOpen=!!(new URLSearchParams(window.location.search).get('review')==='1');
 let S = {
   name:'',userGender:'',relationshipStatus:null,accountEmail:null,profilePhoto:'',
-  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',
+  selectedAddictions:[],behavioralBlueprint:{},novaVoice:'neutral',novaVoiceName:'',
   startDate:null,dailySpend:0,dailyHoursLost:0,remindersEnabled:true,
   // Hours (0-23) the daily lesson reminder is allowed to speak up. Defaults to
   // a civilised 9am-9pm rather than "whenever the app happens to be opened".
@@ -3340,9 +3349,18 @@ function activeExtraPacks(){
   return keys;
 }
 function esc(t){return String(t||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
-// One faith line per day, keyed to the day's theme and cycled through the
-// phases, woven INSIDE the lesson rather than bolted on after it. Only people
-// who said yes or open to the spiritual question ever see a word of this.
+// One faith line per day of the 90-Day Bootcamp, keyed to that day's actual
+// lesson theme, woven INSIDE the lesson rather than bolted on after it. Only
+// people who said yes or open to the spiritual question ever see a word of it.
+//
+// THERE MUST BE NINETY. The index is FAITH_LINES[(day-1) % length], so a short
+// array silently repeats instead of failing: until 28 Aug 2026 there were only
+// thirty, which meant day 31 served the identical line as day 1 and day 61
+// served it a third time. Jacques caught it - faith was picked in onboarding
+// and woven through every track, but only ran a third as deep as the program
+// it was woven into. Days 31-60 now follow REBUILD and 61-90 follow KEEP IT &
+// GIVE IT, each line written against the real title of that day in
+// data/phases.json. If phases.json ever grows past day 90, grow this too.
 const FAITH_LINES=[
 "You didn't get this far alone. Before today starts, say thank you to whoever you believe carried you here.",
 "Ask for one day of strength. Not a lifetime - just today. That prayer has never once been too big.",
@@ -3373,7 +3391,67 @@ const FAITH_LINES=[
 "Perfection was never the assignment. Faithfulness was. Today, be faithful, not flawless.",
 "The person still stuck needs what you've been given. Freely received, freely given.",
 "Sweep the corners today. What you keep hidden keeps you. What you bring to light loses its grip.",
-"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it."
+"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it.",
+"Something moved out and left a hole. Ask for it to be filled with what belongs there, not with the next thing that fits.",
+"Sleep is not lost time. Hand the day back tonight and let yourself be repaired while you do nothing at all.",
+"Telling the truth to one person is older than any therapy. Say where you really are today and let being known do what hiding never did.",
+"Ask for patience to make amends slowly. A changed Tuesday says more than any sentence you could rehearse.",
+"Open the numbers and look straight at them. Ask for courage first - shame rarely survives daylight and arithmetic.",
+"The body carrying you through this was given to you. Feed it today like it belongs to someone you are responsible for.",
+"Ask for the will to move today, even briefly. Thankfulness comes easier in a body that has been used.",
+"Boredom is not an emergency, it is silence. Stay in it one minute past comfortable and hear what speaks.",
+"Ask for clear eyes about the people around you - who is for you, who is for the old you, and who never knew the difference.",
+"Some places still hold the version of you that you are leaving. Ask for the strength to take a different road home.",
+"Ask for the nerve to say no without a speech after it. You are allowed to guard what is being rebuilt.",
+"Bring the anger honestly instead of politely. Nothing you actually feel is too much to bring.",
+"Ask to listen today without preparing your answer underneath. Being understood is not the same as being agreed with.",
+"Ask early. Help that arrives before the emergency is still help, and it costs you far less to receive.",
+"Forty-five days. Look back once, on purpose, and name what carried you that you cannot take credit for.",
+"You are allowed to be spoken of differently now. Ask to stop introducing yourself by your worst years.",
+"Ask for an honest stopping time today. Rest you refuse to take gets taken from you some other way.",
+"Ask to be surprised by something good today - and to notice it while it is happening, not a week later.",
+"Some people were more comfortable with who you were. Ask for kindness toward them and no obligation to go back.",
+"Ask for eyes that see the trap before you are standing in it. Knowing your own pattern is a mercy, not an accusation.",
+"You know the conversation you keep circling. Ask for the words, pick the hour, and go.",
+"The evening is where this is won or lost. Give tonight a shape before it gives you one.",
+"Pay one thing back today, however small. Putting it right is not punishment - it is how the weight comes off.",
+"Ask to be released from comparing. Your road is being walked at exactly the pace it requires.",
+"You cannot hurry anyone else's healing, and demanding to be believed is not repentance. Keep showing up and let time do its work.",
+"Name it plainly, out loud, to whoever you pray to. Half the weight of a feeling is in refusing to say it.",
+"Ask to be freed from needing to be good at it. Nothing worth learning starts skilled.",
+"You already have something to give. Ask to be shown one person today who needs the thing you just learned.",
+"Clear the room, not just the intention. Ask for the honesty to throw out what you are keeping just in case.",
+"Sixty days. Count what stands now that did not before, and say thank you for the hands that were not yours.",
+"Strength is the most dangerous hour. Ask to stay teachable on the days you feel like you have got this.",
+"The long middle is not a mistake. Ask for faithfulness in the stretch where nothing dramatic happens.",
+"Ask to know your own warning signs before they finish speaking. Self-knowledge is a gift, not a verdict.",
+"Write the plan for your worst day while today is still calm. Grace often arrives as preparation.",
+"Walk in with an exit and a prayer. You do not owe any room your presence past the point it costs you.",
+"Away from your routines, keep one small thing. Even a single kept promise travels with you.",
+"The memory edits out the wreckage. Ask for the whole picture back, mornings after included.",
+"Ask again what this is all for. A reason you can name out loud is a reason that holds at 2am.",
+"You believe differently than you did on day one. Say what you believe now, even if only to yourself.",
+"A grudge is rent you keep paying on a room you no longer live in. Ask to be free of it, one name at a time.",
+"Stop waiting to feel forgiven before you act forgiven. Put it on the calendar and keep the appointment.",
+"Ask to be the steadiest person in the room today. Calm is something you carry in, not something you find there.",
+"When someone near you falls, ask for a mouth that helps instead of one that judges. You remember that ground.",
+"Your story is not a confession and not a performance. Ask for three true sentences you could say to anyone.",
+"Someone is watching how you do this without telling you. Ask to be worth watching on the ordinary days.",
+"Ask for clarity about the few lines you will never cross again - and peace about keeping them for good.",
+"Ask to succeed at a pace that does not cost you this. What you win by burning out is not kept.",
+"Being loved without the fog is its own work. Ask for the nerve to be seen and to stay in the room.",
+"Ask for one honest hour a week, on purpose, before honesty gets forced on you by a crisis.",
+"Count the money that stayed and say thank you. It is time and trust that stayed with it.",
+"Ask to listen more than you advise today. Most people need a witness, not a fix.",
+"Ask for a plan simple enough to find at your worst. Help you cannot reach in a panic is not help yet.",
+"There is no finish line, and that is mercy. Ask for grace to keep going without needing it to end.",
+"When people praise you, ask for an honest memory. You did the work, and you were carried.",
+"Do one good thing today that nobody will ever know about. What is done unseen is what keeps you honest.",
+"Nobody will ever know about the night you almost did and did not. Say thank you for it anyway - it counted.",
+"Whatever shame is still left, bring it where it can be seen. It only survives in the dark.",
+"Write to the one still stuck as if writing to yourself three months ago. Ask for words that actually reach.",
+"Ask to be shown the one person to walk with - and for patience to go at their pace, not yours.",
+"Ninety days. You were carried further than you can account for. Ask what to do with what you were given, then go and do it."
 ];
 // One paragraph per linked pair: today's skill, applied to the other track.
 // Written per PAIR, not per day - the mechanism is what's shared.
@@ -5306,7 +5384,15 @@ function updateStats(){
   document.getElementById('dayCount').textContent=days;
   document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const progLbl=document.getElementById('program-lbl');
-  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
+  // Position in the Bootcamp is LESSON progress, not the calendar. This line
+  // used to read `days` - time since the quit date - which put "Day 9 of the
+  // 90-Day Bootcamp" four lines above "Foundation phase · Day 1 of 30" on
+  // Jacques's own screen, 28 Aug: same program, same screen, two numbers.
+  // Lessons advance only when one is finished (`getLessonDayFor`), so someone
+  // who backdates their quit date has not done nine lessons. Overstating it
+  // also misleads about Pro, which starts at lesson 16.
+  const bootcampDay=getLessonDayFor(S.currentAddiction);
+  if(progLbl)progLbl.textContent=bootcampDay<=90?`Day ${bootcampDay} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
   const focusLbl=document.getElementById('focus-lbl');
   if(focusLbl){
     const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
@@ -6351,11 +6437,22 @@ async function renderStories(){
         <div style="font-size:.875rem;line-height:1.7;color:var(--ts);margin-top:8px;white-space:pre-line">${escapeHtml(st.text)}</div></details>
     </div>`).join('');
 }
-async function toggleStory(id){
+// NOTHING MAY BE AWAITED BETWEEN THE TAP AND play(). A phone grants audio
+// playback only inside the gesture that asked for it, and an await spends that
+// permission: play() then rejects with NotAllowedError and the story is silent.
+// This function used to be async and awaited the lesson-audio manifest first,
+// purely to read a base URL it already had a constant for - so it failed on
+// every phone while working on desktop, where the rule is not enforced.
+// startLessonMp3 is the model: build the element and call play() synchronously.
+// (It also called a function that never existed, ensureLessonAudioManifest,
+// which threw above the point where onerror was attached - two separate faults
+// on one line, both silent. Fixed 28 Aug 2026.)
+const STORY_AUDIO_BASE='https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+function toggleStory(id){
   if(storyPlayingId===id&&storyAudio){storyAudio.paused?storyAudio.play():storyAudio.pause();updateStoryBtn(id);return;}
   stopStory();
-  const m=await ensureLessonAudioManifest();
-  const base=(m&&m.base)||'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+  // Read the manifest only if it is already in memory; never wait for it.
+  const base=(typeof LESSON_AUDIO_MANIFEST!=='undefined'&&LESSON_AUDIO_MANIFEST&&LESSON_AUDIO_MANIFEST.base)||STORY_AUDIO_BASE;
   const a=new Audio(base+'stories/'+id+'.mp3');
   storyAudio=a;storyPlayingId=id;a.preload='auto';
   a.onerror=()=>{stopStory();appInfo('Stories',"This story's recording isn't available right now — check your connection and try again.");};
@@ -6369,7 +6466,16 @@ async function toggleStory(id){
   if('mediaSession' in navigator){try{const st=(STORIES_POOL||[]).find(x=>x.id===id);
     navigator.mediaSession.metadata=new MediaMetadata({title:st?st.title:'Story',artist:'Turn Someday Into Day One'});}catch(e){}}
   const prog=document.getElementById('story-prog-'+id);if(prog)prog.style.display='block';
-  a.play().catch(()=>{});
+  // Never swallow this. A rejected play() is the difference between "the file
+  // is missing" and "the phone refused" - the second is a bug in this function,
+  // and silence is what let it hide for so long.
+  const pl=a.play();
+  if(pl&&pl.catch)pl.catch(err=>{
+    if(storyPlayingId!==id)return;
+    stopStory();
+    appInfo('Stories',"That story wouldn't start ("+((err&&err.name)||'unknown')+"). Tap Listen again — and if it keeps happening, tell Jacques and it will land in the error log.");
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Story playback refused',detail:((err&&err.name)||'?')+': '+((err&&err.message)||'')+' · id='+id})}).catch(()=>{});}catch(_){}
+  });
   logActivity('story_play',{id});
 }
 function seekStory(v){if(storyAudio&&storyAudio.duration)storyAudio.currentTime=v/100*storyAudio.duration;}
@@ -6858,7 +6964,7 @@ const CATEGORY_HABIT_COACHING={
   'Smoking':{weakSpot:'Stress breaks tend to be your highest-risk moments.',suggestion:'Replace the cigarette break with a short walk or a few slow breaths.'},
   'Substances':{weakSpot:'Unstructured evenings tend to be your highest-risk time.',suggestion:"Fill the hour you'd normally use with one small, planned activity."},
   'Gambling':{weakSpot:'Idle moments checking odds tend to be your highest-risk time.',suggestion:'Set a specific time to check in with yourself instead of your phone.'},
-  'Social media':{weakSpot:'Boredom scrolling tends to be your highest-risk pattern.',suggestion:'Try a 2-minute grounding exercise before you reach for your phone.'},
+  'Social media':{weakSpot:'Boredom scrolling tends to be your highest-risk pattern.',suggestion:'Try a 1-minute grounding exercise before you reach for your phone.'},
   'Gaming':{weakSpot:'Avoiding other tasks tends to be your highest-risk pattern.',suggestion:'Set one small, specific task to finish before you allow yourself to play.'},
   'Food / Binging':{weakSpot:'Stress eating spikes mid-week.',suggestion:"Add a grounding habit — a short walk or a few slow breaths — before meals."},
   'Shopping / Spending':{weakSpot:'Low-mood moments tend to be your highest-risk time.',suggestion:'Wait 10 minutes and name the feeling before you check out.'},
@@ -6868,8 +6974,8 @@ const CATEGORY_HABIT_COACHING={
   'Supporting Someone':{weakSpot:'The hours right before they come home tend to be your highest-tension time.',suggestion:'Put one thing that is purely yours in that window — a walk, a call, a shower with the door locked.'},
 };
 const HABIT_MICRO_SUGGESTIONS={
-  morning:['Start the day with a 2-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
-  evening:['Try a 2-minute grounding exercise before bed.','Put your phone outside the bedroom 30 minutes before sleep.','Write down one honest sentence about how today went.'],
+  morning:['Start the day with a 1-minute stretch before checking your phone.','Write one line about your intention for the day, right after waking up.','Drink a full glass of water before anything else.'],
+  evening:['Try a 1-minute grounding exercise before bed.','Put your phone outside the bedroom 30 minutes before sleep.','Write down one honest sentence about how today went.'],
   grounding:['Take 5 slow breaths whenever you notice the urge building.','Step outside for 60 seconds when things feel tight.','Name one thing you can see, hear, and feel, right where you are.'],
 };
 function buildWeekdayLessonConsistency(){
@@ -7823,8 +7929,19 @@ async function submitLivePost(){
   const inp=document.getElementById('liveInput');
   const text=(inp.value||'').trim();
   if(!text)return;
-  // The client-side language gate runs first - same rule as private posts.
-  if(typeof roomTextBlocked==='function'&&roomTextBlocked(text))return;
+  // Moderation is server-side and always has been: /api/rooms/post runs every
+  // post past the AI moderator in server/rooms.js before anyone sees it, and
+  // answers with crisis / blocked / held, each handled below.
+  //
+  // A `typeof roomTextBlocked === 'function'` guard used to sit here, above a
+  // comment claiming a client-side language gate ran first "same rule as
+  // private posts". Neither existed - roomTextBlocked is defined nowhere in
+  // this file and there is no private-post path at all; both are leftovers from
+  // a removed feature. The guard could therefore never be true, so it changed
+  // nothing, but the comment claimed protection the code did not provide.
+  // Removed 28 Aug 2026. Do not add a word filter here: the moderator prompt
+  // deliberately allows profanity, anger and despair, and a crude local
+  // blocklist would silence exactly the people this room is for.
   inp.disabled=true;
   try{
     const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -8377,9 +8494,9 @@ const VG_VOICES={
   gentle:{label:'Gentle',url:'audio/sos-talk-gentle.mp3',cues:[0,5.49,14.87,22.2,31.26,41.71,47.46,54.91,62.05,69.21,77.28,83.02,89.2,95.64,104.15]},
   clear:{label:'Clear',url:'audio/sos-talk-clear.mp3',cues:[0,5.16,14.94,22.72,32.18,43.81,49.88,57.43,65.26,72.69,80.94,86.69,93.05,100.05,109.5]},
   male:{label:'Calm male',url:'audio/sos-talk-male.mp3',cues:[0,5.81,16.36,25.21,35.2,46.59,53.23,61.53,69.9,77.81,85.78,91.36,97.73,105.26,116.94]},
-  jacques:{label:'Jacques (founder)',url:'audio/sos-talk-jacques.mp3',cues:[0,5.87,16.85,23.24,30.67,39.48,45.51,51.54,57.38,66.89,75.18,80.34,85.29,90.84,100.45]},
+  deep:{label:'Deep male',url:'audio/sos-talk-deep.mp3',cues:[0.0,5.22,14.48,21.52,30.37,40.6,46.59,53.74,60.68,67.85,75.2,80.7,86.66,92.95,101.89]},
 };
-const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','jacques'];
+const VG_VOICE_ORDER=['warm','soft','gentle','clear','male','deep'];
 function vgVoiceKey(){return VG_VOICES[S.vgVoice]?S.vgVoice:'warm';}
 let vgActive=false,vgTimer=null,vgAudio=null,vgAudioStep=-1,vgCues=null,vgFellBack=false,vgUserPaused=false;
 function vgPickVoice(){
@@ -8633,7 +8750,7 @@ document.addEventListener('visibilitychange',()=>{
 let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null,lessonAudioCurrentUtterance=null;
 let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='',lessonAudioEverSpoke=false;
 // Lessons play as real recordings when one exists for the displayed lesson +
-// chosen voice (same five voices as the SOS talk, hosted on the repo's audio
+// chosen voice (same six voices as the SOS talk, hosted on the repo's audio
 // branch and listed in data/lesson-audio-manifest.json). A recording is a real
 // <audio> element - it survives screen-off and app-switch like a podcast, can
 // pause/resume/seek, and gets a lock-screen card. Anything without a recording
@@ -9402,7 +9519,7 @@ function togglePackLessonAudio(){
   }else{
     text=textEl.textContent.replace(/[ \t]+/g,' ').trim();
   }
-  // The ready-made packs have real recordings in all five voices, filed under
+  // The ready-made packs have real recordings in all six voices, filed under
   // a "pack:" category so they cannot collide with a track name. A pack the
   // person built themselves has none, so that key simply misses the manifest
   // and it reads aloud instead - which is the right answer, not a failure.
@@ -10447,7 +10564,7 @@ const SYSTEM_APP_MAP=`
 
 The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
-- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering); Together is 30 days. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
+- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering); Together is 30 days. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: six voices (Warm, Soft, Gentle, Clear, Male, Deep - Deep is a deeper American male voice), speed control, full-screen read-along player. The founder's own voice was removed on 26 Aug 2026 over a licence - if anyone asks for it, say plainly that it is no longer in the app. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
@@ -10866,9 +10983,15 @@ const PRO_TOOLS={
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
-  // things and nothing else: lesson/pack days 16-30, and 30 Friendly chats a
-  // day instead of 3. Those two gates live where they belong - isLessonLocked,
-  // renderPackLesson, renderCouples, and the chat cap - not here.
+  // things and nothing else. First, every lesson past day 15 - isLessonLocked
+  // is simply `day > FREE_LESSON_CAP`, so that means days 16-90 on a recovery
+  // track, 16-35 on Supporting Someone, and 16-30 on Together, the Spiritual
+  // Path and the 7-day packs. (This comment said "16-30" flat, which quietly
+  // understated the paid half of a 90-day program by sixty days.) Second,
+  // Friendly, which is Pro-only at 30 chats a day - FREE_CHAT_DAILY_LIMIT is
+  // 0, not 3; Jacques made Friendly Pro-only on 24 Aug. Those gates live where
+  // they belong - isLessonLocked, renderPackLesson, renderCouples and the chat
+  // cap - not here.
   // The name openProTool is kept only because a dozen onclick handlers use it.
   window[PRO_TOOLS[key].open]();
 }
@@ -10937,6 +11060,16 @@ function applyNovaVoice(u){
   const want=S.novaVoice||'neutral';
   const vs=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||''));
   if(!vs.length)return;
+  // An exact voice the person chose and heard beats any guess we make from a
+  // name. This exists because the app used to pick FOR people - first voice on
+  // the phone matching a gender - and a voice you did not choose and cannot
+  // change is the fastest way to stop using a companion. If that voice is gone
+  // (new phone, uninstalled language pack) we fall through to the old guess
+  // rather than going silent.
+  if(S.novaVoiceName){
+    const exactPick=vs.find(v=>v.name===S.novaVoiceName);
+    if(exactPick){u.voice=exactPick;return;}
+  }
   if(want==='neutral'){
     const def=vs.find(v=>v.default)||vs[0];
     if(def)u.voice=def;
@@ -11426,16 +11559,65 @@ function setBill(type){
 // latches, and one that already latched (from the earlier build) is cleaned up
 // and put back on the web path.
 const PLAY_PACKAGE='com.turnsomedayintodayone.app';
+// THE LATCH MUST NOT OUTLIVE THE APP SESSION, and this is why.
+//
+// A Trusted Web Activity is Chrome. It shares one storage jar with the browser
+// for this origin, so a flag the Android shell wrote into localStorage is read
+// back by every ordinary Chrome tab on that phone, for good. That turned one
+// launch of the Play app into a permanent verdict: the site decided it was the
+// Play build, routed Upgrade to Google billing, and `create-checkout-session`
+// refused Stripe by policy. On 28 Aug Jacques could not buy Pro on his phone by
+// any route - not in the app, not on the website - and Stripe's dashboard
+// showed no checkout session had been created since 30 July. Every Android
+// owner of this app was in the same position: install once, and the website
+// stops selling to you.
+//
+// So the latch now lives in sessionStorage, which is scoped to one browsing
+// context. The shell's own window keeps it for as long as the app is open; a
+// separate Chrome tab starts clean and gets Stripe. The legacy localStorage key
+// is deleted wherever it is found, because it is the poison.
+//
+// Policy is still safe. The shell's start URL carries ?src=play and its launch
+// sets an `android-app://` referrer, so a real app launch always presents a
+// signal at the very first navigation - it never has to rely on remembering.
+const PLAY_LATCH_KEY='tsid_play_build';      // legacy, localStorage - only ever deleted now
+const PLAY_SESSION_KEY='tsid_play_session';  // current, sessionStorage
+let playLatch=null;
+function forgetLegacyPlayLatch(){
+  try{localStorage.removeItem(PLAY_LATCH_KEY);}catch(e){}
+}
+function readPlayLatch(){
+  try{
+    const raw=sessionStorage.getItem(PLAY_SESSION_KEY);
+    if(!raw)return null;
+    const v=JSON.parse(raw);
+    return (v&&v.how)?v:null;
+  }catch(e){return null;}
+}
+function writePlayLatch(how){
+  const v={how:how,at:new Date().toISOString().slice(0,16)};
+  // Kept in memory too: a private window can throw on write, and the flag still
+  // has to hold for the rest of this page's life.
+  try{sessionStorage.setItem(PLAY_SESSION_KEY,JSON.stringify(v));}catch(e){}
+  return v;
+}
+// The launch signals only exist on the very first navigation, so they are read
+// once here and kept for the life of the page.
+const launchReferrer=(function(){try{return document.referrer||'';}catch(e){return '';}})();
+const launchFromParam=(function(){try{return new URLSearchParams(location.search).get('src')==='play';}catch(e){return false;}})();
+const launchFromShell=launchReferrer.startsWith('android-app://'+PLAY_PACKAGE);
 function detectPlayBuild(){
+  forgetLegacyPlayLatch();
   try{
     if(!/\bAndroid\b/.test(navigator.userAgent||'')){
-      localStorage.removeItem('tsid_play_build');
+      playLatch=null;
       return false;
     }
-    if(localStorage.getItem('tsid_play_build')==='1')return true;
-    const fromParam=new URLSearchParams(location.search).get('src')==='play';
-    const fromReferrer=(document.referrer||'').startsWith('android-app://'+PLAY_PACKAGE);
-    if(fromParam||fromReferrer){localStorage.setItem('tsid_play_build','1');return true;}
+    // Signals from this navigation outrank anything remembered.
+    if(launchFromShell){playLatch=writePlayLatch('referrer');return true;}
+    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
+    const stored=readPlayLatch();
+    if(stored){playLatch=stored;return true;}
   }catch(e){}
   return false;
 }
@@ -11495,16 +11677,31 @@ async function becomeProViaStore(plan){
     appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
     return;
   }
+  // Every step below is labelled because this whole block used to end in one
+  // generic "could not complete that purchase". That message told Jacques
+  // nothing and told us less: it is thrown by the store handshake, by a
+  // missing product, by the payment sheet and by the network alike, so a
+  // screenshot of it could not be acted on and the bug sat open for weeks
+  // while two conversations guessed at different causes. The step name and
+  // the real error now travel with the message so one screenshot is enough.
+  let step='opening the store connection';
   try{
     const service=await window.getDigitalGoodsService('https://play.google.com/billing');
+    step='asking the store about '+productId;
     const details=await service.getDetails([productId]);
-    if(!details||!details.length){appInfo('Upgrade unavailable','That plan is not available in the store right now.');return;}
+    if(!details||!details.length){
+      appInfo('Upgrade unavailable','That plan is not in the store yet.\n\nDetails for support: getDetails returned nothing for '+productId+'. Usually the product is not active in Play Console, or this Google account is not on the tester list.');
+      return;
+    }
     const item=details[0];
+    step='building the payment sheet';
     const request=new PaymentRequest(
       [{supportedMethods:'https://play.google.com/billing',data:{sku:productId}}],
       {total:{label:item.title||'Pro',amount:{currency:item.price.currency,value:item.price.value}}}
     );
+    step='showing the payment sheet';
     const response=await request.show();
+    step='confirming with our server';
     const purchaseToken=response.details&&response.details.purchaseToken;
     // The store says it took the money; the server still asks the store itself
     // before granting anything, because a token from a device proves nothing.
@@ -11524,8 +11721,37 @@ async function becomeProViaStore(plan){
   }catch(e){
     // A user dismissing the store sheet lands here too - say nothing then.
     if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
-    appInfo('Upgrade unavailable','Could not complete that purchase. Please try again in a moment.');
+    const why=((e&&e.name)?e.name+': ':'')+((e&&e.message)||String(e));
+    // Reported before it is shown, so the owner's error log sees every failed
+    // purchase without anyone photographing their screen. Fire-and-forget: a
+    // dead network must not add a second failure on top of the first.
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Store purchase failed while '+step,detail:why+' \u00b7 '+storeDiagnostics()})}).catch(()=>{});}catch(_){}
+    appInfo('Upgrade unavailable','Could not complete that purchase, and nothing has been charged.\n\nDetails for support: failed while '+step+'.\n'+why+'\n\n'+storeDiagnostics());
   }
+}
+// Read verbatim into the failure dialog so a photo of the screen is a usable
+// bug report. Nothing here is private - it is which browser is underneath the
+// app and whether the Play bridge answered.
+function storeDiagnostics(){
+  const bits=[];
+  try{
+    bits.push('bridge='+(('getDigitalGoodsService'in window)?'present':'missing'));
+    // Which host is answering matters: assetlinks.json is only honoured on the
+    // exact origin the shell declares, and a redirect between them is a
+    // verification failure rather than a detour.
+    bits.push('host='+location.host);
+    // The decisive one. launch=shell means the Android app opened this page and
+    // any failure after it is the app's. launch=param or launch=stored means
+    // nothing proves the Play app is involved at all, and a purchase failure
+    // here says nothing about whether Play billing works.
+    bits.push('launch='+(launchFromShell?'shell':(launchFromParam?'param':'none')));
+    bits.push('latch='+(playLatch?(playLatch.how+(playLatch.at?'@'+playLatch.at:'')):'none'));
+    bits.push('display='+((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)?'standalone':'browser'));
+    const m=(navigator.userAgent||'').match(/(SamsungBrowser|EdgA|OPR|Chrome)\/([0-9]+)/);
+    bits.push('engine='+(m?m[1]+' '+m[2]:'unknown'));
+    bits.push('app='+APP_VERSION);
+  }catch(e){}
+  return bits.join(' · ');
 }
 
 // ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
@@ -12419,7 +12645,15 @@ function updateProfileEditUI(){
   const voiceEl=document.getElementById('voice-row-sub');
   if(voiceEl){
     const labels={female:'Female',male:'Male',neutral:'Neutral'};
-    voiceEl.textContent=labels[S.novaVoice]||'Neutral';
+    const base=labels[S.novaVoice]||'Neutral';
+    // Name the voice she will actually hear, not just the presence - the whole
+    // point of the picker is that those two were never the same thing.
+    let picked='';
+    if(S.novaVoiceName){
+      const v=(typeof novaVoicesAvailable==='function'?novaVoicesAvailable():[]).find(x=>x.name===S.novaVoiceName);
+      if(v)picked=novaVoiceLabel(v);
+    }
+    voiceEl.textContent=picked?base+' \u00b7 '+picked:base;
   }
   const catEl=document.getElementById('category-row-sub');
   if(catEl)catEl.textContent=S.selectedAddictions.length?S.selectedAddictions.join(', '):'Not set';
@@ -12432,7 +12666,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.6';
+const APP_VERSION='7.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12568,6 +12802,18 @@ function openVoiceModal(){
   document.getElementById('voice-modal').classList.add('open');
   markChosenVoice();
   describeVoiceSupport();
+  renderNovaVoiceList();
+  // Chrome and Android load the voice list lazily; an empty list on first open
+  // is the normal case, not an error. Redraw once it arrives.
+  try{
+    if(window.speechSynthesis && !speechSynthesis.getVoices().length){
+      speechSynthesis.onvoiceschanged=()=>{
+        speechSynthesis.onvoiceschanged=null;
+        renderNovaVoiceList();
+        describeVoiceSupport();
+      };
+    }
+  }catch(e){}
 }
 // The picker used to give no sign at all which one was chosen - you tapped, the
 // sheet closed, and nothing looked different. That alone made a working setting
@@ -12604,14 +12850,151 @@ function describeVoiceSupport(){
   }
   note.style.display='block';
 }
-function closeVoiceModal(){document.getElementById('voice-modal').classList.remove('open');}
+function closeVoiceModal(){
+  document.getElementById('voice-modal').classList.remove('open');
+  stopSpeaking();
+}
 function chooseVoice(v){
   S.novaVoice=v;
+  // The presence is who she is; the voice is how she sounds. Changing the
+  // presence must not silently keep a voice chosen for the old one - a female
+  // presence speaking in the male voice you picked last week is the exact
+  // mismatch the picker exists to prevent.
+  const kept=(speechSynthesis.getVoices&&S.novaVoiceName)
+    ? (speechSynthesis.getVoices()||[]).find(x=>x.name===S.novaVoiceName) : null;
+  if(kept && v!=='neutral' && novaVoiceGender(kept.name)!=='unknown' && novaVoiceGender(kept.name)!==v){
+    S.novaVoiceName='';
+  }
   save();
   markChosenVoice();
+  renderNovaVoiceList();
   updateProfileEditUI();
-  // Let the mark land before the sheet goes, so the tap visibly registers.
-  setTimeout(closeVoiceModal,180);
+}
+
+// ─── FRIENDLY'S VOICE, CHOSEN BY EAR ─────────────────────────────────────────
+// Jacques, 26 Aug 2026: his wife did not like the voice the app picked for her.
+// It was never her choice - applyNovaVoice took the first voice on the phone
+// matching a gender and that was that. The lesson narrators (Warm, Soft,
+// Gentle, Clear, Calm male) are pre-recorded mp3s of a fixed script,
+// so Friendly cannot use them: every reply she writes is new. What she CAN
+// have is every voice the phone actually owns, each one previewable, so the
+// choice is made by ear instead of by guess.
+const NOVA_PREVIEW_LINE = "I'm here. Tell me what's going on tonight.";
+function novaVoicesAvailable(){
+  try{ return (speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }
+  catch(e){ return []; }
+}
+// Jacques, 26 Aug 2026: "I'm in America, I don't want no UK voice." Right - a
+// British voice on an American phone is not a choice, it is noise in the list.
+// So the phone's OWN region leads, which also means a British user is not
+// handed a wall of American ones. Everything else stays reachable behind a
+// line rather than deleted: a phone whose only English voice is en-GB must
+// still be able to speak, and this app is live in 177 countries.
+let novaShowOtherVoices=false;
+function novaHomeRegion(){
+  const l=String((navigator.languages&&navigator.languages[0])||navigator.language||'en-US');
+  const m=l.match(/^[a-z]{2}[-_]([A-Za-z]{2})/);
+  return m?m[1].toUpperCase():'US';
+}
+function novaVoiceRegion(v){
+  const m=String(v.lang||'').match(/^[a-z]{2}[-_]([A-Za-z]{2})/i);
+  return m?m[1].toUpperCase():'';
+}
+function novaSplitVoices(){
+  const all=novaVoicesAvailable();
+  const home=novaHomeRegion();
+  let mine=all.filter(v=>novaVoiceRegion(v)===home);
+  let rest=all.filter(v=>novaVoiceRegion(v)!==home);
+  // Nothing local: show everything rather than an empty list.
+  if(!mine.length){mine=rest;rest=[];}
+  // A voice already chosen is never hidden from its owner.
+  if(S.novaVoiceName && rest.some(v=>v.name===S.novaVoiceName)){
+    mine=mine.concat(rest.filter(v=>v.name===S.novaVoiceName));
+    rest=rest.filter(v=>v.name!==S.novaVoiceName);
+  }
+  return {mine:mine,rest:rest};
+}
+function toggleOtherNovaVoices(){
+  novaShowOtherVoices=!novaShowOtherVoices;
+  renderNovaVoiceList();
+}
+function renderNovaVoiceList(){
+  const box=document.getElementById('nova-voice-list');
+  if(!box)return;
+  const vs=novaVoicesAvailable();
+  if(!vs.length){
+    box.innerHTML='<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;text-align:left">This phone has not reported any voices yet. Open this again in a moment, or add voices in your phone\u2019s text-to-speech settings.</div>';
+    return;
+  }
+  const split=novaSplitVoices();
+  const shown=split.mine.concat(novaShowOtherVoices?split.rest:[]);
+  const rows=[{name:'',label:'Let the app choose',sub:'Matches the presence above'}]
+    .concat(shown.map(v=>({name:v.name,label:novaVoiceLabel(v),sub:novaVoiceSub(v)})));
+  box.innerHTML=rows.map(r=>{
+    const on=(S.novaVoiceName||'')===r.name;
+    return '<div class="nova-voice-row" data-voice="'+escapeHtml(r.name)+'" '+
+      'style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;'+
+      'background:'+(on?'var(--green-dim)':'var(--s1)')+';border:1px solid '+(on?'var(--green)':'var(--bdr)')+'">'+
+      '<div onclick="chooseNovaVoiceName(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\')" '+
+        'style="flex:1;text-align:left;cursor:pointer;min-width:0">'+
+        '<div style="font-size:.78125rem;font-weight:600;color:var(--tp);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escapeHtml(r.label)+'</div>'+
+        '<div style="font-size:.6875rem;color:var(--tm)">'+escapeHtml(r.sub)+'</div>'+
+      '</div>'+
+      (r.name?'<button onclick="previewNovaVoice(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\')" '+
+        'aria-label="Hear this voice" title="Hear this voice" '+
+        'style="flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--bdr);'+
+        'background:var(--s2);color:var(--tp);cursor:pointer;display:flex;align-items:center;justify-content:center">'+
+        '<i class="ti ti-player-play"></i></button>':'')+
+    '</div>';
+  }).join('');
+  if(split.rest.length){
+    box.innerHTML+='<div onclick="toggleOtherNovaVoices()" style="text-align:left;cursor:pointer;'+
+      'padding:8px 12px;font-size:.71875rem;color:var(--tm);border-top:1px solid var(--bdr);margin-top:2px">'+
+      (novaShowOtherVoices?'Hide':'Show')+' '+split.rest.length+' voice'+(split.rest.length===1?'':'s')+
+      ' from other English-speaking countries</div>';
+  }
+  try{renderIcons(box);}catch(e){}
+  // Bring the chosen one into view. Without this a voice picked from the
+  // bottom of a long list looks unset every time the sheet is reopened.
+  if(S.novaVoiceName){
+    const sel=box.querySelector('.nova-voice-row[data-voice="'+(window.CSS&&CSS.escape?CSS.escape(S.novaVoiceName):S.novaVoiceName)+'"]');
+    if(sel)try{sel.scrollIntoView({block:'nearest'});}catch(e){}
+  }
+}
+// Device voice names are machine-ish ("Google UK English Female", "en-US-x-sfg#female_1").
+// Show something a person can read, without inventing a name that is not theirs.
+// A voice with localService false is synthesised on someone else's server,
+// which means the text of Friendly's reply leaves the phone to be spoken.
+// In an app where that reply can name a relapse or a marriage, the person
+// deserves to see which ones do that before choosing one.
+function novaVoiceSub(v){
+  const lang=v.lang||'';
+  return (v.localService===false)?(lang+' \u00b7 spoken online'):lang;
+}
+function novaVoiceLabel(v){
+  let s=String(v.name||'').replace(/^Microsoft\s+/i,'').replace(/\s*-\s*English.*$/i,'');
+  s=s.replace(/^Google\s+/i,'Google ').replace(/_/g,' ').trim();
+  return s||v.name||'Voice';
+}
+function chooseNovaVoiceName(name){
+  S.novaVoiceName=name||'';
+  save();
+  renderNovaVoiceList();
+  // Say something in it straight away, so the choice is confirmed by ear.
+  if(name)previewNovaVoice(name);
+}
+function previewNovaVoice(name){
+  try{
+    stopSpeaking();
+    if(!('speechSynthesis' in window))return;
+    const u=new SpeechSynthesisUtterance(NOVA_PREVIEW_LINE);
+    u.rate=0.95;u.pitch=1;
+    const v=novaVoicesAvailable().find(x=>x.name===name);
+    if(v)u.voice=v;
+    u.onend=stopSpeaking;u.onerror=stopSpeaking;
+    speaking=true;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
 
 // Wipes what the user wrote, keeps who they are. The case this exists for is
@@ -12676,6 +13059,7 @@ function restartOnboarding(){
     S.selectedAddictions=[];
     S.behavioralBlueprint={};
     S.novaVoice='neutral';
+    S.novaVoiceName='';
     S.startDate=null;
     S.currentAddiction='';
     // These are all day-count/journey-dependent and would otherwise leave stale traces of
@@ -13315,6 +13699,19 @@ async function coupleJoin(){
   if(r.ok){coupleInfo=j;coupleFetchedAt=Date.now();renderCouples();}
   else appInfo('Linking',j.error||"That didn't work — check the code and try again.");
 }
+// Mint this account's link code so a partner who ALREADY has an account can
+// join it. The server has always had /api/couple/create; nothing in the app
+// called it once the letter became the front door.
+async function coupleCreate(){
+  const r=await fetch('/api/couple/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:S.name||''})});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok){
+    coupleInfo=j;coupleFetchedAt=Date.now();renderCouples();
+    if(j.code)appInfo('Your code is '+j.code,"Read it out to them, or send it however you like. They open Together on their phone, type it in, and you're linked. It carries the day count and the nudge - nothing else.");
+  }else{
+    appInfo('Couldn\u2019t make a code',j.error||"That didn't work. If you're already linked, unlink first.");
+  }
+}
 async function coupleNudge(){
   const r=await fetch('/api/couple/nudge',{method:'POST'});
   if(r.ok)appInfo('Sent',"They'll get it as a gentle ask — today's ten minutes, when you're both ready.");
@@ -13351,10 +13748,17 @@ function coupleSectionHtml(){
     +`<div style="font-size:.75rem;color:var(--tm);line-height:1.55;margin-top:4px">Send them the letter you wrote. When they open it, their side of the app opens with it — no code to type, nothing for them to work out. You'll share the day count and the nudge, and nothing else: no journals, no clocks, no checking.</div>`
     +(sent&&!isNaN(sentWhen)?`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:8px">Sent ${sentWhen.toLocaleDateString(undefined,{month:'long',day:'numeric'})}. The link lasts 30 days. <span onclick="revokeLetterLink()" style="color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline">Take it back</span></div>`:'')
     +`<button class="sos-close" style="margin-top:10px;background:var(--accent);color:#fff" onclick="closeCouplesExercises();openPartnerLetter()">${sent?'Send it again':'Send them your letter'}</button>`
-    +`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;text-align:center">Were you handed a code instead?</div>`
+    +`<div style="font-size:.71875rem;color:var(--tm);line-height:1.5;margin-top:12px;text-align:center">Already both in the app?</div>`
     +`<div style="display:flex;gap:8px;margin-top:8px">`
     +`<input id="couple-code-input" placeholder="Enter their code" style="flex:1;margin:0;text-transform:uppercase;background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:0 12px;font-size:.875rem;color:var(--tp);font-family:var(--f)" maxlength="6">`
-    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`);
+    +`<button class="sos-close" style="width:auto;padding:0 14px" onclick="coupleJoin()">Link</button></div>`
+    // The letter mints a code server-side when somebody accepts it, which left
+    // two people who BOTH already had accounts with no way to link at all: the
+    // field above could take a code, but nothing in the app could produce one.
+    // Jacques hit this with his wife - her on an iPhone from the web, him on
+    // Android from Play - and it looked like a platform bug. It was not. This
+    // is the missing half.
+    +`<div onclick="coupleCreate()" style="font-size:.71875rem;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-align:center;margin-top:10px">Get a code to give them instead</div>`);
 }
 function renderCouples(){
   fetchCoupleStatus();
@@ -13532,7 +13936,7 @@ function buildGuideIndex(){
 const GUIDE_FAQ=[
   {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Days 1–15 are free; the rest is part of Pro. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path and the Together couples program), <b>30 Friendly chats a day</b> instead of 3, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path and the Together couples program), <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},
@@ -13549,7 +13953,7 @@ const GUIDE_FAQ=[
   {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Focus areas'},
   {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
-  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all 14 tracks, the Spiritual Path, Together, and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
+  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
   {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in her header. Off by default so nothing talks unasked; switched on, she reads every reply out loud by herself. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},

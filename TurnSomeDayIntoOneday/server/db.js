@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
 // On a hosting platform the database must live on the persistent volume
@@ -912,9 +913,12 @@ function createCoupleLink(userId, name) {
   if (existing) return existing;
   // Unambiguous alphabet: no 0/O or 1/I to misread off a partner's screen.
   const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  // crypto.randomInt, not Math.random: a code is the only thing standing between
+  // a stranger and somebody's Together table, and Math.random's generator can be
+  // predicted from a handful of observed outputs.
   let code;
   do {
-    code = Array.from({ length: 6 }, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join('');
+    code = Array.from({ length: 6 }, () => ALPHA[crypto.randomInt(ALPHA.length)]).join('');
   } while (db.prepare('SELECT 1 FROM couple_links WHERE code = ?').get(code));
   db.prepare('INSERT INTO couple_links (user_a, name_a, code, created_at) VALUES (?,?,?,?)')
     .run(userId, String(name || '').slice(0, 40), code, new Date().toISOString());

@@ -1,0 +1,22 @@
+{
+  "shots": [
+    {
+      "src": "01-cause.png",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "Nobody saw her eat it."
+    },
+    {
+      "src": "02-effect.png",
+      "seconds": 3,
+      "motion": "in",
+      "caption": "Nobody saw this either."
+    }
+  ],
+  "endcard": {
+    "big": "This cycle can be broken.",
+    "green": "It's free. Link in bio."
+  },
+  "music": "content/score/weisser-schnee.mp3",
+  "music_volume": 0.85
+}

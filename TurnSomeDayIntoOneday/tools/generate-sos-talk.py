@@ -95,9 +95,19 @@ VOICES = {
     'gentle': ('vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx', 1.38),       # CC0
     'clear':  ('vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx', 1.34),     # public domain
     'male':   ('vits-piper-en_US-john-medium/en_US-john-medium.onnx', 1.38),         # public domain
+    # Added 27 Aug 2026: the deep male American voice Jacques asked for. joe is
+    # CC0 and the deepest in the clean set (median 99 Hz on a real lesson line,
+    # against john/norman at ~103 and bryce at 130). Same slow pace and EQ as
+    # the other male so switching voice mid-crisis does not change the volume.
+    'deep':   ('vits-piper-en_US-joe-medium/en_US-joe-medium.onnx', 1.38),          # CC0
 }
 # Voices that get the softening EQ as well as the slower pace.
-SOFTENED = {'gentle', 'clear', 'male'}
+SOFTENED = {'gentle', 'clear', 'male', 'deep'}
+
+# Rebuilding all six to add one would overwrite five finished recordings.
+_only = os.environ.get('SOS_ONLY', '').strip()
+if _only:
+    VOICES = {k: v for k, v in VOICES.items() if k == _only}
 
 if len(sys.argv) != 2:
     sys.exit("usage: python3 tools/generate-sos-talk.py path/to/folder-with-voice-folders")

@@ -31,6 +31,55 @@ jobs:
           printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME_17_X64" "$ANDROID_HOME" > ~/.bubblewrap/config.json
           cat ~/.bubblewrap/config.json
 
+      # Every run of this workflow ever - six, counting three on 17 Aug - died
+      # with "The provided androidSdk isn't correct". Read from bubblewrap's own
+      # source (core/lib/androidSdk/AndroidSdkTools.js): validatePath demands a
+      # `tools/` or `bin/` folder directly under androidSdkPath, the pre-2021
+      # command-line-tools layout, and installBuildTools later looks for
+      # `tools/bin/sdkmanager`. The runner's SDK keeps sdkmanager under
+      # `cmdline-tools/latest/bin`, so the check can never pass on a stock
+      # ANDROID_HOME. One symlink gives bubblewrap the old name for the new
+      # place and satisfies every path it builds. Licenses are accepted so
+      # gradle may fetch anything else; build-tools 36.1.0 is what this
+      # bubblewrap pins (BUILD_TOOLS_VERSION) and the image already ships it -
+      # the install is a no-op safety net for future slimmer images.
+      - name: Give bubblewrap the legacy SDK layout it validates
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "build-tools;36.1.0" > /dev/null
+          ln -sfn "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools" \
+            || sudo ln -sfn "$ANDROID_HOME/cmdline-tools/latest" "$ANDROID_HOME/tools"
+          ls "$ANDROID_HOME" "$ANDROID_HOME/tools/bin" | head -30
+
+      # bubblewrap update fetches manifest.json from the live site, and a push
+      # to the deploy branch minutes before a build - the natural sequence -
+      # restarts the site for ~a minute. Runs 5 and 8 both died in exactly that
+      # window with a 502. Wait for the site instead of racing it.
+      # One healthy answer is not enough: run 9's curl got a 200 and bubblewrap
+      # got a 502 from the same URL seventeen seconds later, because a push to
+      # the deploy branch (any push - workflow-only changes included) rebuilds
+      # the site and the cutover lands minutes after the commit. Demand a full
+      # minute of consecutive 200s so a cutover in progress cannot sneak one
+      # good answer past the gate.
+      - name: Wait for the live site to be stable (deploys 502 during cutover)
+        run: |
+          ok=0
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://www.turnsomedayintodayone.com/manifest.json)
+            if [ "$code" = "200" ]; then
+              ok=$((ok+1))
+              echo "attempt $i: 200 ($ok/6 consecutive)"
+              [ "$ok" -ge 6 ] && { echo "site stable"; exit 0; }
+            else
+              ok=0
+              echo "attempt $i: got $code, streak reset"
+            fi
+            sleep 10
+          done
+          echo "site never stayed up for a minute"; exit 1
+
       - name: Regenerate the Android project (pulls current billing library)
         working-directory: TurnSomeDayIntoOneday/twa
         # --skipVersionUpgrade: CI has no keyboard; use the version already in
@@ -46,7 +95,10 @@ jobs:
       - name: Push the bundle to the twa-build branch
         run: |
           set -e
-          AAB=$(ls TurnSomeDayIntoOneday/twa/*.aab | head -1)
+          # A signed build drops the .aab in the project root; --skipSigning
+          # leaves it where gradle wrote it. Look in both, root first.
+          AAB=$(ls TurnSomeDayIntoOneday/twa/*.aab 2>/dev/null | head -1)
+          test -n "$AAB" || AAB=$(ls TurnSomeDayIntoOneday/twa/app/build/outputs/bundle/release/*.aab | head -1)
           test -n "$AAB"
           mkdir -p /tmp/out && cp "$AAB" /tmp/out/
           cp TurnSomeDayIntoOneday/twa/twa-manifest.json /tmp/out/

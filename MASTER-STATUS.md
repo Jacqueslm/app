@@ -6,6 +6,496 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ⚖️ 28 AUG 2026 — PRIVACY AUDIT: THE POLICY DESCRIBED A DIFFERENT APP
+
+Checked every privacy and data-safety claim against the code. Four were wrong,
+and they are the claims with legal weight.
+
+1. **"This app is self-hosted… whoever runs this instance… their own server."**
+   Boilerplate from a self-host template, live on a Play app with 20,000+
+   installs. His users' data is on **his** server. Replaced with the truth:
+   operated by Turn Someday Into Day One, hosted in the US.
+2. **"Anthropic processes the messages you send to Friendly."** The live path is
+   **Google Gemini** — Anthropic is only the fallback when no Gemini key is set,
+   and room moderation is Gemini-only and fails closed without it. So Google
+   also sees **every live room post**, which nothing disclosed.
+3. **"No analytics tracker."** Plausible is wired in server-side and receives the
+   page URL plus the visitor's **IP and user agent**. Cookieless and no
+   cross-site tracking, but it is analytics and it was undisclosed. Resend
+   (email) was undisclosed too — the policy said "two outside services" where
+   there are six.
+4. **Room posts, letters and reviews were not mentioned at all**, though all
+   three persist user-written text server-side (`room_posts.body`,
+   `letters.body`, `reviews.body`).
+
+`privacy.html` is corrected and live. Messages to Friendly are now stated
+plainly as not stored, which is true and verifiable.
+
+**One thing only Jacques can do — Play Console → App content → Data safety.**
+"Other in-app messages" is declared **No — ephemeral**. That was reasoned from
+Friendly alone and is wrong for letters, which are messages to one named person
+stored server-side behind a link. It must become **Yes, collected, not
+ephemeral, App functionality**; sharing stays No. The exact wording and the full
+processor table are in `store-listing/03-data-safety-answers.md`. That file's
+own warning applies to it: under-declaring is the commonest cause of a
+data-safety enforcement action.
+
+---
+
+## 💳 28 AUG 2026 — A REAL SUBSCRIPTION WENT THROUGH ON ANDROID, END TO END
+
+Jacques bought Pro Monthly from his phone minutes after the latch fix, in the
+Chrome-installed shortcut. Verified in the live Stripe account, not taken on
+trust: `sub_1U9L9YCDHXSEg3rLLab9Ahve`, `status: trialing`, `app_user_id 26`,
+Visa ...8776, 7-day trial to **4 Sep**. He cancelled it 68 seconds after
+creating it (`canceled_at` 68s after `created`, `cancel_at` = trial end), so
+**nothing will ever be charged** and Pro stays active until 4 Sep.
+
+So on Android the whole chain works again: Upgrade → Stripe checkout →
+live subscription created. Stripe's "this service will no longer be available
+after September 4" is its normal wording for a trial that is set to cancel —
+not an error.
+
+**CONFIRMED — the payment chain works end to end.** Jacques, 28 Aug:
+*"that was another account i just purchased pro with."* The purchase was made
+on a separate account (`app_user_id 26`, `jkjajmalone@gmail.com` in Stripe),
+not the comped owner account, so the Pro badge at 3:32pm came from the webhook
+and nothing else. Checkout → live subscription → webhook → `isPro`, on a real
+phone with a real card. **First time proven since launch.** The long-standing
+"no real purchase has ever been made" worry is closed for the web path; only
+the Play path is still unproven, waiting on the 1.0.2 upload.
+
+The confound was real even though it did not bite here, and the warning stays
+in `HANDOFF.md`: `isComped()` grants Pro to `APP_OWNER_EMAIL` and to
+`COMP_PRO_EMAILS` with no payment, so **never test billing on the owner
+account** — and if you must, read Profile, where `Pro plan — Monthly` and
+`Pro plan — Complimentary` tell the two apart.
+
+**Found on that same screenshot: the Bootcamp day was calendar-driven.** The
+Today screen said "Day 9 of the 90-Day Bootcamp" four lines above "Foundation
+phase · Day 1 of 30" — same program, same screen, two numbers. `program-lbl`
+read `days` (time since the quit date) while the phase line read
+`getLessonDayFor`, which only advances when a lesson is finished. Anyone who
+backdates their quit date got a Bootcamp position they had not worked, and it
+misleads about Pro too, since Pro starts at lesson 16. `program-lbl` now reads
+the lesson day. Reproduced his exact case in headless Chrome — quit date nine
+days back, lesson 1 — and both lines now say Day 1 while the big counter
+correctly stays 9.
+
+---
+
+## 🔴→✅ 28 AUG 2026 — INSTALLING THE APP WAS SWITCHING OFF STRIPE FOR THAT WHOLE PHONE
+
+**Jacques: "cant even purchase pro through stripe."** He was right, and this
+was worse than the Play bug it was hiding behind.
+
+**Proof, not theory:** Stripe's dashboard shows the most recent checkout
+session was created **30 July**. His attempts on 27-28 Aug never reached
+Stripe at all — the app never asked.
+
+**Why.** A Trusted Web Activity *is* Chrome, sharing one storage jar with the
+browser for this origin. The `tsid_play_build` flag the shell wrote into
+`localStorage` was therefore read back by every ordinary Chrome tab on that
+phone, permanently. One launch of the Play app told the website "this is the
+Play build" forever, so Upgrade routed to Google billing and the server
+refused Stripe by policy (`create-checkout-session` 403s on
+`X-TSID-Client: play`). With Play billing also broken, **every Android owner
+of the app had no way to pay at all — not in the app, not on the website.**
+
+**Fixed (app 6.1).** The latch moved to `sessionStorage`, which is scoped to
+one browsing context: the shell's window keeps it, a separate Chrome tab
+starts clean and reaches Stripe. The legacy `localStorage` key is now deleted
+wherever it is found. Policy is untouched — the shell's start URL carries
+`?src=play` and its launch sets an `android-app://` referrer, so a genuine app
+launch always presents a signal on the first navigation and never relies on
+memory.
+
+**Verified in headless Chrome on an Android user agent:** app window latches
+and *stays* latched across an in-app navigation with no query string (policy
+holds); a separate tab on the same phone reads `play=false` and gets Stripe;
+desktop unaffected; the legacy key is gone in all cases. 11/11 server tests
+pass.
+
+**CONFIRMED BY JACQUES on his own phone, 28 Aug: "yes stripe working again."**
+Android web purchases are live. The 1.0.2 shell is still what fixes purchases
+*inside* the app.
+
+**Worth remembering how this was found.** It was invisible from every angle we
+had been looking from: the app said `unsupported context`, which is a Google
+Play error, so both the Play path and this one pointed at the same screen. It
+only surfaced because Jacques tried the other route and said it was broken
+too. When he reports something that contradicts the current theory, check it
+against the payment processor's own records before explaining it away — the
+30 July gap in Stripe's checkout sessions was the whole answer, and it took
+one query.
+
+---
+
+## 🛠 27 AUG 2026 — THE 1.0.2 FIX BUILD EXISTS. THE CLOUD BUILD WORKS FOR THE FIRST TIME EVER.
+
+The GitHub build workflow had failed all ten runs of its life — three on
+17 Aug (why the release was built by hand on the PC), and seven today, each
+failure a different real bug, each fixed in turn: the build machine stopped
+shipping a folder bubblewrap checks for (found by reading bubblewrap's own
+source: it validates the pre-2021 SDK layout — fixed with one symlink); the
+icon and manifest fetches raced the site's own redeploys (fixed by pulling the
+icon from the repo and gating the build on a full minute of healthy answers);
+and the publish step looked for the unsigned bundle in the signed bundle's
+folder.
+
+**Run 10 succeeded.** `app-release.aab` — 1.0.2, versionCode 3, `www` host,
+Play Billing on — sits on the `twa-build` branch. `Sign-Play-App.bat`
+(in `TurnSomeDayIntoOneday/twa/`) downloads it, signs it with the upload key
+on Jacques's PC, and names the upload steps. His part is: download the .bat,
+double-click, type the keystore password, upload in Play Console. Steps are at
+the top of PLAY-CHECKLIST.md. Waiting on him, on his schedule — do not nag.
+
+---
+
+## ✅ 27 AUG 2026 — SHRM DIRECTORY: CATEGORY FIX AGREED, BALL IS JUDITH'S
+
+The free SHRM Human Resource Vendor Directory listing (MediaBrains, contact
+Judith Gaa) is moving from "Health & Wellness Incentives" — the wrong shelf,
+gym-rewards territory — to **Addiction Services**, her suggestion after
+reading the description. Jacques closed it himself, 27 Aug 8:08am: "Yes, I
+agree. Thank you." Description is added, login works, everything on the
+listing is done and free. Nothing is owed and nobody needs to reply further.
+If no confirmation arrives by ~3 Sep, one line to Judith asking whether the
+move went through is the only follow-up.
+
+---
+
+## 🔴 27 AUG 2026 — NOBODY CAN BUY PRO ON ANDROID. THE "COSMETIC" BUG IS A REVENUE BUG.
+
+**Jacques hit "Upgrade unavailable — Could not complete that purchase" on his
+own phone.** His screenshot shows the browser address bar at the top, which is
+the whole story.
+
+**The chain, and it is not a guess:**
+1. Digital Asset Links verification fails (the long-standing open bug in
+   `TurnSomeDayIntoOneday/HANDOFF.md`).
+2. So the Android app falls back to **Custom Tabs** instead of running as a
+   verified TWA — that is the address bar.
+3. The upgrade path calls `window.getDigitalGoodsService('https://play.google.com/billing')`
+   at `index.html:11515`. **That function exists only inside a verified TWA.**
+4. In Custom Tabs it is undefined, the call throws, and the catch at the end of
+   `startStorePurchase` prints the exact words he saw.
+
+**Nothing is charged and nothing can be.** Every Android purchase has been
+failing this way since launch.
+
+**HANDOFF.md said this bug was "cosmetic only" and listed purchases among the
+things that still work.** That line was wrong and is now corrected. It is the
+reason "buy Pro on a real phone" sat on the open list for weeks looking like an
+untested path rather than a broken one.
+
+**~~Strongest lead: Samsung Internet as the default browser.~~ RULED OUT
+27 Aug, and it was my lead, so I am the one retiring it.** Jacques sent four
+screenshots. Read together they kill it:
+
+1. The app at 12:39 has **no address bar** — so the TWA is verified and running
+   properly. Digital Asset Links is fine. Google's own checker agrees: the
+   statement list for `https://www.turnsomedayintodayone.com` returns both
+   fingerprints cleanly, and `twa-manifest.json` uses that exact host.
+2. The words on his dialog were **"Could not complete that purchase"** — the
+   deepest catch in `becomeProViaStore`. To reach it the code must already have
+   passed `storeBillingAvailable()`, which fails with a *different* sentence
+   ("In-app purchases are not available on this device"). **So
+   `getDigitalGoodsService` exists on his phone.** The bridge is there.
+3. It also passed `/api/billing/status`, so `storeBillingReady` was true.
+
+The address bar in the earlier screenshot was a **separate Custom Tab** he had
+open at 12:38 — the same shots show Chrome's "Install and create shortcut"
+menu over it. Two different windows, one minute apart, mistaken for one.
+
+**So the failure is inside the store handshake itself, and we still do not know
+which step.** Four candidates, all producing that identical sentence:
+`getDigitalGoodsService()` rejecting, `getDetails()` throwing, `PaymentRequest`
+construction, or `request.show()`.
+
+**Fixed the thing that made this unanswerable rather than guessing a fifth
+time.** The dialog now names the step that failed, prints the real error, and
+carries a one-line diagnostic — bridge present/missing, play-build flag,
+standalone vs browser, browser engine and version, app version. One photo of
+that screen now settles it. App bumped to 5.8.
+
+If that is not it, the next step is `adb logcat` over USB to read Chrome's
+actual rejection reason; platform-tools are already on his PC under
+`C:\Users\<user>\.bubblewrap\`.
+
+**SETTLED, later the same day. The app is not running as a verified TWA, and
+that is the whole bug.** The 5.8 dialog printed the real error:
+
+    failed while opening the store connection.
+    OperationError: unsupported context
+    bridge=present · playBuild=yes · display=standalone · engine=Chrome 151
+
+`unsupported context` is Chromium's one specific way of saying *this page is
+not inside a Trusted Web Activity*. So the original Digital Asset Links
+diagnosis was right all along.
+
+**I retired it earlier today and I was wrong to.** My reasoning was that
+reaching the deepest catch proved the bridge existed. It does exist —
+`getDigitalGoodsService` is present in ordinary Chrome on Android — it just
+refuses to work outside a TWA. `bridge=present` and `display=standalone` both
+read as good news and are not. The 12:39 screenshots with no address bar were
+an installed PWA he had just created from Chrome's menu, not the Play app.
+Jacques has now had this called broken, then fixed, then broken again; that is
+on me, and the file records it so nobody restarts the loop.
+
+**Ruled out for good:** Samsung Internet (`engine=Chrome 151`), the served
+file (Google's validator returns both statements cleanly), the host (the TWA
+launches `www`, which is the host the file is under), the apex redirect
+(nothing launches the apex).
+
+**The one unchecked thing:** Chrome matches the *installed* app's signing
+certificate against the two fingerprints in the file. An app installed from
+Play is re-signed by **Play App Signing**, not with the upload key the TWA
+manifest signs with. If that app signing SHA-256 is not one of the two listed,
+verification fails exactly like this while every file looks perfect.
+**Needed from Jacques: Play Console → Test and release → Setup → App integrity
+→ App signing key certificate → SHA-256.** No more code until that is compared.
+
+**27 Aug, 2:06pm — `launch=shell`. The Play app itself is what fails.** The
+5.9 diagnostic proved the Android shell opened the page (referrer was
+`android-app://com.turnsomedayintodayone.app`), on the right host, bridge
+present — and Chrome still refuses to run it verified. Every server-side piece
+checks out, so the fault is in the installed bundle or Chrome's verification of
+it on the device.
+
+**In flight:** shell bumped to 1.0.2 (code 3) and the CI build
+(`twa-build.yml`, run on `main`) queued 27 Aug — a known-good unsigned bundle
+from the repo manifest (www host, billing on) will sit on the `twa-build`
+branch ready to sign and upload if the installed shell turns out to be the
+fault. Next free test asked of Jacques: Settings → Apps → Day One → Open by
+default, which shows Android's own verdict on the same verification.
+
+**Do not describe this as cosmetic again.**
+
+**Checked 27 Aug: "I bought Pro with the Stripe when I tested it 3 weeks ago."**
+True, and verified against the live Stripe account rather than taken on trust.
+Charge `ch_3U1RLwCDHXSEg3rL0Ju6KvMj` — $9.99, 6 Aug 2026, Visa debit ...8776,
+succeeded, never refunded. Trial opened 30 Jul, converted 6 Aug, cancelled
+18 Aug. Two live subscriptions total (`app_user_id` 11 and 18), both his own
+accounts. **Stripe checkout, the webhook, and the entitlement flip all work.**
+
+It does not clear the Android bug, and it is important not to let it feel like
+it does. The two paths split at `becomePro()` and share no code afterwards —
+web goes to `/api/billing/create-checkout-session`, Play goes to
+`becomeProViaStore()` → `getDigitalGoodsService`. A Play install is refused
+Stripe outright; that refusal is the policy line. So a card purchase could only
+have happened in a plain browser, which is the path that already worked. The
+one that has never taken a cent is still the one in the installed app, and the
+Chrome-default test below is still the next thing to run.
+
+---
+
+## 🗑 26 AUG 2026 — THE FOUNDER VOICE IS REMOVED FROM THE APP
+
+**Jacques's instruction: "dispose of jacques voice."** Done.
+
+**The one conflict, in plain terms.** The five narrator voices are public
+domain and have been fine since 8 Aug. His own cloned voice was a different
+thing: the recording is his, but the software that turned it into 1,150 new
+sentences — Coqui **YourTTS** — is licensed **CC BY-NC-ND 4.0**,
+non-commercial. The app charges money. That is the whole issue, and it is the
+reason two conversations could disagree: one was talking about the five
+narrators (fixed), the other about the founder voice (not).
+
+**Removed:** the `jacques` entry in `VG_VOICES`, its slot in `VG_VOICE_ORDER`,
+`audio/sos-talk-jacques.mp3`, 1,150 entries from
+`data/lesson-audio-manifest.json`. Manifest now reads 1,243 × 5 voices.
+
+**Nobody is left stranded.** `vgVoiceKey()` and `lessonVoiceKey()` already fall
+back to Warm for an unknown key — verified in a browser, both return `warm`
+when the saved setting is `jacques`. Zero page errors, both inline scripts
+parse.
+
+**Left alone on purpose:** the 1,150 mp3 files on the `lesson-audio` branch.
+Orphaned, nothing points at them, not deleted.
+
+**Never re-add a founder voice with YourTTS or XTTS v2.** Piper fine-tuned on
+his own recordings is the clean route. Detail in
+`reference/asset-licenses-2026-08-08.md`.
+
+---
+
+## 🔬 26 AUG 2026 — WHY TWO PAGES AREN'T INDEXED: THE ALTERNATIVE PAGES ARE 95% THE SAME PAGE
+
+**Search Console, 26 Aug.** 40 URLs in the sitemap, **32 indexed**. The 13
+"not indexed" break down as: 7 blocked by robots.txt (all deliberate — admin,
+api, server, go, unsubscribe, and the private letters), 1 alternate-canonical,
+3 discovered-not-indexed, 2 crawled-not-indexed.
+
+**The 7 robots.txt blocks are NOT a bug.** All 40 sitemap URLs were checked
+against the robots rules: none is blocked. Nobody should "fix" this — `/l/`
+and `/letter.html` are meant to be uncrawlable.
+
+**Crawled – currently not indexed (2):** `/fortify-app-alternative` and
+`/best-recovery-apps`, both last crawled 19 Aug.
+
+### The measurement
+
+The 14 alternative pages average **95.3% identical text** to each other.
+Per page, only about a third of the words are unique:
+
+| Page | Words | Unique | Unique % |
+|---|---|---|---|
+| i-am-sober-alternative | 680 | 231 | 34.0% |
+| betblocker-alternative | 642 | 221 | 34.4% |
+| covenant-eyes-alternative | 669 | 226 | 33.8% |
+| ever-accountable-alternative | 645 | 216 | 33.5% |
+| blockerx-alternative | 658 | 220 | 33.4% |
+| **fortify-app-alternative** | **671** | **219** | **32.6%** |
+| quitnow-app-alternative | 641 | 203 | 31.7% |
+| nomo-app-alternative | 619 | 194 | 31.3% |
+| brainbuddy-alternative | 638 | 194 | 30.4% |
+| loosid-app-alternative | 632 | 191 | 30.2% |
+| reframe-app-alternative | 647 | 195 | 30.1% |
+| sunnyside-app-alternative | 620 | 184 | 29.7% |
+| quittr-app-alternative | 624 | 176 | 28.2% |
+| sober-time-alternative | 643 | 174 | 27.1% |
+
+Each page carries roughly 200 words of real competitor-specific writing —
+which is good writing, genuinely different per competitor — wrapped in ~450
+words of identical template. Google indexed 13 of the 14 and dropped one.
+
+**Fortify is not the weak one.** At 32.6% it is mid-pack. The choice of which
+page to drop is close to arbitrary, which means **the other 13 sit on the same
+foundation**. `sober-time` (27.1%) and `quittr` (28.2%) are the most exposed.
+
+### The fix, when it is worth doing
+
+Raise the unique share, don't add more pages. Per competitor: real current
+price, what it actually does well, the specific gap, who should pick it over
+this app, and one honest line where the competitor wins. Roughly 500 unique
+words per page flips the ratio. Trimming shared boilerplate helps as much as
+adding words.
+
+`/best-recovery-apps` (739 words) is a separate problem — a listicle head term
+contested by sites running 3,000-word comparisons.
+
+### Also worth correcting
+
+The 26 Aug handover says 10–15 search impressions a day. The export for
+1–20 Aug averages **6.7/day** (last four days: 7, 10, 5, 10). Still up from
+zero four weeks ago; the handover overstates it.
+
+**17 August was the breakthrough** — indexed 24 → 32 and not-indexed 21 → 13
+in a single day.
+
+---
+
+## ✅ 26 AUG 2026 — CONTENT RATING RE-DONE AND SAVED
+
+**Jacques re-did the full IARC questionnaire, saved it and sent it for review.**
+Fully closed. Do not re-walk it, do not ask him to check it again.
+
+The full answer set — every section, with the code evidence behind the Rooms
+answers — is recorded in `TurnSomeDayIntoOneday/store-listing/00-STATUS.md`
+item 3. Anyone touching the content rating again reads that table first.
+
+**A correction I have to record against myself.** Earlier today I told him the
+July certificate had the two user-interaction questions answered No. I read
+that from them being absent from the IARC Summary. It is wrong: **the Summary
+does not display the User Content Sharing answers at all.** Proved on screen —
+the answer was set to Yes and the Summary still showed nothing. Never infer
+those answers from the Summary.
+
+**The real trap, and it is a live one.** A new IARC questionnaire starts
+**blank**. Nothing carries over. The first pass silently left Online Content,
+the Controlled-Substance access lines and "Can purchase digital goods" as No —
+all three were on the July certificate. Saving it would have produced a
+*worse* certificate than the one it replaced, which is the direction Google's
+own warning on that page calls misrepresentation. **Compare the new Summary
+against the previous certificate before saving.** Caught before saving.
+
+**Ratings unchanged:** ESRB Teen / 14+, PEGI 12, USK 12, IARC 12+, ClassInd 14.
+
+**Everything on the Play listing is now finished.** Description, short
+description, screenshots, feature graphic, video, content rating — all done and
+submitted. Only two things remain on Play at all:
+1. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+2. The developer-name change, sitting in Google's review. Nothing to do but wait.
+
+---
+
+## ✅ 26 AUG 2026 — STORE LISTING: BOTH UPLOADS DONE, VIDEO DONE
+
+**Jacques, 26 Aug 2026: "uploads are done."** The Play review cleared and both
+optional assets went up: `07-chat.png` (the re-shot Friendly panel, added as
+screenshot 7) and the rebuilt `feature-graphic-1024x500.png`. The store listing
+video is done too — on the channel, Video field handled.
+
+**The store listing is now finished.** Description, short description,
+screenshots, feature graphic, video: all live and correct. Do not re-check any
+of it and do not ask him to upload anything again.
+
+**Still open on Play, and only these:**
+1. Content rating — confirm the two user-interaction answers say Yes (Rooms
+   lets people post and read each other's writing). Not a release.
+2. Buy Pro on a real phone from the live listing — never tested on the live
+   billing path. Needs a second email; his own account is comped.
+3. Developer name → "Turn Someday Into Day One" — in Google review, 1–2 days
+   from 26 Aug. Nothing to do but wait.
+
+---
+
+## 🗑 26 AUG 2026 — ALL SCRIPTS REMOVED FROM THE REPO (Jacques's instruction)
+
+**"remove all scripts from repo" — both kinds, his call, confirmed.** 47 files
+deleted:
+
+- **The 7 written scripts:** `SCRIPTS.md`, `AI-SCENES.md`, `LAUNCH-SCRIPTS.md`,
+  `EPISODE-2.md`, `EPISODE-2-PROMPTS.md`, `EPISODE-3.md`, `EPISODE-3-PROMPTS.md`.
+- **All 40 code/tool scripts** (`.py`, `.sh`, `.bat`, `.command`) — including
+  `tools-md-to-pdf.py`, `tools/make-film.py`, the `TurnSomeDayIntoOneday/tools/`
+  audio generators, `store-listing/make-captioned-screenshots.py`, the
+  `reference/` card makers, the Studio workers and the Start-app launchers.
+
+**What this costs, so no session is surprised by it:**
+- **RULE ONE's PDF tool was restored the same day, at his instruction** — `tools-md-to-pdf.py` is back in the repo and working. It is the one script that survives.
+- **`--png` page images need `pip install pypdfium2`** on a fresh machine, and the tool itself needs `pip install reportlab`. Neither is vendored.
+- **Lesson/story audio cannot be regenerated** without the generators.
+- **The Start-app / Start-Studio launchers are gone** from the repo.
+
+**Nothing is lost — git keeps all of it.** Everything above is intact in commit
+`118bf7a`. To bring any single file back:
+
+```
+git checkout 118bf7a -- tools-md-to-pdf.py
+```
+
+To bring all 47 back at once:
+
+```
+git checkout 118bf7a -- $(git diff --name-only 118bf7a HEAD --diff-filter=D)
+```
+
+Do not re-ask Jacques whether he meant this. He was shown the consequence and
+chose it.
+
+---
+
+## ✅ 26 AUG 2026 — BILLING LIBRARY 8: ALREADY UPDATED. THERE WAS NO EXTENSION.
+
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The Android
+shell is on a current Google Play Billing Library. There is nothing to fix,
+nothing to watch for on Maven, and no Oct 31 date to work towards.
+
+**The extension that was granted was the Android 16 target-SDK one** (31 Aug →
+1 Nov, requested by Jacques 17 Aug). Earlier notes in this file, in
+`TurnSomeDayIntoOneday/HANDOFF.md` and in `store-listing/00-STATUS.md` attached
+that extension to Billing 8 instead. That was wrong. All three are corrected.
+
+**Any session that sees a Billing Library warning in Play Console:** it is
+stale console text, not work. Do not raise it with Jacques as news, do not plan
+a bubblewrap rebuild around it, and do not tell him to request an extension he
+never needed.
+
+---
+
 ## ✅ 26 AUG 2026 — END OF DAY: LIVE ON PLAY, STORE LISTING FINISHED
 
 **The app went live on Google Play at 7:59 AM.** Production, full rollout, 177
@@ -93,16 +583,20 @@ Verified: ALL CLEAR on all four passes after the conversion, zero overflow at
 - IARC content rating went live the same day. Global Rating ID
   `d0b9a237-57f4-80e0-88d0-3f837bdfd04f` — reusable on any other IARC storefront
   (Microsoft, Amazon, Xbox; Apple does not use IARC).
-- **The Billing Library 8 warning is NOT new and needs nothing done.** It is the
-  same July policy item; the extension was granted and the deadline moved from
-  Aug 30 to **Oct 31 2026**. The app shipped to Production with the warning
-  standing, which proves it blocks only future `.aab` uploads, never a release.
-  Full detail and the exact fix in `HANDOFF.md`. Any session that finds this
-  warning: read HANDOFF first, do not re-explain it to Jacques as news.
+- **The Billing Library 8 warning needs nothing done — the library is already
+  updated.** Corrected by Jacques 26 Aug: it is already on a current version and
+  **there was no extension** for it. (The extension that was granted was the
+  Android 16 target-SDK one, 31 Aug → 1 Nov.) The app shipped to Production with
+  the console warning standing, which proves it never blocked a release. Do not
+  re-explain this to Jacques as news and do not plan a rebuild around it.
 - **Remember the shape of this app.** The Android build is a TWA shell that
   loads the website. Everything shipped through Railway (`claude/vibe-code-uwxxlk`)
   reaches Play users with no new bundle and no review. A Play upload is only
   needed for shell-level changes — billing library, icon, package config.
+
+**Store listing video — DONE (Jacques, 26 Aug 2026).** `content/store-video.mp4`
+is on the channel and the listing's Video field is handled. Do not ask him to
+upload it again.
 
 **ACTION still open:** paste the corrected `store-listing/02-full-description.md`
 into Play Console. The submitted listing still carries the old tier wording.

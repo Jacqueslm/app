@@ -97,6 +97,24 @@ app.use((req, res, next) => {
 // itself are unaffected.
 const CANONICAL_HOST = process.env.CANONICAL_HOST || 'www.turnsomedayintodayone.com';
 const APEX_HOST = CANONICAL_HOST.replace(/^www\./, '');
+
+// One path must never be redirected: Digital Asset Links. Chrome and Google's
+// validator both fetch /.well-known/assetlinks.json with redirects disabled -
+// a 301 is not followed, it is a verification failure. Confirmed 27 Aug 2026:
+// the apex returns ERROR_CODE_REDIRECT from Google's own checker while www
+// returns both statements cleanly.
+//
+// That matters because the Android shell in the Play Store was built before
+// twa/twa-manifest.json existed in this repo, so nothing here proves which
+// host it declares. If it declares the apex, the redirect above is the reason
+// the app never verifies and falls back to a browser tab. Serving the file on
+// both hosts costs nothing and removes the question either way.
+const ASSETLINKS_PATH = '/.well-known/assetlinks.json';
+const ASSETLINKS_FILE = path.join(__dirname, '..', '.well-known', 'assetlinks.json');
+app.get(ASSETLINKS_PATH, (req, res) => {
+  res.type('application/json').sendFile(ASSETLINKS_FILE);
+});
+
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').toLowerCase().split(':')[0];
   if (host !== APEX_HOST) return next();
@@ -447,12 +465,27 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // five emails written to the person who LOVES somebody with a habit. Both are
   // kept away from the quiz nurture, which is written in his voice to the person
   // struggling and would land badly on her.
-  // Anything unrecognised still collapses to 'quiz', so a new page cannot start
-  // sending her his emails by forgetting to declare itself.
+  //
+  // 'binge-quiz' added 28 Aug. The binge check-in had been sending it all
+  // along, but it was not listed here, so it fell through to 'quiz' and was
+  // written into the leads table as 'quiz'. The emails were right - a binge
+  // check-in taker IS the person struggling - but the admin dashboard groups
+  // leads by this column ("which page each lead came in through"), so every
+  // binge signup was indistinguishable from a main-quiz signup and the page
+  // could never be judged on its own numbers.
+  //
+  // The fallback is 'quiz', which is HIS voice. An earlier comment here claimed
+  // the opposite - that collapsing to 'quiz' stopped a new page sending her his
+  // emails - and it is exactly backwards: a new PARTNER page that forgets to
+  // declare source:'partner' will send her his sequence. Declare every new page
+  // here, and check `isSelfQuiz` below when adding another self-facing one.
   const src = source === 'brainreset' ? 'brainreset'
     : source === 'for-her' ? 'for-her'
     : source === 'partner' ? 'partner'
+    : source === 'binge-quiz' ? 'binge-quiz'
     : 'quiz';
+  // Sources written to the person struggling: same nurture, separate reporting.
+  const isSelfQuiz = src === 'quiz' || src === 'binge-quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
   const cleanUtm = readUtm(req.body);
 
@@ -463,17 +496,17 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // nurture - but a brainreset request still gets its PDF.
   if (existingUser || existingLead) {
     if (src === 'brainreset' || src === 'for-her') {
-      const pdf = emailer.brainresetPdfEmail();
+      const pdf = emailer.brainresetPdfEmail(existingLead || null);
       // They just asked for it by typing their address - deliver even if
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
     }
-    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : src === 'partner' ? "You're all set." : 'Check your email — the PDF is on the way.' });
+    return res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? "You're all set." : 'Check your email — the PDF is on the way.' });
   }
 
-  const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
+  const leadId = db.createLead(addr, isSelfQuiz ? cleanResult : null, src, cleanUtm);
   const lead = db.getLeadById(leadId);
-  if (src === 'quiz') {
+  if (isSelfQuiz) {
     emailer.startQuizNurture(lead).catch(() => {});
   } else if (src === 'partner') {
     // Her day 1 goes immediately; the hourly runner picks up days 2-5.
@@ -486,13 +519,13 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
       // so no pre-marking is needed for them.
       db.logEmailSent(null, addr, 'quiz', 1);
     }
-    const pdf = emailer.brainresetPdfEmail();
+    const pdf = emailer.brainresetPdfEmail(lead);
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
   // New-lead funnel event, tagged with the door they came through (quiz,
   // partner, for-her or brainreset) - no email, no result, no PII.
   analytics.event(req, 'Lead', { source: src });
-  res.json({ ok: true, message: (src === 'quiz' || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
+  res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
 const loginLimiter = rateLimit({
@@ -560,11 +593,17 @@ const billingLimiter = rateLimit({
   message: { error: 'Too many billing checks — try again in a few minutes.' },
 });
 
-function setSessionCookie(res, userId, sessionVersion) {
+// Secure comes off the request, not off NODE_ENV. The host sets NODE_ENV, and
+// if it ever stops doing so, every session cookie quietly starts going out
+// without the Secure flag - which is the sort of thing nobody notices until a
+// session leaks over a plain http link. 'trust proxy' is on above, so req.secure
+// is the real answer; the NODE_ENV check stays as a belt-and-braces fallback,
+// and plain-http localhost still gets a working cookie in development.
+function setSessionCookie(req, res, userId, sessionVersion) {
   res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: !!(req && req.secure) || process.env.NODE_ENV === 'production',
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 }
@@ -595,7 +634,7 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   // Attribution must never be able to fail a signup - a malformed tag is worth
   // losing, an account is not.
   try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   res.status(201).json({ email: normalizedEmail });
   // Funnel event - fire-and-forget, and it carries only the plan level, never
   // anything that could identify the person who just signed up.
@@ -661,7 +700,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
-  setSessionCookie(res, user.id, user.session_version || 1);
+  setSessionCookie(req, res, user.id, user.session_version || 1);
   res.json({ email: user.email });
 });
 
@@ -674,7 +713,7 @@ app.post('/api/auth/logout', (req, res) => {
 // existing token, then this device immediately gets a fresh cookie at the new version.
 app.post('/api/auth/logout-all', requireAuth, (req, res) => {
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -692,7 +731,7 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
   // person may have access - so invalidate every existing session, then
   // immediately re-cookie this device at the new version (same as logout-all).
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -771,6 +810,29 @@ app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
   res.json({ ok: true, cleared });
 });
 
+// The purchase failures happening inside phones were invisible from here -
+// every diagnosis ran on screenshots Jacques had to take himself, and on
+// 27 Aug he said he is done doing that. So the app now reports them: signed-in
+// users only, capped fields, and it lands in the same owner-only error log the
+// diagnostics screen already reads. Writing is deliberately not owner-gated -
+// the failures worth seeing are other people's.
+// The log only holds the last 200 rows, so an app stuck in a retry loop - or
+// anybody signed in who felt like it - could push the real failures out of the
+// window before they were ever read. A handful an hour is all a genuine break
+// needs.
+const diagReportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many reports.' },
+});
+app.post('/api/diagnostics/report', requireAuth, diagReportLimiter, (req, res) => {
+  const b = req.body || {};
+  const message = String(b.message || '').slice(0, 300);
+  const detail = String(b.detail || '').slice(0, 600);
+  if (!message) return res.status(400).json({ error: 'Nothing to report.' });
+  try { db.logError('client', message, detail); } catch (_) {}
+  res.json({ ok: true });
+});
+
 // Funnel numbers are business data, so unlike diagnostics this gate has no
 // open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
 function isOwnerRequest(req) {
@@ -831,7 +893,13 @@ app.post('/api/couple/create', requireAuth, (req, res) => {
   db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
   res.json(coupleStatusFor(req.userId));
 });
-app.post('/api/couple/join', requireAuth, (req, res) => {
+// Six characters is a code a partner can read off a screen, not a password, so
+// the guessing has to be stopped at the door rather than by the code's length.
+const coupleJoinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many code attempts. Try again in a little while.' },
+});
+app.post('/api/couple/join', requireAuth, coupleJoinLimiter, (req, res) => {
   const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
   if (out.error) {
     const msg = {
@@ -966,7 +1034,7 @@ app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
     const link = db.createCoupleLink(row.user_id, row.sender_name || '');
     if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
   } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
   res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
   analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });

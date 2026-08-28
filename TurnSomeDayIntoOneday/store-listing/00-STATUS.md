@@ -17,6 +17,33 @@ re-walk it.
 
 ---
 
+## ✅ 28 AUG 2026 — THE FOUNDER-VOICE CLAIM IS OUT OF THE LISTING
+
+**A false claim had been live on the store for two days.** The full description
+sold *"Six narrators, including the founder reading all ninety days himself."*
+The founder voice was removed from the app on 26 Aug over the licence (Coqui
+YourTTS is CC BY-NC-ND, non-commercial; the app charges money), and the listing
+was never updated to match.
+
+Fixed in the console by Jacques, 3:50am, one deletion — the 55 characters
+`, including the founder reading all ninety days himself`. Counter went
+**3925 → 3870**, which is exactly 55, so nothing else was touched. The line now
+reads "Six narrators." — still true: warm, soft, gentle, clear, male, deep.
+
+**Saved and submitted.** Publishing overview shows *Store listings → English
+(United States) → Change full description* in **Changes in review**, quick
+checks running. Managed publishing is **off**, so it goes live by itself once
+review clears. **Nothing further is needed from him. Do not ask him to re-save
+or re-send it.**
+
+**Also settled the same night: the short description needed no change.** It is
+already `Addiction recovery: sober day counter, 90-day program, and support for
+family.` (78/80) and has been since 26 Aug. `01-title-and-short-description.md`
+had gone stale and nearly caused a pointless rewrite — that file now records
+what is live, and the rule: **confirm in the console, never from the drafts.**
+
+---
+
 ## Open — 26 Aug 2026, 11:20 AM
 
 ### ✅ CLOSED TODAY (confirmed in the console, not assumed)
@@ -27,60 +54,112 @@ re-walk it.
 | Short description | Box reads **78/80**, "Addiction recovery: sober day counter, 90-day program, and support for family." |
 | Screenshots — Climb added, stale Friendly removed | 6 panels live |
 | Everything sent + published | Publishing overview empty, "Last published August 26, 2026" |
-| Developer name → "Turn Someday Into Day One" | Banner: *"Your new developer name is being reviewed"* — Jacques's own name comes off the listing when Google approves, 1–2 days |
+| Developer name | **KEPT AS IS — Jacques, 27 Aug 2026: "kept developer the same, nothing change."** The change to "Turn Someday Into Day One" was not gone through with. His own name stays on the listing. Do not raise this again. |
 
 **Do not re-walk any of the above.** Two separate loops happened today because
 the description was confirmed "done" before it was checked, then rewritten and
 re-pasted. It is right now.
 
-### ⛔ BLOCKED UNTIL THE CURRENT REVIEW CLEARS
-**Google greys out the asset Upload button while a submission is in review**
-("Changes in review" shows at the top of the Default store listing page).
-Confirmed on screen 26 Aug, 11:30. Both uploads below are blocked by this —
-it is not a broken button and there is no workaround. Wait for the review to
-clear, then upload. Do not send Jacques round this loop again.
+### ✅ 1 + 2. Both uploads DONE — Jacques, 26 Aug 2026
+**"uploads are done."** The review cleared and both went up:
+- `07-chat.png` — the re-shot Friendly panel (header **Pro · 30/day**, footer
+  **30 of 30 chats left**, caption says "in Pro"), added as panel 7.
+- `screenshots/feature-graphic-1024x500.png` — the rebuilt feature graphic that
+  says what the app is, not just its name.
 
-### 1. ⏳ Upload `07-chat.png` (optional)
-The re-shot Friendly panel — header reads **Pro · 30/day**, footer **30 of 30
-chats left**, caption says "in Pro". Add as panel 7; Play allows 8 and 6 are
-used. Not urgent: nothing currently on the listing is untrue without it.
+**Do not ask him to upload either again, and do not re-check the console for
+them.** The earlier note here said Google greys out the asset Upload button
+while a submission is in review — that was true at 11:30 on 26 Aug and is now
+history, not a live blocker.
 
-### 2. ⏳ Upload the new feature graphic (optional)
-`screenshots/feature-graphic-1024x500.png`, rebuilt 26 Aug. The old one said
-the app's name and nothing else — no category, no reason to install. The new
-one adds: *"Addiction recovery, one day at a time — with a whole side for the
-one who loves you."*
-
-### 2b. ⏳ Store listing video — MADE, needs a YouTube upload
+### 2b. ✅ Store listing video — DONE
 `content/store-video.mp4` — 26s, 1080x1920, a real screen recording of the live
 app (not stills): day counter -> SOS sheet -> The Climb -> Tools -> Friendly ->
 home, five captions, brand end card, scored.
 
-Play's Video field takes a **YouTube URL only** - public or unlisted, ads off,
-not age restricted. So: upload it to the channel as **unlisted**, then paste the
-watch URL into Default store listing -> Video.
+**Jacques confirmed 26 Aug 2026: the video is done.** It is on the channel and
+the listing's Video field is handled. Do not ask him to upload it again.
+
+(For reference only, if it is ever replaced: Play's Video field takes a
+**YouTube URL only** - public or unlisted, ads off, not age restricted.)
 
 How it was built (for the next rebuild): Playwright `recordVideo` drives a
 seeded Pro account against a local server, then captions are overlaid. NOTE:
 this ffmpeg build has **no drawtext filter** - captions must be rendered as
 transparent PNGs and overlaid, the same way `tools/make-film.py` does it.
 
-### 3. ⏳ Content rating — confirm the user-interaction answers
-**Policy and programs → App content → Content rating → Manage.**
-Rooms means "users interact" and "users share content" must both be **Yes**
-(moderation: yes, AI-checked before posting). Friendly is an AI, not a user —
-not user-to-user; answer yes only to an AI-generated-content question.
-If already answered that way, close the tab. Fixing it is not a release.
+### 3. ✅ Content rating — DONE 26 Aug 2026. New questionnaire submitted.
+
+**Jacques re-did the whole IARC questionnaire on 26 Aug, saved it, and sent it
+for review.** Fully closed. Do not re-walk it and do not ask him to check it
+again.
+
+**READ THIS BEFORE YOU EVER "AUDIT" THE CONTENT RATING AGAIN.**
+The IARC **Summary does not display the User Content Sharing answers.** Earlier
+today this file claimed the interaction questions had been answered No, because
+they were absent from the July summary. That conclusion was wrong — absence from
+the summary proves nothing. It was disproved on screen: User Content Sharing was
+set to **Yes**, and the summary still showed no interaction line. Never infer
+those answers from the summary again.
+
+**Where the button is:** Content ratings → **Start new questionnaire**, a blue
+button at the **top right**, above "Your current ratings". It is not at the
+bottom of the page.
+
+**The answers, so nobody re-derives them.** A new questionnaire starts blank —
+nothing carries over from the previous one.
+
+| Section | Answer |
+|---|---|
+| Category | All Other App Types |
+| Downloaded App | Yes |
+| Violence / Fear / Gambling / Crude Humor | No |
+| Sexuality | Yes → Suggestive/Sexual Themes → *References to sexual activity without descriptive detail* |
+| Language | **No** — verified in code: the only profanity in the repo is the Rooms blocklist at `index.html:7890` |
+| Controlled Substance | Yes → Illegal/Recreational **Reference**, Medical **Reference**, Alcohol **Reference + Often**, Tobacco **Reference + Often**. Not Fantasy Drugs. No "Use", no "Encourages/Glamorizes". |
+| **User Content Sharing** | **Yes** — Rooms is native in-app text between users |
+| ↳ UGC the primary source of content? | No |
+| ↳ Public sharing of nudity / graphic violence? | No — Rooms is text only |
+| ↳ Block users or content? | **No** — verified: no block/mute/ignore exists anywhere in the app |
+| ↳ Report users or content? | **Yes** — `index.html:7969` `reportPost()`; line 7791 "two reports hide a post until a human reviews it" |
+| ↳ Chat moderation? | **Yes** — `index.html:2571` a moderator reads every post before the room sees it |
+| ↳ Limited to invited friends only? | No — no friends-only mode exists |
+| Online Content | **Yes** — the app is a TWA that loads the website, embeds YouTube, and Friendly generates AI content |
+| ↳ Is this content the focus? | No |
+| ↳ Visual depictions of illegal/recreational drugs? | Yes |
+| ↳ Referred to in text or spoken? | Yes |
+| Promotion or Sale of Age-Restricted Products | No — the app helps people quit, it does not promote or sell |
+| Miscellaneous — shares precise location with other users? | No |
+| Miscellaneous — allow users to purchase digital goods? | **Yes** — Pro |
+| ↳ Loot boxes / chance-based purchases? | No |
+| ↳ Cash rewards, crypto, NFTs? | No |
+| ↳ Web browser or search engine? | No |
+| ↳ Primarily a news or educational product? | No |
+
+**Two traps found while doing it, both caught before saving:**
+1. A fresh questionnaire silently answers the later sections **No**. The first
+   pass dropped Online Content, the Controlled-Substance access lines and
+   "Can purchase digital goods" — all of which the July certificate carried.
+   Saving that would have made the certificate *less* accurate than before.
+   **Always compare the new Summary against the previous certificate before
+   saving.**
+2. "Medical drugs" frequency defaulted to **Often**; July recorded **Rarely**.
+   It does not change the resulting ratings either way.
+
+**Ratings are unchanged by this pass:** ESRB Teen / 14+, PEGI 12, USK 12,
+IARC 12+, ClassInd 14.
 
 ### 4. ⏳ Buy Pro on a real phone, from the live listing
 Never tested. Closed testing is a different billing path. Install from Play,
 buy, confirm days 16+ unlock and Friendly opens, cancel.
 
-### 5. 🕐 Billing Library 8 — nothing to do until Google ships
-**Fix by Oct 31 2026.** July item, extension **granted** (was Aug 30). The app
-shipped to Production with the warning standing — it blocks only future `.aab`
-uploads, never a release. Detail in `HANDOFF.md`. **Do not re-request the
-extension and do not present it to Jacques as news.**
+### 5. ✅ Billing Library 8 — CLOSED, already updated
+**Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on
+a current Billing Library. There is no Oct 31 deadline — the extension that was
+granted was the **Android 16 target-SDK** one (31 Aug → 1 Nov). The app shipped
+to Production with the console warning standing, which proves it never blocked a
+release. Detail in `HANDOFF.md`. **Do not request an extension, do not plan a
+rebuild for it, and do not present it to Jacques as news.**
 
 ### 6. 🕐 Title keyword — decided against, revisit only if installs climb
 `Turn Someday Into Day One` (25/30) carries no search term, and the title is

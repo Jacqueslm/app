@@ -21,7 +21,7 @@ WHAT IS INSIDE
 
 • A 90-day recovery program, written in plain language, one short lesson a day. Separate tracks for quitting drinking, vaping, gambling, porn and more — including a track written specifically for people supporting someone else.
 
-• Every lesson read aloud, in a real voice. Six narrators, including the founder reading all ninety days himself. Listen with the screen off, on the drive, or when reading is too much.
+• Every lesson read aloud, in a real voice. Six narrators to choose from — warm, soft, gentle, clear, and two male voices. Listen with the screen off, on the drive, or when reading is too much.
 
 • An SOS screen for the craving itself: guided breathing, grounding, and a hands-free "talk me through it" walkthrough for the worst ten minutes.
 
@@ -31,7 +31,7 @@ WHAT IS INSIDE
 
 • A climb up ninety carved steps, one for every day you show up. A slip dims the sky and never takes a step back.
 
-• Ten-minute narrated stories from people who have lived it — addiction and recovery from both sides: the person using and the person who loves them. New ones every week.
+• Ten-minute narrated stories from people who have lived it — addiction and recovery from both sides: the person using and the person who loves them. Five on the shelf, rotating weekly.
 
 • An app lock and a discreet mode: you can change the app's name and icon on your home screen so nothing on your phone announces what this is.
 
@@ -59,6 +59,27 @@ One person, addicted for 38 years and free at 50, who needed this first and coul
 ```
 
 **Character count is checked in `_char-counts.txt` in this folder.**
+
+> **Second false claim found 28 Aug, NOT yet pasted — see the queue note below.**
+> This text promised story audio "New ones every week." The pool is **ten**
+> stories (`data/audio-stories.json`) and the shelf shows five, so the whole
+> library repeats every fortnight — a user three weeks in sees reruns of a
+> promise of new material. Corrected here to "Five on the shelf, rotating
+> weekly", which is true and still sells the feature. The same wording was
+> fixed inside the app immediately (6.2).
+>
+> **Why it is queued and not pasted:** the founder-voice correction is in
+> review in the console right now. Do not stack a second edit on top of a live
+> review. Once that one publishes, paste this block — it contains both fixes.
+
+> **Corrected 28 Aug 2026 — a false claim was live on the store.** This text
+> sold "Six narrators, including the founder reading all ninety days himself."
+> The founder voice was removed from the app on 26 Aug over the licence (Coqui
+> YourTTS is CC BY-NC-ND, non-commercial; the app charges money). The listing
+> kept advertising it for two days. Six narrators is still true — warm, soft,
+> gentle, clear, male, deep — so only the founder clause is gone.
+> **This is the paste that matters: an app store listing must not describe a
+> feature the app does not have.**
 
 > **Corrected 14 Aug 2026.** This text sold **voice journaling** as a Pro feature.
 > It has been free since 5.5.0, and the first fifteen days of *every* lesson pack

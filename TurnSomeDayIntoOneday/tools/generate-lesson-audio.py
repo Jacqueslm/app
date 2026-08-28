@@ -47,15 +47,24 @@ BASE_URL = 'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/'
 
 # Same five voices as the SOS talk (VG_VOICES in index.html). Lessons are read
 # at conversational pace - the in-app speed button handles slower/faster.
+# FIXED 27 Aug 2026. This map still pointed at hfc_female, amy, hfc_male and
+# lessac - the four voices the 8 Aug licence audit banned as non-commercial.
+# The shipped recordings were made with the clean set, but re-running this file
+# would have quietly produced non-commercial audio for any new lesson text.
+# Now identical to PIPER_VOICES in generate-phase-audio.py. File names hash
+# (voice_key, text), not the model, so this change renames nothing.
 VOICES = {
-    'warm':   'vits-piper-en_US-hfc_female-medium/en_US-hfc_female-medium.onnx',
-    'soft':   'vits-piper-en_US-amy-medium/en_US-amy-medium.onnx',
-    'gentle': 'vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx',
-    'male':   'vits-piper-en_US-hfc_male-medium/en_US-hfc_male-medium.onnx',
-    # lessac-high synthesizes 4-8x slower than the medium models - it goes
-    # last so the four fast voices never wait behind it.
-    'clear':  'vits-piper-en_US-lessac-high/en_US-lessac-high.onnx',
+    'warm':   'vits-piper-en_US-kristin-medium/en_US-kristin-medium.onnx',
+    'soft':   'vits-piper-en_GB-cori-medium/en_GB-cori-medium.onnx',
+    'gentle': 'vits-piper-en_US-kathleen-low/en_US-kathleen-low.onnx',
+    'clear':  'vits-piper-en_US-ljspeech-high/en_US-ljspeech-high.onnx',
+    'male':   'vits-piper-en_US-john-medium/en_US-john-medium.onnx',
+    'deep':   'vits-piper-en_US-joe-medium/en_US-joe-medium.onnx',
 }
+
+def wanted(voices):
+    only = os.environ.get('PHASE_ONLY', '').strip()
+    return {k: v for k, v in voices.items() if k == only} if only else voices
 LENGTH_SCALE = 1.05
 MP3_KBPS = 40  # mono speech: transparent enough, ~5KB/s
 
@@ -126,9 +135,15 @@ def main():
     jobs = collect_jobs()
     total_chars = sum(len(j[3]) for j in jobs)
     print(f'{len(jobs)} lesson texts, {total_chars} chars, x{len(VOICES)} voices')
-    items = {}
+    # Merge into the existing manifest. This used to start from {} and write
+    # the file at the end, which silently deleted every days 31-90 entry that
+    # generate-phase-audio.py had put there.
+    try:
+        items = json.load(open(MANIFEST, encoding='utf-8'))['items']
+    except Exception:
+        items = {}
     workers = max(1, (os.cpu_count() or 2) - 0)
-    for voice_key, rel_model in VOICES.items():
+    for voice_key, rel_model in wanted(VOICES).items():
         model = os.path.join(voices_base, rel_model)
         t0 = time.time()
         args = [(voice_key, c, d, v, t, out_dir) for (c, d, v, t) in jobs]

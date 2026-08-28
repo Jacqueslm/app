@@ -3349,9 +3349,18 @@ function activeExtraPacks(){
   return keys;
 }
 function esc(t){return String(t||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
-// One faith line per day, keyed to the day's theme and cycled through the
-// phases, woven INSIDE the lesson rather than bolted on after it. Only people
-// who said yes or open to the spiritual question ever see a word of this.
+// One faith line per day of the 90-Day Bootcamp, keyed to that day's actual
+// lesson theme, woven INSIDE the lesson rather than bolted on after it. Only
+// people who said yes or open to the spiritual question ever see a word of it.
+//
+// THERE MUST BE NINETY. The index is FAITH_LINES[(day-1) % length], so a short
+// array silently repeats instead of failing: until 28 Aug 2026 there were only
+// thirty, which meant day 31 served the identical line as day 1 and day 61
+// served it a third time. Jacques caught it - faith was picked in onboarding
+// and woven through every track, but only ran a third as deep as the program
+// it was woven into. Days 31-60 now follow REBUILD and 61-90 follow KEEP IT &
+// GIVE IT, each line written against the real title of that day in
+// data/phases.json. If phases.json ever grows past day 90, grow this too.
 const FAITH_LINES=[
 "You didn't get this far alone. Before today starts, say thank you to whoever you believe carried you here.",
 "Ask for one day of strength. Not a lifetime - just today. That prayer has never once been too big.",
@@ -3382,7 +3391,67 @@ const FAITH_LINES=[
 "Perfection was never the assignment. Faithfulness was. Today, be faithful, not flawless.",
 "The person still stuck needs what you've been given. Freely received, freely given.",
 "Sweep the corners today. What you keep hidden keeps you. What you bring to light loses its grip.",
-"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it."
+"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it.",
+"Something moved out and left a hole. Ask for it to be filled with what belongs there, not with the next thing that fits.",
+"Sleep is not lost time. Hand the day back tonight and let yourself be repaired while you do nothing at all.",
+"Telling the truth to one person is older than any therapy. Say where you really are today and let being known do what hiding never did.",
+"Ask for patience to make amends slowly. A changed Tuesday says more than any sentence you could rehearse.",
+"Open the numbers and look straight at them. Ask for courage first - shame rarely survives daylight and arithmetic.",
+"The body carrying you through this was given to you. Feed it today like it belongs to someone you are responsible for.",
+"Ask for the will to move today, even briefly. Thankfulness comes easier in a body that has been used.",
+"Boredom is not an emergency, it is silence. Stay in it one minute past comfortable and hear what speaks.",
+"Ask for clear eyes about the people around you - who is for you, who is for the old you, and who never knew the difference.",
+"Some places still hold the version of you that you are leaving. Ask for the strength to take a different road home.",
+"Ask for the nerve to say no without a speech after it. You are allowed to guard what is being rebuilt.",
+"Bring the anger honestly instead of politely. Nothing you actually feel is too much to bring.",
+"Ask to listen today without preparing your answer underneath. Being understood is not the same as being agreed with.",
+"Ask early. Help that arrives before the emergency is still help, and it costs you far less to receive.",
+"Forty-five days. Look back once, on purpose, and name what carried you that you cannot take credit for.",
+"You are allowed to be spoken of differently now. Ask to stop introducing yourself by your worst years.",
+"Ask for an honest stopping time today. Rest you refuse to take gets taken from you some other way.",
+"Ask to be surprised by something good today - and to notice it while it is happening, not a week later.",
+"Some people were more comfortable with who you were. Ask for kindness toward them and no obligation to go back.",
+"Ask for eyes that see the trap before you are standing in it. Knowing your own pattern is a mercy, not an accusation.",
+"You know the conversation you keep circling. Ask for the words, pick the hour, and go.",
+"The evening is where this is won or lost. Give tonight a shape before it gives you one.",
+"Pay one thing back today, however small. Putting it right is not punishment - it is how the weight comes off.",
+"Ask to be released from comparing. Your road is being walked at exactly the pace it requires.",
+"You cannot hurry anyone else's healing, and demanding to be believed is not repentance. Keep showing up and let time do its work.",
+"Name it plainly, out loud, to whoever you pray to. Half the weight of a feeling is in refusing to say it.",
+"Ask to be freed from needing to be good at it. Nothing worth learning starts skilled.",
+"You already have something to give. Ask to be shown one person today who needs the thing you just learned.",
+"Clear the room, not just the intention. Ask for the honesty to throw out what you are keeping just in case.",
+"Sixty days. Count what stands now that did not before, and say thank you for the hands that were not yours.",
+"Strength is the most dangerous hour. Ask to stay teachable on the days you feel like you have got this.",
+"The long middle is not a mistake. Ask for faithfulness in the stretch where nothing dramatic happens.",
+"Ask to know your own warning signs before they finish speaking. Self-knowledge is a gift, not a verdict.",
+"Write the plan for your worst day while today is still calm. Grace often arrives as preparation.",
+"Walk in with an exit and a prayer. You do not owe any room your presence past the point it costs you.",
+"Away from your routines, keep one small thing. Even a single kept promise travels with you.",
+"The memory edits out the wreckage. Ask for the whole picture back, mornings after included.",
+"Ask again what this is all for. A reason you can name out loud is a reason that holds at 2am.",
+"You believe differently than you did on day one. Say what you believe now, even if only to yourself.",
+"A grudge is rent you keep paying on a room you no longer live in. Ask to be free of it, one name at a time.",
+"Stop waiting to feel forgiven before you act forgiven. Put it on the calendar and keep the appointment.",
+"Ask to be the steadiest person in the room today. Calm is something you carry in, not something you find there.",
+"When someone near you falls, ask for a mouth that helps instead of one that judges. You remember that ground.",
+"Your story is not a confession and not a performance. Ask for three true sentences you could say to anyone.",
+"Someone is watching how you do this without telling you. Ask to be worth watching on the ordinary days.",
+"Ask for clarity about the few lines you will never cross again - and peace about keeping them for good.",
+"Ask to succeed at a pace that does not cost you this. What you win by burning out is not kept.",
+"Being loved without the fog is its own work. Ask for the nerve to be seen and to stay in the room.",
+"Ask for one honest hour a week, on purpose, before honesty gets forced on you by a crisis.",
+"Count the money that stayed and say thank you. It is time and trust that stayed with it.",
+"Ask to listen more than you advise today. Most people need a witness, not a fix.",
+"Ask for a plan simple enough to find at your worst. Help you cannot reach in a panic is not help yet.",
+"There is no finish line, and that is mercy. Ask for grace to keep going without needing it to end.",
+"When people praise you, ask for an honest memory. You did the work, and you were carried.",
+"Do one good thing today that nobody will ever know about. What is done unseen is what keeps you honest.",
+"Nobody will ever know about the night you almost did and did not. Say thank you for it anyway - it counted.",
+"Whatever shame is still left, bring it where it can be seen. It only survives in the dark.",
+"Write to the one still stuck as if writing to yourself three months ago. Ask for words that actually reach.",
+"Ask to be shown the one person to walk with - and for patience to go at their pace, not yours.",
+"Ninety days. You were carried further than you can account for. Ask what to do with what you were given, then go and do it."
 ];
 // One paragraph per linked pair: today's skill, applied to the other track.
 // Written per PAIR, not per day - the mechanism is what's shared.
@@ -12561,7 +12630,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='6.5';
+const APP_VERSION='6.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

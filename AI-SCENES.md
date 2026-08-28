@@ -894,3 +894,60 @@ into cause-and-effect about health.
   `/when-he-drinks`, `/partner-drinks`). **Aim the caption at her when posting
   and it has somewhere real to land; post it as general anxiety content and it
   does not.**
+
+---
+
+## A19 — "You told yourself it was just today" · bingeing · CAUSE & EFFECT · 7.6s · BUILT 27 Aug 2026
+
+**The male side of Lane 5.** A16/A16b are the same subject from a woman's side
+and are about the shame cycle. This one is a man, in public, and it is about
+accumulation instead — different person, different mechanism, no repeated lines.
+
+1. **2.9s** the table, slow push — *You told yourself it was just today.*
+2. **2.0s** dissolve at 3.3s — *Your body keeps a **tab**.*
+3. **2.0s** end card — **Bingeing is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** You told yourself it was just today
+**Title (YouTube):** How to stop binge eating — the tab nobody sees (9,900/mo head term, KD 37)
+
+**Caption:** You told yourself it was just today. It's been just today for a
+while now. Nobody sees the tab — that's what makes it easy to keep opening.
+Bingeing is a habit, and habits can be broken. Free, no card, no ads, works
+with no account. Link in bio.
+#bingeeating #emotionaleating #overeating #recovery #dayone
+
+**Score:** `content/score/silent-impact-3.mp3` trimmed to 7.6s with a 1.45s
+fade. Does not end on the last note — see rule 21.
+**Files:** source `content/food-source.html`, stills `content/food/`.
+
+### Why the captions do NOT say what the second frame shows
+
+The supplied effect still is a man clutching his chest. **The captions
+deliberately never name it, never say heart, and never claim the food caused
+it.** "Your body keeps a tab" is accumulation, not diagnosis. Three reasons,
+and they should hold on any recut:
+
+1. **House rule 9.** No medical or research claims. "Overeating gives you a
+   heart attack" is exactly that, and it is a claim this app is not in a
+   position to make.
+2. **It contradicts A16, which is the better piece.** A16's whole thesis is
+   *"the shame isn't the punishment, it's the setup for the next one."* A
+   fear-and-shame appeal about dying is the mechanism A16 identifies as the
+   thing that keeps the cycle running. Naming the heart attack would have this
+   video arguing against the one next to it in the library.
+3. **Reach.** The cause frame is a visibly fat man eating and the effect frame
+   is a medical emergency. Captioned as causation that reads as fat-shaming
+   rather than recovery content, which is both off-brand for Lane 5 and the
+   fastest way to lose the ad-safe status KEYWORDS.md flags for this lane.
+
+Worded as it is, the cut still lands — the frames do the work, which is the
+whole point of Cause & Effect — without the app saying something clinical.
+
+### Two build notes
+
+- **The stills are 784x1168 (2:3), not 9:16**, despite the `_9x16` filenames.
+  Full bleed crops ~8% off each side and upscales ~64% to reach 1080x1920, so
+  this is the softest piece in the file. **Re-generate at 1440x2560 like the
+  A18 pair and it is a re-render, nothing else.**
+- Same man in both frames, which is house-rule series consistency working. Keep
+  him for any further Lane 5 male pieces.

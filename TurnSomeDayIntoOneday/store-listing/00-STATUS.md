@@ -17,6 +17,33 @@ re-walk it.
 
 ---
 
+## ✅ 28 AUG 2026 — THE FOUNDER-VOICE CLAIM IS OUT OF THE LISTING
+
+**A false claim had been live on the store for two days.** The full description
+sold *"Six narrators, including the founder reading all ninety days himself."*
+The founder voice was removed from the app on 26 Aug over the licence (Coqui
+YourTTS is CC BY-NC-ND, non-commercial; the app charges money), and the listing
+was never updated to match.
+
+Fixed in the console by Jacques, 3:50am, one deletion — the 55 characters
+`, including the founder reading all ninety days himself`. Counter went
+**3925 → 3870**, which is exactly 55, so nothing else was touched. The line now
+reads "Six narrators." — still true: warm, soft, gentle, clear, male, deep.
+
+**Saved and submitted.** Publishing overview shows *Store listings → English
+(United States) → Change full description* in **Changes in review**, quick
+checks running. Managed publishing is **off**, so it goes live by itself once
+review clears. **Nothing further is needed from him. Do not ask him to re-save
+or re-send it.**
+
+**Also settled the same night: the short description needed no change.** It is
+already `Addiction recovery: sober day counter, 90-day program, and support for
+family.` (78/80) and has been since 26 Aug. `01-title-and-short-description.md`
+had gone stale and nearly caused a pointless rewrite — that file now records
+what is live, and the rule: **confirm in the console, never from the drafts.**
+
+---
+
 ## Open — 26 Aug 2026, 11:20 AM
 
 ### ✅ CLOSED TODAY (confirmed in the console, not assumed)

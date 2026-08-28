@@ -174,6 +174,25 @@ voices), the sitemap, the reviews file, and the lesson-audio manifest
 (1,243 x 6, complete). No `console.log`, `debugger`, `TODO` or `FIXME` anywhere
 in the app.
 
+### 28 Aug — Stories had never played once. Confirmed fixed.
+
+`toggleStory` awaited `ensureLessonAudioManifest()`, a function that has never
+existed under that name (it is `loadLessonAudioManifest`). The throw happened
+above the line that attaches `onerror`, so it failed in total silence - no
+sound, no dialog - while the store listing sold ten-minute narrated stories.
+Everything else was sound: all ten ids match all ten mp3s, the shelf rotates,
+the read-along text is 7,000+ characters each. **Jacques confirmed it works,
+28 Aug.**
+
+Two things learned that are worth more than the fix:
+- **`.catch(()=>{})` on a media `play()` is how a feature dies quietly.** It
+  now reports the real error to the user and to the owner-only diagnostics log.
+- **Never await between a tap and `play()`** - a phone grants playback only
+  inside the gesture that asked. `startLessonMp3` was always right; stories now
+  match it. Honest caveat: desktop Chromium would not reproduce that failure
+  even with `--autoplay-policy=user-gesture-required`, so it is an alignment
+  with the working player, not a proven cause.
+
 ### Still open
 
 - **The signed 1.0.2 upload** — fixes purchases *inside* the Play app. His PC,

@@ -6,6 +6,43 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## 🔴→✅ 28 AUG 2026 — INSTALLING THE APP WAS SWITCHING OFF STRIPE FOR THAT WHOLE PHONE
+
+**Jacques: "cant even purchase pro through stripe."** He was right, and this
+was worse than the Play bug it was hiding behind.
+
+**Proof, not theory:** Stripe's dashboard shows the most recent checkout
+session was created **30 July**. His attempts on 27-28 Aug never reached
+Stripe at all — the app never asked.
+
+**Why.** A Trusted Web Activity *is* Chrome, sharing one storage jar with the
+browser for this origin. The `tsid_play_build` flag the shell wrote into
+`localStorage` was therefore read back by every ordinary Chrome tab on that
+phone, permanently. One launch of the Play app told the website "this is the
+Play build" forever, so Upgrade routed to Google billing and the server
+refused Stripe by policy (`create-checkout-session` 403s on
+`X-TSID-Client: play`). With Play billing also broken, **every Android owner
+of the app had no way to pay at all — not in the app, not on the website.**
+
+**Fixed (app 6.1).** The latch moved to `sessionStorage`, which is scoped to
+one browsing context: the shell's window keeps it, a separate Chrome tab
+starts clean and reaches Stripe. The legacy `localStorage` key is now deleted
+wherever it is found. Policy is untouched — the shell's start URL carries
+`?src=play` and its launch sets an `android-app://` referrer, so a genuine app
+launch always presents a signal on the first navigation and never relies on
+memory.
+
+**Verified in headless Chrome on an Android user agent:** app window latches
+and *stays* latched across an in-app navigation with no query string (policy
+holds); a separate tab on the same phone reads `play=false` and gets Stripe;
+desktop unaffected; the legacy key is gone in all cases. 11/11 server tests
+pass.
+
+**So Android web purchases work again right now**, without waiting on the Play
+upload. The 1.0.2 shell is still what fixes in-app purchases.
+
+---
+
 ## 🛠 27 AUG 2026 — THE 1.0.2 FIX BUILD EXISTS. THE CLOUD BUILD WORKS FOR THE FIRST TIME EVER.
 
 The GitHub build workflow had failed all ten runs of its life — three on

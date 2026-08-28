@@ -135,6 +135,45 @@ is a table in `TurnSomeDayIntoOneday/HANDOFF.md`; re-run it before editing
   himself"** claim is deleted and in review. It publishes itself — managed
   publishing is off. **Do not ask him to re-save or re-send it.**
 
+### The 28 Aug audit — nine stale claims found and fixed, in one sweep
+
+Jacques asked for a full audit of stale claims after catching one himself. Do
+not re-walk these; do re-run the *method*, which is what actually found them:
+**check every number in the copy against the code that enforces it.**
+
+1. **Free users were promised "3 Friendly chats a day". They get 0.**
+   `FREE_CHAT_DAILY_LIMIT` and the server's `FREE_CHAT_LIMIT` are both 0 -
+   Friendly went Pro-only on 24 Aug and the pricing surface never followed. It
+   also undersold Pro: 30 instead of *nothing* is a better offer than 30 vs 3.
+2. **"Fourteen recovery tracks" double-counted.** `lessons.json` holds fourteen
+   tracks, two of which ARE Supporting Someone and Together - which the same
+   sentence then listed again. It is twelve recovery tracks plus those two.
+3. **Friendly was briefed on five voices.** Deep was missing from
+   `SYSTEM_APP_MAP`, so she would have denied a voice users can hear.
+4. **Faith ran 30 days deep inside a 90-day program** (Jacques's own catch).
+   `FAITH_LINES` held 30 entries behind `[(day-1) % length]`, so day 31 repeated
+   day 1. Sixty new lines written against the real phase titles.
+5. **The Deep voice was the one SOS voice that failed offline** - missing from
+   `sw.js` SHELL_FILES, in the crisis tool, for the voice added most recently.
+6. **His face was still on the share card for fifteen pages** - only
+   `og-default.jpg` was rebuilt on 27 Aug; `og-partner.jpg` was not.
+7. **Stories promised "new ones every week"** against a pool of ten showing
+   five - the library repeats every fortnight.
+8. **The check-ins contradicted themselves three ways.** The codependency test
+   has EIGHT questions while its page said five, its cards said 1-minute and
+   its text said two; three pages linking to the 1-minute quiz said "two
+   minutes" in the prose beside the link.
+9. **The founder's own five stars fed the public star rating.** His review still
+   shows on the page; it no longer feeds `aggregateRating`.
+
+**Verified clean, so do not re-audit:** prices (999/5999/14999 match the server,
+the app, the 15 comparison pages and the structured data), the 90-day claim
+(phases.json really does hold days 31-90), Days 16-90 / 16-35 / 16-30,
+`DAY_90_UPLIFTS` (90, correct), the SOS cue tables (15 steps, 15 cues, six
+voices), the sitemap, the reviews file, and the lesson-audio manifest
+(1,243 x 6, complete). No `console.log`, `debugger`, `TODO` or `FIXME` anywhere
+in the app.
+
 ### Still open
 
 - **The signed 1.0.2 upload** — fixes purchases *inside* the Play app. His PC,

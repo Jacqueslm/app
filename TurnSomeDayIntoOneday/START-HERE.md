@@ -29,3 +29,15 @@ Also checked and clean: the admin pages and stats are owner-gated (and the admin
 shell 404s for everyone else), reviews and room posts are escaped everywhere they
 are shown, letters are printed as text and never as HTML, unsubscribe links are
 signed, and `/go/` redirects only to a fixed list.
+
+### Email audit (28 Aug)
+
+Checked every promise a page makes about email against what actually sends.
+All five sequences fire for the sources that feed them, prices are identical
+across all 46 pages, every internal link resolves, and no page points at a
+missing image or file.
+
+One fix: **the free PDF email now carries an unsubscribe link.** Everything
+else that goes to a lead already had one. The partner page (`/when-he-drinks`)
+promises exactly one email and no sequence, and it kept that promise — but that
+one email was the only thing you send with no way out of the list at the bottom.

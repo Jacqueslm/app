@@ -496,7 +496,7 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // nurture - but a brainreset request still gets its PDF.
   if (existingUser || existingLead) {
     if (src === 'brainreset' || src === 'for-her') {
-      const pdf = emailer.brainresetPdfEmail();
+      const pdf = emailer.brainresetPdfEmail(existingLead || null);
       // They just asked for it by typing their address - deliver even if
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
@@ -519,7 +519,7 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
       // so no pre-marking is needed for them.
       db.logEmailSent(null, addr, 'quiz', 1);
     }
-    const pdf = emailer.brainresetPdfEmail();
+    const pdf = emailer.brainresetPdfEmail(lead);
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
   // New-lead funnel event, tagged with the door they came through (quiz,

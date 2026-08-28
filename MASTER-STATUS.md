@@ -1543,35 +1543,43 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
-## House rule 21 — videos are 6 to 10 seconds (Jacques, 27 Aug 2026)
+## House rule 21 — videos are 5 to 8 seconds (Jacques, 27 Aug 2026)
 
-**Every video is 6-10 seconds. Ten is the ceiling, not the target.**
+**Every video is 5-8 seconds. Eight is the ceiling, not the target.**
 
-**This replaces the 15-20 second version of this rule (22 Aug).** Same reason,
-pushed further: too long for how people actually watch. The 27 Aug call brings
-the whole library in line with the Cause & Effect format, which was already
-running at this length - A12 was 10s, A13 was 8s. The 15-20s rule was the
-outlier, not the C&E pieces.
+**Length history, so nobody re-litigates it:** 15-20s (22 Aug) → 6-10s
+(27 Aug) → **5-8s (27 Aug, current)**. Each step was Jacques, same reason each
+time: too long for how people actually watch. Note where this lands - the
+Cause & Effect format in AI-SCENES.md said **5-8 seconds** when he defined it
+on 23 Aug. The rule has come back to the number the format always had. C&E was
+right and the 15-20s rule was the outlier.
 
-**What 6-10 seconds actually buys you: two beats and an end card.** Not four.
-Roughly 2.5-3.5s a caption including its fade, and the end card is ~2s *inside*
-the budget, not on top of it. A third caption only fits at the 10s ceiling and
-usually shouldn't - cut the line instead of shaving the others.
+**What 5-8 seconds actually buys you: two beats and an end card.** Nothing
+more. Roughly 2.5-3s a caption including its fade, and the end card is ~2s
+*inside* the budget, not on top of it. Three captions do not fit - cut the
+line, don't shave the others to squeeze it in. If a piece needs three beats it
+is the wrong piece for this format.
 
 **The score problem this creates, and the fix.** Every track in
 `content/score/` is 12-14s, which is now LONGER than the cut, so the old
 treatment inverts:
 - At 15s the tracks were too short and got stretched with `atempo` (~4.5%) to
   land on the last note.
-- At 6-10s stretching is impossible - fitting 14.35s into 9s is a 60% speed-up
-  and would wreck the track. So the score gets **trimmed with a fade-out**
-  instead, which means **it cannot end on the last note at this length.**
+- At 5-8s stretching is impossible - fitting 12.36s (the shortest track there
+  is) into 7s is a 77% speed-up and would wreck it. So the score gets
+  **trimmed with a fade-out** instead, which means **it cannot end on the last
+  note at this length.**
+- **Checked 27 Aug against all 16 tracks in `content/score/`: the range is
+  12.36s to 22.66s. Not one is under 12s.** The library the other session added
+  (fading-hymns, neon-rain, static-in-the-rain, weisser-schnee, fading-light,
+  paper-kites) is 17-23s, i.e. even further from usable at this length.
 - That is a real, knowing exception to "music covers the whole video and ends
   on the last note." Either accept the fade, or Jacques cuts 6-10s stings in
   Suno and the rule holds again. His call, not one to make silently.
 
 **The four pieces built 26-27 Aug are all off-spec at ~15s** (A15 trauma bond,
-A16 / A16b binge, A17 pills). They were built to the old rule. Each has its
+A16 / A16b binge, A17 pills) - roughly double the new ceiling. They were built
+to the 15-20s rule. Each has its
 source in `content/*-source.html` with the beat timings in one `SUBS` array, so
 recutting any of them to 6-10s is an edit and a re-render, not a rebuild.
 

@@ -6,6 +6,42 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ⚖️ 28 AUG 2026 — PRIVACY AUDIT: THE POLICY DESCRIBED A DIFFERENT APP
+
+Checked every privacy and data-safety claim against the code. Four were wrong,
+and they are the claims with legal weight.
+
+1. **"This app is self-hosted… whoever runs this instance… their own server."**
+   Boilerplate from a self-host template, live on a Play app with 20,000+
+   installs. His users' data is on **his** server. Replaced with the truth:
+   operated by Turn Someday Into Day One, hosted in the US.
+2. **"Anthropic processes the messages you send to Friendly."** The live path is
+   **Google Gemini** — Anthropic is only the fallback when no Gemini key is set,
+   and room moderation is Gemini-only and fails closed without it. So Google
+   also sees **every live room post**, which nothing disclosed.
+3. **"No analytics tracker."** Plausible is wired in server-side and receives the
+   page URL plus the visitor's **IP and user agent**. Cookieless and no
+   cross-site tracking, but it is analytics and it was undisclosed. Resend
+   (email) was undisclosed too — the policy said "two outside services" where
+   there are six.
+4. **Room posts, letters and reviews were not mentioned at all**, though all
+   three persist user-written text server-side (`room_posts.body`,
+   `letters.body`, `reviews.body`).
+
+`privacy.html` is corrected and live. Messages to Friendly are now stated
+plainly as not stored, which is true and verifiable.
+
+**One thing only Jacques can do — Play Console → App content → Data safety.**
+"Other in-app messages" is declared **No — ephemeral**. That was reasoned from
+Friendly alone and is wrong for letters, which are messages to one named person
+stored server-side behind a link. It must become **Yes, collected, not
+ephemeral, App functionality**; sharing stays No. The exact wording and the full
+processor table are in `store-listing/03-data-safety-answers.md`. That file's
+own warning applies to it: under-declaring is the commonest cause of a
+data-safety enforcement action.
+
+---
+
 ## 💳 28 AUG 2026 — A REAL SUBSCRIPTION WENT THROUGH ON ANDROID, END TO END
 
 Jacques bought Pro Monthly from his phone minutes after the latch fix, in the

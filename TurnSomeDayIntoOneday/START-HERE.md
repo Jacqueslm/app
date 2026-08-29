@@ -99,3 +99,39 @@ shape of this false send.
 Retention in /admin/stats still counts *actions*, not app opens, and that is
 deliberate — retention should measure engagement. Only the win-back needed the
 broader definition.
+
+### Together rebuilt — 30 days → 90 (29 Aug) — app 7.1
+
+Jacques read the couples track and said it looked repetitive, and that the
+things he needs to repair a marriage were not in it. He was right. The old
+30 days measured out like this:
+
+- **24 of 30 daily actions were talking or writing.** It was a talking program.
+- Physical affection: 3 days, and only one was really about it — and that one
+  was a *conversation* about closeness, not touching.
+- Fun, dates or play: 4 days. Two dates booked once, on day 14. Nothing recurring.
+- Chores or doing something for the other: 3 days.
+- Game night, eye contact, kissing, massage: **not in it at all.**
+- Nobody was ever asked their schedule.
+
+**The rebuild, on his direction:**
+
+- **For any couple who needs repair**, not only couples touched by addiction.
+- **90 days**, matching every other track.
+- **One phone, both people, every day.** Nothing is done separately, ever.
+  Linking two accounts is no longer the way in — it stays as an option.
+- **Every day has two parts:** a TOGETHER action and a FOR THEM act of service.
+  All 90 days have both.
+- **Day 1 is the schedule.** The program is built on when they are actually in
+  the same room, because anything not in the calendar loses to everything that is.
+- Framed as training throughout — his own line: a relationship is a muscle, and
+  you do not get the benefit if you do not do the work.
+
+New coverage: touch on 12 days, kissing 5, holding 7, massage 4, dates 19,
+game night 8, acts of service on all 90. Six phases of fifteen — Show Up,
+Turn Toward, Clear The Air, Play Again, Closeness, Make It Permanent.
+
+Together is now excluded from the shared recovery phases (it would have
+addressed a couple as one person working on "the habit"). Every "Together is
+30 days" claim in the app is updated to 90, including the Friendly system
+prompt. Cache v6.9.

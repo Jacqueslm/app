@@ -45,9 +45,10 @@ founder-voice claim) **published successfully** — Publishing overview shows
 1. ~~**Data safety**~~ — ✅ **DONE 29 Aug, 3:15 PM, sent for review.** The data
    type was already ticked; the wrong answer was *"processed ephemerally: Yes"*,
    now **No**. Everything else on that panel was already correct.
-2. **Full description paste** — now unblocked (the founder-voice edit cleared).
-   Fixes the stale "new ones arrive every week" stories claim. Text is in
-   `PASTE-full-description.txt`.
+2. ~~**Full description paste**~~ — ✅ **DONE 29 Aug.** Pasted and saved,
+   3976/4000. Fixed two claims that had gone stale the same day: the stories
+   were described as ten minutes (measured at seven to nine) and as rotating
+   weekly (they now change every two weeks, in sets of ten).
 
 ---
 

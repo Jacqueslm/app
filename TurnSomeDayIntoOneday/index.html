@@ -11907,6 +11907,11 @@ async function openBillingPortal(){
     const data=await res.json();
     if(res.ok&&data.url){
       window.location.href=data.url;
+    }else if(data&&data.managedBy==='play'){
+      // Belt and braces: the client should already have routed here.
+      if(data.storeProductId)S.storeProductId=data.storeProductId;
+      S.billingSource='play';save();
+      openPlaySubscriptions();
     }else{
       appInfo('Billing',data.error||'Could not open billing management right now. Please try again in a moment.');
     }
@@ -11914,15 +11919,30 @@ async function openBillingPortal(){
     appInfo('Billing','Could not reach the server to manage billing. Please try again in a moment.');
   }
 }
+// Where a subscription is billed decides where it is managed. This used to send
+// everybody to Stripe's portal, so a member who paid through Google Play tapped
+// Cancel on their own active plan and was told "No billing account found yet.
+// Upgrade to Pro first." Google also requires that a subscriber can reach their
+// subscription management, so it was a policy problem as well as a wrong answer.
+const PLAY_PACKAGE='com.turnsomedayintodayone.app';
+function billedByPlay(){return (S.billingSource||'stripe')==='play';}
+function openPlaySubscriptions(){
+  const sku=S.storeProductId?('sku='+encodeURIComponent(S.storeProductId)+'&'):'';
+  window.location.href='https://play.google.com/store/account/subscriptions?'+sku+'package='+PLAY_PACKAGE;
+}
+function manageProBilling(){
+  if(billedByPlay()){openPlaySubscriptions();return;}
+  openBillingPortal();
+}
 function cancelProSubscription(){
   if(S.proPlan==='lifetime'){
     appInfo('Lifetime Pro','Lifetime Pro is a one-time purchase that never renews, so there\'s nothing to cancel — it\'s yours for good.');
     return;
   }
-  openBillingPortal();
+  manageProBilling();
 }
 function resumeProSubscription(){
-  openBillingPortal();
+  manageProBilling();
 }
 async function restorePurchases(){
   if(!S.accountEmail){
@@ -11948,6 +11968,9 @@ async function syncBillingStatus(force){
     const data=await res.json();
     S.isPro=!!data.isPro;
     if(data.plan&&data.plan!=='free')S.proPlan=data.plan;
+    // The server is the authority on this; it decides where Cancel goes.
+    if(data.billingSource)S.billingSource=data.billingSource;
+    if(data.storeProductId)S.storeProductId=data.storeProductId;
     S.proRenewsAt=data.currentPeriodEnd||'';
     S.proCancelled=!!data.cancelAtPeriodEnd;
     S.proGraceUntil='';
@@ -12687,7 +12710,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.2';
+const APP_VERSION='7.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -326,3 +326,27 @@ error, so even a stale client redirects correctly.
 This was a policy risk as well as a bug — Google requires that a subscriber can
 reach their subscription management. Five tests in `server/test/billing-source.test.js`,
 including that lifetime is still answered before any billing route is chosen.
+
+### 🔴 I BROKE THE LIVE APP FOR ~25 MINUTES (29 Aug) — app 7.4 is the fix
+
+App 7.3 shipped `const PLAY_PACKAGE='com.turnsomedayintodayone.app';` a second
+time. It was already declared at index.html:11565. A duplicate `const` is a
+**SyntaxError**, and a SyntaxError means the browser parses **none** of the
+script — so every button in the app did nothing. Sign-in did nothing. There was
+no error message anywhere, because no code ran at all.
+
+Jacques found it the hard way: reinstalled twice, then reported "it does
+nothing". He was right and I had shipped it.
+
+**Root cause of the root cause: nothing was checking that index.html parses.**
+It is one 733KB inline script, edited constantly by scripted find-and-replace,
+and a single duplicate identifier takes the whole product down silently.
+
+`server/test/app-syntax.test.js` now extracts every inline script from
+index.html and the other shipped pages and runs `node --check` on each. It
+excludes `type="application/ld+json"` blocks, which are structured data rather
+than JavaScript — checking those as JS reported a false failure on reviews.html
+the first time round.
+
+**Rule from this: never ship an index.html edit without running the tests.**
+The suite catches this in under a second; a person cannot eyeball 733KB.

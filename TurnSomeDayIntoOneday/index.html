@@ -11924,7 +11924,6 @@ async function openBillingPortal(){
 // Cancel on their own active plan and was told "No billing account found yet.
 // Upgrade to Pro first." Google also requires that a subscriber can reach their
 // subscription management, so it was a policy problem as well as a wrong answer.
-const PLAY_PACKAGE='com.turnsomedayintodayone.app';
 function billedByPlay(){return (S.billingSource||'stripe')==='play';}
 function openPlaySubscriptions(){
   const sku=S.storeProductId?('sku='+encodeURIComponent(S.storeProductId)+'&'):'';
@@ -12710,7 +12709,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.3';
+const APP_VERSION='7.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -3719,19 +3719,19 @@ const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'med
 // ─── The rating ask ──────────────────────────────────────────────────────────
 // A 4.0+ star average decides whether Play ever shows this app to strangers,
 // and the people most likely to rate it well are the ones on a streak. So the
-// ask appears on every open until they tap through to the store - Jacques's
-// call, 29 Aug - and never on a day with a slip logged. "Not now" is not an
-// answer, so it comes back next time. It opens the Play listing; there is no
-// rating collected inside the app.
+// ask happens exactly once, as soon as somebody has actually used the app - on
+// open or after a lesson, whichever comes first - and never on a day with a
+// slip logged. "Not now" is final. It opens the Play listing; there is no
+// rating collected inside the app, and Profile keeps a permanent row for
+// anyone who decides later.
 // No nagging: the same quiet register as everything else here.
 function maybeAskForRating(){
-  // Jacques, 29 Aug: ask every time they open it until they have rated it.
-  // IMPORTANT AND UNFIXABLE: the app cannot know whether somebody actually left
-  // a rating - Google does not report that back. Tapping through to the store
-  // is the only signal there is, so that is what stops the asking. Somebody who
-  // taps and then changes their mind is never asked again, and that is the
-  // honest limit of this.
+  // 29 Aug: briefly changed to ask on every open, then Jacques reversed it the
+  // same hour - "dont keep asking". Once is the rule. Anyone who wants to rate
+  // later has the permanent "Rate this app" row in Profile, which is the right
+  // home for a second chance: they go to it, it does not come to them.
   if(S.ratedOnStore)return;
+  if(S.ratingAsked)return;
   // Only somebody who installed from Play can leave a Play rating. Without this
   // the single ask was spent on web and Chrome-installed users who had nowhere
   // to leave one - and the flag is permanent, so if they later installed
@@ -3756,10 +3756,10 @@ function maybeAskForRating(){
     const m=document.getElementById('rating-ask-modal');
     if(!m)return;
     m.classList.add('open');
-    // Deliberately marks nothing. Showing the sheet is not an answer - only
-    // tapping through to the store stops the asking, so "Not now" means exactly
-    // that and the prompt returns on the next open. (S.ratingAsked, the old
-    // once-only flag, is dead: nothing reads it any more.)
+    // Set when the sheet actually OPENS, not when it is scheduled: setting it
+    // up front burned the one ask on days when another sheet was already on
+    // screen, so the guard stood down and the person was never asked at all.
+    S.ratingAsked=true;save();
   },2600);
 }
 function closeRatingAsk(){
@@ -12779,7 +12779,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.9';
+const APP_VERSION='8.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

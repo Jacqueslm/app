@@ -587,6 +587,31 @@ function winbackEmailFor(step) {
 const WINBACK_QUIET_DAYS = 14;
 const WINBACK_MAX_QUIET_DAYS = 120; // beyond this it reads as a cold email, not a welcome back
 
+// How long since this person was last in, or null if we cannot tell. Pulled out
+// of the runner so it can be tested without sending anything.
+//
+// Three signals, and the most recent one wins. The activity log alone was wrong:
+// it records 33 specific actions, so somebody who opens the app and reads leaves
+// no trace in it and looked gone for a fortnight (28 Aug 2026 - an active member
+// was emailed "you haven't been in for a couple of weeks").
+//   activityLog    - she did something the app counts
+//   state sync     - her app wrote anything back to the server
+//   last_seen_at   - any authenticated request arrived at all, which is the
+//                    honest reading of "been in"
+function quietDaysFor(row, state, now) {
+  const log = Array.isArray(state.activityLog) ? state.activityLog : [];
+  const stamps = [
+    log.reduce((m, a) => {
+      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
+      return t > m ? t : m;
+    }, 0),
+    row.state_updated_at ? new Date(row.state_updated_at).getTime() : 0,
+    row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0,
+  ].filter((t) => t > 0 && !Number.isNaN(t));
+  if (!stamps.length) return null;
+  return Math.floor(((now || Date.now()) - Math.max(...stamps)) / 86400000);
+}
+
 async function runWinbackSequence() {
   let rows = [];
   try { rows = db.getUsersWithState(); } catch (_) { return; }
@@ -595,14 +620,9 @@ async function runWinbackSequence() {
     try { st = JSON.parse(row.state_json); } catch (_) { continue; }
     if (!st || !st.startDate) continue;
     if (st.remindersEnabled === false) continue; // they asked for quiet; honour it here too
-    const log = Array.isArray(st.activityLog) ? st.activityLog : [];
-    if (!log.length) continue;
-    const last = log.reduce((m, a) => {
-      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
-      return t > m ? t : m;
-    }, 0);
-    if (!last) continue;
-    const quietDays = Math.floor((Date.now() - last) / 86400000);
+    if (!Array.isArray(st.activityLog) || !st.activityLog.length) continue;
+    const quietDays = quietDaysFor(row, st);
+    if (quietDays === null) continue;
     if (quietDays < WINBACK_QUIET_DAYS || quietDays > WINBACK_MAX_QUIET_DAYS) continue;
     const e = winbackEmailFor(1);
     // sendSequenceEmail's email_log guard makes this send-once by construction.
@@ -690,4 +710,6 @@ module.exports = {
   runScheduledEmails,
   startScheduler,
   SEQUENCE_RUNNERS,
+  quietDaysFor,
+  WINBACK_QUIET_DAYS,
 };

@@ -419,23 +419,24 @@ Profile also carries a permanent **"Rate this app"** row, Play installs only.
 Numbers to judge it against: 6 installs, 23 monthly active devices, 0 ratings
 as of 29 Aug.
 
-### The rating ask now repeats until they tap through (29 Aug) — app 7.9
+### The rating ask — ONCE. Settled 29 Aug, app 8.0.
 
-Jacques: *"keep the app asking for a rating every time they open it and never
-rated it."* Done. It is no longer once-only.
+Asked for and reversed within the hour. He first said *"keep the app asking
+every time they open it and never rated it"*, was told the two consequences,
+and then said **"dont keep asking"**. Once is the rule. **Do not raise
+repeating it again.**
 
-- Shows on **every open** until `S.ratedOnStore` is set.
-- **"Not now" is not an answer any more** — it comes back next time.
-- The only thing that stops it is **tapping through to the Play listing**.
+**How it behaves now:**
 
-**The limit he was told about before choosing this:** the app cannot know
-whether anybody actually left a rating. Google does not report it back. Tapping
-through is the only signal that exists, so somebody who taps and then changes
-their mind is never asked again. There is no way around that.
+- **Once**, as soon as somebody has actually done something in the app —
+  checked on open and after a lesson, whichever comes first.
+- **"Not now" is final.** It never comes back on its own.
+- **Profile keeps a permanent "Rate this app" row** for anyone who decides
+  later. That is the right home for a second chance: they go to it, it does not
+  come to them.
+- **Play installs only**, and **never on a day with a slip logged**.
+- It opens the Play listing. No rating is collected inside the app.
 
-**He was also told the risk:** people who keep dismissing now see it every
-single time, and a share of them leave one star out of irritation. He chose it
-anyway, which is his call.
-
-Still guarded: Play installs only (nobody else can leave a Play rating), and
-never on a day with a slip logged. `S.ratingAsked` is dead — nothing reads it.
+**The limit worth remembering:** the app cannot know whether anybody actually
+left a rating — Google does not report it back. Tapping through is the only
+signal there is.

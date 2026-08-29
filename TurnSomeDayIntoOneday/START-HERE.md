@@ -196,6 +196,12 @@ in a browser tab, so buying Pro fails with:
 | Uninstall + reinstall from Play Store | **Tried. Did not fix it.** |
 | Wrong app being tested | **Ruled out** — Jacques confirmed he installed from the Play Store, and it still shows the bar. An earlier theory that he was testing a Chrome-installed copy was WRONG for this case; he does have two copies, but the Play one fails too |
 | Is `playBilling` enabled in the build? | **Yes, and it was already enabled in 1.0.1** — the 1.0.2 bump changed version numbers only |
+| Which app is actually installed | **PROVEN 29 Aug from Android's own app info screen:** "App downloaded from Google Play Store", **Version 1.0.1**. Not a Chrome copy, not a guess |
+
+**How to know when to retest:** Android Settings → Apps → Turn Someday Into Day
+One shows the installed version at the bottom. It read **1.0.1** on 29 Aug. When
+that screen says **1.0.2**, the fresh build has landed — open the app and look
+for the browser bar. Bar gone = fixed.
 
 **The one variable never tested:** the shell on Play was built weeks ago with
 older build tools and an older Play Billing library. **1.0.2 (code 3) is a

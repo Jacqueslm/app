@@ -42,9 +42,9 @@ founder-voice claim) **published successfully** — Publishing overview shows
 
 ### Still open, only Jacques can do these
 
-1. **Data safety** — App content → Data safety: change "Other in-app messages"
-   from *No, ephemeral* to **Yes, collected, not ephemeral, App functionality**.
-   Sharing stays No. Not started.
+1. ~~**Data safety**~~ — ✅ **DONE 29 Aug, 3:15 PM, sent for review.** The data
+   type was already ticked; the wrong answer was *"processed ephemerally: Yes"*,
+   now **No**. Everything else on that panel was already correct.
 2. **Full description paste** — now unblocked (the founder-voice edit cleared).
    Fixes the stale "new ones arrive every week" stories claim. Text is in
    `PASTE-full-description.txt`.

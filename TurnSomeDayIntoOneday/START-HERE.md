@@ -385,43 +385,36 @@ Nine tests in `server/test/story-rotation.test.js` cover the fortnight boundarie
 exactly 28 days, the single-set repeat, and that a set shorter than ten is served
 whole rather than sliced to nothing.
 
-### Why the app had ZERO Play ratings (29 Aug) — app 7.6
+### Why the app had ZERO Play ratings (29 Aug) — app 7.8
 
-Jacques asked to work on being found on Play. Two bugs in the rating ask
-explain the zero between them:
+Jacques: *"i rated apps on google store within 30 minutes of trying it. i want
+a user to rate it on google store immediately, not in the app."*
+
+Three things were stopping that:
 
 1. **It never checked whether the person could actually rate.** The ask fired
-   for web and Chrome-installed users too. Only somebody who installed from
-   Play can leave a Play rating, so the single ask was being spent on people
-   with nowhere to leave one — and `S.ratingAsked` is permanent, so if they
-   later installed properly they were never asked again. Now gated on
-   `isPlayBuild()`.
+   for web and Chrome-installed users, who have nowhere to leave a Play rating.
+   `S.ratingAsked` is permanent, so if they later installed properly they were
+   never asked again. Now gated on `isPlayBuild()`.
 
-2. **The bar was unreachable.** It required 7 days AND 7 finished lessons. On
-   6 installs and 23 monthly actives, essentially nobody cleared both, so the
-   prompt effectively never appeared. Now the whole bar is **one finished
-   lesson** — Jacques, 29 Aug: *"some people will want to rate it just by
-   looking around"*. It still lands on a moment of pride rather than an empty
-   screen. The slip-day guard and the once-only rule are untouched; this is
-   not a nag.
+2. **The bar was unreachable, and then still too slow.** It wanted 7 days AND
+   7 finished lessons — on 6 installs nobody cleared that, so it never fired.
+   The only bar now is **three logged actions**: somebody looking around
+   clears it in their first sitting.
 
-3. **There was no way to rate on purpose.** A prompt fires once, on its own
-   terms, and never again. Profile now carries a permanent **"Rate this app"**
-   row, shown only on a Play install because nobody else can leave a Play
-   rating. (`ti-star` is in the icon map — an icon key that is missing there
-   renders nothing at all, which is a trap this file has warned about before.)
+3. **It could only fire after a finished lesson.** That one hook made an early
+   ask impossible. It is now also checked shortly after the app opens.
 
-**A one-off email asking the existing list for a rating** is written and ready
-at `outreach/play-rating-ask.txt`. It is a manual send, once, never repeated —
-it tells web members plainly that it is not for them, and tells anyone the app
-has not helped to reply instead of rating.
+The prompt said **"Seven days of showing up."** — a lie the moment it could
+fire on day one. Now "Liking it so far?". It opens the Play listing; no rating
+is collected inside the app.
 
-Also: **the day-30 review email pointed only at the website.** Site reviews
-build trust on the site but do nothing for Play ranking. It now also carries
-the Play listing link, framed for whoever installed from Play.
+**No manual email.** A one-off outreach email was written and Jacques killed
+it: *"im not sending nothing"*. Deleted. The day-30 review email already goes
+out automatically and now carries the Play link — that is the whole email side
+of this, and it should stay automatic.
 
-**The title changed the same day** — see `store-listing/01-title-and-short-description.md`.
-`Day One: Addiction Recovery`, his decision.
+Profile also carries a permanent **"Rate this app"** row, Play installs only.
 
-Numbers if you want to judge whether this worked: 6 installs, 23 monthly active
-devices, 0 ratings as of 29 Aug.
+Numbers to judge it against: 6 installs, 23 monthly active devices, 0 ratings
+as of 29 Aug.

@@ -203,7 +203,33 @@ One shows the installed version at the bottom. It read **1.0.1** on 29 Aug. When
 that screen says **1.0.2**, the fresh build has landed — open the app and look
 for the browser bar. Bar gone = fixed.
 
-### 29 Aug, 2:22 PM — 1.0.2 TESTED. IT DID NOT FIX IT. Rebuild theory is DEAD.
+### 🟢 29 Aug, 2:26 PM — SOLVED. The app signing key had been rotated.
+
+**Play Console's own "Digital Asset Links JSON" snippet** (App signing page,
+below "Request upload key reset") named the fingerprint Google actually signs
+this app with:
+
+    6D:F4:77:66:48:55:36:6D:F2:10:A8:C7:4C:3C:5B:27:A7:59:F4:97:29:8F:C1:FC:74:68:6D:D2:6A:EF:76:9A
+
+**It was not in assetlinks.json.** The file held `99:D2:75:...` (a previous app
+signing key) and `91:7B:4C:...` (the upload key). The signing key had been
+rotated — the page shows a "Previous app signing keys" section and the current
+key marked "Quantum-ready (beta)" — and the file was never updated to match.
+
+Android compares the certificate on the phone against that file. No match means
+no trust, which means the app runs as a plain browser tab, which means the
+Digital Goods API refuses with `unsupported context`. Every symptom, one cause.
+
+All three fingerprints are now in the file, current key first. The previous key
+and the upload key are kept deliberately: Google's own instruction is to MERGE
+with existing statements, and keeping them costs nothing while covering old
+installs and local debug builds.
+
+**The lesson worth keeping: never transcribe fingerprints by hand.** Two of them
+were pasted into this file from screenshots over two days and one was simply the
+wrong key. Play Console generates the exact snippet — use that, always.
+
+### (superseded) 29 Aug, 2:22 PM — 1.0.2 tested, did not fix it
 
 1.0.2 published at ~1:40 PM (under an hour of review, full rollout). Jacques
 uninstalled, installed fresh from Play, opened it: **same browser bar, same

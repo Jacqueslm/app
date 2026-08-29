@@ -945,9 +945,11 @@ whole point of Cause & Effect — without the app saying something clinical.
 
 ### Two build notes
 
-- **The stills are 784x1168 (2:3), not 9:16**, despite the `_9x16` filenames.
-  Full bleed crops ~8% off each side and upscales ~64% to reach 1080x1920, so
-  this is the softest piece in the file. **Re-generate at 1440x2560 like the
-  A18 pair and it is a re-render, nothing else.**
+- **REBUILT 28 Aug with the parallax kit (house rule 28)** and it is now the
+  template every new piece copies. The stills came in at 784x1168 (2:3, not
+  9:16 despite the filenames) which made the first cut the softest in the file;
+  `tools/prep-still.py` took them to 1288x1920 and cut the man out, so the
+  frame is sharp and he now moves independently of the table behind him.
+  Handheld drift replaced the linear push, and grain/vignette/grade went on top.
 - Same man in both frames, which is house-rule series consistency working. Keep
   him for any further Lane 5 male pieces.

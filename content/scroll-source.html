@@ -1,0 +1,103 @@
+<!-- A20 "Every swipe is a tiny hit" - social media, CAUSE & EFFECT.
+     Pure graphics, no stills, no generation. Built to rules 21 (5-8s) and
+     26 (9:16). The mechanism IS the visual: a feed accelerating until it is a
+     blur, then a dead stop and nothing but stillness.
+     NO MEDICAL CLAIM (rule 9) - it never says anything about the brain. It
+     says what the habit costs in attention, which is the honest version.
+     Rendered via window.seek(ms); see tools/render-film.js. -->
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
+  font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+#st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#0f0c29}
+#feed{position:absolute;left:90px;top:0;width:900px;will-change:transform}
+.card{width:900px;height:340px;border-radius:26px;background:#241f4d;border:1px solid #3a3470;
+  margin-bottom:34px;padding:30px 32px;display:flex;flex-direction:column;gap:16px}
+.card .hd{display:flex;align-items:center;gap:16px}
+.card .av{width:70px;height:70px;border-radius:50%;background:#4a4390;flex:none}
+.card .ln{height:17px;border-radius:9px;background:#4a4390}
+.card .body{flex:1;border-radius:14px;background:#332d6b}
+#blur{position:absolute;inset:0;backdrop-filter:blur(0px);pointer-events:none;z-index:30}
+#veil{position:absolute;inset:0;background:#0f0c29;opacity:0;z-index:35}
+#scrim{position:absolute;left:0;right:0;bottom:0;height:900px;z-index:60;
+  background:linear-gradient(to bottom,rgba(15,12,41,0) 0%,rgba(15,12,41,.72) 34%,rgba(15,12,41,.97) 100%)}
+#top{position:absolute;left:0;right:0;top:0;height:420px;z-index:59;
+  background:linear-gradient(to top,rgba(15,12,41,0) 0%,rgba(15,12,41,.9) 100%)}
+#sub{position:absolute;left:50%;bottom:360px;transform:translateX(-50%);width:960px;
+  text-align:center;color:#fff;font-size:58px;font-weight:800;line-height:1.28;
+  text-shadow:0 3px 14px rgba(0,0,0,.95);z-index:90;opacity:0}
+#sub .g{color:#7ee8a2}
+#wm{position:absolute;bottom:210px;right:56px;width:104px;height:104px;border-radius:30px;
+  background:rgba(83,74,183,.92);border:4px solid #7ee8a2;display:flex;align-items:center;
+  justify-content:center;z-index:99}
+#wm svg{width:64px;height:64px}
+#end{position:absolute;inset:0;background:#0f0c29;display:flex;flex-direction:column;
+  align-items:center;text-align:center;opacity:0;z-index:80}
+#mark{width:210px;height:210px;border-radius:62px;background:#534AB7;border:7px solid #7ee8a2;
+  display:flex;align-items:center;justify-content:center;margin-top:430px}
+#mark svg{width:132px;height:132px}
+#tag{color:#fff;font-size:52px;font-weight:600;line-height:1.35;max-width:880px;margin-top:52px}
+#tag .g{color:#7ee8a2}
+#mid{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:120px}
+#rule{width:120px;height:3px;background:rgba(126,232,162,.45);margin:0 auto 56px;border-radius:2px}
+#big{color:#fff;font-size:78px;font-weight:700;line-height:1.16;max-width:920px}
+#green{color:#7ee8a2;font-size:54px;font-weight:600;margin-top:48px}
+#brand{position:absolute;bottom:120px;width:100%;color:#6672a0;font-size:34px;letter-spacing:6px;font-weight:600}
+</style></head><body><div id="st">
+<div id="feed"></div>
+<div id="blur"></div><div id="veil"></div>
+<div id="top"></div><div id="scrim"></div>
+<div id="sub"></div>
+<div id="wm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+<div id="end">
+  <div id="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+  <div id="tag">An app for <span class="g">you</span><br>and the one who <span class="g">supports you</span></div>
+  <div id="mid"><div id="rule"></div>
+    <div id="big">Scrolling is a habit.<br>It can be broken.</div>
+    <div id="green">It's free. Link in bio.</div></div>
+  <div id="brand">TURN SOMEDAY INTO DAY ONE</div>
+</div></div><script>
+window.FILM_LEN=7400;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+// build the feed once - deterministic widths, no random()
+const F=document.getElementById('feed'),CARD=374;
+for(let i=0;i<26;i++){
+  const w1=52+((i*37)%34), w2=30+((i*53)%26);
+  F.insertAdjacentHTML('beforeend',
+   '<div class="card"><div class="hd"><div class="av"></div><div style="flex:1">'+
+   '<div class="ln" style="width:'+w1+'%"></div>'+
+   '<div class="ln" style="width:'+w2+'%;margin-top:11px;opacity:.62"></div>'+
+   '</div></div><div class="body"></div></div>');
+}
+const STOP=3.55;
+window.seek=function(ms){
+  const t=ms/1000;
+  // distance grows as t^2.4 - the scroll does not just move, it accelerates
+  const tt=Math.min(t,STOP);
+  const dist=1180*Math.pow(tt,2.4);
+  F.style.transform='translateY('+(-dist%(CARD*22))+'px)';
+  // blur tracks speed, then snaps off at the stop
+  // blur ramps with speed, then snaps to zero at the stop - the stillness is the point
+  const spd=cl(Math.pow(tt/STOP,2.2),0,1);
+  const clear=cl((t-STOP)/0.12,0,1);
+  document.getElementById('blur').style.backdropFilter='blur('+(spd*13*(1-clear)).toFixed(2)+'px)';
+  // the dead stop: one hard flash of ground, then stillness
+  const st=cl((t-STOP)/0.10,0,1);
+  document.getElementById('veil').style.opacity=(t>=STOP&&t<STOP+0.10)?0.55*(1-st):0;
+  const sub=document.getElementById('sub');
+  let L=null;
+  if(t>=0.15&&t<3.30) L="Every swipe is a <span class='g'>tiny hit</span>.";
+  else if(t>=3.95&&t<5.35) L="Now you can't sit<br>through a red light.";
+  if(L){ if(sub.innerHTML!==L)sub.innerHTML=L;
+    sub.style.opacity=Math.min(1,(t-(t<3.5?0.15:3.95))/0.20,((t<3.5?3.30:5.35)-t)/0.20); }
+  else sub.style.opacity=0;
+  const ec=cl((t-5.45)/0.45,0,1);
+  document.getElementById('end').style.opacity=ec;
+  document.getElementById('wm').style.opacity=1-ec;
+  document.getElementById('scrim').style.opacity=1-ec;
+  document.getElementById('top').style.opacity=1-ec;
+  document.getElementById('big').style.opacity=cl((t-5.75)/0.38,0,1);
+  document.getElementById('green').style.opacity=cl((t-6.15)/0.38,0,1);
+  document.getElementById('brand').style.opacity=cl((t-6.50)/0.38,0,1)*0.9;
+};seek(0);
+</script></body></html>

@@ -953,3 +953,50 @@ whole point of Cause & Effect — without the app saying something clinical.
   Handheld drift replaced the linear push, and grain/vignette/grade went on top.
 - Same man in both frames, which is house-rule series consistency working. Keep
   him for any further Lane 5 male pieces.
+
+---
+
+## A20 — "Every swipe is a tiny hit" · social media · CAUSE & EFFECT · 7.4s · BUILT 28 Aug 2026
+
+**Pure graphics — no stills, no generation, nothing supplied.** Built entirely
+in code, which makes it the cheapest piece in the file and repeatable any time
+the copy changes.
+
+1. **3.4s** a feed accelerating. The scroll distance grows as t^2.4, so it does
+   not just move, it *speeds up*, and a backdrop blur ramps with it until the
+   cards are unreadable — *Every swipe is a **tiny hit**.*
+2. **hard stop at 3.55s** — the blur snaps to zero in 0.12s with one flash of
+   ground. Dead still, perfectly sharp.
+3. **1.4s** nothing moves — *Now you can't sit through a red light.*
+4. **2.0s** end card — **Scrolling is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** Every swipe is a tiny hit
+**Title (YouTube):** Social media addiction — why you can't sit still any more
+**Hashtags:** #socialmediadetox #screenaddiction #dopaminedetox #recovery #dayone
+**Buffer tags:** addictions · recovery
+
+**Caption:** Every swipe is a tiny hit. Thousands a day, each one training you to
+need the next one faster. Then you notice you can't sit through a red light
+without reaching for your pocket. Scrolling is a habit, and habits can be
+broken. Free, no card, no ads, works with no account. Link in bio.
+
+**Score:** `content/score/silent-impact-2.mp3` trimmed to 7.4s with a fade.
+**File:** source `content/scroll-source.html`.
+
+### What this piece deliberately does NOT say
+
+Jacques asked for "how social media is destroying brain cells." **That is not
+true and it is not in here.** Scrolling does not kill neurons. Saying so would
+be a medical claim (house rule 9), it would be false, and the first counsellor
+or school that read it would stop trusting everything else in the library —
+which is the audience OUTREACH.md and SCHOOLS.md are built to reach.
+
+The true version is stronger anyway, and it is what the cut argues: the habit
+costs **attention**, and the tell is that stillness becomes unbearable. The red
+light line is specific, recognisable, and needs no science to land. If the
+literal brain-cell version is ever wanted, it should be a conscious decision
+made with that trade understood, not a caption swap.
+
+**Where it sends them:** the app's **Social media** track is live (one of the 14
+in `lessons.json`), and KEYWORDS.md has `social media addiction symptoms`
+(390/mo, KD 39) and `screen addict` (480/mo, KD 25) tagged Build (video).

@@ -1,19 +1,29 @@
 <!-- A19 "You told yourself it was just today" - bingeing, CAUSE & EFFECT.
-     Built to the 5-8s rule (house rule 21) and the 9:16 rule (house rule 26),
-     both 27 Aug: two beats and an end card, 7.6s, FULL BLEED.
-     Cause: the table. Effect: what the body does with it later.
-     NOTE the stills are 784x1168 (2:3), NOT 9:16 despite the filenames, and
-     low-res for a 1080x1920 out. Full bleed crops ~8% off each side and
-     upscales ~64%. Re-generate at 1440x2560 if it is ever reshot.
+     Built to house rules 21 (5-8s), 26 (9:16 full bleed) and 28 (parallax kit).
+     7.6s: two beats and an end card.
+
+     THIS IS THE HOUSE TEMPLATE - copy it for new pieces. Three things make it
+     look like footage instead of a slideshow, and all three are free and local:
+       1. PARALLAX  - tools/prep-still.py cuts the subject out (rembg/u2net) and
+          upscales the plate. The two layers move at different speeds, so the
+          picture has depth instead of sliding as one sheet.
+       2. HANDHELD  - a deterministic noise drift on the camera. No linear
+          Ken Burns anywhere; a person is holding this.
+       3. GRAIN     - per-frame canvas grain over the top, which kills the
+          plastic "AI render" look that is the usual tell on these stills.
      Rendered via window.seek(ms); see tools/render-film.js. -->
 <!doctype html><html><head><meta charset="utf-8"><style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
   font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
-#st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#0f0c29}
-.ph{position:absolute;top:50%;left:50%;width:1080px;height:1920px;object-fit:cover;
+#st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000}
+.ly{position:absolute;top:50%;left:50%;width:1080px;height:1920px;object-fit:cover;
   transform:translate(-50%,-50%);will-change:transform;opacity:0}
-/* full bleed has no dark band under the type, so it carries its own scrim */
+.bg{z-index:10;filter:blur(3px) brightness(.80) contrast(1.06) saturate(.86)}
+.fg{z-index:20;filter:contrast(1.08) saturate(.88)}
+#grain{position:absolute;inset:0;z-index:40;opacity:.5;mix-blend-mode:overlay;pointer-events:none}
+#vig{position:absolute;inset:0;z-index:45;pointer-events:none;
+  box-shadow:inset 0 0 300px 80px rgba(0,0,0,.78)}
 #scrim{position:absolute;left:0;right:0;bottom:0;height:900px;z-index:60;
   background:linear-gradient(to bottom,rgba(15,12,41,0) 0%,rgba(15,12,41,.60) 36%,rgba(15,12,41,.95) 100%)}
 #sub{position:absolute;left:50%;bottom:360px;transform:translateX(-50%);width:960px;
@@ -37,9 +47,12 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
 #green{color:#7ee8a2;font-size:54px;font-weight:600;margin-top:48px}
 #brand{position:absolute;bottom:120px;width:100%;color:#6672a0;font-size:34px;letter-spacing:6px;font-weight:600}
 </style></head><body><div id="st">
-<img class="ph" id="ph0" src="food/01-table.jpg">
-<img class="ph" id="ph1" src="food/02-chest.jpg">
-<div id="scrim"></div>
+<img class="ly bg" id="bg0" src="food/01-table-up.jpg">
+<img class="ly fg" id="fg0" src="food/01-table-cut.png">
+<img class="ly bg" id="bg1" src="food/02-chest-up.jpg">
+<img class="ly fg" id="fg1" src="food/02-chest-cut.png">
+<canvas id="grain" width="540" height="960"></canvas>
+<div id="vig"></div><div id="scrim"></div>
 <div id="sub"></div>
 <div id="wm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
 <div id="end">
@@ -57,14 +70,24 @@ const SUBS=[
   [0.15,3.05,"You told yourself<br>it was just today."],
   [3.60,5.55,"Your body keeps a <span class='g'>tab</span>."],
 ];
+// deterministic handheld - same frame every render, no random()
+function nz(t,s){return Math.sin(t*1.7+s)*0.6+Math.sin(t*3.1+s*2.3)*0.28+Math.sin(t*5.9+s*4.1)*0.12;}
+const G=document.getElementById('grain'),gx=G.getContext('2d');
+function grain(seed){const d=gx.createImageData(540,960),D=d.data;let x=seed*9301+49297;
+  for(let i=0;i<D.length;i+=4){x=(x*9301+49297)%233280;const v=(x/233280)*255;
+    D[i]=D[i+1]=D[i+2]=v;D[i+3]=40;}gx.putImageData(d,0,0);}
+// bg drifts a little, fg drifts more - that difference IS the depth
+function layer(bg,fg,p,on){
+  const hx=nz(p*3.4,1)*2.0, hy=nz(p*3.4,7)*1.6, rot=nz(p*3.4,3)*0.18;
+  bg.style.opacity=on; fg.style.opacity=on;
+  bg.style.transform='translate(calc(-50% + '+(hx*0.35+p*7)+'px),calc(-50% + '+(hy*0.35)+'px)) rotate('+(rot*0.4)+'deg) scale('+(1.06+0.020*p)+')';
+  fg.style.transform='translate(calc(-50% + '+(hx-p*22)+'px),calc(-50% + '+(hy+p*5)+'px)) rotate('+rot+'deg) scale('+(1.00+0.075*p)+')';
+}
 window.seek=function(ms){
-  const t=ms/1000;
-  const m=cl((t-CUT)/DIS,0,1);
-  document.getElementById('ph0').style.opacity=1-m;
-  document.getElementById('ph1').style.opacity=m;
-  const p0=cl(t/CUT,0,1), p1=cl((t-CUT)/(5.6-CUT),0,1);
-  document.getElementById('ph0').style.transform='translate(-50%,-50%) scale('+(1+0.055*p0)+')';
-  document.getElementById('ph1').style.transform='translate(-50%,-50%) scale('+(1+0.050*p1)+')';
+  const t=ms/1000, m=cl((t-CUT)/DIS,0,1);
+  layer(document.getElementById('bg0'),document.getElementById('fg0'),cl(t/CUT,0,1),1-m);
+  layer(document.getElementById('bg1'),document.getElementById('fg1'),cl((t-CUT)/(5.6-CUT),0,1),m);
+  grain(Math.floor(t*30));
   const sub=document.getElementById('sub');
   let line=null;
   for(const L of SUBS){ if(t>=L[0]&&t<L[1]){line=L;break;} }
@@ -75,6 +98,8 @@ window.seek=function(ms){
   document.getElementById('end').style.opacity=ec;
   document.getElementById('wm').style.opacity=1-ec;
   document.getElementById('scrim').style.opacity=1-ec;
+  document.getElementById('grain').style.opacity=(1-ec)*0.5;
+  document.getElementById('vig').style.opacity=1-ec;
   document.getElementById('big').style.opacity=cl((t-5.90)/0.38,0,1);
   document.getElementById('green').style.opacity=cl((t-6.30)/0.38,0,1);
   document.getElementById('brand').style.opacity=cl((t-6.65)/0.38,0,1)*0.9;

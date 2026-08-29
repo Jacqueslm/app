@@ -1,10 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.turnsomedayintodayone.app",
       "sha256_cert_fingerprints": [
+        "6D:F4:77:66:48:55:36:6D:F2:10:A8:C7:4C:3C:5B:27:A7:59:F4:97:29:8F:C1:FC:74:68:6D:D2:6A:EF:76:9A",
         "99:D2:75:CF:F6:D9:79:73:E0:EB:DE:32:D0:3B:D0:00:CB:5B:AF:65:98:1D:6D:1D:C4:EA:74:0C:8D:29:6B:F5",
         "91:7B:4C:99:B1:13:F3:EC:27:E1:EB:87:3B:04:49:11:4C:FB:9E:04:1B:C3:B4:94:A2:D4:55:8D:73:E4:D4:F4"
       ]

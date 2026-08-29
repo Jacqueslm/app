@@ -11,6 +11,7 @@ const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
 const push = require('./push');
+const backup = require('./backup');
 const analytics = require('./analytics');
 const {
   COOKIE_NAME,
@@ -833,6 +834,55 @@ app.post('/api/diagnostics/report', requireAuth, diagReportLimiter, (req, res) =
   res.json({ ok: true });
 });
 
+// ─── BACKUPS ─────────────────────────────────────────────────────────────────
+// Owner only, same gate as diagnostics. The download is the point of the whole
+// feature: a copy of the database in Jacques's own hands, off this machine, in
+// one tap - so a lost volume is an inconvenience rather than the end of the app.
+function ownerOnly(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Backups are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Only the app owner can touch backups.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/backup/status', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  res.json({
+    keep: backup.SNAPSHOT_KEEP,
+    emailMaxMb: Math.round(backup.EMAIL_MAX_BYTES / 1048576),
+    emailedTo: DIAG_OWNER_EMAIL || null,
+    snapshots: snaps.map((s) => ({ name: s.name, mb: +(s.bytes / 1048576).toFixed(2), at: s.at })),
+  });
+});
+app.post('/api/backup/run', requireAuth, async (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  try {
+    const r = await backup.runBackup(emailer, DIAG_OWNER_EMAIL);
+    res.json({
+      ok: true,
+      name: r.snapshot.name,
+      mb: +(r.snapshot.bytes / 1048576).toFixed(2),
+      emailed: !!r.mail.ok,
+      emailProblem: r.mail.ok ? null : (r.mail.skipped || r.mail.error || `status ${r.mail.status}`),
+    });
+  } catch (err) {
+    try { db.logError('backup', `manual backup failed: ${err.message}`, err.stack); } catch (_) {}
+    res.status(500).json({ error: err.message });
+  }
+});
+app.get('/api/backup/download', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  if (!snaps.length) return res.status(404).json({ error: 'No backup yet. Run one first.' });
+  res.download(snaps[0].path, snaps[0].name);
+});
+
 // Funnel numbers are business data, so unlike diagnostics this gate has no
 // open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
 function isOwnerRequest(req) {
@@ -1176,6 +1226,15 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // A Play subscriber has no Stripe customer, so the portal cannot help them and
+  // its error reads as nonsense to somebody looking at their own active plan.
+  if ((user.billing_source || 'stripe') === 'play') {
+    return res.status(409).json({
+      error: 'This subscription is billed by Google Play, so it is managed in the Play Store.',
+      managedBy: 'play',
+      storeProductId: user.store_product_id || null,
+    });
+  }
   try {
     const url = await billing.createPortalSession(user, getOrigin(req));
     res.json({ url });
@@ -1205,6 +1264,14 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
     ...billing.getBillingStatus(user),
     storeBillingReady: storeBilling.isPlayConfigured(),
     lifetimeSoldOut: user.plan !== 'lifetime' && billing.getLifetimeAvailability().soldOut,
+    // Where this subscription is actually billed. Without it the app sent every
+    // cancel request to the Stripe portal, so a member who paid through Google
+    // Play was told "No billing account found yet. Upgrade to Pro first." while
+    // looking at their own active plan. Play also requires that a subscriber can
+    // reach their subscription management, so that dead end was a policy risk
+    // as well as a bad answer.
+    billingSource: user.billing_source || 'stripe',
+    storeProductId: user.store_product_id || null,
   });
 });
 
@@ -1497,6 +1564,7 @@ process.on('unhandledRejection', (err) => {
 
 emailer.startScheduler();
 push.startScheduler();
+backup.startBackupScheduler(emailer, DIAG_OWNER_EMAIL, (scope, msg, detail) => db.logError(scope, msg, detail));
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

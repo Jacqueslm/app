@@ -25,7 +25,7 @@ function isConfigured() {
 // choke point on purpose - no caller can forget it. The single exception is
 // force:true, reserved for account access (password reset): opting out of
 // emails must never lock someone out of their own account.
-async function sendEmail({ to, subject, text, force }) {
+async function sendEmail({ to, subject, text, force, attachments }) {
   const addr = String(to).toLowerCase();
   const user = db.getUserByEmail(addr);
   if (user && user.unsubscribed && !force) {
@@ -37,7 +37,8 @@ async function sendEmail({ to, subject, text, force }) {
   }
   if (DRY_RUN) {
     const lastLine = text.trimEnd().split('\n').pop();
-    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars) last-line="${lastLine}"`);
+    const att = attachments && attachments.length ? ` +${attachments.length} attachment(s)` : '';
+    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars)${att} last-line="${lastLine}"`);
     return { ok: true, dryRun: true };
   }
   if (!RESEND_API_KEY) {
@@ -57,6 +58,8 @@ async function sendEmail({ to, subject, text, force }) {
         reply_to: EMAIL_REPLY_TO,
         subject,
         text,
+        // Only the database backup uses this. Resend takes base64 content.
+        ...(attachments && attachments.length ? { attachments } : {}),
       }),
     });
     if (!res.ok) {
@@ -645,6 +648,10 @@ If the app has done anything for you — a hard night it got you through, a morn
 ${APP_URL}/reviews
 
 There aren't many there yet. That's on purpose. I don't fake reviews, so the page says so until real people write them. One line from you is worth more than any ad I could buy.
+
+And if you installed this from the Google Play Store, a rating there does something the website can't - it's the only thing that decides whether Play ever shows this app to somebody searching at 2am. It takes ten seconds:
+
+https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app
 
 If it hasn't helped, don't leave one. You don't owe me a review for trying. But if it has, that sentence is how the next person at 2am finds it.
 

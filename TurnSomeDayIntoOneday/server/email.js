@@ -25,7 +25,7 @@ function isConfigured() {
 // choke point on purpose - no caller can forget it. The single exception is
 // force:true, reserved for account access (password reset): opting out of
 // emails must never lock someone out of their own account.
-async function sendEmail({ to, subject, text, force }) {
+async function sendEmail({ to, subject, text, force, attachments }) {
   const addr = String(to).toLowerCase();
   const user = db.getUserByEmail(addr);
   if (user && user.unsubscribed && !force) {
@@ -37,7 +37,8 @@ async function sendEmail({ to, subject, text, force }) {
   }
   if (DRY_RUN) {
     const lastLine = text.trimEnd().split('\n').pop();
-    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars) last-line="${lastLine}"`);
+    const att = attachments && attachments.length ? ` +${attachments.length} attachment(s)` : '';
+    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars)${att} last-line="${lastLine}"`);
     return { ok: true, dryRun: true };
   }
   if (!RESEND_API_KEY) {
@@ -57,6 +58,8 @@ async function sendEmail({ to, subject, text, force }) {
         reply_to: EMAIL_REPLY_TO,
         subject,
         text,
+        // Only the database backup uses this. Resend takes base64 content.
+        ...(attachments && attachments.length ? { attachments } : {}),
       }),
     });
     if (!res.ok) {

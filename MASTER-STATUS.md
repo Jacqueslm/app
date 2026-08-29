@@ -1601,6 +1601,51 @@ go **in the handover**, so he can post straight from the message without
 opening the repo. He posts from his phone; making him cross-reference a
 markdown file to find a caption is the thing this rule exists to stop.
 
+## House rule 28 — the parallax kit is the default look (Jacques, 28 Aug 2026)
+
+**No more flat Ken Burns.** Every new piece uses three things, all free, all
+local, all proven in this container:
+
+1. **Parallax.** `python3 tools/prep-still.py <still.jpg>` writes
+   `<name>-up.jpg` (upscaled plate) and `<name>-cut.png` (subject on
+   transparency). The source moves those two layers at *different speeds*. That
+   difference is the depth - the picture stops sliding around as one sheet.
+2. **Handheld drift.** A deterministic sine-noise wobble on the camera instead
+   of a straight-line zoom. Same frame every render (no `random()`), so a
+   re-render is identical. It is the single biggest "slideshow → footage"
+   change and it costs nothing.
+3. **Film grain + vignette + grade.** Per-frame canvas grain, contrast and
+   desaturation. This kills the plastic look that is the usual tell on AI
+   stills.
+
+**`content/food-source.html` is the template - copy it, don't rewrite it.**
+
+**Where the tools came from.** Studio's own free/local half. Its generative
+half cannot run here (fal.run, queue.fal.run, rest.alpha.fal.ai, openrouter.ai,
+api.pexels.com all 403 at the gateway, and no `FAL_KEY` in this env), but three
+of its tools need no network and two of those are now in the pipeline:
+
+- **`bgremove.js`** → rembg + u2net. **The model is on a GitHub release, which
+  is reachable**, so the cutout is free and offline after one 176MB download.
+  ~4 seconds a picture. This is the whole reason parallax is possible here.
+- **`photo-tools.js`** → the Lanczos + unsharp upscaler, reimplemented in
+  `prep-still.py`. Not an AI upscaler and it invents no detail; it makes a
+  small picture usable at 1080x1920. A19's stills went 784x1168 → 1288x1920.
+- **`parallax.js`** → its depth model is on HuggingFace, so blocked. Not
+  needed: rembg's cutout does the separation instead.
+
+**House rule 13 was respected - no Studio file was edited.** The techniques
+were read and reimplemented on this side.
+
+**The honest limit:** the cutout is ONE flat layer, subject vs everything else.
+It is excellent on a single subject (A19's man, A17's man on the steps) and does
+much less on a group shot like A18's clinic frame, where three people sit at the
+same depth. Use it everywhere, but expect the payoff to vary.
+
+**First run** builds a venv at `/tmp/still-venv` and downloads u2net. Do not
+install into system site-packages - it fails here on a broken
+`setuptools-84.0.0.dist-info`.
+
 ## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
 
 **Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**

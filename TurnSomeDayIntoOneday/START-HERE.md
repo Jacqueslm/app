@@ -203,7 +203,16 @@ One shows the installed version at the bottom. It read **1.0.1** on 29 Aug. When
 that screen says **1.0.2**, the fresh build has landed — open the app and look
 for the browser bar. Bar gone = fixed.
 
-### 🟢 29 Aug, 2:26 PM — SOLVED. The app signing key had been rotated.
+### 🟢 29 Aug, 2:42 PM — CONFIRMED WORKING ON A REAL DEVICE
+
+After the fingerprint fix deployed, Jacques uninstalled, reinstalled from Play
+and opened the app. **The browser bar is gone** — the app runs as a real
+Trusted Web Activity — and **a Google Play purchase completed**: "You're Pro.
+Your purchase is confirmed." with the Pro column showing Current plan.
+
+Android in-app purchases work. This was broken from launch.
+
+### 29 Aug, 2:26 PM — the cause: the app signing key had been rotated.
 
 **Play Console's own "Digital Asset Links JSON" snippet** (App signing page,
 below "Request upload key reset") named the fingerprint Google actually signs

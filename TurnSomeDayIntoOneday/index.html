@@ -1094,7 +1094,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div id="lessonBody" style="font-size:.875rem;color:var(--ts);line-height:1.75;margin-top:14px;white-space:pre-wrap"></div>
             <div id="lesson-action-box" style="background:var(--acc);border-radius:12px;padding:14px 16px;margin-top:18px">
               <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-t);font-weight:700;margin-bottom:6px">✦ Today's action</div>
-              <div id="lessonAction" style="font-size:.84375rem;color:var(--acc-t);line-height:1.65"></div>
+              <div id="lessonAction" style="font-size:.84375rem;color:var(--acc-t);line-height:1.65;white-space:pre-line"></div>
             </div>
             <div id="lesson-reflect-box" style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-top:10px">
               <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:6px">Reflect</div>
@@ -1537,7 +1537,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:.78125rem;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
+        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
         <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — day 16 onward on every track, all the way to day 90 on the recovery tracks — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Days 16–90 of every recovery track — the full bootcamp</div>
@@ -1545,7 +1545,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div>✓ Friendly, your AI companion — 30 chats a day</div>
           <div>✓ Live rooms — a moderated community, open daily</div>
           <div>✓ Days 16–35 of Supporting Someone</div>
-          <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
+          <div id="plans-pro-together">✓ Days 16–90 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
         <!-- This button sits on the tier banner, which is the brand navy in BOTH
@@ -1606,7 +1606,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Days 16–90 — the full 90-Day Bootcamp on every track</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–90 of Together, the couples program</div>
             <div class="feat y"><i class="ti ti-check"></i>Friendly, your AI companion — 30 chats a day</div>
             <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
@@ -2797,7 +2797,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <div class="sos-modal" id="couples-modal" onclick="if(event.target===this)closeCouplesExercises()">
   <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
     <div class="sos-title" style="color:var(--accent)">Do this together</div>
-    <div class="sos-sub">Ten minutes a day, phones down, no fixing — a 30-day program for the two of you, plus exercises you can reach for anytime.</div>
+    <div class="sos-sub">A 90-day program for any couple repairing a relationship. Ten minutes a day, both of you, one phone — every day is done side by side, never apart. Each day has one thing you do together and one thing you each do for the other. Plus exercises you can reach for anytime.</div>
     <div id="couples-list" style="overflow-y:auto;flex:1;min-height:120px"></div>
     <button class="sos-close" onclick="closeCouplesExercises()">Close</button>
   </div>
@@ -3123,6 +3123,10 @@ function phaseLessonFor(day){
   // Supporters run their own 35-day track and are never addressed as the
   // person recovering, so the shared phases don't apply to them.
   if(S.userType==='partner'||S.currentAddiction==='Supporting Someone')return null;
+  // Together is a relationship programme, not a recovery track. It carries its
+  // own ninety days, and the shared phases would address a couple as one person
+  // working on "the habit".
+  if(S.currentAddiction==='Together')return null;
   if(day<31||day>90)return null;
   if(!(LESSON_PACKS[S.currentAddiction]||[]).length)return null;
   const l=PHASE_LESSONS.find(x=>x.day===day);
@@ -3517,7 +3521,7 @@ function renderLessonExtras(day){
     if(l.action){
       html+=`<div style="margin-top:10px">
         <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:4px">Today</div>
-        <div style="font-size:.84375rem;color:var(--ts);line-height:1.6">${esc(l.action)}</div>
+        <div style="font-size:.84375rem;color:var(--ts);line-height:1.6;white-space:pre-line">${esc(l.action)}</div>
       </div>`;
     }
     html+='</div>';
@@ -10564,11 +10568,11 @@ const SYSTEM_APP_MAP=`
 
 The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
-- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering); Together is 30 days. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: six voices (Warm, Soft, Gentle, Clear, Male, Deep - Deep is a deeper American male voice), speed control, full-screen read-along player. The founder's own voice was removed on 26 Aug 2026 over a licence - if anyone asks for it, say plainly that it is no longer in the app. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
+- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering). Together is its own 90-day RELATIONSHIP programme, rebuilt 29 Aug 2026: it is for ANY couple repairing a relationship, not only couples touched by addiction, and it does not use the shared phases. Every day is done by the two of them side by side on ONE phone - never separately - and every day has two parts, a TOGETHER action and a FOR THEM act of service. It covers the daily ten minutes, phones out of the room, dates twice a month, weekly game night, eye contact, kissing, hugging, massage and touch, chores done unasked, arguing and repair, money, and a permanent calendar of rhythms at the end. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: six voices (Warm, Soft, Gentle, Clear, Male, Deep - Deep is a deeper American male voice), speed control, full-screen read-along player. The founder's own voice was removed on 26 Aug 2026 over a licence - if anyone asks for it, say plainly that it is no longer in the app. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and days 16-90 of Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
 const SYSTEM_FREE_ADDENDUM=`
@@ -12666,7 +12670,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.0';
+const APP_VERSION='7.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13647,7 +13651,7 @@ const COUPLES_EXERCISES=[
   {t:'The gratitude swap',w:'Addiction narrows life to the next fix; gratitude widens it back. Do this one out loud.',s:['Each of you names three things you\'re grateful for today — at least one about the other person.','No repeats from last time.','Do it at the same time each week — after dinner, before bed — so it becomes yours.']},
   {t:'Reclaim the hour',w:'The habit used to own a time slot. Take one hour of it back, together.',s:['Pick the hour the struggle usually claims (late night, Sunday afternoon — you know yours).','Fill it with something analog you both do: walk, cook, cards, drive, music.','Protect it like an appointment. This is the hour you\'re stealing back from the old life.']},
 ];
-// The 30-day Together program. Progress is S.togetherDone (count of completed
+// The 90-day Together program. Progress is S.togetherDone (count of completed
 // days) - same kind of data as lesson progress, synced with the rest of S.
 // Jacques's phone-test note, 12 Aug: the old modal was six cards and a dead
 // end - "you open it up and say do this together, but it really goes nowhere."
@@ -13795,7 +13799,7 @@ function renderCouples(){
       <div style="font-size:.6875rem;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
       <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">${escapeHtml(l.title)}</div>
       <div style="font-size:.8125rem;color:var(--ts);line-height:1.65;margin-top:8px">${escapeHtml(l.content)}</div>
-      <div style="font-size:.78125rem;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> ${escapeHtml(l.action)}</div>
+      <div style="font-size:.78125rem;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> <span style="white-space:pre-line">${escapeHtml(l.action)}</span></div>
       <div style="font-size:.78125rem;color:var(--ts);line-height:1.6;margin-top:6px"><b style="color:var(--accent)">Ask each other:</b> ${escapeHtml(l.reflection)}</div>
       ${(typeof faithOn==='function'&&faithOn())?`<div style="font-size:.78125rem;color:var(--ts);line-height:1.6;margin-top:8px;border-left:3px solid #7ee8a2;padding-left:10px"><b style="color:#5cae7e">Faith:</b> ${escapeHtml(FAITH_LINES[(l.day-1)%FAITH_LINES.length])}</div>`:''}
       ${isCurrent?`<button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="markTogetherDone()">We did this one — mark day ${l.day} done</button>`:''}
@@ -13936,7 +13940,7 @@ function buildGuideIndex(){
 const GUIDE_FAQ=[
   {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Days 1–15 are free; the rest is part of Pro. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path and the Together couples program), <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path, and 16–90 of the Together couples program), <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},

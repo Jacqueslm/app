@@ -350,3 +350,37 @@ the first time round.
 
 **Rule from this: never ship an index.html edit without running the tests.**
 The suite catches this in under a second; a person cannot eyeball 733KB.
+
+### Stories now rotate in fortnightly SETS (29 Aug) — app 7.5
+
+Jacques: *"every 2 weeks there should be new stories — the first five, then
+switch to the next five, and deleted, and a new set of 10."*
+
+A **set of ten runs four weeks**: five for a fortnight, the other five for the
+fortnight after, then the set retires and the next one begins. The old code
+picked five weekly with a stride, so a story could appear two weeks running and
+a set could never end.
+
+`data/audio-stories.json` now accepts either shape:
+
+    { "batches": [ { "id": "...", "stories": [ ...10 ] }, ... ] }
+    { "stories": [ ...10 ] }          // a flat file is read as one set
+
+**Adding the next set is a data change only** — append a batch, put ten mp3s on
+the `lesson-audio` branch under `stories/<id>.mp3`, done. No code.
+
+**Order inside a set is load-bearing.** The file's original order would have made
+fortnight one all five *from the fight* and fortnight two all five *for the
+supporter* — a wife opening the app in week one would have found nothing written
+for her. Reordered to 3/2 then 2/3, with topics spread across both halves. Keep
+that balance when writing the next set.
+
+**With only one set written, it repeats rather than emptying.** That is deliberate,
+and it is the honest consequence of the next ten not existing yet — "deleted for
+good" needs a fresh set to exist, and that means ten new stories plus ten new
+recordings, roughly monthly.
+
+Nine tests in `server/test/story-rotation.test.js` cover the fortnight boundaries
+(days 0/13/14/27/28), that no story appears in both halves, that a set owns
+exactly 28 days, the single-set repeat, and that a set shorter than ten is served
+whole rather than sliced to nothing.

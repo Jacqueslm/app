@@ -1422,7 +1422,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="s-stories" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0">Stories</div>
-        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Seven to nine minutes each. Five on the shelf, rotating every week.</div>
+        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Seven to nine minutes each. Five on the shelf, changing every two weeks.</div>
         <div id="stories-list"></div>
       </div>
     </div>
@@ -6409,18 +6409,52 @@ function isoWeek(){const d=new Date();const t=new Date(Date.UTC(d.getFullYear(),
   const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);
   const f=new Date(Date.UTC(t.getUTCFullYear(),0,4));
   return t.getUTCFullYear()*100+Math.round(((t-f)/86400000-3+((f.getUTCDay()+6)%7))/7)+1;}
+// Jacques, 29 Aug 2026: "every 2 weeks there should be new stories - the first
+// five, then switch to the next five, and deleted, and a new set of 10."
+//
+// So a SET of ten runs for four weeks: five for a fortnight, the other five for
+// the fortnight after, then the set retires and the next one starts. The old
+// code picked five weekly with a stride, which could repeat a story two weeks
+// running and had no concept of a set ending at all.
+//
+// data/audio-stories.json may hold either `batches: [{id, stories:[10]}, ...]`
+// or, as it always has, a flat `stories: [...]` - a flat file is read as one set.
+let STORY_BATCHES=[];
+const STORY_FORTNIGHT_DAYS=14;
+function storyFortnightIndex(){
+  // Local midnight, so a set turns over on the member's own calendar.
+  const n=new Date();
+  const day=Math.floor(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/86400000);
+  return Math.floor(day/STORY_FORTNIGHT_DAYS);
+}
+// Which set is live, and which half of it. Wraps when the last set runs out:
+// a repeated set is a far better failure than an empty shelf, and it is the
+// honest consequence of not having written the next ten yet.
+function storyShelfPosition(batchCount){
+  const f=storyFortnightIndex();
+  return {batch:batchCount?Math.floor(f/2)%batchCount:0,half:f%2};
+}
 function storyShelf(pool){
-  const wk=isoWeek();
-  const users=pool.filter(x=>x.perspective==='user'),sups=pool.filter(x=>x.perspective==='supporter');
-  const pick=(arr,n,seed)=>{const out=[];for(let i=0;i<n&&arr.length;i++)out.push(arr[(seed+i*2)%arr.length]);return out;};
-  // alternate the balance weekly so supporters get their week too
-  return wk%2?pick(users,3,wk).concat(pick(sups,2,wk)):pick(users,2,wk).concat(pick(sups,3,wk));
+  const batches=(STORY_BATCHES&&STORY_BATCHES.length)?STORY_BATCHES:[pool||[]];
+  const pos=storyShelfPosition(batches.length);
+  const set=batches[pos.batch]||[];
+  if(set.length<=5)return set.slice();
+  // First five for one fortnight, the rest for the next.
+  return pos.half?set.slice(5,10):set.slice(0,5);
 }
 async function renderStories(){
   const el=document.getElementById('stories-list');
   if(!STORIES_POOL){
     el.innerHTML='<div style="color:var(--tm);font-size:.8125rem">Loading the shelf…</div>';
-    try{STORIES_POOL=(await (await fetch('data/audio-stories.json')).json()).stories;}
+    try{
+      const d=await (await fetch('data/audio-stories.json')).json();
+      STORY_BATCHES=(Array.isArray(d.batches)&&d.batches.length)
+        ? d.batches.map(b=>Array.isArray(b)?b:(b.stories||[]))
+        : [d.stories||[]];
+      // Flat list of everything ever published, so a story that is off the shelf
+      // can still be looked up by id - the player reads its title from here.
+      STORIES_POOL=STORY_BATCHES.reduce((a,b)=>a.concat(b),[]);
+    }
     catch(e){el.innerHTML='<div style="color:var(--tm);font-size:.8125rem">Stories need a connection the first time. They\'ll be here when you\'re back online.</div>';return;}
   }
   const shelf=storyShelf(STORIES_POOL);
@@ -12709,7 +12743,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.4';
+const APP_VERSION='7.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

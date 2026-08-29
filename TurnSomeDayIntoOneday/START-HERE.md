@@ -440,3 +440,25 @@ repeating it again.**
 **The limit worth remembering:** the app cannot know whether anybody actually
 left a rating — Google does not report it back. Tapping through is the only
 signal there is.
+
+### Railway variables — CHECKED 29 Aug. Do not raise these again.
+
+Confirmed on screen in Railway → app → Variables:
+
+`APP_OWNER_EMAIL` · `APP_URL` · `COMP_PRO_EMAILS` · `DB_PATH` · `EMAIL_FROM` ·
+`GEMINI_API_KEY` · **`NODE_ENV`** · `PLAY_SERVICE_ACCOUNT_JSON` · `PORT` ·
+`RESEND_API_KEY` · **`SESSION_SECRET`** · `STRIPE_SECRET_KEY`
+
+**`SESSION_SECRET` is set**, so sessions survive a redeploy and shipping does
+not log everybody out. The 29 Aug logout was the phone reinstall clearing local
+storage, nothing systemic. **`NODE_ENV` is set** too, so the old
+`secure`-cookie concern was already covered — the fix that reads it from the
+request instead stays anyway, since it no longer depends on a variable being
+remembered.
+
+`PLAY_SERVICE_ACCOUNT_JSON` being present is also why `storeBillingReady` was
+true throughout the billing investigation.
+
+Railway's service panel has a **Backups** tab. Not examined. Worth a look as a
+second layer under the app's own daily snapshots, which are the thing that
+actually leaves the machine.

@@ -418,3 +418,24 @@ Profile also carries a permanent **"Rate this app"** row, Play installs only.
 
 Numbers to judge it against: 6 installs, 23 monthly active devices, 0 ratings
 as of 29 Aug.
+
+### The rating ask now repeats until they tap through (29 Aug) — app 7.9
+
+Jacques: *"keep the app asking for a rating every time they open it and never
+rated it."* Done. It is no longer once-only.
+
+- Shows on **every open** until `S.ratedOnStore` is set.
+- **"Not now" is not an answer any more** — it comes back next time.
+- The only thing that stops it is **tapping through to the Play listing**.
+
+**The limit he was told about before choosing this:** the app cannot know
+whether anybody actually left a rating. Google does not report it back. Tapping
+through is the only signal that exists, so somebody who taps and then changes
+their mind is never asked again. There is no way around that.
+
+**He was also told the risk:** people who keep dismissing now see it every
+single time, and a share of them leave one star out of irritation. He chose it
+anyway, which is his call.
+
+Still guarded: Play installs only (nobody else can leave a Play rating), and
+never on a day with a slip logged. `S.ratingAsked` is dead — nothing reads it.

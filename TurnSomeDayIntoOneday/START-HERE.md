@@ -483,3 +483,38 @@ Nothing on the Play side is outstanding.
 - The next ten stories. The pipeline is proven to run from this environment:
   piper-tts installs, the voice model downloads, ffmpeg and Chromium are both
   present. Writing and recording can both be done here.
+
+### Story set two — written, recorded, live (29 Aug) — app 8.1
+
+Ten new stories on the habits the first ten missed: smoking, vaping, gaming,
+shopping, social media and work. Both sides of the room in each fortnight.
+
+**`tools/generate-story-audio.py` now exists.** The first ten were recorded by
+a session that never committed its script, so the audio could not be reproduced
+from this repo. It can now:
+
+    python3 tools/generate-story-audio.py <voices-folder> <out-folder>
+    python3 tools/generate-story-audio.py voices out --only some-story-id
+
+Voice models come from sherpa-onnx's release mirror; `VOICE_FOR` maps each
+story id to one of the six house voices. The 26MB of mp3s go to the
+`lesson-audio` branch under `stories/` — **never into this repo.**
+
+**Two things caught by checking rather than assuming:**
+
+1. **Adding a batch changes the shelf IMMEDIATELY.** Rotation is
+   `floor(daysSinceEpoch/14)`, absolute — not "weeks since the set was added".
+   Set two went live the moment it existed. Committing the text before the
+   audio was pushed would have left five stories on the shelf with no
+   recordings. **Always push the mp3s first.**
+
+2. **The declared `minutes` were all wrong.** They were guesses at 8; the real
+   recordings run 6.2 to 9.6. Every one is now the measured value, and the
+   shelf copy reads "six to ten minutes each" rather than seven to nine. The
+   generator prints a NOTE whenever the json disagrees with the audio, so this
+   cannot drift silently again.
+
+**One small thing left over:** the Play full description, pasted earlier today,
+says "seven to nine minutes each". The true range across both sets is six to
+ten. Not a false claim about the product, just imprecise now — worth a one-line
+edit next time he is in the console. Not worth a special trip.

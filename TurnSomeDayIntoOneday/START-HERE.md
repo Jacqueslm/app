@@ -203,7 +203,24 @@ One shows the installed version at the bottom. It read **1.0.1** on 29 Aug. When
 that screen says **1.0.2**, the fresh build has landed — open the app and look
 for the browser bar. Bar gone = fixed.
 
-**The one variable never tested:** the shell on Play was built weeks ago with
+### 29 Aug, 2:22 PM — 1.0.2 TESTED. IT DID NOT FIX IT. Rebuild theory is DEAD.
+
+1.0.2 published at ~1:40 PM (under an hour of review, full rollout). Jacques
+uninstalled, installed fresh from Play, opened it: **same browser bar, same
+`OperationError: unsupported context`.** Diagnostics `app=7.2 ·
+latch=referrer@2026-08-29T19:21 · engine=Chrome 151`.
+
+So the age of the build was NOT the cause. Do not rebuild again expecting a fix.
+
+**The single fact still unverified** — asked for twice, not yet supplied — is
+**which Play Console section the fingerprint `99:D2:75:...:6B:F5` came from.**
+If it is the *upload* key, and Google's *app signing* key is a third value that
+is not in the file at all, then every other check passing is exactly what you
+would expect and verification still fails. That is the last hypothesis standing
+and it fits every symptom. Get a screenshot of **Test and release → Setup →
+App signing** showing BOTH certificates before doing anything else.
+
+**The old one-variable theory, now disproved:** the shell on Play was built weeks ago with
 older build tools and an older Play Billing library. **1.0.2 (code 3) is a
 fresh rebuild** and was signed and submitted 29 Aug — it was in Google review
 at end of session. When it publishes: reinstall, open, and look for the bar.

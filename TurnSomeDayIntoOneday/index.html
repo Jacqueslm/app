@@ -3710,13 +3710,22 @@ const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'med
 // ─── The rating ask ──────────────────────────────────────────────────────────
 // A 4.0+ star average decides whether Play ever shows this app to strangers,
 // and the people most likely to rate it well are the ones on a streak. So the
-// ask happens exactly once, after the day-7-or-later lesson is finished - a
-// moment of earned pride - and never on a day with a slip logged. "Not now" is
-// permanent. No nagging: the same quiet register as everything else here.
+// ask happens exactly once, after a lesson on day three or later - a moment of
+// earned pride - and never on a day with a slip logged. "Not now" is permanent.
+// No nagging: the same quiet register as everything else here.
 function maybeAskForRating(){
   if(S.ratingAsked)return;
-  if(getDays()<7)return;
-  if((S.lessonsCompletedCount||0)<7)return;
+  // Only somebody who installed from Play can leave a Play rating. Without this
+  // the single ask was being spent on web and Chrome-installed users who had
+  // nowhere to leave one - and because the flag is permanent, if they later
+  // installed properly they would never be asked again. That is a large share
+  // of the reason this app has zero ratings.
+  if(typeof isPlayBuild==='function'&&!isPlayBuild())return;
+  // Was 7 days AND 7 finished lessons. On the real numbers almost nobody
+  // cleared both, so the ask effectively never fired. Three and three is still
+  // somebody with real momentum - and it is reachable.
+  if(getDays()<3)return;
+  if((S.lessonsCompletedCount||0)<3)return;
   const today=new Date().toDateString();
   if((S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today))return;
   // The flag is set when the sheet actually OPENS, not when it is scheduled.
@@ -12743,7 +12752,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.5';
+const APP_VERSION='7.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

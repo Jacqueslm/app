@@ -649,6 +649,10 @@ ${APP_URL}/reviews
 
 There aren't many there yet. That's on purpose. I don't fake reviews, so the page says so until real people write them. One line from you is worth more than any ad I could buy.
 
+And if you installed this from the Google Play Store, a rating there does something the website can't - it's the only thing that decides whether Play ever shows this app to somebody searching at 2am. It takes ten seconds:
+
+https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app
+
 If it hasn't helped, don't leave one. You don't owe me a review for trying. But if it has, that sentence is how the next person at 2am finds it.
 
 — Jacques`,

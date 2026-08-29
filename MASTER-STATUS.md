@@ -1646,6 +1646,31 @@ same depth. Use it everywhere, but expect the payoff to vary.
 install into system site-packages - it fails here on a broken
 `setuptools-84.0.0.dist-info`.
 
+## 🚫 Play Store home address — DECIDED, do not re-open (Jacques, 28 Aug 2026)
+
+**His home address stays public on the Play listing for now. This is settled.**
+
+Google will not let an individual developer change it to anything but another
+residential address, and hiding it requires converting to an **organization**
+account (business entity + D-U-N-S + a business address). **Jacques is not doing
+that right now.** Do not keep suggesting it; it is a known cost he has accepted.
+
+Why it is public at all: the app has in-app purchases, and Play publishes the
+developer's legal name and full address in "About the developer" for any account
+that takes payments. Personal accounts cannot use a PO box or virtual office.
+
+**The one mitigation that needs no business, and is worth doing:** Google's
+**Results about you** (goo.gle/resultsaboutyou, or the profile menu in the Google
+app) will remove search results containing a home address, phone or email. It
+does **not** touch the Play listing itself — the address stays there — but it
+strips the copies that data-broker and people-search sites publish, which is
+where the real exposure is. Free, no entity needed, and a granted removal applies
+for everyone.
+
+**Also already done:** his address is NOT in this repo (checked 27 Aug), and it
+is deliberately kept off the outreach PDFs in `reference/pdf-kit/`. Keep it that
+way — public contact is the gmail address and the website.
+
 ## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
 
 **Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**

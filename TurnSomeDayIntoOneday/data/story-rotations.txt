@@ -1,0 +1,11 @@
+Story rotations - what has been taken down, and when.
+Newest at the bottom.
+
+Every set listed here is gone: its ten stories were removed from
+data/audio-stories.json and its ten mp3s deleted from the lesson-audio
+branch, so nothing in the app can reach them. This file is the record that
+they existed. The full text of each one is still in git history.
+
+Written by tools/rotate-stories.js. Do not edit by hand.
+
+(Nothing retired yet. set-1 is the first shelf.)

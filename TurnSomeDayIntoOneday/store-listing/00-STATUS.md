@@ -1,5 +1,23 @@
 # Play Store — live status
 
+## 🟢 29 AUG 2026, 2:42 PM — ANDROID PURCHASES WORK. VERIFIED ON DEVICE.
+
+A Google Play purchase completed in the installed app: "You're Pro. Your
+purchase is confirmed." The app also now opens WITHOUT the browser address bar,
+which is the visible proof that Digital Asset Links verification passes.
+
+**The cause was one missing line.** `assetlinks.json` did not contain the
+SHA-256 of the certificate Google actually signs the app with. The signing key
+had been rotated, and the file still named the previous key plus the upload key.
+Play Console's own "Digital Asset Links JSON" snippet (App signing page) gave
+the correct value: `6D:F4:77:66:...:76:9A`. Adding it fixed both the address bar
+and the purchase, with no rebuild and no new upload.
+
+**Never hand-type these again.** Copy Play Console's generated snippet.
+
+---
+
+
 ## ✅ 29 AUG 2026 — 1.0.2 (CODE 3) SIGNED AND SUBMITTED
 
 **Release `3 (1.0.2)` was uploaded to Production and sent for review on 29 Aug,

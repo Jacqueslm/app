@@ -1,5 +1,40 @@
 # Play Store — live status
 
+## ✅ 29 AUG 2026 — 1.0.2 (CODE 3) SIGNED AND SUBMITTED
+
+**Release `3 (1.0.2)` was uploaded to Production and sent for review on 29 Aug,
+1:24 PM.** Managed publishing is off, so it publishes itself once review passes.
+Nothing further is needed from Jacques. Do not ask him to re-send it.
+
+- Signed on his PC with the upload key (see START-HERE for the three scripts)
+- Uploaded, release notes "Fixes in-app purchases.", full rollout
+- Device check clean: **0 devices lost**, totals identical to the last release
+- Publishing overview showed it in "Changes in review", quick checks running
+
+**Honest note on the release notes.** They say "Fixes in-app purchases", and
+that is a hope, not a proven fact. `playBilling` was already enabled in 1.0.1 —
+the 1.0.2 bump changed version numbers only. What makes it worth shipping is
+that it is a fresh rebuild with current build tools and a current billing
+library. Whether it fixes the browser-bar problem is unknown until it is live
+and reinstalled. See the ruled-out table in START-HERE before investigating.
+
+**Also confirmed 29 Aug:** the 28 Aug full-description edit (removing the
+founder-voice claim) **published successfully** — Publishing overview shows
+"Last published August 28, 2026" with no listing changes outstanding.
+
+### Still open, only Jacques can do these
+
+1. **Data safety** — App content → Data safety: change "Other in-app messages"
+   from *No, ephemeral* to **Yes, collected, not ephemeral, App functionality**.
+   Sharing stays No. Not started.
+2. **Full description paste** — now unblocked (the founder-voice edit cleared).
+   Fixes the stale "new ones arrive every week" stories claim. Text is in
+   `PASTE-full-description.txt`.
+
+---
+
+
+
 **Read this first, before anything else in this folder.** It is the record of
 what is actually done in Play Console, so nobody re-walks finished ground.
 

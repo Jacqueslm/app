@@ -172,3 +172,77 @@ signed in as anyone else.
 Six tests in `server/test/backup.test.js`, including an actual restore: the live
 database is thrown away and the snapshot is opened to prove the accounts and
 their data come back. A backup nobody has restored is only a belief.
+
+---
+
+## 29 AUG 2026 — PLAY BILLING: WHAT IS RULED OUT. READ BEFORE TOUCHING IT.
+
+**The symptom.** The Play Store app opens with a browser bar at the top (an ✕,
+the web address, a share icon). That bar means Android is NOT running it as a
+trusted app — it has fallen back to a browser tab. Play Billing is unavailable
+in a browser tab, so buying Pro fails with:
+
+    OperationError: unsupported context
+    bridge=present · launch=shell · display=standalone · engine=Chrome 151
+
+**These are checked and eliminated. Do not re-walk them.**
+
+| Checked | Result |
+|---|---|
+| `assetlinks.json` reachable | **Yes** — 200, `application/json`, on the apex AND on www |
+| File contents | **Correct** — right package name, right relation, valid JSON |
+| Fingerprint vs Play Console | **Exact match**, compared programmatically not by eye. Google's app signing SHA-256 `99:D2:75:...:6B:F5` is present in the file |
+| Assetlinks served before the apex→www redirect | **Yes** — route registered at server.js line ~115, redirect at ~119 |
+| Uninstall + reinstall from Play Store | **Tried. Did not fix it.** |
+| Wrong app being tested | **Ruled out** — Jacques confirmed he installed from the Play Store, and it still shows the bar. An earlier theory that he was testing a Chrome-installed copy was WRONG for this case; he does have two copies, but the Play one fails too |
+| Is `playBilling` enabled in the build? | **Yes, and it was already enabled in 1.0.1** — the 1.0.2 bump changed version numbers only |
+
+**The one variable never tested:** the shell on Play was built weeks ago with
+older build tools and an older Play Billing library. **1.0.2 (code 3) is a
+fresh rebuild** and was signed and submitted 29 Aug — it was in Google review
+at end of session. When it publishes: reinstall, open, and look for the bar.
+Bar gone = fixed. Bar still there = this is beyond what was worked out from
+here and deserves fresh eyes.
+
+**Do not re-suggest the following — they were offered and Jacques said no:**
+
+- A Stripe fallback when Play billing fails (see below). He declined it.
+
+### The Stripe fallback — offered 29 Aug, DECLINED
+
+The app detects "launched from an app shell" and switches to Play purchases.
+A Chrome-installed copy looks identical from the inside, so the app offers Play
+billing where it can never work, and blocks the Stripe path that would have
+worked — the user gets "Upgrade unavailable" instead of a card form.
+
+Fixing it means falling through to Stripe when the Digital Goods call fails.
+**Jacques was offered this and said no.** Do not implement it or raise it again
+unless he asks.
+
+### Signing the Play bundle — the toolchain, so it is never re-derived
+
+Three scripts in `twa/`, in the order they are used:
+
+1. **`Install-Java.bat`** — his PC had NO Java. jarsigner ships inside Java, so
+   signing was impossible until this was installed. One time only.
+2. **`Sign-Play-App-v2.bat`** — downloads the cloud-built .aab, finds Java
+   (PATH, `.bubblewrap`, Android Studio's jbr, Program Files vendors), signs it.
+   v1 is dead: it looked in exactly one guessed folder and failed.
+3. **`Find-Signed-App.bat`** — the move to the Desktop fails on this machine
+   because **his Desktop is inside OneDrive** (`C:\Users\malon\OneDrive\Desktop`),
+   so `%USERPROFILE%\Desktop` does not exist. This finds the bundle, verifies
+   the signature, and copies it to the real Desktop.
+
+Signing works. It produced `day-one-1.0.2-signed.aab`, 1.75 MB, verified.
+
+### Free hosting — asked twice, answered, CLOSED
+
+He asked about free hosting twice. The honest answer: the only genuinely free
+option that runs this app unchanged is a self-administered VM (Oracle Always
+Free) or a home machine behind Cloudflare Tunnel; everything else either sleeps
+(killing the hourly email scheduler) or has no persistent disk (destroying the
+SQLite database). **He said "leave it alone." Staying on Railway. Do not raise
+it again.**
+
+The lasting good that came out of it: the database had no backup at all, and
+now has one (see the backup section above).

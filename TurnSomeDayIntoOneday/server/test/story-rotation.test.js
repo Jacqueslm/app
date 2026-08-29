@@ -1,76 +1,61 @@
-// Jacques, 29 Aug 2026: a SET of ten runs four weeks - five for a fortnight,
-// the other five for the fortnight after - then the set retires and the next
-// begins. The old code picked five weekly with a stride, which could show the
-// same story two weeks running and had no idea a set could end.
+// Jacques, 29 Aug 2026: "dont auto update stories just do it when i ask, to
+// stop the confusion. When I ask, 10 stories get taken down and 10 more added.
+// Put all the old stories on the app and just store the new ones in the repo
+// for when I'm ready to rotate."
 //
-// The rotation is pure arithmetic on the date, so it is tested as such: the
-// functions are lifted out of index.html and run directly.
+// So the shelf is no longer a function of the date. It is whatever set the
+// `live` field in data/audio-stories.json names, and it moves only when that
+// word is edited and shipped. These tests guard the two things that can go
+// quietly wrong: the app going back to a timer, and `live` naming a set that
+// isn't there (which would silently show the wrong ten).
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 
-const APP = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8');
+const ROOT = path.join(__dirname, '..', '..');
+const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const DATA = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'audio-stories.json'), 'utf8'));
 
-// Rebuild the two pure functions exactly as shipped, driven by an injectable day.
-function rotationAt(dayNumber, batches) {
-  const f = Math.floor(dayNumber / 14);
-  const batch = batches.length ? Math.floor(f / 2) % batches.length : 0;
-  const half = f % 2;
-  const set = batches[batch] || [];
-  if (set.length <= 5) return { batch, half, shelf: set.slice() };
-  return { batch, half, shelf: half ? set.slice(5, 10) : set.slice(0, 5) };
+// The two pure functions exactly as shipped, with their globals injected.
+function shelfFor(batchIds, liveId, batches) {
+  const i = batchIds.indexOf(liveId);
+  return (batches[i >= 0 ? i : 0] || []).slice();
 }
 
 const setA = Array.from({ length: 10 }, (_, i) => `a${i + 1}`);
 const setB = Array.from({ length: 10 }, (_, i) => `b${i + 1}`);
 
-test('the shipped code uses a 14-day period, not a week', () => {
-  assert.match(APP, /const STORY_FORTNIGHT_DAYS=14;/);
-  assert.match(APP, /Math\.floor\(day\/STORY_FORTNIGHT_DAYS\)/);
+test('nothing in the shipped shelf code depends on the date', () => {
+  assert.doesNotMatch(APP, /STORY_FORTNIGHT_DAYS/,
+    'the fortnight timer is gone - a new set must never publish itself');
+  assert.match(APP, /STORY_LIVE_ID=d\.live\|\|''/, 'the shelf is named, not calculated');
 });
 
-test('first five for a fortnight, second five for the next', () => {
-  const first = rotationAt(0, [setA]);
-  const stillFirst = rotationAt(13, [setA]);
-  const second = rotationAt(14, [setA]);
-  const stillSecond = rotationAt(27, [setA]);
-  assert.deepEqual(first.shelf, ['a1', 'a2', 'a3', 'a4', 'a5']);
-  assert.deepEqual(stillFirst.shelf, first.shelf, 'unchanged for the whole fortnight');
-  assert.deepEqual(second.shelf, ['a6', 'a7', 'a8', 'a9', 'a10']);
-  assert.deepEqual(stillSecond.shelf, second.shelf, 'unchanged for its fortnight too');
+test('the live set is served whole - all ten, not five', () => {
+  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]), setA);
+  assert.equal(shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]).length, 10);
+  assert.doesNotMatch(APP, /set\.slice\(5,10\)/, 'sets no longer split in half');
 });
 
-test('no story appears in both halves of a set', () => {
-  const a = rotationAt(0, [setA]).shelf;
-  const b = rotationAt(14, [setA]).shelf;
-  assert.equal(a.filter((x) => b.includes(x)).length, 0,
-    'the whole point of switching is that they are different');
+test('a set written but not named live stays off the shelf', () => {
+  const shelf = shelfFor(['set-1', 'set-2'], 'set-1', [setA, setB]);
+  assert.equal(shelf.filter((x) => setB.includes(x)).length, 0,
+    'adding the next ten to the file must not publish them');
 });
 
-test('after four weeks the set retires and the next one starts', () => {
-  assert.equal(rotationAt(0, [setA, setB]).batch, 0);
-  assert.equal(rotationAt(27, [setA, setB]).batch, 0, 'still set A at the end of week four');
-  assert.equal(rotationAt(28, [setA, setB]).batch, 1, 'set B at the start of week five');
-  assert.deepEqual(rotationAt(28, [setA, setB]).shelf, ['b1', 'b2', 'b3', 'b4', 'b5']);
+test('rotating is one word - naming the other set swaps all ten', () => {
+  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-2', [setA, setB]), setB);
 });
 
-test('a set is shown for exactly 28 days', () => {
-  const seen = new Set();
-  for (let d = 0; d < 28; d++) seen.add(rotationAt(d, [setA, setB]).batch);
-  assert.deepEqual([...seen], [0], 'set A owns days 0-27 and nothing else');
-});
-
-test('with only one set written it repeats rather than going empty', () => {
-  const later = rotationAt(28, [setA]);
-  assert.equal(later.batch, 0);
-  assert.equal(later.shelf.length, 5, 'a repeated set beats an empty shelf');
+test('an unknown or missing live id falls back to the first set, never empty', () => {
+  assert.deepEqual(shelfFor(['set-1', 'set-2'], 'set-3', [setA, setB]), setA, 'typo');
+  assert.deepEqual(shelfFor(['set-1', 'set-2'], '', [setA, setB]), setA, 'no live field');
 });
 
 test('a flat file with no batches is read as a single set', () => {
-  assert.match(APP, /Array\.isArray\(d\.batches\)&&d\.batches\.length/,
-    'batches when present');
-  assert.match(APP, /\[d\.stories\|\|\[\]\]/, 'falls back to the flat list');
+  assert.match(APP, /Array\.isArray\(d\.batches\)&&d\.batches\.length/, 'batches when present');
+  assert.match(APP, /\{id:'all',stories:d\.stories\|\|\[\]\}/, 'falls back to the flat list');
 });
 
 test('every story ever published stays looked-up-able by id', () => {
@@ -78,8 +63,59 @@ test('every story ever published stays looked-up-able by id', () => {
     'the player reads titles from this, including for a story off the shelf');
 });
 
-test('a short set is served whole rather than sliced to nothing', () => {
-  const short = rotationAt(14, [['x1', 'x2', 'x3']]);
-  assert.deepEqual(short.shelf, ['x1', 'x2', 'x3'],
-    'slice(5,10) on a 3-item set would render an empty shelf');
+test('the data file names a set that actually exists', () => {
+  const ids = DATA.batches.map((b) => b.id);
+  assert.ok(DATA.live, 'live must be set');
+  assert.ok(ids.includes(DATA.live), `live "${DATA.live}" is not one of ${ids.join(', ')}`);
+});
+
+test('every set is ten stories with unique ids across the whole file', () => {
+  const seen = new Set();
+  for (const b of DATA.batches) {
+    assert.equal(b.stories.length, 10, `${b.id} should be ten stories`);
+    for (const s of b.stories) {
+      assert.ok(!seen.has(s.id), `duplicate story id ${s.id}`);
+      seen.add(s.id);
+    }
+  }
+});
+
+test('every story on the live shelf has what the card renders', () => {
+  const live = DATA.batches.find((b) => b.id === DATA.live);
+  for (const s of live.stories) {
+    for (const k of ['id', 'title', 'perspective', 'topic', 'narrator', 'minutes', 'text']) {
+      assert.ok(s[k], `${s.id} is missing ${k}`);
+    }
+    assert.ok(['user', 'supporter'].includes(s.perspective), `${s.id} perspective`);
+  }
+});
+
+// Jacques, 29 Aug 2026: "when the stories get rotated always delete the old
+// ones, log to repo." So a retired set must be gone from the data file, not
+// left sitting there, and data/story-rotations.txt must say what went.
+const LOG_PATH = path.join(ROOT, 'data', 'story-rotations.txt');
+
+test('the live set is the first one in the file - nothing retired is left behind', () => {
+  assert.equal(DATA.batches[0].id, DATA.live,
+    'sets before the live one should have been deleted when they came down');
+});
+
+test('the rotation log exists and is in the repo', () => {
+  assert.ok(fs.existsSync(LOG_PATH), 'data/story-rotations.txt is the only record of a deleted set');
+});
+
+test('nothing recorded as retired is still on the shelf', () => {
+  const log = fs.readFileSync(LOG_PATH, 'utf8');
+  const retired = [...log.matchAll(/^\d{4}-\d{2}-\d{2}\s+(\S+) retired/gm)].map((m) => m[1]);
+  for (const id of retired) {
+    assert.ok(!DATA.batches.some((b) => b.id === id),
+      `${id} is logged as retired but is still in audio-stories.json`);
+  }
+});
+
+test('the rotation tool is the thing that does it, and it deletes', () => {
+  const tool = fs.readFileSync(path.join(ROOT, 'tools', 'rotate-stories.js'), 'utf8');
+  assert.match(tool, /data\.batches = kept/, 'the retired sets are dropped from the file');
+  assert.match(tool, /git rm/, 'and their recordings are deleted from the audio branch');
+  assert.match(tool, /APP_VERSION='\$\{newApp\}'/, 'and the version bumps, or phones keep the old shelf');
 });

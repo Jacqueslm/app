@@ -52,7 +52,8 @@ risk — put those on YouTube first. Lean TikTok and Facebook on A2, A3, A4.
 
 ## THE CAUSE & EFFECT FORMAT (Jacques, 23 Aug 2026) — the new default for short AI videos
 
-Three shots, **5-8 seconds total**. Cheapest and fastest format there is
+Three shots, **5-8 seconds total** (house rule 21 came back to this number on
+27 Aug after a day at 15-20 and an hour at 6-10 — the format had it right). Cheapest and fastest format there is
 (~2 paid generations), and it still follows the same script criteria as
 everything else — the hook-first titles, the KEYWORDS.md rule, one idea per
 video, no medical claims:
@@ -69,7 +70,7 @@ the choice, the effect caption names the price. Example pair:
 "The choice took two seconds." / "The road back takes everything."
 No jokes, no hope-copy on shots 1-2 - the hope lives on the end card.
 
-Timing inside 5-8s: roughly 2-3s cause, 2-3s effect, 2s end card. Music from
+Timing inside 5-8s: roughly 2.5-3s cause, 2.5-3s effect, 2s end card. Music from
 the score library covers the whole thing and ends on the last note. Scripts
 in this format still get the full four fields (both titles, SAY/prompts,
 caption) and a number in this file.
@@ -839,3 +840,114 @@ identified by looking at them, not by sorting. Do that every time.
 "was." orphaned on its own line. Rewritten as three short lines instead of two
 long ones, and the bottom scrim lifted from .55 to .62/.96 because the hospital
 frame is nearly white where the type sits. Both are in the source.
+
+---
+
+## A18 — "Worrying feels like control" · compulsive worry · CAUSE & EFFECT · 7.6s · BUILT 27 Aug 2026
+
+**First piece built to both new rules:** house rule 21 at **5-8 seconds** and
+house rule 26 at **9:16 full bleed**. Two beats and an end card — three beats
+genuinely do not fit at this length, which is the point of the rule.
+
+1. **2.9s** the kitchen table at night, slow push — *Worrying feels like
+   **control**.*
+2. **2.0s** dissolve at 3.3s to the room it ends up in, slow push — *This is
+   where it actually ends up.*
+3. **2.0s** end card — **Worry is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** Worrying feels like control
+**Title (YouTube):** Compulsive worrying — why it feels like you're doing something
+
+**Caption:** Worrying feels like control. Like if you run it through enough
+times, you can stop the thing from happening. You can't — and this is where the
+nights actually end up. Worry is a habit, and habits can be broken. Free, no
+card, no ads, works with no account. Link in bio.
+#overthinking #worry #anxietyrelief #recovery #dayone
+
+**Score:** `content/score/the-last-breath.mp3` — the shortest track there is
+(12.36s) — **trimmed to 7.6s with a 1.45s fade, NOT stretched.** It does not end
+on the last note, and at this length nothing can. See house rule 21: all 16
+tracks in `content/score/` run 12.36-22.66s, so trimming is the only option
+until there are 5-8s stings.
+**Files:** source `content/worry-source.html`, stills `content/worry/`
+(`01-kitchen.png`, `02-clinic.png`, both natively 1440x2560). The .mp4 is
+handed over, not committed.
+
+**No medical claim, deliberately.** The clinic frame shows her being *looked
+after* — a hand held, a form being filled in — and the caption says "this is
+where it ends up," not that worry caused an illness. That distinction is house
+rule 9 and it is the whole reason the line is worded that way. Do not tighten it
+into cause-and-effect about health.
+
+### Two things to know before this one goes out
+
+- **There is no worry or anxiety term anywhere in KEYWORDS.md**, same as pills.
+  The file is final (Semrush ended 15 Aug), so there is no volume for this lane
+  and none can be pulled. Content-led. Do not invent a number.
+- **The app has no worry track.** The 14 in `lessons.json` are Porn & Sex,
+  Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging,
+  Shopping/Spending, Work, Other, Supporting Someone, Anger & Control, Together.
+  The honest destination is the SOS tools and the journal, or **Supporting
+  Someone** — which is where this piece is strongest anyway. The person who
+  cannot stop worrying about somebody else's drinking is the supporter lane,
+  Jacques's moat, and it already has pages built (`/for-her`,
+  `/when-he-drinks`, `/partner-drinks`). **Aim the caption at her when posting
+  and it has somewhere real to land; post it as general anxiety content and it
+  does not.**
+
+---
+
+## A19 — "You told yourself it was just today" · bingeing · CAUSE & EFFECT · 7.6s · BUILT 27 Aug 2026
+
+**The male side of Lane 5.** A16/A16b are the same subject from a woman's side
+and are about the shame cycle. This one is a man, in public, and it is about
+accumulation instead — different person, different mechanism, no repeated lines.
+
+1. **2.9s** the table, slow push — *You told yourself it was just today.*
+2. **2.0s** dissolve at 3.3s — *Your body keeps a **tab**.*
+3. **2.0s** end card — **Bingeing is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** You told yourself it was just today
+**Title (YouTube):** How to stop binge eating — the tab nobody sees (9,900/mo head term, KD 37)
+
+**Caption:** You told yourself it was just today. It's been just today for a
+while now. Nobody sees the tab — that's what makes it easy to keep opening.
+Bingeing is a habit, and habits can be broken. Free, no card, no ads, works
+with no account. Link in bio.
+#bingeeating #emotionaleating #overeating #recovery #dayone
+
+**Score:** `content/score/silent-impact-3.mp3` trimmed to 7.6s with a 1.45s
+fade. Does not end on the last note — see rule 21.
+**Files:** source `content/food-source.html`, stills `content/food/`.
+
+### Why the captions do NOT say what the second frame shows
+
+The supplied effect still is a man clutching his chest. **The captions
+deliberately never name it, never say heart, and never claim the food caused
+it.** "Your body keeps a tab" is accumulation, not diagnosis. Three reasons,
+and they should hold on any recut:
+
+1. **House rule 9.** No medical or research claims. "Overeating gives you a
+   heart attack" is exactly that, and it is a claim this app is not in a
+   position to make.
+2. **It contradicts A16, which is the better piece.** A16's whole thesis is
+   *"the shame isn't the punishment, it's the setup for the next one."* A
+   fear-and-shame appeal about dying is the mechanism A16 identifies as the
+   thing that keeps the cycle running. Naming the heart attack would have this
+   video arguing against the one next to it in the library.
+3. **Reach.** The cause frame is a visibly fat man eating and the effect frame
+   is a medical emergency. Captioned as causation that reads as fat-shaming
+   rather than recovery content, which is both off-brand for Lane 5 and the
+   fastest way to lose the ad-safe status KEYWORDS.md flags for this lane.
+
+Worded as it is, the cut still lands — the frames do the work, which is the
+whole point of Cause & Effect — without the app saying something clinical.
+
+### Two build notes
+
+- **The stills are 784x1168 (2:3), not 9:16**, despite the `_9x16` filenames.
+  Full bleed crops ~8% off each side and upscales ~64% to reach 1080x1920, so
+  this is the softest piece in the file. **Re-generate at 1440x2560 like the
+  A18 pair and it is a re-render, nothing else.**
+- Same man in both frames, which is house-rule series consistency working. Keep
+  him for any further Lane 5 male pieces.

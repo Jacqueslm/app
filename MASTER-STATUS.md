@@ -1487,6 +1487,41 @@ Jacques hours of work he should never have touched.
 - **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
   Replicate and fal.ai are BLOCKED by the environment's network policy - that
   is why no AI model can be called from here for images, video or voice.
+
+**IMAGE GENERATION - properly tested 28 Aug, not assumed (Jacques asked for a
+real attempt rather than a prediction).** The answer is still no, but the
+reason is now precise:
+
+- **The software side works.** `torch 2.13.0` plus `diffusers`, `transformers`,
+  `accelerate` and `safetensors` all install fine from PyPI into a venv. (Note:
+  installing into system site-packages fails on a broken
+  `setuptools-84.0.0.dist-info` - use a venv.)
+- **The weights are the wall.** A real
+  `StableDiffusionPipeline.from_pretrained(...)` call fails with
+  **`ProxyError: 403 Forbidden`** - the gateway refuses the CONNECT. Same 403
+  for huggingface.co, cdn-lfs.huggingface.co, hf.co, hf-mirror.com,
+  modelscope.cn, gitee.com, civitai.com, api.openai.com, fal.run,
+  api.replicate.com, api.stability.ai, storage.googleapis.com and
+  download.pytorch.org.
+- **What IS reachable**: pypi.org, files.pythonhosted.org, github.com,
+  raw.githubusercontent.com, GitHub *release assets* (tested, real download),
+  and s3.amazonaws.com. So weights mirrored on a GitHub release could
+  physically come in - but no mainstream photoreal model is distributed that
+  way.
+- **Even if weights arrived, the hardware kills it**: 4 CPU cores, 15 GB RAM,
+  **no GPU** (`torch.cuda.is_available()` is False). SDXL on 4 CPU cores is
+  minutes per image, and matching a series face needs IP-Adapter/LoRA on top.
+- **Shutterstock MCP: search works, download does not.** The connector returns
+  real photoreal stock with IDs and descriptions, but `image.shutterstock.com`
+  is blocked, so nothing can be fetched here. Usable as **a way to propose
+  specific stock IDs for Jacques to license and send back** - not as an asset
+  pipeline.
+
+**Conclusion that holds until the network policy changes:** Jacques generates
+the stills and sends them (a zip works; chat images do not always reach the
+filesystem). That loop is faster than anything that could be stood up in here.
+**Do not re-litigate this without re-running the tests** - and if the policy is
+ever opened, image generation works the same day, because the stack is proven.
 - **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
   the ear and the eye on every piece of media. That one never changes.
 
@@ -1543,16 +1578,97 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
-## House rule 21 — videos are 15 to 20 seconds (Jacques, 22 Aug 2026)
+## House rule 27 — a video is not finished until it has a title and tags (Jacques, 27 Aug 2026)
 
-**Every video is 15-20 seconds. Twenty is the ceiling, not the target.**
+**Handing over an .mp4 on its own is an unfinished job.** Every finished video
+is delivered with all of the following, in the chat message that carries the
+file — not buried in AI-SCENES for him to go dig out:
 
-Jacques called this after a 31-second piece: too long for how people actually
-watch. In practice that is about **four beats**, not seven - roughly 3.5 to 4.5
-seconds a line including its fade. Every line has to earn its place, and the
-end card is 2 seconds inside the budget, not on top of it.
+1. **Social title** — the hook-first one, for TikTok and Facebook. Short enough
+   to read at a glance. This is the line that stops the scroll.
+2. **YouTube title** — the search-shaped one. Carries the keyword where
+   KEYWORDS.md actually has a term for the lane. **Where it has none (pills,
+   worry), say so instead of inventing a volume.** KEYWORDS.md is final.
+3. **Hashtags** — 4-6, specific to the lane, not generic recovery filler.
+4. **Buffer tags** — from the three the org actually has, reused not invented:
+   `addictions` · `recovery` · `partner support`. See the Buffer rules above
+   for the IDs.
+5. **The AI-generated flag reminder** (house rule 19), because Facebook cannot
+   take it through the API and it has to be set by hand.
 
-Existing longer pieces stay as they are. This governs everything new.
+Same four fields already go in the AI-SCENES entry. The rule is that they also
+go **in the handover**, so he can post straight from the message without
+opening the repo. He posts from his phone; making him cross-reference a
+markdown file to find a caption is the thing this rule exists to stop.
+
+## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
+
+**Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**
+
+**The one carve-out is YouTube long-form, and it is not ours.** Jacques has a
+different AI making those; nothing in this repo's pipeline should ever output
+16:9. If a request here seems to want landscape, it is the wrong lane - say so
+rather than building it.
+
+**What this changes in practice: ask for the stills in 9:16 up front.** The
+treatment follows the source, and there are only two:
+
+- **Source is natively 9:16 → FULL BLEED.** The frame fills 1080x1920, no
+  band, no blurred blowup. Captions need their own bottom scrim because there
+  is no dark band under them. A17 (pills) and A18 (worry) are built this way.
+- **Source is 4:3 or landscape → the letterboxed band**: the photo sits in a
+  1080x810 band on a blurred, darkened blowup of itself. This is the fallback,
+  not the goal - it wastes roughly a third of the frame. A16 (binge) is the
+  example.
+
+Full bleed is better every time: more picture, no dead bars, and it is what the
+feed actually shows. **A 4:3 still is a compromise, so ask for 9:16 before the
+image is generated rather than banding it afterwards.**
+
+Both treatments already exist in `content/*-source.html` - copy whichever
+matches the stills rather than writing a new one.
+
+## House rule 21 — videos are 5 to 8 seconds (Jacques, 27 Aug 2026)
+
+**Every video is 5-8 seconds. Eight is the ceiling, not the target.**
+
+**Length history, so nobody re-litigates it:** 15-20s (22 Aug) → 6-10s
+(27 Aug) → **5-8s (27 Aug, current)**. Each step was Jacques, same reason each
+time: too long for how people actually watch. Note where this lands - the
+Cause & Effect format in AI-SCENES.md said **5-8 seconds** when he defined it
+on 23 Aug. The rule has come back to the number the format always had. C&E was
+right and the 15-20s rule was the outlier.
+
+**What 5-8 seconds actually buys you: two beats and an end card.** Nothing
+more. Roughly 2.5-3s a caption including its fade, and the end card is ~2s
+*inside* the budget, not on top of it. Three captions do not fit - cut the
+line, don't shave the others to squeeze it in. If a piece needs three beats it
+is the wrong piece for this format.
+
+**The score problem this creates, and the fix.** Every track in
+`content/score/` is 12-14s, which is now LONGER than the cut, so the old
+treatment inverts:
+- At 15s the tracks were too short and got stretched with `atempo` (~4.5%) to
+  land on the last note.
+- At 5-8s stretching is impossible - fitting 12.36s (the shortest track there
+  is) into 7s is a 77% speed-up and would wreck it. So the score gets
+  **trimmed with a fade-out** instead, which means **it cannot end on the last
+  note at this length.**
+- **Checked 27 Aug against all 16 tracks in `content/score/`: the range is
+  12.36s to 22.66s. Not one is under 12s.** The library the other session added
+  (fading-hymns, neon-rain, static-in-the-rain, weisser-schnee, fading-light,
+  paper-kites) is 17-23s, i.e. even further from usable at this length.
+- That is a real, knowing exception to "music covers the whole video and ends
+  on the last note." Either accept the fade, or Jacques cuts 6-10s stings in
+  Suno and the rule holds again. His call, not one to make silently.
+
+**The four pieces built 26-27 Aug are all off-spec at ~15s** (A15 trauma bond,
+A16 / A16b binge, A17 pills) - roughly double the new ceiling. They were built
+to the 15-20s rule. Each has its
+source in `content/*-source.html` with the beat timings in one `SUBS` array, so
+recutting any of them to 6-10s is an edit and a re-render, not a rebuild.
+
+Existing longer pieces stay as they are unless asked. This governs everything new.
 
 ## House rule 25 — Pro sells itself quietly (Jacques, 24 Aug 2026)
 

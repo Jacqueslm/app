@@ -399,9 +399,22 @@ explain the zero between them:
 
 2. **The bar was unreachable.** It required 7 days AND 7 finished lessons. On
    6 installs and 23 monthly actives, essentially nobody cleared both, so the
-   prompt effectively never appeared. Lowered to **3 days and 3 lessons** —
-   still real momentum, and actually reachable. The slip-day guard and the
-   once-only rule are untouched; this is not a nag.
+   prompt effectively never appeared. Now the whole bar is **one finished
+   lesson** — Jacques, 29 Aug: *"some people will want to rate it just by
+   looking around"*. It still lands on a moment of pride rather than an empty
+   screen. The slip-day guard and the once-only rule are untouched; this is
+   not a nag.
+
+3. **There was no way to rate on purpose.** A prompt fires once, on its own
+   terms, and never again. Profile now carries a permanent **"Rate this app"**
+   row, shown only on a Play install because nobody else can leave a Play
+   rating. (`ti-star` is in the icon map — an icon key that is missing there
+   renders nothing at all, which is a trap this file has warned about before.)
+
+**A one-off email asking the existing list for a rating** is written and ready
+at `outreach/play-rating-ask.txt`. It is a manual send, once, never repeated —
+it tells web members plainly that it is not for them, and tells anyone the app
+has not helped to reply instead of rating.
 
 Also: **the day-30 review email pointed only at the website.** Site reviews
 build trust on the site but do nothing for Play ranking. It now also carries

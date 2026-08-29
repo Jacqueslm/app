@@ -1707,6 +1707,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <!-- Jacques, 29 Aug 2026: "some people will want to rate it just by looking
+           around". The one-time prompt fires on its own terms and never again;
+           this is here whenever somebody feels like it. Hidden unless the app
+           came from Play, because nobody else can leave a Play rating. -->
+      <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
+        <i class="ti ti-star"></i>
+        <div class="setting-row-txt"><p>Rate this app</p><span>A line on Google Play is how the next person finds it</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" onclick="logOutFromProfile()">
         <i class="ti ti-logout"></i>
         <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
@@ -3710,8 +3719,8 @@ const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'med
 // ─── The rating ask ──────────────────────────────────────────────────────────
 // A 4.0+ star average decides whether Play ever shows this app to strangers,
 // and the people most likely to rate it well are the ones on a streak. So the
-// ask happens exactly once, after a lesson on day three or later - a moment of
-// earned pride - and never on a day with a slip logged. "Not now" is permanent.
+// ask happens exactly once, after a finished lesson - a moment of earned pride,
+// from day one on - and never on a day with a slip logged. "Not now" is permanent.
 // No nagging: the same quiet register as everything else here.
 function maybeAskForRating(){
   if(S.ratingAsked)return;
@@ -3721,11 +3730,13 @@ function maybeAskForRating(){
   // installed properly they would never be asked again. That is a large share
   // of the reason this app has zero ratings.
   if(typeof isPlayBuild==='function'&&!isPlayBuild())return;
-  // Was 7 days AND 7 finished lessons. On the real numbers almost nobody
-  // cleared both, so the ask effectively never fired. Three and three is still
-  // somebody with real momentum - and it is reachable.
-  if(getDays()<3)return;
-  if((S.lessonsCompletedCount||0)<3)return;
+  // Was 7 days AND 7 finished lessons, which on the real numbers nobody
+  // cleared, so it never fired. Jacques, 29 Aug: somebody who likes what they
+  // see should be able to say so straight away. One finished lesson is the
+  // whole bar now - it still lands on a moment of pride rather than an empty
+  // screen, and Profile carries a permanent "Rate this app" row for anyone who
+  // wants to rate without being asked.
+  if((S.lessonsCompletedCount||0)<1)return;
   const today=new Date().toDateString();
   if((S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today))return;
   // The flag is set when the sheet actually OPENS, not when it is scheduled.
@@ -11677,6 +11688,9 @@ function isPlayBuild(){return playBuild;}
 function applyPlayBuildUI(){
   if(!isPlayBuild())return;
   document.body.classList.add('play-build');
+  // Only a Play install can leave a Play rating, so the row appears only there.
+  const rr=document.getElementById('rate-app-row');
+  if(rr)rr.style.display='';
 }
 
 // ─── IN-APP PURCHASE (GOOGLE PLAY, LATER APPLE) ──────────────────────────────
@@ -12752,7 +12766,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.6';
+const APP_VERSION='7.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

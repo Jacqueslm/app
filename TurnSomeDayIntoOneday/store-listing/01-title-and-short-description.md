@@ -33,7 +33,26 @@ category is not a claim — I Am Sober, Nomo, Sober Time and Reframe all do it.
 
 ---
 
-## App title — LIVE `Turn Someday Into Day One` (25 / 30)
+## App title — DECISION 29 Aug 2026: change to `Day One: Addiction Recovery`
+
+**Jacques chose this himself on 29 Aug**, after asking to work on Play
+visibility. It supersedes the earlier "leave it alone" note below. `Day One:
+Addiction Recovery` is **27 / 30** characters.
+
+Why he changed it: Play search results show only icon, title, developer and
+star rating — never the short description. `Turn Someday Into Day One`
+truncated to **"Turn Someday Int…"** and contained no term anyone types, so a
+search result could not say what the app was.
+
+**The launcher name on the phone is NOT affected.** That comes from
+`launcherName: "Day One"` in twa-manifest.json and is already "Day One". No
+rebuild, no new upload — this is a store listing edit only.
+
+**The brand is not dead.** "Turn Someday Into Day One" remains the line on the
+website, in the emails and inside the app. Only the store title changes, which
+is ordinary practice.
+
+### (superseded) the old note
 
 **His name, his call. Do not change it without asking, and do not keep
 re-raising it.**

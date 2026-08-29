@@ -46,9 +46,20 @@ you can defend the answer if Play ever asks.
 
 | Data type | Collected | Shared | Purpose |
 |---|---|---|---|
-| **Other in-app messages** | **YES — CHANGE THIS IN THE CONSOLE** | No | App functionality |
+| **Other in-app messages** | **Yes — DONE 29 Aug, not ephemeral** | No | App functionality |
 
-> ### ⚠ 28 Aug 2026 — this answer is wrong and needs changing in Play Console.
+> ### ✅ FIXED 29 Aug 2026, 3:15 PM — submitted for review.
+>
+> The data type was ALREADY ticked; the wrong answer was one step further in.
+> Play asks *"Is this data processed ephemerally?"* and it was set to **Yes**.
+> Changed to **No**. Collected/not-shared, required, and App functionality were
+> all already correct and were left alone. Publishing overview: "App content →
+> Data safety → Complete Data safety questionnaire", 1 change sent for review.
+>
+> Note for next time: the repo said "change it to Yes, collected". It was
+> already collected. Look at the actual console before acting on these notes.
+>
+> ### The reasoning (28 Aug) — why it had to change:
 >
 > The reasoning below is correct **about Friendly** and stays true: chat text is
 > never stored. But the answer was written as if Friendly were the only place a

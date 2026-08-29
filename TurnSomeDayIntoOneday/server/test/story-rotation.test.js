@@ -89,3 +89,33 @@ test('every story on the live shelf has what the card renders', () => {
     assert.ok(['user', 'supporter'].includes(s.perspective), `${s.id} perspective`);
   }
 });
+
+// Jacques, 29 Aug 2026: "when the stories get rotated always delete the old
+// ones, log to repo." So a retired set must be gone from the data file, not
+// left sitting there, and data/story-rotations.txt must say what went.
+const LOG_PATH = path.join(ROOT, 'data', 'story-rotations.txt');
+
+test('the live set is the first one in the file - nothing retired is left behind', () => {
+  assert.equal(DATA.batches[0].id, DATA.live,
+    'sets before the live one should have been deleted when they came down');
+});
+
+test('the rotation log exists and is in the repo', () => {
+  assert.ok(fs.existsSync(LOG_PATH), 'data/story-rotations.txt is the only record of a deleted set');
+});
+
+test('nothing recorded as retired is still on the shelf', () => {
+  const log = fs.readFileSync(LOG_PATH, 'utf8');
+  const retired = [...log.matchAll(/^\d{4}-\d{2}-\d{2}\s+(\S+) retired/gm)].map((m) => m[1]);
+  for (const id of retired) {
+    assert.ok(!DATA.batches.some((b) => b.id === id),
+      `${id} is logged as retired but is still in audio-stories.json`);
+  }
+});
+
+test('the rotation tool is the thing that does it, and it deletes', () => {
+  const tool = fs.readFileSync(path.join(ROOT, 'tools', 'rotate-stories.js'), 'utf8');
+  assert.match(tool, /data\.batches = kept/, 'the retired sets are dropped from the file');
+  assert.match(tool, /git rm/, 'and their recordings are deleted from the audio branch');
+  assert.match(tool, /APP_VERSION='\$\{newApp\}'/, 'and the version bumps, or phones keep the old shelf');
+});

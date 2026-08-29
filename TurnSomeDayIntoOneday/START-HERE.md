@@ -68,3 +68,34 @@ there are no orphan files, and no story in the app is missing audio.
 
 Service worker cache bumped to v6.8 so the corrected lengths reach people who
 already have the app open.
+
+### The win-back email went to an active member (28 Aug) — FIXED
+
+Jacques forwarded a screenshot: someone who has been using the app got the
+"Day one is still there — you haven't been in for a couple of weeks" email.
+
+**Why.** The win-back worked out whether you had been away by looking at the
+activity log, and the activity log only records 33 specific actions — finishing
+a lesson, logging a craving, playing a story. Open the app, read, close it, and
+it writes nothing. To that email you had vanished.
+
+**Fixed** by asking three questions instead of one, and taking the most recent
+answer:
+
+- did she do something the app counts (activity log, as before)
+- did her app sync anything back to the server
+- did any signed-in request arrive at all — a new `last_seen_at` stamp, written
+  on every authenticated request, throttled to one write an hour
+
+The third is the honest reading of "been in" and it did not exist before.
+
+**Nobody gets it twice.** The send-once guard means anyone already emailed by
+mistake will not be emailed again. `last_seen_at` starts empty and fills in as
+people use the app, so the state-sync signal is what protects the next few days.
+
+Five regression tests in `server/test/winback.test.js`, including the exact
+shape of this false send.
+
+Retention in /admin/stats still counts *actions*, not app opens, and that is
+deliberate — retention should measure engagement. Only the win-back needed the
+broader definition.

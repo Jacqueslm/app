@@ -294,6 +294,23 @@ addColumnIfMissing('utm_medium', 'utm_medium TEXT');
 addColumnIfMissing('billing_source', "billing_source TEXT NOT NULL DEFAULT 'stripe'");
 addColumnIfMissing('store_product_id', 'store_product_id TEXT');
 addColumnIfMissing('store_purchase_token', 'store_purchase_token TEXT');
+// The win-back email told an active member she had not been in for a couple of
+// weeks (28 Aug 2026). It measured "quiet" from the activity log alone, and the
+// activity log only records 33 specific actions - somebody who opens the app and
+// reads is invisible to it. This column records the last time an authenticated
+// request arrived at all, which is what "been in" actually means.
+addColumnIfMissing('last_seen_at', 'last_seen_at TEXT');
+
+// Written from requireAuth on every authenticated request, so it is throttled to
+// one write an hour per person: the precision that matters here is days.
+const LAST_SEEN_THROTTLE_MS = 60 * 60 * 1000;
+function touchLastSeen(userId) {
+  const row = db.prepare('SELECT last_seen_at FROM users WHERE id = ?').get(userId);
+  if (!row) return;
+  const prev = row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0;
+  if (Date.now() - prev < LAST_SEEN_THROTTLE_MS) return;
+  db.prepare('UPDATE users SET last_seen_at = ? WHERE id = ?').run(new Date().toISOString(), userId);
+}
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 // leads predates the utm_medium/utm_campaign columns, so it needs the same
@@ -649,7 +666,7 @@ function getUsersInTrialWindow() {
 // belongs given state_json has no schema guarantees.
 function getUsersWithState() {
   return db.prepare(`
-    SELECT u.id, u.email, s.state_json
+    SELECT u.id, u.email, u.last_seen_at, s.state_json, s.updated_at AS state_updated_at
     FROM users u JOIN user_state s ON s.user_id = u.id
     WHERE u.email IS NOT NULL AND u.email != ''
   `).all();
@@ -1083,6 +1100,7 @@ module.exports = {
   getUserById,
   getState,
   saveState,
+  touchLastSeen,
   getSetting,
   setSetting,
   savePushSubscription,

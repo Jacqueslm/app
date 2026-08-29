@@ -95,6 +95,11 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Not signed in.' });
   }
   req.userId = payload.userId;
+  // "Have they been in?" is answered here and nowhere else. The win-back email
+  // used to answer it from the activity log, which only records 33 specific
+  // actions, so somebody who opened the app and read got told she had not been
+  // in for a fortnight. Any authenticated request means she was in.
+  try { db.touchLastSeen(payload.userId); } catch (_) {}
   next();
 }
 

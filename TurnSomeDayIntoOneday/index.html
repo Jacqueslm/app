@@ -1416,13 +1416,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
-    <!-- STORIES: narrated first-person recovery stories, 5 on the shelf at a
-         time, rotating weekly from the pool in data/audio-stories.json.
-         Audio lives on the lesson-audio CDN branch under stories/. -->
+    <!-- STORIES: narrated first-person recovery stories. The whole live set
+         is on the shelf; which set is live is named by `live` in
+         data/audio-stories.json and changes only when that is edited - never
+         on a timer. Audio lives on the lesson-audio CDN branch under stories/. -->
     <div id="s-stories" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0">Stories</div>
-        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Six to ten minutes each. Five on the shelf, changing every two weeks.</div>
+        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Six to ten minutes each. A new set goes up when the last one comes down.</div>
         <div id="stories-list"></div>
       </div>
     </div>
@@ -6434,46 +6435,37 @@ async function shareFilm(){
 }
 
 // ─── STORIES ─────────────────────────────────────────────────────────────────
-// Five narrated stories on the shelf at a time, rotated weekly from the pool.
-// The rotation is deterministic from the ISO week, so every phone shows the
-// same shelf with no server involved, and a new set appears each Monday.
-let STORIES_POOL=null,storyAudio=null,storyPlayingId=null;
-function isoWeek(){const d=new Date();const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
-  const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);
-  const f=new Date(Date.UTC(t.getUTCFullYear(),0,4));
-  return t.getUTCFullYear()*100+Math.round(((t-f)/86400000-3+((f.getUTCDay()+6)%7))/7)+1;}
-// Jacques, 29 Aug 2026: "every 2 weeks there should be new stories - the first
-// five, then switch to the next five, and deleted, and a new set of 10."
+// Jacques, 29 Aug 2026: "dont auto update stories just do it when i ask, to
+// stop the confusion. When I ask, 10 stories get taken down and 10 more added.
+// Put all the old stories on the app and just store the new ones in the repo
+// for when I'm ready to rotate."
 //
-// So a SET of ten runs for four weeks: five for a fortnight, the other five for
-// the fortnight after, then the set retires and the next one starts. The old
-// code picked five weekly with a stride, which could repeat a story two weeks
-// running and had no concept of a set ending at all.
+// So there is NO date arithmetic here any more. The shelf is whatever set
+// data/audio-stories.json names in its `live` field, and it changes only when
+// that one word is edited and shipped. A set that has been written and
+// recorded but not yet published simply sits in the file, unreferenced.
+//
+// The old code derived the shelf from the calendar (a fortnight index), which
+// meant writing the next ten stories published them by accident - the shelf
+// jumped the moment a batch was added, with no way to hold it back.
 //
 // data/audio-stories.json may hold either `batches: [{id, stories:[10]}, ...]`
-// or, as it always has, a flat `stories: [...]` - a flat file is read as one set.
-let STORY_BATCHES=[];
-const STORY_FORTNIGHT_DAYS=14;
-function storyFortnightIndex(){
-  // Local midnight, so a set turns over on the member's own calendar.
-  const n=new Date();
-  const day=Math.floor(new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime()/86400000);
-  return Math.floor(day/STORY_FORTNIGHT_DAYS);
+// plus `live: "<batch id>"`, or, as it always has, a flat `stories: [...]` -
+// a flat file is read as one set and shown whole.
+let STORIES_POOL=null,storyAudio=null,storyPlayingId=null;
+let STORY_BATCHES=[],STORY_BATCH_IDS=[],STORY_LIVE_ID='';
+// Which set is on the shelf. Named set wins; anything unrecognised (a typo, an
+// old file, no `live` at all) falls back to the first set rather than an empty
+// shelf - a wrong-but-present shelf is a far better failure than nothing.
+function storyLiveIndex(){
+  const i=STORY_BATCH_IDS.indexOf(STORY_LIVE_ID);
+  return i>=0?i:0;
 }
-// Which set is live, and which half of it. Wraps when the last set runs out:
-// a repeated set is a far better failure than an empty shelf, and it is the
-// honest consequence of not having written the next ten yet.
-function storyShelfPosition(batchCount){
-  const f=storyFortnightIndex();
-  return {batch:batchCount?Math.floor(f/2)%batchCount:0,half:f%2};
-}
+// Every story in the live set, in file order. All ten, not five: they go up
+// together and come down together.
 function storyShelf(pool){
   const batches=(STORY_BATCHES&&STORY_BATCHES.length)?STORY_BATCHES:[pool||[]];
-  const pos=storyShelfPosition(batches.length);
-  const set=batches[pos.batch]||[];
-  if(set.length<=5)return set.slice();
-  // First five for one fortnight, the rest for the next.
-  return pos.half?set.slice(5,10):set.slice(0,5);
+  return (batches[storyLiveIndex()]||[]).slice();
 }
 async function renderStories(){
   const el=document.getElementById('stories-list');
@@ -6481,9 +6473,10 @@ async function renderStories(){
     el.innerHTML='<div style="color:var(--tm);font-size:.8125rem">Loading the shelf…</div>';
     try{
       const d=await (await fetch('data/audio-stories.json')).json();
-      STORY_BATCHES=(Array.isArray(d.batches)&&d.batches.length)
-        ? d.batches.map(b=>Array.isArray(b)?b:(b.stories||[]))
-        : [d.stories||[]];
+      const raw=(Array.isArray(d.batches)&&d.batches.length)?d.batches:[{id:'all',stories:d.stories||[]}];
+      STORY_BATCHES=raw.map(b=>Array.isArray(b)?b:(b.stories||[]));
+      STORY_BATCH_IDS=raw.map((b,i)=>(Array.isArray(b)?'':(b.id||''))||('set-'+(i+1)));
+      STORY_LIVE_ID=d.live||'';
       // Flat list of everything ever published, so a story that is off the shelf
       // can still be looked up by id - the player reads its title from here.
       STORIES_POOL=STORY_BATCHES.reduce((a,b)=>a.concat(b),[]);
@@ -12779,7 +12772,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.1';
+const APP_VERSION='8.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

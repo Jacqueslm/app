@@ -1,0 +1,54 @@
+PLAY RATING ASK — one-off email to existing members
+Written 29 Aug 2026. Send from turnsomedayintodayone@gmail.com, or through
+Resend. This is a manual send, not part of any sequence — it is a one-time ask
+and it should never become a recurring one.
+
+WHO TO SEND IT TO
+Everybody on the list. The second line handles the fact that only somebody who
+installed from Google Play can leave a Play rating — web members are told
+plainly that this one isn't for them, rather than being made to feel ignored.
+
+WHY IT MATTERS RIGHT NOW
+0 ratings as of 29 Aug, on 6 installs and 23 monthly active devices. Play
+decides whether to show an app to strangers largely on ratings and install
+velocity. No stars in a search result is also the single biggest reason people
+scroll past. The first five ratings are worth more than the next fifty.
+
+---------------------------------------------------------------------------
+SUBJECT:  One favour, and it takes ten seconds
+---------------------------------------------------------------------------
+
+It's Jacques. I don't send many of these, and this one isn't about money.
+
+If you installed the app from the Google Play Store, this is for you. If you
+use it in your browser, ignore this one — you've done nothing wrong, Google
+just won't let you.
+
+Here's the honest situation. The app is on Google Play now, and Google decides
+whether to ever show it to anybody based almost entirely on ratings. Right now
+it has none. Not a bad score — none at all. So when somebody types "quit
+drinking app" into their phone at two in the morning, this does not come up.
+
+If the app has been any use to you, a rating there does more than anything
+else I could do about that.
+
+https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app
+
+Ten seconds. You don't have to write a word — the stars on their own are
+enough.
+
+And if it hasn't been any use, please don't leave one. I'd rather have five
+honest ratings than fifty I talked people into. But do hit reply and tell me
+why, because that's worth more to me than a star is.
+
+— Jacques
+
+---------------------------------------------------------------------------
+
+NOTES FOR NEXT TIME
+- Do not repeat this ask. Once is a favour; twice is pressure, and pressure is
+  the opposite of everything else this app does.
+- The in-app prompt (once, after a finished lesson, never on a slip day) and
+  the permanent "Rate this app" row in Profile carry it from here.
+- Check the rating count before sending again for any reason:
+  play.google.com/console -> your app -> Monitor and improve -> Ratings and reviews

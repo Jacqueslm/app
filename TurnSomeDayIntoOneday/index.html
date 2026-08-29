@@ -11661,24 +11661,41 @@ async function becomeProViaStore(plan){
   // Asked fresh rather than read from the last sync: this is the last moment
   // before the store takes real money, and a stale "ready" here costs a
   // customer a payment that cannot be honored.
+  // Three outcomes, told apart on purpose. The old version collapsed all of
+  // them into "temporarily unavailable": r.ok?r.json():null turned a 401 into
+  // a null, so somebody whose session had simply expired was told the SHOP was
+  // broken and had no idea to sign in. The catch swallowed the real error too,
+  // and it wrapped the sold-out branch as well, so a throw in there reported
+  // itself as a network failure.
+  let ready=null;
   try{
-    const ready=await fetch('/api/billing/status').then(r=>r.ok?r.json():null);
-    if(!ready||!ready.storeBillingReady){
-      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.");
+    const res=await fetch('/api/billing/status');
+    if(res.status===401){
+      appInfo('Please sign in first',"Your session expired, so nothing has been charged. Sign in and tap upgrade again.");
+      try{openAuthModal();}catch(e){}
       return;
     }
-    // The Founding 50 is checked here as well as on the server. The server check
-    // is the authority, but it only runs after the store has already charged the
-    // card - seat 51 would pay and then be told it was sold out.
-    if(plan==='lifetime'&&ready.lifetimeSoldOut){
-      lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
-      applyLifetimeAvailability&&applyLifetimeAvailability();
-      const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
-      appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
+    if(!res.ok){
+      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged.\n\nDetails for support: billing status returned "+res.status+".");
       return;
     }
+    ready=await res.json();
   }catch(e){
-    appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
+    appInfo('Upgrade unavailable',"We could not reach the server, so nothing has been charged. Please try again.\n\nDetails for support: "+((e&&e.name)||'error')+': '+((e&&e.message)||'no message'));
+    return;
+  }
+  if(!ready||!ready.storeBillingReady){
+    appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.\n\nDetails for support: storeBillingReady was false — the server's Play service account is probably not configured.");
+    return;
+  }
+  // The Founding 50 is checked here as well as on the server. The server check
+  // is the authority, but it only runs after the store has already charged the
+  // card - seat 51 would pay and then be told it was sold out.
+  if(plan==='lifetime'&&ready.lifetimeSoldOut){
+    lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
+    applyLifetimeAvailability&&applyLifetimeAvailability();
+    const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
+    appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
     return;
   }
   // Every step below is labelled because this whole block used to end in one
@@ -12670,7 +12687,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.1';
+const APP_VERSION='7.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

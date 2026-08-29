@@ -135,3 +135,40 @@ Together is now excluded from the shared recovery phases (it would have
 addressed a couple as one person working on "the habit"). Every "Together is
 30 days" claim in the app is updated to 90, including the Friendly system
 prompt. Cache v6.9.
+
+### The database now has backups (29 Aug) — it had NONE
+
+Jacques asked about free hosting. Free hosting is not the real risk; the answer
+to that is in the reply. What the question uncovered is: **there was no database
+backup of any kind.** Every account, password, Stripe link, couple link and
+person's progress lived in one SQLite file on one volume, and if that volume had
+gone, there was no way back. `/api/account/export` is one person's own data on
+request — it was never a backup.
+
+**What exists now:**
+
+- **A daily snapshot**, taken with `VACUUM INTO` so it is consistent while the
+  app is running. Last 7 kept beside the database. These cover the likely
+  disaster — a bad deploy, a wrong delete.
+- **An emailed copy** to `APP_OWNER_EMAIL` with the database attached. This is
+  the layer that survives losing the machine, because it lands somewhere the
+  hosting provider does not control. Skipped above 15 MB, and the skip is
+  written to the error log rather than passing quietly.
+- **A Download button** on `/admin/stats`, plus "Back up now". One tap puts a
+  copy on his own machine.
+
+Owner-gated the same as diagnostics — verified by test: 401 signed out, 403
+signed in as anyone else.
+
+**Two real bugs were caught by testing before this shipped:**
+
+1. The prune deleted the **newest** snapshots and kept the oldest. It sorted on
+   file modification time, which a restore or a volume migration resets. It now
+   sorts on the timestamp in the filename.
+2. Two snapshots in the same second **threw** instead of backing up —
+   `VACUUM INTO` will not write over an existing file. It now takes the next
+   free name.
+
+Six tests in `server/test/backup.test.js`, including an actual restore: the live
+database is thrown away and the snapshot is opened to prove the accounts and
+their data come back. A backup nobody has restored is only a belief.

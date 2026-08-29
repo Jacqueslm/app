@@ -390,6 +390,14 @@ function saveState(userId, stateJson) {
   ).run(userId, stateJson, new Date().toISOString());
 }
 
+// A consistent copy of the live database, for backup.js. VACUUM INTO rather
+// than a file copy: copying bytes out from under an open database can catch it
+// mid-write, and a torn backup restores as a corrupt one. The path is built by
+// the caller from an env var, never from a request; quotes escaped regardless.
+function snapshotTo(outPath) {
+  db.exec(`VACUUM INTO '${String(outPath).split("'").join("''")}'`);
+}
+
 function deleteUser(userId) {
   db.prepare('DELETE FROM password_resets WHERE user_id = ?').run(userId);
   db.prepare('DELETE FROM email_log WHERE user_id = ?').run(userId);
@@ -1101,6 +1109,7 @@ module.exports = {
   getState,
   saveState,
   touchLastSeen,
+  snapshotTo,
   getSetting,
   setSetting,
   savePushSubscription,

@@ -2754,8 +2754,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:2rem;margin-bottom:8px">⛰️</div>
     <!-- NOT .sos-title: that class is #E24B4A, the emergency red used on the SOS
          sheet. Red on a moment of pride reads as an alarm. -->
-    <div style="font-size:1.125rem;font-weight:600;color:var(--accent);margin-bottom:6px;text-align:center">Seven days of showing up.</div>
-    <div class="sos-sub" style="margin-bottom:16px">If this app is helping, a rating on Google Play helps the next person find it — the one still searching at 2am.</div>
+    <div style="font-size:1.125rem;font-weight:600;color:var(--accent);margin-bottom:6px;text-align:center">Liking it so far?</div>
+    <div class="sos-sub" style="margin-bottom:16px">A rating on Google Play helps the next person find it — the one still searching at 2am.</div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="goRateApp()">Rate it on Google Play</button>
     <button class="sos-close" onclick="closeRatingAsk()">Not now</button>
     <div style="font-size:.6875rem;color:var(--tm);margin-top:10px">We'll never ask again either way.</div>
@@ -3719,24 +3719,24 @@ const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'med
 // ─── The rating ask ──────────────────────────────────────────────────────────
 // A 4.0+ star average decides whether Play ever shows this app to strangers,
 // and the people most likely to rate it well are the ones on a streak. So the
-// ask happens exactly once, after a finished lesson - a moment of earned pride,
-// from day one on - and never on a day with a slip logged. "Not now" is permanent.
+// ask happens exactly once, as soon as somebody has actually used the app -
+// on open or after a lesson, whichever comes first - and never on a day with a
+// slip logged. "Not now" is permanent. It opens the Play listing; there is no
+// rating collected inside the app.
 // No nagging: the same quiet register as everything else here.
 function maybeAskForRating(){
   if(S.ratingAsked)return;
   // Only somebody who installed from Play can leave a Play rating. Without this
-  // the single ask was being spent on web and Chrome-installed users who had
-  // nowhere to leave one - and because the flag is permanent, if they later
-  // installed properly they would never be asked again. That is a large share
-  // of the reason this app has zero ratings.
+  // the single ask was spent on web and Chrome-installed users who had nowhere
+  // to leave one - and the flag is permanent, so if they later installed
+  // properly they were never asked again.
   if(typeof isPlayBuild==='function'&&!isPlayBuild())return;
-  // Was 7 days AND 7 finished lessons, which on the real numbers nobody
-  // cleared, so it never fired. Jacques, 29 Aug: somebody who likes what they
-  // see should be able to say so straight away. One finished lesson is the
-  // whole bar now - it still lands on a moment of pride rather than an empty
-  // screen, and Profile carries a permanent "Rate this app" row for anyone who
-  // wants to rate without being asked.
-  if((S.lessonsCompletedCount||0)<1)return;
+  // Jacques, 29 Aug: "i rated apps on google store within 30 minutes of trying
+  // it - i want a user to rate it on google store immediately". It used to
+  // need 7 days and 7 lessons, then one lesson. Now the only bar is that they
+  // have actually done something in the app: a handful of real actions, which
+  // a person who is looking around clears in their first sitting.
+  if((S.activityLog||[]).length<3)return;
   const today=new Date().toDateString();
   if((S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today))return;
   // The flag is set when the sheet actually OPENS, not when it is scheduled.
@@ -12766,7 +12766,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='7.7';
+const APP_VERSION='7.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -14443,6 +14443,10 @@ function enterApp(){
   updateAccountUI();
   loadLessonPacks();
   loadRoomStories();
+  // Also checked on open, not only after a lesson. The lesson hook alone meant
+  // the ask could never reach somebody in their first half hour - which is
+  // exactly when people rate an app they like.
+  setTimeout(()=>{try{maybeAskForRating();}catch(e){}},4000);
   if(S.startDate){
     document.getElementById('onboarding').style.display='none';
     if(S.pinEnabled&&S.pinHash){

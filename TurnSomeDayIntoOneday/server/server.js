@@ -1226,6 +1226,15 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // A Play subscriber has no Stripe customer, so the portal cannot help them and
+  // its error reads as nonsense to somebody looking at their own active plan.
+  if ((user.billing_source || 'stripe') === 'play') {
+    return res.status(409).json({
+      error: 'This subscription is billed by Google Play, so it is managed in the Play Store.',
+      managedBy: 'play',
+      storeProductId: user.store_product_id || null,
+    });
+  }
   try {
     const url = await billing.createPortalSession(user, getOrigin(req));
     res.json({ url });
@@ -1255,6 +1264,14 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
     ...billing.getBillingStatus(user),
     storeBillingReady: storeBilling.isPlayConfigured(),
     lifetimeSoldOut: user.plan !== 'lifetime' && billing.getLifetimeAvailability().soldOut,
+    // Where this subscription is actually billed. Without it the app sent every
+    // cancel request to the Stripe portal, so a member who paid through Google
+    // Play was told "No billing account found yet. Upgrade to Pro first." while
+    // looking at their own active plan. Play also requires that a subscriber can
+    // reach their subscription management, so that dead end was a policy risk
+    // as well as a bad answer.
+    billingSource: user.billing_source || 'stripe',
+    storeProductId: user.store_product_id || null,
   });
 });
 

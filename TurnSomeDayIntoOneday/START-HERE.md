@@ -304,3 +304,25 @@ it again.**
 
 The lasting good that came out of it: the database had no backup at all, and
 now has one (see the backup section above).
+
+### A Play subscriber could not cancel (29 Aug) — app 7.3
+
+Minutes after the first successful Play purchase, Jacques tapped **Cancel
+subscription** on his own active plan and got:
+
+> "No billing account found yet. Upgrade to Pro first."
+
+Every cancel went to the Stripe billing portal, and a Play subscriber has no
+Stripe customer, so `createPortalSession` threw that message at somebody
+looking at a live subscription. The client had no idea `billing_source` even
+existed — the word appeared nowhere in index.html.
+
+Fixed: `/api/billing/status` now returns `billingSource` and `storeProductId`;
+the app routes Cancel and Resume to the Google Play subscriptions page when
+Play is the biller and to Stripe otherwise; and the portal endpoint refuses a
+Play user with a machine-readable `managedBy: 'play'` instead of the misleading
+error, so even a stale client redirects correctly.
+
+This was a policy risk as well as a bug — Google requires that a subscriber can
+reach their subscription management. Five tests in `server/test/billing-source.test.js`,
+including that lifetime is still answered before any billing route is chosen.

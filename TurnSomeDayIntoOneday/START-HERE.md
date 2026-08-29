@@ -462,3 +462,24 @@ true throughout the billing investigation.
 Railway's service panel has a **Backups** tab. Not examined. Worth a look as a
 second layer under the app's own daily snapshots, which are the thing that
 actually leaves the machine.
+
+### Play Store work — ALL DONE 29 Aug 2026
+
+Nothing on the Play side is outstanding.
+
+| | |
+|---|---|
+| **1.0.2 signed and shipped** | Published in under an hour, full rollout |
+| **In-app purchases** | **Working.** One missing certificate fingerprint |
+| **App title** | `Day One: Addiction Recovery` — live in search |
+| **Data safety** | In-app messages corrected, submitted |
+| **Full description** | Pasted, 3976/4000, story claims accurate |
+| **Promo video** | Remade. The old one claimed "Every tool, free" over a Pro screen |
+| **Railway variables** | Checked. `SESSION_SECRET` and `NODE_ENV` both set |
+
+**Still parked, at his word — do not start these unasked:**
+
+- Play links on the 45 marketing pages (he stopped it mid-way: *"no stop"*)
+- The next ten stories. The pipeline is proven to run from this environment:
+  piper-tts installs, the voice model downloads, ffmpeg and Chromium are both
+  present. Writing and recording can both be done here.

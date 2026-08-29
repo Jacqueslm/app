@@ -384,3 +384,31 @@ Nine tests in `server/test/story-rotation.test.js` cover the fortnight boundarie
 (days 0/13/14/27/28), that no story appears in both halves, that a set owns
 exactly 28 days, the single-set repeat, and that a set shorter than ten is served
 whole rather than sliced to nothing.
+
+### Why the app had ZERO Play ratings (29 Aug) — app 7.6
+
+Jacques asked to work on being found on Play. Two bugs in the rating ask
+explain the zero between them:
+
+1. **It never checked whether the person could actually rate.** The ask fired
+   for web and Chrome-installed users too. Only somebody who installed from
+   Play can leave a Play rating, so the single ask was being spent on people
+   with nowhere to leave one — and `S.ratingAsked` is permanent, so if they
+   later installed properly they were never asked again. Now gated on
+   `isPlayBuild()`.
+
+2. **The bar was unreachable.** It required 7 days AND 7 finished lessons. On
+   6 installs and 23 monthly actives, essentially nobody cleared both, so the
+   prompt effectively never appeared. Lowered to **3 days and 3 lessons** —
+   still real momentum, and actually reachable. The slip-day guard and the
+   once-only rule are untouched; this is not a nag.
+
+Also: **the day-30 review email pointed only at the website.** Site reviews
+build trust on the site but do nothing for Play ranking. It now also carries
+the Play listing link, framed for whoever installed from Play.
+
+**The title changed the same day** — see `store-listing/01-title-and-short-description.md`.
+`Day One: Addiction Recovery`, his decision.
+
+Numbers if you want to judge whether this worked: 6 installs, 23 monthly active
+devices, 0 ratings as of 29 Aug.

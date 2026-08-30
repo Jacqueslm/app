@@ -143,7 +143,7 @@ Open the app and write your relapse plan.
 
 Not lessons. Not the counter. The plan. It takes eleven minutes and it is the only part of this that works at 2am.
 
-Write it now, while you're clear-headed and a little bit motivated, because that version of you is the only one who can. The 2am version of you can't write it — he can only read it.
+Write it now, while you're clear-headed and a little bit motivated, because that version of you is the only one who can. The 2am version of you can't write it — they can only read it.
 
 — Jacques` },
   { step: 1, subject: 'Nobody quits at noon', text: `At noon you're fine. At noon you're a guy with a plan.
@@ -159,15 +159,15 @@ That's what the plan is for. If you didn't write yours yesterday, write it today
 — Jacques` },
   { step: 2, subject: "There's a section in there that isn't for you", text: `Something you probably haven't opened yet.
 
-There's a whole section in the app built for your partner. Not about her — for her. Her own space.
+There's a whole section in the app built for your partner. Not about them — for them. Their own space.
 
-Here's why I built it. When I was in it, I thought I was the one suffering. I was wrong. She'd been awake for years, being told she was overreacting, doing quiet math on whether to stay. Nobody built her anything. Every app in this space treats her like a bystander.
+Here's why I built it. When I was in it, I thought I was the one suffering. I was wrong. She'd been awake for years, being told she was overreacting, doing quiet math on whether to stay. Nobody built her anything. Every app in this space treats the partner like a bystander.
 
-I'm not going to tell you when to show it to her. You know your marriage and I don't.
+I'm not going to tell you when to show it to them. You know your marriage and I don't.
 
-But it's there. And if you're ever going to have that conversation, having something to hand her is better than having nothing.
+But it's there. And if you're ever going to have that conversation, having something to hand them is better than having nothing.
 
-If you want to send it to her directly without her seeing the rest of your account: turnsomedayintodayone.com/for-her
+If you want to send it to them directly without them seeing the rest of your account: turnsomedayintodayone.com/for-her
 
 — Jacques` },
   { step: 3, subject: "The reset button isn't failure", text: `Day 3 is usually where the first wobble shows up.
@@ -433,17 +433,17 @@ That's all for today. Tomorrow I'll tell you the one thing that changed everythi
 {APP_URL}` },
   { step: 2, subject: 'Two jobs, and you only ever had one', text: `There are two jobs in your house.
 
-One is his: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages him.
+One is theirs: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages them.
 
 Almost everybody in your position quietly takes on both. It's not weakness - it's what happens when somebody has to keep the household upright and nobody else is going to. But here's the thing I watched from the other side: me not getting better was never once caused by somebody not managing me well enough. Nobody talked me into it and nobody could have. The people who tried the hardest just got the most worn out.
 
-Your healing does not have to wait in a queue behind his.
+Your healing does not have to wait in a queue behind theirs.
 
 That's not permission to stop caring. It's permission to stop carrying the half that was never yours.
 
 - Jacques
 {APP_URL}` },
-  { step: 3, subject: 'The ten minutes when you want to check his phone', text: `You know the ten minutes. He's in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
+  { step: 3, subject: 'The ten minutes when you want to check their phone', text: `You know the ten minutes. They're in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
 
 I'm not going to tell you not to. Checking is not a character flaw - it's what a person does when they've been lied to and their own judgment stopped feeling reliable. That's the real injury, by the way. Not the drinking. The fact that you can't trust your own read on your own life anymore.
 
@@ -457,21 +457,21 @@ It won't fix anything tonight. It'll give you back one night.
 {APP_URL}` },
   { step: 4, subject: 'A promise and a change look identical from the outside', text: `This is the one I owe you an honest answer on, because I made a lot of promises and meant every single one of them.
 
-That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "he promised" and "he lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
+That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "they promised" and "they lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
 
-So here's the only thing I know that separates a promise from a change, and it's not what he says:
+So here's the only thing I know that separates a promise from a change, and it's not what they say:
 
 A promise is about the future. A change shows up in the boring middle of an ordinary week. Not a grand declaration after a bad night - the Tuesday. Did anything about the Tuesday get different? That's the whole test. It takes weeks to read, it can't be rushed, and it's the only honest measure there is.
 
-You don't have to decide anything based on it. Just stop grading him on the apologies. They were never the evidence.
+You don't have to decide anything based on it. Just stop grading them on the apologies. They were never the evidence.
 
 - Jacques
 {APP_URL}` },
   { step: 5, subject: "One thing this week that's yours", text: `Last one, then I'll leave you alone.
 
-I want you to do one thing this week that has nothing to do with him. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
+I want you to do one thing this week that has nothing to do with them. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
 
-I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was him, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
+I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was me, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
 
 Don't let that be yours.
 

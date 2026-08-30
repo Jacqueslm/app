@@ -1504,7 +1504,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
         <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
           <i class="ti ti-headphones" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Stories</p><span>Ten-minute narrated stories of falling and coming back — five, rotating weekly</span></div>
+          <div class="setting-row-txt"><p>Stories</p><span>Narrated stories of falling and coming back — ten on the shelf, six to ten minutes each</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -6074,6 +6074,10 @@ function burstTierForDay(days){
 function celebrationBurst(tier){
   try{
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    // 2AM has no confetti in it - that is the whole tone of the thing. This
+    // canvas is page-level and sits above everything, so a milestone landing
+    // while the tower is open would rain colour over it. It can wait.
+    if(typeof currentScreenId==='function'&&currentScreenId()==='tower')return;
     const T=BURST_TIERS[tier]||BURST_TIERS.medium;
     const c=document.createElement('canvas');
     c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:10000';
@@ -6616,16 +6620,28 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 // ─── 2AM — THE TOWER (game) ──────────────────────────────────────────────────
 // Spec: docs/GAME-SPEC.md. Jacques, 30 Aug 2026.
 //
-// PHASE 1 ONLY, and deliberately so: ten floors, a map you tap around, the
-// Truth-or-Dare door, Friendly in the HUD, progress read from The Climb.
-// The Urge Wave (Phase 2), the Trigger Board and artifact Vault (Phase 3) and
-// floors 11-90 behind Pro (Phase 4) are NOT here. Do not start Phase 2 until
-// this has shipped and been played cold.
+// PHASE 1 ONLY: ten floors, a map you tap around, the Truth-or-Dare door,
+// progress read from The Climb. The Urge Wave (Phase 2), the Trigger Board and
+// artifact Vault (Phase 3) and floors 11-90 behind Pro (Phase 4) are NOT here.
+//
+// Jacques, 30 Aug 2026, on his sixth reference: it was ROBLOX, not "robot", and
+// what he meant by it is that every floor should be its own place - "floor 3
+// doesn't look or play like floor 7". So there is no shared map template any
+// more. Each floor below carries its own layout, its own palette, its own air,
+// and its own rule. The rules are drawn from six primitives, implemented once
+// and reused, because ten bespoke rule engines is how a two-week build becomes
+// a four-month one:
+//   dark     - a room stays unlit until you are standing next to it
+//   dim      - the lights fade the longer you stand still; moving relights them
+//   echo     - every room is drawn again, reflected, underneath itself
+//   oneway   - a corridor you cannot come back through
+//   sequence - the door will not let you in until you have been somewhere else
+//   slow     - you move heavily
 //
 // The spec's non-negotiables, and where each one lives in this file:
-//   1. No character    - no mascot, no robot, no guide, and Friendly is not in
+//   1. No character - no mascot, no robot, no guide, and Friendly is not in
 //      here either. The floor's line is unattributed; nobody is talking to you.
-//   2. Unbiased        - floor text never names who is at fault. It says "it".
+//   2. Unbiased - floor text never names who is at fault. It says "it".
 //   3. No medical claims - no brain chemistry, no "research shows", anywhere.
 //   4. No relapse punishment - towerOnRelapse drops you to the last landing and
 //      never below floor 1, and never un-clears a door you already opened.
@@ -6633,83 +6649,119 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //      there is no Pro gate in here yet by design.
 //   6. No new dependencies - canvas plus vanilla JS, inside this same file.
 const TOWER_PHASE1_FLOORS=10;
-// Rooms live in 0..1 of the stage. A floor is small on purpose: two to four
-// rooms, one of them the door. The stairs only exist once the door is open.
-const TOWER_LAYOUTS=[
-  {rooms:{entry:[0.17,0.70],side1:[0.50,0.25],door:[0.83,0.70],stairs:[0.83,0.25]},
-   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']]},
-  {rooms:{entry:[0.17,0.28],side1:[0.50,0.74],door:[0.83,0.28],stairs:[0.83,0.74]},
-   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']]},
-  {rooms:{entry:[0.15,0.50],side1:[0.45,0.20],side2:[0.45,0.80],door:[0.80,0.50],stairs:[0.80,0.14]},
-   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']]},
-  {rooms:{entry:[0.24,0.50],door:[0.72,0.50],stairs:[0.72,0.16]},
-   edges:[['entry','door'],['door','stairs']]},
-];
-// Ten floors. Two cold lines, one blunt question, one real action, one line
-// from Friendly. Nothing here tells the player how to feel about any of it.
+// Ten floors. Each one is its own place: its own rooms, palette, air and rule.
+// Rooms live in 0..1 of the stage. The stairs are not a room until the door is
+// open, and the door is always the only way to them.
 const TOWER_FLOORS=[
-  {n:1,layout:0,name:'FIRST NIGHT',
+  {n:1,name:'FIRST NIGHT',rule:'dark',air:'grain',
+   pal:{bg:'#04060c',room:'#080c16',roomOn:'#111a2e',stroke:'#141c2e',strokeOn:'#6b62d8',line:'#3b4a7a',label:'#5c688c'},
+   // No corridor from the landing to the door on purpose: with the dark rule,
+   // a floor where every room touches the entrance hides nothing, and the rule
+   // would be inert on the one floor whose whole point is that it is dark.
+   rooms:{entry:[0.17,0.70],side1:[0.50,0.40],door:[0.83,0.70],stairs:[0.83,0.28]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor one. It is dark and you are still here.','The door opens two ways. Pick one.'],
    truth:'What time last night did it get hardest?',
    dare:{text:'Stand outside, or at an open window, and do nothing for sixty seconds.',seconds:60,hold:true},
-   line:"I don't need the whole story. Just the door.",
+   line:'You cannot see a room until you are next to it. Walk anyway.',
    sides:{side1:{name:'STAIRWELL',line:'Cold. Someone else has been up here — there is a cup on the step.'}}},
-  {n:2,layout:1,name:'THE WANT',
+
+  {n:2,name:'THE WANT',rule:'none',air:'grid',
+   pal:{bg:'#050a16',room:'#0a1224',roomOn:'#132244',stroke:'#1a2744',strokeOn:'#6b7ee0',line:'#2a3d6b',label:'#7183b4'},
+   rooms:{entry:[0.17,0.26],side1:[0.50,0.74],door:[0.83,0.26],stairs:[0.83,0.74]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor two. The want came back. It was always going to.','Wanting it and doing it are two different floors.'],
    truth:'What did you tell yourself the last time you gave in?',
    dare:{text:'Put your phone in another room. Sit where you can see the doorway for two minutes.',seconds:120,hold:true},
-   line:'The want is loud. Loud is not the same as in charge.',
+   line:'Nothing on this floor is in your way. That is the hard part.',
    sides:{side1:{name:'STORE ROOM',line:'Boxes of things you bought for the version of you that was going to be fine.'}}},
-  {n:3,layout:2,name:'ONE PERSON',
+
+  {n:3,name:'ONE PERSON',rule:'sequence',air:'glow',
+   pal:{bg:'#0a0805',room:'#14100a',roomOn:'#241c10',stroke:'#2a2114',strokeOn:'#d8a35a',line:'#513c1d',label:'#9a8258'},
+   rooms:{entry:[0.15,0.50],side1:[0.45,0.20],side2:[0.45,0.80],door:[0.81,0.50],stairs:[0.81,0.14]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   doorNeeds:['side1'],
    brief:['Floor three. Nobody gets through this quietly and alone.','One person is enough to start.'],
    truth:'Who already knows, and what have you never actually said to them?',
    dare:{text:'Text one person the word "hey". Nothing else. Send it.',seconds:45,hold:false},
-   line:"You don't have to explain anything. Just open the line.",
+   line:'The door will not open from here. Go through the phone booth first.',
    sides:{side1:{name:'PHONE BOOTH',line:'The handset is warm. Whoever was in here left in a hurry.'},
           side2:{name:'WAITING ROOM',line:'Four chairs. Three of them have been sat in tonight.'}}},
-  {n:4,layout:3,name:'THE HOUR',
+
+  {n:4,name:'THE HOUR',rule:'dim',air:'flicker',
+   pal:{bg:'#0c0508',room:'#180a10',roomOn:'#2c1018',stroke:'#2e1420',strokeOn:'#e0607e',line:'#5a2334',label:'#a86e80'},
+   rooms:{entry:[0.20,0.50],side1:[0.50,0.22],door:[0.78,0.50],stairs:[0.78,0.16]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor four. One hour of your day is worse than the rest.','You already know which one.'],
    truth:'Which hour of the day is the dangerous one for you?',
    dare:{text:"Write that hour somewhere physical — paper, your hand, the mirror. Somewhere you'll walk past it.",seconds:60,hold:false},
-   line:'Name the hour and it stops ambushing you.',
-   sides:{}},
-  {n:5,layout:0,name:'THE SENTENCE',
+   line:'Stand still on this floor and the lights go down. Move and they come back.',
+   sides:{side1:{name:'CLOCK ROOM',line:'Every clock in here reads a different time and all of them are late.'}}},
+
+  {n:5,name:'THE SENTENCE',rule:'echo',air:'dust',
+   pal:{bg:'#08090b',room:'#0f1114',roomOn:'#1c2026',stroke:'#20242b',strokeOn:'#cfd6e4',line:'#3a4048',label:'#8b929c'},
+   rooms:{entry:[0.19,0.36],side1:[0.50,0.36],door:[0.81,0.36],stairs:[0.81,0.72]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor five. Every one of these starts with a sentence.','Yours has been said out loud before.'],
    truth:'What is the exact sentence you say right before it starts?',
    dare:{text:'Say that sentence out loud, once, to the empty room. Listen to it.',seconds:30,hold:false},
-   line:"Out loud it's thinner than it is in your head.",
+   line:'Everything on this floor is doubled. Only one of them is real.',
    sides:{side1:{name:'MIRROR ROOM',line:'Nothing in here but the mirror, and it is honest, which is worse.'}}},
-  {n:6,layout:2,name:'WITHIN REACH',
+
+  {n:6,name:'WITHIN REACH',rule:'oneway',air:'grain',
+   pal:{bg:'#040a08',room:'#081410',roomOn:'#0e241a',stroke:'#12291f',strokeOn:'#5fd6a0',line:'#1e4a37',label:'#6a9a85'},
+   rooms:{entry:[0.16,0.28],side1:[0.44,0.74],side2:[0.72,0.24],door:[0.84,0.66],stairs:[0.50,0.20]},
+   edges:[['entry','side1'],['side1','side2'],['side2','door'],['side1','door'],['door','stairs']],
+   oneway:[['side1','side2']],
    brief:['Floor six. Some rooms are not neutral.','Some names in your phone are not neutral either.'],
    truth:'Which person, place or app makes it close to automatic?',
    dare:{text:'Delete one app, one number, or one bookmark. One. Now.',seconds:60,hold:false},
-   line:'You are not cutting anyone off. You are moving one thing out of reach.',
+   line:'The back stairs only go one way. Once you are through, you are through.',
    sides:{side1:{name:'BACK STAIRS',line:'The quick way down. It is still here. It will always still be here.'},
           side2:{name:'OLD ROOM',line:'The furniture is the same. That is the trouble with it.'}}},
-  {n:7,layout:1,name:'EMPTY TIME',
+
+  {n:7,name:'EMPTY TIME',rule:'none',air:'dust',
+   pal:{bg:'#060810',room:'#0a0e1a',roomOn:'#141c30',stroke:'#161d2e',strokeOn:'#7b8bc4',line:'#232c46',label:'#5d6789'},
+   rooms:{entry:[0.13,0.50],side1:[0.35,0.20],side2:[0.35,0.80],side3:[0.60,0.50],door:[0.85,0.50],stairs:[0.85,0.16]},
+   edges:[['entry','side1'],['entry','side2'],['side1','side3'],['side2','side3'],['side3','door'],['door','stairs']],
    brief:['Floor seven. The hours it used to fill are still there.','Empty time is where this comes back.'],
    truth:'What did it take up — evenings, mornings, the drive home?',
    dare:{text:'Move your body for ninety seconds. Walk, stairs, anything. Start now.',seconds:90,hold:true},
-   line:"Not fitness. Just proof the hour can be spent another way.",
-   sides:{side1:{name:'CLOCK ROOM',line:'Every clock in here reads a different time and all of them are late.'}}},
-  {n:8,layout:3,name:'THE BODY',
+   line:'The biggest floor in the building and there is nothing in any of it.',
+   sides:{side1:{name:'EMPTY',line:'Nothing. Not even dust. Nobody has used this room for anything.'},
+          side2:{name:'EMPTY',line:'The same as the last one. That is the point of it.'},
+          side3:{name:'LONG HALL',line:'It takes longer to cross than it looks like it should.'}}},
+
+  {n:8,name:'THE BODY',rule:'slow',air:'grain',
+   pal:{bg:'#0a0906',room:'#14120b',roomOn:'#242015',stroke:'#282416',strokeOn:'#d6c76a',line:'#4a4320',label:'#968a5c'},
+   rooms:{entry:[0.22,0.62],side1:[0.50,0.26],door:[0.78,0.62],stairs:[0.78,0.22]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor eight. Bad sleep, short temper, no appetite.','None of it is proof you are failing.'],
    truth:'What has your body been doing this week that you have been ignoring?',
    dare:{text:'Drink a full glass of water and eat something before you leave this floor.',seconds:90,hold:false},
-   line:'Tired makes everything louder. Sometimes that is the whole explanation.',
-   sides:{}},
-  {n:9,layout:2,name:'WHO CARRIED IT',
+   line:'You are slower on this floor. Nothing is wrong with you.',
+   sides:{side1:{name:'WASH ROOM',line:'The tap runs cold for a long time before it runs warm.'}}},
+
+  {n:9,name:'WHO CARRIED IT',rule:'sequence',air:'glow',
+   pal:{bg:'#0a0706',room:'#150f0c',roomOn:'#251a14',stroke:'#2a1e18',strokeOn:'#d98f6a',line:'#4e3226',label:'#9a7663'},
+   rooms:{entry:[0.15,0.24],side1:[0.44,0.68],side2:[0.66,0.22],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   doorNeeds:['side1','side2'],
    brief:['Floor nine. Someone was carrying this before it was said out loud.','That has a cost and the cost is real.'],
    truth:'Who has been carrying this with you, and what has it cost them?',
    dare:{text:'Do one small thing for that person without telling them why.',seconds:60,hold:false},
-   line:'No speech. No apology yet. Just the thing.',
+   line:'Both rooms first. You do not get to skip either one of them.',
    sides:{side1:{name:'KITCHEN',line:'Two plates by the sink. One of them has not been touched.'},
           side2:{name:'HALL',line:'A coat still on the hook that nobody has moved in a while.'}}},
-  {n:10,layout:0,name:'THE LANDING',
+
+  {n:10,name:'THE LANDING',rule:'none',air:'window',
+   pal:{bg:'#080b14',room:'#101728',roomOn:'#1d2a46',stroke:'#22304e',strokeOn:'#9fb4ee',line:'#33456e',label:'#8b9cc8'},
+   rooms:{entry:[0.18,0.68],side1:[0.50,0.30],door:[0.82,0.68],stairs:[0.82,0.30]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
    brief:['Floor ten. The first landing.','Ten is not a cure. It is a floor you can stand on.'],
    truth:'What is true now that was not true ten days ago?',
    dare:{text:'Say the number out loud to one person. "Ten days." That is the whole sentence.',seconds:60,hold:false},
-   line:'Landing reached. If you fall from here, you fall to here — not to the ground.',
+   line:'First floor with a window in it. That is all this is.',
    sides:{side1:{name:'LANDING WINDOW',line:'You can see the street from here. It is the first floor you can.'}}},
 ];
 function towerFloor(n){return TOWER_FLOORS[Math.max(0,Math.min(TOWER_FLOORS.length-1,n-1))];}
@@ -6719,6 +6771,7 @@ function towerState(){
   if(!t.room)t.room='entry';
   if(!t.cleared)t.cleared={};
   if(!t.truths)t.truths={};
+  if(!t.visited)t.visited={};
   if(typeof t.nerve!=='number')t.nerve=0;
   return t;
 }
@@ -6741,16 +6794,29 @@ function towerOnRelapse(){
   }catch(e){}
 }
 
-let twAnim=null,twPos=null,twTarget=null,twDareTimer=null,twDareLeft=0,twSayTimer=null;
-function towerLayout(n){return TOWER_LAYOUTS[towerFloor(n).layout];}
+let twAnim=null,twPos=null,twTarget=null,twDareTimer=null,twDareLeft=0,twSayTimer=null,twMoved=0;
 function towerRooms(n){
   // The stairs are not a room until the door is open.
-  const lay=towerLayout(n),out={};
-  Object.keys(lay.rooms).forEach(k=>{if(k!=='stairs'||towerCleared(n))out[k]=lay.rooms[k];});
+  const f=towerFloor(n),out={};
+  Object.keys(f.rooms).forEach(k=>{if(k!=='stairs'||towerCleared(n))out[k]=f.rooms[k];});
   return out;
 }
+function towerVisited(n,k){return !!(towerState().visited[n]||{})[k];}
+// The sequence rule: the door will not let you in until you have been through
+// the rooms it names. Floor 3 wants the phone booth; floor 9 wants both.
+function towerDoorBlocked(n){
+  const need=towerFloor(n).doorNeeds;
+  if(!need||towerCleared(n))return null;
+  const missing=need.filter(k=>!towerVisited(n,k));
+  return missing.length?missing:null;
+}
 function towerConnected(n,a,b){
-  return towerLayout(n).edges.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));
+  const f=towerFloor(n);
+  if(!f.edges.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a)))return false;
+  // The oneway rule: listed as [from,to], and it refuses the way back.
+  if((f.oneway||[]).some(e=>e[0]===b&&e[1]===a))return false;
+  if(b==='door'&&towerDoorBlocked(n))return false;
+  return true;
 }
 function towerRoomName(n,k){
   if(k==='entry')return 'LANDING';
@@ -6765,6 +6831,8 @@ function renderTower(){
   if(t.floor>towerCeiling())t.floor=towerCeiling();
   const f=towerFloor(t.floor);
   if(!towerRooms(t.floor)[t.room])t.room='entry';
+  t.visited[t.floor]=t.visited[t.floor]||{};
+  t.visited[t.floor][t.room]=true;
   document.getElementById('tw-brief-1').textContent=f.brief[0];
   document.getElementById('tw-brief-2').textContent=f.brief[1];
   document.getElementById('tw-hud-floor').textContent='FLOOR '+String(t.floor).padStart(2,'0');
@@ -6772,9 +6840,12 @@ function renderTower(){
   const cleared=Object.keys(t.cleared).length;
   document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
   towerSay(f.line);
+  const stage=document.getElementById('tw-stage');
+  if(stage)stage.style.background=f.pal.bg;
   const c=document.getElementById('tw-canvas');
-  twPos=Object.assign({},towerRooms(t.floor)[t.room]?{x:towerRooms(t.floor)[t.room][0],y:towerRooms(t.floor)[t.room][1]}:{x:.17,y:.7});
-  twTarget=null;
+  const here=towerRooms(t.floor)[t.room]||[0.17,0.7];
+  twPos={x:here[0],y:here[1]};
+  twTarget=null;twMoved=Date.now();
   if(!c._twBound){c.addEventListener('pointerdown',towerTap);c._twBound=true;}
   cancelAnimationFrame(twAnim);
   const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
@@ -6787,6 +6858,38 @@ function towerSay(text){
   const el=document.getElementById('tw-say');
   if(el)el.textContent=text;
 }
+// A fixed wobble per floor, so the air on floor 5 is the same air every time
+// you walk onto floor 5 instead of a fresh random mess on every frame.
+function twRand(seed){let x=Math.sin(seed*12.9898)*43758.5453;return x-Math.floor(x);}
+function towerAir(g,W,H,f,tms){
+  const p=f.pal;
+  g.save();
+  if(f.air==='grain'){
+    g.fillStyle=p.line;g.globalAlpha=.16;
+    for(let i=0;i<70;i++)g.fillRect(twRand(i+f.n*7)*W,twRand(i*3.7+f.n)*H,1,1);
+  }else if(f.air==='grid'){
+    g.strokeStyle=p.line;g.globalAlpha=.10;g.lineWidth=1;
+    for(let x=0;x<W;x+=26){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+    for(let y=0;y<H;y+=26){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  }else if(f.air==='dust'){
+    g.fillStyle=p.label;g.globalAlpha=.22;
+    for(let i=0;i<34;i++){
+      const dx=twRand(i+f.n)*W,dy=(twRand(i*2.3+f.n)*H+(tms/90)*(0.4+twRand(i*5)*0.9))%H;
+      g.beginPath();g.arc(dx,dy,1.1,0,7);g.fill();
+    }
+  }else if(f.air==='glow'){
+    const gr=g.createRadialGradient(W*0.5,H*0.1,4,W*0.5,H*0.1,H*1.1);
+    gr.addColorStop(0,p.strokeOn);gr.addColorStop(1,'rgba(0,0,0,0)');
+    g.globalAlpha=.10;g.fillStyle=gr;g.fillRect(0,0,W,H);
+  }else if(f.air==='flicker'){
+    g.globalAlpha=.05+0.05*Math.abs(Math.sin(tms/210)*Math.sin(tms/97));
+    g.fillStyle=p.strokeOn;g.fillRect(0,0,W,H);
+  }else if(f.air==='window'){
+    g.globalAlpha=.13;g.fillStyle=p.strokeOn;
+    g.beginPath();g.moveTo(W*0.34,0);g.lineTo(W*0.62,0);g.lineTo(W*0.80,H);g.lineTo(W*0.46,H);g.closePath();g.fill();
+  }
+  g.restore();
+}
 function towerDraw(){
   const c=document.getElementById('tw-canvas');
   if(!c||!c.clientWidth)return;
@@ -6796,35 +6899,47 @@ function towerDraw(){
   const g=c.getContext('2d');
   g.setTransform(dpr,0,0,dpr,0,0);
   g.clearRect(0,0,W,H);
-  g.fillStyle='#070a14';g.fillRect(0,0,W,H);
-  const t=towerState(),n=t.floor,rooms=towerRooms(n),lay=towerLayout(n);
+  const t=towerState(),n=t.floor,f=towerFloor(n),p=f.pal,rooms=towerRooms(n);
+  g.fillStyle=p.bg;g.fillRect(0,0,W,H);
+  const now=Date.now();
+  towerAir(g,W,H,f,now);
+  // The dim rule: stand still and the floor goes down to almost nothing.
+  const still=(now-twMoved)/1000;
+  const lit=f.rule==='dim'?Math.max(0.34,1-Math.max(0,still-2)/9):1;
+  g.globalAlpha=lit;
   const RW=Math.min(92,W*0.24),RH=Math.min(62,H*0.21);
   const px=r=>r[0]*W,py=r=>r[1]*H;
-  // corridors first, so the rooms sit on top of them
-  g.lineWidth=5;g.strokeStyle='rgba(90,110,170,0.22)';g.lineCap='round';
-  lay.edges.forEach(e=>{
+  // The dark rule: a room you have never been in and are not standing next to
+  // is a shape with no name on it.
+  const known=k=>f.rule!=='dark'||k===t.room||towerVisited(n,k)||towerConnected(n,t.room,k);
+  g.lineWidth=5;g.strokeStyle=p.line;g.globalAlpha=lit*0.5;g.lineCap='round';
+  f.edges.forEach(e=>{
     if(!rooms[e[0]]||!rooms[e[1]])return;
+    if(!known(e[0])&&!known(e[1]))return;
     g.beginPath();g.moveTo(px(rooms[e[0]]),py(rooms[e[0]]));g.lineTo(px(rooms[e[1]]),py(rooms[e[1]]));g.stroke();
   });
-  Object.keys(rooms).forEach(k=>{
-    const r=rooms[k],x=px(r)-RW/2,y=py(r)-RH/2;
-    const here=k===t.room,reach=towerConnected(n,t.room,k)&&!here;
+  g.globalAlpha=lit;
+  const drawRoom=(k,r,alpha)=>{
+    const x=px(r)-RW/2,y=py(r)-RH/2;
+    const here=k===t.room,reach=towerConnected(n,t.room,k)&&!here,seen=known(k);
+    g.globalAlpha=alpha;
     g.beginPath();
     if(g.roundRect)g.roundRect(x,y,RW,RH,8);else g.rect(x,y,RW,RH);
-    g.fillStyle=here?'#141d33':'#0c1220';g.fill();
+    g.fillStyle=here?p.roomOn:p.room;g.fill();
     g.lineWidth=here?2:1;
-    g.strokeStyle=here?'#6b62d8':(reach?'#2f3d61':'#1b2438');
+    g.strokeStyle=here?p.strokeOn:p.stroke;
     g.stroke();
-    g.font='600 9px '+'-apple-system,Segoe UI,Roboto,sans-serif';
+    if(!seen){g.globalAlpha=lit;return;}
+    g.font='600 9px -apple-system,Segoe UI,Roboto,sans-serif';
     g.textAlign='center';g.textBaseline='middle';
     // Label along the bottom of the room, never through the middle - the
-    // player dot stands in the centre and was sitting on top of the word.
-    g.fillStyle=here?'#cdd5f0':(reach?'#7b88b4':'#4a5474');
+    // player stands in the centre and was sitting on top of the word.
+    g.fillStyle=here?p.strokeOn:(reach?p.label:p.line);
     g.fillText(towerRoomName(n,k),px(r),py(r)+RH/2-9);
     if(k==='door'){
-      g.fillStyle=towerCleared(n)?'#7ee8a2':'#8f86ff';
+      g.fillStyle=towerCleared(n)?'#7ee8a2':(towerDoorBlocked(n)?p.line:p.strokeOn);
       g.fillRect(px(r)-7,py(r)-19,14,16);
-      g.fillStyle='#0c1220';g.fillRect(px(r)-4,py(r)-16,8,10);
+      g.fillStyle=p.room;g.fillRect(px(r)-4,py(r)-16,8,10);
     }
     if(k==='stairs'){
       g.strokeStyle='#7ee8a2';g.lineWidth=2;g.beginPath();
@@ -6832,27 +6947,49 @@ function towerDraw(){
       g.lineTo(px(r)+4,py(r)-10);g.lineTo(px(r)+4,py(r)-16);g.lineTo(px(r)+11,py(r)-16);
       g.stroke();
     }
+    g.globalAlpha=lit;
+  };
+  Object.keys(rooms).forEach(k=>{
+    // The echo rule: everything is drawn twice, and only one of them is real.
+    if(f.rule==='echo'){
+      const r=rooms[k];
+      g.save();g.translate(0,(r[1]*H)*2+RH*1.5);g.scale(1,-1);
+      drawRoom(k,r,lit*0.16);g.restore();
+    }
+    drawRoom(k,rooms[k],lit);
   });
-  // the player
+  // the one-way corridors get an arrow, so it is a rule and not a bug
+  (f.oneway||[]).forEach(e=>{
+    if(!rooms[e[0]]||!rooms[e[1]])return;
+    const a=rooms[e[0]],b=rooms[e[1]];
+    const mx=(px(a)+px(b))/2,my=(py(a)+py(b))/2,an=Math.atan2(py(b)-py(a),px(b)-px(a));
+    g.save();g.translate(mx,my);g.rotate(an);
+    g.globalAlpha=lit*0.8;g.strokeStyle=p.strokeOn;g.lineWidth=2;
+    g.beginPath();g.moveTo(-5,-5);g.lineTo(4,0);g.lineTo(-5,5);g.stroke();
+    g.restore();
+  });
+  g.globalAlpha=lit;
   if(twPos){
     g.beginPath();g.arc(twPos.x*W,twPos.y*H,5,0,7);
     g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
   }
+  g.globalAlpha=1;
   // the tower itself, ten ticks up the right edge
   const lx=W-11;
   for(let i=1;i<=TOWER_PHASE1_FLOORS;i++){
     const y=H-18-((i-1)*((H-40)/(TOWER_PHASE1_FLOORS-1)));
     g.beginPath();g.arc(lx,y,i===n?4:2.5,0,7);
-    // lit = the floor you are on, dim blue = cleared, grey = reachable tonight,
+    // lit = the floor you are on, dim = cleared, grey = reachable tonight,
     // near-black = not open yet. No numbers on it; it is a building, not a bar.
-    g.fillStyle=i===n?'#8f86ff':(towerCleared(i)?'#4a5f8c':(i<=towerCeiling()?'#31405f':'#1d2536'));
+    g.fillStyle=i===n?p.strokeOn:(towerCleared(i)?p.label:(i<=towerCeiling()?p.line:p.stroke));
     g.fill();
   }
-  // movement
   if(twTarget){
+    // The slow rule: floor eight is heavy. Nothing is wrong with you.
+    const k=f.rule==='slow'?0.055:0.16;
     const dx=twTarget.x-twPos.x,dy=twTarget.y-twPos.y;
     if(Math.abs(dx)<0.004&&Math.abs(dy)<0.004){twPos.x=twTarget.x;twPos.y=twTarget.y;twTarget=null;towerArrived();}
-    else{twPos.x+=dx*0.16;twPos.y+=dy*0.16;}
+    else{twPos.x+=dx*k;twPos.y+=dy*k;}
   }
 }
 function towerTap(ev){
@@ -6865,12 +7002,27 @@ function towerTap(ev){
     const rr=rooms[k];
     if(Math.abs(x-rr[0])<=RW/2+0.02&&Math.abs(y-rr[1])<=RH/2+0.03)hit=k;
   });
+  twMoved=Date.now();
   if(!hit)return;
   if(hit===t.room){towerArrived();return;}
-  if(!towerConnected(n,t.room,hit))return;
-  t.room=hit;save();
+  if(!towerConnected(n,t.room,hit)){towerRefused(n,hit);return;}
+  t.room=hit;
+  t.visited[n]=t.visited[n]||{};t.visited[n][hit]=true;
+  save();
   twTarget={x:rooms[hit][0],y:rooms[hit][1]};
   towerPanel();
+}
+// A room that will not let you in says why. A rule you cannot see is a bug.
+function towerRefused(n,hit){
+  const f=towerFloor(n),missing=hit==='door'?towerDoorBlocked(n):null;
+  if(missing){
+    towerSay('The door will not open until you have been through '+
+      missing.map(k=>towerRoomName(n,k).toLowerCase()).join(' and ')+'.');
+  }else if((f.oneway||[]).some(e=>e[1]===towerState().room&&e[0]===hit)){
+    towerSay('That corridor only went one way. You cannot go back through it.');
+  }
+  clearTimeout(twSayTimer);
+  twSayTimer=setTimeout(()=>towerSay(f.line),3600);
 }
 function towerArrived(){towerPanel();}
 function towerPanel(){
@@ -6899,7 +7051,10 @@ function towerPanel(){
     return;
   }
   if(t.room==='entry'){
-    el.innerHTML='<div class="tw-note">Tap a room to move. The door is the only way up.</div>';
+    const blocked=towerDoorBlocked(n);
+    el.innerHTML='<div class="tw-note">'+(blocked
+      ? 'Tap a room to move. The door is shut from this side — go through '+blocked.map(k=>towerRoomName(n,k).toLowerCase()).join(' and ')+' first.'
+      : 'Tap a room to move. The door is the only way up.')+'</div>';
     return;
   }
   const s=f.sides[t.room];
@@ -13236,7 +13391,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.4';
+const APP_VERSION='8.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -20,9 +20,7 @@ function literal(name) {
   return new Function('return ' + m[1].replace(/;$/, ''))();
 }
 const FLOORS = literal('TOWER_FLOORS');
-const LAYOUTS = literal('TOWER_LAYOUTS');
 
-// The two rules that are arithmetic, reimplemented exactly as shipped.
 const ceiling = (climbSteps) => Math.max(1, Math.min(10, climbSteps));
 const afterRelapse = (floor) => Math.max(1, Math.floor(floor / 10) * 10);
 
@@ -43,7 +41,6 @@ test('every floor has both keys and everything the screen renders', () => {
     assert.ok(f.dare.seconds > 0 && f.dare.seconds <= 120,
       `floor ${f.n} dare timer must be real but must not trap anyone on a floor`);
     assert.ok(f.line && f.name, `floor ${f.n} needs its line and a name`);
-    assert.ok(LAYOUTS[f.layout], `floor ${f.n} points at a layout that exists`);
   }
 });
 
@@ -98,29 +95,95 @@ test('the tower can never be climbed higher than the real days behind it', () =>
     'the ceiling must read The Climb, which only moves on a real day');
 });
 
-test('every floor is walkable: entry reaches the door, the door reaches the stairs', () => {
-  for (const lay of LAYOUTS) {
-    const names = Object.keys(lay.rooms);
-    assert.ok(names.includes('entry') && names.includes('door') && names.includes('stairs'));
-    assert.ok(names.length >= 2 && names.length <= 5, 'two to four rooms plus the stairs');
-    const seen = new Set(['entry']);
-    for (let i = 0; i < names.length; i++) {
-      for (const [a, b] of lay.edges) {
-        if (seen.has(a)) seen.add(b);
-        if (seen.has(b)) seen.add(a);
+test('every floor is its own place, not the same map ten times', () => {
+  // Jacques, 30 Aug 2026, on the Roblox reference: "floor 3 doesn't look or
+  // play like floor 7." So no two floors may share a layout, and every floor
+  // carries its own palette and its own air.
+  const shapes = FLOORS.map((f) => JSON.stringify([f.rooms, f.edges]));
+  assert.equal(new Set(shapes).size, 10, 'two floors have identical maps');
+  const airs = FLOORS.map((f) => f.air);
+  assert.ok(new Set(airs).size >= 5, 'the floors should not all breathe the same');
+  for (const f of FLOORS) {
+    for (const k of ['bg', 'room', 'roomOn', 'stroke', 'strokeOn', 'line', 'label']) {
+      assert.match(f.pal[k], /^#[0-9a-f]{6}$/i, `floor ${f.n} palette ${k}`);
+    }
+  }
+  assert.ok(new Set(FLOORS.map((f) => f.pal.bg)).size >= 8, 'the floors look too alike');
+});
+
+// The rules are a fixed set implemented once and reused. A floor inventing its
+// own is how this becomes ten games instead of one.
+const RULES = ['none', 'dark', 'dim', 'echo', 'oneway', 'sequence', 'slow'];
+const AIRS = ['grain', 'grid', 'dust', 'glow', 'flicker', 'window'];
+test('every floor rule comes from the shared set', () => {
+  for (const f of FLOORS) {
+    assert.ok(RULES.includes(f.rule), `floor ${f.n} rule "${f.rule}" is not implemented`);
+    assert.ok(AIRS.includes(f.air), `floor ${f.n} air "${f.air}" is not implemented`);
+    const src = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    if (f.rule !== 'none') assert.ok(src.includes(`'${f.rule}'`), `${f.rule} is declared but never used`);
+  }
+  assert.ok(new Set(FLOORS.map((f) => f.rule)).size >= 5, 'the floors should not all play the same');
+});
+
+test('a rule can never seal a floor: the door and the stairs stay reachable', () => {
+  for (const f of FLOORS) {
+    // Walk it the way a player has to, respecting one-way corridors and the
+    // rooms the door insists on first.
+    const need = f.doorNeeds || [];
+    const oneway = f.oneway || [];
+    const canGo = (from, to, visited) => {
+      if (!f.edges.some(([a, b]) => (a === from && b === to) || (a === to && b === from))) return false;
+      if (oneway.some(([a, b]) => a === to && b === from)) return false;
+      if (to === 'door' && need.some((k) => !visited.has(k))) return false;
+      return true;
+    };
+    // Breadth-first over (room, set of rooms seen) - small enough to brute force.
+    const seen = new Set();
+    const queue = [['entry', new Set(['entry'])]];
+    let reachedDoor = false;
+    while (queue.length) {
+      const [at, vis] = queue.shift();
+      const key = at + '|' + [...vis].sort().join(',');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (at === 'door') reachedDoor = true;
+      for (const to of Object.keys(f.rooms)) {
+        if (to === at || to === 'stairs') continue;
+        if (!canGo(at, to, vis)) continue;
+        const nv = new Set(vis); nv.add(to);
+        queue.push([to, nv]);
       }
     }
-    for (const k of names) assert.ok(seen.has(k), `${k} is unreachable from the landing`);
-    assert.ok(lay.edges.some(([a, b]) => (a === 'door' && b === 'stairs') || (a === 'stairs' && b === 'door')),
-      'the stairs hang off the door, so the door is the only way up');
+    assert.ok(reachedDoor, `floor ${f.n}: the door cannot be reached at all`);
+    assert.ok(f.edges.some(([a, b]) => (a === 'door' && b === 'stairs') || (a === 'stairs' && b === 'door')),
+      `floor ${f.n}: the stairs must hang off the door, so the door is the only way up`);
   }
 });
 
+test('one-way corridors and door conditions point at rooms that exist', () => {
+  for (const f of FLOORS) {
+    for (const [a, b] of f.oneway || []) {
+      assert.ok(f.rooms[a] && f.rooms[b], `floor ${f.n} oneway names a missing room`);
+      assert.ok(f.edges.some(([x, y]) => (x === a && y === b) || (x === b && y === a)),
+        `floor ${f.n} oneway is not on a corridor that exists`);
+    }
+    for (const k of f.doorNeeds || []) {
+      assert.ok(f.rooms[k], `floor ${f.n} doorNeeds names a missing room`);
+      assert.ok(k !== 'door' && k !== 'stairs', `floor ${f.n} doorNeeds must name a side room`);
+    }
+  }
+});
+
+test('a rule the player cannot see is a bug, so a refused room says why', () => {
+  assert.match(APP, /function towerRefused\(n,hit\)\{[\s\S]*?towerDoorBlocked[\s\S]*?oneway/,
+    'both blocking rules must explain themselves');
+});
+
 test('rooms sit inside the stage', () => {
-  for (const lay of LAYOUTS) {
-    for (const [k, r] of Object.entries(lay.rooms)) {
-      assert.ok(r[0] > 0.1 && r[0] < 0.9, `${k} x`);
-      assert.ok(r[1] > 0.1 && r[1] < 0.9, `${k} y`);
+  for (const f of FLOORS) {
+    for (const [k, r] of Object.entries(f.rooms)) {
+      assert.ok(r[0] > 0.1 && r[0] < 0.9, `floor ${f.n} ${k} x`);
+      assert.ok(r[1] > 0.1 && r[1] < 0.9, `floor ${f.n} ${k} y`);
     }
   }
 });

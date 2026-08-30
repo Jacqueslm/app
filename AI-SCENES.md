@@ -1032,19 +1032,30 @@ fade — the knowing 5–8s exception (see rule 21): every track in the library 
 12s+, so a short piece can only fade, never land on the last note.
 **File:** source `content/couple-source.html`, panels `content/couple/`.
 
-### Treatment — why this one is banded, not full bleed
+### Treatment — REBUILT 9:16 full bleed
 
-The panels are **1664x2080 (4:5)**, not native 9:16, so house rule 26 puts them
-in the **letterboxed band**: 1080x1350 sitting on a blurred, darkened blowup of
-the same panel. A centre-crop to 9:16 was never an option here — it would have
-sliced the burned-in caption off the bottom of every panel, which is the whole
-readability of the piece.
+Jacques supplied the panels twice. The **first pass** used the 1664x2080 (4:5)
+set, which house rule 26 puts in the **letterboxed band** — a centre-crop to
+9:16 was never an option there, it would have sliced the burned-in caption off
+the bottom of every panel.
 
-Depth comes from band-vs-backdrop instead of the usual cutout-vs-plate:
-`prep-still.py` / rembg would mangle flat line art, so the band pushes in and
-drifts one way while the backdrop drifts the other, direction alternating per
-beat. House handheld noise and per-frame grain over the top, grain dropped to
-.32 (from .5) because comic linework already carries texture.
+He then sent the same three panels at **1440x2560 — exactly 9:16** — so the
+piece was rebuilt **full bleed**, which is what rule 26 asks for whenever the
+art is native. Both sets are kept in `content/couple/` (`*-9x16.png` are the
+ones in the cut).
+
+**The one trick worth stealing:** `transform-origin: 50% 100%`. Every panel
+carries its caption in a strip at the very bottom of the art, and a normal
+centre-anchored push-in would crop it. Anchored at the **bottom edge**, the
+push scales up and away from the caption — the crop comes off the ceiling,
+where there is nothing, and the words never move a pixel. Base scale is 1.012
+so the handheld drift has room without exposing an edge. **Any future piece
+with burned-in bottom captions wants this.**
+
+The watermark moved **top-right**: the bottom ~175px is caption territory on
+all three panels. Grain dropped to .32 (from .5) because comic linework already
+carries texture, and the vignette eased to .62 so it does not dim the caption
+strips.
 
 ### Why there are no overlay captions
 

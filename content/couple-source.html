@@ -1,38 +1,37 @@
 <!-- A21 "Who's wrong?" - the Together (couple) track, CAUSE / CONSEQUENCE / EFFECT.
      Built to house rules 21 (5-8s) and 26 (9:16). 8.0s: three beats + end card.
 
-     TREATMENT: the three panels are 1664x2080 (4:5), NOT native 9:16, so per
-     rule 26 they get the LETTERBOXED BAND - a 1080x1350 band sitting on a
-     blurred, darkened blowup of the same panel. No centre-crop: these are comic
-     panels and a crop would cut the burned-in caption off the bottom.
+     REBUILT 30 Aug on the 1440x2560 panels. The first pass used the 1664x2080
+     (4:5) set in the letterboxed band; these are native 9:16, so rule 26 puts
+     them FULL BLEED. Old panels kept in content/couple/ as *-caught.png etc.
 
-     NO OVERLAY CAPTIONS. Each panel already carries its own caption in the art
-     (CAUGHT. / THE ARGUMENT. / WHO'S WRONG?), which is what lets three beats
-     fit under the 8s ceiling - nothing extra to read.
+     THE ONE TRICK THIS PIECE ADDS: transform-origin is 50% 100%, so the push-in
+     scales UP FROM THE BOTTOM EDGE. Every panel carries its caption in a strip
+     at the very bottom of the art (CAUGHT. / THE ARGUMENT. / WHO'S WRONG?), and
+     a normal centre-anchored push would crop it. Anchored at the bottom, the
+     caption is pinned and the crop is taken off the ceiling instead, where
+     there is nothing. Any future piece with burned-in bottom captions wants this.
 
-     Motion is a slow push-in on the band against a counter-drifting backdrop,
-     plus the house handheld noise and per-frame grain. Same depth trick as the
-     parallax kit, but the two planes are band vs. backdrop instead of cutout
-     vs. plate - rembg would mangle flat line art.
+     NO OVERLAY CAPTIONS - the panels caption themselves, which is the only
+     reason three beats fit under the 8s ceiling (rule 21: three ADDED caption
+     strips still don't fit).
+
+     Watermark moved top-right: the bottom ~175px is caption territory on all
+     three panels. Handheld drift and per-frame grain per the house kit; grain
+     at .32 rather than .5 because comic linework already carries texture.
      Rendered via window.seek(ms); see tools/render-film.js. -->
 <!doctype html><html><head><meta charset="utf-8"><style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
   font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
 #st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000}
-.beat{position:absolute;inset:0;opacity:0;will-change:opacity}
-.bd{position:absolute;top:50%;left:50%;width:1080px;height:1920px;object-fit:cover;
-  transform:translate(-50%,-50%);z-index:10;
-  filter:blur(26px) brightness(.42) contrast(1.05) saturate(.72);will-change:transform}
-.band{position:absolute;top:50%;left:50%;width:1080px;height:1350px;overflow:hidden;
-  transform:translate(-50%,-50%);z-index:20;will-change:transform;
-  box-shadow:0 26px 70px rgba(0,0,0,.62),0 0 0 2px rgba(0,0,0,.55)}
-.band img{position:absolute;top:50%;left:50%;width:1080px;height:1350px;object-fit:cover;
-  transform:translate(-50%,-50%);filter:contrast(1.05) saturate(1.02);will-change:transform}
+.ly{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover;
+  transform-origin:50% 100%;opacity:0;will-change:transform,opacity;
+  filter:contrast(1.05) saturate(1.02)}
 #grain{position:absolute;inset:0;z-index:40;opacity:.32;mix-blend-mode:overlay;pointer-events:none}
 #vig{position:absolute;inset:0;z-index:45;pointer-events:none;
-  box-shadow:inset 0 0 300px 90px rgba(0,0,0,.80)}
-#wm{position:absolute;bottom:118px;right:56px;width:104px;height:104px;border-radius:30px;
+  box-shadow:inset 0 0 300px 90px rgba(0,0,0,.62)}
+#wm{position:absolute;top:70px;right:56px;width:104px;height:104px;border-radius:30px;
   background:rgba(83,74,183,.92);border:4px solid #7ee8a2;display:flex;align-items:center;
   justify-content:center;box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:99}
 #wm svg{width:64px;height:64px}
@@ -50,12 +49,9 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
 #brand{position:absolute;bottom:120px;width:100%;color:#6672a0;font-size:34px;letter-spacing:6px;font-weight:600}
 </style></head><body><div id="st">
 
-<div class="beat" id="b0"><img class="bd" src="couple/01-caught.png">
-  <div class="band"><img src="couple/01-caught.png"></div></div>
-<div class="beat" id="b1"><img class="bd" src="couple/02-argument.png">
-  <div class="band"><img src="couple/02-argument.png"></div></div>
-<div class="beat" id="b2"><img class="bd" src="couple/03-whos-wrong.png">
-  <div class="band"><img src="couple/03-whos-wrong.png"></div></div>
+<img class="ly" id="b0" src="couple/01-caught-9x16.png">
+<img class="ly" id="b1" src="couple/02-argument-9x16.png">
+<img class="ly" id="b2" src="couple/03-whos-wrong-9x16.png">
 
 <canvas id="grain" width="540" height="960"></canvas>
 <div id="vig"></div>
@@ -79,15 +75,13 @@ const G=document.getElementById('grain'),gx=G.getContext('2d');
 function grain(seed){const d=gx.createImageData(540,960),D=d.data;let x=seed*9301+49297;
   for(let i=0;i<D.length;i+=4){x=(x*9301+49297)%233280;const v=(x/233280)*255;
     D[i]=D[i+1]=D[i+2]=v;D[i+3]=40;}gx.putImageData(d,0,0);}
-// band pushes in and drifts one way, backdrop drifts the other - that difference IS the depth
+// base scale 1.012 gives the handheld drift room to move without exposing an edge.
+// origin is the BOTTOM, so the push crops the ceiling and never the caption.
 function beat(el,p,on,dir){
   if(el.style.opacity!=on)el.style.opacity=on;
   if(on<=0)return;
-  const hx=nz(p*3.2,1+dir)*2.2, hy=nz(p*3.2,7+dir)*1.7, rot=nz(p*3.2,3+dir)*0.16;
-  const bd=el.querySelector('.bd'), bn=el.querySelector('.band'), im=bn.querySelector('img');
-  bd.style.transform='translate(calc(-50% + '+(hx*0.3-p*10*dir)+'px),calc(-50% + '+(hy*0.3)+'px)) scale('+(1.10+0.030*p)+')';
-  bn.style.transform='translate(calc(-50% + '+(hx+p*9*dir)+'px),calc(-50% + '+(hy-p*6)+'px)) rotate('+(rot*0.35)+'deg)';
-  im.style.transform='translate(calc(-50% + '+(-p*7*dir)+'px),calc(-50% + '+(p*4)+'px)) rotate('+rot+'deg) scale('+(1.015+0.055*p)+')';
+  const hx=nz(p*3.2,1+dir)*2.4*dir, hy=nz(p*3.2,7+dir)*1.8, rot=nz(p*3.2,3+dir)*0.14;
+  el.style.transform='scale('+(1.012+0.056*p)+') translate('+hx+'px,'+hy+'px) rotate('+rot+'deg)';
 }
 window.seek=function(ms){
   const t=ms/1000;

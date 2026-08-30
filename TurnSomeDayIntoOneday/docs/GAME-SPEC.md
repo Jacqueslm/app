@@ -79,12 +79,31 @@ seconds either way."*
 
 Walking off the screen mid-wave does not bank it. It runs again next time.
 
-### 3. TONE — the Call of Duty layer
+### 3. TONE — the Call of Duty layer  (briefings ✅ BUILT 30 Aug 2026)
 Serious, not cartoon. Dark UI, high contrast, no bright colors, no confetti.
+Each floor is its own palette; see §5.
 
-Each floor opens with a short **briefing card**: 2 lines, cold and factual, in his
-narrator voice (reuse the six existing voice tracks — Warm, Soft, Gentle, Clear,
-Calm male, and his own). Stakes are stated plainly. No jokes.
+Every floor opens with a **briefing card**: 2 lines, cold and factual. They can
+be read aloud in the member's own narrator — the same six voices as the
+lessons (Warm, Soft, Gentle, Clear, Male, Deep), following whatever they
+already picked. The game never asks them to choose a voice a second time.
+
+Sixty recordings (10 floors x 6 voices, ~7-9 seconds each, 2.6 MB total) live
+on the `lesson-audio` branch under `tower/<voice>/floor-NN.mp3`, made by
+`tools/generate-tower-audio.py`. That script reads the twenty lines straight
+out of index.html rather than keeping a copy, so a rewrite of a briefing can
+never leave the recordings quietly saying something else.
+
+It is off until asked for once. After that every floor reads itself — and
+because a floor only changes on a tap, that autoplay always happens inside a
+real gesture, which is what phones require. A recording that will not load is
+silent and disables the button; it never interrupts the floor with a dialog,
+because the two lines are already on the screen. Leaving the screen, the wave,
+and the door all stop it.
+
+*"No confetti" is enforced in code, not just written here: `celebrationBurst`
+is a page-level canvas above everything, so a milestone landing while the
+tower is open would rain colour over it. It waits until the player leaves.*
 
 ### 4. THE TOWER — the Uncharted layer
 Floors are not a straight list. Each floor is a small top-down map with 2–4 rooms.
@@ -165,7 +184,10 @@ Clearing the board earns the landing. Failing means retry, not loss.
 
 **Phase 2:**
 - ~~Urge Wave mini-game~~ — built 30 Aug 2026
-- Voice briefings using existing narrator tracks — NOT built
+- ~~Voice briefings using existing narrator tracks~~ — built 30 Aug 2026
+
+Phase 2 is complete. Phase 3 (Trigger Board, artifact rooms, Vault) has not
+been started.
 
 **Phase 3:**
 - Trigger Board puzzle on landings

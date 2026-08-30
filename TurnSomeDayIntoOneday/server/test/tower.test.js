@@ -200,8 +200,8 @@ test('there is no character in the tower at all', () => {
 
 test('the game loop and the dare timer stop when you leave the screen', () => {
   assert.match(APP, /if\(from==='tower'&&id!=='tower'\)\{try\{towerStop\(\);\}catch\(e\)\{\}\}/);
-  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);towerWaveStop\(\);\}/,
-    'and the wave, which holds a rAF loop, an interval and a stack of timeouts');
+  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);towerWaveStop\(\);towerBriefStop\(\);\}/,
+    'the wave (a rAF loop, an interval and a stack of timeouts), and the voice');
 });
 
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
@@ -268,4 +268,42 @@ test('the whole curve is drawn from the first second, end included', () => {
   // behind you would hide exactly the thing the mechanic is teaching.
   const draw = WAVE.match(/function towerWaveDraw\(\)\{[\s\S]*?\n\}/)[0];
   assert.match(draw, /for\(let i=0;i<=W;i\+=2\)/, 'the faint pass covers the full width');
+});
+
+// ── THE SPOKEN BRIEFING (Phase 2) ───────────────────────────────────────────
+test('the briefing is read in the voice the member already chose', () => {
+  const src = APP.match(/function towerBriefUrl\(n\)\{[\s\S]*?\n\}/)[0];
+  assert.match(src, /lessonVoiceKey\(\)/, 'no second voice picker for the game');
+  assert.match(src, /'tower\/'\+v\+'\/floor-'\+String\(n\)\.padStart\(2,'0'\)\+'\.mp3'/);
+  assert.match(src, /LESSON_AUDIO_MANIFEST[\s\S]*?STORY_AUDIO_BASE/, 'same base as the lessons');
+});
+
+test('the six recorded voices are the six the app offers', () => {
+  const gen = fs.readFileSync(path.join(ROOT, 'tools', 'generate-tower-audio.py'), 'utf8');
+  const recorded = [...gen.matchAll(/^    '(\w+)':\s+\('vits-piper/gm)].map((m) => m[1]);
+  const offered = APP.match(/const VG_VOICE_ORDER=\[([^\]]+)\]/)[1].replace(/'/g, '').split(',');
+  assert.deepEqual(recorded.slice().sort(), offered.slice().sort());
+});
+
+test('a recording that will not load never interrupts the floor', () => {
+  // The two lines are already on the screen. A missing mp3 is silent.
+  const src = APP.match(/function towerBriefPlay\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(src, /a\.onerror=\(\)=>\{[^}]*towerBriefBtn\('gone'\)/);
+  assert.doesNotMatch(src, /appInfo|alert\(|confirm\(/, 'no dialog on a failed briefing');
+  assert.match(src, /pr\.catch/, 'a blocked autoplay must not throw either');
+});
+
+test('the briefing is generated from the same twenty lines the screen shows', () => {
+  const gen = fs.readFileSync(path.join(ROOT, 'tools', 'generate-tower-audio.py'), 'utf8');
+  assert.match(gen, /TOWER_FLOORS/, 'the generator reads index.html, it does not keep a copy');
+  assert.doesNotMatch(gen, /Floor one\. It is dark/, 'the briefing text must not be duplicated here');
+});
+
+test('the voice stops when anything else takes the screen', () => {
+  for (const fn of ['towerStartWave', 'towerOpenDoor']) {
+    const src = APP.match(new RegExp('function ' + fn + '\\([^)]*\\)\\{[\\s\\S]*?\\n\\}'))[0];
+    assert.match(src, /towerBriefStop\(\)/, fn + ' must silence the briefing');
+  }
+  assert.match(APP, /towerBriefStop\(\);\n  if\(t\.readBriefs\)towerBriefPlay\(\);/,
+    'and a new floor replaces it rather than talking over it');
 });

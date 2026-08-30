@@ -443,6 +443,11 @@ body.nova-open #mini-player{bottom:160px}
 #tw-brief{border-left:2px solid #3b4a7a;padding:2px 0 2px 12px;margin-bottom:14px}
 #tw-brief div{font-size:.8125rem;line-height:1.55;color:#93a0c8}
 #tw-brief div+div{color:#6b779c;margin-top:2px}
+/* The spoken briefing. Same six narrators as the lessons, and it follows
+   whichever one the member already picked - the game does not ask again. */
+#tw-brief-btn{margin-top:9px;background:none;border:1px solid #26324f;color:#7b88b4;border-radius:8px;padding:5px 11px;font-size:.6875rem;letter-spacing:1.4px;font-family:var(--f);cursor:pointer}
+#tw-brief-btn.on{border-color:#6b62d8;color:#a99fff}
+#tw-brief-btn[disabled]{opacity:.45;cursor:default}
 #tw-stage{position:relative;width:100%;height:302px;border:1px solid #18213a;border-radius:10px;overflow:hidden;background:#070a14}
 #tw-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation;display:block}
 #tw-hud{position:absolute;top:10px;left:12px;pointer-events:none}
@@ -1488,7 +1493,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
          and the artifact Vault are Phases 2-3 and are deliberately not here. -->
     <div id="s-tower" class="scr">
       <div id="tw">
-        <div id="tw-brief"><div id="tw-brief-1"></div><div id="tw-brief-2"></div></div>
+        <div id="tw-brief"><div id="tw-brief-1"></div><div id="tw-brief-2"></div>
+          <button id="tw-brief-btn" title="Read in your narrator's voice — change the voice on any lesson" onclick="towerBriefToggle()">▶ HEAR IT</button></div>
         <div id="tw-stage">
           <canvas id="tw-canvas"></canvas>
           <div id="tw-hud"><div id="tw-hud-floor">FLOOR 01</div><div id="tw-hud-sub">DAY 1</div></div>
@@ -6879,6 +6885,8 @@ function renderTower(){
   const cleared=Object.keys(t.cleared).length;
   document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
   towerSay(f.line);
+  towerBriefStop();
+  if(t.readBriefs)towerBriefPlay();
   const stage=document.getElementById('tw-stage');
   if(stage)stage.style.background=f.pal.bg;
   const c=document.getElementById('tw-canvas');
@@ -6890,7 +6898,50 @@ function renderTower(){
   const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
   towerPanel();
 }
-function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();}
+function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();towerBriefStop();}
+// The floor read aloud, in the narrator the member already chose for their
+// lessons (spec §3). Sixty short recordings on the lesson-audio branch, made by
+// tools/generate-tower-audio.py: tower/<voice>/floor-NN.mp3.
+//
+// Once they have asked for it once, every floor after this one reads itself -
+// and because a floor only changes on a tap (the stairs, or opening the tab),
+// that autoplay always happens inside a real gesture and phones allow it.
+let twBrief=null;
+function towerBriefUrl(n){
+  const base=(typeof LESSON_AUDIO_MANIFEST!=='undefined'&&LESSON_AUDIO_MANIFEST&&LESSON_AUDIO_MANIFEST.base)||STORY_AUDIO_BASE;
+  const v=(typeof lessonVoiceKey==='function')?lessonVoiceKey():'warm';
+  return base+'tower/'+v+'/floor-'+String(n).padStart(2,'0')+'.mp3';
+}
+function towerBriefBtn(state){
+  const b=document.getElementById('tw-brief-btn');
+  if(!b)return;
+  b.classList.toggle('on',state==='playing');
+  b.disabled=state==='gone';
+  b.textContent=state==='playing'?'■ STOP':(state==='gone'?'NO RECORDING':'▶ HEAR IT');
+}
+function towerBriefStop(){
+  if(twBrief){try{twBrief.pause();}catch(e){}twBrief.src='';twBrief=null;}
+  towerBriefBtn('idle');
+}
+function towerBriefPlay(){
+  towerBriefStop();
+  const n=towerState().floor;
+  const a=new Audio(towerBriefUrl(n));
+  twBrief=a;a.preload='auto';
+  // A missing or unreachable recording is silent and stays silent. It never
+  // interrupts the floor with a dialog - the two lines are already on screen.
+  a.onerror=()=>{if(twBrief===a){twBrief=null;towerBriefBtn('gone');}};
+  a.onended=()=>{if(twBrief===a){twBrief=null;towerBriefBtn('idle');}};
+  towerBriefBtn('playing');
+  const pr=a.play();
+  if(pr&&pr.catch)pr.catch(()=>{if(twBrief===a){twBrief=null;towerBriefBtn('idle');}});
+}
+function towerBriefToggle(){
+  const t=towerState();
+  if(twBrief){t.readBriefs=false;save();towerBriefStop();return;}
+  t.readBriefs=true;save();
+  towerBriefPlay();
+}
 // The line the floor gives you. Unattributed on purpose: 2AM has no guide and
 // no companion in it. Friendly lives in the rest of the app and stays there.
 function towerSay(text){
@@ -7149,6 +7200,7 @@ function towerStartWave(n){
   const f=towerFloor(n);
   twWave={n:n,len:TOWER_WAVE_MIN,seq:[],at:0,rounds:0,input:false,over:false,
     started:Date.now(),timers:[],tick:null,anim:null};
+  towerBriefStop();
   document.getElementById('tw-wave').classList.add('open');
   document.getElementById('tw-wave-eyebrow').textContent='FLOOR '+String(n).padStart(2,'0')+' · THE WAVE';
   document.getElementById('tw-wave-say').textContent='It is here. Nothing you do makes it shorter.';
@@ -7276,6 +7328,7 @@ function towerOpenDoor(){
   // before the door opens. Survive it once and the floor remembers.
   const n=towerState().floor;
   if(towerFloorHasWave(n)&&!towerWaveSurvived(n)&&!towerCleared(n)){towerStartWave(n);return;}
+  towerBriefStop();
   const d=document.getElementById('tw-door');
   d.classList.add('open');
   towerDoorChoice();
@@ -13593,7 +13646,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.6';
+const APP_VERSION='8.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

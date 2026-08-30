@@ -449,15 +449,9 @@ body.nova-open #mini-player{bottom:160px}
 #tw-hud-floor{font-size:.9375rem;font-weight:700;letter-spacing:2px;color:#dbe2f7}
 #tw-hud-sub{font-size:.625rem;letter-spacing:1.6px;color:#5e6a90;margin-top:1px}
 #tw-nerve{position:absolute;top:12px;right:24px;font-size:.625rem;letter-spacing:1.4px;color:#5e6a90;pointer-events:none;text-align:right}
-/* Friendly. One companion in this product - this is the same one, given a body.
-   Geometric, glowing, no face, CSS transforms only (spec rule 1 and §5). */
-#tw-friend{position:absolute;left:12px;bottom:12px;width:38px;height:38px;cursor:pointer}
-#tw-friend .tw-f-core{position:absolute;inset:9px;background:linear-gradient(160deg,#8f86ff,#4a3fb0);transform:rotate(45deg);border-radius:4px;box-shadow:0 0 14px rgba(120,110,255,.55);animation:twpulse 3.4s ease-in-out infinite}
-#tw-friend .tw-f-ring{position:absolute;inset:0;border:1px solid rgba(140,130,255,.45);border-radius:50%;animation:twspin 9s linear infinite}
-@keyframes twpulse{0%,100%{transform:rotate(45deg) scale(1);opacity:.9}50%{transform:rotate(45deg) scale(.86);opacity:1}}
-@keyframes twspin{to{transform:rotate(360deg)}}
-#tw-say{font-size:.8125rem;line-height:1.55;color:#8b96bd;margin:12px 2px 0;min-height:2.6em}
-#tw-say b{color:#a99fff;font-weight:600}
+/* The floor's own line. Nobody says it - there is no guide, no companion and
+   no character in this game. The building talks, or nothing does. */
+#tw-say{font-size:.8125rem;line-height:1.55;color:#8b96bd;margin:12px 2px 0;min-height:2.6em;border-left:2px solid #232e4d;padding-left:11px}
 #tw-panel{margin-top:12px}
 .tw-btn{width:100%;background:#111a2e;border:1px solid #26324f;color:#d5dcf2;border-radius:10px;padding:13px;font-size:.875rem;font-family:var(--f);cursor:pointer;text-align:left}
 .tw-btn:disabled{opacity:.4;cursor:default}
@@ -1478,7 +1472,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <canvas id="tw-canvas"></canvas>
           <div id="tw-hud"><div id="tw-hud-floor">FLOOR 01</div><div id="tw-hud-sub">DAY 1</div></div>
           <div id="tw-nerve"></div>
-          <div id="tw-friend" onclick="towerTapFriendly()"><div class="tw-f-ring"></div><div class="tw-f-core"></div></div>
         </div>
         <div id="tw-say"></div>
         <div id="tw-panel"></div>
@@ -6630,7 +6623,8 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 // this has shipped and been played cold.
 //
 // The spec's non-negotiables, and where each one lives in this file:
-//   1. No new mascot   - #tw-friend IS Friendly. One companion, given a body.
+//   1. No character    - no mascot, no robot, no guide, and Friendly is not in
+//      here either. The floor's line is unattributed; nobody is talking to you.
 //   2. Unbiased        - floor text never names who is at fault. It says "it".
 //   3. No medical claims - no brain chemistry, no "research shows", anywhere.
 //   4. No relapse punishment - towerOnRelapse drops you to the last landing and
@@ -6658,64 +6652,64 @@ const TOWER_FLOORS=[
    brief:['Floor one. It is dark and you are still here.','The door opens two ways. Pick one.'],
    truth:'What time last night did it get hardest?',
    dare:{text:'Stand outside, or at an open window, and do nothing for sixty seconds.',seconds:60,hold:true},
-   say:"I don't need the whole story. Just the door.",
+   line:"I don't need the whole story. Just the door.",
    sides:{side1:{name:'STAIRWELL',line:'Cold. Someone else has been up here — there is a cup on the step.'}}},
   {n:2,layout:1,name:'THE WANT',
    brief:['Floor two. The want came back. It was always going to.','Wanting it and doing it are two different floors.'],
    truth:'What did you tell yourself the last time you gave in?',
    dare:{text:'Put your phone in another room. Sit where you can see the doorway for two minutes.',seconds:120,hold:true},
-   say:'The want is loud. Loud is not the same as in charge.',
+   line:'The want is loud. Loud is not the same as in charge.',
    sides:{side1:{name:'STORE ROOM',line:'Boxes of things you bought for the version of you that was going to be fine.'}}},
   {n:3,layout:2,name:'ONE PERSON',
    brief:['Floor three. Nobody gets through this quietly and alone.','One person is enough to start.'],
    truth:'Who already knows, and what have you never actually said to them?',
    dare:{text:'Text one person the word "hey". Nothing else. Send it.',seconds:45,hold:false},
-   say:"You don't have to explain anything. Just open the line.",
+   line:"You don't have to explain anything. Just open the line.",
    sides:{side1:{name:'PHONE BOOTH',line:'The handset is warm. Whoever was in here left in a hurry.'},
           side2:{name:'WAITING ROOM',line:'Four chairs. Three of them have been sat in tonight.'}}},
   {n:4,layout:3,name:'THE HOUR',
    brief:['Floor four. One hour of your day is worse than the rest.','You already know which one.'],
    truth:'Which hour of the day is the dangerous one for you?',
    dare:{text:"Write that hour somewhere physical — paper, your hand, the mirror. Somewhere you'll walk past it.",seconds:60,hold:false},
-   say:'Name the hour and it stops ambushing you.',
+   line:'Name the hour and it stops ambushing you.',
    sides:{}},
   {n:5,layout:0,name:'THE SENTENCE',
    brief:['Floor five. Every one of these starts with a sentence.','Yours has been said out loud before.'],
    truth:'What is the exact sentence you say right before it starts?',
    dare:{text:'Say that sentence out loud, once, to the empty room. Listen to it.',seconds:30,hold:false},
-   say:"Out loud it's thinner than it is in your head.",
+   line:"Out loud it's thinner than it is in your head.",
    sides:{side1:{name:'MIRROR ROOM',line:'Nothing in here but the mirror, and it is honest, which is worse.'}}},
   {n:6,layout:2,name:'WITHIN REACH',
    brief:['Floor six. Some rooms are not neutral.','Some names in your phone are not neutral either.'],
    truth:'Which person, place or app makes it close to automatic?',
    dare:{text:'Delete one app, one number, or one bookmark. One. Now.',seconds:60,hold:false},
-   say:'You are not cutting anyone off. You are moving one thing out of reach.',
+   line:'You are not cutting anyone off. You are moving one thing out of reach.',
    sides:{side1:{name:'BACK STAIRS',line:'The quick way down. It is still here. It will always still be here.'},
           side2:{name:'OLD ROOM',line:'The furniture is the same. That is the trouble with it.'}}},
   {n:7,layout:1,name:'EMPTY TIME',
    brief:['Floor seven. The hours it used to fill are still there.','Empty time is where this comes back.'],
    truth:'What did it take up — evenings, mornings, the drive home?',
    dare:{text:'Move your body for ninety seconds. Walk, stairs, anything. Start now.',seconds:90,hold:true},
-   say:"Not fitness. Just proof the hour can be spent another way.",
+   line:"Not fitness. Just proof the hour can be spent another way.",
    sides:{side1:{name:'CLOCK ROOM',line:'Every clock in here reads a different time and all of them are late.'}}},
   {n:8,layout:3,name:'THE BODY',
    brief:['Floor eight. Bad sleep, short temper, no appetite.','None of it is proof you are failing.'],
    truth:'What has your body been doing this week that you have been ignoring?',
    dare:{text:'Drink a full glass of water and eat something before you leave this floor.',seconds:90,hold:false},
-   say:'Tired makes everything louder. Sometimes that is the whole explanation.',
+   line:'Tired makes everything louder. Sometimes that is the whole explanation.',
    sides:{}},
   {n:9,layout:2,name:'WHO CARRIED IT',
    brief:['Floor nine. Someone was carrying this before it was said out loud.','That has a cost and the cost is real.'],
    truth:'Who has been carrying this with you, and what has it cost them?',
    dare:{text:'Do one small thing for that person without telling them why.',seconds:60,hold:false},
-   say:'No speech. No apology yet. Just the thing.',
+   line:'No speech. No apology yet. Just the thing.',
    sides:{side1:{name:'KITCHEN',line:'Two plates by the sink. One of them has not been touched.'},
           side2:{name:'HALL',line:'A coat still on the hook that nobody has moved in a while.'}}},
   {n:10,layout:0,name:'THE LANDING',
    brief:['Floor ten. The first landing.','Ten is not a cure. It is a floor you can stand on.'],
    truth:'What is true now that was not true ten days ago?',
    dare:{text:'Say the number out loud to one person. "Ten days." That is the whole sentence.',seconds:60,hold:false},
-   say:'Landing reached. If you fall from here, you fall to here — not to the ground.',
+   line:'Landing reached. If you fall from here, you fall to here — not to the ground.',
    sides:{side1:{name:'LANDING WINDOW',line:'You can see the street from here. It is the first floor you can.'}}},
 ];
 function towerFloor(n){return TOWER_FLOORS[Math.max(0,Math.min(TOWER_FLOORS.length-1,n-1))];}
@@ -6777,7 +6771,7 @@ function renderTower(){
   document.getElementById('tw-hud-sub').textContent=f.name+' · DAY '+t.floor;
   const cleared=Object.keys(t.cleared).length;
   document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
-  towerSay(f.say);
+  towerSay(f.line);
   const c=document.getElementById('tw-canvas');
   twPos=Object.assign({},towerRooms(t.floor)[t.room]?{x:towerRooms(t.floor)[t.room][0],y:towerRooms(t.floor)[t.room][1]}:{x:.17,y:.7});
   twTarget=null;
@@ -6787,14 +6781,11 @@ function renderTower(){
   towerPanel();
 }
 function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();}
+// The line the floor gives you. Unattributed on purpose: 2AM has no guide and
+// no companion in it. Friendly lives in the rest of the app and stays there.
 function towerSay(text){
   const el=document.getElementById('tw-say');
-  if(el)el.innerHTML='<b>Friendly:</b> '+escapeHtml(text);
-}
-function towerTapFriendly(){
-  // One companion. Tapping the body opens the same Friendly the rest of the
-  // app uses - it does not spawn a second character with its own chat.
-  switchTo('nova');actBn('bn-nova');
+  if(el)el.textContent=text;
 }
 function towerDraw(){
   const c=document.getElementById('tw-canvas');
@@ -13245,7 +13236,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.3';
+const APP_VERSION='8.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

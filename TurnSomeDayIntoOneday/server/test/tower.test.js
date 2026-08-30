@@ -42,7 +42,7 @@ test('every floor has both keys and everything the screen renders', () => {
     assert.ok(f.dare.text.length > 10, `floor ${f.n} dare`);
     assert.ok(f.dare.seconds > 0 && f.dare.seconds <= 120,
       `floor ${f.n} dare timer must be real but must not trap anyone on a floor`);
-    assert.ok(f.say && f.name, `floor ${f.n} needs Friendly's line and a name`);
+    assert.ok(f.line && f.name, `floor ${f.n} needs its line and a name`);
     assert.ok(LAYOUTS[f.layout], `floor ${f.n} points at a layout that exists`);
   }
 });
@@ -51,7 +51,7 @@ test('every floor has both keys and everything the screen renders', () => {
 test('no medical claims anywhere in the floor text', () => {
   const banned = /\b(brain|dopamine|neuro\w*|chemical|receptor|research shows|studies show|clinically|disease)\b/i;
   for (const f of FLOORS) {
-    const all = [f.brief.join(' '), f.truth, f.dare.text, f.say, Object.values(f.sides).map((s) => s.line).join(' ')].join(' ');
+    const all = [f.brief.join(' '), f.truth, f.dare.text, f.line, Object.values(f.sides).map((s) => s.line).join(' ')].join(' ');
     assert.doesNotMatch(all, banned, `floor ${f.n} makes a medical claim`);
   }
 });
@@ -62,7 +62,7 @@ test('no medical claims anywhere in the floor text', () => {
 test('no floor blames anyone or tells the player to fix another person', () => {
   const banned = /\b(fault|blame|their addiction|make them|get them to|his drinking|her drinking)\b/i;
   for (const f of FLOORS) {
-    const all = [f.brief.join(' '), f.truth, f.dare.text, f.say].join(' ');
+    const all = [f.brief.join(' '), f.truth, f.dare.text, f.line].join(' ');
     assert.doesNotMatch(all, banned, `floor ${f.n} takes a side`);
   }
 });
@@ -125,11 +125,14 @@ test('rooms sit inside the stage', () => {
   }
 });
 
-test('there is still exactly one companion in this product', () => {
-  // Spec rule 1. Tapping the figure opens the same Friendly as the rest of the
-  // app; it must never grow its own chat.
-  const src = APP.match(/function towerTapFriendly\(\)\{[\s\S]*?\n\}/)[0];
-  assert.match(src, /switchTo\('nova'\)/);
+test('there is no character in the tower at all', () => {
+  // Jacques, 30 Aug 2026: "friendly was not supposed to be a part of this."
+  // The spec it was built from read his sixth reference as a robot guide. It
+  // was Roblox. There is no mascot, no robot and no Friendly in this game -
+  // the floor's line is unattributed and nothing in here talks back.
+  assert.doesNotMatch(APP, /tw-friend|towerTapFriendly/, 'the HUD figure is gone');
+  const src = APP.match(/function towerSay\(text\)\{[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(src, /Friendly/, 'the floor line has no speaker');
 });
 
 test('the game loop and the dare timer stop when you leave the screen', () => {

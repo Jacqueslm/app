@@ -17,8 +17,10 @@ have to survive before the door opens.
 
 ## Non-negotiable rules (do not break these)
 
-1. **No new mascot.** The "robot" guide IS Friendly, given a visual body. There is
-   exactly one companion in this product. Do not invent a second character.
+1. **No character at all.** Corrected by Jacques 30 Aug 2026: the sixth reference
+   was **Roblox**, not "robot". There was never meant to be a guide. Friendly is
+   not in this game either — it lives in the rest of the app and stays there. The
+   floor's line is unattributed. Nothing in the tower talks to you.
 2. **Unbiased.** The game never blames the addict to comfort the supporter, or
    blames the supporter to comfort the addict.
 3. **No medical claims.** No brain-chemistry language, no "research shows."
@@ -75,13 +77,19 @@ Floors are not a straight list. Each floor is a small top-down map with 2–4 ro
 
 Movement is tap-to-move between rooms. No joystick, no physics.
 
-### 5. FRIENDLY — the high-tech animated guide
-Friendly appears as a simple animated figure in the corner of the HUD — clean
-geometric shapes, glowing outline, no face, no cute expressions. Animated with CSS
-transforms only.
+### 5. ROBLOX — the sixth reference (WAS MISREAD AS "ROBOT")
+The original spec turned this line into an animated robot guide and then into
+Friendly with a body. That was wrong and it has been removed from the build.
 
-Friendly speaks 1–2 lines per floor. Pro users can tap Friendly to open the real
-chat. Free users see the line but the tap prompts an upgrade.
+**Still to be decided with Jacques** — what Roblox means here. It is not the
+platform and it is not user-generated content. It is one of:
+  a) the LOOK — blocky, chunky, low-poly rooms and a blocky figure;
+  b) the AVATAR — a character that is yours, that you change and keep;
+  c) the WORLDS — each floor its own small place with its own rules, rather
+     than the same map format ten times.
+
+Until that is settled, nothing in the game fills this slot. The per-floor line
+is written as the building's, spoken by nobody.
 
 ### 6. TRIGGER BOARD — the Candy Crush / Angry Birds layer
 Appears on landing floors (10, 20, 30...). This is the thinking puzzle.
@@ -114,7 +122,7 @@ Clearing the board earns the landing. Failing means retry, not loss.
 **Phase 1 (ship first, this is playable on its own):**
 - Tower map screen, 10 floors, tap-to-move
 - Truth or Dare door
-- Friendly HUD figure with static lines
+- The floor's own unattributed line
 - Progress synced to existing Climb data
 
 **Phase 2:**

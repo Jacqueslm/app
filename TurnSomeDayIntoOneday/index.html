@@ -3088,6 +3088,12 @@ function load(){
     S.lessonProgress[S.currentAddiction]=S.currentDay||1;
   }
   if(!S.notifiedDay30Tracks)S.notifiedDay30Tracks=[];
+  // Re-derive the master clock on every boot. Without this, an account saved
+  // under the old rule keeps a startDate pinned to its most recently slipped
+  // track for good - the fix would only take effect the next time something
+  // happened to call syncMasterClock, which for most people is a relapse.
+  // Cheap, and it self-corrects the moment the app opens.
+  try{syncMasterClock();}catch(e){}
   // One-time repair: early supporter accounts had their loved one's addiction
   // stored as their OWN focus area, which aimed addict-directed questions and
   // tracks at the supporter. Move those to partnerFocus where they belonged.
@@ -5500,10 +5506,15 @@ function getDays(){
 // ─── PER-ADDICTION CLOCKS ────────────────────────────────────────────────────
 // One slip used to zero the single clock for every track at once - somebody
 // 47 days off alcohol who slipped on porn lost the 47 on screen. Each track
-// now keeps its own start date. S.startDate stays the master clock and always
-// equals the YOUNGEST per-track clock, so "Days sober" still means sober,
-// full stop - and everything downstream of it (milestones, money saved,
-// share cards) stays conservative rather than inflated.
+// now keeps its own start date.
+//
+// S.startDate is the master clock and equals the OLDEST per-track clock: the
+// longest run still standing. It was the youngest until 30 Aug 2026, which
+// meant the front of the app always showed the track you had most recently
+// slipped on - the same bug these per-track clocks exist to fix, one level up.
+// Where the master feeds something that could overstate (the "Since" line, the
+// share text) the track it belongs to is named alongside it, and the chips
+// under the counter show every track regardless.
 function addictionClocks(){
   S.addictionClocks=S.addictionClocks||{};
   (S.selectedAddictions||[]).forEach(a=>{
@@ -5516,11 +5527,32 @@ function daysFor(addiction){
   if(!c)return getDays();
   return Math.max(0,Math.floor((Date.now()-new Date(c).getTime())/86400000));
 }
+// Which track the big number on Today belongs to: the one you have been at
+// the longest, plus whether the tracks currently disagree at all.
+//
+// Jacques, 30 Aug 2026, three tracks running - Porn & Sex 5d, Food 1d, Anger
+// 8d - and the screen said "Days clean: 1": "it keeps saying day one on the
+// one I failed on when I'm doing multiple tracks."
+//
+// It did, because this took the LATEST start date, which is always the most
+// recent slip. Eight days of work on one thing vanished off the front of the
+// app because of a bad night on another. That is the same mistake per-track
+// clocks were added to fix, one level up. It now takes the earliest, so the
+// headline is your longest run standing; the chips under it still show every
+// track honestly, so nothing is hidden by it.
+function masterTrack(){
+  const clocks=addictionClocks();
+  const rows=(S.selectedAddictions||[])
+    .map(a=>({a:a,t:clocks[a]?new Date(clocks[a]).getTime():0}))
+    .filter(r=>r.t>0)
+    .sort((x,y)=>x.t-y.t);
+  if(!rows.length)return null;
+  return {name:rows[0].a,t:rows[0].t,
+    mixed:rows.length>1&&rows[0].t!==rows[rows.length-1].t};
+}
 function syncMasterClock(){
-  const times=(S.selectedAddictions||[])
-    .map(a=>addictionClocks()[a]).filter(Boolean)
-    .map(c=>new Date(c).getTime());
-  if(times.length)S.startDate=new Date(Math.max(...times)).toISOString();
+  const m=masterTrack();
+  if(m)S.startDate=new Date(m.t).toISOString();
 }
 function renderClockChips(){
   const el=document.getElementById('clock-chips');
@@ -5571,7 +5603,12 @@ function updateStats(){
   evaluateSmartReminders();
 
   document.getElementById('dayCount').textContent=days;
-  document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  // With tracks at different lengths the big number is the longest one, so it
+  // has to say which - otherwise it reads as a claim about all of them.
+  const mt=masterTrack();
+  const sinceTxt='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('since-lbl').textContent=
+    (mt&&mt.mixed&&S.userType!=='partner')?(mt.name+' \u00b7 '+sinceTxt):sinceTxt;
   const progLbl=document.getElementById('program-lbl');
   // Position in the Bootcamp is LESSON progress, not the calendar. This line
   // used to read `days` - time since the quit date - which put "Day 9 of the
@@ -13732,8 +13769,12 @@ function confirmResetDate(){
     errEl.textContent='That is already your start date — nothing to reset. Use "Start over from right now" above.';
     return;
   }
-  const priorStreakLength=getDays();
-  const prevStart=S.startDate;
+  // Both of these must be read from the TRACK BEING RESET, not the master
+  // clock. Now that the master is the longest run, slipping on a short track
+  // often does not move it at all - measured against the master, that slip
+  // would bank nothing, record no streak, and never reach the tower.
+  const priorStreakLength=resetTarget?daysFor(resetTarget):getDays();
+  const prevStart=guardIso;
   const clocks=addictionClocks();
   if(resetTarget){
     clocks[resetTarget]=chosen.toISOString();
@@ -13742,9 +13783,9 @@ function confirmResetDate(){
     S.startDate=chosen.toISOString();
   }
   syncMasterClock();
-  // Bank the ended streak only when the master clock actually moved forward -
+  // Bank the ended streak only when that clock actually moved forward -
   // correcting a date backwards is a correction, not a relapse.
-  if(prevStart&&new Date(S.startDate).getTime()>new Date(prevStart).getTime()){
+  if(prevStart&&chosen.getTime()>new Date(prevStart).getTime()){
     S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
     S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
     if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
@@ -13887,7 +13928,12 @@ function pwConfirmYes(){
 // ─── SHARE ─────────────────────────────────────────────────────────────────────
 function shareMyMilestone(){
   const days=getDays();
-  const text=`I'm ${days} day${days===1?'':'s'} into my recovery journey with Turn Someday Into Day One. One day at a time.`;
+  // The headline is the longest track. When the tracks disagree, a bare
+  // "8 days" would be a claim about all of them, so the share names the one
+  // it is true of.
+  const mt=masterTrack();
+  const on=(mt&&mt.mixed&&S.userType!=='partner')?` on ${mt.name}`:'';
+  const text=`I'm ${days} day${days===1?'':'s'}${on} into my recovery journey with Turn Someday Into Day One. One day at a time.`;
   if(navigator.share){
     navigator.share({text}).catch(()=>{});
     return;
@@ -13936,7 +13982,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.8';
+const APP_VERSION='8.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

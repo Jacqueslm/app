@@ -200,5 +200,72 @@ test('there is no character in the tower at all', () => {
 
 test('the game loop and the dare timer stop when you leave the screen', () => {
   assert.match(APP, /if\(from==='tower'&&id!=='tower'\)\{try\{towerStop\(\);\}catch\(e\)\{\}\}/);
-  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);\}/);
+  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);towerWaveStop\(\);\}/,
+    'and the wave, which holds a rAF loop, an interval and a stack of timeouts');
+});
+
+// ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
+// The whole mechanic rests on one thing: nothing the player does moves the
+// clock. Every test here exists to stop someone "improving" that later.
+const WAVE = APP.slice(APP.indexOf('// ── THE URGE WAVE'), APP.indexOf('function towerOpenDoor()'));
+
+test('the wave runs ninety seconds, as specced', () => {
+  assert.match(APP, /const TOWER_WAVE_SECONDS=90;/);
+  assert.match(APP, /const TOWER_WAVE_MIN=3,TOWER_WAVE_MAX=7;/, 'three to seven pulses');
+});
+
+test('the wave is on about one floor in four, and always on floors ending in zero', () => {
+  const declared = FLOORS.filter((f) => f.wave).map((f) => f.n);
+  const has = (n) => n % 10 === 0 || declared.includes(n);
+  const on = FLOORS.map((f) => f.n).filter(has);
+  assert.ok(on.includes(10), 'floor ten ends in zero, so it always has one');
+  assert.ok(on.length >= 2 && on.length <= 4, `~1 in 4 of ten floors, got ${on.length}`);
+  assert.match(APP, /function towerFloorHasWave\(n\)\{return n%10===0\|\|!!towerFloor\(n\)\.wave;\}/);
+});
+
+test('the clock is read from the start time and nothing else', () => {
+  const left = WAVE.match(/function towerWaveLeft\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(left, /TOWER_WAVE_SECONDS-Math\.floor\(\(Date\.now\(\)-twWave\.started\)/);
+  // Nothing anywhere may push the finish line around. It is stamped once, in
+  // the object the wave is built from, and never assigned again after that.
+  assert.match(WAVE, /started:Date\.now\(\)/, 'stamped when the wave begins');
+  const writes = WAVE.match(/twWave\.started\s*=[^=]/g) || [];
+  assert.equal(writes.length, 0, 'twWave.started must never be reassigned');
+});
+
+test('winning a round buys a longer pattern and not one second', () => {
+  const tap = WAVE.match(/function towerWaveTap\(i\)\{[\s\S]*?\n\}\n/)[0];
+  const won = tap.slice(tap.indexOf('twWave.at>=twWave.seq.length'), tap.indexOf('// Wrong'));
+  assert.match(won, /twWave\.len=Math\.min\(TOWER_WAVE_MAX,twWave\.len\+1\)/);
+  assert.doesNotMatch(won, /started|TOWER_WAVE_SECONDS|towerWaveBreak/,
+    'a good round must never shorten the wave or end it early');
+});
+
+test('getting it wrong restarts the sequence and ends nothing', () => {
+  const tap = WAVE.match(/function towerWaveTap\(i\)\{[\s\S]*?\n\}\n/)[0];
+  const wrong = tap.slice(tap.indexOf('// Wrong'));
+  assert.match(wrong, /twWave\.len=TOWER_WAVE_MIN/, 'the sequence starts again');
+  assert.match(wrong, /towerWaveNext\(/, 'and it keeps going');
+  assert.doesNotMatch(wrong, /towerWaveBreak|towerWaveStop|started/,
+    'failing must not end the wave, and must not extend it either');
+});
+
+test('the wave counts as survived only when it breaks on its own', () => {
+  const brk = WAVE.match(/function towerWaveBreak\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(brk, /t\.waves\[n\]=true;save\(\)/);
+  const stop = WAVE.match(/function towerWaveStop\(\)\{[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(stop, /waves\[/, 'walking away mid-wave must not bank it');
+});
+
+test('the wave stands between the player and the door, once', () => {
+  const open = APP.match(/function towerOpenDoor\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(open, /towerFloorHasWave\(n\)&&!towerWaveSurvived\(n\)&&!towerCleared\(n\)/);
+  assert.match(open, /towerStartWave\(n\);return;/, 'the door does not open behind it');
+});
+
+test('the whole curve is drawn from the first second, end included', () => {
+  // Being able to see that it stops is the point; a bar that only fills in
+  // behind you would hide exactly the thing the mechanic is teaching.
+  const draw = WAVE.match(/function towerWaveDraw\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(draw, /for\(let i=0;i<=W;i\+=2\)/, 'the faint pass covers the full width');
 });

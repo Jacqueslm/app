@@ -5362,7 +5362,7 @@ function initApp(){
     if(S.userType==='partner'){
       const secondLine=S.partnerRelation==='minor-child'
         ?'Being the parent in this is its own weight. How are you doing with it today?'
-        :'This space is yours — not his, not about fixing him. How are YOU holding up today?';
+        :'This space is yours — not theirs, not about fixing anyone. How are YOU holding up today?';
       greeting=`Hey${S.name?' '+S.name:''}. I'm glad you're here.\n\n${secondLine}`;
     }else if(S.userType==='both'){
       greeting=`Hey${S.name?' '+S.name:''}. You're carrying both sides of this — your own day one and someone you love. We can start with either. Which is louder right now?`;
@@ -12355,7 +12355,7 @@ function updateNovaVoiceToggle(){
   const on=novaVoiceOn();
   el.classList.toggle('on',on);
   el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i><span>AI voice ${on?'on':'off'}</span>`;
-  el.setAttribute('title',on?"Friendly reads her replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
+  el.setAttribute('title',on?"Friendly reads replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
   try{renderIcons(el);}catch(e){}
 }
 // "7:15 AM" for today, "Yesterday 11:40 PM", then the date beyond that.
@@ -13085,12 +13085,12 @@ let lifetimeFaqApplied=false;
 // and both paths only - a recovering user searching the guide should not be
 // answered as though they were the one doing the watching.
 const SUPPORTER_FAQ=[
-  {q:"How do I know if he's really changing or just saying it again?",
+  {q:"How do I know if they're really changing or just saying it again?",
    k:'changing change really different this time promise promises believe trust lying again saying same words',
-   a:"A promise is loud and it usually comes right after he's caught. A change is quiet and it shows up on an ordinary Tuesday when nothing's wrong. Stop grading the promises — watch what happens on the days there's no pressure. Patterns over weeks tell the truth; words on the worst night don't."},
-  {q:'Should I check his phone?',
+   a:"A promise is loud and it usually comes right after they're caught. A change is quiet and it shows up on an ordinary Tuesday when nothing's wrong. Stop grading the promises — watch what happens on the days there's no pressure. Patterns over weeks tell the truth; words on the worst night don't."},
+  {q:'Should I check their phone?',
    k:'check phone snoop search history look through spy monitor device browser evidence',
-   a:"There's no right answer here, and anyone who gives you one confidently is selling something. What's worth knowing: checking usually calms you for an hour and costs you the rest of the day, and the more you police it the more you become his conscience instead of his partner. If you're checking every night, that's not a character flaw — it's a sign you're carrying something that needs support of its own."},
+   a:"There's no right answer here, and anyone who gives you one confidently is selling something. What's worth knowing: checking usually calms you for an hour and costs you the rest of the day, and the more you police it the more you become their conscience instead of their partner. If you're checking every night, that's not a character flaw — it's a sign you're carrying something that needs support of its own."},
   {q:'Is any of this my fault?',
    k:'my fault blame caused cause because of me did i do something not enough good enough responsible',
    a:"No. Not the way you're asking it. This started before you and it runs on something that has nothing to do with how you look, what you did, or whether you were enough. You can be a factor in a marriage without being the cause of an addiction — those are different things, and the second one was never yours."},
@@ -13982,7 +13982,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.9';
+const APP_VERSION='9.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -14155,7 +14155,7 @@ function describeVoiceSupport(){
   let voices=[];
   try{ voices=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }catch(e){}
   if(!('speechSynthesis' in window)){
-    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes how she writes.';
+    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes the writing.';
   }else if(voices.length<2){
     note.textContent='Heads up: this phone has only one English voice installed, so all three will sound the same out loud. The presence you pick still shapes how Friendly writes to you. Adding more voices in your phone\u2019s text-to-speech settings gives her something to switch to.';
   }else{
@@ -15270,7 +15270,7 @@ const GUIDE_FAQ=[
   {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
   {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
-  {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in her header. Off by default so nothing talks unasked; switched on, she reads every reply out loud by herself. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
+  {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},

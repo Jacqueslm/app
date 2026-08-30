@@ -85,10 +85,13 @@ test('a slip never takes back a door that was already opened', () => {
 });
 
 test('the relapse hook only fires on a real slip, not a backwards date fix', () => {
-  // It has to sit inside the same guard that banks the ended streak.
+  // It has to sit inside the same guard that banks the ended streak, and that
+  // guard measures the clock being reset - not the master, which since 30 Aug
+  // is the longest run and often does not move when a short track slips.
   const i = APP.indexOf('towerOnRelapse();');
-  const guard = APP.lastIndexOf('if(prevStart&&new Date(S.startDate).getTime()>new Date(prevStart).getTime())', i);
+  const guard = APP.lastIndexOf('if(prevStart&&chosen.getTime()>new Date(prevStart).getTime())', i);
   assert.ok(guard > 0 && i - guard < 900, 'towerOnRelapse is not inside the real-relapse guard');
+  assert.match(APP, /const prevStart=guardIso;/, 'measured against the track that was reset');
 });
 
 test('the tower can never be climbed higher than the real days behind it', () => {

@@ -436,6 +436,45 @@ body.nova-open #mini-player{bottom:160px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:.875rem;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
 .usage{font-size:.75rem;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:1.3125rem;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:.5625rem;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:.5625rem;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px}
+/* 2AM — the tower game (docs/GAME-SPEC.md). Its own night palette in both app
+   themes on purpose: the spec calls for dark, high contrast, no bright colour,
+   no confetti. Nothing here uses the app's --s/--t variables for that reason. */
+#tw{background:#05070e;min-height:calc(100vh - 132px);padding:14px 14px 28px;color:#c8cfe8}
+#tw-brief{border-left:2px solid #3b4a7a;padding:2px 0 2px 12px;margin-bottom:14px}
+#tw-brief div{font-size:.8125rem;line-height:1.55;color:#93a0c8}
+#tw-brief div+div{color:#6b779c;margin-top:2px}
+#tw-stage{position:relative;width:100%;height:302px;border:1px solid #18213a;border-radius:10px;overflow:hidden;background:#070a14}
+#tw-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation;display:block}
+#tw-hud{position:absolute;top:10px;left:12px;pointer-events:none}
+#tw-hud-floor{font-size:.9375rem;font-weight:700;letter-spacing:2px;color:#dbe2f7}
+#tw-hud-sub{font-size:.625rem;letter-spacing:1.6px;color:#5e6a90;margin-top:1px}
+#tw-nerve{position:absolute;top:12px;right:24px;font-size:.625rem;letter-spacing:1.4px;color:#5e6a90;pointer-events:none;text-align:right}
+/* Friendly. One companion in this product - this is the same one, given a body.
+   Geometric, glowing, no face, CSS transforms only (spec rule 1 and §5). */
+#tw-friend{position:absolute;left:12px;bottom:12px;width:38px;height:38px;cursor:pointer}
+#tw-friend .tw-f-core{position:absolute;inset:9px;background:linear-gradient(160deg,#8f86ff,#4a3fb0);transform:rotate(45deg);border-radius:4px;box-shadow:0 0 14px rgba(120,110,255,.55);animation:twpulse 3.4s ease-in-out infinite}
+#tw-friend .tw-f-ring{position:absolute;inset:0;border:1px solid rgba(140,130,255,.45);border-radius:50%;animation:twspin 9s linear infinite}
+@keyframes twpulse{0%,100%{transform:rotate(45deg) scale(1);opacity:.9}50%{transform:rotate(45deg) scale(.86);opacity:1}}
+@keyframes twspin{to{transform:rotate(360deg)}}
+#tw-say{font-size:.8125rem;line-height:1.55;color:#8b96bd;margin:12px 2px 0;min-height:2.6em}
+#tw-say b{color:#a99fff;font-weight:600}
+#tw-panel{margin-top:12px}
+.tw-btn{width:100%;background:#111a2e;border:1px solid #26324f;color:#d5dcf2;border-radius:10px;padding:13px;font-size:.875rem;font-family:var(--f);cursor:pointer;text-align:left}
+.tw-btn:disabled{opacity:.4;cursor:default}
+.tw-btn.key{border-color:#3d4a75}
+.tw-btn.key b{display:block;font-size:.6875rem;letter-spacing:2px;color:#7f8cba;font-weight:700;margin-bottom:3px}
+.tw-btn+.tw-btn{margin-top:8px}
+.tw-btn.go{background:#241f5c;border-color:#3b348f;color:#cfc9ff}
+.tw-note{font-size:.75rem;color:#5e6a90;line-height:1.5;margin-top:10px}
+#tw-foot{font-size:.6875rem;color:#48536f;margin-top:18px;text-align:center}
+.tw-door{display:none;position:fixed;inset:0;background:#05070e;z-index:960;overflow-y:auto}
+.tw-door.open{display:block}
+.tw-door-in{max-width:430px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 30px) 18px 40px}
+.tw-q{font-size:1.0625rem;line-height:1.5;color:#e4e9fa;font-weight:600;margin:6px 0 14px}
+.tw-eyebrow{font-size:.625rem;letter-spacing:2.4px;color:#6f7ba6;font-weight:700}
+.tw-ta{width:100%;min-height:120px;background:#0b1120;border:1px solid #23304d;border-radius:10px;color:#d5dcf2;padding:12px;font-size:.875rem;font-family:var(--f);line-height:1.6;resize:vertical}
+.tw-timer{font-size:2.5rem;font-weight:700;letter-spacing:3px;color:#dbe2f7;text-align:center;margin:18px 0 4px;font-variant-numeric:tabular-nums}
+.tw-timer-sub{font-size:.6875rem;letter-spacing:1.6px;color:#5e6a90;text-align:center;margin-bottom:16px}
  </style> <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
 // First touch wins: someone who lands from TikTok, reads /for-her, then signs up
@@ -1428,6 +1467,25 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
+    <!-- 2AM — the tower. Spec: docs/GAME-SPEC.md. PHASE 1 ONLY: ten floors,
+         tap-to-move rooms, the Truth-or-Dare door, Friendly's HUD, progress
+         read from The Climb. The Urge Wave, voice briefings, the Trigger Board
+         and the artifact Vault are Phases 2-3 and are deliberately not here. -->
+    <div id="s-tower" class="scr">
+      <div id="tw">
+        <div id="tw-brief"><div id="tw-brief-1"></div><div id="tw-brief-2"></div></div>
+        <div id="tw-stage">
+          <canvas id="tw-canvas"></canvas>
+          <div id="tw-hud"><div id="tw-hud-floor">FLOOR 01</div><div id="tw-hud-sub">DAY 1</div></div>
+          <div id="tw-nerve"></div>
+          <div id="tw-friend" onclick="towerTapFriendly()"><div class="tw-f-ring"></div><div class="tw-f-core"></div></div>
+        </div>
+        <div id="tw-say"></div>
+        <div id="tw-panel"></div>
+        <div id="tw-foot">Ten floors are built. The tower goes to ninety.</div>
+      </div>
+    </div>
+
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
@@ -1480,6 +1538,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row" onclick="openClimb()">
           <i class="ti ti-mountain" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openTower()">
+          <i class="ti ti-building" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>2AM</p><span>A building you climb at night. Every floor is a day, and every floor asks you for the truth or the dare</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openFilm()">
@@ -2681,6 +2744,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     Made on this phone from your own numbers. Nothing is uploaded, and nobody sees it unless you share it.
   </div>
 </div>
+<!-- 2AM: the locked door. Full-screen so the choice is the only thing on it. -->
+<div id="tw-door" class="tw-door" onclick="if(event.target===this)towerCloseDoor()">
+  <div class="tw-door-in" id="tw-door-in"></div>
+</div>
+
 <div id="climb-overlay" style="display:none;position:fixed;inset:0;background:#0b0e1a;z-index:999;overflow:hidden">
   <canvas id="climb-canvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
   <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;pointer-events:none">
@@ -3001,6 +3069,11 @@ const ICON_PATHS={
   'ti-volume':'<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v14a.8.8 0 0 1-1.5.5l-3.5-4.5"/>',
   'ti-volume-off':'<path d="M15 8a5 5 0 0 1 1.912 4.377"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v3"/><path d="M11 17.75v.25a.8.8 0 0 1-1.5.5l-3.5-4.5"/><path d="M3 3l18 18"/>',
 'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
+// The Climb's row has been iconless since it shipped - its key was never in
+// this map. 2AM's building is added at the same time so the same thing does
+// not happen twice on the same screen.
+'ti-mountain':'<path d="M3 20h18L14 7l-3.2 5.6L8.6 10z"/><path d="M10.8 12.6l1.6 2.4"/>',
+'ti-building':'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20"/><path d="M8 8h3M8 12h3M8 16h3"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
 'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
@@ -6546,6 +6619,396 @@ function seekStory(v){if(storyAudio&&storyAudio.duration)storyAudio.currentTime=
 function updateStoryBtn(id){const b=document.getElementById('story-btn-'+id);
   if(b)b.textContent=(storyAudio&&storyPlayingId===id&&!storyAudio.paused)?'❚❚ Pause':'▶ Listen';}
 function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=storyPlayingId;storyAudio=null;storyPlayingId=null;if(old)updateStoryBtn(old);}}
+
+// ─── 2AM — THE TOWER (game) ──────────────────────────────────────────────────
+// Spec: docs/GAME-SPEC.md. Jacques, 30 Aug 2026.
+//
+// PHASE 1 ONLY, and deliberately so: ten floors, a map you tap around, the
+// Truth-or-Dare door, Friendly in the HUD, progress read from The Climb.
+// The Urge Wave (Phase 2), the Trigger Board and artifact Vault (Phase 3) and
+// floors 11-90 behind Pro (Phase 4) are NOT here. Do not start Phase 2 until
+// this has shipped and been played cold.
+//
+// The spec's non-negotiables, and where each one lives in this file:
+//   1. No new mascot   - #tw-friend IS Friendly. One companion, given a body.
+//   2. Unbiased        - floor text never names who is at fault. It says "it".
+//   3. No medical claims - no brain chemistry, no "research shows", anywhere.
+//   4. No relapse punishment - towerOnRelapse drops you to the last landing and
+//      never below floor 1, and never un-clears a door you already opened.
+//   5. Floors 1-10 are the free tier, which is exactly all of Phase 1, so
+//      there is no Pro gate in here yet by design.
+//   6. No new dependencies - canvas plus vanilla JS, inside this same file.
+const TOWER_PHASE1_FLOORS=10;
+// Rooms live in 0..1 of the stage. A floor is small on purpose: two to four
+// rooms, one of them the door. The stairs only exist once the door is open.
+const TOWER_LAYOUTS=[
+  {rooms:{entry:[0.17,0.70],side1:[0.50,0.25],door:[0.83,0.70],stairs:[0.83,0.25]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']]},
+  {rooms:{entry:[0.17,0.28],side1:[0.50,0.74],door:[0.83,0.28],stairs:[0.83,0.74]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']]},
+  {rooms:{entry:[0.15,0.50],side1:[0.45,0.20],side2:[0.45,0.80],door:[0.80,0.50],stairs:[0.80,0.14]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']]},
+  {rooms:{entry:[0.24,0.50],door:[0.72,0.50],stairs:[0.72,0.16]},
+   edges:[['entry','door'],['door','stairs']]},
+];
+// Ten floors. Two cold lines, one blunt question, one real action, one line
+// from Friendly. Nothing here tells the player how to feel about any of it.
+const TOWER_FLOORS=[
+  {n:1,layout:0,name:'FIRST NIGHT',
+   brief:['Floor one. It is dark and you are still here.','The door opens two ways. Pick one.'],
+   truth:'What time last night did it get hardest?',
+   dare:{text:'Stand outside, or at an open window, and do nothing for sixty seconds.',seconds:60,hold:true},
+   say:"I don't need the whole story. Just the door.",
+   sides:{side1:{name:'STAIRWELL',line:'Cold. Someone else has been up here — there is a cup on the step.'}}},
+  {n:2,layout:1,name:'THE WANT',
+   brief:['Floor two. The want came back. It was always going to.','Wanting it and doing it are two different floors.'],
+   truth:'What did you tell yourself the last time you gave in?',
+   dare:{text:'Put your phone in another room. Sit where you can see the doorway for two minutes.',seconds:120,hold:true},
+   say:'The want is loud. Loud is not the same as in charge.',
+   sides:{side1:{name:'STORE ROOM',line:'Boxes of things you bought for the version of you that was going to be fine.'}}},
+  {n:3,layout:2,name:'ONE PERSON',
+   brief:['Floor three. Nobody gets through this quietly and alone.','One person is enough to start.'],
+   truth:'Who already knows, and what have you never actually said to them?',
+   dare:{text:'Text one person the word "hey". Nothing else. Send it.',seconds:45,hold:false},
+   say:"You don't have to explain anything. Just open the line.",
+   sides:{side1:{name:'PHONE BOOTH',line:'The handset is warm. Whoever was in here left in a hurry.'},
+          side2:{name:'WAITING ROOM',line:'Four chairs. Three of them have been sat in tonight.'}}},
+  {n:4,layout:3,name:'THE HOUR',
+   brief:['Floor four. One hour of your day is worse than the rest.','You already know which one.'],
+   truth:'Which hour of the day is the dangerous one for you?',
+   dare:{text:"Write that hour somewhere physical — paper, your hand, the mirror. Somewhere you'll walk past it.",seconds:60,hold:false},
+   say:'Name the hour and it stops ambushing you.',
+   sides:{}},
+  {n:5,layout:0,name:'THE SENTENCE',
+   brief:['Floor five. Every one of these starts with a sentence.','Yours has been said out loud before.'],
+   truth:'What is the exact sentence you say right before it starts?',
+   dare:{text:'Say that sentence out loud, once, to the empty room. Listen to it.',seconds:30,hold:false},
+   say:"Out loud it's thinner than it is in your head.",
+   sides:{side1:{name:'MIRROR ROOM',line:'Nothing in here but the mirror, and it is honest, which is worse.'}}},
+  {n:6,layout:2,name:'WITHIN REACH',
+   brief:['Floor six. Some rooms are not neutral.','Some names in your phone are not neutral either.'],
+   truth:'Which person, place or app makes it close to automatic?',
+   dare:{text:'Delete one app, one number, or one bookmark. One. Now.',seconds:60,hold:false},
+   say:'You are not cutting anyone off. You are moving one thing out of reach.',
+   sides:{side1:{name:'BACK STAIRS',line:'The quick way down. It is still here. It will always still be here.'},
+          side2:{name:'OLD ROOM',line:'The furniture is the same. That is the trouble with it.'}}},
+  {n:7,layout:1,name:'EMPTY TIME',
+   brief:['Floor seven. The hours it used to fill are still there.','Empty time is where this comes back.'],
+   truth:'What did it take up — evenings, mornings, the drive home?',
+   dare:{text:'Move your body for ninety seconds. Walk, stairs, anything. Start now.',seconds:90,hold:true},
+   say:"Not fitness. Just proof the hour can be spent another way.",
+   sides:{side1:{name:'CLOCK ROOM',line:'Every clock in here reads a different time and all of them are late.'}}},
+  {n:8,layout:3,name:'THE BODY',
+   brief:['Floor eight. Bad sleep, short temper, no appetite.','None of it is proof you are failing.'],
+   truth:'What has your body been doing this week that you have been ignoring?',
+   dare:{text:'Drink a full glass of water and eat something before you leave this floor.',seconds:90,hold:false},
+   say:'Tired makes everything louder. Sometimes that is the whole explanation.',
+   sides:{}},
+  {n:9,layout:2,name:'WHO CARRIED IT',
+   brief:['Floor nine. Someone was carrying this before it was said out loud.','That has a cost and the cost is real.'],
+   truth:'Who has been carrying this with you, and what has it cost them?',
+   dare:{text:'Do one small thing for that person without telling them why.',seconds:60,hold:false},
+   say:'No speech. No apology yet. Just the thing.',
+   sides:{side1:{name:'KITCHEN',line:'Two plates by the sink. One of them has not been touched.'},
+          side2:{name:'HALL',line:'A coat still on the hook that nobody has moved in a while.'}}},
+  {n:10,layout:0,name:'THE LANDING',
+   brief:['Floor ten. The first landing.','Ten is not a cure. It is a floor you can stand on.'],
+   truth:'What is true now that was not true ten days ago?',
+   dare:{text:'Say the number out loud to one person. "Ten days." That is the whole sentence.',seconds:60,hold:false},
+   say:'Landing reached. If you fall from here, you fall to here — not to the ground.',
+   sides:{side1:{name:'LANDING WINDOW',line:'You can see the street from here. It is the first floor you can.'}}},
+];
+function towerFloor(n){return TOWER_FLOORS[Math.max(0,Math.min(TOWER_FLOORS.length-1,n-1))];}
+function towerState(){
+  const t=S.tower||(S.tower={});
+  if(!t.floor)t.floor=1;
+  if(!t.room)t.room='entry';
+  if(!t.cleared)t.cleared={};
+  if(!t.truths)t.truths={};
+  if(typeof t.nerve!=='number')t.nerve=0;
+  return t;
+}
+// How high the building is open tonight. This is the tie to real sobriety
+// (spec §4): the tower reads The Climb, and a Climb step is only earned by a
+// real day with the lesson done. So the tower cannot be ground out in one
+// sitting - the top floor is always locked from the outside until tomorrow.
+function towerCeiling(){
+  return Math.max(1,Math.min(TOWER_PHASE1_FLOORS,climbSteps()));
+}
+function towerCleared(n){return !!towerState().cleared[n];}
+// Rule 4: a slip drops you to the last landing and never to the ground, and it
+// never takes back a door you already opened.
+function towerOnRelapse(){
+  try{
+    const t=towerState();
+    t.floor=Math.max(1,Math.floor(t.floor/10)*10);
+    t.room='entry';
+    save();
+  }catch(e){}
+}
+
+let twAnim=null,twPos=null,twTarget=null,twDareTimer=null,twDareLeft=0,twSayTimer=null;
+function towerLayout(n){return TOWER_LAYOUTS[towerFloor(n).layout];}
+function towerRooms(n){
+  // The stairs are not a room until the door is open.
+  const lay=towerLayout(n),out={};
+  Object.keys(lay.rooms).forEach(k=>{if(k!=='stairs'||towerCleared(n))out[k]=lay.rooms[k];});
+  return out;
+}
+function towerConnected(n,a,b){
+  return towerLayout(n).edges.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));
+}
+function towerRoomName(n,k){
+  if(k==='entry')return 'LANDING';
+  if(k==='door')return towerCleared(n)?'OPEN':'THE DOOR';
+  if(k==='stairs')return 'UP';
+  const s=towerFloor(n).sides[k];
+  return s?s.name:'ROOM';
+}
+function openTower(){switchTo('tower');actBn('bn-tools');}
+function renderTower(){
+  const t=towerState();
+  if(t.floor>towerCeiling())t.floor=towerCeiling();
+  const f=towerFloor(t.floor);
+  if(!towerRooms(t.floor)[t.room])t.room='entry';
+  document.getElementById('tw-brief-1').textContent=f.brief[0];
+  document.getElementById('tw-brief-2').textContent=f.brief[1];
+  document.getElementById('tw-hud-floor').textContent='FLOOR '+String(t.floor).padStart(2,'0');
+  document.getElementById('tw-hud-sub').textContent=f.name+' · DAY '+t.floor;
+  const cleared=Object.keys(t.cleared).length;
+  document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
+  towerSay(f.say);
+  const c=document.getElementById('tw-canvas');
+  twPos=Object.assign({},towerRooms(t.floor)[t.room]?{x:towerRooms(t.floor)[t.room][0],y:towerRooms(t.floor)[t.room][1]}:{x:.17,y:.7});
+  twTarget=null;
+  if(!c._twBound){c.addEventListener('pointerdown',towerTap);c._twBound=true;}
+  cancelAnimationFrame(twAnim);
+  const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
+  towerPanel();
+}
+function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();}
+function towerSay(text){
+  const el=document.getElementById('tw-say');
+  if(el)el.innerHTML='<b>Friendly:</b> '+escapeHtml(text);
+}
+function towerTapFriendly(){
+  // One companion. Tapping the body opens the same Friendly the rest of the
+  // app uses - it does not spawn a second character with its own chat.
+  switchTo('nova');actBn('bn-nova');
+}
+function towerDraw(){
+  const c=document.getElementById('tw-canvas');
+  if(!c||!c.clientWidth)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=c.clientWidth,H=c.clientHeight;
+  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}
+  const g=c.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  g.fillStyle='#070a14';g.fillRect(0,0,W,H);
+  const t=towerState(),n=t.floor,rooms=towerRooms(n),lay=towerLayout(n);
+  const RW=Math.min(92,W*0.24),RH=Math.min(62,H*0.21);
+  const px=r=>r[0]*W,py=r=>r[1]*H;
+  // corridors first, so the rooms sit on top of them
+  g.lineWidth=5;g.strokeStyle='rgba(90,110,170,0.22)';g.lineCap='round';
+  lay.edges.forEach(e=>{
+    if(!rooms[e[0]]||!rooms[e[1]])return;
+    g.beginPath();g.moveTo(px(rooms[e[0]]),py(rooms[e[0]]));g.lineTo(px(rooms[e[1]]),py(rooms[e[1]]));g.stroke();
+  });
+  Object.keys(rooms).forEach(k=>{
+    const r=rooms[k],x=px(r)-RW/2,y=py(r)-RH/2;
+    const here=k===t.room,reach=towerConnected(n,t.room,k)&&!here;
+    g.beginPath();
+    if(g.roundRect)g.roundRect(x,y,RW,RH,8);else g.rect(x,y,RW,RH);
+    g.fillStyle=here?'#141d33':'#0c1220';g.fill();
+    g.lineWidth=here?2:1;
+    g.strokeStyle=here?'#6b62d8':(reach?'#2f3d61':'#1b2438');
+    g.stroke();
+    g.font='600 9px '+'-apple-system,Segoe UI,Roboto,sans-serif';
+    g.textAlign='center';g.textBaseline='middle';
+    // Label along the bottom of the room, never through the middle - the
+    // player dot stands in the centre and was sitting on top of the word.
+    g.fillStyle=here?'#cdd5f0':(reach?'#7b88b4':'#4a5474');
+    g.fillText(towerRoomName(n,k),px(r),py(r)+RH/2-9);
+    if(k==='door'){
+      g.fillStyle=towerCleared(n)?'#7ee8a2':'#8f86ff';
+      g.fillRect(px(r)-7,py(r)-19,14,16);
+      g.fillStyle='#0c1220';g.fillRect(px(r)-4,py(r)-16,8,10);
+    }
+    if(k==='stairs'){
+      g.strokeStyle='#7ee8a2';g.lineWidth=2;g.beginPath();
+      g.moveTo(px(r)-10,py(r)-4);g.lineTo(px(r)-3,py(r)-4);g.lineTo(px(r)-3,py(r)-10);
+      g.lineTo(px(r)+4,py(r)-10);g.lineTo(px(r)+4,py(r)-16);g.lineTo(px(r)+11,py(r)-16);
+      g.stroke();
+    }
+  });
+  // the player
+  if(twPos){
+    g.beginPath();g.arc(twPos.x*W,twPos.y*H,5,0,7);
+    g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
+  }
+  // the tower itself, ten ticks up the right edge
+  const lx=W-11;
+  for(let i=1;i<=TOWER_PHASE1_FLOORS;i++){
+    const y=H-18-((i-1)*((H-40)/(TOWER_PHASE1_FLOORS-1)));
+    g.beginPath();g.arc(lx,y,i===n?4:2.5,0,7);
+    // lit = the floor you are on, dim blue = cleared, grey = reachable tonight,
+    // near-black = not open yet. No numbers on it; it is a building, not a bar.
+    g.fillStyle=i===n?'#8f86ff':(towerCleared(i)?'#4a5f8c':(i<=towerCeiling()?'#31405f':'#1d2536'));
+    g.fill();
+  }
+  // movement
+  if(twTarget){
+    const dx=twTarget.x-twPos.x,dy=twTarget.y-twPos.y;
+    if(Math.abs(dx)<0.004&&Math.abs(dy)<0.004){twPos.x=twTarget.x;twPos.y=twTarget.y;twTarget=null;towerArrived();}
+    else{twPos.x+=dx*0.16;twPos.y+=dy*0.16;}
+  }
+}
+function towerTap(ev){
+  const c=document.getElementById('tw-canvas'),r=c.getBoundingClientRect();
+  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+  const t=towerState(),n=t.floor,rooms=towerRooms(n);
+  const RW=Math.min(92,r.width*0.24)/r.width,RH=Math.min(62,r.height*0.21)/r.height;
+  let hit=null;
+  Object.keys(rooms).forEach(k=>{
+    const rr=rooms[k];
+    if(Math.abs(x-rr[0])<=RW/2+0.02&&Math.abs(y-rr[1])<=RH/2+0.03)hit=k;
+  });
+  if(!hit)return;
+  if(hit===t.room){towerArrived();return;}
+  if(!towerConnected(n,t.room,hit))return;
+  t.room=hit;save();
+  twTarget={x:rooms[hit][0],y:rooms[hit][1]};
+  towerPanel();
+}
+function towerArrived(){towerPanel();}
+function towerPanel(){
+  const t=towerState(),n=t.floor,f=towerFloor(n),el=document.getElementById('tw-panel');
+  if(!el)return;
+  if(t.room==='door'){
+    if(!towerCleared(n)){
+      el.innerHTML='<button class="tw-btn go" onclick="towerOpenDoor()">The door is locked. Two keys.</button>'+
+        '<div class="tw-note">Truth is the safe key. Dare is worth more.</div>';
+    }else{
+      const via=t.cleared[n].via;
+      el.innerHTML='<div class="tw-note">This door is open. You took the '+(via==='dare'?'dare':'truth')+'.</div>';
+    }
+    return;
+  }
+  if(t.room==='stairs'){
+    const ceiling=towerCeiling();
+    if(n<ceiling){
+      el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
+    }else if(n>=TOWER_PHASE1_FLOORS){
+      el.innerHTML='<div class="tw-note">Floor ten is the top of what is built. The rest of the tower is coming.</div>';
+    }else{
+      el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
+        '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
+    }
+    return;
+  }
+  if(t.room==='entry'){
+    el.innerHTML='<div class="tw-note">Tap a room to move. The door is the only way up.</div>';
+    return;
+  }
+  const s=f.sides[t.room];
+  el.innerHTML='<div class="tw-note">'+escapeHtml(s?s.line:'Empty.')+'</div>';
+}
+function towerGoEarn(){
+  const e=climbEarnable();
+  if(e.ok){openClimb();return;}
+  switchTo('lesson');actBn('bn-home');
+}
+function towerAscend(){
+  const t=towerState();
+  if(!towerCleared(t.floor)||t.floor>=towerCeiling()||t.floor>=TOWER_PHASE1_FLOORS)return;
+  t.floor+=1;t.room='entry';save();
+  logActivity('tower_floor',{floor:t.floor});
+  renderTower();
+}
+// ── the door ────────────────────────────────────────────────────────────────
+function towerOpenDoor(){
+  const d=document.getElementById('tw-door');
+  d.classList.add('open');
+  towerDoorChoice();
+}
+function towerCloseDoor(){
+  const d=document.getElementById('tw-door');
+  if(d)d.classList.remove('open');
+  clearInterval(twDareTimer);twDareTimer=null;
+}
+function towerDoorChoice(){
+  const n=towerState().floor,f=towerFloor(n);
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">FLOOR '+String(n).padStart(2,'0')+' · '+escapeHtml(f.name)+'</div>'+
+    '<div class="tw-q">The door is locked. There are two keys and you only need one.</div>'+
+    '<button class="tw-btn key" onclick="towerPickTruth()"><b>TRUTH</b>One question. Nobody sees the answer but you.</button>'+
+    '<button class="tw-btn key" onclick="towerPickDare()"><b>DARE</b>One thing, done in the real world, now.</button>'+
+    '<div class="tw-note">Both open the door. The dare is worth more.</div>'+
+    '<button class="tw-btn" style="margin-top:16px" onclick="towerCloseDoor()">Back to the floor</button>';
+}
+function towerPickTruth(){
+  const n=towerState().floor,f=towerFloor(n);
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">TRUTH</div>'+
+    '<div class="tw-q">'+escapeHtml(f.truth)+'</div>'+
+    '<textarea class="tw-ta" id="tw-truth" placeholder="However short. It stays on this phone."></textarea>'+
+    '<button class="tw-btn go" style="margin-top:10px" onclick="towerSubmitTruth()">Unlock the door</button>'+
+    '<button class="tw-btn" onclick="towerDoorChoice()">Take the dare instead</button>';
+  setTimeout(()=>{const a=document.getElementById('tw-truth');if(a)a.focus();},80);
+}
+function towerSubmitTruth(){
+  const a=document.getElementById('tw-truth'),v=(a&&a.value||'').trim();
+  if(v.length<2){if(a)a.focus();return;}
+  const t=towerState(),n=t.floor;
+  t.truths[n]=v;
+  towerClear(n,'truth');
+}
+function towerPickDare(){
+  const n=towerState().floor,f=towerFloor(n);
+  twDareLeft=f.dare.seconds;
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">DARE</div>'+
+    '<div class="tw-q">'+escapeHtml(f.dare.text)+'</div>'+
+    '<div class="tw-timer" id="tw-clock">'+towerClock(twDareLeft)+'</div>'+
+    '<div class="tw-timer-sub" id="tw-clock-sub">'+(f.dare.hold?'HOLD IT UNTIL ZERO':'DO IT, THEN MARK IT')+'</div>'+
+    '<button class="tw-btn go" id="tw-done" onclick="towerMarkDare()"'+(f.dare.hold?' disabled':'')+'>I did it</button>'+
+    '<button class="tw-btn" onclick="towerDoorChoice()">Take the truth instead</button>';
+  clearInterval(twDareTimer);
+  twDareTimer=setInterval(()=>{
+    twDareLeft--;
+    const c=document.getElementById('tw-clock');
+    if(!c){clearInterval(twDareTimer);twDareTimer=null;return;}
+    c.textContent=towerClock(Math.max(0,twDareLeft));
+    if(twDareLeft<=0){
+      clearInterval(twDareTimer);twDareTimer=null;
+      const b=document.getElementById('tw-done');if(b)b.disabled=false;
+      const s=document.getElementById('tw-clock-sub');if(s)s.textContent='TIME. MARK IT IF YOU DID IT.';
+      if(navigator.vibrate)try{navigator.vibrate(30);}catch(x){}
+    }
+  },1000);
+}
+function towerClock(s){const m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
+function towerMarkDare(){
+  const t=towerState();
+  t.nerve=(t.nerve||0)+1;
+  towerClear(t.floor,'dare');
+}
+function towerClear(n,via){
+  const t=towerState();
+  t.cleared[n]={via:via,at:new Date().toISOString()};
+  t.room='door';
+  save();
+  logActivity('tower_door',{floor:n,via:via});
+  towerCloseDoor();
+  renderTower();
+  const f=towerFloor(n);
+  towerSay(via==='dare'?'You did the thing. That counts more than saying it.':'Noted. Nobody else sees that.');
+  clearTimeout(twSayTimer);
+  twSayTimer=setTimeout(()=>{
+    towerSay(n>=towerCeiling()?'That is as high as tonight goes. Come back after a real day.':'Stairs are open. Floor '+(n+1)+' is above you.');
+  },3200);
+}
 
 // ─── THE CLIMB ───────────────────────────────────────────────────────────────
 // Jacques's design (24 Aug 2026): your avatar climbs 90 carved steps up a
@@ -11478,6 +11941,7 @@ const SCREEN_MAP={
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
+  tower:'s-tower',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -11486,8 +11950,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-tools'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -11513,7 +11977,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-tools'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -11521,6 +11985,9 @@ function switchTo(id,opts){
   try{stopDictation();}catch(e){}
   // Record the leaving screen unless we're already walking backward.
   const from=currentScreenId();
+  // The tower runs a requestAnimationFrame loop and can hold a dare timer.
+  // Neither has any business still running on another screen.
+  if(from==='tower'&&id!=='tower'){try{towerStop();}catch(e){}}
   if(!(opts&&opts.fromBack)&&from&&from!==id){
     screenHistory.push(from);
     if(screenHistory.length>30)screenHistory.shift();
@@ -11570,6 +12037,7 @@ function switchTo(id,opts){
   if(id==='plans'){renderPlansScreen();}
   if(id==='tools'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
+  if(id==='tower'){renderTower();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -12589,6 +13057,11 @@ function confirmResetDate(){
     S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
     S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
     if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
+    // 2AM, spec rule 4: a slip drops you to the last landing and never to the
+    // ground, and never takes back a door you already opened. Only on a real
+    // relapse - a date corrected backwards is a correction, not a slip, which
+    // is why this sits inside the same guard as the banked streak above.
+    towerOnRelapse();
   }
   S.pledged=false;
   logActivity('relapse_reset');
@@ -12772,7 +13245,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.2';
+const APP_VERSION='8.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

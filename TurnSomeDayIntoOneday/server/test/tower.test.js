@@ -20,6 +20,11 @@ function literal(name) {
   return new Function('return ' + m[1].replace(/;$/, ''))();
 }
 const FLOORS = literal('TOWER_FLOORS');
+function literal2(name) {
+  const m = APP.match(new RegExp('const ' + name + '=(\\{[\\s\\S]*?\\n\\};)'));
+  assert.ok(m, name + ' not found in index.html');
+  return new Function('return ' + m[1].replace(/;$/, ''))();
+}
 
 const ceiling = (climbSteps) => Math.max(1, Math.min(10, climbSteps));
 const afterRelapse = (floor) => Math.max(1, Math.floor(floor / 10) * 10);
@@ -200,8 +205,8 @@ test('there is no character in the tower at all', () => {
 
 test('the game loop and the dare timer stop when you leave the screen', () => {
   assert.match(APP, /if\(from==='tower'&&id!=='tower'\)\{try\{towerStop\(\);\}catch\(e\)\{\}\}/);
-  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);towerWaveStop\(\);towerBriefStop\(\);\}/,
-    'the wave (a rAF loop, an interval and a stack of timeouts), and the voice');
+  assert.match(APP, /function towerStop\(\)\{cancelAnimationFrame\(twAnim\);[\s\S]*?towerCloseDoor\(\);towerWaveStop\(\);towerBriefStop\(\);towerBoardStop\(\);\}/,
+    'the wave (a rAF loop, an interval and a stack of timeouts), the voice, the board');
 });
 
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
@@ -306,4 +311,92 @@ test('the voice stops when anything else takes the screen', () => {
   }
   assert.match(APP, /towerBriefStop\(\);\n  if\(t\.readBriefs\)towerBriefPlay\(\);/,
     'and a new floor replaces it rather than talking over it');
+});
+
+// ── ARTIFACTS, THE VAULT AND THE TRIGGER BOARD (Phase 3) ────────────────────
+const ART = literal2('TOWER_ARTIFACTS');
+const COPING = literal('TOWER_COPING');
+
+test('every artifact sits in a side room that actually exists', () => {
+  for (const key of Object.keys(ART)) {
+    const [n, room] = key.split(':');
+    const f = FLOORS.find((x) => x.n === Number(n));
+    assert.ok(f, `artifact ${key} is on a floor that does not exist`);
+    assert.ok(f.rooms[room], `artifact ${key} is in a room that does not exist`);
+    assert.ok(f.sides[room], `artifact ${key} must be in an optional room, not the door or the stairs`);
+  }
+});
+
+test('the artifacts are the three kinds the spec names, and they are written', () => {
+  const kinds = new Set();
+  for (const [key, a] of Object.entries(ART)) {
+    assert.ok(['LESSON', 'STORY', 'LETTER'].includes(a.kind), `${key} kind`);
+    kinds.add(a.kind);
+    assert.ok(a.title && a.title.length > 3, `${key} title`);
+    assert.ok(a.text.length > 200, `${key} is too short to be worth finding`);
+  }
+  assert.deepEqual([...kinds].sort(), ['LESSON', 'LETTER', 'STORY']);
+  assert.ok(Object.keys(ART).length >= 12, 'most side rooms should hold something');
+});
+
+test('no artifact makes a medical claim or takes a side', () => {
+  const banned = /\b(brain|dopamine|neuro\w*|receptor|research shows|studies show|clinically|fault|blame|make them|get them to)\b/i;
+  for (const [key, a] of Object.entries(ART)) assert.doesNotMatch(a.title + ' ' + a.text, banned, key);
+});
+
+test('walking into the room is all it takes, and it is kept once', () => {
+  const src = APP.match(/function towerCollect\(n,room\)\{[\s\S]*?\n\}/)[0];
+  assert.match(src, /if\(!t\.kept\[key\]\)/, 'collecting twice must not re-log or re-stamp it');
+  assert.match(APP, /towerCollect\(t\.floor,t\.room\);/, 'the room you are standing in counts');
+  assert.match(APP, /towerCollect\(n,hit\);/, 'and so does the one you walk into');
+});
+
+test('the vault lists the whole building, gaps included', () => {
+  const src = APP.match(/function renderTowerVault\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(src, /Object\.keys\(TOWER_ARTIFACTS\)\.map/, 'every artifact, not only the found ones');
+  assert.match(src, /vault-card locked/, 'the ones still out there show as gaps');
+  assert.doesNotMatch(src, /a\.text[\s\S]{0,80}locked/, 'a locked card must never leak its text');
+});
+
+// The board is the only place in 2AM that can be lost, so it gets the most care.
+test('the board is a landing-floor thing only', () => {
+  assert.match(APP, /function towerFloorIsLanding\(n\)\{return n%10===0;\}/);
+  const panel = APP.match(/function towerPanel\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(panel, /towerFloorIsLanding\(n\)&&!towerLanded\(n\)/);
+});
+
+test('eight moves on the first landing, tightening as the tower rises, never below four', () => {
+  const moves = (n) => Math.max(4, 8 - Math.floor((n - 10) / 10));
+  assert.equal(moves(10), 8);
+  assert.equal(moves(20), 7);
+  assert.equal(moves(50), 4);
+  assert.equal(moves(90), 4, 'it must not fall to nothing at the top of the tower');
+  assert.match(APP, /function towerBoardMoves\(n\)\{return Math\.max\(4,8-Math\.floor\(\(n-10\)\/10\)\);\}/);
+});
+
+test('every coping tile answers real triggers, and every trigger has an answer', () => {
+  const src = APP.match(/const TOWER_TRIGGERS=\{[\s\S]*?\};/)[0];
+  const triggers = [...src.matchAll(/(\w+):'/g)].map((m) => m[1]);
+  const answered = new Set();
+  for (const c of COPING) {
+    assert.ok(c.clears.length >= 1, `${c.k} clears nothing`);
+    for (const t of c.clears) {
+      assert.ok(triggers.includes(t), `${c.k} clears "${t}", which is not a trigger`);
+      answered.add(t);
+    }
+  }
+  for (const t of triggers) assert.ok(answered.has(t), `nothing answers "${t}" - the board would be unwinnable`);
+});
+
+test('a board is built backwards from a solution, so it can never be unsolvable', () => {
+  const src = APP.match(/function towerBoardBuild\(moves\)\{[\s\S]*?\n\}/)[0];
+  assert.match(src, /const wanted=Math\.max\(3,moves-1\);/, 'a winning run always fits inside the moves allowed');
+  assert.match(src, /!isSpot\(j\)/, 'and a trigger never lands on a square that run needs');
+});
+
+test('running out of moves is a retry, not a loss', () => {
+  const src = APP.match(/function towerBoardRender\(\)\{[\s\S]*?\n\}/)[0];
+  const out = src.slice(src.indexOf('twBoard.left<=0&&left>0'));
+  assert.match(out, /towerStartBoard\(\)/, 'a fresh board');
+  assert.doesNotMatch(out, /cleared\[|landings\[|floor=|nerve/, 'nothing is taken back');
 });

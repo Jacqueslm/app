@@ -105,17 +105,20 @@ and the door all stop it.
 is a page-level canvas above everything, so a milestone landing while the
 tower is open would rain colour over it. It waits until the player leaves.*
 
-### 4. THE TOWER — the Uncharted layer
-Floors are not a straight list. Each floor is a small top-down map with 2–4 rooms.
+### 4. THE TOWER — the Uncharted layer  (artifacts ✅ BUILT 30 Aug 2026)
+Floors are not a straight list. Each floor is a small top-down map with 2-4
+rooms. Tap to move; no joystick, no physics.
 
 - One room holds the door (the Truth-or-Dare choice).
-- Optional rooms hold **artifacts**: a lesson excerpt, a story fragment, a letter.
-  Collectible, viewable later in a Vault screen.
-- Some doors are **locked from the outside** — they only open after the player
-  completes a real streak day in the main app. This ties the game to actual sobriety
-  instead of letting it be grinded in one sitting.
-
-Movement is tap-to-move between rooms. No joystick, no physics.
+- Optional rooms hold **artifacts**: a lesson excerpt, a story fragment, or a
+  letter. Fourteen of them across the ten floors — walking in is enough, there
+  is nothing to pick up and no way to miss one. Readable afterwards in the
+  **Vault**, which lists the whole building including the ones still unfound
+  (a locked card shows the floor and the kind and never leaks its text).
+  Floor 7's second EMPTY room holds nothing, on purpose.
+- The stairs are **locked from the outside** — they only open after a real
+  streak day in the main app. That is what ties the game to actual sobriety
+  instead of letting it be ground out in one sitting; see `towerCeiling`.
 
 ### 5. ROBLOX — every floor is its own place
 The original spec misread this reference as "robot" and turned it into an
@@ -148,18 +151,33 @@ A rule the player cannot see is a bug, so a room that refuses you says why.
 own and dress. Both were live readings of "Roblox" until Jacques settled it;
 neither is in the game. Revisit only if the tower ever needs an avatar.
 
-### 6. TRIGGER BOARD — the Candy Crush / Angry Birds layer
-Appears on landing floors (10, 20, 30...). This is the thinking puzzle.
+### 6. TRIGGER BOARD — the Candy Crush layer  ✅ BUILT (30 Aug 2026)
+Landing floors only (10, 20, 30...). It stands where the stairs would be and
+it is what earns the landing.
 
-A 5x5 grid of **trigger tiles**: Bored, Stressed, Alone, Tired, Phone, Angry, Late
-Night, Argument. The player has a fixed number of moves (start at 8, tighten as
-floors rise) and a hand of **coping tiles** drawn from the lesson content: Call
-Someone, Move, Eat, Sleep, Write, Leave the Room, Tell Her.
+A 5x5 grid of trigger tiles — Bored, Stressed, Alone, Tired, Phone, Angry,
+Late Night, Argument — and a hand of coping tiles drawn from the lesson
+content: Call Someone, Move, Eat, Sleep, Write, Leave the Room, Tell Them.
+(The original note said "Tell Her". It is "Tell Them" in the build: this game
+is played by the person in it and by the person who loves them, and rule 2
+says it never takes a side.)
 
-Placing a coping tile clears matching triggers around it. Limited moves means the
-player has to plan which trigger to attack first — that planning is the point.
+Placing a coping tile clears the triggers it answers in the squares around it.
+**The coping tiles never run out — the moves do.** You do not run out of "call
+someone", you run out of the night. Eight moves on floor 10, one fewer every
+ten floors, never below four.
 
-Clearing the board earns the landing. Failing means retry, not loss.
+Boards are built **backwards from a solution**: the squares a winning run
+would use are chosen first, and triggers are only ever scattered where those
+squares would clear them. A random board looks identical and is sometimes
+impossible, which on a landing floor would be quietly cruel. Simulated over
+thousands of boards: a player who looks first always clears it with about two
+moves in hand; a player placing at random essentially never does. The coping
+tiles are dealt rather than rolled, or three squares pick SLEEP and the board
+comes out as nine TIRED tiles.
+
+Running out of moves is a **retry, not a loss** — nothing cleared is taken
+back, no door re-locks, and the next board is new.
 
 ---
 
@@ -189,9 +207,12 @@ Clearing the board earns the landing. Failing means retry, not loss.
 Phase 2 is complete. Phase 3 (Trigger Board, artifact rooms, Vault) has not
 been started.
 
-**Phase 3:**
-- Trigger Board puzzle on landings
-- Artifact rooms + Vault screen
+**Phase 3:** — built 30 Aug 2026
+- ~~Trigger Board puzzle on landings~~
+- ~~Artifact rooms + Vault screen~~
+
+Phases 1-3 are complete. Phase 4 (floors 11-90 behind Pro, supporter tower)
+has not been started.
 
 **Phase 4:**
 - Floors 11–90 unlocked behind Pro

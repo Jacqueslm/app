@@ -448,6 +448,27 @@ body.nova-open #mini-player{bottom:160px}
 #tw-brief-btn{margin-top:9px;background:none;border:1px solid #26324f;color:#7b88b4;border-radius:8px;padding:5px 11px;font-size:.6875rem;letter-spacing:1.4px;font-family:var(--f);cursor:pointer}
 #tw-brief-btn.on{border-color:#6b62d8;color:#a99fff}
 #tw-brief-btn[disabled]{opacity:.45;cursor:default}
+/* THE TRIGGER BOARD (Phase 3) and THE VAULT. Same night palette as the rest. */
+#tw-board-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:14px 0 4px}
+.tb-cell{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.5rem;letter-spacing:.4px;font-weight:700;line-height:1.15;padding:2px;overflow:hidden}
+.tb-cell.open{background:#0b1120;border:1px dashed #232e4d;color:#232e4d;cursor:pointer}
+.tb-cell.open:active{background:#141d33}
+.tb-cell.trig{background:#2a1018;border:1px solid #5c2436;color:#e8859c}
+.tb-cell.cop{background:#141b3a;border:1px solid #3d4a95;color:#a99fff}
+#tw-board-hand{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.tb-hand{text-align:left;background:#0d1424;border:1px solid #26324f;color:#8b96bd;border-radius:9px;padding:7px 9px;font-size:.625rem;letter-spacing:.9px;font-weight:700;font-family:var(--f);cursor:pointer}
+.tb-hand.on{border-color:#6b62d8;background:#191f45;color:#cfc9ff}
+.tb-hand b{display:block;font-weight:400;letter-spacing:.4px;font-size:.5625rem;color:#5e6a90;margin-top:2px}
+#tw-board-moves{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;text-align:right;margin-top:6px}
+#tw-vault-link{display:block;width:100%;margin-top:16px;background:none;border:1px solid #1c2540;color:#5e6a90;border-radius:9px;padding:10px;font-size:.6875rem;letter-spacing:1.6px;font-family:var(--f);cursor:pointer}
+#s-vault{background:#05070e;min-height:calc(100vh - 132px);padding:16px 14px 30px}
+#vault-count{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;margin-bottom:14px}
+.vault-card{background:#0b1120;border:1px solid #1c2540;border-radius:11px;padding:14px;margin-bottom:10px}
+.vault-card.locked{border-style:dashed;opacity:.55;padding:9px 14px}
+.vault-meta{font-size:.5625rem;letter-spacing:2px;color:#5a678f}
+.vault-title{font-size:.9375rem;font-weight:650;color:#d5dcf2;margin-top:4px}
+.vault-card.locked .vault-title{color:#3f4a68;font-weight:400;font-style:italic}
+.vault-text{font-size:.84375rem;line-height:1.65;color:#8b96bd;margin-top:9px;white-space:pre-line}
 #tw-stage{position:relative;width:100%;height:302px;border:1px solid #18213a;border-radius:10px;overflow:hidden;background:#070a14}
 #tw-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation;display:block}
 #tw-hud{position:absolute;top:10px;left:12px;pointer-events:none}
@@ -1502,10 +1523,17 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div id="tw-say"></div>
         <div id="tw-panel"></div>
+        <button id="tw-vault-link" onclick="openTowerVault()">THE VAULT</button>
         <div id="tw-foot">Ten floors are built. The tower goes to ninety.</div>
       </div>
     </div>
 
+    <!-- 2AM: the Vault. Everything found in the building, and the gaps where
+         the rest of it still is. -->
+    <div id="s-vault" class="scr">
+      <div id="vault-count"></div>
+      <div id="vault-list"></div>
+    </div>
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
@@ -2765,6 +2793,18 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 <!-- 2AM: the locked door. Full-screen so the choice is the only thing on it. -->
+<!-- 2AM: the Trigger Board. Landing floors only. -->
+<div id="tw-board" class="tw-door">
+  <div class="tw-door-in">
+    <div class="tw-eyebrow">THE LANDING</div>
+    <div class="tw-q" id="tw-board-say"></div>
+    <div id="tw-board-grid"></div>
+    <div id="tw-board-moves"></div>
+    <div id="tw-board-hand"></div>
+    <div class="tw-note" id="tw-board-note"></div>
+    <div id="tw-board-out"></div>
+  </div>
+</div>
 <!-- 2AM: the Urge Wave. It runs 90 seconds and breaks on its own. -->
 <div id="tw-wave" class="tw-door">
   <div class="tw-door-in">
@@ -6866,7 +6906,7 @@ function towerConnected(n,a,b){
 function towerRoomName(n,k){
   if(k==='entry')return 'LANDING';
   if(k==='door')return towerCleared(n)?'OPEN':'THE DOOR';
-  if(k==='stairs')return 'UP';
+  if(k==='stairs')return towerFloorIsLanding(n)&&!towerLanded(n)?'THE LANDING':'UP';
   const s=towerFloor(n).sides[k];
   return s?s.name:'ROOM';
 }
@@ -6878,10 +6918,14 @@ function renderTower(){
   if(!towerRooms(t.floor)[t.room])t.room='entry';
   t.visited[t.floor]=t.visited[t.floor]||{};
   t.visited[t.floor][t.room]=true;
+  towerCollect(t.floor,t.room);
   document.getElementById('tw-brief-1').textContent=f.brief[0];
   document.getElementById('tw-brief-2').textContent=f.brief[1];
   document.getElementById('tw-hud-floor').textContent='FLOOR '+String(t.floor).padStart(2,'0');
   document.getElementById('tw-hud-sub').textContent=f.name+' · DAY '+t.floor;
+  const vc=towerVaultCounts();
+  const vl=document.getElementById('tw-vault-link');
+  if(vl)vl.textContent='THE VAULT · '+vc.have+' OF '+vc.all+' FOUND';
   const cleared=Object.keys(t.cleared).length;
   document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
   towerSay(f.line);
@@ -6898,7 +6942,7 @@ function renderTower(){
   const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
   towerPanel();
 }
-function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();towerBriefStop();}
+function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();towerBriefStop();towerBoardStop();}
 // The floor read aloud, in the narrator the member already chose for their
 // lessons (spec §3). Sixty short recordings on the lesson-audio branch, made by
 // tools/generate-tower-audio.py: tower/<voice>/floor-NN.mp3.
@@ -7098,6 +7142,7 @@ function towerTap(ev){
   if(!towerConnected(n,t.room,hit)){towerRefused(n,hit);return;}
   t.room=hit;
   t.visited[n]=t.visited[n]||{};t.visited[n][hit]=true;
+  towerCollect(n,hit);
   save();
   twTarget={x:rooms[hit][0],y:rooms[hit][1]};
   towerPanel();
@@ -7134,10 +7179,17 @@ function towerPanel(){
   }
   if(t.room==='stairs'){
     const ceiling=towerCeiling();
+    // Spec §6: on a landing floor the board is what earns it, and it stands
+    // where the stairs would be - there is nothing above floor ten yet.
+    if(towerFloorIsLanding(n)&&!towerLanded(n)){
+      el.innerHTML='<button class="tw-btn go" onclick="towerStartBoard()">Earn the landing</button>'+
+        '<div class="tw-note">'+towerBoardMoves(n)+' moves. The tiles never run out; the moves do.</div>';
+      return;
+    }
     if(n<ceiling){
       el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
     }else if(n>=TOWER_PHASE1_FLOORS){
-      el.innerHTML='<div class="tw-note">Floor ten is the top of what is built. The rest of the tower is coming.</div>';
+      el.innerHTML='<div class="tw-note">The landing is yours. Floor ten is the top of what is built — the rest of the tower is coming.</div>';
     }else{
       el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
         '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
@@ -7151,8 +7203,12 @@ function towerPanel(){
       : 'Tap a room to move. The door is the only way up.')+'</div>';
     return;
   }
-  const s=f.sides[t.room];
-  el.innerHTML='<div class="tw-note">'+escapeHtml(s?s.line:'Empty.')+'</div>';
+  const s=f.sides[t.room],art=towerArtifactAt(n,t.room);
+  el.innerHTML='<div class="tw-note">'+escapeHtml(s?s.line:'Empty.')+'</div>'+
+    (art?'<div class="vault-card" style="margin-top:12px">'+
+      '<div class="vault-meta">'+art.kind+' · KEPT</div>'+
+      '<div class="vault-title">'+escapeHtml(art.title)+'</div>'+
+      '<div class="vault-text">'+escapeHtml(art.text)+'</div></div>':'');
 }
 function towerGoEarn(){
   const e=climbEarnable();
@@ -7167,6 +7223,239 @@ function towerAscend(){
   renderTower();
 }
 // ── the door ────────────────────────────────────────────────────────────────
+// ── ARTIFACTS AND THE VAULT (Phase 3) ───────────────────────────────────────
+// Spec §4: the optional rooms hold a lesson excerpt, a story fragment or a
+// letter. Walk into the room and it is yours; it is readable afterwards in the
+// Vault whether or not you ever go back to that floor.
+//
+// Kept out of TOWER_FLOORS so the floor table stays readable at a glance, and
+// so the Vault can list every artifact in the building - including the ones
+// still unfound - without walking ten floors of layout data.
+const TOWER_ARTIFACTS={
+'1:side1':{kind:'LETTER',title:'Left on the step',text:
+"Whoever you are — I sat here too. Third-floor landing, about two in the morning, because the flat was too quiet and the street was too loud. I did not have a plan. I had a cup of tea going cold and a phone I was not going to use. That was the whole of it. I got up eventually. That is the only part that mattered."},
+'2:side1':{kind:'LESSON',title:'Wanting is not deciding',text:
+"The want will come back. It comes back for people ten years in. What changes is not whether it arrives — it is how much of you it gets. Early on it arrives and you are already halfway to the car. Later it arrives and you notice it, the way you notice weather.\n\nNothing about that is willpower. It is repetition, and repetition is boring, which is exactly why it works."},
+'3:side1':{kind:'STORY',title:"The call he didn't make",text:
+"...I stood in the hall with the phone in my hand for eleven minutes. I know it was eleven because I watched the clock change. I had the number up. I had the thing I was going to say, more or less.\n\nAnd I put it back in my pocket and went to bed. And the next night was worse, because now it was two things I hadn't said."},
+'3:side2':{kind:'LETTER',title:'For whoever is next',text:
+"They will not say the right thing. Nobody says the right thing. My sister said \"well, that explains a lot,\" and I wanted to put my fist through a door.\n\nTwo years later that is the sentence I am most grateful for, because it meant she had already known and had not walked off. You are not asking them to be good at this. You are asking them to stay."},
+'4:side1':{kind:'LESSON',title:'The hour',text:
+"It is rarely random. There is a window — for most people about ninety minutes long, and almost always in the same part of the day. When the house goes quiet. When the shift ends. When the car pulls into the drive and the engine stops.\n\nFind yours and you have found the only hour you actually have to plan for. The other twenty-three mostly take care of themselves."},
+'5:side1':{kind:'STORY',title:'What the mirror had',text:
+"...the sentence was \"I have had a day.\" That was it. Five words. I said them to my own face in the bathroom mirror maybe four hundred times, and every single time it worked — because it is not a lie. I had had a day. Everyone has had a day.\n\nThe lie was the second half. The part I never said out loud. \"And therefore.\""},
+'6:side1':{kind:'LESSON',title:'Out of reach',text:
+"Willpower is a bad lock. It works until you are tired, and you will be tired.\n\nDistance is a better lock. The app that is deleted, the number that is gone, the way home that does not pass the place. None of those need you to be strong at eleven at night. They only needed you to be strong once, in the afternoon, when it was easy."},
+'6:side2':{kind:'STORY',title:'The same chair',text:
+"...I moved the chair. That is the whole story. It had been facing the telly, in the corner where I always sat, and I dragged it round to face the window.\n\nFor about two weeks I could not settle in it. That was the point. I did not want to be comfortable in the exact shape I had been comfortable in."},
+'7:side1':{kind:'LETTER',title:'On the empty hours',text:
+"Nobody warns you that stopping hands your evenings back, and that this is the hard part. I had four hours a night that used to be full and suddenly were not.\n\nI filled them badly at first. Biscuits, phone, arguing with strangers. Then a bit better. It took about five months before an empty evening stopped feeling like a threat. Five months is not long. It feels long."},
+'7:side3':{kind:'LESSON',title:'The long hall',text:
+"Boredom gets treated as a joke in recovery. It is one of the big ones.\n\nThe habit was doing a job. It filled time and it changed how the evening felt. Take it away and the job is still there and nothing is doing it. That is not weakness — that is a gap, and gaps get filled by whatever is nearest."},
+'8:side1':{kind:'STORY',title:'The tap',text:
+"...I could not work out why I was angry at everything. Turned out I had not slept properly in nine days and had been living on toast. That was it. That was the whole mystery.\n\nI am not saying it was simple. I am saying some of what I thought was my character was tiredness wearing my clothes."},
+'9:side1':{kind:'LETTER',title:'The plates',text:
+"I am not going to pretend I did it out of love that night. I did it because the kitchen was a mess and I could not stand looking at it.\n\nBut she came down in the morning and stopped in the doorway and did not say anything, and I understood that she had stopped expecting things like that a long time before. Small is not nothing. Small is most of it."},
+'9:side2':{kind:'STORY',title:'The coat',text:
+"...it stayed on the hook for a year after he stopped, because taking it down would have meant deciding something, and neither of us was ready to decide anything.\n\nThen one Tuesday it was gone, and neither of us mentioned it. That is how most of it happened, honestly. Not conversations. Tuesdays."},
+'10:side1':{kind:'LETTER',title:'From the window',text:
+"Ten days. I know what you are thinking, because I thought it too — ten days is nothing, anyone can do ten days.\n\nHere is the thing though. You have done ten days before and it did not feel like this. The difference is not the number. It is that this time you were counting on purpose."},
+};
+function towerArtifactAt(n,room){return TOWER_ARTIFACTS[n+':'+room]||null;}
+function towerArtifactKey(n,room){return n+':'+room;}
+function towerKept(key){return !!(towerState().kept||{})[key];}
+// Walking in is enough. There is nothing to pick up and no way to miss one.
+function towerCollect(n,room){
+  const a=towerArtifactAt(n,room);
+  if(!a)return null;
+  const t=towerState(),key=towerArtifactKey(n,room);
+  if(!t.kept)t.kept={};
+  if(!t.kept[key]){
+    t.kept[key]=new Date().toISOString();
+    save();
+    logActivity('tower_artifact',{floor:n,kind:a.kind});
+  }
+  return a;
+}
+function towerVaultCounts(){
+  const keys=Object.keys(TOWER_ARTIFACTS);
+  return {have:keys.filter(towerKept).length,all:keys.length};
+}
+function openTowerVault(){switchTo('vault');actBn('bn-tools');}
+function renderTowerVault(){
+  const el=document.getElementById('vault-list');
+  if(!el)return;
+  const c=towerVaultCounts();
+  document.getElementById('vault-count').textContent=c.have+' of '+c.all+' found';
+  el.innerHTML=Object.keys(TOWER_ARTIFACTS).map(key=>{
+    const a=TOWER_ARTIFACTS[key],n=key.split(':')[0],got=towerKept(key);
+    if(!got)return '<div class="vault-card locked">'+
+      '<div class="vault-meta">FLOOR '+String(n).padStart(2,'0')+' · '+a.kind+'</div>'+
+      '<div class="vault-title">Still in the building</div></div>';
+    return '<div class="vault-card">'+
+      '<div class="vault-meta">FLOOR '+String(n).padStart(2,'0')+' · '+a.kind+'</div>'+
+      '<div class="vault-title">'+escapeHtml(a.title)+'</div>'+
+      '<div class="vault-text">'+escapeHtml(a.text)+'</div></div>';
+  }).join('');
+}
+
+// ── THE TRIGGER BOARD (Phase 3) ─────────────────────────────────────────────
+// Spec §6. Landing floors only - 10, 20, 30. A 5x5 grid of triggers, a hand of
+// coping tiles, and a fixed number of MOVES. Placing a coping tile clears the
+// triggers it answers in the squares around it. Clearing the board earns the
+// landing. Running out of moves is a retry, never a loss.
+//
+// The coping tiles do not run out. You never run out of "call someone" - you
+// run out of the night. Moves are the scarce thing, which is what makes this a
+// planning puzzle instead of a clicking one.
+const TOWER_TRIGGERS={
+  bored:'BORED',stressed:'STRESSED',alone:'ALONE',tired:'TIRED',
+  phone:'PHONE',angry:'ANGRY',late:'LATE NIGHT',argument:'ARGUMENT'};
+// Drawn from the lesson content, as specced. "Tell her" in the original note is
+// "TELL THEM" here: this game is played by the person in it and by the person
+// who loves them, and rule 2 says it never takes a side.
+const TOWER_COPING=[
+  {k:'call', t:'CALL SOMEONE',   clears:['alone','argument']},
+  {k:'move', t:'MOVE',           clears:['bored','stressed']},
+  {k:'eat',  t:'EAT',            clears:['tired','bored']},
+  {k:'sleep',t:'SLEEP',          clears:['tired','late']},
+  {k:'write',t:'WRITE',          clears:['angry','stressed']},
+  {k:'leave',t:'LEAVE THE ROOM', clears:['phone','argument']},
+  {k:'tell', t:'TELL THEM',      clears:['alone','angry']},
+];
+const TOWER_BOARD_N=5;
+function towerFloorIsLanding(n){return n%10===0;}
+function towerLanded(n){return !!(towerState().landings||{})[n];}
+// Eight on the first landing, one fewer every ten floors, never below four.
+function towerBoardMoves(n){return Math.max(4,8-Math.floor((n-10)/10));}
+function towerBoardArea(i){
+  const N=TOWER_BOARD_N,r=Math.floor(i/N),c=i%N,out=[];
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    const rr=r+dr,cc=c+dc;
+    if(rr>=0&&rr<N&&cc>=0&&cc<N)out.push(rr*N+cc);
+  }
+  return out;
+}
+// Built backwards from a solution, so a board can never be unsolvable: pick the
+// squares a winning run would use, then scatter triggers only where those
+// squares would clear them. A random board looks the same and is sometimes
+// impossible, which on a landing floor would be quietly cruel.
+function towerBoardBuild(moves){
+  const cells=new Array(TOWER_BOARD_N*TOWER_BOARD_N).fill(null);
+  // One fewer than the moves allowed, so a thinking player always has a
+  // spare. Tuned against a simulator: at this density a careless player who
+  // places at random never clears it, and a player who looks first always
+  // does, with two or three moves in hand.
+  const wanted=Math.max(3,moves-1);
+  const spots=[];
+  for(let guard=0;spots.length<wanted&&guard<400;guard++){
+    const i=Math.floor(Math.random()*cells.length);
+    if(spots.indexOf(i)<0)spots.push(i);
+  }
+  const isSpot=(i)=>spots.indexOf(i)>=0;
+  // Deal the coping tiles out rather than rolling one per spot: rolling let
+  // three spots all pick SLEEP, and a board that is nine TIRED tiles is not a
+  // puzzle. Shuffled, so it is a different seven-tile deal every night.
+  const deal=TOWER_COPING.slice();
+  for(let k=deal.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));const t=deal[k];deal[k]=deal[r];deal[r]=t;}
+  let placed=0;
+  spots.forEach((i,si)=>{
+    const cop=deal[si%deal.length];
+    const free=towerBoardArea(i).filter(j=>!isSpot(j)&&!cells[j]);
+    for(let k=free.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));const t=free[k];free[k]=free[r];free[r]=t;}
+    const take=Math.min(free.length,2+Math.floor(Math.random()*2));
+    for(let k=0;k<take;k++){
+      // Cycle the tile's answers rather than rolling each one: rolling piled
+      // seven TIRED tiles onto one board, because two of the seven coping
+      // tiles answer it. A board wants variety to be worth planning against.
+      cells[free[k]]={trigger:cop.clears[k%cop.clears.length]};
+      placed++;
+    }
+  });
+  return {cells:cells,left:moves,moves:moves,triggers:placed,sel:TOWER_COPING[0].k,done:false};
+}
+let twBoard=null;
+function towerBoardStop(){
+  twBoard=null;
+  const el=document.getElementById('tw-board');
+  if(el)el.classList.remove('open');
+}
+function towerStartBoard(){
+  const n=towerState().floor;
+  twBoard=towerBoardBuild(towerBoardMoves(n));
+  twBoard.n=n;
+  document.getElementById('tw-board').classList.add('open');
+  logActivity('tower_board_start',{floor:n});
+  towerBoardRender();
+}
+function towerBoardPick(k){
+  if(!twBoard||twBoard.done)return;
+  twBoard.sel=k;towerBoardRender();
+}
+function towerBoardTap(i){
+  if(!twBoard||twBoard.done)return;
+  const cell=twBoard.cells[i];
+  if(cell)return;                       // a trigger, or a tile already down
+  if(twBoard.left<=0)return;
+  const cop=TOWER_COPING.find(c=>c.k===twBoard.sel);
+  twBoard.cells[i]={coping:cop.k};
+  twBoard.left--;
+  let cleared=0;
+  towerBoardArea(i).forEach(j=>{
+    const c=twBoard.cells[j];
+    if(c&&c.trigger&&cop.clears.indexOf(c.trigger)>=0){twBoard.cells[j]=null;cleared++;}
+  });
+  if(navigator.vibrate&&cleared)try{navigator.vibrate(14);}catch(e){}
+  towerBoardRender();
+}
+function towerBoardLeft(){
+  return twBoard?twBoard.cells.filter(c=>c&&c.trigger).length:0;
+}
+function towerBoardRender(){
+  if(!twBoard)return;
+  const n=twBoard.n,f=towerFloor(n),left=towerBoardLeft();
+  const grid=document.getElementById('tw-board-grid');
+  grid.innerHTML=twBoard.cells.map((c,i)=>{
+    if(c&&c.trigger)return '<div class="tb-cell trig">'+TOWER_TRIGGERS[c.trigger]+'</div>';
+    if(c&&c.coping)return '<div class="tb-cell cop">'+(TOWER_COPING.find(x=>x.k===c.coping)||{t:''}).t+'</div>';
+    return '<div class="tb-cell open" onclick="towerBoardTap('+i+')"></div>';
+  }).join('');
+  document.getElementById('tw-board-hand').innerHTML=TOWER_COPING.map(c=>
+    '<button class="tb-hand'+(twBoard.sel===c.k?' on':'')+'" onclick="towerBoardPick(\''+c.k+'\')">'+
+    c.t+'<b>'+c.clears.map(x=>TOWER_TRIGGERS[x]).join(' · ')+'</b></button>').join('');
+  document.getElementById('tw-board-moves').textContent=
+    twBoard.done?'':(twBoard.left+' MOVE'+(twBoard.left===1?'':'S')+' LEFT · '+left+' TRIGGER'+(left===1?'':'S'));
+  const out=document.getElementById('tw-board-out');
+  if(left===0&&!twBoard.done){
+    twBoard.done=true;
+    const t=towerState();
+    t.landings=t.landings||{};t.landings[n]=true;save();
+    logActivity('tower_landing',{floor:n,movesLeft:twBoard.left});
+    document.getElementById('tw-board-say').textContent='The board is clear.';
+    document.getElementById('tw-board-note').textContent=
+      'You did not clear it by being fast. You cleared it by deciding which one to go at first. That is the whole skill.';
+    out.innerHTML='<button class="tw-btn go" style="margin-top:16px" onclick="towerBoardDone()">Take the landing</button>';
+    return;
+  }
+  if(twBoard.left<=0&&left>0&&!twBoard.done){
+    twBoard.done=true;
+    document.getElementById('tw-board-say').textContent='Out of moves.';
+    document.getElementById('tw-board-note').textContent=
+      'Nothing is lost and nothing is taken back. The night resets and the board is new.';
+    out.innerHTML='<button class="tw-btn go" style="margin-top:16px" onclick="towerStartBoard()">Again</button>'+
+      '<button class="tw-btn" onclick="towerBoardStop()">Not now</button>';
+    return;
+  }
+  document.getElementById('tw-board-say').textContent='Floor '+n+'. '+f.name+'.';
+  document.getElementById('tw-board-note').textContent=
+    twBoard.moves+' moves, and the tiles never run out. Pick which one to go at first.';
+  out.innerHTML='<button class="tw-btn" style="margin-top:14px" onclick="towerBoardStop()">Step back</button>';
+}
+function towerBoardDone(){
+  towerBoardStop();
+  renderTower();
+}
+
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
 // Spec §2. A pattern of 3-7 pulses plays; you tap it back. Each round you get
 // right makes the next one longer. Getting one wrong restarts the sequence and
@@ -12342,7 +12631,7 @@ const SCREEN_MAP={
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
-  tower:'s-tower',
+  tower:'s-tower',vault:'s-vault',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -12351,8 +12640,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-tools'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-tools',vault:'bn-tools'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -12378,7 +12667,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-tools'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-tools',vault:'bn-tools'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -12439,6 +12728,7 @@ function switchTo(id,opts){
   if(id==='tools'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
+  if(id==='vault'){renderTowerVault();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -13646,7 +13936,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.7';
+const APP_VERSION='8.8';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

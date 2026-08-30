@@ -469,6 +469,27 @@ body.nova-open #mini-player{bottom:160px}
 .tw-ta{width:100%;min-height:120px;background:#0b1120;border:1px solid #23304d;border-radius:10px;color:#d5dcf2;padding:12px;font-size:.875rem;font-family:var(--f);line-height:1.6;resize:vertical}
 .tw-timer{font-size:2.5rem;font-weight:700;letter-spacing:3px;color:#dbe2f7;text-align:center;margin:18px 0 4px;font-variant-numeric:tabular-nums}
 .tw-timer-sub{font-size:.6875rem;letter-spacing:1.6px;color:#5e6a90;text-align:center;margin-bottom:16px}
+/* THE WAVE (Phase 2). Same full-screen treatment as the door: when it is on
+   you, it is the only thing on the screen, which is the honest version. */
+#tw-wave-canvas{width:100%;height:96px;display:block;margin:14px 0 10px}
+.tw-wave-bar{height:3px;background:#161e33;border-radius:2px;overflow:hidden}
+.tw-wave-bar i{display:block;height:100%;width:100%;background:#3d4a75;transition:width 1s linear}
+#tw-wave-pads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 4px}
+.tw-pad{height:74px;border-radius:12px;border:1px solid #26324f;background:#0d1424;cursor:pointer;transition:background .09s,border-color .09s,transform .09s;display:flex;align-items:center;justify-content:center}
+/* Four blank boxes give no affordance and nothing to tell them apart. Each pad
+   gets its own shape, so the pattern is readable as shapes and not only as
+   which square lit up - it has to work for a colourblind player too. */
+.tw-pad i{display:block;width:16px;height:16px;background:#2f3d61;transition:background .09s}
+.tw-pad.p0 i{border-radius:50%}
+.tw-pad.p1 i{border-radius:3px}
+.tw-pad.p2 i{transform:rotate(45deg);border-radius:2px}
+.tw-pad.p3 i{width:0;height:0;background:none;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid #2f3d61}
+.tw-pad.lit i{background:#cfc9ff}
+.tw-pad.p3.lit i{background:none;border-bottom-color:#cfc9ff}
+.tw-pad.lit{background:#2a2470;border-color:#6b62d8}
+.tw-pad.hit{transform:scale(.96)}
+.tw-pad.wrong{background:#3a1420;border-color:#8c3550}
+#tw-wave-count{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;text-align:right;margin-top:8px}
  </style> <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
 // First touch wins: someone who lands from TikTok, reads /for-her, then signs up
@@ -2738,6 +2759,24 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 <!-- 2AM: the locked door. Full-screen so the choice is the only thing on it. -->
+<!-- 2AM: the Urge Wave. It runs 90 seconds and breaks on its own. -->
+<div id="tw-wave" class="tw-door">
+  <div class="tw-door-in">
+    <div class="tw-eyebrow" id="tw-wave-eyebrow">THE WAVE</div>
+    <div class="tw-q" id="tw-wave-say">It is here. Nothing you do makes it shorter.</div>
+    <canvas id="tw-wave-canvas"></canvas>
+    <div class="tw-wave-bar"><i id="tw-wave-fill"></i></div>
+    <div id="tw-wave-pads">
+      <div class="tw-pad p0" id="tw-pad-0" onclick="towerWaveTap(0)"><i></i></div>
+      <div class="tw-pad p1" id="tw-pad-1" onclick="towerWaveTap(1)"><i></i></div>
+      <div class="tw-pad p2" id="tw-pad-2" onclick="towerWaveTap(2)"><i></i></div>
+      <div class="tw-pad p3" id="tw-pad-3" onclick="towerWaveTap(3)"><i></i></div>
+    </div>
+    <div id="tw-wave-count"></div>
+    <div class="tw-note" id="tw-wave-note"></div>
+    <div id="tw-wave-out"></div>
+  </div>
+</div>
 <div id="tw-door" class="tw-door" onclick="if(event.target===this)towerCloseDoor()">
   <div class="tw-door-in" id="tw-door-in"></div>
 </div>
@@ -6688,7 +6727,7 @@ const TOWER_FLOORS=[
    sides:{side1:{name:'PHONE BOOTH',line:'The handset is warm. Whoever was in here left in a hurry.'},
           side2:{name:'WAITING ROOM',line:'Four chairs. Three of them have been sat in tonight.'}}},
 
-  {n:4,name:'THE HOUR',rule:'dim',air:'flicker',
+  {n:4,name:'THE HOUR',rule:'dim',air:'flicker',wave:true,
    pal:{bg:'#0c0508',room:'#180a10',roomOn:'#2c1018',stroke:'#2e1420',strokeOn:'#e0607e',line:'#5a2334',label:'#a86e80'},
    rooms:{entry:[0.20,0.50],side1:[0.50,0.22],door:[0.78,0.50],stairs:[0.78,0.16]},
    edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
@@ -6720,7 +6759,7 @@ const TOWER_FLOORS=[
    sides:{side1:{name:'BACK STAIRS',line:'The quick way down. It is still here. It will always still be here.'},
           side2:{name:'OLD ROOM',line:'The furniture is the same. That is the trouble with it.'}}},
 
-  {n:7,name:'EMPTY TIME',rule:'none',air:'dust',
+  {n:7,name:'EMPTY TIME',rule:'none',air:'dust',wave:true,
    pal:{bg:'#060810',room:'#0a0e1a',roomOn:'#141c30',stroke:'#161d2e',strokeOn:'#7b8bc4',line:'#232c46',label:'#5d6789'},
    rooms:{entry:[0.13,0.50],side1:[0.35,0.20],side2:[0.35,0.80],side3:[0.60,0.50],door:[0.85,0.50],stairs:[0.85,0.16]},
    edges:[['entry','side1'],['entry','side2'],['side1','side3'],['side2','side3'],['side3','door'],['door','stairs']],
@@ -6851,7 +6890,7 @@ function renderTower(){
   const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
   towerPanel();
 }
-function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();}
+function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();}
 // The line the floor gives you. Unattributed on purpose: 2AM has no guide and
 // no companion in it. Friendly lives in the rest of the app and stays there.
 function towerSay(text){
@@ -7030,8 +7069,12 @@ function towerPanel(){
   if(!el)return;
   if(t.room==='door'){
     if(!towerCleared(n)){
-      el.innerHTML='<button class="tw-btn go" onclick="towerOpenDoor()">The door is locked. Two keys.</button>'+
-        '<div class="tw-note">Truth is the safe key. Dare is worth more.</div>';
+      const wave=towerFloorHasWave(n)&&!towerWaveSurvived(n);
+      el.innerHTML='<button class="tw-btn go" onclick="towerOpenDoor()">'+
+        (wave?'Something is between you and the door.':'The door is locked. Two keys.')+'</button>'+
+        '<div class="tw-note">'+(wave
+          ? 'It has to pass before the door opens. It takes as long as it takes.'
+          : 'Truth is the safe key. Dare is worth more.')+'</div>';
     }else{
       const via=t.cleared[n].via;
       el.innerHTML='<div class="tw-note">This door is open. You took the '+(via==='dare'?'dare':'truth')+'.</div>';
@@ -7073,7 +7116,166 @@ function towerAscend(){
   renderTower();
 }
 // ── the door ────────────────────────────────────────────────────────────────
+// ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
+// Spec §2. A pattern of 3-7 pulses plays; you tap it back. Each round you get
+// right makes the next one longer. Getting one wrong restarts the sequence and
+// does not end anything.
+//
+// The one thing that matters here: NOTHING the player does changes the clock.
+// The wave runs ninety seconds and then breaks on its own whether they play it
+// perfectly, fail every round, or sit there and do nothing at all. That is the
+// lesson and it is delivered mechanically rather than stated - the pads are
+// something to do with your hands while it passes, not a way to beat it.
+// If you ever find yourself "rewarding" a good round with time off, don't.
+const TOWER_WAVE_SECONDS=90;
+const TOWER_WAVE_MIN=3,TOWER_WAVE_MAX=7;
+// Spec: "~1 in 4 floors, and always on floors ending in 0." Declared per floor
+// rather than rolled at runtime - a trap that appears at random is unfair, and
+// a random trap cannot be tested.
+function towerFloorHasWave(n){return n%10===0||!!towerFloor(n).wave;}
+function towerWaveSurvived(n){return !!(towerState().waves||{})[n];}
+let twWave=null;
+function towerWaveStop(){
+  if(!twWave)return;
+  (twWave.timers||[]).forEach(clearTimeout);
+  clearInterval(twWave.tick);
+  cancelAnimationFrame(twWave.anim);
+  twWave=null;
+  const el=document.getElementById('tw-wave');
+  if(el)el.classList.remove('open');
+}
+function towerStartWave(n){
+  towerWaveStop();
+  const f=towerFloor(n);
+  twWave={n:n,len:TOWER_WAVE_MIN,seq:[],at:0,rounds:0,input:false,over:false,
+    started:Date.now(),timers:[],tick:null,anim:null};
+  document.getElementById('tw-wave').classList.add('open');
+  document.getElementById('tw-wave-eyebrow').textContent='FLOOR '+String(n).padStart(2,'0')+' · THE WAVE';
+  document.getElementById('tw-wave-say').textContent='It is here. Nothing you do makes it shorter.';
+  document.getElementById('tw-wave-note').textContent='Tap the pattern back if you want something to do with your hands. It changes nothing.';
+  document.getElementById('tw-wave-out').innerHTML='';
+  document.getElementById('tw-wave-pads').style.display='';
+  document.getElementById('tw-wave-fill').style.width='100%';
+  logActivity('tower_wave_start',{floor:n});
+  const loop=()=>{towerWaveDraw();twWave&&(twWave.anim=requestAnimationFrame(loop));};loop();
+  twWave.tick=setInterval(()=>{
+    if(!twWave)return;
+    const left=towerWaveLeft();
+    document.getElementById('tw-wave-fill').style.width=(left/TOWER_WAVE_SECONDS*100)+'%';
+    if(left<=0)towerWaveBreak();
+  },1000);
+  towerWaveNext(700);
+}
+function towerWaveLeft(){
+  if(!twWave)return 0;
+  return Math.max(0,TOWER_WAVE_SECONDS-Math.floor((Date.now()-twWave.started)/1000));
+}
+function towerWaveNext(delay){
+  if(!twWave||twWave.over)return;
+  twWave.seq=[];
+  for(let i=0;i<twWave.len;i++)twWave.seq.push(Math.floor(Math.random()*4));
+  twWave.at=0;twWave.input=false;
+  document.getElementById('tw-wave-count').textContent='ROUND '+(twWave.rounds+1)+' · '+twWave.len+' PULSES';
+  let t=delay;
+  twWave.seq.forEach((pad)=>{
+    twWave.timers.push(setTimeout(()=>towerWaveLight(pad,380),t));
+    t+=580;
+  });
+  twWave.timers.push(setTimeout(()=>{if(twWave&&!twWave.over)twWave.input=true;},t));
+}
+function towerWaveLight(pad,ms){
+  const el=document.getElementById('tw-pad-'+pad);
+  if(!el)return;
+  el.classList.add('lit');
+  setTimeout(()=>el.classList.remove('lit'),ms);
+}
+function towerWaveTap(i){
+  if(!twWave||twWave.over||!twWave.input)return;
+  const el=document.getElementById('tw-pad-'+i);
+  if(el){el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),110);}
+  if(navigator.vibrate)try{navigator.vibrate(12);}catch(e){}
+  if(i===twWave.seq[twWave.at]){
+    twWave.at++;
+    if(twWave.at>=twWave.seq.length){
+      // Round won. The only thing it buys is a longer pattern. Not one second.
+      twWave.rounds++;
+      twWave.len=Math.min(TOWER_WAVE_MAX,twWave.len+1);
+      twWave.input=false;
+      document.getElementById('tw-wave-note').textContent='Right. The clock did not move.';
+      towerWaveNext(900);
+    }
+    return;
+  }
+  // Wrong. Nothing ends. The sequence starts again and the clock keeps running.
+  twWave.input=false;
+  twWave.len=TOWER_WAVE_MIN;
+  document.getElementById('tw-wave-note').textContent='Wrong. Nothing happens. The clock did not move for that either.';
+  [0,1,2,3].forEach(k=>{
+    const p=document.getElementById('tw-pad-'+k);
+    if(p){p.classList.add('wrong');setTimeout(()=>p.classList.remove('wrong'),260);}
+  });
+  towerWaveNext(1100);
+}
+// The shape of it: it climbs, it peaks about a third of the way through, and
+// then it goes down. The whole curve is drawn from the first second, so the
+// player can see the end of it before they get there. That is the point.
+function twWaveEnv(p){
+  if(p<=0||p>=1)return 0;
+  return p<0.32?Math.pow(p/0.32,1.5):Math.pow((1-p)/0.68,1.15);
+}
+function towerWaveDraw(){
+  const c=document.getElementById('tw-wave-canvas');
+  if(!c||!c.clientWidth||!twWave)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=c.clientWidth,H=c.clientHeight;
+  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}
+  const g=c.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const f=towerFloor(twWave.n),p=f.pal,mid=H/2;
+  const prog=twWave.over?1:Math.min(1,(Date.now()-twWave.started)/(TOWER_WAVE_SECONDS*1000));
+  const t=Date.now();
+  const yAt=(x)=>mid+Math.sin(x*30+t/240)*twWaveEnv(x)*H*0.40;
+  // the whole wave, faint - including the part that has not happened yet
+  g.strokeStyle=p.line;g.lineWidth=1.5;g.globalAlpha=.5;g.beginPath();
+  for(let i=0;i<=W;i+=2){const x=i/W;i?g.lineTo(i,yAt(x)):g.moveTo(i,yAt(x));}
+  g.stroke();
+  // the part you have already been through
+  g.strokeStyle=p.strokeOn;g.lineWidth=2;g.globalAlpha=1;g.beginPath();
+  for(let i=0;i<=W*prog;i+=2){const x=i/W;i?g.lineTo(i,yAt(x)):g.moveTo(i,yAt(x));}
+  g.stroke();
+  const mx=W*prog;
+  g.beginPath();g.arc(mx,yAt(prog),4,0,7);
+  g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=10;g.fill();g.shadowBlur=0;
+}
+function towerWaveBreak(){
+  if(!twWave||twWave.over)return;
+  twWave.over=true;twWave.input=false;
+  (twWave.timers||[]).forEach(clearTimeout);twWave.timers=[];
+  clearInterval(twWave.tick);twWave.tick=null;
+  const n=twWave.n,rounds=twWave.rounds;
+  const t=towerState();
+  t.waves=t.waves||{};t.waves[n]=true;save();
+  logActivity('tower_wave',{floor:n,rounds:rounds});
+  document.getElementById('tw-wave-say').textContent='It broke on its own.';
+  document.getElementById('tw-wave-note').textContent=
+    'It would have broken if you had played every round, and it would have broken if you had put the phone down and stared at the wall. Ninety seconds either way.';
+  document.getElementById('tw-wave-count').textContent=rounds===1?'1 ROUND':rounds+' ROUNDS';
+  document.getElementById('tw-wave-pads').style.display='none';
+  document.getElementById('tw-wave-out').innerHTML=
+    '<button class="tw-btn go" style="margin-top:16px" onclick="towerWaveDone()">The door is ahead</button>';
+}
+function towerWaveDone(){
+  towerWaveStop();
+  towerOpenDoor();
+}
+
+// ── the door ────────────────────────────────────────────────────────────────
 function towerOpenDoor(){
+  // Spec, core idea: some floors trap you in an urge you have to survive
+  // before the door opens. Survive it once and the floor remembers.
+  const n=towerState().floor;
+  if(towerFloorHasWave(n)&&!towerWaveSurvived(n)&&!towerCleared(n)){towerStartWave(n);return;}
   const d=document.getElementById('tw-door');
   d.classList.add('open');
   towerDoorChoice();
@@ -13391,7 +13593,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='8.5';
+const APP_VERSION='8.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -48,15 +48,36 @@ Each floor presents a locked door with two keys.
 Player picks one. Both unlock the floor. Truth is the safe path; Dare is worth more
 progress. This is the adventurous layer.
 
-### 2. URGE WAVE — the Simon-says layer
-Triggers randomly on ~1 in 4 floors, and always on floors ending in 0.
+### 2. URGE WAVE — the Simon-says layer  ✅ BUILT (30 Aug 2026)
+Stands between the player and the door on floors 4, 7 and 10 — "~1 in 4 floors,
+and always on floors ending in 0". Declared per floor rather than rolled at
+runtime: a trap that appears at random is unfair, and a random trap cannot be
+tested. Survive it once and the floor remembers.
 
-A pattern of 3–7 pulses plays on screen. The player repeats it back by tapping.
-Each correct round extends the wave. The wave runs a fixed **90 seconds** and then
-breaks on its own — the player learns the wave ends whether or not they fight it.
+A pattern of 3 pulses plays across four pads; the player taps it back. Each
+round they get right makes the next pattern one longer, to a maximum of 7.
+Getting one wrong restarts the sequence at 3 and ends nothing.
 
-Failing a round does not end the game. It restarts the sequence and the clock keeps
-running. The lesson is "wait it out," delivered mechanically instead of stated.
+**The one rule that must never be "improved":** nothing the player does moves
+the clock. The wave runs a fixed 90 seconds and breaks on its own whether they
+play every round perfectly, fail every one, or put the phone down and stare at
+the wall. Winning a round buys a longer pattern and not one second. The pads
+are something to do with your hands while it passes, not a way to beat it.
+Six tests exist purely to stop someone later rewarding a good round with time
+off, or ending the wave early on a fail.
+
+The whole curve — including the part that has not happened yet — is drawn from
+the first second, so the player can see it stop before they get there. A bar
+that only filled in behind them would hide exactly what the mechanic teaches.
+
+Each pad carries its own shape (circle, square, diamond, triangle), so the
+pattern is readable as shapes and not only as which square lit up.
+
+When it breaks: *"It would have broken if you had played every round, and it
+would have broken if you had put the phone down and stared at the wall. Ninety
+seconds either way."*
+
+Walking off the screen mid-wave does not bank it. It runs again next time.
 
 ### 3. TONE — the Call of Duty layer
 Serious, not cartoon. Dark UI, high contrast, no bright colors, no confetti.
@@ -143,8 +164,8 @@ Clearing the board earns the landing. Failing means retry, not loss.
 - Progress synced to existing Climb data
 
 **Phase 2:**
-- Urge Wave mini-game
-- Voice briefings using existing narrator tracks
+- ~~Urge Wave mini-game~~ — built 30 Aug 2026
+- Voice briefings using existing narrator tracks — NOT built
 
 **Phase 3:**
 - Trigger Board puzzle on landings

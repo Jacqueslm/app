@@ -953,3 +953,122 @@ whole point of Cause & Effect — without the app saying something clinical.
   Handheld drift replaced the linear push, and grain/vignette/grade went on top.
 - Same man in both frames, which is house-rule series consistency working. Keep
   him for any further Lane 5 male pieces.
+
+---
+
+## A20 — "Every swipe is a tiny hit" · social media · CAUSE & EFFECT · 7.4s · BUILT 28 Aug 2026
+
+**Pure graphics — no stills, no generation, nothing supplied.** Built entirely
+in code, which makes it the cheapest piece in the file and repeatable any time
+the copy changes.
+
+1. **3.4s** a feed accelerating. The scroll distance grows as t^2.4, so it does
+   not just move, it *speeds up*, and a backdrop blur ramps with it until the
+   cards are unreadable — *Every swipe is a **tiny hit**.*
+2. **hard stop at 3.55s** — the blur snaps to zero in 0.12s with one flash of
+   ground. Dead still, perfectly sharp.
+3. **1.4s** nothing moves — *Now you can't sit through a red light.*
+4. **2.0s** end card — **Scrolling is a habit. It can be broken.**
+
+**Title (TikTok / Facebook):** Every swipe is a tiny hit
+**Title (YouTube):** Social media addiction — why you can't sit still any more
+**Hashtags:** #socialmediadetox #screenaddiction #dopaminedetox #recovery #dayone
+**Buffer tags:** addictions · recovery
+
+**Caption:** Every swipe is a tiny hit. Thousands a day, each one training you to
+need the next one faster. Then you notice you can't sit through a red light
+without reaching for your pocket. Scrolling is a habit, and habits can be
+broken. Free, no card, no ads, works with no account. Link in bio.
+
+**Score:** `content/score/silent-impact-2.mp3` trimmed to 7.4s with a fade.
+**File:** source `content/scroll-source.html`.
+
+### What this piece deliberately does NOT say
+
+Jacques asked for "how social media is destroying brain cells." **That is not
+true and it is not in here.** Scrolling does not kill neurons. Saying so would
+be a medical claim (house rule 9), it would be false, and the first counsellor
+or school that read it would stop trusting everything else in the library —
+which is the audience OUTREACH.md and SCHOOLS.md are built to reach.
+
+The true version is stronger anyway, and it is what the cut argues: the habit
+costs **attention**, and the tell is that stillness becomes unbearable. The red
+light line is specific, recognisable, and needs no science to land. If the
+literal brain-cell version is ever wanted, it should be a conscious decision
+made with that trade understood, not a caption swap.
+
+**Where it sends them:** the app's **Social media** track is live (one of the 14
+in `lessons.json`), and KEYWORDS.md has `social media addiction symptoms`
+(390/mo, KD 39) and `screen addict` (480/mo, KD 25) tagged Build (video).
+
+---
+
+## A21 — "Who's wrong?" · the Together track · CAUSE / CONSEQUENCE / EFFECT · 8.0s · BUILT 30 Aug 2026
+
+The first piece aimed at the **couple**, not the addict alone. Three comic
+panels supplied by Jacques, cut to the three-part shape he asked for:
+
+1. **1.95s — CAUSE.** *CAUGHT.* He slams the laptop shut. She is already
+   standing behind him, arms folded.
+2. **1.95s — CONSEQUENCE.** *THE ARGUMENT.* "Seriously?!" Both hands up, him
+   shrugging, the laptop lying closed on the sofa between them.
+3. **2.05s — EFFECT.** *WHO'S WRONG?* Both on the sofa pointing at each other.
+   Two mugs: I'M LISTENING (???) and NO, I'M LISTENING (???).
+4. **2.05s — end card.** **Nobody wins that argument.**
+
+**Title (TikTok / Facebook):** Who's wrong?
+**Title (YouTube):** Caught, then the argument — why "who's wrong" never ends
+**Hashtags:** #recovery #relationships #addictionrecovery #couples #supportsystem #dayone
+**Buffer tags:** addictions · recovery · partner support
+
+**Caption:** Caught. Then the argument. Then the part nobody talks about — two
+people pointing at each other, both certain, both exhausted, nothing fixed.
+Nobody wins that argument. The Together track is built for both of you at once:
+you work it, they work it, same day, same page. Free, no card, no ads, works
+with no account. Link in bio.
+
+**Score:** `content/score/paper-kites-in-the-rain.mp3` trimmed to 8.0s with a
+fade — the knowing 5–8s exception (see rule 21): every track in the library is
+12s+, so a short piece can only fade, never land on the last note.
+**File:** source `content/couple-source.html`, panels `content/couple/`.
+
+### Treatment — REBUILT 9:16 full bleed
+
+Jacques supplied the panels twice. The **first pass** used the 1664x2080 (4:5)
+set, which house rule 26 puts in the **letterboxed band** — a centre-crop to
+9:16 was never an option there, it would have sliced the burned-in caption off
+the bottom of every panel.
+
+He then sent the same three panels at **1440x2560 — exactly 9:16** — so the
+piece was rebuilt **full bleed**, which is what rule 26 asks for whenever the
+art is native. Both sets are kept in `content/couple/` (`*-9x16.png` are the
+ones in the cut).
+
+**The one trick worth stealing:** `transform-origin: 50% 100%`. Every panel
+carries its caption in a strip at the very bottom of the art, and a normal
+centre-anchored push-in would crop it. Anchored at the **bottom edge**, the
+push scales up and away from the caption — the crop comes off the ceiling,
+where there is nothing, and the words never move a pixel. Base scale is 1.012
+so the handheld drift has room without exposing an edge. **Any future piece
+with burned-in bottom captions wants this.**
+
+The watermark moved **top-right**: the bottom ~175px is caption territory on
+all three panels. Grain dropped to .32 (from .5) because comic linework already
+carries texture, and the vignette eased to .62 so it does not dim the caption
+strips.
+
+### Why there are no overlay captions
+
+**The panels caption themselves** — CAUGHT. / THE ARGUMENT. / WHO'S WRONG? are
+in the art. That is the only reason three beats fit under the 8s ceiling: rule
+21 says three added caption strips do not fit, and they still don't. Burned-in
+text costs no extra reading time because it arrives with the frame. If a future
+piece needs three beats, this is the trick — put the words in the image.
+
+### What it points at
+
+The app's **Together** track, live with 90 lessons, for the person in recovery
+and the person supporting them. The end card answers the panel's question by
+refusing it: "who's wrong" is the trap, not the question. No claim is made that
+the app resolves arguments — it gives both people the same day's work, which is
+what the tag line has always said (*an app for you and the one who supports you*).

@@ -1000,3 +1000,64 @@ made with that trade understood, not a caption swap.
 **Where it sends them:** the app's **Social media** track is live (one of the 14
 in `lessons.json`), and KEYWORDS.md has `social media addiction symptoms`
 (390/mo, KD 39) and `screen addict` (480/mo, KD 25) tagged Build (video).
+
+---
+
+## A21 — "Who's wrong?" · the Together track · CAUSE / CONSEQUENCE / EFFECT · 8.0s · BUILT 30 Aug 2026
+
+The first piece aimed at the **couple**, not the addict alone. Three comic
+panels supplied by Jacques, cut to the three-part shape he asked for:
+
+1. **1.95s — CAUSE.** *CAUGHT.* He slams the laptop shut. She is already
+   standing behind him, arms folded.
+2. **1.95s — CONSEQUENCE.** *THE ARGUMENT.* "Seriously?!" Both hands up, him
+   shrugging, the laptop lying closed on the sofa between them.
+3. **2.05s — EFFECT.** *WHO'S WRONG?* Both on the sofa pointing at each other.
+   Two mugs: I'M LISTENING (???) and NO, I'M LISTENING (???).
+4. **2.05s — end card.** **Nobody wins that argument.**
+
+**Title (TikTok / Facebook):** Who's wrong?
+**Title (YouTube):** Caught, then the argument — why "who's wrong" never ends
+**Hashtags:** #recovery #relationships #addictionrecovery #couples #supportsystem #dayone
+**Buffer tags:** addictions · recovery · partner support
+
+**Caption:** Caught. Then the argument. Then the part nobody talks about — two
+people pointing at each other, both certain, both exhausted, nothing fixed.
+Nobody wins that argument. The Together track is built for both of you at once:
+you work it, they work it, same day, same page. Free, no card, no ads, works
+with no account. Link in bio.
+
+**Score:** `content/score/paper-kites-in-the-rain.mp3` trimmed to 8.0s with a
+fade — the knowing 5–8s exception (see rule 21): every track in the library is
+12s+, so a short piece can only fade, never land on the last note.
+**File:** source `content/couple-source.html`, panels `content/couple/`.
+
+### Treatment — why this one is banded, not full bleed
+
+The panels are **1664x2080 (4:5)**, not native 9:16, so house rule 26 puts them
+in the **letterboxed band**: 1080x1350 sitting on a blurred, darkened blowup of
+the same panel. A centre-crop to 9:16 was never an option here — it would have
+sliced the burned-in caption off the bottom of every panel, which is the whole
+readability of the piece.
+
+Depth comes from band-vs-backdrop instead of the usual cutout-vs-plate:
+`prep-still.py` / rembg would mangle flat line art, so the band pushes in and
+drifts one way while the backdrop drifts the other, direction alternating per
+beat. House handheld noise and per-frame grain over the top, grain dropped to
+.32 (from .5) because comic linework already carries texture.
+
+### Why there are no overlay captions
+
+**The panels caption themselves** — CAUGHT. / THE ARGUMENT. / WHO'S WRONG? are
+in the art. That is the only reason three beats fit under the 8s ceiling: rule
+21 says three added caption strips do not fit, and they still don't. Burned-in
+text costs no extra reading time because it arrives with the frame. If a future
+piece needs three beats, this is the trick — put the words in the image.
+
+### What it points at
+
+The app's **Together** track, live with 90 lessons, for the person in recovery
+and the person supporting them. The end card answers the panel's question by
+refusing it: "who's wrong" is the trap, not the question. No claim is made that
+the app resolves arguments — it gives both people the same day's work, which is
+what the tag line has always said (*an app for you and the one who supports you*).

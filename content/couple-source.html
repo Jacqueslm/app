@@ -1,0 +1,111 @@
+<!-- A21 "Who's wrong?" - the Together (couple) track, CAUSE / CONSEQUENCE / EFFECT.
+     Built to house rules 21 (5-8s) and 26 (9:16). 8.0s: three beats + end card.
+
+     TREATMENT: the three panels are 1664x2080 (4:5), NOT native 9:16, so per
+     rule 26 they get the LETTERBOXED BAND - a 1080x1350 band sitting on a
+     blurred, darkened blowup of the same panel. No centre-crop: these are comic
+     panels and a crop would cut the burned-in caption off the bottom.
+
+     NO OVERLAY CAPTIONS. Each panel already carries its own caption in the art
+     (CAUGHT. / THE ARGUMENT. / WHO'S WRONG?), which is what lets three beats
+     fit under the 8s ceiling - nothing extra to read.
+
+     Motion is a slow push-in on the band against a counter-drifting backdrop,
+     plus the house handheld noise and per-frame grain. Same depth trick as the
+     parallax kit, but the two planes are band vs. backdrop instead of cutout
+     vs. plate - rembg would mangle flat line art.
+     Rendered via window.seek(ms); see tools/render-film.js. -->
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#0f0c29;
+  font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+#st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000}
+.beat{position:absolute;inset:0;opacity:0;will-change:opacity}
+.bd{position:absolute;top:50%;left:50%;width:1080px;height:1920px;object-fit:cover;
+  transform:translate(-50%,-50%);z-index:10;
+  filter:blur(26px) brightness(.42) contrast(1.05) saturate(.72);will-change:transform}
+.band{position:absolute;top:50%;left:50%;width:1080px;height:1350px;overflow:hidden;
+  transform:translate(-50%,-50%);z-index:20;will-change:transform;
+  box-shadow:0 26px 70px rgba(0,0,0,.62),0 0 0 2px rgba(0,0,0,.55)}
+.band img{position:absolute;top:50%;left:50%;width:1080px;height:1350px;object-fit:cover;
+  transform:translate(-50%,-50%);filter:contrast(1.05) saturate(1.02);will-change:transform}
+#grain{position:absolute;inset:0;z-index:40;opacity:.32;mix-blend-mode:overlay;pointer-events:none}
+#vig{position:absolute;inset:0;z-index:45;pointer-events:none;
+  box-shadow:inset 0 0 300px 90px rgba(0,0,0,.80)}
+#wm{position:absolute;bottom:118px;right:56px;width:104px;height:104px;border-radius:30px;
+  background:rgba(83,74,183,.92);border:4px solid #7ee8a2;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:99}
+#wm svg{width:64px;height:64px}
+#end{position:absolute;inset:0;background:#0f0c29;display:flex;flex-direction:column;
+  align-items:center;text-align:center;opacity:0;z-index:80}
+#mark{width:210px;height:210px;border-radius:62px;background:#534AB7;border:7px solid #7ee8a2;
+  display:flex;align-items:center;justify-content:center;margin-top:430px}
+#mark svg{width:132px;height:132px}
+#tag{color:#fff;font-size:52px;font-weight:600;line-height:1.35;max-width:880px;margin-top:52px}
+#tag .g{color:#7ee8a2}
+#mid{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:120px}
+#rule{width:120px;height:3px;background:rgba(126,232,162,.45);margin:0 auto 56px;border-radius:2px}
+#big{color:#fff;font-size:82px;font-weight:700;line-height:1.15;max-width:920px}
+#green{color:#7ee8a2;font-size:54px;font-weight:600;margin-top:48px}
+#brand{position:absolute;bottom:120px;width:100%;color:#6672a0;font-size:34px;letter-spacing:6px;font-weight:600}
+</style></head><body><div id="st">
+
+<div class="beat" id="b0"><img class="bd" src="couple/01-caught.png">
+  <div class="band"><img src="couple/01-caught.png"></div></div>
+<div class="beat" id="b1"><img class="bd" src="couple/02-argument.png">
+  <div class="band"><img src="couple/02-argument.png"></div></div>
+<div class="beat" id="b2"><img class="bd" src="couple/03-whos-wrong.png">
+  <div class="band"><img src="couple/03-whos-wrong.png"></div></div>
+
+<canvas id="grain" width="540" height="960"></canvas>
+<div id="vig"></div>
+<div id="wm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+<div id="end">
+  <div id="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+  <div id="tag">An app for <span class="g">you</span><br>and the one who <span class="g">supports you</span></div>
+  <div id="mid"><div id="rule"></div>
+    <div id="big">Nobody wins<br>that argument.</div>
+    <div id="green">It's free. Link in bio.</div></div>
+  <div id="brand">TURN SOMEDAY INTO DAY ONE</div>
+</div></div><script>
+window.FILM_LEN=8000;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+// three beats, 0.26s cross-dissolves, end card from 5.60
+const BEATS=[[0.00,1.95],[1.85,3.80],[3.70,5.75]];
+const DIS=0.26;
+// deterministic handheld - same frame every render, no random()
+function nz(t,s){return Math.sin(t*1.7+s)*0.6+Math.sin(t*3.1+s*2.3)*0.28+Math.sin(t*5.9+s*4.1)*0.12;}
+const G=document.getElementById('grain'),gx=G.getContext('2d');
+function grain(seed){const d=gx.createImageData(540,960),D=d.data;let x=seed*9301+49297;
+  for(let i=0;i<D.length;i+=4){x=(x*9301+49297)%233280;const v=(x/233280)*255;
+    D[i]=D[i+1]=D[i+2]=v;D[i+3]=40;}gx.putImageData(d,0,0);}
+// band pushes in and drifts one way, backdrop drifts the other - that difference IS the depth
+function beat(el,p,on,dir){
+  if(el.style.opacity!=on)el.style.opacity=on;
+  if(on<=0)return;
+  const hx=nz(p*3.2,1+dir)*2.2, hy=nz(p*3.2,7+dir)*1.7, rot=nz(p*3.2,3+dir)*0.16;
+  const bd=el.querySelector('.bd'), bn=el.querySelector('.band'), im=bn.querySelector('img');
+  bd.style.transform='translate(calc(-50% + '+(hx*0.3-p*10*dir)+'px),calc(-50% + '+(hy*0.3)+'px)) scale('+(1.10+0.030*p)+')';
+  bn.style.transform='translate(calc(-50% + '+(hx+p*9*dir)+'px),calc(-50% + '+(hy-p*6)+'px)) rotate('+(rot*0.35)+'deg)';
+  im.style.transform='translate(calc(-50% + '+(-p*7*dir)+'px),calc(-50% + '+(p*4)+'px)) rotate('+rot+'deg) scale('+(1.015+0.055*p)+')';
+}
+window.seek=function(ms){
+  const t=ms/1000;
+  for(let i=0;i<3;i++){
+    const B=BEATS[i], el=document.getElementById('b'+i);
+    // in on its own start, out when the next beat dissolves over it
+    const fin=i===0?1:cl((t-B[0])/DIS,0,1);
+    const fout=i===2?1:1-cl((t-BEATS[i+1][0])/DIS,0,1);
+    beat(el,cl((t-B[0])/(B[1]-B[0]),0,1),Math.min(fin,fout),i%2?-1:1);
+  }
+  grain(Math.floor(t*30));
+  const ec=cl((t-5.60)/0.45,0,1);
+  document.getElementById('end').style.opacity=ec;
+  document.getElementById('wm').style.opacity=1-ec;
+  document.getElementById('grain').style.opacity=(1-ec)*0.32;
+  document.getElementById('vig').style.opacity=1-ec;
+  document.getElementById('big').style.opacity=cl((t-6.10)/0.38,0,1);
+  document.getElementById('green').style.opacity=cl((t-6.55)/0.38,0,1);
+  document.getElementById('brand').style.opacity=cl((t-6.95)/0.38,0,1)*0.9;
+};seek(0);
+</script></body></html>

@@ -77,19 +77,36 @@ Floors are not a straight list. Each floor is a small top-down map with 2–4 ro
 
 Movement is tap-to-move between rooms. No joystick, no physics.
 
-### 5. ROBLOX — the sixth reference (WAS MISREAD AS "ROBOT")
-The original spec turned this line into an animated robot guide and then into
-Friendly with a body. That was wrong and it has been removed from the build.
+### 5. ROBLOX — every floor is its own place
+The original spec misread this reference as "robot" and turned it into an
+animated guide, then into Friendly with a body. Removed.
 
-**Still to be decided with Jacques** — what Roblox means here. It is not the
-platform and it is not user-generated content. It is one of:
-  a) the LOOK — blocky, chunky, low-poly rooms and a blocky figure;
-  b) the AVATAR — a character that is yours, that you change and keep;
-  c) the WORLDS — each floor its own small place with its own rules, rather
-     than the same map format ten times.
+Jacques, 30 Aug 2026, on what it actually meant: **"floor 3 doesn't look or
+play like floor 7."** Not the platform, not user-generated content, not a
+blocky art style — ten small places rather than one map drawn ten times.
 
-Until that is settled, nothing in the game fills this slot. The per-floor line
-is written as the building's, spoken by nobody.
+Built as: every floor carries its own room layout, its own palette, its own
+air, and its own rule. The rules come from six primitives, implemented once
+and reused, because ten bespoke rule engines is how a two-week build becomes a
+four-month one:
+
+| primitive | what it does | floors |
+|---|---|---|
+| `dark` | a room stays unlit and unnamed until you stand next to it | 1 |
+| `dim` | the lights fade the longer you stand still; moving relights them | 4 |
+| `echo` | every room is drawn again, reflected, underneath itself | 5 |
+| `oneway` | a corridor you cannot come back through | 6 |
+| `sequence` | the door will not open until you have been somewhere else first | 3, 9 |
+| `slow` | you move heavily | 8 |
+
+Floors 2, 7 and 10 carry no rule on purpose — an unbroken floor between the
+awkward ones is what makes the awkward ones land.
+
+A rule the player cannot see is a bug, so a room that refuses you says why.
+
+**Not built, deliberately:** a blocky/low-poly art style, and a character you
+own and dress. Both were live readings of "Roblox" until Jacques settled it;
+neither is in the game. Revisit only if the tower ever needs an avatar.
 
 ### 6. TRIGGER BOARD — the Candy Crush / Angry Birds layer
 Appears on landing floors (10, 20, 30...). This is the thinking puzzle.

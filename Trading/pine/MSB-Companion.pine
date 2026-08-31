@@ -12,6 +12,16 @@ expBars = input.int(400, "Setup expires after N bars", minval = 20)
 scalpTF = input.timeframe("15", "Scalp timeframe for the hand-off levels")
 maxLbl  = input.int(8, "Keep at most this many labels", minval = 3, maxval = 30)
 
+// ─── panel size and place — a phone is not a monitor ─────────────────────────
+grpP     = "Panel"
+showPnl  = input.bool(true,  "Show the panel", group = grpP)
+compact  = input.bool(false, "Compact — setups only, no scalp rows", group = grpP,
+     tooltip = "Turn this on for a phone. Drops the panel to two rows.")
+pnlSize  = input.string("small", "Panel text size", options = ["tiny", "small", "normal", "large"], group = grpP)
+pnlPos   = input.string("top right", "Panel corner", group = grpP,
+     options = ["top right", "top left", "middle right", "middle left", "bottom right", "bottom left"],
+     tooltip = "Move it off the bot panel if the two overlap.")
+
 // ─── wave record (the bot's brain) ───────────────────────────────────────────
 ph = ta.pivothigh(pvB, pvB)
 pl = ta.pivotlow(pvB, pvB)
@@ -215,18 +225,36 @@ f_vcol(float r, string why) => why != "" ? color.yellow : na(r) or r < 0.8 ? col
 // ─── dashboard ───────────────────────────────────────────────────────────────
 stTx(int on, int b, bool armed) => on == 1 ? (b == 2 ? "trap loading" : b == 1 ? "bounced" : "stops running") : armed ? "level armed" : "watching"
 
-var table dash = table.new(position.top_right, 2, 6, bgcolor = color.new(#0e1116, 8),
+f_pos() =>
+    pnlPos == "top left"      ? position.top_left      :
+     pnlPos == "middle right" ? position.middle_right  :
+     pnlPos == "middle left"  ? position.middle_left   :
+     pnlPos == "bottom right" ? position.bottom_right  :
+     pnlPos == "bottom left"  ? position.bottom_left   : position.top_right
+
+f_size() =>
+    pnlSize == "tiny"   ? size.tiny   :
+     pnlSize == "normal" ? size.normal :
+     pnlSize == "large"  ? size.large  : size.small
+
+var table dash = table.new(f_pos(), 2, 6, bgcolor = color.new(#0e1116, 8),
      frame_color = color.new(color.gray, 60), frame_width = 1)
 if barstate.islast
-    table.cell(dash, 0, 0, "MSB EYES", text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 0, 1, "Long setup", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 1, stTx(Lon, Lb, not na(aL_HL)), text_color = Lon == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 2, "Short setup", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 2, stTx(Son, Sb, not na(aS_LH)), text_color = Son == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 3, "Scalp ▲ " + (na(upTgt) ? "—" : str.tostring(upTgt, format.mintick)), text_color = color.lime, text_size = size.small)
-    table.cell(dash, 1, 3, f_verdict(upR, upLH, longWhy), text_color = f_vcol(upR, longWhy), text_size = size.small)
-    table.cell(dash, 0, 4, "Scalp ▼ " + (na(dnTgt) ? "—" : str.tostring(dnTgt, format.mintick)), text_color = color.red, text_size = size.small)
-    table.cell(dash, 1, 4, f_verdict(dnR, dnHL, shortWhy), text_color = f_vcol(dnR, shortWhy), text_size = size.small)
-    table.cell(dash, 0, 5, "Hand-off", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 5, (upLH ? "▲ lower high ✓  " : "") + (dnHL ? "▼ higher low ✓" : "") + (not upLH and not dnHL ? "none clean" : ""), text_color = color.silver, text_size = size.small)
+    table.clear(dash, 0, 0, 1, 5)
+    if showPnl
+        sz = f_size()
+        table.cell(dash, 0, 0, "MSB EYES", text_color = color.white, text_size = sz, bgcolor = #3b82f6)
+        table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = sz, bgcolor = #3b82f6)
+        table.cell(dash, 0, 1, "Long", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 1, stTx(Lon, Lb, not na(aL_HL)), text_color = Lon == 1 ? color.yellow : color.silver, text_size = sz)
+        table.cell(dash, 0, 2, "Short", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 2, stTx(Son, Sb, not na(aS_LH)), text_color = Son == 1 ? color.yellow : color.silver, text_size = sz)
+        // The scalp rows are the wide ones. On a phone they are what pushes the
+        // panel across the whole screen, so compact mode simply drops them.
+        if not compact
+            table.cell(dash, 0, 3, "Scalp ▲ " + (na(upTgt) ? "—" : str.tostring(upTgt, format.mintick)), text_color = color.lime, text_size = sz)
+            table.cell(dash, 1, 3, f_verdict(upR, upLH, longWhy), text_color = f_vcol(upR, longWhy), text_size = sz)
+            table.cell(dash, 0, 4, "Scalp ▼ " + (na(dnTgt) ? "—" : str.tostring(dnTgt, format.mintick)), text_color = color.red, text_size = sz)
+            table.cell(dash, 1, 4, f_verdict(dnR, dnHL, shortWhy), text_color = f_vcol(dnR, shortWhy), text_size = sz)
+            table.cell(dash, 0, 5, "Hand-off", text_color = color.gray, text_size = sz)
+            table.cell(dash, 1, 5, (upLH ? "▲ lower high ✓  " : "") + (dnHL ? "▼ higher low ✓" : "") + (not upLH and not dnHL ? "none clean" : ""), text_color = color.silver, text_size = sz)

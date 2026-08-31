@@ -46,6 +46,14 @@ useSess = input.bool(true, "Only trade the New York session", group = grpR)
 sessStr = input.session("0930-1500", "Tradeable window", group = grpR)
 sessTZ  = input.string("America/New_York", "Timezone", group = grpR)
 
+// ─── panel size and place ────────────────────────────────────────────────────
+grpP    = "Panel"
+showPnl = input.bool(true, "Show the panel", group = grpP)
+pnlSize = input.string("small", "Panel text size", options = ["tiny", "small", "normal", "large"], group = grpP)
+pnlPos  = input.string("bottom right", "Panel corner", group = grpP,
+     options = ["top right", "top left", "middle right", "middle left", "bottom right", "bottom left"],
+     tooltip = "The eyes panel sits top right by default, so this one starts bottom right. Two panels, two corners.")
+
 // ─── The wave record ─────────────────────────────────────────────────────────
 ph = ta.pivothigh(pvB, pvB)
 pl = ta.pivotlow(pvB, pvB)
@@ -197,32 +205,32 @@ if fire
     line.new(bar_index, stopRaw, bar_index + 10, stopRaw, color = #ef5350, width = 1, style = line.style_dashed)
     line.new(bar_index, t2,      bar_index + 10, t2,      color = #26a69a, width = 1, style = line.style_dashed)
 
-var table dash = table.new(position.top_right, 2, 4, bgcolor = color.new(#0e1116, 10),
+f_pos() =>
+    pnlPos == "top left"      ? position.top_left      :
+     pnlPos == "middle right" ? position.middle_right  :
+     pnlPos == "middle left"  ? position.middle_left   :
+     pnlPos == "bottom right" ? position.bottom_right  :
+     pnlPos == "bottom left"  ? position.bottom_left   : position.top_right
+
+f_size() =>
+    pnlSize == "tiny"   ? size.tiny   :
+     pnlSize == "normal" ? size.normal :
+     pnlSize == "large"  ? size.large  : size.small
+
+var table dash = table.new(f_pos(), 2, 4, bgcolor = color.new(#0e1116, 10),
      frame_color = color.new(color.gray, 60), frame_width = 1)
 if barstate.islast
-    table.cell(dash, 0, 0, "MSB PRICE", text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = size.small, bgcolor = #3b82f6)
-    table.cell(dash, 0, 1, "Long side", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 1, Lon == 1 ? "shakeout live — waiting the reclaim" : not na(aL_HL) ? "armed — waiting the break" : "watching",
-         text_color = Lon == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 2, "Short side", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 2, Son == 1 ? "shakeout live — waiting the reclaim" : not na(aS_LH) ? "armed — waiting the break" : "watching",
-         text_color = Son == 1 ? color.yellow : color.silver, text_size = size.small)
-    table.cell(dash, 0, 3, "Bullets left", text_color = color.gray, text_size = size.small)
-    table.cell(dash, 1, 3, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
-         text_color = tookToday < maxPerDay ? color.silver : color.gray, text_size = size.small)
-
-plot(fire ? (trigLong ? 1 : -1) : na, "aDir",   display = display.none, editable = false)
-plot(fire ? entry   : na,             "aEntry", display = display.none, editable = false)
-plot(fire ? stopRaw : na,             "aStop",  display = display.none, editable = false)
-plot(fire ? riskPts : na,             "aRisk",  display = display.none, editable = false)
-plot(fire ? t1      : na,             "aT1",    display = display.none, editable = false)
-plot(fire ? t2      : na,             "aT2",    display = display.none, editable = false)
-plot(fire ? roomR   : na,             "aRoom",  display = display.none, editable = false)
-plot(fire ? qty     : na,             "aQty",   display = display.none, editable = false)
-
-alertcondition(fire, "TRADE SIGNAL — the full alert",
-     "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R | qty {{plot(\"aQty\")}}")
-
-alertcondition((Lon == 1 and Lon[1] != 1) or (Son == 1 and Son[1] != 1), "Shakeout — the reclaim is next",
-     "{{ticker}} broke the higher low. If it closes back above the lower high, that is the trade.")
+    table.clear(dash, 0, 0, 1, 3)
+    if showPnl
+        sz = f_size()
+        table.cell(dash, 0, 0, "MSB PRICE", text_color = color.white, text_size = sz, bgcolor = #3b82f6)
+        table.cell(dash, 1, 0, syminfo.ticker, text_color = color.white, text_size = sz, bgcolor = #3b82f6)
+        table.cell(dash, 0, 1, "Long", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 1, Lon == 1 ? "shakeout — waiting reclaim" : not na(aL_HL) ? "armed" : "watching",
+             text_color = Lon == 1 ? color.yellow : color.silver, text_size = sz)
+        table.cell(dash, 0, 2, "Short", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 2, Son == 1 ? "shakeout — waiting reclaim" : not na(aS_LH) ? "armed" : "watching",
+             text_color = Son == 1 ? color.yellow : color.silver, text_size = sz)
+        table.cell(dash, 0, 3, "Bullets", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 3, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
+             text_color = tookToday < maxPerDay ? color.silver : color.gray, text_size = sz)

@@ -373,7 +373,8 @@ test('walking into the room is all it takes, and it is kept once', () => {
 
 test('the vault lists the whole building, gaps included', () => {
   const src = APP.match(/function renderTowerVault\(\)\{[\s\S]*?\n\}/)[0];
-  assert.match(src, /Object\.keys\(TOWER_ARTIFACTS\)\.map/, 'every artifact, not only the found ones');
+  // reads the active set now: TOWER_ARTIFACTS or the supporter's
+  assert.match(src, /Object\.keys\(SET\)\.map/, 'every artifact, not only the found ones');
   assert.match(src, /vault-card locked/, 'the ones still out there show as gaps');
   assert.doesNotMatch(src, /a\.text[\s\S]{0,80}locked/, 'a locked card must never leak its text');
 });

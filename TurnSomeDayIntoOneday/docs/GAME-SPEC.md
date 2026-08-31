@@ -211,9 +211,8 @@ been started.
 - ~~Trigger Board puzzle on landings~~
 - ~~Artifact rooms + Vault screen~~
 
-Phases 1-3 are complete. Phase 4 is built except for the supporter tower:
-floors 11-90 exist and are gated behind Pro (31 Aug 2026). The supporter
-variant has not been started.
+Phases 1-4 are complete (31 Aug 2026): ninety floors, gated 1-10 free and
+11-90 Pro, with the supporter variant built.
 
 **Phase 4:**
 - ~~Floors 11–90 unlocked behind Pro~~ — built 31 Aug 2026. The arc runs in
@@ -228,7 +227,17 @@ variant has not been started.
   consecutive floors, and no two floors share a whole (map + rule + air).
 - The Vault went from 14 artifacts to 47, spread so every twenty floors holds
   at least three.
-- Supporter tower variant — still to do.
+- ~~Supporter tower variant~~ — built 31 Aug 2026. `TOWER_FLOORS_SUP` is
+  writing only (name, briefing, truth, dare, line, room names) laid over the
+  same ninety maps, palettes, rules and waves, so the building is identical
+  and only who it addresses changes. `towerIsSupporter()` keys on the ACTIVE
+  TRACK, matching `isSupporterTrack()`: somebody carrying both sides gets the
+  supporter tower while on the Supporting Someone track and their own back
+  when they switch. Its Vault is separate (31 pieces) and its found-state is
+  prefixed `s:` — the two towers share room coordinates, so an unprefixed key
+  would have handed a supporter writing addressed to the person recovering.
+  Tests enforce: no truth asks about the other person, no dare is
+  surveillance, and nobody in it is ever given a pronoun.
 
 Do not start Phase 2 until Phase 1 is live and he has played it as a stranger.
 

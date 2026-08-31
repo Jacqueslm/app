@@ -34,9 +34,16 @@ __pycache__/
 # Jacques keeps them in his own file and on social media; they are handed to
 # him in chat instead.
 #
-# MUSIC AND AUDIO STAY - content/score/, TurnSomeDayIntoOneday/audio/. So do
-# the sources and stills (*-source.html, spec.json, the jpgs and pngs) and the
-# render tooling, so any piece can be rebuilt without the video living here.
+# UPDATED 31 Aug 2026 - "we dont push videos no more only music" (Jacques).
+# MUSIC AND AUDIO STAY: content/score/, TurnSomeDayIntoOneday/audio/.
+# The RENDER TOOLING STAYS: tools/render-film.js, prep-still.py, make-film.py.
+# EVERYTHING ELSE ABOUT A VIDEO IS HANDED OVER IN CHAT, NOT COMMITTED - the
+# .mp4, the *-source.html, and the stills. This REPLACES the 27 Aug line that
+# kept sources and stills here so pieces could be rebuilt from the repo.
+# Already-tracked files are NOT affected by the line below; it only stops a
+# future session committing a NEW source by accident, the same way the video
+# extensions have since 27 Aug.
+content/*-source.html
 *.mp4
 *.mov
 *.webm

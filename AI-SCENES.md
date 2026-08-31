@@ -1139,3 +1139,241 @@ actually created depth — **two near ropes in the foreground, blurred**, so the
 camera is shooting *through* the ropes instead of at a flat backdrop. Red
 corner right, blue corner left. Vignette eased from .90 to .72; at .90 it was
 eating the set faster than the set could build.
+
+---
+
+# THE APP SERIES — A23–A30 · one piece per part of the app · BUILT 31 Aug 2026
+
+Jacques, 31 Aug: *"now make it for all parts of the app separate videos — update
+yourself first on the app, it's been upgraded."*
+
+**All pure graphics in the app's own palette.** No stills, no generation,
+nothing supplied. Every piece is 8.0s and 9:16, shares the house end card, and
+carries the same watermark — so they run as a series, and any one of them can
+be recut in ten minutes when a feature changes.
+
+## What the read-through found
+
+The app moved a long way since the last video. **The Game is its own bottom-nav
+tab** — the five are now **Today · Tools · Game · Friendly · Profile**. The Game
+tab is **THE COUNT**, an arcade round: ten seconds, relapse thoughts rising up
+the screen, tap them before they land, fill the UP bar before the referee gets
+to ten. **2AM** (ten floors of ninety, six rules, a Truth-or-Dare door, no
+mascot) moved to Tools while Jacques decides which game lives. Nova is now
+**Friendly**. New since the last look: **The Climb**, **Your film**, **the
+Vault**, **Stories**, and Together at a full 90 days.
+
+**A22 turned out to be the Game tab's trailer.** It was built the same day from
+the same boxing reference the game was built from, in a different session. The
+ten-count and the DAY ONE turn line up exactly. Not planned — worth keeping.
+
+## Where I got it wrong, and Jacques corrected me
+
+I planned the Rooms piece around *"no comments, no replies, no DMs — on
+purpose."* Jacques: **"rooms are public you have 9 wrong."** He was right.
+
+I had read only the written-reflections block and taken its disclaimer as the
+whole feature. **Rooms is three layers**: a **live feed of real people** at the
+top (one per focus area, a first name and day count on every post, open
+6am–10pm Central, every post read by the moderator *before* the room sees it,
+Report on every post), the daily written reflections under it, and a private
+space below that. Posts only — no replies, DMs or profiles.
+
+The corrected piece is better than the one I'd planned: the idea is now the
+*shape* of the feed. **"Seen. Not reachable."**
+
+**The lesson, for the next time:** a screen's disclaimer describes the block it
+sits in, not the screen. Read the whole screen before writing copy about it.
+
+## The honesty pass this forced
+
+Checking Rooms turned up that my template ends every piece on *"It's free. Link
+in bio."* — which is false on the Pro features. Corrected:
+
+| Piece | End line | Why |
+|---|---|---|
+| Friendly | **Free app. Friendly is Pro.** | Friendly is a Pro feature; free plan has no chats |
+| Rooms | **Free app. Live rooms are Pro.** | The live feed is Pro |
+| Partner | **Free to start.** | Supporting Someone days 1–15 free, 16–35 Pro |
+| The other five | It's free. Link in bio. | They are |
+
+Nobody should download this app on the strength of a video and find the thing
+they came for behind a paywall. That is how a 1-star review gets written.
+
+## The eight
+
+| # | Piece | The idea | End card |
+|---|---|---|---|
+| A23 | **Today** | The counter climbs to 30, then the three things the screen asks | One screen. Every morning. |
+| A24 | **Tools** | 2:14am on a lock screen, then six free tools lighting up | For the hour you can't call anyone. |
+| A25 | **Friendly** | 3:41am. *"i'm about to do it."* It pauses before answering | Somebody answers at 3am. |
+| A26 | **Progress** | Totals build, day 42 takes the streak, the lifetime number survives | A slip takes the streak. It doesn't take the days. |
+| A27 | **The Tower** | Rooms unlit until you're next to them; the Truth-or-Dare door | A building you climb at night. |
+| A28 | **The Climb** | A switchback path drawing itself, 0 to 90 | Ninety steps. One a day. |
+| A29 | **Rooms** | The live feed, then the three things it will never have | A room that can't turn on you. |
+| A30 | **Partner** | The app's own sentence, both halves, then the four things | Nobody handed you a manual either. |
+
+Plus **A22 "The count"** (the Game tab) and **A21 "Who's wrong?"** (Together),
+already built, which complete the set at ten.
+
+## Craft notes worth reusing
+
+- **Centre both phases, not one.** A23's first cut put the counter at
+  `padding-top:430px` and lifted it to make room for the rows — which left the
+  bottom 45% of a 9:16 frame empty in both states. Animating 730 → 535 centres
+  the block before *and* after. Same fix applied to A29's feed.
+- **A pause is content.** A25's typing dots hold for 1.2s before Friendly
+  replies. An instant answer reads as a canned response; the wait reads as
+  something considering you.
+- **Draw the real thing.** A27's floor plan is `TOWER_FLOORS[0]` from the app —
+  the same room coordinates, the same edges, the same 'dark' rule. It costs
+  nothing to be accurate and the piece is unfakeable because of it.
+- **A path, not a bar.** A28's 90 steps run on a deterministic switchback
+  (`sin(u·π·3.15)` swaying, damped as it rises) so it reads as a climb. A
+  straight line of 90 dots is a progress bar, and a progress bar is not a
+  mountain.
+
+## What is NOT in any of them
+
+No medical or research claims (house rule 9). No promise that the app treats,
+diagnoses or fixes anything — A25 says out loud what Friendly is not, because
+the app's own disclaimer does. The Rooms posts are illustrative and labelled as
+such in the source, not quotes from real members. The Progress numbers are an
+illustration of the screen, not a claim about any user.
+
+## One thing found and deliberately not fixed
+
+`index.html:15633` — the FAQ answer to *"Are the people in the Rooms real? Can I
+reply to them?"* still says the stories are written reflections, the names
+aren't real people, and there is no commenting or messaging. **It never mentions
+the live room.** That is the exact text that misled me, and it reads as a flat
+contradiction of a Pro feature being sold at $9.99/mo. Jacques said don't fix
+anything, so it stands — logged here so it isn't lost.
+
+
+---
+
+## Late corrections, 31 Aug — three from Jacques in a row
+
+**1. "the game is under construction."** THE COUNT was rebuilt the same day
+into something else entirely — *"dont like it, make it an actually boxing
+game."* It is now a **slipping game**: he winds up on one side, you have a
+window to slip the other way, slip right and he is open, slip wrong or freeze
+and you eat it. Three zones, no buttons — left third slips left, right third
+slips right, middle throws. 75-second rounds. Every fighter, glove and rope
+drawn per frame, no sprites. Go down and the referee counts while you tap to
+get up; if the count beats you the screen says the fight is over **and you are
+not**.
+
+**I had told Jacques that A22 "The count" was the Game tab's trailer. It is
+not.** A22 is a countdown of addictions landing on DAY ONE — it shows no fight,
+no slip, no mechanic of what the game became. It still works as the
+all-addictions piece it was asked to be. It does not sell the game. Corrected
+to him directly rather than left standing.
+
+**2. "name 2am is no longer."** I withdrew A27 on the spot — wrong name on a
+public video, and I would not invent a replacement.
+
+**3. "the tower is still the tower."** A27 came back, and the reason is worth
+keeping: **the name never appears on screen.** The piece shows FLOOR 01, the
+map lighting room by room, the Truth-or-Dare door, and "10 FLOORS BUILT / It
+goes to ninety". Only the filename said 2AM. A rename cost a `mv` and a comment
+edit — no re-render, no re-encode.
+
+**The principle:** a piece that *shows* the thing outlives a piece that *names*
+it. Product names change; a floor plan lighting up as you walk it does not. Put
+the name in the caption, where it is free to change, and keep the frame showing
+mechanics. Every piece in this series follows that except where the name IS the
+idea (A21's burned-in captions, A22's DAY ONE).
+
+**Still open:** whether the boxing game gets its own piece once it ships. The
+slipping mechanic — wind-up, slip, opening, counter — is the only thing in the
+app with real timing in it, and it is the one feature that would cut unlike
+anything else in the library.
+
+---
+
+# THE APP SERIES, PART TWO — A31–A34 · the four parts still uncovered · 31 Aug 2026
+
+After the first eight, four parts of the app had no piece. Two of them are the
+strongest arguments the product has, and neither had ever been on video.
+
+| # | Piece | The idea | End card |
+|---|---|---|---|
+| A31 | **Twelve tracks** | Pick your fight; ninety days fill in behind it | Not one program. Twelve. |
+| A32 | **The Spiritual Path** | The question, both answers equal | It asks. It doesn't assume. |
+| A33 | **Stories** | The shelf, alternating both sides of it | You're not the first one awake at this hour. |
+| A34 | **Your film** | A render bar, then the film it made | Post it, or keep it. |
+
+## A31 — the competitive argument, finally on video
+
+Every other app in COMPETITORS.md ships **one** recovery program with the noun
+swapped. This app ships **twelve**, each its own 90 days. That is the product's
+best argument and nothing in the library had made it.
+
+The Climb already owns *"ninety steps, one a day"*, so this piece takes the
+other half of the same fact — not the length, **the choice**. Twelve names land
+as a list (the length of the list IS the point), Alcohol lights and the other
+eleven fall back, then its ninety days fill in.
+
+**Pacing note:** the first cut gave the pick beat 0.8s and the whole idea passed
+unseen. Moved to 1.3s. A beat that carries the argument needs longer than a beat
+that carries a fact.
+
+## A32 — the sharpest thing in the product
+
+Jacques wrote this into the app on 14 Aug and it has never been marketed:
+
+> *"It is ASKED, not asserted: the same page that says 'you stepped away from
+> God' to someone who says yes would tell an atheist their addiction is a
+> spiritual failure at the exact moment the app is trying to earn their trust.
+> Asked, it lands harder and costs nothing."*
+
+Every recovery app picks a side — 12-step-God-shaped or aggressively secular.
+This one asks on day one and then honours the answer either way. The piece is
+the question verbatim, both answers, and *"Neither answer is the right one."*
+
+**The one craft decision that carries the whole piece:** YES and NO arrive at
+the **same instant**, in boxes of the **same size**, with equal weight of
+colour. Staggering them, or making either larger, would put a thumb on the
+scale — which is the exact thing this piece exists to say the app does not do.
+The form has to make the argument, or the words are just a claim.
+
+**And the constraint written into the source:** no proselytising and no sneer.
+If either the believer or the atheist feels got at, the piece has failed and so
+has the point it is making.
+
+## A33 — both chairs
+
+Half the shelf is written from the supporter's chair, which nothing else in the
+recovery-audio space does. The list alternates fighter / supporter / fighter and
+colour-codes them so it cannot be missed. The waveform is drawn as **speech, not
+music** — two slow sines multiplied by a fast one and floored, so it breathes
+and stops the way a person reading aloud does. A music visualiser would have
+been the wrong instrument for a narrated story.
+
+The app's own careful phrase is *"real-feeling"*, and the piece keeps that care:
+the titles are illustrative of the shelf's shape, and nothing claims they are
+transcripts of real people.
+
+## A34 — the joke that is also the honest version
+
+"Your film" renders a video of your numbers **on the phone**, nothing uploaded.
+So the piece shows its own render bar filling — unevenly, fast-stall-fast, the
+way a real encode goes — and then reveals the film it just made.
+
+This is a video, made by rendering frames in a browser, about a feature that
+makes a video by rendering frames in a browser. Same trick, same machine.
+Admitting that is better than pretending a phone did it.
+
+## The bug this batch found, which was latent in all ten before it
+
+The house end card fades in as a **translucent fill over 0.45s**. Anything still
+lit underneath reads straight through it. A32's YES/NO boxes are large and
+bright, so they ghosted across the tag line and the fault finally showed.
+
+**The fix, now in every new source:** multiply the mid-section's opacity by
+`(1-ec)` so the frame is clear before the card lands. The earlier eight got away
+with it only because their content had already faded by then — that was luck,
+not design. Any future piece with something bright still on screen at 5.7s needs
+this or it will ghost.

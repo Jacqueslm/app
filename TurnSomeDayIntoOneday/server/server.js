@@ -417,6 +417,30 @@ app.get('/go/:src', (req, res) => {
   res.redirect(`/when-he-drinks?utm_source=${src}&utm_medium=social&utm_campaign=her-drinking`);
 });
 
+// ─── /play: the counted way to the Play listing ──────────────────────────────
+// Every store button on the site points here rather than straight at Google,
+// for three reasons. Play reports installs but never how many people reached
+// the listing, so without this there is no way to tell "nobody clicked" from
+// "a hundred clicked and none installed" - and those two need opposite fixes.
+// It also lets a bio or a video say "/play" out loud, and it puts the store URL
+// in ONE place instead of 27 files.
+//
+// The referrer parameter is what Play reads back into its acquisition report,
+// so the page that sent someone survives all the way to the install.
+//
+// 302 and no-store on purpose: a 301 gets cached by the browser and the second
+// click is never counted.
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app';
+function playRedirect(req, res, raw) {
+  const src = String(raw || 'direct').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40) || 'direct';
+  try { db.recordStoreClick(src); } catch (_) { /* a counter must never block the click */ }
+  const referrer = encodeURIComponent(`utm_source=website&utm_medium=button&utm_campaign=${src}`);
+  res.set('Cache-Control', 'no-store');
+  res.redirect(302, `${PLAY_URL}&referrer=${referrer}`);
+}
+app.get('/play', (req, res) => playRedirect(req, res, req.query.from));
+app.get('/play/:src', (req, res) => playRedirect(req, res, req.params.src));
+
 // One-click unsubscribe from any inbox - no login. Idempotent by design:
 // setting the flag to 1 again is the same write and the same page, so a
 // double-click or a second device never sees an error.

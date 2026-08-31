@@ -179,6 +179,54 @@ in this section, and a Play upload is only ever needed for shell-level changes
 (icon, package config, target SDK).
 
 
+## Testing purchases: never use the owner account
+
+`isComped()` in `server/billing.js` grants Pro to `APP_OWNER_EMAIL` — and to
+every address in `COMP_PRO_EMAILS` — with no payment. So a Pro badge on
+Jacques's own account proves nothing about billing, and on 28 Aug it very
+nearly went into the log as "payment system proven end to end". He caught it:
+*"i already got all time pro on my owner account."*
+
+**Test on a fresh address that is neither.** If you must use his, read
+Profile → the subscription line, which distinguishes the two cases because
+`getBillingStatus` resolves `paid` before `comped`:
+
+- `Pro plan — Monthly` / `Yearly` / `Lifetime` → a real `user.plan`, written
+  only by the Stripe webhook. The chain worked.
+- `Pro plan — Complimentary` → `plan: 'comp'`, no payment involved. Whatever
+  you were testing is still untested.
+
+## The Play latch: why it is sessionStorage, and do not "fix" it back
+
+A Trusted Web Activity **is** Chrome, sharing one storage jar with the browser
+for this origin. So the old `localStorage` flag written by the Android shell
+was read back by every ordinary Chrome tab and every Chrome-installed shortcut
+on that phone, permanently — the site believed it was the Play build, routed
+Upgrade to Google billing, and `create-checkout-session` refused Stripe by
+policy (403 on `X-TSID-Client: play`). Combined with the broken shell, **every
+Android owner of the app was unable to pay by any route.** Stripe had created
+no checkout session between 30 July and 28 Aug.
+
+The flag now lives in `sessionStorage` (one browsing context), and the legacy
+`localStorage` key is deleted wherever found.
+
+**Both directions are covered, and both were tested in headless Chrome on an
+Android user agent — rerun these before touching `detectPlayBuild`:**
+
+| Context | `isPlayBuild()` | Why it must be that |
+|---|---|---|
+| Play app launch (`?src=play`) | `true` | Play policy: never Stripe in the shell |
+| Play app after a reload with no query | `true` | sessionStorage carries it |
+| Play app returning from a redirect | `true` | same |
+| Chrome-installed shortcut / plain tab | `false` | not Play-distributed; Stripe is correct and is revenue |
+
+**Do not add a `display-mode: standalone` test as a backstop.** It looks
+tempting and it is wrong: a Chrome-installed shortcut reports `standalone` too
+(Jacques's 27 Aug screenshots show exactly that), so it would re-break the very
+case this fixed. The honest discriminator once the shell is healthy is
+`getDigitalGoodsService()` actually resolving; it cannot be used while the
+shell is broken, because it rejects there too.
+
 ## Open bug
 
 **The Android app is not running as a verified Trusted Web Activity, and that
@@ -275,6 +323,49 @@ before the apex→www redirect, so both hosts return it with a 200. Verified by
 replaying both middlewares in registration order against real `Host` headers —
 apex and www both 200 `application/json`, and every other apex path still 301s
 to www. This removes cause 2 without a Play upload.
+
+**Cause 1 is also weaker than it looks.** `PLAY-CHECKLIST.md` records that the
+live 1.0.1 / code 2 bundle was built on 17 Aug from this very manifest, with
+"Play Billing on, notifications on, Android 16, Billing 8". So the live shell
+probably does carry the billing feature and the `www` host. Do not order a
+rebuild as the first move; it is a real cost to Jacques and may change nothing.
+
+**What app 5.9 adds, and why it is the next step instead.** One thing has never
+been established: whether the failing window is the Play shell at all. The
+`playBuild` flag latches into `localStorage` and, on Android, is permanent — a
+single visit to `/app?src=play` in ordinary Chrome latches it forever, after
+which every Upgrade tap routes to Play billing and fails exactly like a broken
+shell. Jacques also installed a PWA from Chrome's menu on 27 Aug, which is a
+third context that looks like the app and is not.
+
+So the latch now records **how** it was set — `referrer` (an `android-app://`
+launch, which is proof the shell opened the page), `param` (a query string,
+which proves nothing), or `unknown` (the legacy `'1'`, never upgraded to
+`referrer` because that would invent evidence). The diagnostic line adds
+`host=`, `launch=` and `latch=`.
+
+**The answer came back at 14:06 on 27 Aug, and it is `launch=shell`:**
+
+    bridge=present · host=www.turnsomedayintodayone.com ·
+    launch=shell · latch=referrer@2026-08-27T19:05 ·
+    display=standalone · engine=Chrome 151 · app=5.9
+
+`launch=shell` means `document.referrer` was `android-app://com.turnsomedayintodayone.app`
+— the Android shell itself opened this page. Not a stale flag, not the PWA, not
+a browser tab. `host=` is the exact host the file is served under. And the
+address bar is still across the top.
+
+**So this is now established, not inferred: the Play app launches, on the right
+host, and Chrome refuses to run it as a verified TWA.** Everything on the
+server side checks out, so the fault is in the installed shell or in Chrome's
+verification of it — the one component nothing in this repo can inspect.
+
+Historical read of the field, kept because the reasoning still holds:
+- `launch=shell` → the Android app really did open this page, the shell is at
+  fault, and a rebuild is then justified.
+- `launch=param` or `launch=none` with `latch=unknown` → this is not the Play
+  app. Nothing about Play billing has been tested yet, and the rebuild would
+  have been wasted.
 
 **Still needs Jacques:** rebuild the shell from `twa/twa-manifest.json`, sign it
 with the upload key, and upload it. That is the only way to settle cause 1.

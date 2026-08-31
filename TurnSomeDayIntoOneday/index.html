@@ -436,6 +436,87 @@ body.nova-open #mini-player{bottom:160px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:.875rem;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
 .usage{font-size:.75rem;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:1.3125rem;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:.5625rem;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:.5625rem;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px}
+/* 2AM — the tower game (docs/GAME-SPEC.md). Its own night palette in both app
+   themes on purpose: the spec calls for dark, high contrast, no bright colour,
+   no confetti. Nothing here uses the app's --s/--t variables for that reason. */
+#tw{background:#05070e;min-height:calc(100vh - 132px);padding:14px 14px 28px;color:#c8cfe8}
+#tw-brief{border-left:2px solid #3b4a7a;padding:2px 0 2px 12px;margin-bottom:14px}
+#tw-brief div{font-size:.8125rem;line-height:1.55;color:#93a0c8}
+#tw-brief div+div{color:#6b779c;margin-top:2px}
+/* The spoken briefing. Same six narrators as the lessons, and it follows
+   whichever one the member already picked - the game does not ask again. */
+#tw-brief-btn{margin-top:9px;background:none;border:1px solid #26324f;color:#7b88b4;border-radius:8px;padding:5px 11px;font-size:.6875rem;letter-spacing:1.4px;font-family:var(--f);cursor:pointer}
+#tw-brief-btn.on{border-color:#6b62d8;color:#a99fff}
+#tw-brief-btn[disabled]{opacity:.45;cursor:default}
+/* THE TRIGGER BOARD (Phase 3) and THE VAULT. Same night palette as the rest. */
+#tw-board-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:14px 0 4px}
+.tb-cell{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.5rem;letter-spacing:.4px;font-weight:700;line-height:1.15;padding:2px;overflow:hidden}
+.tb-cell.open{background:#0b1120;border:1px dashed #232e4d;color:#232e4d;cursor:pointer}
+.tb-cell.open:active{background:#141d33}
+.tb-cell.trig{background:#2a1018;border:1px solid #5c2436;color:#e8859c}
+.tb-cell.cop{background:#141b3a;border:1px solid #3d4a95;color:#a99fff}
+#tw-board-hand{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.tb-hand{text-align:left;background:#0d1424;border:1px solid #26324f;color:#8b96bd;border-radius:9px;padding:7px 9px;font-size:.625rem;letter-spacing:.9px;font-weight:700;font-family:var(--f);cursor:pointer}
+.tb-hand.on{border-color:#6b62d8;background:#191f45;color:#cfc9ff}
+.tb-hand b{display:block;font-weight:400;letter-spacing:.4px;font-size:.5625rem;color:#5e6a90;margin-top:2px}
+#tw-board-moves{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;text-align:right;margin-top:6px}
+#tw-vault-link{display:block;width:100%;margin-top:16px;background:none;border:1px solid #1c2540;color:#5e6a90;border-radius:9px;padding:10px;font-size:.6875rem;letter-spacing:1.6px;font-family:var(--f);cursor:pointer}
+#tw-climb-link{display:block;width:100%;margin-top:8px;background:none;border:1px solid #1c2540;color:#5e6a90;border-radius:9px;padding:10px;font-size:.6875rem;letter-spacing:1.6px;font-family:var(--f);cursor:pointer}
+#s-vault{background:#05070e;min-height:calc(100vh - 132px);padding:16px 14px 30px}
+#vault-count{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;margin-bottom:14px}
+.vault-card{background:#0b1120;border:1px solid #1c2540;border-radius:11px;padding:14px;margin-bottom:10px}
+.vault-card.locked{border-style:dashed;opacity:.55;padding:9px 14px}
+.vault-meta{font-size:.5625rem;letter-spacing:2px;color:#5a678f}
+.vault-title{font-size:.9375rem;font-weight:650;color:#d5dcf2;margin-top:4px}
+.vault-card.locked .vault-title{color:#3f4a68;font-weight:400;font-style:italic}
+.vault-text{font-size:.84375rem;line-height:1.65;color:#8b96bd;margin-top:9px;white-space:pre-line}
+#tw-stage{position:relative;width:100%;height:302px;border:1px solid #18213a;border-radius:10px;overflow:hidden;background:#070a14}
+#tw-canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:manipulation;display:block}
+#tw-hud{position:absolute;top:10px;left:12px;pointer-events:none}
+#tw-hud-floor{font-size:.9375rem;font-weight:700;letter-spacing:2px;color:#dbe2f7}
+#tw-hud-sub{font-size:.625rem;letter-spacing:1.6px;color:#5e6a90;margin-top:1px}
+#tw-nerve{position:absolute;top:12px;right:24px;font-size:.625rem;letter-spacing:1.4px;color:#5e6a90;pointer-events:none;text-align:right}
+/* The floor's own line. Nobody says it - there is no guide, no companion and
+   no character in this game. The building talks, or nothing does. */
+#tw-say{font-size:.8125rem;line-height:1.55;color:#8b96bd;margin:12px 2px 0;min-height:2.6em;border-left:2px solid #232e4d;padding-left:11px}
+#tw-panel{margin-top:12px}
+.tw-btn{width:100%;background:#111a2e;border:1px solid #26324f;color:#d5dcf2;border-radius:10px;padding:13px;font-size:.875rem;font-family:var(--f);cursor:pointer;text-align:left}
+.tw-btn:disabled{opacity:.4;cursor:default}
+.tw-btn.key{border-color:#3d4a75}
+.tw-btn.key b{display:block;font-size:.6875rem;letter-spacing:2px;color:#7f8cba;font-weight:700;margin-bottom:3px}
+.tw-btn+.tw-btn{margin-top:8px}
+.tw-btn.go{background:#241f5c;border-color:#3b348f;color:#cfc9ff}
+.tw-note{font-size:.75rem;color:#5e6a90;line-height:1.5;margin-top:10px}
+#tw-foot{font-size:.6875rem;color:#48536f;margin-top:18px;text-align:center}
+.tw-door{display:none;position:fixed;inset:0;background:#05070e;z-index:960;overflow-y:auto}
+.tw-door.open{display:block}
+.tw-door-in{max-width:430px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 30px) 18px 40px}
+.tw-q{font-size:1.0625rem;line-height:1.5;color:#e4e9fa;font-weight:600;margin:6px 0 14px}
+.tw-eyebrow{font-size:.625rem;letter-spacing:2.4px;color:#6f7ba6;font-weight:700}
+.tw-ta{width:100%;min-height:120px;background:#0b1120;border:1px solid #23304d;border-radius:10px;color:#d5dcf2;padding:12px;font-size:.875rem;font-family:var(--f);line-height:1.6;resize:vertical}
+.tw-timer{font-size:2.5rem;font-weight:700;letter-spacing:3px;color:#dbe2f7;text-align:center;margin:18px 0 4px;font-variant-numeric:tabular-nums}
+.tw-timer-sub{font-size:.6875rem;letter-spacing:1.6px;color:#5e6a90;text-align:center;margin-bottom:16px}
+/* THE WAVE (Phase 2). Same full-screen treatment as the door: when it is on
+   you, it is the only thing on the screen, which is the honest version. */
+#tw-wave-canvas{width:100%;height:96px;display:block;margin:14px 0 10px}
+.tw-wave-bar{height:3px;background:#161e33;border-radius:2px;overflow:hidden}
+.tw-wave-bar i{display:block;height:100%;width:100%;background:#3d4a75;transition:width 1s linear}
+#tw-wave-pads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 4px}
+.tw-pad{height:74px;border-radius:12px;border:1px solid #26324f;background:#0d1424;cursor:pointer;transition:background .09s,border-color .09s,transform .09s;display:flex;align-items:center;justify-content:center}
+/* Four blank boxes give no affordance and nothing to tell them apart. Each pad
+   gets its own shape, so the pattern is readable as shapes and not only as
+   which square lit up - it has to work for a colourblind player too. */
+.tw-pad i{display:block;width:16px;height:16px;background:#2f3d61;transition:background .09s}
+.tw-pad.p0 i{border-radius:50%}
+.tw-pad.p1 i{border-radius:3px}
+.tw-pad.p2 i{transform:rotate(45deg);border-radius:2px}
+.tw-pad.p3 i{width:0;height:0;background:none;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid #2f3d61}
+.tw-pad.lit i{background:#cfc9ff}
+.tw-pad.p3.lit i{background:none;border-bottom-color:#cfc9ff}
+.tw-pad.lit{background:#2a2470;border-color:#6b62d8}
+.tw-pad.hit{transform:scale(.96)}
+.tw-pad.wrong{background:#3a1420;border-color:#8c3550}
+#tw-wave-count{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;text-align:right;margin-top:8px}
  </style> <script>
 function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'null')||undefined;}catch(e){return undefined;}}
 // First touch wins: someone who lands from TikTok, reads /for-her, then signs up
@@ -1094,7 +1175,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div id="lessonBody" style="font-size:.875rem;color:var(--ts);line-height:1.75;margin-top:14px;white-space:pre-wrap"></div>
             <div id="lesson-action-box" style="background:var(--acc);border-radius:12px;padding:14px 16px;margin-top:18px">
               <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc-t);font-weight:700;margin-bottom:6px">✦ Today's action</div>
-              <div id="lessonAction" style="font-size:.84375rem;color:var(--acc-t);line-height:1.65"></div>
+              <div id="lessonAction" style="font-size:.84375rem;color:var(--acc-t);line-height:1.65;white-space:pre-line"></div>
             </div>
             <div id="lesson-reflect-box" style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:14px 16px;margin-top:10px">
               <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:6px">Reflect</div>
@@ -1416,17 +1497,45 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
-    <!-- STORIES: narrated first-person recovery stories, 5 on the shelf at a
-         time, rotating weekly from the pool in data/audio-stories.json.
-         Audio lives on the lesson-audio CDN branch under stories/. -->
+    <!-- STORIES: narrated first-person recovery stories. The whole live set
+         is on the shelf; which set is live is named by `live` in
+         data/audio-stories.json and changes only when that is edited - never
+         on a timer. Audio lives on the lesson-audio CDN branch under stories/. -->
     <div id="s-stories" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0">Stories</div>
-        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. About ten minutes each. Five on the shelf; new ones arrive every week.</div>
+        <div style="font-size:.75rem;color:var(--tm);margin-bottom:14px;line-height:1.5">Real-feeling, first-person stories of the struggle and the way back — from the one fighting it and the one who loves them. Six to ten minutes each. A new set goes up when the last one comes down.</div>
         <div id="stories-list"></div>
       </div>
     </div>
 
+    <!-- 2AM — the tower. Spec: docs/GAME-SPEC.md. PHASE 1 ONLY: ten floors,
+         tap-to-move rooms, the Truth-or-Dare door, Friendly's HUD, progress
+         read from The Climb. The Urge Wave, voice briefings, the Trigger Board
+         and the artifact Vault are Phases 2-3 and are deliberately not here. -->
+    <div id="s-tower" class="scr">
+      <div id="tw">
+        <div id="tw-brief"><div id="tw-brief-1"></div><div id="tw-brief-2"></div>
+          <button id="tw-brief-btn" title="Read in your narrator's voice — change the voice on any lesson" onclick="towerBriefToggle()">▶ HEAR IT</button></div>
+        <div id="tw-stage">
+          <canvas id="tw-canvas"></canvas>
+          <div id="tw-hud"><div id="tw-hud-floor">FLOOR 01</div><div id="tw-hud-sub">DAY 1</div></div>
+          <div id="tw-nerve"></div>
+        </div>
+        <div id="tw-say"></div>
+        <div id="tw-panel"></div>
+        <button id="tw-vault-link" onclick="openTowerVault()">THE VAULT</button>
+        <button id="tw-climb-link" onclick="openClimb()">THE CLIMB · 90 STEPS</button>
+        <div id="tw-foot">Ten floors are built. The tower goes to ninety.</div>
+      </div>
+    </div>
+
+    <!-- 2AM: the Vault. Everything found in the building, and the gaps where
+         the rest of it still is. -->
+    <div id="s-vault" class="scr">
+      <div id="vault-count"></div>
+      <div id="vault-list"></div>
+    </div>
     <!-- TOOLS (hub) -->
     <div id="s-tools" class="scr">
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">Recovery tools</div></div>
@@ -1452,7 +1561,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
         <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
           <i class="ti ti-headphones" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>Stories</p><span>Ten-minute narrated stories of falling and coming back — five each week</span></div>
+          <div class="setting-row-txt"><p>Stories</p><span>Narrated stories of falling and coming back — ten on the shelf, six to ten minutes each</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
@@ -1479,6 +1588,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row" onclick="openClimb()">
           <i class="ti ti-mountain" style="color:#534AB7"></i>
           <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" onclick="openTower()">
+          <i class="ti ti-building" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>2AM</p><span>A building you climb at night. Every floor is a day, and every floor asks you for the truth or the dare</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openFilm()">
@@ -1537,15 +1651,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:.78125rem;line-height:1.6"></div>
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Fourteen recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a program the two of you work side by side.</div>
-        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — days 16–90 of every track, including the Spiritual Path and Together — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
+        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — day 16 onward on every track, all the way to day 90 on the recovery tracks — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Days 16–90 of every track — the full bootcamp</div>
+          <div>✓ Days 16–90 of every recovery track — the full bootcamp</div>
           <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
-          <div>✓ 30 Friendly chats a day instead of 3</div>
+          <div>✓ Friendly, your AI companion — 30 chats a day</div>
           <div>✓ Live rooms — a moderated community, open daily</div>
           <div>✓ Days 16–35 of Supporting Someone</div>
-          <div id="plans-pro-together">✓ Days 16–30 of Together, the couples program</div>
+          <div id="plans-pro-together">✓ Days 16–90 of Together, the couples program</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
         <!-- This button sits on the tier banner, which is the brand navy in BOTH
@@ -1606,8 +1720,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div class="feat y"><i class="ti ti-check"></i>Days 16–90 — the full 90-Day Bootcamp on every track</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of Together, the couples program</div>
-            <div class="feat y"><i class="ti ti-check"></i>30 Friendly chats a day instead of 3</div>
+            <div class="feat y"><i class="ti ti-check"></i>Days 16–90 of Together, the couples program</div>
+            <div class="feat y"><i class="ti ti-check"></i>Friendly, your AI companion — 30 chats a day</div>
             <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
           </div>
@@ -1705,6 +1819,15 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" onclick="openAuthModal()">
         <i class="ti ti-cloud"></i>
         <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <!-- Jacques, 29 Aug 2026: "some people will want to rate it just by looking
+           around". The one-time prompt fires on its own terms and never again;
+           this is here whenever somebody feels like it. Hidden unless the app
+           came from Play, because nobody else can leave a Play rating. -->
+      <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
+        <i class="ti ti-star"></i>
+        <div class="setting-row-txt"><p>Rate this app</p><span>A line on Google Play is how the next person finds it</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="logOutFromProfile()">
@@ -1907,6 +2030,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="bnav">
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
+    <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-building"></i><span>Game</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
@@ -2671,6 +2795,41 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     Made on this phone from your own numbers. Nothing is uploaded, and nobody sees it unless you share it.
   </div>
 </div>
+<!-- 2AM: the locked door. Full-screen so the choice is the only thing on it. -->
+<!-- 2AM: the Trigger Board. Landing floors only. -->
+<div id="tw-board" class="tw-door">
+  <div class="tw-door-in">
+    <div class="tw-eyebrow">THE LANDING</div>
+    <div class="tw-q" id="tw-board-say"></div>
+    <div id="tw-board-grid"></div>
+    <div id="tw-board-moves"></div>
+    <div id="tw-board-hand"></div>
+    <div class="tw-note" id="tw-board-note"></div>
+    <div id="tw-board-out"></div>
+  </div>
+</div>
+<!-- 2AM: the Urge Wave. It runs 90 seconds and breaks on its own. -->
+<div id="tw-wave" class="tw-door">
+  <div class="tw-door-in">
+    <div class="tw-eyebrow" id="tw-wave-eyebrow">THE WAVE</div>
+    <div class="tw-q" id="tw-wave-say">It is here. Nothing you do makes it shorter.</div>
+    <canvas id="tw-wave-canvas"></canvas>
+    <div class="tw-wave-bar"><i id="tw-wave-fill"></i></div>
+    <div id="tw-wave-pads">
+      <div class="tw-pad p0" id="tw-pad-0" onclick="towerWaveTap(0)"><i></i></div>
+      <div class="tw-pad p1" id="tw-pad-1" onclick="towerWaveTap(1)"><i></i></div>
+      <div class="tw-pad p2" id="tw-pad-2" onclick="towerWaveTap(2)"><i></i></div>
+      <div class="tw-pad p3" id="tw-pad-3" onclick="towerWaveTap(3)"><i></i></div>
+    </div>
+    <div id="tw-wave-count"></div>
+    <div class="tw-note" id="tw-wave-note"></div>
+    <div id="tw-wave-out"></div>
+  </div>
+</div>
+<div id="tw-door" class="tw-door" onclick="if(event.target===this)towerCloseDoor()">
+  <div class="tw-door-in" id="tw-door-in"></div>
+</div>
+
 <div id="climb-overlay" style="display:none;position:fixed;inset:0;background:#0b0e1a;z-index:999;overflow:hidden">
   <canvas id="climb-canvas" style="position:absolute;inset:0;width:100%;height:100%;touch-action:none"></canvas>
   <div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;pointer-events:none">
@@ -2745,8 +2904,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div style="font-size:2rem;margin-bottom:8px">⛰️</div>
     <!-- NOT .sos-title: that class is #E24B4A, the emergency red used on the SOS
          sheet. Red on a moment of pride reads as an alarm. -->
-    <div style="font-size:1.125rem;font-weight:600;color:var(--accent);margin-bottom:6px;text-align:center">Seven days of showing up.</div>
-    <div class="sos-sub" style="margin-bottom:16px">If this app is helping, a rating on Google Play helps the next person find it — the one still searching at 2am.</div>
+    <div style="font-size:1.125rem;font-weight:600;color:var(--accent);margin-bottom:6px;text-align:center">Liking it so far?</div>
+    <div class="sos-sub" style="margin-bottom:16px">A rating on Google Play helps the next person find it — the one still searching at 2am.</div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="goRateApp()">Rate it on Google Play</button>
     <button class="sos-close" onclick="closeRatingAsk()">Not now</button>
     <div style="font-size:.6875rem;color:var(--tm);margin-top:10px">We'll never ask again either way.</div>
@@ -2797,7 +2956,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <div class="sos-modal" id="couples-modal" onclick="if(event.target===this)closeCouplesExercises()">
   <div class="sos-sheet" style="max-height:85vh;display:flex;flex-direction:column">
     <div class="sos-title" style="color:var(--accent)">Do this together</div>
-    <div class="sos-sub">Ten minutes a day, phones down, no fixing — a 30-day program for the two of you, plus exercises you can reach for anytime.</div>
+    <div class="sos-sub">A 90-day program for any couple repairing a relationship. Ten minutes a day, both of you, one phone — every day is done side by side, never apart. Each day has one thing you do together and one thing you each do for the other. Plus exercises you can reach for anytime.</div>
     <div id="couples-list" style="overflow-y:auto;flex:1;min-height:120px"></div>
     <button class="sos-close" onclick="closeCouplesExercises()">Close</button>
   </div>
@@ -2932,6 +3091,12 @@ function load(){
     S.lessonProgress[S.currentAddiction]=S.currentDay||1;
   }
   if(!S.notifiedDay30Tracks)S.notifiedDay30Tracks=[];
+  // Re-derive the master clock on every boot. Without this, an account saved
+  // under the old rule keeps a startDate pinned to its most recently slipped
+  // track for good - the fix would only take effect the next time something
+  // happened to call syncMasterClock, which for most people is a relapse.
+  // Cheap, and it self-corrects the moment the app opens.
+  try{syncMasterClock();}catch(e){}
   // One-time repair: early supporter accounts had their loved one's addiction
   // stored as their OWN focus area, which aimed addict-directed questions and
   // tracks at the supporter. Move those to partnerFocus where they belonged.
@@ -2991,6 +3156,12 @@ const ICON_PATHS={
   'ti-volume':'<path d="M15 8a5 5 0 0 1 0 8"/><path d="M17.7 5a9 9 0 0 1 0 14"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v14a.8.8 0 0 1-1.5.5l-3.5-4.5"/>',
   'ti-volume-off':'<path d="M15 8a5 5 0 0 1 1.912 4.377"/><path d="M6 15h-2a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h2l3.5-4.5a.8.8 0 0 1 1.5.5v3"/><path d="M11 17.75v.25a.8.8 0 0 1-1.5.5l-3.5-4.5"/><path d="M3 3l18 18"/>',
 'ti-activity':'<path d="M3 12h4l2-8 4 16 2-8h6"/>',
+// The Climb's row has been iconless since it shipped - its key was never in
+// this map. 2AM's building is added at the same time so the same thing does
+// not happen twice on the same screen.
+'ti-mountain':'<path d="M3 20h18L14 7l-3.2 5.6L8.6 10z"/><path d="M10.8 12.6l1.6 2.4"/>',
+'ti-bolt':'<path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/>',
+'ti-building':'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20"/><path d="M8 8h3M8 12h3M8 16h3"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
 'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
@@ -3123,6 +3294,10 @@ function phaseLessonFor(day){
   // Supporters run their own 35-day track and are never addressed as the
   // person recovering, so the shared phases don't apply to them.
   if(S.userType==='partner'||S.currentAddiction==='Supporting Someone')return null;
+  // Together is a relationship programme, not a recovery track. It carries its
+  // own ninety days, and the shared phases would address a couple as one person
+  // working on "the habit".
+  if(S.currentAddiction==='Together')return null;
   if(day<31||day>90)return null;
   if(!(LESSON_PACKS[S.currentAddiction]||[]).length)return null;
   const l=PHASE_LESSONS.find(x=>x.day===day);
@@ -3349,9 +3524,18 @@ function activeExtraPacks(){
   return keys;
 }
 function esc(t){return String(t||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
-// One faith line per day, keyed to the day's theme and cycled through the
-// phases, woven INSIDE the lesson rather than bolted on after it. Only people
-// who said yes or open to the spiritual question ever see a word of this.
+// One faith line per day of the 90-Day Bootcamp, keyed to that day's actual
+// lesson theme, woven INSIDE the lesson rather than bolted on after it. Only
+// people who said yes or open to the spiritual question ever see a word of it.
+//
+// THERE MUST BE NINETY. The index is FAITH_LINES[(day-1) % length], so a short
+// array silently repeats instead of failing: until 28 Aug 2026 there were only
+// thirty, which meant day 31 served the identical line as day 1 and day 61
+// served it a third time. Jacques caught it - faith was picked in onboarding
+// and woven through every track, but only ran a third as deep as the program
+// it was woven into. Days 31-60 now follow REBUILD and 61-90 follow KEEP IT &
+// GIVE IT, each line written against the real title of that day in
+// data/phases.json. If phases.json ever grows past day 90, grow this too.
 const FAITH_LINES=[
 "You didn't get this far alone. Before today starts, say thank you to whoever you believe carried you here.",
 "Ask for one day of strength. Not a lifetime - just today. That prayer has never once been too big.",
@@ -3382,7 +3566,67 @@ const FAITH_LINES=[
 "Perfection was never the assignment. Faithfulness was. Today, be faithful, not flawless.",
 "The person still stuck needs what you've been given. Freely received, freely given.",
 "Sweep the corners today. What you keep hidden keeps you. What you bring to light loses its grip.",
-"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it."
+"Look back thirty days and call it what it is: not luck, not willpower alone. Say thank you like you mean it.",
+"Something moved out and left a hole. Ask for it to be filled with what belongs there, not with the next thing that fits.",
+"Sleep is not lost time. Hand the day back tonight and let yourself be repaired while you do nothing at all.",
+"Telling the truth to one person is older than any therapy. Say where you really are today and let being known do what hiding never did.",
+"Ask for patience to make amends slowly. A changed Tuesday says more than any sentence you could rehearse.",
+"Open the numbers and look straight at them. Ask for courage first - shame rarely survives daylight and arithmetic.",
+"The body carrying you through this was given to you. Feed it today like it belongs to someone you are responsible for.",
+"Ask for the will to move today, even briefly. Thankfulness comes easier in a body that has been used.",
+"Boredom is not an emergency, it is silence. Stay in it one minute past comfortable and hear what speaks.",
+"Ask for clear eyes about the people around you - who is for you, who is for the old you, and who never knew the difference.",
+"Some places still hold the version of you that you are leaving. Ask for the strength to take a different road home.",
+"Ask for the nerve to say no without a speech after it. You are allowed to guard what is being rebuilt.",
+"Bring the anger honestly instead of politely. Nothing you actually feel is too much to bring.",
+"Ask to listen today without preparing your answer underneath. Being understood is not the same as being agreed with.",
+"Ask early. Help that arrives before the emergency is still help, and it costs you far less to receive.",
+"Forty-five days. Look back once, on purpose, and name what carried you that you cannot take credit for.",
+"You are allowed to be spoken of differently now. Ask to stop introducing yourself by your worst years.",
+"Ask for an honest stopping time today. Rest you refuse to take gets taken from you some other way.",
+"Ask to be surprised by something good today - and to notice it while it is happening, not a week later.",
+"Some people were more comfortable with who you were. Ask for kindness toward them and no obligation to go back.",
+"Ask for eyes that see the trap before you are standing in it. Knowing your own pattern is a mercy, not an accusation.",
+"You know the conversation you keep circling. Ask for the words, pick the hour, and go.",
+"The evening is where this is won or lost. Give tonight a shape before it gives you one.",
+"Pay one thing back today, however small. Putting it right is not punishment - it is how the weight comes off.",
+"Ask to be released from comparing. Your road is being walked at exactly the pace it requires.",
+"You cannot hurry anyone else's healing, and demanding to be believed is not repentance. Keep showing up and let time do its work.",
+"Name it plainly, out loud, to whoever you pray to. Half the weight of a feeling is in refusing to say it.",
+"Ask to be freed from needing to be good at it. Nothing worth learning starts skilled.",
+"You already have something to give. Ask to be shown one person today who needs the thing you just learned.",
+"Clear the room, not just the intention. Ask for the honesty to throw out what you are keeping just in case.",
+"Sixty days. Count what stands now that did not before, and say thank you for the hands that were not yours.",
+"Strength is the most dangerous hour. Ask to stay teachable on the days you feel like you have got this.",
+"The long middle is not a mistake. Ask for faithfulness in the stretch where nothing dramatic happens.",
+"Ask to know your own warning signs before they finish speaking. Self-knowledge is a gift, not a verdict.",
+"Write the plan for your worst day while today is still calm. Grace often arrives as preparation.",
+"Walk in with an exit and a prayer. You do not owe any room your presence past the point it costs you.",
+"Away from your routines, keep one small thing. Even a single kept promise travels with you.",
+"The memory edits out the wreckage. Ask for the whole picture back, mornings after included.",
+"Ask again what this is all for. A reason you can name out loud is a reason that holds at 2am.",
+"You believe differently than you did on day one. Say what you believe now, even if only to yourself.",
+"A grudge is rent you keep paying on a room you no longer live in. Ask to be free of it, one name at a time.",
+"Stop waiting to feel forgiven before you act forgiven. Put it on the calendar and keep the appointment.",
+"Ask to be the steadiest person in the room today. Calm is something you carry in, not something you find there.",
+"When someone near you falls, ask for a mouth that helps instead of one that judges. You remember that ground.",
+"Your story is not a confession and not a performance. Ask for three true sentences you could say to anyone.",
+"Someone is watching how you do this without telling you. Ask to be worth watching on the ordinary days.",
+"Ask for clarity about the few lines you will never cross again - and peace about keeping them for good.",
+"Ask to succeed at a pace that does not cost you this. What you win by burning out is not kept.",
+"Being loved without the fog is its own work. Ask for the nerve to be seen and to stay in the room.",
+"Ask for one honest hour a week, on purpose, before honesty gets forced on you by a crisis.",
+"Count the money that stayed and say thank you. It is time and trust that stayed with it.",
+"Ask to listen more than you advise today. Most people need a witness, not a fix.",
+"Ask for a plan simple enough to find at your worst. Help you cannot reach in a panic is not help yet.",
+"There is no finish line, and that is mercy. Ask for grace to keep going without needing it to end.",
+"When people praise you, ask for an honest memory. You did the work, and you were carried.",
+"Do one good thing today that nobody will ever know about. What is done unseen is what keeps you honest.",
+"Nobody will ever know about the night you almost did and did not. Say thank you for it anyway - it counted.",
+"Whatever shame is still left, bring it where it can be seen. It only survives in the dark.",
+"Write to the one still stuck as if writing to yourself three months ago. Ask for words that actually reach.",
+"Ask to be shown the one person to walk with - and for patience to go at their pace, not yours.",
+"Ninety days. You were carried further than you can account for. Ask what to do with what you were given, then go and do it."
 ];
 // One paragraph per linked pair: today's skill, applied to the other track.
 // Written per PAIR, not per day - the mechanism is what's shared.
@@ -3448,7 +3692,7 @@ function renderLessonExtras(day){
     if(l.action){
       html+=`<div style="margin-top:10px">
         <div style="font-size:.65625rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--tm);font-weight:700;margin-bottom:4px">Today</div>
-        <div style="font-size:.84375rem;color:var(--ts);line-height:1.6">${esc(l.action)}</div>
+        <div style="font-size:.84375rem;color:var(--ts);line-height:1.6;white-space:pre-line">${esc(l.action)}</div>
       </div>`;
     }
     html+='</div>';
@@ -3637,13 +3881,32 @@ const LESSON_MARKS={1:'large',7:'large',15:'large',30:'large',3:'medium',14:'med
 // ─── The rating ask ──────────────────────────────────────────────────────────
 // A 4.0+ star average decides whether Play ever shows this app to strangers,
 // and the people most likely to rate it well are the ones on a streak. So the
-// ask happens exactly once, after the day-7-or-later lesson is finished - a
-// moment of earned pride - and never on a day with a slip logged. "Not now" is
-// permanent. No nagging: the same quiet register as everything else here.
+// ask happens exactly once, as soon as somebody has actually used the app - on
+// open or after a lesson, whichever comes first - and never on a day with a
+// slip logged. "Not now" is final. It opens the Play listing; there is no
+// rating collected inside the app, and Profile keeps a permanent row for
+// anyone who decides later.
+// No nagging: the same quiet register as everything else here.
 function maybeAskForRating(){
+  // 29 Aug: briefly changed to ask on every open, then Jacques reversed it the
+  // same hour - "dont keep asking". Once is the rule. Anyone who wants to rate
+  // later has the permanent "Rate this app" row in Profile, which is the right
+  // home for a second chance: they go to it, it does not come to them.
+  if(S.ratedOnStore)return;
   if(S.ratingAsked)return;
-  if(getDays()<7)return;
-  if((S.lessonsCompletedCount||0)<7)return;
+  // Only somebody who installed from Play can leave a Play rating. Without this
+  // the single ask was spent on web and Chrome-installed users who had nowhere
+  // to leave one - and the flag is permanent, so if they later installed
+  // properly they were never asked again.
+  if(typeof isPlayBuild==='function'&&!isPlayBuild())return;
+  // Jacques, 29 Aug: "i rated apps on google store within 30 minutes of trying
+  // it - i want a user to rate it on google store immediately". It used to
+  // need 7 days and 7 lessons, then one lesson. Now the only bar is that they
+  // have actually done something in the app: a handful of real actions, which
+  // a person who is looking around clears in their first sitting.
+  // Enough that it never lands on a blank first paint, low enough that anybody
+  // who has actually touched the app clears it.
+  if(!(S.activityLog||[]).length)return;
   const today=new Date().toDateString();
   if((S.activityLog||[]).some(a=>(a.type==='slip_reported'||a.type==='relapse_reset')&&new Date(a.ts).toDateString()===today))return;
   // The flag is set when the sheet actually OPENS, not when it is scheduled.
@@ -3655,6 +3918,9 @@ function maybeAskForRating(){
     const m=document.getElementById('rating-ask-modal');
     if(!m)return;
     m.classList.add('open');
+    // Set when the sheet actually OPENS, not when it is scheduled: setting it
+    // up front burned the one ask on days when another sheet was already on
+    // screen, so the guard stood down and the person was never asked at all.
     S.ratingAsked=true;save();
   },2600);
 }
@@ -3664,6 +3930,8 @@ function closeRatingAsk(){
 }
 function goRateApp(){
   closeRatingAsk();
+  // The one signal that stops the asking. Set here, not when the sheet opens.
+  S.ratedOnStore=true;save();
   logActivity('rating_ask_accepted',{});
   window.open('https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app','_blank','noopener');
 }
@@ -4740,17 +5008,19 @@ function finishOnboard(){
 // replayable any time from Profile → "How to use this app". Each step switches
 // to the screen it explains and frames the key control. Skipping is one tap.
 const NAV_TOUR_STEPS=[
-  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 6',title:'This is Today — your home base',
+  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 7',title:'This is Today — your home base',
    body:'Your day counter, today\'s lesson, and the SOS button live here. If a craving hits, the red SOS button is one tap away.'},
-  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 6',title:'Tools — everything for right now',
+  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 7',title:'Tools — everything for right now',
    body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
-  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'3 of 6',title:'Friendly — your AI companion',
+  {screen:'tower',tab:'bn-game',target:'#bn-game',step:'3 of 7',title:'2AM — the tower',
+   body:'A building you climb at night. Every floor is a day, and every floor asks you for the truth or the dare. It only opens as fast as your real days do.'},
+  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'4 of 7',title:'Friendly — your AI companion',
    body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
-  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'4 of 6',title:'Profile — your plan and settings',
+  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'5 of 7',title:'Profile — your plan and settings',
    body:'Your subscription, reminders, app lock, and every setting live here — including the button that brings this tour back.'},
-  {screen:null,target:'#guide-fab',step:'5 of 6',title:'Lost? The guide bot knows the way',
+  {screen:null,target:'#guide-fab',step:'6 of 7',title:'Lost? The guide bot knows the way',
    body:'This floating ? answers plain questions — "where is my journal?" — on any screen. Free, always available.'},
-  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'6 of 6',title:'Every lesson can be listened to',
+  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'7 of 7',title:'Every lesson can be listened to',
    body:'Tap Listen and the lesson reads aloud while you do anything else in the app — a player floats above the nav so you can pause it any time.'},
 ];
 let navTourIdx=0;
@@ -5098,7 +5368,7 @@ function initApp(){
     if(S.userType==='partner'){
       const secondLine=S.partnerRelation==='minor-child'
         ?'Being the parent in this is its own weight. How are you doing with it today?'
-        :'This space is yours — not his, not about fixing him. How are YOU holding up today?';
+        :'This space is yours — not theirs, not about fixing anyone. How are YOU holding up today?';
       greeting=`Hey${S.name?' '+S.name:''}. I'm glad you're here.\n\n${secondLine}`;
     }else if(S.userType==='both'){
       greeting=`Hey${S.name?' '+S.name:''}. You're carrying both sides of this — your own day one and someone you love. We can start with either. Which is louder right now?`;
@@ -5242,10 +5512,15 @@ function getDays(){
 // ─── PER-ADDICTION CLOCKS ────────────────────────────────────────────────────
 // One slip used to zero the single clock for every track at once - somebody
 // 47 days off alcohol who slipped on porn lost the 47 on screen. Each track
-// now keeps its own start date. S.startDate stays the master clock and always
-// equals the YOUNGEST per-track clock, so "Days sober" still means sober,
-// full stop - and everything downstream of it (milestones, money saved,
-// share cards) stays conservative rather than inflated.
+// now keeps its own start date.
+//
+// S.startDate is the master clock and equals the OLDEST per-track clock: the
+// longest run still standing. It was the youngest until 30 Aug 2026, which
+// meant the front of the app always showed the track you had most recently
+// slipped on - the same bug these per-track clocks exist to fix, one level up.
+// Where the master feeds something that could overstate (the "Since" line, the
+// share text) the track it belongs to is named alongside it, and the chips
+// under the counter show every track regardless.
 function addictionClocks(){
   S.addictionClocks=S.addictionClocks||{};
   (S.selectedAddictions||[]).forEach(a=>{
@@ -5258,11 +5533,32 @@ function daysFor(addiction){
   if(!c)return getDays();
   return Math.max(0,Math.floor((Date.now()-new Date(c).getTime())/86400000));
 }
+// Which track the big number on Today belongs to: the one you have been at
+// the longest, plus whether the tracks currently disagree at all.
+//
+// Jacques, 30 Aug 2026, three tracks running - Porn & Sex 5d, Food 1d, Anger
+// 8d - and the screen said "Days clean: 1": "it keeps saying day one on the
+// one I failed on when I'm doing multiple tracks."
+//
+// It did, because this took the LATEST start date, which is always the most
+// recent slip. Eight days of work on one thing vanished off the front of the
+// app because of a bad night on another. That is the same mistake per-track
+// clocks were added to fix, one level up. It now takes the earliest, so the
+// headline is your longest run standing; the chips under it still show every
+// track honestly, so nothing is hidden by it.
+function masterTrack(){
+  const clocks=addictionClocks();
+  const rows=(S.selectedAddictions||[])
+    .map(a=>({a:a,t:clocks[a]?new Date(clocks[a]).getTime():0}))
+    .filter(r=>r.t>0)
+    .sort((x,y)=>x.t-y.t);
+  if(!rows.length)return null;
+  return {name:rows[0].a,t:rows[0].t,
+    mixed:rows.length>1&&rows[0].t!==rows[rows.length-1].t};
+}
 function syncMasterClock(){
-  const times=(S.selectedAddictions||[])
-    .map(a=>addictionClocks()[a]).filter(Boolean)
-    .map(c=>new Date(c).getTime());
-  if(times.length)S.startDate=new Date(Math.max(...times)).toISOString();
+  const m=masterTrack();
+  if(m)S.startDate=new Date(m.t).toISOString();
 }
 function renderClockChips(){
   const el=document.getElementById('clock-chips');
@@ -5313,9 +5609,22 @@ function updateStats(){
   evaluateSmartReminders();
 
   document.getElementById('dayCount').textContent=days;
-  document.getElementById('since-lbl').textContent='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  // With tracks at different lengths the big number is the longest one, so it
+  // has to say which - otherwise it reads as a claim about all of them.
+  const mt=masterTrack();
+  const sinceTxt='Since '+start.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('since-lbl').textContent=
+    (mt&&mt.mixed&&S.userType!=='partner')?(mt.name+' \u00b7 '+sinceTxt):sinceTxt;
   const progLbl=document.getElementById('program-lbl');
-  if(progLbl)progLbl.textContent=days<=90?`Day ${days} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
+  // Position in the Bootcamp is LESSON progress, not the calendar. This line
+  // used to read `days` - time since the quit date - which put "Day 9 of the
+  // 90-Day Bootcamp" four lines above "Foundation phase · Day 1 of 30" on
+  // Jacques's own screen, 28 Aug: same program, same screen, two numbers.
+  // Lessons advance only when one is finished (`getLessonDayFor`), so someone
+  // who backdates their quit date has not done nine lessons. Overstating it
+  // also misleads about Pro, which starts at lesson 16.
+  const bootcampDay=getLessonDayFor(S.currentAddiction);
+  if(progLbl)progLbl.textContent=bootcampDay<=90?`Day ${bootcampDay} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
   const focusLbl=document.getElementById('focus-lbl');
   if(focusLbl){
     const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
@@ -5893,6 +6202,10 @@ function burstTierForDay(days){
 function celebrationBurst(tier){
   try{
     if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    // 2AM has no confetti in it - that is the whole tone of the thing. This
+    // canvas is page-level and sits above everything, so a milestone landing
+    // while the tower is open would rain colour over it. It can wait.
+    if(typeof currentScreenId==='function'&&currentScreenId()==='tower')return;
     const T=BURST_TIERS[tier]||BURST_TIERS.medium;
     const c=document.createElement('canvas');
     c.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:10000';
@@ -6320,26 +6633,52 @@ async function shareFilm(){
 }
 
 // ─── STORIES ─────────────────────────────────────────────────────────────────
-// Five narrated stories on the shelf at a time, rotated weekly from the pool.
-// The rotation is deterministic from the ISO week, so every phone shows the
-// same shelf with no server involved, and a new set appears each Monday.
+// Jacques, 29 Aug 2026: "dont auto update stories just do it when i ask, to
+// stop the confusion. When I ask, 10 stories get taken down and 10 more added.
+// Put all the old stories on the app and just store the new ones in the repo
+// for when I'm ready to rotate."
+//
+// So there is NO date arithmetic here any more. The shelf is whatever set
+// data/audio-stories.json names in its `live` field, and it changes only when
+// that one word is edited and shipped. A set that has been written and
+// recorded but not yet published simply sits in the file, unreferenced.
+//
+// The old code derived the shelf from the calendar (a fortnight index), which
+// meant writing the next ten stories published them by accident - the shelf
+// jumped the moment a batch was added, with no way to hold it back.
+//
+// data/audio-stories.json may hold either `batches: [{id, stories:[10]}, ...]`
+// plus `live: "<batch id>"`, or, as it always has, a flat `stories: [...]` -
+// a flat file is read as one set and shown whole.
 let STORIES_POOL=null,storyAudio=null,storyPlayingId=null;
-function isoWeek(){const d=new Date();const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
-  const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);
-  const f=new Date(Date.UTC(t.getUTCFullYear(),0,4));
-  return t.getUTCFullYear()*100+Math.round(((t-f)/86400000-3+((f.getUTCDay()+6)%7))/7)+1;}
+let STORY_BATCHES=[],STORY_BATCH_IDS=[],STORY_LIVE_ID='';
+// Which set is on the shelf. Named set wins; anything unrecognised (a typo, an
+// old file, no `live` at all) falls back to the first set rather than an empty
+// shelf - a wrong-but-present shelf is a far better failure than nothing.
+function storyLiveIndex(){
+  const i=STORY_BATCH_IDS.indexOf(STORY_LIVE_ID);
+  return i>=0?i:0;
+}
+// Every story in the live set, in file order. All ten, not five: they go up
+// together and come down together.
 function storyShelf(pool){
-  const wk=isoWeek();
-  const users=pool.filter(x=>x.perspective==='user'),sups=pool.filter(x=>x.perspective==='supporter');
-  const pick=(arr,n,seed)=>{const out=[];for(let i=0;i<n&&arr.length;i++)out.push(arr[(seed+i*2)%arr.length]);return out;};
-  // alternate the balance weekly so supporters get their week too
-  return wk%2?pick(users,3,wk).concat(pick(sups,2,wk)):pick(users,2,wk).concat(pick(sups,3,wk));
+  const batches=(STORY_BATCHES&&STORY_BATCHES.length)?STORY_BATCHES:[pool||[]];
+  return (batches[storyLiveIndex()]||[]).slice();
 }
 async function renderStories(){
   const el=document.getElementById('stories-list');
   if(!STORIES_POOL){
     el.innerHTML='<div style="color:var(--tm);font-size:.8125rem">Loading the shelf…</div>';
-    try{STORIES_POOL=(await (await fetch('data/audio-stories.json')).json()).stories;}
+    try{
+      const d=await (await fetch('data/audio-stories.json')).json();
+      const raw=(Array.isArray(d.batches)&&d.batches.length)?d.batches:[{id:'all',stories:d.stories||[]}];
+      STORY_BATCHES=raw.map(b=>Array.isArray(b)?b:(b.stories||[]));
+      STORY_BATCH_IDS=raw.map((b,i)=>(Array.isArray(b)?'':(b.id||''))||('set-'+(i+1)));
+      STORY_LIVE_ID=d.live||'';
+      // Flat list of everything ever published, so a story that is off the shelf
+      // can still be looked up by id - the player reads its title from here.
+      STORIES_POOL=STORY_BATCHES.reduce((a,b)=>a.concat(b),[]);
+    }
     catch(e){el.innerHTML='<div style="color:var(--tm);font-size:.8125rem">Stories need a connection the first time. They\'ll be here when you\'re back online.</div>';return;}
   }
   const shelf=storyShelf(STORIES_POOL);
@@ -6360,11 +6699,22 @@ async function renderStories(){
         <div style="font-size:.875rem;line-height:1.7;color:var(--ts);margin-top:8px;white-space:pre-line">${escapeHtml(st.text)}</div></details>
     </div>`).join('');
 }
-async function toggleStory(id){
+// NOTHING MAY BE AWAITED BETWEEN THE TAP AND play(). A phone grants audio
+// playback only inside the gesture that asked for it, and an await spends that
+// permission: play() then rejects with NotAllowedError and the story is silent.
+// This function used to be async and awaited the lesson-audio manifest first,
+// purely to read a base URL it already had a constant for - so it failed on
+// every phone while working on desktop, where the rule is not enforced.
+// startLessonMp3 is the model: build the element and call play() synchronously.
+// (It also called a function that never existed, ensureLessonAudioManifest,
+// which threw above the point where onerror was attached - two separate faults
+// on one line, both silent. Fixed 28 Aug 2026.)
+const STORY_AUDIO_BASE='https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+function toggleStory(id){
   if(storyPlayingId===id&&storyAudio){storyAudio.paused?storyAudio.play():storyAudio.pause();updateStoryBtn(id);return;}
   stopStory();
-  const m=await ensureLessonAudioManifest();
-  const base=(m&&m.base)||'https://raw.githubusercontent.com/Jacqueslm/app/lesson-audio/';
+  // Read the manifest only if it is already in memory; never wait for it.
+  const base=(typeof LESSON_AUDIO_MANIFEST!=='undefined'&&LESSON_AUDIO_MANIFEST&&LESSON_AUDIO_MANIFEST.base)||STORY_AUDIO_BASE;
   const a=new Audio(base+'stories/'+id+'.mp3');
   storyAudio=a;storyPlayingId=id;a.preload='auto';
   a.onerror=()=>{stopStory();appInfo('Stories',"This story's recording isn't available right now — check your connection and try again.");};
@@ -6378,13 +6728,1020 @@ async function toggleStory(id){
   if('mediaSession' in navigator){try{const st=(STORIES_POOL||[]).find(x=>x.id===id);
     navigator.mediaSession.metadata=new MediaMetadata({title:st?st.title:'Story',artist:'Turn Someday Into Day One'});}catch(e){}}
   const prog=document.getElementById('story-prog-'+id);if(prog)prog.style.display='block';
-  a.play().catch(()=>{});
+  // Never swallow this. A rejected play() is the difference between "the file
+  // is missing" and "the phone refused" - the second is a bug in this function,
+  // and silence is what let it hide for so long.
+  const pl=a.play();
+  if(pl&&pl.catch)pl.catch(err=>{
+    if(storyPlayingId!==id)return;
+    stopStory();
+    appInfo('Stories',"That story wouldn't start ("+((err&&err.name)||'unknown')+"). Tap Listen again — and if it keeps happening, tell Jacques and it will land in the error log.");
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Story playback refused',detail:((err&&err.name)||'?')+': '+((err&&err.message)||'')+' · id='+id})}).catch(()=>{});}catch(_){}
+  });
   logActivity('story_play',{id});
 }
 function seekStory(v){if(storyAudio&&storyAudio.duration)storyAudio.currentTime=v/100*storyAudio.duration;}
 function updateStoryBtn(id){const b=document.getElementById('story-btn-'+id);
   if(b)b.textContent=(storyAudio&&storyPlayingId===id&&!storyAudio.paused)?'❚❚ Pause':'▶ Listen';}
 function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=storyPlayingId;storyAudio=null;storyPlayingId=null;if(old)updateStoryBtn(old);}}
+
+// ─── 2AM — THE TOWER (game) ──────────────────────────────────────────────────
+// Spec: docs/GAME-SPEC.md. Jacques, 30 Aug 2026.
+//
+// PHASE 1 ONLY: ten floors, a map you tap around, the Truth-or-Dare door,
+// progress read from The Climb. The Urge Wave (Phase 2), the Trigger Board and
+// artifact Vault (Phase 3) and floors 11-90 behind Pro (Phase 4) are NOT here.
+//
+// Jacques, 30 Aug 2026, on his sixth reference: it was ROBLOX, not "robot", and
+// what he meant by it is that every floor should be its own place - "floor 3
+// doesn't look or play like floor 7". So there is no shared map template any
+// more. Each floor below carries its own layout, its own palette, its own air,
+// and its own rule. The rules are drawn from six primitives, implemented once
+// and reused, because ten bespoke rule engines is how a two-week build becomes
+// a four-month one:
+//   dark     - a room stays unlit until you are standing next to it
+//   dim      - the lights fade the longer you stand still; moving relights them
+//   echo     - every room is drawn again, reflected, underneath itself
+//   oneway   - a corridor you cannot come back through
+//   sequence - the door will not let you in until you have been somewhere else
+//   slow     - you move heavily
+//
+// The spec's non-negotiables, and where each one lives in this file:
+//   1. No character - no mascot, no robot, no guide, and Friendly is not in
+//      here either. The floor's line is unattributed; nobody is talking to you.
+//   2. Unbiased - floor text never names who is at fault. It says "it".
+//   3. No medical claims - no brain chemistry, no "research shows", anywhere.
+//   4. No relapse punishment - towerOnRelapse drops you to the last landing and
+//      never below floor 1, and never un-clears a door you already opened.
+//   5. Floors 1-10 are the free tier, which is exactly all of Phase 1, so
+//      there is no Pro gate in here yet by design.
+//   6. No new dependencies - canvas plus vanilla JS, inside this same file.
+const TOWER_PHASE1_FLOORS=10;
+// Ten floors. Each one is its own place: its own rooms, palette, air and rule.
+// Rooms live in 0..1 of the stage. The stairs are not a room until the door is
+// open, and the door is always the only way to them.
+const TOWER_FLOORS=[
+  {n:1,name:'FIRST NIGHT',rule:'dark',air:'grain',
+   pal:{bg:'#04060c',room:'#080c16',roomOn:'#111a2e',stroke:'#141c2e',strokeOn:'#6b62d8',line:'#3b4a7a',label:'#5c688c'},
+   // No corridor from the landing to the door on purpose: with the dark rule,
+   // a floor where every room touches the entrance hides nothing, and the rule
+   // would be inert on the one floor whose whole point is that it is dark.
+   rooms:{entry:[0.17,0.70],side1:[0.50,0.40],door:[0.83,0.70],stairs:[0.83,0.28]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor one. It is dark and you are still here.','The door opens two ways. Pick one.'],
+   truth:'What time last night did it get hardest?',
+   dare:{text:'Stand outside, or at an open window, and do nothing for sixty seconds.',seconds:60,hold:true},
+   line:'You cannot see a room until you are next to it. Walk anyway.',
+   sides:{side1:{name:'STAIRWELL',line:'Cold. Someone else has been up here — there is a cup on the step.'}}},
+
+  {n:2,name:'THE WANT',rule:'none',air:'grid',
+   pal:{bg:'#050a16',room:'#0a1224',roomOn:'#132244',stroke:'#1a2744',strokeOn:'#6b7ee0',line:'#2a3d6b',label:'#7183b4'},
+   rooms:{entry:[0.17,0.26],side1:[0.50,0.74],door:[0.83,0.26],stairs:[0.83,0.74]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor two. The want came back. It was always going to.','Wanting it and doing it are two different floors.'],
+   truth:'What did you tell yourself the last time you gave in?',
+   dare:{text:'Put your phone in another room. Sit where you can see the doorway for two minutes.',seconds:120,hold:true},
+   line:'Nothing on this floor is in your way. That is the hard part.',
+   sides:{side1:{name:'STORE ROOM',line:'Boxes of things you bought for the version of you that was going to be fine.'}}},
+
+  {n:3,name:'ONE PERSON',rule:'sequence',air:'glow',
+   pal:{bg:'#0a0805',room:'#14100a',roomOn:'#241c10',stroke:'#2a2114',strokeOn:'#d8a35a',line:'#513c1d',label:'#9a8258'},
+   rooms:{entry:[0.15,0.50],side1:[0.45,0.20],side2:[0.45,0.80],door:[0.81,0.50],stairs:[0.81,0.14]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   doorNeeds:['side1'],
+   brief:['Floor three. Nobody gets through this quietly and alone.','One person is enough to start.'],
+   truth:'Who already knows, and what have you never actually said to them?',
+   dare:{text:'Text one person the word "hey". Nothing else. Send it.',seconds:45,hold:false},
+   line:'The door will not open from here. Go through the phone booth first.',
+   sides:{side1:{name:'PHONE BOOTH',line:'The handset is warm. Whoever was in here left in a hurry.'},
+          side2:{name:'WAITING ROOM',line:'Four chairs. Three of them have been sat in tonight.'}}},
+
+  {n:4,name:'THE HOUR',rule:'dim',air:'flicker',wave:true,
+   pal:{bg:'#0c0508',room:'#180a10',roomOn:'#2c1018',stroke:'#2e1420',strokeOn:'#e0607e',line:'#5a2334',label:'#a86e80'},
+   rooms:{entry:[0.20,0.50],side1:[0.50,0.22],door:[0.78,0.50],stairs:[0.78,0.16]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor four. One hour of your day is worse than the rest.','You already know which one.'],
+   truth:'Which hour of the day is the dangerous one for you?',
+   dare:{text:"Write that hour somewhere physical — paper, your hand, the mirror. Somewhere you'll walk past it.",seconds:60,hold:false},
+   line:'Stand still on this floor and the lights go down. Move and they come back.',
+   sides:{side1:{name:'CLOCK ROOM',line:'Every clock in here reads a different time and all of them are late.'}}},
+
+  {n:5,name:'THE SENTENCE',rule:'echo',air:'dust',
+   pal:{bg:'#08090b',room:'#0f1114',roomOn:'#1c2026',stroke:'#20242b',strokeOn:'#cfd6e4',line:'#3a4048',label:'#8b929c'},
+   rooms:{entry:[0.19,0.36],side1:[0.50,0.36],door:[0.81,0.36],stairs:[0.81,0.72]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor five. Every one of these starts with a sentence.','Yours has been said out loud before.'],
+   truth:'What is the exact sentence you say right before it starts?',
+   dare:{text:'Say that sentence out loud, once, to the empty room. Listen to it.',seconds:30,hold:false},
+   line:'Everything on this floor is doubled. Only one of them is real.',
+   sides:{side1:{name:'MIRROR ROOM',line:'Nothing in here but the mirror, and it is honest, which is worse.'}}},
+
+  {n:6,name:'WITHIN REACH',rule:'oneway',air:'grain',
+   pal:{bg:'#040a08',room:'#081410',roomOn:'#0e241a',stroke:'#12291f',strokeOn:'#5fd6a0',line:'#1e4a37',label:'#6a9a85'},
+   rooms:{entry:[0.16,0.28],side1:[0.44,0.74],side2:[0.72,0.24],door:[0.84,0.66],stairs:[0.50,0.20]},
+   edges:[['entry','side1'],['side1','side2'],['side2','door'],['side1','door'],['door','stairs']],
+   oneway:[['side1','side2']],
+   brief:['Floor six. Some rooms are not neutral.','Some names in your phone are not neutral either.'],
+   truth:'Which person, place or app makes it close to automatic?',
+   dare:{text:'Delete one app, one number, or one bookmark. One. Now.',seconds:60,hold:false},
+   line:'The back stairs only go one way. Once you are through, you are through.',
+   sides:{side1:{name:'BACK STAIRS',line:'The quick way down. It is still here. It will always still be here.'},
+          side2:{name:'OLD ROOM',line:'The furniture is the same. That is the trouble with it.'}}},
+
+  {n:7,name:'EMPTY TIME',rule:'none',air:'dust',wave:true,
+   pal:{bg:'#060810',room:'#0a0e1a',roomOn:'#141c30',stroke:'#161d2e',strokeOn:'#7b8bc4',line:'#232c46',label:'#5d6789'},
+   rooms:{entry:[0.13,0.50],side1:[0.35,0.20],side2:[0.35,0.80],side3:[0.60,0.50],door:[0.85,0.50],stairs:[0.85,0.16]},
+   edges:[['entry','side1'],['entry','side2'],['side1','side3'],['side2','side3'],['side3','door'],['door','stairs']],
+   brief:['Floor seven. The hours it used to fill are still there.','Empty time is where this comes back.'],
+   truth:'What did it take up — evenings, mornings, the drive home?',
+   dare:{text:'Move your body for ninety seconds. Walk, stairs, anything. Start now.',seconds:90,hold:true},
+   line:'The biggest floor in the building and there is nothing in any of it.',
+   sides:{side1:{name:'EMPTY',line:'Nothing. Not even dust. Nobody has used this room for anything.'},
+          side2:{name:'EMPTY',line:'The same as the last one. That is the point of it.'},
+          side3:{name:'LONG HALL',line:'It takes longer to cross than it looks like it should.'}}},
+
+  {n:8,name:'THE BODY',rule:'slow',air:'grain',
+   pal:{bg:'#0a0906',room:'#14120b',roomOn:'#242015',stroke:'#282416',strokeOn:'#d6c76a',line:'#4a4320',label:'#968a5c'},
+   rooms:{entry:[0.22,0.62],side1:[0.50,0.26],door:[0.78,0.62],stairs:[0.78,0.22]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eight. Bad sleep, short temper, no appetite.','None of it is proof you are failing.'],
+   truth:'What has your body been doing this week that you have been ignoring?',
+   dare:{text:'Drink a full glass of water and eat something before you leave this floor.',seconds:90,hold:false},
+   line:'You are slower on this floor. Nothing is wrong with you.',
+   sides:{side1:{name:'WASH ROOM',line:'The tap runs cold for a long time before it runs warm.'}}},
+
+  {n:9,name:'WHO CARRIED IT',rule:'sequence',air:'glow',
+   pal:{bg:'#0a0706',room:'#150f0c',roomOn:'#251a14',stroke:'#2a1e18',strokeOn:'#d98f6a',line:'#4e3226',label:'#9a7663'},
+   rooms:{entry:[0.15,0.24],side1:[0.44,0.68],side2:[0.66,0.22],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   doorNeeds:['side1','side2'],
+   brief:['Floor nine. Someone was carrying this before it was said out loud.','That has a cost and the cost is real.'],
+   truth:'Who has been carrying this with you, and what has it cost them?',
+   dare:{text:'Do one small thing for that person without telling them why.',seconds:60,hold:false},
+   line:'Both rooms first. You do not get to skip either one of them.',
+   sides:{side1:{name:'KITCHEN',line:'Two plates by the sink. One of them has not been touched.'},
+          side2:{name:'HALL',line:'A coat still on the hook that nobody has moved in a while.'}}},
+
+  {n:10,name:'THE LANDING',rule:'none',air:'window',
+   pal:{bg:'#080b14',room:'#101728',roomOn:'#1d2a46',stroke:'#22304e',strokeOn:'#9fb4ee',line:'#33456e',label:'#8b9cc8'},
+   rooms:{entry:[0.18,0.68],side1:[0.50,0.30],door:[0.82,0.68],stairs:[0.82,0.30]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor ten. The first landing.','Ten is not a cure. It is a floor you can stand on.'],
+   truth:'What is true now that was not true ten days ago?',
+   dare:{text:'Say the number out loud to one person. "Ten days." That is the whole sentence.',seconds:60,hold:false},
+   line:'First floor with a window in it. That is all this is.',
+   sides:{side1:{name:'LANDING WINDOW',line:'You can see the street from here. It is the first floor you can.'}}},
+];
+function towerFloor(n){return TOWER_FLOORS[Math.max(0,Math.min(TOWER_FLOORS.length-1,n-1))];}
+function towerState(){
+  const t=S.tower||(S.tower={});
+  if(!t.floor)t.floor=1;
+  if(!t.room)t.room='entry';
+  if(!t.cleared)t.cleared={};
+  if(!t.truths)t.truths={};
+  if(!t.visited)t.visited={};
+  if(typeof t.nerve!=='number')t.nerve=0;
+  return t;
+}
+// How high the building is open tonight. This is the tie to real sobriety
+// (spec §4): the tower reads The Climb, and a Climb step is only earned by a
+// real day with the lesson done. So the tower cannot be ground out in one
+// sitting - the top floor is always locked from the outside until tomorrow.
+function towerCeiling(){
+  return Math.max(1,Math.min(TOWER_PHASE1_FLOORS,climbSteps()));
+}
+function towerCleared(n){return !!towerState().cleared[n];}
+// Rule 4: a slip drops you to the last landing and never to the ground, and it
+// never takes back a door you already opened.
+function towerOnRelapse(){
+  try{
+    const t=towerState();
+    t.floor=Math.max(1,Math.floor(t.floor/10)*10);
+    t.room='entry';
+    save();
+  }catch(e){}
+}
+
+let twAnim=null,twPos=null,twTarget=null,twDareTimer=null,twDareLeft=0,twSayTimer=null,twMoved=0;
+function towerRooms(n){
+  // The stairs are not a room until the door is open.
+  const f=towerFloor(n),out={};
+  Object.keys(f.rooms).forEach(k=>{if(k!=='stairs'||towerCleared(n))out[k]=f.rooms[k];});
+  return out;
+}
+function towerVisited(n,k){return !!(towerState().visited[n]||{})[k];}
+// The sequence rule: the door will not let you in until you have been through
+// the rooms it names. Floor 3 wants the phone booth; floor 9 wants both.
+function towerDoorBlocked(n){
+  const need=towerFloor(n).doorNeeds;
+  if(!need||towerCleared(n))return null;
+  const missing=need.filter(k=>!towerVisited(n,k));
+  return missing.length?missing:null;
+}
+function towerConnected(n,a,b){
+  const f=towerFloor(n);
+  if(!f.edges.some(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a)))return false;
+  // The oneway rule: listed as [from,to], and it refuses the way back.
+  if((f.oneway||[]).some(e=>e[0]===b&&e[1]===a))return false;
+  if(b==='door'&&towerDoorBlocked(n))return false;
+  return true;
+}
+function towerRoomName(n,k){
+  if(k==='entry')return 'LANDING';
+  if(k==='door')return towerCleared(n)?'OPEN':'THE DOOR';
+  if(k==='stairs')return towerFloorIsLanding(n)&&!towerLanded(n)?'THE LANDING':'UP';
+  const s=towerFloor(n).sides[k];
+  return s?s.name:'ROOM';
+}
+function openTower(){switchTo('tower');actBn('bn-game');}
+function renderTower(){
+  const t=towerState();
+  if(t.floor>towerCeiling())t.floor=towerCeiling();
+  const f=towerFloor(t.floor);
+  if(!towerRooms(t.floor)[t.room])t.room='entry';
+  t.visited[t.floor]=t.visited[t.floor]||{};
+  t.visited[t.floor][t.room]=true;
+  towerCollect(t.floor,t.room);
+  document.getElementById('tw-brief-1').textContent=f.brief[0];
+  document.getElementById('tw-brief-2').textContent=f.brief[1];
+  document.getElementById('tw-hud-floor').textContent='FLOOR '+String(t.floor).padStart(2,'0');
+  document.getElementById('tw-hud-sub').textContent=f.name+' · DAY '+t.floor;
+  const vc=towerVaultCounts();
+  const vl=document.getElementById('tw-vault-link');
+  if(vl)vl.textContent='THE VAULT · '+vc.have+' OF '+vc.all+' FOUND';
+  const cleared=Object.keys(t.cleared).length;
+  document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
+  towerSay(f.line);
+  towerBriefStop();
+  if(t.readBriefs)towerBriefPlay();
+  const stage=document.getElementById('tw-stage');
+  if(stage)stage.style.background=f.pal.bg;
+  const c=document.getElementById('tw-canvas');
+  const here=towerRooms(t.floor)[t.room]||[0.17,0.7];
+  twPos={x:here[0],y:here[1]};
+  twTarget=null;twMoved=Date.now();
+  if(!c._twBound){c.addEventListener('pointerdown',towerTap);c._twBound=true;}
+  cancelAnimationFrame(twAnim);
+  const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
+  towerPanel();
+}
+function towerStop(){cancelAnimationFrame(twAnim);twAnim=null;towerCloseDoor();towerWaveStop();towerBriefStop();towerBoardStop();}
+// The floor read aloud, in the narrator the member already chose for their
+// lessons (spec §3). Sixty short recordings on the lesson-audio branch, made by
+// tools/generate-tower-audio.py: tower/<voice>/floor-NN.mp3.
+//
+// Once they have asked for it once, every floor after this one reads itself -
+// and because a floor only changes on a tap (the stairs, or opening the tab),
+// that autoplay always happens inside a real gesture and phones allow it.
+let twBrief=null;
+function towerBriefUrl(n){
+  const base=(typeof LESSON_AUDIO_MANIFEST!=='undefined'&&LESSON_AUDIO_MANIFEST&&LESSON_AUDIO_MANIFEST.base)||STORY_AUDIO_BASE;
+  const v=(typeof lessonVoiceKey==='function')?lessonVoiceKey():'warm';
+  return base+'tower/'+v+'/floor-'+String(n).padStart(2,'0')+'.mp3';
+}
+function towerBriefBtn(state){
+  const b=document.getElementById('tw-brief-btn');
+  if(!b)return;
+  b.classList.toggle('on',state==='playing');
+  b.disabled=state==='gone';
+  b.textContent=state==='playing'?'■ STOP':(state==='gone'?'NO RECORDING':'▶ HEAR IT');
+}
+function towerBriefStop(){
+  if(twBrief){try{twBrief.pause();}catch(e){}twBrief.src='';twBrief=null;}
+  towerBriefBtn('idle');
+}
+function towerBriefPlay(){
+  towerBriefStop();
+  const n=towerState().floor;
+  const a=new Audio(towerBriefUrl(n));
+  twBrief=a;a.preload='auto';
+  // A missing or unreachable recording is silent and stays silent. It never
+  // interrupts the floor with a dialog - the two lines are already on screen.
+  a.onerror=()=>{if(twBrief===a){twBrief=null;towerBriefBtn('gone');}};
+  a.onended=()=>{if(twBrief===a){twBrief=null;towerBriefBtn('idle');}};
+  towerBriefBtn('playing');
+  const pr=a.play();
+  if(pr&&pr.catch)pr.catch(()=>{if(twBrief===a){twBrief=null;towerBriefBtn('idle');}});
+}
+function towerBriefToggle(){
+  const t=towerState();
+  if(twBrief){t.readBriefs=false;save();towerBriefStop();return;}
+  t.readBriefs=true;save();
+  towerBriefPlay();
+}
+// The line the floor gives you. Unattributed on purpose: 2AM has no guide and
+// no companion in it. Friendly lives in the rest of the app and stays there.
+function towerSay(text){
+  const el=document.getElementById('tw-say');
+  if(el)el.textContent=text;
+}
+// A fixed wobble per floor, so the air on floor 5 is the same air every time
+// you walk onto floor 5 instead of a fresh random mess on every frame.
+function twRand(seed){let x=Math.sin(seed*12.9898)*43758.5453;return x-Math.floor(x);}
+function towerAir(g,W,H,f,tms){
+  const p=f.pal;
+  g.save();
+  if(f.air==='grain'){
+    g.fillStyle=p.line;g.globalAlpha=.16;
+    for(let i=0;i<70;i++)g.fillRect(twRand(i+f.n*7)*W,twRand(i*3.7+f.n)*H,1,1);
+  }else if(f.air==='grid'){
+    g.strokeStyle=p.line;g.globalAlpha=.10;g.lineWidth=1;
+    for(let x=0;x<W;x+=26){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();}
+    for(let y=0;y<H;y+=26){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  }else if(f.air==='dust'){
+    g.fillStyle=p.label;g.globalAlpha=.22;
+    for(let i=0;i<34;i++){
+      const dx=twRand(i+f.n)*W,dy=(twRand(i*2.3+f.n)*H+(tms/90)*(0.4+twRand(i*5)*0.9))%H;
+      g.beginPath();g.arc(dx,dy,1.1,0,7);g.fill();
+    }
+  }else if(f.air==='glow'){
+    const gr=g.createRadialGradient(W*0.5,H*0.1,4,W*0.5,H*0.1,H*1.1);
+    gr.addColorStop(0,p.strokeOn);gr.addColorStop(1,'rgba(0,0,0,0)');
+    g.globalAlpha=.10;g.fillStyle=gr;g.fillRect(0,0,W,H);
+  }else if(f.air==='flicker'){
+    g.globalAlpha=.05+0.05*Math.abs(Math.sin(tms/210)*Math.sin(tms/97));
+    g.fillStyle=p.strokeOn;g.fillRect(0,0,W,H);
+  }else if(f.air==='window'){
+    g.globalAlpha=.13;g.fillStyle=p.strokeOn;
+    g.beginPath();g.moveTo(W*0.34,0);g.lineTo(W*0.62,0);g.lineTo(W*0.80,H);g.lineTo(W*0.46,H);g.closePath();g.fill();
+  }
+  g.restore();
+}
+function towerDraw(){
+  const c=document.getElementById('tw-canvas');
+  if(!c||!c.clientWidth)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=c.clientWidth,H=c.clientHeight;
+  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}
+  const g=c.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const t=towerState(),n=t.floor,f=towerFloor(n),p=f.pal,rooms=towerRooms(n);
+  g.fillStyle=p.bg;g.fillRect(0,0,W,H);
+  const now=Date.now();
+  towerAir(g,W,H,f,now);
+  // The dim rule: stand still and the floor goes down to almost nothing.
+  const still=(now-twMoved)/1000;
+  const lit=f.rule==='dim'?Math.max(0.34,1-Math.max(0,still-2)/9):1;
+  g.globalAlpha=lit;
+  const RW=Math.min(92,W*0.24),RH=Math.min(62,H*0.21);
+  const px=r=>r[0]*W,py=r=>r[1]*H;
+  // The dark rule: a room you have never been in and are not standing next to
+  // is a shape with no name on it.
+  const known=k=>f.rule!=='dark'||k===t.room||towerVisited(n,k)||towerConnected(n,t.room,k);
+  g.lineWidth=5;g.strokeStyle=p.line;g.globalAlpha=lit*0.5;g.lineCap='round';
+  f.edges.forEach(e=>{
+    if(!rooms[e[0]]||!rooms[e[1]])return;
+    if(!known(e[0])&&!known(e[1]))return;
+    g.beginPath();g.moveTo(px(rooms[e[0]]),py(rooms[e[0]]));g.lineTo(px(rooms[e[1]]),py(rooms[e[1]]));g.stroke();
+  });
+  g.globalAlpha=lit;
+  const drawRoom=(k,r,alpha)=>{
+    const x=px(r)-RW/2,y=py(r)-RH/2;
+    const here=k===t.room,reach=towerConnected(n,t.room,k)&&!here,seen=known(k);
+    g.globalAlpha=alpha;
+    g.beginPath();
+    if(g.roundRect)g.roundRect(x,y,RW,RH,8);else g.rect(x,y,RW,RH);
+    g.fillStyle=here?p.roomOn:p.room;g.fill();
+    g.lineWidth=here?2:1;
+    g.strokeStyle=here?p.strokeOn:p.stroke;
+    g.stroke();
+    if(!seen){g.globalAlpha=lit;return;}
+    g.font='600 9px -apple-system,Segoe UI,Roboto,sans-serif';
+    g.textAlign='center';g.textBaseline='middle';
+    // Label along the bottom of the room, never through the middle - the
+    // player stands in the centre and was sitting on top of the word.
+    g.fillStyle=here?p.strokeOn:(reach?p.label:p.line);
+    g.fillText(towerRoomName(n,k),px(r),py(r)+RH/2-9);
+    if(k==='door'){
+      g.fillStyle=towerCleared(n)?'#7ee8a2':(towerDoorBlocked(n)?p.line:p.strokeOn);
+      g.fillRect(px(r)-7,py(r)-19,14,16);
+      g.fillStyle=p.room;g.fillRect(px(r)-4,py(r)-16,8,10);
+    }
+    if(k==='stairs'){
+      g.strokeStyle='#7ee8a2';g.lineWidth=2;g.beginPath();
+      g.moveTo(px(r)-10,py(r)-4);g.lineTo(px(r)-3,py(r)-4);g.lineTo(px(r)-3,py(r)-10);
+      g.lineTo(px(r)+4,py(r)-10);g.lineTo(px(r)+4,py(r)-16);g.lineTo(px(r)+11,py(r)-16);
+      g.stroke();
+    }
+    g.globalAlpha=lit;
+  };
+  Object.keys(rooms).forEach(k=>{
+    // The echo rule: everything is drawn twice, and only one of them is real.
+    if(f.rule==='echo'){
+      const r=rooms[k];
+      g.save();g.translate(0,(r[1]*H)*2+RH*1.5);g.scale(1,-1);
+      drawRoom(k,r,lit*0.16);g.restore();
+    }
+    drawRoom(k,rooms[k],lit);
+  });
+  // the one-way corridors get an arrow, so it is a rule and not a bug
+  (f.oneway||[]).forEach(e=>{
+    if(!rooms[e[0]]||!rooms[e[1]])return;
+    const a=rooms[e[0]],b=rooms[e[1]];
+    const mx=(px(a)+px(b))/2,my=(py(a)+py(b))/2,an=Math.atan2(py(b)-py(a),px(b)-px(a));
+    g.save();g.translate(mx,my);g.rotate(an);
+    g.globalAlpha=lit*0.8;g.strokeStyle=p.strokeOn;g.lineWidth=2;
+    g.beginPath();g.moveTo(-5,-5);g.lineTo(4,0);g.lineTo(-5,5);g.stroke();
+    g.restore();
+  });
+  g.globalAlpha=lit;
+  if(twPos){
+    g.beginPath();g.arc(twPos.x*W,twPos.y*H,5,0,7);
+    g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
+  }
+  g.globalAlpha=1;
+  // the tower itself, ten ticks up the right edge
+  const lx=W-11;
+  for(let i=1;i<=TOWER_PHASE1_FLOORS;i++){
+    const y=H-18-((i-1)*((H-40)/(TOWER_PHASE1_FLOORS-1)));
+    g.beginPath();g.arc(lx,y,i===n?4:2.5,0,7);
+    // lit = the floor you are on, dim = cleared, grey = reachable tonight,
+    // near-black = not open yet. No numbers on it; it is a building, not a bar.
+    g.fillStyle=i===n?p.strokeOn:(towerCleared(i)?p.label:(i<=towerCeiling()?p.line:p.stroke));
+    g.fill();
+  }
+  if(twTarget){
+    // The slow rule: floor eight is heavy. Nothing is wrong with you.
+    const k=f.rule==='slow'?0.055:0.16;
+    const dx=twTarget.x-twPos.x,dy=twTarget.y-twPos.y;
+    if(Math.abs(dx)<0.004&&Math.abs(dy)<0.004){twPos.x=twTarget.x;twPos.y=twTarget.y;twTarget=null;towerArrived();}
+    else{twPos.x+=dx*k;twPos.y+=dy*k;}
+  }
+}
+function towerTap(ev){
+  const c=document.getElementById('tw-canvas'),r=c.getBoundingClientRect();
+  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+  const t=towerState(),n=t.floor,rooms=towerRooms(n);
+  const RW=Math.min(92,r.width*0.24)/r.width,RH=Math.min(62,r.height*0.21)/r.height;
+  let hit=null;
+  Object.keys(rooms).forEach(k=>{
+    const rr=rooms[k];
+    if(Math.abs(x-rr[0])<=RW/2+0.02&&Math.abs(y-rr[1])<=RH/2+0.03)hit=k;
+  });
+  twMoved=Date.now();
+  if(!hit)return;
+  if(hit===t.room){towerArrived();return;}
+  if(!towerConnected(n,t.room,hit)){towerRefused(n,hit);return;}
+  t.room=hit;
+  t.visited[n]=t.visited[n]||{};t.visited[n][hit]=true;
+  towerCollect(n,hit);
+  save();
+  twTarget={x:rooms[hit][0],y:rooms[hit][1]};
+  towerPanel();
+}
+// A room that will not let you in says why. A rule you cannot see is a bug.
+function towerRefused(n,hit){
+  const f=towerFloor(n),missing=hit==='door'?towerDoorBlocked(n):null;
+  if(missing){
+    towerSay('The door will not open until you have been through '+
+      missing.map(k=>towerRoomName(n,k).toLowerCase()).join(' and ')+'.');
+  }else if((f.oneway||[]).some(e=>e[1]===towerState().room&&e[0]===hit)){
+    towerSay('That corridor only went one way. You cannot go back through it.');
+  }
+  clearTimeout(twSayTimer);
+  twSayTimer=setTimeout(()=>towerSay(f.line),3600);
+}
+function towerArrived(){towerPanel();}
+function towerPanel(){
+  const t=towerState(),n=t.floor,f=towerFloor(n),el=document.getElementById('tw-panel');
+  if(!el)return;
+  if(t.room==='door'){
+    if(!towerCleared(n)){
+      const wave=towerFloorHasWave(n)&&!towerWaveSurvived(n);
+      el.innerHTML='<button class="tw-btn go" onclick="towerOpenDoor()">'+
+        (wave?'Something is between you and the door.':'The door is locked. Two keys.')+'</button>'+
+        '<div class="tw-note">'+(wave
+          ? 'It has to pass before the door opens. It takes as long as it takes.'
+          : 'Truth is the safe key. Dare is worth more.')+'</div>';
+    }else{
+      const via=t.cleared[n].via;
+      el.innerHTML='<div class="tw-note">This door is open. You took the '+(via==='dare'?'dare':'truth')+'.</div>';
+    }
+    return;
+  }
+  if(t.room==='stairs'){
+    const ceiling=towerCeiling();
+    // Spec §6: on a landing floor the board is what earns it, and it stands
+    // where the stairs would be - there is nothing above floor ten yet.
+    if(towerFloorIsLanding(n)&&!towerLanded(n)){
+      el.innerHTML='<button class="tw-btn go" onclick="towerStartBoard()">Earn the landing</button>'+
+        '<div class="tw-note">'+towerBoardMoves(n)+' moves. The tiles never run out; the moves do.</div>';
+      return;
+    }
+    if(n<ceiling){
+      el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
+    }else if(n>=TOWER_PHASE1_FLOORS){
+      el.innerHTML='<div class="tw-note">The landing is yours. Floor ten is the top of what is built — the rest of the tower is coming.</div>';
+    }else{
+      el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
+        '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
+    }
+    return;
+  }
+  if(t.room==='entry'){
+    const blocked=towerDoorBlocked(n);
+    el.innerHTML='<div class="tw-note">'+(blocked
+      ? 'Tap a room to move. The door is shut from this side — go through '+blocked.map(k=>towerRoomName(n,k).toLowerCase()).join(' and ')+' first.'
+      : 'Tap a room to move. The door is the only way up.')+'</div>';
+    return;
+  }
+  const s=f.sides[t.room],art=towerArtifactAt(n,t.room);
+  el.innerHTML='<div class="tw-note">'+escapeHtml(s?s.line:'Empty.')+'</div>'+
+    (art?'<div class="vault-card" style="margin-top:12px">'+
+      '<div class="vault-meta">'+art.kind+' · KEPT</div>'+
+      '<div class="vault-title">'+escapeHtml(art.title)+'</div>'+
+      '<div class="vault-text">'+escapeHtml(art.text)+'</div></div>':'');
+}
+function towerGoEarn(){
+  const e=climbEarnable();
+  if(e.ok){openClimb();return;}
+  switchTo('lesson');actBn('bn-home');
+}
+function towerAscend(){
+  const t=towerState();
+  if(!towerCleared(t.floor)||t.floor>=towerCeiling()||t.floor>=TOWER_PHASE1_FLOORS)return;
+  t.floor+=1;t.room='entry';save();
+  logActivity('tower_floor',{floor:t.floor});
+  renderTower();
+}
+// ── the door ────────────────────────────────────────────────────────────────
+// ── ARTIFACTS AND THE VAULT (Phase 3) ───────────────────────────────────────
+// Spec §4: the optional rooms hold a lesson excerpt, a story fragment or a
+// letter. Walk into the room and it is yours; it is readable afterwards in the
+// Vault whether or not you ever go back to that floor.
+//
+// Kept out of TOWER_FLOORS so the floor table stays readable at a glance, and
+// so the Vault can list every artifact in the building - including the ones
+// still unfound - without walking ten floors of layout data.
+const TOWER_ARTIFACTS={
+'1:side1':{kind:'LETTER',title:'Left on the step',text:
+"Whoever you are — I sat here too. Third-floor landing, about two in the morning, because the flat was too quiet and the street was too loud. I did not have a plan. I had a cup of tea going cold and a phone I was not going to use. That was the whole of it. I got up eventually. That is the only part that mattered."},
+'2:side1':{kind:'LESSON',title:'Wanting is not deciding',text:
+"The want will come back. It comes back for people ten years in. What changes is not whether it arrives — it is how much of you it gets. Early on it arrives and you are already halfway to the car. Later it arrives and you notice it, the way you notice weather.\n\nNothing about that is willpower. It is repetition, and repetition is boring, which is exactly why it works."},
+'3:side1':{kind:'STORY',title:"The call he didn't make",text:
+"...I stood in the hall with the phone in my hand for eleven minutes. I know it was eleven because I watched the clock change. I had the number up. I had the thing I was going to say, more or less.\n\nAnd I put it back in my pocket and went to bed. And the next night was worse, because now it was two things I hadn't said."},
+'3:side2':{kind:'LETTER',title:'For whoever is next',text:
+"They will not say the right thing. Nobody says the right thing. My sister said \"well, that explains a lot,\" and I wanted to put my fist through a door.\n\nTwo years later that is the sentence I am most grateful for, because it meant she had already known and had not walked off. You are not asking them to be good at this. You are asking them to stay."},
+'4:side1':{kind:'LESSON',title:'The hour',text:
+"It is rarely random. There is a window — for most people about ninety minutes long, and almost always in the same part of the day. When the house goes quiet. When the shift ends. When the car pulls into the drive and the engine stops.\n\nFind yours and you have found the only hour you actually have to plan for. The other twenty-three mostly take care of themselves."},
+'5:side1':{kind:'STORY',title:'What the mirror had',text:
+"...the sentence was \"I have had a day.\" That was it. Five words. I said them to my own face in the bathroom mirror maybe four hundred times, and every single time it worked — because it is not a lie. I had had a day. Everyone has had a day.\n\nThe lie was the second half. The part I never said out loud. \"And therefore.\""},
+'6:side1':{kind:'LESSON',title:'Out of reach',text:
+"Willpower is a bad lock. It works until you are tired, and you will be tired.\n\nDistance is a better lock. The app that is deleted, the number that is gone, the way home that does not pass the place. None of those need you to be strong at eleven at night. They only needed you to be strong once, in the afternoon, when it was easy."},
+'6:side2':{kind:'STORY',title:'The same chair',text:
+"...I moved the chair. That is the whole story. It had been facing the telly, in the corner where I always sat, and I dragged it round to face the window.\n\nFor about two weeks I could not settle in it. That was the point. I did not want to be comfortable in the exact shape I had been comfortable in."},
+'7:side1':{kind:'LETTER',title:'On the empty hours',text:
+"Nobody warns you that stopping hands your evenings back, and that this is the hard part. I had four hours a night that used to be full and suddenly were not.\n\nI filled them badly at first. Biscuits, phone, arguing with strangers. Then a bit better. It took about five months before an empty evening stopped feeling like a threat. Five months is not long. It feels long."},
+'7:side3':{kind:'LESSON',title:'The long hall',text:
+"Boredom gets treated as a joke in recovery. It is one of the big ones.\n\nThe habit was doing a job. It filled time and it changed how the evening felt. Take it away and the job is still there and nothing is doing it. That is not weakness — that is a gap, and gaps get filled by whatever is nearest."},
+'8:side1':{kind:'STORY',title:'The tap',text:
+"...I could not work out why I was angry at everything. Turned out I had not slept properly in nine days and had been living on toast. That was it. That was the whole mystery.\n\nI am not saying it was simple. I am saying some of what I thought was my character was tiredness wearing my clothes."},
+'9:side1':{kind:'LETTER',title:'The plates',text:
+"I am not going to pretend I did it out of love that night. I did it because the kitchen was a mess and I could not stand looking at it.\n\nBut she came down in the morning and stopped in the doorway and did not say anything, and I understood that she had stopped expecting things like that a long time before. Small is not nothing. Small is most of it."},
+'9:side2':{kind:'STORY',title:'The coat',text:
+"...it stayed on the hook for a year after he stopped, because taking it down would have meant deciding something, and neither of us was ready to decide anything.\n\nThen one Tuesday it was gone, and neither of us mentioned it. That is how most of it happened, honestly. Not conversations. Tuesdays."},
+'10:side1':{kind:'LETTER',title:'From the window',text:
+"Ten days. I know what you are thinking, because I thought it too — ten days is nothing, anyone can do ten days.\n\nHere is the thing though. You have done ten days before and it did not feel like this. The difference is not the number. It is that this time you were counting on purpose."},
+};
+function towerArtifactAt(n,room){return TOWER_ARTIFACTS[n+':'+room]||null;}
+function towerArtifactKey(n,room){return n+':'+room;}
+function towerKept(key){return !!(towerState().kept||{})[key];}
+// Walking in is enough. There is nothing to pick up and no way to miss one.
+function towerCollect(n,room){
+  const a=towerArtifactAt(n,room);
+  if(!a)return null;
+  const t=towerState(),key=towerArtifactKey(n,room);
+  if(!t.kept)t.kept={};
+  if(!t.kept[key]){
+    t.kept[key]=new Date().toISOString();
+    save();
+    logActivity('tower_artifact',{floor:n,kind:a.kind});
+  }
+  return a;
+}
+function towerVaultCounts(){
+  const keys=Object.keys(TOWER_ARTIFACTS);
+  return {have:keys.filter(towerKept).length,all:keys.length};
+}
+function openTowerVault(){switchTo('vault');actBn('bn-game');}
+function renderTowerVault(){
+  const el=document.getElementById('vault-list');
+  if(!el)return;
+  const c=towerVaultCounts();
+  document.getElementById('vault-count').textContent=c.have+' of '+c.all+' found';
+  el.innerHTML=Object.keys(TOWER_ARTIFACTS).map(key=>{
+    const a=TOWER_ARTIFACTS[key],n=key.split(':')[0],got=towerKept(key);
+    if(!got)return '<div class="vault-card locked">'+
+      '<div class="vault-meta">FLOOR '+String(n).padStart(2,'0')+' · '+a.kind+'</div>'+
+      '<div class="vault-title">Still in the building</div></div>';
+    return '<div class="vault-card">'+
+      '<div class="vault-meta">FLOOR '+String(n).padStart(2,'0')+' · '+a.kind+'</div>'+
+      '<div class="vault-title">'+escapeHtml(a.title)+'</div>'+
+      '<div class="vault-text">'+escapeHtml(a.text)+'</div></div>';
+  }).join('');
+}
+
+// ── THE TRIGGER BOARD (Phase 3) ─────────────────────────────────────────────
+// Spec §6. Landing floors only - 10, 20, 30. A 5x5 grid of triggers, a hand of
+// coping tiles, and a fixed number of MOVES. Placing a coping tile clears the
+// triggers it answers in the squares around it. Clearing the board earns the
+// landing. Running out of moves is a retry, never a loss.
+//
+// The coping tiles do not run out. You never run out of "call someone" - you
+// run out of the night. Moves are the scarce thing, which is what makes this a
+// planning puzzle instead of a clicking one.
+const TOWER_TRIGGERS={
+  bored:'BORED',stressed:'STRESSED',alone:'ALONE',tired:'TIRED',
+  phone:'PHONE',angry:'ANGRY',late:'LATE NIGHT',argument:'ARGUMENT'};
+// Drawn from the lesson content, as specced. "Tell her" in the original note is
+// "TELL THEM" here: this game is played by the person in it and by the person
+// who loves them, and rule 2 says it never takes a side.
+const TOWER_COPING=[
+  {k:'call', t:'CALL SOMEONE',   clears:['alone','argument']},
+  {k:'move', t:'MOVE',           clears:['bored','stressed']},
+  {k:'eat',  t:'EAT',            clears:['tired','bored']},
+  {k:'sleep',t:'SLEEP',          clears:['tired','late']},
+  {k:'write',t:'WRITE',          clears:['angry','stressed']},
+  {k:'leave',t:'LEAVE THE ROOM', clears:['phone','argument']},
+  {k:'tell', t:'TELL THEM',      clears:['alone','angry']},
+];
+const TOWER_BOARD_N=5;
+function towerFloorIsLanding(n){return n%10===0;}
+function towerLanded(n){return !!(towerState().landings||{})[n];}
+// Eight on the first landing, one fewer every ten floors, never below four.
+function towerBoardMoves(n){return Math.max(4,8-Math.floor((n-10)/10));}
+function towerBoardArea(i){
+  const N=TOWER_BOARD_N,r=Math.floor(i/N),c=i%N,out=[];
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    const rr=r+dr,cc=c+dc;
+    if(rr>=0&&rr<N&&cc>=0&&cc<N)out.push(rr*N+cc);
+  }
+  return out;
+}
+// Built backwards from a solution, so a board can never be unsolvable: pick the
+// squares a winning run would use, then scatter triggers only where those
+// squares would clear them. A random board looks the same and is sometimes
+// impossible, which on a landing floor would be quietly cruel.
+function towerBoardBuild(moves){
+  const cells=new Array(TOWER_BOARD_N*TOWER_BOARD_N).fill(null);
+  // One fewer than the moves allowed, so a thinking player always has a
+  // spare. Tuned against a simulator: at this density a careless player who
+  // places at random never clears it, and a player who looks first always
+  // does, with two or three moves in hand.
+  const wanted=Math.max(3,moves-1);
+  const spots=[];
+  for(let guard=0;spots.length<wanted&&guard<400;guard++){
+    const i=Math.floor(Math.random()*cells.length);
+    if(spots.indexOf(i)<0)spots.push(i);
+  }
+  const isSpot=(i)=>spots.indexOf(i)>=0;
+  // Deal the coping tiles out rather than rolling one per spot: rolling let
+  // three spots all pick SLEEP, and a board that is nine TIRED tiles is not a
+  // puzzle. Shuffled, so it is a different seven-tile deal every night.
+  const deal=TOWER_COPING.slice();
+  for(let k=deal.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));const t=deal[k];deal[k]=deal[r];deal[r]=t;}
+  let placed=0;
+  spots.forEach((i,si)=>{
+    const cop=deal[si%deal.length];
+    const free=towerBoardArea(i).filter(j=>!isSpot(j)&&!cells[j]);
+    for(let k=free.length-1;k>0;k--){const r=Math.floor(Math.random()*(k+1));const t=free[k];free[k]=free[r];free[r]=t;}
+    const take=Math.min(free.length,2+Math.floor(Math.random()*2));
+    for(let k=0;k<take;k++){
+      // Cycle the tile's answers rather than rolling each one: rolling piled
+      // seven TIRED tiles onto one board, because two of the seven coping
+      // tiles answer it. A board wants variety to be worth planning against.
+      cells[free[k]]={trigger:cop.clears[k%cop.clears.length]};
+      placed++;
+    }
+  });
+  return {cells:cells,left:moves,moves:moves,triggers:placed,sel:TOWER_COPING[0].k,done:false};
+}
+let twBoard=null;
+function towerBoardStop(){
+  twBoard=null;
+  const el=document.getElementById('tw-board');
+  if(el)el.classList.remove('open');
+}
+function towerStartBoard(){
+  const n=towerState().floor;
+  twBoard=towerBoardBuild(towerBoardMoves(n));
+  twBoard.n=n;
+  document.getElementById('tw-board').classList.add('open');
+  logActivity('tower_board_start',{floor:n});
+  towerBoardRender();
+}
+function towerBoardPick(k){
+  if(!twBoard||twBoard.done)return;
+  twBoard.sel=k;towerBoardRender();
+}
+function towerBoardTap(i){
+  if(!twBoard||twBoard.done)return;
+  const cell=twBoard.cells[i];
+  if(cell)return;                       // a trigger, or a tile already down
+  if(twBoard.left<=0)return;
+  const cop=TOWER_COPING.find(c=>c.k===twBoard.sel);
+  twBoard.cells[i]={coping:cop.k};
+  twBoard.left--;
+  let cleared=0;
+  towerBoardArea(i).forEach(j=>{
+    const c=twBoard.cells[j];
+    if(c&&c.trigger&&cop.clears.indexOf(c.trigger)>=0){twBoard.cells[j]=null;cleared++;}
+  });
+  if(navigator.vibrate&&cleared)try{navigator.vibrate(14);}catch(e){}
+  towerBoardRender();
+}
+function towerBoardLeft(){
+  return twBoard?twBoard.cells.filter(c=>c&&c.trigger).length:0;
+}
+function towerBoardRender(){
+  if(!twBoard)return;
+  const n=twBoard.n,f=towerFloor(n),left=towerBoardLeft();
+  const grid=document.getElementById('tw-board-grid');
+  grid.innerHTML=twBoard.cells.map((c,i)=>{
+    if(c&&c.trigger)return '<div class="tb-cell trig">'+TOWER_TRIGGERS[c.trigger]+'</div>';
+    if(c&&c.coping)return '<div class="tb-cell cop">'+(TOWER_COPING.find(x=>x.k===c.coping)||{t:''}).t+'</div>';
+    return '<div class="tb-cell open" onclick="towerBoardTap('+i+')"></div>';
+  }).join('');
+  document.getElementById('tw-board-hand').innerHTML=TOWER_COPING.map(c=>
+    '<button class="tb-hand'+(twBoard.sel===c.k?' on':'')+'" onclick="towerBoardPick(\''+c.k+'\')">'+
+    c.t+'<b>'+c.clears.map(x=>TOWER_TRIGGERS[x]).join(' · ')+'</b></button>').join('');
+  document.getElementById('tw-board-moves').textContent=
+    twBoard.done?'':(twBoard.left+' MOVE'+(twBoard.left===1?'':'S')+' LEFT · '+left+' TRIGGER'+(left===1?'':'S'));
+  const out=document.getElementById('tw-board-out');
+  if(left===0&&!twBoard.done){
+    twBoard.done=true;
+    const t=towerState();
+    t.landings=t.landings||{};t.landings[n]=true;save();
+    logActivity('tower_landing',{floor:n,movesLeft:twBoard.left});
+    document.getElementById('tw-board-say').textContent='The board is clear.';
+    document.getElementById('tw-board-note').textContent=
+      'You did not clear it by being fast. You cleared it by deciding which one to go at first. That is the whole skill.';
+    out.innerHTML='<button class="tw-btn go" style="margin-top:16px" onclick="towerBoardDone()">Take the landing</button>';
+    return;
+  }
+  if(twBoard.left<=0&&left>0&&!twBoard.done){
+    twBoard.done=true;
+    document.getElementById('tw-board-say').textContent='Out of moves.';
+    document.getElementById('tw-board-note').textContent=
+      'Nothing is lost and nothing is taken back. The night resets and the board is new.';
+    out.innerHTML='<button class="tw-btn go" style="margin-top:16px" onclick="towerStartBoard()">Again</button>'+
+      '<button class="tw-btn" onclick="towerBoardStop()">Not now</button>';
+    return;
+  }
+  document.getElementById('tw-board-say').textContent='Floor '+n+'. '+f.name+'.';
+  document.getElementById('tw-board-note').textContent=
+    twBoard.moves+' moves, and the tiles never run out. Pick which one to go at first.';
+  out.innerHTML='<button class="tw-btn" style="margin-top:14px" onclick="towerBoardStop()">Step back</button>';
+}
+function towerBoardDone(){
+  towerBoardStop();
+  renderTower();
+}
+
+// ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
+// Spec §2. A pattern of 3-7 pulses plays; you tap it back. Each round you get
+// right makes the next one longer. Getting one wrong restarts the sequence and
+// does not end anything.
+//
+// The one thing that matters here: NOTHING the player does changes the clock.
+// The wave runs ninety seconds and then breaks on its own whether they play it
+// perfectly, fail every round, or sit there and do nothing at all. That is the
+// lesson and it is delivered mechanically rather than stated - the pads are
+// something to do with your hands while it passes, not a way to beat it.
+// If you ever find yourself "rewarding" a good round with time off, don't.
+const TOWER_WAVE_SECONDS=90;
+const TOWER_WAVE_MIN=3,TOWER_WAVE_MAX=7;
+// Spec: "~1 in 4 floors, and always on floors ending in 0." Declared per floor
+// rather than rolled at runtime - a trap that appears at random is unfair, and
+// a random trap cannot be tested.
+function towerFloorHasWave(n){return n%10===0||!!towerFloor(n).wave;}
+function towerWaveSurvived(n){return !!(towerState().waves||{})[n];}
+let twWave=null;
+function towerWaveStop(){
+  if(!twWave)return;
+  (twWave.timers||[]).forEach(clearTimeout);
+  clearInterval(twWave.tick);
+  cancelAnimationFrame(twWave.anim);
+  twWave=null;
+  const el=document.getElementById('tw-wave');
+  if(el)el.classList.remove('open');
+}
+function towerStartWave(n){
+  towerWaveStop();
+  const f=towerFloor(n);
+  twWave={n:n,len:TOWER_WAVE_MIN,seq:[],at:0,rounds:0,input:false,over:false,
+    started:Date.now(),timers:[],tick:null,anim:null};
+  towerBriefStop();
+  document.getElementById('tw-wave').classList.add('open');
+  document.getElementById('tw-wave-eyebrow').textContent='FLOOR '+String(n).padStart(2,'0')+' · THE WAVE';
+  document.getElementById('tw-wave-say').textContent='It is here. Nothing you do makes it shorter.';
+  document.getElementById('tw-wave-note').textContent='Tap the pattern back if you want something to do with your hands. It changes nothing.';
+  document.getElementById('tw-wave-out').innerHTML='';
+  document.getElementById('tw-wave-pads').style.display='';
+  document.getElementById('tw-wave-fill').style.width='100%';
+  logActivity('tower_wave_start',{floor:n});
+  const loop=()=>{towerWaveDraw();twWave&&(twWave.anim=requestAnimationFrame(loop));};loop();
+  twWave.tick=setInterval(()=>{
+    if(!twWave)return;
+    const left=towerWaveLeft();
+    document.getElementById('tw-wave-fill').style.width=(left/TOWER_WAVE_SECONDS*100)+'%';
+    if(left<=0)towerWaveBreak();
+  },1000);
+  towerWaveNext(700);
+}
+function towerWaveLeft(){
+  if(!twWave)return 0;
+  return Math.max(0,TOWER_WAVE_SECONDS-Math.floor((Date.now()-twWave.started)/1000));
+}
+function towerWaveNext(delay){
+  if(!twWave||twWave.over)return;
+  twWave.seq=[];
+  for(let i=0;i<twWave.len;i++)twWave.seq.push(Math.floor(Math.random()*4));
+  twWave.at=0;twWave.input=false;
+  document.getElementById('tw-wave-count').textContent='ROUND '+(twWave.rounds+1)+' · '+twWave.len+' PULSES';
+  let t=delay;
+  twWave.seq.forEach((pad)=>{
+    twWave.timers.push(setTimeout(()=>towerWaveLight(pad,380),t));
+    t+=580;
+  });
+  twWave.timers.push(setTimeout(()=>{if(twWave&&!twWave.over)twWave.input=true;},t));
+}
+function towerWaveLight(pad,ms){
+  const el=document.getElementById('tw-pad-'+pad);
+  if(!el)return;
+  el.classList.add('lit');
+  setTimeout(()=>el.classList.remove('lit'),ms);
+}
+function towerWaveTap(i){
+  if(!twWave||twWave.over||!twWave.input)return;
+  const el=document.getElementById('tw-pad-'+i);
+  if(el){el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),110);}
+  if(navigator.vibrate)try{navigator.vibrate(12);}catch(e){}
+  if(i===twWave.seq[twWave.at]){
+    twWave.at++;
+    if(twWave.at>=twWave.seq.length){
+      // Round won. The only thing it buys is a longer pattern. Not one second.
+      twWave.rounds++;
+      twWave.len=Math.min(TOWER_WAVE_MAX,twWave.len+1);
+      twWave.input=false;
+      document.getElementById('tw-wave-note').textContent='Right. The clock did not move.';
+      towerWaveNext(900);
+    }
+    return;
+  }
+  // Wrong. Nothing ends. The sequence starts again and the clock keeps running.
+  twWave.input=false;
+  twWave.len=TOWER_WAVE_MIN;
+  document.getElementById('tw-wave-note').textContent='Wrong. Nothing happens. The clock did not move for that either.';
+  [0,1,2,3].forEach(k=>{
+    const p=document.getElementById('tw-pad-'+k);
+    if(p){p.classList.add('wrong');setTimeout(()=>p.classList.remove('wrong'),260);}
+  });
+  towerWaveNext(1100);
+}
+// The shape of it: it climbs, it peaks about a third of the way through, and
+// then it goes down. The whole curve is drawn from the first second, so the
+// player can see the end of it before they get there. That is the point.
+function twWaveEnv(p){
+  if(p<=0||p>=1)return 0;
+  return p<0.32?Math.pow(p/0.32,1.5):Math.pow((1-p)/0.68,1.15);
+}
+function towerWaveDraw(){
+  const c=document.getElementById('tw-wave-canvas');
+  if(!c||!c.clientWidth||!twWave)return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=c.clientWidth,H=c.clientHeight;
+  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);}
+  const g=c.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const f=towerFloor(twWave.n),p=f.pal,mid=H/2;
+  const prog=twWave.over?1:Math.min(1,(Date.now()-twWave.started)/(TOWER_WAVE_SECONDS*1000));
+  const t=Date.now();
+  const yAt=(x)=>mid+Math.sin(x*30+t/240)*twWaveEnv(x)*H*0.40;
+  // the whole wave, faint - including the part that has not happened yet
+  g.strokeStyle=p.line;g.lineWidth=1.5;g.globalAlpha=.5;g.beginPath();
+  for(let i=0;i<=W;i+=2){const x=i/W;i?g.lineTo(i,yAt(x)):g.moveTo(i,yAt(x));}
+  g.stroke();
+  // the part you have already been through
+  g.strokeStyle=p.strokeOn;g.lineWidth=2;g.globalAlpha=1;g.beginPath();
+  for(let i=0;i<=W*prog;i+=2){const x=i/W;i?g.lineTo(i,yAt(x)):g.moveTo(i,yAt(x));}
+  g.stroke();
+  const mx=W*prog;
+  g.beginPath();g.arc(mx,yAt(prog),4,0,7);
+  g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=10;g.fill();g.shadowBlur=0;
+}
+function towerWaveBreak(){
+  if(!twWave||twWave.over)return;
+  twWave.over=true;twWave.input=false;
+  (twWave.timers||[]).forEach(clearTimeout);twWave.timers=[];
+  clearInterval(twWave.tick);twWave.tick=null;
+  const n=twWave.n,rounds=twWave.rounds;
+  const t=towerState();
+  t.waves=t.waves||{};t.waves[n]=true;save();
+  logActivity('tower_wave',{floor:n,rounds:rounds});
+  document.getElementById('tw-wave-say').textContent='It broke on its own.';
+  document.getElementById('tw-wave-note').textContent=
+    'It would have broken if you had played every round, and it would have broken if you had put the phone down and stared at the wall. Ninety seconds either way.';
+  document.getElementById('tw-wave-count').textContent=rounds===1?'1 ROUND':rounds+' ROUNDS';
+  document.getElementById('tw-wave-pads').style.display='none';
+  document.getElementById('tw-wave-out').innerHTML=
+    '<button class="tw-btn go" style="margin-top:16px" onclick="towerWaveDone()">The door is ahead</button>';
+}
+function towerWaveDone(){
+  towerWaveStop();
+  towerOpenDoor();
+}
+
+// ── the door ────────────────────────────────────────────────────────────────
+function towerOpenDoor(){
+  // Spec, core idea: some floors trap you in an urge you have to survive
+  // before the door opens. Survive it once and the floor remembers.
+  const n=towerState().floor;
+  if(towerFloorHasWave(n)&&!towerWaveSurvived(n)&&!towerCleared(n)){towerStartWave(n);return;}
+  towerBriefStop();
+  const d=document.getElementById('tw-door');
+  d.classList.add('open');
+  towerDoorChoice();
+}
+function towerCloseDoor(){
+  const d=document.getElementById('tw-door');
+  if(d)d.classList.remove('open');
+  clearInterval(twDareTimer);twDareTimer=null;
+}
+function towerDoorChoice(){
+  const n=towerState().floor,f=towerFloor(n);
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">FLOOR '+String(n).padStart(2,'0')+' · '+escapeHtml(f.name)+'</div>'+
+    '<div class="tw-q">The door is locked. There are two keys and you only need one.</div>'+
+    '<button class="tw-btn key" onclick="towerPickTruth()"><b>TRUTH</b>One question. Nobody sees the answer but you.</button>'+
+    '<button class="tw-btn key" onclick="towerPickDare()"><b>DARE</b>One thing, done in the real world, now.</button>'+
+    '<div class="tw-note">Both open the door. The dare is worth more.</div>'+
+    '<button class="tw-btn" style="margin-top:16px" onclick="towerCloseDoor()">Back to the floor</button>';
+}
+function towerPickTruth(){
+  const n=towerState().floor,f=towerFloor(n);
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">TRUTH</div>'+
+    '<div class="tw-q">'+escapeHtml(f.truth)+'</div>'+
+    '<textarea class="tw-ta" id="tw-truth" placeholder="However short. It stays on this phone."></textarea>'+
+    '<button class="tw-btn go" style="margin-top:10px" onclick="towerSubmitTruth()">Unlock the door</button>'+
+    '<button class="tw-btn" onclick="towerDoorChoice()">Take the dare instead</button>';
+  setTimeout(()=>{const a=document.getElementById('tw-truth');if(a)a.focus();},80);
+}
+function towerSubmitTruth(){
+  const a=document.getElementById('tw-truth'),v=(a&&a.value||'').trim();
+  if(v.length<2){if(a)a.focus();return;}
+  const t=towerState(),n=t.floor;
+  t.truths[n]=v;
+  towerClear(n,'truth');
+}
+function towerPickDare(){
+  const n=towerState().floor,f=towerFloor(n);
+  twDareLeft=f.dare.seconds;
+  document.getElementById('tw-door-in').innerHTML=
+    '<div class="tw-eyebrow">DARE</div>'+
+    '<div class="tw-q">'+escapeHtml(f.dare.text)+'</div>'+
+    '<div class="tw-timer" id="tw-clock">'+towerClock(twDareLeft)+'</div>'+
+    '<div class="tw-timer-sub" id="tw-clock-sub">'+(f.dare.hold?'HOLD IT UNTIL ZERO':'DO IT, THEN MARK IT')+'</div>'+
+    '<button class="tw-btn go" id="tw-done" onclick="towerMarkDare()"'+(f.dare.hold?' disabled':'')+'>I did it</button>'+
+    '<button class="tw-btn" onclick="towerDoorChoice()">Take the truth instead</button>';
+  clearInterval(twDareTimer);
+  twDareTimer=setInterval(()=>{
+    twDareLeft--;
+    const c=document.getElementById('tw-clock');
+    if(!c){clearInterval(twDareTimer);twDareTimer=null;return;}
+    c.textContent=towerClock(Math.max(0,twDareLeft));
+    if(twDareLeft<=0){
+      clearInterval(twDareTimer);twDareTimer=null;
+      const b=document.getElementById('tw-done');if(b)b.disabled=false;
+      const s=document.getElementById('tw-clock-sub');if(s)s.textContent='TIME. MARK IT IF YOU DID IT.';
+      if(navigator.vibrate)try{navigator.vibrate(30);}catch(x){}
+    }
+  },1000);
+}
+function towerClock(s){const m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0');}
+function towerMarkDare(){
+  const t=towerState();
+  t.nerve=(t.nerve||0)+1;
+  towerClear(t.floor,'dare');
+}
+function towerClear(n,via){
+  const t=towerState();
+  t.cleared[n]={via:via,at:new Date().toISOString()};
+  t.room='door';
+  save();
+  logActivity('tower_door',{floor:n,via:via});
+  towerCloseDoor();
+  renderTower();
+  const f=towerFloor(n);
+  towerSay(via==='dare'?'You did the thing. That counts more than saying it.':'Noted. Nobody else sees that.');
+  clearTimeout(twSayTimer);
+  twSayTimer=setTimeout(()=>{
+    towerSay(n>=towerCeiling()?'That is as high as tonight goes. Come back after a real day.':'Stairs are open. Floor '+(n+1)+' is above you.');
+  },3200);
+}
 
 // ─── THE CLIMB ───────────────────────────────────────────────────────────────
 // Jacques's design (24 Aug 2026): your avatar climbs 90 carved steps up a
@@ -7832,8 +9189,19 @@ async function submitLivePost(){
   const inp=document.getElementById('liveInput');
   const text=(inp.value||'').trim();
   if(!text)return;
-  // The client-side language gate runs first - same rule as private posts.
-  if(typeof roomTextBlocked==='function'&&roomTextBlocked(text))return;
+  // Moderation is server-side and always has been: /api/rooms/post runs every
+  // post past the AI moderator in server/rooms.js before anyone sees it, and
+  // answers with crisis / blocked / held, each handled below.
+  //
+  // A `typeof roomTextBlocked === 'function'` guard used to sit here, above a
+  // comment claiming a client-side language gate ran first "same rule as
+  // private posts". Neither existed - roomTextBlocked is defined nowhere in
+  // this file and there is no private-post path at all; both are leftovers from
+  // a removed feature. The guard could therefore never be true, so it changed
+  // nothing, but the comment claimed protection the code did not provide.
+  // Removed 28 Aug 2026. Do not add a word filter here: the moderator prompt
+  // deliberately allows profanity, anger and despair, and a crude local
+  // blocklist would silence exactly the people this room is for.
   inp.disabled=true;
   try{
     const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -8642,7 +10010,7 @@ document.addEventListener('visibilitychange',()=>{
 let lessonAudioState='idle',lessonAudioQueue=[],lessonAudioIdx=0,lessonAudioBtnId=null,lessonAudioKeepAlive=null,lessonAudioCurrentUtterance=null;
 let lessonAudioWatchdog=null,lessonAudioChunkStartedAt=0,lessonAudioRetryIdx=-1,lessonAudioRetryCount=0,lessonAudioLastError='',lessonAudioEverSpoke=false;
 // Lessons play as real recordings when one exists for the displayed lesson +
-// chosen voice (same five voices as the SOS talk, hosted on the repo's audio
+// chosen voice (same six voices as the SOS talk, hosted on the repo's audio
 // branch and listed in data/lesson-audio-manifest.json). A recording is a real
 // <audio> element - it survives screen-off and app-switch like a podcast, can
 // pause/resume/seek, and gets a lock-screen card. Anything without a recording
@@ -9411,7 +10779,7 @@ function togglePackLessonAudio(){
   }else{
     text=textEl.textContent.replace(/[ \t]+/g,' ').trim();
   }
-  // The ready-made packs have real recordings in all five voices, filed under
+  // The ready-made packs have real recordings in all six voices, filed under
   // a "pack:" category so they cannot collide with a track name. A pack the
   // person built themselves has none, so that key simply misses the manifest
   // and it reads aloud instead - which is the right answer, not a failure.
@@ -10456,11 +11824,11 @@ const SYSTEM_APP_MAP=`
 
 The app, screen by screen (answer questions about it precisely - never invent features, never deny one listed here):
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
-- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering); Together is 30 days. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: five voices (Warm, Soft, Gentle, Clear, Calm male), speed control, full-screen read-along player. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
+- LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering). Together is its own 90-day RELATIONSHIP programme, rebuilt 29 Aug 2026: it is for ANY couple repairing a relationship, not only couples touched by addiction, and it does not use the shared phases. Every day is done by the two of them side by side on ONE phone - never separately - and every day has two parts, a TOGETHER action and a FOR THEM act of service. It covers the daily ten minutes, phones out of the room, dates twice a month, weekly game night, eye contact, kissing, hugging, massage and touch, chores done unasked, arguing and repair, money, and a permanent calendar of rhythms at the end. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: six voices (Warm, Soft, Gentle, Clear, Male, Deep - Deep is a deeper American male voice), speed control, full-screen read-along player. The founder's own voice was removed on 26 Aug 2026 over a licence - if anyone asks for it, say plainly that it is no longer in the app. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and days 16-90 of Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
 const SYSTEM_FREE_ADDENDUM=`
@@ -10875,9 +12243,15 @@ const PRO_TOOLS={
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
-  // things and nothing else: lesson/pack days 16-30, and 30 Friendly chats a
-  // day instead of 3. Those two gates live where they belong - isLessonLocked,
-  // renderPackLesson, renderCouples, and the chat cap - not here.
+  // things and nothing else. First, every lesson past day 15 - isLessonLocked
+  // is simply `day > FREE_LESSON_CAP`, so that means days 16-90 on a recovery
+  // track, 16-35 on Supporting Someone, and 16-30 on Together, the Spiritual
+  // Path and the 7-day packs. (This comment said "16-30" flat, which quietly
+  // understated the paid half of a 90-day program by sixty days.) Second,
+  // Friendly, which is Pro-only at 30 chats a day - FREE_CHAT_DAILY_LIMIT is
+  // 0, not 3; Jacques made Friendly Pro-only on 24 Aug. Those gates live where
+  // they belong - isLessonLocked, renderPackLesson, renderCouples and the chat
+  // cap - not here.
   // The name openProTool is kept only because a dozen onclick handlers use it.
   window[PRO_TOOLS[key].open]();
 }
@@ -10987,7 +12361,7 @@ function updateNovaVoiceToggle(){
   const on=novaVoiceOn();
   el.classList.toggle('on',on);
   el.innerHTML=`<i class="ti ti-volume${on?'':'-off'}"></i><span>AI voice ${on?'on':'off'}</span>`;
-  el.setAttribute('title',on?"Friendly reads her replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
+  el.setAttribute('title',on?"Friendly reads replies out loud - tap to turn off":"Tap to hear Friendly's replies out loud");
   try{renderIcons(el);}catch(e){}
 }
 // "7:15 AM" for today, "Yesterday 11:40 PM", then the date beyond that.
@@ -11300,6 +12674,7 @@ const SCREEN_MAP={
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
+  tower:'s-tower',vault:'s-vault',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -11308,8 +12683,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -11335,7 +12710,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -11343,6 +12718,9 @@ function switchTo(id,opts){
   try{stopDictation();}catch(e){}
   // Record the leaving screen unless we're already walking backward.
   const from=currentScreenId();
+  // The tower runs a requestAnimationFrame loop and can hold a dare timer.
+  // Neither has any business still running on another screen.
+  if(from==='tower'&&id!=='tower'){try{towerStop();}catch(e){}}
   if(!(opts&&opts.fromBack)&&from&&from!==id){
     screenHistory.push(from);
     if(screenHistory.length>30)screenHistory.shift();
@@ -11392,6 +12770,8 @@ function switchTo(id,opts){
   if(id==='plans'){renderPlansScreen();}
   if(id==='tools'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
+  if(id==='tower'){renderTower();}
+  if(id==='vault'){renderTowerVault();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -11445,16 +12825,65 @@ function setBill(type){
 // latches, and one that already latched (from the earlier build) is cleaned up
 // and put back on the web path.
 const PLAY_PACKAGE='com.turnsomedayintodayone.app';
+// THE LATCH MUST NOT OUTLIVE THE APP SESSION, and this is why.
+//
+// A Trusted Web Activity is Chrome. It shares one storage jar with the browser
+// for this origin, so a flag the Android shell wrote into localStorage is read
+// back by every ordinary Chrome tab on that phone, for good. That turned one
+// launch of the Play app into a permanent verdict: the site decided it was the
+// Play build, routed Upgrade to Google billing, and `create-checkout-session`
+// refused Stripe by policy. On 28 Aug Jacques could not buy Pro on his phone by
+// any route - not in the app, not on the website - and Stripe's dashboard
+// showed no checkout session had been created since 30 July. Every Android
+// owner of this app was in the same position: install once, and the website
+// stops selling to you.
+//
+// So the latch now lives in sessionStorage, which is scoped to one browsing
+// context. The shell's own window keeps it for as long as the app is open; a
+// separate Chrome tab starts clean and gets Stripe. The legacy localStorage key
+// is deleted wherever it is found, because it is the poison.
+//
+// Policy is still safe. The shell's start URL carries ?src=play and its launch
+// sets an `android-app://` referrer, so a real app launch always presents a
+// signal at the very first navigation - it never has to rely on remembering.
+const PLAY_LATCH_KEY='tsid_play_build';      // legacy, localStorage - only ever deleted now
+const PLAY_SESSION_KEY='tsid_play_session';  // current, sessionStorage
+let playLatch=null;
+function forgetLegacyPlayLatch(){
+  try{localStorage.removeItem(PLAY_LATCH_KEY);}catch(e){}
+}
+function readPlayLatch(){
+  try{
+    const raw=sessionStorage.getItem(PLAY_SESSION_KEY);
+    if(!raw)return null;
+    const v=JSON.parse(raw);
+    return (v&&v.how)?v:null;
+  }catch(e){return null;}
+}
+function writePlayLatch(how){
+  const v={how:how,at:new Date().toISOString().slice(0,16)};
+  // Kept in memory too: a private window can throw on write, and the flag still
+  // has to hold for the rest of this page's life.
+  try{sessionStorage.setItem(PLAY_SESSION_KEY,JSON.stringify(v));}catch(e){}
+  return v;
+}
+// The launch signals only exist on the very first navigation, so they are read
+// once here and kept for the life of the page.
+const launchReferrer=(function(){try{return document.referrer||'';}catch(e){return '';}})();
+const launchFromParam=(function(){try{return new URLSearchParams(location.search).get('src')==='play';}catch(e){return false;}})();
+const launchFromShell=launchReferrer.startsWith('android-app://'+PLAY_PACKAGE);
 function detectPlayBuild(){
+  forgetLegacyPlayLatch();
   try{
     if(!/\bAndroid\b/.test(navigator.userAgent||'')){
-      localStorage.removeItem('tsid_play_build');
+      playLatch=null;
       return false;
     }
-    if(localStorage.getItem('tsid_play_build')==='1')return true;
-    const fromParam=new URLSearchParams(location.search).get('src')==='play';
-    const fromReferrer=(document.referrer||'').startsWith('android-app://'+PLAY_PACKAGE);
-    if(fromParam||fromReferrer){localStorage.setItem('tsid_play_build','1');return true;}
+    // Signals from this navigation outrank anything remembered.
+    if(launchFromShell){playLatch=writePlayLatch('referrer');return true;}
+    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
+    const stored=readPlayLatch();
+    if(stored){playLatch=stored;return true;}
   }catch(e){}
   return false;
 }
@@ -11467,6 +12896,9 @@ function isPlayBuild(){return playBuild;}
 function applyPlayBuildUI(){
   if(!isPlayBuild())return;
   document.body.classList.add('play-build');
+  // Only a Play install can leave a Play rating, so the row appears only there.
+  const rr=document.getElementById('rate-app-row');
+  if(rr)rr.style.display='';
 }
 
 // ─── IN-APP PURCHASE (GOOGLE PLAY, LATER APPLE) ──────────────────────────────
@@ -11494,24 +12926,41 @@ async function becomeProViaStore(plan){
   // Asked fresh rather than read from the last sync: this is the last moment
   // before the store takes real money, and a stale "ready" here costs a
   // customer a payment that cannot be honored.
+  // Three outcomes, told apart on purpose. The old version collapsed all of
+  // them into "temporarily unavailable": r.ok?r.json():null turned a 401 into
+  // a null, so somebody whose session had simply expired was told the SHOP was
+  // broken and had no idea to sign in. The catch swallowed the real error too,
+  // and it wrapped the sold-out branch as well, so a throw in there reported
+  // itself as a network failure.
+  let ready=null;
   try{
-    const ready=await fetch('/api/billing/status').then(r=>r.ok?r.json():null);
-    if(!ready||!ready.storeBillingReady){
-      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.");
+    const res=await fetch('/api/billing/status');
+    if(res.status===401){
+      appInfo('Please sign in first',"Your session expired, so nothing has been charged. Sign in and tap upgrade again.");
+      try{openAuthModal();}catch(e){}
       return;
     }
-    // The Founding 50 is checked here as well as on the server. The server check
-    // is the authority, but it only runs after the store has already charged the
-    // card - seat 51 would pay and then be told it was sold out.
-    if(plan==='lifetime'&&ready.lifetimeSoldOut){
-      lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
-      applyLifetimeAvailability&&applyLifetimeAvailability();
-      const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
-      appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
+    if(!res.ok){
+      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged.\n\nDetails for support: billing status returned "+res.status+".");
       return;
     }
+    ready=await res.json();
   }catch(e){
-    appInfo('Upgrade unavailable','We could not reach the server, so nothing has been charged. Please try again.');
+    appInfo('Upgrade unavailable',"We could not reach the server, so nothing has been charged. Please try again.\n\nDetails for support: "+((e&&e.name)||'error')+': '+((e&&e.message)||'no message'));
+    return;
+  }
+  if(!ready||!ready.storeBillingReady){
+    appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.\n\nDetails for support: storeBillingReady was false — the server's Play service account is probably not configured.");
+    return;
+  }
+  // The Founding 50 is checked here as well as on the server. The server check
+  // is the authority, but it only runs after the store has already charged the
+  // card - seat 51 would pay and then be told it was sold out.
+  if(plan==='lifetime'&&ready.lifetimeSoldOut){
+    lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
+    applyLifetimeAvailability&&applyLifetimeAvailability();
+    const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
+    appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
     return;
   }
   // Every step below is labelled because this whole block used to end in one
@@ -11559,6 +13008,10 @@ async function becomeProViaStore(plan){
     // A user dismissing the store sheet lands here too - say nothing then.
     if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
     const why=((e&&e.name)?e.name+': ':'')+((e&&e.message)||String(e));
+    // Reported before it is shown, so the owner's error log sees every failed
+    // purchase without anyone photographing their screen. Fire-and-forget: a
+    // dead network must not add a second failure on top of the first.
+    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Store purchase failed while '+step,detail:why+' \u00b7 '+storeDiagnostics()})}).catch(()=>{});}catch(_){}
     appInfo('Upgrade unavailable','Could not complete that purchase, and nothing has been charged.\n\nDetails for support: failed while '+step+'.\n'+why+'\n\n'+storeDiagnostics());
   }
 }
@@ -11569,7 +13022,16 @@ function storeDiagnostics(){
   const bits=[];
   try{
     bits.push('bridge='+(('getDigitalGoodsService'in window)?'present':'missing'));
-    bits.push('playBuild='+(isPlayBuild()?'yes':'no'));
+    // Which host is answering matters: assetlinks.json is only honoured on the
+    // exact origin the shell declares, and a redirect between them is a
+    // verification failure rather than a detour.
+    bits.push('host='+location.host);
+    // The decisive one. launch=shell means the Android app opened this page and
+    // any failure after it is the app's. launch=param or launch=stored means
+    // nothing proves the Play app is involved at all, and a purchase failure
+    // here says nothing about whether Play billing works.
+    bits.push('launch='+(launchFromShell?'shell':(launchFromParam?'param':'none')));
+    bits.push('latch='+(playLatch?(playLatch.how+(playLatch.at?'@'+playLatch.at:'')):'none'));
     bits.push('display='+((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)?'standalone':'browser'));
     const m=(navigator.userAgent||'').match(/(SamsungBrowser|EdgA|OPR|Chrome)\/([0-9]+)/);
     bits.push('engine='+(m?m[1]+' '+m[2]:'unknown'));
@@ -11629,12 +13091,12 @@ let lifetimeFaqApplied=false;
 // and both paths only - a recovering user searching the guide should not be
 // answered as though they were the one doing the watching.
 const SUPPORTER_FAQ=[
-  {q:"How do I know if he's really changing or just saying it again?",
+  {q:"How do I know if they're really changing or just saying it again?",
    k:'changing change really different this time promise promises believe trust lying again saying same words',
-   a:"A promise is loud and it usually comes right after he's caught. A change is quiet and it shows up on an ordinary Tuesday when nothing's wrong. Stop grading the promises — watch what happens on the days there's no pressure. Patterns over weeks tell the truth; words on the worst night don't."},
-  {q:'Should I check his phone?',
+   a:"A promise is loud and it usually comes right after they're caught. A change is quiet and it shows up on an ordinary Tuesday when nothing's wrong. Stop grading the promises — watch what happens on the days there's no pressure. Patterns over weeks tell the truth; words on the worst night don't."},
+  {q:'Should I check their phone?',
    k:'check phone snoop search history look through spy monitor device browser evidence',
-   a:"There's no right answer here, and anyone who gives you one confidently is selling something. What's worth knowing: checking usually calms you for an hour and costs you the rest of the day, and the more you police it the more you become his conscience instead of his partner. If you're checking every night, that's not a character flaw — it's a sign you're carrying something that needs support of its own."},
+   a:"There's no right answer here, and anyone who gives you one confidently is selling something. What's worth knowing: checking usually calms you for an hour and costs you the rest of the day, and the more you police it the more you become their conscience instead of their partner. If you're checking every night, that's not a character flaw — it's a sign you're carrying something that needs support of its own."},
   {q:'Is any of this my fault?',
    k:'my fault blame caused cause because of me did i do something not enough good enough responsible',
    a:"No. Not the way you're asking it. This started before you and it runs on something that has nothing to do with how you look, what you did, or whether you were enough. You can be a factor in a marriage without being the cause of an addiction — those are different things, and the second one was never yours."},
@@ -11710,6 +13172,11 @@ async function openBillingPortal(){
     const data=await res.json();
     if(res.ok&&data.url){
       window.location.href=data.url;
+    }else if(data&&data.managedBy==='play'){
+      // Belt and braces: the client should already have routed here.
+      if(data.storeProductId)S.storeProductId=data.storeProductId;
+      S.billingSource='play';save();
+      openPlaySubscriptions();
     }else{
       appInfo('Billing',data.error||'Could not open billing management right now. Please try again in a moment.');
     }
@@ -11717,15 +13184,29 @@ async function openBillingPortal(){
     appInfo('Billing','Could not reach the server to manage billing. Please try again in a moment.');
   }
 }
+// Where a subscription is billed decides where it is managed. This used to send
+// everybody to Stripe's portal, so a member who paid through Google Play tapped
+// Cancel on their own active plan and was told "No billing account found yet.
+// Upgrade to Pro first." Google also requires that a subscriber can reach their
+// subscription management, so it was a policy problem as well as a wrong answer.
+function billedByPlay(){return (S.billingSource||'stripe')==='play';}
+function openPlaySubscriptions(){
+  const sku=S.storeProductId?('sku='+encodeURIComponent(S.storeProductId)+'&'):'';
+  window.location.href='https://play.google.com/store/account/subscriptions?'+sku+'package='+PLAY_PACKAGE;
+}
+function manageProBilling(){
+  if(billedByPlay()){openPlaySubscriptions();return;}
+  openBillingPortal();
+}
 function cancelProSubscription(){
   if(S.proPlan==='lifetime'){
     appInfo('Lifetime Pro','Lifetime Pro is a one-time purchase that never renews, so there\'s nothing to cancel — it\'s yours for good.');
     return;
   }
-  openBillingPortal();
+  manageProBilling();
 }
 function resumeProSubscription(){
-  openBillingPortal();
+  manageProBilling();
 }
 async function restorePurchases(){
   if(!S.accountEmail){
@@ -11751,6 +13232,9 @@ async function syncBillingStatus(force){
     const data=await res.json();
     S.isPro=!!data.isPro;
     if(data.plan&&data.plan!=='free')S.proPlan=data.plan;
+    // The server is the authority on this; it decides where Cancel goes.
+    if(data.billingSource)S.billingSource=data.billingSource;
+    if(data.storeProductId)S.storeProductId=data.storeProductId;
     S.proRenewsAt=data.currentPeriodEnd||'';
     S.proCancelled=!!data.cancelAtPeriodEnd;
     S.proGraceUntil='';
@@ -12291,8 +13775,12 @@ function confirmResetDate(){
     errEl.textContent='That is already your start date — nothing to reset. Use "Start over from right now" above.';
     return;
   }
-  const priorStreakLength=getDays();
-  const prevStart=S.startDate;
+  // Both of these must be read from the TRACK BEING RESET, not the master
+  // clock. Now that the master is the longest run, slipping on a short track
+  // often does not move it at all - measured against the master, that slip
+  // would bank nothing, record no streak, and never reach the tower.
+  const priorStreakLength=resetTarget?daysFor(resetTarget):getDays();
+  const prevStart=guardIso;
   const clocks=addictionClocks();
   if(resetTarget){
     clocks[resetTarget]=chosen.toISOString();
@@ -12301,12 +13789,17 @@ function confirmResetDate(){
     S.startDate=chosen.toISOString();
   }
   syncMasterClock();
-  // Bank the ended streak only when the master clock actually moved forward -
+  // Bank the ended streak only when that clock actually moved forward -
   // correcting a date backwards is a correction, not a relapse.
-  if(prevStart&&new Date(S.startDate).getTime()>new Date(prevStart).getTime()){
+  if(prevStart&&chosen.getTime()>new Date(prevStart).getTime()){
     S.totalSoberDaysEver=(S.totalSoberDaysEver||0)+priorStreakLength;
     S.streakHistory=(S.streakHistory||[]).concat([{length:priorStreakLength,endedAt:new Date().toISOString()}]);
     if(S.streakHistory.length>50)S.streakHistory=S.streakHistory.slice(-50);
+    // 2AM, spec rule 4: a slip drops you to the last landing and never to the
+    // ground, and never takes back a door you already opened. Only on a real
+    // relapse - a date corrected backwards is a correction, not a slip, which
+    // is why this sits inside the same guard as the banked streak above.
+    towerOnRelapse();
   }
   S.pledged=false;
   logActivity('relapse_reset');
@@ -12441,7 +13934,12 @@ function pwConfirmYes(){
 // ─── SHARE ─────────────────────────────────────────────────────────────────────
 function shareMyMilestone(){
   const days=getDays();
-  const text=`I'm ${days} day${days===1?'':'s'} into my recovery journey with Turn Someday Into Day One. One day at a time.`;
+  // The headline is the longest track. When the tracks disagree, a bare
+  // "8 days" would be a claim about all of them, so the share names the one
+  // it is true of.
+  const mt=masterTrack();
+  const on=(mt&&mt.mixed&&S.userType!=='partner')?` on ${mt.name}`:'';
+  const text=`I'm ${days} day${days===1?'':'s'}${on} into my recovery journey with Turn Someday Into Day One. One day at a time.`;
   if(navigator.share){
     navigator.share({text}).catch(()=>{});
     return;
@@ -12490,7 +13988,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='5.8';
+const APP_VERSION='9.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -12663,7 +14161,7 @@ function describeVoiceSupport(){
   let voices=[];
   try{ voices=(speechSynthesis.getVoices()||[]).filter(v=>/^en/i.test(v.lang||'')); }catch(e){}
   if(!('speechSynthesis' in window)){
-    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes how she writes.';
+    note.textContent='This device has no built-in speech, so Friendly can only be read, not heard. The presence you pick still shapes the writing.';
   }else if(voices.length<2){
     note.textContent='Heads up: this phone has only one English voice installed, so all three will sound the same out loud. The presence you pick still shapes how Friendly writes to you. Adding more voices in your phone\u2019s text-to-speech settings gives her something to switch to.';
   }else{
@@ -13096,6 +14594,8 @@ const HELP_INDEX=[
   {name:'Profile & settings',sub:'Your account, PIN, reminders, updates — all settings',k:'profile page settings preferences options menu account section',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Today screen',sub:'Your day counter, pledge, and daily lesson',k:'today home main screen front day counter start',go:()=>{switchTo('home');actBn('bn-home');}},
   {name:'Tools',sub:'All the free recovery tools in one place',k:'tools toolbox exercises coping techniques',go:()=>{switchTo('tools');actBn('bn-tools');}},
+  {name:'2AM (the Game tab)',sub:'A building you climb at night — one floor per real day',k:'game games 2am tower building floors night play',go:()=>openTower()},
+  {name:'The Climb',sub:'Your 90 steps up the mountain',k:'climb mountain steps 90 ninety progress journey game',go:()=>openClimb()},
   {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
   {name:'Breathing exercise',sub:'4-7-8 calm-down technique',k:'breathe breathing calm anxiety relax',go:()=>breathe()},
@@ -13471,7 +14971,7 @@ const COUPLES_EXERCISES=[
   {t:'The gratitude swap',w:'Addiction narrows life to the next fix; gratitude widens it back. Do this one out loud.',s:['Each of you names three things you\'re grateful for today — at least one about the other person.','No repeats from last time.','Do it at the same time each week — after dinner, before bed — so it becomes yours.']},
   {t:'Reclaim the hour',w:'The habit used to own a time slot. Take one hour of it back, together.',s:['Pick the hour the struggle usually claims (late night, Sunday afternoon — you know yours).','Fill it with something analog you both do: walk, cook, cards, drive, music.','Protect it like an appointment. This is the hour you\'re stealing back from the old life.']},
 ];
-// The 30-day Together program. Progress is S.togetherDone (count of completed
+// The 90-day Together program. Progress is S.togetherDone (count of completed
 // days) - same kind of data as lesson progress, synced with the rest of S.
 // Jacques's phone-test note, 12 Aug: the old modal was six cards and a dead
 // end - "you open it up and say do this together, but it really goes nowhere."
@@ -13619,7 +15119,7 @@ function renderCouples(){
       <div style="font-size:.6875rem;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
       <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">${escapeHtml(l.title)}</div>
       <div style="font-size:.8125rem;color:var(--ts);line-height:1.65;margin-top:8px">${escapeHtml(l.content)}</div>
-      <div style="font-size:.78125rem;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> ${escapeHtml(l.action)}</div>
+      <div style="font-size:.78125rem;color:var(--tp);line-height:1.6;margin-top:10px"><b style="color:var(--accent)">Do together:</b> <span style="white-space:pre-line">${escapeHtml(l.action)}</span></div>
       <div style="font-size:.78125rem;color:var(--ts);line-height:1.6;margin-top:6px"><b style="color:var(--accent)">Ask each other:</b> ${escapeHtml(l.reflection)}</div>
       ${(typeof faithOn==='function'&&faithOn())?`<div style="font-size:.78125rem;color:var(--ts);line-height:1.6;margin-top:8px;border-left:3px solid #7ee8a2;padding-left:10px"><b style="color:#5cae7e">Faith:</b> ${escapeHtml(FAITH_LINES[(l.day-1)%FAITH_LINES.length])}</div>`:''}
       ${isCurrent?`<button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="markTogetherDone()">We did this one — mark day ${l.day} done</button>`:''}
@@ -13760,34 +15260,35 @@ function buildGuideIndex(){
 const GUIDE_FAQ=[
   {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Days 1–15 are free; the rest is part of Pro. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path and the Together couples program), <b>30 Friendly chats a day</b> instead of 3, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path, and 16–90 of the Together couples program), <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
+  {q:'What is the Game tab?',k:'game tab play 2am tower climb mountain floors bolt what is',a:"It holds <b>2AM</b> — a building you climb at night, where every floor is a real day and each one asks you for the truth or a dare. It only opens as fast as your actual days do, so it can't be rushed or farmed. <b>The Climb</b>, your 90 steps up the mountain, sits on the same screen.",go:'2AM (the Game tab)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
   {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
-  {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},
+  {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminders & notifications'},
   {q:'How do I change my email or password?',k:'change email password credentials account update',a:"Everything account-related lives in <b>Account &amp; Sync</b> in Profile — password changes included.",go:'Account & sync'},
-  {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Focus areas'},
-  {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
+  {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Profile & settings'},
+  {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Profile & settings'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
-  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all 14 tracks, the Spiritual Path, Together, and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
-  {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in her header. Off by default so nothing talks unasked; switched on, she reads every reply out loud by herself. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
+  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Packs'},
+  {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
-  {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Focus areas'},
-  {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Focus areas'},
+  {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Profile & settings'},
+  {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Profile & settings'},
   {q:'Are the people in the Rooms real? Can I reply to them?',k:'rooms real people fake stories reply comment message contact dm chat others users community',a:"Straight answer: the stories are <b>written reflections</b>, not live posts, and the names aren't real people. A new set appears in each room every day. <b>There is no commenting, replying or messaging — on purpose.</b> Recovery spaces online turn toxic fast, and this app is built to keep that out. You can like a story to keep it; nothing is sent and nobody can reach you. Anything you write in a room stays private to your account.",go:'Rooms'},
-  {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Focus areas'},
-  {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Focus areas'},
+  {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Profile & settings'},
+  {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Profile & settings'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){
@@ -14167,6 +15668,10 @@ function enterApp(){
   updateAccountUI();
   loadLessonPacks();
   loadRoomStories();
+  // Also checked on open, not only after a lesson. The lesson hook alone meant
+  // the ask could never reach somebody in their first half hour - which is
+  // exactly when people rate an app they like.
+  setTimeout(()=>{try{maybeAskForRating();}catch(e){}},4000);
   if(S.startDate){
     document.getElementById('onboarding').style.display='none';
     if(S.pinEnabled&&S.pinHash){

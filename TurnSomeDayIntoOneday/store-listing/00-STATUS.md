@@ -1,5 +1,59 @@
 # Play Store — live status
 
+## 🟢 29 AUG 2026, 2:42 PM — ANDROID PURCHASES WORK. VERIFIED ON DEVICE.
+
+A Google Play purchase completed in the installed app: "You're Pro. Your
+purchase is confirmed." The app also now opens WITHOUT the browser address bar,
+which is the visible proof that Digital Asset Links verification passes.
+
+**The cause was one missing line.** `assetlinks.json` did not contain the
+SHA-256 of the certificate Google actually signs the app with. The signing key
+had been rotated, and the file still named the previous key plus the upload key.
+Play Console's own "Digital Asset Links JSON" snippet (App signing page) gave
+the correct value: `6D:F4:77:66:...:76:9A`. Adding it fixed both the address bar
+and the purchase, with no rebuild and no new upload.
+
+**Never hand-type these again.** Copy Play Console's generated snippet.
+
+---
+
+
+## ✅ 29 AUG 2026 — 1.0.2 (CODE 3) SIGNED AND SUBMITTED
+
+**Release `3 (1.0.2)` was uploaded to Production and sent for review on 29 Aug,
+1:24 PM.** Managed publishing is off, so it publishes itself once review passes.
+Nothing further is needed from Jacques. Do not ask him to re-send it.
+
+- Signed on his PC with the upload key (see START-HERE for the three scripts)
+- Uploaded, release notes "Fixes in-app purchases.", full rollout
+- Device check clean: **0 devices lost**, totals identical to the last release
+- Publishing overview showed it in "Changes in review", quick checks running
+
+**Honest note on the release notes.** They say "Fixes in-app purchases", and
+that is a hope, not a proven fact. `playBilling` was already enabled in 1.0.1 —
+the 1.0.2 bump changed version numbers only. What makes it worth shipping is
+that it is a fresh rebuild with current build tools and a current billing
+library. Whether it fixes the browser-bar problem is unknown until it is live
+and reinstalled. See the ruled-out table in START-HERE before investigating.
+
+**Also confirmed 29 Aug:** the 28 Aug full-description edit (removing the
+founder-voice claim) **published successfully** — Publishing overview shows
+"Last published August 28, 2026" with no listing changes outstanding.
+
+### Still open, only Jacques can do these
+
+1. ~~**Data safety**~~ — ✅ **DONE 29 Aug, 3:15 PM, sent for review.** The data
+   type was already ticked; the wrong answer was *"processed ephemerally: Yes"*,
+   now **No**. Everything else on that panel was already correct.
+2. ~~**Full description paste**~~ — ✅ **DONE 29 Aug.** Pasted and saved,
+   3976/4000. Fixed two claims that had gone stale the same day: the stories
+   were described as ten minutes (measured at seven to nine) and as rotating
+   weekly (they now change every two weeks, in sets of ten).
+
+---
+
+
+
 **Read this first, before anything else in this folder.** It is the record of
 what is actually done in Play Console, so nobody re-walks finished ground.
 
@@ -14,6 +68,33 @@ Everything in the old "Open" section below is **closed** — closed testing,
 production access, data safety and the health declaration all cleared and the
 app shipped. That history is kept at the bottom for reference only. Do not
 re-walk it.
+
+---
+
+## ✅ 28 AUG 2026 — THE FOUNDER-VOICE CLAIM IS OUT OF THE LISTING
+
+**A false claim had been live on the store for two days.** The full description
+sold *"Six narrators, including the founder reading all ninety days himself."*
+The founder voice was removed from the app on 26 Aug over the licence (Coqui
+YourTTS is CC BY-NC-ND, non-commercial; the app charges money), and the listing
+was never updated to match.
+
+Fixed in the console by Jacques, 3:50am, one deletion — the 55 characters
+`, including the founder reading all ninety days himself`. Counter went
+**3925 → 3870**, which is exactly 55, so nothing else was touched. The line now
+reads "Six narrators." — still true: warm, soft, gentle, clear, male, deep.
+
+**Saved and submitted.** Publishing overview shows *Store listings → English
+(United States) → Change full description* in **Changes in review**, quick
+checks running. Managed publishing is **off**, so it goes live by itself once
+review clears. **Nothing further is needed from him. Do not ask him to re-save
+or re-send it.**
+
+**Also settled the same night: the short description needed no change.** It is
+already `Addiction recovery: sober day counter, 90-day program, and support for
+family.` (78/80) and has been since 26 Aug. `01-title-and-short-description.md`
+had gone stale and nearly caused a pointless rewrite — that file now records
+what is live, and the rule: **confirm in the console, never from the drafts.**
 
 ---
 
@@ -134,7 +215,16 @@ to Production with the console warning standing, which proves it never blocked a
 release. Detail in `HANDOFF.md`. **Do not request an extension, do not plan a
 rebuild for it, and do not present it to Jacques as news.**
 
-### 6. 🕐 Title keyword — decided against, revisit only if installs climb
+### 6. ✅ Title keyword — CHANGED, AND CONFIRMED LIVE 31 AUG 2026
+
+**The live title is `Day One: Addiction Recovery`.** Confirmed from Play
+Console itself, in the console header on Jacques's own screenshot, 31 Aug.
+This settles a disagreement between this file and
+`01-title-and-short-description.md`, which had said the change was made on
+29 Aug while the note below still said it was declined. The note below is
+**superseded and kept only for the reasoning.**
+
+#### (superseded) decided against, revisit only if installs climb
 `Turn Someday Into Day One` (25/30) carries no search term, and the title is
 Play's heaviest ranking field. Kept anyway: that name is on the business cards,
 the domain, the YouTube channel and the end card of every video. Splitting the

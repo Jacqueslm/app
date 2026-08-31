@@ -11,6 +11,7 @@ const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
 const push = require('./push');
+const backup = require('./backup');
 const analytics = require('./analytics');
 const {
   COOKIE_NAME,
@@ -416,6 +417,30 @@ app.get('/go/:src', (req, res) => {
   res.redirect(`/when-he-drinks?utm_source=${src}&utm_medium=social&utm_campaign=her-drinking`);
 });
 
+// ─── /play: the counted way to the Play listing ──────────────────────────────
+// Every store button on the site points here rather than straight at Google,
+// for three reasons. Play reports installs but never how many people reached
+// the listing, so without this there is no way to tell "nobody clicked" from
+// "a hundred clicked and none installed" - and those two need opposite fixes.
+// It also lets a bio or a video say "/play" out loud, and it puts the store URL
+// in ONE place instead of 27 files.
+//
+// The referrer parameter is what Play reads back into its acquisition report,
+// so the page that sent someone survives all the way to the install.
+//
+// 302 and no-store on purpose: a 301 gets cached by the browser and the second
+// click is never counted.
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app';
+function playRedirect(req, res, raw) {
+  const src = String(raw || 'direct').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40) || 'direct';
+  try { db.recordStoreClick(src); } catch (_) { /* a counter must never block the click */ }
+  const referrer = encodeURIComponent(`utm_source=website&utm_medium=button&utm_campaign=${src}`);
+  res.set('Cache-Control', 'no-store');
+  res.redirect(302, `${PLAY_URL}&referrer=${referrer}`);
+}
+app.get('/play', (req, res) => playRedirect(req, res, req.query.from));
+app.get('/play/:src', (req, res) => playRedirect(req, res, req.params.src));
+
 // One-click unsubscribe from any inbox - no login. Idempotent by design:
 // setting the flag to 1 again is the same write and the same page, so a
 // double-click or a second device never sees an error.
@@ -465,12 +490,27 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // five emails written to the person who LOVES somebody with a habit. Both are
   // kept away from the quiz nurture, which is written in his voice to the person
   // struggling and would land badly on her.
-  // Anything unrecognised still collapses to 'quiz', so a new page cannot start
-  // sending her his emails by forgetting to declare itself.
+  //
+  // 'binge-quiz' added 28 Aug. The binge check-in had been sending it all
+  // along, but it was not listed here, so it fell through to 'quiz' and was
+  // written into the leads table as 'quiz'. The emails were right - a binge
+  // check-in taker IS the person struggling - but the admin dashboard groups
+  // leads by this column ("which page each lead came in through"), so every
+  // binge signup was indistinguishable from a main-quiz signup and the page
+  // could never be judged on its own numbers.
+  //
+  // The fallback is 'quiz', which is HIS voice. An earlier comment here claimed
+  // the opposite - that collapsing to 'quiz' stopped a new page sending her his
+  // emails - and it is exactly backwards: a new PARTNER page that forgets to
+  // declare source:'partner' will send her his sequence. Declare every new page
+  // here, and check `isSelfQuiz` below when adding another self-facing one.
   const src = source === 'brainreset' ? 'brainreset'
     : source === 'for-her' ? 'for-her'
     : source === 'partner' ? 'partner'
+    : source === 'binge-quiz' ? 'binge-quiz'
     : 'quiz';
+  // Sources written to the person struggling: same nurture, separate reporting.
+  const isSelfQuiz = src === 'quiz' || src === 'binge-quiz';
   const cleanResult = typeof quiz_result === 'string' ? quiz_result.slice(0, 80) : null;
   const cleanUtm = readUtm(req.body);
 
@@ -481,17 +521,17 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
   // nurture - but a brainreset request still gets its PDF.
   if (existingUser || existingLead) {
     if (src === 'brainreset' || src === 'for-her') {
-      const pdf = emailer.brainresetPdfEmail();
+      const pdf = emailer.brainresetPdfEmail(existingLead || null);
       // They just asked for it by typing their address - deliver even if
       // previously unsubscribed from sequences.
       emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text, force: true }).catch(() => {});
     }
-    return res.json({ ok: true, message: src === 'quiz' ? "You're all set." : src === 'partner' ? "You're all set." : 'Check your email — the PDF is on the way.' });
+    return res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? "You're all set." : 'Check your email — the PDF is on the way.' });
   }
 
-  const leadId = db.createLead(addr, src === 'quiz' ? cleanResult : null, src, cleanUtm);
+  const leadId = db.createLead(addr, isSelfQuiz ? cleanResult : null, src, cleanUtm);
   const lead = db.getLeadById(leadId);
-  if (src === 'quiz') {
+  if (isSelfQuiz) {
     emailer.startQuizNurture(lead).catch(() => {});
   } else if (src === 'partner') {
     // Her day 1 goes immediately; the hourly runner picks up days 2-5.
@@ -504,13 +544,13 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
       // so no pre-marking is needed for them.
       db.logEmailSent(null, addr, 'quiz', 1);
     }
-    const pdf = emailer.brainresetPdfEmail();
+    const pdf = emailer.brainresetPdfEmail(lead);
     emailer.sendEmail({ to: addr, subject: pdf.subject, text: pdf.text }).catch(() => {});
   }
   // New-lead funnel event, tagged with the door they came through (quiz,
   // partner, for-her or brainreset) - no email, no result, no PII.
   analytics.event(req, 'Lead', { source: src });
-  res.json({ ok: true, message: (src === 'quiz' || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
+  res.json({ ok: true, message: (isSelfQuiz || src === 'partner') ? 'Day 1 is on its way to your inbox.' : 'Check your email — the PDF is on the way.' });
 });
 
 const loginLimiter = rateLimit({
@@ -578,11 +618,17 @@ const billingLimiter = rateLimit({
   message: { error: 'Too many billing checks — try again in a few minutes.' },
 });
 
-function setSessionCookie(res, userId, sessionVersion) {
+// Secure comes off the request, not off NODE_ENV. The host sets NODE_ENV, and
+// if it ever stops doing so, every session cookie quietly starts going out
+// without the Secure flag - which is the sort of thing nobody notices until a
+// session leaks over a plain http link. 'trust proxy' is on above, so req.secure
+// is the real answer; the NODE_ENV check stays as a belt-and-braces fallback,
+// and plain-http localhost still gets a working cookie in development.
+function setSessionCookie(req, res, userId, sessionVersion) {
   res.cookie(COOKIE_NAME, signSession(userId, sessionVersion), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: !!(req && req.secure) || process.env.NODE_ENV === 'production',
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 }
@@ -613,7 +659,7 @@ app.post('/api/auth/signup', signupLimiter, (req, res) => {
   // Attribution must never be able to fail a signup - a malformed tag is worth
   // losing, an account is not.
   try { db.setUserUtm(userId, readUtm(req.body)); } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   res.status(201).json({ email: normalizedEmail });
   // Funnel event - fire-and-forget, and it carries only the plan level, never
   // anything that could identify the person who just signed up.
@@ -679,7 +725,7 @@ app.post('/api/auth/login', loginLimiter, (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect email, or wrong password/PIN.' });
   }
-  setSessionCookie(res, user.id, user.session_version || 1);
+  setSessionCookie(req, res, user.id, user.session_version || 1);
   res.json({ email: user.email });
 });
 
@@ -692,7 +738,7 @@ app.post('/api/auth/logout', (req, res) => {
 // existing token, then this device immediately gets a fresh cookie at the new version.
 app.post('/api/auth/logout-all', requireAuth, (req, res) => {
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -710,7 +756,7 @@ app.post('/api/auth/change-password', changePasswordLimiter, requireAuth, (req, 
   // person may have access - so invalidate every existing session, then
   // immediately re-cookie this device at the new version (same as logout-all).
   const newVersion = db.bumpSessionVersion(req.userId);
-  setSessionCookie(res, req.userId, newVersion);
+  setSessionCookie(req, res, req.userId, newVersion);
   res.json({ ok: true });
 });
 
@@ -789,6 +835,78 @@ app.post('/api/diagnostics/clear', requireAuth, (req, res) => {
   res.json({ ok: true, cleared });
 });
 
+// The purchase failures happening inside phones were invisible from here -
+// every diagnosis ran on screenshots Jacques had to take himself, and on
+// 27 Aug he said he is done doing that. So the app now reports them: signed-in
+// users only, capped fields, and it lands in the same owner-only error log the
+// diagnostics screen already reads. Writing is deliberately not owner-gated -
+// the failures worth seeing are other people's.
+// The log only holds the last 200 rows, so an app stuck in a retry loop - or
+// anybody signed in who felt like it - could push the real failures out of the
+// window before they were ever read. A handful an hour is all a genuine break
+// needs.
+const diagReportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many reports.' },
+});
+app.post('/api/diagnostics/report', requireAuth, diagReportLimiter, (req, res) => {
+  const b = req.body || {};
+  const message = String(b.message || '').slice(0, 300);
+  const detail = String(b.detail || '').slice(0, 600);
+  if (!message) return res.status(400).json({ error: 'Nothing to report.' });
+  try { db.logError('client', message, detail); } catch (_) {}
+  res.json({ ok: true });
+});
+
+// ─── BACKUPS ─────────────────────────────────────────────────────────────────
+// Owner only, same gate as diagnostics. The download is the point of the whole
+// feature: a copy of the database in Jacques's own hands, off this machine, in
+// one tap - so a lost volume is an inconvenience rather than the end of the app.
+function ownerOnly(req, res) {
+  if (!DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Backups are unavailable: APP_OWNER_EMAIL is not configured.' });
+    return false;
+  }
+  const user = db.getUserById(req.userId);
+  if (!user || user.email !== DIAG_OWNER_EMAIL) {
+    res.status(403).json({ error: 'Only the app owner can touch backups.' });
+    return false;
+  }
+  return true;
+}
+app.get('/api/backup/status', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  res.json({
+    keep: backup.SNAPSHOT_KEEP,
+    emailMaxMb: Math.round(backup.EMAIL_MAX_BYTES / 1048576),
+    emailedTo: DIAG_OWNER_EMAIL || null,
+    snapshots: snaps.map((s) => ({ name: s.name, mb: +(s.bytes / 1048576).toFixed(2), at: s.at })),
+  });
+});
+app.post('/api/backup/run', requireAuth, async (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  try {
+    const r = await backup.runBackup(emailer, DIAG_OWNER_EMAIL);
+    res.json({
+      ok: true,
+      name: r.snapshot.name,
+      mb: +(r.snapshot.bytes / 1048576).toFixed(2),
+      emailed: !!r.mail.ok,
+      emailProblem: r.mail.ok ? null : (r.mail.skipped || r.mail.error || `status ${r.mail.status}`),
+    });
+  } catch (err) {
+    try { db.logError('backup', `manual backup failed: ${err.message}`, err.stack); } catch (_) {}
+    res.status(500).json({ error: err.message });
+  }
+});
+app.get('/api/backup/download', requireAuth, (req, res) => {
+  if (!ownerOnly(req, res)) return;
+  const snaps = backup.listSnapshots();
+  if (!snaps.length) return res.status(404).json({ error: 'No backup yet. Run one first.' });
+  res.download(snaps[0].path, snaps[0].name);
+});
+
 // Funnel numbers are business data, so unlike diagnostics this gate has no
 // open fallback: with APP_OWNER_EMAIL unset, nobody gets in.
 function isOwnerRequest(req) {
@@ -849,7 +967,13 @@ app.post('/api/couple/create', requireAuth, (req, res) => {
   db.createCoupleLink(req.userId, (req.body && req.body.name) || '');
   res.json(coupleStatusFor(req.userId));
 });
-app.post('/api/couple/join', requireAuth, (req, res) => {
+// Six characters is a code a partner can read off a screen, not a password, so
+// the guessing has to be stopped at the door rather than by the code's length.
+const coupleJoinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, max: 20, standardHeaders: true, legacyHeaders: false,
+  message: { error: 'Too many code attempts. Try again in a little while.' },
+});
+app.post('/api/couple/join', requireAuth, coupleJoinLimiter, (req, res) => {
   const out = db.joinCoupleLink(req.userId, req.body && req.body.code, (req.body && req.body.name) || '');
   if (out.error) {
     const msg = {
@@ -984,7 +1108,7 @@ app.post('/api/letter/:token/accept', signupLimiter, (req, res) => {
     const link = db.createCoupleLink(row.user_id, row.sender_name || '');
     if (link && !link.user_b) db.joinCoupleLink(userId, link.code, String(name || '').slice(0, 40));
   } catch (_) {}
-  setSessionCookie(res, userId);
+  setSessionCookie(req, res, userId);
   const youAre = db.LETTER_OPPOSITE[row.sender_type] || 'partner';
   res.status(201).json({ email: normalizedEmail, youAre, senderName: row.sender_name });
   analytics.event(req, 'AccountCreatedFromLetter', { side: youAre });
@@ -1126,6 +1250,15 @@ app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => 
   }
   const user = db.getUserById(req.userId);
   if (!user) return res.status(401).json({ error: 'Not signed in.' });
+  // A Play subscriber has no Stripe customer, so the portal cannot help them and
+  // its error reads as nonsense to somebody looking at their own active plan.
+  if ((user.billing_source || 'stripe') === 'play') {
+    return res.status(409).json({
+      error: 'This subscription is billed by Google Play, so it is managed in the Play Store.',
+      managedBy: 'play',
+      storeProductId: user.store_product_id || null,
+    });
+  }
   try {
     const url = await billing.createPortalSession(user, getOrigin(req));
     res.json({ url });
@@ -1155,6 +1288,14 @@ app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => 
     ...billing.getBillingStatus(user),
     storeBillingReady: storeBilling.isPlayConfigured(),
     lifetimeSoldOut: user.plan !== 'lifetime' && billing.getLifetimeAvailability().soldOut,
+    // Where this subscription is actually billed. Without it the app sent every
+    // cancel request to the Stripe portal, so a member who paid through Google
+    // Play was told "No billing account found yet. Upgrade to Pro first." while
+    // looking at their own active plan. Play also requires that a subscriber can
+    // reach their subscription management, so that dead end was a policy risk
+    // as well as a bad answer.
+    billingSource: user.billing_source || 'stripe',
+    storeProductId: user.store_product_id || null,
   });
 });
 
@@ -1447,6 +1588,7 @@ process.on('unhandledRejection', (err) => {
 
 emailer.startScheduler();
 push.startScheduler();
+backup.startBackupScheduler(emailer, DIAG_OWNER_EMAIL, (scope, msg, detail) => db.logError(scope, msg, detail));
 
 app.listen(PORT, () => {
   console.log(`Turn Someday Into Day One server running on http://localhost:${PORT}`);

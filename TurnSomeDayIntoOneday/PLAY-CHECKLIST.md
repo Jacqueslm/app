@@ -8,6 +8,44 @@ the $25 Play account fee, which you have already paid.
 
 ---
 
+## ⭐ 27 AUG 2026 — THE 1.0.2 FIX BUILD: **BUILT IN THE CLOUD, WAITING FOR YOUR SIGNATURE**
+
+**Why 1.0.2 exists:** purchases fail on the installed app with `unsupported
+context` — the shell in the store is not verifying as a Trusted Web Activity
+even though the website, the fingerprints and the Play products all check out.
+The 17 Aug bundle was built on your PC and its exact contents can't be
+inspected; 1.0.2 (versionCode 3) is the same app rebuilt from the verified
+settings (`www` host, Play Billing on, Billing 8, current bubblewrap).
+
+**The cloud build works now.** The GitHub workflow had failed every run since
+17 Aug — its machine was missing a folder the build tool checks for — which is
+why you had to build on your PC in the first place. Fixed 27 Aug; run 10
+produced `app-release.aab` (1.79 MB) on the `twa-build` branch. To rebuild in
+future: GitHub → Actions → "Build the Play app (.aab)" → Run workflow. No PC
+needed except to sign.
+
+**Your part — three steps, no typing:**
+
+1. Download `Sign-Play-App.bat` from
+   `https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/twa/Sign-Play-App.bat`
+   (Ctrl+S; make sure the name ends in `.bat`, not `.txt`) and put it in
+   `C:\dayone\app-claude-vibe-code-uwxxlk\TurnSomeDayIntoOneday\twa` — the
+   folder with `android-upload.keystore` in it.
+2. Double-click it. It downloads the cloud-built bundle and asks for your
+   keystore password (USB "play key" note). Out comes
+   `day-one-1.0.2-signed.aab`.
+3. Play Console → Test and release → Production → Create new release → upload
+   that file (it should show 1.0.2, code 3). Release notes: "Fixes in-app
+   purchases." Save, review, roll out.
+
+**After it goes live:** update the app on your phone (Play Store → your app →
+Update, or uninstall/reinstall), open it, tap Upgrade. If the address bar is
+gone and the Google payment sheet opens, Android revenue is unblocked. If it
+still fails, the dialog now reports the exact failing step to the server on
+its own — no screenshot needed.
+
+---
+
 ## ⭐ 17 AUG 2026 — THE RELEASE BUILD: **BUILT AND SIGNED, same day.**
 
 **DONE up to the upload.** The 1.0.1 (versionCode 2) `.aab` was built 17 Aug on

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { DatabaseSync } = require('node:sqlite');
 
 // On a hosting platform the database must live on the persistent volume
@@ -201,6 +202,18 @@ db.exec(`
     accepted_user_id INTEGER REFERENCES users(id)
   );
 
+  -- Clicks through to the Play listing, counted per day and per page.
+  -- Deliberately a COUNTER and nothing else: no id, no ip, no user agent, no
+  -- user link. Play only reports installs, so without this there is no way to
+  -- tell "nobody clicked" from "a hundred clicked and none installed" - two
+  -- problems with opposite fixes.
+  CREATE TABLE IF NOT EXISTS store_clicks (
+    day TEXT NOT NULL,
+    source TEXT NOT NULL,
+    clicks INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, source)
+  );
+
   CREATE TABLE IF NOT EXISTS couple_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_a INTEGER NOT NULL REFERENCES users(id),
@@ -293,6 +306,23 @@ addColumnIfMissing('utm_medium', 'utm_medium TEXT');
 addColumnIfMissing('billing_source', "billing_source TEXT NOT NULL DEFAULT 'stripe'");
 addColumnIfMissing('store_product_id', 'store_product_id TEXT');
 addColumnIfMissing('store_purchase_token', 'store_purchase_token TEXT');
+// The win-back email told an active member she had not been in for a couple of
+// weeks (28 Aug 2026). It measured "quiet" from the activity log alone, and the
+// activity log only records 33 specific actions - somebody who opens the app and
+// reads is invisible to it. This column records the last time an authenticated
+// request arrived at all, which is what "been in" actually means.
+addColumnIfMissing('last_seen_at', 'last_seen_at TEXT');
+
+// Written from requireAuth on every authenticated request, so it is throttled to
+// one write an hour per person: the precision that matters here is days.
+const LAST_SEEN_THROTTLE_MS = 60 * 60 * 1000;
+function touchLastSeen(userId) {
+  const row = db.prepare('SELECT last_seen_at FROM users WHERE id = ?').get(userId);
+  if (!row) return;
+  const prev = row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0;
+  if (Date.now() - prev < LAST_SEEN_THROTTLE_MS) return;
+  db.prepare('UPDATE users SET last_seen_at = ? WHERE id = ?').run(new Date().toISOString(), userId);
+}
 db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)');
 
 // leads predates the utm_medium/utm_campaign columns, so it needs the same
@@ -370,6 +400,14 @@ function saveState(userId, stateJson) {
     `INSERT INTO user_state (user_id, state_json, updated_at) VALUES (?, ?, ?)
      ON CONFLICT(user_id) DO UPDATE SET state_json = excluded.state_json, updated_at = excluded.updated_at`
   ).run(userId, stateJson, new Date().toISOString());
+}
+
+// A consistent copy of the live database, for backup.js. VACUUM INTO rather
+// than a file copy: copying bytes out from under an open database can catch it
+// mid-write, and a torn backup restores as a corrupt one. The path is built by
+// the caller from an env var, never from a request; quotes escaped regardless.
+function snapshotTo(outPath) {
+  db.exec(`VACUUM INTO '${String(outPath).split("'").join("''")}'`);
 }
 
 function deleteUser(userId) {
@@ -648,7 +686,7 @@ function getUsersInTrialWindow() {
 // belongs given state_json has no schema guarantees.
 function getUsersWithState() {
   return db.prepare(`
-    SELECT u.id, u.email, s.state_json
+    SELECT u.id, u.email, u.last_seen_at, s.state_json, s.updated_at AS state_updated_at
     FROM users u JOIN user_state s ON s.user_id = u.id
     WHERE u.email IS NOT NULL AND u.email != ''
   `).all();
@@ -667,6 +705,28 @@ const TRIALING_SQL = "plan != 'free' AND subscription_status = 'trialing'";
 // partial week 00, and strftime('%Y') can disagree with the ISO year at a year
 // boundary. Grouping by the Monday date sidesteps both and still sorts correctly.
 const WEEK_SQL = "date(created_at, 'weekday 0', '-6 days')";
+
+// One row per day per source, incremented in place.
+function recordStoreClick(source) {
+  const src = String(source || 'direct').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40) || 'direct';
+  const day = new Date().toISOString().slice(0, 10);
+  db.prepare(`INSERT INTO store_clicks (day, source, clicks) VALUES (?, ?, 1)
+              ON CONFLICT(day, source) DO UPDATE SET clicks = clicks + 1`).run(day, src);
+}
+function getStoreClicks(windowDays) {
+  const days = windowDays || 30;
+  const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  const total = db.prepare('SELECT COALESCE(SUM(clicks),0) n FROM store_clicks').get().n;
+  return {
+    total,
+    window_days: days,
+    in_window: db.prepare('SELECT COALESCE(SUM(clicks),0) n FROM store_clicks WHERE day >= ?').get(since).n,
+    by_source: db.prepare(`SELECT source, SUM(clicks) clicks FROM store_clicks WHERE day >= ?
+                           GROUP BY source ORDER BY clicks DESC`).all(since),
+    by_day: db.prepare(`SELECT day, SUM(clicks) clicks FROM store_clicks WHERE day >= ?
+                        GROUP BY day ORDER BY day DESC`).all(since),
+  };
+}
 
 function getAdminStats(opts) {
   const freeChatLimit = (opts && opts.freeChatLimit) || 3;
@@ -804,6 +864,9 @@ function getAdminStats(opts) {
     retention,
     by_utm_source,
     by_week,
+    // How many people we sent to the Play listing. The other half of the
+    // install number, which Play reports and this cannot see.
+    store_clicks: getStoreClicks(windowDays),
     // The letter funnel. Its own block because it answers a different question
     // from the signup funnel: not "did somebody find us", but "did somebody
     // hand this to a person they love, and did that person take it".
@@ -912,9 +975,12 @@ function createCoupleLink(userId, name) {
   if (existing) return existing;
   // Unambiguous alphabet: no 0/O or 1/I to misread off a partner's screen.
   const ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  // crypto.randomInt, not Math.random: a code is the only thing standing between
+  // a stranger and somebody's Together table, and Math.random's generator can be
+  // predicted from a handful of observed outputs.
   let code;
   do {
-    code = Array.from({ length: 6 }, () => ALPHA[Math.floor(Math.random() * ALPHA.length)]).join('');
+    code = Array.from({ length: 6 }, () => ALPHA[crypto.randomInt(ALPHA.length)]).join('');
   } while (db.prepare('SELECT 1 FROM couple_links WHERE code = ?').get(code));
   db.prepare('INSERT INTO couple_links (user_a, name_a, code, created_at) VALUES (?,?,?,?)')
     .run(userId, String(name || '').slice(0, 40), code, new Date().toISOString());
@@ -1072,6 +1138,8 @@ module.exports = {
   createUser,
   setUserUtm,
   getAdminStats,
+  recordStoreClick,
+  getStoreClicks,
   countLifetimeSold,
   recordStorePurchase,
   getUserByPurchaseToken,
@@ -1079,6 +1147,8 @@ module.exports = {
   getUserById,
   getState,
   saveState,
+  touchLastSeen,
+  snapshotTo,
   getSetting,
   setSetting,
   savePushSubscription,

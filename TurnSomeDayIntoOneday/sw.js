@@ -1,8 +1,15 @@
-// v5.1.2: SOS recordings rebuilt again - Gentle, Clear and Calm male are now
-// slower and softer. The filenames never change, so every audio rebuild needs
-// a new cache name here or existing installs keep the old audio and pair it
-// with the new caption timings, drifting further out with every step.
-const CACHE_NAME = 'tsid-shell-v5.7';
+// The filenames never change, so every audio rebuild needs a new cache name
+// here, or existing installs keep the old audio and pair it with the new
+// caption timings, drifting further out with every step.
+//
+// WHEN A VOICE IS ADDED, ADD ITS SOS FILE BELOW AND BUMP THE CACHE NAME.
+// Deep shipped on 27 Aug 2026 and this list was not updated, so five of the six
+// voices were available offline and Deep was not. "Talk me through it" is the
+// crisis walkthrough - free, always, and needed precisely when the signal is
+// gone. Anyone who chose Deep had the one voice that goes silent offline.
+// Fixed 28 Aug; the cache name now tracks APP_VERSION in index.html so the two
+// cannot drift apart unnoticed again.
+const CACHE_NAME = 'tsid-shell-v9.6';
 const SHELL_FILES = [
   '/',
   '/app',
@@ -13,8 +20,10 @@ const SHELL_FILES = [
   '/audio/sos-talk-gentle.mp3',
   '/audio/sos-talk-clear.mp3',
   '/audio/sos-talk-male.mp3',
+  '/audio/sos-talk-deep.mp3',
   '/data/lessons.json',
   '/data/stories.json',
+  '/data/audio-stories.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-discrete-192.png',
@@ -91,6 +100,11 @@ self.addEventListener('fetch', (event) => {
   // HTTP cache handles them, and copying multi-megabyte recordings into the
   // shell cache would burn the storage quota for no gain.
   if (url.origin !== location.origin) return;
+
+  // /play is a server-side redirect off to Google. Answering a navigation with
+  // a redirected response from inside a service worker is exactly the kind of
+  // thing that breaks for installed users only, so it never enters the worker.
+  if (url.pathname === '/play' || url.pathname.startsWith('/play/')) return;
 
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 

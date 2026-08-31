@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Codependency Test — Am I Codependent? Free, Private, No Signup</title>
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
-<meta name="description" content="A free codependency test: five honest questions, about two minutes. Worked out on your device, nothing stored or sent. Not a diagnosis — codependency isn't one.">
+<meta name="description" content="A free codependency test: five honest questions, about a minute. Worked out on your device, nothing stored or sent. Not a diagnosis — codependency isn't one.">
 <link rel="canonical" href="https://www.turnsomedayintodayone.com/codependency-test">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Turn Someday Into Day One">
@@ -81,7 +81,7 @@ h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
   <!-- INTRO -->
   <div class="step on" id="st-intro">
     <h1>Am I codependent?</h1>
-    <p class="sub">Five honest questions, about two minutes. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
+    <p class="sub">Five honest questions, about a minute. <span class="free">Free — no card, no signup.</span> Nothing you answer is stored or sent anywhere; the result is worked out on your device, for you.</p>
     <p class="sub"><strong>This is not a diagnosis — and codependency isn't one either.</strong> No doctor hands it out and no quiz can make it official. What this can do is put words to something you've probably been carrying without a name for it.</p>
     <button class="btn" onclick="startQ()">Start the check-in</button>
     <div class="crisis">If you're in crisis right now, call or text <strong>988</strong> — free, confidential, 24/7. If you're afraid of someone in your home, the National Domestic Violence Hotline is <a href="tel:18007997233">1-800-799-7233</a>.</div>
@@ -105,7 +105,7 @@ h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
     <div id="res-pro" style="display:none;background:var(--s1);border:1px solid var(--bdr);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:13px;color:var(--ts);line-height:1.6;margin-bottom:14px"></div>
     <div style="background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin:6px 0 14px;text-align:left" id="p5-box">
       <div style="font-size:15px;font-weight:650;margin-bottom:4px">Five short emails, one a day?</div>
-      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Written for your side of it. No day counting, no advice about fixing him, and nothing telling you to leave or to stay.</div>
+      <div style="font-size:13px;color:var(--ts);line-height:1.5;margin-bottom:12px">Written for your side of it. No day counting, no advice about fixing them, and nothing telling you to leave or to stay.</div>
       <input type="email" id="p5-email" placeholder="you@email.com" autocomplete="email">
       <button class="btn" style="margin-top:0" id="p5-btn" onclick="p5Send()">Send me the five</button>
       <div style="font-size:11.5px;color:var(--tm);margin-top:8px;text-align:center" id="p5-note">Only your email leaves this device — never your answers.</div>
@@ -135,9 +135,6 @@ h2{font-size:20px;line-height:1.3;font-weight:650;margin-bottom:6px}
 const QUESTIONS=[
   {t:'How much of your day is spent tracking how they are?',o:[['Barely any — I know how they are, I don\'t track it',0],['Some. More on a bad week',1],['Most of it. I read the mood before I decide anything',2],['All of it. I can tell from the sound of the car door',3]]},
   {t:'When you say no to them, what happens next?',o:[['Nothing much. It\'s fine',0],['A bit of friction, then it passes',1],['Guilt, mostly mine, for a day or two',2],['A fight, or a silence, and a lot of repair work. So I rarely say it',3]]},
-  {t:'Have you covered for them?',o:[['No',0],['Once or twice, small things',1],['Yes — to family, to work, to friends',2],['Routinely. There\'s a whole story I keep straight',3]]},
-  {t:'Somebody asks how you are. What comes out of your mouth?',o:[['How I am',0],['A bit about me, then about them',1],['Mostly an update on them',2],['I honestly don\'t know how I am. I\'d have to think about it',3]]},
-  {t:'When things are calm at home, how does that feel?',o:[['Good. Calm feels like calm',0],['Nice, though I stay a bit alert',1],['I enjoy it and I\'m waiting for it to end',2],['I don\'t relax. Calm is just the gap before the next thing',3]]},
   {t:'What happens to the consequences of their choices?',o:[['They handle them',0],['We share them, more or less fairly',1],['I smooth most of them over — money, lifts, excuses',2],['I handle all of them, and then wonder why nothing ever changes',3]]},
   {t:'What have you given up because of this?',o:[['Nothing much',0],['A few plans here and there',1],['Friendships, hobbies, time off — quite a lot',2],['I couldn\'t tell you what I like doing anymore',3]]},
   {t:'When you think about what happens if they don\'t change, what comes up?',o:[['I\'d be sad, but I\'d be okay',0],['I\'d manage. I don\'t like thinking about it',1],['I don\'t let myself think about it',2],['I feel like I\'d disappear. There isn\'t a me separate from this',3]]}
@@ -184,19 +181,21 @@ async function p5Send(){
 }
 
 function showResult(){
-  // Max score is 24. Gentle at the bottom, honest at the top, and never a label.
+  // Max score is 15 across five questions. Bands scaled from the old
+  // eight-question 5/11/17 so each band keeps the same share of the range.
+  // Gentle at the bottom, honest at the top, and never a label.
   let seg,title,body,close,pro='';
-  if(score<=5){
+  if(score<=3){
     seg='Not what this describes';
     title="This doesn't sound like codependency.";
     body="Caring about somebody and worrying about them is not the same thing as losing yourself in them. Nothing in your answers points at the pattern this check-in looks for.";
-    close="If something still feels wrong, trust that over eight questions. You know your own house better than a quiz does.";
-  }else if(score<=11){
+    close="If something still feels wrong, trust that over five questions. You know your own house better than a quiz does.";
+  }else if(score<=7){
     seg='It has started to tilt';
     title="You're still in there — but it's tilting.";
     body="Some of what you described is how this begins: saying yes when you meant no, smoothing things over because it's quicker, keeping half an eye on their mood. None of it is dramatic. That's exactly why it grows.";
     close="The fix at this stage is small and unglamorous — one no, said out loud, and one thing a week that is yours. That's genuinely most of it.";
-  }else if(score<=17){
+  }else if(score<=11){
     seg='You are carrying it';
     title="You've been carrying a job that was never yours.";
     body="Tracking the mood, managing the consequences, keeping the story straight, answering “how are you” with news about them. That isn't a character flaw and it isn't weakness — it's what happens when somebody has to hold a household together and nobody else will.";

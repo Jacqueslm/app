@@ -25,7 +25,7 @@ function isConfigured() {
 // choke point on purpose - no caller can forget it. The single exception is
 // force:true, reserved for account access (password reset): opting out of
 // emails must never lock someone out of their own account.
-async function sendEmail({ to, subject, text, force }) {
+async function sendEmail({ to, subject, text, force, attachments }) {
   const addr = String(to).toLowerCase();
   const user = db.getUserByEmail(addr);
   if (user && user.unsubscribed && !force) {
@@ -37,7 +37,8 @@ async function sendEmail({ to, subject, text, force }) {
   }
   if (DRY_RUN) {
     const lastLine = text.trimEnd().split('\n').pop();
-    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars) last-line="${lastLine}"`);
+    const att = attachments && attachments.length ? ` +${attachments.length} attachment(s)` : '';
+    console.log(`[email dry-run] to=${to} subject="${subject}" (${text.length} chars)${att} last-line="${lastLine}"`);
     return { ok: true, dryRun: true };
   }
   if (!RESEND_API_KEY) {
@@ -57,6 +58,8 @@ async function sendEmail({ to, subject, text, force }) {
         reply_to: EMAIL_REPLY_TO,
         subject,
         text,
+        // Only the database backup uses this. Resend takes base64 content.
+        ...(attachments && attachments.length ? { attachments } : {}),
       }),
     });
     if (!res.ok) {
@@ -140,7 +143,7 @@ Open the app and write your relapse plan.
 
 Not lessons. Not the counter. The plan. It takes eleven minutes and it is the only part of this that works at 2am.
 
-Write it now, while you're clear-headed and a little bit motivated, because that version of you is the only one who can. The 2am version of you can't write it — he can only read it.
+Write it now, while you're clear-headed and a little bit motivated, because that version of you is the only one who can. The 2am version of you can't write it — they can only read it.
 
 — Jacques` },
   { step: 1, subject: 'Nobody quits at noon', text: `At noon you're fine. At noon you're a guy with a plan.
@@ -156,15 +159,15 @@ That's what the plan is for. If you didn't write yours yesterday, write it today
 — Jacques` },
   { step: 2, subject: "There's a section in there that isn't for you", text: `Something you probably haven't opened yet.
 
-There's a whole section in the app built for your partner. Not about her — for her. Her own space.
+There's a whole section in the app built for your partner. Not about them — for them. Their own space.
 
-Here's why I built it. When I was in it, I thought I was the one suffering. I was wrong. She'd been awake for years, being told she was overreacting, doing quiet math on whether to stay. Nobody built her anything. Every app in this space treats her like a bystander.
+Here's why I built it. When I was in it, I thought I was the one suffering. I was wrong. She'd been awake for years, being told she was overreacting, doing quiet math on whether to stay. Nobody built her anything. Every app in this space treats the partner like a bystander.
 
-I'm not going to tell you when to show it to her. You know your marriage and I don't.
+I'm not going to tell you when to show it to them. You know your marriage and I don't.
 
-But it's there. And if you're ever going to have that conversation, having something to hand her is better than having nothing.
+But it's there. And if you're ever going to have that conversation, having something to hand them is better than having nothing.
 
-If you want to send it to her directly without her seeing the rest of your account: turnsomedayintodayone.com/for-her
+If you want to send it to them directly without them seeing the rest of your account: turnsomedayintodayone.com/for-her
 
 — Jacques` },
   { step: 3, subject: "The reset button isn't failure", text: `Day 3 is usually where the first wobble shows up.
@@ -374,15 +377,20 @@ Day one is a decision, not a date.
 ];
 
 // The lead-magnet delivery mail (subject and body approved by Jacques).
-function brainresetPdfEmail() {
-  return {
-    subject: 'The 90-Day Brain Reset (your PDF)',
-    text: `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
+// It carries an unsubscribe link like everything else that goes to a lead: a
+// for-her lead is promised exactly one email and never enters a sequence, so
+// this is the only message she ever gets - and it was the only one with no way
+// out of the list at the bottom of it.
+function brainresetPdfEmail(lead) {
+  let text = `Here it is — the whole 90-day map in five pages. Read section 06 before you need it.
 
 ${APP_URL}/The90DayBrainReset.pdf
 
-— Jacques`,
-  };
+— Jacques`;
+  if (lead && lead.id && lead.email) {
+    text += `\n\nUnsubscribe: ${APP_URL}/unsubscribe?token=${signLeadUnsubToken(lead.id, lead.email)}`;
+  }
+  return { subject: 'The 90-Day Brain Reset (your PDF)', text };
 }
 
 // Same contract as sendSequenceEmail, but for leads: guard keys on the email
@@ -425,17 +433,17 @@ That's all for today. Tomorrow I'll tell you the one thing that changed everythi
 {APP_URL}` },
   { step: 2, subject: 'Two jobs, and you only ever had one', text: `There are two jobs in your house.
 
-One is his: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages him.
+One is theirs: stopping, and staying stopped, and dealing with whatever the drink or the phone or the betting was covering up. The other is yours: sleeping, eating, seeing your friends, being someone other than the person who manages them.
 
 Almost everybody in your position quietly takes on both. It's not weakness - it's what happens when somebody has to keep the household upright and nobody else is going to. But here's the thing I watched from the other side: me not getting better was never once caused by somebody not managing me well enough. Nobody talked me into it and nobody could have. The people who tried the hardest just got the most worn out.
 
-Your healing does not have to wait in a queue behind his.
+Your healing does not have to wait in a queue behind theirs.
 
 That's not permission to stop caring. It's permission to stop carrying the half that was never yours.
 
 - Jacques
 {APP_URL}` },
-  { step: 3, subject: 'The ten minutes when you want to check his phone', text: `You know the ten minutes. He's in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
+  { step: 3, subject: 'The ten minutes when you want to check their phone', text: `You know the ten minutes. They're in the shower, or asleep, or out, and the phone is right there, and you hate that you want to look and you're going to look anyway.
 
 I'm not going to tell you not to. Checking is not a character flaw - it's what a person does when they've been lied to and their own judgment stopped feeling reliable. That's the real injury, by the way. Not the drinking. The fact that you can't trust your own read on your own life anymore.
 
@@ -449,21 +457,21 @@ It won't fix anything tonight. It'll give you back one night.
 {APP_URL}` },
   { step: 4, subject: 'A promise and a change look identical from the outside', text: `This is the one I owe you an honest answer on, because I made a lot of promises and meant every single one of them.
 
-That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "he promised" and "he lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
+That's what nobody tells you. They aren't lies at the moment they're said. At 9am I completely intended it. By 6pm I was a different set of priorities with the same face. Which is why "they promised" and "they lied to me" both feel true - they are both true, and living inside that contradiction is exhausting.
 
-So here's the only thing I know that separates a promise from a change, and it's not what he says:
+So here's the only thing I know that separates a promise from a change, and it's not what they say:
 
 A promise is about the future. A change shows up in the boring middle of an ordinary week. Not a grand declaration after a bad night - the Tuesday. Did anything about the Tuesday get different? That's the whole test. It takes weeks to read, it can't be rushed, and it's the only honest measure there is.
 
-You don't have to decide anything based on it. Just stop grading him on the apologies. They were never the evidence.
+You don't have to decide anything based on it. Just stop grading them on the apologies. They were never the evidence.
 
 - Jacques
 {APP_URL}` },
   { step: 5, subject: "One thing this week that's yours", text: `Last one, then I'll leave you alone.
 
-I want you to do one thing this week that has nothing to do with him. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
+I want you to do one thing this week that has nothing to do with them. Not a grand gesture. One hour, one coffee, one walk, one phone call to the friend you've been too tired to ring back.
 
-I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was him, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
+I'm asking because of something I saw and can't unsee. The people around me disappeared slowly. Not in a dramatic way - they just stopped having answers to "what have you been up to?", because the answer was me, for years. By the time I finally stopped, some of them had no idea what they even liked anymore. That was mine too. That was on my account.
 
 Don't let that be yours.
 
@@ -511,7 +519,14 @@ async function runQuizNurture() {
     // The sequence is written in the voice of the man doing the work. Partner
     // leads (source 'for-her') asked for one PDF, not his emails - and any
     // future source is excluded until a sequence is written for it.
-    if (lead.source && lead.source !== 'quiz' && lead.source !== 'brainreset') continue;
+    //
+    // KEEP THIS LIST IN STEP WITH /api/lead's `isSelfQuiz`. Day 1 is sent
+    // directly at signup and days 2-5 only ever come from this loop, so a
+    // self-facing source that is missing here does not fail loudly - it
+    // delivers exactly one of the five emails the page promised and stops.
+    // 'binge-quiz' was added 28 Aug for that reason.
+    const NURTURE_SOURCES = ['quiz', 'binge-quiz', 'brainreset'];
+    if (lead.source && !NURTURE_SOURCES.includes(lead.source)) continue;
     const day = Math.floor((Date.now() - new Date(lead.created_at).getTime()) / 86400000);
     const step = day + 1;
     if (step < 1 || step > 5) continue;
@@ -575,6 +590,31 @@ function winbackEmailFor(step) {
 const WINBACK_QUIET_DAYS = 14;
 const WINBACK_MAX_QUIET_DAYS = 120; // beyond this it reads as a cold email, not a welcome back
 
+// How long since this person was last in, or null if we cannot tell. Pulled out
+// of the runner so it can be tested without sending anything.
+//
+// Three signals, and the most recent one wins. The activity log alone was wrong:
+// it records 33 specific actions, so somebody who opens the app and reads leaves
+// no trace in it and looked gone for a fortnight (28 Aug 2026 - an active member
+// was emailed "you haven't been in for a couple of weeks").
+//   activityLog    - she did something the app counts
+//   state sync     - her app wrote anything back to the server
+//   last_seen_at   - any authenticated request arrived at all, which is the
+//                    honest reading of "been in"
+function quietDaysFor(row, state, now) {
+  const log = Array.isArray(state.activityLog) ? state.activityLog : [];
+  const stamps = [
+    log.reduce((m, a) => {
+      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
+      return t > m ? t : m;
+    }, 0),
+    row.state_updated_at ? new Date(row.state_updated_at).getTime() : 0,
+    row.last_seen_at ? new Date(row.last_seen_at).getTime() : 0,
+  ].filter((t) => t > 0 && !Number.isNaN(t));
+  if (!stamps.length) return null;
+  return Math.floor(((now || Date.now()) - Math.max(...stamps)) / 86400000);
+}
+
 async function runWinbackSequence() {
   let rows = [];
   try { rows = db.getUsersWithState(); } catch (_) { return; }
@@ -583,14 +623,9 @@ async function runWinbackSequence() {
     try { st = JSON.parse(row.state_json); } catch (_) { continue; }
     if (!st || !st.startDate) continue;
     if (st.remindersEnabled === false) continue; // they asked for quiet; honour it here too
-    const log = Array.isArray(st.activityLog) ? st.activityLog : [];
-    if (!log.length) continue;
-    const last = log.reduce((m, a) => {
-      const t = a && a.ts ? new Date(a.ts).getTime() : 0;
-      return t > m ? t : m;
-    }, 0);
-    if (!last) continue;
-    const quietDays = Math.floor((Date.now() - last) / 86400000);
+    if (!Array.isArray(st.activityLog) || !st.activityLog.length) continue;
+    const quietDays = quietDaysFor(row, st);
+    if (quietDays === null) continue;
     if (quietDays < WINBACK_QUIET_DAYS || quietDays > WINBACK_MAX_QUIET_DAYS) continue;
     const e = winbackEmailFor(1);
     // sendSequenceEmail's email_log guard makes this send-once by construction.
@@ -613,6 +648,10 @@ If the app has done anything for you — a hard night it got you through, a morn
 ${APP_URL}/reviews
 
 There aren't many there yet. That's on purpose. I don't fake reviews, so the page says so until real people write them. One line from you is worth more than any ad I could buy.
+
+And if you installed this from the Google Play Store, a rating there does something the website can't - it's the only thing that decides whether Play ever shows this app to somebody searching at 2am. It takes ten seconds:
+
+https://play.google.com/store/apps/details?id=com.turnsomedayintodayone.app
 
 If it hasn't helped, don't leave one. You don't owe me a review for trying. But if it has, that sentence is how the next person at 2am finds it.
 
@@ -678,4 +717,6 @@ module.exports = {
   runScheduledEmails,
   startScheduler,
   SEQUENCE_RUNNERS,
+  quietDaysFor,
+  WINBACK_QUIET_DAYS,
 };

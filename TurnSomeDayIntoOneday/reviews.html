@@ -39,6 +39,12 @@
     "@type": "Organization",
     "name": "Turn Someday Into Day One",
     "url": "https://www.turnsomedayintodayone.com/",
+    "sameAs": [
+      "https://www.instagram.com/turnsomedayintodayone",
+      "https://www.tiktok.com/@turnsomedayintodayone",
+      "https://www.youtube.com/@turnsomedayintodayone",
+      "https://www.facebook.com/turnsomedayintodayone"
+    ],
     "email": "turnsomedayintodayone@gmail.com"
   }
 }
@@ -115,6 +121,7 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
 
   <section style="text-align:center">
     <a class="btn" href="/app">Start your 7 days</a>
+    <a href="/play?from=reviews" style="display:block;width:100%;box-sizing:border-box;background:transparent;color:var(--green);border:1px solid var(--green);border-radius:12px;padding:15px;font-size:15px;font-weight:650;font-family:var(--f);text-align:center;text-decoration:none;margin-bottom:12px">On Android? Get it on Google Play</a>
     <a class="btn" href="/quiz" style="background:none;border:1px solid var(--bdr);color:var(--ts)">Take the free 1-minute check-in</a>
   </section>
 
@@ -167,12 +174,22 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
     // Review structured data restored (Jacques, 19 Aug 2026). Each published
     // quote is emitted as schema.org/Review under the app's SoftwareApplication
     // block, which is what lets search engines show a star rating in results.
+    // The founder's own review stays on the page, in full, under his name -
+    // it is real, it is labelled, and it is the story the page is built on.
+    // It is kept OUT of the structured data below. Google's review-snippet
+    // rules exclude reviews written by the business itself, and with only a
+    // handful of members his five stars measurably lift the average shown in
+    // search results. Displaying it is honest; letting it inflate a public
+    // star rating is not. This removes nothing a human reads.
+    function isFounder(rv){
+      return /founder/i.test(String(rv.when || '')) || /founder/i.test(String(rv.role || ''));
+    }
     var ld = [];
     reviews.forEach(function(rv){
       var name = String(rv.name || 'A member');
       var text = String(rv.text || '');
       var stars = Math.min(5, Math.max(1, parseInt(rv.stars, 10) || 5));
-      if (!text) return;
+      if (!text || isFounder(rv)) return;
       ld.push({
         '@type': 'Review',
         'author': { '@type': 'Person', 'name': name },
@@ -190,6 +207,7 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
       var sum = 0, n = 0;
       reviews.forEach(function(rv){
         var st = parseInt(rv.stars, 10);
+        if (isFounder(rv)) return;
         if (st >= 1 && st <= 5 && String(rv.text || '')) { sum += st; n++; }
       });
       var app = {

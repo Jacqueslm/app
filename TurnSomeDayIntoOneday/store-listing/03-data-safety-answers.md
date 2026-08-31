@@ -46,9 +46,43 @@ you can defend the answer if Play ever asks.
 
 | Data type | Collected | Shared | Purpose |
 |---|---|---|---|
-| **Other in-app messages** | **No — processed ephemerally** | No | App functionality |
+| **Other in-app messages** | **Yes — DONE 29 Aug, not ephemeral** | No | App functionality |
 
-> Tick **"Data is processed ephemerally"**. This is verified, not a claim:
+> ### ✅ FIXED 29 Aug 2026, 3:15 PM — submitted for review.
+>
+> The data type was ALREADY ticked; the wrong answer was one step further in.
+> Play asks *"Is this data processed ephemerally?"* and it was set to **Yes**.
+> Changed to **No**. Collected/not-shared, required, and App functionality were
+> all already correct and were left alone. Publishing overview: "App content →
+> Data safety → Complete Data safety questionnaire", 1 change sent for review.
+>
+> Note for next time: the repo said "change it to Yes, collected". It was
+> already collected. Look at the actual console before acting on these notes.
+>
+> ### The reasoning (28 Aug) — why it had to change:
+>
+> The reasoning below is correct **about Friendly** and stays true: chat text is
+> never stored. But the answer was written as if Friendly were the only place a
+> member writes something, and it is not. Two other places persist user-written
+> text on the server, and neither was considered when this form was filled in:
+>
+> - **`room_posts.body`** — every live room post, stored server-side and shown
+>   to other members (`createRoomPost` in `server/db.js`).
+> - **`letters.body`** — a letter written to a partner, stored against a token
+>   so the recipient can open it by link (`createLetter` in `server/db.js`).
+>
+> A letter written to one named person and delivered by link is an in-app
+> message by any reading. So **Other in-app messages must be Yes, collected,
+> not ephemeral**, purpose App functionality. Sharing stays **No**: showing a
+> post to other members of the app is not "sharing" in Play's sense, which
+> means transfer to a third party.
+>
+> This file's own warning applies to itself - under-declaring is the single
+> most common cause of a data-safety enforcement action. Jacques must change
+> this one in the console; nothing in the repo can do it for him.
+>
+> The note below remains accurate for Friendly and is worth keeping as the
+> defence of the "not stored" half:
 > `serializeState()` in `index.html` explicitly strips `chatHistory` before
 > anything is written to storage, and `load()` clears it on every start. The
 > server stores only a per-day integer count in the `chat_usage` table — there
@@ -117,6 +151,31 @@ you can defend the answer if Play ever asks.
 > `recordStorePurchase` in `server/db.js` stores the plan, the store product ID
 > and the purchase token against the account. That is purchase history in Play's
 > sense and must be declared — it is what keeps Pro unlocked across devices.
+
+### ⚠ Also check while you are in there (28 Aug 2026)
+
+The **Data sharing** section below named two processors. There are more, and an
+audit on 28 Aug found the privacy policy had the same gap — it named Anthropic
+and Stripe only, described the app as "self-hosted", and stated there was no
+analytics tracker. All three were wrong; `privacy.html` is corrected. The real
+list, read from the code:
+
+| Processor | What it receives | Where |
+|---|---|---|
+| **Google (Gemini)** | Friendly messages, and every room post for moderation | `server/server.js`, `server/rooms.js` |
+| **Anthropic** | Friendly messages — only if no Gemini key is set | `server/server.js` (fallback path) |
+| **Stripe** | Card details and email, web purchases only | `server/billing.js` |
+| **Google Play** | Android purchases | `server/store-billing.js` |
+| **Resend** | Email address and message body | `server/email.js` |
+| **Plausible** | Page URL, plus IP and user agent so a visit counts once | `server/analytics.js` |
+
+Push notifications use self-issued VAPID keys and no third party.
+
+**Plausible is the one that changes an answer.** It is cookieless and does not
+track across sites, but it is analytics and it receives an IP address, so do
+not tell Play there is no analytics at all. It does not add a *data type* to
+declare — no name, email or account id is ever sent — but the privacy policy
+must disclose it, and now does.
 
 ### Everything else — declare NO
 

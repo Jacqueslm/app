@@ -1,5 +1,5 @@
 {
-  "_note": "Page slug -> the YouTube video that belongs on it. Adding an entry here is all it takes; run tools/embed-videos.py to inject the player and the VideoObject schema. Titles must match YouTube exactly - Google cross-checks them.",
+  "_note": "REMOVED FROM ALL PAGES 28 Aug 2026 on Jacques's instruction: 'remove all videos from all pages'. Every page's player, its VideoObject schema and the player CSS/JS are gone, and tools/embed-videos.py no longer exists. This file is kept only as the record of which YouTube video was made for which page - it is NOT a to-do list. Do not re-embed any of these, and do not rebuild the injector, without him asking for it in those words.",
   "hangxiety": {
     "id": "GRg1tdeH8PQ",
     "title": "Hangxiety: Why You Wake Up at 4AM Terrified After Drinking",

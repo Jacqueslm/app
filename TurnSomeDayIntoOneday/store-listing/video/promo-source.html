@@ -1,0 +1,90 @@
+<!doctype html><meta charset="utf-8">
+<style>
+ *{margin:0;padding:0;box-sizing:border-box}
+ html,body{width:1920px;height:1080px;overflow:hidden;background:#0f0c29;
+   font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+ #stage{position:relative;width:1920px;height:1080px;
+   background:radial-gradient(1200px 800px at 22% 40%,#1b1746 0%,#0f0c29 62%)}
+ .shot{position:absolute;inset:0;opacity:0}
+ .txt{position:absolute;left:132px;top:50%;transform:translateY(-50%);width:820px}
+ .kicker{font-size:26px;letter-spacing:4.5px;text-transform:uppercase;color:#7ee8a2;font-weight:700;margin-bottom:26px}
+ .head{font-size:76px;line-height:1.1;color:#fff;font-weight:700;letter-spacing:-1.2px}
+ .sub{font-size:31px;line-height:1.55;color:#a9b0d8;margin-top:28px;font-weight:400}
+ .phone{position:absolute;right:210px;top:50%;width:430px;height:764px;margin-top:-382px;
+   border-radius:38px;overflow:hidden;border:3px solid #2e2a5e;background:#000;
+   box-shadow:0 40px 120px rgba(0,0,0,.65)}
+ .phone img{width:100%;display:block}
+ /* centred shots */
+ .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 200px}
+ .mid .head{font-size:88px}
+ .mark{width:132px;height:132px;border-radius:32px;background:#534AB7;border:3px solid #7ee8a2;
+   display:flex;align-items:center;justify-content:center;margin-bottom:38px}
+ .mark svg{width:74px;height:74px}
+ .row{display:flex;gap:74px;margin-top:44px}
+ .col{text-align:left}
+ .col h4{font-size:27px;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;font-weight:700}
+ .col p{font-size:28px;line-height:1.6;color:#c0caff;font-weight:400}
+ .free h4{color:#7ee8a2}.pro h4{color:#9d92ff}
+</style>
+<div id="stage">
+  <div class="shot" id="s0">
+    <div class="txt"><div class="kicker">The counter</div>
+      <div class="head">It counts the days.<br>It never shames a slip.</div>
+      <div class="sub">Reset whenever you need to. Nothing else is taken away.</div></div>
+    <div class="phone"><img src="file:///home/user/app/TurnSomeDayIntoOneday/store-listing/screenshots/01-home.png"></div>
+  </div>
+
+  <div class="shot" id="s1">
+    <div class="txt"><div class="kicker">The bad ten minutes</div>
+      <div class="head">One button for<br>the worst of it.</div>
+      <div class="sub">Breathing, grounding, a voice that talks you through it, and 988. Always free.</div></div>
+    <div class="phone"><img src="file:///home/user/app/TurnSomeDayIntoOneday/store-listing/screenshots/06-sos.png"></div>
+  </div>
+
+  <div class="shot" id="s2">
+    <div class="txt"><div class="kicker">90 days</div>
+      <div class="head">Plain language.<br>No lectures.</div>
+      <div class="sub">A lesson a day, on twelve habits. Every one reads itself aloud.</div></div>
+    <div class="phone"><img src="file:///home/user/app/TurnSomeDayIntoOneday/store-listing/screenshots/02-lessons.png"></div>
+  </div>
+
+  <div class="shot" id="s3"><div class="mid">
+    <div class="head" style="font-size:64px">Free is genuinely free.</div>
+    <div class="row">
+      <div class="col free"><h4>Free forever</h4>
+        <p>The day counter · SOS &amp; breathing<br>The journal · Weekly reports<br>The first 15 days of every track</p></div>
+      <div class="col pro"><h4>Pro adds</h4>
+        <p>Days 16–90 · Friendly, the AI companion<br>The live rooms</p></div>
+    </div>
+  </div></div>
+
+  <div class="shot" id="s4"><div class="mid">
+    <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12c0-2 1.5-3.5 3.5-3.5S10 12 12 12s2.5-3.5 4.5-3.5S21 10 21 12s-1.5 3.5-3.5 3.5S14 12 12 12s-2.5 3.5-4.5 3.5S3 14 3 12z"/></svg></div>
+    <div class="head" style="font-size:70px">Day One: Addiction Recovery</div>
+    <div class="sub" style="font-size:30px;max-width:1100px">Built by someone who was addicted for 38 years<br>and got free at 50. Free to start on Google Play.</div>
+  </div></div>
+</div>
+<script>
+const SHOTS=[[0,3400],[3400,6800],[6800,10000],[10000,12600],[12600,15000]];
+window.FILM_LEN=15000;
+const FADE=340;
+window.seek=function(ms){
+  SHOTS.forEach((s,i)=>{
+    const el=document.getElementById('s'+i);
+    const [a,b]=s;
+    let o=0,shift=0;
+    if(ms>=a-FADE && ms<=b){
+      const inT=Math.min(1,Math.max(0,(ms-a+FADE)/FADE));
+      const outT=Math.min(1,Math.max(0,(b-ms)/FADE));
+      o=Math.min(inT,outT);
+      shift=(1-inT)*26;
+    }
+    el.style.opacity=o;
+    const t=el.querySelector('.txt')||el.querySelector('.mid');
+    if(t)t.style.transform=(el.querySelector('.txt')?'translateY(-50%) ':'')+'translateX('+shift+'px)';
+    const ph=el.querySelector('.phone');
+    if(ph&&o>0){const p=(ms-a)/(b-a);ph.style.transform='translateY('+(-6+p*12)+'px) scale('+(1.005+p*0.02)+')';}
+  });
+};
+window.seek(0);
+</script>

@@ -76,6 +76,19 @@ the free tier is the trial.
 **Jacques' story (the brand's spine):** addicted 38 years, got free at 50, built
 the app he needed. First person, no guru voice.
 
+**He is on BOTH sides of this, and the second half keeps getting forgotten.**
+Corrected by Jacques himself, 31 Aug 2026: *"I have been a supporter. I am the
+supporter right now, even though I've been dealing with my own things."* So he
+is not only the person who was in it — he is currently carrying somebody else's
+too, while working on his own. That is the `both` path in the app, the one he
+built, and it is the rarest voice in this whole market: almost nobody writing
+about recovery can speak truthfully from the addict's side AND the partner's
+side at the same time.
+
+Do not tell him he has only lived one side of it. A session did that on 31 Aug,
+from a file, and it was wrong. When he says "I've lived both sides", that is
+true and he may say it anywhere.
+
 **The lead audience:** the partner — usually a wife — of someone who drinks.
 She searches in crisis, she has money, nobody has built for her (Al-Anon since
 1951, no product), and she brings him into the app. Secondary: the person

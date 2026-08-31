@@ -6,6 +6,165 @@ Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done 
 
 ---
 
+## ⚖️ 28 AUG 2026 — PRIVACY AUDIT: THE POLICY DESCRIBED A DIFFERENT APP
+
+Checked every privacy and data-safety claim against the code. Four were wrong,
+and they are the claims with legal weight.
+
+1. **"This app is self-hosted… whoever runs this instance… their own server."**
+   Boilerplate from a self-host template, live on a Play app with 20,000+
+   installs. His users' data is on **his** server. Replaced with the truth:
+   operated by Turn Someday Into Day One, hosted in the US.
+2. **"Anthropic processes the messages you send to Friendly."** The live path is
+   **Google Gemini** — Anthropic is only the fallback when no Gemini key is set,
+   and room moderation is Gemini-only and fails closed without it. So Google
+   also sees **every live room post**, which nothing disclosed.
+3. **"No analytics tracker."** Plausible is wired in server-side and receives the
+   page URL plus the visitor's **IP and user agent**. Cookieless and no
+   cross-site tracking, but it is analytics and it was undisclosed. Resend
+   (email) was undisclosed too — the policy said "two outside services" where
+   there are six.
+4. **Room posts, letters and reviews were not mentioned at all**, though all
+   three persist user-written text server-side (`room_posts.body`,
+   `letters.body`, `reviews.body`).
+
+`privacy.html` is corrected and live. Messages to Friendly are now stated
+plainly as not stored, which is true and verifiable.
+
+**One thing only Jacques can do — Play Console → App content → Data safety.**
+"Other in-app messages" is declared **No — ephemeral**. That was reasoned from
+Friendly alone and is wrong for letters, which are messages to one named person
+stored server-side behind a link. It must become **Yes, collected, not
+ephemeral, App functionality**; sharing stays No. The exact wording and the full
+processor table are in `store-listing/03-data-safety-answers.md`. That file's
+own warning applies to it: under-declaring is the commonest cause of a
+data-safety enforcement action.
+
+---
+
+## 💳 28 AUG 2026 — A REAL SUBSCRIPTION WENT THROUGH ON ANDROID, END TO END
+
+Jacques bought Pro Monthly from his phone minutes after the latch fix, in the
+Chrome-installed shortcut. Verified in the live Stripe account, not taken on
+trust: `sub_1U9L9YCDHXSEg3rLLab9Ahve`, `status: trialing`, `app_user_id 26`,
+Visa ...8776, 7-day trial to **4 Sep**. He cancelled it 68 seconds after
+creating it (`canceled_at` 68s after `created`, `cancel_at` = trial end), so
+**nothing will ever be charged** and Pro stays active until 4 Sep.
+
+So on Android the whole chain works again: Upgrade → Stripe checkout →
+live subscription created. Stripe's "this service will no longer be available
+after September 4" is its normal wording for a trial that is set to cancel —
+not an error.
+
+**CONFIRMED — the payment chain works end to end.** Jacques, 28 Aug:
+*"that was another account i just purchased pro with."* The purchase was made
+on a separate account (`app_user_id 26`, `jkjajmalone@gmail.com` in Stripe),
+not the comped owner account, so the Pro badge at 3:32pm came from the webhook
+and nothing else. Checkout → live subscription → webhook → `isPro`, on a real
+phone with a real card. **First time proven since launch.** The long-standing
+"no real purchase has ever been made" worry is closed for the web path; only
+the Play path is still unproven, waiting on the 1.0.2 upload.
+
+The confound was real even though it did not bite here, and the warning stays
+in `HANDOFF.md`: `isComped()` grants Pro to `APP_OWNER_EMAIL` and to
+`COMP_PRO_EMAILS` with no payment, so **never test billing on the owner
+account** — and if you must, read Profile, where `Pro plan — Monthly` and
+`Pro plan — Complimentary` tell the two apart.
+
+**Found on that same screenshot: the Bootcamp day was calendar-driven.** The
+Today screen said "Day 9 of the 90-Day Bootcamp" four lines above "Foundation
+phase · Day 1 of 30" — same program, same screen, two numbers. `program-lbl`
+read `days` (time since the quit date) while the phase line read
+`getLessonDayFor`, which only advances when a lesson is finished. Anyone who
+backdates their quit date got a Bootcamp position they had not worked, and it
+misleads about Pro too, since Pro starts at lesson 16. `program-lbl` now reads
+the lesson day. Reproduced his exact case in headless Chrome — quit date nine
+days back, lesson 1 — and both lines now say Day 1 while the big counter
+correctly stays 9.
+
+---
+
+## 🔴→✅ 28 AUG 2026 — INSTALLING THE APP WAS SWITCHING OFF STRIPE FOR THAT WHOLE PHONE
+
+**Jacques: "cant even purchase pro through stripe."** He was right, and this
+was worse than the Play bug it was hiding behind.
+
+**Proof, not theory:** Stripe's dashboard shows the most recent checkout
+session was created **30 July**. His attempts on 27-28 Aug never reached
+Stripe at all — the app never asked.
+
+**Why.** A Trusted Web Activity *is* Chrome, sharing one storage jar with the
+browser for this origin. The `tsid_play_build` flag the shell wrote into
+`localStorage` was therefore read back by every ordinary Chrome tab on that
+phone, permanently. One launch of the Play app told the website "this is the
+Play build" forever, so Upgrade routed to Google billing and the server
+refused Stripe by policy (`create-checkout-session` 403s on
+`X-TSID-Client: play`). With Play billing also broken, **every Android owner
+of the app had no way to pay at all — not in the app, not on the website.**
+
+**Fixed (app 6.1).** The latch moved to `sessionStorage`, which is scoped to
+one browsing context: the shell's window keeps it, a separate Chrome tab
+starts clean and reaches Stripe. The legacy `localStorage` key is now deleted
+wherever it is found. Policy is untouched — the shell's start URL carries
+`?src=play` and its launch sets an `android-app://` referrer, so a genuine app
+launch always presents a signal on the first navigation and never relies on
+memory.
+
+**Verified in headless Chrome on an Android user agent:** app window latches
+and *stays* latched across an in-app navigation with no query string (policy
+holds); a separate tab on the same phone reads `play=false` and gets Stripe;
+desktop unaffected; the legacy key is gone in all cases. 11/11 server tests
+pass.
+
+**CONFIRMED BY JACQUES on his own phone, 28 Aug: "yes stripe working again."**
+Android web purchases are live. The 1.0.2 shell is still what fixes purchases
+*inside* the app.
+
+**Worth remembering how this was found.** It was invisible from every angle we
+had been looking from: the app said `unsupported context`, which is a Google
+Play error, so both the Play path and this one pointed at the same screen. It
+only surfaced because Jacques tried the other route and said it was broken
+too. When he reports something that contradicts the current theory, check it
+against the payment processor's own records before explaining it away — the
+30 July gap in Stripe's checkout sessions was the whole answer, and it took
+one query.
+
+---
+
+## 🛠 27 AUG 2026 — THE 1.0.2 FIX BUILD EXISTS. THE CLOUD BUILD WORKS FOR THE FIRST TIME EVER.
+
+The GitHub build workflow had failed all ten runs of its life — three on
+17 Aug (why the release was built by hand on the PC), and seven today, each
+failure a different real bug, each fixed in turn: the build machine stopped
+shipping a folder bubblewrap checks for (found by reading bubblewrap's own
+source: it validates the pre-2021 SDK layout — fixed with one symlink); the
+icon and manifest fetches raced the site's own redeploys (fixed by pulling the
+icon from the repo and gating the build on a full minute of healthy answers);
+and the publish step looked for the unsigned bundle in the signed bundle's
+folder.
+
+**Run 10 succeeded.** `app-release.aab` — 1.0.2, versionCode 3, `www` host,
+Play Billing on — sits on the `twa-build` branch. `Sign-Play-App.bat`
+(in `TurnSomeDayIntoOneday/twa/`) downloads it, signs it with the upload key
+on Jacques's PC, and names the upload steps. His part is: download the .bat,
+double-click, type the keystore password, upload in Play Console. Steps are at
+the top of PLAY-CHECKLIST.md. Waiting on him, on his schedule — do not nag.
+
+---
+
+## ✅ 27 AUG 2026 — SHRM DIRECTORY: CATEGORY FIX AGREED, BALL IS JUDITH'S
+
+The free SHRM Human Resource Vendor Directory listing (MediaBrains, contact
+Judith Gaa) is moving from "Health & Wellness Incentives" — the wrong shelf,
+gym-rewards territory — to **Addiction Services**, her suggestion after
+reading the description. Jacques closed it himself, 27 Aug 8:08am: "Yes, I
+agree. Thank you." Description is added, login works, everything on the
+listing is done and free. Nothing is owed and nobody needs to reply further.
+If no confirmation arrives by ~3 Sep, one line to Judith asking whether the
+move went through is the only follow-up.
+
+---
+
 ## 🔴 27 AUG 2026 — NOBODY CAN BUY PRO ON ANDROID. THE "COSMETIC" BUG IS A REVENUE BUG.
 
 **Jacques hit "Upgrade unavailable — Could not complete that purchase" on his
@@ -96,6 +255,20 @@ manifest signs with. If that app signing SHA-256 is not one of the two listed,
 verification fails exactly like this while every file looks perfect.
 **Needed from Jacques: Play Console → Test and release → Setup → App integrity
 → App signing key certificate → SHA-256.** No more code until that is compared.
+
+**27 Aug, 2:06pm — `launch=shell`. The Play app itself is what fails.** The
+5.9 diagnostic proved the Android shell opened the page (referrer was
+`android-app://com.turnsomedayintodayone.app`), on the right host, bridge
+present — and Chrome still refuses to run it verified. Every server-side piece
+checks out, so the fault is in the installed bundle or Chrome's verification of
+it on the device.
+
+**In flight:** shell bumped to 1.0.2 (code 3) and the CI build
+(`twa-build.yml`, run on `main`) queued 27 Aug — a known-good unsigned bundle
+from the repo manifest (www host, billing on) will sit on the `twa-build`
+branch ready to sign and upload if the installed shell turns out to be the
+fault. Next free test asked of Jacques: Settings → Apps → Day One → Open by
+default, which shows Android's own verdict on the same verification.
 
 **Do not describe this as cosmetic again.**
 
@@ -959,6 +1132,27 @@ commit dies with the container; that is how the 18 Aug marketing batch was lost.
 - **`.gitignore` now blocks `*.mp4 *.mov *.webm *.m4v *.avi *.mkv` repo-wide**,
   so no future session can commit one by accident.
 
+**ONLY MUSIC GOES IN THE REPO (Jacques, 31 Aug 2026) — TIGHTENS the 27 Aug rule above.**
+
+- *"we dont push videos no more only music."*
+- The 27 Aug rule kept **everything needed to rebuild a video** in git — the
+  `*-source.html`, the stills, the spec JSON. **That part is now withdrawn.**
+  No video work goes in: not the .mp4, not the source, not the stills.
+- **Music and audio still go in**, exactly as before: `content/score/`,
+  `TurnSomeDayIntoOneday/audio/`, anything else uploaded here.
+- **`tools/render-film.js`, `tools/prep-still.py` and `tools/make-film.py` stay**
+  — they are tooling, not video work, and every future piece needs them.
+- **Sources are handed over in chat**, the same way finished .mp4s are. Jacques
+  keeps them in his own file alongside the videos they build.
+
+**The cost of this rule, stated once so nobody is surprised by it later:** an
+uncommitted file dies when the container is reclaimed. That is exactly how the
+18 Aug marketing batch was lost (see house rule 18 above). A video whose source
+is not in git and not in Jacques's file **cannot be re-rendered or re-cut** —
+not to fix a typo, not to swap a track, not to change a caption. The .mp4 is
+then the only copy that exists. That is a real trade and it is his to make; it
+is recorded here so it is a decision rather than an accident.
+
 **Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
 
 1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and
@@ -1314,6 +1508,41 @@ Jacques hours of work he should never have touched.
 - **Reach**: GitHub, PyPI, and MCP connectors work. HuggingFace, OpenAI,
   Replicate and fal.ai are BLOCKED by the environment's network policy - that
   is why no AI model can be called from here for images, video or voice.
+
+**IMAGE GENERATION - properly tested 28 Aug, not assumed (Jacques asked for a
+real attempt rather than a prediction).** The answer is still no, but the
+reason is now precise:
+
+- **The software side works.** `torch 2.13.0` plus `diffusers`, `transformers`,
+  `accelerate` and `safetensors` all install fine from PyPI into a venv. (Note:
+  installing into system site-packages fails on a broken
+  `setuptools-84.0.0.dist-info` - use a venv.)
+- **The weights are the wall.** A real
+  `StableDiffusionPipeline.from_pretrained(...)` call fails with
+  **`ProxyError: 403 Forbidden`** - the gateway refuses the CONNECT. Same 403
+  for huggingface.co, cdn-lfs.huggingface.co, hf.co, hf-mirror.com,
+  modelscope.cn, gitee.com, civitai.com, api.openai.com, fal.run,
+  api.replicate.com, api.stability.ai, storage.googleapis.com and
+  download.pytorch.org.
+- **What IS reachable**: pypi.org, files.pythonhosted.org, github.com,
+  raw.githubusercontent.com, GitHub *release assets* (tested, real download),
+  and s3.amazonaws.com. So weights mirrored on a GitHub release could
+  physically come in - but no mainstream photoreal model is distributed that
+  way.
+- **Even if weights arrived, the hardware kills it**: 4 CPU cores, 15 GB RAM,
+  **no GPU** (`torch.cuda.is_available()` is False). SDXL on 4 CPU cores is
+  minutes per image, and matching a series face needs IP-Adapter/LoRA on top.
+- **Shutterstock MCP: search works, download does not.** The connector returns
+  real photoreal stock with IDs and descriptions, but `image.shutterstock.com`
+  is blocked, so nothing can be fetched here. Usable as **a way to propose
+  specific stock IDs for Jacques to license and send back** - not as an asset
+  pipeline.
+
+**Conclusion that holds until the network policy changes:** Jacques generates
+the stills and sends them (a zip works; chat images do not always reach the
+filesystem). That loop is faster than anything that could be stood up in here.
+**Do not re-litigate this without re-running the tests** - and if the policy is
+ever opened, image generation works the same day, because the stack is proven.
 - **Hard limits, real ones**: cannot hear audio, cannot watch video. Jacques is
   the ear and the eye on every piece of media. That one never changes.
 
@@ -1370,16 +1599,167 @@ What shipped, all verified in a real browser before push:
 Per-addiction clocks (v7.3) and the agents upgrade rode along in the same push.
 
 
-## House rule 21 — videos are 15 to 20 seconds (Jacques, 22 Aug 2026)
+## House rule 27 — a video is not finished until it has a title and tags (Jacques, 27 Aug 2026)
 
-**Every video is 15-20 seconds. Twenty is the ceiling, not the target.**
+**Handing over an .mp4 on its own is an unfinished job.** Every finished video
+is delivered with all of the following, in the chat message that carries the
+file — not buried in AI-SCENES for him to go dig out:
 
-Jacques called this after a 31-second piece: too long for how people actually
-watch. In practice that is about **four beats**, not seven - roughly 3.5 to 4.5
-seconds a line including its fade. Every line has to earn its place, and the
-end card is 2 seconds inside the budget, not on top of it.
+1. **Social title** — the hook-first one, for TikTok and Facebook. Short enough
+   to read at a glance. This is the line that stops the scroll.
+2. **YouTube title** — the search-shaped one. Carries the keyword where
+   KEYWORDS.md actually has a term for the lane. **Where it has none (pills,
+   worry), say so instead of inventing a volume.** KEYWORDS.md is final.
+3. **Hashtags** — 4-6, specific to the lane, not generic recovery filler.
+4. **Buffer tags** — from the three the org actually has, reused not invented:
+   `addictions` · `recovery` · `partner support`. See the Buffer rules above
+   for the IDs.
+5. **The AI-generated flag reminder** (house rule 19), because Facebook cannot
+   take it through the API and it has to be set by hand.
 
-Existing longer pieces stay as they are. This governs everything new.
+Same four fields already go in the AI-SCENES entry. The rule is that they also
+go **in the handover**, so he can post straight from the message without
+opening the repo. He posts from his phone; making him cross-reference a
+markdown file to find a caption is the thing this rule exists to stop.
+
+## House rule 28 — the parallax kit is the default look (Jacques, 28 Aug 2026)
+
+**No more flat Ken Burns.** Every new piece uses three things, all free, all
+local, all proven in this container:
+
+1. **Parallax.** `python3 tools/prep-still.py <still.jpg>` writes
+   `<name>-up.jpg` (upscaled plate) and `<name>-cut.png` (subject on
+   transparency). The source moves those two layers at *different speeds*. That
+   difference is the depth - the picture stops sliding around as one sheet.
+2. **Handheld drift.** A deterministic sine-noise wobble on the camera instead
+   of a straight-line zoom. Same frame every render (no `random()`), so a
+   re-render is identical. It is the single biggest "slideshow → footage"
+   change and it costs nothing.
+3. **Film grain + vignette + grade.** Per-frame canvas grain, contrast and
+   desaturation. This kills the plastic look that is the usual tell on AI
+   stills.
+
+**`content/food-source.html` is the template - copy it, don't rewrite it.**
+
+**Where the tools came from.** Studio's own free/local half. Its generative
+half cannot run here (fal.run, queue.fal.run, rest.alpha.fal.ai, openrouter.ai,
+api.pexels.com all 403 at the gateway, and no `FAL_KEY` in this env), but three
+of its tools need no network and two of those are now in the pipeline:
+
+- **`bgremove.js`** → rembg + u2net. **The model is on a GitHub release, which
+  is reachable**, so the cutout is free and offline after one 176MB download.
+  ~4 seconds a picture. This is the whole reason parallax is possible here.
+- **`photo-tools.js`** → the Lanczos + unsharp upscaler, reimplemented in
+  `prep-still.py`. Not an AI upscaler and it invents no detail; it makes a
+  small picture usable at 1080x1920. A19's stills went 784x1168 → 1288x1920.
+- **`parallax.js`** → its depth model is on HuggingFace, so blocked. Not
+  needed: rembg's cutout does the separation instead.
+
+**House rule 13 was respected - no Studio file was edited.** The techniques
+were read and reimplemented on this side.
+
+**The honest limit:** the cutout is ONE flat layer, subject vs everything else.
+It is excellent on a single subject (A19's man, A17's man on the steps) and does
+much less on a group shot like A18's clinic frame, where three people sit at the
+same depth. Use it everywhere, but expect the payoff to vary.
+
+**First run** builds a venv at `/tmp/still-venv` and downloads u2net. Do not
+install into system site-packages - it fails here on a broken
+`setuptools-84.0.0.dist-info`.
+
+## 🚫 Play Store home address — DECIDED, do not re-open (Jacques, 28 Aug 2026)
+
+**His home address stays public on the Play listing for now. This is settled.**
+
+Google will not let an individual developer change it to anything but another
+residential address, and hiding it requires converting to an **organization**
+account (business entity + D-U-N-S + a business address). **Jacques is not doing
+that right now.** Do not keep suggesting it; it is a known cost he has accepted.
+
+Why it is public at all: the app has in-app purchases, and Play publishes the
+developer's legal name and full address in "About the developer" for any account
+that takes payments. Personal accounts cannot use a PO box or virtual office.
+
+**The one mitigation that needs no business, and is worth doing:** Google's
+**Results about you** (goo.gle/resultsaboutyou, or the profile menu in the Google
+app) will remove search results containing a home address, phone or email. It
+does **not** touch the Play listing itself — the address stays there — but it
+strips the copies that data-broker and people-search sites publish, which is
+where the real exposure is. Free, no entity needed, and a granted removal applies
+for everyone.
+
+**Also already done:** his address is NOT in this repo (checked 27 Aug), and it
+is deliberately kept off the outreach PDFs in `reference/pdf-kit/`. Keep it that
+way — public contact is the gmail address and the website.
+
+## House rule 26 — everything is 9:16 (Jacques, 27 Aug 2026)
+
+**Every video is vertical 9:16, 1080x1920. No exceptions in this lane.**
+
+**The one carve-out is YouTube long-form, and it is not ours.** Jacques has a
+different AI making those; nothing in this repo's pipeline should ever output
+16:9. If a request here seems to want landscape, it is the wrong lane - say so
+rather than building it.
+
+**What this changes in practice: ask for the stills in 9:16 up front.** The
+treatment follows the source, and there are only two:
+
+- **Source is natively 9:16 → FULL BLEED.** The frame fills 1080x1920, no
+  band, no blurred blowup. Captions need their own bottom scrim because there
+  is no dark band under them. A17 (pills) and A18 (worry) are built this way.
+- **Source is 4:3 or landscape → the letterboxed band**: the photo sits in a
+  1080x810 band on a blurred, darkened blowup of itself. This is the fallback,
+  not the goal - it wastes roughly a third of the frame. A16 (binge) is the
+  example.
+
+Full bleed is better every time: more picture, no dead bars, and it is what the
+feed actually shows. **A 4:3 still is a compromise, so ask for 9:16 before the
+image is generated rather than banding it afterwards.**
+
+Both treatments already exist in `content/*-source.html` - copy whichever
+matches the stills rather than writing a new one.
+
+## House rule 21 — videos are 5 to 8 seconds (Jacques, 27 Aug 2026)
+
+**Every video is 5-8 seconds. Eight is the ceiling, not the target.**
+
+**Length history, so nobody re-litigates it:** 15-20s (22 Aug) → 6-10s
+(27 Aug) → **5-8s (27 Aug, current)**. Each step was Jacques, same reason each
+time: too long for how people actually watch. Note where this lands - the
+Cause & Effect format in AI-SCENES.md said **5-8 seconds** when he defined it
+on 23 Aug. The rule has come back to the number the format always had. C&E was
+right and the 15-20s rule was the outlier.
+
+**What 5-8 seconds actually buys you: two beats and an end card.** Nothing
+more. Roughly 2.5-3s a caption including its fade, and the end card is ~2s
+*inside* the budget, not on top of it. Three captions do not fit - cut the
+line, don't shave the others to squeeze it in. If a piece needs three beats it
+is the wrong piece for this format.
+
+**The score problem this creates, and the fix.** Every track in
+`content/score/` is 12-14s, which is now LONGER than the cut, so the old
+treatment inverts:
+- At 15s the tracks were too short and got stretched with `atempo` (~4.5%) to
+  land on the last note.
+- At 5-8s stretching is impossible - fitting 12.36s (the shortest track there
+  is) into 7s is a 77% speed-up and would wreck it. So the score gets
+  **trimmed with a fade-out** instead, which means **it cannot end on the last
+  note at this length.**
+- **Checked 27 Aug against all 16 tracks in `content/score/`: the range is
+  12.36s to 22.66s. Not one is under 12s.** The library the other session added
+  (fading-hymns, neon-rain, static-in-the-rain, weisser-schnee, fading-light,
+  paper-kites) is 17-23s, i.e. even further from usable at this length.
+- That is a real, knowing exception to "music covers the whole video and ends
+  on the last note." Either accept the fade, or Jacques cuts 6-10s stings in
+  Suno and the rule holds again. His call, not one to make silently.
+
+**The four pieces built 26-27 Aug are all off-spec at ~15s** (A15 trauma bond,
+A16 / A16b binge, A17 pills) - roughly double the new ceiling. They were built
+to the 15-20s rule. Each has its
+source in `content/*-source.html` with the beat timings in one `SUBS` array, so
+recutting any of them to 6-10s is an edit and a re-render, not a rebuild.
+
+Existing longer pieces stay as they are unless asked. This governs everything new.
 
 ## House rule 25 — Pro sells itself quietly (Jacques, 24 Aug 2026)
 

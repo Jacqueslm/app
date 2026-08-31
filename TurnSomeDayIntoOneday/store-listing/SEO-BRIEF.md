@@ -168,3 +168,51 @@ plus first-touch UTM attribution stored per lead, so signup source is already
 tracked. Play Console gives install and store-listing conversion data.
 
 Anyone proposing a measurement plan should work with those, not assume GA4.
+
+
+---
+
+## The gmail contact address — LEAVE IT ALONE
+
+Raised 31 Aug 2026 as a possible weak "entity signal", because the
+Organization schema gives a gmail address while the app sends from
+`jacques@turnsomedayintodayone.com`. Jacques said research it before touching
+it. He was right and the suggestion was wrong. Recorded so nobody raises it
+again.
+
+`turnsomedayintodayone@gmail.com` is not a leftover. It is the single public
+INBOUND address for the whole business, used in nine places:
+
+- the privacy policy
+- the in-app terms ("questions about these terms")
+- the in-app contact line
+- **delete-account.html, twice** — the account-deletion route
+- llms.txt
+- the reviews page "send me your line" mailto
+- the Organization schema on the home page and the reviews page
+- `EMAIL_REPLY_TO` in server/email.js — the reply-to on every email sent
+
+`jacques@turnsomedayintodayone.com` is the OUTBOUND From address. Different
+job. `support@turnsomedayintodayone.com` appears exactly once, as the VAPID
+contact in push.js, which is a technical field for push services and is never
+shown to anyone.
+
+**Why changing only the schema would have made things worse.** The claim was
+that the schema disagreed with the rest of the site. It does not — it agrees
+with all eight other places. Editing it to `support@` would have created the
+exact inconsistency it was meant to fix.
+
+**Why changing it everywhere is worse still.** The privacy policy and the
+account-deletion page are compliance surfaces. The deletion URL is declared in
+Play Console and Google has reviewed it with that address on it. Rewriting a
+contact address across reviewed legal pages, on a live app, to gain a
+cosmetic preference is a bad trade.
+
+**And the premise was overstated.** Google does not penalise a free mailbox in
+Organization schema. What carries entity weight is consistency and `sameAs` —
+both of which are now in place. A domain address would read marginally more
+established to a human. That is the whole of the upside.
+
+If it is ever revisited, it is one job done everywhere at once — legal pages,
+Play Console, the schema, llms.txt and EMAIL_REPLY_TO — and never a
+one-file edit.

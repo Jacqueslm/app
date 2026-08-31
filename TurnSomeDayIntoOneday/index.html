@@ -1590,7 +1590,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="ct-scores"></div>
         </div>
       </div>
-      <div id="ct-foot"><div class="n">Left third slips left, right third slips right, the middle punches. Jab him any time — but slip his punch and the counter hits for three times more. Throwing into his windup is the only punch that costs you.</div></div>
+      <div id="ct-foot"><div class="n">Left slips left, right slips right, the middle punches — and the strip along the bottom ducks. A slip needs the right side and pays the most. A duck goes under it either way, so it is the only answer when he switches sides on you.</div></div>
     </div>
     <div id="s-vault" class="scr">
       <div id="vault-count"></div>
@@ -7815,7 +7815,7 @@ function bxTale(i){
     o.tag+'<div class="bx-tape"><canvas id="bx-tape-o" width="128" height="128"></canvas>'+
     '<div class="bx-vs">'+bxRec(o.key)+'<br>VS<br>'+a.tag.split('.')[0]+'.</div>'+
     '<canvas id="bx-tape-a" width="128" height="128"></canvas></div>'+
-    'First to three knockdowns. Get counted out and it is over - for tonight.',
+    'First to three knockdowns. Get counted out and it is over - for tonight.<div class="bx-note" style="margin-top:12px;text-align:left">Slip left, slip right, punch in the middle, or <b>tap the bottom strip to duck</b>. A duck beats the punch whichever side it came from.</div>',
     '<button class="ct-btn" onclick="bxStart('+i+')">TOUCH GLOVES</button>'+
     '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
   bxPortrait(document.getElementById('bx-tape-o'),o.pal);
@@ -7830,7 +7830,7 @@ function bxStart(oi){
   bx={opp:opp,ava:a,perk:a.perk,kd:0,you:a.perk==='fresh'?112:100,him:100,
       riseNeed:a.perk==='heart'?4:(a.perk==='corner'?5:6),
       phase:'rest',phaseAt:0,side:0,feintAt:0,feinted:false,burst:false,
-      slip:0,slipAt:0,throwAt:0,hand:1,impactAt:0,rock:0,rockSide:1,rockPow:0,
+      slip:0,slipAt:0,duckAt:0,throwAt:0,hand:1,impactAt:0,rock:0,rockSide:1,rockPow:0,
       combo:0,shake:0,flash:0,hitFlash:0,
       down:false,count:0,countAt:0,rises:0,phUsed:false,state:'live',msg:'',msgAt:0};
   bxRound();
@@ -7877,8 +7877,13 @@ function bxTick(now){
       bx.phaseAt=now-t.windMs*0.30;
       bxSay('Switch.');
     }else if(dt>t.windMs){
-      // It lands. Slipping the correct way is the only thing that beats it.
-      if(bx.slip===-bx.side){
+      // Two ways to beat it. A duck goes under it whichever side it came
+      // from - the only answer to a feint - but buys a shorter opening and
+      // no combo. A slip needs the right side and pays full.
+      if(bxDucking(now)){
+        bx.phase='open';bx.phaseAt=now-bx.tune.openMs*0.4;bx.flash=now;
+        bxSay('Under it.');
+      }else if(bx.slip===-bx.side){
         bx.phase='open';bx.phaseAt=now;bx.flash=now;
         bxSay('Slipped.');
       }else{
@@ -7988,11 +7993,27 @@ function bxWinFight(){
       '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
   }
 }
-// ── input: three zones, no buttons ──────────────────────────────────────────
+// ── input: three zones across the top, and the duck along the bottom ────────
+// Jacques: "i cant duck." He was right - there was no duck, only two slips,
+// so a feint that switched sides had no safe answer at all.
+//
+// The duck is its own strip along the bottom of the ring, where your gloves
+// are drawn and where a thumb already rests. A zone rather than a swipe on
+// purpose: a downward swipe starting in the middle would have thrown a punch
+// on the way down and eaten the wild-swing penalty for it.
+//
+// Slip vs duck is the real decision in the game. A slip needs the correct
+// side and pays a full opening plus the combo. A duck beats the punch from
+// EITHER side - it is the only answer to a feint - but the opening is short
+// and it does not build the combo, and it cannot be spammed.
+const BX_DUCK_MS=340;          // how long you stay under it
+const BX_DUCK_COOL=200;        // and how long before you can duck again
+function bxDucking(now){return bx.duckAt&&now-bx.duckAt<BX_DUCK_MS;}
 function ctTap(ev){
   if(!bx||bx.state==='over')return;
   const c=document.getElementById('ct-canvas'),r=c.getBoundingClientRect();
-  const x=(ev.clientX-r.left)/r.width,now=performance.now();
+  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+  const now=performance.now();
   if(bx.down){
     // Getting up is work. The count is still running while you do it.
     bx.taps=(bx.taps||0)+1;
@@ -8001,6 +8022,11 @@ function ctTap(ev){
     return;
   }
   if(bx.state!=='live')return;
+  if(y>0.78){
+    if(bx.duckAt&&now-bx.duckAt<BX_DUCK_MS+BX_DUCK_COOL)return;   // no spamming it
+    bx.duckAt=now;bx.slip=0;
+    return;
+  }
   if(x<0.34){bx.slip=-1;bx.slipAt=now;return;}
   if(x>0.66){bx.slip=1;bx.slipAt=now;return;}
   bxThrow(now);
@@ -8014,7 +8040,7 @@ function bxThrow(now){
   // Boxing rules now: a jab lands whenever he is not punching, the counter
   // after a slip is the shot that wins fights, and the only wrong time to
   // throw is into his live windup.
-  if(bx.phase==='open'||(bx.phase==='wind'&&bx.slip===-bx.side&&(bx.feinted||!bx.feintAt))){
+  if(bx.phase==='open'||(bx.phase==='wind'&&(bxDucking(now)||(bx.slip===-bx.side&&(bx.feinted||!bx.feintAt))))){
     // The counter - he is open, or you are already inside his punch on the
     // slip and it interrupts him. Full damage, and it chains.
     bx.impactAt=now+150;                   // the moment the glove arrives, not the tap
@@ -8066,17 +8092,21 @@ function bxCtx(c){
   return g;
 }
 function bxRing(g,W,H){
+  // Painted well past the frame on every side: ducking drops the camera by
+  // 13% of the height, and a ring that stopped at the edges left a black band
+  // across the top of every duck.
+  const PX=W*0.3,PY=H*0.3;
   const grd=g.createLinearGradient(0,0,0,H);
   grd.addColorStop(0,'#0a0c14');grd.addColorStop(0.55,'#0e1119');grd.addColorStop(1,'#05060a');
-  g.fillStyle=grd;g.fillRect(0,0,W,H);
+  g.fillStyle=grd;g.fillRect(-PX,-PY,W+PX*2,H+PY*2);
   // one hard overhead light, which is what makes a ring look like a ring
   const sp=g.createRadialGradient(W*0.5,H*0.06,10,W*0.5,H*0.06,H*0.9);
   sp.addColorStop(0,'rgba(190,205,255,0.13)');sp.addColorStop(1,'rgba(0,0,0,0)');
-  g.fillStyle=sp;g.fillRect(0,0,W,H);
+  g.fillStyle=sp;g.fillRect(-PX,-PY,W+PX*2,H+PY*2);
   g.strokeStyle='#171b28';g.lineWidth=3;
   for(let i=0;i<3;i++){
     const y=H*0.14+i*H*0.085;
-    g.beginPath();g.moveTo(-8,y);g.lineTo(W+8,y+H*0.008);g.stroke();
+    g.beginPath();g.moveTo(-PX,y);g.lineTo(W+PX,y+H*0.008);g.stroke();
   }
   g.fillStyle='rgba(255,255,255,0.02)';
   g.beginPath();g.ellipse(W*0.5,H*0.92,W*0.62,H*0.10,0,0,7);g.fill();
@@ -8253,8 +8283,9 @@ function bxFighter(g,W,H,now){
     let gr=W*(0.058+(active?strike*0.05:0));
     if(active&&launch>0){
       const k=launch*launch;
+      const over=bxDucking(now)?H*0.30:0;   // it passes above you, not through you
       gx+=(W*0.5+s*W*0.07-gx)*k;
-      gy+=(H*0.68-gy)*k;
+      gy+=(H*0.68-over-gy)*k;
       gr+=(W*0.30-gr)*k;
       for(let i=1;i<=3;i++){
         const b=Math.max(0,k-i*0.18);
@@ -8297,8 +8328,10 @@ function bxYourGloves(g,W,H,now){
   const e=ext*ext*(3-2*ext);
   for(const s of [-1,1]){
     const lead=(s===bx.hand&&dt<300);
-    const rx=W*0.5+s*W*0.34-(bx.slip?bx.slip*W*0.08:0);
-    const ry=H*0.99+Math.sin(now/700+s*2)*H*0.005-(bx.slip===s?H*0.025:0);
+    const duck=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
+    const dK=duck>0?Math.sin(Math.min(1,duck*1.6)*Math.PI*0.5):0;
+    const rx=W*0.5+s*W*(0.34-dK*0.06)-(bx.slip?bx.slip*W*0.08:0);
+    const ry=H*(0.99-dK*0.16)+Math.sin(now/700+s*2)*H*0.005-(bx.slip===s?H*0.025:0);
     const rr=W*0.105;
     const px=lead?rx+(W*0.5+s*W*0.05-rx)*e:rx;
     const py=lead?ry+(H*0.30-ry)*e:ry;
@@ -8361,6 +8394,10 @@ function bxDraw(now){
   if(sh>0)g.translate((Math.random()-0.5)*14*sh,(Math.random()-0.5)*10*sh);
   const sl=bx.slip?Math.max(0,1-(now-bx.slipAt)/300):0;
   if(sl>0)g.translate(-bx.slip*W*0.07*sl,0);
+  // ducking drops the camera, because the camera is your eyes
+  const dk=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
+  const duckK=dk>0?Math.sin(Math.min(1,dk*1.6)*Math.PI*0.5):0;
+  if(duckK>0){g.translate(0,duckK*H*0.13);g.scale(1+duckK*0.05,1+duckK*0.05);}
 
   g.clearRect(-30,-30,W+60,H+60);
   bxRing(g,W,H);
@@ -8368,10 +8405,10 @@ function bxDraw(now){
   bxYourGloves(g,W,H,now);
 
   // a red wash when he lands one
-  if(sh>0){g.fillStyle='rgba(190,40,60,'+(0.30*sh)+')';g.fillRect(-30,-30,W+60,H+60);}
+  if(sh>0){g.fillStyle='rgba(190,40,60,'+(0.30*sh)+')';g.fillRect(-W*0.3,-H*0.3,W*1.6,H*1.6);}
   // a white pop when you do
   const hf=Math.max(0,1-(now-bx.hitFlash)/170);
-  if(hf>0){g.fillStyle='rgba(255,255,255,'+(0.20*hf)+')';g.fillRect(-30,-30,W+60,H+60);}
+  if(hf>0){g.fillStyle='rgba(255,255,255,'+(0.20*hf)+')';g.fillRect(-W*0.3,-H*0.3,W*1.6,H*1.6);}
   g.restore();
 
   // health. His along the top, yours along the bottom, the way a fight card
@@ -8398,6 +8435,19 @@ function bxDraw(now){
     g.fillText(bx.msg,W/2,H*0.30);
     g.restore();
   }
+  // the duck strip, so the move is visible instead of a secret
+  const dkl=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
+  g.save();
+  g.strokeStyle=dkl>0?'rgba(126,232,162,'+(0.10+0.45*dkl)+')':'rgba(126,232,162,0.10)';
+  g.lineWidth=1;g.setLineDash([5,7]);
+  g.beginPath();g.moveTo(0,H*0.78);g.lineTo(W,H*0.78);g.stroke();
+  g.setLineDash([]);
+  if(bx.opp.idx===0&&!bx.duckAt){
+    g.font='700 9px -apple-system,Segoe UI,Roboto,sans-serif';
+    g.textAlign='center';g.fillStyle='rgba(126,232,162,0.45)';
+    g.fillText('TAP DOWN HERE TO DUCK',W/2,H*0.815);
+  }
+  g.restore();
   if(bx.down)bxDrawCount(g,W,H,now);
   bxHud();
 }

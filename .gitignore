@@ -44,6 +44,17 @@ __pycache__/
 # future session committing a NEW source by accident, the same way the video
 # extensions have since 27 Aug.
 content/*-source.html
+content/a18/
+content/a19/
+content/binge-night/
+content/couple/
+content/film-engine/
+content/food/
+content/library/
+content/pills/
+content/supporter-husband/
+content/worry/
+content/endcard-template.html
 *.mp4
 *.mov
 *.webm

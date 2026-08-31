@@ -511,7 +511,7 @@ body.nova-open #mini-player{bottom:160px}
 #ct-scores div{text-align:center}
 #ct-scores b{display:block;font-size:1.5rem;color:#f2f3f7;font-weight:800;line-height:1}
 #ct-scores span{font-size:.5625rem;letter-spacing:2.5px;color:#5f6478}
-#ct-hud{position:absolute;top:0;left:0;right:0;padding:12px 14px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start}
+#ct-hud{position:absolute;top:0;left:0;right:0;padding:22px 14px 12px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start}
 .ct-hud-l{font-size:.625rem;letter-spacing:2.4px;color:#6b7089}
 .ct-hud-r{font-size:.625rem;letter-spacing:2.4px;color:#6b7089;text-align:right}
 #ct-foot{padding:14px 16px 26px;text-align:center}
@@ -1566,7 +1566,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="ct-scores"></div>
         </div>
       </div>
-      <div id="ct-foot"><div class="n">Ten seconds a round. The count never stops - the thoughts are what keep you down, and every one you miss lands on you.</div></div>
+      <div id="ct-foot"><div class="n">Left third slips left, right third slips right, the middle throws. He tells you which side it is coming from — the tell is in his body.</div></div>
     </div>
     <div id="s-vault" class="scr">
       <div id="vault-count"></div>
@@ -7535,230 +7535,218 @@ function towerBoardDone(){
   renderTower();
 }
 
-// ─── THE COUNT ───────────────────────────────────────────────────────────────
-// Jacques, 31 Aug 2026: the tower was boring. He was right - it was a mood with
-// no game in it. This is the replacement and it is the oldest image in the
-// sport: you are down, the referee is counting, and you have ten seconds.
+// ─── THE COUNT — the fight ───────────────────────────────────────────────────
+// Jacques, 31 Aug 2026: "dont like it, make it an actually boxing game."
+// The first pass was tapping words as they floated up. It read as a mood
+// board, not a fight. This is a fight.
 //
-// The loop, and why each piece is the way it is:
+// It is a slipping game, which is what boxing actually is at close range.
+// He winds up on one side. You have a window to slip the other way. Slip it
+// and he is open - hit him. Slip the wrong way, or stand there, and you eat it.
+// Throw when he is not open and you are the one who is open.
 //
-//   The count is the clock. It runs to ten and it does not stop for anything.
-//   The thoughts are the things that keep you down - real relapse thinking,
-//   rising up the screen. Tap one and it goes. Let it reach the top and it
-//   lands on you: the UP bar drops and the count jumps forward. Missing
-//   compounds, which is the honest part.
-//   Fill the UP bar before ten and you are on your feet. Next round is faster.
+// Three zones, no buttons, no joystick: left third slips left, right third
+// slips right, the middle throws. One thumb, at arm's length, at 11pm.
 //
-// It is skill, under a hard timer, in ten-second bites - so it can be played
-// at 11pm with one hand, which is the only time it matters.
+// THE RULE THIS GAME MUST NEVER BREAK, same as The Climb and the tower before
+// it: it can end a fight. It can never tell somebody they are finished. When
+// you go down the referee counts and you tap to get up, and if the count beats
+// you the screen says the fight is over and you are not.
 //
-// THE ONE RULE THIS GAME MUST NEVER BREAK: losing is never final and the
-// screen never says otherwise. The count getting you ends a round, not a
-// person. Same rule as The Climb and the tower before it. If you are ever
-// tempted to write "down for good" on the lose screen, don't.
-const CT_LINES=[
-  'one won\'t hurt','nobody would know','you already blew it','just tonight',
-  'you deserve this','you can stop tomorrow','it was never that bad',
-  'everyone else does it','you\'ve earned it','it\'s been a long week',
-  'you\'re fine now','you can handle it','nothing else is working',
-  'what\'s the point','you always do this','you\'re not like them',
-  'you can start again Monday','it helps you sleep','it\'s only a small one',
-  'you\'ll be normal about it','nobody is watching','you can hide it',
-  'this is the last time','you weren\'t really trying',
-];
-const CT_COUNT_MAX=10;
-let ct=null,ctAnim=null;
-function ctState(){
+// No images anywhere. Every fighter, glove and rope is drawn per frame, which
+// is the only way the glove can actually pull back and the head can actually
+// snap - and it costs a few KB instead of a sprite sheet the app has to ship.
+const BX_ROUND_MS=75000;              // three minutes would be a chore on a phone
+let bx=null,bxAnim=null;
+function bxState(){
   const s=S.count||(S.count={});
-  if(typeof s.best!=='number')s.best=0;
-  if(typeof s.rounds!=='number')s.rounds=0;
+  if(typeof s.best!=='number')s.best=0;      // best round reached
+  if(typeof s.wins!=='number')s.wins=0;
   if(typeof s.plays!=='number')s.plays=0;
   return s;
 }
-// Everything that scales with the round, in one place so the difficulty curve
-// can be read and tuned without hunting through the loop.
-function ctTuning(round){
+// Everything that scales with the round, in one place so the curve can be read
+// without hunting through the loop. Every value is checked in the tests.
+function bxTuning(round){
   const r=round-1;
   return {
-    countMs:  Math.max(6000, 10000-r*420),   // ten seconds, tightening
-    spawnMs:  Math.max(520,  1350-r*70),     // how often a thought starts
-    travelMs: Math.max(1700, 3300-r*110),    // how long it takes to land
-    // Every THIRD round, and capped at eight. It used to climb by one a round
-    // while the clock shrank, and by round four it asked for seven thoughts
-    // when only six could physically spawn inside the count - unwinnable, and
-    // it looked like the player's fault. Every step of this curve is checked
-    // against the worst-case spawn run in the tests. A round must be beatable.
-    needed:   Math.min(8,    4+Math.floor(r/3)),
+    windMs:  Math.max(260, 620-r*45),   // how long he telegraphs before it lands
+    openMs:  Math.max(340, 620-r*35),   // how long he stays open after a slip
+    restMs:  Math.max(420, 1100-r*80),  // breath between his punches
+    hit:     Math.min(22,  10+r*1.5),   // what his punch takes off you
+    give:    Math.max(9,   16-r*0.7),   // what your counter takes off him
+    hp:      Math.min(180, 100+r*14),   // how much he can take
   };
 }
-function ctSetUi(eyebrow,big,sub,buttons,showScores){
-  const ui=document.getElementById('ct-ui');
-  const st=ctState();
+function bxHud(){
+  const l=document.getElementById('ct-hud-l'),r=document.getElementById('ct-hud-r');
+  if(!bx){if(l)l.textContent='';if(r)r.textContent='';return;}
+  if(l)l.textContent='ROUND '+bx.round;
+  if(r)r.textContent=bx.combo>1?bx.combo+' IN A ROW':'';
+}
+function bxUi(eyebrow,big,sub,buttons,scores){
+  const st=bxState(),ui=document.getElementById('ct-ui');
   document.getElementById('ct-eyebrow').textContent=eyebrow;
   document.getElementById('ct-big').innerHTML=big;
   document.getElementById('ct-sub').textContent=sub;
   document.getElementById('ct-buttons').innerHTML=buttons;
-  document.getElementById('ct-scores').style.display=showScores?'flex':'none';
-  document.getElementById('ct-scores').innerHTML=showScores
-    ? '<div><b>'+st.rounds+'</b><span>GOT UP</span></div><div><b>'+st.best+'</b><span>BEST</span></div>'
-    : '';
+  const sc=document.getElementById('ct-scores');
+  sc.style.display=scores?'flex':'none';
+  sc.innerHTML=scores?('<div><b>'+st.best+'</b><span>BEST ROUND</span></div>'+
+                       '<div><b>'+st.wins+'</b><span>WINS</span></div>'):'';
   ui.style.display='flex';ui.classList.add('on');
 }
-function ctHideUi(){
+function bxHideUi(){
   const ui=document.getElementById('ct-ui');
   ui.style.display='none';ui.classList.remove('on');
 }
 function renderCount(){
-  ctStop();
-  ct=null;
-  ctDrawIdle();
-  const st=ctState();
-  ctSetUi('THE COUNT','Ten seconds.<br>Get up.',
-    st.rounds?'Tap the thoughts before they land on you.':'You are on the canvas. The referee is counting. Tap the thoughts away and get to your feet before ten.',
-    '<button class="ct-btn" onclick="ctStart()">RISE</button>',true);
-  ctHud('','');
+  bxStop();bx=null;
+  bxDrawIdle();bxHud();
+  bxUi('THE COUNT','Slip it.<br>Then hit him.',
+    'He tells you which side it is coming from. Tap the other side to slip, then tap the middle while he is open. Throw at the wrong time and you are the one who is open.',
+    '<button class="ct-btn" onclick="bxStart()">TOUCH GLOVES</button>',true);
 }
-function ctHud(l,r){
-  const a=document.getElementById('ct-hud-l'),b=document.getElementById('ct-hud-r');
-  if(a)a.textContent=l;
-  if(b)b.textContent=r;
+function bxStop(){cancelAnimationFrame(bxAnim);bxAnim=null;}
+function bxStart(){
+  const st=bxState();st.plays++;save();
+  logActivity('fight_start',{});
+  bx={round:1,you:100,him:100,hisHp:100,phase:'rest',phaseAt:0,side:0,
+      slip:0,slipAt:0,throwAt:0,combo:0,shake:0,flash:0,hitFlash:0,
+      down:false,count:0,countAt:0,rises:0,state:'live',msg:'',msgAt:0};
+  bxRound(1);
 }
-function ctStop(){
-  cancelAnimationFrame(ctAnim);ctAnim=null;
+function bxRound(n){
+  const t=bxTuning(n);
+  Object.assign(bx,{round:n,tune:t,him:t.hp,hisHp:t.hp,you:Math.min(100,bx.you+ (n>1?18:0)),
+    phase:'rest',phaseAt:performance.now(),combo:0,state:'live'});
+  bxSay(n===1?'Round one.':'Round '+n+'.');
+  bxHideUi();bxHud();bxLoop();
 }
-function ctStart(){
-  const st=ctState();
-  st.plays++;save();
-  logActivity('count_play',{});
-  ct={round:1,up:0,cleared:0,thoughts:[],last:0,nextSpawn:0,started:0,countAt:0,
-      state:'live',flash:0,piled:0,roundsThisRun:0};
-  ctHideUi();
-  ctRound(1);
-}
-function ctRound(n){
-  const t=ctTuning(n);
-  Object.assign(ct,{round:n,up:0,cleared:0,thoughts:[],state:'live',
-    started:performance.now(),nextSpawn:performance.now()+400,tune:t,piled:0});
-  ctLoop();
-}
-function ctLoop(){
-  ctStop();
+function bxSay(m){bx.msg=m;bx.msgAt=performance.now();}
+function bxLoop(){
+  bxStop();
   const step=(now)=>{
-    if(!ct)return;
-    ctTick(now);
-    // ctTick can end the round mid-frame. Drawing anyway repainted the count
-    // straight back over the cleared canvas, so the lose screen read through a
-    // giant red 10.
-    if(ct.state==='down')return;
-    ctDraw(now);
-    ctAnim=requestAnimationFrame(step);
+    if(!bx)return;
+    bxTick(now);
+    if(!bx||bx.state==='over')return;
+    bxDraw(now);
+    bxAnim=requestAnimationFrame(step);
   };
-  ctAnim=requestAnimationFrame(step);
+  bxAnim=requestAnimationFrame(step);
 }
-// How far the referee has counted, 0..10. Missed thoughts push it forward -
-// that is what "it compounds" means mechanically.
-function ctCountNow(now){
-  if(!ct||!ct.tune)return 0;
-  const base=(now-ct.started)/ct.tune.countMs*CT_COUNT_MAX;
-  return Math.min(CT_COUNT_MAX,base+ct.piled*0.42);
-}
-function ctTick(now){
-  if(ct.state!=='live')return;
-  const t=ct.tune,W=1;
-  if(now>=ct.nextSpawn){
-    ct.thoughts.push({
-      text:CT_LINES[Math.floor(Math.random()*CT_LINES.length)],
-      x:0.12+Math.random()*0.76,
-      born:now,
-      hit:0,
-    });
-    ct.nextSpawn=now+t.spawnMs*(0.85+Math.random()*0.4);
-  }
-  ct.thoughts=ct.thoughts.filter(th=>{
-    if(th.hit)return now-th.hit<260;                 // let the shatter play out
-    const p=(now-th.born)/t.travelMs;
-    if(p>=1){                                        // it landed on you
-      ct.piled++;
-      ct.up=Math.max(0,ct.up-0.6);
-      if(navigator.vibrate)try{navigator.vibrate(28);}catch(e){}
-      return false;
+function bxTick(now){
+  if(bx.state!=='live')return;
+  if(bx.down){bxTickCount(now);return;}
+  const t=bx.tune,dt=now-bx.phaseAt;
+  if(bx.phase==='rest'&&dt>t.restMs){
+    bx.side=Math.random()<0.5?-1:1;
+    bx.phase='wind';bx.phaseAt=now;
+  }else if(bx.phase==='wind'&&dt>t.windMs){
+    // It lands. Slipping the correct way is the only thing that beats it.
+    if(bx.slip===-bx.side){
+      bx.phase='open';bx.phaseAt=now;bx.flash=now;
+      bxSay('Slipped.');
+    }else{
+      bxHurt(now,t.hit);
+      bx.phase='rest';bx.phaseAt=now;
     }
-    return true;
-  });
-  if(ct.up>=t.needed){ctWon(now);return;}
-  if(ctCountNow(now)>=CT_COUNT_MAX)ctLost();
+  }else if(bx.phase==='open'&&dt>t.openMs){
+    bx.phase='rest';bx.phaseAt=now;bx.combo=0;
+  }
+  if(bx.slip&&now-bx.slipAt>300)bx.slip=0;
 }
-function ctWon(now){
-  ct.state='won';
-  ct.roundsThisRun++;
-  const st=ctState();
-  st.rounds++;
-  if(ct.roundsThisRun>st.best)st.best=ct.roundsThisRun;
+function bxHurt(now,amount){
+  bx.you=Math.max(0,bx.you-amount);
+  bx.combo=0;bx.shake=now;
+  if(navigator.vibrate)try{navigator.vibrate(45);}catch(e){}
+  if(bx.you<=0)bxGoDown(now);
+}
+// Down, and the referee starts counting. Tapping is how you get up - the
+// mechanic the whole thing is named for.
+function bxGoDown(now){
+  bx.down=true;bx.count=0;bx.countAt=now;bx.taps=0;bx.phase='rest';
+  bxSay('Down.');
+}
+function bxTickCount(now){
+  bx.count=(now-bx.countAt)/1000;
+  if(bx.count>=10)bxLost();
+}
+function bxRise(){
+  bx.down=false;bx.rises++;bx.you=52;bx.combo=0;
+  bx.phase='rest';bx.phaseAt=performance.now();
+  bxSay('Up.');
+  if(navigator.vibrate)try{navigator.vibrate([20,40,20]);}catch(e){}
+}
+function bxLost(){
+  bx.state='over';bxStop();bxDrawIdle();bxHud();
+  const st=bxState();
+  if(bx.round-1>st.best)st.best=bx.round-1;
   save();
-  ct.flash=now;
-  setTimeout(()=>{if(ct&&ct.state==='won')ctRound(ct.round+1);},1000);
+  logActivity('fight_end',{round:bx.round,won:false});
+  bxUi('TEN','The fight is over.',
+    // Never "you're finished". It ends a fight. It does not end anybody.
+    'The fight is over. You are not. Rounds do not carry over — the bell does.',
+    '<button class="ct-btn" onclick="bxStart()">AGAIN</button>'+
+    '<button class="ct-btn ghost" onclick="renderCount()">Sit down a minute</button>',true);
 }
-function ctLost(){
-  ct.state='down';
-  ctStop();
-  ctDrawIdle();
-  const st=ctState();
-  logActivity('count_round',{rounds:ct.roundsThisRun,best:st.best});
-  const n=ct.roundsThisRun;
-  ctSetUi('TEN',
-    n?('You got up '+n+'<br>time'+(n===1?'':'s')+'.'):'The count got you.',
-    // Never "down for good". The count ends a round. It does not get to keep
-    // anybody, and this screen is read by people at their worst.
-    'That one got you. It does not get to keep you.',
-    '<button class="ct-btn" onclick="ctStart()">RISE AGAIN</button>'+
-    '<button class="ct-btn ghost" onclick="renderCount()">Not now</button>',true);
-  ctHud('','');
+function bxWonRound(now){
+  bx.state='between';bxStop();
+  const st=bxState();
+  if(bx.round>st.best)st.best=bx.round;
+  save();
+  bxDrawIdle();
+  bxUi('ROUND '+bx.round,'Down he goes.',
+    'That is round '+bx.round+'. He gets up too, and he is quicker next time.',
+    '<button class="ct-btn" onclick="bxNext()">NEXT ROUND</button>'+
+    '<button class="ct-btn ghost" onclick="bxQuit()">Take the win</button>',true);
 }
-// One x for both the drawing and the tap. Without this a long thought spawned
-// with its centre near the edge and drew half off-screen - visible, unhittable,
-// and it still landed on you. A pill you cannot reach is not difficulty.
-// Where a thought is on its way up, 0..1 of the stage. Shared for the same
-// reason as ctThoughtX: it was written out twice, in the drawing and in the
-// hit test, and two copies of a moving target only ever drift apart. It now
-// starts just below the frame so nothing spawns sitting on the UP bar.
-function ctThoughtY(th,now,t){
-  return 1.03-((now-th.born)/t.travelMs)*0.95;
+function bxNext(){bx.state='live';bxRound(bx.round+1);}
+function bxQuit(){
+  const st=bxState();st.wins++;save();
+  logActivity('fight_end',{round:bx.round,won:true});
+  bx=null;renderCount();
 }
-function ctThoughtX(th,W,g){
-  g.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
-  const half=(g.measureText(th.text).width/2+21)/W;
-  return Math.min(1-half,Math.max(half,th.x));
-}
+// ── input: three zones, no buttons ──────────────────────────────────────────
 function ctTap(ev){
-  if(!ct||ct.state!=='live')return;
+  if(!bx||bx.state==='over')return;
   const c=document.getElementById('ct-canvas'),r=c.getBoundingClientRect();
-  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
-  const now=performance.now(),t=ct.tune,g=c.getContext('2d');
-  let best=null,bestD=9;
-  ct.thoughts.forEach(th=>{
-    if(th.hit)return;
-    const p=(now-th.born)/t.travelMs;
-    const ty=ctThoughtY(th,now,t);
-    const d=Math.abs(y-ty)+Math.abs(x-ctThoughtX(th,r.width,g))*0.22;
-    if(d<bestD){bestD=d;best=th;}
-  });
-  // Generous target: a thought is a word on a moving line, and a miss because
-  // the hitbox was mean is not the difficulty this game is about.
-  if(best&&bestD<0.11){
-    best.hit=now;
-    ct.up++;ct.cleared++;
-    if(navigator.vibrate)try{navigator.vibrate(10);}catch(e){}
+  const x=(ev.clientX-r.left)/r.width,now=performance.now();
+  if(bx.down){
+    // Getting up is work. Six taps, and the count is still running.
+    bx.taps=(bx.taps||0)+1;
+    bx.hitFlash=now;
+    if(bx.taps>=6)bxRise();
+    return;
+  }
+  if(bx.state!=='live')return;
+  if(x<0.34){bx.slip=-1;bx.slipAt=now;return;}
+  if(x>0.66){bx.slip=1;bx.slipAt=now;return;}
+  bxThrow(now);
+}
+function bxThrow(now){
+  bx.throwAt=now;
+  if(bx.phase==='open'){
+    bx.combo++;
+    bx.him=Math.max(0,bx.him-(bx.tune.give+bx.combo*2));
+    bx.hitFlash=now;
+    if(navigator.vibrate)try{navigator.vibrate(14);}catch(e){}
+    if(bx.him<=0){bxWonRound(now);return;}
+    bx.phase='rest';bx.phaseAt=now;
+    bxSay(bx.combo>2?'Again.':'');
+  }else{
+    // Throwing into nothing leaves you open, and he takes it.
+    bxHurt(now,Math.round(bx.tune.hit*0.55));
+    bxSay('Wild.');
   }
 }
-function ctDrawIdle(){
-  const c=document.getElementById('ct-canvas');
-  if(!c||!c.clientWidth)return;
-  const g=ctCtx(c),W=c.clientWidth,H=c.clientHeight;
-  g.clearRect(0,0,W,H);
-  g.fillStyle='#07080c';g.fillRect(0,0,W,H);
-  ctDrawRing(g,W,H,0.25);
-}
-function ctCtx(c){
+
+// ── drawing: no images, every frame built from shapes ────────────────────────
+// The whole reason not to use sprites: the glove has to actually pull back
+// during the windup and actually lunge at the camera on the strike. A sprite
+// sheet cannot do that without a dozen frames per punch; a circle whose radius
+// and position are functions of time can.
+function bxCtx(c){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   const W=c.clientWidth,H=c.clientHeight;
   if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){
@@ -7768,87 +7756,189 @@ function ctCtx(c){
   g.setTransform(dpr,0,0,dpr,0,0);
   return g;
 }
-// The ring: three ropes and a canvas floor. Cheap, and it says boxing in one
-// glance without a single image file.
-function ctDrawRing(g,W,H,alpha){
-  g.save();g.globalAlpha=alpha;
-  g.strokeStyle='#1d2130';g.lineWidth=2;
+function bxRing(g,W,H){
+  const grd=g.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0,'#0a0c14');grd.addColorStop(0.55,'#0e1119');grd.addColorStop(1,'#05060a');
+  g.fillStyle=grd;g.fillRect(0,0,W,H);
+  // one hard overhead light, which is what makes a ring look like a ring
+  const sp=g.createRadialGradient(W*0.5,H*0.06,10,W*0.5,H*0.06,H*0.9);
+  sp.addColorStop(0,'rgba(190,205,255,0.13)');sp.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=sp;g.fillRect(0,0,W,H);
+  g.strokeStyle='#171b28';g.lineWidth=3;
   for(let i=0;i<3;i++){
-    const y=H*0.10+i*H*0.055;
-    g.beginPath();g.moveTo(-10,y);g.lineTo(W+10,y+H*0.012);g.stroke();
+    const y=H*0.14+i*H*0.085;
+    g.beginPath();g.moveTo(-8,y);g.lineTo(W+8,y+H*0.008);g.stroke();
   }
-  const grd=g.createLinearGradient(0,H*0.28,0,H);
-  grd.addColorStop(0,'#0d1017');grd.addColorStop(1,'#05060a');
-  g.fillStyle=grd;g.fillRect(0,H*0.28,W,H*0.72);
-  g.restore();
+  g.fillStyle='rgba(255,255,255,0.02)';
+  g.beginPath();g.ellipse(W*0.5,H*0.92,W*0.62,H*0.10,0,0,7);g.fill();
 }
-function ctDraw(now){
-  const c=document.getElementById('ct-canvas');
-  if(!c||!c.clientWidth||!ct)return;
-  const g=ctCtx(c),W=c.clientWidth,H=c.clientHeight,t=ct.tune;
-  g.clearRect(0,0,W,H);
-  g.fillStyle='#07080c';g.fillRect(0,0,W,H);
-  ctDrawRing(g,W,H,0.5);
+// The opponent, in silhouette. Head, shoulders, two gloves. He leans and winds
+// on the side he is about to throw from, so the tell is in the body, not a
+// caption.
+function bxFighter(g,W,H,now){
+  const t=bx.tune,dt=now-bx.phaseAt;
+  let wind=0,lunge=0;
+  if(bx.phase==='wind')wind=Math.min(1,dt/t.windMs);
+  if(bx.phase==='open')lunge=0;
+  const openK=bx.phase==='open'?Math.min(1,dt/120):0;
+  const cx=W*0.5+bx.side*wind*W*0.05, cy=H*0.52;
+  const sway=Math.sin(now/620)*W*0.008;
+  const stunned=bx.phase==='open';
 
-  // the count, huge and behind everything
-  const cnt=ctCountNow(now),shown=Math.min(CT_COUNT_MAX,Math.floor(cnt)+1);
-  const urgency=cnt/CT_COUNT_MAX;
   g.save();
-  g.globalAlpha=0.16+urgency*0.30;
-  g.fillStyle=urgency>0.75?'#e2566f':'#93a0c8';
-  g.font='800 '+Math.round(H*0.42)+'px -apple-system,Segoe UI,Roboto,sans-serif';
-  g.textAlign='center';g.textBaseline='middle';
-  g.fillText(String(shown),W/2,H*0.52);
+  g.translate(cx+sway, cy + (stunned?H*0.03*openK:0));
+  if(stunned)g.rotate(0.10*openK*bx.side);
+
+  const bodyW=W*0.46,bodyH=H*0.34;
+  // Torso, then a rim light down the shoulders. Without the rim he was a dark
+  // shape on a dark ring - the silhouette only reads as a man once the lamp
+  // above the ring catches the top of him.
+  g.fillStyle=stunned?'#232c40':'#1a2130';
+  g.beginPath();
+  g.moveTo(-bodyW/2,bodyH*0.62);
+  g.quadraticCurveTo(-bodyW*0.52,-bodyH*0.30,-bodyW*0.22,-bodyH*0.48);
+  g.quadraticCurveTo(0,-bodyH*0.56,bodyW*0.22,-bodyH*0.48);
+  g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW/2,bodyH*0.62);
+  g.closePath();g.fill();
+  g.strokeStyle='rgba(180,198,255,0.16)';g.lineWidth=2;
+  g.beginPath();
+  g.moveTo(-bodyW*0.50,bodyH*0.10);
+  g.quadraticCurveTo(-bodyW*0.52,-bodyH*0.30,-bodyW*0.22,-bodyH*0.48);
+  g.quadraticCurveTo(0,-bodyH*0.56,bodyW*0.22,-bodyH*0.48);
+  g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW*0.50,bodyH*0.10);
+  g.stroke();
+
+  const hr=W*0.105;
+  g.fillStyle=stunned?'#2e3850':'#232b3c';
+  g.beginPath();g.arc(0,-bodyH*0.72,hr,0,7);g.fill();
+  const hl=g.createLinearGradient(0,-bodyH*0.72-hr,0,-bodyH*0.72+hr);
+  hl.addColorStop(0,'rgba(200,215,255,0.22)');hl.addColorStop(0.6,'rgba(0,0,0,0)');
+  g.fillStyle=hl;g.beginPath();g.arc(0,-bodyH*0.72,hr,0,7);g.fill();
+  if(stunned){                                   // eyes go out for a moment
+    g.strokeStyle='#7ee8a2';g.lineWidth=2;
+    for(const s of [-1,1]){
+      g.beginPath();
+      g.moveTo(s*W*0.042-6,-bodyH*0.76-5);g.lineTo(s*W*0.042+6,-bodyH*0.76+5);
+      g.moveTo(s*W*0.042-6,-bodyH*0.76+5);g.lineTo(s*W*0.042+6,-bodyH*0.76-5);
+      g.stroke();
+    }
+  }
   g.restore();
 
-  // the thoughts, rising
-  g.textAlign='center';g.textBaseline='middle';
-  ct.thoughts.forEach(th=>{
-    const p=(now-th.born)/t.travelMs;
-    const y=ctThoughtY(th,now,t)*H;
-    const x=ctThoughtX(th,W,g)*W;
-    if(th.hit){
-      const k=(now-th.hit)/260;
-      g.save();g.globalAlpha=1-k;
-      g.font='700 '+Math.round(13+k*10)+'px -apple-system,Segoe UI,Roboto,sans-serif';
-      g.fillStyle='#7ee8a2';
-      g.fillText(th.text,x,y);
-      g.restore();return;
+  // gloves. The near one pulls back and grows as it comes at the camera.
+  const strike=bx.phase==='wind'?Math.pow(wind,3):0;
+  for(const s of [-1,1]){
+    const active=(s===bx.side&&bx.phase==='wind');
+    const pull=active?wind:0;
+    const gx=cx+sway+s*W*(0.20+pull*0.06)-strike*(active?s*W*0.14:0);
+    const gy=cy-H*0.02-(active?pull*H*0.05:0)+Math.sin(now/540+s)*H*0.006
+             +(active?strike*H*0.09:0);
+    const gr=W*(0.058+(active?strike*0.075:0));
+    g.beginPath();g.arc(gx,gy,gr,0,7);
+    g.fillStyle=active?(strike>0.75?'#c9455e':'#8e3448'):'#1c222f';
+    if(active){g.shadowColor='rgba(200,60,85,0.55)';g.shadowBlur=22*strike;}
+    g.fill();g.shadowBlur=0;
+    if(active){
+      g.strokeStyle='rgba(255,255,255,'+(0.10+strike*0.35)+')';g.lineWidth=2;g.stroke();
     }
-    g.save();
-    g.globalAlpha=Math.min(1,p*4);
-    g.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
-    const pad=13,w=g.measureText(th.text).width+pad*2,h=30;
-    g.beginPath();
-    if(g.roundRect)g.roundRect(x-w/2,y-h/2,w,h,15);else g.rect(x-w/2,y-h/2,w,h);
-    g.fillStyle='#181d2b';g.fill();
-    g.lineWidth=1;
-    g.strokeStyle='#2b3247';g.stroke();
-    g.fillStyle='#c3c8da';
-    g.fillText(th.text,x,y);
-    g.restore();
-  });
-
-  // the UP bar - how far off the canvas you are
-  const need=t.needed,frac=Math.min(1,ct.up/need);
-  const bx=14,bw=W-28,by=H-14;
-  g.fillStyle='#141824';g.beginPath();
-  if(g.roundRect)g.roundRect(bx,by,bw,8,4);else g.rect(bx,by,bw,8);
+  }
+}
+// Your own gloves, low in frame, so the camera is behind your eyes.
+function bxYourGloves(g,W,H,now){
+  const punching=now-bx.throwAt<170;
+  const p=punching?1-(now-bx.throwAt)/170:0;
+  for(const s of [-1,1]){
+    const lead=(s===1);
+    const px=W*0.5+s*W*0.30+(bx.slip? -bx.slip*W*0.10:0)+(lead?p*W*0.06:0);
+    const py=H*0.92-(lead?p*H*0.30:0)+Math.sin(now/700+s*2)*H*0.006;
+    const pr=W*0.115+(lead?p*W*0.03:0);
+    g.beginPath();g.arc(px,py,pr,0,7);
+    const gl=g.createLinearGradient(px,py-pr,px,py+pr);
+    gl.addColorStop(0,'#313b52');gl.addColorStop(1,'#1b2231');
+    g.fillStyle=gl;g.fill();
+    g.strokeStyle='rgba(190,205,255,0.13)';g.lineWidth=2;g.stroke();
+  }
+}
+function bxBar(g,x,y,w,h,frac,col,bg){
+  g.fillStyle=bg;g.beginPath();
+  if(g.roundRect)g.roundRect(x,y,w,h,h/2);else g.rect(x,y,w,h);
   g.fill();
-  g.fillStyle=frac>=1?'#7ee8a2':'#e8e9ee';g.beginPath();
-  if(g.roundRect)g.roundRect(bx,by,Math.max(4,bw*frac),8,4);else g.rect(bx,by,Math.max(4,bw*frac),8);
+  g.fillStyle=col;g.beginPath();
+  const ww=Math.max(2,w*Math.max(0,Math.min(1,frac)));
+  if(g.roundRect)g.roundRect(x,y,ww,h,h/2);else g.rect(x,y,ww,h);
   g.fill();
+}
+function bxDrawIdle(){
+  const c=document.getElementById('ct-canvas');
+  if(!c||!c.clientWidth)return;
+  const g=bxCtx(c),W=c.clientWidth,H=c.clientHeight;
+  g.clearRect(0,0,W,H);bxRing(g,W,H);
+}
+function bxDraw(now){
+  const c=document.getElementById('ct-canvas');
+  if(!c||!c.clientWidth||!bx)return;
+  const g=bxCtx(c),W=c.clientWidth,H=c.clientHeight;
+  g.save();
+  const sh=Math.max(0,1-(now-bx.shake)/260);
+  if(sh>0)g.translate((Math.random()-0.5)*14*sh,(Math.random()-0.5)*10*sh);
+  const sl=bx.slip?Math.max(0,1-(now-bx.slipAt)/300):0;
+  if(sl>0)g.translate(-bx.slip*W*0.07*sl,0);
 
-  ctHud('ROUND '+ct.round,'UP '+Math.floor(ct.up)+' / '+need);
+  g.clearRect(-30,-30,W+60,H+60);
+  bxRing(g,W,H);
+  bxFighter(g,W,H,now);
+  bxYourGloves(g,W,H,now);
 
-  if(ct.state==='won'){
-    const k=Math.min(1,(now-ct.flash)/900);
-    g.save();g.globalAlpha=1-k;
-    g.fillStyle='#7ee8a2';
-    g.font='800 '+Math.round(H*0.16)+'px -apple-system,Segoe UI,Roboto,sans-serif';
-    g.fillText('UP',W/2,H*0.5);
+  // a red wash when he lands one
+  if(sh>0){g.fillStyle='rgba(190,40,60,'+(0.30*sh)+')';g.fillRect(-30,-30,W+60,H+60);}
+  // a white pop when you do
+  const hf=Math.max(0,1-(now-bx.hitFlash)/170);
+  if(hf>0){g.fillStyle='rgba(255,255,255,'+(0.20*hf)+')';g.fillRect(-30,-30,W+60,H+60);}
+  g.restore();
+
+  // health. His along the top, yours along the bottom, the way a fight card reads.
+  // His along the top edge, yours along the bottom. Both were inset far enough
+  // to sit under the HUD text, so ROUND 1 was printed through his health.
+  bxBar(g,14,7,W-28,6,bx.him/bx.tune.hp,'#c9455e','#181d29');
+  bxBar(g,14,H-13,W-28,6,bx.you/100,'#7ee8a2','#181d29');
+
+  // the tell, in words as well as body, for the first round only
+  if(bx.round===1&&bx.phase==='wind'){
+    g.save();g.globalAlpha=0.5;
+    g.font='700 11px -apple-system,Segoe UI,Roboto,sans-serif';
+    g.textAlign='center';g.fillStyle='#c9455e';
+    // ASCII only in canvas text: an em dash here rendered as mojibake wherever
+    // the document's charset was not declared, and the tell is the one line
+    // that has to be readable.
+    g.fillText(bx.side<0?'COMING FROM YOUR LEFT. SLIP RIGHT.':'COMING FROM YOUR RIGHT. SLIP LEFT.',W/2,H*0.20);
     g.restore();
   }
+  if(bx.msg&&now-bx.msgAt<1100){
+    g.save();g.globalAlpha=Math.max(0,1-(now-bx.msgAt)/1100);
+    g.font='800 20px -apple-system,Segoe UI,Roboto,sans-serif';
+    g.textAlign='center';g.fillStyle='#e8ebf5';
+    g.fillText(bx.msg,W/2,H*0.30);
+    g.restore();
+  }
+  if(bx.down)bxDrawCount(g,W,H,now);
+  bxHud();
+}
+// The ten count, over the top of the ring. Tapping fills the bar and gets you up.
+function bxDrawCount(g,W,H,now){
+  g.save();
+  g.fillStyle='rgba(4,5,9,0.82)';g.fillRect(0,0,W,H);
+  const n=Math.min(10,Math.floor(bx.count)+1);
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle=bx.count>7?'#e2566f':'#8e97b5';
+  g.font='800 '+Math.round(H*0.34)+'px -apple-system,Segoe UI,Roboto,sans-serif';
+  g.globalAlpha=0.9;
+  g.fillText(String(n),W/2,H*0.42);
+  g.globalAlpha=1;
+  g.font='700 12px -apple-system,Segoe UI,Roboto,sans-serif';
+  g.fillStyle='#c3c8da';
+  g.fillText('TAP TO GET UP',W/2,H*0.66);
+  bxBar(g,W*0.2,H*0.72,W*0.6,8,(bx.taps||0)/6,'#7ee8a2','#1a2030');
+  g.restore();
 }
 
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
@@ -13073,7 +13163,7 @@ function switchTo(id,opts){
   // The tower runs a requestAnimationFrame loop and can hold a dare timer.
   // Neither has any business still running on another screen.
   if(from==='tower'&&id!=='tower'){try{towerStop();}catch(e){}}
-  if(from==='count'&&id!=='count'){try{ctStop();}catch(e){}}
+  if(from==='count'&&id!=='count'){try{bxStop();}catch(e){}}
   if(!(opts&&opts.fromBack)&&from&&from!==id){
     screenHistory.push(from);
     if(screenHistory.length>30)screenHistory.shift();
@@ -14342,7 +14432,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.3';
+const APP_VERSION='9.4';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

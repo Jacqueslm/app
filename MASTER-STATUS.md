@@ -1132,6 +1132,27 @@ commit dies with the container; that is how the 18 Aug marketing batch was lost.
 - **`.gitignore` now blocks `*.mp4 *.mov *.webm *.m4v *.avi *.mkv` repo-wide**,
   so no future session can commit one by accident.
 
+**ONLY MUSIC GOES IN THE REPO (Jacques, 31 Aug 2026) — TIGHTENS the 27 Aug rule above.**
+
+- *"we dont push videos no more only music."*
+- The 27 Aug rule kept **everything needed to rebuild a video** in git — the
+  `*-source.html`, the stills, the spec JSON. **That part is now withdrawn.**
+  No video work goes in: not the .mp4, not the source, not the stills.
+- **Music and audio still go in**, exactly as before: `content/score/`,
+  `TurnSomeDayIntoOneday/audio/`, anything else uploaded here.
+- **`tools/render-film.js`, `tools/prep-still.py` and `tools/make-film.py` stay**
+  — they are tooling, not video work, and every future piece needs them.
+- **Sources are handed over in chat**, the same way finished .mp4s are. Jacques
+  keeps them in his own file alongside the videos they build.
+
+**The cost of this rule, stated once so nobody is surprised by it later:** an
+uncommitted file dies when the container is reclaimed. That is exactly how the
+18 Aug marketing batch was lost (see house rule 18 above). A video whose source
+is not in git and not in Jacques's file **cannot be re-rendered or re-cut** —
+not to fix a typo, not to swap a track, not to change a caption. The .mp4 is
+then the only copy that exists. That is a real trade and it is his to make; it
+is recorded here so it is a decision rather than an accident.
+
 **Buffer posting rules (Jacques, 27 Aug 2026) — supersedes the 24 Aug block above.**
 
 1. **DO NOT QUEUE TO BUFFER.** Jacques posts. Videos get built, committed and

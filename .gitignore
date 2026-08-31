@@ -61,3 +61,12 @@ content/endcard-template.html
 *.m4v
 *.avi
 *.mkv
+
+# The user database and its backups. These hold real people's journals,
+# cravings and emails; a database committed once is in the history forever,
+# even after a later delete. Running the server locally creates both.
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+TurnSomeDayIntoOneday/server/backups/

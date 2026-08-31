@@ -1526,7 +1526,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div id="tw-panel"></div>
         <button id="tw-vault-link" onclick="openTowerVault()">THE VAULT</button>
         <button id="tw-climb-link" onclick="openClimb()">THE CLIMB · 90 STEPS</button>
-        <div id="tw-foot">Ten floors are built. The tower goes to ninety.</div>
+        <div id="tw-foot">Ninety floors. One for every day you show up.</div>
       </div>
     </div>
 
@@ -6776,7 +6776,11 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   5. Floors 1-10 are the free tier, which is exactly all of Phase 1, so
 //      there is no Pro gate in here yet by design.
 //   6. No new dependencies - canvas plus vanilla JS, inside this same file.
-const TOWER_PHASE1_FLOORS=10;
+// Floors 1-10 are free; 11-90 are Pro. The whole ninety are built, so the
+// cap is a plan boundary now, not the edge of what exists.
+const TOWER_FREE_FLOORS=10;
+const TOWER_TOP_FLOOR=90;
+function towerMaxFloor(){return S.isPro?TOWER_TOP_FLOOR:TOWER_FREE_FLOORS;}
 // Ten floors. Each one is its own place: its own rooms, palette, air and rule.
 // Rooms live in 0..1 of the stage. The stairs are not a room until the door is
 // open, and the door is always the only way to them.
@@ -6891,6 +6895,818 @@ const TOWER_FLOORS=[
    dare:{text:'Say the number out loud to one person. "Ten days." That is the whole sentence.',seconds:60,hold:false},
    line:'First floor with a window in it. That is all this is.',
    sides:{side1:{name:'LANDING WINDOW',line:'You can see the street from here. It is the first floor you can.'}}},
+
+  {n:11,name:'THE SECOND WEEK',rule:'none',air:'grain',
+   pal:{bg:'#04080e',room:'#080d19',roomOn:'#101b32',stroke:'#131e33',strokeOn:'#5769a8',line:'#1f2d4d',label:'#576383'},
+   rooms:{entry:[0.16,0.62],side1:[0.4,0.24],door:[0.86,0.24],stairs:[0.86,0.62]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor eleven. The second week is quieter than the first.','The novelty is gone and the days are just days now.'],
+   truth:'What is harder this week than it was in the first week?',
+   dare:{text:'Write down the three hardest hours of your day. Just the times.',seconds:75,hold:false},
+   line:'Nothing dramatic on this floor. That is what makes it hard.',
+   sides:{side1:{name:'DIARY ROOM',line:'A page for every day. The first few are neat. Then the handwriting goes.'}}},
+
+  {n:12,name:'THE FIRST LIE',rule:'fog',air:'rain',
+   pal:{bg:'#04080f',room:'#080e1b',roomOn:'#111c35',stroke:'#142037',strokeOn:'#5d70b4',line:'#213053',label:'#5d6a8c'},
+   rooms:{entry:[0.13,0.5],side1:[0.36,0.22],side2:[0.36,0.78],door:[0.86,0.5],stairs:[0.86,0.18]},
+   edges:[['entry','side1'],['entry','side2'],['door','stairs'],['side2','door']],
+   brief:['Floor twelve. Nothing big has been lied about yet.','Small ones start before big ones do.'],
+   truth:'What have you shaded, left out or made smaller in the last week?',
+   dare:{text:'Correct one small thing you said that was not quite true. One sentence.',seconds:60,hold:false},
+   line:'Two doors marked the same. Only one of them is where you said you were.',
+   sides:{side1:{name:'BACK ROOM',line:'Nothing wrong in here. That is exactly why you would say you were in it.'},
+          side2:{name:'FRONT ROOM',line:'The light is on and the curtains are open. Harder to be in.'}}},
+
+  {n:13,name:'NOBODY NOTICED',rule:'quiet',air:'dust',
+   pal:{bg:'#040910',room:'#090f1c',roomOn:'#121e39',stroke:'#15223b',strokeOn:'#6377c0',line:'#243458',label:'#637196'},
+   rooms:{entry:[0.14,0.36],side1:[0.4,0.72],door:[0.86,0.72],stairs:[0.86,0.34]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor thirteen. You are doing the hardest thing of your year.','Nobody is going to announce it for you.'],
+   truth:'Who have you been waiting to notice, and what are you waiting for them to say?',
+   dare:{text:'Tell one person a true sentence about how this week has gone.',seconds:60,hold:false},
+   line:'The floor is full and none of it is looking at you.',
+   sides:{side1:{name:'WAITING ROOM',line:'Chairs against every wall. All of them facing the door.'}}},
+
+  {n:14,name:'THE GOOD DAY',rule:'dim',air:'glow',
+   pal:{bg:'#050911',room:'#09101e',roomOn:'#13203c',stroke:'#17243e',strokeOn:'#697fcc',line:'#26375e',label:'#69789f'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fourteen. Today was easy and that is its own problem.','A day this easy is not proof you were never in trouble.'],
+   truth:'What did you tell yourself the last time a good stretch ended?',
+   dare:{text:'Write the sentence you would need to read on a bad night. Keep it.',seconds:90,hold:false},
+   line:'Warm floor. Everything works. Note the exits anyway.',
+   sides:{side1:{name:'SUN ROOM',line:'It is genuinely nice in here. That is not a trick.'}}},
+
+  {n:15,name:'HALFWAY TO NOTHING',rule:'sequence',air:'static',
+   pal:{bg:'#050a12',room:'#0a1120',roomOn:'#142240',stroke:'#182642',strokeOn:'#6f86d8',line:'#283a63',label:'#6f7fa8'},
+   rooms:{entry:[0.17,0.44],side1:[0.47,0.76],door:[0.82,0.44],stairs:[0.82,0.78]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   doorNeeds:['side1'],
+   brief:['Floor fifteen. Two weeks. Not nothing, not much.','Two weeks is real and it is also not very much.'],
+   truth:'What are you counting toward, and what happens the day after you reach it?',
+   dare:{text:'Say a number out loud that is not your day count. Something you are building.',seconds:45,hold:false},
+   line:'The stairs keep going up past where you can see.',
+   sides:{side1:{name:'STAIR HEAD',line:'More floors above this one than below it. A lot more.'}}},
+
+  {n:16,name:'THE OFFER',rule:'echo',air:'grid',
+   pal:{bg:'#050b13',room:'#0b1222',roomOn:'#152444',stroke:'#192846',strokeOn:'#758de4',line:'#2a3d68',label:'#7586b1'},
+   rooms:{entry:[0.17,0.7],side1:[0.5,0.38],door:[0.83,0.7],stairs:[0.83,0.3]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixteen. Somebody is going to offer.','Somebody will offer, and they will not mean any harm by it.'],
+   truth:'Who is most likely to offer, and what will you actually say?',
+   dare:{text:'Say your no out loud, in your own voice, right now. Once.',seconds:45,hold:true},
+   line:'Someone left the door open for you. It is a kindness and it is a problem.',
+   sides:{side1:{name:'SIDE DOOR',line:'Propped open with a shoe. Somebody meant well.'}}},
+
+  {n:17,name:'THE OLD FRIEND',rule:'pull',air:'embers',wave:true,
+   pal:{bg:'#060b14',room:'#0b1324',roomOn:'#162647',stroke:'#1b2a49',strokeOn:'#7b95f0',line:'#2c406e',label:'#7b8dba'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],side2:[0.62,0.72],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['side1','side2'],['side2','door'],['door','stairs']],
+   brief:['Floor seventeen. Some people only knew the old version.','Some people only ever knew the version that used.'],
+   truth:'Which friendship only works when you are the person you were?',
+   dare:{text:'Name one person you have been avoiding on purpose. Say why, out loud.',seconds:60,hold:false},
+   line:'You know this floor. You have been on it a lot.',
+   sides:{side1:{name:'THE BOOTH',line:'Same table. Same seat. Same shape in the cushion.'},
+          side2:{name:'THE STREET',line:'Cold out here. Quieter, though.'}}},
+
+  {n:18,name:'THE MONEY',rule:'fog',air:'flicker',
+   pal:{bg:'#060c15',room:'#0c1425',roomOn:'#17284b',stroke:'#1c2c4d',strokeOn:'#819cfc',line:'#2f4473',label:'#8194c4'},
+   rooms:{entry:[0.5,0.2],side1:[0.18,0.56],door:[0.5,0.84],stairs:[0.16,0.86]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighteen. It was expensive and you never added it up.','It cost more than you have added up.'],
+   truth:'What did this cost you last year, in money, roughly?',
+   dare:{text:'Work out one week of what you used to spend. Write the number down.',seconds:90,hold:false},
+   line:'Numbers on the wall. None of them are the day count.',
+   sides:{side1:{name:'LEDGER ROOM',line:'Somebody kept records. They stop about a year in.'}}},
+
+  {n:19,name:'THE DREAM',rule:'slow',air:'window',
+   pal:{bg:'#060c16',room:'#0c1527',roomOn:'#18294e',stroke:'#1d2e51',strokeOn:'#87a3ff',line:'#314779',label:'#879bcd'},
+   rooms:{entry:[0.22,0.3],side1:[0.52,0.62],door:[0.8,0.3],stairs:[0.8,0.68]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor nineteen. You will dream about it eventually.','You will dream you did it. It will feel completely real.'],
+   truth:'What did you feel first when you woke up — relief, or something worse?',
+   dare:{text:'Say out loud: "I dreamed it. I did not do it." Once, properly.',seconds:45,hold:true},
+   line:'This floor is not laid out the way you remember it.',
+   sides:{side1:{name:'BEDROOM',line:'The bed is made. You do not remember making it.'}}},
+
+  {n:20,name:'TWENTY',rule:'none',air:'glow',wave:true,
+   pal:{bg:'#060d17',room:'#0d1629',roomOn:'#1a2b52',stroke:'#1f3054',strokeOn:'#8eabff',line:'#334a7e',label:'#8ea2d6'},
+   rooms:{entry:[0.22,0.2],side1:[0.52,0.48],door:[0.82,0.78],stairs:[0.82,0.22]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty. Twenty days.','Second landing. You can stand on this one too.'],
+   truth:'What is different about you at twenty days that nobody can see?',
+   dare:{text:'Tell one person the number and nothing else. "Twenty days."',seconds:60,hold:false},
+   line:'Another window. Bigger than the one on ten.',
+   sides:{side1:{name:'LANDING WINDOW',line:'Further up. Same street, smaller.'}}},
+
+  {n:21,name:'WHY STILL BAD',rule:'none',air:'dust',
+   pal:{bg:'#08050c',room:'#0e0916',roomOn:'#1a1129',stroke:'#1c142c',strokeOn:'#7d5da8',line:'#302248',label:'#6c5c83'},
+   rooms:{entry:[0.2,0.78],side1:[0.42,0.42],door:[0.84,0.36],stairs:[0.84,0.76]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty-one. You stopped and you still feel bad.','You stopped, and some of it got worse before it got better.'],
+   truth:'What did you expect to feel by now that you do not feel?',
+   dare:{text:'Name one thing that IS better. Out loud, even if it is small.',seconds:45,hold:false},
+   line:'The floor is fine. You are the thing that is heavy.',
+   sides:{side1:{name:'FLAT ROOM',line:'Nothing wrong with it. Nothing right with it either.'}}},
+
+  {n:22,name:'THE ANGER',rule:'quiet',air:'grain',
+   pal:{bg:'#08060d',room:'#0f0a17',roomOn:'#1c122b',stroke:'#1e152f',strokeOn:'#8663b4',line:'#33244d',label:'#73638c'},
+   rooms:{entry:[0.5,0.82],side1:[0.2,0.46],door:[0.5,0.2],stairs:[0.84,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty-two. The anger has to go somewhere.','It comes out sideways at people who did nothing.'],
+   truth:'Who has taken the edge of your mood this week that did not earn it?',
+   dare:{text:'Apologise to one person for one specific moment. No explanation after it.',seconds:75,hold:false},
+   line:'Something in here has been kicked. Recently.',
+   sides:{side1:{name:'BACK HALL',line:'A dent in the plaster at about shoulder height.'}}},
+
+  {n:23,name:'THE COMPARISON',rule:'fog',air:'rain',
+   pal:{bg:'#09060e',room:'#100b19',roomOn:'#1d142e',stroke:'#201632',strokeOn:'#8e6ac0',line:'#362652',label:'#7b6996'},
+   rooms:{entry:[0.16,0.28],side1:[0.5,0.74],door:[0.84,0.28],stairs:[0.84,0.72]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty-three. Somebody else looks like they are doing this better.','You do not know what their week actually looks like.'],
+   truth:'Who are you measuring yourself against, and do you actually know their life?',
+   dare:{text:'Put your phone face down for two minutes. Stay where you are.',seconds:120,hold:true},
+   line:'Mirrors down one side. All of them slightly wrong.',
+   sides:{side1:{name:'LONG MIRROR',line:'It makes the room look bigger than it is. That is all it does.'}}},
+
+  {n:24,name:'THE BARGAIN',rule:'none',air:'dust',wave:true,
+   pal:{bg:'#09070f',room:'#110b1a',roomOn:'#1f1531',stroke:'#221835',strokeOn:'#9770cc',line:'#3a2957',label:'#82709f'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor twenty-four. Your head has an offer prepared.','"Just once, properly, and then never again."'],
+   truth:'What is the exact deal your head has been offering you?',
+   dare:{text:'Write the deal down in full. Then write what happened last time.',seconds:90,hold:false},
+   line:'Somebody has done a deal on this floor before. It did not hold.',
+   sides:{side1:{name:'SIDE OFFICE',line:'A handshake happened in here. Only one side kept to it.'}}},
+
+  {n:25,name:'THE PLATEAU',rule:'fog',air:'glow',
+   pal:{bg:'#0a0710',room:'#120c1c',roomOn:'#211634',stroke:'#241938',strokeOn:'#a077d8',line:'#3d2b5c',label:'#8a76a8'},
+   rooms:{entry:[0.12,0.2],side1:[0.44,0.44],door:[0.86,0.24],stairs:[0.5,0.84]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty-five. Nothing is moving in either direction.','Nothing is getting better and nothing is getting worse.'],
+   truth:'What are you doing on the days when nothing feels like it is working?',
+   dare:{text:'Do the smallest useful thing you can think of. Now. Then stop.',seconds:60,hold:false},
+   line:'Long floor. Flat. No slope either way.',
+   sides:{side1:{name:'LONG FLOOR',line:'It goes on for a while. There is nothing wrong with it.'}}},
+
+  {n:26,name:'THE BODY AGAIN',rule:'quiet',air:'static',
+   pal:{bg:'#0b0711',room:'#130d1e',roomOn:'#231737',stroke:'#261a3b',strokeOn:'#a97ee4',line:'#402d61',label:'#927cb1'},
+   rooms:{entry:[0.15,0.24],side1:[0.45,0.66],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor twenty-six. Your body is still catching up.','Sleep comes back before the energy does.'],
+   truth:'What has changed in how you sleep since you stopped?',
+   dare:{text:'Set the time you are going to bed tonight. Say it out loud.',seconds:45,hold:false},
+   line:'Warm in here. Warmer than the last few floors.',
+   sides:{side1:{name:'BACK STAIRS',line:'You take them slower than you did on floor six. That is fine.'}}},
+
+  {n:27,name:'THE PERSON YOU HURT',rule:'dim',air:'grid',
+   pal:{bg:'#0b0812',room:'#140d1f',roomOn:'#25183a',stroke:'#281c3e',strokeOn:'#b284f0',line:'#443066',label:'#9983ba'},
+   rooms:{entry:[0.16,0.62],side1:[0.4,0.24],side2:[0.64,0.62],door:[0.86,0.24],stairs:[0.86,0.62]},
+   edges:[['entry','side1'],['side1','side2'],['side2','door'],['door','stairs']],
+   brief:['Floor twenty-seven. Stopping did not undo everything.','Some of it cannot be fixed by stopping.'],
+   truth:'Who is still carrying something you did, that you have never named to them?',
+   dare:{text:'Write what you would say to them. Do not send it tonight.',seconds:120,hold:false},
+   line:'Two rooms, and you have to go through both.',
+   sides:{side1:{name:'THEIR ROOM',line:'Their things, exactly where they left them.'},
+          side2:{name:'YOUR ROOM',line:'Yours. Messier. You know why.'}}},
+
+  {n:28,name:'THE STORY',rule:'sequence',air:'embers',
+   pal:{bg:'#0c0813',room:'#150e21',roomOn:'#261a3d',stroke:'#2a1d41',strokeOn:'#ba8bfc',line:'#47326b',label:'#a189c4'},
+   rooms:{entry:[0.13,0.5],side1:[0.36,0.22],door:[0.86,0.5],stairs:[0.86,0.18]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   doorNeeds:['side1'],
+   brief:['Floor twenty-eight. You have told this story a few times now.','The version you tell has been getting smoother.'],
+   truth:'What part of your story do you leave out when you tell it?',
+   dare:{text:'Say the left-out part out loud, alone, once.',seconds:60,hold:true},
+   line:'Every room in here is a slightly different shape of the same room.',
+   sides:{side1:{name:'TELLING ROOM',line:'Somebody has practised in here. You can tell.'}}},
+
+  {n:29,name:'THE FEAR',rule:'echo',air:'flicker',
+   pal:{bg:'#0c0914',room:'#160f22',roomOn:'#281b3f',stroke:'#2c1e44',strokeOn:'#c391ff',line:'#4a3470',label:'#a890cd'},
+   rooms:{entry:[0.14,0.36],side1:[0.4,0.72],door:[0.86,0.72],stairs:[0.86,0.34]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor twenty-nine. The fear is not about tonight.','Not of tonight. Of the year.'],
+   truth:'What are you actually afraid of — the craving, or the rest of your life without it?',
+   dare:{text:'Say the fear in one sentence, out loud. Do not solve it.',seconds:60,hold:true},
+   line:'The corridor keeps going past where the light reaches.',
+   sides:{side1:{name:'FAR END',line:'You cannot see the end of it from here. It does have one.'}}},
+
+  {n:30,name:'THIRTY',rule:'none',air:'embers',wave:true,
+   pal:{bg:'#0d0914',room:'#170f24',roomOn:'#2a1c42',stroke:'#2e2047',strokeOn:'#cc98ff',line:'#4e3775',label:'#b096d6'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty. A month.','Third landing. A month is a real unit of time.'],
+   truth:'What would you tell yourself on day one, knowing what today feels like?',
+   dare:{text:'Write one line to somebody on their first day. Keep it.',seconds:90,hold:false},
+   line:'You can see a long way down from this one.',
+   sides:{side1:{name:'HIGH WINDOW',line:'Thirty floors of street below. It looks like a map now.'}}},
+
+  {n:31,name:'WHO AM I NOW',rule:'fog',air:'rain',wave:true,
+   pal:{bg:'#050909',room:'#091110',roomOn:'#0f1f1c',stroke:'#10221e',strokeOn:'#489986',line:'#1b3a33',label:'#55756d'},
+   rooms:{entry:[0.17,0.44],side1:[0.47,0.76],door:[0.82,0.44],stairs:[0.82,0.78]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-one. You have more hours than you know what to do with.','It was doing more jobs than you gave it credit for.'],
+   truth:'What did it do for you that nothing has replaced?',
+   dare:{text:'Name the job it was doing. One word if that is all you have.',seconds:60,hold:false},
+   line:'The rooms have no names on them tonight.',
+   sides:{side1:{name:'UNMARKED',line:'Nothing on the door. You have to go in to find out.'}}},
+
+  {n:32,name:'THE EVENING',rule:'slow',air:'dust',
+   pal:{bg:'#050a09',room:'#091211',roomOn:'#10211e',stroke:'#122420',strokeOn:'#4da490',line:'#1c3e36',label:'#5b7d75'},
+   rooms:{entry:[0.17,0.7],side1:[0.5,0.38],door:[0.83,0.7],stairs:[0.83,0.3]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-two. The evening is the long part.','Four hours that used to be full.'],
+   truth:'What happens in your house between eight and midnight now?',
+   dare:{text:'Plan tomorrow evening in three items. Write them down.',seconds:90,hold:false},
+   line:'Quiet. The kind you notice.',
+   sides:{side1:{name:'SITTING ROOM',line:'The telly is off. Nobody turned it off, it was just never on.'}}},
+
+  {n:33,name:'THE BOREDOM',rule:'dark',air:'grain',
+   pal:{bg:'#050b0a',room:'#0a1412',roomOn:'#112420',stroke:'#132622',strokeOn:'#52ae99',line:'#1e423a',label:'#61867d'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],side2:[0.62,0.72],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['side1','side2'],['side2','door'],['door','stairs']],
+   brief:['Floor thirty-three. There is nothing to do and that is the danger.','Nobody warns you this is one of the big ones.'],
+   truth:'When were you last properly bored, and what did you do about it?',
+   dare:{text:'Sit still and do nothing at all for ninety seconds. No phone.',seconds:90,hold:true},
+   line:'There is genuinely nothing to do on this floor.',
+   sides:{side1:{name:'EMPTY',line:'Nothing in it. Again.'},
+          side2:{name:'ALSO EMPTY',line:'The same. Still the point.'}}},
+
+  {n:34,name:'THE NEW THING',rule:'none',air:'rain',
+   pal:{bg:'#060b0a',room:'#0a1513',roomOn:'#122622',stroke:'#142924',strokeOn:'#57b9a3',line:'#20463d',label:'#678e84'},
+   rooms:{entry:[0.5,0.2],side1:[0.18,0.56],door:[0.5,0.84],stairs:[0.16,0.86]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-four. Something has to fill it.','Something has to go in the gap and it will be bad at first.'],
+   truth:'What have you always said you would do if you had the time?',
+   dare:{text:'Do five minutes of it tonight. Badly. That is allowed.',seconds:120,hold:false},
+   line:'Something half-built in the corner. Somebody started.',
+   sides:{side1:{name:'WORK ROOM',line:'Tools out, job unfinished. Started, though.'}}},
+
+  {n:35,name:'THE OLD ROUTE',rule:'quiet',air:'dust',
+   pal:{bg:'#060c0b',room:'#0b1614',roomOn:'#132824',stroke:'#152b26',strokeOn:'#5cc4ac',line:'#224a41',label:'#6d968c'},
+   rooms:{entry:[0.22,0.3],side1:[0.52,0.62],door:[0.8,0.3],stairs:[0.8,0.68]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-five. Your feet still know the old way.','Your feet know a way you no longer take.'],
+   truth:'What route, room or time of day still runs on the old script?',
+   dare:{text:'Change one route tomorrow. Decide which one now.',seconds:60,hold:false},
+   line:'This floor is laid out like somewhere you used to live.',
+   sides:{side1:{name:'THE WAY HOME',line:'It goes past the place. It always did.'}}},
+
+  {n:36,name:'THE PHONE',rule:'fog',air:'glow',
+   pal:{bg:'#060d0c',room:'#0c1715',roomOn:'#142a26',stroke:'#162d28',strokeOn:'#61cfb5',line:'#244e45',label:'#739e94'},
+   rooms:{entry:[0.22,0.2],side1:[0.52,0.48],door:[0.82,0.78],stairs:[0.82,0.22]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-six. The phone is doing some of the old job.','The thing in your hand knows the way better than you do.'],
+   truth:'What do you reach for the phone to avoid feeling?',
+   dare:{text:'Delete one thing off your phone. Now, while you are here.',seconds:60,hold:false},
+   line:'Something in here keeps lighting up.',
+   sides:{side1:{name:'SMALL ROOM',line:'A light going on and off in the corner. No one is calling.'}}},
+
+  {n:37,name:'THE WEEKEND',rule:'none',air:'static',
+   pal:{bg:'#070d0c',room:'#0c1816',roomOn:'#152c28',stroke:'#17302a',strokeOn:'#66dabf',line:'#265248',label:'#79a79b'},
+   rooms:{entry:[0.2,0.78],side1:[0.42,0.42],door:[0.84,0.36],stairs:[0.84,0.76]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-seven. The weekend has no shape in it.','Structure disappears and the days go loose.'],
+   truth:'Which day of the week is hardest, and what is missing from it?',
+   dare:{text:'Put one fixed thing in Saturday. Anything. Decide it now.',seconds:75,hold:false},
+   line:'No corridors on this floor. Everything opens into everything.',
+   sides:{side1:{name:'OPEN FLOOR',line:'No walls to speak of. You can go anywhere from here.'}}},
+
+  {n:38,name:'THE CELEBRATION',rule:'fog',air:'grid',wave:true,
+   pal:{bg:'#070e0d',room:'#0d1a17',roomOn:'#162f2a',stroke:'#18322c',strokeOn:'#6be4c8',line:'#28564c',label:'#7fafa3'},
+   rooms:{entry:[0.5,0.82],side1:[0.2,0.46],door:[0.5,0.2],stairs:[0.84,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-eight. Good news used to come with a ritual.','Good news used to have a ritual attached.'],
+   truth:'How did you used to mark a win, and what marks it now?',
+   dare:{text:'Decide what you do next time something goes right. Say it out loud.',seconds:60,hold:false},
+   line:'Somebody had something to celebrate in here once.',
+   sides:{side1:{name:'FUNCTION ROOM',line:'Chairs stacked. It was a good night, by all accounts.'}}},
+
+  {n:39,name:'THE GRIEF',rule:'quiet',air:'embers',
+   pal:{bg:'#070f0d',room:'#0d1b18',roomOn:'#17312c',stroke:'#1a342e',strokeOn:'#70efd2',line:'#295a4f',label:'#85b7ab'},
+   rooms:{entry:[0.16,0.28],side1:[0.5,0.74],door:[0.84,0.28],stairs:[0.84,0.72]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor thirty-nine. You miss it. That is allowed.','You are allowed to miss it. That is not a relapse.'],
+   truth:'What do you actually miss — not the harm, but the thing underneath it?',
+   dare:{text:'Say what you miss out loud. Do not argue with yourself afterwards.',seconds:75,hold:true},
+   line:'This floor is not hostile. It is just sad.',
+   sides:{side1:{name:'QUIET ROOM',line:'Nothing bad happened in here. Something ended, that is all.'}}},
+
+  {n:40,name:'FORTY',rule:'none',air:'window',wave:true,
+   pal:{bg:'#080f0e',room:'#0e1c1a',roomOn:'#18332e',stroke:'#1b3730',strokeOn:'#75fadb',line:'#2b5e53',label:'#8bbfb2'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor forty. Forty days.','Fourth landing. Longer than most people manage.'],
+   truth:'What have you stopped having to decide every single day?',
+   dare:{text:'Name one thing that is automatic now that used to take everything.',seconds:60,hold:false},
+   line:'The window on this one is bigger again.',
+   sides:{side1:{name:'WIDE WINDOW',line:'Forty up. The street is a line now, not a road.'}}},
+
+  {n:41,name:'THE TRUST',rule:'sequence',air:'window',
+   pal:{bg:'#0a0605',room:'#140c09',roomOn:'#22160e',stroke:'#251810',strokeOn:'#a9663d',line:'#442918',label:'#7a5c45'},
+   rooms:{entry:[0.12,0.2],side1:[0.44,0.44],door:[0.86,0.24],stairs:[0.5,0.84]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   doorNeeds:['side1'],
+   brief:['Floor forty-one. They have not relaxed yet.','They are still waiting to see if this one holds.'],
+   truth:'Who has not relaxed yet, and are they wrong not to have?',
+   dare:{text:'Do one thing you said you would do, today, exactly as you said it.',seconds:90,hold:false},
+   line:'Somebody is checking the rooms behind you.',
+   sides:{side1:{name:'CHECKED ROOM',line:'The door has been opened and shut again recently.'}}},
+
+  {n:42,name:'THE APOLOGY',rule:'echo',air:'rain',
+   pal:{bg:'#0b0705',room:'#160d09',roomOn:'#25170f',stroke:'#281a11',strokeOn:'#b56d41',line:'#492c1a',label:'#82634a'},
+   rooms:{entry:[0.15,0.24],side1:[0.45,0.66],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor forty-two. You have said sorry for this before.','Saying sorry and changing are two different floors.'],
+   truth:'What have you apologised for more than once without anything changing?',
+   dare:{text:'Pick one and change the thing instead of saying it again.',seconds:90,hold:false},
+   line:'You have been in this room before, saying this.',
+   sides:{side1:{name:'SAME ROOM',line:'It looks exactly like it did the last two times.'}}},
+
+  {n:43,name:'THE RESENTMENT',rule:'pull',air:'dust',
+   pal:{bg:'#0c0705',room:'#170e0a',roomOn:'#271910',stroke:'#2b1c12',strokeOn:'#c17545',line:'#4d2f1c',label:'#8b694f'},
+   rooms:{entry:[0.16,0.62],side1:[0.4,0.24],door:[0.86,0.24],stairs:[0.86,0.62]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor forty-three. You gave something up and nobody clapped.','You gave something up and part of you wants it acknowledged.'],
+   truth:'Who do you resent for not making this easier?',
+   dare:{text:'Say the resentment out loud, then say what is actually yours in it.',seconds:75,hold:true},
+   line:'Something in here has been building up for a while.',
+   sides:{side1:{name:'STORE ROOM',line:'Full to the ceiling. None of it labelled.'}}},
+
+  {n:44,name:'THE HONESTY',rule:'fog',air:'grain',
+   pal:{bg:'#0c0806',room:'#190f0a',roomOn:'#2a1a11',stroke:'#2d1d13',strokeOn:'#cd7c4a',line:'#52321d',label:'#937054'},
+   rooms:{entry:[0.13,0.5],side1:[0.36,0.22],door:[0.86,0.5],stairs:[0.86,0.18]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor forty-four. One accurate sentence would change this week.','Not confession. Just an accurate sentence.'],
+   truth:'What is the most accurate sentence about where you are tonight?',
+   dare:{text:'Send that sentence to one person. Send it before you leave the floor.',seconds:90,hold:false},
+   line:'Nothing hidden on this floor. Every room is open.',
+   sides:{side1:{name:'OPEN ROOM',line:'Door off its hinges. You can see everything in it from here.'}}},
+
+  {n:45,name:'THE ONES WHO LEFT',rule:'slow',air:'rain',wave:true,
+   pal:{bg:'#0d0806',room:'#1a100b',roomOn:'#2c1c12',stroke:'#301f14',strokeOn:'#d9834e',line:'#57351f',label:'#9c7659'},
+   rooms:{entry:[0.14,0.36],side1:[0.4,0.72],door:[0.86,0.72],stairs:[0.86,0.34]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor forty-five. Some people did not stay.','Some people did not stay, and some of that was fair.'],
+   truth:'Who left, and what part of it do you understand now that you did not then?',
+   dare:{text:'Write their name. Write one true sentence about it. Stop there.',seconds:75,hold:false},
+   line:'Rooms with the furniture gone.',
+   sides:{side1:{name:'CLEARED ROOM',line:'Marks on the carpet where things used to be.'}}},
+
+  {n:46,name:'THE CHILD',rule:'dark',air:'dust',
+   pal:{bg:'#0e0806',room:'#1b110c',roomOn:'#2e1e13',stroke:'#332115',strokeOn:'#e58a52',line:'#5c3821',label:'#a57c5e'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor forty-six. Somebody younger is watching.','They are learning what a hard thing looks like.'],
+   truth:'Who is learning what a hard thing looks like from you?',
+   dare:{text:'Do one thing tonight you would be glad for them to see.',seconds:90,hold:false},
+   line:'Something small has been through here.',
+   sides:{side1:{name:'SMALL ROOM',line:'Low shelf. Things on it at the wrong height for you.'}}},
+
+  {n:47,name:'THE HELP',rule:'none',air:'glow',
+   pal:{bg:'#0e0907',room:'#1d120c',roomOn:'#311f14',stroke:'#352216',strokeOn:'#f19157',line:'#613b22',label:'#ad8363'},
+   rooms:{entry:[0.17,0.44],side1:[0.47,0.76],door:[0.82,0.44],stairs:[0.82,0.78]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor forty-seven. You have not asked anybody for anything.','Asking is a skill and you are probably bad at it.'],
+   truth:'What do you need right now that you have not asked anybody for?',
+   dare:{text:'Ask one person for one specific thing. Small is fine.',seconds:90,hold:false},
+   line:'Doors on this floor open from the other side.',
+   sides:{side1:{name:'LOCKED SIDE',line:'It opens. Somebody else has to turn the handle.'}}},
+
+  {n:48,name:'THE ROOM YOU AVOID',rule:'quiet',air:'static',
+   pal:{bg:'#0f0907',room:'#1e130d',roomOn:'#332115',stroke:'#382417',strokeOn:'#fd995b',line:'#653e24',label:'#b68968'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],side2:[0.44,0.8],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   brief:['Floor forty-eight. There is a conversation you keep not having.','Every day you do not have it, it gets heavier.'],
+   truth:'Which conversation have you been putting off for the longest?',
+   dare:{text:'Name the date you will have it. Out loud. A real date.',seconds:60,hold:true},
+   line:'One room on this floor you keep walking past.',
+   sides:{side1:{name:'THE DOOR YOU PASS',line:'You have gone by it four times.'},
+          side2:{name:'THE LONG WAY',line:'It takes longer. You have been taking it.'}}},
+
+  {n:49,name:'THE REPAIR',rule:'fog',air:'grid',
+   pal:{bg:'#100a07',room:'#20140d',roomOn:'#362216',stroke:'#3b2618',strokeOn:'#ffa05f',line:'#6a4126',label:'#be906d'},
+   rooms:{entry:[0.18,0.62],side1:[0.48,0.28],door:[0.8,0.62],stairs:[0.8,0.24]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor forty-nine. It gets repaired in small pieces or not at all.','Small, unannounced, repeated. That is what it looks like.'],
+   truth:'What small thing, done every day for a month, would mean the most to them?',
+   dare:{text:'Do it once tonight and say nothing about it.',seconds:75,hold:false},
+   line:'Somebody has been fixing things in here. Quietly.',
+   sides:{side1:{name:'MENDED ROOM',line:'A repair you would not notice unless you knew.'}}},
+
+  {n:50,name:'FIFTY',rule:'none',air:'static',wave:true,
+   pal:{bg:'#110a08',room:'#21140e',roomOn:'#382417',stroke:'#3d281a',strokeOn:'#ffa763',line:'#6f4428',label:'#c79671'},
+   rooms:{entry:[0.5,0.2],side1:[0.18,0.56],door:[0.5,0.84],stairs:[0.16,0.86]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty. Fifty days. Halfway up.','Fifth landing. Over halfway up the building.'],
+   truth:'Who would be surprised to hear you are at fifty days?',
+   dare:{text:'Tell that person. Tonight if you can.',seconds:75,hold:false},
+   line:'Halfway. The stairs behind you are longer than the ones ahead.',
+   sides:{side1:{name:'HALF LANDING',line:'You can see both ways from here.'}}},
+
+  {n:51,name:'THE FORGETTING',rule:'fog',air:'flicker',
+   pal:{bg:'#08080a',room:'#0f0f13',roomOn:'#1b1b22',stroke:'#1e1e25',strokeOn:'#787d90',line:'#2f303b',label:'#626573'},
+   rooms:{entry:[0.22,0.3],side1:[0.52,0.62],door:[0.8,0.3],stairs:[0.8,0.68]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-one. It is getting hard to remember how bad it was.','You are starting to forget how bad it actually was.'],
+   truth:'What is the worst single night you can remember, in detail?',
+   dare:{text:'Write down three details of that night. Keep them where you will find them.',seconds:120,hold:false},
+   line:'The floors below you are hard to make out from here.',
+   sides:{side1:{name:'LOOK DOWN',line:'You can see the lower floors. They look smaller than they were.'}}},
+
+  {n:52,name:'MAYBE I WASN’T',rule:'quiet',air:'window',wave:true,
+   pal:{bg:'#08080b',room:'#101014',roomOn:'#1c1c25',stroke:'#202028',strokeOn:'#81869a',line:'#32333f',label:'#686c7c'},
+   rooms:{entry:[0.22,0.2],side1:[0.52,0.48],door:[0.82,0.78],stairs:[0.82,0.22]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-two. The idea that it was never a problem is back.','"Maybe it was never really a problem."'],
+   truth:'If it was never a problem, why did you start counting days?',
+   dare:{text:'Say why you started. Out loud, in your own words.',seconds:60,hold:true},
+   line:'This floor is trying to be a different floor.',
+   sides:{side1:{name:'WRONG ROOM',line:'It looks like a room from the second floor. It is not.'}}},
+
+  {n:53,name:'THE MODERATION',rule:'dim',air:'rain',
+   pal:{bg:'#09090c',room:'#111115',roomOn:'#1e1e27',stroke:'#22222b',strokeOn:'#898ea4',line:'#353644',label:'#6f7384'},
+   rooms:{entry:[0.2,0.78],side1:[0.42,0.42],door:[0.84,0.36],stairs:[0.84,0.76]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-three. The reasonable version of the deal has returned.','The idea comes back wearing a suit and sounding reasonable.'],
+   truth:'What rules would you set for yourself, and how long did they last last time?',
+   dare:{text:'Write the rules out. Then write the date they broke.',seconds:90,hold:false},
+   line:'Somebody has drawn lines on this floor. They have been stepped over.',
+   sides:{side1:{name:'RULED ROOM',line:'Lines marked on the floor. Scuffed out in places.'}}},
+
+  {n:54,name:'THE STRESS',rule:'sequence',air:'dust',
+   pal:{bg:'#09090c',room:'#121217',roomOn:'#20202a',stroke:'#24242d',strokeOn:'#9297ae',line:'#393a48',label:'#767a8c'},
+   rooms:{entry:[0.5,0.82],side1:[0.2,0.46],door:[0.5,0.2],stairs:[0.84,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   doorNeeds:['side1'],
+   brief:['Floor fifty-four. Something is going to go wrong that you did not cause.','What you do in the ten minutes after is the whole thing.'],
+   truth:'What is the thing most likely to knock you sideways this month?',
+   dare:{text:'Decide now what you do in the first ten minutes after it happens.',seconds:90,hold:false},
+   line:'Something is coming up through the floor.',
+   sides:{side1:{name:'UNDER FLOOR',line:'You can hear it. It is not on this floor yet.'}}},
+
+  {n:55,name:'THE COMPLACENCY',rule:'echo',air:'grain',
+   pal:{bg:'#0a0a0d',room:'#131318',roomOn:'#22222c',stroke:'#262630',strokeOn:'#9aa0b8',line:'#3c3d4c',label:'#7d8194'},
+   rooms:{entry:[0.16,0.28],side1:[0.5,0.74],door:[0.84,0.28],stairs:[0.84,0.72]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-five. You stopped doing what worked.','You stopped doing the things that got you here.'],
+   truth:'What were you doing in week one that you have quietly stopped doing?',
+   dare:{text:'Start one of them again tonight. The smallest one.',seconds:60,hold:false},
+   line:'The tools are still here. Nobody has picked them up in a while.',
+   sides:{side1:{name:'TOOL ROOM',line:'Dust on the handles. They still work.'}}},
+
+  {n:56,name:'THE ANNIVERSARY',rule:'pull',air:'rain',
+   pal:{bg:'#0b0b0e',room:'#141419',roomOn:'#24242e',stroke:'#282833',strokeOn:'#a2a9c2',line:'#3f4050',label:'#84889c'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor fifty-six. A date is coming.','A date is coming that used to mean drinking, or using, or worse.'],
+   truth:'What date is on the calendar that you are not looking forward to?',
+   dare:{text:'Make a plan for that day now. Two lines is enough.',seconds:90,hold:false},
+   line:'A room in here is set up for something.',
+   sides:{side1:{name:'SET ROOM',line:'Laid out for an occasion. The date is not today.'}}},
+
+  {n:57,name:'THE SLIP THAT DIDN’T',rule:'fog',air:'dust',
+   pal:{bg:'#0b0b0e',room:'#15151b',roomOn:'#262631',stroke:'#2a2a35',strokeOn:'#abb2cc',line:'#434454',label:'#8b8fa4'},
+   rooms:{entry:[0.12,0.2],side1:[0.44,0.44],door:[0.86,0.24],stairs:[0.5,0.84]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-seven. You got close and you did not.','You got close and you did not. That counts for something.'],
+   truth:'When were you closest, and what actually stopped you?',
+   dare:{text:'Name the thing that stopped you. Write it down. That is your tool.',seconds:75,hold:false},
+   line:'Something nearly happened on this floor.',
+   sides:{side1:{name:'NEAR ROOM',line:'You can see where somebody stopped and turned round.'}}},
+
+  {n:58,name:'THE IDENTITY',rule:'slow',air:'glow',
+   pal:{bg:'#0c0c0f',room:'#16161c',roomOn:'#282833',stroke:'#2c2c38',strokeOn:'#b3bad6',line:'#464759',label:'#9296ac'},
+   rooms:{entry:[0.15,0.24],side1:[0.45,0.66],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor fifty-eight. You are more than the thing you stopped.','You are not "somebody who quit". You are somebody.'],
+   truth:'What are you, in a sentence that does not mention what you stopped?',
+   dare:{text:'Say that sentence out loud. No mention of the habit in it.',seconds:60,hold:true},
+   line:'Nothing on this floor refers to the thing at all.',
+   sides:{side1:{name:'PLAIN ROOM',line:'An ordinary room. Nothing to do with any of it.'}}},
+
+  {n:59,name:'THE TWO MONTHS',rule:'dark',air:'static',wave:true,
+   pal:{bg:'#0c0c10',room:'#17171d',roomOn:'#292936',stroke:'#2e2e3b',strokeOn:'#bcc3e0',line:'#494a5d',label:'#989db5'},
+   rooms:{entry:[0.16,0.62],side1:[0.4,0.24],door:[0.86,0.24],stairs:[0.86,0.62]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor fifty-nine. This is your life now, not a project.','Long enough that this is your life, not a project.'],
+   truth:'What has become normal that you thought would always be an effort?',
+   dare:{text:'Name three ordinary things about today. Just three.',seconds:60,hold:false},
+   line:'The building feels like a building tonight, not a test.',
+   sides:{side1:{name:'ORDINARY FLOOR',line:'Nothing special about it. That is new.'}}},
+
+  {n:60,name:'SIXTY',rule:'none',air:'glow',wave:true,
+   pal:{bg:'#0d0d11',room:'#18181f',roomOn:'#2b2b38',stroke:'#30303d',strokeOn:'#c4cceb',line:'#4c4e61',label:'#9fa4bd'},
+   rooms:{entry:[0.13,0.5],side1:[0.36,0.22],door:[0.86,0.5],stairs:[0.86,0.18]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor sixty. Sixty days.','Sixth landing. Two months standing up.'],
+   truth:'What would breaking this cost you now that it would not have cost at day ten?',
+   dare:{text:'Say what you would lose. Out loud, properly, all of it.',seconds:90,hold:true},
+   line:'High up now. The wind sounds different at this height.',
+   sides:{side1:{name:'HIGH LANDING',line:'Sixty floors of building underneath you.'}}},
+
+  {n:61,name:'WHAT IT WAS FOR',rule:'quiet',air:'embers',
+   pal:{bg:'#090407',room:'#13080c',roomOn:'#211017',stroke:'#241219',strokeOn:'#a44e63',line:'#44222d',label:'#79535e'},
+   rooms:{entry:[0.14,0.36],side1:[0.4,0.72],door:[0.86,0.72],stairs:[0.86,0.34]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor sixty-one. It was solving something real.','It was solving something. That something is still there.'],
+   truth:'What problem was it solving that you have not solved another way?',
+   dare:{text:'Name the problem plainly. Not the habit — the thing under it.',seconds:75,hold:true},
+   line:'There is a floor under this floor.',
+   sides:{side1:{name:'LOWER ROOM',line:'Stairs down out of this one. It is not the way back.'}}},
+
+  {n:62,name:'THE THING BEFORE',rule:'fog',air:'flicker',
+   pal:{bg:'#0a0408',room:'#14080d',roomOn:'#231118',stroke:'#26131b',strokeOn:'#af546a',line:'#492530',label:'#815964'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-two. This started before the habit did.','Most of this started somewhere and it was not the habit.'],
+   truth:'What was happening in your life the year it got bad?',
+   dare:{text:'Write the year down and one thing that happened in it.',seconds:90,hold:false},
+   line:'This floor is older than the ones below it.',
+   sides:{side1:{name:'OLD ROOM',line:'The fittings are from a long time before the rest of the building.'}}},
+
+  {n:63,name:'THE SHAME',rule:'none',air:'window',
+   pal:{bg:'#0b0408',room:'#15090e',roomOn:'#25121a',stroke:'#29141c',strokeOn:'#bb5971',line:'#4d2734',label:'#8a5f6b'},
+   rooms:{entry:[0.17,0.44],side1:[0.47,0.76],door:[0.82,0.44],stairs:[0.82,0.78]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-three. Shame has never once stopped it.','It is the one feeling that has never once helped.'],
+   truth:'What are you still carrying that you have never told anybody?',
+   dare:{text:'Say it out loud to an empty room. Once. Nobody has to hear it.',seconds:75,hold:true},
+   line:'Nothing on this floor is lit from above.',
+   sides:{side1:{name:'DARK CORNER',line:'Somewhere you would put something you did not want found.'}}},
+
+  {n:64,name:'THE FORGIVENESS',rule:'fog',air:'rain',
+   pal:{bg:'#0b0509',room:'#17090f',roomOn:'#28131b',stroke:'#2b161e',strokeOn:'#c65e78',line:'#522a37',label:'#926571'},
+   rooms:{entry:[0.17,0.7],side1:[0.5,0.38],door:[0.83,0.7],stairs:[0.83,0.3]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-four. The sentence you gave yourself has run long enough.','Not letting yourself off. Just stopping the sentence.'],
+   truth:'What are you still punishing yourself for, and how long is the sentence?',
+   dare:{text:'Say what you did and then say "that was then". Both halves.',seconds:75,hold:true},
+   line:'The room you were in has been left open behind you.',
+   sides:{side1:{name:'OPEN BEHIND',line:'The door back is open. You do not have to go through it.'}}},
+
+  {n:65,name:'THE PATTERN',rule:'quiet',air:'dust',
+   pal:{bg:'#0c0509',room:'#180a10',roomOn:'#2a141d',stroke:'#2e1720',strokeOn:'#d2647f',line:'#572c3a',label:'#9b6b78'},
+   rooms:{entry:[0.18,0.62],side1:[0.48,0.28],door:[0.8,0.62],stairs:[0.8,0.24]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-five. It happens in the same order every time.','It is the same shape every time. That is useful.'],
+   truth:'What are the three steps that always come before, in order?',
+   dare:{text:'Write the three steps down. That is your early warning.',seconds:120,hold:false},
+   line:'This floor has the same layout as one you have already walked.',
+   sides:{side1:{name:'REPEAT ROOM',line:'You have been in a room this exact shape before.'}}},
+
+  {n:66,name:'THE OTHER HABIT',rule:'dim',air:'grain',wave:true,
+   pal:{bg:'#0d0509',room:'#190b11',roomOn:'#2c151f',stroke:'#311822',strokeOn:'#de6a86',line:'#5c2e3d',label:'#a4717f'},
+   rooms:{entry:[0.5,0.2],side1:[0.18,0.56],door:[0.5,0.84],stairs:[0.16,0.86]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-six. Something moved into the space.','Something quietly took over the same job.'],
+   truth:'What have you been doing more of since you stopped?',
+   dare:{text:'Name it. Do not fix it tonight, just name it out loud.',seconds:60,hold:true},
+   line:'Something has moved into the empty rooms.',
+   sides:{side1:{name:'OCCUPIED',line:'It was empty last time. Something is in it now.'}}},
+
+  {n:67,name:'THE LONELINESS',rule:'sequence',air:'rain',
+   pal:{bg:'#0d060a',room:'#1b0b12',roomOn:'#2f1620',stroke:'#331a24',strokeOn:'#e96f8d',line:'#613140',label:'#ac7785'},
+   rooms:{entry:[0.22,0.3],side1:[0.52,0.62],door:[0.8,0.3],stairs:[0.8,0.68]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   doorNeeds:['side1'],
+   brief:['Floor sixty-seven. You can be lonely in a full room.','Different from being alone. You can be in a full room.'],
+   truth:'When did you last feel properly understood by somebody?',
+   dare:{text:'Contact one person who has known you a long time. Two lines.',seconds:90,hold:false},
+   line:'The floor is full and it is quiet.',
+   sides:{side1:{name:'FULL ROOM',line:'People-shaped spaces. All of them at a distance.'}}},
+
+  {n:68,name:'THE MEANING',rule:'echo',air:'dust',
+   pal:{bg:'#0e060a',room:'#1c0c13',roomOn:'#311722',stroke:'#361b25',strokeOn:'#f57494',line:'#653344',label:'#b57d8c'},
+   rooms:{entry:[0.22,0.2],side1:[0.52,0.48],door:[0.82,0.78],stairs:[0.82,0.22]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-eight. It has to be worth the trouble.','Something has to be worth the trouble.'],
+   truth:'What is this actually for — not who, but what?',
+   dare:{text:'Write the answer in one sentence. Keep the sentence.',seconds:90,hold:false},
+   line:'Long climb to this one. Worth asking why you are climbing.',
+   sides:{side1:{name:'QUESTION ROOM',line:'Nothing in here answers it. It is just where it gets asked.'}}},
+
+  {n:69,name:'THE BEFORE PERSON',rule:'pull',air:'glow',
+   pal:{bg:'#0f060b',room:'#1d0c14',roomOn:'#331823',stroke:'#381c27',strokeOn:'#ff7a9b',line:'#6a3647',label:'#bd8392'},
+   rooms:{entry:[0.2,0.78],side1:[0.42,0.42],door:[0.84,0.36],stairs:[0.84,0.76]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor sixty-nine. You existed before this started.','You were somebody before this started.'],
+   truth:'What did you care about at fifteen that you have not thought about in years?',
+   dare:{text:'Do one small thing that fifteen-year-old would recognise.',seconds:90,hold:false},
+   line:'This floor is decorated like a much older place.',
+   sides:{side1:{name:'KEPT ROOM',line:'Somebody kept it exactly the way it was.'}}},
+
+  {n:70,name:'SEVENTY',rule:'none',air:'window',wave:true,
+   pal:{bg:'#0f060b',room:'#1f0d14',roomOn:'#361a25',stroke:'#3b1d29',strokeOn:'#ff7fa2',line:'#6f384a',label:'#c68899'},
+   rooms:{entry:[0.5,0.82],side1:[0.2,0.46],door:[0.5,0.2],stairs:[0.84,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy. Seventy days.','Seventh landing. Most of the building is below you.'],
+   truth:'What do you know now that you could not have been told?',
+   dare:{text:'Write it down for whoever is on floor one tonight.',seconds:90,hold:false},
+   line:'You can see weather from up here.',
+   sides:{side1:{name:'WEATHER SIDE',line:'Rain going sideways past the glass.'}}},
+
+  {n:71,name:'THE GOOD HABIT',rule:'slow',air:'grid',
+   pal:{bg:'#04090b',room:'#081014',roomOn:'#0e1e23',stroke:'#102025',strokeOn:'#458e9f',line:'#19353e',label:'#537077'},
+   rooms:{entry:[0.16,0.28],side1:[0.5,0.74],door:[0.84,0.28],stairs:[0.84,0.72]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy-one. Something has to be there when this stops being new.','Something has to be there when this is not new any more.'],
+   truth:'What have you done nearly every day for the last month?',
+   dare:{text:'Do it now, or set the exact time you will do it tomorrow.',seconds:60,hold:false},
+   line:'Something on this floor has been used a lot, recently.',
+   sides:{side1:{name:'WORN ROOM',line:'A path worn in the floor. Somebody comes in here daily.'}}},
+
+  {n:72,name:'THE SLEEP',rule:'dark',air:'embers',
+   pal:{bg:'#04090c',room:'#081215',roomOn:'#0f2026',stroke:'#112228',strokeOn:'#4998aa',line:'#1b3943',label:'#597780'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor seventy-two. Sleep is the last thing to come back.','It comes back last and it changes everything.'],
+   truth:'What time do you go to bed, honestly, most nights?',
+   dare:{text:'Set one alarm for going to bed, not for getting up.',seconds:60,hold:false},
+   line:'Dim floor. Not dark — dim on purpose.',
+   sides:{side1:{name:'DARK ROOM',line:'Curtains drawn. Somebody sleeps in here properly.'}}},
+
+  {n:73,name:'THE MONEY BACK',rule:'none',air:'flicker',wave:true,
+   pal:{bg:'#040a0c',room:'#091316',roomOn:'#102228',stroke:'#12242b',strokeOn:'#4ea2b6',line:'#1c3d47',label:'#5f7f88'},
+   rooms:{entry:[0.12,0.2],side1:[0.44,0.44],door:[0.86,0.24],stairs:[0.5,0.84]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy-three. The money turned into a real number.','It adds up to something real.'],
+   truth:'What would you do with what this has saved you in a year?',
+   dare:{text:'Pick one thing and write down what it costs.',seconds:75,hold:false},
+   line:'Numbers on the wall again. Different sign in front of them.',
+   sides:{side1:{name:'COUNT ROOM',line:'The ledger from floor eighteen. The column has turned.'}}},
+
+  {n:74,name:'THE JOY',rule:'quiet',air:'window',
+   pal:{bg:'#050a0d',room:'#091418',roomOn:'#11242b',stroke:'#13272d',strokeOn:'#53acc1',line:'#1e404c',label:'#658791'},
+   rooms:{entry:[0.15,0.24],side1:[0.45,0.66],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy-four. Ordinary things are working again.','Ordinary pleasure comes back slowly and quietly.'],
+   truth:'What did you enjoy this week without needing anything to enjoy it?',
+   dare:{text:'Do one of those things tonight for five minutes.',seconds:120,hold:false},
+   line:'Warm floor. Nothing is wrong here.',
+   sides:{side1:{name:'WARM ROOM',line:'Genuinely a good room. No catch in it.'}}},
+
+  {n:75,name:'THE WORK',rule:'fog',air:'rain',
+   pal:{bg:'#050b0e',room:'#0a1519',roomOn:'#12262d',stroke:'#142930',strokeOn:'#58b6cc',line:'#204450',label:'#6b8f99'},
+   rooms:{entry:[0.16,0.62],side1:[0.4,0.24],door:[0.86,0.24],stairs:[0.86,0.62]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor seventy-five. You can do things now, so you have taken on too much.','You are able to do things again. That has a cost too.'],
+   truth:'What have you taken on because you can, that you should not have?',
+   dare:{text:'Say no to one thing this week. Decide which one now.',seconds:75,hold:false},
+   line:'Somebody has put a lot into this floor. Maybe too much.',
+   sides:{side1:{name:'BUSY ROOM',line:'Everything half-done, all at once.'}}},
+
+  {n:76,name:'THE ROUTINE',rule:'none',air:'dust',
+   pal:{bg:'#050c0f',room:'#0b161a',roomOn:'#13282f',stroke:'#152b33',strokeOn:'#5dc0d7',line:'#224854',label:'#7197a1'},
+   rooms:{entry:[0.13,0.5],side1:[0.36,0.22],door:[0.86,0.5],stairs:[0.86,0.18]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor seventy-six. Nothing interesting happened today.','Boring is the goal. Boring is the whole prize.'],
+   truth:'What does a completely ordinary good day look like for you now?',
+   dare:{text:'Write the day out in five lines. That is your template.',seconds:120,hold:false},
+   line:'Nothing surprising on this floor at all.',
+   sides:{side1:{name:'PLAIN CORRIDOR',line:'It goes where you expect. Every time.'}}},
+
+  {n:77,name:'THE RELAPSE PLAN',rule:'fog',air:'grain',
+   pal:{bg:'#060c10',room:'#0b171c',roomOn:'#142a32',stroke:'#162e35',strokeOn:'#62cae2',line:'#244b59',label:'#779faa'},
+   rooms:{entry:[0.14,0.36],side1:[0.4,0.72],door:[0.86,0.72],stairs:[0.86,0.34]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor seventy-seven. Plan for it, not to do it.','Not planning to. Planning for.'],
+   truth:'If it happened tomorrow, what is the first thing you would do?',
+   dare:{text:'Write the first three steps down. Put them where you would find them.',seconds:120,hold:false},
+   line:'There is a way down from this floor that is marked properly.',
+   sides:{side1:{name:'MARKED STAIR',line:'Signed, lit, and it goes to a landing. Not the ground.'}}},
+
+  {n:78,name:'THE OTHERS',rule:'quiet',air:'rain',
+   pal:{bg:'#060d10',room:'#0c181d',roomOn:'#152c34',stroke:'#173038',strokeOn:'#67d4ee',line:'#254f5d',label:'#7da7b2'},
+   rooms:{entry:[0.14,0.5],side1:[0.44,0.2],door:[0.82,0.5],stairs:[0.82,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy-eight. Somebody near you is on floor one tonight.','They cannot see the floor you are standing on.'],
+   truth:'Who do you know who is where you were?',
+   dare:{text:'Send them one message with no advice in it.',seconds:90,hold:false},
+   line:'You can hear somebody on the floor below.',
+   sides:{side1:{name:'BELOW',line:'Footsteps. Somebody a long way down, still coming up.'}}},
+
+  {n:79,name:'THE LONG VIEW',rule:'dim',air:'dust',
+   pal:{bg:'#060d11',room:'#0c1a1e',roomOn:'#162e37',stroke:'#18323b',strokeOn:'#6bdef9',line:'#275362',label:'#83aebb'},
+   rooms:{entry:[0.17,0.44],side1:[0.47,0.76],door:[0.82,0.44],stairs:[0.82,0.78]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor seventy-nine. A year from now is closer than it sounds.','A year from now is closer than it sounds.'],
+   truth:'Where do you want to be a year from tonight?',
+   dare:{text:'Say the date out loud. Then say one thing that is true by then.',seconds:75,hold:true},
+   line:'The top of the building is visible from here.',
+   sides:{side1:{name:'UPPER STAIR',line:'You can see the last flight from this one.'}}},
+
+  {n:80,name:'EIGHTY',rule:'none',air:'dust',wave:true,
+   pal:{bg:'#060e12',room:'#0d1b20',roomOn:'#173039',stroke:'#1a343d',strokeOn:'#70e8ff',line:'#295766',label:'#88b6c3'},
+   rooms:{entry:[0.17,0.7],side1:[0.5,0.38],door:[0.83,0.7],stairs:[0.83,0.3]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty. Eighty days.','Eighth landing. This is a long way up.'],
+   truth:'What is the smallest thing that keeps you honest?',
+   dare:{text:'Do that thing now, whatever it is.',seconds:60,hold:false},
+   line:'Cold and clear at this height.',
+   sides:{side1:{name:'CLEAR WINDOW',line:'Nothing between you and a long way down. It is only a view.'}}},
+
+  {n:81,name:'THE FOREVER PART',rule:'echo',air:'static',
+   pal:{bg:'#06070c',room:'#0c0f1b',roomOn:'#171c32',stroke:'#1a1f37',strokeOn:'#7381ba',line:'#283256',label:'#697397'},
+   rooms:{entry:[0.18,0.62],side1:[0.48,0.28],door:[0.8,0.62],stairs:[0.8,0.24]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-one. There is no floor where this is finished.','That is not a threat. It is the arrangement.'],
+   truth:'What are you willing to keep doing for the rest of your life?',
+   dare:{text:'Name the one thing you will never stop doing. Say it out loud.',seconds:75,hold:true},
+   line:'The stairs do not stop at the top of this building.',
+   sides:{side1:{name:'ENDLESS STAIR',line:'It keeps going past the roof. That is not a threat.'}}},
+
+  {n:82,name:'THE RULES',rule:'pull',air:'grid',
+   pal:{bg:'#07080d',room:'#0d101c',roomOn:'#181e35',stroke:'#1c213b',strokeOn:'#7b8bc7',line:'#2b355c',label:'#717ca2'},
+   rooms:{entry:[0.5,0.2],side1:[0.18,0.56],side2:[0.82,0.56],door:[0.5,0.84],stairs:[0.16,0.86]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   brief:['Floor eighty-two. Three rules, and none negotiable at night.','Short, few, and not up for negotiation at eleven at night.'],
+   truth:'What are your three rules — not goals, but rules?',
+   dare:{text:'Write the three. Three only. Put them where you will see them.',seconds:120,hold:false},
+   line:'Three doors. That is the whole floor.',
+   sides:{side1:{name:'FIRST RULE',line:'One line on the wall.'},
+          side2:{name:'SECOND RULE',line:'Another. Shorter.'}}},
+
+  {n:83,name:'THE CARD',rule:'fog',air:'embers',
+   pal:{bg:'#07080e',room:'#0e111e',roomOn:'#1a2039',stroke:'#1d243f',strokeOn:'#8394d4',line:'#2d3962',label:'#7884ad'},
+   rooms:{entry:[0.22,0.3],side1:[0.52,0.62],door:[0.8,0.3],stairs:[0.8,0.68]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-three. Something in your pocket for a bad night.','Your head will not be on your side that night.'],
+   truth:'What would you need to read at 2am to not do it?',
+   dare:{text:'Write it on something physical. Put it in your wallet tonight.',seconds:120,hold:false},
+   line:'Somebody left a note in one of these rooms.',
+   sides:{side1:{name:'NOTE ROOM',line:'A card on the table, face down.'}}},
+
+  {n:84,name:'THE HONEST WEEK',rule:'slow',air:'flicker',
+   pal:{bg:'#08090f',room:'#0f1220',roomOn:'#1b223c',stroke:'#1f2643',strokeOn:'#8b9de1',line:'#303c68',label:'#808cb7'},
+   rooms:{entry:[0.22,0.2],side1:[0.52,0.48],door:[0.82,0.78],stairs:[0.82,0.22]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-four. Once a week beats once a year.','One check-in a week beats one big confession a year.'],
+   truth:'Who could you tell the truth to every week, without a crisis?',
+   dare:{text:'Ask that person for a weekly ten minutes. Ask tonight.',seconds:90,hold:false},
+   line:'A room in here is set up for two people to sit in.',
+   sides:{side1:{name:'TWO CHAIRS',line:'Facing each other. Somebody uses this weekly.'}}},
+
+  {n:85,name:'THE DOOR BACK',rule:'dark',air:'window',
+   pal:{bg:'#080910',room:'#101322',roomOn:'#1d2440',stroke:'#212847',strokeOn:'#93a6ee',line:'#33406e',label:'#8794c2'},
+   rooms:{entry:[0.2,0.78],side1:[0.42,0.42],door:[0.84,0.36],stairs:[0.84,0.76]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-five. The way back stays unlocked.','It stays unlocked. That is the arrangement.'],
+   truth:'What does the way back look like, and how would you know you were on it?',
+   dare:{text:'Name the first sign. The real one, not the dramatic one.',seconds:75,hold:true},
+   line:'The way down is open, lit, and nobody is stopping you.',
+   sides:{side1:{name:'THE WAY DOWN',line:'It is right there. It always was.'}}},
+
+  {n:86,name:'THE PASSING ON',rule:'none',air:'rain',
+   pal:{bg:'#080911',room:'#111424',roomOn:'#1f2644',stroke:'#232a4b',strokeOn:'#9baffb',line:'#364474',label:'#8e9ccd'},
+   rooms:{entry:[0.5,0.82],side1:[0.2,0.46],door:[0.5,0.2],stairs:[0.84,0.16]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-six. What you know is worth handing over.','Nobody handed it to you either.'],
+   truth:'Who could use what you know, and what has stopped you telling them?',
+   dare:{text:'Tell one person one thing that worked for you.',seconds:90,hold:false},
+   line:'Somebody has left the doors propped for whoever comes next.',
+   sides:{side1:{name:'PROPPED DOOR',line:'Held open with a brick. Deliberately.'}}},
+
+  {n:87,name:'THE ORDINARY LIFE',rule:'quiet',air:'dust',wave:true,
+   pal:{bg:'#090a12',room:'#121526',roomOn:'#202847',stroke:'#252c4f',strokeOn:'#a3b8ff',line:'#39477a',label:'#96a4d7'},
+   rooms:{entry:[0.16,0.28],side1:[0.5,0.74],door:[0.84,0.28],stairs:[0.84,0.72]},
+   edges:[['entry','door'],['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-seven. This stops being the main thing about you.','Something else has to be, and you choose what.'],
+   truth:'What do you want to be the main thing about you instead?',
+   dare:{text:'Spend five minutes on that thing. Now.',seconds:120,hold:false},
+   line:'Nothing on this floor is about recovery at all.',
+   sides:{side1:{name:'LIVING ROOM',line:'Somebody just lives here.'}}},
+
+  {n:88,name:'THE BAD NIGHT AHEAD',rule:'fog',air:'grain',
+   pal:{bg:'#090a13',room:'#131628',roomOn:'#222a4b',stroke:'#262f53',strokeOn:'#abc1ff',line:'#3b4b80',label:'#9dace2'},
+   rooms:{entry:[0.14,0.76],side1:[0.38,0.34],door:[0.86,0.32],stairs:[0.86,0.74]},
+   edges:[['entry','side1'],['door','stairs'],['side1','door']],
+   brief:['Floor eighty-eight. There will be a bad night.','There will be one. It does not undo any of this.'],
+   truth:'What will you tell yourself on the worst night of next year?',
+   dare:{text:'Write that sentence. Keep it with the card.',seconds:90,hold:false},
+   line:'The lights on this floor go down and come back.',
+   sides:{side1:{name:'FLICKERING ROOM',line:'It comes back on every time. Every time so far.'}}},
+
+  {n:89,name:'THE COUNT',rule:'none',air:'rain',
+   pal:{bg:'#0a0b14',room:'#141729',roomOn:'#232c4e',stroke:'#283157',strokeOn:'#b3cbff',line:'#3e4e86',label:'#a5b5ed'},
+   rooms:{entry:[0.12,0.2],side1:[0.44,0.44],door:[0.86,0.24],stairs:[0.5,0.84]},
+   edges:[['entry','side1'],['side1','door'],['door','stairs']],
+   brief:['Floor eighty-nine. The number stops being the point.','Ninety is a number too. So is one.'],
+   truth:'If the number vanished tomorrow, what would still be true?',
+   dare:{text:'List three things that are true regardless of the count.',seconds:90,hold:false},
+   line:'No numbers anywhere on this floor.',
+   sides:{side1:{name:'BLANK WALL',line:'Where a number would go. Nothing on it.'}}},
+
+  {n:90,name:'THE ROOF',rule:'none',air:'window',wave:true,
+   pal:{bg:'#0a0b14',room:'#14182b',roomOn:'#252e52',stroke:'#2a335b',strokeOn:'#bbd4ff',line:'#41528c',label:'#acbdf7'},
+   rooms:{entry:[0.15,0.24],side1:[0.45,0.66],side2:[0.66,0.22],door:[0.85,0.66],stairs:[0.85,0.24]},
+   edges:[['entry','side1'],['entry','side2'],['side1','door'],['side2','door'],['door','stairs']],
+   brief:['Floor ninety. Ninety floors. The stairs keep going.','The building ends here. The climb does not.'],
+   truth:'What do you want to say to whoever is on floor one tonight?',
+   dare:{text:'Say it out loud, to the room, as if they were in it.',seconds:90,hold:true},
+   line:'Open air. The building ends and the climb does not.',
+   sides:{side1:{name:'THE EDGE',line:'You can see the whole city and every road out of it.'},
+          side2:{name:'THE NEXT STAIR',line:'Another flight, going up from a roof. Somebody built it anyway.'}}},
 ];
 function towerFloor(n){return TOWER_FLOORS[Math.max(0,Math.min(TOWER_FLOORS.length-1,n-1))];}
 function towerState(){
@@ -6908,7 +7724,7 @@ function towerState(){
 // real day with the lesson done. So the tower cannot be ground out in one
 // sitting - the top floor is always locked from the outside until tomorrow.
 function towerCeiling(){
-  return Math.max(1,Math.min(TOWER_PHASE1_FLOORS,climbSteps()));
+  return Math.max(1,Math.min(towerMaxFloor(),climbSteps()));
 }
 function towerCleared(n){return !!towerState().cleared[n];}
 // Rule 4: a slip drops you to the last landing and never to the ground, and it
@@ -6922,7 +7738,7 @@ function towerOnRelapse(){
   }catch(e){}
 }
 
-let twAnim=null,twPos=null,twTarget=null,twDareTimer=null,twDareLeft=0,twSayTimer=null,twMoved=0;
+let twAnim=null,twPos=null,twTarget=null,twTargetKey=null,twDareTimer=null,twDareLeft=0,twSayTimer=null,twMoved=0;
 function towerRooms(n){
   // The stairs are not a room until the door is open.
   const f=towerFloor(n),out={};
@@ -6970,7 +7786,9 @@ function renderTower(){
   const vl=document.getElementById('tw-vault-link');
   if(vl)vl.textContent='THE VAULT · '+vc.have+' OF '+vc.all+' FOUND';
   const cleared=Object.keys(t.cleared).length;
-  document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_PHASE1_FLOORS+'<br>NERVE '+t.nerve;
+  // Against the whole building, not the plan ceiling: somebody who cleared
+  // sixty floors on Pro and then went back to free was shown 'CLEARED 60 / 10'.
+  document.getElementById('tw-nerve').innerHTML='CLEARED '+cleared+' / '+TOWER_TOP_FLOOR+'<br>NERVE '+t.nerve;
   towerSay(f.line);
   towerBriefStop();
   if(t.readBriefs)towerBriefPlay();
@@ -6979,7 +7797,7 @@ function renderTower(){
   const c=document.getElementById('tw-canvas');
   const here=towerRooms(t.floor)[t.room]||[0.17,0.7];
   twPos={x:here[0],y:here[1]};
-  twTarget=null;twMoved=Date.now();
+  twTarget=null;twTargetKey=null;twMoved=Date.now();
   if(!c._twBound){c.addEventListener('pointerdown',towerTap);c._twBound=true;}
   cancelAnimationFrame(twAnim);
   const loop=()=>{towerDraw();twAnim=requestAnimationFrame(loop);};loop();
@@ -7064,6 +7882,30 @@ function towerAir(g,W,H,f,tms){
   }else if(f.air==='window'){
     g.globalAlpha=.13;g.fillStyle=p.strokeOn;
     g.beginPath();g.moveTo(W*0.34,0);g.lineTo(W*0.62,0);g.lineTo(W*0.80,H);g.lineTo(W*0.46,H);g.closePath();g.fill();
+  // Three more atmospheres, added for floors 11-90: six of them over ninety
+  // floors meant every seventh floor breathed exactly the same way.
+  }else if(f.air==='rain'){
+    g.strokeStyle=p.line;g.globalAlpha=.20;g.lineWidth=1;
+    for(let i=0;i<40;i++){
+      const rx=twRand(i+f.n*3)*W;
+      const ry=(twRand(i*1.7+f.n)*H+(tms/32)*(0.7+twRand(i*4)*0.8))%H;
+      g.beginPath();g.moveTo(rx,ry);g.lineTo(rx+1.5,ry+11);g.stroke();
+    }
+  }else if(f.air==='embers'){
+    g.fillStyle=p.strokeOn;
+    for(let i=0;i<26;i++){
+      const ex=twRand(i+f.n*5)*W+Math.sin(tms/900+i)*7;
+      const ey=H-((twRand(i*2.9+f.n)*H+(tms/120)*(0.5+twRand(i*6)*0.7))%H);
+      g.globalAlpha=.10+0.16*twRand(i*8+f.n);
+      g.beginPath();g.arc(ex,ey,1.3,0,7);g.fill();
+    }
+  }else if(f.air==='static'){
+    g.fillStyle=p.label;
+    for(let i=0;i<16;i++){
+      const sy=twRand(i+f.n*11)*H;
+      g.globalAlpha=.04+0.05*Math.abs(Math.sin(tms/430+i));
+      g.fillRect(0,sy,W,1.5);
+    }
   }
   g.restore();
 }
@@ -7089,10 +7931,18 @@ function towerDraw(){
   // The dark rule: a room you have never been in and are not standing next to
   // is a shape with no name on it.
   const known=k=>f.rule!=='dark'||k===t.room||towerVisited(n,k)||towerConnected(n,t.room,k);
+  // The quiet rule: the rooms are all visible, but none of them tells you what
+  // it is until you have stood in it. Different from dark, which hides the
+  // room itself - here you can see exactly where you could go and nothing
+  // about what is there.
+  const named=k=>f.rule!=='quiet'||k===t.room||towerVisited(n,k);
+  // The fog rule: only where you are and what touches it is at full strength.
+  const fogA=k=>(f.rule!=='fog'||k===t.room||towerConnected(n,t.room,k))?1:0.34;
   g.lineWidth=5;g.strokeStyle=p.line;g.globalAlpha=lit*0.5;g.lineCap='round';
   f.edges.forEach(e=>{
     if(!rooms[e[0]]||!rooms[e[1]])return;
     if(!known(e[0])&&!known(e[1]))return;
+    g.globalAlpha=lit*0.5*Math.min(fogA(e[0]),fogA(e[1]));
     g.beginPath();g.moveTo(px(rooms[e[0]]),py(rooms[e[0]]));g.lineTo(px(rooms[e[1]]),py(rooms[e[1]]));g.stroke();
   });
   g.globalAlpha=lit;
@@ -7106,7 +7956,7 @@ function towerDraw(){
     g.lineWidth=here?2:1;
     g.strokeStyle=here?p.strokeOn:p.stroke;
     g.stroke();
-    if(!seen){g.globalAlpha=lit;return;}
+    if(!seen||!named(k)){g.globalAlpha=lit;return;}
     g.font='600 9px -apple-system,Segoe UI,Roboto,sans-serif';
     g.textAlign='center';g.textBaseline='middle';
     // Label along the bottom of the room, never through the middle - the
@@ -7133,7 +7983,7 @@ function towerDraw(){
       g.save();g.translate(0,(r[1]*H)*2+RH*1.5);g.scale(1,-1);
       drawRoom(k,r,lit*0.16);g.restore();
     }
-    drawRoom(k,rooms[k],lit);
+    drawRoom(k,rooms[k],lit*fogA(k));
   });
   // the one-way corridors get an arrow, so it is a rule and not a bug
   (f.oneway||[]).forEach(e=>{
@@ -7151,11 +8001,16 @@ function towerDraw(){
     g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
   }
   g.globalAlpha=1;
-  // the tower itself, ten ticks up the right edge
-  const lx=W-11;
-  for(let i=1;i<=TOWER_PHASE1_FLOORS;i++){
-    const y=H-18-((i-1)*((H-40)/(TOWER_PHASE1_FLOORS-1)));
-    g.beginPath();g.arc(lx,y,i===n?4:2.5,0,7);
+  // The tower up the right edge: ten ticks for a free account, ninety for a
+  // Pro one. At ninety they are a few pixels apart, so the dots shrink and the
+  // landings (every tenth) stay full size - the shape of the building still
+  // reads at a glance without a single number on it.
+  const lx=W-11,top=towerMaxFloor();
+  const dense=top>40;
+  for(let i=1;i<=top;i++){
+    const y=H-18-((i-1)*((H-40)/(top-1)));
+    const landing=i%10===0;
+    g.beginPath();g.arc(lx,y,i===n?4:(dense?(landing?2.2:1.3):2.5),0,7);
     // lit = the floor you are on, dim = cleared, grey = reachable tonight,
     // near-black = not open yet. No numbers on it; it is a building, not a bar.
     g.fillStyle=i===n?p.strokeOn:(towerCleared(i)?p.label:(i<=towerCeiling()?p.line:p.stroke));
@@ -7163,9 +8018,12 @@ function towerDraw(){
   }
   if(twTarget){
     // The slow rule: floor eight is heavy. Nothing is wrong with you.
-    const k=f.rule==='slow'?0.055:0.16;
+    // The pull rule: every step toward the door drags. Moving anywhere else
+    // on the floor is normal speed, which is the whole point of it.
+    const toDoor=twTargetKey==='door'||twTargetKey==='stairs';
+    const k=f.rule==='slow'?0.055:(f.rule==='pull'&&toDoor?0.045:0.16);
     const dx=twTarget.x-twPos.x,dy=twTarget.y-twPos.y;
-    if(Math.abs(dx)<0.004&&Math.abs(dy)<0.004){twPos.x=twTarget.x;twPos.y=twTarget.y;twTarget=null;towerArrived();}
+    if(Math.abs(dx)<0.004&&Math.abs(dy)<0.004){twPos.x=twTarget.x;twPos.y=twTarget.y;twTarget=null;twTargetKey=null;towerArrived();}
     else{twPos.x+=dx*k;twPos.y+=dy*k;}
   }
 }
@@ -7187,7 +8045,7 @@ function towerTap(ev){
   t.visited[n]=t.visited[n]||{};t.visited[n][hit]=true;
   towerCollect(n,hit);
   save();
-  twTarget={x:rooms[hit][0],y:rooms[hit][1]};
+  twTarget={x:rooms[hit][0],y:rooms[hit][1]};twTargetKey=hit;
   towerPanel();
 }
 // A room that will not let you in says why. A rule you cannot see is a bug.
@@ -7231,8 +8089,13 @@ function towerPanel(){
     }
     if(n<ceiling){
       el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
-    }else if(n>=TOWER_PHASE1_FLOORS){
-      el.innerHTML='<div class="tw-note">The landing is yours. Floor ten is the top of what is built — the rest of the tower is coming.</div>';
+    }else if(n>=TOWER_TOP_FLOOR){
+      el.innerHTML='<div class="tw-note">The roof. Ninety floors under you and the stairs still go up — there is no floor where this is finished, and that is the good news.</div>';
+    }else if(n>=towerMaxFloor()){
+      // Free tier stops at ten. Say what is above it plainly and once; never
+      // dress the wall up as part of the story.
+      el.innerHTML='<div class="tw-note">Floor ten is the top of the free tower. Floors eleven to ninety are part of Pro.</div>'+
+        '<button class="tw-btn go" style="margin-top:8px" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</button>';
     }else{
       el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
         '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
@@ -7260,7 +8123,7 @@ function towerGoEarn(){
 }
 function towerAscend(){
   const t=towerState();
-  if(!towerCleared(t.floor)||t.floor>=towerCeiling()||t.floor>=TOWER_PHASE1_FLOORS)return;
+  if(!towerCleared(t.floor)||t.floor>=towerCeiling()||t.floor>=towerMaxFloor())return;
   t.floor+=1;t.room='entry';save();
   logActivity('tower_floor',{floor:t.floor});
   renderTower();
@@ -7303,6 +8166,72 @@ const TOWER_ARTIFACTS={
 "...it stayed on the hook for a year after he stopped, because taking it down would have meant deciding something, and neither of us was ready to decide anything.\n\nThen one Tuesday it was gone, and neither of us mentioned it. That is how most of it happened, honestly. Not conversations. Tuesdays."},
 '10:side1':{kind:'LETTER',title:'From the window',text:
 "Ten days. I know what you are thinking, because I thought it too — ten days is nothing, anyone can do ten days.\n\nHere is the thing though. You have done ten days before and it did not feel like this. The difference is not the number. It is that this time you were counting on purpose."},
+'12:side2':{kind:'LESSON',title:"The small ones first",text:
+"Nobody's first lie is a big one. It is \"I'm fine,\" said quickly, to somebody who was not really asking.\n\nThe reason it matters is not moral. It is that the small ones are practice. By the time there is something big to hide, you are already fluent."},
+'14:side1':{kind:'STORY',title:"The good Tuesday",text:
+"...it was a completely ordinary good day and it frightened the life out of me. I kept waiting for the other thing. I actually said to myself, out loud, in the kitchen: what is this.\n\nIt was just a Tuesday. I had forgotten they came like that."},
+'16:side1':{kind:'LETTER',title:"About the offering",text:
+"They will not be testing you. That is the part I got wrong for about a year — I thought every offer was a trap somebody had set.\n\nMostly people are just being normal at you. They do not know. You do not owe them the reason, either. \"Not tonight, thanks\" has never once been questioned, in seven years of saying it."},
+'18:side1':{kind:'LESSON',title:"The real number",text:
+"Work it out for one week, not one year. A year is too big to feel and it turns into a shrug you can do nothing with.\n\nOne week you can picture. One week is a coat, or a train fare, or the thing you keep saying you cannot afford. That is the number that changes what you do on a Thursday, and Thursdays are what this is made of."},
+'20:side1':{kind:'LETTER',title:"Twenty",text:
+"I do not remember day twenty. I remember day one and I remember about four months, and in between is a smear.\n\nThat is worth knowing, because right now day twenty feels enormous and like it should be commemorated. It is not going to be. It is going to be a day you got through, and then forgot, and the forgetting is not disrespect. It is the point."},
+'21:side1':{kind:'LESSON',title:"Worse before",text:
+"Stopping does not fix your life. It removes the thing that was making your life worse while also being the only thing making it bearable.\n\nFor a stretch, that leaves you with less than you had. Everyone hits it. It is not a sign you have chosen wrong."},
+'24:side1':{kind:'STORY',title:"The deal I made",text:
+"...the terms were: one, on my birthday, with people around, and then never again. I remember being genuinely impressed with how reasonable it sounded.\n\nI kept to it exactly. One, on my birthday, with people around. And then the following Thursday, on my own, because the rule had been about birthdays."},
+'27:side2':{kind:'LETTER',title:"What I could not fix",text:
+"I stopped, and I thought that was the payment. Turned out stopping was the entry fee.\n\nWhat she actually wanted was for me to hear the thing I did without explaining the circumstances around it. It took me two more years to be able to sit still for that."},
+'30:side1':{kind:'LESSON',title:"A month",text:
+"Thirty days does not mean you are thirty days from finished. It means your body has stopped being in crisis and the actual work is now visible.\n\nMost people quit here. Not back to the habit — they quit the effort, because the emergency is over and effort without an emergency is just discipline."},
+'33:side2':{kind:'STORY',title:"Learning to be bored",text:
+"...I sat in the garden for twenty minutes with no phone and I have genuinely never felt so stupid.\n\nAbout the fourth time, something shifted. Not peace, nothing like that. Just — the twenty minutes stopped feeling like a punishment and started feeling like twenty minutes."},
+'36:side1':{kind:'LESSON',title:"What the hand is doing",text:
+"Watch where your hand goes when you are uncomfortable. Not what you think about — what your hand does.\n\nIt is usually already moving before you have decided anything. That is the thing to interrupt, and it is easier to interrupt a hand than a mood."},
+'39:side1':{kind:'LETTER',title:"On missing it",text:
+"You are allowed to miss it. I want to say that clearly because nobody said it to me and I thought missing it meant I was failing.\n\nI missed it for about two years, in a low background way, like a song you cannot place. Then one day I noticed I had not thought about it in a fortnight. Nobody announces that day. You find it afterwards."},
+'40:side1':{kind:'LESSON',title:"Automatic",text:
+"Somewhere in here, one or two things stop being decisions.\n\nYou will not notice on the day. You notice a month later, when you realise you did not have the argument with yourself on the way home, and have not had it for a while."},
+'42:side1':{kind:'STORY',title:"The fourth apology",text:
+"...she said, quite gently, \"you've said that before,\" and I got angry, because I had said it before and I had meant it every time.\n\nMeaning it was never what she was waiting for. She was waiting for a Tuesday where nothing happened, and then another one."},
+'45:side1':{kind:'LETTER',title:"The ones who left",text:
+"Two people did not stay. One of them I understand completely and would have done the same.\n\nThe other one still stings. I have made my peace with the fact that some of what this cost me is simply gone, and no amount of doing well now buys it back. That is not despair. It is just the bill."},
+'47:side1':{kind:'LESSON',title:"Asking",text:
+"\"Let me know if you need anything\" is not an offer anybody can act on. Neither is \"I'm here for you.\"\n\nAsk for one specific thing at one specific time. \"Can you ring me at nine on Friday.\" People are enormously good at specific and hopeless at general."},
+'50:side1':{kind:'LETTER',title:"Halfway",text:
+"Fifty days in I told somebody I was \"basically fine now\", and I believed it.\n\nI was not fine. I was fifty days in, which is a completely different thing and also genuinely good. Both were true. It took me a long time to be able to hold those at once."},
+'52:side1':{kind:'LESSON',title:"The returning idea",text:
+"The thought that it was never really a problem comes back when you are doing well. Never when you are struggling.\n\nThat timing is the whole tell. It does not arrive to inform you. It arrives when it thinks it can get through."},
+'55:side1':{kind:'STORY',title:"What I stopped doing",text:
+"...I had stopped writing the three lines at night. Not decided to — just stopped, the way you stop doing anything that is working.\n\nWhen I looked back, the two worst weeks of that year both started about nine days after I stopped writing them. I do not think the writing was magic. I think it was a thing I did while paying attention."},
+'57:side1':{kind:'LESSON',title:"The near miss",text:
+"You got close and did not. Something stopped you, and it was not willpower — willpower does not turn up at that range.\n\nIt was a person, a distance, a rule, or a sentence. Find out which one it was. That is not a nice memory, it is equipment."},
+'60:side1':{kind:'LETTER',title:"Sixty",text:
+"Two months. Nobody will mention it.\n\nI have thought a lot about why the milestones stop getting marked, and I think it is simply that people assume you are done. It is not indifference. It is that from the outside this looks finished long before it feels finished."},
+'63:side1':{kind:'LESSON',title:"Shame",text:
+"Shame and guilt get used as the same word and they do opposite jobs.\n\nGuilt is about a thing you did and it points at a repair. Shame is about what you are, and it points at the habit — because the habit is very good at making you feel like less of a problem for about an hour."},
+'65:side1':{kind:'STORY',title:"Three steps",text:
+"...it was always the same three. Tired. Then a small unfairness, usually at work. Then being on my own with the evening ahead.\n\nWhen I wrote it down I could not believe how boring it was. Fifteen years of my life and the trigger was a rota change and a quiet flat."},
+'68:side1':{kind:'LETTER',title:"What it is for",text:
+"Somebody asked me what I was staying sober for and I did not have an answer, and it bothered me for months.\n\nWhat I have now is not inspiring. It is: I like the mornings. That is genuinely it. I did not know mornings were a thing you could like."},
+'70:side1':{kind:'LESSON',title:"Seventy",text:
+"By now the reasons you started with have usually been replaced.\n\nPeople begin for somebody else and carry on for themselves, or begin out of fear and carry on out of preference. If your reason has changed, nothing is wrong. Ask what the current one actually is, though — the old one is not holding anything up any more."},
+'72:side1':{kind:'LETTER',title:"On sleeping",text:
+"Sleep was the last thing to come back for me and it took about five months, and for the first three I was certain I had done permanent damage.\n\nI had not. But nobody had told me the timeline, so I spent three months treating a normal stage as evidence of a disaster."},
+'74:side1':{kind:'STORY',title:"The small pleasure",text:
+"...it was a cup of tea on a step in the sun and I noticed I was enjoying it. Actually noticed, at the time, not afterwards.\n\nThat had not happened in years. Not once. I had been getting through things and calling it living."},
+'77:side1':{kind:'LESSON',title:"Planning for it",text:
+"Writing down what you would do if it happened is not permission and it does not make it likelier. It makes the first ten minutes afterwards survivable.\n\nMost of the damage is not in the slip. It is in the fortnight after, when somebody decides the whole thing is ruined now anyway."},
+'80:side1':{kind:'LETTER',title:"Eighty",text:
+"The honest thing I would tell you at eighty days: it does get easier, and it never gets to zero.\n\nI check in with one person every Sunday, still, years on. Ten minutes. That is the whole maintenance cost, and it is cheap compared to what the alternative charged."},
+'82:side2':{kind:'LESSON',title:"Three rules",text:
+"Rules beat intentions because they do not require you to be in a good state at the moment you need them.\n\nKeep them to three, keep them short enough to say in one breath, and write them about actions rather than feelings. \"Not alone after ten\" is a rule. \"Stay positive\" is a wish."},
+'85:side1':{kind:'LETTER',title:"The door back",text:
+"I want to be careful with this one. The way back is always open, and it stays open whether or not anyone talks about it.\n\nSaying so is not encouragement. It is that people who believe the door has locked behind them stop asking for help, and that is when it goes badly. You can always come back. That is a fact about the door, not an invitation."},
+'87:side1':{kind:'STORY',title:"No longer the headline",text:
+"...somebody I had known for two years found out, and was completely surprised, and I realised it had stopped being the first thing about me.\n\nI had spent so long as a person who was dealing with this that I had not noticed it had become a thing I had dealt with."},
+'90:side2':{kind:'LETTER',title:"From the roof",text:
+"You made it to the top of a building that does not have a top. That is not a trick — the stairs really do keep going, and the reason that is good news rather than bad is that a finished thing can be lost.\n\nSomebody is on floor one tonight, in the dark, with the phone in their hand, deciding. You know exactly what that landing smells like. That is worth more than the ninety floors."},
 };
 function towerArtifactAt(n,room){return TOWER_ARTIFACTS[n+':'+room]||null;}
 function towerArtifactKey(n,room){return n+':'+room;}
@@ -13988,7 +14917,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.6';
+const APP_VERSION='9.7';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

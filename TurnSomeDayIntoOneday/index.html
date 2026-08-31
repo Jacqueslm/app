@@ -1590,7 +1590,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="ct-scores"></div>
         </div>
       </div>
-      <div id="ct-foot"><div class="n">Left third slips left, right third slips right, the middle throws. He tells you which side it is coming from — the tell is in his body.</div></div>
+      <div id="ct-foot"><div class="n">Left third slips left, right third slips right, the middle punches. Jab him any time — but slip his punch and the counter hits for three times more. Throwing into his windup is the only punch that costs you.</div></div>
     </div>
     <div id="s-vault" class="scr">
       <div id="vault-count"></div>
@@ -7830,7 +7830,8 @@ function bxStart(oi){
   bx={opp:opp,ava:a,perk:a.perk,kd:0,you:a.perk==='fresh'?112:100,him:100,
       riseNeed:a.perk==='heart'?4:(a.perk==='corner'?5:6),
       phase:'rest',phaseAt:0,side:0,feintAt:0,feinted:false,burst:false,
-      slip:0,slipAt:0,throwAt:0,hand:1,impactAt:0,combo:0,shake:0,flash:0,hitFlash:0,
+      slip:0,slipAt:0,throwAt:0,hand:1,impactAt:0,rock:0,rockSide:1,rockPow:0,
+      combo:0,shake:0,flash:0,hitFlash:0,
       down:false,count:0,countAt:0,rises:0,phUsed:false,state:'live',msg:'',msgAt:0};
   bxRound();
 }
@@ -8007,20 +8008,43 @@ function ctTap(ev){
 function bxThrow(now){
   bx.throwAt=now;
   bx.hand=-bx.hand;                        // jab, cross, jab - hands alternate
-  if(bx.phase==='open'){
+  // Jacques, after playing: "my punches are not punching him at all." The
+  // first rule only scored a punch thrown while he was open after a slip -
+  // every other tap of the middle was punished, so punching felt broken.
+  // Boxing rules now: a jab lands whenever he is not punching, the counter
+  // after a slip is the shot that wins fights, and the only wrong time to
+  // throw is into his live windup.
+  if(bx.phase==='open'||(bx.phase==='wind'&&bx.slip===-bx.side&&(bx.feinted||!bx.feintAt))){
+    // The counter - he is open, or you are already inside his punch on the
+    // slip and it interrupts him. Full damage, and it chains.
     bx.impactAt=now+150;                   // the moment the glove arrives, not the tap
     bx.combo++;
     let give=bx.tune.give+bx.combo*(bx.perk==='counter'?4:2);
     if(bx.perk==='power')give*=1.2;
     if(bx.perk==='underdog'&&bx.you<30)give*=1.35;
     bx.him=Math.max(0,bx.him-Math.round(give));
-    bx.hitFlash=now;
+    bx.hitFlash=now;bx.rock=now;bx.rockSide=bx.hand;bx.rockPow=1;
     if(navigator.vibrate)try{navigator.vibrate(14);}catch(e){}
     if(bx.him<=0){bxKnockdown(now);return;}
     bx.phase='rest';bx.phaseAt=now;
     bxSay(bx.combo>2?'Again.':'');
+  }else if(bx.phase==='rest'){
+    // The jab. It always punches - most land for chip damage, some he catches,
+    // so holding the middle down is a choice with a cost, not a free button.
+    if(Math.random()<0.25){
+      bxHurt(now,Math.round(bx.tune.hit*0.35),true);
+      bxSay('Caught.');
+    }else{
+      bx.impactAt=now+150;
+      let give=Math.max(3,Math.round(bx.tune.give*0.4));
+      if(bx.perk==='power')give=Math.round(give*1.2);
+      bx.him=Math.max(0,bx.him-give);
+      bx.hitFlash=now;bx.rock=now;bx.rockSide=bx.hand;bx.rockPow=0.45;
+      if(navigator.vibrate)try{navigator.vibrate(8);}catch(e){}
+      if(bx.him<=0){bxKnockdown(now);return;}
+    }
   }else{
-    // Throwing into nothing leaves you open, and he takes it.
+    // Punching into his live punch - the one time throwing is wrong.
     bxHurt(now,Math.round(bx.tune.hit*0.55),true);
     bxSay('Wild.');
   }
@@ -8150,9 +8174,14 @@ function bxFighter(g,W,H,now){
   const sway=Math.sin(now/620)*W*0.008;
   const stunned=bx.phase==='open';
 
+  // a landed punch rocks him: the whole man recoils away from the glove and
+  // settles back. Without this the only sign a punch landed was a bar moving.
+  const rk=bx.rock?Math.max(0,1-(now-bx.rock)/320):0;
+  const rock=rk>0?Math.sin(rk*Math.PI)*bx.rockPow:0;
   g.save();
-  g.translate(cx+sway, cy + (stunned?H*0.03*openK:0));
+  g.translate(cx+sway-rock*bx.rockSide*W*0.075, cy+(stunned?H*0.03*openK:0)+rock*H*0.018);
   if(stunned)g.rotate(0.10*openK*(bx.side||1));
+  if(rock)g.rotate(-rock*0.16*bx.rockSide);
 
   const bodyW=W*0.40*(bld.w||1),bodyH=H*0.29;
   // Torso in his tank, then a rim light down the shoulders. Without the rim he
@@ -8177,7 +8206,8 @@ function bxFighter(g,W,H,now){
   g.stroke();
 
   const hr=W*0.095*(bld.head||1);
-  g.save();g.translate(0,-bodyH*0.78);
+  g.save();g.translate(-rock*bx.rockSide*W*0.05,-bodyH*0.78-rock*H*0.012);
+  if(rock)g.rotate(-rock*0.30*bx.rockSide);
   const sg=g.createLinearGradient(0,-hr,0,hr);
   sg.addColorStop(0,pal.skin);sg.addColorStop(1,bxShade(pal.skin,-0.45));
   g.fillStyle=sg;
@@ -8197,6 +8227,17 @@ function bxFighter(g,W,H,now){
   }
   g.restore();
   g.restore();
+
+  // sweat off the jaw on a clean one
+  if(rock>0.35){
+    g.fillStyle='rgba(210,225,255,'+(0.5*rock)+')';
+    for(let i=0;i<5;i++){
+      const a2=-1.0-i*0.34,d=W*(0.10+0.22*(1-rock))+i*3;
+      g.beginPath();
+      g.arc(cx-bx.rockSide*(W*0.05+Math.cos(a2)*d),cy-bodyH*0.78+Math.sin(a2)*d*0.55,2.2,0,7);
+      g.fill();
+    }
+  }
 
   // gloves. The windup pulls the near one back; the last 130ms is the punch
   // itself, coming AT the camera - it grows, drops toward your chin, and
@@ -8265,8 +8306,12 @@ function bxYourGloves(g,W,H,now){
     g.save();
     g.translate(px,py);g.rotate(s*0.30*(1-e));
     // wrist wrap first, then the glove over it, then the thumb
-    g.fillStyle=bxShade(pal.glove,-0.58);
-    g.fillRect(-pr*0.55,pr*0.35,pr*1.1,pr*1.2);
+    if(!lead||e<0.35){
+      g.globalAlpha=lead?1-e/0.35:1;
+      g.fillStyle=bxShade(pal.glove,-0.58);
+      g.fillRect(-pr*0.55,pr*0.35,pr*1.1,pr*1.2);
+      g.globalAlpha=1;
+    }
     const gl=g.createRadialGradient(-pr*0.30,-pr*0.30,pr*0.2,0,0,pr);
     gl.addColorStop(0,bxShade(pal.glove,0.28));gl.addColorStop(1,bxShade(pal.glove,-0.38));
     g.fillStyle=gl;
@@ -8277,8 +8322,8 @@ function bxYourGloves(g,W,H,now){
     g.restore();
   }
   // the moment a counter arrives on him: a short white burst at his head
-  const ik=bx.impactAt?Math.max(0,1-(now-bx.impactAt)/180):0;
-  if(ik>0&&now>=bx.impactAt-160){
+  const ik=bx.impactAt&&now>=bx.impactAt?Math.max(0,1-(now-bx.impactAt)/180):0;
+  if(ik>0){
     g.save();g.globalAlpha=ik*0.85;
     g.strokeStyle='#fff';g.lineWidth=2.5;
     const hx=W*0.5,hy=H*0.245;

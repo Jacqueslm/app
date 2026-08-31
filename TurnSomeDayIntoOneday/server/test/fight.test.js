@@ -153,17 +153,41 @@ test('the feint switches sides mid-windup and says so', () => {
   assert.match(tick, /bxSay\('Switch\.'\)/, 'the switch is announced, not hidden');
 });
 
-test('throwing when he is not open is punished', () => {
+test('a jab lands whenever he is not punching', () => {
+  // Jacques played the first build and said "my punches are not punching him
+  // at all" - because a punch only scored after a perfect slip, and every
+  // other tap of the middle hurt HIM instead. The middle button has to punch.
   const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
-  assert.match(thr, /if\(bx\.phase==='open'\)/);
-  assert.match(thr, /else\{[\s\S]*?bxHurt\(now,Math\.round\(bx\.tune\.hit\*0\.55\),true\)/,
-    'swinging at nothing has to cost something, or the middle is a free button');
+  assert.match(thr, /else if\(bx\.phase==='rest'\)\{/, 'throwing at rest is its own case');
+  assert.match(thr, /bx\.him=Math\.max\(0,bx\.him-give\)/, 'and it takes his health down');
+  assert.ok(!/else if\(bx\.phase==='rest'\)\{[\s\S]*?\n  \}else\{/.test(thr) ||
+    /if\(Math\.random\(\)<0\.25\)\{\s*bxHurt/.test(thr),
+    'some jabs get caught, so the middle is not a free button');
 });
 
-test('a counter chain is worth more than single shots', () => {
+test('the counter after a slip is worth far more than a jab', () => {
   const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
-  assert.match(thr, /bx\.combo\+\+/);
-  assert.match(thr, /bx\.combo\*\(bx\.perk==='counter'\?4:2\)/);
+  const jab = thr.match(/else if\(bx\.phase==='rest'\)\{[\s\S]*?\n  \}else\{/)[0];
+  assert.match(jab, /Math\.max\(3,Math\.round\(bx\.tune\.give\*0\.4\)\)/, 'a jab is chip damage');
+  assert.match(thr, /bx\.tune\.give\+bx\.combo\*\(bx\.perk==='counter'\?4:2\)/,
+    'the counter is full damage and it chains');
+});
+
+test('the only wrong time to throw is into his live windup', () => {
+  const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
+  const wrong = thr.slice(thr.lastIndexOf('}else{'));
+  assert.match(wrong, /bxHurt\(now,Math\.round\(bx\.tune\.hit\*0\.55\),true\)/);
+  assert.match(wrong, /bxSay\('Wild\.'\)/);
+});
+
+test('every landed punch visibly rocks him', () => {
+  // A health bar moving is not feedback. The man has to move.
+  const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
+  const hits = thr.match(/bx\.rock=now/g) || [];
+  assert.equal(hits.length, 2, 'both the jab and the counter rock him');
+  const fig = CODE.match(/function bxFighter\(g,W,H,now\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(fig, /const rk=bx\.rock\?Math\.max\(0,1-\(now-bx\.rock\)\/320\):0/);
+  assert.match(fig, /g\.rotate\(-rock\*0\.30\*bx\.rockSide\)/, 'his head snaps further than his body');
 });
 
 test('going down starts the count, and tapping gets you up', () => {

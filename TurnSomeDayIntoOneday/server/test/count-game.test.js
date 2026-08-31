@@ -80,6 +80,16 @@ test('a best score survives a loss', () => {
   assert.doesNotMatch(lost, /st\.best=0|rounds=0/, 'losing must not wipe anything');
 });
 
+test('the rise is written once, not twice', () => {
+  // Both the drawing and the hit test have to agree about where a moving
+  // target is. Two copies of that formula only ever drift apart.
+  assert.match(GAME, /function ctThoughtY\(th,now,t\)\{[\s\S]*?return 1\.03-/);
+  assert.match(GAME, /const ty=ctThoughtY\(th,now,t\);/, 'the tap uses it');
+  assert.match(GAME, /const y=ctThoughtY\(th,now,t\)\*H;/, 'and so does the drawing');
+  const stray = (GAME.match(/1-p\*0\.92/g) || []);
+  assert.deepEqual(stray, [], 'no hand-written copy of the rise is left');
+});
+
 test('a thought can never be drawn where it cannot be tapped', () => {
   // It spawned with its centre near the edge, drew half off-screen, and still
   // landed on you. One x, shared by the drawing and the hit test.

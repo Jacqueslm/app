@@ -205,6 +205,56 @@ test('three zones, no buttons', () => {
   assert.match(tap, /bxThrow\(now\)/, 'and the middle throws');
 });
 
+// ── the duck ────────────────────────────────────────────────────────────────
+test('you can duck, and it has its own zone rather than a swipe', () => {
+  // Jacques: "the i cant duck." There were only two slips before this.
+  const tap = CODE.match(/function ctTap\(ev\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(tap, /y=\(ev\.clientY-r\.top\)\/r\.height/, 'the duck needs the y of the tap');
+  assert.match(tap, /if\(y>0\.78\)\{/, 'a strip along the bottom, where a thumb rests');
+  assert.match(tap, /bx\.duckAt=now;bx\.slip=0/, 'ducking cancels a slip - you do one or the other');
+});
+
+test('a duck beats the punch from either side, including a feint', () => {
+  const tick = CODE.match(/function bxTick\(now\)\{[\s\S]*?\n\}/)[0];
+  const resolve = tick.slice(tick.indexOf('}else if(dt>t.windMs){'));
+  assert.match(resolve, /if\(bxDucking\(now\)\)\{/, 'the duck is checked before the side is');
+  assert.match(resolve, /bxSay\('Under it\.'\)/);
+  // and it is genuinely side-independent: nothing about bx.side gates it
+  const duckArm = resolve.slice(resolve.indexOf('if(bxDucking(now)){'),
+                                resolve.indexOf("}else if(bx.slip===-bx.side)"));
+  assert.doesNotMatch(duckArm, /bx\.side/, 'a duck that depended on the side would not answer a feint');
+});
+
+test('the duck is the safe option and the slip is the greedy one', () => {
+  const tick = CODE.match(/function bxTick\(now\)\{[\s\S]*?\n\}/)[0];
+  assert.match(tick, /bx\.phaseAt=now-bx\.tune\.openMs\*0\.4/,
+    'ducking buys a shorter opening than slipping');
+  const slipArm = tick.slice(tick.indexOf("}else if(bx.slip===-bx.side){"));
+  assert.match(slipArm, /bx\.phase='open';bx\.phaseAt=now;/, 'a slip pays the full opening');
+});
+
+test('the duck cannot be held down or spammed', () => {
+  const tap = CODE.match(/function ctTap\(ev\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(tap, /if\(bx\.duckAt&&now-bx\.duckAt<BX_DUCK_MS\+BX_DUCK_COOL\)return/);
+  assert.match(CODE, /const BX_DUCK_MS=340/, 'you are only under it for a moment');
+  assert.match(CODE, /const BX_DUCK_COOL=200/, 'and there is a gap before the next one');
+});
+
+test('the duck is visible and taught, not a secret', () => {
+  assert.match(CODE, /TAP DOWN HERE TO DUCK/, 'named on the canvas in the first fight');
+  assert.match(CODE, /tap the bottom strip to duck/, 'and before the first bell');
+  assert.match(CODE, /g\.moveTo\(0,H\*0\.78\);g\.lineTo\(W,H\*0\.78\)/, 'the strip is drawn');
+  const foot = APP.match(/<div id="ct-foot">[\s\S]*?<\/div><\/div>/)[0];
+  assert.match(foot, /ducks/, 'and the footer teaches all four controls');
+});
+
+test('ducking drops the camera and his punch passes over it', () => {
+  const draw = CODE.match(/function bxDraw\(now\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(draw, /g\.translate\(0,duckK\*H\*0\.13\)/, 'the view drops - the camera is your eyes');
+  const fig = CODE.match(/function bxFighter\(g,W,H,now\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(fig, /const over=bxDucking\(now\)\?H\*0\.30:0/, 'the glove goes above you, not through you');
+});
+
 // ── the rule ────────────────────────────────────────────────────────────────
 test('it can end a fight and never a person', () => {
   const lost = CODE.match(/function bxLost\(\)\{[\s\S]*?\n\}/)[0];

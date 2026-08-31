@@ -1072,3 +1072,70 @@ and the person supporting them. The end card answers the panel's question by
 refusing it: "who's wrong" is the trap, not the question. No claim is made that
 the app resolves arguments — it gives both people the same day's work, which is
 what the tag line has always said (*an app for you and the one who supports you*).
+
+---
+
+## A22 — "The count" · ALL ADDICTIONS · 8.0s · BUILT 31 Aug 2026
+
+**Pure graphics — no stills, no generation, nothing supplied.** Second piece
+built entirely in code (after A20), which makes the addiction list a one-line
+edit: change `WORDS` in the source and re-render.
+
+Sparked by a boxing game intro Jacques found — `10`, `K.O.`, `DOWN FOR GOOD`,
+a `RISE AGAIN` button, a fighter on the canvas. Taken and turned.
+
+1. **3.6s — the count.** Ten to two, hard white numerals slamming onto a black
+   ring floor under the lamp, each one wearing a different addiction:
+   **10 ALCOHOL · 9 SUBSTANCES · 8 SMOKING · 7 PORN · 6 GAMBLING ·
+   5 SCROLLING · 4 GAMING · 3 BINGING · 2 SPENDING.** 0.40s each, every
+   numeral landing with an overshoot, a shake that dies out, and a flash.
+2. **1.9s — the turn.** It hits **1**. The 1 goes green and **DAY ONE** writes
+   underneath it.
+3. **2.25s — end card.** **Different fight. Same day one.**
+
+**Title (TikTok / Facebook):** The count
+**Title (YouTube):** Ten to one — every addiction, the same day one
+**Hashtags:** #recovery #addictionrecovery #dayone #sobriety #onedayatatime
+**Buffer tags:** addictions · recovery
+
+**Caption:** Ten. Nine. Eight. Different fight on every number — drinking,
+pills, smoking, porn, gambling, scrolling, gaming, food, spending. Same count.
+And the count doesn't end at zero, it ends at one. Day one. 14 tracks, free, no
+card, no ads, works with no account. Link in bio.
+
+**Score:** `content/score/the-last-breath.mp3` trimmed to 8.0s with a fade —
+the knowing 5–8s exception (rule 21).
+**File:** source `content/count-source.html`.
+
+### Why the count runs DOWN
+
+A real referee counts **up** to ten, and ten means you lost. That version ends
+on the addiction winning. Counting **down** lands on **1** — and 1 is the
+brand. The whole piece is that pun, and it only works in one direction. The
+reference image is the *setup*; the inversion is the idea.
+
+### The nine words are all real tracks
+
+Every word on a numeral is a live track in `lessons.json` (14 total). Nothing
+here promises a track the app doesn't have. **Work** and **Other** were left
+off for room, not because they're missing — the end card's "14 tracks" covers
+the gap without listing them.
+
+### Reading load — a knowing exception to rule 21
+
+Nine words in 3.6s is far past what rule 21 allows for caption strips. It works
+here for the same reason A20's accelerating feed worked: this is a **montage,
+not a read**. The numerals do the structure, the words are single 66px tokens
+riding them, and the piece is designed so that *any* word the viewer catches
+lands the point — the list is the message, not any one entry. If it ever tests
+badly, the fix is fewer numbers, not slower ones.
+
+### Getting the ring to read
+
+First pass was a number on black — the ring wasn't there at all. What fixed it:
+a hard lamp **cone** rather than a haze, the light **pool** it throws on the
+canvas, three far ropes bright enough to catch that light, and — the one that
+actually created depth — **two near ropes in the foreground, blurred**, so the
+camera is shooting *through* the ropes instead of at a flat backdrop. Red
+corner right, blue corner left. Vignette eased from .90 to .72; at .90 it was
+eating the set faster than the set could build.

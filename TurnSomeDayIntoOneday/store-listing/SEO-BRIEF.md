@@ -93,7 +93,20 @@ partner, win-back, review-ask), sent from jacques@ / support@turnsomedayintodayo
 **Video:** a 15-second Play promo video on YouTube (`YtkZR0NFd1g`), plus a
 library of short social videos generated in-repo.
 
-**Social handles:** `[JACQUES FILLS IN — none are recorded in the repo]`
+**Social handles** — confirmed live by Jacques, 30 Aug 2026:
+
+- Instagram: https://www.instagram.com/turnsomedayintodayone
+- TikTok: https://www.tiktok.com/@turnsomedayintodayone
+- YouTube: https://www.youtube.com/@turnsomedayintodayone
+- Facebook: https://www.facebook.com/turnsomedayintodayone
+
+No X/Twitter and no Reddit account under this name — both platforms cap
+usernames below the 21 characters the brand needs (X at 15, Reddit at 20).
+
+These four are now declared as `sameAs` in the Organization schema on the home
+page and the reviews page, and listed under "Official accounts" in llms.txt.
+That is the entity signal that ties the accounts to the site for Google and
+for AI answer engines; it did not exist before 30 Aug.
 
 **Prior ASO work:** short description, full description, screenshots
 (captioned set), feature graphic, promo video, data safety, content rating and

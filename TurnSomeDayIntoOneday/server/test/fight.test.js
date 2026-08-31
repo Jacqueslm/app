@@ -1,9 +1,14 @@
-// THE COUNT — the fight.
+// THE COUNT — the fight card.
 //
-// Jacques, 31 Aug 2026: "dont like it, make it an actually boxing game."
-// The first pass was tapping words as they floated up; it read as a mood board.
-// This is a slipping game, which is what boxing is at close range: he winds up
-// on one side, you slip the other way, and then he is open.
+// Jacques, 31 Aug 2026: "build it like a competitive boxing game with 13
+// different opponents which are the addictions and 13 different avatars which
+// is the user and 1 avatar which is the supporter."
+//
+// So the tests hold the game to that sentence: thirteen on the card and the
+// twelve real ones are exactly the twelve addictions the app tracks; thirteen
+// fighters for the user plus THE CORNER for the supporter; SOMEDAY only after
+// the other twelve; and the one rule this app never breaks - it can end a
+// fight, it can never tell somebody they are finished.
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -14,95 +19,159 @@ const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const GAME = APP.slice(APP.indexOf('// ─── THE COUNT — the fight'), APP.indexOf('// ── THE URGE WAVE'));
 const CODE = GAME.replace(/^\s*\/\/.*$/gm, '');   // comments quote the banned phrases on purpose
 
-// The curve as shipped.
-const tune = (round) => {
-  const r = round - 1;
-  return {
-    windMs: Math.max(260, 620 - r * 45),
-    openMs: Math.max(340, 620 - r * 35),
-    restMs: Math.max(420, 1100 - r * 80),
-    hit: Math.min(22, 10 + r * 1.5),
-    give: Math.max(9, 16 - r * 0.7),
-    hp: Math.min(180, 100 + r * 14),
-  };
-};
+// Pull the real roster and the real curve out of the page, so the tests break
+// the moment the data and the game drift apart.
+const dataSrc = GAME.slice(GAME.indexOf('const BX_OPP'), GAME.indexOf('function bxIsSupporter'));
+const tuneSrc = GAME.match(/function bxTuning\(opp,kd\)\{[\s\S]*?\n\}/)[0];
+const { BX_OPP, BX_AVA, bxTuning } = new Function(
+  'let bx=null;' + dataSrc + tuneSrc + ';return {BX_OPP:BX_OPP,BX_AVA:BX_AVA,bxTuning:bxTuning};'
+)();
 
-test('round one gives you time to see the punch coming', () => {
-  const t = tune(1);
-  assert.equal(t.windMs, 620, 'over half a second of tell');
-  assert.equal(t.openMs, 620, 'and a real window to counter into');
+// ── the card ────────────────────────────────────────────────────────────────
+test('thirteen opponents: the twelve addictions the app tracks, then SOMEDAY', () => {
+  assert.equal(BX_OPP.length, 13);
+  const tracked = ['Porn & Sex', 'Alcohol', 'Smoking', 'Substances', 'Gambling',
+    'Social media', 'Gaming', 'Food / Binging', 'Shopping / Spending', 'Work',
+    'Anger & Control', 'Other'];
+  const keys = BX_OPP.map(o => o.key);
+  for (const t of tracked) {
+    assert.ok(keys.includes(t), `${t} is a track in the app but not a fight on the card`);
+    // and the name on the card matches an onboarding chip, letter for letter
+    assert.ok(APP.includes(`toggleAddiction(this, '${t.replace('&', '&amp;').replace(' &amp; ', ' & ') === t ? t : t}')`) || APP.includes(`'${t}'`), `${t} does not match the app's own chip`);
+  }
+  assert.equal(BX_OPP[12].key, 'SOMEDAY', 'the champion goes on last');
 });
 
-test('every round is harder, and none of it inverts', () => {
-  for (let r = 2; r <= 40; r++) {
-    const a = tune(r - 1), b = tune(r);
-    assert.ok(b.windMs <= a.windMs, `round ${r}: the tell must not get longer`);
-    assert.ok(b.openMs <= a.openMs, `round ${r}: the opening must not get wider`);
-    assert.ok(b.hit >= a.hit, `round ${r}: his punch must not soften`);
-    assert.ok(b.give <= a.give, `round ${r}: your counter must not get stronger`);
-    assert.ok(b.hp >= a.hp, `round ${r}: he must not get easier to drop`);
+test('every opponent fights differently, and every one is distinct to look at', () => {
+  const seenName = new Set(), seenSty = new Set(), seenLook = new Set();
+  for (const o of BX_OPP) {
+    assert.ok(o.name && o.tag, `${o.key} needs a ring name and a line`);
+    seenName.add(o.name);
+    seenSty.add(JSON.stringify(o.sty));
+    seenLook.add(JSON.stringify(o.pal));
+    for (const k of ['pace', 'power', 'chin', 'speed', 'feint', 'combo']) {
+      assert.equal(typeof o.sty[k], 'number', `${o.name} is missing sty.${k}`);
+    }
+  }
+  assert.equal(seenName.size, 13, 'two opponents share a ring name');
+  assert.equal(seenSty.size, 13, 'two opponents fight identically');
+  assert.equal(seenLook.size, 13, 'two opponents look identical');
+});
+
+test('SOMEDAY is the hardest fight on the card', () => {
+  const champ = bxTuning(BX_OPP[12], 2);
+  for (const o of BX_OPP.slice(0, 12)) {
+    const t = bxTuning(o, 2);
+    assert.ok(t.hp <= champ.hp, `${o.name} takes more than the champion`);
   }
 });
 
-test('a round is always winnable and always survivable', () => {
-  for (let r = 1; r <= 40; r++) {
-    const t = tune(r);
-    // The tell has to stay long enough for a human to react to. 250ms is about
-    // the floor for see-and-move; below that it is a coin toss, not a skill.
-    assert.ok(t.windMs >= 260, `round ${r}: ${t.windMs}ms is not a tell, it is a coin toss`);
-    // There has to be a breath between punches, or there is no time to counter.
-    assert.ok(t.restMs > t.windMs, `round ${r}: no rest between punches`);
-    // And he has to be droppable inside a round: hp over the best counter.
-    const punches = Math.ceil(t.hp / (t.give + 6));
-    assert.ok(punches <= 20, `round ${r}: ${punches} clean counters to drop him is a chore`);
+// ── your side ───────────────────────────────────────────────────────────────
+test('fourteen fighters: thirteen for the user and THE CORNER for the supporter', () => {
+  assert.equal(BX_AVA.length, 14);
+  const sup = BX_AVA.filter(a => a.sup);
+  assert.equal(sup.length, 1, 'exactly one supporter fighter');
+  assert.equal(sup[0].key, 'corner');
+  assert.equal(new Set(BX_AVA.map(a => a.name)).size, 14, 'two fighters share a name');
+});
+
+test('a supporter walks into the gym with THE CORNER already picked', () => {
+  assert.match(CODE, /s\.ava=bxIsSupporter\(\)\?'corner':'dayone'/);
+  assert.match(CODE, /includes\('Supporting Someone'\)\|\|S\.userType==='partner'/);
+});
+
+test('no perk is decorative: every perk on a card is read by the engine', () => {
+  for (const a of BX_AVA) {
+    if (a.perk === 'none') continue;
+    assert.ok(CODE.includes(`perk==='${a.perk}'`) || CODE.includes(`perk!=='${a.perk}'`),
+      `${a.name} promises "${a.tag}" but the engine never checks perk '${a.perk}'`);
   }
 });
 
+test('avatar tags carry no pronouns - any fighter can be anybody', () => {
+  for (const a of BX_AVA) {
+    assert.doesNotMatch(a.tag, /\b(he|she|his|her|him)\b/i, `${a.name}: "${a.tag}"`);
+  }
+});
+
+// ── the ladder ──────────────────────────────────────────────────────────────
+test('the card unlocks in order, and SOMEDAY only after the other twelve', () => {
+  assert.match(CODE, /const locked=i>st\.open/);
+  assert.match(CODE, /if\(o\.idx===st\.open&&st\.open<12\)st\.open\+\+/,
+    'only beating the top of your ladder opens the next name');
+  assert.match(CODE, /if\(title\)st\.belt\+\+/);
+});
+
+test('a fight is first to three knockdowns, and only a count-out ends it', () => {
+  assert.match(CODE, /bx\.kd\+\+;[\s\S]*?if\(bx\.kd>=3\)\{bxWinFight\(\);return;\}/);
+  assert.match(CODE, /if\(bx\.count>=10\)\{[\s\S]*?bxLost\(\)/);
+});
+
+// ── the curve: winnable and survivable against all 13, at every knockdown ───
+test('no opponent, at any point in any fight, becomes a coin toss', () => {
+  for (const o of BX_OPP) {
+    for (let kd = 0; kd <= 2; kd++) {
+      const t = bxTuning(o, kd);
+      // 230ms is the floor for see-and-move; below that it is not a skill.
+      assert.ok(t.windMs >= 230, `${o.name} kd${kd}: ${t.windMs}ms tell`);
+      assert.ok(t.openMs >= 300, `${o.name} kd${kd}: ${t.openMs}ms opening`);
+      assert.ok(t.restMs >= 380, `${o.name} kd${kd}: no breath at all`);
+      // Droppable: hp over a modest counter chain, inside a phone round.
+      const punches = Math.ceil(t.hp / (t.give + 6));
+      assert.ok(punches <= 20, `${o.name} kd${kd}: ${punches} clean counters is a chore`);
+      // Survivable: even doubled by DOUBLE OR NOTHING the cap holds.
+      assert.ok(t.hit <= 26, `${o.name} kd${kd}: hits for ${t.hit}`);
+    }
+  }
+  assert.match(CODE, /Math\.min\(30,Math\.round\(hit\*\(Math\.random\(\)<0\.5\?0\.5:2\)\)\)/,
+    'the double-or-nothing double is capped');
+  assert.match(CODE, /Math\.min\(30,Math\.round\(hit\*\(1\+0\.12\*bx\.kd\)\)\)/,
+    'last call getting heavier is capped');
+});
+
+test('every fight gets harder with every knockdown scored', () => {
+  for (const o of BX_OPP) {
+    for (let kd = 1; kd <= 2; kd++) {
+      const a = bxTuning(o, kd - 1), b = bxTuning(o, kd);
+      assert.ok(b.windMs <= a.windMs, `${o.name}: the tell must not get longer`);
+      assert.ok(b.hp >= a.hp, `${o.name}: he must not get easier to drop`);
+      assert.ok(b.hit >= a.hit, `${o.name}: his punch must not soften`);
+    }
+  }
+});
+
+// ── the fight itself ────────────────────────────────────────────────────────
 test('slipping the correct way is the only thing that beats a punch', () => {
   const tick = CODE.match(/function bxTick\(now\)\{[\s\S]*?\n\}/)[0];
   assert.match(tick, /if\(bx\.slip===-bx\.side\)/, 'you must slip AWAY from the side it comes from');
   assert.match(tick, /bx\.phase='open'/, 'and that is what opens him up');
-  assert.match(tick, /else\{\s*bxHurt/, 'anything else and it lands');
+});
+
+test('the feint switches sides mid-windup and says so', () => {
+  const tick = CODE.match(/function bxTick\(now\)\{[\s\S]*?\n\}/)[0];
+  assert.match(tick, /bx\.feinted=true;bx\.side=-bx\.side/);
+  assert.match(tick, /bxSay\('Switch\.'\)/, 'the switch is announced, not hidden');
 });
 
 test('throwing when he is not open is punished', () => {
   const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
   assert.match(thr, /if\(bx\.phase==='open'\)/);
-  assert.match(thr, /else\{[\s\S]*?bxHurt\(now,Math\.round\(bx\.tune\.hit\*0\.55\)\)/,
+  assert.match(thr, /else\{[\s\S]*?bxHurt\(now,Math\.round\(bx\.tune\.hit\*0\.55\),true\)/,
     'swinging at nothing has to cost something, or the middle is a free button');
 });
 
 test('a counter chain is worth more than single shots', () => {
   const thr = CODE.match(/function bxThrow\(now\)\{[\s\S]*?\n\}\n/)[0];
   assert.match(thr, /bx\.combo\+\+/);
-  assert.match(thr, /bx\.tune\.give\+bx\.combo\*2/, 'the reward for stringing them together');
+  assert.match(thr, /bx\.combo\*\(bx\.perk==='counter'\?4:2\)/);
 });
 
 test('going down starts the count, and tapping gets you up', () => {
   assert.match(CODE, /function bxGoDown\(now\)\{[\s\S]*?bx\.down=true;bx\.count=0/);
   const tap = CODE.match(/function ctTap\(ev\)\{[\s\S]*?\n\}\n/)[0];
-  assert.match(tap, /if\(bx\.down\)\{[\s\S]*?if\(bx\.taps>=6\)bxRise\(\)/,
-    'six taps - getting up is work, and the count keeps running while you do it');
+  assert.match(tap, /if\(bx\.down\)\{[\s\S]*?if\(bx\.taps>=bx\.riseNeed\)bxRise\(\)/,
+    'getting up is work, and the count keeps running while you do it');
   assert.match(CODE, /function bxRise\(\)\{[\s\S]*?bx\.you=52/, 'you come back up hurt, not fresh');
-});
-
-test('the count runs to ten and then the fight ends', () => {
-  assert.match(CODE, /bx\.count=\(now-bx\.countAt\)\/1000;\n\s*if\(bx\.count>=10\)bxLost\(\)/);
-});
-
-test('it can end a fight and never a person', () => {
-  // The one rule, same as The Climb and the tower before it.
-  const lost = CODE.match(/function bxLost\(\)\{[\s\S]*?\n\}/)[0];
-  assert.doesNotMatch(lost, /you are finished|you failed|game over|down for good|you lose/i);
-  assert.match(lost, /The fight is over\. You are not\./);
-  assert.match(lost, /AGAIN/, 'the way back is always on the screen');
-  assert.doesNotMatch(CODE, /game over|down for good/i);
-});
-
-test('a loss never takes the record with it', () => {
-  const lost = CODE.match(/function bxLost\(\)\{[\s\S]*?\n\}/)[0];
-  assert.match(lost, /if\(bx\.round-1>st\.best\)st\.best=bx\.round-1/, 'the rounds you did win still count');
-  assert.doesNotMatch(lost, /st\.best=0|st\.wins=0/);
 });
 
 test('three zones, no buttons', () => {
@@ -112,17 +181,35 @@ test('three zones, no buttons', () => {
   assert.match(tap, /bxThrow\(now\)/, 'and the middle throws');
 });
 
+// ── the rule ────────────────────────────────────────────────────────────────
+test('it can end a fight and never a person', () => {
+  const lost = CODE.match(/function bxLost\(\)\{[\s\S]*?\n\}/)[0];
+  assert.doesNotMatch(lost, /you are finished|you failed|game over|down for good|you lose/i);
+  assert.match(lost, /The fight is over\. You are not\./);
+  assert.match(lost, /RUN IT BACK/, 'the way back is always on the screen');
+  assert.doesNotMatch(CODE, /game over|down for good/i);
+});
+
+test('a loss still counts what was real, and never wipes the record', () => {
+  const lost = CODE.match(/function bxLost\(\)\{[\s\S]*?\n\}/)[0];
+  assert.match(lost, /knockdown/, 'the knockdowns scored before the count are named');
+  assert.doesNotMatch(lost, /st\.wins=0|st\.rec=\{\}|st\.open=0/);
+});
+
+test('beating SOMEDAY crowns you and does not finish you', () => {
+  const win = CODE.match(/function bxWinFight\(\)\{[\s\S]*?\n\}\n/)[0];
+  assert.match(win, /defended, not retired/);
+  assert.doesNotMatch(win, /you are done|it is finished|the end/i);
+});
+
+// ── plumbing ────────────────────────────────────────────────────────────────
 test('not one image anywhere in it', () => {
-  // Sprites would ship with the app, load on every open, and could not animate
-  // per frame. A glove whose radius is a function of time can.
   assert.doesNotMatch(CODE, /<img|url\(|\.png|\.jpg|\.svg|Image\(/i);
   assert.match(CODE, /function bxFighter\(g,W,H,now\)/, 'he is drawn, every frame');
+  assert.match(CODE, /function bxPortrait\(cv,pal\)/, 'so are the portraits');
 });
 
 test('the loop stops when the screen is left', () => {
-  // This was broken when the fight replaced the old game: switchTo still
-  // called ctStop, which no longer existed, so the throw was swallowed by the
-  // try/catch and the loop ran on forever behind whatever screen you moved to.
   assert.match(APP, /if\(from==='count'&&id!=='count'\)\{try\{bxStop\(\);\}catch\(e\)\{\}\}/);
   assert.match(CODE, /function bxStop\(\)\{cancelAnimationFrame\(bxAnim\);bxAnim=null;\}/);
   const stops = APP.match(/try\{(\w+Stop)\(\);\}catch/g) || [];

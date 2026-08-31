@@ -7756,7 +7756,8 @@ function renderCount(){
   bxUi('THE COUNT','Fight night.',
     'Thirteen on the card. Twelve of them you already know by another name. Beat all twelve and SOMEDAY has to put the belt on the line.',
     '<button class="ct-btn" onclick="bxCard()">THE CARD</button>'+
-    '<button class="ct-btn ghost" onclick="bxGym()">YOUR FIGHTER: '+a.name+'</button>',
+    '<button class="ct-btn ghost" onclick="bxGym()">YOUR FIGHTER: '+a.name+'</button>'+
+    '<button class="ct-btn ghost" onclick="openClimb()"><i class="ti ti-mountain" style="font-size:.8125rem;margin-right:7px"></i>THE CLIMB · 90 STEPS</button>',
     '<div><b>'+st.wins+'-'+st.losses+'</b><span>RECORD</span></div>'+
     '<div><b>'+Math.min(13,st.open+(st.belt>0?1:0))+'/13</b><span>BEATEN</span></div>'+
     '<div><b>'+st.belt+'</b><span>'+(st.belt===1?'BELT':'BELTS')+'</span></div>');
@@ -7829,7 +7830,7 @@ function bxStart(oi){
   bx={opp:opp,ava:a,perk:a.perk,kd:0,you:a.perk==='fresh'?112:100,him:100,
       riseNeed:a.perk==='heart'?4:(a.perk==='corner'?5:6),
       phase:'rest',phaseAt:0,side:0,feintAt:0,feinted:false,burst:false,
-      slip:0,slipAt:0,throwAt:0,combo:0,shake:0,flash:0,hitFlash:0,
+      slip:0,slipAt:0,throwAt:0,hand:1,impactAt:0,combo:0,shake:0,flash:0,hitFlash:0,
       down:false,count:0,countAt:0,rises:0,phUsed:false,state:'live',msg:'',msgAt:0};
   bxRound();
 }
@@ -8005,7 +8006,9 @@ function ctTap(ev){
 }
 function bxThrow(now){
   bx.throwAt=now;
+  bx.hand=-bx.hand;                        // jab, cross, jab - hands alternate
   if(bx.phase==='open'){
+    bx.impactAt=now+150;                   // the moment the glove arrives, not the tap
     bx.combo++;
     let give=bx.tune.give+bx.combo*(bx.perk==='counter'?4:2);
     if(bx.perk==='power')give*=1.2;
@@ -8195,40 +8198,98 @@ function bxFighter(g,W,H,now){
   g.restore();
   g.restore();
 
-  // gloves. The near one pulls back and grows as it comes at the camera.
-  const strike=bx.phase==='wind'?Math.pow(wind,3):0;
+  // gloves. The windup pulls the near one back; the last 130ms is the punch
+  // itself, coming AT the camera - it grows, drops toward your chin, and
+  // leaves a streak. Before this the punch just materialised at the end of
+  // the timer, which is why it never read as a punch.
+  const strike=bx.phase==='wind'?Math.pow(wind,2.6):0;
+  const launch=bx.phase==='wind'?Math.max(0,(dt-(t.windMs-130))/130):0;
   for(const s of [-1,1]){
     const active=(s===bx.side&&bx.phase==='wind');
     const pull=active?wind:0;
-    const gx=cx+sway+s*W*(0.20+pull*0.06)*(bld.w||1)-strike*(active?s*W*0.14:0);
-    const gy=cy-H*0.02-(active?pull*H*0.05:0)+Math.sin(now/540+s)*H*0.006
-             +(active?strike*H*0.09:0);
-    const gr=W*(0.058+(active?strike*0.075:0));
+    let gx=cx+sway+s*W*(0.20+pull*0.06)*(bld.w||1)-strike*(active?s*W*0.10:0);
+    let gy=cy-H*0.02-(active?pull*H*0.06:0)+Math.sin(now/540+s)*H*0.006;
+    let gr=W*(0.058+(active?strike*0.05:0));
+    if(active&&launch>0){
+      const k=launch*launch;
+      gx+=(W*0.5+s*W*0.07-gx)*k;
+      gy+=(H*0.68-gy)*k;
+      gr+=(W*0.30-gr)*k;
+      for(let i=1;i<=3;i++){
+        const b=Math.max(0,k-i*0.18);
+        if(b<=0)continue;
+        g.beginPath();
+        g.arc(gx-(gx-(cx+s*W*0.20))*i*0.22,gy-(gy-(cy-H*0.02))*i*0.22,Math.max(4,gr*(1-i*0.2)),0,7);
+        g.fillStyle='rgba(200,60,85,'+(0.10*b)+')';g.fill();
+      }
+    }
     g.beginPath();g.arc(gx,gy,gr,0,7);
-    g.fillStyle=active?pal.glove:bxShade(pal.glove,-0.62);
+    const grd2=g.createRadialGradient(gx-gr*0.3,gy-gr*0.3,gr*0.15,gx,gy,gr);
+    grd2.addColorStop(0,active?bxShade(pal.glove,0.30):bxShade(pal.glove,-0.45));
+    grd2.addColorStop(1,active?bxShade(pal.glove,-0.15):bxShade(pal.glove,-0.72));
+    g.fillStyle=grd2;
     if(active){g.shadowColor='rgba(200,60,85,0.55)';g.shadowBlur=22*strike;}
     g.fill();g.shadowBlur=0;
     if(active){
       g.strokeStyle='rgba(255,255,255,'+(0.10+strike*0.35)+')';g.lineWidth=2;g.stroke();
     }
   }
+  // a slipped punch does not vanish - it whiffs past your ear and off the screen
+  if(bx.phase==='open'&&openK<1){
+    const wx=W*0.5+bx.side*W*(0.25+openK*0.65),wy=H*0.72+openK*H*0.25;
+    g.globalAlpha=0.5*(1-openK);
+    g.beginPath();g.arc(wx,wy,W*0.26,0,7);
+    g.fillStyle=bxShade(pal.glove,-0.15);g.fill();
+    g.globalAlpha=1;
+  }
 }
-// Your own gloves, low in frame, so the camera is behind your eyes. In the
-// colours of the fighter you picked in the gym.
+// Your own gloves, tucked into the bottom corners so the camera is behind
+// your eyes and the ring stays visible - the first pass parked two big discs
+// mid-screen and Jacques called it, fairly, irritating. They alternate like
+// real hands (jab, cross, jab), and a throw travels all the way to his head
+// and comes back, shrinking as it goes, instead of twitching in place.
 function bxYourGloves(g,W,H,now){
   const pal=bx.ava.pal;
-  const punching=now-bx.throwAt<170;
-  const p=punching?1-(now-bx.throwAt)/170:0;
+  const dt=now-bx.throwAt;
+  let ext=0;
+  if(dt<300)ext=dt<170?dt/170:1-(dt-170)/130;
+  const e=ext*ext*(3-2*ext);
   for(const s of [-1,1]){
-    const lead=(s===1);
-    const px=W*0.5+s*W*0.30+(bx.slip? -bx.slip*W*0.10:0)+(lead?p*W*0.06:0);
-    const py=H*0.92-(lead?p*H*0.30:0)+Math.sin(now/700+s*2)*H*0.006;
-    const pr=W*0.115+(lead?p*W*0.03:0);
-    g.beginPath();g.arc(px,py,pr,0,7);
-    const gl=g.createLinearGradient(px,py-pr,px,py+pr);
-    gl.addColorStop(0,pal.glove);gl.addColorStop(1,'#141824');
-    g.fillStyle=gl;g.fill();
-    g.strokeStyle='rgba(190,205,255,0.13)';g.lineWidth=2;g.stroke();
+    const lead=(s===bx.hand&&dt<300);
+    const rx=W*0.5+s*W*0.34-(bx.slip?bx.slip*W*0.08:0);
+    const ry=H*0.99+Math.sin(now/700+s*2)*H*0.005-(bx.slip===s?H*0.025:0);
+    const rr=W*0.105;
+    const px=lead?rx+(W*0.5+s*W*0.05-rx)*e:rx;
+    const py=lead?ry+(H*0.30-ry)*e:ry;
+    const pr=lead?rr*(1-0.45*e):rr;
+    g.save();
+    g.translate(px,py);g.rotate(s*0.30*(1-e));
+    // wrist wrap first, then the glove over it, then the thumb
+    g.fillStyle=bxShade(pal.glove,-0.58);
+    g.fillRect(-pr*0.55,pr*0.35,pr*1.1,pr*1.2);
+    const gl=g.createRadialGradient(-pr*0.30,-pr*0.30,pr*0.2,0,0,pr);
+    gl.addColorStop(0,bxShade(pal.glove,0.28));gl.addColorStop(1,bxShade(pal.glove,-0.38));
+    g.fillStyle=gl;
+    g.beginPath();g.arc(0,0,pr,0,7);g.fill();
+    g.beginPath();g.arc(-s*pr*0.72,pr*0.30,pr*0.36,0,7);g.fill();
+    g.strokeStyle='rgba(190,205,255,0.10)';g.lineWidth=2;
+    g.beginPath();g.arc(0,0,pr,0,7);g.stroke();
+    g.restore();
+  }
+  // the moment a counter arrives on him: a short white burst at his head
+  const ik=bx.impactAt?Math.max(0,1-(now-bx.impactAt)/180):0;
+  if(ik>0&&now>=bx.impactAt-160){
+    g.save();g.globalAlpha=ik*0.85;
+    g.strokeStyle='#fff';g.lineWidth=2.5;
+    const hx=W*0.5,hy=H*0.245;
+    for(let i=0;i<6;i++){
+      const an=i*Math.PI/3+0.4;
+      g.beginPath();
+      g.moveTo(hx+Math.cos(an)*W*0.045,hy+Math.sin(an)*W*0.045);
+      g.lineTo(hx+Math.cos(an)*W*(0.045+0.05*ik),hy+Math.sin(an)*W*(0.045+0.05*ik));
+      g.stroke();
+    }
+    g.restore();g.globalAlpha=1;
   }
 }
 function bxBar(g,x,y,w,h,frac,col,bg){

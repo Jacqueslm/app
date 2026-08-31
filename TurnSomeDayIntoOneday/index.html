@@ -495,6 +495,27 @@ body.nova-open #mini-player{bottom:160px}
 .tw-ta{width:100%;min-height:120px;background:#0b1120;border:1px solid #23304d;border-radius:10px;color:#d5dcf2;padding:12px;font-size:.875rem;font-family:var(--f);line-height:1.6;resize:vertical}
 .tw-timer{font-size:2.5rem;font-weight:700;letter-spacing:3px;color:#dbe2f7;text-align:center;margin:18px 0 4px;font-variant-numeric:tabular-nums}
 .tw-timer-sub{font-size:.6875rem;letter-spacing:1.6px;color:#5e6a90;text-align:center;margin-bottom:16px}
+/* THE COUNT — the ten-count as an arcade round. Its own dark ring in both
+   app themes, same reasoning as the tower: this is a fight at night. */
+#s-count{background:#07080c;min-height:calc(100vh - 132px);padding:0}
+#ct-stage{position:relative;width:100%;height:calc(100vh - 190px);max-height:660px;min-height:380px;overflow:hidden;background:#07080c}
+#ct-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+#ct-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;pointer-events:none}
+#ct-ui.on{pointer-events:auto}
+#ct-eyebrow{font-size:.625rem;letter-spacing:4px;color:#7c8199;font-weight:700}
+#ct-big{font-size:2.5rem;line-height:1.1;font-weight:800;color:#f2f3f7;margin:8px 0 6px;letter-spacing:-1px}
+#ct-sub{font-size:.875rem;line-height:1.6;color:#8b90a6;max-width:300px}
+.ct-btn{margin-top:18px;background:#e8e9ee;color:#0b0c10;border:0;border-radius:10px;padding:15px 34px;font-size:.9375rem;font-weight:750;letter-spacing:1.5px;font-family:var(--f);cursor:pointer}
+.ct-btn.ghost{background:transparent;color:#8b90a6;border:1px solid #262a38;font-weight:600;letter-spacing:1px;padding:12px 24px;margin-top:10px}
+#ct-scores{display:flex;gap:34px;justify-content:center;margin-top:20px}
+#ct-scores div{text-align:center}
+#ct-scores b{display:block;font-size:1.5rem;color:#f2f3f7;font-weight:800;line-height:1}
+#ct-scores span{font-size:.5625rem;letter-spacing:2.5px;color:#5f6478}
+#ct-hud{position:absolute;top:0;left:0;right:0;padding:12px 14px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start}
+.ct-hud-l{font-size:.625rem;letter-spacing:2.4px;color:#6b7089}
+.ct-hud-r{font-size:.625rem;letter-spacing:2.4px;color:#6b7089;text-align:right}
+#ct-foot{padding:14px 16px 26px;text-align:center}
+#ct-foot .n{font-size:.75rem;color:#5f6478;line-height:1.6}
 /* THE WAVE (Phase 2). Same full-screen treatment as the door: when it is on
    you, it is the only thing on the screen, which is the honest version. */
 #tw-wave-canvas{width:100%;height:96px;display:block;margin:14px 0 10px}
@@ -1530,6 +1551,23 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
     <!-- 2AM: the Vault. Everything found in the building, and the gaps where
          the rest of it still is. -->
+    <!-- THE COUNT: the ten-count as an arcade round. This is the Game tab now;
+         the tower stays reachable from Tools until Jacques has played this and
+         said which one lives. -->
+    <div id="s-count" class="scr">
+      <div id="ct-stage">
+        <canvas id="ct-canvas" onpointerdown="ctTap(event)"></canvas>
+        <div id="ct-hud"><div class="ct-hud-l" id="ct-hud-l"></div><div class="ct-hud-r" id="ct-hud-r"></div></div>
+        <div id="ct-ui">
+          <div id="ct-eyebrow"></div>
+          <div id="ct-big"></div>
+          <div id="ct-sub"></div>
+          <div id="ct-buttons"></div>
+          <div id="ct-scores"></div>
+        </div>
+      </div>
+      <div id="ct-foot"><div class="n">Ten seconds a round. The count never stops - the thoughts are what keep you down, and every one you miss lands on you.</div></div>
+    </div>
     <div id="s-vault" class="scr">
       <div id="vault-count"></div>
       <div id="vault-list"></div>
@@ -2028,7 +2066,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="bnav">
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
-    <div class="bn" id="bn-game" onclick="switchTo('tower');actBn('bn-game')"><i class="ti ti-building"></i><span>Game</span></div>
+    <div class="bn" id="bn-game" onclick="switchTo('count');actBn('bn-game')"><i class="ti ti-bolt"></i><span>Game</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
@@ -3158,6 +3196,7 @@ const ICON_PATHS={
 // this map. 2AM's building is added at the same time so the same thing does
 // not happen twice on the same screen.
 'ti-mountain':'<path d="M3 20h18L14 7l-3.2 5.6L8.6 10z"/><path d="M10.8 12.6l1.6 2.4"/>',
+'ti-bolt':'<path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/>',
 'ti-building':'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20"/><path d="M8 8h3M8 12h3M8 16h3"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
@@ -7494,6 +7533,315 @@ function towerBoardRender(){
 function towerBoardDone(){
   towerBoardStop();
   renderTower();
+}
+
+// ─── THE COUNT ───────────────────────────────────────────────────────────────
+// Jacques, 31 Aug 2026: the tower was boring. He was right - it was a mood with
+// no game in it. This is the replacement and it is the oldest image in the
+// sport: you are down, the referee is counting, and you have ten seconds.
+//
+// The loop, and why each piece is the way it is:
+//
+//   The count is the clock. It runs to ten and it does not stop for anything.
+//   The thoughts are the things that keep you down - real relapse thinking,
+//   rising up the screen. Tap one and it goes. Let it reach the top and it
+//   lands on you: the UP bar drops and the count jumps forward. Missing
+//   compounds, which is the honest part.
+//   Fill the UP bar before ten and you are on your feet. Next round is faster.
+//
+// It is skill, under a hard timer, in ten-second bites - so it can be played
+// at 11pm with one hand, which is the only time it matters.
+//
+// THE ONE RULE THIS GAME MUST NEVER BREAK: losing is never final and the
+// screen never says otherwise. The count getting you ends a round, not a
+// person. Same rule as The Climb and the tower before it. If you are ever
+// tempted to write "down for good" on the lose screen, don't.
+const CT_LINES=[
+  'one won\'t hurt','nobody would know','you already blew it','just tonight',
+  'you deserve this','you can stop tomorrow','it was never that bad',
+  'everyone else does it','you\'ve earned it','it\'s been a long week',
+  'you\'re fine now','you can handle it','nothing else is working',
+  'what\'s the point','you always do this','you\'re not like them',
+  'you can start again Monday','it helps you sleep','it\'s only a small one',
+  'you\'ll be normal about it','nobody is watching','you can hide it',
+  'this is the last time','you weren\'t really trying',
+];
+const CT_COUNT_MAX=10;
+let ct=null,ctAnim=null;
+function ctState(){
+  const s=S.count||(S.count={});
+  if(typeof s.best!=='number')s.best=0;
+  if(typeof s.rounds!=='number')s.rounds=0;
+  if(typeof s.plays!=='number')s.plays=0;
+  return s;
+}
+// Everything that scales with the round, in one place so the difficulty curve
+// can be read and tuned without hunting through the loop.
+function ctTuning(round){
+  const r=round-1;
+  return {
+    countMs:  Math.max(6000, 10000-r*420),   // ten seconds, tightening
+    spawnMs:  Math.max(520,  1350-r*70),     // how often a thought starts
+    travelMs: Math.max(1700, 3300-r*110),    // how long it takes to land
+    // Every THIRD round, and capped at eight. It used to climb by one a round
+    // while the clock shrank, and by round four it asked for seven thoughts
+    // when only six could physically spawn inside the count - unwinnable, and
+    // it looked like the player's fault. Every step of this curve is checked
+    // against the worst-case spawn run in the tests. A round must be beatable.
+    needed:   Math.min(8,    4+Math.floor(r/3)),
+  };
+}
+function ctSetUi(eyebrow,big,sub,buttons,showScores){
+  const ui=document.getElementById('ct-ui');
+  const st=ctState();
+  document.getElementById('ct-eyebrow').textContent=eyebrow;
+  document.getElementById('ct-big').innerHTML=big;
+  document.getElementById('ct-sub').textContent=sub;
+  document.getElementById('ct-buttons').innerHTML=buttons;
+  document.getElementById('ct-scores').style.display=showScores?'flex':'none';
+  document.getElementById('ct-scores').innerHTML=showScores
+    ? '<div><b>'+st.rounds+'</b><span>GOT UP</span></div><div><b>'+st.best+'</b><span>BEST</span></div>'
+    : '';
+  ui.style.display='flex';ui.classList.add('on');
+}
+function ctHideUi(){
+  const ui=document.getElementById('ct-ui');
+  ui.style.display='none';ui.classList.remove('on');
+}
+function renderCount(){
+  ctStop();
+  ct=null;
+  ctDrawIdle();
+  const st=ctState();
+  ctSetUi('THE COUNT','Ten seconds.<br>Get up.',
+    st.rounds?'Tap the thoughts before they land on you.':'You are on the canvas. The referee is counting. Tap the thoughts away and get to your feet before ten.',
+    '<button class="ct-btn" onclick="ctStart()">RISE</button>',true);
+  ctHud('','');
+}
+function ctHud(l,r){
+  const a=document.getElementById('ct-hud-l'),b=document.getElementById('ct-hud-r');
+  if(a)a.textContent=l;
+  if(b)b.textContent=r;
+}
+function ctStop(){
+  cancelAnimationFrame(ctAnim);ctAnim=null;
+}
+function ctStart(){
+  const st=ctState();
+  st.plays++;save();
+  logActivity('count_play',{});
+  ct={round:1,up:0,cleared:0,thoughts:[],last:0,nextSpawn:0,started:0,countAt:0,
+      state:'live',flash:0,piled:0,roundsThisRun:0};
+  ctHideUi();
+  ctRound(1);
+}
+function ctRound(n){
+  const t=ctTuning(n);
+  Object.assign(ct,{round:n,up:0,cleared:0,thoughts:[],state:'live',
+    started:performance.now(),nextSpawn:performance.now()+400,tune:t,piled:0});
+  ctLoop();
+}
+function ctLoop(){
+  ctStop();
+  const step=(now)=>{
+    if(!ct)return;
+    ctTick(now);
+    // ctTick can end the round mid-frame. Drawing anyway repainted the count
+    // straight back over the cleared canvas, so the lose screen read through a
+    // giant red 10.
+    if(ct.state==='down')return;
+    ctDraw(now);
+    ctAnim=requestAnimationFrame(step);
+  };
+  ctAnim=requestAnimationFrame(step);
+}
+// How far the referee has counted, 0..10. Missed thoughts push it forward -
+// that is what "it compounds" means mechanically.
+function ctCountNow(now){
+  if(!ct||!ct.tune)return 0;
+  const base=(now-ct.started)/ct.tune.countMs*CT_COUNT_MAX;
+  return Math.min(CT_COUNT_MAX,base+ct.piled*0.42);
+}
+function ctTick(now){
+  if(ct.state!=='live')return;
+  const t=ct.tune,W=1;
+  if(now>=ct.nextSpawn){
+    ct.thoughts.push({
+      text:CT_LINES[Math.floor(Math.random()*CT_LINES.length)],
+      x:0.12+Math.random()*0.76,
+      born:now,
+      hit:0,
+    });
+    ct.nextSpawn=now+t.spawnMs*(0.85+Math.random()*0.4);
+  }
+  ct.thoughts=ct.thoughts.filter(th=>{
+    if(th.hit)return now-th.hit<260;                 // let the shatter play out
+    const p=(now-th.born)/t.travelMs;
+    if(p>=1){                                        // it landed on you
+      ct.piled++;
+      ct.up=Math.max(0,ct.up-0.6);
+      if(navigator.vibrate)try{navigator.vibrate(28);}catch(e){}
+      return false;
+    }
+    return true;
+  });
+  if(ct.up>=t.needed){ctWon(now);return;}
+  if(ctCountNow(now)>=CT_COUNT_MAX)ctLost();
+}
+function ctWon(now){
+  ct.state='won';
+  ct.roundsThisRun++;
+  const st=ctState();
+  st.rounds++;
+  if(ct.roundsThisRun>st.best)st.best=ct.roundsThisRun;
+  save();
+  ct.flash=now;
+  setTimeout(()=>{if(ct&&ct.state==='won')ctRound(ct.round+1);},1000);
+}
+function ctLost(){
+  ct.state='down';
+  ctStop();
+  ctDrawIdle();
+  const st=ctState();
+  logActivity('count_round',{rounds:ct.roundsThisRun,best:st.best});
+  const n=ct.roundsThisRun;
+  ctSetUi('TEN',
+    n?('You got up '+n+'<br>time'+(n===1?'':'s')+'.'):'The count got you.',
+    // Never "down for good". The count ends a round. It does not get to keep
+    // anybody, and this screen is read by people at their worst.
+    'That one got you. It does not get to keep you.',
+    '<button class="ct-btn" onclick="ctStart()">RISE AGAIN</button>'+
+    '<button class="ct-btn ghost" onclick="renderCount()">Not now</button>',true);
+  ctHud('','');
+}
+// One x for both the drawing and the tap. Without this a long thought spawned
+// with its centre near the edge and drew half off-screen - visible, unhittable,
+// and it still landed on you. A pill you cannot reach is not difficulty.
+function ctThoughtX(th,W,g){
+  g.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
+  const half=(g.measureText(th.text).width/2+21)/W;
+  return Math.min(1-half,Math.max(half,th.x));
+}
+function ctTap(ev){
+  if(!ct||ct.state!=='live')return;
+  const c=document.getElementById('ct-canvas'),r=c.getBoundingClientRect();
+  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
+  const now=performance.now(),t=ct.tune,g=c.getContext('2d');
+  let best=null,bestD=9;
+  ct.thoughts.forEach(th=>{
+    if(th.hit)return;
+    const p=(now-th.born)/t.travelMs;
+    const ty=1-p*0.92-0.04;
+    const d=Math.abs(y-ty)+Math.abs(x-ctThoughtX(th,r.width,g))*0.22;
+    if(d<bestD){bestD=d;best=th;}
+  });
+  // Generous target: a thought is a word on a moving line, and a miss because
+  // the hitbox was mean is not the difficulty this game is about.
+  if(best&&bestD<0.11){
+    best.hit=now;
+    ct.up++;ct.cleared++;
+    if(navigator.vibrate)try{navigator.vibrate(10);}catch(e){}
+  }
+}
+function ctDrawIdle(){
+  const c=document.getElementById('ct-canvas');
+  if(!c||!c.clientWidth)return;
+  const g=ctCtx(c),W=c.clientWidth,H=c.clientHeight;
+  g.clearRect(0,0,W,H);
+  g.fillStyle='#07080c';g.fillRect(0,0,W,H);
+  ctDrawRing(g,W,H,0.25);
+}
+function ctCtx(c){
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=c.clientWidth,H=c.clientHeight;
+  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){
+    c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+  }
+  const g=c.getContext('2d');
+  g.setTransform(dpr,0,0,dpr,0,0);
+  return g;
+}
+// The ring: three ropes and a canvas floor. Cheap, and it says boxing in one
+// glance without a single image file.
+function ctDrawRing(g,W,H,alpha){
+  g.save();g.globalAlpha=alpha;
+  g.strokeStyle='#1d2130';g.lineWidth=2;
+  for(let i=0;i<3;i++){
+    const y=H*0.10+i*H*0.055;
+    g.beginPath();g.moveTo(-10,y);g.lineTo(W+10,y+H*0.012);g.stroke();
+  }
+  const grd=g.createLinearGradient(0,H*0.28,0,H);
+  grd.addColorStop(0,'#0d1017');grd.addColorStop(1,'#05060a');
+  g.fillStyle=grd;g.fillRect(0,H*0.28,W,H*0.72);
+  g.restore();
+}
+function ctDraw(now){
+  const c=document.getElementById('ct-canvas');
+  if(!c||!c.clientWidth||!ct)return;
+  const g=ctCtx(c),W=c.clientWidth,H=c.clientHeight,t=ct.tune;
+  g.clearRect(0,0,W,H);
+  g.fillStyle='#07080c';g.fillRect(0,0,W,H);
+  ctDrawRing(g,W,H,0.5);
+
+  // the count, huge and behind everything
+  const cnt=ctCountNow(now),shown=Math.min(CT_COUNT_MAX,Math.floor(cnt)+1);
+  const urgency=cnt/CT_COUNT_MAX;
+  g.save();
+  g.globalAlpha=0.16+urgency*0.30;
+  g.fillStyle=urgency>0.75?'#e2566f':'#93a0c8';
+  g.font='800 '+Math.round(H*0.42)+'px -apple-system,Segoe UI,Roboto,sans-serif';
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillText(String(shown),W/2,H*0.52);
+  g.restore();
+
+  // the thoughts, rising
+  g.textAlign='center';g.textBaseline='middle';
+  ct.thoughts.forEach(th=>{
+    const p=(now-th.born)/t.travelMs;
+    const y=(1-p*0.92-0.04)*H;
+    const x=ctThoughtX(th,W,g)*W;
+    if(th.hit){
+      const k=(now-th.hit)/260;
+      g.save();g.globalAlpha=1-k;
+      g.font='700 '+Math.round(13+k*10)+'px -apple-system,Segoe UI,Roboto,sans-serif';
+      g.fillStyle='#7ee8a2';
+      g.fillText(th.text,x,y);
+      g.restore();return;
+    }
+    g.save();
+    g.globalAlpha=Math.min(1,p*4);
+    g.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
+    const pad=13,w=g.measureText(th.text).width+pad*2,h=30;
+    g.beginPath();
+    if(g.roundRect)g.roundRect(x-w/2,y-h/2,w,h,15);else g.rect(x-w/2,y-h/2,w,h);
+    g.fillStyle='#181d2b';g.fill();
+    g.lineWidth=1;
+    g.strokeStyle='#2b3247';g.stroke();
+    g.fillStyle='#c3c8da';
+    g.fillText(th.text,x,y);
+    g.restore();
+  });
+
+  // the UP bar - how far off the canvas you are
+  const need=t.needed,frac=Math.min(1,ct.up/need);
+  const bx=14,bw=W-28,by=H-26;
+  g.fillStyle='#141824';g.beginPath();
+  if(g.roundRect)g.roundRect(bx,by,bw,8,4);else g.rect(bx,by,bw,8);
+  g.fill();
+  g.fillStyle=frac>=1?'#7ee8a2':'#e8e9ee';g.beginPath();
+  if(g.roundRect)g.roundRect(bx,by,Math.max(4,bw*frac),8,4);else g.rect(bx,by,Math.max(4,bw*frac),8);
+  g.fill();
+
+  ctHud('ROUND '+ct.round,'UP '+Math.floor(ct.up)+' / '+need);
+
+  if(ct.state==='won'){
+    const k=Math.min(1,(now-ct.flash)/900);
+    g.save();g.globalAlpha=1-k;
+    g.fillStyle='#7ee8a2';
+    g.font='800 '+Math.round(H*0.16)+'px -apple-system,Segoe UI,Roboto,sans-serif';
+    g.fillText('UP',W/2,H*0.5);
+    g.restore();
+  }
 }
 
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
@@ -12671,7 +13019,7 @@ const SCREEN_MAP={
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
-  tower:'s-tower',vault:'s-vault',
+  tower:'s-tower',vault:'s-vault',count:'s-count',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -12680,8 +13028,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault',count:'The Count'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game',count:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -12707,7 +13055,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game',count:'bn-game'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -12718,6 +13066,7 @@ function switchTo(id,opts){
   // The tower runs a requestAnimationFrame loop and can hold a dare timer.
   // Neither has any business still running on another screen.
   if(from==='tower'&&id!=='tower'){try{towerStop();}catch(e){}}
+  if(from==='count'&&id!=='count'){try{ctStop();}catch(e){}}
   if(!(opts&&opts.fromBack)&&from&&from!==id){
     screenHistory.push(from);
     if(screenHistory.length>30)screenHistory.shift();
@@ -12769,6 +13118,7 @@ function switchTo(id,opts){
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
   if(id==='vault'){renderTowerVault();}
+  if(id==='count'){renderCount();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -13985,7 +14335,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.1';
+const APP_VERSION='9.2';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

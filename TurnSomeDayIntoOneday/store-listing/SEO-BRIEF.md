@@ -52,7 +52,13 @@ Pain: it is 11pm, they are alone with it, and knowing what to do was never the
 problem. Written for everybody — straight, gay, bi, men and women.
 
 **B. The partner.** The wife, husband, parent or friend living with someone
-else's habit. Almost nothing in this market is built for them. They get their
+else's habit.
+
+*Founder note, 31 Aug 2026:* Jacques is in BOTH audiences, not just the first.
+He was the person in it for 38 years, and he is a supporter right now, carrying
+someone else's while still working on his own. Any strategy or outreach that
+casts him only as the recovered addict is using half of what he actually has —
+and a claim that he has lived both sides is true, not positioning. Almost nothing in this market is built for them. They get their
 own track, their own private journal the other person cannot see, and content
 about boundaries and getting their own life back — not about monitoring anyone.
 

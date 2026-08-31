@@ -215,7 +215,16 @@ to Production with the console warning standing, which proves it never blocked a
 release. Detail in `HANDOFF.md`. **Do not request an extension, do not plan a
 rebuild for it, and do not present it to Jacques as news.**
 
-### 6. 🕐 Title keyword — decided against, revisit only if installs climb
+### 6. ✅ Title keyword — CHANGED, AND CONFIRMED LIVE 31 AUG 2026
+
+**The live title is `Day One: Addiction Recovery`.** Confirmed from Play
+Console itself, in the console header on Jacques's own screenshot, 31 Aug.
+This settles a disagreement between this file and
+`01-title-and-short-description.md`, which had said the change was made on
+29 Aug while the note below still said it was declined. The note below is
+**superseded and kept only for the reasoning.**
+
+#### (superseded) decided against, revisit only if installs climb
 `Turn Someday Into Day One` (25/30) carries no search term, and the title is
 Play's heaviest ranking field. Kept anyway: that name is on the business cards,
 the domain, the YouTube channel and the end card of every video. Splitting the

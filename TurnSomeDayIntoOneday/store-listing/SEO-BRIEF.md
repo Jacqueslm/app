@@ -11,9 +11,9 @@ hold. Do not guess them.
 
 ## 1. App name, package, Play URL
 
-- **Store title:** `Day One: Addiction Recovery` (27/30) — changed 29 Aug 2026
-  from `Turn Someday Into Day One`. **Confirm live value in Play Console
-  before acting on it**; this repo's notes have been stale before.
+- **Store title:** `Day One: Addiction Recovery` (27/30) — changed from
+  `Turn Someday Into Day One` on 29 Aug 2026. **Confirmed live in Play Console
+  31 Aug 2026.**
 - **Brand name everywhere else:** Turn Someday Into Day One (domain, website,
   emails, in-app, video end cards). Only the store title differs.
 - **Launcher name on the phone:** `Day One`
@@ -64,9 +64,25 @@ about boundaries and getting their own life back — not about monitoring anyone
 testers (target was 15). Content rating live 26 Aug. Data safety answered and
 in review 29 Aug. Android in-app purchases verified working on device 29 Aug.
 
-- Installs to date: `[JACQUES FILLS IN — Play Console → Statistics]`
+**Installed audience (active installs), Play Console, 3–25 Aug 2026:**
+peaked at 17 on 9 Aug, sat between 6 and 12 for the rest of the window, 6 on
+25 Aug. Single digits to low teens throughout.
+
+**Where they are — this is the finding.** India is 45–83% of the installed
+audience every single day. The United States is 10–22%, usually 1 device.
+Every page, every email and the $9.99/mo price point are written for a
+US/UK reader.
+
+**Read this before drawing conclusions from those numbers.** That window ends
+25 Aug and the app went to **Production on 26 Aug**. So it shows the closed
+test, not the market: 38 closed testers were recruited to clear Google's
+12-tester requirement, and tester-swap groups skew heavily to India. It is
+almost certainly the testers, not an audience. Post-launch numbers are a
+different dataset and are the ones that matter.
+
+- Post-launch installs (26 Aug onward): `[JACQUES FILLS IN]`
+- Store listing visitors + conversion rate: `[JACQUES FILLS IN]`
 - Rating and review count: `[JACQUES FILLS IN]`
-- Retention / DAU: `[JACQUES FILLS IN if he wants to share it]`
 
 ## 6. Existing assets
 

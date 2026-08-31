@@ -2028,6 +2028,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="bnav">
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
+    <div class="bn" id="bn-game" onclick="switchTo('tower');actBn('bn-game')"><i class="ti ti-building"></i><span>Game</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
@@ -5004,17 +5005,19 @@ function finishOnboard(){
 // replayable any time from Profile → "How to use this app". Each step switches
 // to the screen it explains and frames the key control. Skipping is one tap.
 const NAV_TOUR_STEPS=[
-  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 6',title:'This is Today — your home base',
+  {screen:'home',tab:'bn-home',target:'#home-sos-btn',step:'1 of 7',title:'This is Today — your home base',
    body:'Your day counter, today\'s lesson, and the SOS button live here. If a craving hits, the red SOS button is one tap away.'},
-  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 6',title:'Tools — everything for right now',
+  {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 7',title:'Tools — everything for right now',
    body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
-  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'3 of 6',title:'Friendly — your AI companion',
+  {screen:'tower',tab:'bn-game',target:'#bn-game',step:'3 of 7',title:'2AM — the tower',
+   body:'A building you climb at night. Every floor is a day, and every floor asks you for the truth or the dare. It only opens as fast as your real days do.'},
+  {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'4 of 7',title:'Friendly — your AI companion',
    body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
-  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'4 of 6',title:'Profile — your plan and settings',
+  {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'5 of 7',title:'Profile — your plan and settings',
    body:'Your subscription, reminders, app lock, and every setting live here — including the button that brings this tour back.'},
-  {screen:null,target:'#guide-fab',step:'5 of 6',title:'Lost? The guide bot knows the way',
+  {screen:null,target:'#guide-fab',step:'6 of 7',title:'Lost? The guide bot knows the way',
    body:'This floating ? answers plain questions — "where is my journal?" — on any screen. Free, always available.'},
-  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'6 of 6',title:'Every lesson can be listened to',
+  {screen:'lesson',tab:'bn-home',target:'#lessonListenBtn',step:'7 of 7',title:'Every lesson can be listened to',
    body:'Tap Listen and the lesson reads aloud while you do anything else in the app — a player floats above the nav so you can pause it any time.'},
 ];
 let navTourIdx=0;
@@ -6947,7 +6950,7 @@ function towerRoomName(n,k){
   const s=towerFloor(n).sides[k];
   return s?s.name:'ROOM';
 }
-function openTower(){switchTo('tower');actBn('bn-tools');}
+function openTower(){switchTo('tower');actBn('bn-game');}
 function renderTower(){
   const t=towerState();
   if(t.floor>towerCeiling())t.floor=towerCeiling();
@@ -7318,7 +7321,7 @@ function towerVaultCounts(){
   const keys=Object.keys(TOWER_ARTIFACTS);
   return {have:keys.filter(towerKept).length,all:keys.length};
 }
-function openTowerVault(){switchTo('vault');actBn('bn-tools');}
+function openTowerVault(){switchTo('vault');actBn('bn-game');}
 function renderTowerVault(){
   const el=document.getElementById('vault-list');
   if(!el)return;
@@ -12678,7 +12681,7 @@ const SCREEN_MAP={
 };
 const TITLES={
   'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-tools',vault:'bn-tools'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -12704,7 +12707,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-tools',vault:'bn-tools'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -13982,7 +13985,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.0';
+const APP_VERSION='9.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

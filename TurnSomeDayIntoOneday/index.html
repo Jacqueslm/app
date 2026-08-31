@@ -7717,6 +7717,13 @@ function ctLost(){
 // One x for both the drawing and the tap. Without this a long thought spawned
 // with its centre near the edge and drew half off-screen - visible, unhittable,
 // and it still landed on you. A pill you cannot reach is not difficulty.
+// Where a thought is on its way up, 0..1 of the stage. Shared for the same
+// reason as ctThoughtX: it was written out twice, in the drawing and in the
+// hit test, and two copies of a moving target only ever drift apart. It now
+// starts just below the frame so nothing spawns sitting on the UP bar.
+function ctThoughtY(th,now,t){
+  return 1.03-((now-th.born)/t.travelMs)*0.95;
+}
 function ctThoughtX(th,W,g){
   g.font='600 13px -apple-system,Segoe UI,Roboto,sans-serif';
   const half=(g.measureText(th.text).width/2+21)/W;
@@ -7731,7 +7738,7 @@ function ctTap(ev){
   ct.thoughts.forEach(th=>{
     if(th.hit)return;
     const p=(now-th.born)/t.travelMs;
-    const ty=1-p*0.92-0.04;
+    const ty=ctThoughtY(th,now,t);
     const d=Math.abs(y-ty)+Math.abs(x-ctThoughtX(th,r.width,g))*0.22;
     if(d<bestD){bestD=d;best=th;}
   });
@@ -7798,7 +7805,7 @@ function ctDraw(now){
   g.textAlign='center';g.textBaseline='middle';
   ct.thoughts.forEach(th=>{
     const p=(now-th.born)/t.travelMs;
-    const y=(1-p*0.92-0.04)*H;
+    const y=ctThoughtY(th,now,t)*H;
     const x=ctThoughtX(th,W,g)*W;
     if(th.hit){
       const k=(now-th.hit)/260;
@@ -7824,7 +7831,7 @@ function ctDraw(now){
 
   // the UP bar - how far off the canvas you are
   const need=t.needed,frac=Math.min(1,ct.up/need);
-  const bx=14,bw=W-28,by=H-26;
+  const bx=14,bw=W-28,by=H-14;
   g.fillStyle='#141824';g.beginPath();
   if(g.roundRect)g.roundRect(bx,by,bw,8,4);else g.rect(bx,by,bw,8);
   g.fill();
@@ -14335,7 +14342,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.2';
+const APP_VERSION='9.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

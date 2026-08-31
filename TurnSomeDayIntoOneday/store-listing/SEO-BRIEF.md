@@ -58,31 +58,37 @@ about boundaries and getting their own life back — not about monitoring anyone
 
 **Geography:** English-speaking, US-weighted. No localisation yet.
 
-## 5. Current status
+## 5. Current status — read this section first
 
-**Live in Production since 26 Aug 2026.** Closed testing completed with 38
-testers (target was 15). Content rating live 26 Aug. Data safety answered and
-in review 29 Aug. Android in-app purchases verified working on device 29 Aug.
+**Live in Production since 26 Aug 2026. ZERO downloads since launch.**
 
-**Installed audience (active installs), Play Console, 3–25 Aug 2026:**
-peaked at 17 on 9 Aug, sat between 6 and 12 for the rest of the window, 6 on
-25 Aug. Single digits to low teens throughout.
+That is five days at the time of writing and it is the single most important
+fact in this document. Everything else should be read against it.
 
-**Where they are — this is the finding.** India is 45–83% of the installed
-audience every single day. The United States is 10–22%, usually 1 device.
-Every page, every email and the $9.99/mo price point are written for a
-US/UK reader.
+**Pre-launch, 3–25 Aug (closed test, NOT the market):** installed audience
+peaked at 17 on 9 Aug and sat between 6 and 12 for the rest of the window.
+India was 45–83% of it every single day; the United States 10–22%, usually one
+device. This window ENDS the day before production launch. It is the 38 closed
+testers recruited to clear Google's 12-tester requirement, and tester-swap
+groups skew heavily to India. Do not read it as an audience.
 
-**Read this before drawing conclusions from those numbers.** That window ends
-25 Aug and the app went to **Production on 26 Aug**. So it shows the closed
-test, not the market: 38 closed testers were recruited to clear Google's
-12-tester requirement, and tester-swap groups skew heavily to India. It is
-almost certainly the testers, not an audience. Post-launch numbers are a
-different dataset and are the ones that matter.
+**Why zero is arithmetic rather than mystery — two causes, both known:**
 
-- Post-launch installs (26 Aug onward): `[JACQUES FILLS IN]`
-- Store listing visitors + conversion rate: `[JACQUES FILLS IN]`
-- Rating and review count: `[JACQUES FILLS IN]`
+1. **The website routes around the store.** Every primary CTA on the site
+   points at `/quiz` or `/app`, the web version. The Play link is present on
+   38 of 46 pages but as a small text line near the bottom — "On Android, get
+   it on Google Play." The only traffic the business has is being sent
+   somewhere other than the listing.
+2. **Play gives no traffic to new listings.** Ranking runs on installs,
+   ratings and engagement. All three are ~0, so the app ranks nowhere against
+   incumbents like I Am Sober. Nobody browses Play for recovery apps; a
+   listing is a checkout counter, not a source.
+
+- Rating and review count: assume none. `[JACQUES CONFIRMS]`
+- Store listing visitors and conversion rate: `[JACQUES PULLS — Play Console →
+  Acquisition → Store listing acquisitions, 26 Aug onward]` This is the number
+  that separates "the listing converts badly" from "nobody arrives", which are
+  different problems with different fixes.
 
 ## 6. Existing assets
 
@@ -136,14 +142,25 @@ Paid budget: `[JACQUES FILLS IN — organic only, or a monthly figure]`
 
 ## 8. Primary 90-day goal
 
-`[JACQUES FILLS IN — pick ONE: installs, Play search ranking, free-to-Pro
-conversion, or review count]`
+**Recommended: get 100 people to the Play listing from a source Jacques
+controls, and measure what percentage install.**
 
-Context for whoever advises: revenue is $9.99/mo, $59.99/yr (both with a
-7-day free trial) or $149.99 lifetime. The core app is free forever with no
-card — day counter, SOS tools, journal, reminders, insights, and the first
-half of every program (15 of 30 lessons). Pro unlocks the second half, the AI
-companion (Friendly) and the live rooms.
+Reasoning, given zero downloads: install count is an outcome, not a goal, and
+cannot be forced. Play search ranking cannot be won before there are ratings.
+Free-to-Pro conversion cannot be measured on single-digit users without
+reading noise. Review count — an earlier draft's answer — is one step too far
+down the funnel, because reviews require installs first.
+
+Store conversion rate is the one number that tells him whether the listing is
+the problem or the traffic is. Until he has it, any ASO work is guesswork.
+
+Jacques's call, and he may override this. `[CONFIRM]`
+
+**Monetisation context.** $9.99/mo, $59.99/yr (both with a 7-day free trial),
+$149.99 lifetime. Core app free forever with no card — day counter, SOS tools,
+journal, reminders, insights, and the first half of every program (15 of 30
+lessons). Pro unlocks the second half, the AI companion (Friendly) and the
+live rooms.
 
 ## 9. Competitors
 
@@ -169,6 +186,34 @@ tracked. Play Console gives install and store-listing conversion data.
 
 Anyone proposing a measurement plan should work with those, not assume GA4.
 
+
+---
+
+## Strategic context a plan must account for
+
+**The app is a TWA — a website in an Android wrapper.** Consequences:
+
+- The web version works on any phone, installs with no store, and updates
+  instantly with no Play review. Web changes reach Play users immediately.
+- Web payment is Stripe, so Jacques keeps the full amount. Play billing costs
+  15–30%. Android in-app purchases work but took days of debugging to fix.
+- So Play is arguably a credibility layer rather than a growth engine, and a
+  plan should say plainly which of the two it is treating it as.
+
+**The store title collides with a large incumbent.** `Day One: Addiction
+Recovery` shares its lead word with Day One, the journaling app owned by
+Automattic — a decade old with millions of users, and it owns that term in
+Google search. A search for this brand and for the package name returns
+nothing about this app at all. "Addiction recovery" is doing all the work in
+that title. Factor it into the keyword plan.
+
+**Resource reality.** One person, no team, no designer, limited weekly hours,
+already stretched. A plan requiring daily posting across four platforms will
+not survive contact with his week. Prefer few things done consistently.
+
+**The privacy stance is not negotiable.** No GA4, no pixels, no third-party
+trackers on a recovery app. Measurement must be built on Play Console,
+first-party `/admin/stats`, and the existing first-touch UTM capture.
 
 ---
 

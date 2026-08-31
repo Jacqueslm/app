@@ -516,6 +516,30 @@ body.nova-open #mini-player{bottom:160px}
 .ct-hud-r{font-size:.625rem;letter-spacing:2.4px;color:#6b7089;text-align:right}
 #ct-foot{padding:14px 16px 26px;text-align:center}
 #ct-foot .n{font-size:.75rem;color:#5f6478;line-height:1.6}
+/* The card, the gym and the tale of the tape. The list screens scroll; the
+   fight screens never do. */
+#ct-ui.list{justify-content:flex-start;overflow-y:auto;padding:18px 12px 24px}
+#ct-ui.list #ct-sub{max-width:430px;width:100%}
+.bx-list{width:100%}
+.bx-row{display:flex;align-items:center;gap:11px;width:100%;background:#10131d;border:1px solid #1d2231;border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer;text-align:left}
+.bx-row.lk{opacity:.4;cursor:default}
+.bx-row .e{font-size:1.25rem;width:28px;text-align:center;flex:none}
+.bx-row b{display:block;font-size:.8125rem;letter-spacing:1.2px;color:#eef0f6;font-weight:750}
+.bx-row b i{font-style:normal;font-weight:600;color:#7c8199;letter-spacing:.4px;font-size:.6875rem}
+.bx-row b u{text-decoration:none;color:#7ee8a2;font-size:.5625rem;letter-spacing:2px;font-weight:800}
+.bx-row span{font-size:.6875rem;color:#7c8199;line-height:1.45;display:block;margin-top:2px}
+.bx-row .rec{margin-left:auto;flex:none;font-size:.6875rem;color:#8b90a6;letter-spacing:1px;text-align:right}
+.bx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;margin-top:10px}
+.bx-ava{background:#10131d;border:1px solid #1d2231;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center}
+.bx-ava.sel{border-color:#7ee8a2;background:#101a16}
+.bx-ava canvas{width:64px;height:64px;border-radius:10px}
+.bx-ava b{display:block;font-size:.6875rem;letter-spacing:1.5px;color:#eef0f6;margin-top:7px;font-weight:750}
+.bx-ava em{display:block;font-style:normal;font-size:.5625rem;letter-spacing:2px;color:#e8c447;margin-top:2px;font-weight:700}
+.bx-ava span{font-size:.625rem;color:#7c8199;display:block;margin-top:4px;line-height:1.45}
+.bx-note{font-size:.75rem;color:#8b90a6;line-height:1.55;background:#101a16;border:1px solid #1e3a2a;border-radius:10px;padding:10px 12px}
+.bx-tape{display:flex;align-items:center;justify-content:center;gap:14px;margin:14px 0}
+.bx-tape canvas{width:84px;height:84px;border-radius:12px;flex:none}
+.bx-vs{font-size:.625rem;letter-spacing:1.5px;color:#5f6478;line-height:1.7}
 /* THE WAVE (Phase 2). Same full-screen treatment as the door: when it is on
    you, it is the only thing on the screen, which is the honest version. */
 #tw-wave-canvas{width:100%;height:96px;display:block;margin:14px 0 10px}
@@ -7536,91 +7560,283 @@ function towerBoardDone(){
 }
 
 // ─── THE COUNT — the fight ───────────────────────────────────────────────────
-// Jacques, 31 Aug 2026: "dont like it, make it an actually boxing game."
-// The first pass was tapping words as they floated up. It read as a mood
-// board, not a fight. This is a fight.
+// Jacques, 31 Aug 2026: "build it like a competitive boxing game with 13
+// different opponents which are the addictions and 13 different avatars which
+// is the user and 1 avatar which is the supporter."
 //
-// It is a slipping game, which is what boxing actually is at close range.
-// He winds up on one side. You have a window to slip the other way. Slip it
-// and he is open - hit him. Slip the wrong way, or stand there, and you eat it.
-// Throw when he is not open and you are the one who is open.
+// So: a card of thirteen. Twelve of them are the twelve things this app helps
+// people quit, fighting the way the thing itself behaves - the scroll never
+// stops coming, the crave hits heavy and slow, smoke feints, last call gets
+// heavier every round. The thirteenth is SOMEDAY, the champion, and the belt
+// only goes on the line once the other twelve are beaten. Fourteen fighters to
+// choose from on your side: thirteen for the person recovering and THE CORNER,
+// the fourteenth, for the supporter - because a supporter's whole job in this
+// app is being somebody's corner.
 //
-// Three zones, no buttons, no joystick: left third slips left, right third
-// slips right, the middle throws. One thumb, at arm's length, at 11pm.
+// The fight itself is a slipping game, which is what boxing is at close range.
+// He winds up on one side. You have a window to slip the other way. Slip it and
+// he is open - hit him. Slip the wrong way, or stand there, and you eat it.
+// Throw when he is not open and you are the one who is open. A fight is won by
+// putting him down three times; it is lost only by being counted out.
 //
 // THE RULE THIS GAME MUST NEVER BREAK, same as The Climb and the tower before
 // it: it can end a fight. It can never tell somebody they are finished. When
 // you go down the referee counts and you tap to get up, and if the count beats
-// you the screen says the fight is over and you are not.
+// you the screen says the fight is over and you are not. Beating SOMEDAY does
+// not finish anything either - the belt gets defended, not retired.
 //
 // No images anywhere. Every fighter, glove and rope is drawn per frame, which
 // is the only way the glove can actually pull back and the head can actually
-// snap - and it costs a few KB instead of a sprite sheet the app has to ship.
-const BX_ROUND_MS=75000;              // three minutes would be a chore on a phone
+// snap - and it costs a few KB instead of 27 sprite sheets the app would have
+// to ship for a card this size.
 let bx=null,bxAnim=null;
+
+// ── the card: 13 opponents, one per addiction, SOMEDAY last ─────────────────
+// Ladder order is easiest first. sty is how the addiction fights:
+//   pace  - rest between punches (lower = less rest)
+//   power - what a landed punch takes off you
+//   chin  - how much he can take before he goes down
+//   speed - how fast the windup and the opening go by
+//   feint - odds a windup switches sides halfway through
+//   combo - odds a landed punch chains straight into another
+const BX_OPP=[
+ {key:'Social media',emo:'📱',name:'THE SCROLL',
+  tag:'Never hurts much. Just never stops.',
+  pal:{skin:'#c89b72',tank:'#1d3a5f',glove:'#3f7fbf',hair:'buzz',hairCol:'#2a2118'},
+  sty:{pace:0.62,power:0.55,chin:0.72,speed:1.05,feint:0.05,combo:0.50}},
+ {key:'Gaming',emo:'🎮',name:'ONE MORE',
+  tag:'Says it is the last one. It is never the last one.',
+  pal:{skin:'#f0c8a0',tank:'#3b2a5f',glove:'#7a5fd0',hair:'spike',hairCol:'#161311'},
+  sty:{pace:0.80,power:0.70,chin:0.80,speed:1.10,feint:0.10,combo:0.60}},
+ {key:'Shopping / Spending',emo:'🛍️',name:'THE PRICE',
+  tag:'Looks great under the lights. Sends the bill later.',
+  pal:{skin:'#b98a68',tank:'#4a3a10',glove:'#d4af37',hair:'band',hairCol:'#d4af37'},
+  sty:{pace:1.00,power:0.80,chin:0.85,speed:1.00,feint:0.45,combo:0.20}},
+ {key:'Food / Binging',emo:'🍽️',name:'THE CRAVE',
+  tag:'Slow. Heavy. Lands anyway the moment you stop moving.',
+  pal:{skin:'#e8b68c',tank:'#4f2020',glove:'#a83232',hair:'bald',hairCol:'#000'},
+  bld:{w:1.18,head:1.08},
+  sty:{pace:1.15,power:1.35,chin:1.15,speed:0.80,feint:0.05,combo:0.15}},
+ {key:'Work',emo:'💼',name:'OVERTIME',
+  tag:'Does not rest between rounds. Thinks that is a virtue.',
+  pal:{skin:'#d9a67e',tank:'#26303c',glove:'#5a6b7d',hair:'buzz',hairCol:'#3a3125'},
+  sty:{pace:0.55,power:0.85,chin:1.00,speed:1.00,feint:0.10,combo:0.35}},
+ {key:'Smoking',emo:'🚬',name:'SMOKE',
+  tag:'You never see the real one coming. Watch the switch.',
+  pal:{skin:'#8d5a3b',tank:'#2c2c34',glove:'#6d6d78',hair:'bald',hairCol:'#000'},
+  sty:{pace:0.95,power:0.80,chin:0.90,speed:1.05,feint:0.50,combo:0.25}},
+ {key:'Gambling',emo:'🎰',name:'DOUBLE OR NOTHING',
+  tag:'Half his punches are nothing. The other half you remember.',
+  pal:{skin:'#f2d0a4',tank:'#123524',glove:'#1f7a4d',hair:'spike',hairCol:'#4a3520'},
+  sty:{pace:0.90,power:1.00,chin:0.95,speed:1.00,feint:0.20,combo:0.30,swing:true}},
+ {key:'Alcohol',emo:'🍺',name:'LAST CALL',
+  tag:'Friendly early. Heavier every round.',
+  pal:{skin:'#e0a878',tank:'#3d2410',glove:'#b5651d',hair:'buzz',hairCol:'#55402a'},
+  sty:{pace:1.00,power:1.00,chin:1.10,speed:0.95,feint:0.10,combo:0.30,late:true}},
+ {key:'Substances',emo:'💊',name:'THE HIGH',
+  tag:'Comes in bursts. The quiet in between is a setup.',
+  pal:{skin:'#c99',tank:'#33174a',glove:'#8a3ab5',hair:'spike',hairCol:'#1c1210'},
+  sty:{pace:0.85,power:1.05,chin:0.95,speed:1.10,feint:0.15,combo:0.70,burst:true}},
+ {key:'Anger & Control',emo:'🔥',name:'THE FUSE',
+  tag:'Short. Fast. Everything at once, then nothing.',
+  pal:{skin:'#b07050',tank:'#4a1010',glove:'#d43518',hair:'bald',hairCol:'#000'},
+  bld:{w:1.08},
+  sty:{pace:0.85,power:1.15,chin:1.00,speed:1.15,feint:0.15,combo:0.80}},
+ {key:'Porn & Sex',emo:'🔞',name:'THE LOOP',
+  tag:'Chains punches. One always invites the next.',
+  pal:{skin:'#9a6a4a',tank:'#101a2c',glove:'#c2185b',hair:'afro',hairCol:'#151210'},
+  sty:{pace:0.75,power:0.95,chin:1.15,speed:1.05,feint:0.30,combo:0.85}},
+ {key:'Other',emo:'✨',name:'THE HABIT',
+  tag:'Fights like whoever you have been fighting.',
+  pal:{skin:'#caa27c',tank:'#22282f',glove:'#8b90a6',hair:'buzz',hairCol:'#2a2a2a'},
+  sty:{pace:0.80,power:1.10,chin:1.20,speed:1.15,feint:0.30,combo:0.50}},
+ {key:'SOMEDAY',emo:'👑',name:'SOMEDAY',
+  tag:'Undefeated against everyone who waited.',
+  pal:{skin:'#7a4a2e',tank:'#0c0c10',glove:'#d4af37',hair:'crown',hairCol:'#d4af37'},
+  bld:{w:1.10,head:1.02},
+  sty:{pace:0.70,power:1.20,chin:1.35,speed:1.25,feint:0.40,combo:0.60}},
+];
+BX_OPP.forEach((o,i)=>{o.idx=i;});
+
+// ── your side: 13 fighters, and THE CORNER for the supporter ────────────────
+// One perk each, all mild, all implemented in the engine below. Tags are
+// written without pronouns on purpose - any of these can be anybody.
+const BX_AVA=[
+ {key:'dayone', name:'DAY ONE',       perk:'none',    tag:'No gimmick. Starts tonight.',
+  pal:{skin:'#b98a68',tank:'#14202c',glove:'#c53030',hair:'buzz',hairCol:'#241a10'}},
+ {key:'chin',   name:'IRON CHIN',     perk:'chin',    tag:'Punches land softer on this chin.',
+  pal:{skin:'#8d5a3b',tank:'#26303c',glove:'#31549f',hair:'bald',hairCol:'#000'}},
+ {key:'quick',  name:'QUICK',         perk:'speed',   tag:'Openings stay open a beat longer.',
+  pal:{skin:'#f0c8a0',tank:'#0f2a20',glove:'#1f7a4d',hair:'spike',hairCol:'#3a2a18'}},
+ {key:'hammer', name:'HAMMER',        perk:'power',   tag:'Counters hit harder.',
+  pal:{skin:'#c89b72',tank:'#3a1010',glove:'#a83232',hair:'bald',hairCol:'#000'}},
+ {key:'heart',  name:'BIG HEART',     perk:'heart',   tag:'Up in four taps, not six.',
+  pal:{skin:'#e8b68c',tank:'#401a2e',glove:'#c2185b',hair:'afro',hairCol:'#1c1512'}},
+ {key:'comeback',name:'THE COMEBACK', perk:'recover', tag:'Comes back stronger between rounds.',
+  pal:{skin:'#9a6a4a',tank:'#1d3a5f',glove:'#3f7fbf',hair:'buzz',hairCol:'#141210'}},
+ {key:'counter',name:'COUNTERPUNCH',  perk:'counter', tag:'Chained counters pay double.',
+  pal:{skin:'#d9a67e',tank:'#33174a',glove:'#7a5fd0',hair:'spike',hairCol:'#241c14'}},
+ {key:'student',name:'THE STUDENT',   perk:'student', tag:'Reads the tell in every round, not just the first.',
+  pal:{skin:'#f2d0a4',tank:'#22282f',glove:'#5a6b7d',hair:'band',hairCol:'#e8e9ee'}},
+ {key:'wall',   name:'THE WALL',      perk:'guard',   tag:'Wild swings cost half as much.',
+  pal:{skin:'#b07050',tank:'#2c2c34',glove:'#6d6d78',hair:'buzz',hairCol:'#100c08'}},
+ {key:'light',  name:'FIRST LIGHT',   perk:'fresh',   tag:'Walks in over a hundred.',
+  pal:{skin:'#e0a878',tank:'#4a3a10',glove:'#d4af37',hair:'buzz',hairCol:'#3f3020'}},
+ {key:'steady', name:'STEADY',        perk:'steady',  tag:'The combo carries through the quiet.',
+  pal:{skin:'#caa27c',tank:'#123524',glove:'#1f7a4d',hair:'bald',hairCol:'#000'}},
+ {key:'phoenix',name:'THE PHOENIX',   perk:'phoenix', tag:'The first count-out is not the end. Once a fight.',
+  pal:{skin:'#c99',tank:'#4f2020',glove:'#d43518',hair:'spike',hairCol:'#701800'}},
+ {key:'underdog',name:'UNDERDOG',     perk:'underdog',tag:'Hits hardest below thirty.',
+  pal:{skin:'#8a6a52',tank:'#101a2c',glove:'#8b6f47',hair:'afro',hairCol:'#171310'}},
+ {key:'corner', name:'THE CORNER',    perk:'corner',  sup:true,
+  tag:'Fights for someone else. A corner like this fixes a lot between rounds.',
+  pal:{skin:'#b98a68',tank:'#3d3208',glove:'#e8c447',hair:'band',hairCol:'#e8c447'}},
+];
+function bxIsSupporter(){
+  return (S.selectedAddictions||[]).includes('Supporting Someone')||S.userType==='partner';
+}
 function bxState(){
   const s=S.count||(S.count={});
-  if(typeof s.best!=='number')s.best=0;      // best round reached
-  if(typeof s.wins!=='number')s.wins=0;
+  if(typeof s.wins!=='number')s.wins=0;      // fights won, all opponents
+  if(typeof s.losses!=='number')s.losses=0;  // counted out
   if(typeof s.plays!=='number')s.plays=0;
+  if(typeof s.open!=='number')s.open=0;      // ladder index reached
+  if(typeof s.belt!=='number')s.belt=0;      // times SOMEDAY has gone down
+  if(!s.rec)s.rec={};                        // per-opponent {w,l}
+  if(!s.ava)s.ava=bxIsSupporter()?'corner':'dayone';
   return s;
 }
-// Everything that scales with the round, in one place so the curve can be read
-// without hunting through the loop. Every value is checked in the tests.
-function bxTuning(round){
-  const r=round-1;
-  return {
-    windMs:  Math.max(260, 620-r*45),   // how long he telegraphs before it lands
-    openMs:  Math.max(340, 620-r*35),   // how long he stays open after a slip
-    restMs:  Math.max(420, 1100-r*80),  // breath between his punches
-    hit:     Math.min(22,  10+r*1.5),   // what his punch takes off you
-    give:    Math.max(9,   16-r*0.7),   // what your counter takes off him
-    hp:      Math.min(180, 100+r*14),   // how much he can take
+function bxAvatar(){return BX_AVA.find(a=>a.key===bxState().ava)||BX_AVA[0];}
+function bxRec(key){const r=bxState().rec[key];return r?r.w+'-'+r.l:'0-0';}
+
+// Everything that scales, in one place. oi is the ladder index (0..12), kd is
+// knockdowns already scored this fight (0..2) - the base curve from the first
+// version of this game, then the opponent's style over the top of it, then
+// hard floors so no combination is ever a coin toss. Every floor is tested.
+function bxTuning(opp,kd){
+  const sty=opp.sty,r=opp.idx*0.55+kd*1.1;
+  const t={
+    windMs: Math.max(230, Math.max(260,620-r*45)/sty.speed),
+    openMs: Math.max(300, Math.max(340,620-r*35)/sty.speed),
+    restMs: Math.max(380, Math.max(420,1100-r*80)*sty.pace),
+    hit:    Math.min(26, Math.round(Math.min(22,10+r*1.5)*sty.power)),
+    give:   Math.max(9, 16-r*0.7),
+    hp:     Math.min(200, Math.round(Math.min(180,100+r*14)*sty.chin)),
   };
+  if(bx&&bx.perk==='speed')t.openMs*=1.25;
+  return t;
 }
 function bxHud(){
   const l=document.getElementById('ct-hud-l'),r=document.getElementById('ct-hud-r');
   if(!bx){if(l)l.textContent='';if(r)r.textContent='';return;}
-  if(l)l.textContent='ROUND '+bx.round;
-  if(r)r.textContent=bx.combo>1?bx.combo+' IN A ROW':'';
+  if(l)l.textContent=bx.opp.name+' · RD '+(bx.kd+1);
+  if(r)r.textContent=bx.combo>1?bx.combo+' IN A ROW':'KD '+bx.kd+'/3';
 }
-function bxUi(eyebrow,big,sub,buttons,scores){
-  const st=bxState(),ui=document.getElementById('ct-ui');
+function bxUi(eyebrow,big,sub,buttons,extra){
+  const ui=document.getElementById('ct-ui');
+  ui.classList.remove('list');
   document.getElementById('ct-eyebrow').textContent=eyebrow;
   document.getElementById('ct-big').innerHTML=big;
-  document.getElementById('ct-sub').textContent=sub;
+  document.getElementById('ct-sub').innerHTML=sub;
   document.getElementById('ct-buttons').innerHTML=buttons;
   const sc=document.getElementById('ct-scores');
-  sc.style.display=scores?'flex':'none';
-  sc.innerHTML=scores?('<div><b>'+st.best+'</b><span>BEST ROUND</span></div>'+
-                       '<div><b>'+st.wins+'</b><span>WINS</span></div>'):'';
+  sc.style.display=extra?'flex':'none';
+  sc.innerHTML=extra||'';
   ui.style.display='flex';ui.classList.add('on');
 }
 function bxHideUi(){
   const ui=document.getElementById('ct-ui');
-  ui.style.display='none';ui.classList.remove('on');
+  ui.style.display='none';ui.classList.remove('on','list');
 }
+// ── screens ─────────────────────────────────────────────────────────────────
 function renderCount(){
   bxStop();bx=null;
   bxDrawIdle();bxHud();
-  bxUi('THE COUNT','Slip it.<br>Then hit him.',
-    'He tells you which side it is coming from. Tap the other side to slip, then tap the middle while he is open. Throw at the wrong time and you are the one who is open.',
-    '<button class="ct-btn" onclick="bxStart()">TOUCH GLOVES</button>',true);
+  const st=bxState(),a=bxAvatar();
+  bxUi('THE COUNT','Fight night.',
+    'Thirteen on the card. Twelve of them you already know by another name. Beat all twelve and SOMEDAY has to put the belt on the line.',
+    '<button class="ct-btn" onclick="bxCard()">THE CARD</button>'+
+    '<button class="ct-btn ghost" onclick="bxGym()">YOUR FIGHTER: '+a.name+'</button>',
+    '<div><b>'+st.wins+'-'+st.losses+'</b><span>RECORD</span></div>'+
+    '<div><b>'+Math.min(13,st.open+(st.belt>0?1:0))+'/13</b><span>BEATEN</span></div>'+
+    '<div><b>'+st.belt+'</b><span>'+(st.belt===1?'BELT':'BELTS')+'</span></div>');
 }
+function bxCard(){
+  bxStop();bx=null;bxDrawIdle();bxHud();
+  const st=bxState(),mine=S.selectedAddictions||[];
+  let rows='';
+  BX_OPP.forEach((o,i)=>{
+    const locked=i>st.open;
+    const beaten=(st.rec[o.key]||{}).w>0;
+    const yours=mine.includes(o.key);
+    rows+='<div class="bx-row'+(locked?' lk':'')+'" '+(locked?'':'onclick="bxTale('+i+')"')+'>'+
+      '<div class="e">'+o.emo+'</div>'+
+      '<div><b>'+o.name+(o.key==='SOMEDAY'?'':' <i>· '+o.key+'</i>')+(yours?' <u>YOURS</u>':'')+'</b>'+
+      '<span>'+(locked?(o.key==='SOMEDAY'?'Beat the other twelve first.':'Beat the one above first.'):o.tag)+'</span></div>'+
+      '<div class="rec">'+(locked?'🔒':(beaten?'✔ ':'')+bxRec(o.key))+'</div></div>';
+  });
+  const ui=document.getElementById('ct-ui');
+  bxUi('THE CARD','', '', '');
+  document.getElementById('ct-big').innerHTML='';
+  document.getElementById('ct-sub').innerHTML=
+    '<div class="bx-list">'+rows+'</div>'+
+    '<button class="ct-btn ghost" onclick="renderCount()" style="margin-top:14px">BACK</button>';
+  ui.classList.add('list');
+}
+function bxGym(){
+  bxStop();bx=null;bxDrawIdle();bxHud();
+  const st=bxState(),sup=bxIsSupporter();
+  let cards='';
+  BX_AVA.forEach(a=>{
+    cards+='<div class="bx-ava'+(st.ava===a.key?' sel':'')+'" onclick="bxPick(\''+a.key+'\')">'+
+      '<canvas class="bxp" data-k="'+a.key+'" width="128" height="128"></canvas>'+
+      '<b>'+a.name+'</b>'+(a.sup?'<em>THE SUPPORTER</em>':'')+'<span>'+a.tag+'</span></div>';
+  });
+  const ui=document.getElementById('ct-ui');
+  bxUi('YOUR FIGHTER','','','');
+  document.getElementById('ct-big').innerHTML='';
+  document.getElementById('ct-sub').innerHTML=
+    (sup?'<div class="bx-note">You picked "Supporting someone I love" - THE CORNER was made for you. Any of the fourteen is yours to use.</div>':'')+
+    '<div class="bx-grid">'+cards+'</div>'+
+    '<button class="ct-btn ghost" onclick="renderCount()" style="margin-top:14px">BACK</button>';
+  ui.classList.add('list');
+  document.querySelectorAll('canvas.bxp').forEach(cv=>{
+    const a=BX_AVA.find(x=>x.key===cv.dataset.k);
+    if(a)bxPortrait(cv,a.pal);
+  });
+}
+function bxPick(k){bxState().ava=k;save();bxGym();}
+function bxTale(i){
+  bxStop();bx=null;bxDrawIdle();bxHud();
+  const o=BX_OPP[i],a=bxAvatar();
+  bxUi(o.key==='SOMEDAY'?'TITLE FIGHT':'FIGHT '+(i+1)+' OF 13',
+    o.name+'<br><span style="font-size:.9375rem;color:#8b90a6">vs</span><br>'+a.name,
+    o.tag+'<div class="bx-tape"><canvas id="bx-tape-o" width="128" height="128"></canvas>'+
+    '<div class="bx-vs">'+bxRec(o.key)+'<br>VS<br>'+a.tag.split('.')[0]+'.</div>'+
+    '<canvas id="bx-tape-a" width="128" height="128"></canvas></div>'+
+    'First to three knockdowns. Get counted out and it is over - for tonight.',
+    '<button class="ct-btn" onclick="bxStart('+i+')">TOUCH GLOVES</button>'+
+    '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
+  bxPortrait(document.getElementById('bx-tape-o'),o.pal);
+  bxPortrait(document.getElementById('bx-tape-a'),a.pal);
+}
+// ── the fight ───────────────────────────────────────────────────────────────
 function bxStop(){cancelAnimationFrame(bxAnim);bxAnim=null;}
-function bxStart(){
+function bxStart(oi){
   const st=bxState();st.plays++;save();
-  logActivity('fight_start',{});
-  bx={round:1,you:100,him:100,hisHp:100,phase:'rest',phaseAt:0,side:0,
+  const opp=BX_OPP[oi],a=bxAvatar();
+  logActivity('fight_start',{opp:opp.key,ava:a.key});
+  bx={opp:opp,ava:a,perk:a.perk,kd:0,you:a.perk==='fresh'?112:100,him:100,
+      riseNeed:a.perk==='heart'?4:(a.perk==='corner'?5:6),
+      phase:'rest',phaseAt:0,side:0,feintAt:0,feinted:false,burst:false,
       slip:0,slipAt:0,throwAt:0,combo:0,shake:0,flash:0,hitFlash:0,
-      down:false,count:0,countAt:0,rises:0,state:'live',msg:'',msgAt:0};
-  bxRound(1);
+      down:false,count:0,countAt:0,rises:0,phUsed:false,state:'live',msg:'',msgAt:0};
+  bxRound();
 }
-function bxRound(n){
-  const t=bxTuning(n);
-  Object.assign(bx,{round:n,tune:t,him:t.hp,hisHp:t.hp,you:Math.min(100,bx.you+ (n>1?18:0)),
-    phase:'rest',phaseAt:performance.now(),combo:0,state:'live'});
-  bxSay(n===1?'Round one.':'Round '+n+'.');
+function bxRound(){
+  const t=bxTuning(bx.opp,bx.kd);
+  Object.assign(bx,{tune:t,him:t.hp,phase:'rest',phaseAt:performance.now(),state:'live'});
+  if(bx.kd===0)bxSay('Round one.');
   bxHideUi();bxHud();bxLoop();
 }
 function bxSay(m){bx.msg=m;bx.msgAt=performance.now();}
@@ -7638,25 +7854,57 @@ function bxLoop(){
 function bxTick(now){
   if(bx.state!=='live')return;
   if(bx.down){bxTickCount(now);return;}
-  const t=bx.tune,dt=now-bx.phaseAt;
-  if(bx.phase==='rest'&&dt>t.restMs){
-    bx.side=Math.random()<0.5?-1:1;
-    bx.phase='wind';bx.phaseAt=now;
-  }else if(bx.phase==='wind'&&dt>t.windMs){
-    // It lands. Slipping the correct way is the only thing that beats it.
-    if(bx.slip===-bx.side){
-      bx.phase='open';bx.phaseAt=now;bx.flash=now;
-      bxSay('Slipped.');
-    }else{
-      bxHurt(now,t.hit);
-      bx.phase='rest';bx.phaseAt=now;
+  const t=bx.tune,sty=bx.opp.sty,dt=now-bx.phaseAt;
+  if(bx.phase==='rest'){
+    // THE HIGH rests in bursts - short quiet, long quiet, short quiet.
+    let rest=t.restMs;
+    if(sty.burst)rest=bx.burst?t.restMs*0.45:t.restMs*1.7;
+    if(dt>rest){
+      bx.burst=!bx.burst;
+      bx.side=Math.random()<0.5?-1:1;
+      bx.feinted=false;
+      bx.feintAt=Math.random()<sty.feint?t.windMs*0.45:0;
+      bx.phase='wind';bx.phaseAt=now;
+    }
+  }else if(bx.phase==='wind'){
+    // The feint: halfway through the windup he switches sides. SMOKE and THE
+    // PRICE live on this. A slip thrown at the first tell has decayed by the
+    // time the real one lands, so the answer is to wait the switch out.
+    if(bx.feintAt&&!bx.feinted&&dt>bx.feintAt){
+      bx.feinted=true;bx.side=-bx.side;
+      bx.phaseAt=now-t.windMs*0.30;
+      bxSay('Switch.');
+    }else if(dt>t.windMs){
+      // It lands. Slipping the correct way is the only thing that beats it.
+      if(bx.slip===-bx.side){
+        bx.phase='open';bx.phaseAt=now;bx.flash=now;
+        bxSay('Slipped.');
+      }else{
+        let hit=t.hit;
+        // DOUBLE OR NOTHING: half his punches are nothing, half are double.
+        if(sty.swing)hit=Math.min(30,Math.round(hit*(Math.random()<0.5?0.5:2)));
+        // LAST CALL gets heavier the deeper the fight goes.
+        if(sty.late)hit=Math.min(30,Math.round(hit*(1+0.12*bx.kd)));
+        bxHurt(now,hit,false);
+        // The chain: a landed punch invites the next one. THE LOOP's whole game.
+        if(bx.you>0&&!bx.down&&Math.random()<sty.combo){
+          bx.side=Math.random()<0.5?-1:1;
+          bx.feinted=false;bx.feintAt=0;
+          bx.phase='wind';bx.phaseAt=now-t.windMs*0.25;
+        }else{
+          bx.phase='rest';bx.phaseAt=now;
+        }
+      }
     }
   }else if(bx.phase==='open'&&dt>t.openMs){
-    bx.phase='rest';bx.phaseAt=now;bx.combo=0;
+    bx.phase='rest';bx.phaseAt=now;
+    if(bx.perk!=='steady')bx.combo=0;
   }
   if(bx.slip&&now-bx.slipAt>300)bx.slip=0;
 }
-function bxHurt(now,amount){
+function bxHurt(now,amount,wild){
+  if(bx.perk==='chin')amount=Math.round(amount*0.85);
+  if(wild&&bx.perk==='guard')amount=Math.round(amount*0.5);
   bx.you=Math.max(0,bx.you-amount);
   bx.combo=0;bx.shake=now;
   if(navigator.vibrate)try{navigator.vibrate(45);}catch(e){}
@@ -7670,7 +7918,12 @@ function bxGoDown(now){
 }
 function bxTickCount(now){
   bx.count=(now-bx.countAt)/1000;
-  if(bx.count>=10)bxLost();
+  if(bx.count>=10){
+    // THE PHOENIX: the first count-out in a fight is not the end. Once.
+    if(bx.perk==='phoenix'&&!bx.phUsed){
+      bx.phUsed=true;bxRise();bxSay('Not tonight.');
+    }else bxLost();
+  }
 }
 function bxRise(){
   bx.down=false;bx.rises++;bx.you=52;bx.combo=0;
@@ -7680,32 +7933,58 @@ function bxRise(){
 }
 function bxLost(){
   bx.state='over';bxStop();bxDrawIdle();bxHud();
-  const st=bxState();
-  if(bx.round-1>st.best)st.best=bx.round-1;
+  const st=bxState(),o=bx.opp;
+  st.losses++;
+  const r=st.rec[o.key]||(st.rec[o.key]={w:0,l:0});r.l++;
   save();
-  logActivity('fight_end',{round:bx.round,won:false});
+  logActivity('fight_end',{opp:o.key,won:false,kd:bx.kd});
+  const oi=o.idx;
   bxUi('TEN','The fight is over.',
     // Never "you're finished". It ends a fight. It does not end anybody.
-    'The fight is over. You are not. Rounds do not carry over — the bell does.',
-    '<button class="ct-btn" onclick="bxStart()">AGAIN</button>'+
-    '<button class="ct-btn ghost" onclick="renderCount()">Sit down a minute</button>',true);
+    'The fight is over. You are not. '+o.name+' only wins the nights you do not come back.'+
+    (bx.kd>0?' The '+bx.kd+' knockdown'+(bx.kd>1?'s':'')+' you scored were real.':''),
+    '<button class="ct-btn" onclick="bxStart('+oi+')">RUN IT BACK</button>'+
+    '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
 }
-function bxWonRound(now){
+function bxKnockdown(now){
+  bx.kd++;
+  const st=bxState();save();
+  if(bx.kd>=3){bxWinFight();return;}
   bx.state='between';bxStop();
-  const st=bxState();
-  if(bx.round>st.best)st.best=bx.round;
-  save();
   bxDrawIdle();
-  bxUi('ROUND '+bx.round,'Down he goes.',
-    'That is round '+bx.round+'. He gets up too, and he is quicker next time.',
+  // The corner works between rounds. THE COMEBACK's and THE CORNER's whole perk.
+  const heal=bx.perk==='corner'?32:(bx.perk==='recover'?30:18);
+  bx.you=Math.min(120,bx.you+heal);
+  bxUi('KNOCKDOWN '+bx.kd+' OF 3','Down he goes.',
+    'He gets up too - quicker and meaner. One more like that'+(bx.kd===2?' and the fight is yours.':', then one more.'),
     '<button class="ct-btn" onclick="bxNext()">NEXT ROUND</button>'+
-    '<button class="ct-btn ghost" onclick="bxQuit()">Take the win</button>',true);
+    '<button class="ct-btn ghost" onclick="bxQuitMid()">Leave it here</button>');
 }
-function bxNext(){bx.state='live';bxRound(bx.round+1);}
-function bxQuit(){
-  const st=bxState();st.wins++;save();
-  logActivity('fight_end',{round:bx.round,won:true});
-  bx=null;renderCount();
+function bxNext(){bx.state='live';bxRound();}
+function bxQuitMid(){bx=null;bxCard();}
+function bxWinFight(){
+  bx.state='over';bxStop();bxDrawIdle();bxHud();
+  const st=bxState(),o=bx.opp;
+  st.wins++;
+  const r=st.rec[o.key]||(st.rec[o.key]={w:0,l:0});r.w++;
+  if(o.idx===st.open&&st.open<12)st.open++;
+  const title=o.key==='SOMEDAY';
+  if(title)st.belt++;
+  save();
+  logActivity('fight_end',{opp:o.key,won:true});
+  const nxt=BX_OPP[st.open];
+  if(title){
+    bxUi('AND NEW','SOMEDAY<br>GOES DOWN.',
+      'The belt says DAY ONE now. It gets defended, not retired - a champion is not finished, a champion is busy. The whole card is open for rematches.',
+      '<button class="ct-btn" onclick="bxCard()">THE CARD</button>'+
+      '<button class="ct-btn ghost" onclick="renderCount()">Sit down a minute</button>');
+  }else{
+    bxUi('WINNER','That is '+o.name+'.',
+      'Three knockdowns. '+(nxt&&nxt.key==='SOMEDAY'&&st.open>=12?'That was the twelfth. SOMEDAY cannot duck you any more.':(nxt?'Next on the card: '+nxt.name+'.':''))+
+      ' He will take a rematch any time - they always do.',
+      (nxt?'<button class="ct-btn" onclick="bxTale('+nxt.idx+')">NEXT: '+nxt.name+'</button>':'')+
+      '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
+  }
 }
 // ── input: three zones, no buttons ──────────────────────────────────────────
 function ctTap(ev){
@@ -7713,10 +7992,10 @@ function ctTap(ev){
   const c=document.getElementById('ct-canvas'),r=c.getBoundingClientRect();
   const x=(ev.clientX-r.left)/r.width,now=performance.now();
   if(bx.down){
-    // Getting up is work. Six taps, and the count is still running.
+    // Getting up is work. The count is still running while you do it.
     bx.taps=(bx.taps||0)+1;
     bx.hitFlash=now;
-    if(bx.taps>=6)bxRise();
+    if(bx.taps>=bx.riseNeed)bxRise();
     return;
   }
   if(bx.state!=='live')return;
@@ -7728,24 +8007,27 @@ function bxThrow(now){
   bx.throwAt=now;
   if(bx.phase==='open'){
     bx.combo++;
-    bx.him=Math.max(0,bx.him-(bx.tune.give+bx.combo*2));
+    let give=bx.tune.give+bx.combo*(bx.perk==='counter'?4:2);
+    if(bx.perk==='power')give*=1.2;
+    if(bx.perk==='underdog'&&bx.you<30)give*=1.35;
+    bx.him=Math.max(0,bx.him-Math.round(give));
     bx.hitFlash=now;
     if(navigator.vibrate)try{navigator.vibrate(14);}catch(e){}
-    if(bx.him<=0){bxWonRound(now);return;}
+    if(bx.him<=0){bxKnockdown(now);return;}
     bx.phase='rest';bx.phaseAt=now;
     bxSay(bx.combo>2?'Again.':'');
   }else{
     // Throwing into nothing leaves you open, and he takes it.
-    bxHurt(now,Math.round(bx.tune.hit*0.55));
+    bxHurt(now,Math.round(bx.tune.hit*0.55),true);
     bxSay('Wild.');
   }
 }
 
 // ── drawing: no images, every frame built from shapes ────────────────────────
 // The whole reason not to use sprites: the glove has to actually pull back
-// during the windup and actually lunge at the camera on the strike. A sprite
-// sheet cannot do that without a dozen frames per punch; a circle whose radius
-// and position are functions of time can.
+// during the windup and actually lunge at the camera on the strike, and a card
+// of thirteen opponents and fourteen fighters would need 27 sprite sheets. A
+// palette and a hairline per character costs nothing and ships with the page.
 function bxCtx(c){
   const dpr=Math.min(2,window.devicePixelRatio||1);
   const W=c.clientWidth,H=c.clientHeight;
@@ -7772,34 +8054,117 @@ function bxRing(g,W,H){
   g.fillStyle='rgba(255,255,255,0.02)';
   g.beginPath();g.ellipse(W*0.5,H*0.92,W*0.62,H*0.10,0,0,7);g.fill();
 }
-// The opponent, in silhouette. Head, shoulders, two gloves. He leans and winds
-// on the side he is about to throw from, so the tell is in the body, not a
-// caption.
+// Lighten (f>0) or darken (f<0) a hex colour. The palettes are authored flat;
+// every gradient in the ring is derived from them here, so a character's whole
+// look still lives on one line of the roster.
+function bxShade(hex,f){
+  const h=hex.slice(1),n=parseInt(h.length===3?h.replace(/./g,c=>c+c):h,16);
+  const ch=(v)=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f)));
+  return 'rgb('+ch(n>>16)+','+ch((n>>8)&255)+','+ch(n&255)+')';
+}
+// A hairline is most of a face at this size. Drawn relative to a head centred
+// on (0,0) with radius r.
+function bxHair(g,r,hair,col){
+  g.fillStyle=col;
+  if(hair==='buzz'){
+    g.beginPath();g.arc(0,0,r*1.01,Math.PI*1.05,Math.PI*1.95);
+    g.arc(0,-r*0.08,r*0.82,Math.PI*1.95,Math.PI*1.05,true);g.fill();
+  }else if(hair==='afro'){
+    g.beginPath();g.arc(0,-r*0.42,r*0.98,0,7);g.fill();
+  }else if(hair==='spike'){
+    for(let i=-2;i<=2;i++){
+      g.beginPath();
+      g.moveTo(i*r*0.34-r*0.16,-r*0.72);
+      g.lineTo(i*r*0.34,-r*1.34);
+      g.lineTo(i*r*0.34+r*0.16,-r*0.72);
+      g.closePath();g.fill();
+    }
+  }else if(hair==='band'){
+    g.fillRect(-r*0.98,-r*0.62,r*1.96,r*0.34);
+  }else if(hair==='crown'){
+    // SOMEDAY wears it into the ring. That is the point of him.
+    g.beginPath();
+    g.moveTo(-r*0.9,-r*0.98);
+    for(let i=0;i<3;i++){
+      g.lineTo(-r*0.9+r*0.6*(i+0.5),-r*1.5);
+      g.lineTo(-r*0.9+r*0.6*(i+1),-r*0.98);
+    }
+    g.lineTo(-r*0.9,-r*0.98);g.closePath();g.fill();
+  }
+  // bald draws nothing, which is also a look
+}
+// A head-and-gloves portrait for the card, the gym and the tale of the tape.
+// Same palette the ring uses, so the man you pick is the man you see fight.
+function bxPortrait(cv,pal){
+  if(!cv)return;
+  const g=cv.getContext('2d'),s=cv.width;
+  g.clearRect(0,0,s,s);
+  const grd=g.createLinearGradient(0,0,0,s);
+  grd.addColorStop(0,'#141827');grd.addColorStop(1,'#0a0c13');
+  g.fillStyle=grd;g.fillRect(0,0,s,s);
+  g.save();g.translate(s/2,s*0.46);
+  const r=s*0.20;
+  // shoulders in the tank
+  const tg=g.createLinearGradient(0,s*0.07,0,s*0.54);
+  tg.addColorStop(0,bxShade(pal.tank,0.14));tg.addColorStop(1,bxShade(pal.tank,-0.5));
+  g.fillStyle=tg;
+  g.beginPath();
+  g.moveTo(-s*0.36,s*0.54);
+  g.quadraticCurveTo(-s*0.38,s*0.10,0,s*0.07);
+  g.quadraticCurveTo(s*0.38,s*0.10,s*0.36,s*0.54);
+  g.closePath();g.fill();
+  // head
+  const sg2=g.createLinearGradient(0,-r,0,r);
+  sg2.addColorStop(0,pal.skin);sg2.addColorStop(1,bxShade(pal.skin,-0.4));
+  g.fillStyle=sg2;
+  g.beginPath();g.arc(0,0,r,0,7);g.fill();
+  const hl=g.createLinearGradient(0,-r,0,r);
+  hl.addColorStop(0,'rgba(255,255,255,0.20)');hl.addColorStop(0.6,'rgba(0,0,0,0)');
+  g.fillStyle=hl;g.beginPath();g.arc(0,0,r,0,7);g.fill();
+  bxHair(g,r,pal.hair,pal.hairCol);
+  // a face reads at 64px with almost nothing: two eyes and the shadow of a brow
+  g.fillStyle='rgba(12,12,18,0.30)';
+  g.beginPath();g.ellipse(0,-r*0.10,r*0.72,r*0.26,0,0,7);g.fill();
+  g.fillStyle='#0c0c12';
+  for(const sd of [-1,1]){g.beginPath();g.arc(sd*r*0.34,-r*0.05,r*0.09,0,7);g.fill();}
+  // gloves up either side of the jaw
+  for(const sd of [-1,1]){
+    g.beginPath();g.arc(sd*s*0.27,s*0.16,s*0.13,0,7);
+    g.fillStyle=pal.glove;g.fill();
+    g.strokeStyle='rgba(0,0,0,0.35)';g.lineWidth=2;g.stroke();
+  }
+  g.restore();
+}
+// The opponent. Head, shoulders, two gloves, in his own colours and build. He
+// leans and winds on the side he is about to throw from, so the tell is in the
+// body, not a caption.
 function bxFighter(g,W,H,now){
-  const t=bx.tune,dt=now-bx.phaseAt;
-  let wind=0,lunge=0;
+  const t=bx.tune,pal=bx.opp.pal,bld=bx.opp.bld||{},dt=now-bx.phaseAt;
+  let wind=0;
   if(bx.phase==='wind')wind=Math.min(1,dt/t.windMs);
-  if(bx.phase==='open')lunge=0;
   const openK=bx.phase==='open'?Math.min(1,dt/120):0;
-  const cx=W*0.5+bx.side*wind*W*0.05, cy=H*0.52;
+  const cx=W*0.5+bx.side*wind*W*0.05, cy=H*0.50;
   const sway=Math.sin(now/620)*W*0.008;
   const stunned=bx.phase==='open';
 
   g.save();
   g.translate(cx+sway, cy + (stunned?H*0.03*openK:0));
-  if(stunned)g.rotate(0.10*openK*bx.side);
+  if(stunned)g.rotate(0.10*openK*(bx.side||1));
 
-  const bodyW=W*0.46,bodyH=H*0.34;
-  // Torso, then a rim light down the shoulders. Without the rim he was a dark
-  // shape on a dark ring - the silhouette only reads as a man once the lamp
-  // above the ring catches the top of him.
-  g.fillStyle=stunned?'#232c40':'#1a2130';
+  const bodyW=W*0.40*(bld.w||1),bodyH=H*0.29;
+  // Torso in his tank, then a rim light down the shoulders. Without the rim he
+  // is a dark shape on a dark ring - the lamp catching the top of him is what
+  // makes the silhouette read as a man.
+  const tg=g.createLinearGradient(0,-bodyH*0.56,0,bodyH*0.62);
+  tg.addColorStop(0,bxShade(pal.tank,0.16));tg.addColorStop(1,bxShade(pal.tank,-0.62));
+  g.fillStyle=tg;
   g.beginPath();
   g.moveTo(-bodyW/2,bodyH*0.62);
   g.quadraticCurveTo(-bodyW*0.52,-bodyH*0.30,-bodyW*0.22,-bodyH*0.48);
   g.quadraticCurveTo(0,-bodyH*0.56,bodyW*0.22,-bodyH*0.48);
   g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW/2,bodyH*0.62);
   g.closePath();g.fill();
+  if(stunned){g.fillStyle='rgba(255,255,255,0.07)';g.fill();}
   g.strokeStyle='rgba(180,198,255,0.16)';g.lineWidth=2;
   g.beginPath();
   g.moveTo(-bodyW*0.50,bodyH*0.10);
@@ -7808,21 +8173,26 @@ function bxFighter(g,W,H,now){
   g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW*0.50,bodyH*0.10);
   g.stroke();
 
-  const hr=W*0.105;
-  g.fillStyle=stunned?'#2e3850':'#232b3c';
-  g.beginPath();g.arc(0,-bodyH*0.72,hr,0,7);g.fill();
-  const hl=g.createLinearGradient(0,-bodyH*0.72-hr,0,-bodyH*0.72+hr);
+  const hr=W*0.095*(bld.head||1);
+  g.save();g.translate(0,-bodyH*0.78);
+  const sg=g.createLinearGradient(0,-hr,0,hr);
+  sg.addColorStop(0,pal.skin);sg.addColorStop(1,bxShade(pal.skin,-0.45));
+  g.fillStyle=sg;
+  g.beginPath();g.arc(0,0,hr,0,7);g.fill();
+  const hl=g.createLinearGradient(0,-hr,0,hr);
   hl.addColorStop(0,'rgba(200,215,255,0.22)');hl.addColorStop(0.6,'rgba(0,0,0,0)');
-  g.fillStyle=hl;g.beginPath();g.arc(0,-bodyH*0.72,hr,0,7);g.fill();
+  g.fillStyle=hl;g.beginPath();g.arc(0,0,hr,0,7);g.fill();
+  bxHair(g,hr,pal.hair,pal.hairCol);
   if(stunned){                                   // eyes go out for a moment
     g.strokeStyle='#7ee8a2';g.lineWidth=2;
     for(const s of [-1,1]){
       g.beginPath();
-      g.moveTo(s*W*0.042-6,-bodyH*0.76-5);g.lineTo(s*W*0.042+6,-bodyH*0.76+5);
-      g.moveTo(s*W*0.042-6,-bodyH*0.76+5);g.lineTo(s*W*0.042+6,-bodyH*0.76-5);
+      g.moveTo(s*hr*0.4-5,-hr*0.05-5);g.lineTo(s*hr*0.4+5,-hr*0.05+5);
+      g.moveTo(s*hr*0.4-5,-hr*0.05+5);g.lineTo(s*hr*0.4+5,-hr*0.05-5);
       g.stroke();
     }
   }
+  g.restore();
   g.restore();
 
   // gloves. The near one pulls back and grows as it comes at the camera.
@@ -7830,12 +8200,12 @@ function bxFighter(g,W,H,now){
   for(const s of [-1,1]){
     const active=(s===bx.side&&bx.phase==='wind');
     const pull=active?wind:0;
-    const gx=cx+sway+s*W*(0.20+pull*0.06)-strike*(active?s*W*0.14:0);
+    const gx=cx+sway+s*W*(0.20+pull*0.06)*(bld.w||1)-strike*(active?s*W*0.14:0);
     const gy=cy-H*0.02-(active?pull*H*0.05:0)+Math.sin(now/540+s)*H*0.006
              +(active?strike*H*0.09:0);
     const gr=W*(0.058+(active?strike*0.075:0));
     g.beginPath();g.arc(gx,gy,gr,0,7);
-    g.fillStyle=active?(strike>0.75?'#c9455e':'#8e3448'):'#1c222f';
+    g.fillStyle=active?pal.glove:bxShade(pal.glove,-0.62);
     if(active){g.shadowColor='rgba(200,60,85,0.55)';g.shadowBlur=22*strike;}
     g.fill();g.shadowBlur=0;
     if(active){
@@ -7843,8 +8213,10 @@ function bxFighter(g,W,H,now){
     }
   }
 }
-// Your own gloves, low in frame, so the camera is behind your eyes.
+// Your own gloves, low in frame, so the camera is behind your eyes. In the
+// colours of the fighter you picked in the gym.
 function bxYourGloves(g,W,H,now){
+  const pal=bx.ava.pal;
   const punching=now-bx.throwAt<170;
   const p=punching?1-(now-bx.throwAt)/170:0;
   for(const s of [-1,1]){
@@ -7854,7 +8226,7 @@ function bxYourGloves(g,W,H,now){
     const pr=W*0.115+(lead?p*W*0.03:0);
     g.beginPath();g.arc(px,py,pr,0,7);
     const gl=g.createLinearGradient(px,py-pr,px,py+pr);
-    gl.addColorStop(0,'#313b52');gl.addColorStop(1,'#1b2231');
+    gl.addColorStop(0,pal.glove);gl.addColorStop(1,'#141824');
     g.fillStyle=gl;g.fill();
     g.strokeStyle='rgba(190,205,255,0.13)';g.lineWidth=2;g.stroke();
   }
@@ -7896,14 +8268,14 @@ function bxDraw(now){
   if(hf>0){g.fillStyle='rgba(255,255,255,'+(0.20*hf)+')';g.fillRect(-30,-30,W+60,H+60);}
   g.restore();
 
-  // health. His along the top, yours along the bottom, the way a fight card reads.
-  // His along the top edge, yours along the bottom. Both were inset far enough
-  // to sit under the HUD text, so ROUND 1 was printed through his health.
+  // health. His along the top, yours along the bottom, the way a fight card
+  // reads. Inset under the HUD text so ROUND is never printed through a bar.
   bxBar(g,14,7,W-28,6,bx.him/bx.tune.hp,'#c9455e','#181d29');
-  bxBar(g,14,H-13,W-28,6,bx.you/100,'#7ee8a2','#181d29');
+  bxBar(g,14,H-13,W-28,6,bx.you/(bx.perk==='fresh'?112:100),'#7ee8a2','#181d29');
 
-  // the tell, in words as well as body, for the first round only
-  if(bx.round===1&&bx.phase==='wind'){
+  // the tell, in words as well as body - first fight on the card for everyone,
+  // every fight for THE STUDENT, whose whole perk is doing the reading.
+  if((bx.opp.idx===0||bx.perk==='student')&&bx.phase==='wind'){
     g.save();g.globalAlpha=0.5;
     g.font='700 11px -apple-system,Segoe UI,Roboto,sans-serif';
     g.textAlign='center';g.fillStyle='#c9455e';
@@ -7937,10 +8309,9 @@ function bxDrawCount(g,W,H,now){
   g.font='700 12px -apple-system,Segoe UI,Roboto,sans-serif';
   g.fillStyle='#c3c8da';
   g.fillText('TAP TO GET UP',W/2,H*0.66);
-  bxBar(g,W*0.2,H*0.72,W*0.6,8,(bx.taps||0)/6,'#7ee8a2','#1a2030');
+  bxBar(g,W*0.2,H*0.72,W*0.6,8,(bx.taps||0)/bx.riseNeed,'#7ee8a2','#1a2030');
   g.restore();
 }
-
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
 // Spec §2. A pattern of 3-7 pulses plays; you tap it back. Each round you get
 // right makes the next one longer. Getting one wrong restarts the sequence and
@@ -14432,7 +14803,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.4';
+const APP_VERSION='9.5';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

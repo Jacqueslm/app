@@ -461,6 +461,7 @@ body.nova-open #mini-player{bottom:160px}
 .tb-hand b{display:block;font-weight:400;letter-spacing:.4px;font-size:.5625rem;color:#5e6a90;margin-top:2px}
 #tw-board-moves{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;text-align:right;margin-top:6px}
 #tw-vault-link{display:block;width:100%;margin-top:16px;background:none;border:1px solid #1c2540;color:#5e6a90;border-radius:9px;padding:10px;font-size:.6875rem;letter-spacing:1.6px;font-family:var(--f);cursor:pointer}
+#tw-climb-link{display:block;width:100%;margin-top:8px;background:none;border:1px solid #1c2540;color:#5e6a90;border-radius:9px;padding:10px;font-size:.6875rem;letter-spacing:1.6px;font-family:var(--f);cursor:pointer}
 #s-vault{background:#05070e;min-height:calc(100vh - 132px);padding:16px 14px 30px}
 #vault-count{font-size:.625rem;letter-spacing:1.8px;color:#5e6a90;margin-bottom:14px}
 .vault-card{background:#0b1120;border:1px solid #1c2540;border-radius:11px;padding:14px;margin-bottom:10px}
@@ -495,51 +496,6 @@ body.nova-open #mini-player{bottom:160px}
 .tw-ta{width:100%;min-height:120px;background:#0b1120;border:1px solid #23304d;border-radius:10px;color:#d5dcf2;padding:12px;font-size:.875rem;font-family:var(--f);line-height:1.6;resize:vertical}
 .tw-timer{font-size:2.5rem;font-weight:700;letter-spacing:3px;color:#dbe2f7;text-align:center;margin:18px 0 4px;font-variant-numeric:tabular-nums}
 .tw-timer-sub{font-size:.6875rem;letter-spacing:1.6px;color:#5e6a90;text-align:center;margin-bottom:16px}
-/* THE COUNT — the ten-count as an arcade round. Its own dark ring in both
-   app themes, same reasoning as the tower: this is a fight at night. */
-#s-count{background:#07080c;min-height:calc(100vh - 132px);padding:0}
-#ct-stage{position:relative;width:100%;height:calc(100vh - 190px);max-height:660px;min-height:380px;overflow:hidden;background:#07080c}
-#ct-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
-#ct-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;pointer-events:none}
-#ct-ui.on{pointer-events:auto}
-#ct-eyebrow{font-size:.625rem;letter-spacing:4px;color:#7c8199;font-weight:700}
-#ct-big{font-size:2.5rem;line-height:1.1;font-weight:800;color:#f2f3f7;margin:8px 0 6px;letter-spacing:-1px}
-#ct-sub{font-size:.875rem;line-height:1.6;color:#8b90a6;max-width:300px}
-.ct-btn{margin-top:18px;background:#e8e9ee;color:#0b0c10;border:0;border-radius:10px;padding:15px 34px;font-size:.9375rem;font-weight:750;letter-spacing:1.5px;font-family:var(--f);cursor:pointer}
-.ct-btn.ghost{background:transparent;color:#8b90a6;border:1px solid #262a38;font-weight:600;letter-spacing:1px;padding:12px 24px;margin-top:10px}
-#ct-scores{display:flex;gap:34px;justify-content:center;margin-top:20px}
-#ct-scores div{text-align:center}
-#ct-scores b{display:block;font-size:1.5rem;color:#f2f3f7;font-weight:800;line-height:1}
-#ct-scores span{font-size:.5625rem;letter-spacing:2.5px;color:#5f6478}
-#ct-hud{position:absolute;top:0;left:0;right:0;padding:22px 14px 12px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-start}
-.ct-hud-l{font-size:.625rem;letter-spacing:2.4px;color:#6b7089}
-.ct-hud-r{font-size:.625rem;letter-spacing:2.4px;color:#6b7089;text-align:right}
-#ct-foot{padding:14px 16px 26px;text-align:center}
-#ct-foot .n{font-size:.75rem;color:#5f6478;line-height:1.6}
-/* The card, the gym and the tale of the tape. The list screens scroll; the
-   fight screens never do. */
-#ct-ui.list{justify-content:flex-start;overflow-y:auto;padding:18px 12px 24px}
-#ct-ui.list #ct-sub{max-width:430px;width:100%}
-.bx-list{width:100%}
-.bx-row{display:flex;align-items:center;gap:11px;width:100%;background:#10131d;border:1px solid #1d2231;border-radius:12px;padding:10px 12px;margin-top:8px;cursor:pointer;text-align:left}
-.bx-row.lk{opacity:.4;cursor:default}
-.bx-row .e{font-size:1.25rem;width:28px;text-align:center;flex:none}
-.bx-row b{display:block;font-size:.8125rem;letter-spacing:1.2px;color:#eef0f6;font-weight:750}
-.bx-row b i{font-style:normal;font-weight:600;color:#7c8199;letter-spacing:.4px;font-size:.6875rem}
-.bx-row b u{text-decoration:none;color:#7ee8a2;font-size:.5625rem;letter-spacing:2px;font-weight:800}
-.bx-row span{font-size:.6875rem;color:#7c8199;line-height:1.45;display:block;margin-top:2px}
-.bx-row .rec{margin-left:auto;flex:none;font-size:.6875rem;color:#8b90a6;letter-spacing:1px;text-align:right}
-.bx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;margin-top:10px}
-.bx-ava{background:#10131d;border:1px solid #1d2231;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:center}
-.bx-ava.sel{border-color:#7ee8a2;background:#101a16}
-.bx-ava canvas{width:64px;height:64px;border-radius:10px}
-.bx-ava b{display:block;font-size:.6875rem;letter-spacing:1.5px;color:#eef0f6;margin-top:7px;font-weight:750}
-.bx-ava em{display:block;font-style:normal;font-size:.5625rem;letter-spacing:2px;color:#e8c447;margin-top:2px;font-weight:700}
-.bx-ava span{font-size:.625rem;color:#7c8199;display:block;margin-top:4px;line-height:1.45}
-.bx-note{font-size:.75rem;color:#8b90a6;line-height:1.55;background:#101a16;border:1px solid #1e3a2a;border-radius:10px;padding:10px 12px}
-.bx-tape{display:flex;align-items:center;justify-content:center;gap:14px;margin:14px 0}
-.bx-tape canvas{width:84px;height:84px;border-radius:12px;flex:none}
-.bx-vs{font-size:.625rem;letter-spacing:1.5px;color:#5f6478;line-height:1.7}
 /* THE WAVE (Phase 2). Same full-screen treatment as the door: when it is on
    you, it is the only thing on the screen, which is the honest version. */
 #tw-wave-canvas{width:100%;height:96px;display:block;margin:14px 0 10px}
@@ -1569,29 +1525,13 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div id="tw-say"></div>
         <div id="tw-panel"></div>
         <button id="tw-vault-link" onclick="openTowerVault()">THE VAULT</button>
+        <button id="tw-climb-link" onclick="openClimb()">THE CLIMB · 90 STEPS</button>
         <div id="tw-foot">Ten floors are built. The tower goes to ninety.</div>
       </div>
     </div>
 
     <!-- 2AM: the Vault. Everything found in the building, and the gaps where
          the rest of it still is. -->
-    <!-- THE COUNT: the ten-count as an arcade round. This is the Game tab now;
-         the tower stays reachable from Tools until Jacques has played this and
-         said which one lives. -->
-    <div id="s-count" class="scr">
-      <div id="ct-stage">
-        <canvas id="ct-canvas" onpointerdown="ctTap(event)"></canvas>
-        <div id="ct-hud"><div class="ct-hud-l" id="ct-hud-l"></div><div class="ct-hud-r" id="ct-hud-r"></div></div>
-        <div id="ct-ui">
-          <div id="ct-eyebrow"></div>
-          <div id="ct-big"></div>
-          <div id="ct-sub"></div>
-          <div id="ct-buttons"></div>
-          <div id="ct-scores"></div>
-        </div>
-      </div>
-      <div id="ct-foot"><div class="n">Left slips left, right slips right, the middle punches — and the strip along the bottom ducks. A slip needs the right side and pays the most. A duck goes under it either way, so it is the only answer when he switches sides on you.</div></div>
-    </div>
     <div id="s-vault" class="scr">
       <div id="vault-count"></div>
       <div id="vault-list"></div>
@@ -2090,7 +2030,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="bnav">
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
-    <div class="bn" id="bn-game" onclick="switchTo('count');actBn('bn-game')"><i class="ti ti-bolt"></i><span>Game</span></div>
+    <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-building"></i><span>Game</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
@@ -7559,915 +7499,6 @@ function towerBoardDone(){
   renderTower();
 }
 
-// ─── THE COUNT — the fight ───────────────────────────────────────────────────
-// Jacques, 31 Aug 2026: "build it like a competitive boxing game with 13
-// different opponents which are the addictions and 13 different avatars which
-// is the user and 1 avatar which is the supporter."
-//
-// So: a card of thirteen. Twelve of them are the twelve things this app helps
-// people quit, fighting the way the thing itself behaves - the scroll never
-// stops coming, the crave hits heavy and slow, smoke feints, last call gets
-// heavier every round. The thirteenth is SOMEDAY, the champion, and the belt
-// only goes on the line once the other twelve are beaten. Fourteen fighters to
-// choose from on your side: thirteen for the person recovering and THE CORNER,
-// the fourteenth, for the supporter - because a supporter's whole job in this
-// app is being somebody's corner.
-//
-// The fight itself is a slipping game, which is what boxing is at close range.
-// He winds up on one side. You have a window to slip the other way. Slip it and
-// he is open - hit him. Slip the wrong way, or stand there, and you eat it.
-// Throw when he is not open and you are the one who is open. A fight is won by
-// putting him down three times; it is lost only by being counted out.
-//
-// THE RULE THIS GAME MUST NEVER BREAK, same as The Climb and the tower before
-// it: it can end a fight. It can never tell somebody they are finished. When
-// you go down the referee counts and you tap to get up, and if the count beats
-// you the screen says the fight is over and you are not. Beating SOMEDAY does
-// not finish anything either - the belt gets defended, not retired.
-//
-// No images anywhere. Every fighter, glove and rope is drawn per frame, which
-// is the only way the glove can actually pull back and the head can actually
-// snap - and it costs a few KB instead of 27 sprite sheets the app would have
-// to ship for a card this size.
-let bx=null,bxAnim=null;
-
-// ── the card: 13 opponents, one per addiction, SOMEDAY last ─────────────────
-// Ladder order is easiest first. sty is how the addiction fights:
-//   pace  - rest between punches (lower = less rest)
-//   power - what a landed punch takes off you
-//   chin  - how much he can take before he goes down
-//   speed - how fast the windup and the opening go by
-//   feint - odds a windup switches sides halfway through
-//   combo - odds a landed punch chains straight into another
-const BX_OPP=[
- {key:'Social media',emo:'📱',name:'THE SCROLL',
-  tag:'Never hurts much. Just never stops.',
-  pal:{skin:'#c89b72',tank:'#1d3a5f',glove:'#3f7fbf',hair:'buzz',hairCol:'#2a2118'},
-  sty:{pace:0.62,power:0.55,chin:0.72,speed:1.05,feint:0.05,combo:0.50}},
- {key:'Gaming',emo:'🎮',name:'ONE MORE',
-  tag:'Says it is the last one. It is never the last one.',
-  pal:{skin:'#f0c8a0',tank:'#3b2a5f',glove:'#7a5fd0',hair:'spike',hairCol:'#161311'},
-  sty:{pace:0.80,power:0.70,chin:0.80,speed:1.10,feint:0.10,combo:0.60}},
- {key:'Shopping / Spending',emo:'🛍️',name:'THE PRICE',
-  tag:'Looks great under the lights. Sends the bill later.',
-  pal:{skin:'#b98a68',tank:'#4a3a10',glove:'#d4af37',hair:'band',hairCol:'#d4af37'},
-  sty:{pace:1.00,power:0.80,chin:0.85,speed:1.00,feint:0.45,combo:0.20}},
- {key:'Food / Binging',emo:'🍽️',name:'THE CRAVE',
-  tag:'Slow. Heavy. Lands anyway the moment you stop moving.',
-  pal:{skin:'#e8b68c',tank:'#4f2020',glove:'#a83232',hair:'bald',hairCol:'#000'},
-  bld:{w:1.18,head:1.08},
-  sty:{pace:1.15,power:1.35,chin:1.15,speed:0.80,feint:0.05,combo:0.15}},
- {key:'Work',emo:'💼',name:'OVERTIME',
-  tag:'Does not rest between rounds. Thinks that is a virtue.',
-  pal:{skin:'#d9a67e',tank:'#26303c',glove:'#5a6b7d',hair:'buzz',hairCol:'#3a3125'},
-  sty:{pace:0.55,power:0.85,chin:1.00,speed:1.00,feint:0.10,combo:0.35}},
- {key:'Smoking',emo:'🚬',name:'SMOKE',
-  tag:'You never see the real one coming. Watch the switch.',
-  pal:{skin:'#8d5a3b',tank:'#2c2c34',glove:'#6d6d78',hair:'bald',hairCol:'#000'},
-  sty:{pace:0.95,power:0.80,chin:0.90,speed:1.05,feint:0.50,combo:0.25}},
- {key:'Gambling',emo:'🎰',name:'DOUBLE OR NOTHING',
-  tag:'Half his punches are nothing. The other half you remember.',
-  pal:{skin:'#f2d0a4',tank:'#123524',glove:'#1f7a4d',hair:'spike',hairCol:'#4a3520'},
-  sty:{pace:0.90,power:1.00,chin:0.95,speed:1.00,feint:0.20,combo:0.30,swing:true}},
- {key:'Alcohol',emo:'🍺',name:'LAST CALL',
-  tag:'Friendly early. Heavier every round.',
-  pal:{skin:'#e0a878',tank:'#3d2410',glove:'#b5651d',hair:'buzz',hairCol:'#55402a'},
-  sty:{pace:1.00,power:1.00,chin:1.10,speed:0.95,feint:0.10,combo:0.30,late:true}},
- {key:'Substances',emo:'💊',name:'THE HIGH',
-  tag:'Comes in bursts. The quiet in between is a setup.',
-  pal:{skin:'#c99',tank:'#33174a',glove:'#8a3ab5',hair:'spike',hairCol:'#1c1210'},
-  sty:{pace:0.85,power:1.05,chin:0.95,speed:1.10,feint:0.15,combo:0.70,burst:true}},
- {key:'Anger & Control',emo:'🔥',name:'THE FUSE',
-  tag:'Short. Fast. Everything at once, then nothing.',
-  pal:{skin:'#b07050',tank:'#4a1010',glove:'#d43518',hair:'bald',hairCol:'#000'},
-  bld:{w:1.08},
-  sty:{pace:0.85,power:1.15,chin:1.00,speed:1.15,feint:0.15,combo:0.80}},
- {key:'Porn & Sex',emo:'🔞',name:'THE LOOP',
-  tag:'Chains punches. One always invites the next.',
-  pal:{skin:'#9a6a4a',tank:'#101a2c',glove:'#c2185b',hair:'afro',hairCol:'#151210'},
-  sty:{pace:0.75,power:0.95,chin:1.15,speed:1.05,feint:0.30,combo:0.85}},
- {key:'Other',emo:'✨',name:'THE HABIT',
-  tag:'Fights like whoever you have been fighting.',
-  pal:{skin:'#caa27c',tank:'#22282f',glove:'#8b90a6',hair:'buzz',hairCol:'#2a2a2a'},
-  sty:{pace:0.80,power:1.10,chin:1.20,speed:1.15,feint:0.30,combo:0.50}},
- {key:'SOMEDAY',emo:'👑',name:'SOMEDAY',
-  tag:'Undefeated against everyone who waited.',
-  pal:{skin:'#7a4a2e',tank:'#0c0c10',glove:'#d4af37',hair:'crown',hairCol:'#d4af37'},
-  bld:{w:1.10,head:1.02},
-  sty:{pace:0.70,power:1.20,chin:1.35,speed:1.25,feint:0.40,combo:0.60}},
-];
-BX_OPP.forEach((o,i)=>{o.idx=i;});
-
-// ── your side: 13 fighters, and THE CORNER for the supporter ────────────────
-// One perk each, all mild, all implemented in the engine below. Tags are
-// written without pronouns on purpose - any of these can be anybody.
-const BX_AVA=[
- {key:'dayone', name:'DAY ONE',       perk:'none',    tag:'No gimmick. Starts tonight.',
-  pal:{skin:'#b98a68',tank:'#14202c',glove:'#c53030',hair:'buzz',hairCol:'#241a10'}},
- {key:'chin',   name:'IRON CHIN',     perk:'chin',    tag:'Punches land softer on this chin.',
-  pal:{skin:'#8d5a3b',tank:'#26303c',glove:'#31549f',hair:'bald',hairCol:'#000'}},
- {key:'quick',  name:'QUICK',         perk:'speed',   tag:'Openings stay open a beat longer.',
-  pal:{skin:'#f0c8a0',tank:'#0f2a20',glove:'#1f7a4d',hair:'spike',hairCol:'#3a2a18'}},
- {key:'hammer', name:'HAMMER',        perk:'power',   tag:'Counters hit harder.',
-  pal:{skin:'#c89b72',tank:'#3a1010',glove:'#a83232',hair:'bald',hairCol:'#000'}},
- {key:'heart',  name:'BIG HEART',     perk:'heart',   tag:'Up in four taps, not six.',
-  pal:{skin:'#e8b68c',tank:'#401a2e',glove:'#c2185b',hair:'afro',hairCol:'#1c1512'}},
- {key:'comeback',name:'THE COMEBACK', perk:'recover', tag:'Comes back stronger between rounds.',
-  pal:{skin:'#9a6a4a',tank:'#1d3a5f',glove:'#3f7fbf',hair:'buzz',hairCol:'#141210'}},
- {key:'counter',name:'COUNTERPUNCH',  perk:'counter', tag:'Chained counters pay double.',
-  pal:{skin:'#d9a67e',tank:'#33174a',glove:'#7a5fd0',hair:'spike',hairCol:'#241c14'}},
- {key:'student',name:'THE STUDENT',   perk:'student', tag:'Reads the tell in every round, not just the first.',
-  pal:{skin:'#f2d0a4',tank:'#22282f',glove:'#5a6b7d',hair:'band',hairCol:'#e8e9ee'}},
- {key:'wall',   name:'THE WALL',      perk:'guard',   tag:'Wild swings cost half as much.',
-  pal:{skin:'#b07050',tank:'#2c2c34',glove:'#6d6d78',hair:'buzz',hairCol:'#100c08'}},
- {key:'light',  name:'FIRST LIGHT',   perk:'fresh',   tag:'Walks in over a hundred.',
-  pal:{skin:'#e0a878',tank:'#4a3a10',glove:'#d4af37',hair:'buzz',hairCol:'#3f3020'}},
- {key:'steady', name:'STEADY',        perk:'steady',  tag:'The combo carries through the quiet.',
-  pal:{skin:'#caa27c',tank:'#123524',glove:'#1f7a4d',hair:'bald',hairCol:'#000'}},
- {key:'phoenix',name:'THE PHOENIX',   perk:'phoenix', tag:'The first count-out is not the end. Once a fight.',
-  pal:{skin:'#c99',tank:'#4f2020',glove:'#d43518',hair:'spike',hairCol:'#701800'}},
- {key:'underdog',name:'UNDERDOG',     perk:'underdog',tag:'Hits hardest below thirty.',
-  pal:{skin:'#8a6a52',tank:'#101a2c',glove:'#8b6f47',hair:'afro',hairCol:'#171310'}},
- {key:'corner', name:'THE CORNER',    perk:'corner',  sup:true,
-  tag:'Fights for someone else. A corner like this fixes a lot between rounds.',
-  pal:{skin:'#b98a68',tank:'#3d3208',glove:'#e8c447',hair:'band',hairCol:'#e8c447'}},
-];
-function bxIsSupporter(){
-  return (S.selectedAddictions||[]).includes('Supporting Someone')||S.userType==='partner';
-}
-function bxState(){
-  const s=S.count||(S.count={});
-  if(typeof s.wins!=='number')s.wins=0;      // fights won, all opponents
-  if(typeof s.losses!=='number')s.losses=0;  // counted out
-  if(typeof s.plays!=='number')s.plays=0;
-  if(typeof s.open!=='number')s.open=0;      // ladder index reached
-  if(typeof s.belt!=='number')s.belt=0;      // times SOMEDAY has gone down
-  if(!s.rec)s.rec={};                        // per-opponent {w,l}
-  if(!s.ava)s.ava=bxIsSupporter()?'corner':'dayone';
-  return s;
-}
-function bxAvatar(){return BX_AVA.find(a=>a.key===bxState().ava)||BX_AVA[0];}
-function bxRec(key){const r=bxState().rec[key];return r?r.w+'-'+r.l:'0-0';}
-
-// Everything that scales, in one place. oi is the ladder index (0..12), kd is
-// knockdowns already scored this fight (0..2) - the base curve from the first
-// version of this game, then the opponent's style over the top of it, then
-// hard floors so no combination is ever a coin toss. Every floor is tested.
-function bxTuning(opp,kd){
-  const sty=opp.sty,r=opp.idx*0.55+kd*1.1;
-  const t={
-    windMs: Math.max(230, Math.max(260,620-r*45)/sty.speed),
-    openMs: Math.max(300, Math.max(340,620-r*35)/sty.speed),
-    restMs: Math.max(380, Math.max(420,1100-r*80)*sty.pace),
-    hit:    Math.min(26, Math.round(Math.min(22,10+r*1.5)*sty.power)),
-    give:   Math.max(9, 16-r*0.7),
-    hp:     Math.min(200, Math.round(Math.min(180,100+r*14)*sty.chin)),
-  };
-  if(bx&&bx.perk==='speed')t.openMs*=1.25;
-  return t;
-}
-function bxHud(){
-  const l=document.getElementById('ct-hud-l'),r=document.getElementById('ct-hud-r');
-  if(!bx){if(l)l.textContent='';if(r)r.textContent='';return;}
-  if(l)l.textContent=bx.opp.name+' · RD '+(bx.kd+1);
-  if(r)r.textContent=bx.combo>1?bx.combo+' IN A ROW':'KD '+bx.kd+'/3';
-}
-function bxUi(eyebrow,big,sub,buttons,extra){
-  const ui=document.getElementById('ct-ui');
-  ui.classList.remove('list');
-  document.getElementById('ct-eyebrow').textContent=eyebrow;
-  document.getElementById('ct-big').innerHTML=big;
-  document.getElementById('ct-sub').innerHTML=sub;
-  document.getElementById('ct-buttons').innerHTML=buttons;
-  const sc=document.getElementById('ct-scores');
-  sc.style.display=extra?'flex':'none';
-  sc.innerHTML=extra||'';
-  ui.style.display='flex';ui.classList.add('on');
-}
-function bxHideUi(){
-  const ui=document.getElementById('ct-ui');
-  ui.style.display='none';ui.classList.remove('on','list');
-}
-// ── screens ─────────────────────────────────────────────────────────────────
-function renderCount(){
-  bxStop();bx=null;
-  bxDrawIdle();bxHud();
-  const st=bxState(),a=bxAvatar();
-  bxUi('THE COUNT','Fight night.',
-    'Thirteen on the card. Twelve of them you already know by another name. Beat all twelve and SOMEDAY has to put the belt on the line.',
-    '<button class="ct-btn" onclick="bxCard()">THE CARD</button>'+
-    '<button class="ct-btn ghost" onclick="bxGym()">YOUR FIGHTER: '+a.name+'</button>'+
-    '<button class="ct-btn ghost" onclick="openClimb()"><i class="ti ti-mountain" style="font-size:.8125rem;margin-right:7px"></i>THE CLIMB · 90 STEPS</button>',
-    '<div><b>'+st.wins+'-'+st.losses+'</b><span>RECORD</span></div>'+
-    '<div><b>'+Math.min(13,st.open+(st.belt>0?1:0))+'/13</b><span>BEATEN</span></div>'+
-    '<div><b>'+st.belt+'</b><span>'+(st.belt===1?'BELT':'BELTS')+'</span></div>');
-}
-function bxCard(){
-  bxStop();bx=null;bxDrawIdle();bxHud();
-  const st=bxState(),mine=S.selectedAddictions||[];
-  let rows='';
-  BX_OPP.forEach((o,i)=>{
-    const locked=i>st.open;
-    const beaten=(st.rec[o.key]||{}).w>0;
-    const yours=mine.includes(o.key);
-    rows+='<div class="bx-row'+(locked?' lk':'')+'" '+(locked?'':'onclick="bxTale('+i+')"')+'>'+
-      '<div class="e">'+o.emo+'</div>'+
-      '<div><b>'+o.name+(o.key==='SOMEDAY'?'':' <i>· '+o.key+'</i>')+(yours?' <u>YOURS</u>':'')+'</b>'+
-      '<span>'+(locked?(o.key==='SOMEDAY'?'Beat the other twelve first.':'Beat the one above first.'):o.tag)+'</span></div>'+
-      '<div class="rec">'+(locked?'🔒':(beaten?'✔ ':'')+bxRec(o.key))+'</div></div>';
-  });
-  const ui=document.getElementById('ct-ui');
-  bxUi('THE CARD','', '', '');
-  document.getElementById('ct-big').innerHTML='';
-  document.getElementById('ct-sub').innerHTML=
-    '<div class="bx-list">'+rows+'</div>'+
-    '<button class="ct-btn ghost" onclick="renderCount()" style="margin-top:14px">BACK</button>';
-  ui.classList.add('list');
-}
-function bxGym(){
-  bxStop();bx=null;bxDrawIdle();bxHud();
-  const st=bxState(),sup=bxIsSupporter();
-  let cards='';
-  BX_AVA.forEach(a=>{
-    cards+='<div class="bx-ava'+(st.ava===a.key?' sel':'')+'" onclick="bxPick(\''+a.key+'\')">'+
-      '<canvas class="bxp" data-k="'+a.key+'" width="128" height="128"></canvas>'+
-      '<b>'+a.name+'</b>'+(a.sup?'<em>THE SUPPORTER</em>':'')+'<span>'+a.tag+'</span></div>';
-  });
-  const ui=document.getElementById('ct-ui');
-  bxUi('YOUR FIGHTER','','','');
-  document.getElementById('ct-big').innerHTML='';
-  document.getElementById('ct-sub').innerHTML=
-    (sup?'<div class="bx-note">You picked "Supporting someone I love" - THE CORNER was made for you. Any of the fourteen is yours to use.</div>':'')+
-    '<div class="bx-grid">'+cards+'</div>'+
-    '<button class="ct-btn ghost" onclick="renderCount()" style="margin-top:14px">BACK</button>';
-  ui.classList.add('list');
-  document.querySelectorAll('canvas.bxp').forEach(cv=>{
-    const a=BX_AVA.find(x=>x.key===cv.dataset.k);
-    if(a)bxPortrait(cv,a.pal);
-  });
-}
-function bxPick(k){bxState().ava=k;save();bxGym();}
-function bxTale(i){
-  bxStop();bx=null;bxDrawIdle();bxHud();
-  const o=BX_OPP[i],a=bxAvatar();
-  bxUi(o.key==='SOMEDAY'?'TITLE FIGHT':'FIGHT '+(i+1)+' OF 13',
-    o.name+'<br><span style="font-size:.9375rem;color:#8b90a6">vs</span><br>'+a.name,
-    o.tag+'<div class="bx-tape"><canvas id="bx-tape-o" width="128" height="128"></canvas>'+
-    '<div class="bx-vs">'+bxRec(o.key)+'<br>VS<br>'+a.tag.split('.')[0]+'.</div>'+
-    '<canvas id="bx-tape-a" width="128" height="128"></canvas></div>'+
-    'First to three knockdowns. Get counted out and it is over - for tonight.<div class="bx-note" style="margin-top:12px;text-align:left">Slip left, slip right, punch in the middle, or <b>tap the bottom strip to duck</b>. A duck beats the punch whichever side it came from.</div>',
-    '<button class="ct-btn" onclick="bxStart('+i+')">TOUCH GLOVES</button>'+
-    '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
-  bxPortrait(document.getElementById('bx-tape-o'),o.pal);
-  bxPortrait(document.getElementById('bx-tape-a'),a.pal);
-}
-// ── the fight ───────────────────────────────────────────────────────────────
-function bxStop(){cancelAnimationFrame(bxAnim);bxAnim=null;}
-function bxStart(oi){
-  const st=bxState();st.plays++;save();
-  const opp=BX_OPP[oi],a=bxAvatar();
-  logActivity('fight_start',{opp:opp.key,ava:a.key});
-  bx={opp:opp,ava:a,perk:a.perk,kd:0,you:a.perk==='fresh'?112:100,him:100,
-      riseNeed:a.perk==='heart'?4:(a.perk==='corner'?5:6),
-      phase:'rest',phaseAt:0,side:0,feintAt:0,feinted:false,burst:false,
-      slip:0,slipAt:0,duckAt:0,throwAt:0,hand:1,impactAt:0,rock:0,rockSide:1,rockPow:0,
-      combo:0,shake:0,flash:0,hitFlash:0,
-      down:false,count:0,countAt:0,rises:0,phUsed:false,state:'live',msg:'',msgAt:0};
-  bxRound();
-}
-function bxRound(){
-  const t=bxTuning(bx.opp,bx.kd);
-  Object.assign(bx,{tune:t,him:t.hp,phase:'rest',phaseAt:performance.now(),state:'live'});
-  if(bx.kd===0)bxSay('Round one.');
-  bxHideUi();bxHud();bxLoop();
-}
-function bxSay(m){bx.msg=m;bx.msgAt=performance.now();}
-function bxLoop(){
-  bxStop();
-  const step=(now)=>{
-    if(!bx)return;
-    bxTick(now);
-    if(!bx||bx.state==='over')return;
-    bxDraw(now);
-    bxAnim=requestAnimationFrame(step);
-  };
-  bxAnim=requestAnimationFrame(step);
-}
-function bxTick(now){
-  if(bx.state!=='live')return;
-  if(bx.down){bxTickCount(now);return;}
-  const t=bx.tune,sty=bx.opp.sty,dt=now-bx.phaseAt;
-  if(bx.phase==='rest'){
-    // THE HIGH rests in bursts - short quiet, long quiet, short quiet.
-    let rest=t.restMs;
-    if(sty.burst)rest=bx.burst?t.restMs*0.45:t.restMs*1.7;
-    if(dt>rest){
-      bx.burst=!bx.burst;
-      bx.side=Math.random()<0.5?-1:1;
-      bx.feinted=false;
-      bx.feintAt=Math.random()<sty.feint?t.windMs*0.45:0;
-      bx.phase='wind';bx.phaseAt=now;
-    }
-  }else if(bx.phase==='wind'){
-    // The feint: halfway through the windup he switches sides. SMOKE and THE
-    // PRICE live on this. A slip thrown at the first tell has decayed by the
-    // time the real one lands, so the answer is to wait the switch out.
-    if(bx.feintAt&&!bx.feinted&&dt>bx.feintAt){
-      bx.feinted=true;bx.side=-bx.side;
-      bx.phaseAt=now-t.windMs*0.30;
-      bxSay('Switch.');
-    }else if(dt>t.windMs){
-      // Two ways to beat it. A duck goes under it whichever side it came
-      // from - the only answer to a feint - but buys a shorter opening and
-      // no combo. A slip needs the right side and pays full.
-      if(bxDucking(now)){
-        bx.phase='open';bx.phaseAt=now-bx.tune.openMs*0.4;bx.flash=now;
-        bxSay('Under it.');
-      }else if(bx.slip===-bx.side){
-        bx.phase='open';bx.phaseAt=now;bx.flash=now;
-        bxSay('Slipped.');
-      }else{
-        let hit=t.hit;
-        // DOUBLE OR NOTHING: half his punches are nothing, half are double.
-        if(sty.swing)hit=Math.min(30,Math.round(hit*(Math.random()<0.5?0.5:2)));
-        // LAST CALL gets heavier the deeper the fight goes.
-        if(sty.late)hit=Math.min(30,Math.round(hit*(1+0.12*bx.kd)));
-        bxHurt(now,hit,false);
-        // The chain: a landed punch invites the next one. THE LOOP's whole game.
-        if(bx.you>0&&!bx.down&&Math.random()<sty.combo){
-          bx.side=Math.random()<0.5?-1:1;
-          bx.feinted=false;bx.feintAt=0;
-          bx.phase='wind';bx.phaseAt=now-t.windMs*0.25;
-        }else{
-          bx.phase='rest';bx.phaseAt=now;
-        }
-      }
-    }
-  }else if(bx.phase==='open'&&dt>t.openMs){
-    bx.phase='rest';bx.phaseAt=now;
-    if(bx.perk!=='steady')bx.combo=0;
-  }
-  if(bx.slip&&now-bx.slipAt>300)bx.slip=0;
-}
-function bxHurt(now,amount,wild){
-  if(bx.perk==='chin')amount=Math.round(amount*0.85);
-  if(wild&&bx.perk==='guard')amount=Math.round(amount*0.5);
-  bx.you=Math.max(0,bx.you-amount);
-  bx.combo=0;bx.shake=now;
-  if(navigator.vibrate)try{navigator.vibrate(45);}catch(e){}
-  if(bx.you<=0)bxGoDown(now);
-}
-// Down, and the referee starts counting. Tapping is how you get up - the
-// mechanic the whole thing is named for.
-function bxGoDown(now){
-  bx.down=true;bx.count=0;bx.countAt=now;bx.taps=0;bx.phase='rest';
-  bxSay('Down.');
-}
-function bxTickCount(now){
-  bx.count=(now-bx.countAt)/1000;
-  if(bx.count>=10){
-    // THE PHOENIX: the first count-out in a fight is not the end. Once.
-    if(bx.perk==='phoenix'&&!bx.phUsed){
-      bx.phUsed=true;bxRise();bxSay('Not tonight.');
-    }else bxLost();
-  }
-}
-function bxRise(){
-  bx.down=false;bx.rises++;bx.you=52;bx.combo=0;
-  bx.phase='rest';bx.phaseAt=performance.now();
-  bxSay('Up.');
-  if(navigator.vibrate)try{navigator.vibrate([20,40,20]);}catch(e){}
-}
-function bxLost(){
-  bx.state='over';bxStop();bxDrawIdle();bxHud();
-  const st=bxState(),o=bx.opp;
-  st.losses++;
-  const r=st.rec[o.key]||(st.rec[o.key]={w:0,l:0});r.l++;
-  save();
-  logActivity('fight_end',{opp:o.key,won:false,kd:bx.kd});
-  const oi=o.idx;
-  bxUi('TEN','The fight is over.',
-    // Never "you're finished". It ends a fight. It does not end anybody.
-    'The fight is over. You are not. '+o.name+' only wins the nights you do not come back.'+
-    (bx.kd>0?' The '+bx.kd+' knockdown'+(bx.kd>1?'s':'')+' you scored were real.':''),
-    '<button class="ct-btn" onclick="bxStart('+oi+')">RUN IT BACK</button>'+
-    '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
-}
-function bxKnockdown(now){
-  bx.kd++;
-  const st=bxState();save();
-  if(bx.kd>=3){bxWinFight();return;}
-  bx.state='between';bxStop();
-  bxDrawIdle();
-  // The corner works between rounds. THE COMEBACK's and THE CORNER's whole perk.
-  const heal=bx.perk==='corner'?32:(bx.perk==='recover'?30:18);
-  bx.you=Math.min(120,bx.you+heal);
-  bxUi('KNOCKDOWN '+bx.kd+' OF 3','Down he goes.',
-    'He gets up too - quicker and meaner. One more like that'+(bx.kd===2?' and the fight is yours.':', then one more.'),
-    '<button class="ct-btn" onclick="bxNext()">NEXT ROUND</button>'+
-    '<button class="ct-btn ghost" onclick="bxQuitMid()">Leave it here</button>');
-}
-function bxNext(){bx.state='live';bxRound();}
-function bxQuitMid(){bx=null;bxCard();}
-function bxWinFight(){
-  bx.state='over';bxStop();bxDrawIdle();bxHud();
-  const st=bxState(),o=bx.opp;
-  st.wins++;
-  const r=st.rec[o.key]||(st.rec[o.key]={w:0,l:0});r.w++;
-  if(o.idx===st.open&&st.open<12)st.open++;
-  const title=o.key==='SOMEDAY';
-  if(title)st.belt++;
-  save();
-  logActivity('fight_end',{opp:o.key,won:true});
-  const nxt=BX_OPP[st.open];
-  if(title){
-    bxUi('AND NEW','SOMEDAY<br>GOES DOWN.',
-      'The belt says DAY ONE now. It gets defended, not retired - a champion is not finished, a champion is busy. The whole card is open for rematches.',
-      '<button class="ct-btn" onclick="bxCard()">THE CARD</button>'+
-      '<button class="ct-btn ghost" onclick="renderCount()">Sit down a minute</button>');
-  }else{
-    bxUi('WINNER','That is '+o.name+'.',
-      'Three knockdowns. '+(nxt&&nxt.key==='SOMEDAY'&&st.open>=12?'That was the twelfth. SOMEDAY cannot duck you any more.':(nxt?'Next on the card: '+nxt.name+'.':''))+
-      ' He will take a rematch any time - they always do.',
-      (nxt?'<button class="ct-btn" onclick="bxTale('+nxt.idx+')">NEXT: '+nxt.name+'</button>':'')+
-      '<button class="ct-btn ghost" onclick="bxCard()">BACK TO THE CARD</button>');
-  }
-}
-// ── input: three zones across the top, and the duck along the bottom ────────
-// Jacques: "i cant duck." He was right - there was no duck, only two slips,
-// so a feint that switched sides had no safe answer at all.
-//
-// The duck is its own strip along the bottom of the ring, where your gloves
-// are drawn and where a thumb already rests. A zone rather than a swipe on
-// purpose: a downward swipe starting in the middle would have thrown a punch
-// on the way down and eaten the wild-swing penalty for it.
-//
-// Slip vs duck is the real decision in the game. A slip needs the correct
-// side and pays a full opening plus the combo. A duck beats the punch from
-// EITHER side - it is the only answer to a feint - but the opening is short
-// and it does not build the combo, and it cannot be spammed.
-const BX_DUCK_MS=340;          // how long you stay under it
-const BX_DUCK_COOL=200;        // and how long before you can duck again
-function bxDucking(now){return bx.duckAt&&now-bx.duckAt<BX_DUCK_MS;}
-function ctTap(ev){
-  if(!bx||bx.state==='over')return;
-  const c=document.getElementById('ct-canvas'),r=c.getBoundingClientRect();
-  const x=(ev.clientX-r.left)/r.width,y=(ev.clientY-r.top)/r.height;
-  const now=performance.now();
-  if(bx.down){
-    // Getting up is work. The count is still running while you do it.
-    bx.taps=(bx.taps||0)+1;
-    bx.hitFlash=now;
-    if(bx.taps>=bx.riseNeed)bxRise();
-    return;
-  }
-  if(bx.state!=='live')return;
-  if(y>0.78){
-    if(bx.duckAt&&now-bx.duckAt<BX_DUCK_MS+BX_DUCK_COOL)return;   // no spamming it
-    bx.duckAt=now;bx.slip=0;
-    return;
-  }
-  if(x<0.34){bx.slip=-1;bx.slipAt=now;return;}
-  if(x>0.66){bx.slip=1;bx.slipAt=now;return;}
-  bxThrow(now);
-}
-function bxThrow(now){
-  bx.throwAt=now;
-  bx.hand=-bx.hand;                        // jab, cross, jab - hands alternate
-  // Jacques, after playing: "my punches are not punching him at all." The
-  // first rule only scored a punch thrown while he was open after a slip -
-  // every other tap of the middle was punished, so punching felt broken.
-  // Boxing rules now: a jab lands whenever he is not punching, the counter
-  // after a slip is the shot that wins fights, and the only wrong time to
-  // throw is into his live windup.
-  if(bx.phase==='open'||(bx.phase==='wind'&&(bxDucking(now)||(bx.slip===-bx.side&&(bx.feinted||!bx.feintAt))))){
-    // The counter - he is open, or you are already inside his punch on the
-    // slip and it interrupts him. Full damage, and it chains.
-    bx.impactAt=now+150;                   // the moment the glove arrives, not the tap
-    bx.combo++;
-    let give=bx.tune.give+bx.combo*(bx.perk==='counter'?4:2);
-    if(bx.perk==='power')give*=1.2;
-    if(bx.perk==='underdog'&&bx.you<30)give*=1.35;
-    bx.him=Math.max(0,bx.him-Math.round(give));
-    bx.hitFlash=now;bx.rock=now;bx.rockSide=bx.hand;bx.rockPow=1;
-    if(navigator.vibrate)try{navigator.vibrate(14);}catch(e){}
-    if(bx.him<=0){bxKnockdown(now);return;}
-    bx.phase='rest';bx.phaseAt=now;
-    bxSay(bx.combo>2?'Again.':'');
-  }else if(bx.phase==='rest'){
-    // The jab. It always punches - most land for chip damage, some he catches,
-    // so holding the middle down is a choice with a cost, not a free button.
-    if(Math.random()<0.25){
-      bxHurt(now,Math.round(bx.tune.hit*0.35),true);
-      bxSay('Caught.');
-    }else{
-      bx.impactAt=now+150;
-      let give=Math.max(3,Math.round(bx.tune.give*0.4));
-      if(bx.perk==='power')give=Math.round(give*1.2);
-      bx.him=Math.max(0,bx.him-give);
-      bx.hitFlash=now;bx.rock=now;bx.rockSide=bx.hand;bx.rockPow=0.45;
-      if(navigator.vibrate)try{navigator.vibrate(8);}catch(e){}
-      if(bx.him<=0){bxKnockdown(now);return;}
-    }
-  }else{
-    // Punching into his live punch - the one time throwing is wrong.
-    bxHurt(now,Math.round(bx.tune.hit*0.55),true);
-    bxSay('Wild.');
-  }
-}
-
-// ── drawing: no images, every frame built from shapes ────────────────────────
-// The whole reason not to use sprites: the glove has to actually pull back
-// during the windup and actually lunge at the camera on the strike, and a card
-// of thirteen opponents and fourteen fighters would need 27 sprite sheets. A
-// palette and a hairline per character costs nothing and ships with the page.
-function bxCtx(c){
-  const dpr=Math.min(2,window.devicePixelRatio||1);
-  const W=c.clientWidth,H=c.clientHeight;
-  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){
-    c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
-  }
-  const g=c.getContext('2d');
-  g.setTransform(dpr,0,0,dpr,0,0);
-  return g;
-}
-function bxRing(g,W,H){
-  // Painted well past the frame on every side: ducking drops the camera by
-  // 13% of the height, and a ring that stopped at the edges left a black band
-  // across the top of every duck.
-  const PX=W*0.3,PY=H*0.3;
-  const grd=g.createLinearGradient(0,0,0,H);
-  grd.addColorStop(0,'#0a0c14');grd.addColorStop(0.55,'#0e1119');grd.addColorStop(1,'#05060a');
-  g.fillStyle=grd;g.fillRect(-PX,-PY,W+PX*2,H+PY*2);
-  // one hard overhead light, which is what makes a ring look like a ring
-  const sp=g.createRadialGradient(W*0.5,H*0.06,10,W*0.5,H*0.06,H*0.9);
-  sp.addColorStop(0,'rgba(190,205,255,0.13)');sp.addColorStop(1,'rgba(0,0,0,0)');
-  g.fillStyle=sp;g.fillRect(-PX,-PY,W+PX*2,H+PY*2);
-  g.strokeStyle='#171b28';g.lineWidth=3;
-  for(let i=0;i<3;i++){
-    const y=H*0.14+i*H*0.085;
-    g.beginPath();g.moveTo(-PX,y);g.lineTo(W+PX,y+H*0.008);g.stroke();
-  }
-  g.fillStyle='rgba(255,255,255,0.02)';
-  g.beginPath();g.ellipse(W*0.5,H*0.92,W*0.62,H*0.10,0,0,7);g.fill();
-}
-// Lighten (f>0) or darken (f<0) a hex colour. The palettes are authored flat;
-// every gradient in the ring is derived from them here, so a character's whole
-// look still lives on one line of the roster.
-function bxShade(hex,f){
-  const h=hex.slice(1),n=parseInt(h.length===3?h.replace(/./g,c=>c+c):h,16);
-  const ch=(v)=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f)));
-  return 'rgb('+ch(n>>16)+','+ch((n>>8)&255)+','+ch(n&255)+')';
-}
-// A hairline is most of a face at this size. Drawn relative to a head centred
-// on (0,0) with radius r.
-function bxHair(g,r,hair,col){
-  g.fillStyle=col;
-  if(hair==='buzz'){
-    g.beginPath();g.arc(0,0,r*1.01,Math.PI*1.05,Math.PI*1.95);
-    g.arc(0,-r*0.08,r*0.82,Math.PI*1.95,Math.PI*1.05,true);g.fill();
-  }else if(hair==='afro'){
-    g.beginPath();g.arc(0,-r*0.42,r*0.98,0,7);g.fill();
-  }else if(hair==='spike'){
-    for(let i=-2;i<=2;i++){
-      g.beginPath();
-      g.moveTo(i*r*0.34-r*0.16,-r*0.72);
-      g.lineTo(i*r*0.34,-r*1.34);
-      g.lineTo(i*r*0.34+r*0.16,-r*0.72);
-      g.closePath();g.fill();
-    }
-  }else if(hair==='band'){
-    g.fillRect(-r*0.98,-r*0.62,r*1.96,r*0.34);
-  }else if(hair==='crown'){
-    // SOMEDAY wears it into the ring. That is the point of him.
-    g.beginPath();
-    g.moveTo(-r*0.9,-r*0.98);
-    for(let i=0;i<3;i++){
-      g.lineTo(-r*0.9+r*0.6*(i+0.5),-r*1.5);
-      g.lineTo(-r*0.9+r*0.6*(i+1),-r*0.98);
-    }
-    g.lineTo(-r*0.9,-r*0.98);g.closePath();g.fill();
-  }
-  // bald draws nothing, which is also a look
-}
-// A head-and-gloves portrait for the card, the gym and the tale of the tape.
-// Same palette the ring uses, so the man you pick is the man you see fight.
-function bxPortrait(cv,pal){
-  if(!cv)return;
-  const g=cv.getContext('2d'),s=cv.width;
-  g.clearRect(0,0,s,s);
-  const grd=g.createLinearGradient(0,0,0,s);
-  grd.addColorStop(0,'#141827');grd.addColorStop(1,'#0a0c13');
-  g.fillStyle=grd;g.fillRect(0,0,s,s);
-  g.save();g.translate(s/2,s*0.46);
-  const r=s*0.20;
-  // shoulders in the tank
-  const tg=g.createLinearGradient(0,s*0.07,0,s*0.54);
-  tg.addColorStop(0,bxShade(pal.tank,0.14));tg.addColorStop(1,bxShade(pal.tank,-0.5));
-  g.fillStyle=tg;
-  g.beginPath();
-  g.moveTo(-s*0.36,s*0.54);
-  g.quadraticCurveTo(-s*0.38,s*0.10,0,s*0.07);
-  g.quadraticCurveTo(s*0.38,s*0.10,s*0.36,s*0.54);
-  g.closePath();g.fill();
-  // head
-  const sg2=g.createLinearGradient(0,-r,0,r);
-  sg2.addColorStop(0,pal.skin);sg2.addColorStop(1,bxShade(pal.skin,-0.4));
-  g.fillStyle=sg2;
-  g.beginPath();g.arc(0,0,r,0,7);g.fill();
-  const hl=g.createLinearGradient(0,-r,0,r);
-  hl.addColorStop(0,'rgba(255,255,255,0.20)');hl.addColorStop(0.6,'rgba(0,0,0,0)');
-  g.fillStyle=hl;g.beginPath();g.arc(0,0,r,0,7);g.fill();
-  bxHair(g,r,pal.hair,pal.hairCol);
-  // a face reads at 64px with almost nothing: two eyes and the shadow of a brow
-  g.fillStyle='rgba(12,12,18,0.30)';
-  g.beginPath();g.ellipse(0,-r*0.10,r*0.72,r*0.26,0,0,7);g.fill();
-  g.fillStyle='#0c0c12';
-  for(const sd of [-1,1]){g.beginPath();g.arc(sd*r*0.34,-r*0.05,r*0.09,0,7);g.fill();}
-  // gloves up either side of the jaw
-  for(const sd of [-1,1]){
-    g.beginPath();g.arc(sd*s*0.27,s*0.16,s*0.13,0,7);
-    g.fillStyle=pal.glove;g.fill();
-    g.strokeStyle='rgba(0,0,0,0.35)';g.lineWidth=2;g.stroke();
-  }
-  g.restore();
-}
-// The opponent. Head, shoulders, two gloves, in his own colours and build. He
-// leans and winds on the side he is about to throw from, so the tell is in the
-// body, not a caption.
-function bxFighter(g,W,H,now){
-  const t=bx.tune,pal=bx.opp.pal,bld=bx.opp.bld||{},dt=now-bx.phaseAt;
-  let wind=0;
-  if(bx.phase==='wind')wind=Math.min(1,dt/t.windMs);
-  const openK=bx.phase==='open'?Math.min(1,dt/120):0;
-  const cx=W*0.5+bx.side*wind*W*0.05, cy=H*0.50;
-  const sway=Math.sin(now/620)*W*0.008;
-  const stunned=bx.phase==='open';
-
-  // a landed punch rocks him: the whole man recoils away from the glove and
-  // settles back. Without this the only sign a punch landed was a bar moving.
-  const rk=bx.rock?Math.max(0,1-(now-bx.rock)/320):0;
-  const rock=rk>0?Math.sin(rk*Math.PI)*bx.rockPow:0;
-  g.save();
-  g.translate(cx+sway-rock*bx.rockSide*W*0.075, cy+(stunned?H*0.03*openK:0)+rock*H*0.018);
-  if(stunned)g.rotate(0.10*openK*(bx.side||1));
-  if(rock)g.rotate(-rock*0.16*bx.rockSide);
-
-  const bodyW=W*0.40*(bld.w||1),bodyH=H*0.29;
-  // Torso in his tank, then a rim light down the shoulders. Without the rim he
-  // is a dark shape on a dark ring - the lamp catching the top of him is what
-  // makes the silhouette read as a man.
-  const tg=g.createLinearGradient(0,-bodyH*0.56,0,bodyH*0.62);
-  tg.addColorStop(0,bxShade(pal.tank,0.16));tg.addColorStop(1,bxShade(pal.tank,-0.62));
-  g.fillStyle=tg;
-  g.beginPath();
-  g.moveTo(-bodyW/2,bodyH*0.62);
-  g.quadraticCurveTo(-bodyW*0.52,-bodyH*0.30,-bodyW*0.22,-bodyH*0.48);
-  g.quadraticCurveTo(0,-bodyH*0.56,bodyW*0.22,-bodyH*0.48);
-  g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW/2,bodyH*0.62);
-  g.closePath();g.fill();
-  if(stunned){g.fillStyle='rgba(255,255,255,0.07)';g.fill();}
-  g.strokeStyle='rgba(180,198,255,0.16)';g.lineWidth=2;
-  g.beginPath();
-  g.moveTo(-bodyW*0.50,bodyH*0.10);
-  g.quadraticCurveTo(-bodyW*0.52,-bodyH*0.30,-bodyW*0.22,-bodyH*0.48);
-  g.quadraticCurveTo(0,-bodyH*0.56,bodyW*0.22,-bodyH*0.48);
-  g.quadraticCurveTo(bodyW*0.52,-bodyH*0.30,bodyW*0.50,bodyH*0.10);
-  g.stroke();
-
-  const hr=W*0.095*(bld.head||1);
-  g.save();g.translate(-rock*bx.rockSide*W*0.05,-bodyH*0.78-rock*H*0.012);
-  if(rock)g.rotate(-rock*0.30*bx.rockSide);
-  const sg=g.createLinearGradient(0,-hr,0,hr);
-  sg.addColorStop(0,pal.skin);sg.addColorStop(1,bxShade(pal.skin,-0.45));
-  g.fillStyle=sg;
-  g.beginPath();g.arc(0,0,hr,0,7);g.fill();
-  const hl=g.createLinearGradient(0,-hr,0,hr);
-  hl.addColorStop(0,'rgba(200,215,255,0.22)');hl.addColorStop(0.6,'rgba(0,0,0,0)');
-  g.fillStyle=hl;g.beginPath();g.arc(0,0,hr,0,7);g.fill();
-  bxHair(g,hr,pal.hair,pal.hairCol);
-  if(stunned){                                   // eyes go out for a moment
-    g.strokeStyle='#7ee8a2';g.lineWidth=2;
-    for(const s of [-1,1]){
-      g.beginPath();
-      g.moveTo(s*hr*0.4-5,-hr*0.05-5);g.lineTo(s*hr*0.4+5,-hr*0.05+5);
-      g.moveTo(s*hr*0.4-5,-hr*0.05+5);g.lineTo(s*hr*0.4+5,-hr*0.05-5);
-      g.stroke();
-    }
-  }
-  g.restore();
-  g.restore();
-
-  // sweat off the jaw on a clean one
-  if(rock>0.35){
-    g.fillStyle='rgba(210,225,255,'+(0.5*rock)+')';
-    for(let i=0;i<5;i++){
-      const a2=-1.0-i*0.34,d=W*(0.10+0.22*(1-rock))+i*3;
-      g.beginPath();
-      g.arc(cx-bx.rockSide*(W*0.05+Math.cos(a2)*d),cy-bodyH*0.78+Math.sin(a2)*d*0.55,2.2,0,7);
-      g.fill();
-    }
-  }
-
-  // gloves. The windup pulls the near one back; the last 130ms is the punch
-  // itself, coming AT the camera - it grows, drops toward your chin, and
-  // leaves a streak. Before this the punch just materialised at the end of
-  // the timer, which is why it never read as a punch.
-  const strike=bx.phase==='wind'?Math.pow(wind,2.6):0;
-  const launch=bx.phase==='wind'?Math.max(0,(dt-(t.windMs-130))/130):0;
-  for(const s of [-1,1]){
-    const active=(s===bx.side&&bx.phase==='wind');
-    const pull=active?wind:0;
-    let gx=cx+sway+s*W*(0.20+pull*0.06)*(bld.w||1)-strike*(active?s*W*0.10:0);
-    let gy=cy-H*0.02-(active?pull*H*0.06:0)+Math.sin(now/540+s)*H*0.006;
-    let gr=W*(0.058+(active?strike*0.05:0));
-    if(active&&launch>0){
-      const k=launch*launch;
-      const over=bxDucking(now)?H*0.30:0;   // it passes above you, not through you
-      gx+=(W*0.5+s*W*0.07-gx)*k;
-      gy+=(H*0.68-over-gy)*k;
-      gr+=(W*0.30-gr)*k;
-      for(let i=1;i<=3;i++){
-        const b=Math.max(0,k-i*0.18);
-        if(b<=0)continue;
-        g.beginPath();
-        g.arc(gx-(gx-(cx+s*W*0.20))*i*0.22,gy-(gy-(cy-H*0.02))*i*0.22,Math.max(4,gr*(1-i*0.2)),0,7);
-        g.fillStyle='rgba(200,60,85,'+(0.10*b)+')';g.fill();
-      }
-    }
-    g.beginPath();g.arc(gx,gy,gr,0,7);
-    const grd2=g.createRadialGradient(gx-gr*0.3,gy-gr*0.3,gr*0.15,gx,gy,gr);
-    grd2.addColorStop(0,active?bxShade(pal.glove,0.30):bxShade(pal.glove,-0.45));
-    grd2.addColorStop(1,active?bxShade(pal.glove,-0.15):bxShade(pal.glove,-0.72));
-    g.fillStyle=grd2;
-    if(active){g.shadowColor='rgba(200,60,85,0.55)';g.shadowBlur=22*strike;}
-    g.fill();g.shadowBlur=0;
-    if(active){
-      g.strokeStyle='rgba(255,255,255,'+(0.10+strike*0.35)+')';g.lineWidth=2;g.stroke();
-    }
-  }
-  // a slipped punch does not vanish - it whiffs past your ear and off the screen
-  if(bx.phase==='open'&&openK<1){
-    const wx=W*0.5+bx.side*W*(0.25+openK*0.65),wy=H*0.72+openK*H*0.25;
-    g.globalAlpha=0.5*(1-openK);
-    g.beginPath();g.arc(wx,wy,W*0.26,0,7);
-    g.fillStyle=bxShade(pal.glove,-0.15);g.fill();
-    g.globalAlpha=1;
-  }
-}
-// Your own gloves, tucked into the bottom corners so the camera is behind
-// your eyes and the ring stays visible - the first pass parked two big discs
-// mid-screen and Jacques called it, fairly, irritating. They alternate like
-// real hands (jab, cross, jab), and a throw travels all the way to his head
-// and comes back, shrinking as it goes, instead of twitching in place.
-function bxYourGloves(g,W,H,now){
-  const pal=bx.ava.pal;
-  const dt=now-bx.throwAt;
-  let ext=0;
-  if(dt<300)ext=dt<170?dt/170:1-(dt-170)/130;
-  const e=ext*ext*(3-2*ext);
-  for(const s of [-1,1]){
-    const lead=(s===bx.hand&&dt<300);
-    const duck=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
-    const dK=duck>0?Math.sin(Math.min(1,duck*1.6)*Math.PI*0.5):0;
-    const rx=W*0.5+s*W*(0.34-dK*0.06)-(bx.slip?bx.slip*W*0.08:0);
-    const ry=H*(0.99-dK*0.16)+Math.sin(now/700+s*2)*H*0.005-(bx.slip===s?H*0.025:0);
-    const rr=W*0.105;
-    const px=lead?rx+(W*0.5+s*W*0.05-rx)*e:rx;
-    const py=lead?ry+(H*0.30-ry)*e:ry;
-    const pr=lead?rr*(1-0.45*e):rr;
-    g.save();
-    g.translate(px,py);g.rotate(s*0.30*(1-e));
-    // wrist wrap first, then the glove over it, then the thumb
-    if(!lead||e<0.35){
-      g.globalAlpha=lead?1-e/0.35:1;
-      g.fillStyle=bxShade(pal.glove,-0.58);
-      g.fillRect(-pr*0.55,pr*0.35,pr*1.1,pr*1.2);
-      g.globalAlpha=1;
-    }
-    const gl=g.createRadialGradient(-pr*0.30,-pr*0.30,pr*0.2,0,0,pr);
-    gl.addColorStop(0,bxShade(pal.glove,0.28));gl.addColorStop(1,bxShade(pal.glove,-0.38));
-    g.fillStyle=gl;
-    g.beginPath();g.arc(0,0,pr,0,7);g.fill();
-    g.beginPath();g.arc(-s*pr*0.72,pr*0.30,pr*0.36,0,7);g.fill();
-    g.strokeStyle='rgba(190,205,255,0.10)';g.lineWidth=2;
-    g.beginPath();g.arc(0,0,pr,0,7);g.stroke();
-    g.restore();
-  }
-  // the moment a counter arrives on him: a short white burst at his head
-  const ik=bx.impactAt&&now>=bx.impactAt?Math.max(0,1-(now-bx.impactAt)/180):0;
-  if(ik>0){
-    g.save();g.globalAlpha=ik*0.85;
-    g.strokeStyle='#fff';g.lineWidth=2.5;
-    const hx=W*0.5,hy=H*0.245;
-    for(let i=0;i<6;i++){
-      const an=i*Math.PI/3+0.4;
-      g.beginPath();
-      g.moveTo(hx+Math.cos(an)*W*0.045,hy+Math.sin(an)*W*0.045);
-      g.lineTo(hx+Math.cos(an)*W*(0.045+0.05*ik),hy+Math.sin(an)*W*(0.045+0.05*ik));
-      g.stroke();
-    }
-    g.restore();g.globalAlpha=1;
-  }
-}
-function bxBar(g,x,y,w,h,frac,col,bg){
-  g.fillStyle=bg;g.beginPath();
-  if(g.roundRect)g.roundRect(x,y,w,h,h/2);else g.rect(x,y,w,h);
-  g.fill();
-  g.fillStyle=col;g.beginPath();
-  const ww=Math.max(2,w*Math.max(0,Math.min(1,frac)));
-  if(g.roundRect)g.roundRect(x,y,ww,h,h/2);else g.rect(x,y,ww,h);
-  g.fill();
-}
-function bxDrawIdle(){
-  const c=document.getElementById('ct-canvas');
-  if(!c||!c.clientWidth)return;
-  const g=bxCtx(c),W=c.clientWidth,H=c.clientHeight;
-  g.clearRect(0,0,W,H);bxRing(g,W,H);
-}
-function bxDraw(now){
-  const c=document.getElementById('ct-canvas');
-  if(!c||!c.clientWidth||!bx)return;
-  const g=bxCtx(c),W=c.clientWidth,H=c.clientHeight;
-  g.save();
-  const sh=Math.max(0,1-(now-bx.shake)/260);
-  if(sh>0)g.translate((Math.random()-0.5)*14*sh,(Math.random()-0.5)*10*sh);
-  const sl=bx.slip?Math.max(0,1-(now-bx.slipAt)/300):0;
-  if(sl>0)g.translate(-bx.slip*W*0.07*sl,0);
-  // ducking drops the camera, because the camera is your eyes
-  const dk=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
-  const duckK=dk>0?Math.sin(Math.min(1,dk*1.6)*Math.PI*0.5):0;
-  if(duckK>0){g.translate(0,duckK*H*0.13);g.scale(1+duckK*0.05,1+duckK*0.05);}
-
-  g.clearRect(-30,-30,W+60,H+60);
-  bxRing(g,W,H);
-  bxFighter(g,W,H,now);
-  bxYourGloves(g,W,H,now);
-
-  // a red wash when he lands one
-  if(sh>0){g.fillStyle='rgba(190,40,60,'+(0.30*sh)+')';g.fillRect(-W*0.3,-H*0.3,W*1.6,H*1.6);}
-  // a white pop when you do
-  const hf=Math.max(0,1-(now-bx.hitFlash)/170);
-  if(hf>0){g.fillStyle='rgba(255,255,255,'+(0.20*hf)+')';g.fillRect(-W*0.3,-H*0.3,W*1.6,H*1.6);}
-  g.restore();
-
-  // health. His along the top, yours along the bottom, the way a fight card
-  // reads. Inset under the HUD text so ROUND is never printed through a bar.
-  bxBar(g,14,7,W-28,6,bx.him/bx.tune.hp,'#c9455e','#181d29');
-  bxBar(g,14,H-13,W-28,6,bx.you/(bx.perk==='fresh'?112:100),'#7ee8a2','#181d29');
-
-  // the tell, in words as well as body - first fight on the card for everyone,
-  // every fight for THE STUDENT, whose whole perk is doing the reading.
-  if((bx.opp.idx===0||bx.perk==='student')&&bx.phase==='wind'){
-    g.save();g.globalAlpha=0.5;
-    g.font='700 11px -apple-system,Segoe UI,Roboto,sans-serif';
-    g.textAlign='center';g.fillStyle='#c9455e';
-    // ASCII only in canvas text: an em dash here rendered as mojibake wherever
-    // the document's charset was not declared, and the tell is the one line
-    // that has to be readable.
-    g.fillText(bx.side<0?'COMING FROM YOUR LEFT. SLIP RIGHT.':'COMING FROM YOUR RIGHT. SLIP LEFT.',W/2,H*0.20);
-    g.restore();
-  }
-  if(bx.msg&&now-bx.msgAt<1100){
-    g.save();g.globalAlpha=Math.max(0,1-(now-bx.msgAt)/1100);
-    g.font='800 20px -apple-system,Segoe UI,Roboto,sans-serif';
-    g.textAlign='center';g.fillStyle='#e8ebf5';
-    g.fillText(bx.msg,W/2,H*0.30);
-    g.restore();
-  }
-  // the duck strip, so the move is visible instead of a secret
-  const dkl=bx.duckAt?Math.max(0,1-(now-bx.duckAt)/BX_DUCK_MS):0;
-  g.save();
-  g.strokeStyle=dkl>0?'rgba(126,232,162,'+(0.10+0.45*dkl)+')':'rgba(126,232,162,0.10)';
-  g.lineWidth=1;g.setLineDash([5,7]);
-  g.beginPath();g.moveTo(0,H*0.78);g.lineTo(W,H*0.78);g.stroke();
-  g.setLineDash([]);
-  if(bx.opp.idx===0&&!bx.duckAt){
-    g.font='700 9px -apple-system,Segoe UI,Roboto,sans-serif';
-    g.textAlign='center';g.fillStyle='rgba(126,232,162,0.45)';
-    g.fillText('TAP DOWN HERE TO DUCK',W/2,H*0.815);
-  }
-  g.restore();
-  if(bx.down)bxDrawCount(g,W,H,now);
-  bxHud();
-}
-// The ten count, over the top of the ring. Tapping fills the bar and gets you up.
-function bxDrawCount(g,W,H,now){
-  g.save();
-  g.fillStyle='rgba(4,5,9,0.82)';g.fillRect(0,0,W,H);
-  const n=Math.min(10,Math.floor(bx.count)+1);
-  g.textAlign='center';g.textBaseline='middle';
-  g.fillStyle=bx.count>7?'#e2566f':'#8e97b5';
-  g.font='800 '+Math.round(H*0.34)+'px -apple-system,Segoe UI,Roboto,sans-serif';
-  g.globalAlpha=0.9;
-  g.fillText(String(n),W/2,H*0.42);
-  g.globalAlpha=1;
-  g.font='700 12px -apple-system,Segoe UI,Roboto,sans-serif';
-  g.fillStyle='#c3c8da';
-  g.fillText('TAP TO GET UP',W/2,H*0.66);
-  bxBar(g,W*0.2,H*0.72,W*0.6,8,(bx.taps||0)/bx.riseNeed,'#7ee8a2','#1a2030');
-  g.restore();
-}
 // ── THE URGE WAVE (Phase 2) ─────────────────────────────────────────────────
 // Spec §2. A pattern of 3-7 pulses plays; you tap it back. Each round you get
 // right makes the next one longer. Getting one wrong restarts the sequence and
@@ -13643,7 +12674,7 @@ const SCREEN_MAP={
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
-  tower:'s-tower',vault:'s-vault',count:'s-count',
+  tower:'s-tower',vault:'s-vault',
   // The Lesson Library was in TITLES but never here, so switchTo looked up
   // getElementById(undefined), found nothing, and added 'on' to no screen -
   // while still stripping 'on' off every other one. The header said "Lesson
@@ -13652,8 +12683,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault',count:'The Count'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game',count:'bn-game'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game',vault:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -13679,7 +12710,7 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
-  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game',count:'bn-game'};
+  'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game',vault:'bn-game'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
   // Leaving the screen ends any dictation on it. A mic left listening in the
@@ -13690,7 +12721,6 @@ function switchTo(id,opts){
   // The tower runs a requestAnimationFrame loop and can hold a dare timer.
   // Neither has any business still running on another screen.
   if(from==='tower'&&id!=='tower'){try{towerStop();}catch(e){}}
-  if(from==='count'&&id!=='count'){try{bxStop();}catch(e){}}
   if(!(opts&&opts.fromBack)&&from&&from!==id){
     screenHistory.push(from);
     if(screenHistory.length>30)screenHistory.shift();
@@ -13742,7 +12772,6 @@ function switchTo(id,opts){
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
   if(id==='vault'){renderTowerVault();}
-  if(id==='count'){renderCount();}
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -14959,7 +13988,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.5';
+const APP_VERSION='9.6';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -15565,6 +14594,8 @@ const HELP_INDEX=[
   {name:'Profile & settings',sub:'Your account, PIN, reminders, updates — all settings',k:'profile page settings preferences options menu account section',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Today screen',sub:'Your day counter, pledge, and daily lesson',k:'today home main screen front day counter start',go:()=>{switchTo('home');actBn('bn-home');}},
   {name:'Tools',sub:'All the free recovery tools in one place',k:'tools toolbox exercises coping techniques',go:()=>{switchTo('tools');actBn('bn-tools');}},
+  {name:'2AM (the Game tab)',sub:'A building you climb at night — one floor per real day',k:'game games 2am tower building floors night play',go:()=>openTower()},
+  {name:'The Climb',sub:'Your 90 steps up the mountain',k:'climb mountain steps 90 ninety progress journey game',go:()=>openClimb()},
   {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
   {name:'Breathing exercise',sub:'4-7-8 calm-down technique',k:'breathe breathing calm anxiety relax',go:()=>breathe()},
@@ -16236,27 +15267,28 @@ const GUIDE_FAQ=[
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
+  {q:'What is the Game tab?',k:'game tab play 2am tower climb mountain floors bolt what is',a:"It holds <b>2AM</b> — a building you climb at night, where every floor is a real day and each one asks you for the truth or a dare. It only opens as fast as your actual days do, so it can't be rushed or farmed. <b>The Climb</b>, your 90 steps up the mountain, sits on the same screen.",go:'2AM (the Game tab)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
   {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
-  {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminder sound'},
+  {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminders & notifications'},
   {q:'How do I change my email or password?',k:'change email password credentials account update',a:"Everything account-related lives in <b>Account &amp; Sync</b> in Profile — password changes included.",go:'Account & sync'},
-  {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Focus areas'},
-  {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Update the app'},
+  {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Profile & settings'},
+  {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Profile & settings'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
-  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Library'},
+  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Packs'},
   {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
-  {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Focus areas'},
-  {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Focus areas'},
+  {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Profile & settings'},
+  {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Profile & settings'},
   {q:'Are the people in the Rooms real? Can I reply to them?',k:'rooms real people fake stories reply comment message contact dm chat others users community',a:"Straight answer: the stories are <b>written reflections</b>, not live posts, and the names aren't real people. A new set appears in each room every day. <b>There is no commenting, replying or messaging — on purpose.</b> Recovery spaces online turn toxic fast, and this app is built to keep that out. You can like a story to keep it; nothing is sent and nobody can reach you. Anything you write in a room stays private to your account.",go:'Rooms'},
-  {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Focus areas'},
-  {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Focus areas'},
+  {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Profile & settings'},
+  {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Profile & settings'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
 ];
 function guideGoName(n){

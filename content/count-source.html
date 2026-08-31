@@ -1,0 +1,146 @@
+<!-- A22 "The count" - ALL ADDICTIONS. 8.0s. Built to house rules 21 and 26.
+
+     Sparked by a boxing "10 / K.O. / DOWN FOR GOOD" game intro Jacques found.
+     Taken and turned: the count runs DOWN, not up, so it lands on 1 - and 1 is
+     the brand. A real referee counts UP to ten and ten means you lost; a
+     countdown lands on one and one is DAY ONE. The pun only works downward.
+
+     PURE GRAPHICS. No stills, no generation, nothing supplied - same as A20.
+     That makes the addiction list on the numbers a one-line edit: change WORDS
+     below and re-render. All nine are real tracks in lessons.json.
+
+     Rendered via window.seek(ms); see tools/render-film.js. -->
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#07080b;
+  font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+#st{position:relative;width:1080px;height:1920px;overflow:hidden;background:#07080b}
+#ring{position:absolute;inset:0;z-index:5;will-change:transform}
+/* the lamp over the ring - a hard cone, not a haze */
+#lamp{position:absolute;left:50%;top:-520px;width:1560px;height:1700px;transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 26%,rgba(232,238,255,.52) 0%,rgba(214,224,255,.24) 22%,
+    rgba(180,196,240,.09) 44%,rgba(0,0,0,0) 70%)}
+/* the pool it throws on the canvas */
+#pool{position:absolute;left:50%;bottom:180px;width:1500px;height:640px;transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 50%,rgba(206,214,240,.20) 0%,rgba(206,214,240,.07) 40%,rgba(0,0,0,0) 72%)}
+/* canvas floor */
+#floor{position:absolute;left:0;right:0;bottom:0;height:820px;
+  background:linear-gradient(to bottom,rgba(0,0,0,0) 0%,rgba(46,42,52,.55) 34%,rgba(58,52,62,.80) 72%,rgba(20,18,24,.96) 100%)}
+/* far ropes - slack diagonals catching the lamp */
+.rope{position:absolute;left:-8%;width:116%;height:6px;transform-origin:50% 50%;background:
+  linear-gradient(to right,rgba(255,255,255,0) 0%,rgba(236,240,255,.42) 20%,rgba(255,255,255,.68) 50%,rgba(236,240,255,.42) 80%,rgba(255,255,255,0) 100%);
+  box-shadow:0 0 22px rgba(200,215,255,.30)}
+#r1{top:236px;transform:rotate(-3.2deg)}
+#r2{top:392px;transform:rotate(-2.4deg)}
+#r3{top:544px;transform:rotate(-1.7deg)}
+/* near ropes - foreground, thrown out of focus, this is what gives it depth */
+.nrope{position:absolute;left:-14%;width:128%;height:26px;transform-origin:50% 50%;
+  background:linear-gradient(to bottom,rgba(150,158,182,0),rgba(178,186,212,.50),rgba(120,126,148,0));
+  filter:blur(11px);z-index:26}
+#n1{bottom:214px;transform:rotate(2.2deg)}
+#n2{bottom:46px;transform:rotate(1.5deg)}
+/* corners */
+#corner{position:absolute;right:-180px;top:60px;width:640px;height:640px;
+  background:radial-gradient(circle,rgba(206,48,56,.42) 0%,rgba(190,44,52,.12) 46%,rgba(190,44,52,0) 72%)}
+#corner2{position:absolute;left:-200px;top:180px;width:600px;height:600px;
+  background:radial-gradient(circle,rgba(46,86,190,.30) 0%,rgba(46,86,190,.08) 48%,rgba(46,86,190,0) 74%)}
+#flash{position:absolute;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
+#stage{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;will-change:transform}
+#num{color:#fff;font-size:470px;font-weight:900;line-height:.86;letter-spacing:-14px;
+  text-shadow:0 0 90px rgba(180,200,255,.30),0 22px 60px rgba(0,0,0,.85)}
+#word{margin-top:26px;font-size:66px;font-weight:800;letter-spacing:11px;
+  color:#aab4d4;text-shadow:0 4px 22px rgba(0,0,0,.9)}
+#day{margin-top:26px;font-size:104px;font-weight:900;letter-spacing:9px;color:#7ee8a2;
+  opacity:0;text-shadow:0 0 60px rgba(126,232,162,.45),0 6px 26px rgba(0,0,0,.9)}
+#grain{position:absolute;inset:0;z-index:40;opacity:.34;mix-blend-mode:overlay;pointer-events:none}
+#vig{position:absolute;inset:0;z-index:45;pointer-events:none;
+  box-shadow:inset 0 0 300px 70px rgba(0,0,0,.72)}
+#wm{position:absolute;bottom:118px;right:56px;width:104px;height:104px;border-radius:30px;
+  background:rgba(83,74,183,.92);border:4px solid #7ee8a2;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 8px 26px rgba(0,0,0,.45);z-index:99}
+#wm svg{width:64px;height:64px}
+#end{position:absolute;inset:0;background:#0f0c29;display:flex;flex-direction:column;
+  align-items:center;text-align:center;opacity:0;z-index:80}
+#mark{width:210px;height:210px;border-radius:62px;background:#534AB7;border:7px solid #7ee8a2;
+  display:flex;align-items:center;justify-content:center;margin-top:430px}
+#mark svg{width:132px;height:132px}
+#tag{color:#fff;font-size:52px;font-weight:600;line-height:1.35;max-width:880px;margin-top:52px}
+#tag .g{color:#7ee8a2}
+#mid{display:flex;flex-direction:column;align-items:center;width:100%;margin-top:120px}
+#rule{width:120px;height:3px;background:rgba(126,232,162,.45);margin:0 auto 56px;border-radius:2px}
+#big{color:#fff;font-size:86px;font-weight:700;line-height:1.15;max-width:920px}
+#green{color:#7ee8a2;font-size:52px;font-weight:600;margin-top:48px}
+#brand{position:absolute;bottom:120px;width:100%;color:#6672a0;font-size:34px;letter-spacing:6px;font-weight:600}
+</style></head><body><div id="st">
+
+<div id="ring"><div id="lamp"></div><div id="corner"></div><div id="corner2"></div>
+  <div class="rope" id="r1"></div><div class="rope" id="r2"></div><div class="rope" id="r3"></div>
+  <div id="floor"></div><div id="pool"></div>
+  <div class="nrope" id="n1"></div><div class="nrope" id="n2"></div></div>
+<div id="flash"></div>
+
+<div id="stage">
+  <div id="num">10</div>
+  <div id="word">ALCOHOL</div>
+  <div id="day">DAY ONE</div>
+</div>
+
+<canvas id="grain" width="540" height="960"></canvas>
+<div id="vig"></div>
+<div id="wm"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+<div id="end">
+  <div id="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-2.5c.8-.6 1.9-.6 2.6.1l1 1"/><path d="M21 12l-3-2.5c-.8-.6-1.9-.6-2.6.1l-2.6 2.3c-.6.5-.6 1.4 0 2l.2.2c.6.6 1.6.6 2.2 0"/><path d="M9.6 10.6l2.3 2.1c.6.6.6 1.5 0 2.1-.6.6-1.5.6-2.1 0l-1-.9"/><path d="M3 12v4a1 1 0 0 0 1 1h1M21 12v4a1 1 0 0 1-1 1h-1"/></svg></div>
+  <div id="tag">An app for <span class="g">you</span><br>and the one who <span class="g">supports you</span></div>
+  <div id="mid"><div id="rule"></div>
+    <div id="big">Different fight.<br>Same day one.</div>
+    <div id="green">14 tracks. Free. Link in bio.</div></div>
+  <div id="brand">TURN SOMEDAY INTO DAY ONE</div>
+</div></div><script>
+window.FILM_LEN=8000;
+const cl=(v,a,b)=>Math.max(a,Math.min(b,v));
+// nine addictions, all real tracks in lessons.json, then the turn
+const WORDS=[[10,'ALCOHOL'],[9,'SUBSTANCES'],[8,'SMOKING'],[7,'PORN'],[6,'GAMBLING'],
+             [5,'SCROLLING'],[4,'GAMING'],[3,'BINGING'],[2,'SPENDING'],[1,'']];
+const T0=0.25, STEP=0.40, LAST=T0+9*STEP;   // 1 lands at 3.85
+const DAYIN=LAST+0.40;                       // DAY ONE writes at 4.25
+// deterministic handheld - same frame every render, no random()
+function nz(t,s){return Math.sin(t*1.7+s)*0.6+Math.sin(t*3.1+s*2.3)*0.28+Math.sin(t*5.9+s*4.1)*0.12;}
+const G=document.getElementById('grain'),gx=G.getContext('2d');
+function grain(seed){const d=gx.createImageData(540,960),D=d.data;let x=seed*9301+49297;
+  for(let i=0;i<D.length;i+=4){x=(x*9301+49297)%233280;const v=(x/233280)*255;
+    D[i]=D[i+1]=D[i+2]=v;D[i+3]=40;}gx.putImageData(d,0,0);}
+const NUM=document.getElementById('num'),WD=document.getElementById('word'),
+      DY=document.getElementById('day'),STG=document.getElementById('stage'),
+      RNG=document.getElementById('ring'),FL=document.getElementById('flash');
+window.seek=function(ms){
+  const t=ms/1000;
+  const i=cl(Math.floor((t-T0)/STEP),0,9);
+  const W=WORDS[i], lt=Math.max(0,t-(T0+i*STEP));
+  if(NUM.textContent!==String(W[0]))NUM.textContent=W[0];
+  if(WD.textContent!==W[1])WD.textContent=W[1];
+  // each number lands: overshoot scale decaying fast, plus a shake that dies out
+  const pop=1+0.34*Math.exp(-lt*22);
+  const shk=Math.sin(lt*62)*7*Math.exp(-lt*15);
+  const hx=nz(t*1.1,1)*3.0, hy=nz(t*1.1,7)*2.2;
+  const on=t<T0?cl(t/T0,0,1):1;
+  STG.style.opacity=on;
+  STG.style.transform='translate('+(hx+shk*0.5)+'px,'+(hy+shk)+'px) scale('+pop+')';
+  RNG.style.transform='translate('+(hx*0.4-shk*0.25)+'px,'+(hy*0.4)+'px) scale(1.03)';
+  FL.style.opacity=0.13*Math.exp(-lt*17)*(t>T0?1:0);
+  // the turn: 1 goes green, DAY ONE writes under it
+  const g=i===9?cl((t-DAYIN)/0.28,0,1):0;
+  NUM.style.color=g>0?'rgb('+Math.round(255-129*g)+','+Math.round(255-23*g)+','+Math.round(255-93*g)+')':'#fff';
+  DY.style.opacity=g;
+  WD.style.opacity=i===9?0:1;
+  grain(Math.floor(t*30));
+  const ec=cl((t-5.75)/0.45,0,1);
+  document.getElementById('end').style.opacity=ec;
+  document.getElementById('wm').style.opacity=1-ec;
+  document.getElementById('grain').style.opacity=(1-ec)*0.34;
+  document.getElementById('vig').style.opacity=1-ec;
+  document.getElementById('big').style.opacity=cl((t-6.25)/0.38,0,1);
+  document.getElementById('green').style.opacity=cl((t-6.70)/0.38,0,1);
+  document.getElementById('brand').style.opacity=cl((t-7.05)/0.38,0,1)*0.9;
+};seek(0);
+</script></body></html>

@@ -202,6 +202,18 @@ db.exec(`
     accepted_user_id INTEGER REFERENCES users(id)
   );
 
+  -- Clicks through to the Play listing, counted per day and per page.
+  -- Deliberately a COUNTER and nothing else: no id, no ip, no user agent, no
+  -- user link. Play only reports installs, so without this there is no way to
+  -- tell "nobody clicked" from "a hundred clicked and none installed" - two
+  -- problems with opposite fixes.
+  CREATE TABLE IF NOT EXISTS store_clicks (
+    day TEXT NOT NULL,
+    source TEXT NOT NULL,
+    clicks INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, source)
+  );
+
   CREATE TABLE IF NOT EXISTS couple_links (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_a INTEGER NOT NULL REFERENCES users(id),
@@ -694,6 +706,28 @@ const TRIALING_SQL = "plan != 'free' AND subscription_status = 'trialing'";
 // boundary. Grouping by the Monday date sidesteps both and still sorts correctly.
 const WEEK_SQL = "date(created_at, 'weekday 0', '-6 days')";
 
+// One row per day per source, incremented in place.
+function recordStoreClick(source) {
+  const src = String(source || 'direct').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40) || 'direct';
+  const day = new Date().toISOString().slice(0, 10);
+  db.prepare(`INSERT INTO store_clicks (day, source, clicks) VALUES (?, ?, 1)
+              ON CONFLICT(day, source) DO UPDATE SET clicks = clicks + 1`).run(day, src);
+}
+function getStoreClicks(windowDays) {
+  const days = windowDays || 30;
+  const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
+  const total = db.prepare('SELECT COALESCE(SUM(clicks),0) n FROM store_clicks').get().n;
+  return {
+    total,
+    window_days: days,
+    in_window: db.prepare('SELECT COALESCE(SUM(clicks),0) n FROM store_clicks WHERE day >= ?').get(since).n,
+    by_source: db.prepare(`SELECT source, SUM(clicks) clicks FROM store_clicks WHERE day >= ?
+                           GROUP BY source ORDER BY clicks DESC`).all(since),
+    by_day: db.prepare(`SELECT day, SUM(clicks) clicks FROM store_clicks WHERE day >= ?
+                        GROUP BY day ORDER BY day DESC`).all(since),
+  };
+}
+
 function getAdminStats(opts) {
   const freeChatLimit = (opts && opts.freeChatLimit) || 3;
   const windowDays = (opts && opts.windowDays) || 30;
@@ -830,6 +864,9 @@ function getAdminStats(opts) {
     retention,
     by_utm_source,
     by_week,
+    // How many people we sent to the Play listing. The other half of the
+    // install number, which Play reports and this cannot see.
+    store_clicks: getStoreClicks(windowDays),
     // The letter funnel. Its own block because it answers a different question
     // from the signup funnel: not "did somebody find us", but "did somebody
     // hand this to a person they love, and did that person take it".
@@ -1101,6 +1138,8 @@ module.exports = {
   createUser,
   setUserUtm,
   getAdminStats,
+  recordStoreClick,
+  getStoreClicks,
   countLifetimeSold,
   recordStorePurchase,
   getUserByPurchaseToken,

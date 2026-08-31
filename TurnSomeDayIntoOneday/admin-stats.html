@@ -55,6 +55,25 @@ fetch('/api/admin/stats').then(async r=>{
       .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>'+
     '<div class="note">Paid counts Stripe status <code>active</code> only. Trialing is shown separately — a trial that has not converted is not revenue.</div>';
 
+  // Clicks through to the Play listing. Play reports installs and nothing
+  // about how many people arrived, so this is the other half of that number -
+  // and the only way to tell "nobody clicked" apart from "everybody bounced
+  // at the listing", which need opposite fixes.
+  if(d.store_clicks){
+    const S=d.store_clicks;
+    h+='<h2>Play listing</h2><div class="cards">'+
+      [['Sent to the listing (all time)',S.total],['Last '+S.window_days+' days',S.in_window]]
+        .map(([l,n])=>`<div class="card"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`).join('')+'</div>';
+    h+='<div class="note">Counted on /play before anyone reaches Google — a count only, no visitor data. '+
+       'Compare it with installs in Play Console: that ratio is the store conversion rate, and it is the number '+
+       'that says whether the problem is the listing or the traffic.</div>';
+    if(S.by_source&&S.by_source.length){
+      h+=table([{key:'source',label:'Page that sent them'},{key:'clicks',label:'Clicks',n:1}],S.by_source);
+    }else{
+      h+='<div class="note">No clicks through yet.</div>';
+    }
+  }
+
   // The letter funnel. Three numbers, in the order they happen: somebody sent
   // the hardest thing they had to say, somebody read it, somebody came in
   // because of it. The last one is the only referral number in the app that

@@ -101,6 +101,11 @@ self.addEventListener('fetch', (event) => {
   // shell cache would burn the storage quota for no gain.
   if (url.origin !== location.origin) return;
 
+  // /play is a server-side redirect off to Google. Answering a navigation with
+  // a redirected response from inside a service worker is exactly the kind of
+  // thing that breaks for installed users only, so it never enters the worker.
+  if (url.pathname === '/play' || url.pathname.startsWith('/play/')) return;
+
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
 
   if (isPage) {

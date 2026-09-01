@@ -10984,11 +10984,24 @@ const RECOVERY_TERMS={
 function recoveryTerm(){
   return RECOVERY_TERMS[S.currentAddiction]||'sober';
 }
+// The big number on Home counts the LONGEST-RUNNING track (masterTrack), but the
+// label above it used recoveryTerm(), which follows the track whose lessons you
+// are reading. Jacques, 1 Sep 2026: three tracks running, the counter said
+// "Days binge-free / 9 / Anger & Control - Since August 22" with Food/Binging
+// sitting at 0d two lines below. Same counter, two different habits. The label
+// has to name the thing being counted.
+function counterTerm(){
+  const m=(typeof masterTrack==='function')?masterTrack():null;
+  const name=(m&&m.mixed&&S.userType!=='partner')?m.name:S.currentAddiction;
+  return RECOVERY_TERMS[name]||'sober';
+}
 function capitalize(str){
   return str.charAt(0).toUpperCase()+str.slice(1);
 }
 function updateRecoveryTermLabels(){
-  const term=recoveryTerm();
+  // Counter labels follow the counter's own track; everything else below still
+  // follows the track being worked.
+  const term=counterTerm();
   const daysLbl=document.getElementById('days-term-lbl');
   if(daysLbl)daysLbl.textContent=`Days ${term}`;
   const hoursLbl=document.getElementById('prog-hours-lbl');
@@ -14146,7 +14159,9 @@ async function sendMsg(){
     const profileBlock=`[System Context - EXPLICIT PERSONALIZATION PROTOCOL]:
 User Name: ${S.name||'Recovering Individual'}
 User Gender Identity: ${S.userGender||'Not Specified'}
-${capitalize(recoveryTerm())} Since: ${S.startDate||'today'}
+${capitalize(counterTerm())} Since: ${S.startDate||'today'}
+DAY COUNT SHOWN ON THEIR SCREEN RIGHT NOW: ${(()=>{const st=S.startDate?new Date(S.startDate):new Date();return Math.max(0,Math.floor((Date.now()-st.getTime())/86400000));})()}${(()=>{const m=(typeof masterTrack==='function')?masterTrack():null;return (m&&m.mixed&&S.userType!=='partner')?` (this is the ${m.name} track, their longest-running one)`:'';})()}. Use THIS number if you mention how many days they have. Do NOT work it out from the date yourself and do NOT use a lesson number as a day count - they are different things and getting it wrong is the fastest way to lose their trust.
+${(()=>{const t=S.selectedAddictions||[];return t.length>1?`Days per track: ${t.map(a=>`${a} ${daysFor(a)}d`).join(', ')}.`:'';})()}
 Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
 ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')} — the user is the SUPPORTER, not the person with the addiction. Never coach them as the addict.`:''}
 ${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
@@ -14155,9 +14170,9 @@ Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
 ${(()=>{
   const t=S.selectedAddictions||[];
   if(t.length<2)return '';
-  const where=t.map(a=>`${a} day ${getLessonDayFor(a)}`).join(', ');
+  const where=t.map(a=>`${a} lesson ${getLessonDayFor(a)}`).join(', ');
   const links=activeTrackLinks(t);
-  return `Working MORE THAN ONE track at once: ${where}.`
+  return `Working MORE THAN ONE track at once, at these LESSON positions (lessons advance when finished, so these run AHEAD of the day count for anyone doing more than one a day - never call a lesson number a day): ${where}.`
     +(links.length?`\nThese overlap: ${links.map(l=>`${l.a} + ${l.b} (${l.why})`).join('; ')}.`:'')
     +`\nTreat these as ONE person with one pattern showing up in different places - if they mention one, you may connect it to the other when it genuinely fits. Never claim one CAUSES another, and never bring it up to be clever; only when it helps them see something.`;
 })()}

@@ -1,38 +1,21 @@
-# Two talking heads — read-and-film
+# Two talking heads
 
-Written 1 Sep 2026 from the keyword research. Straight to lens, one take, no
-intro, shoot vertical. Neither script names alcohol, drugs or porn, so neither
-needs LegitScript — both can run now.
+Straight to lens, one take, vertical.
 
----
-
-## TH1 — "You didn't decide to pick it up"  ·  15 sec
+## TH1 — 8 sec
 
 Nobody decides to pick up their phone. Your hand just goes.
 
-It's the same loop as everything else people quit. It just doesn't have an ugly
-enough name yet.
+No rock bottom is coming for this one. You just pick a day.
 
-So nothing's coming to force it. No rock bottom. You just pick a day.
+**FREE · NO CARD**
 
-**End card:** FREE · NO CARD
-
----
-
-## TH2 — "Every app that says free isn't"  ·  20 sec
+## TH2 — 9 sec
 
 Every app that says free isn't.
 
-You find out on day eight. You go to open your own day count, and it wants
-sixty dollars a year for it.
+Day eight, your own streak is behind a card.
 
-Your streak. The thing you did. Behind a card.
+Mine isn't. Counter, panic button, journal. Free.
 
-Mine's free. The counter, the panic button, the journal. No card.
-
-**End card:** FREE · NO CARD
-
----
-
-Don't name a competitor on camera. Don't let TH2 drift into "everything is
-free" — free is the counter, SOS, breathing, the journal and the first 15 days.
+**FREE · NO CARD**

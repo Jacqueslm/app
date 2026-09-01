@@ -1,0 +1,139 @@
+term,cluster,source,intent,have_page,volume,notes
+# ─────────────────────────────────────────────────────────────────────────────
+# KEYWORDS AND SEARCH TERMS — Turn Someday Into Day One
+# Built 1 Sep 2026. Research: live Google/social/AI-search sweep + page audit.
+#
+# READ THIS BEFORE USING THE FILE:
+# The `volume` column is EMPTY on purpose. Semrush had no API units left when
+# this was built, so no real search volumes could be pulled. Every number in a
+# keyword file should come from a tool, not from a guess, so there are none
+# here rather than invented ones. Top up units at semrush.com/mcp-access and
+# the volumes can be filled in against this exact list.
+#
+# `have_page` = a page already exists on the site for that term.
+#   yes  = covered
+#   NO   = genuine gap
+#   app  = belongs in the Play Store listing, not a web page
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ══ 1. THE BIG SHIFT: AI SEARCH ══════════════════════════════════════════════
+# The single most important finding. Google queries average 3.4 words. ChatGPT
+# prompts average ~60. People now paste their whole situation and expect an
+# answer, and AI Overviews trigger MORE on long question-shaped queries. Short
+# keyword pages are losing; pages that answer a full question in plain words
+# get quoted. Every row below marked "AI" is a full sentence somebody types.
+"how do I stop drinking without going to AA",ai-search,AI conversational,help,NO,,"Long-tail question. His whole app IS the non-AA answer. No page states that."
+"is it normal to still want to drink after a month sober",ai-search,AI conversational,reassurance,NO,,"Maps exactly to tower floor 21 and floor 25. Content already written."
+"my partner says they will stop but they never do what do I do",ai-search,AI conversational,supporter,partial,,"partner-drinks.html is close but not phrased as the question."
+"what happens to your body when you quit drinking day by day",ai-search,AI conversational,informational,yes,,alcohol-withdrawal-timeline.html — strongest existing AI-answer page
+"how do I know if I am an alcoholic or just drink a lot",ai-search,AI conversational,self-diagnosis,partial,,"is-my-husband-an-alcoholic covers the partner angle, not the self angle"
+"free app to count days sober without a subscription",ai-search,AI conversational,commercial,NO,,"Free day counter is his actual differentiator. Not stated as an answer anywhere."
+"how to help someone who doesn't want help",ai-search,AI conversational,supporter,NO,,High-volume supporter question with no page
+"what do I do at 2am when I want to relapse",ai-search,AI conversational,crisis,partial,,"SOS + 'Talk me through it' exist in-app; no indexable page answers it"
+
+# ══ 2. REDDIT / COMMUNITY LANGUAGE ═══════════════════════════════════════════
+# What people actually type, as opposed to what marketers write.
+IWNDWYT,community,r/stopdrinking,community,NO,,"'I Will Not Drink With You Today' — the r/stopdrinking motto. His daily pledge IS this mechanic. Zero pages mention it. Biggest single miss in this file."
+"I will not drink with you today",community,r/stopdrinking,community,NO,,Spelled-out version of the above
+"day one",community,universal,identity,yes,,The brand name. Own it harder — it is the exact phrase the communities use.
+"day 1 again",community,r/stopdrinking,relapse,NO,,"What people search after a slip. His 'relapse never resets to zero' rule answers it."
+"sober badge",community,r/stopdrinking,tracking,NO,,Reddit's day-count badge. Same idea as his counter.
+"sober tracker",community,search,tracking,NO,,Common generic term for the counter
+"counting days",community,universal,tracking,partial,,
+"one day at a time",community,AA,identity,partial,,Already in the landing tagline
+"white knuckling",community,recovery,struggle,NO,,"Used constantly in the communities; lesson day 3 already uses the concept"
+"pink cloud",community,recovery,stage,NO,,"Early-recovery euphoria then the crash. Maps to tower floors 14 and 25."
+"dry drunk",community,recovery,stage,yes,,dry-drunk.html
+"hangxiety",community,Gen Z,symptom,yes,,hangxiety.html
+"California sober",community,Gen Z,partial-abstinence,NO,,Growing term; sits awkwardly with abstinence framing — decide a position
+"sober curious",trend,mainstream,exploratory,NO,,"Big and growing. Non-abstinence framing — the softest door into the app."
+"mindful drinking",trend,mainstream,moderation,NO,,"Reframe and Sunnyside own this. He has alternative pages for both but no topic page."
+
+# ══ 3. THE DOPAMINE CLUSTER ══════════════════════════════════════════════════
+# Competitor 'Essence' targets exactly these words in its Play listing.
+# IMPORTANT TENSION: the app's own spec bans brain-chemistry claims. You can
+# RANK for these words without MAKING the claim — write the page in plain
+# language about habit and reward, and never write 'research shows'.
+"dopamine detox",trend,TikTok,self-improvement,NO,,#dopaminedetox is an active TikTok tag
+"dopamine reset",trend,Play Store,self-improvement,NO,,Direct competitor keyword
+"30 day dopamine detox",trend,TikTok,challenge,NO,,Challenge framing — maps to a 30-day lesson block
+"reset culture",trend,Play Store,self-improvement,NO,,
+"brain reset",trend,owned,self-improvement,yes,,brainreset.html + The90DayBrainReset.pdf
+
+# ══ 4. SOCIAL PLATFORM TAGS ══════════════════════════════════════════════════
+# For posting, not for SEO. His four handles all end turnsomedayintodayone.
+#sobertok,social,TikTok,community,app,,Primary recovery tag on TikTok
+#recoverytok,social,TikTok,community,app,,
+#sobrietyjourney,social,TikTok/IG,community,app,,
+#recoveryispossible,social,TikTok/IG,community,app,,
+#sobercurious,social,TikTok/IG,exploratory,app,,Softest entry point for cold audiences
+#dopaminedetox,social,TikTok,self-improvement,app,,Largest non-recovery adjacent audience
+#day1,social,TikTok/IG,identity,app,,
+
+# ══ 5. PER-TRACK SEARCH TERMS ════════════════════════════════════════════════
+# One row per addiction the app tracks. Gaps here are gaps in the funnel.
+"how to stop drinking",track-alcohol,Google,help,yes,,how-to-stop-drinking.html
+"quit drinking app",track-alcohol,Google,commercial,NO,,"Head commercial term. Only competitor-alternative pages target it obliquely."
+"how to stop watching porn",track-porn,Google,help,yes,,how-to-stop-watching-porn.html
+"porn blocker app",track-porn,Google,commercial,NO,,"He is NOT a blocker — the alternative pages should say so plainly"
+"quit vaping",track-vaping,Google,help,yes,,quit-vaping.html
+"quit smoking app",track-smoking,Google,commercial,NO,,
+"quit gambling app",track-gambling,Google,commercial,NO,,"Bye Bet owns this space; betblocker-alternative.html exists"
+"how to stop gambling",track-gambling,Google,help,NO,,Gap — no page
+"how to stop binge eating",track-food,Google,help,yes,,how-to-stop-binge-eating.html
+"phone addiction",track-social,Google,help,NO,,Gap — a tracked addiction with no page
+"social media addiction help",track-social,Google,help,NO,,Gap
+"gaming addiction help",track-gaming,Google,help,NO,,Gap — tracked in app, no page
+"shopping addiction",track-shopping,Google,help,NO,,Gap — tracked in app, no page
+"work addiction workaholic help",track-work,Google,help,NO,,Gap — tracked in app, no page
+"anger management app",track-anger,Google,help,NO,,Gap — tracked in app, no page
+
+# ══ 6. SUPPORTER SIDE ════════════════════════════════════════════════════════
+# Jacques is on this side himself right now. The supporter tower is built.
+"Al-Anon alternative",supporter,Google,commercial,yes,,what-is-al-anon.html
+"my husband drinks",supporter,Google,help,yes,,is-my-husband-an-alcoholic.html + when-he-drinks.html
+"my wife drinks",supporter,Google,help,NO,,"GAP AND A BIAS. Every supporter page is written for a woman about a man."
+"my partner drinks",supporter,Google,help,yes,,partner-drinks.html — the neutral version
+"living with an alcoholic",supporter,Google,help,NO,,Strong informational term
+"how to set boundaries with an addict",supporter,Google,help,NO,,"Maps to supporter tower floor 32 — content already written"
+"codependency test",supporter,Google,self-diagnosis,yes,,codependency-test.html
+"betrayal trauma",supporter,Google,help,yes,,betrayal-trauma-recovery.html
+"adult children of alcoholics",supporter,Google,help,yes,,adult-children-of-alcoholics.html
+"detaching with love",supporter,Al-Anon,help,NO,,Core Al-Anon phrase with no page
+"am I enabling",supporter,Google,self-diagnosis,NO,,"Maps to supporter tower floor 53 (THE RESCUING)"
+
+# ══ 7. COMPETITOR / ALTERNATIVE TERMS ════════════════════════════════════════
+# 14 alternative pages already exist. These are the ones still missing.
+"I Am Sober alternative",competitor,Google,commercial,yes,,
+"Nomo alternative",competitor,Google,commercial,yes,,
+"Reframe app alternative",competitor,Google,commercial,yes,,
+"Sunnyside alternative",competitor,Google,commercial,yes,,
+"Quittr alternative",competitor,Google,commercial,yes,,
+"Fortify alternative",competitor,Google,commercial,yes,,
+"Covenant Eyes alternative",competitor,Google,commercial,yes,,
+"BlockerX alternative",competitor,Google,commercial,yes,,
+"Ever Accountable alternative",competitor,Google,commercial,yes,,
+"Brainbuddy alternative",competitor,Google,commercial,yes,,
+"Loosid alternative",competitor,Google,commercial,yes,,
+"QuitNow alternative",competitor,Google,commercial,yes,,
+"Sober Time alternative",competitor,Google,commercial,yes,,
+"BetBlocker alternative",competitor,Google,commercial,yes,,
+"Try Dry alternative",competitor,Google,commercial,NO,,"Named in 2026 best-of lists; no page"
+"Sobrius alternative",competitor,Google,commercial,NO,,New entrant in 2026 round-ups
+"SoberNow alternative",competitor,Google,commercial,NO,,New entrant in 2026 round-ups
+"Secondway alternative",competitor,Play Store,commercial,NO,,Blocker app ranking on quit-porn terms
+"Essence quit addiction alternative",competitor,Play Store,commercial,NO,,Owns the dopamine-detox keyword cluster
+"best sobriety apps",competitor,Google,commercial,yes,,best-recovery-apps.html
+"best sober apps 2026",competitor,Google,commercial,partial,,Year-stamped variant — worth its own heading
+
+# ══ 8. PLAY STORE (ASO) ══════════════════════════════════════════════════════
+# Every word in title, short description AND long description is a ranking
+# signal on Google Play. These belong in the listing, not on the website.
+"sobriety counter",aso,Play Store,commercial,app,,
+"sober day counter",aso,Play Store,commercial,app,,
+"addiction recovery app",aso,Play Store,commercial,app,,
+"habit tracker sobriety",aso,Play Store,commercial,app,,
+"relapse prevention app",aso,Play Store,commercial,app,,
+"recovery journal app",aso,Play Store,commercial,app,,
+"quit anything app",aso,Play Store,commercial,app,,"Matches the 12-track design better than single-addiction rivals"
+"free sobriety app no subscription",aso,Play Store,commercial,app,,Free tier is the differentiator

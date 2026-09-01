@@ -33,9 +33,10 @@ test('the spec is in the repo next to the code it describes', () => {
   assert.ok(fs.existsSync(path.join(ROOT, 'docs', 'GAME-SPEC.md')));
 });
 
-test('phase 1 is ten floors, numbered one to ten', () => {
-  assert.equal(FLOORS.length, 10);
-  assert.deepEqual(FLOORS.map((f) => f.n), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+test('the building is ninety floors, numbered one to ninety', () => {
+  // Phase 4 built 11-90. Floors 1-10 stay free; the rest are Pro.
+  assert.equal(FLOORS.length, 90);
+  assert.deepEqual(FLOORS.map((f) => f.n), Array.from({ length: 90 }, (_, i) => i + 1));
 });
 
 test('every floor has both keys and everything the screen renders', () => {
@@ -107,8 +108,19 @@ test('every floor is its own place, not the same map ten times', () => {
   // Jacques, 30 Aug 2026, on the Roblox reference: "floor 3 doesn't look or
   // play like floor 7." So no two floors may share a layout, and every floor
   // carries its own palette and its own air.
+  // Ninety floors are built from ten maps, so a map necessarily comes round
+  // again - what must never happen is meeting the same place twice while you
+  // can still remember it. Two rules hold that: no repeat inside any ten
+  // consecutive floors, and no floor anywhere shares its whole signature
+  // (map + rule + air) with another, so the repeat never plays the same.
   const shapes = FLOORS.map((f) => JSON.stringify([f.rooms, f.edges]));
-  assert.equal(new Set(shapes).size, 10, 'two floors have identical maps');
+  for (let i = 0; i < FLOORS.length; i++) {
+    const window = shapes.slice(i, i + 10);
+    assert.equal(new Set(window).size, window.length,
+      `two floors within ten of floor ${i + 1} have identical maps`);
+  }
+  const sigs = FLOORS.map((f, i) => shapes[i] + '|' + f.rule + '|' + f.air);
+  assert.equal(new Set(sigs).size, 90, 'two floors are the same place played the same way');
   const airs = FLOORS.map((f) => f.air);
   assert.ok(new Set(airs).size >= 5, 'the floors should not all breathe the same');
   for (const f of FLOORS) {
@@ -121,8 +133,10 @@ test('every floor is its own place, not the same map ten times', () => {
 
 // The rules are a fixed set implemented once and reused. A floor inventing its
 // own is how this becomes ten games instead of one.
-const RULES = ['none', 'dark', 'dim', 'echo', 'oneway', 'sequence', 'slow'];
-const AIRS = ['grain', 'grid', 'dust', 'glow', 'flicker', 'window'];
+// quiet, fog and pull were added for floors 11-90: seven rules over ninety
+// floors meant every seventh floor played exactly the same way.
+const RULES = ['none', 'dark', 'dim', 'echo', 'oneway', 'sequence', 'slow', 'quiet', 'fog', 'pull'];
+const AIRS = ['grain', 'grid', 'dust', 'glow', 'flicker', 'window', 'rain', 'embers', 'static'];
 test('every floor rule comes from the shared set', () => {
   for (const f of FLOORS) {
     assert.ok(RULES.includes(f.rule), `floor ${f.n} rule "${f.rule}" is not implemented`);
@@ -226,8 +240,11 @@ test('the wave is on about one floor in four, and always on floors ending in zer
   const declared = FLOORS.filter((f) => f.wave).map((f) => f.n);
   const has = (n) => n % 10 === 0 || declared.includes(n);
   const on = FLOORS.map((f) => f.n).filter(has);
-  assert.ok(on.includes(10), 'floor ten ends in zero, so it always has one');
-  assert.ok(on.length >= 2 && on.length <= 4, `~1 in 4 of ten floors, got ${on.length}`);
+  for (const landing of [10, 20, 30, 40, 50, 60, 70, 80, 90]) {
+    assert.ok(on.includes(landing), `floor ${landing} ends in zero, so it always has one`);
+  }
+  const ratio = on.length / FLOORS.length;
+  assert.ok(ratio >= 0.18 && ratio <= 0.34, `~1 in 4 of ninety floors, got ${on.length}`);
   assert.match(APP, /function towerFloorHasWave\(n\)\{return n%10===0\|\|!!towerFloor\(n\)\.wave;\}/);
 });
 
@@ -356,7 +373,8 @@ test('walking into the room is all it takes, and it is kept once', () => {
 
 test('the vault lists the whole building, gaps included', () => {
   const src = APP.match(/function renderTowerVault\(\)\{[\s\S]*?\n\}/)[0];
-  assert.match(src, /Object\.keys\(TOWER_ARTIFACTS\)\.map/, 'every artifact, not only the found ones');
+  // reads the active set now: TOWER_ARTIFACTS or the supporter's
+  assert.match(src, /Object\.keys\(SET\)\.map/, 'every artifact, not only the found ones');
   assert.match(src, /vault-card locked/, 'the ones still out there show as gaps');
   assert.doesNotMatch(src, /a\.text[\s\S]{0,80}locked/, 'a locked card must never leak its text');
 });

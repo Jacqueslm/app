@@ -211,12 +211,33 @@ been started.
 - ~~Trigger Board puzzle on landings~~
 - ~~Artifact rooms + Vault screen~~
 
-Phases 1-3 are complete. Phase 4 (floors 11-90 behind Pro, supporter tower)
-has not been started.
+Phases 1-4 are complete (31 Aug 2026): ninety floors, gated 1-10 free and
+11-90 Pro, with the supporter variant built.
 
 **Phase 4:**
-- Floors 11–90 unlocked behind Pro
-- Supporter tower variant
+- ~~Floors 11–90 unlocked behind Pro~~ — built 31 Aug 2026. The arc runs in
+  decades: 11-20 the fog lifting, 21-30 the month, 31-40 the empty hours,
+  41-50 the people, 51-60 the plateau, 61-70 what it was for, 71-80 the
+  rebuild, 81-90 what comes after. `TOWER_FREE_FLOORS=10`,
+  `TOWER_TOP_FLOOR=90`, `towerMaxFloor()` reads `S.isPro`.
+- Three rules and three atmospheres were added for it (`quiet`, `fog`, `pull`;
+  `rain`, `embers`, `static`), and the layout set went from 10 maps to 16 —
+  with ten maps and ninety floors the generator could not keep floors distinct
+  past floor forty. 22 distinct maps are used, no map repeats inside any ten
+  consecutive floors, and no two floors share a whole (map + rule + air).
+- The Vault went from 14 artifacts to 47, spread so every twenty floors holds
+  at least three.
+- ~~Supporter tower variant~~ — built 31 Aug 2026. `TOWER_FLOORS_SUP` is
+  writing only (name, briefing, truth, dare, line, room names) laid over the
+  same ninety maps, palettes, rules and waves, so the building is identical
+  and only who it addresses changes. `towerIsSupporter()` keys on the ACTIVE
+  TRACK, matching `isSupporterTrack()`: somebody carrying both sides gets the
+  supporter tower while on the Supporting Someone track and their own back
+  when they switch. Its Vault is separate (31 pieces) and its found-state is
+  prefixed `s:` — the two towers share room coordinates, so an unprefixed key
+  would have handed a supporter writing addressed to the person recovering.
+  Tests enforce: no truth asks about the other person, no dare is
+  surveillance, and nobody in it is ever given a pronoun.
 
 Do not start Phase 2 until Phase 1 is live and he has played it as a stranger.
 

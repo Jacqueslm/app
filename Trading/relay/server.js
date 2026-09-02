@@ -171,7 +171,11 @@ const AUTO_DEFAULT = {
   balance: 25000,
   riskPct: 10,         // set by choice. Reference: the paper record averages 0.87% a
                        // trade, and the sweeps put 10% at a 30-99% drawdown on the same edge.
-  maxContracts: 50,       // a hard ceiling no arithmetic can talk its way past
+  maxContracts: 10,       // a hard ceiling no arithmetic can talk its way past.
+                          // 10 is a size you can watch go wrong: on a 20-point MES
+                          // stop that is $1,000, on a 40-point MNQ stop $800. The
+                          // percentage regularly asks for far more than that.
+  lotsSet: false,         // flipped true once the ceiling has been chosen on /bot
   maxPerDay: 1,           // the bot's bullet count — same rule as yours
   dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
@@ -187,16 +191,28 @@ const AUTO_DEFAULT = {
   }
 };
 let auto = AUTO_DEFAULT;
+let needsMigration = false;
 try {
   auto = Object.assign({}, AUTO_DEFAULT, JSON.parse(fs.readFileSync(AUTO_FILE, "utf8")));
 } catch {
   fs.writeFileSync(AUTO_FILE, JSON.stringify(AUTO_DEFAULT, null, 2));
+}
+// The ceiling used to default to 50, which on a six-figure balance at 10% is not
+// a ceiling at all — it is the position size, quietly. Existing autotrade.json
+// files carry that old number, and the person who has to live with it does not
+// edit JSON. So: bring the ceiling down to today's default exactly once, then
+// mark it chosen and never touch it again. Any value saved from /bot sticks.
+if (auto.lotsSet !== true) {
+  auto.maxContracts = AUTO_DEFAULT.maxContracts;
+  auto.lotsSet = true;
+  needsMigration = true;
 }
 // Autotrade is switched on and its numbers set from the /bot page, not by hand.
 // A phone is often the only thing in reach when a number is wrong, and a stale
 // `balance` silently mis-sizes every trade. Written back so changes survive a
 // restart. Going LIVE still means editing this file on purpose — see /bot/arm.
 const saveAuto = () => { try { fs.writeFileSync(AUTO_FILE, JSON.stringify(auto, null, 2)); } catch {} };
+if (needsMigration) saveAuto();
 
 // Bot state that must survive a restart: the kill switch, today's trade count,
 // and recent alert fingerprints. Lives in relay/state.json.
@@ -546,7 +562,7 @@ const server = http.createServer((req, res) => {
       if (b !== null) auto.balance = b;
       if (r !== null) auto.riskPct = r;
       if (d !== null) auto.maxPerDay = Math.round(d);
-      if (c !== null) auto.maxContracts = Math.round(c);
+      if (c !== null) { auto.maxContracts = Math.round(c); auto.lotsSet = true; }
       saveAuto();
       console.log("⚙ autotrade: $" + auto.balance + " balance, " + auto.riskPct + "% risk, "
                   + auto.maxPerDay + " a day = $" + Math.round(auto.balance * auto.riskPct / 100)
@@ -605,6 +621,7 @@ server.listen(PORT, () => {
   console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +
               " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
               "   (contracts computed from the stop distance)");
+  console.log("  Never more than:  " + auto.maxContracts + " contracts — the ceiling, whatever the maths says");
   if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);

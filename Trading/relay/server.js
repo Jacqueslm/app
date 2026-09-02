@@ -192,6 +192,11 @@ try {
 } catch {
   fs.writeFileSync(AUTO_FILE, JSON.stringify(AUTO_DEFAULT, null, 2));
 }
+// Autotrade is switched on and its numbers set from the /bot page, not by hand.
+// A phone is often the only thing in reach when a number is wrong, and a stale
+// `balance` silently mis-sizes every trade. Written back so changes survive a
+// restart. Going LIVE still means editing this file on purpose — see /bot/arm.
+const saveAuto = () => { try { fs.writeFileSync(AUTO_FILE, JSON.stringify(auto, null, 2)); } catch {} };
 
 // Bot state that must survive a restart: the kill switch, today's trade count,
 // and recent alert fingerprints. Lives in relay/state.json.
@@ -405,11 +410,34 @@ Contracts are computed from that and the stop distance in the alert.</p>
 order file and never hears about the fill. Trades of 2+ contracts take half at 1R and let the rest
 run to T2 against the <i>original</i> stop. For break-even after 1R, run the NinjaScript
 (ninjatrader/MSBPure.cs) instead, which sees its own fills.</p>
-<form method="POST" action="/bot/${secret}/toggle">
+<form method="POST" action="/bot/${secret}/arm">
+<button style="background:${auto.enabled ? "#546e7a" : "#26a69a"};color:#fff">
+${auto.enabled ? "TURN AUTOTRADE OFF" : "TURN AUTOTRADE ON — " + auto.account}</button></form>
+${live
+  ? `<p style="font-size:13px;color:#ef5350">This button only arms <b>Sim101</b>. The account is
+<b>${auto.account}</b>, which is real money, so autotrade there can only be switched on by editing
+relay/autotrade.json deliberately.</p>`
+  : `<p style="font-size:13px;color:#8b96a5">Sim money. When a signal fires the bot places the entry,
+the stop and both targets in NinjaTrader by itself. It never touches a trade you opened by hand.</p>`}
+<form method="POST" action="/bot/${secret}/toggle" style="margin-top:14px">
 <button style="background:${state.killed ? "#26a69a" : "#ef5350"};color:#fff">
 ${state.killed ? "RE-ARM THE BOT" : "KILL — stop placing orders"}</button></form>
 <p style="font-size:13px;color:#8b96a5">The kill switch survives restarts. It stops new orders only —
 anything already working in NinjaTrader stays yours to manage.</p>
+<h1 style="font-size:16px;margin-top:22px">Numbers</h1>
+<form method="POST" action="/bot/${secret}/settings">
+<div style="display:flex;gap:8px">
+${[["balance", "Balance $", auto.balance], ["riskPct", "Risk %", auto.riskPct],
+   ["maxPerDay", "Per day", auto.maxPerDay], ["maxContracts", "Max lots", auto.maxContracts]].map(([k, label, v]) =>
+`<label style="flex:1;font-size:12px;color:#8b96a5">${label}<br>
+<input name="${k}" value="${v}" inputmode="decimal" style="width:100%;box-sizing:border-box;
+padding:10px;margin-top:4px;font-size:16px;border-radius:8px;border:1px solid #2a3341;
+background:#161b22;color:#e6edf3"></label>`).join("")}
+</div>
+<button style="background:#2f81f7;color:#fff;margin-top:10px">Save</button></form>
+<p style="font-size:13px;color:#8b96a5">Balance is the one number the relay cannot look up for itself.
+If it is wrong, every contract count is wrong the same way. <b>Max lots</b> is a hard ceiling the risk
+maths cannot argue past — when it bites, the ceiling is your real position size, not the percentage.</p>
 <table>${rows}</table>
 <h1 style="font-size:16px;margin-top:22px">Decisions this session</h1><ul>${dec}</ul>
 </body></html>`;
@@ -487,6 +515,47 @@ const server = http.createServer((req, res) => {
     res.end();
     return;
   }
+  // Switch autotrade on or off from the phone. Turning it ON is only allowed on
+  // Sim101: arming a real account is a decision that should cost more than a tap,
+  // so it stays a deliberate edit of autotrade.json. Turning it OFF always works.
+  if (req.method === "POST" && url === "/bot/" + secret + "/arm") {
+    if (!auto.enabled && auto.account !== "Sim101") {
+      decide(false, "arm refused — " + auto.account + " is not Sim101. Edit relay/autotrade.json to go live on purpose.");
+    } else {
+      auto.enabled = !auto.enabled;
+      saveAuto();
+      console.log(auto.enabled ? "🟢 AUTOTRADE ON → " + auto.account + " (sim)"
+                               : "⚪ Autotrade OFF — signals arrive, no orders are placed.");
+    }
+    res.writeHead(303, { Location: "/bot/" + secret });
+    res.end();
+    return;
+  }
+  // Balance / risk / bullets, edited from the same page. Clamped, never trusted raw.
+  if (req.method === "POST" && url === "/bot/" + secret + "/settings") {
+    let body = "";
+    req.on("data", c => { body += c; if (body.length > 4000) req.destroy(); });
+    req.on("end", () => {
+      const f = new URLSearchParams(body);
+      const num = (k, min, max) => {
+        const v = parseFloat(String(f.get(k) || "").replace(/[^0-9.]/g, ""));
+        return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : null;
+      };
+      const b = num("balance", 0, 1e9), r = num("riskPct", 0, 100),
+            d = num("maxPerDay", 0, 10),   c = num("maxContracts", 1, 200);
+      if (b !== null) auto.balance = b;
+      if (r !== null) auto.riskPct = r;
+      if (d !== null) auto.maxPerDay = Math.round(d);
+      if (c !== null) auto.maxContracts = Math.round(c);
+      saveAuto();
+      console.log("⚙ autotrade: $" + auto.balance + " balance, " + auto.riskPct + "% risk, "
+                  + auto.maxPerDay + " a day = $" + Math.round(auto.balance * auto.riskPct / 100)
+                  + " a trade, ceiling " + auto.maxContracts + " lots.");
+      res.writeHead(303, { Location: "/bot/" + secret });
+      res.end();
+    });
+    return;
+  }
 
   // TradingView posts the alert text here
   if (req.method === "POST" && url === "/hook/" + secret) {
@@ -532,7 +601,7 @@ server.listen(PORT, () => {
   console.log("");
   console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
                                              : state.killed ? "🔴 KILLED — re-arm on the /bot page"
-                                             : "⚪ off (relay/autotrade.json)"));
+                                             : "⚪ off — tap TURN AUTOTRADE ON on the /bot page"));
   console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +
               " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
               "   (contracts computed from the stop distance)");

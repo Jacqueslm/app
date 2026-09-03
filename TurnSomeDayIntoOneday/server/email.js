@@ -226,9 +226,9 @@ Whichever way you go tomorrow — cancel or stay — pick one on purpose instead
 
 const TRIAL_DAY7_CHARGED = { subject: "You're Pro. Here's what that means.", text: `Card went through, you're in properly, thank you. That money is what keeps this running and it's not lost on me that you chose to spend it here.
 
-Three things:
+Two things:
 
-Days 16-90 of every track unlock - the whole 90-Day Bootcamp - plus Friendly, your AI companion (up to 30 chats a day), and the live rooms. The recovery tools stay free either way.
+Friendly, your AI companion (up to 30 chats a day), and the live rooms. Every lesson and every recovery tool is free either way - that never changes.
 Cancel any time, two clicks, no phone call, no retention trap.
 Reply to this email whenever you want. I read them. It's still just me.
 

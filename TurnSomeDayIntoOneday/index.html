@@ -6778,9 +6778,13 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   6. No new dependencies - canvas plus vanilla JS, inside this same file.
 // Floors 1-10 are free; 11-90 are Pro. The whole ninety are built, so the
 // cap is a plan boundary now, not the edge of what exists.
-const TOWER_FREE_FLOORS=10;
+// Jacques, 1 Sep 2026: "make the whole tower game free." The gate is gone -
+// all ninety floors are free for everybody. TOWER_FREE_FLOORS stayed as a
+// constant only so nothing else in the file breaks looking for it; nothing
+// reads it any more.
+const TOWER_FREE_FLOORS=90;
 const TOWER_TOP_FLOOR=90;
-function towerMaxFloor(){return S.isPro?TOWER_TOP_FLOOR:TOWER_FREE_FLOORS;}
+function towerMaxFloor(){return TOWER_TOP_FLOOR;}
 // Ten floors. Each one is its own place: its own rooms, palette, air and rule.
 // Rooms live in 0..1 of the stage. The stairs are not a room until the door is
 // open, and the door is always the only way to them.
@@ -8566,10 +8570,10 @@ function towerDraw(){
     g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
   }
   g.globalAlpha=1;
-  // The tower up the right edge: ten ticks for a free account, ninety for a
-  // Pro one. At ninety they are a few pixels apart, so the dots shrink and the
-  // landings (every tenth) stay full size - the shape of the building still
-  // reads at a glance without a single number on it.
+  // The tower up the right edge: ninety ticks, for everybody. They sit a few
+  // pixels apart at that count, so the dots shrink and the landings (every
+  // tenth) stay full size - the shape of the building still reads at a glance
+  // without a single number on it.
   const lx=W-11,top=towerMaxFloor();
   const dense=top>40;
   for(let i=1;i<=top;i++){
@@ -8656,11 +8660,6 @@ function towerPanel(){
       el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
     }else if(n>=TOWER_TOP_FLOOR){
       el.innerHTML='<div class="tw-note">The roof. Ninety floors under you and the stairs still go up — there is no floor where this is finished, and that is the good news.</div>';
-    }else if(n>=towerMaxFloor()){
-      // Free tier stops at ten. Say what is above it plainly and once; never
-      // dress the wall up as part of the story.
-      el.innerHTML='<div class="tw-note">Floor ten is the top of the free tower. Floors eleven to ninety are part of Pro.</div>'+
-        '<button class="tw-btn go" style="margin-top:8px" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</button>';
     }else{
       el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
         '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
@@ -15569,7 +15568,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.8';
+const APP_VERSION='9.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

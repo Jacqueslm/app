@@ -31,8 +31,10 @@ Standing instructions. These override default behaviour and repo conventions.
 ## The app — hard rules
 
 - **Free tier:** day counter, SOS set, breathing, "Talk me through it",
-  journal, weekly reports, first 15 days of every pack. Pro is days 16–90,
-  Friendly, and the rooms. Do not blur this in marketing copy.
+  journal, weekly reports, first 15 days of every pack, and **the whole 2AM
+  tower — all 90 floors, both variants** (made free 1 Sep 2026). Pro is days
+  16–90 of the packs, Friendly, and the rooms. Do not blur this in marketing
+  copy.
 - **No medical claims.** No "research shows", no brain chemistry, no
   mechanisms. Only what people report.
 - **It can end a fight, a floor, a day. It can never tell somebody they are

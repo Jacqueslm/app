@@ -134,12 +134,17 @@ test('the Vault is worth walking into and spread across the building', () => {
   }
 });
 
-test('floors 1-10 are free and 11-90 are Pro', () => {
-  assert.match(APP, /const TOWER_FREE_FLOORS=10;/);
+test('the whole tower is free - all ninety floors, no plan check', () => {
+  // Jacques, 1 Sep 2026: "make the whole tower game free."
   assert.match(APP, /const TOWER_TOP_FLOOR=90;/);
-  assert.match(APP, /function towerMaxFloor\(\)\{return S\.isPro\?TOWER_TOP_FLOOR:TOWER_FREE_FLOORS;\}/);
-  assert.match(APP, /Floors eleven to ninety are part of Pro/);
-  // and the ceiling a player can climb to is that boundary, not a build limit
+  assert.match(APP, /function towerMaxFloor\(\)\{return TOWER_TOP_FLOOR;\}/,
+    'the ceiling must not depend on the plan');
+  assert.doesNotMatch(APP, /Floors eleven to ninety are part of Pro/,
+    'the upsell at floor ten is gone');
+  // nothing in the tower may read the subscription flag at all
+  const tower = APP.slice(APP.indexOf('const TOWER_FREE_FLOORS'), APP.indexOf('// \u2500\u2500 THE URGE WAVE'));
+  assert.doesNotMatch(tower, /S\.isPro/, 'the tower must not check S.isPro anywhere');
+  // the only thing that gates a floor now is real days on The Climb
   assert.match(APP, /return Math\.max\(1,Math\.min\(towerMaxFloor\(\),climbSteps\(\)\)\);/);
 });
 

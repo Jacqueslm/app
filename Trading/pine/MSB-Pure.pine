@@ -342,7 +342,23 @@ qtyRaw  = not na(riskPts) and riskPts > 0 and ptVal > 0 ? math.floor(riskUsd / (
 qty     = math.min(maxQty, qtyRaw)
 
 // ─── Your rules ──────────────────────────────────────────────────────────────
-inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+// The session gate, read off the bar's own New York clock.
+//
+// The obvious way to write this is time(timeframe.period, sessStr, sessTZ),
+// but that returns non-na for any bar that merely OVERLAPS the window. On an
+// hourly chart that lets an edge bar through: a candle that opens inside the
+// window and closes well outside it still counts as "in session", and the
+// signal prints at a price the window never described. So the test is done on
+// the close instead — the only moment the bar actually commits to anything.
+f_hm(sess) =>
+    a = str.tonumber(str.substring(sess, 0, 2)) * 100 + str.tonumber(str.substring(sess, 2, 4))
+    b = str.tonumber(str.substring(sess, 5, 7)) * 100 + str.tonumber(str.substring(sess, 7, 9))
+    [a, b]
+[sessFrom, sessTo] = f_hm(sessStr)
+etHM  = hour(time_close, sessTZ) * 100 + minute(time_close, sessTZ)
+etDow = dayofweek(time_close, sessTZ)
+weekday = etDow != dayofweek.saturday and etDow != dayofweek.sunday
+inSess = not useSess or (weekday and etHM > sessFrom and etHM <= sessTo)
 var int tookToday = 0
 var int lastDay   = na
 if na(lastDay) or dayofmonth != lastDay

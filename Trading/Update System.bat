@@ -11,8 +11,6 @@ if not exist "pine" mkdir "pine"
 if not exist "relay" mkdir "relay"
 if not exist "ninjatrader" mkdir "ninjatrader"
 
-curl -s -o "trade-grader.html"        "%BASE%/trade-grader.html"          && echo   [ok] trade grader
-curl -s -o "journal.html"             "%BASE%/journal.html"               && echo   [ok] journal      (your saved trades are kept - they live in the browser, not this file)
 curl -s -o "DAILY-USE.md"             "%BASE%/DAILY-USE.md"               && echo   [ok] daily-use guide
 curl -s -o "PLAYBOOK.md"              "%BASE%/PLAYBOOK.md"                && echo   [ok] playbook
 curl -s -o "BOT-SETUP.md"             "%BASE%/BOT-SETUP.md"               && echo   [ok] bot setup guide
@@ -28,6 +26,9 @@ curl -s -o "YOUR-RULES.md"            "%BASE%/YOUR-RULES.md"              && ech
 
 REM The old filtered scripts are gone - the system is pure structure now.
 del /q "pine\MSB-Indicator.pine" "pine\MSB-Scout.pine" "pine\MSB-Strategy.pine" "pine\MSB-Diagnostic.pine" >nul 2>&1
+REM The grader and the file journal are retired: one ledger, one link. The
+REM two launchers they needed go with them - TURN ON AUTO does all of it.
+del /q "trade-grader.html" "journal.html" "Start Trade Grader.bat" "Start Phone Link.bat" >nul 2>&1
 
 REM Last of all, this updater refreshes itself so next run knows about any
 REM newly added files. The swap happens after this window is done reading
@@ -38,6 +39,6 @@ findstr /c:"MSB - Update System" "Update System.new.bat" >nul 2>&1 && (
 ) || del /q "Update System.new.bat" >nul 2>&1
 
 echo.
-echo   Done. Refresh the grader/journal tabs with Ctrl+F5.
+echo   Done. If a Pine script changed, re-paste it into TradingView.
 echo.
 pause

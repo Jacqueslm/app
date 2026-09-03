@@ -1,11 +1,11 @@
 @echo off
-title MSB - Auto Journal
+title MSB - Turn On Auto
 cd /d "%~dp0"
 color 0B
 
 echo.
 echo   ===========================================================
-echo     TURNING ON AUTO - the bot writes its own trades down
+echo     TURNING ON AUTO - the bot trades its own signals
 echo   ===========================================================
 echo.
 
@@ -48,8 +48,8 @@ set HOOK=https://explicit-sprung-produce.ngrok-free.dev/hook/%SECRET%
 
 rem --- put it on the clipboard so there is nothing to type ------------------
 echo %HOOK%| clip
-echo   [4/4] Opening your journal...
-start "" http://localhost:4410/journal
+echo   [4/4] Opening the Bot switch...
+start "" http://localhost:4410/bot/%SECRET%
 
 echo.
 echo   ===========================================================
@@ -65,8 +65,9 @@ echo     3. Tick "Webhook URL"
 echo     4. Click the box and press Ctrl+V
 echo     5. Save
 echo.
-echo   That is it. From now on every signal writes itself into the
-echo   journal. Leave the two small windows running while you trade.
+echo   That is it. On the page that opened: TURN AUTOTRADE ON, set your
+echo   balance, and the bot places its own trades in NinjaTrader.
+echo   Leave the two small windows running while you trade.
 echo.
 echo   (If TradingView greys out "Webhook URL", that feature needs a
 echo    paid plan - everything else still works without it.)

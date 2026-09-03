@@ -28,7 +28,8 @@ expBars = input.int(400, "Setup expires after N bars", minval = 20, group = grpS
 grpZ = "Size & stop"
 riskPct  = input.float(10.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.5, group = grpZ)
 acctSize = input.float(100000, "Account size ($)", minval = 100, step = 500, group = grpZ)
-maxQty   = input.int(50, "Contract cap", minval = 1, group = grpZ)
+maxQty   = input.int(10, "Contract cap", minval = 1, group = grpZ,
+     tooltip = "Same ceiling as the relay. At 10% risk the maths often asks for far more than this; the cap, not the percentage, is then your size.")
 stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpZ)
 use15    = input.bool(true, "15m stop — the last 15m swing when tighter", group = grpZ,
      tooltip = "This is what turned the pattern positive in the backtest. OFF = stop at the shakeout extreme.")
@@ -88,7 +89,23 @@ f_ph() =>
 lo15 = request.security(syminfo.tickerid, "15", f_pl(), lookahead = barmerge.lookahead_off)
 hi15 = request.security(syminfo.tickerid, "15", f_ph(), lookahead = barmerge.lookahead_off)
 
-inSess = not useSess or not na(time(timeframe.period, sessStr, sessTZ))
+// The session gate, read off the bar's own New York clock.
+//
+// The obvious way to write this is time(timeframe.period, sessStr, sessTZ),
+// but that returns non-na for any bar that merely OVERLAPS the window. On an
+// hourly chart that lets an edge bar through: a candle that opens inside the
+// window and closes well outside it still counts as "in session", and the
+// signal prints at a price the window never described. So the test is done on
+// the close instead — the only moment the bar actually commits to anything.
+f_hm(sess) =>
+    a = str.tonumber(str.substring(sess, 0, 2)) * 100 + str.tonumber(str.substring(sess, 2, 4))
+    b = str.tonumber(str.substring(sess, 5, 7)) * 100 + str.tonumber(str.substring(sess, 7, 9))
+    [a, b]
+[sessFrom, sessTo] = f_hm(sessStr)
+etHM  = hour(time_close, sessTZ) * 100 + minute(time_close, sessTZ)
+etDow = dayofweek(time_close, sessTZ)
+weekday = etDow != dayofweek.saturday and etDow != dayofweek.sunday
+inSess = not useSess or (weekday and etHM > sessFrom and etHM <= sessTo)
 var int tookToday = 0
 var int lastDay = na
 if na(lastDay) or dayofmonth != lastDay
@@ -234,3 +251,24 @@ if barstate.islast
         table.cell(dash, 0, 3, "Bullets", text_color = color.gray, text_size = sz)
         table.cell(dash, 1, 3, str.tostring(math.max(0, maxPerDay - tookToday)) + " / " + str.tostring(maxPerDay),
              text_color = tookToday < maxPerDay ? color.silver : color.gray, text_size = sz)
+
+// The alert payload. Each number rides out on its own hidden plot, and the
+// alert message pulls them back in by name — that is the only way to get live
+// values into TradingView alert text.
+plot(fire ? (trigLong ? 1 : -1) : na, "aDir",   display = display.none, editable = false)
+plot(fire ? entry   : na,             "aEntry", display = display.none, editable = false)
+plot(fire ? stopRaw : na,             "aStop",  display = display.none, editable = false)
+plot(fire ? riskPts : na,             "aRisk",  display = display.none, editable = false)
+plot(fire ? t1      : na,             "aT1",    display = display.none, editable = false)
+plot(fire ? t2      : na,             "aT2",    display = display.none, editable = false)
+plot(fire ? roomR   : na,             "aRoom",  display = display.none, editable = false)
+plot(fire ? qty     : na,             "aQty",   display = display.none, editable = false)
+
+alertcondition(fire, "TRADE SIGNAL — the full alert",
+     "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R | qty {{plot(\"aQty\")}}")
+
+// One alert for both sides, so the text cannot name a side: a short shakeout
+// breaks the LOWER HIGH, and the old wording ("broke the higher low") read
+// wrong every time it fired on that side.
+alertcondition((Lon == 1 and Lon[1] != 1) or (Son == 1 and Son[1] != 1), "Shakeout — the reclaim is next",
+     "{{ticker}} shakeout — a level just got swept. Not a trade yet. The trade is the 1H close back through it; the panel shows which side.")

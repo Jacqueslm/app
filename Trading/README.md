@@ -16,8 +16,9 @@ Read them in this order.
 | **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Backtests in one click, and it is the only path that can move a stop to break-even. |
 | **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Dashboard, chart labels, and the alert that carries the trade plan. |
 | **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | **The backtester.** Same rules as the watcher, run against history. |
-| **[trade-grader.html](trade-grader.html)** | Double-click it. Sizes the trade, refuses the bad ones, keeps your journal |
-| **[Start Trade Grader.bat](Start%20Trade%20Grader.bat)** + `relay/` | Hands-free mode: TradingView webhooks fill the grader automatically (paid TV plan + ngrok) |
+| **[TURN ON AUTO.bat](TURN%20ON%20AUTO.bat)** + `relay/` | One button: starts the relay and the tunnel, opens the Bot switch page. Arm it and the bot places its own trades in NinjaTrader (Sim101 first). |
+| **Trade Ledger** (link in DAILY-USE.md) | Dollars in, R out. Two bullets a day, three branches, moved-stop flags. |
+| **Bot Decoder** (link in DAILY-USE.md) | Every word the two panels can print, in the order you read them. |
 
 Plus a **`trade-checker` agent** — in this project, ask Claude *"grade this MNQ long, entry 20,450,
 stop 20,410, daily's bullish"* and it reads the playbook and gives you a verdict. It will not
@@ -59,7 +60,7 @@ You get two kinds:
 - *"Level reclaimed — waiting on the trigger"* — go look at the chart, get ready.
 - The full setup alert — grade, SCALP/STANDARD/HOLD, entry, stop, T1, T2, room. This is the one you act on.
 
-**The alert is not permission to click buy.** It's permission to open the grader.
+**The alert is not permission to click buy.** It's the trade, at its numbers, or a pass.
 
 ---
 
@@ -70,15 +71,12 @@ You get two kinds:
         ↓
   open the 1H chart — does it match what the playbook describes?
         ↓
-  open trade-grader.html — tick the checklist honestly
-        ↓
-  REJECT → log it, close the laptop.  TAKE/HALF → it tells you your size
-        ↓
-  place the bracket from the TradingView chart (routed to NinjaTrader)
+  autotrade ARMED → the bot has placed it, leave it alone
+  autotrade OFF   → place the whole bracket at the alert's numbers
         ↓
   manage on the 15m — half at 1R, stop to break-even, runner to the HTF level
         ↓
-  log the outcome in the grader
+  log the outcome in the ledger
 ```
 
 ### About NinjaTrader
@@ -89,10 +87,10 @@ order from the chart itself. No second platform, no retyping levels under time p
 
 **Place the whole bracket in one action — entry, stop and target together.** Never enter first and
 "add the stop in a second." That second is exactly when price moves against you and a planned
-loss becomes whatever you can stomach. The grader gives you all three numbers before you click.
+loss becomes whatever you can stomach. The alert gives you all three numbers before you click.
 
-**The connection still doesn't place trades for you, and that's deliberate.** The indicator alerts,
-the grader approves, you click. Keep it that way until the journal says the system works.
+**Autotrade is a switch, and it starts on Sim101.** Flip it on the Bot switch page and the relay
+places the bracket itself; leave it off and you click. Either way the ledger is the judge.
 
 If you eventually want real automation, the honest path is NinjaScript (C#) inside NinjaTrader,
 ported from these same rules. **Don't do that yet** — automate after a few hundred manual trades

@@ -1,107 +1,101 @@
 # Daily Use — computer and phone
 
-The system in one line: MSB Pure watches MNQ and MES all day, and when the structure
-completes it fires an alert carrying the numbers — direction, entry, stop, T1, T2,
-room and the contract count. Your job is not to find trades. Your job is to review
-the one it hands you and say yes or no.
+The system in one line: **MSB PRICE** watches MES, MNQ and MGC on the 1-hour chart.
+When the structure completes it fires an alert with the numbers — direction, entry,
+stop, T1, T2, room and the contract count. Your job is not to find trades. Your
+job is to take the one it hands you, at its size, or pass.
 
-**The alert has no opinion.** It is not graded and it is not verified — the software
-reads swing highs and swing lows, and quality is your call, made on the checklist
-before you click. Nothing on the grader ticks itself.
+Two boxes sit on every chart. **MSB PRICE** decides. **MSB EYES** describes.
+Every word either one can print, and what to do about it, is on the decoder:
+**https://claude.ai/code/artifact/3fc30878-134e-4724-845a-df31c7f1bdac**
 
 ---
 
 ## Every morning (computer, ~1 minute)
 
-1. Double-click **Start Trade Grader.bat** — opens the relay window and the grader.
-2. Double-click **Start Phone Link.bat** — opens the ngrok window (this is what
-   lets TradingView and your phone reach the grader).
-3. Open TradingView desktop with NinjaTrader connected (live data).
+1. Open **NinjaTrader**. Leave it open.
+2. Double-click **TURN ON AUTO.bat**. Two small windows start (the relay and
+   the tunnel) and the **Bot switch** page opens.
+3. On that page, check the big word at the top: **ARMED** means the bot places
+   its own trades in NinjaTrader when a signal fires. **OFF** or **KILLED**
+   means it only watches. Tap the button to change it.
+4. Open TradingView.
 
-Leave all three running. That's the whole setup. If either black window is closed,
-alerts still hit your phone through the TradingView app — but the grader won't
-self-fill until you start them again.
+Leave the two small windows running. If they are closed, alerts still reach
+your phone through the TradingView app — the bot just won't place anything.
 
-**No signal all day = the system did its job.** Zero-trade days are correct outcomes.
-
----
-
-## When an alert fires — at the computer
-
-1. The grader tab flashes **⚡ ALERT** and fills itself with the numbers: symbol,
-   direction, entry, stop, targets and the bot's contract count. The checklist stays
-   blank — that part is the point of it.
-2. **Tick the boxes honestly, including NEWS.** Nothing in the software watches the
-   calendar any more, so the news box is entirely yours. FOMC day? Don't tick it,
-   and don't trade.
-3. Read the verdict. **TAKE IT** → look at the chart for 30 seconds. Does the story
-   on the screen match the plan? Then place the bracket in NinjaTrader as ONE
-   action: entry + stop + targets together, sized by the grader's contract count.
-4. The alert message tells you the exit plan:
-   - **SCALP** — one target at T1, full exit, done for the day.
-   - **STANDARD** — half off at T1, stop to break-even, rest at T2.
-   - **HOLD** — half off at T1, stop to break-even, trail the rest on the 15m to T2.
-5. **REJECT** means no trade. Not "no trade unless it looks really good." No trade.
-6. One bullet per day. After the trade — win or lose — log it in the journal and
-   close the laptop lid on trading.
+**No signal all day = the system did its job.** Zero-trade days are correct.
 
 ---
 
-## When an alert fires — on your phone
+## When an alert fires
 
-The TradingView app pushes the alert to your phone automatically (nothing new to
-set up — same alerts you already get). The message IS the trade plan: direction,
-entry, stop, risk, T1, T2, room.
+There are two alerts. They are not the same thing.
 
-To run it through the grader from your phone:
+**"Shakeout — the reclaim is next"** — a heads-up. A level just got swept. Not a
+trade. Get to a screen. Nothing to do yet.
 
-1. Open your phone's browser and go to:
+**"TRADE SIGNAL"** — the trade. The message carries everything:
 
-   **https://explicit-sprung-produce.ngrok-free.dev**
+```
+MES1! MSB PURE dir 1 | entry 6720.00 | stop 6700.00 | risk 20.00 pts | T1 6740.00 | T2 6790.00 | room 3.5R | qty 8
+```
 
-   (Bookmark it / add to home screen. First visit shows an ngrok warning page —
-   tap **Visit Site**.)
-2. That is your grader — same page, live, as long as your computer at home is on
-   with both windows running.
-3. If the page was already open when the alert fired, it filled itself. If you
-   opened it after, copy the alert text from the TradingView notification and
-   paste it into the paste box — it fills and machine-verifies the same way.
-4. Tick NEWS, read the verdict, look at the chart in the TradingView app, decide.
-5. Place the bracket from the NinjaTrader mobile app — entry, stop, and target
-   together, never entry alone.
+- `dir` 1 is long, −1 is short
+- `entry` the close the bot fired on — where you get in
+- `stop` where you get out if wrong — not negotiable
+- `T1` one R away; `T2` the structural target
+- `qty` contracts that fit your risk — the ceiling is 10
 
-**If your computer is off:** you still get the push with the full plan in it, and
-the checklist discipline still applies — you just tick it in your head against the
-chart. The grader is the second opinion, not the permission slip. When in doubt
-with no grader: that IS your answer. Pass.
+**If autotrade is ARMED:** the bot has already placed it — entry, stop, both
+targets — in NinjaTrader. Your job is to leave it alone.
+
+**If autotrade is OFF:** place the whole bracket yourself, in one action, at the
+alert's numbers. Entry, stop and targets together. Never entry first and "the
+stop in a second."
+
+Then log it in the ledger — four taps and the dollar amount:
+**https://claude.ai/code/artifact/4b968d1f-1e98-4b4b-ab9e-bfbe273a44f4**
 
 ---
 
-## Phone rules (protect-me-from-myself edition)
+## Two bullets a day
 
+The chart says **Bullets 2 / 2**. The relay stops at two. The ledger shows
+**Done for today** at two. Three tools, one rule. When it says done, it is done —
+the third trade is the one that undoes the first two.
+
+---
+
+## On the phone
+
+- The TradingView app pushes both alerts. The TRADE SIGNAL message *is* the plan.
+- The Bot switch page works from the phone on the home network, or through the
+  tunnel address printed in the relay window. The kill switch is there.
 - The phone is for **reviewing a signal that fired**, not for scrolling charts
   looking for one. If no alert fired, there is no trade to find.
-- Never market-in from the phone because "it's moving." The system waited hours
-  for this setup; price running without you is not an emergency.
-- Small screen = bigger mistakes. If you can't check the 15m chart AND place a
-  full bracket comfortably, skip the trade. There is another one tomorrow.
+- Never market-in from the phone because "it's moving." The system waited
+  hours for this setup; price running without you is not an emergency.
+- On a phone, set the EYES panel to **Compact** (script settings → Panel).
+  It drops the scalp rows and fits the screen.
 
 ---
 
 ## Weekly (2 minutes, Sunday)
 
-- Open the grader → Journal → look at the per-grade win rates. The A+ number is
-  the whole system's report card.
-- Export CSV if you want a backup.
-- Check both alerts still say **Active** in TradingView's alert panel (they
-  survive restarts, but a re-login can pause them).
+- Open the ledger. Look at the three branches — **bot signal**, **hand-off**,
+  **my own**. After twenty trades, that comparison is the whole report card.
+- Check both alerts still say **Active** on every chart in TradingView's alert
+  panel (a re-login can pause them).
+- If the Bot switch page shows **rollover month** next to a contract, tap **Roll**.
 
 ## If something breaks
 
 | Symptom | Fix |
 |---|---|
-| Grader doesn't self-fill | Are both black windows running? Restart both .bat files. |
-| Phone page won't load | Computer asleep/off, or ngrok window closed. |
-| Alert fired but grader says "Could not read that" | Paste the full message including the entry/stop line. |
-| No alerts for many days | Normal in chop — check the dashboard: "All four" will read *mixed* rather than ALIGNED. The market is the reason, not the system. |
-| Dashboard shows ⚠ next to Exec | The script is on the wrong chart timeframe: 1H for standard mode, 15m for scalp. |
+| Bot switch page won't open | The relay window is closed. Run TURN ON AUTO.bat again. |
+| Signal fired, nothing placed | Is the page ARMED? Is NinjaTrader open with the AT interface on? Check "Decisions this session" at the bottom of the page — it says why. |
+| Alert says qty 8, bot placed 10 or fewer | The ceiling. Max lots on the Bot switch page is the real size. |
+| MSB-PRICE missing from the alert dropdown | Add the script to that chart first (Indicators → My scripts). Alerts are per chart. |
+| No alerts for many days | Normal. The pattern fires about once every two months per market. |
+| Panel eats the phone screen | EYES settings → Panel → Compact, size tiny. |

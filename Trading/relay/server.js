@@ -19,7 +19,6 @@ const path = require("path");
 const crypto = require("crypto");
 
 const PORT = 4410;
-const GRADER = path.join(__dirname, "..", "trade-grader.html");
 const SECRET_FILE = path.join(__dirname, "secret.txt");
 const LOG_FILE = path.join(__dirname, "alerts.log");
 const STATE_FILE = path.join(__dirname, "state.json");
@@ -39,7 +38,7 @@ try {
 let alerts = [];
 let nextId = 1;
 
-// ═══ SIGNALS FOR THE JOURNAL ═════════════════════════════════════════════════
+// ═══ SIGNALS ═════════════════════════════════════════════════════════════════
 // Every "MSB PURE" alert that arrives is parsed and saved to signals.json,
 // whether autotrade is on or not. The journal page pulls this file, so a
 // signal writes itself into the journal with no typing. The fills and P&L
@@ -65,28 +64,6 @@ function recordSignal(text) {
   try { fs.writeFileSync(SIGNALS_FILE, JSON.stringify(signals, null, 1)); } catch {}
 }
 
-// The journal page keeps itself current: at every relay start, fetch the
-// latest journal.html from the repo (the same place Update System.bat pulls
-// from) and write it next to the grader. Best-effort — offline, the copy on
-// disk keeps working. Your trades are never in this file: they live in the
-// browser's own storage, so refreshing the page file can't touch them.
-const JOURNAL_FILE = path.join(__dirname, "..", "journal.html");
-function refreshJournal() {
-  require("https").get(
-    "https://raw.githubusercontent.com/Jacqueslm/app/main/Trading/journal.html",
-    res => {
-      if (res.statusCode !== 200) { res.resume(); return; }
-      let body = "";
-      res.on("data", c => { body += c; });
-      res.on("end", () => {
-        if (body.includes("Trade Journal") && body.includes("</html>")) {
-          try { fs.writeFileSync(JOURNAL_FILE, body); } catch {}
-        }
-      });
-    }
-  ).on("error", () => {});
-}
-refreshJournal();
 
 // ═══ THE TUNNEL, STARTED FOR YOU ═════════════════════════════════════════════
 // TradingView's servers live on the internet and cannot see a PC behind a
@@ -112,10 +89,15 @@ startTunnel();
 
 const hookUrl = () => "https://" + TUNNEL_HOST + "/hook/" + secret;
 
+// Through the tunnel, every request arrives with X-Forwarded-For; from a
+// browser on this PC, none does. Anything that prints the secret (the hook
+// address, the /bot link) is shown only to the local side. The tunnel exists
+// for one caller — TradingView — and it only ever needs /hook/<secret>.
+const isLocal = req => !req.headers["x-forwarded-for"] && !req.headers["x-forwarded-proto"];
+
 // The one line a person still has to move by hand is the webhook address, so
-// put it where it cannot be missed: the top of whatever page the relay serves,
-// with a button that copies it. Injected at serve time so it rides along with
-// pages this file does not own.
+// put it where it cannot be missed: the top of the bot page, with a button
+// that copies it.
 function banner() {
   return '<div style="font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;' +
     'background:#0b2b22;border-bottom:2px solid #26a69a;color:#e6edf3;' +
@@ -130,7 +112,6 @@ function banner() {
     "this.style.background='#26a69a'" + '" ' +
     'style="background:#238636;color:#fff;border:0;border-radius:6px;padding:7px 14px;' +
     'font-weight:700;cursor:pointer">copy</button>' +
-    '<a href="/journal" style="color:#8ab4ff;margin-left:auto">open the journal &rarr;</a>' +
     '</div>';
 }
 function withBanner(html) {
@@ -171,8 +152,13 @@ const AUTO_DEFAULT = {
   balance: 25000,
   riskPct: 10,         // set by choice. Reference: the paper record averages 0.87% a
                        // trade, and the sweeps put 10% at a 30-99% drawdown on the same edge.
-  maxContracts: 50,       // a hard ceiling no arithmetic can talk its way past
-  maxPerDay: 1,           // the bot's bullet count — same rule as yours
+  maxContracts: 10,       // a hard ceiling no arithmetic can talk its way past.
+                          // 10 is a size you can watch go wrong: on a 20-point MES
+                          // stop that is $1,000, on a 40-point MNQ stop $800. The
+                          // percentage regularly asks for far more than that.
+  lotsSet: false,         // flipped true once the ceiling has been chosen on /bot
+  cfgVersion: 0,          // which one-time migrations below have run on this file
+  maxPerDay: 2,           // the chart says Bullets 2 / 2; the relay agrees, or it is confusing
   dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
     "Documents", "NinjaTrader 8", "incoming"),
@@ -187,11 +173,33 @@ const AUTO_DEFAULT = {
   }
 };
 let auto = AUTO_DEFAULT;
+let needsMigration = false;
 try {
   auto = Object.assign({}, AUTO_DEFAULT, JSON.parse(fs.readFileSync(AUTO_FILE, "utf8")));
 } catch {
   fs.writeFileSync(AUTO_FILE, JSON.stringify(AUTO_DEFAULT, null, 2));
 }
+// The ceiling used to default to 50, which on a six-figure balance at 10% is not
+// a ceiling at all — it is the position size, quietly. Existing autotrade.json
+// files carry that old number, and the person who has to live with it does not
+// edit JSON. So: bring the ceiling down to today's default exactly once, then
+// mark it chosen and never touch it again. Any value saved from /bot sticks.
+const CFG_VERSION = 2;
+if (auto.lotsSet !== true) {                       // v1: the ceiling
+  auto.maxContracts = AUTO_DEFAULT.maxContracts;
+  auto.lotsSet = true;
+  needsMigration = true;
+}
+if (!(auto.cfgVersion >= 2)) {                     // v2: bullets match the chart
+  auto.maxPerDay = AUTO_DEFAULT.maxPerDay;
+  needsMigration = true;
+}
+auto.cfgVersion = CFG_VERSION;
+// Autotrade is switched on and its numbers set from the /bot page, not by hand.
+// A phone is often the only thing in reach when a number is wrong, and a stale
+// `balance` silently mis-sizes every trade. Written back so changes survive a
+// restart. Going LIVE still means editing this file on purpose — see /bot/arm.
+const saveAuto = () => { try { fs.writeFileSync(AUTO_FILE, JSON.stringify(auto, null, 2)); } catch {} };
 
 // Bot state that must survive a restart: the kill switch, today's trade count,
 // and recent alert fingerprints. Lives in relay/state.json.
@@ -233,6 +241,31 @@ function contractStatus(name) {
   if (cy === now.year && cm === now.month) return "rollover";
   return "ok";
 }
+
+// "MES 09-26" → "MES 12-26". Index futures list quarterly; gold every other
+// month. Used when a contract has expired (automatically — a dead contract
+// cannot trade anyway) and offered as a button during the rollover month.
+function rollForward(name) {
+  const m = /^(\S+)\s+(\d{2})-(\d{2})\s*$/.exec(name || "");
+  if (!m) return name;
+  const root = m[1], cm = +m[2], cy = +m[3];
+  const months = /^M?GC$/i.test(root) ? [2, 4, 6, 8, 10, 12] : [3, 6, 9, 12];
+  const next = months.find(x => x > cm);
+  const nm = next || months[0], ny = next ? cy : cy + 1;
+  return root + " " + String(nm).padStart(2, "0") + "-" + String(ny).padStart(2, "0");
+}
+// Expired contracts roll themselves at startup. Rollover month is a choice —
+// the old contract still trades — so that one is a button on /bot, not a rule.
+for (const [tk, inst] of Object.entries(auto.instruments)) {
+  let guard = 0;
+  while (contractStatus(inst.name) === "expired" && guard++ < 12) {
+    const was = inst.name;
+    inst.name = rollForward(inst.name);
+    console.log("↻ " + tk + ": " + was + " had expired — rolled to " + inst.name);
+    needsMigration = true;
+  }
+}
+if (needsMigration) saveAuto();
 
 function inSession(sess) {
   const m = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(sess || "");
@@ -377,9 +410,13 @@ function botPage() {
   const live = auto.account !== "Sim101";
   const rows = Object.entries(auto.instruments).map(([tk, i]) => {
     const cs = contractStatus(i.name);
-    const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED — fix autotrade.json</b>'
+    const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED</b>'
                : cs === "rollover" ? ' <b style="color:#f0a020">rollover month</b>' : "";
-    return `<tr><td>${tk}</td><td>${i.name}${warn}</td><td>${i.session || "—"} ET</td></tr>`;
+    const roll = cs === "ok" ? "" :
+      `<form method="POST" action="/bot/${secret}/roll" style="display:inline;margin-left:8px">
+<input type="hidden" name="tk" value="${tk}"><button style="width:auto;padding:6px 10px;font-size:13px;
+background:#f0a020;color:#000">Roll to ${rollForward(i.name)}</button></form>`;
+    return `<tr><td>${tk}</td><td>${i.name}${warn}${roll}</td><td>${i.session || "—"} ET</td></tr>`;
   }).join("");
   const dec = decisions.slice().reverse().map(d =>
     `<li>${new Date(d.t).toLocaleTimeString()} — ${d.placed ? "✅" : "🚫"} ${d.msg}</li>`).join("") ||
@@ -392,6 +429,7 @@ td{padding:6px 4px;border-bottom:1px solid #2a3341}li{font-size:13px;color:#8b96
 .big{font-size:26px;font-weight:800;padding:14px;border-radius:10px;text-align:center;margin:14px 0}
 button{width:100%;padding:16px;font-size:18px;font-weight:700;border:0;border-radius:10px;cursor:pointer}
 .pill{padding:2px 10px;border-radius:20px;font-size:13px;font-weight:700}</style></head><body>
+${banner()}
 <h1>MSB Bot — ${today}</h1>
 <div class="big" style="background:${armed ? "rgba(38,166,154,.15);color:#26a69a" : "rgba(239,83,80,.15);color:#ef5350"}">
 ${armed ? "ARMED" : state.killed ? "KILLED" : "OFF (autotrade.json)"}</div>
@@ -405,11 +443,34 @@ Contracts are computed from that and the stop distance in the alert.</p>
 order file and never hears about the fill. Trades of 2+ contracts take half at 1R and let the rest
 run to T2 against the <i>original</i> stop. For break-even after 1R, run the NinjaScript
 (ninjatrader/MSBPure.cs) instead, which sees its own fills.</p>
-<form method="POST" action="/bot/${secret}/toggle">
+<form method="POST" action="/bot/${secret}/arm">
+<button style="background:${auto.enabled ? "#546e7a" : "#26a69a"};color:#fff">
+${auto.enabled ? "TURN AUTOTRADE OFF" : "TURN AUTOTRADE ON — " + auto.account}</button></form>
+${live
+  ? `<p style="font-size:13px;color:#ef5350">This button only arms <b>Sim101</b>. The account is
+<b>${auto.account}</b>, which is real money, so autotrade there can only be switched on by editing
+relay/autotrade.json deliberately.</p>`
+  : `<p style="font-size:13px;color:#8b96a5">Sim money. When a signal fires the bot places the entry,
+the stop and both targets in NinjaTrader by itself. It never touches a trade you opened by hand.</p>`}
+<form method="POST" action="/bot/${secret}/toggle" style="margin-top:14px">
 <button style="background:${state.killed ? "#26a69a" : "#ef5350"};color:#fff">
 ${state.killed ? "RE-ARM THE BOT" : "KILL — stop placing orders"}</button></form>
 <p style="font-size:13px;color:#8b96a5">The kill switch survives restarts. It stops new orders only —
 anything already working in NinjaTrader stays yours to manage.</p>
+<h1 style="font-size:16px;margin-top:22px">Numbers</h1>
+<form method="POST" action="/bot/${secret}/settings">
+<div style="display:flex;gap:8px">
+${[["balance", "Balance $", auto.balance], ["riskPct", "Risk %", auto.riskPct],
+   ["maxPerDay", "Per day", auto.maxPerDay], ["maxContracts", "Max lots", auto.maxContracts]].map(([k, label, v]) =>
+`<label style="flex:1;font-size:12px;color:#8b96a5">${label}<br>
+<input name="${k}" value="${v}" inputmode="decimal" style="width:100%;box-sizing:border-box;
+padding:10px;margin-top:4px;font-size:16px;border-radius:8px;border:1px solid #2a3341;
+background:#161b22;color:#e6edf3"></label>`).join("")}
+</div>
+<button style="background:#2f81f7;color:#fff;margin-top:10px">Save</button></form>
+<p style="font-size:13px;color:#8b96a5">Balance is the one number the relay cannot look up for itself.
+If it is wrong, every contract count is wrong the same way. <b>Max lots</b> is a hard ceiling the risk
+maths cannot argue past — when it bites, the ceiling is your real position size, not the percentage.</p>
 <table>${rows}</table>
 <h1 style="font-size:16px;margin-top:22px">Decisions this session</h1><ul>${dec}</ul>
 </body></html>`;
@@ -419,50 +480,27 @@ anything already working in NinjaTrader stays yours to manage.</p>
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
 
-  // The grader itself
+  // The front door. The grader and the file journal are gone — the ledger
+  // lives at its own link now — so this is a status line and, from this PC
+  // only, the way in to the bot page.
   if (req.method === "GET" && (url === "/" || url === "/index.html")) {
-    fs.readFile(GRADER, (err, html) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Could not find trade-grader.html one folder up from relay/. Keep the Trading folder together.");
-        return;
-      }
-      // no-store: the grader gets updated in place, and a browser holding a
-      // stale copy looks exactly like a broken system. Always serve fresh.
-      res.writeHead(200, {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store, must-revalidate",
-      });
-      res.end(withBanner(html));
-    });
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSB relay</title><style>body{background:#0e1116;color:#e6edf3;font:16px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;
+max-width:520px;margin:0 auto;padding:28px 20px}a{color:#8ab4ff}</style></head><body>
+<h1 style="font-size:20px">MSB relay is running</h1>
+${isLocal(req)
+  ? `<p><a href="/bot/${secret}" style="font-size:18px;font-weight:700">Open the Bot switch &rarr;</a></p>
+<p style="color:#8b96a5;font-size:14px">Arm and disarm, balance and size, the webhook address to paste, the contract roll.</p>`
+  : `<p style="color:#8b96a5">Nothing to see from here. Open it on the PC it runs on.</p>`}
+</body></html>`);
     return;
   }
 
-  // The grader polls this for fresh alerts
-  if (req.method === "GET" && url === "/alerts.json") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ alerts }));
-    return;
-  }
-
-  // The journal, served fresh — same folder, second doorway.
-  if (req.method === "GET" && url === "/journal") {
-    fs.readFile(JOURNAL_FILE, (err, html) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Could not find journal.html one folder up from relay/. Keep the Trading folder together.");
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, must-revalidate" });
-      res.end(withBanner(html));
-    });
-    return;
-  }
-
-  // The journal pulls signals here. The open CORS header is deliberate:
-  // journal.html opened straight from the folder (file://) still gets to read
-  // this list. It only ever exposes the bot's own signal history, nothing else.
+  // The bot's own signal history, for anything on this PC that wants it. The
+  // open CORS header lets a page opened from a folder (file://) read it.
   if (req.method === "GET" && url === "/signals.json") {
+    if (!isLocal(req)) { res.writeHead(403); res.end(); return; }
     res.writeHead(200, {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
@@ -485,6 +523,65 @@ const server = http.createServer((req, res) => {
                              : "🟢 Bot re-armed from the /bot page.");
     res.writeHead(303, { Location: "/bot/" + secret });
     res.end();
+    return;
+  }
+  // Switch autotrade on or off from the phone. Turning it ON is only allowed on
+  // Sim101: arming a real account is a decision that should cost more than a tap,
+  // so it stays a deliberate edit of autotrade.json. Turning it OFF always works.
+  if (req.method === "POST" && url === "/bot/" + secret + "/arm") {
+    if (!auto.enabled && auto.account !== "Sim101") {
+      decide(false, "arm refused — " + auto.account + " is not Sim101. Edit relay/autotrade.json to go live on purpose.");
+    } else {
+      auto.enabled = !auto.enabled;
+      saveAuto();
+      console.log(auto.enabled ? "🟢 AUTOTRADE ON → " + auto.account + " (sim)"
+                               : "⚪ Autotrade OFF — signals arrive, no orders are placed.");
+    }
+    res.writeHead(303, { Location: "/bot/" + secret });
+    res.end();
+    return;
+  }
+  // Roll one instrument to its next contract month, from the phone.
+  if (req.method === "POST" && url === "/bot/" + secret + "/roll") {
+    let body = "";
+    req.on("data", c => { body += c; if (body.length > 1000) req.destroy(); });
+    req.on("end", () => {
+      const tk = new URLSearchParams(body).get("tk");
+      const inst = auto.instruments[tk];
+      if (inst) {
+        const was = inst.name;
+        inst.name = rollForward(inst.name);
+        saveAuto();
+        console.log("↻ " + tk + ": " + was + " → " + inst.name + " (rolled from the /bot page)");
+      }
+      res.writeHead(303, { Location: "/bot/" + secret });
+      res.end();
+    });
+    return;
+  }
+  // Balance / risk / bullets, edited from the same page. Clamped, never trusted raw.
+  if (req.method === "POST" && url === "/bot/" + secret + "/settings") {
+    let body = "";
+    req.on("data", c => { body += c; if (body.length > 4000) req.destroy(); });
+    req.on("end", () => {
+      const f = new URLSearchParams(body);
+      const num = (k, min, max) => {
+        const v = parseFloat(String(f.get(k) || "").replace(/[^0-9.]/g, ""));
+        return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : null;
+      };
+      const b = num("balance", 0, 1e9), r = num("riskPct", 0, 100),
+            d = num("maxPerDay", 0, 10),   c = num("maxContracts", 1, 200);
+      if (b !== null) auto.balance = b;
+      if (r !== null) auto.riskPct = r;
+      if (d !== null) auto.maxPerDay = Math.round(d);
+      if (c !== null) { auto.maxContracts = Math.round(c); auto.lotsSet = true; }
+      saveAuto();
+      console.log("⚙ autotrade: $" + auto.balance + " balance, " + auto.riskPct + "% risk, "
+                  + auto.maxPerDay + " a day = $" + Math.round(auto.balance * auto.riskPct / 100)
+                  + " a trade, ceiling " + auto.maxContracts + " lots.");
+      res.writeHead(303, { Location: "/bot/" + secret });
+      res.end();
+    });
     return;
   }
 
@@ -525,29 +622,28 @@ server.listen(PORT, () => {
   console.log("  │  MSB ALERT RELAY is running                                 │");
   console.log("  └─────────────────────────────────────────────────────────────┘");
   console.log("");
-  console.log("  Your grader:      http://localhost:" + PORT);
-  console.log("  Your journal:     http://localhost:" + PORT + "/journal   (bot signals save themselves here)");
   console.log("  Webhook path:     /hook/" + secret);
   console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
   console.log("");
   console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
                                              : state.killed ? "🔴 KILLED — re-arm on the /bot page"
-                                             : "⚪ off (relay/autotrade.json)"));
+                                             : "⚪ off — tap TURN AUTOTRADE ON on the /bot page"));
   console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +
               " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
               "   (contracts computed from the stop distance)");
+  console.log("  Never more than:  " + auto.maxContracts + " contracts — the ceiling, whatever the maths says");
   if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);
-    if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — update autotrade.json before trading.");
-    else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — update it soon.");
+    if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — it will roll itself on the next start.");
+    else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — tap Roll on the Bot switch page.");
   }
   console.log("");
   console.log("  ── PASTE THIS ONCE, then auto runs itself ──────────────────");
   console.log("      " + hookUrl());
   console.log("  In TradingView: open the TRADE SIGNAL alert, Notifications tab,");
-  console.log("  tick Webhook URL, paste, Save. The same address is on screen");
-  console.log("  with a copy button at the top of the page that just opened.");
+  console.log("  tick Webhook URL, paste, Save. The same address, with a copy");
+  console.log("  button, sits at the top of the Bot switch page.");
   console.log("");
   console.log("  Keep this window open during the session. Ctrl+C to stop.");
   console.log("");

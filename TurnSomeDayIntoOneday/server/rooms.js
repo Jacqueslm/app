@@ -93,10 +93,10 @@ async function aiVerdict(text, deps) {
 }
 
 function register(app, { requireAuth, isOwnerRequest, GEMINI_API_KEY_REF, GEMINI_MODEL }) {
-  // The live rooms are Pro (Jacques, 18 Aug) - alongside lessons 16-30 and the
-  // 30-chat day, this is the third thing Pro actually buys. Server-verified,
-  // same as the chat cap: the client's isPro flag is decoration, this is the
-  // rule. The owner and comp-list accounts pass through getBillingStatus.
+  // The live rooms are Pro (Jacques, 18 Aug; briefly opened and put back on
+  // 1 Sep). Server-verified, same as the chat cap: the client's isPro flag is
+  // decoration, this is the rule. The owner and comp-list accounts pass through
+  // getBillingStatus.
   function requirePro(req, res) {
     const user = db.getUserById(req.userId);
     if (user && billing.getBillingStatus(user).isPro) return true;

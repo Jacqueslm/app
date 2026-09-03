@@ -176,7 +176,8 @@ const AUTO_DEFAULT = {
                           // stop that is $1,000, on a 40-point MNQ stop $800. The
                           // percentage regularly asks for far more than that.
   lotsSet: false,         // flipped true once the ceiling has been chosen on /bot
-  maxPerDay: 1,           // the bot's bullet count — same rule as yours
+  cfgVersion: 0,          // which one-time migrations below have run on this file
+  maxPerDay: 2,           // the chart says Bullets 2 / 2; the relay agrees, or it is confusing
   dupWindowMin: 10,       // identical alert text inside this window trades once
   incoming: path.join(process.env.USERPROFILE || require("os").homedir(),
     "Documents", "NinjaTrader 8", "incoming"),
@@ -202,17 +203,22 @@ try {
 // files carry that old number, and the person who has to live with it does not
 // edit JSON. So: bring the ceiling down to today's default exactly once, then
 // mark it chosen and never touch it again. Any value saved from /bot sticks.
-if (auto.lotsSet !== true) {
+const CFG_VERSION = 2;
+if (auto.lotsSet !== true) {                       // v1: the ceiling
   auto.maxContracts = AUTO_DEFAULT.maxContracts;
   auto.lotsSet = true;
   needsMigration = true;
 }
+if (!(auto.cfgVersion >= 2)) {                     // v2: bullets match the chart
+  auto.maxPerDay = AUTO_DEFAULT.maxPerDay;
+  needsMigration = true;
+}
+auto.cfgVersion = CFG_VERSION;
 // Autotrade is switched on and its numbers set from the /bot page, not by hand.
 // A phone is often the only thing in reach when a number is wrong, and a stale
 // `balance` silently mis-sizes every trade. Written back so changes survive a
 // restart. Going LIVE still means editing this file on purpose — see /bot/arm.
 const saveAuto = () => { try { fs.writeFileSync(AUTO_FILE, JSON.stringify(auto, null, 2)); } catch {} };
-if (needsMigration) saveAuto();
 
 // Bot state that must survive a restart: the kill switch, today's trade count,
 // and recent alert fingerprints. Lives in relay/state.json.
@@ -254,6 +260,31 @@ function contractStatus(name) {
   if (cy === now.year && cm === now.month) return "rollover";
   return "ok";
 }
+
+// "MES 09-26" → "MES 12-26". Index futures list quarterly; gold every other
+// month. Used when a contract has expired (automatically — a dead contract
+// cannot trade anyway) and offered as a button during the rollover month.
+function rollForward(name) {
+  const m = /^(\S+)\s+(\d{2})-(\d{2})\s*$/.exec(name || "");
+  if (!m) return name;
+  const root = m[1], cm = +m[2], cy = +m[3];
+  const months = /^M?GC$/i.test(root) ? [2, 4, 6, 8, 10, 12] : [3, 6, 9, 12];
+  const next = months.find(x => x > cm);
+  const nm = next || months[0], ny = next ? cy : cy + 1;
+  return root + " " + String(nm).padStart(2, "0") + "-" + String(ny).padStart(2, "0");
+}
+// Expired contracts roll themselves at startup. Rollover month is a choice —
+// the old contract still trades — so that one is a button on /bot, not a rule.
+for (const [tk, inst] of Object.entries(auto.instruments)) {
+  let guard = 0;
+  while (contractStatus(inst.name) === "expired" && guard++ < 12) {
+    const was = inst.name;
+    inst.name = rollForward(inst.name);
+    console.log("↻ " + tk + ": " + was + " had expired — rolled to " + inst.name);
+    needsMigration = true;
+  }
+}
+if (needsMigration) saveAuto();
 
 function inSession(sess) {
   const m = /^(\d{2})(\d{2})-(\d{2})(\d{2})$/.exec(sess || "");
@@ -398,9 +429,13 @@ function botPage() {
   const live = auto.account !== "Sim101";
   const rows = Object.entries(auto.instruments).map(([tk, i]) => {
     const cs = contractStatus(i.name);
-    const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED — fix autotrade.json</b>'
+    const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED</b>'
                : cs === "rollover" ? ' <b style="color:#f0a020">rollover month</b>' : "";
-    return `<tr><td>${tk}</td><td>${i.name}${warn}</td><td>${i.session || "—"} ET</td></tr>`;
+    const roll = cs === "ok" ? "" :
+      `<form method="POST" action="/bot/${secret}/roll" style="display:inline;margin-left:8px">
+<input type="hidden" name="tk" value="${tk}"><button style="width:auto;padding:6px 10px;font-size:13px;
+background:#f0a020;color:#000">Roll to ${rollForward(i.name)}</button></form>`;
+    return `<tr><td>${tk}</td><td>${i.name}${warn}${roll}</td><td>${i.session || "—"} ET</td></tr>`;
   }).join("");
   const dec = decisions.slice().reverse().map(d =>
     `<li>${new Date(d.t).toLocaleTimeString()} — ${d.placed ? "✅" : "🚫"} ${d.msg}</li>`).join("") ||
@@ -545,6 +580,24 @@ const server = http.createServer((req, res) => {
     }
     res.writeHead(303, { Location: "/bot/" + secret });
     res.end();
+    return;
+  }
+  // Roll one instrument to its next contract month, from the phone.
+  if (req.method === "POST" && url === "/bot/" + secret + "/roll") {
+    let body = "";
+    req.on("data", c => { body += c; if (body.length > 1000) req.destroy(); });
+    req.on("end", () => {
+      const tk = new URLSearchParams(body).get("tk");
+      const inst = auto.instruments[tk];
+      if (inst) {
+        const was = inst.name;
+        inst.name = rollForward(inst.name);
+        saveAuto();
+        console.log("↻ " + tk + ": " + was + " → " + inst.name + " (rolled from the /bot page)");
+      }
+      res.writeHead(303, { Location: "/bot/" + secret });
+      res.end();
+    });
     return;
   }
   // Balance / risk / bullets, edited from the same page. Clamped, never trusted raw.

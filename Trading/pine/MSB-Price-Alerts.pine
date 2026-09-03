@@ -28,7 +28,8 @@ expBars = input.int(400, "Setup expires after N bars", minval = 20, group = grpS
 grpZ = "Size & stop"
 riskPct  = input.float(10.0, "Risk per trade (% of account)", minval = 0.1, maxval = 100, step = 0.5, group = grpZ)
 acctSize = input.float(100000, "Account size ($)", minval = 100, step = 500, group = grpZ)
-maxQty   = input.int(50, "Contract cap", minval = 1, group = grpZ)
+maxQty   = input.int(10, "Contract cap", minval = 1, group = grpZ,
+     tooltip = "Same ceiling as the relay. At 10% risk the maths often asks for far more than this; the cap, not the percentage, is then your size.")
 stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpZ)
 use15    = input.bool(true, "15m stop — the last 15m swing when tighter", group = grpZ,
      tooltip = "This is what turned the pattern positive in the backtest. OFF = stop at the shakeout extreme.")
@@ -266,5 +267,8 @@ plot(fire ? qty     : na,             "aQty",   display = display.none, editable
 alertcondition(fire, "TRADE SIGNAL — the full alert",
      "{{ticker}} MSB PURE dir {{plot(\"aDir\")}} | entry {{plot(\"aEntry\")}} | stop {{plot(\"aStop\")}} | risk {{plot(\"aRisk\")}} pts | T1 {{plot(\"aT1\")}} | T2 {{plot(\"aT2\")}} | room {{plot(\"aRoom\")}}R | qty {{plot(\"aQty\")}}")
 
+// One alert for both sides, so the text cannot name a side: a short shakeout
+// breaks the LOWER HIGH, and the old wording ("broke the higher low") read
+// wrong every time it fired on that side.
 alertcondition((Lon == 1 and Lon[1] != 1) or (Son == 1 and Son[1] != 1), "Shakeout — the reclaim is next",
-     "{{ticker}} broke the higher low. If it closes back above the lower high, that is the trade.")
+     "{{ticker}} shakeout — a level just got swept. Not a trade yet. The trade is the 1H close back through it; the panel shows which side.")

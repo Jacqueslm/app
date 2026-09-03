@@ -12,6 +12,23 @@ expBars = input.int(400, "Setup expires after N bars", minval = 20)
 scalpTF = input.timeframe("15", "Scalp timeframe for the hand-off levels")
 maxLbl  = input.int(8, "Keep at most this many labels", minval = 3, maxval = 30)
 
+// The same window as the bot. The eyes trade nothing, but a "trap sprung"
+// label at 3am used to look exactly like one at 10am, and only one of those
+// is a signal — the bot waits for the first New York close still through the
+// level. So the label now says which it is.
+grpR    = "Bot hours (match the bot)"
+useSess = input.bool(true, "Bot only trades the New York session", group = grpR)
+sessStr = input.session("0930-1500", "Tradeable window", group = grpR)
+sessTZ  = input.string("America/New_York", "Timezone", group = grpR)
+f_hm(sess) =>
+    a = str.tonumber(str.substring(sess, 0, 2)) * 100 + str.tonumber(str.substring(sess, 2, 4))
+    b = str.tonumber(str.substring(sess, 5, 7)) * 100 + str.tonumber(str.substring(sess, 7, 9))
+    [a, b]
+[sessFrom, sessTo] = f_hm(sessStr)
+etHM  = hour(time_close, sessTZ) * 100 + minute(time_close, sessTZ)
+etDow = dayofweek(time_close, sessTZ)
+inSess = not useSess or (etDow != dayofweek.saturday and etDow != dayofweek.sunday and etHM > sessFrom and etHM <= sessTo)
+
 // ─── panel size and place — a phone is not a monitor ─────────────────────────
 grpP     = "Panel"
 showPnl  = input.bool(true,  "Show the panel", group = grpP)
@@ -173,9 +190,9 @@ plotshape(evSRS, "caution: stop run above", shape.triangledown, location.aboveba
 plotshape(evClkL, "caution: trap loading (crowd short)", shape.triangledown, location.abovebar, color.new(color.yellow, 0), size = size.small, text = "trap loading\nno shorts", textcolor = color.yellow)
 plotshape(evClkS, "caution: trap loading (crowd long)", shape.triangleup, location.belowbar, color.new(color.yellow, 0), size = size.small, text = "trap loading\nno longs", textcolor = color.yellow)
 if fireL
-    f_note(low, "LONG — trap sprung", color.new(color.green, 0), true)
+    f_note(low, inSess ? "LONG — trap sprung" : "LONG — sprung OFF-HOURS\nbot waits for NY", inSess ? color.new(color.green, 0) : color.new(color.yellow, 0), true)
 if fireS
-    f_note(high, "SHORT — trap sprung", color.new(color.red, 0), false)
+    f_note(high, inSess ? "SHORT — trap sprung" : "SHORT — sprung OFF-HOURS\nbot waits for NY", inSess ? color.new(color.red, 0) : color.new(color.yellow, 0), false)
 
 // ─── SCALP CHECK: the trade YOU want, answered live ──────────────────────────
 // Hand-off scalps: up to the next 15m swing high (best when it is a LOWER

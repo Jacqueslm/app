@@ -14,11 +14,11 @@ you flip it.
 2. **Tell NinjaTrader to accept orders** — in NinjaTrader:
    Tools → Options → Automated trading interface → tick **AT interface** → OK.
 
-3. **Flip the switch** — open `relay\autotrade.json` in Notepad. Change
-   `"enabled": false` to `"enabled": true`. Check three things while you're in
-   there: the contract months are current (MNQ 09-26 etc. — update them each
-   quarter at rollover), `"balance"` matches your actual account, and
-   `"riskPct"` is the number you meant. Save.
+3. **Flip the switch** — open the **Bot switch** link the relay prints when it
+   starts (`http://localhost:4410/bot/...`) and tap **TURN AUTOTRADE ON — Sim101**.
+   The same page has the numbers: balance, risk %, trades per day, max lots.
+   Turning it on from the page only works on Sim101 — a real account is a
+   deliberate edit of `relay\autotrade.json`, on purpose.
 
    Size is computed, not fixed: `floor( (balance × riskPct%) ÷ (stop points ×
    dollars per point) )`, using the stop distance from the alert. So the dollars

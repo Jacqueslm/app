@@ -19,7 +19,6 @@ const path = require("path");
 const crypto = require("crypto");
 
 const PORT = 4410;
-const GRADER = path.join(__dirname, "..", "trade-grader.html");
 const SECRET_FILE = path.join(__dirname, "secret.txt");
 const LOG_FILE = path.join(__dirname, "alerts.log");
 const STATE_FILE = path.join(__dirname, "state.json");
@@ -39,7 +38,7 @@ try {
 let alerts = [];
 let nextId = 1;
 
-// ═══ SIGNALS FOR THE JOURNAL ═════════════════════════════════════════════════
+// ═══ SIGNALS ═════════════════════════════════════════════════════════════════
 // Every "MSB PURE" alert that arrives is parsed and saved to signals.json,
 // whether autotrade is on or not. The journal page pulls this file, so a
 // signal writes itself into the journal with no typing. The fills and P&L
@@ -65,28 +64,6 @@ function recordSignal(text) {
   try { fs.writeFileSync(SIGNALS_FILE, JSON.stringify(signals, null, 1)); } catch {}
 }
 
-// The journal page keeps itself current: at every relay start, fetch the
-// latest journal.html from the repo (the same place Update System.bat pulls
-// from) and write it next to the grader. Best-effort — offline, the copy on
-// disk keeps working. Your trades are never in this file: they live in the
-// browser's own storage, so refreshing the page file can't touch them.
-const JOURNAL_FILE = path.join(__dirname, "..", "journal.html");
-function refreshJournal() {
-  require("https").get(
-    "https://raw.githubusercontent.com/Jacqueslm/app/main/Trading/journal.html",
-    res => {
-      if (res.statusCode !== 200) { res.resume(); return; }
-      let body = "";
-      res.on("data", c => { body += c; });
-      res.on("end", () => {
-        if (body.includes("Trade Journal") && body.includes("</html>")) {
-          try { fs.writeFileSync(JOURNAL_FILE, body); } catch {}
-        }
-      });
-    }
-  ).on("error", () => {});
-}
-refreshJournal();
 
 // ═══ THE TUNNEL, STARTED FOR YOU ═════════════════════════════════════════════
 // TradingView's servers live on the internet and cannot see a PC behind a
@@ -112,10 +89,15 @@ startTunnel();
 
 const hookUrl = () => "https://" + TUNNEL_HOST + "/hook/" + secret;
 
+// Through the tunnel, every request arrives with X-Forwarded-For; from a
+// browser on this PC, none does. Anything that prints the secret (the hook
+// address, the /bot link) is shown only to the local side. The tunnel exists
+// for one caller — TradingView — and it only ever needs /hook/<secret>.
+const isLocal = req => !req.headers["x-forwarded-for"] && !req.headers["x-forwarded-proto"];
+
 // The one line a person still has to move by hand is the webhook address, so
-// put it where it cannot be missed: the top of whatever page the relay serves,
-// with a button that copies it. Injected at serve time so it rides along with
-// pages this file does not own.
+// put it where it cannot be missed: the top of the bot page, with a button
+// that copies it.
 function banner() {
   return '<div style="font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif;' +
     'background:#0b2b22;border-bottom:2px solid #26a69a;color:#e6edf3;' +
@@ -130,7 +112,6 @@ function banner() {
     "this.style.background='#26a69a'" + '" ' +
     'style="background:#238636;color:#fff;border:0;border-radius:6px;padding:7px 14px;' +
     'font-weight:700;cursor:pointer">copy</button>' +
-    '<a href="/journal" style="color:#8ab4ff;margin-left:auto">open the journal &rarr;</a>' +
     '</div>';
 }
 function withBanner(html) {
@@ -448,6 +429,7 @@ td{padding:6px 4px;border-bottom:1px solid #2a3341}li{font-size:13px;color:#8b96
 .big{font-size:26px;font-weight:800;padding:14px;border-radius:10px;text-align:center;margin:14px 0}
 button{width:100%;padding:16px;font-size:18px;font-weight:700;border:0;border-radius:10px;cursor:pointer}
 .pill{padding:2px 10px;border-radius:20px;font-size:13px;font-weight:700}</style></head><body>
+${banner()}
 <h1>MSB Bot — ${today}</h1>
 <div class="big" style="background:${armed ? "rgba(38,166,154,.15);color:#26a69a" : "rgba(239,83,80,.15);color:#ef5350"}">
 ${armed ? "ARMED" : state.killed ? "KILLED" : "OFF (autotrade.json)"}</div>
@@ -498,50 +480,27 @@ maths cannot argue past — when it bites, the ceiling is your real position siz
 const server = http.createServer((req, res) => {
   const url = req.url.split("?")[0];
 
-  // The grader itself
+  // The front door. The grader and the file journal are gone — the ledger
+  // lives at its own link now — so this is a status line and, from this PC
+  // only, the way in to the bot page.
   if (req.method === "GET" && (url === "/" || url === "/index.html")) {
-    fs.readFile(GRADER, (err, html) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Could not find trade-grader.html one folder up from relay/. Keep the Trading folder together.");
-        return;
-      }
-      // no-store: the grader gets updated in place, and a browser holding a
-      // stale copy looks exactly like a broken system. Always serve fresh.
-      res.writeHead(200, {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store, must-revalidate",
-      });
-      res.end(withBanner(html));
-    });
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSB relay</title><style>body{background:#0e1116;color:#e6edf3;font:16px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;
+max-width:520px;margin:0 auto;padding:28px 20px}a{color:#8ab4ff}</style></head><body>
+<h1 style="font-size:20px">MSB relay is running</h1>
+${isLocal(req)
+  ? `<p><a href="/bot/${secret}" style="font-size:18px;font-weight:700">Open the Bot switch &rarr;</a></p>
+<p style="color:#8b96a5;font-size:14px">Arm and disarm, balance and size, the webhook address to paste, the contract roll.</p>`
+  : `<p style="color:#8b96a5">Nothing to see from here. Open it on the PC it runs on.</p>`}
+</body></html>`);
     return;
   }
 
-  // The grader polls this for fresh alerts
-  if (req.method === "GET" && url === "/alerts.json") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ alerts }));
-    return;
-  }
-
-  // The journal, served fresh — same folder, second doorway.
-  if (req.method === "GET" && url === "/journal") {
-    fs.readFile(JOURNAL_FILE, (err, html) => {
-      if (err) {
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("Could not find journal.html one folder up from relay/. Keep the Trading folder together.");
-        return;
-      }
-      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store, must-revalidate" });
-      res.end(withBanner(html));
-    });
-    return;
-  }
-
-  // The journal pulls signals here. The open CORS header is deliberate:
-  // journal.html opened straight from the folder (file://) still gets to read
-  // this list. It only ever exposes the bot's own signal history, nothing else.
+  // The bot's own signal history, for anything on this PC that wants it. The
+  // open CORS header lets a page opened from a folder (file://) read it.
   if (req.method === "GET" && url === "/signals.json") {
+    if (!isLocal(req)) { res.writeHead(403); res.end(); return; }
     res.writeHead(200, {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
@@ -663,8 +622,6 @@ server.listen(PORT, () => {
   console.log("  │  MSB ALERT RELAY is running                                 │");
   console.log("  └─────────────────────────────────────────────────────────────┘");
   console.log("");
-  console.log("  Your grader:      http://localhost:" + PORT);
-  console.log("  Your journal:     http://localhost:" + PORT + "/journal   (bot signals save themselves here)");
   console.log("  Webhook path:     /hook/" + secret);
   console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
   console.log("");
@@ -678,15 +635,15 @@ server.listen(PORT, () => {
   if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);
-    if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — update autotrade.json before trading.");
-    else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — update it soon.");
+    if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — it will roll itself on the next start.");
+    else if (cs === "rollover") console.log("  ⚠ " + tk + " → " + i.name + " is in its rollover month — tap Roll on the Bot switch page.");
   }
   console.log("");
   console.log("  ── PASTE THIS ONCE, then auto runs itself ──────────────────");
   console.log("      " + hookUrl());
   console.log("  In TradingView: open the TRADE SIGNAL alert, Notifications tab,");
-  console.log("  tick Webhook URL, paste, Save. The same address is on screen");
-  console.log("  with a copy button at the top of the page that just opened.");
+  console.log("  tick Webhook URL, paste, Save. The same address, with a copy");
+  console.log("  button, sits at the top of the Bot switch page.");
   console.log("");
   console.log("  Keep this window open during the session. Ctrl+C to stop.");
   console.log("");

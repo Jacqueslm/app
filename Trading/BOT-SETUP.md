@@ -25,9 +25,8 @@ you flip it.
    at risk are the same on a tight stop and a wide one — but **a stale `balance`
    makes every trade the wrong size in the same direction**, so keep it current.
 
-4. **Restart the relay** — close the MSB Alert Relay window, double-click
-   `Start Trade Grader.bat` again. Start the phone link too
-   (`Start Phone Link.bat`).
+4. **Restart the relay** — close the MSB Alert Relay window and double-click
+   `TURN ON AUTO.bat` again. It starts the tunnel too.
 
 5. **Create the alert** — on the MNQ chart: Alt+A → Condition **MSB Trap** (or MSB Pure if you run that one) →
    **TRADE SIGNAL — the full alert** → Trigger **Once per bar close** →
@@ -79,7 +78,7 @@ you can always audit what the bot did and why.
 
 | Rail | What it stops |
 |---|---|
-| **Kill switch** | You, from your phone. Open the `/bot` page (URL is printed when the relay starts — same address as the grader, plus `/bot/<secret>`), hit **KILL**. No orders until you re-arm. Survives restarts. |
+| **Kill switch** | You, from your phone. Open the Bot switch page (TURN ON AUTO opens it; the address is printed when the relay starts), hit **KILL**. No orders until you re-arm. Survives restarts. |
 | **One a day** | A second signal after the bullet is spent. Counted in `relay\state.json`, so restarting the relay does not reload the gun. Change it with `maxPerDay` in `autotrade.json`. |
 | **Duplicates** | TradingView retrying a webhook, or an alert double-firing. The identical alert inside 10 minutes places once, not twice. |
 | **Session gate** | Stale alerts. An alert that lands outside that instrument's ET window (delayed webhook, relay started mid-day, weekends) is describing prices that no longer exist — it's logged, not traded. |

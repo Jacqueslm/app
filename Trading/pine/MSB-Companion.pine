@@ -32,7 +32,7 @@ inSess = not useSess or (etDow != dayofweek.saturday and etDow != dayofweek.sund
 // ─── panel size and place — a phone is not a monitor ─────────────────────────
 grpP     = "Panel"
 showPnl  = input.bool(true,  "Show the panel", group = grpP)
-compact  = input.bool(false, "Compact — setups only, no scalp rows", group = grpP,
+compact  = input.bool(true,  "Compact — setups only, no scalp rows", group = grpP,
      tooltip = "Turn this on for a phone. Drops the panel to two rows.")
 pnlSize  = input.string("small", "Panel text size", options = ["tiny", "small", "normal", "large"], group = grpP)
 pnlPos   = input.string("top right", "Panel corner", group = grpP,

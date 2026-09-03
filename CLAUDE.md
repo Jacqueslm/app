@@ -30,11 +30,14 @@ Standing instructions. These override default behaviour and repo conventions.
 
 ## The app — hard rules
 
-- **Free tier:** day counter, SOS set, breathing, "Talk me through it",
-  journal, weekly reports, first 15 days of every pack, and **the whole 2AM
-  tower — all 90 floors, both variants** (made free 1 Sep 2026). Pro is days
-  16–90 of the packs, Friendly, and the rooms. Do not blur this in marketing
-  copy.
+- **Free tier (as of 1 Sep 2026):** everything except two things. Day counter,
+  SOS set, breathing, "Talk me through it", journal, weekly reports, analytics,
+  **every lesson day 1–90 on every track**, the Spiritual Path, Together, and
+  **the whole 2AM tower — all 90 floors, both variants**.
+- **Pro is exactly two things: Friendly and the live rooms.** Friendly is the
+  one feature with a real per-message bill, so free gets zero chats, not three.
+  Never advertise a lesson day as paid — that was removed and the copy went
+  with it.
 - **No medical claims.** No "research shows", no brain chemistry, no
   mechanisms. Only what people report.
 - **It can end a fight, a floor, a day. It can never tell somebody they are

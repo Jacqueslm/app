@@ -26,8 +26,11 @@ have to survive before the door opens.
 3. **No medical claims.** No brain-chemistry language, no "research shows."
 4. **No relapse punishment.** Relapse drops you to the last landing (floors 10, 20,
    30...). It never resets to zero. Same rule as The Climb.
-5. **Free tier gets floors 1–10.** Pro unlocks 11–90. Android build stays free-tier
-   only per existing gating.
+5. ~~**Free tier gets floors 1–10.** Pro unlocks 11–90.~~ **AMENDED 1 Sep 2026 —
+   the whole tower is free.** Jacques: "make the whole tower game free."
+   All ninety floors, both variants, no plan check anywhere in the tower. The
+   only thing that opens a floor is a real day on The Climb. A test asserts the
+   tower never reads `S.isPro`.
 6. **No new dependencies.** HTML5 canvas + vanilla JS inside the existing
    Node/Express PWA. No Unity, no Phaser, no game engine, no app store rebuild.
 
@@ -211,15 +214,16 @@ been started.
 - ~~Trigger Board puzzle on landings~~
 - ~~Artifact rooms + Vault screen~~
 
-Phases 1-4 are complete (31 Aug 2026): ninety floors, gated 1-10 free and
-11-90 Pro, with the supporter variant built.
+Phases 1-4 are complete: ninety floors and the supporter variant. The whole
+tower is FREE (1 Sep 2026) - see the amendment below.
 
 **Phase 4:**
-- ~~Floors 11–90 unlocked behind Pro~~ — built 31 Aug 2026. The arc runs in
+- ~~Floors 11–90 unlocked behind Pro~~ — built 31 Aug 2026, **and made free on
+  1 Sep 2026**. The arc runs in
   decades: 11-20 the fog lifting, 21-30 the month, 31-40 the empty hours,
   41-50 the people, 51-60 the plateau, 61-70 what it was for, 71-80 the
-  rebuild, 81-90 what comes after. `TOWER_FREE_FLOORS=10`,
-  `TOWER_TOP_FLOOR=90`, `towerMaxFloor()` reads `S.isPro`.
+  rebuild, 81-90 what comes after. `TOWER_TOP_FLOOR=90` and
+  `towerMaxFloor()` returns it unconditionally.
 - Three rules and three atmospheres were added for it (`quiet`, `fog`, `pull`;
   `rain`, `embers`, `static`), and the layout set went from 10 maps to 16 —
   with ten maps and ninety floors the generator could not keep floors distinct

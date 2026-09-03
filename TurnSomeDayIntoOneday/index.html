@@ -6778,9 +6778,13 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   6. No new dependencies - canvas plus vanilla JS, inside this same file.
 // Floors 1-10 are free; 11-90 are Pro. The whole ninety are built, so the
 // cap is a plan boundary now, not the edge of what exists.
-const TOWER_FREE_FLOORS=10;
+// Jacques, 1 Sep 2026: "make the whole tower game free." The gate is gone -
+// all ninety floors are free for everybody. TOWER_FREE_FLOORS stayed as a
+// constant only so nothing else in the file breaks looking for it; nothing
+// reads it any more.
+const TOWER_FREE_FLOORS=90;
 const TOWER_TOP_FLOOR=90;
-function towerMaxFloor(){return S.isPro?TOWER_TOP_FLOOR:TOWER_FREE_FLOORS;}
+function towerMaxFloor(){return TOWER_TOP_FLOOR;}
 // Ten floors. Each one is its own place: its own rooms, palette, air and rule.
 // Rooms live in 0..1 of the stage. The stairs are not a room until the door is
 // open, and the door is always the only way to them.
@@ -8566,10 +8570,10 @@ function towerDraw(){
     g.fillStyle='#e6ebff';g.shadowColor='rgba(150,160,255,.9)';g.shadowBlur=12;g.fill();g.shadowBlur=0;
   }
   g.globalAlpha=1;
-  // The tower up the right edge: ten ticks for a free account, ninety for a
-  // Pro one. At ninety they are a few pixels apart, so the dots shrink and the
-  // landings (every tenth) stay full size - the shape of the building still
-  // reads at a glance without a single number on it.
+  // The tower up the right edge: ninety ticks, for everybody. They sit a few
+  // pixels apart at that count, so the dots shrink and the landings (every
+  // tenth) stay full size - the shape of the building still reads at a glance
+  // without a single number on it.
   const lx=W-11,top=towerMaxFloor();
   const dense=top>40;
   for(let i=1;i<=top;i++){
@@ -8656,11 +8660,6 @@ function towerPanel(){
       el.innerHTML='<button class="tw-btn go" onclick="towerAscend()">Go up to floor '+(n+1)+'</button>';
     }else if(n>=TOWER_TOP_FLOOR){
       el.innerHTML='<div class="tw-note">The roof. Ninety floors under you and the stairs still go up — there is no floor where this is finished, and that is the good news.</div>';
-    }else if(n>=towerMaxFloor()){
-      // Free tier stops at ten. Say what is above it plainly and once; never
-      // dress the wall up as part of the story.
-      el.innerHTML='<div class="tw-note">Floor ten is the top of the free tower. Floors eleven to ninety are part of Pro.</div>'+
-        '<button class="tw-btn go" style="margin-top:8px" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</button>';
     }else{
       el.innerHTML='<div class="tw-note">Locked from the outside. This one opens after a real day — finish today\'s lesson and take your step on The Climb, then come back.</div>'+
         '<button class="tw-btn" style="margin-top:8px" onclick="towerGoEarn()">Go take today\'s step</button>';
@@ -10984,11 +10983,24 @@ const RECOVERY_TERMS={
 function recoveryTerm(){
   return RECOVERY_TERMS[S.currentAddiction]||'sober';
 }
+// The big number on Home counts the LONGEST-RUNNING track (masterTrack), but the
+// label above it used recoveryTerm(), which follows the track whose lessons you
+// are reading. Jacques, 1 Sep 2026: three tracks running, the counter said
+// "Days binge-free / 9 / Anger & Control - Since August 22" with Food/Binging
+// sitting at 0d two lines below. Same counter, two different habits. The label
+// has to name the thing being counted.
+function counterTerm(){
+  const m=(typeof masterTrack==='function')?masterTrack():null;
+  const name=(m&&m.mixed&&S.userType!=='partner')?m.name:S.currentAddiction;
+  return RECOVERY_TERMS[name]||'sober';
+}
 function capitalize(str){
   return str.charAt(0).toUpperCase()+str.slice(1);
 }
 function updateRecoveryTermLabels(){
-  const term=recoveryTerm();
+  // Counter labels follow the counter's own track; everything else below still
+  // follows the track being worked.
+  const term=counterTerm();
   const daysLbl=document.getElementById('days-term-lbl');
   if(daysLbl)daysLbl.textContent=`Days ${term}`;
   const hoursLbl=document.getElementById('prog-hours-lbl');
@@ -14146,7 +14158,9 @@ async function sendMsg(){
     const profileBlock=`[System Context - EXPLICIT PERSONALIZATION PROTOCOL]:
 User Name: ${S.name||'Recovering Individual'}
 User Gender Identity: ${S.userGender||'Not Specified'}
-${capitalize(recoveryTerm())} Since: ${S.startDate||'today'}
+${capitalize(counterTerm())} Since: ${S.startDate||'today'}
+DAY COUNT SHOWN ON THEIR SCREEN RIGHT NOW: ${(()=>{const st=S.startDate?new Date(S.startDate):new Date();return Math.max(0,Math.floor((Date.now()-st.getTime())/86400000));})()}${(()=>{const m=(typeof masterTrack==='function')?masterTrack():null;return (m&&m.mixed&&S.userType!=='partner')?` (this is the ${m.name} track, their longest-running one)`:'';})()}. Use THIS number if you mention how many days they have. Do NOT work it out from the date yourself and do NOT use a lesson number as a day count - they are different things and getting it wrong is the fastest way to lose their trust.
+${(()=>{const t=S.selectedAddictions||[];return t.length>1?`Days per track: ${t.map(a=>`${a} ${daysFor(a)}d`).join(', ')}.`:'';})()}
 Target Areas/Addictions: ${S.selectedAddictions.join(', ')||'general recovery'}
 ${(S.partnerFocus||[]).length?`Loved One's Struggle: ${S.partnerFocus.join(', ')} — the user is the SUPPORTER, not the person with the addiction. Never coach them as the addict.`:''}
 ${S.userType==='partner'&&S.partnerRelation?`Loved One's Relation: ${({partner:'their partner/spouse','adult-child':'their adult child','minor-child':'their child, UNDER 18',parent:'their parent',sibling:'their sibling',friend:'a friend'})[S.partnerRelation]||S.partnerRelation}`:''}
@@ -14155,9 +14169,9 @@ Specific Behavioral Profile: ${blueprintSummary||'not yet specified'}
 ${(()=>{
   const t=S.selectedAddictions||[];
   if(t.length<2)return '';
-  const where=t.map(a=>`${a} day ${getLessonDayFor(a)}`).join(', ');
+  const where=t.map(a=>`${a} lesson ${getLessonDayFor(a)}`).join(', ');
   const links=activeTrackLinks(t);
-  return `Working MORE THAN ONE track at once: ${where}.`
+  return `Working MORE THAN ONE track at once, at these LESSON positions (lessons advance when finished, so these run AHEAD of the day count for anyone doing more than one a day - never call a lesson number a day): ${where}.`
     +(links.length?`\nThese overlap: ${links.map(l=>`${l.a} + ${l.b} (${l.why})`).join('; ')}.`:'')
     +`\nTreat these as ONE person with one pattern showing up in different places - if they mention one, you may connect it to the other when it genuinely fits. Never claim one CAUSES another, and never bring it up to be clever; only when it helps them see something.`;
 })()}
@@ -15554,7 +15568,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.8';
+const APP_VERSION='9.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

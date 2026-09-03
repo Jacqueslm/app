@@ -126,7 +126,9 @@ function withBanner(html) {
 // incoming folder (the ATI). NinjaTrader places the bracket: market entry,
 // then two OCO pairs — half at T1, half at T2, both protected by the stop.
 //
-// OFF until you turn it on in relay/autotrade.json, and it starts on Sim101.
+// OFF until you switch it on from the /bot page, and only a sim account can
+// be switched on there. NinjaTrader names its practice accounts "Sim101" or,
+// on a hosted demo, "DEMO" plus a number — either is sim money.
 // Requirements in NinjaTrader: Tools → Options → Automated trading interface
 // → tick "AT interface". That folder only exists while NinjaTrader is running.
 //
@@ -172,6 +174,8 @@ const AUTO_DEFAULT = {
     "MGC1!": { name: "MGC 12-26", tick: 0.10, perPoint: 10, session: "0800-1300", maxRiskPts: 35 }
   }
 };
+// Sim money or real money, from the name alone. Anything else is treated as real.
+const isSim = name => /^(sim|demo)/i.test(String(name || "").trim());
 let auto = AUTO_DEFAULT;
 let needsMigration = false;
 try {
@@ -407,7 +411,7 @@ function botPage() {
   const armed = auto.enabled && !state.killed;
   const today = etNow().date;
   const used = state.day === today ? state.placed.length : 0;
-  const live = auto.account !== "Sim101";
+  const live = !isSim(auto.account);
   const rows = Object.entries(auto.instruments).map(([tk, i]) => {
     const cs = contractStatus(i.name);
     const warn = cs === "expired" ? ' <b style="color:#ef5350">EXPIRED</b>'
@@ -447,9 +451,9 @@ run to T2 against the <i>original</i> stop. For break-even after 1R, run the Nin
 <button style="background:${auto.enabled ? "#546e7a" : "#26a69a"};color:#fff">
 ${auto.enabled ? "TURN AUTOTRADE OFF" : "TURN AUTOTRADE ON — " + auto.account}</button></form>
 ${live
-  ? `<p style="font-size:13px;color:#ef5350">This button only arms <b>Sim101</b>. The account is
-<b>${auto.account}</b>, which is real money, so autotrade there can only be switched on by editing
-relay/autotrade.json deliberately.</p>`
+  ? `<p style="font-size:13px;color:#ef5350">This button only arms a <b>sim</b> account — one named
+Sim101 or DEMO…. The account is <b>${auto.account}</b>, which is real money, so autotrade there can
+only be switched on by editing relay/autotrade.json deliberately.</p>`
   : `<p style="font-size:13px;color:#8b96a5">Sim money. When a signal fires the bot places the entry,
 the stop and both targets in NinjaTrader by itself. It never touches a trade you opened by hand.</p>`}
 <form method="POST" action="/bot/${secret}/toggle" style="margin-top:14px">
@@ -460,17 +464,18 @@ anything already working in NinjaTrader stays yours to manage.</p>
 <h1 style="font-size:16px;margin-top:22px">Numbers</h1>
 <form method="POST" action="/bot/${secret}/settings">
 <div style="display:flex;gap:8px">
-${[["balance", "Balance $", auto.balance], ["riskPct", "Risk %", auto.riskPct],
+${[["account", "Account", auto.account], ["balance", "Balance $", auto.balance], ["riskPct", "Risk %", auto.riskPct],
    ["maxPerDay", "Per day", auto.maxPerDay], ["maxContracts", "Max lots", auto.maxContracts]].map(([k, label, v]) =>
 `<label style="flex:1;font-size:12px;color:#8b96a5">${label}<br>
-<input name="${k}" value="${v}" inputmode="decimal" style="width:100%;box-sizing:border-box;
+<input name="${k}" value="${v}" inputmode="${k === "account" ? "text" : "decimal"}" style="width:100%;box-sizing:border-box;
 padding:10px;margin-top:4px;font-size:16px;border-radius:8px;border:1px solid #2a3341;
 background:#161b22;color:#e6edf3"></label>`).join("")}
 </div>
 <button style="background:#2f81f7;color:#fff;margin-top:10px">Save</button></form>
 <p style="font-size:13px;color:#8b96a5">Balance is the one number the relay cannot look up for itself.
-If it is wrong, every contract count is wrong the same way. <b>Max lots</b> is a hard ceiling the risk
-maths cannot argue past — when it bites, the ceiling is your real position size, not the percentage.</p>
+If it is wrong, every contract count is wrong the same way. <b>Account</b> is the name NinjaTrader shows
+in its Accounts tab — copy it exactly. <b>Max lots</b> is a hard ceiling the risk maths cannot argue
+past — when it bites, the ceiling is your real position size, not the percentage.</p>
 <table>${rows}</table>
 <h1 style="font-size:16px;margin-top:22px">Decisions this session</h1><ul>${dec}</ul>
 </body></html>`;
@@ -529,8 +534,8 @@ ${isLocal(req)
   // Sim101: arming a real account is a decision that should cost more than a tap,
   // so it stays a deliberate edit of autotrade.json. Turning it OFF always works.
   if (req.method === "POST" && url === "/bot/" + secret + "/arm") {
-    if (!auto.enabled && auto.account !== "Sim101") {
-      decide(false, "arm refused — " + auto.account + " is not Sim101. Edit relay/autotrade.json to go live on purpose.");
+    if (!auto.enabled && !isSim(auto.account)) {
+      decide(false, "arm refused — " + auto.account + " is not a sim account. Edit relay/autotrade.json to go live on purpose.");
     } else {
       auto.enabled = !auto.enabled;
       saveAuto();
@@ -569,6 +574,13 @@ ${isLocal(req)
         const v = parseFloat(String(f.get(k) || "").replace(/[^0-9.]/g, ""));
         return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : null;
       };
+      // The account name: letters and digits only, and switching to a real
+      // account from the page disarms the bot — going live is never a side effect.
+      const acct = String(f.get("account") || "").trim().replace(/[^A-Za-z0-9_-]/g, "").slice(0, 32);
+      if (acct && acct !== auto.account) {
+        auto.account = acct;
+        if (!isSim(acct) && auto.enabled) { auto.enabled = false; console.log("⚪ Autotrade OFF — account changed to a real one."); }
+      }
       const b = num("balance", 0, 1e9), r = num("riskPct", 0, 100),
             d = num("maxPerDay", 0, 10),   c = num("maxContracts", 1, 200);
       if (b !== null) auto.balance = b;
@@ -576,7 +588,7 @@ ${isLocal(req)
       if (d !== null) auto.maxPerDay = Math.round(d);
       if (c !== null) { auto.maxContracts = Math.round(c); auto.lotsSet = true; }
       saveAuto();
-      console.log("⚙ autotrade: $" + auto.balance + " balance, " + auto.riskPct + "% risk, "
+      console.log("⚙ autotrade: " + auto.account + ", $" + auto.balance + " balance, " + auto.riskPct + "% risk, "
                   + auto.maxPerDay + " a day = $" + Math.round(auto.balance * auto.riskPct / 100)
                   + " a trade, ceiling " + auto.maxContracts + " lots.");
       res.writeHead(303, { Location: "/bot/" + secret });
@@ -625,7 +637,7 @@ server.listen(PORT, () => {
   console.log("  Webhook path:     /hook/" + secret);
   console.log("  Bot switch:       http://localhost:" + PORT + "/bot/" + secret);
   console.log("");
-  console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (auto.account !== "Sim101" ? "  ⚠ REAL MONEY" : " (sim)")
+  console.log("  Autotrade:        " + (armed ? "🟢 ARMED → " + auto.account + (isSim(auto.account) ? " (sim)" : "  ⚠ REAL MONEY")
                                              : state.killed ? "🔴 KILLED — re-arm on the /bot page"
                                              : "⚪ off — tap TURN AUTOTRADE ON on the /bot page"));
   console.log("  Risk per trade:   " + (auto.riskPct || 0) + "% of $" + (auto.balance || 0) +

@@ -205,7 +205,7 @@ IARC 12+, ClassInd 14.
 
 ### 4. ⏳ Buy Pro on a real phone, from the live listing
 Never tested. Closed testing is a different billing path. Install from Play,
-buy, confirm days 16+ unlock and Friendly opens, cancel.
+buy, confirm Friendly opens and the rooms open, cancel. (Lessons stopped being a Pro feature on 1 Sep 2026 - every day is free.)
 
 ### 5. ✅ Billing Library 8 — CLOSED, already updated
 **Jacques, 26 Aug 2026: "it's already updated, no extension."** The shell is on

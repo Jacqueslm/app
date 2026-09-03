@@ -93,12 +93,15 @@ async function aiVerdict(text, deps) {
 }
 
 function register(app, { requireAuth, isOwnerRequest, GEMINI_API_KEY_REF, GEMINI_MODEL }) {
-  // The live rooms were Pro from 18 Aug. Jacques, 1 Sep 2026: "make the whole
-  // app free." The check is kept as a function rather than deleted at every
-  // call site, so the rooms can be gated again by changing one thing here
-  // instead of hunting through the file.
+  // The live rooms are Pro (Jacques, 18 Aug; briefly opened and put back on
+  // 1 Sep). Server-verified, same as the chat cap: the client's isPro flag is
+  // decoration, this is the rule. The owner and comp-list accounts pass through
+  // getBillingStatus.
   function requirePro(req, res) {
-    return true;
+    const user = db.getUserById(req.userId);
+    if (user && billing.getBillingStatus(user).isPro) return true;
+    res.status(403).json({ proRequired: true, error: 'The live rooms are part of Pro.' });
+    return false;
   }
   // Open/closed and the rules, for the room screen to render honestly.
   app.get('/api/rooms/status', (req, res) => {

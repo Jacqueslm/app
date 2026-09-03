@@ -1200,7 +1200,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
               <div id="lockedTeaser" style="font-size:.8125rem;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none"></div>
               <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
             </div>
-            <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">Days 16–90 are part of the Pro bootcamp — BREAK IT finishes, then REBUILD (days 31–60) and KEEP IT (days 61–90). Upgrade to keep going.</div>
+            <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">BREAK IT finishes here, then REBUILD (days 31–60) and KEEP IT (days 61–90). All of it is free.</div>
             <div class="mini-pricing-row" style="font-size:.71875rem;color:var(--tm);text-align:center;margin-top:10px"></div>
             <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
             <button class="ob-btn outline" style="margin-top:8px" onclick="viewLessonDay(15)">Back to Day 15</button>
@@ -1225,7 +1225,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="text-align:left;margin-bottom:28px">
           <div class="ob-label">With Pro, you get</div>
           <div style="font-size:.8125rem;color:#c0caff;line-height:2">
-            <div>✓ Days 16–90, the rest of the bootcamp</div>
+            <div>✓ Friendly — your AI companion, 30 chats a day</div>
             <div>✓ 30 Friendly AI chats/day</div>
             <div>✓ Priority support</div>
           </div>
@@ -1654,12 +1654,12 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
         <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — day 16 onward on every track, all the way to day 90 on the recovery tracks — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Days 16–90 of every recovery track — the full bootcamp</div>
+          <div>✓ Friendly — the AI companion, up to 30 chats a day</div>
           <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
           <div>✓ Friendly, your AI companion — 30 chats a day</div>
           <div>✓ Live rooms — a moderated community, open daily</div>
           <div>✓ Days 16–35 of Supporting Someone</div>
-          <div id="plans-pro-together">✓ Days 16–90 of Together, the couples program</div>
+          <div id="plans-pro-together">✓ The live rooms — real people on the same road</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
         <!-- This button sits on the tier banner, which is the brand navy in BOTH
@@ -1717,10 +1717,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div style="font-size:.71875rem;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–90 — the full 90-Day Bootcamp on every track</div>
+            <div class="feat y"><i class="ti ti-check"></i>Friendly — the AI companion, up to 30 chats a day</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
             <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–90 of Together, the couples program</div>
+            <div class="feat y"><i class="ti ti-check"></i>The live rooms — one moderated feed per focus area</div>
             <div class="feat y"><i class="ti ti-check"></i>Friendly, your AI companion — 30 chats a day</div>
             <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
             <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
@@ -1734,7 +1734,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--tm)">The recovery tools are free, always. Pro is days 16–90 of the Bootcamp on every track, Friendly (up to 30 chats a day), and the live rooms.</div>
+      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--tm)">Every lesson and the whole 2AM tower are free, always. Pro is two things: Friendly (up to 30 chats a day) and the live rooms.</div>
       <div style="padding:0 16px 24px;text-align:center;font-size:.71875rem;color:var(--tm);line-height:1.6">Monthly and yearly include 7 days free — you're not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again after that. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</div>
     </div>
 
@@ -2010,7 +2010,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
         <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — the first 15 days are free</span></div>
+          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — all of it free</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
@@ -3986,7 +3986,7 @@ function advanceAfterLessonDone(){
 
 // ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
 function novaDay15Message(){
-  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. If you want me to guide you through the rest of the journey, you can unlock the rest of the 90-Day Bootcamp — days 16 through 90 — with Pro.";
+  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. Keep going: days 16 through 90 are yours, free, same as the first fifteen.";
 }
 function openDay15Overlay(){
   document.getElementById('day15-nova-msg').textContent=novaDay15Message();
@@ -4338,7 +4338,7 @@ function getPackLessonForDay(packKey,day){
 }
 function openPack(packKey){
   // Every pack is open to everyone now — Spiritual, Together-adjacent, all of
-  // them. The free tier gets the first 15 days of each (same cap as the main
+  // them. Every day of every pack is free since 1 Sep 2026 (same cap as the main
   // program); the per-day gate lives in renderPackLesson.
   S.activeCustomPack=packKey;
   save();
@@ -4418,7 +4418,7 @@ function renderPackLesson(){
     wrap.innerHTML=`<div class="card"><div class="sec-hd" style="margin-top:0">Pack complete</div><div style="font-size:.8125rem;color:var(--ts);line-height:1.6">You've completed every lesson in this pack. Nice work seeing it through.</div></div>`;
     return;
   }
-  // Free tier: the first 15 days of every pack, same cap as the main program.
+  // Every pack is free in full since 1 Sep 2026, same cap as the main program.
   if(!S.isPro&&day>FREE_LESSON_CAP){
     wrap.innerHTML=`<div class="card">
       <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
@@ -4426,7 +4426,7 @@ function renderPackLesson(){
         <div style="font-size:.8125rem;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none">${lesson.content.slice(0,140)}…</div>
         <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
       </div>
-      <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">The first 15 days of every pack are free — you finished them all. Days 16 and up are part of Pro.</div>
+      <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">You have finished every pack. All of it, every day, free.</div>
       <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
     </div>`;
     renderIcons(wrap);
@@ -10696,10 +10696,10 @@ async function loadLiveRoom(){
     banner.textContent='The live room is for signed-in members — sign in from Profile and you can read and post here.';
     compose.style.display='none';feed.innerHTML='';return;
   }
-  // The live rooms were Pro until 1 Sep 2026, when Jacques opened them to
-  // everybody. Kept as a dead branch rather than deleted so the room screen
-  // still has somewhere to put a banner if it is ever gated again.
-  if(false){
+  // The live rooms are Pro. The pitch names what's actually behind the door -
+  // real people on the same road - because that, not "advanced tools", is what
+  // someone at day 12 would pay for. The server enforces this regardless.
+  if(!S.isPro){
     banner.style.display='block';
     banner.style.background='var(--s1)';banner.style.color='var(--ts)';
     banner.innerHTML='<strong>The live room is part of Pro.</strong> Real people working the same thing you are — one moderated feed, open 6am–10pm Central, no replies, no DMs, nobody can reach you. <span style="color:var(--accent);font-weight:600;cursor:pointer" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</span>';
@@ -13410,14 +13410,14 @@ The app, screen by screen (answer questions about it precisely - never invent fe
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above except lesson days 16-90, Friendly, and the live rooms. PRO is exactly three things - days 16-90 of the Bootcamp on every track (plus days 16-30 of the Spiritual Path and days 16-90 of Together), Friendly (up to 30 chats/day), and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only.
+- PRICING, the truth: FREE is everything above INCLUDING every lesson day 1-90 on every track, the Spiritual Path, Together, and the whole 2AM tower. PRO is exactly two things - Friendly (up to 30 chats/day) and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only. Lessons stopped being paid on 1 Sep 2026; never tell anyone a lesson day is behind Pro.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
 const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Friendly Free mode. In this mode:
-- Everything in the app is available to this person EXCEPT Days 16-90 of the lesson program (the Bootcamp beyond day 15). Pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching, analytics - all of that is FREE now. Answer those questions fully and warmly; never withhold them, never treat them as a paid extra.
-- Do NOT describe or reference the content of Days 16-90 of the lesson program - those are the one thing that is part of Pro.
+- EVERY lesson day, 1 to 90, on every track - plus the Spiritual Path, Together, and all ninety floors of 2AM - is FREE as of 1 Sep 2026. So is pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching and analytics. Answer all of it fully and warmly; never withhold a lesson, never call a lesson day a paid extra, never suggest upgrading to continue a programme.
+- The only things this person does not have are Friendly itself beyond this conversation, and the live rooms.
 - Friendly itself is Pro-only (up to 30 chats a day). Do not bring pricing up unless they ask.
 - EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
 
@@ -13826,7 +13826,7 @@ function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
   // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
   // things and nothing else. First, every lesson past day 15 - isLessonLocked
-  // is simply `day > FREE_LESSON_CAP`, so that means days 16-90 on a recovery
+  // is simply `day > FREE_LESSON_CAP`, which no longer fires - the cap is 90
   // track, 16-35 on Supporting Someone, and 16-30 on Together, the Spiritual
   // Path and the 7-day packs. (This comment said "16-30" flat, which quietly
   // understated the paid half of a 90-day program by sixty days.) Second,
@@ -15572,7 +15572,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='9.9';
+const APP_VERSION='10.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -16681,7 +16681,7 @@ function renderCouples(){
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
     const isCurrent=!finished&&showDay===done+1;
-    // Free tier: the first 15 days, same cap as every lesson track.
+    // Free in full since 1 Sep 2026, same cap as every lesson track.
     if(!S.isPro&&!couplesViewDay&&!finished&&done+1>FREE_LESSON_CAP){
       html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · day ${done+1} of ${pack.length}</div>`;
       html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
@@ -16844,7 +16844,7 @@ function buildGuideIndex(){
 const GUIDE_FAQ=[
   {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Days 1–15 are free; the rest is part of Pro. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Three things, and that's it: <b>days 16–90 of the 90-Day Bootcamp</b> on every track (plus days 16–30 of the Spiritual Path, and 16–90 of the Together couples program), <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. Everything else is free forever — the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, building your own packs, and the first 15 days of every lesson pack. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
+  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Two things, and that's it: <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. <b>Everything else is free forever</b> — every lesson day 1 to 90 on every track, the Spiritual Path, Together, all ninety floors of 2AM, the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, and building your own packs. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
   {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
   {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},

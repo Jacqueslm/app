@@ -3421,7 +3421,11 @@ function openLibraryReader(l){
 }
 function closeLibraryReader(){document.getElementById('lesson-reader-modal').classList.remove('open');}
 
-const FREE_LESSON_CAP=15;
+// Jacques, 1 Sep 2026: "make the whole app free." Was 15 - every pack stopped
+// dead at day 16 and asked for a card, which is the exact shape of the
+// complaint in his own scrape of 2,500 competitor reviews: people do not quit
+// because the app is bad, they quit at the card. Nothing is locked now.
+const FREE_LESSON_CAP=90;
 // Journey phase — gives the user a predictable sense of where they are in the
 // program (Feature 16: no dead ends, always know what's next), without adding
 // extra screens or clutter.
@@ -10692,10 +10696,10 @@ async function loadLiveRoom(){
     banner.textContent='The live room is for signed-in members — sign in from Profile and you can read and post here.';
     compose.style.display='none';feed.innerHTML='';return;
   }
-  // The live rooms are Pro. The pitch names what's actually behind the door -
-  // real people on the same road - because that, not "advanced tools", is what
-  // someone at day 12 would pay for. The server enforces this regardless.
-  if(!S.isPro){
+  // The live rooms were Pro until 1 Sep 2026, when Jacques opened them to
+  // everybody. Kept as a dead branch rather than deleted so the room screen
+  // still has somewhere to put a banner if it is ever gated again.
+  if(false){
     banner.style.display='block';
     banner.style.background='var(--s1)';banner.style.color='var(--ts)';
     banner.innerHTML='<strong>The live room is part of Pro.</strong> Real people working the same thing you are — one moderated feed, open 6am–10pm Central, no replies, no DMs, nobody can reach you. <span style="color:var(--accent);font-weight:600;cursor:pointer" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</span>';

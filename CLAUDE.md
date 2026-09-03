@@ -33,7 +33,7 @@ Standing instructions. These override default behaviour and repo conventions.
 - **Free tier (as of 1 Sep 2026):** everything except two things. Day counter,
   SOS set, breathing, "Talk me through it", journal, weekly reports, analytics,
   **every lesson day 1–90 on every track**, the Spiritual Path, Together, and
-  **the whole 2AM tower — all 90 floors, both variants**.
+  **The Fight of Your Life, the game — every building, every roof**.
 - **Pro is exactly two things: Friendly and the live rooms.** Friendly is the
   one feature with a real per-message bill, so free gets zero chats, not three.
   Never advertise a lesson day as paid — that was removed and the copy went
@@ -56,4 +56,9 @@ Standing instructions. These override default behaviour and repo conventions.
   reviewed. Researched 31 Aug; changing it was the wrong call.
 - **The boxing game is removed.** He rejected it three times. Recoverable at
   commit `5623c870` if he ever asks, but do not suggest it.
-- The Game tab opens 2AM, with The Climb on that screen.
+- The Game tab opens The Fight of Your Life (code still says 2AM/tower), with The Climb on that screen.
+- **The Fight of Your Life is the buildings game (3 Sep 2026, renamed from 2AM the same day):** 12 quick floors, a boss on the
+  roof (the person's own addiction, by name), strength earned in the app, a
+  parachute/helicopter/jet to the next building, never ends. The 90-floor
+  tower and its vault were removed — he did not like the vault. Buildings 1–2
+  are single words on a slow clock; lines get longer as buildings go up.

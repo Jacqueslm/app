@@ -1573,7 +1573,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div class="setting-row" onclick="openTower()">
           <i class="ti ti-building" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>2AM</p><span>A building you climb at night. Every floor is a day, and every floor asks you for the truth or the dare</span></div>
+          <div class="setting-row-txt"><p>The Fight of Your Life</p><span>Twelve floors, then the thing you’re fighting waits on the roof. Your strength comes from the work you do here</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openFilm()">
@@ -1633,7 +1633,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
         <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
-        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Everything you need to do the work is free: every lesson, day 1 to 90, on every track, the Spiritual Path, Together, 2AM, the journal and the reports. Pro adds two things: Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Everything you need to do the work is free: every lesson, day 1 to 90, on every track, the Spiritual Path, Together, The Fight of Your Life, the journal and the reports. Pro adds two things: Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Friendly — the AI companion, up to 30 chats a day</div>
           <div id="plans-pro-together">✓ The live rooms — real people on the same road, 6am–10pm Central</div>
@@ -1662,7 +1662,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Every lesson — days 1 to 90, every track</div>
-            <div class="feat y"><i class="ti ti-check"></i>2AM — the game, every building, every roof</div>
+            <div class="feat y"><i class="ti ti-check"></i>The Fight of Your Life — the game, every building, every roof</div>
             <div class="feat n"><i class="ti ti-x"></i>Friendly and the live rooms (Pro)</div>
             <div class="feat y"><i class="ti ti-check"></i>Every tool: Urge Surfing, Panic Mode &amp; Emergency Plan</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
@@ -1707,7 +1707,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
       </div>
       <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--tm)">Every lesson and 2AM, the game, are free, always. Pro is two things: Friendly (up to 30 chats a day) and the live rooms.</div>
+      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--tm)">Every lesson and The Fight of Your Life, the game, are free, always. Pro is two things: Friendly (up to 30 chats a day) and the live rooms.</div>
       <div style="padding:0 16px 24px;text-align:center;font-size:.71875rem;color:var(--tm);line-height:1.6">Monthly and yearly include 7 days free — you're not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again after that. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</div>
     </div>
 
@@ -4935,7 +4935,7 @@ const NAV_TOUR_STEPS=[
    body:'Your day counter, today\'s lesson, and the SOS button live here. If a craving hits, the red SOS button is one tap away.'},
   {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 7',title:'Tools — everything for right now',
    body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
-  {screen:'tower',tab:'bn-game',target:'#bn-game',step:'3 of 7',title:'2AM — the game',
+  {screen:'tower',tab:'bn-game',target:'#bn-game',step:'3 of 7',title:'The Fight of Your Life',
    body:'Buildings you climb at night. Twelve quick floors, then the thing you\'re fighting waits on the roof. Your strength comes from the work you do in the app.'},
   {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'4 of 7',title:'Friendly — your AI companion',
    body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
@@ -7202,7 +7202,7 @@ function renderTower(){
     floors.push(`<i class="gm-win${lit} ${cls}" title="Floor ${f}"></i>`);
   }
   head.innerHTML=`
-    <div class="gm-title"><span>2AM</span><b>Building ${g.b}</b><em>vs ${gmEsc(boss)}</em></div>
+    <div class="gm-title"><span>THE FIGHT OF YOUR LIFE</span><b>Building ${g.b}</b><em>vs ${gmEsc(boss)}</em></div>
     <div class="gm-bld">${floors.join('')}</div>
     <div class="gm-meta"><span>${g.f>GAME_TOP_FLOOR?'ROOFTOP':'FLOOR '+g.f+' OF '+GAME_TOP_FLOOR}</span><span>WINS ${g.wins}</span><span>✈️ ${g.rides.jet} 🚁 ${g.rides.heli} 🪂 ${g.rides.chute}</span></div>`;
   if(g.f>GAME_TOP_FLOOR)renderRoofDoor();else renderFloor();
@@ -11591,13 +11591,13 @@ The app, screen by screen (answer questions about it precisely - never invent fe
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
 - FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
 - PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above INCLUDING every lesson day 1-90 on every track, the Spiritual Path, Together, and 2AM, the game. PRO is exactly two things - Friendly (up to 30 chats/day) and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only. Lessons stopped being paid on 1 Sep 2026; never tell anyone a lesson day is behind Pro.
+- PRICING, the truth: FREE is everything above INCLUDING every lesson day 1-90 on every track, the Spiritual Path, Together, and The Fight of Your Life (the game). PRO is exactly two things - Friendly (up to 30 chats/day) and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only. Lessons stopped being paid on 1 Sep 2026; never tell anyone a lesson day is behind Pro.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
 const SYSTEM_FREE_ADDENDUM=`
 
 You are running in Friendly Free mode. In this mode:
-- EVERY lesson day, 1 to 90, on every track - plus the Spiritual Path, Together, and 2AM, the game - is FREE as of 1 Sep 2026. So is pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching and analytics. Answer all of it fully and warmly; never withhold a lesson, never call a lesson day a paid extra, never suggest upgrading to continue a programme.
+- EVERY lesson day, 1 to 90, on every track - plus the Spiritual Path, Together, and The Fight of Your Life (the game) - is FREE as of 1 Sep 2026. So is pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching and analytics. Answer all of it fully and warmly; never withhold a lesson, never call a lesson day a paid extra, never suggest upgrading to continue a programme.
 - The only things this person does not have are Friendly itself beyond this conversation, and the live rooms.
 - Friendly itself is Pro-only (up to 30 chats a day). Do not bring pricing up unless they ask.
 - EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
@@ -12448,7 +12448,7 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'2AM',vault:'The Vault'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':'Recovery Toolkit','weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
 const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
@@ -13752,7 +13752,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='10.2';
+const APP_VERSION='10.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -14358,7 +14358,7 @@ const HELP_INDEX=[
   {name:'Profile & settings',sub:'Your account, PIN, reminders, updates — all settings',k:'profile page settings preferences options menu account section',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Today screen',sub:'Your day counter, pledge, and daily lesson',k:'today home main screen front day counter start',go:()=>{switchTo('home');actBn('bn-home');}},
   {name:'Tools',sub:'All the free recovery tools in one place',k:'tools toolbox exercises coping techniques',go:()=>{switchTo('tools');actBn('bn-tools');}},
-  {name:'2AM (the Game tab)',sub:'Buildings of twelve floors, and the thing you\'re fighting waits on every roof',k:'game games 2am tower building buildings floors night play boss fight rooftop roof punch',go:()=>openTower()},
+  {name:'The Fight of Your Life (the Game tab)',sub:'Buildings of twelve floors, and the thing you\'re fighting waits on every roof',k:'game games 2am fight life tower building buildings floors night play boss rooftop roof punch',go:()=>openTower()},
   {name:'The Climb',sub:'Your 90 steps up the mountain',k:'climb mountain steps 90 ninety progress journey game',go:()=>openClimb()},
   {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
@@ -15030,7 +15030,7 @@ const GUIDE_FAQ=[
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
-  {q:'What is the Game tab?',k:'game tab play 2am tower climb mountain floors building buildings boss fight roof rooftop punch what is',a:"It holds <b>2AM</b> — buildings you climb at night. Twelve quick floors, each a test under a minute: spot the voice, quick fire, finish a line from a lesson you’ve done, find the exit. Then the roof, where the thing you’re fighting waits by name — pick the right counter and you punch, pick the wrong one and it hits you. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, sits on the same screen.",go:'2AM (the Game tab)'},
+  {q:'What is the Game tab?',k:'game tab play 2am fight life tower climb mountain floors building buildings boss roof rooftop punch what is',a:"It holds <b>The Fight of Your Life</b> — buildings you climb at night. Twelve quick floors, each a test under a minute: spot the voice, quick fire, finish a line from a lesson you’ve done, find the exit. Then the roof, where the thing you’re fighting waits by name — pick the right counter and you punch, pick the wrong one and it hits you. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, sits on the same screen.",go:'The Fight of Your Life (the Game tab)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
   {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},

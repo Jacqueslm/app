@@ -71,7 +71,7 @@ body{display:flex;justify-content:center}
 /* overlays get bottom clearance so the last button clears the fold at bigger text
    (they inherit the .app zoom - verified 23 Aug: adding their own scale
    double-zooms them, so don't) */
-.app.fs-bigger #day30-overlay,.app.fs-bigger #day15-overlay,
+.app.fs-bigger #day30-overlay,
 .app.fs-bigger #lesson-player-overlay{padding-bottom:140px}
 /* Every centered full-screen overlay must survive its content outgrowing the
    screen (Bigger text makes that routine): 'safe center' keeps the centered
@@ -899,7 +899,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div>
       <div style="display:flex;align-items:center;gap:6px">
         <span class="nova-name">Friendly</span>
-        <span class="nova-badge" id="nova-tier-lbl">Free · 3/day</span>
+        <span class="nova-badge" id="nova-tier-lbl">Free · Pro only</span>
         <span class="nova-mode-chip" id="nova-mode-chip" style="display:none"></span>
       </div>
       <div class="nova-sub"><i class="ti ti-circle-filled" style="font-size:.5rem"></i> AI recovery companion · Non-judgmental · Confidential</div>
@@ -1195,7 +1195,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           </div>
           <div id="lesson-locked" style="display:none">
             <div style="font-size:.9375rem;font-weight:600;color:var(--tp)" id="lockedTitle"></div>
-            <div style="font-size:.75rem;color:var(--tm);margin-top:2px">Part of the Pro program</div>
             <div style="position:relative;margin-top:10px;max-height:80px;overflow:hidden">
               <div id="lockedTeaser" style="font-size:.8125rem;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none"></div>
               <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
@@ -1203,37 +1202,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">BREAK IT finishes here, then REBUILD (days 31–60) and KEEP IT (days 61–90). All of it is free.</div>
             <div class="mini-pricing-row" style="font-size:.71875rem;color:var(--tm);text-align:center;margin-top:10px"></div>
             <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
-            <button class="ob-btn outline" style="margin-top:8px" onclick="viewLessonDay(15)">Back to Day 15</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- DAY 15 MILESTONE / UPGRADE OVERLAY -->
-    <div id="day15-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;overflow-y:auto;padding:32px 24px;color:#fff">
-      <div style="max-width:400px;margin:0 auto;text-align:center">
-        <div style="font-size:2.5rem;margin-bottom:12px">🌱</div>
-        <h1 style="margin-bottom:10px">You've completed the foundation.</h1>
-        <p style="color:#c0caff;margin-bottom:24px">Day 15 is a real achievement.</p>
-        <div id="day15-nova-msg" style="background:rgba(255,255,255,0.06);border-radius:12px;padding:16px;text-align:left;font-size:.8125rem;line-height:1.6;color:#c0caff;margin-bottom:28px"></div>
-
-        <div style="text-align:left;margin-bottom:20px">
-          <div class="ob-label">Coming up in the full program</div>
-          <div id="day15-preview-list"></div>
-        </div>
-
-        <div style="text-align:left;margin-bottom:28px">
-          <div class="ob-label">With Pro, you get</div>
-          <div style="font-size:.8125rem;color:#c0caff;line-height:2">
-            <div>✓ Friendly — your AI companion, 30 chats a day</div>
-            <div>✓ 30 Friendly AI chats/day</div>
-            <div>✓ Priority support</div>
-          </div>
-        </div>
-
-        <div class="mini-pricing-row" style="font-size:.71875rem;color:#8892c0;text-align:center;margin-bottom:10px"></div>
-        <button class="ob-btn" onclick="upgradeFromDay15Overlay()">Continue with Pro</button>
-        <button class="ob-btn outline" onclick="closeDay15Overlay()">Stay on Day 15 for now</button>
       </div>
     </div>
 
@@ -1652,14 +1622,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="tier-banner">
         <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
         <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
-        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">The recovery tools in this app are free. Pro adds three things: the rest of the 90-Day Bootcamp — day 16 onward on every track, all the way to day 90 on the recovery tracks — Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
+        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Everything you need to do the work is free: every lesson, day 1 to 90, on every track, the Spiritual Path, Together, the whole 2AM tower, the journal and the reports. Pro adds two things: Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
         <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
           <div>✓ Friendly — the AI companion, up to 30 chats a day</div>
-          <div>✓ Days 16–30 of the Spiritual Path, woven into every lesson</div>
-          <div>✓ Friendly, your AI companion — 30 chats a day</div>
-          <div>✓ Live rooms — a moderated community, open daily</div>
-          <div>✓ Days 16–35 of Supporting Someone</div>
-          <div id="plans-pro-together">✓ The live rooms — real people on the same road</div>
+          <div id="plans-pro-together">✓ The live rooms — real people on the same road, 6am–10pm Central</div>
         </div>
         <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
         <!-- This button sits on the tier banner, which is the brand navy in BOTH
@@ -1684,18 +1650,19 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="tc-name">Free</div>
           <div class="tc-price">$0<span>/mo</span></div>
           <div class="fl">
-            <div class="feat y"><i class="ti ti-check"></i>Days 1–15 of your program</div>
-            <div class="feat n"><i class="ti ti-x"></i>Friendly (Pro feature)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Every lesson — days 1 to 90, every track</div>
+            <div class="feat y"><i class="ti ti-check"></i>2AM — the whole tower, all 90 floors</div>
+            <div class="feat n"><i class="ti ti-x"></i>Friendly and the live rooms (Pro)</div>
             <div class="feat y"><i class="ti ti-check"></i>Every tool: Urge Surfing, Panic Mode &amp; Emergency Plan</div>
             <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
             <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
             <div class="feat y"><i class="ti ti-check"></i>Guided journal prompts &amp; insights</div>
             <div class="feat y"><i class="ti ti-check"></i>Advanced streaks</div>
-            <div class="feat y"><i class="ti ti-check"></i>Supporting Someone — a 35-day track for the person who loves them (Days 1–15)</div>
-            <div class="feat y"><i class="ti ti-check"></i>Together — the program you work as a couple (Days 1–15)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Supporting Someone — a 35-day track for the person who loves them, all of it</div>
+            <div class="feat y"><i class="ti ti-check"></i>Together — the 90-day program you work as a couple, all of it</div>
             <div class="feat y"><i class="ti ti-check"></i>Partner self-check</div>
             <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-letter">Partner letter — help them understand</span></div>
-            <div class="feat y"><i class="ti ti-check"></i>Spiritual Path — faith and recovery (Days 1–15)</div>
+            <div class="feat y"><i class="ti ti-check"></i>Spiritual Path — faith and recovery, all of it</div>
             <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
             <div class="feat y"><i class="ti ti-check"></i>Meditation room with 11 sounds &amp; tracks</div>
             <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
@@ -1718,12 +1685,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="fl">
             <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
             <div class="feat y"><i class="ti ti-check"></i>Friendly — the AI companion, up to 30 chats a day</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–30 of the Spiritual Path</div>
-            <div class="feat y"><i class="ti ti-check"></i>Days 16–35 of Supporting Someone</div>
-            <div class="feat y"><i class="ti ti-check"></i>The live rooms — one moderated feed per focus area</div>
-            <div class="feat y"><i class="ti ti-check"></i>Friendly, your AI companion — 30 chats a day</div>
-            <div class="feat y"><i class="ti ti-check"></i>Live rooms — moderated, anonymous, open daily</div>
-            <div class="feat y"><i class="ti ti-check"></i>Priority support</div>
+            <div class="feat y"><i class="ti ti-check"></i>The live rooms — one moderated feed per focus area, open 6am–10pm Central</div>
           </div>
           <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
         </div>
@@ -2010,7 +1972,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd" id="together-deeper-hd">Together — go deeper</div>
         <div class="setting-row" id="together-couples-row" onclick="openProTool('couples')">
           <i class="ti ti-users" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Do this together</p><span>A 30-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — all of it free</span></div>
+          <div class="setting-row-txt"><p>Do this together</p><span>A 90-day program for the two of you, plus anytime exercises — check-ins, the craving signal, the slip plan — all of it free</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" id="together-selfcheck-row" onclick="openProTool('partnerCheck')">
@@ -2685,7 +2647,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
     <div style="margin-top:18px;text-align:left">
-      <div style="font-size:.75rem;font-weight:600;color:var(--tp);letter-spacing:.02em">Her voice on this phone</div>
+      <div style="font-size:.75rem;font-weight:600;color:var(--tp);letter-spacing:.02em">Friendly's voice on this phone</div>
       <div style="font-size:.6875rem;color:var(--tm);line-height:1.5;margin-top:2px">Tap the play button to hear one before you keep it.</div>
     </div>
     <div id="nova-voice-list" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:30vh;overflow-y:auto;padding:8px;background:var(--s2);border:1px solid var(--bdr);border-radius:12px"></div>
@@ -3312,9 +3274,8 @@ function phaseLessonFor(day){
 // and every pack. Built once on first open and cached - it is a few hundred
 // entries and rebuilding it on every keystroke would be felt on an old phone.
 //
-// The lock is unchanged. Days 16-30 are still Pro; this only makes them
-// FINDABLE, which is the opposite of giving them away - you cannot want
-// something you never knew was there.
+// Every lesson is free (1 Sep 2026). This only makes them FINDABLE - you
+// cannot want something you never knew was there.
 let LESSON_INDEX=null;
 function buildLessonIndex(){
   const out=[];
@@ -3405,7 +3366,7 @@ function openLibraryLesson(group,day){
   if(isLessonLocked(day)){
     // Same gate as everywhere else. Say what it is, do not pretend it is broken.
     appConfirm(
-      `\u201c${l.title}\u201d is day ${day}, which is part of Pro. Days 1\u201315 of every track and pack are free; Pro opens the rest, plus Friendly and the live rooms.`,
+      `\u201c${l.title}\u201d is day ${day}. Every lesson in the app is free, so this one should open - Pro is only Friendly and the live rooms.`,
       ()=>{switchTo('plans');actBn('bn-plans');},
       {okText:'See Pro',cancelText:'Not now'}
     );
@@ -3435,8 +3396,16 @@ function getJourneyPhase(day){
   return{stage:3,label:'Long-Term Growth'};
 }
 function journeyPhaseLabelText(day){
-  const phase=getJourneyPhase(day);
-  return `${phase.label} phase${phase.stage<3?` · Day ${day} of 30`:''}`;
+  // Named after the Bootcamp's own phases, and sized to the track: this used
+  // to say "Foundation phase · Day 1 of 30" on every track, left over from the
+  // 30-day programme - wrong on a 90-day track and wrong on the 35-day one.
+  const len=((typeof LESSON_PACKS==='object'&&LESSON_PACKS[S.currentAddiction])||[]).length||90;
+  const d=Math.min(day,len);
+  const named=len===90&&S.currentAddiction!=='Together'&&S.currentAddiction!=='Supporting Someone';
+  if(!named)return `Day ${d} of ${len}`;
+  if(d<=30)return `BREAK IT phase · Day ${d} of 90`;
+  if(d<=60)return `REBUILD phase · Day ${d} of 90`;
+  return `KEEP IT & GIVE IT phase · Day ${d} of 90`;
 }
 let viewingDay=null; // null = showing the current track's lesson day; otherwise re-reading a specific past/locked day
 
@@ -3830,7 +3799,6 @@ function completeLessonForToday(){
   (S.lessonDoneDates=S.lessonDoneDates||{})[new Date().toDateString()]=true;// earns today's Climb step
   const lesson=getTodayLesson();
   if(!lesson)return;
-  const justHitFreeCap=lesson.day===FREE_LESSON_CAP&&!S.isPro;
   const phaseHandoff=(lesson.day===30||lesson.day===60)&&!!phaseLessonFor(lesson.day+1);
   const justFinishedProgram=(lesson.day===90||(lesson.day===30&&!phaseLessonFor(31)))&&!S.notifiedDay30Tracks.includes(S.currentAddiction);
   setLessonDayFor(S.currentAddiction,getLessonDayFor(S.currentAddiction)+1);
@@ -3859,11 +3827,9 @@ function completeLessonForToday(){
   // The one and only rating ask. The ASO guide's rule is right: ask after a
   // positive action, never cold. Day 7+ of showing up is the earned moment.
   // Once, ever - a dismissal is an answer, not an opening bid (house rule 25).
-  if(!justHitFreeCap&&!justFinishedProgram)maybeAskForRating();
+  if(!justFinishedProgram)maybeAskForRating();
   if(justHitLessonConsistency)novaNudge("Seven lessons done — that consistency is exactly what builds lasting change.");
-  if(justHitFreeCap){
-    setTimeout(()=>{openDay15Overlay();},1200);
-  }else if(justFinishedProgram){
+  if(justFinishedProgram){
     setTimeout(()=>{openDay30Overlay();},1200);
   }else if(phaseHandoff){
     setTimeout(()=>{
@@ -3982,30 +3948,6 @@ function advanceAfterLessonDone(){
   updateLessonPromo();
   const screensEl=document.getElementById('screens');
   if(screensEl){screensEl.scrollTop=0;requestAnimationFrame(()=>{screensEl.scrollTop=0;});}
-}
-
-// ─── DAY 15 MILESTONE / UPGRADE ────────────────────────────────────────────────
-function novaDay15Message(){
-  return "You've built a strong foundation these past 15 days. The next phase goes deeper — into patterns, triggers, relationships, and long-term change. Keep going: days 16 through 90 are yours, free, same as the first fifteen.";
-}
-function openDay15Overlay(){
-  document.getElementById('day15-nova-msg').textContent=novaDay15Message();
-  const pack=LESSON_PACKS[S.currentAddiction]||[];
-  const upcoming=pack.filter(l=>l.day>=16&&l.day<=20);
-  document.getElementById('day15-preview-list').innerHTML=upcoming.map(l=>
-    `<div style="font-size:.8125rem;color:#c0caff;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08)">Day ${l.day}: ${l.title}</div>`
-  ).join('');
-  document.getElementById('day15-overlay').style.display='block';
-}
-function closeDay15Overlay(){
-  document.getElementById('day15-overlay').style.display='none';
-  renderTodayLesson();
-}
-function upgradeFromDay15Overlay(){
-  becomePro();
-  closeDay15Overlay();
-  viewingDay=null;
-  switchTo('lesson');
 }
 
 // ─── DAY 30 COMPLETION / LONG-TERM RECOVERY ────────────────────────────────────
@@ -4768,7 +4710,7 @@ function handleAppPopstate(){
   // 2) A full-screen overlay is up (these use display, not the modal class).
   //    Every overlay in the app is listed here so the hardware button closes
   //    it through its own close path instead of leaving the app underneath it.
-  const overlays=[['breathe-overlay',closeBreathe],['day15-overlay',closeDay15Overlay],['day30-overlay',closeDay30Overlay],
+  const overlays=[['breathe-overlay',closeBreathe],['day30-overlay',closeDay30Overlay],
     ['lesson-player-overlay',closeLessonPlayer],['welcome-overlay',closeWelcomeOverlay],['nav-tour',endNavTour],
     ['film-overlay',closeFilm],    ['wave-overlay',closeWave],['climb-overlay',closeClimb],['meditation-overlay',closeMeditation],['urgesurf-overlay',closeUrgeSurf],['panic-overlay',closePanicMode],
     ['voiceguide-overlay',closeVoiceGuide],['legal-overlay',closeLegalOverlay]];
@@ -4909,7 +4851,7 @@ function buildBehavioralStep(){
         <div class="ob-label">When are you most vulnerable to acting out?</div>
         ${renderBehaviorChips('behavior-porn-time',['Late at night when isolated','During high stress or work anxiety','When bored during random downtime'])}
         <div class="ob-label">What is the primary emotional escape mechanism for you?</div>
-        ${renderBehaviorChips('behavior-porn-root',['Anesthetizing loneliness / lack of connection','Dopamine hunting to escape boredom','Decompressing from intense performance anxiety'])}`;
+        ${renderBehaviorChips('behavior-porn-root',['Anesthetizing loneliness / lack of connection','Chasing a hit to escape boredom','Decompressing from intense performance anxiety'])}`;
     }else if(addiction==='Alcohol'||addiction==='Substances'){
       htmlBlock+=`
         <div class="ob-label">How do you usually engage in this cycle?</div>
@@ -5626,9 +5568,15 @@ function updateStats(){
   // Jacques's own screen, 28 Aug: same program, same screen, two numbers.
   // Lessons advance only when one is finished (`getLessonDayFor`), so someone
   // who backdates their quit date has not done nine lessons. Overstating it
-  // also misleads about Pro, which starts at lesson 16.
+  // also overstates how far along they are.
+  // Supporting Someone is 35 days, not 90 - a supporter's Home used to say
+  // "Day 1 of the 90-Day Bootcamp" over a track that ends at 35.
   const bootcampDay=getLessonDayFor(S.currentAddiction);
-  if(progLbl)progLbl.textContent=bootcampDay<=90?`Day ${bootcampDay} of the 90-Day Bootcamp — support continues past day 90`:'Bootcamp complete — continuous support continues';
+  const trackLen=((typeof LESSON_PACKS==='object'&&LESSON_PACKS[S.currentAddiction])||[]).length||90;
+  const isSupTrack=S.currentAddiction==='Supporting Someone';
+  if(progLbl)progLbl.textContent=bootcampDay<=trackLen
+    ?(isSupTrack?`Day ${bootcampDay} of your ${trackLen}-day track — support continues past day ${trackLen}`:`Day ${bootcampDay} of the 90-Day Bootcamp — support continues past day 90`)
+    :(isSupTrack?'Track complete — support continues':'Bootcamp complete — continuous support continues');
   const focusLbl=document.getElementById('focus-lbl');
   if(focusLbl){
     const list=(S.selectedAddictions&&S.selectedAddictions.length?S.selectedAddictions:[S.currentAddiction]).filter(Boolean);
@@ -8729,7 +8677,7 @@ const TOWER_ARTIFACTS={
 '8:side1':{kind:'STORY',title:'The tap',text:
 "...I could not work out why I was angry at everything. Turned out I had not slept properly in nine days and had been living on toast. That was it. That was the whole mystery.\n\nI am not saying it was simple. I am saying some of what I thought was my character was tiredness wearing my clothes."},
 '9:side1':{kind:'LETTER',title:'The plates',text:
-"I am not going to pretend I did it out of love that night. I did it because the kitchen was a mess and I could not stand looking at it.\n\nBut she came down in the morning and stopped in the doorway and did not say anything, and I understood that she had stopped expecting things like that a long time before. Small is not nothing. Small is most of it."},
+"I am not going to pretend I did it out of love that night. I did it because the kitchen was a mess and I could not stand looking at it.\n\nBut they came down in the morning and stopped in the doorway and did not say anything, and I understood that they had stopped expecting things like that a long time before. Small is not nothing. Small is most of it."},
 '9:side2':{kind:'STORY',title:'The coat',text:
 "...it stayed on the hook for a year after he stopped, because taking it down would have meant deciding something, and neither of us was ready to decide anything.\n\nThen one Tuesday it was gone, and neither of us mentioned it. That is how most of it happened, honestly. Not conversations. Tuesdays."},
 '10:side1':{kind:'LETTER',title:'From the window',text:
@@ -8749,7 +8697,7 @@ const TOWER_ARTIFACTS={
 '24:side1':{kind:'STORY',title:"The deal I made",text:
 "...the terms were: one, on my birthday, with people around, and then never again. I remember being genuinely impressed with how reasonable it sounded.\n\nI kept to it exactly. One, on my birthday, with people around. And then the following Thursday, on my own, because the rule had been about birthdays."},
 '27:side2':{kind:'LETTER',title:"What I could not fix",text:
-"I stopped, and I thought that was the payment. Turned out stopping was the entry fee.\n\nWhat she actually wanted was for me to hear the thing I did without explaining the circumstances around it. It took me two more years to be able to sit still for that."},
+"I stopped, and I thought that was the payment. Turned out stopping was the entry fee.\n\nWhat they actually wanted was for me to hear the thing I did without explaining the circumstances around it. It took me two more years to be able to sit still for that."},
 '30:side1':{kind:'LESSON',title:"A month",text:
 "Thirty days does not mean you are thirty days from finished. It means your body has stopped being in crisis and the actual work is now visible.\n\nMost people quit here. Not back to the habit — they quit the effort, because the emergency is over and effort without an emergency is just discipline."},
 '33:side2':{kind:'STORY',title:"Learning to be bored",text:
@@ -11059,7 +11007,7 @@ const SUPPORTER_TEXT={
   // tier can't keep advertising them as things she gets.
   'plans-free-tracker':'Journal & lesson history',
   'plans-free-letter':'Your letter — say it once, properly',
-  'plans-pro-together':'✓ Together — tools for you and the person you\'re supporting',
+  'plans-pro-together':'✓ The live rooms — real people on the same road, 6am–10pm Central',
   'rem-urge-title':'Hard-hour alerts',
   'rem-urge-sub':'Based on when your hardest hours have been',
   'rem-risk-title':'Heavy-day check-ins',
@@ -13338,7 +13286,7 @@ function evaluateSmartReminders(){
   }
 }
 
-// Reminder Settings screen (Pro only)
+// Reminder Settings screen (free, like every tool)
 function openSmartReminderSettings(){
   renderSmartReminderSettings();
   switchTo('reminder-settings');actBn('bn-plans');
@@ -14931,7 +14879,7 @@ function updateTierUI(){
     if(proCta){proCta.textContent='Current plan ✓';proCta.style.background='var(--ok)';proCta.style.color='var(--ok-t)';}
   }else{
     badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
-    if(novaLbl)novaLbl.textContent='Free · 3/day';
+    if(novaLbl)novaLbl.textContent='Free · Pro only';
     if(limitBar)limitBar.style.display='flex';
     // Restore the free meter text (Pro rewrites it). No upgrade button here.
     const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='Friendly is a <strong>Pro</strong> feature — <a href="#" onclick="switchTo(\'plans\');actBn(\'bn-plans\');return false" style="color:var(--accent)">upgrade to talk</a>';
@@ -15572,7 +15520,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='10.0';
+const APP_VERSION='10.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -16675,7 +16623,7 @@ function renderCouples(){
   const el=document.getElementById('couples-list');
   let html='';
   if(pack.length){
-    html+=`<div style="font-size:.78125rem;color:var(--ts);line-height:1.6;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">Thirty real lessons, one a day, about the relationship itself — the check-ins, the hard conversations, the repair. Ten minutes together. Not a one-time assignment: a 30-day program for the two of you.</div>`;
+    html+=`<div style="font-size:.78125rem;color:var(--ts);line-height:1.6;background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:10px">Ninety real lessons, one a day, about the relationship itself — the check-ins, the hard conversations, the repair. Ten minutes together. Not a one-time assignment: a 90-day program for the two of you.</div>`;
     html+=coupleSectionHtml();
     const finished=done>=pack.length;
     const showDay=couplesViewDay||(finished?pack.length:done+1);
@@ -16683,11 +16631,10 @@ function renderCouples(){
     const isCurrent=!finished&&showDay===done+1;
     // Free in full since 1 Sep 2026, same cap as every lesson track.
     if(!S.isPro&&!couplesViewDay&&!finished&&done+1>FREE_LESSON_CAP){
-      html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · day ${done+1} of ${pack.length}</div>`;
+      html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 90-day program · day ${done+1} of ${pack.length}</div>`;
       html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
-        <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">You two did the first 15 together.</div>
-        <div style="font-size:.8125rem;color:var(--ts);line-height:1.65;margin-top:8px">That's the whole free half — and doing it as a team is the hard part. Days 16–30 go deeper: repair, boundaries, the long game. They're part of Pro.</div>
-        <button class="sos-close" style="margin-top:12px;background:var(--accent);color:#fff" onclick="closeCouplesExercises();switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
+        <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">You two did every day together.</div>
+        <div style="font-size:.8125rem;color:var(--ts);line-height:1.65;margin-top:8px">Every day of Together is free — re-read any of them whenever you like.</div>
       </div>`;
       html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${pack.slice(0,done).map(p=>`<span onclick="couplesViewDay=${p.day};renderCouples()" style="font-size:.71875rem;color:var(--ts);background:var(--s1);border:1px solid var(--bdr);border-radius:99px;padding:4px 10px;cursor:pointer">✓ ${p.day}</span>`).join('')}</div>`;
       el.innerHTML=html+`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:6px 0 8px">Anytime exercises</div>`+COUPLES_EXERCISES.map(e=>
@@ -16698,7 +16645,7 @@ function renderCouples(){
         </div>`).join('');
       return;
     }
-    html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 30-day program · ${finished?'complete — re-read anytime':`day ${done+1} of ${pack.length}`}</div>`;
+    html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 90-day program · ${finished?'complete — re-read anytime':`day ${done+1} of ${pack.length}`}</div>`;
     html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
       <div style="font-size:.6875rem;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
       <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">${escapeHtml(l.title)}</div>
@@ -16805,7 +16752,7 @@ function pcAnswer(v){pcAnswers.push(v);renderPartnerCheckQ();}
 // ─── GUIDE BOT ───────────────────────────────────────────────────────────────
 // The floating "?" on every screen. Same free offline index as Find anything,
 // presented as a chat: ask in plain words, tap the answer, get taken there.
-const GUIDE_STOP=new Set(['how','do','does','i','the','a','an','my','me','to','where','is','are','can','you','get','of','in','it','on','for','what','want','need','go','open','please','and','app','with','turn']);
+const GUIDE_STOP=new Set(['how','do','does','i','the','a','an','my','me','to','where','is','are','can','you','of','in','it','on','for','what','want','need','go','open','please','and','app','with','turn']);
 
 // Every visible row in the app indexes ITSELF - the bot scans the real screens,
 // so anything that exists in a menu is automatically findable. Curated entries
@@ -16842,7 +16789,7 @@ function buildGuideIndex(){
 // Built-in answers for the most common "how/why" questions - free and offline,
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
-  {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Days 1–15 are free; the rest is part of Pro. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
+  {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Every day, 1 to 90, is free. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
   {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
   {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Two things, and that's it: <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. <b>Everything else is free forever</b> — every lesson day 1 to 90 on every track, the Spiritual Path, Together, all ninety floors of 2AM, the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, and building your own packs. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
   {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
@@ -16862,7 +16809,7 @@ const GUIDE_FAQ=[
   {q:'Can I track more than one addiction?',k:'multiple more than one addiction several both two track focus',a:"Yes — that's the point. Real life rarely comes one struggle at a time. Set them all in <b>Focus areas</b> and switch your active focus whenever you need.",go:'Profile & settings'},
   {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Profile & settings'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
-  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Days 1–15 of everything are free to read; the rest shows a lock and opens with Pro.",go:'Lesson Packs'},
+  {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Every one of them is free to read.",go:'Lesson Packs'},
   {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
   {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},
@@ -16935,9 +16882,11 @@ function guideSend(){
     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
   // A question beats a location when it matches at least as well - "how do I
   // cancel" deserves the explanation with a button, not just the button.
-  const faqScored=GUIDE_FAQ.map((f,i)=>({i,score:words.reduce((s,w)=>s
-    +(f.q.toLowerCase().includes(w)?3:0)
-    +(f.k.includes(w)?1:0),0)}))
+  // Whole words only. "pro" used to score inside "program", so "what do I get
+  // with pro" answered with how the Bootcamp works instead of what Pro is.
+  const faqScored=GUIDE_FAQ.map((f,i)=>{const qw=' '+f.q.toLowerCase().replace(/[?!.,']/g,' ')+' ';const kw=' '+f.k+' ';return {i,score:words.reduce((s,w)=>s
+    +(qw.includes(' '+w+' ')?3:(qw.includes(' '+w)?1:0))
+    +(kw.includes(' '+w+' ')?1:0),0)};})
     .filter(x=>x.score>1).sort((a,b)=>b.score-a.score);
   if(faqScored.length&&(!scored.length||faqScored[0].score>=scored[0].score)){
     const f=GUIDE_FAQ[faqScored[0].i];

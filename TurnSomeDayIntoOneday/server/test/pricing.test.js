@@ -71,3 +71,27 @@ test('the crisis door is never priced', () => {
   // The one rule that outranks all of the above.
   assert.match(APP, /the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall/);
 });
+
+test('the plans screen and the Friendly tab agree with the pricing above', () => {
+  // 3 Sep audit: the Plans screen still said "Pro adds three things" and
+  // "Days 1-15 of your program", the Free card listed "Priority support",
+  // and the Friendly tab badge read "Free · 3/day" - all from before 1 Sep.
+  const plans = APP.slice(APP.indexOf('id="s-plans"'), APP.indexOf('id="pricing-cards"') + 6000);
+  assert.doesNotMatch(plans, /three things/i);
+  assert.doesNotMatch(plans, /Days? 1[–-]15/);
+  assert.doesNotMatch(plans, /Priority support/);
+  assert.match(plans, /Pro adds two things: Friendly/);
+  assert.doesNotMatch(APP, /Free · 3\/day/, 'free gets no Friendly chats, so the badge cannot promise three');
+});
+
+test('the day-15 upsell is gone, not just unreachable', () => {
+  // It was still wired to `lesson.day===FREE_LESSON_CAP`, so with the cap at
+  // 90 a free member finishing the programme got "Day 15 is a real
+  // achievement ... Stay on Day 15 for now" instead of the day-90 screen.
+  assert.doesNotMatch(APP, /day15-overlay|openDay15Overlay|justHitFreeCap/);
+});
+
+test('the guide bot and lesson library never say days 1-15 are the free part', () => {
+  assert.doesNotMatch(APP, /Days 1[–-]15 (are|of everything are) free/);
+  assert.doesNotMatch(APP, /the rest (is part of|shows a lock and opens with) Pro/);
+});

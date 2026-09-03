@@ -21,7 +21,7 @@ curl -s -o "pine\MSB-Price-Alerts.pine" "%BASE%/pine/MSB-Price-Alerts.pine" && e
 curl -s -o "pine\MSB-Companion.pine"    "%BASE%/pine/MSB-Companion.pine"    && echo   [ok] MSB-EYES companion    (re-paste into TradingView if it changed)
 curl -s -o "pine\MSB-Pure.pine"       "%BASE%/pine/MSB-Pure.pine"         && echo   [ok] old Pure backtester
 curl -s -o "pine\MSB-Pure-Alerts.pine" "%BASE%/pine/MSB-Pure-Alerts.pine" && echo   [ok] old Pure watcher
-curl -s -o "TURN ON AUTO.bat"     "%BASE%/TURN%20ON%20AUTO.bat"        && echo   [ok] TURN ON AUTO button
+curl -s -o "TURN ON AUTO.bat"     "%BASE%/TURN%%20ON%%20AUTO.bat"      && echo   [ok] TURN ON AUTO button
 curl -s -o "YOUR-RULES.md"            "%BASE%/YOUR-RULES.md"              && echo   [ok] your rules
 
 REM The old filtered scripts are gone - the system is pure structure now.
@@ -33,7 +33,7 @@ del /q "trade-grader.html" "journal.html" "Start Trade Grader.bat" "Start Phone 
 REM Last of all, this updater refreshes itself so next run knows about any
 REM newly added files. The swap happens after this window is done reading
 REM the file, which is why it is the final step.
-curl -s -o "Update System.new.bat" "%BASE%/Update System.bat"
+curl -s -o "Update System.new.bat" "%BASE%/Update%%20System.bat"
 findstr /c:"MSB - Update System" "Update System.new.bat" >nul 2>&1 && (
   start "" /min cmd /c "timeout /t 2 >nul & move /y "Update System.new.bat" "Update System.bat" >nul"
 ) || del /q "Update System.new.bat" >nul 2>&1

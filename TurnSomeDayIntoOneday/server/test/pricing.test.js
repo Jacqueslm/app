@@ -4,7 +4,7 @@
 // free ... nothing for friendly cost me money."
 //
 // FREE: every lesson day 1-90 on every track, the Spiritual Path, Together,
-//       all ninety floors of 2AM, and every tool.
+//       2AM (the game), and every tool.
 // PRO:  Friendly and the live rooms. Exactly two things.
 //
 // This file exists because the promise is made in eighteen different places -

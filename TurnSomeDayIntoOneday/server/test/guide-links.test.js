@@ -36,7 +36,7 @@ test('the guide bot knows about the Game tab', () => {
   // The Game tab shipped without ever being added to the guide, so "what is
   // the game tab" had no answer and no destination.
   assert.match(APP, /\{q:'What is the Game tab\?'/);
-  assert.ok(helpNames().has('2AM (the Game tab)'), 'and it is a destination you can be sent to');
+  assert.ok(helpNames().has('The Fight of Your Life (the Game tab)'), 'and it is a destination you can be sent to');
   assert.ok(helpNames().has('The Climb'), 'so is The Climb, which lives on the same screen');
 });
 

@@ -1,4 +1,6 @@
-# GAME-SPEC.md — "2AM"
+# GAME-SPEC.md — "The Fight of Your Life"
+
+Renamed from "2AM" on 3 Sep 2026 (Jacques). Code identifiers still say `tower`, `2AM`, `gm-`.
 
 The recovery game inside Turn Someday Into Day One. The Game tab opens it, with
 The Climb on the same screen.

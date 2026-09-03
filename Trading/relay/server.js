@@ -390,7 +390,8 @@ function tryAutotrade(text) {
     lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};LIMIT;${P1};;GTC;${id}A;${id}T1;;`);
     lines.push(`PLACE;${auto.account};${inst.name};${sell};${qty};STOPMARKET;;${S};GTC;${id}A;${id}S1;;`);
   }
-  const file = path.join(auto.incoming, "oif" + (++oifSeq) + "." + id + ".txt");
+  const dir = findIncoming();
+  const file = path.join(dir, "oif" + (++oifSeq) + "." + id + ".txt");
   try {
     fs.writeFileSync(file, lines.join("\r\n") + "\r\n");
     state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty });
@@ -401,9 +402,24 @@ function tryAutotrade(text) {
       " of $" + riskUsd.toFixed(0) + " (" + (auto.riskPct || 0) + "% of " + (auto.balance || 0) + ")" +
       (cs === "rollover" ? "   ⚠ rollover month — update the contract soon" : ""));
   } catch (e) {
-    decide(false, "could not write to " + auto.incoming +
+    decide(false, "could not write to " + dir +
       " — is NinjaTrader running with the AT interface enabled? (" + e.message + ")");
   }
+}
+
+// Where NinjaTrader's "incoming" folder actually is. On a PC where OneDrive
+// owns Documents, it lives under OneDrive\Documents and the plain Documents
+// path is a dead letterbox — an order written there is never seen. So: the
+// configured path if it exists, else the two places Windows puts Documents.
+// The one that exists wins; if none does, NinjaTrader is not running with the
+// AT interface on, and the write fails loudly.
+function findIncoming() {
+  const home = process.env.USERPROFILE || require("os").homedir();
+  const cands = [auto.incoming,
+    path.join(home, "Documents", "NinjaTrader 8", "incoming"),
+    path.join(home, "OneDrive", "Documents", "NinjaTrader 8", "incoming")];
+  for (const c of cands) { try { if (c && fs.statSync(c).isDirectory()) return c; } catch {} }
+  return auto.incoming;
 }
 
 // ── the /bot page: status + the kill switch, phone-sized ─────────────────────
@@ -477,6 +493,8 @@ If it is wrong, every contract count is wrong the same way. <b>Account</b> is th
 in its Accounts tab — copy it exactly. <b>Max lots</b> is a hard ceiling the risk maths cannot argue
 past — when it bites, the ceiling is your real position size, not the percentage.</p>
 <table>${rows}</table>
+<p style="font-size:13px;color:${(() => { try { return fs.statSync(findIncoming()).isDirectory() ? "#26a69a" : "#ef5350"; } catch { return "#ef5350"; } })()}">
+NinjaTrader folder: <code>${findIncoming()}</code> — ${(() => { try { return fs.statSync(findIncoming()).isDirectory() ? "found ✓" : "NOT FOUND"; } catch { return "NOT FOUND — open NinjaTrader with the AT interface ticked"; } })()}</p>
 <h1 style="font-size:16px;margin-top:22px">Decisions this session</h1><ul>${dec}</ul>
 </body></html>`;
 }

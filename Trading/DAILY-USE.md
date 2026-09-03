@@ -76,15 +76,13 @@ the third trade is the one that undoes the first two.
   looking for one. If no alert fired, there is no trade to find.
 - Never market-in from the phone because "it's moving." The system waited
   hours for this setup; price running without you is not an emergency.
-- On a phone, set the EYES panel to **Compact** (script settings → Panel).
-  It drops the scalp rows and fits the screen.
 
 ---
 
 ## Weekly (2 minutes, Sunday)
 
-- Open the ledger. Look at the three branches — **bot signal**, **hand-off**,
-  **my own**. After twenty trades, that comparison is the whole report card.
+- Open the ledger. Look at the branches — **bot signal** against **my own**.
+  After twenty trades, that comparison is the whole report card.
 - Check both alerts still say **Active** on every chart in TradingView's alert
   panel (a re-login can pause them).
 - If the Bot switch page shows **rollover month** next to a contract, tap **Roll**.
@@ -98,4 +96,4 @@ the third trade is the one that undoes the first two.
 | Alert says qty 8, bot placed 10 or fewer | The ceiling. Max lots on the Bot switch page is the real size. |
 | MSB-PRICE missing from the alert dropdown | Add the script to that chart first (Indicators → My scripts). Alerts are per chart. |
 | No alerts for many days | Normal. The pattern fires about once every two months per market. |
-| Panel eats the phone screen | EYES settings → Panel → Compact, size tiny. |
+| Panel eats the phone screen | EYES settings → Panel → size tiny, or move it to another corner. |

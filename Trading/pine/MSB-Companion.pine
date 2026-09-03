@@ -1,15 +1,21 @@
 //@version=6
-//  MSB COMPANION v3 — green long · red short · yellow caution
-//  The talk-to-the-bot layer: the SCALP CHECK panel answers, live, the trade
-//  YOU want to take (up to the next 15m high / down to the next 15m low),
-//  and every yellow triangle carries its reason. Trades nothing, ever.
+//  MSB COMPANION v4 — green long · red short · yellow caution
+//  The eyes: where each side of the pattern has got to, and why the bot would
+//  caution a direction right now. Every yellow triangle carries its reason.
+//  Trades nothing, ever.
+//
+//  v4 removes the scalp rows. Measured on 15 years of Nasdaq, 14 of gold and
+//  11 months of MES, the "up to the next 15m high" trade the panel used to
+//  bless with a green OK lost money at every setting (-0.1R a trade on MES,
+//  one winner in three, losing runs of 12+). A panel should not put a green
+//  light on a trade that has never paid. The cautions stay — they are the
+//  bot's own read of the 1H, and that is the part that was measured.
 
 indicator("MSB Companion — talk to the bot", "MSB-EYES", overlay = true,
      max_lines_count = 200, max_labels_count = 60)
 
 pvB = input.int(3, "Swing strength (match the bot)", minval = 1, maxval = 20)
 expBars = input.int(400, "Setup expires after N bars", minval = 20)
-scalpTF = input.timeframe("15", "Scalp timeframe for the hand-off levels")
 maxLbl  = input.int(8, "Keep at most this many labels", minval = 3, maxval = 30)
 
 // The same window as the bot. The eyes trade nothing, but a "trap sprung"
@@ -32,8 +38,6 @@ inSess = not useSess or (etDow != dayofweek.saturday and etDow != dayofweek.sund
 // ─── panel size and place — a phone is not a monitor ─────────────────────────
 grpP     = "Panel"
 showPnl  = input.bool(true,  "Show the panel", group = grpP)
-compact  = input.bool(true,  "Compact — setups only, no scalp rows", group = grpP,
-     tooltip = "Turn this on for a phone. Drops the panel to two rows.")
 pnlSize  = input.string("small", "Panel text size", options = ["tiny", "small", "normal", "large"], group = grpP)
 pnlPos   = input.string("top right", "Panel corner", group = grpP,
      options = ["top right", "top left", "middle right", "middle left", "bottom right", "bottom left"],
@@ -194,36 +198,6 @@ if fireL
 if fireS
     f_note(high, inSess ? "SHORT — trap sprung" : "SHORT — sprung OFF-HOURS\nbot waits for NY", inSess ? color.new(color.red, 0) : color.new(color.yellow, 0), false)
 
-// ─── SCALP CHECK: the trade YOU want, answered live ──────────────────────────
-// Hand-off scalps: up to the next 15m swing high (best when it is a LOWER
-// high - trade TO it, never through it), or down to the next 15m swing low.
-f_sw() =>
-    xh = ta.pivothigh(3, 3)
-    xl = ta.pivotlow(3, 3)
-    var float ha = na
-    var float hb = na
-    var float la = na
-    var float lb = na
-    if not na(xh)
-        hb := ha
-        ha := xh
-    if not na(xl)
-        lb := la
-        la := xl
-    [ha, hb, la, lb]
-[sh1, sh2, sl1, sl2] = request.security(syminfo.tickerid, scalpTF, f_sw(), lookahead = barmerge.lookahead_off)
-
-// long scalp: target the 15m high above, stop under the 15m low below
-upTgt  = not na(sh1) and sh1 > close ? sh1 : na
-upRisk = not na(sl1) and sl1 < close ? close - sl1 : na
-upR    = not na(upTgt) and not na(upRisk) and upRisk > 0 ? (upTgt - close) / upRisk : na
-upLH   = not na(sh1) and not na(sh2) and sh1 < sh2       // it's a lower high: the hand-off
-// short scalp mirror
-dnTgt  = not na(sl1) and sl1 < close ? sl1 : na
-dnRisk = not na(sh1) and sh1 > close ? sh1 - close : na
-dnR    = not na(dnTgt) and not na(dnRisk) and dnRisk > 0 ? (close - dnTgt) / dnRisk : na
-dnHL   = not na(sl1) and not na(sl2) and sl1 > sl2       // it's a higher low: the hand-off
-
 // why the bot would caution each direction
 longWhy  = Son == 1 and Sb == 2 ? "trap loading — crowd longs are bait" :
      Son == 1 ? "stops just ran above — that high may be bait" :
@@ -231,13 +205,6 @@ longWhy  = Son == 1 and Sb == 2 ? "trap loading — crowd longs are bait" :
 shortWhy = Lon == 1 and Lb == 2 ? "trap loading — crowd shorts are bait" :
      Lon == 1 ? "stops just ran below — that low may be bait" :
      Son == 1 and Sb < 2 ? "flush in progress — wait for the reclaim" : ""
-
-f_verdict(float r, bool handoff, string why) =>
-    why != "" ? "⚠ " + why :
-     na(r) ? "no clean level" :
-     r < 0.8 ? "⚠ thin — " + str.tostring(r, "#.0") + "R to the level" :
-     (handoff ? "OK — " : "OK (level may break) — ") + str.tostring(r, "#.0") + "R"
-f_vcol(float r, string why) => why != "" ? color.yellow : na(r) or r < 0.8 ? color.yellow : color.lime
 
 // ─── dashboard ───────────────────────────────────────────────────────────────
 stTx(int on, int b, bool armed) => on == 1 ? (b == 2 ? "trap loading" : b == 1 ? "bounced" : "stops running") : armed ? "level armed" : "watching"
@@ -254,10 +221,10 @@ f_size() =>
      pnlSize == "normal" ? size.normal :
      pnlSize == "large"  ? size.large  : size.small
 
-var table dash = table.new(f_pos(), 2, 6, bgcolor = color.new(#0e1116, 8),
+var table dash = table.new(f_pos(), 2, 4, bgcolor = color.new(#0e1116, 8),
      frame_color = color.new(color.gray, 60), frame_width = 1)
 if barstate.islast
-    table.clear(dash, 0, 0, 1, 5)
+    table.clear(dash, 0, 0, 1, 3)
     if showPnl
         sz = f_size()
         table.cell(dash, 0, 0, "MSB EYES", text_color = color.white, text_size = sz, bgcolor = #3b82f6)
@@ -266,12 +233,7 @@ if barstate.islast
         table.cell(dash, 1, 1, stTx(Lon, Lb, not na(aL_HL)), text_color = Lon == 1 ? color.yellow : color.silver, text_size = sz)
         table.cell(dash, 0, 2, "Short", text_color = color.gray, text_size = sz)
         table.cell(dash, 1, 2, stTx(Son, Sb, not na(aS_LH)), text_color = Son == 1 ? color.yellow : color.silver, text_size = sz)
-        // The scalp rows are the wide ones. On a phone they are what pushes the
-        // panel across the whole screen, so compact mode simply drops them.
-        if not compact
-            table.cell(dash, 0, 3, "Scalp ▲ " + (na(upTgt) ? "—" : str.tostring(upTgt, format.mintick)), text_color = color.lime, text_size = sz)
-            table.cell(dash, 1, 3, f_verdict(upR, upLH, longWhy), text_color = f_vcol(upR, longWhy), text_size = sz)
-            table.cell(dash, 0, 4, "Scalp ▼ " + (na(dnTgt) ? "—" : str.tostring(dnTgt, format.mintick)), text_color = color.red, text_size = sz)
-            table.cell(dash, 1, 4, f_verdict(dnR, dnHL, shortWhy), text_color = f_vcol(dnR, shortWhy), text_size = sz)
-            table.cell(dash, 0, 5, "Hand-off", text_color = color.gray, text_size = sz)
-            table.cell(dash, 1, 5, (upLH ? "▲ lower high ✓  " : "") + (dnHL ? "▼ higher low ✓" : "") + (not upLH and not dnHL ? "none clean" : ""), text_color = color.silver, text_size = sz)
+        // One caution row: the side the bot would warn you off right now, and why.
+        caution = longWhy != "" ? "▲ " + longWhy : shortWhy != "" ? "▼ " + shortWhy : "none"
+        table.cell(dash, 0, 3, "Caution", text_color = color.gray, text_size = sz)
+        table.cell(dash, 1, 3, caution, text_color = caution == "none" ? color.silver : color.yellow, text_size = sz)

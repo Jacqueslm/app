@@ -5097,9 +5097,10 @@ function maybeStartNavTour(){
 // can sit inside for ten minutes - so these stayed. Jacques's music lands under
 // the 'Music' heading when it is ready; nothing here has to move for it.
 //
-// Eleven loose buttons wrap into a block on a phone and nobody reads past the
-// first line, so they render under headings instead. `cat` is the heading;
-// `label` is what the button says, word for word as Jacques names it.
+// Loose buttons wrap into a block on a phone and nobody reads past the first
+// line, so each category renders as one horizontal strip that scrolls sideways
+// (and centers itself when it fits). `cat` is the heading; `label` is what the
+// button says, word for word as Jacques names it.
 //
 // TO ADD A TRACK: drop the file in audio/meditation/ and add one line below.
 // Nothing else changes - the headings, the fade-in and the stop-on-close all
@@ -5119,11 +5120,31 @@ const MED_SOUNDS=[
   {k:'night-fade',            label:'Night Fade',             cat:'Music'},
   {k:'deep-focus',            label:'Deep Focus',             cat:'Music'},
   {k:'still-waters',          label:'Still Waters',           cat:'Music'},
+  {k:'soft-moonlight',        label:'Soft Moonlight',         cat:'Music'},
+  {k:'soft-moonlight-ii',     label:'Soft Moonlight II',      cat:'Music'},
+  {k:'slow-down',             label:'Slow Down',              cat:'Music'},
+  {k:'slow-down-ii',          label:'Slow Down II',           cat:'Music'},
+  {k:'stillness-within',      label:'Stillness Within',       cat:'Music'},
+  {k:'stillness-within-ii',   label:'Stillness Within II',    cat:'Music'},
+  {k:'waterfall-meditation',  label:'Waterfall Meditation',   cat:'Music'},
+  {k:'waterfall-meditation-ii',label:'Waterfall Meditation II',cat:'Music'},
+  {k:'dust-and-stillness',    label:'Dust and Stillness',     cat:'Music'},
+  {k:'dust-and-stillness-ii', label:'Dust and Stillness II',  cat:'Music'},
+  {k:'dusty-trail-home',      label:'Dusty Trail Home',       cat:'Music'},
+  {k:'golden-hour-promise',   label:'Golden Hour Promise',    cat:'Music'},
+  {k:'neon-reverie',          label:'Neon Reverie',           cat:'Music'},
+  {k:'neon-reverie-ii',       label:'Neon Reverie II',        cat:'Music'},
+  {k:'pull-the-veil',         label:'Pull the Veil',          cat:'Music'},
+  {k:'take-a-moment',         label:'Take a Moment',          cat:'Music'},
+  {k:'lullaby-of-the-old-oak',label:'The Lullaby of the Old Oak',cat:'Music'},
+  {k:'lullaby-of-the-old-oak-ii',label:'The Lullaby of the Old Oak II',cat:'Music'},
+  {k:'d-minor-drift',         label:'D Minor Drift',          cat:'Music'},
+  {k:'d-minor-drift-ii',      label:'D Minor Drift II',       cat:'Music'},
 ];
 const MED_CATS=['Nature','Music'];
 let medTimer=null,medEndsAt=0,medPaused=false,medRemainMs=0,medAudio=null;
 function medChip(k,label,on){
-  return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:.78125rem;border-radius:20px;cursor:pointer;font-family:var(--f);
+  return `<button onclick="pickMedSound('${k}')" style="margin:0;padding:8px 13px;font-size:.78125rem;border-radius:20px;cursor:pointer;font-family:var(--f);white-space:nowrap;flex:0 0 auto;
     background:${on?'rgba(126,232,162,.22)':'rgba(255,255,255,.08)'};
     border:1px solid ${on?'var(--green)':'rgba(255,255,255,.25)'};
     color:${on?'var(--green)':'#fff'}">${label}</button>`;
@@ -5150,7 +5171,9 @@ function renderMedSounds(){
     if(!inCat.length)continue;
     html+=`<div style="width:100%;margin-top:14px">
       <div style="font-size:.65625rem;letter-spacing:1.4px;opacity:.6;margin-bottom:7px;text-transform:uppercase">${cat}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">${inCat.map(sd=>medChip(sd.k,sd.label,sd.k===cur)).join('')}</div>
+      <div style="display:flex;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:thin">
+        <div style="display:flex;gap:8px;margin:0 auto;flex:0 0 auto">${inCat.map(sd=>medChip(sd.k,sd.label,sd.k===cur)).join('')}</div>
+      </div>
     </div>`;
   }
   row.innerHTML=html;

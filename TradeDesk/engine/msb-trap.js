@@ -146,6 +146,13 @@ function run(D, opt) {
           if (!open && took < maxPerDay && et.hm >= sessFrom && et.hm <= sessTo) {
             s.on = 0; s.pend = 0;
             enter(up ? 1 : -1, s.LH, s);
+            // the retest bar is a falling knife: if it filled us and kept
+            // going through the stop, that is a loss on this very bar —
+            // crediting the target here instead would be fantasy.
+            if (open && (up ? c.l <= open.stop : c.h >= open.stop)) {
+              trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat});
+              open = null;
+            }
           }
         }
         return;

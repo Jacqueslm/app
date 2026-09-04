@@ -236,3 +236,109 @@ const T2 = [H, ...rows2.map(r => r.n
 const w2 = H.map((_, i) => Math.max(...T2.map(r => r[i].length)));
 console.log('\nVariant B — wait for the higher low to prove itself, stop under it\n');
 T2.forEach((r, i) => { console.log(r.map((x, j) => j < 2 ? x.padEnd(w2[j]) : x.padStart(w2[j])).join('   ')); if (!i) console.log(w2.map(x => '-'.repeat(x)).join('---')); });
+
+/* Variant C — his rules verbatim: enter once the higher low proves itself,
+   STOP BEHIND THE ZONE (under the low that put in the new high), and manage
+   by structure: out at the previous high, or the moment a LOWER HIGH prints.
+   extend=true is "the higher timeframe indicates": skip the take-profit and
+   ride until the lower high, trailing nothing — structure is the exit. */
+function runC(c, et, S, htf, I, opt) {
+  const buf = 4 * I.tick, cap = 2, pct = opt.pct;
+  const trades = []; const hi = [], lo = [];
+  const st = {L: null, S: null};
+  let open = null, day = '', took = 0;
+  for (let i = 1; i < c.length; i++) {
+    const b = c[i], p = c[i-1], e = et[i];
+    if (e.date !== day) { day = e.date; took = 0; }
+    const inSess = e.hm > I.from && e.hm <= I.to;
+    const newHi = !isNaN(S.pivHi[i]) && S.pivHi[i] !== hi[0] ? S.pivHi[i] : null;
+    const newLo = !isNaN(S.pivLo[i]) && S.pivLo[i] !== lo[0] ? S.pivLo[i] : null;
+    if (open) {
+      const L = open.dir === 1; let R = null;
+      if (L ? b.l <= open.stop : b.h >= open.stop) R = -1;
+      else if (!opt.extend && (L ? b.h >= open.tgt : b.l <= open.tgt)) R = open.room;
+      else if (L && newHi !== null) {           // structure exit: a lower high printed
+        if (open.lastHi !== null && newHi < open.lastHi) R = ((b.c - open.entry)) / open.risk;
+        else open.lastHi = newHi;
+      }
+      else if (!L && newLo !== null) {
+        if (open.lastLo !== null && newLo > open.lastLo) R = ((open.entry - b.c)) / open.risk;
+        else open.lastLo = newLo;
+      }
+      if (R === null && e.hm >= I.to) R = ((b.c - open.entry) * open.dir) / open.risk;
+      if (R !== null) { trades.push({R}); open = null; }
+      if (open) continue;
+    }
+    if (newHi !== null) hi.unshift(newHi), hi.length = Math.min(hi.length, 3);
+    if (newLo !== null) lo.unshift(newLo), lo.length = Math.min(lo.length, 3);
+    if (hi.length < 2 || lo.length < 2) continue;
+    let A = st.L;
+    if (A) {
+      A.age++;
+      if (A.phase === 0) { A.high = Math.max(A.high, b.h); if (b.c < A.level) A.phase = 1; }
+      else {
+        const zone = pct == null ? A.level : A.high - pct * (A.high - A.legLo);
+        A.plo = Math.min(A.plo ?? b.l, b.l);
+        if (A.plo <= zone) A.tag = 1;
+        if (b.c < A.legLo || b.c > A.high) st.L = null;
+        else if (A.tag && b.c > p.h) {
+          const entry = b.c, stop = A.legLo - buf, risk = entry - stop, room = (A.high - entry) / risk;
+          st.L = null;
+          if (inSess && took < cap && htf(i) > 0 && risk > 0 && room > 0.05) {
+            open = {dir: 1, entry, stop, risk, tgt: A.high, room, lastHi: hi[0], lastLo: null}; took++;
+          }
+        }
+      }
+      if (st.L && A.age > 120) st.L = null;
+    }
+    if (!st.L && hi[0] < hi[1] && lo[0] < lo[1] && b.c > hi[0])
+      st.L = {level: hi[0], legLo: Math.min(lo[0], b.l), high: b.h, phase: 0, age: 0};
+    let Z = st.S;
+    if (Z) {
+      Z.age++;
+      if (Z.phase === 0) { Z.low = Math.min(Z.low, b.l); if (b.c > Z.level) Z.phase = 1; }
+      else {
+        const zone = pct == null ? Z.level : Z.low + pct * (Z.legHi - Z.low);
+        Z.phi = Math.max(Z.phi ?? b.h, b.h);
+        if (Z.phi >= zone) Z.tag = 1;
+        if (b.c > Z.legHi || b.c < Z.low) st.S = null;
+        else if (Z.tag && b.c < p.l) {
+          const entry = b.c, stop = Z.legHi + buf, risk = stop - entry, room = (entry - Z.low) / risk;
+          st.S = null;
+          if (inSess && took < cap && htf(i) < 0 && risk > 0 && room > 0.05) {
+            open = {dir: -1, entry, stop, risk, tgt: Z.low, room, lastLo: lo[0], lastHi: null}; took++;
+          }
+        }
+      }
+      if (st.S && Z.age > 120) st.S = null;
+    }
+    if (!st.S && hi[0] > hi[1] && lo[0] > lo[1] && b.c < lo[0])
+      st.S = {level: lo[0], legHi: Math.max(hi[0], b.h), low: b.l, phase: 0, age: 0};
+  }
+  return trades;
+}
+
+const rows3 = [];
+for (const I of SETS) {
+  const dir = path.join(__dirname, '..', 'data');
+  const c = load(path.join(dir, I.exec));
+  const S = structure(c, 3, 3);
+  const et = c.map(x => etStamp(x.t + I.tfMs));
+  const h = load(path.join(dir, I.htf));
+  const HS = structure(h, 3, 3);
+  const map = alignIndex(c.map(x => x.t + I.tfMs), h, I.htfMs);
+  const htf = i => { const j = map[i]; return j >= 0 ? HS.trend[j] : 0; };
+  const months = (c[c.length-1].t - c[0].t) / (30.44 * 864e5);
+  for (const v of [
+    {name: 'TP @ prev high', pct: null, extend: false},
+    {name: 'TP, zone 50%',   pct: 0.5,  extend: false},
+    {name: 'ride to LH',     pct: null, extend: true},
+    {name: 'ride, zone 50%', pct: 0.5,  extend: true},
+  ]) rows3.push({k: I.k, v: v.name, ...stats(runC(c, et, S, htf, I, v), months)});
+}
+const T3 = [H, ...rows3.map(r => r.n
+  ? [r.k, r.v, r.n, r.perMo.toFixed(1), r.win.toFixed(0), r.exp.toFixed(3), r.tot.toFixed(1), r.worst]
+  : [r.k, r.v, 0, '-', '-', '-', '-', '-']).map(r => r.map(String))];
+const w3 = H.map((_, i) => Math.max(...T3.map(r => r[i].length)));
+console.log('\nVariant C — stop behind the zone, out on the lower high or at the previous high\n');
+T3.forEach((r, i) => { console.log(r.map((x, j) => j < 2 ? x.padEnd(w3[j]) : x.padStart(w3[j])).join('   ')); if (!i) console.log(w3.map(x => '-'.repeat(x)).join('---')); });

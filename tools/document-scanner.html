@@ -35,6 +35,8 @@
   #bar div { height:100%; width:0; background:var(--blue); transition:width .2s; }
   textarea { width:100%; min-height:320px; border:1px solid #d1d5db; border-radius:8px; padding:12px; font-size:15px; line-height:1.5; font-family:inherit; resize:vertical; }
   video { width:100%; max-height:60vh; border-radius:8px; background:#000; }
+  .check { display:flex; align-items:center; gap:8px; font-size:14px; margin:0 0 10px; cursor:pointer; }
+  .check input { width:18px; height:18px; }
   .row { display:flex; flex-wrap:wrap; gap:0 6px; align-items:center; }
   @media (max-width:600px){ .btn { width:100%; margin:4px 0; } }
 </style>
@@ -68,6 +70,8 @@
   <div class="card">
     <h2>Step 2 — Read the text (OCR)</h2>
     <p class="hint">This reads the words out of your photos and PDFs. It can take a minute for big files.</p>
+    <label class="check"><input type="checkbox" id="handwriting"> This is <strong>handwriting</strong></label>
+    <p class="hint" id="hwNote" hidden>Handwriting mode sharpens the picture and reads it line by line. It does well with <strong>neat, separated printing</strong>. Joined-up cursive is still very hit-and-miss — expect to fix a lot in Step 3.</p>
     <button class="btn btn-blue" id="ocrBtn" disabled>🔍 Read the text</button>
     <div id="status"></div>
     <div id="bar"><div id="barFill"></div></div>
@@ -157,6 +161,38 @@ $("snapBtn").onclick = ()=>{
   c.toBlob(b=>{ addFile(new File([b], "photo-"+(files.length+1)+".jpg", {type:"image/jpeg"})); }, "image/jpeg", .92);
 };
 
+// clean up a picture so the reader has a better chance:
+// bigger, grey, and pushed towards black-on-white
+function enhance(source, width, height){
+  const scale = Math.min(3, Math.max(1, 1600 / width));
+  const c = document.createElement("canvas");
+  c.width = Math.round(width * scale); c.height = Math.round(height * scale);
+  const ctx = c.getContext("2d", { willReadFrequently:true });
+  ctx.drawImage(source, 0, 0, c.width, c.height);
+  const img = ctx.getImageData(0, 0, c.width, c.height), d = img.data;
+  // average brightness, so we adapt to a dark photo or a bright one
+  let sum = 0;
+  for(let i=0;i<d.length;i+=4) sum += (d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114);
+  const mean = sum / (d.length/4);
+  const contrast = 1.9;
+  for(let i=0;i<d.length;i+=4){
+    const g = d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114;
+    let v = (g - mean) * contrast + 190;      // lift the paper towards white
+    v = v < 0 ? 0 : v > 255 ? 255 : v;
+    d[i] = d[i+1] = d[i+2] = v; d[i+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return c;
+}
+async function enhanceFile(file){
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  try {
+    await new Promise((res, rej)=>{ img.onload = res; img.onerror = rej; img.src = url; });
+    return enhance(img, img.naturalWidth, img.naturalHeight);
+  } finally { URL.revokeObjectURL(url); }
+}
+
 // render a PDF page to a canvas (for OCR of scanned PDFs)
 async function pdfPageToCanvas(page){
   const viewport = page.getViewport({ scale: 2 });
@@ -166,19 +202,32 @@ async function pdfPageToCanvas(page){
   return c;
 }
 
+$("handwriting").onchange = e => { $("hwNote").hidden = !e.target.checked; };
+
 // OCR
 $("ocrBtn").onclick = async ()=>{
   $("ocrBtn").disabled = true;
   let out = [];
   try {
+    const hw = $("handwriting").checked;
     const worker = await Tesseract.createWorker("eng", 1, {
       logger: m => { if(m.status==="recognizing text") setBar(m.progress); }
     });
+    if(hw){
+      // handwriting: read a line at a time and stop the dictionary from
+      // "correcting" real words into something else
+      await worker.setParameters({
+        tessedit_pageseg_mode: "6",
+        preserve_interword_spaces: "1",
+        load_system_dawg: "0",
+        load_freq_dawg: "0"
+      });
+    }
     for(let i=0;i<files.length;i++){
       const f = files[i];
       setStatus(`Reading ${f.file.name} (${i+1} of ${files.length})…`); setBar(0);
       if(f.kind==="image"){
-        const { data } = await worker.recognize(f.file);
+        const { data } = await worker.recognize(hw ? await enhanceFile(f.file) : f.file);
         out.push(data.text.trim());
       } else {
         const lib = await getPdfjs();
@@ -190,7 +239,8 @@ $("ocrBtn").onclick = async ()=>{
           const tc = await page.getTextContent();
           const embedded = tc.items.map(it=>it.str).join(" ").trim();
           if(embedded.length > 20){ out.push(embedded); continue; }
-          const { data } = await worker.recognize(await pdfPageToCanvas(page));
+          const rendered = await pdfPageToCanvas(page);
+          const { data } = await worker.recognize(hw ? enhance(rendered, rendered.width, rendered.height) : rendered);
           out.push(data.text.trim());
         }
       }
@@ -198,7 +248,8 @@ $("ocrBtn").onclick = async ()=>{
     await worker.terminate();
     const t = $("text");
     t.value = (t.value ? t.value + "\n\n" : "") + out.filter(Boolean).join("\n\n");
-    setStatus("Done ✅ — the text is in Step 3. Fix anything that looks wrong, then save it in Step 4.");
+    setStatus(hw ? "Done ✅ — handwriting is the hard case, so read it over carefully in Step 3 before saving."
+                 : "Done ✅ — the text is in Step 3. Fix anything that looks wrong, then save it in Step 4.");
   } catch(e){
     setStatus("Something went wrong reading the text: " + e.message);
   }

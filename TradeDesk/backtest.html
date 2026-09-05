@@ -125,6 +125,12 @@ function create(opts){
   const o = Object.assign({}, DEFAULTS, opts || {});
   return {
     o, n: 0,
+    // Where the 4H grid sits inside the day. CME index futures open 23:00 UTC,
+    // so real 4H bars land on 3,7,11,15,19,23 — a 3-hour phase, not the 2 this
+    // file used to hardcode. One hour of phase error folds a different 4H
+    // structure than the research engine and flips the external filter on the
+    // margin. Pass h4Offset (ms) to pin it; otherwise the first candle decides.
+    h4Off: opts && opts.h4Offset != null ? opts.h4Offset : null,
     h1: newStruct(o.fractalN),      // execution
     h4: newStruct(o.fractalN),      // external
     d1: newStruct(o.fractalN),      // external
@@ -242,7 +248,8 @@ function tick(st, c){
   const o = st.o, i = st.n++;
 
   /* higher timeframes first, and only on completed buckets */
-  const k4 = Math.floor((c.t - 7200000) / 14400000);
+  if(st.h4Off == null) st.h4Off = ((c.t % 14400000) + 14400000) % 14400000;
+  const k4 = Math.floor((c.t - st.h4Off) / 14400000);
   if(st.agg4 && st.agg4.key !== k4){ feedStruct(st.h4, st.agg4); st.agg4 = null; }
   st.agg4 = roll(st.agg4, c, k4);
 

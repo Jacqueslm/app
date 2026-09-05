@@ -67,6 +67,7 @@ function run(c, et, S, htf, I, opt) {
           st.L = null;
           if (inSess && took < cap && trendUpOK) {
             open = {dir: 1, entry, stop, risk, tgt: A.high, room}; took++;
+            if (b.l <= stop) { trades.push({R: -1}); open = null; }  // filled and flushed, same bar
           }
         } else if (A.age > (opt.expire ?? 120)) st.L = null;
       }
@@ -93,6 +94,7 @@ function run(c, et, S, htf, I, opt) {
           st.S = null;
           if (inSess && took < cap && trendDownOK) {
             open = {dir: -1, entry, stop, risk, tgt: Z.low, room}; took++;
+            if (b.h >= stop) { trades.push({R: -1}); open = null; }
           }
         } else if (Z.age > (opt.expire ?? 120)) st.S = null;
       }

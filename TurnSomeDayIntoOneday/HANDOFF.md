@@ -27,10 +27,11 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   and counting. Open it in a browser as is. Published for him as an artifact.
 
 **What he asked for next, in order:**
-1. **Make the ref move.** Advice given: image-to-video clips of her photo
-   (Kling/Runway/Luma free tiers): standing breathing, counting on fingers,
-   waving off the fight, walking toward camera. Play them in the ring as video
-   textures instead of the still.
+1. **The ref is switching to Megan**, a Mixamo character, so she can move
+   (the photo referee in `img/fight/ref.png` stays as a fallback). Jacques is
+   downloading Megan With Skin plus Idle, Counting/Pointing, Waving, Walking,
+   Talking. Run them through `tools/mixamo/` into `img/fight/ref.glb`, then put
+   her in `tools/ring3d/ring3d.html` in place of the photo board, and in the app.
 2. **Announcer** (photo + clips: standing, talking into mic, arm up for the
    winner) — introduces the person by name, days, boxer, then the boss.
 3. **Round-card woman** (photo with a blank card held up + walking/holding

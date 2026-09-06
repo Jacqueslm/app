@@ -237,6 +237,27 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   a ding), the wrong one eats a harder punch and feeds its meter. Verified
   headless: counter 74 after a hook and counter, wrong answer 84 and its
   meter 18, super takes 46, its special 30 (or 12 blocked).
+- **Ring walks, corners and voices (6 Sep, late).** His notes: the announcer
+  never actually spoke, the fighters stayed on their marks between rounds
+  while only the corner team moved, everyone stood in front of the ring girl,
+  and there were no entrances. Researched the real order (ABC referee manual,
+  cutman/cornerman practice) and rebuilt the shell of the fight:
+  **the announcer, the referee and the addiction now speak aloud** through the
+  browser's own speech (`speak()`, no files, nothing to license; announcer low
+  and slow, the addiction lower and slower, the referee a female voice).
+  **Ring walks**: you come up the near aisle with your trainer and cut-man
+  behind you and the house up, it comes up the far aisle in its own colour
+  with the clown and the wrestler; both cameras are fixed at the ring apron
+  looking down the aisle, the way television shoots it (a tracking camera kept
+  catching the crew). Then **introductions at centre ring** and the
+  **referee's instructions** ("Protect yourself at all times. Obey my
+  commands. Touch gloves."), a glove touch, and both go to their corners.
+  **Between rounds the fighters walk to their own corners and sit on stools**
+  (`toCorners`/`toMarks`, the seated clip from the crowd set; the ref's walk
+  is renamed onto both fighters by `giveWalk`), the corner team works from
+  the side, the ring girl crosses an otherwise clear ring, "Seconds out" and
+  the bell. Rest is 14 s by default now. The crowd reacts on nearly every
+  seat rather than a third.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

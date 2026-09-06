@@ -8,6 +8,11 @@
   canvas{display:block;width:100%;height:100%}
   .hud{position:absolute;left:0;right:0;top:0;padding:14px 16px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);background:linear-gradient(180deg,rgba(0,0,0,.7),transparent)}
   .hud .r{text-align:right}.hud .rd{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:1.1rem;color:var(--chalk);text-align:center}#clk{display:block;font-size:1.5rem;color:var(--lamp);font-variant-numeric:tabular-nums}.row.one{grid-template-columns:1fr}.row.four{grid-template-columns:repeat(4,1fr)}.row.six{grid-template-columns:repeat(5,1fr)}.row.punch{grid-template-columns:repeat(4,1fr)}.row.punch button{padding:12px 2px;font-size:1rem}.row.six button{font-size:.9rem;padding:9px 2px}#fighters button.on{background:rgba(242,169,59,.25)}.row.four button,#gloves button{font-size:.9rem;padding:9px 4px}#places button.on,#gloves button.on{background:rgba(242,169,59,.25)}
+  .bar.sp{height:4px;margin-top:3px}.bar.sp i{background:linear-gradient(90deg,#f2a93b,#fff1d6);transition:width .25s}
+  .talk{position:absolute;left:12px;right:12px;top:118px;z-index:6;background:rgba(7,10,20,.85);border:2px solid var(--lamp);border-radius:12px;padding:8px 10px}.talk .tline{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:1.25rem;color:var(--lamp);margin-bottom:6px}.talk .tbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.talk button{padding:9px 6px;font-size:.95rem;text-transform:none;letter-spacing:0;border-color:var(--chalk)}
+  .fx{position:absolute;inset:0;pointer-events:none;background:#fff;opacity:0}.fx.on{animation:fxflash .18s ease-out}@keyframes fxflash{from{opacity:.75}to{opacity:0}}
+  .lines{position:absolute;inset:-40%;pointer-events:none;opacity:0;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.0) 0deg 4deg,rgba(255,255,255,.09) 4deg 5deg);mix-blend-mode:screen}.lines.on{opacity:.7;animation:spin 1.2s linear infinite}@keyframes spin{to{transform:rotate(20deg)}}
+  .super{position:absolute;left:50%;transform:translateX(-50%);top:36%;z-index:7;font-size:1.6rem;padding:14px 26px;border-color:var(--lamp);color:var(--lamp);background:rgba(7,10,20,.85);animation:superpulse .7s ease-in-out infinite alternate}@keyframes superpulse{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.12);box-shadow:0 0 30px var(--lamp)}}
   .bar{height:8px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden;margin-top:4px}.bar i{display:block;height:100%;background:var(--hit);transition:width .35s}.bar.you i{background:var(--you)}
   .voice{position:absolute;left:16px;right:16px;top:74px;background:var(--chalk);color:var(--ink);padding:10px 12px;font-weight:600;border-radius:14px 14px 14px 4px;max-width:80%;font-size:.95rem}
   .voice small{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
@@ -30,7 +35,10 @@
 </style>
 <div id="stage">
   <canvas id="c"></canvas>
-  <div class="hud"><div>You<div class="bar you"><i id="yb" style="width:100%"></i></div></div><div class="rd" id="rd">RD 1<span id="clk">1:00</span></div><div class="r">The Drink<div class="bar"><i id="bb" style="width:100%"></i></div></div></div>
+  <div class="hud"><div>You<div class="bar you"><i id="yb" style="width:100%"></i></div><div class="bar sp"><i id="ysp" style="width:0%"></i></div></div><div class="rd" id="rd">RD 1<span id="clk">1:00</span></div><div class="r"><span id="bossname">The Drink</span><div class="bar"><i id="bb" style="width:100%"></i></div><div class="bar sp"><i id="bsp" style="width:0%"></i></div></div></div>
+  <div class="talk" id="talk" hidden><div class="tline" id="tline"></div><div class="tbtns"><button id="ta"></button><button id="tb"></button></div></div>
+  <div class="fx" id="fx"></div><div class="lines" id="lines"></div>
+  <button class="super" id="super" hidden>DAY ONE</button>
   <div class="voice" id="v"><small>The Drink</small>Twelve floors down, the roof. Six rounds of sixty seconds. Ring the bell.</div>
   <div class="red" id="red"></div>
   <div class="chant L" id="cl"></div><div class="chant R" id="cr"></div>
@@ -6223,10 +6231,21 @@ function snd(n){try{const a=new Audio(SND[n]);a.volume=.9;a.play().catch(()=>{})
 const Q=new URLSearchParams(location.search);const ROUNDS=+Q.get('rounds')||6,ROUND_SECS=+Q.get('secs')||60,REST_SECS=+Q.get('rest')||10;
 let shake=0,youHP=100,bossHP=100,busy=false,downState=false,dodge=null,block=false;const hand={jab:'R',hook:'R',up:'R',combo:'R'};
 let round=0,timeLeft=ROUND_SECS,running=false,fightOver=true,cards={you:0,boss:0},landed={you:0,boss:0},downs={you:0,boss:0},downsFight={you:0,boss:0},result=null;
-function bars(){$('yb').style.width=youHP+'%';$('bb').style.width=bossHP+'%';}
+let ysp=0,bsp=0,inSuper=false;function bars(){$('yb').style.width=youHP+'%';$('bb').style.width=bossHP+'%';$('ysp').style.width=Math.min(100,ysp)+'%';$('bsp').style.width=Math.min(100,bsp)+'%';$('super').hidden=!(running&&ysp>=100&&!busy&&!downState);}
+// a hit flashes at the glove and the frame holds for a beat, the arcade way
+const hitTex=(()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.translate(64,64);x.fillStyle='#fff';for(let i=0;i<10;i++){x.rotate(Math.PI/5);x.beginPath();x.moveTo(0,-8);x.lineTo(6,-30-(i%2)*26);x.lineTo(-6,-30-(i%2)*26);x.closePath();x.fill();}x.beginPath();x.arc(0,0,14,0,7);x.fill();const t=new T.CanvasTexture(c);return t;})();
+function hitFx(at,color,big){const sp=new T.Sprite(new T.SpriteMaterial({map:hitTex,color:color||0xfff1d6,transparent:true,depthTest:false,blending:T.AdditiveBlending}));sp.position.copy(at);sp.scale.setScalar(big?.9:.5);scene.add(sp);const t0=performance.now();(function f(){const t=(performance.now()-t0)/160;if(t>=1){scene.remove(sp);return;}sp.scale.setScalar((big?.9:.5)*(1+t*.8));sp.material.opacity=1-t;sp.material.rotation=t*1.2;requestAnimationFrame(f);})();if(big){$('fx').classList.remove('on');void $('fx').offsetWidth;$('fx').classList.add('on');}}
+function freeze(ms){const was=slow;slow=0;setTimeout(()=>{if(slow===0)slow=was||1;},ms);}
+function glovePos(F){const g=F.gloves&&F.gloves[F.gloves.length>1?1:0];const v=new T.Vector3();if(g)g.getWorldPosition(v);else F.root.getWorldPosition(v);return v;}
 function clockShow(){$('rd').firstChild.textContent='RD '+Math.max(1,Math.min(round,ROUNDS));$('clk').textContent=Math.floor(timeLeft/60)+':'+String(timeLeft%60).padStart(2,'0');}
 function slam(t){const e=document.createElement('div');e.className='slam';e.textContent=t;$('stage').appendChild(e);setTimeout(()=>e.remove(),600);}
 function count(n){const e=document.createElement('div');e.className='count';e.textContent=n;$('stage').appendChild(e);setTimeout(()=>e.remove(),850);}
+// the addiction's own words, from the app's GAME_BOSSES for this track (here: Alcohol, as the app has it). The app passes the full set.
+const LINES={drink:[{line:'One?',right:'No.',wrong:['Maybe.','Small.']},{line:'Friday.',right:'Still no.',wrong:['Fair.','One.']},{line:'Thirsty?',right:'Water.',wrong:['Beer.','Wine.']},{line:'Celebrate.',right:'Sober.',wrong:['Cheers.','Toast.']},{line:'Relax.',right:'Breathe.',wrong:['Pour.','Drink.']},{line:"Nobody's looking.",right:'I am.',wrong:['Quick.','Once.']},{line:'Just one tonight.',right:'Not tonight.',wrong:['Just one.','A small one.']},{line:"You've earned it.",right:"I've earned sleep.",wrong:['I have, actually.','One as a reward.']},{line:"Everyone's having one.",right:'Not everyone.',wrong:["I'll hold one.",'Fit in, then stop.']},{line:'Half a glass.',right:"Half's the door.",wrong:["Half's nothing.","Pour, don't finish."]},{line:'Start again tomorrow.',right:'Tonight counts.',wrong:["Tomorrow's cleaner.",'One last night.']}]};
+let answer=null,answered=null;
+function askLine(){const set=LINES[addictionKey]||LINES.drink;const q=set[Math.floor(Math.random()*set.length)];const wrong=q.wrong[Math.floor(Math.random()*q.wrong.length)];const flip=Math.random()<.5;$('tline').textContent=q.line;$('ta').textContent=flip?wrong:q.right;$('tb').textContent=flip?q.right:wrong;answer=flip?'b':'a';answered=null;$('talk').hidden=false;say(q.line,ADD().name);return q;}
+function hideLine(){$('talk').hidden=true;}
+$('ta').onclick=()=>{if(answered)return;answered='a';$('ta').style.borderColor=answer==='a'?'#2fd08a':'#e24b4a';};$('tb').onclick=()=>{if(answered)return;answered='b';$('tb').style.borderColor=answer==='b'?'#2fd08a':'#e24b4a';};
 function say(t,who){$('v').innerHTML='<small>'+(who||'The Drink')+'</small>'+t;}
 setInterval(()=>{if(!running||downState)return;timeLeft=Math.max(0,timeLeft-1);clockShow();if(timeLeft===0)endRound();},1000);
 async function announce(lines,arm){if(!ANN)return;await castWalk(ANN,new T.Vector3(-1.15,0,-0.95),1.3);castFace(ANN,cam.position);ANN.play('talking',{loop:true,fade:.2});for(const l of lines){say(l,'Announcer');await wait(2300);}if(arm){const a=ANN.play('hand_raising',{fade:.2});await wait(1700);if(a)a.paused=true;await wait(2200);if(a)a.paused=false;await wait(800);}ANN.idle();await castWalk(ANN,ANN.home,1.5);}
@@ -6246,7 +6265,7 @@ function cornerTap(what){if(!running&&!fightOver&&!cornerUsed[what]&&!$('corner'
 $('cw').onclick=()=>cornerTap('water');$('ct').onclick=()=>cornerTap('towel');$('cd').onclick=()=>cornerTap('word');
 async function walkTheCard(n){if(!GIRL||!card)return;card.material.map=cardTex(String(n),true);card.material.needsUpdate=true;cardFront=true;
   await castWalk(GIRL,new T.Vector3(-0.95,0,-1.3),0.9);castFace(GIRL,cam.position);const a=GIRL.play('hand_raising',{fade:.2});await wait(1500);if(a)a.paused=true;card.visible=true;await wait(3600);card.visible=false;if(a)a.paused=false;GIRL.idle();await castWalk(GIRL,new T.Vector3(-2.1,0,-1.4),1.0);await castWalk(GIRL,GIRL.home,1.6);}
-async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};$('go').hidden=true;$('places').hidden=true;$('gloves').hidden=true;$('fighters').hidden=true;
+async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};$('go').hidden=true;$('places').hidden=true;$('gloves').hidden=true;$('fighters').hidden=true;ysp=0;bsp=0;$('bossname').textContent=ADD().name;
   await announce(['Six rounds on the roof of '+PLACES[place].name.replace('The ','the ')+'.','In this corner: you.','In the other: '+ADD().name+'.','It calls itself '+ADD().name+'. You know what it is.']);
   await nextRound();ai();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
@@ -6254,7 +6273,7 @@ async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   BOSS.idle();YOU.idle();
   snd('round-'+round);say(round===1?'The roof of '+PLACES[place].name.replace('The ','the ')+'. Round 1.':'Round '+round+'.','Announcer');shot('crowd',0);await wait(1600);snd('bell');crowdOn(.35);shot('tv',900);running=true;}
 // the bell: the round is scored ten-point must and the corner gets its ten seconds
-async function endRound(){if(!running||fightOver)return;running=false;snd('bell');crowdOn(.15);
+async function endRound(){if(!running||fightOver)return;running=false;snd('bell');crowdOn(.15);hideLine();$('super').hidden=true;
   while(busy)await wait(100);
   const y=landed.you,b=landed.boss;let sy=10,sb=10;
   if(y>b)sb=9;else if(b>y)sy=9;
@@ -6265,9 +6284,18 @@ async function endRound(){if(!running||fightOver)return;running=false;snd('bell'
   BOSS.idle();YOU.idle();crowdChat();const rest=wait(REST_SECS*1000);if(round<ROUNDS){cornersIn();walkTheCard(round+1);}await rest;
   if(round<ROUNDS)await cornersOut();
   await nextRound();}
+async function superMove(){if(!running||busy||downState||ysp<100)return;busy=true;inSuper=true;ysp=0;bars();$('super').hidden=true;$('lines').classList.add('on');snd('cheer');swell();chant('R',SUPPORT);say('Day one. Again.','You');
+  shot('low',300);slowMo(1400);const seq=[['lead_jab','jab',8,500],['right_jab','jab',8,500],['hook','hook',12,400],['right_uppercut','up',18,470]];
+  for(const [clip,kind,dmg,at] of seq){YOU.play(clip,{speed:1.3});stepIn(YOU,.3,at/1.3);await wait(at/1.3*1.6);land(kind,dmg);await wait(260);stepBack(YOU,200);if(bossHP<=0)break;}
+  $('lines').classList.remove('on');slow=1;inSuper=false;YOU.idle();stepBack(YOU,300);shot('tv',700);crowdReact('R','cheer');if(bossHP<=0){busy=false;return knockdown();}await wait(300);BOSS.idle();busy=false;}
+$('super').onclick=superMove;
+async function bossSpecial(){if(!running||busy||downState)return;busy=true;bsp=0;bars();aura.scale.set(5.5,5.5,1);rim.intensity=420;$('lines').classList.add('on');say('Last call.',ADD().name);chant('L',TEMPT);crowdReact('L','cheer');shot('low',300);slowMo(1200);
+  for(const [clip,at] of [['hook',400],['right_hook',400],['uppercut',470]]){BOSS.play(clip,{speed:1.4});stepIn(BOSS,.3,at/1.4);await wait(at/1.4*1.6);const b=block;const d=b?4:10;youHP=Math.max(0,youHP-d);landed.boss+=d;YOU.play(b?'center_block':'head_hit',{speed:1.5});hitFx(glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35),ADD().glow,!b);freeze(80);bars();thud(b?'block':'hook');await wait(240);stepBack(BOSS,200);if(youHP<=0)break;}
+  $('lines').classList.remove('on');slow=1;rim.intensity=180;aura.scale.set(3.6,3.6,1);BOSS.idle();YOU.idle();stepBack(BOSS,300);shot('tv',700);busy=false;if(youHP<=0)meDown();}
+function ding(){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(1320,t);o.frequency.exponentialRampToValueAtTime(1980,t+.08);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.4);}catch(e){}}
 async function ai(){while(!fightOver){await wait(2200+Math.random()*1800);if(running&&!busy&&!downState)await bossSwing();}}
 // your punch: your body throws it, its body takes it
-function land(kind,dmg){if(kind==='up'||kind==='combo2')punchIn();BOSS.play({up:'taking_punch',hook:'head_hit',combo2:'head_hit'}[kind]||'stomach_hit',{speed:1.6});shake=kind==='up'?.09:.05;
+function land(kind,dmg){if(kind==='up'||kind==='combo2')punchIn();const big=kind==='up'||kind==='combo2'||kind==='hook';hitFx(glovePos(YOU).lerp(BOSS.root.position.clone().setY(1.35),.35),ADD().glow,big);freeze(big?90:50);if(!inSuper)ysp=Math.min(100,ysp+(big?12:7));BOSS.play({up:'taking_punch',hook:'head_hit',combo2:'head_hit'}[kind]||'stomach_hit',{speed:1.6});shake=kind==='up'?.09:.05;
   bossHP=Math.max(0,bossHP-dmg);landed.you+=dmg;bars();slam({up:'WHAM',hook:'CRACK',combo2:'BANG'}[kind]||'JAB');thud(kind==='combo2'?'hook':kind);snd('boss-hit-'+(1+Math.floor(Math.random()*4)));crowdJump('R',kind==='up'?.9:.5);if(kind!=='jab'){swell();chant('R',SUPPORT);}}
 // the one-two lands twice: the left at 0.40 s and the right at 0.67 s of the clip
 async function punch(kind){if(!running||busy||downState||!YOU)return;busy=true;
@@ -6280,22 +6308,23 @@ async function punch(kind){if(!running||busy||downState||!YOU)return;busy=true;
   if(bossHP<=0){busy=false;return knockdown();}
   await wait(260);BOSS.idle();busy=false;}
 // its swing: it winds up (the tell), then throws. Slip the way the arrow points, or block.
-async function bossSwing(){if(!running||busy||downState||!BOSS)return;busy=true;dodge=null;block=false;swingAt=performance.now();
-  const side=Math.random()<.5?'L':'R';say('…');
+async function bossSwing(){if(!running||busy||downState||!BOSS)return;busy=true;dodge=null;block=false;swingAt=performance.now();const dir=Math.random()<.5?'L':'R';
+  const side=Math.random()<.5?'L':'R';const q=askLine();$('ta').style.borderColor='';$('tb').style.borderColor='';
   const cue=document.createElement('div');cue.className='cue '+side;cue.innerHTML=`<b>${side==='L'?'◀':'▶'}</b>`;$('stage').appendChild(cue);
   // the tell: it leans and the light behind it flares
   const face=BOSS.root.rotation.y,lean=side==='L'?.3:-.3;BOSS.root.rotation.y=face+lean;rim.intensity=260;
-  await wait(900);cue.remove();rim.intensity=140;BOSS.root.rotation.y=face;
+  await wait(1900);cue.remove();rim.intensity=140;BOSS.root.rotation.y=face;const right=answered&&answered===answer,wrongAns=answered&&answered!==answer;hideLine();
+  if(right){slam('COUNTER');ding();YOU.play(dir==='L'?'dodging':'dodging_right',{speed:2.2,fade:.08});await wait(300);BOSS.root.rotation.y=face;YOU.play('right_hook',{speed:1.4});stepIn(YOU,.3,400/1.4);await wait(400/1.4);land('hook',14);say(q.right,'You');ysp=Math.min(100,ysp+15);bars();await wait(420);YOU.idle();stepBack(YOU,300);BOSS.idle();busy=false;if(bossHP<=0)knockdown();return;}
   // its glove arrives at 0.40 s of the hook and 0.50 s of the jab, played at 1.4
   const swing=side==='L'?'hook':(Math.random()<.5?'right_hook':'right_jab');const contact=(swing.endsWith('jab')?500:400)/1.4;
   BOSS.play(swing,{speed:1.4});stepIn(BOSS,.3,contact);
   await wait(contact);
-  const dodged=dodge===side,blocked=!dodged&&block;
+  const dodged=!wrongAns&&dodge===side,blocked=!dodged&&!wrongAns&&block;const dmgHit=wrongAns?16:12;
   if(dodged){slam('MISS');whoosh();crowdJump('R',.4);await wait(500);}
   else if(blocked){youHP=Math.max(0,youHP-6);landed.boss+=6;bars();slam('BLOCKED');thud('block');shake=.05;$('red').style.opacity=.4;setTimeout(()=>$('red').style.opacity=0,400);await wait(450);}
-  else{YOU.play(swing.endsWith('jab')?'stomach_hit':'head_hit',{speed:1.5});shake=.12;youHP=Math.max(0,youHP-12);landed.boss+=12;bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(600);}
-  BOSS.idle();YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':'Sit down.');busy=false;
-  if(youHP<=0)meDown();}
+  else{YOU.play(swing.endsWith('jab')?'stomach_hit':'head_hit',{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+18);hitFx(glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35),0xff6a5a,true);freeze(90);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(600);}
+  BOSS.idle();YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':wrongAns?'That is what I wanted to hear.':'Sit down.',ADD().name);busy=false;
+  if(youHP<=0)meDown();else if(bsp>=100&&running)bossSpecial();}
 // it goes down: the mandatory eight. It beats the count unless this is its fourth trip to the canvas,
 // and three in one round is the referee's stoppage
 async function knockdown(){if(downState)return;downState=true;busy=true;slam('DOWN');snd('boss-down');snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
@@ -6346,7 +6375,7 @@ let sx=null;canvas.addEventListener('pointerdown',e=>{if(tapCard(e)){sx=null;ret
 const SHOTS={corner:{pos:()=>new T.Vector3(0.6,1.55,2.15),look:()=>new T.Vector3(-0.55,1.05,0.25)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>new T.Vector3(2.75,1.5,0.1),look:()=>new T.Vector3(-0.1,1.0,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
 let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1,fovBase=48;
 function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
-function camTick(dt){if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
+function camTick(dt){if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.35+d*.55,1.45,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
 function punchIn(){cam.fov=41;cam.updateProjectionMatrix();}
 function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
 // the director: during a round it cuts between the TV view and your shoulder every few seconds unless you picked a camera yourself

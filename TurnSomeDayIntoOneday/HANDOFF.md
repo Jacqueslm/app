@@ -134,6 +134,19 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   `?place=&glove=`; the app will pass the person's own door choices. He is
   downloading the announcer for step 2 (man in a suit, T-pose with skin, plus
   Idle, Talking, Walking, Cheering without skin, release tag `announcer`).
+- **Step 6 came early: six fighters with skin.** Jacques had already put six
+  Mixamo characters on a draft release tagged `Fighters` (a draft is
+  downloadable with the session's `GITHUB_TOKEN` through the API assets URL;
+  the public link does not work for drafts). Converted with
+  `tools/mixamo/convert-fighter.*`: the shadow's thirteen moves plus mirrors
+  are renamed onto each body's bones (prefix `mixamorig`, `mixamorig1`, and so
+  on) and saved as `img/fight/fighter1..6.glb` (1 = blue goblin, 2 = woman in
+  yellow, 3 = man in black, 4 = Claire, 5 = Kaya with the mushroom hat,
+  6 = the motion-capture man). In `ring3d.html` the bodies ride without moves
+  and get them from the shadow at load, skins as plain images; the page is
+  10 MB, under the 16 MB limit. Every fighter is scaled to stand 1.8 m. Picker
+  row 1–6 before the bell, `?fighter=`; the app will pass the door's choice.
+  The boss stays the black shadow.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

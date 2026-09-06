@@ -54,3 +54,12 @@ To rebuild her, or add a move:
 
 `Standing Idle` is renamed `idle` on the way through so the game code can ask
 for it by the same name it uses for the fighters.
+
+## Fighters with skin
+
+`convert-fighter.html` / `convert-fighter.js` take a Mixamo character FBX
+(with skin) from a `fighters/` folder and put the shadow's moves on it from
+`fighter-both.glb` (the thirteen boxing clips and their mirrors), renaming the
+bone prefix to match. Textures shrink to 160 px, the mesh to about a sixth.
+Output `img/fight/fighter1..6.glb`. The ring page carries body-only copies
+and puts the moves on at load.

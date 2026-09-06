@@ -39,8 +39,11 @@ building. It never ends. Your strength comes from the work you do in the app.
 5. **A relapse costs nothing in here.** The building stands where it stood.
 6. **Strength is earned in the app, never in the game.** No taps, coins or
    grinding make you stronger. The door lists exactly what is missing.
-7. **No clock. Anywhere.** Jacques: "no timer, it's added stress." The only
-   thing that tightens is the wind-up before the boss swings. Tests enforce it.
+7. **No clock. Anywhere in the app.** Jacques: "no timer, it's added stress." The
+   only thing that tightens is the wind-up before the boss swings. Tests enforce
+   it. One exception, settled 6 Sep: the 3D roof fight (`tools/ring3d/`) runs real
+   boxing rules, six rounds of sixty seconds with a round clock. The floors,
+   the door and everything else stay clockless.
 8. **Nothing invented.** Every card behind a door, every corner line, every
    puzzle word is read from what this person actually did: days, money kept,
    journal lines, the person they named, today's lesson. No "% of people".

@@ -30,13 +30,13 @@
 <div id="stage">
   <canvas id="c"></canvas>
   <div class="hud"><div>You<div class="bar you"><i id="yb" style="width:100%"></i></div></div><div class="rd" id="rd">RD 1<span id="clk">1:00</span></div><div class="r">The Drink<div class="bar"><i id="bb" style="width:100%"></i></div></div></div>
-  <div class="voice" id="v"><small>The Drink</small>Six rounds of sixty seconds. Ten-point must. Ring the bell.</div>
+  <div class="voice" id="v"><small>The Drink</small>Twelve floors down, the roof. Six rounds of sixty seconds. Ring the bell.</div>
   <div class="red" id="red"></div>
   <div class="chant L" id="cl"></div><div class="chant R" id="cr"></div>
   <div class="ctl">
     <div class="row"><button class="p" id="jl">Jab</button><button class="p" id="up">Uppercut</button><button class="p" id="hk">Hook</button></div>
     <div class="row"><button class="d" id="dl">◀ Dodge</button><button class="d" id="bl">🛡 Block</button><button class="d" id="dr">Dodge ▶</button></div>
-    <div class="row four" id="places"><button data-p="temple">Temple</button><button data-p="tomb">Tomb</button><button data-p="monastery">Monastery</button><button data-p="rooftop">Rooftop</button></div>
+    <div class="row" id="places"><button data-p="temple">Temple</button><button data-p="tomb">Tomb</button><button data-p="monastery">Monastery</button></div>
     <div class="row" id="gloves"><button data-g="red" style="border-color:#c8262a;color:#e24b4a">Red</button><button data-g="blue" style="border-color:#2f5fd6;color:#6b8cff">Blue</button><button data-g="white" style="border-color:#eee;color:#eee">White</button></div>
     <div class="row one"><button class="x" id="go">Bell</button></div>
   </div>
@@ -6126,7 +6126,7 @@ loadOne(g=>{YOU=fighter(g.scene,g.animations,{color:0x6b7fa8,emissive:0x0a1020,g
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<3)return;faceOff();setPlace(Q.get('place')||'rooftop');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();}
+function ready(){if(++loaded<3)return;faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();}
 loader.parse(b64buf(REF_GLB),'',g=>{const root=g.scene;const tl=new T.TextureLoader();const imgs={},skins={};for(const k in REF_TEX.images){const t=tl.load(REF_TEX.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}for(const n in REF_TEX.by)skins[n]=imgs[REF_TEX.by[n]];
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;if(skins[o.name]){m.map=skins[o.name];m.color.set(0xffffff);m.emissiveMap=skins[o.name];m.emissive.set(0xffffff);m.emissiveIntensity=.55;m.roughness=1;m.metalness=0;m.needsUpdate=true;}}});ref.add(root);const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>acts[c.name]=mixer.clipAction(c));REF={root,mixer,acts,cur:null};refIdle();ready();},e=>console.error(e));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -6164,7 +6164,7 @@ async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=fa
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   bossHP=100;youHP=Math.min(100,youHP+25);bars();landed={you:0,boss:0};downs={you:0,boss:0};timeLeft=ROUND_SECS;clockShow();
   BOSS.idle();YOU.idle();cam.position.copy(camBase);look.copy(LOOK);
-  snd('round-'+round);say(round===1?PLACES[place].name+'. Round 1.':'Round '+round+'.','Announcer');await wait(1600);snd('bell');crowdOn(.35);running=true;}
+  snd('round-'+round);say(round===1?'The roof of '+PLACES[place].name.replace('The ','the ')+'. Round 1.':'Round '+round+'.','Announcer');await wait(1600);snd('bell');crowdOn(.35);running=true;}
 // the bell: the round is scored ten-point must and the corner gets its ten seconds
 async function endRound(){if(!running||fightOver)return;running=false;snd('bell');crowdOn(.15);
   while(busy)await wait(100);

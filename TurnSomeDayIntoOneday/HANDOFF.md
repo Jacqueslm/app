@@ -158,6 +158,23 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   never plays it). Gloves are now sized from each hand, wrist to middle
   fingertip, and centred on it (`fitGlove`), so no fingers poke out on any
   body. Three files in that zip had lost their `.fbx` extension.
+- **Steps 2 and 3 done: announcer and ring girl** from the published release
+  `characters` (Ch33, a man in a suit; Peasant Girl). Neither came with moves,
+  so Suzie's six (idle, walking, talking, waving, hand_raising, counting) are
+  renamed onto them at load, `tools/mixamo/convert-cast.*`, files
+  `img/fight/announcer.glb`, `ringgirl.glb`. The announcer walks to ringside
+  centre before round 1: the roof, "In this corner: you", the boss by name,
+  and the damage line; he walks in again to read the cards and puts his arm
+  up on a win. The ring girl walks the round card across between rounds,
+  holds it up with the arm-raise clip; **tap the card and it flips** to the
+  corner's line (raycast on the canvas). Names and days come from the app
+  later; the proof says "you".
+- **The boss wears the damage.** Six kinds cycle with the building number:
+  body (red), money (gold), people (violet), time (blue), mind (grey), trust
+  (amber). The shadow's colour, its glow and the light behind it change,
+  and the announcer says which. `DAMAGE` in `ring3d.html`, `?building=N`;
+  the Temple/Tomb/Monastery buttons set 1/2/3 within the current cycle. The
+  app will pass its own building number.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

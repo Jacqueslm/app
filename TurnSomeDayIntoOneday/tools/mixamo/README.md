@@ -23,3 +23,27 @@ position tracks except the hips; halves the frame rate on clips over two
 seconds; strips textures and UVs (the game lights it as a black shadow or a
 colour); welds and simplifies the mesh with meshoptimizer to about 7,600
 vertices keeping skin weights.
+
+## The ref — `img/fight/ref.glb`
+
+Suzie from Mixamo (the woman in the white shirt and black trousers), with six
+moves baked in: `idle` (Standing Idle), `counting` (13.9 s: standing, bends and points for the count,
+stands back up), `walking` (1 s loop), `talking`, `waving`, `hand_raising` (she raises her own
+arm, 4 s). 2.6 MB. Made 6 Sep
+2026 from the zip Jacques put on the GitHub release tagged `suzie`.
+
+She keeps her skin, unlike the fighter: `convert-ref.html` keeps each
+material's colour map, shrunk to 512 px and shared between the body parts, and
+drops the normal, specular and gloss maps. Mesh cut to about 15,800 vertices.
+
+To rebuild her, or add a move:
+
+1. Put `character.fbx` (the character download, T-pose, FBX Binary, with skin)
+   and each animation `.fbx` (Without Skin, 30 fps) in `mix/` next to
+   `convert-ref.html`, with the same `three/` folder as above (the simplifier
+   import is the `.module.js` build).
+2. Edit `FILES` in `convert-ref.js` and run `node convert-ref.js`. It writes
+   `ref.glb` next to itself.
+
+`Standing Idle` is renamed `idle` on the way through so the game code can ask
+for it by the same name it uses for the fighters.

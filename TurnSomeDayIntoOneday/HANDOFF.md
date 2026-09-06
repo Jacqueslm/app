@@ -26,12 +26,28 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   tell, dodge/block, knockdown with the ref (her photo on a board) walking over
   and counting. Open it in a browser as is. Published for him as an artifact.
 
+**Done 6 Sep, later that day (local commits, not pushed unless he said push):**
+- The ref is **Suzie** from Mixamo (he picked her over Megan: white shirt, black
+  trousers). `img/fight/ref.glb`, 2.6 MB, moves: idle, counting, walking, talking,
+  waving, hand_raising. Converter and notes in `tools/mixamo/convert-ref.*` and the README.
+- She is in `tools/ring3d/ring3d.html` in place of the photo board: stands at
+  ringside, walks over with her own walk when somebody is down, bends and
+  counts, then walks to you and raises her arm for the winner. Verified headless: no errors, screenshots checked.
+- Big files reach a chat only through GitHub: a zip over 25 MB goes on a
+  **release** (`github.com/jacqueslm/app/releases/new`, tag it, drop the file in
+  the bottom "Attach binaries" box, publish). The `suzie` release holds her
+  original FBX files. Drive, Dropbox and Mixamo are blocked from the container.
+- The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
+  the app itself uses. She goes into the app with step 6 below, when the 3D
+  fight replaces the photo boss on the roof; the app has no 3D engine before
+  then.
+- The fighters have no skin because `fighter.glb` is the grey X Bot stand-in and
+  `convert.html` strips colour on purpose (black shadow boss). He asked why on
+  6 Sep. A skinned fighter needs a Mixamo boxer character downloaded like Suzie
+  and run through `convert-ref.html`, which keeps the colour map.
+
 **What he asked for next, in order:**
-1. **The ref is switching to Megan**, a Mixamo character, so she can move
-   (the photo referee in `img/fight/ref.png` stays as a fallback). Jacques is
-   downloading Megan With Skin plus Idle, Counting/Pointing, Waving, Walking,
-   Talking. Run them through `tools/mixamo/` into `img/fight/ref.glb`, then put
-   her in `tools/ring3d/ring3d.html` in place of the photo board, and in the app.
+1. ~~The ref switches to a Mixamo character~~ done (Suzie).
 2. **Announcer** (photo + clips: standing, talking into mic, arm up for the
    winner) — introduces the person by name, days, boxer, then the boss.
 3. **Round-card woman** (photo with a blank card held up + walking/holding

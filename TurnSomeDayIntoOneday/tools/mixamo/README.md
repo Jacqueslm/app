@@ -6,6 +6,13 @@ left/right/center_block, dodging, stomach_hit, taking_punch, knocked_out,
 getting_up, victory). 1.1 MB. Made 6 Sep 2026 from FBX files Jacques pulled
 from mixamo.com (free Adobe account).
 
+Mixamo's jab, hook, uppercut and dodge are all left-handed. `mirror.html`
+makes right-handed twins (`right_jab`, `right_hook`, `right_uppercut`,
+`dodging_right`, and mirrored blocks) by swapping every Left bone for its Right
+twin and reflecting each turn across the centre line; open it with
+`?f=fighter.glb` next to the file and save `window.B64`. The shipped
+`fighter.glb` already has them.
+
 To rebuild it, or add a move:
 
 1. On mixamo.com pick the character, then each animation, and Download as

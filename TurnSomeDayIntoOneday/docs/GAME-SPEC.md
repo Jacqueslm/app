@@ -14,10 +14,17 @@ history before this date.
 
 ## Core idea in one sentence
 
-You climb buildings at night. Every floor starts with a wheel that lands on one
-of three game shows. Twelve floors, then the thing you are fighting waits on the
-roof, by name, as a shadow in the ring. Beat it and a ride takes you to the next
-building. It never ends. Your strength comes from the work you do in the app.
+You go up to the roof of a building at night and fight the thing you are
+fighting, by name, as a shadow in the ring. Beat it and a ride takes you to the
+next building. It never ends. Your strength comes from the work you do in the
+app.
+
+**The twelve game-show floors are gone (6 Sep 2026, evening).** Jacques, twice:
+"the questions on all levels are wack", then "the whole question is wacky, the
+graphics is not fun". Every building now opens on the roof. The addiction's own
+lines from `GAME_BOSSES` were not lost — they moved *into* the ring, said while
+it winds up, with two answers and a counter for the right one. The show code in
+`index.html` is unreachable and can be deleted; it is in git before this date.
 
 ---
 

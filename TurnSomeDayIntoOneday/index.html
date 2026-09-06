@@ -7294,7 +7294,7 @@ function gmTop(){
   const sub=gm('g2-sub'),ups=gm('g2-ups'),fl=gm('g2-floors');
   if(sub)sub.textContent=`Building ${g.b} · ${gamePlace().name}`;
   if(ups)ups.textContent=g.ups;
-  if(fl)fl.innerHTML=Array.from({length:GAME_TOP_FLOOR},(_,i)=>{const f=i+1;return `<i class="${g.cleared[f]?'done':''} ${GM_SAFE.includes(f)?'safe':''} ${f===g.f?'here':''}"></i>`;}).join('')+`<i class="roof ${g.f>GAME_TOP_FLOOR?'here':''}"></i>`;
+  if(fl)fl.innerHTML=Array.from({length:Math.min(12,g.b)},(_,i)=>`<i class="${i+1<g.b?'done':'here'}"></i>`).join('')+`<i class="roof here"></i>`;
 }
 function gmBody(html){const b=gm('g2-body');if(b)b.innerHTML=html;}
 function gmSlam(t){const s=gm('g2');if(!s)return;const e=document.createElement('div');e.className='g2-slam';e.textContent=t;s.appendChild(e);setTimeout(()=>e.remove(),600);}
@@ -7303,8 +7303,10 @@ function renderTower(){
   gameStop();
   const g=gameState();
   if(!gm('g2'))return;
+  // the game is the fight: every building opens on the roof
+  if(g.f<=GAME_TOP_FLOOR){g.f=GAME_TOP_FLOOR+1;save();}
   gmTop();
-  if(g.f>GAME_TOP_FLOOR)renderRoofDoor();else renderDoor();
+  renderRoofDoor();
 }
 
 // ─── The door: the front of the building ─────────────────────────────────────
@@ -7870,7 +7872,7 @@ async function gmKnockdown(){
   <button class="g2-big" onclick="gameNextBuilding()">Building ${g.b+1}</button>`);
   gmFight=null;gmBusy=false;
 }
-function gameNextBuilding(){const g=gameState();g.b++;g.f=1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
+function gameNextBuilding(){const g=gameState();g.b++;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
 function gmSaved(){
   const g=gameState();g.losses++;g.f=GAME_TOP_FLOOR+1;gameLock();save();
   gmBell(2);gmCrowdLevel(0);setTimeout(()=>gmSay('saved'),900);

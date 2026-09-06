@@ -220,6 +220,23 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   button). Still to build in this order: it talks and you answer from
   `GAME_BOSSES`; the DAY ONE meter and flurry; announcer calls; the sound
   layer. He has Blender installed now, for two-person moves later.
+- **"I want it like Big Rumble Boxing"** (Creed Champions, 2021, Survios):
+  side-on like a TV fight, light and heavy punches, a special and a super per
+  fighter, story through talk between matches. Built on top of the Rumble
+  cut: the **side camera follows the two of them** and leans in when they
+  close (`camTick`), **impact flashes and freeze frames** on every landed
+  punch (`hitFx`, `freeze`), a **DAY ONE meter** under each health bar
+  (`ysp`, `bsp`; yours fills on landed punches and right answers, its on
+  punches it lands), your **super** at a full meter (a pulsing DAY ONE button:
+  slow motion, low camera, speed lines, jab-jab-hook-uppercut, the house up;
+  `superMove`), **its special** at a full meter (aura flares, three punches;
+  block halves them; `bossSpecial`), and **the talk-back**: during its wind-up
+  it says one of its own lines from the app's `GAME_BOSSES` (the Alcohol set
+  is in the page as `LINES.drink`; the app passes the real set per track),
+  two answers appear for 1.9 s, the right one slips and counters (`COUNTER`,
+  a ding), the wrong one eats a harder punch and feeds its meter. Verified
+  headless: counter 74 after a hook and counter, wrong answer 84 and its
+  meter 18, super takes 46, its special 30 (or 12 blocked).
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

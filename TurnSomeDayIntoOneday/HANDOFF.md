@@ -258,6 +258,12 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   the side, the ring girl crosses an otherwise clear ring, "Seconds out" and
   the bell. Rest is 14 s by default now. The crowd reacts on nearly every
   seat rather than a third.
+- **Announcer calls the action** (the last piece of the Rumble cut): a short
+  spoken line over the bottom of the screen on a big punch, a jab working, a
+  slip, a block, a counter, either fighter hurt under 28, ten seconds left,
+  a knockdown, up at eight, and both supers. `call()` throttles to one every
+  3.4 s, gives way to whoever else is speaking, and never invents a number.
+  Verified headless: seven lines in one round, correct triggers.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

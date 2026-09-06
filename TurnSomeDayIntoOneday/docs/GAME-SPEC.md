@@ -196,7 +196,7 @@ finished, no clock in the app, free):
 6. **Sound** layered in the page: thud, slap, whoosh, a ding on a right
    answer, a riser on the flurry, crowd swells. Nothing to license.
 
-Step 1 and 3 are built in `tools/ring3d/ring3d.html`; 2, 4, 5, 6 follow.
+All six are built in `tools/ring3d/ring3d.html`.
 The building still picks the venue (Temple / Tomb / Monastery); the boss
 colour is the addiction's, not the building's (the earlier per-building
 damage colours were dropped on this change).

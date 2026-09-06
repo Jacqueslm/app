@@ -1,5 +1,55 @@
 # Handoff — Turn Someday Into Day One
 
+## Where the game is, 6 Sep 2026 (read this first if you are continuing the game work)
+
+Jacques is rebuilding **The Fight of Your Life** (the Game tab) with the person
+in this chat, one preview at a time. He is not a developer. Short replies, plain
+words, one step at a time, never push unless he says "push", commit locally.
+
+**Shipped, live in the app (version 10.4):** the whole v2 game. Spec in
+`docs/GAME-SPEC.md`. Floors are game shows (Who Wants to Recover, Wheel of Your
+Addictions, Time to Heal), no clock anywhere, nothing invented; the roof is a
+Punch-Out style fight against the addiction's shadow photo: counters, tap the
+lights, stars, tells, dodge, block, counter-punch, patterns per boss, corner
+talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
+`img/fight`, sound in `audio/fight` (Piper deep male, same as SOS). Tests in
+`server/test/game.test.js` (100 pass). Boxer and glove picker on the door.
+
+**Committed after that (may be local-only if he never said push):**
+- `img/fight/fighter.glb` — Mixamo X Bot with thirteen boxing moves in one
+  1.1 MB file, and `tools/mixamo/` (the converter and how to run it).
+- `img/fight/ref.png` — Jacques's referee, cut out. In the app she slides in for
+  every ref count (`.g2-ref`, `gmRefCount`).
+- `tools/ring3d/ring3d.html` — the 3D ring proof: Three.js bundled inline, the
+  real fighter as the black shadow boss with amber rim light and as you (blue,
+  red gloves, over-the-shoulder camera), jab/hook/uppercut, its swing with a
+  tell, dodge/block, knockdown with the ref (her photo on a board) walking over
+  and counting. Open it in a browser as is. Published for him as an artifact.
+
+**What he asked for next, in order:**
+1. **Make the ref move.** Advice given: image-to-video clips of her photo
+   (Kling/Runway/Luma free tiers): standing breathing, counting on fingers,
+   waving off the fight, walking toward camera. Play them in the ring as video
+   textures instead of the still.
+2. **Announcer** (photo + clips: standing, talking into mic, arm up for the
+   winner) — introduces the person by name, days, boxer, then the boss.
+3. **Round-card woman** (photo with a blank card held up + walking/holding
+   clips) — walks the ring between rounds with the round number; tap the card
+   to flip it to the corner's line.
+4. **Corner people interactive** (cut-man, trainer: photo + clips) — between
+   rounds tap for water (bit of health), towel (clear a hit), a word (the
+   person's own journal line or their person's text). One tap each per corner.
+5. **Every character interactive**: tap the ref for a warning, tap the boss
+   while it winds up for a free block, tap yourself to hear your last counter.
+6. Then put the 3D fight on the roof in the app in place of the photo boss,
+   driven by the same rules already in `index.html`.
+
+He sends art as zips (inline images do not always arrive as files). Boss
+photos for every addiction are done; boxers 1,2,3,5,6,7,9 are complete sets;
+the Latino man (4) and the white woman (8) are punch-only.
+
+---
+
 State as of 3 August 2026. Written so someone picking this up cold does not have
 to rediscover it. Current version: **5.0.1** (`APP_VERSION` in `index.html`,
 `tsid-shell-v5.0.1` in `sw.js` — the line was deliberately renamed from 12.x

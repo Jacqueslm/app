@@ -586,6 +586,9 @@ body.nova-open #mini-player{bottom:160px}
 @keyframes g2swu{0%{opacity:1;transform:translate(-50%,50%) rotate(-8deg) scale(1.7)}55%{opacity:1;transform:translate(-50%,-50%) rotate(4deg) scale(.95)}100%{opacity:0;transform:translate(-50%,-60%) rotate(4deg) scale(.85)}}
 .g2-mini{position:absolute;right:12px;top:64px;width:72px;height:112px;z-index:4;border-radius:6px;border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 20px rgba(0,0,0,.7);background-size:cover;background-position:center 20%;transition:transform .2s}
 .g2-mini.punch{transform:translateX(14px) scale(1.06)}.g2-mini.count{transform:translateX(-8px) rotate(-6deg)}.g2-mini.down{transform:translateY(20px) rotate(-12deg);filter:brightness(.6)}
+.g2-ref{position:absolute;left:-40%;bottom:calc(215px + env(safe-area-inset-bottom));width:26%;max-width:118px;aspect-ratio:361/1100;z-index:5;background:url(img/fight/ref.png) center/contain no-repeat;filter:drop-shadow(0 16px 18px rgba(0,0,0,.8));transition:left .9s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.g2-ref.in{left:4%}.g2-ref.bob{animation:g2refbob .3s ease-out}
+@keyframes g2refbob{30%{transform:translateY(-10px)}}
 .g2-red{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(226,75,74,0) 30%,rgba(226,75,74,.85) 100%);transition:opacity .12s}
 .g2-red.on{opacity:1}.g2-red.on.soft{opacity:.45}
 .g2-dmg{position:absolute;left:55%;top:32%;z-index:5;font-family:var(--g2-disp);font-weight:800;font-size:2.4rem;color:var(--g2-lamp);text-shadow:0 2px 8px #000;animation:g2dmg .9s ease-out forwards;pointer-events:none}
@@ -1578,6 +1581,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="g2-glove red" id="g2-glove"></div>
         <div class="g2-mini" id="g2-mini" hidden></div>
         <div class="g2-red" id="g2-red"></div>
+        <div class="g2-ref" id="g2-ref" hidden></div>
         <div class="g2-top"><div><div class="g2-kicker">The Fight of Your Life</div><div class="g2-sub" id="g2-sub"></div></div><div class="g2-ups"><b id="g2-ups">0</b><span>Ups</span></div></div>
         <div class="g2-floors" id="g2-floors"></div>
         <div class="g2-body" id="g2-body"></div>
@@ -7781,9 +7785,12 @@ async function fightCorner(){
 }
 // The ref counts. Numbers on screen, voice out loud.
 async function gmRefCount(upto,onTick){
-  const stage=gm('g2');
-  for(let i=1;i<=upto;i++){if(!stage||!gmFight)return false;const e=document.createElement('div');e.className='g2-count';e.textContent=i;stage.appendChild(e);setTimeout(()=>e.remove(),850);gmSay(String(i));if(onTick&&onTick(i))return true;await gmWait(900);}
-  return false;
+  const stage=gm('g2'),ref=gm('g2-ref');
+  if(ref){ref.hidden=false;requestAnimationFrame(()=>ref.classList.add('in'));await gmWait(700);}
+  let up=false;
+  for(let i=1;i<=upto;i++){if(!stage||!gmFight)break;const e=document.createElement('div');e.className='g2-count';e.textContent=i;stage.appendChild(e);setTimeout(()=>e.remove(),850);gmSay(String(i));if(ref){ref.classList.remove('bob');void ref.offsetWidth;ref.classList.add('bob');}if(onTick&&onTick(i)){up=true;break;}await gmWait(900);}
+  if(ref){ref.classList.remove('in');setTimeout(()=>{ref.hidden=true;},900);}
+  return up;
 }
 async function gmYouDown(){
   const F=gmFight;if(!F)return;F.downs++;

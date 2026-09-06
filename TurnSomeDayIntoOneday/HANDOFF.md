@@ -147,6 +147,17 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   10 MB, under the 16 MB limit. Every fighter is scaled to stand 1.8 m. Picker
   row 1–6 before the bell, `?fighter=`; the app will pass the door's choice.
   The boss stays the black shadow.
+- **Fighters, second pass (his call: Claire and Kaya's arms did not bend, out).**
+  Now five: 1 goblin, 2 woman in yellow, 3 man in black, 4 **Jackie** (Ch29,
+  from the draft release `fightermoves`), 5 motion-capture man. Claire and
+  Kaya deleted from `img/fight`. That release also carried four moves, added
+  to the set with `tools/mixamo/addmoves.html`: `head_hit` (the short head
+  snap, now the reaction to a hook and to the boss's hooks), `jab_cross`
+  (the **1-2** button: left lands at 0.40 s, right at 0.67 s of the clip),
+  `lead_jab2` (spare), `defeat` (the boss slumps when it loses; the person
+  never plays it). Gloves are now sized from each hand, wrist to middle
+  fingertip, and centred on it (`fitGlove`), so no fingers poke out on any
+  body. Three files in that zip had lost their `.fbx` extension.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

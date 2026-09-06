@@ -187,6 +187,27 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   rest; the row hides when the bell goes. Files `img/fight/trainer.glb`,
   `cutman.glb`, `clown.glb`, `wrestler.glb`. Every cast body is scaled to
   1.78 m at load (Remy's file came in at a different unit).
+- **Step 5 done: a real crowd**, from the published release `crowd` (nineteen
+  characters, twelve seated moves). Jacques: **monsters are the addiction's
+  side, people are the person's.** Six of the nineteen (`character (4)`,
+  `(5)`, `(6)`, `(7)`, `(11)`, `(12)`) are FBX 6.1 files three.js cannot read;
+  re-download those as FBX Binary 7.x if wanted. The thirteen usable bodies
+  are in `img/fight/crowd/c*.glb` (body only, 5% mesh, 64 px skins): monsters
+  c2 ghoul, c4 "The Boss", c5 zombie in a red dress, c6 mushroom-head, c16
+  shadow, c18 masked ninja; people c0, c1, c3, c9, c10, c11, c17. Eight seated
+  moves (`sitting_idle`, `sitting_clap`, `cheering_while_sitting`,
+  `sitting_yell`, `sitting_disapproval`, `sitting_disbelief`,
+  `sitting_talking`, `sitting_laughing`) are baked into `fighter.glb` at a
+  third of their keys (`tools/mixamo/addmoves-crowd.html`); `stand_to_sit`,
+  `standing_clap`, `sitting`, `sitting_and_pointing` were left out for size.
+  The page seats 24: two rows a side on dark blocks behind the far ropes,
+  three monster bodies left under red light, three people right under
+  green, cloned with a small in-page skeleton clone. They idle, cheer or boo
+  on each landed punch (`crowdReact`), chat between rounds (`crowdChat`),
+  and the house comes up on a knockdown. **The page is 15.6 MB against a
+  16 MB limit**: Suzie's page copy was cut to a third of her triangles and
+  four seated moves dropped to fit. Nothing more can go in the preview
+  page; the app serves files from its own origin and has no such limit.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

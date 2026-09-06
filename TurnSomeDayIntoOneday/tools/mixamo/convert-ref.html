@@ -1,0 +1,55 @@
+<meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./three/package/build/three.module.js","three/addons/":"./three/package/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
+import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+import {MeshoptSimplifier} from './three/mo/package/meshopt_simplifier.module.js';
+import {mergeVertices} from 'three/addons/utils/BufferGeometryUtils.js';
+window.THREE=THREE;
+const loader=new FBXLoader();
+async function load(f){return new Promise((res,rej)=>loader.load('./mix/'+encodeURIComponent(f)+'.fbx',res,undefined,rej));}
+const TEXCACHE=new Map();function shrink(tex,size){const img=tex.image;if(TEXCACHE.has(img))return TEXCACHE.get(img);if(!img||!img.width)return null;const c=document.createElement('canvas');const s=Math.min(size,img.width);c.width=s;c.height=Math.round(img.height*s/img.width);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.flipY=tex.flipY;t.wrapS=tex.wrapS;t.wrapT=tex.wrapT;TEXCACHE.set(img,t);return t;}
+window.convert=async function(){
+  const base=await load(window.BASE||'character');
+  base.scale.setScalar(0.01);
+  const names=[],clips=[];
+  function slim(c){
+    c.tracks=c.tracks.filter(t=>{const [bone,prop]=t.name.split('.');if(prop==='position'&&!/Hips$/.test(bone))return false;if(prop==='scale')return false;return true;});
+    if(c.duration>2)c.tracks=c.tracks.map(t=>{const n=t.times.length,keep=[];for(let i=0;i<n;i+=2)keep.push(i);if(!keep.includes(n-1))keep.push(n-1);const vs=t.getValueSize();const times=new Float32Array(keep.length),vals=new Float32Array(keep.length*vs);keep.forEach((k,j)=>{times[j]=t.times[k];for(let v=0;v<vs;v++)vals[j*vs+v]=t.values[k*vs+v];});return new t.constructor(t.name,times,vals);});
+    return c;}
+  function take(obj,name){const c=obj.animations&&obj.animations[0];if(!c)return;c.name=name;clips.push(slim(c));names.push(name+' '+c.duration.toFixed(2)+'s '+c.tracks.length+' tracks');}
+  for(const f of (window.FILES||[])){const o=await load(f);take(o,f==='Standing Idle'?'idle':f.toLowerCase().replace(/\s+/g,'_'));}
+  base.animations=clips;
+  // keep only the colour map, shrunk; she is lit as herself, not a shadow
+  const mats=[];let meshes=0,verts=0;
+  // wait for embedded textures to decode
+  await new Promise(r=>setTimeout(r,1500));
+  base.traverse(o=>{if(!o.isSkinnedMesh)return;meshes++;verts+=o.geometry.attributes.position.count;
+    const list=Array.isArray(o.material)?o.material:[o.material];
+    const nm=list.map(m=>{const map=m.map?shrink(m.map,window.TEX||512):null;const s=new THREE.MeshStandardMaterial({color:map?0xffffff:(m.color||0x888888),map,roughness:.75,metalness:0,side:THREE.FrontSide});mats.push((m.name||'?')+' map='+(m.map?(m.map.image&&m.map.image.width):'none'));return s;});
+    o.material=Array.isArray(o.material)?nm:nm[0];
+    for(const k of ['uv1','uv2','color','tangent'])if(o.geometry.attributes[k])o.geometry.deleteAttribute(k);});
+  window.VERTS=verts;
+  await MeshoptSimplifier.ready;
+  let after=0;
+  base.traverse(o=>{if(!o.isSkinnedMesh)return;let g=mergeVertices(o.geometry,1e-4);
+    const pos=g.attributes.position.array,idx=g.index?new Uint32Array(g.index.array):new Uint32Array(Array.from({length:pos.length/3},(_,i)=>i));
+    const target=Math.floor(idx.length*(window.RATIO||0.35)/3)*3;
+    const [newIdx]=MeshoptSimplifier.simplify(idx,pos,3,target,0.01,['LockBorder']);
+    const [remap,unique]=MeshoptSimplifier.compactMesh(newIdx);
+    const ng=new THREE.BufferGeometry();
+    for(const name of ['position','normal','uv','skinIndex','skinWeight']){const a=g.attributes[name];if(!a)continue;const sz=a.itemSize,arr=new a.array.constructor(unique*sz);for(let i=0;i<a.count;i++){const r=remap[i];if(r===0xffffffff||r>=unique)continue;for(let k=0;k<sz;k++)arr[r*sz+k]=a.array[i*sz+k];}ng.setAttribute(name,new THREE.BufferAttribute(arr,sz,a.normalized));}
+    ng.setIndex(new THREE.BufferAttribute(new Uint32Array(newIdx),1));
+    if(g.groups&&g.groups.length){/* groups do not survive simplification; use first material */ if(Array.isArray(o.material))o.material=o.material[0];}
+    o.geometry=ng;after+=unique;});
+  window.AFTER=after;
+  const exporter=new GLTFExporter();
+  const glb=await new Promise((res,rej)=>exporter.parse(base,res,rej,{binary:true,animations:clips}));
+  window.RESULT={names,mats,meshes,verts,after,size:glb.byteLength};
+  const u8=new Uint8Array(glb);let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+  window.B64=btoa(s);
+  return window.RESULT;
+};
+window.READY=true;
+</script>

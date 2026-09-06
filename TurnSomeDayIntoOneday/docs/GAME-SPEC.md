@@ -157,3 +157,46 @@ exists; strength and the lock read the app; the house rules on words.
 3D fighters. A Three.js proof exists (shadow boxer, gloves, ref) built from
 shapes; real fighters and moves come from Mixamo when Jacques pulls them.
 The same rules drive them.
+
+
+---
+
+## The roof, the Rumble cut (concept change, 6 Sep 2026, evening)
+
+Jacques on the first 3D fight: "change of concept, I don't like it, I want
+more talking, more interaction, different camera views like Big Rumble
+Boxing, better visual and sound effects, the addictions like the images
+with the glow." The reference is the arcade boxing style of *Ready 2 Rumble*
+and *Big Rumble Boxing: Creed Champions*: personality, taunts, a power meter
+that spells a word, TV-style cameras with slow-motion knockdowns, announcer
+calls, exaggerated hits. Adapted to the app's rules (nothing invented, never
+finished, no clock in the app, free):
+
+1. **The addiction looks like the boss pictures.** A black shape lit from
+   behind in its own colour, with its own thing in the ring: The Drink amber
+   with a glass on the canvas; The Screen blue with a phone glowing in its
+   glove; The Bet red with chips on the floor; The Smoke an ember at the
+   mouth; The Cart bags; The Scroll and The Checking a phone; One More Match
+   and The Inbox a glowing slab. Thirteen named in `ADDICTIONS`; a new one
+   gets a colour and a prop the same way; unknown falls back to The Habit.
+   The glow and backlight stay behind it from whatever camera is up.
+2. **It talks and you talk back.** Its lines come from `GAME_BOSSES`
+   (short/mid/long, with the right answer and the wrongs). It says one while
+   it winds up; two answers appear; the right one slips and counters, the
+   wrong one eats the punch. Nothing invented.
+3. **Cameras.** TV side view as the main shot, over the shoulder for
+   exchanges, low corner camera in slow motion for a knockdown, the house
+   from the back at the bell, a punch-in and shake on big hits, a **Cam**
+   button to flip views. Built: `SHOTS`, `shot()`, `slowMo()`, `punchIn()`.
+4. **The DAY ONE meter.** Ready 2 Rumble spells RUMBLE. This spells DAY ONE
+   on landed punches and right answers, then a flurry with slow motion and
+   the house up.
+5. **Announcer calls** ("Big right hand.", "It's hurt."), corner talk, crowd
+   chants both sides.
+6. **Sound** layered in the page: thud, slap, whoosh, a ding on a right
+   answer, a riser on the flurry, crowd swells. Nothing to license.
+
+Step 1 and 3 are built in `tools/ring3d/ring3d.html`; 2, 4, 5, 6 follow.
+The building still picks the venue (Temple / Tomb / Monastery); the boss
+colour is the addiction's, not the building's (the earlier per-building
+damage colours were dropped on this change).

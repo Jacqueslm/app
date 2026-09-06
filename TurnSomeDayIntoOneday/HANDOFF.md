@@ -208,6 +208,18 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   16 MB limit**: Suzie's page copy was cut to a third of her triangles and
   four seated moves dropped to fit. Nothing more can go in the preview
   page; the app serves files from its own origin and has no such limit.
+- **Concept change, 6 Sep evening: the Rumble cut.** He did not like the
+  first full fight: "more talking, more interaction, different camera views
+  like Big Rumble Boxing, better visual and sound, the addictions like the
+  images with the glow." New section at the end of `docs/GAME-SPEC.md`.
+  Built so far: the addiction's look (silhouette, its colour's glow and
+  backlight following the camera, its prop: glass, phone, chips, ember,
+  bags, slab; `ADDICTIONS`, `?boss=drink`) and the camera director (`SHOTS`
+  tv/shoulder/low/crowd/corner, cuts every few seconds in a round, slow
+  motion and a low camera on knockdowns, punch-in on big hits, a **Cam**
+  button). Still to build in this order: it talks and you answer from
+  `GAME_BOSSES`; the DAY ONE meter and flurry; announcer calls; the sound
+  layer. He has Blender installed now, for two-person moves later.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

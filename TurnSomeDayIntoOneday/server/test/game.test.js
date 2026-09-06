@@ -1,14 +1,17 @@
-// 2AM - the buildings. Jacques, 3 Sep 2026: "make it fun and challenging to
-// want to do better in your recovery - that's the point."
+// The Fight of Your Life. Jacques, 6 Sep 2026: game shows on the floors, a
+// Punch-Out fight on the roof, no clock anywhere, nothing invented.
 //
 // What this file guards:
-//   - every track the app offers has an opponent, in all three tiers
+//   - every track the app offers has an opponent, in all three tiers, with a
+//     shadow photo and a fighting pattern
 //   - every line has exactly one right counter and two wrong ones
-//   - the pace starts slow (single words, long clock) and tightens
+//   - the pace starts slow (single words, long wind-up, dodge arrows) and
+//     tightens; there is no clock
 //   - strength is earned in the app, and the door says what is missing
 //   - a loss locks the roof until one real thing is done in the app
 //   - the house rules: no medical claims, never "finished", no pronouns for
-//     a supporter's person, and the supporter's opponent never blames them
+//     a supporter's person, the supporter's opponent never blames them, and
+//     no invented numbers ("% of people") anywhere in the game
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
@@ -25,8 +28,8 @@ function block(startMarker, endMarker) {
 }
 const src = block('const GAME_TOP_FLOOR=', '// ─── State ───');
 const ctx = {};
-vm.runInNewContext(src + '\nthis.GAME_TRACKS=GAME_TRACKS;this.BOSS_NAME=BOSS_NAME;this.GAME_BOSSES=GAME_BOSSES;this.GAME_EXITS=GAME_EXITS;this.GAME_QUICK_GENERIC=GAME_QUICK_GENERIC;this.GAME_QUICK_TRACK=GAME_QUICK_TRACK;this.GAME_RIDES=GAME_RIDES;this.gameTier=gameTier;', ctx);
-const { GAME_TRACKS, BOSS_NAME, GAME_BOSSES, GAME_EXITS, GAME_QUICK_GENERIC, GAME_QUICK_TRACK, GAME_RIDES, gameTier } = ctx;
+vm.runInNewContext(src + '\nthis.GAME_TRACKS=GAME_TRACKS;this.BOSS_NAME=BOSS_NAME;this.GAME_BOSSES=GAME_BOSSES;this.GAME_EXITS=GAME_EXITS;this.GAME_RIDES=GAME_RIDES;this.gameTier=gameTier;this.BOSS_IMG=BOSS_IMG;this.GAME_PATTERNS=GAME_PATTERNS;this.GAME_BOXERS=GAME_BOXERS;this.GAME_SHOWS=typeof GAME_SHOWS!=="undefined"?GAME_SHOWS:null;', ctx);
+const { GAME_TRACKS, BOSS_NAME, GAME_BOSSES, GAME_EXITS, GAME_RIDES, gameTier, BOSS_IMG, GAME_PATTERNS, GAME_BOXERS } = ctx;
 
 const LESSON_TRACKS = Object.keys(JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'lessons.json'), 'utf8')));
 
@@ -36,7 +39,14 @@ test('every track in the app has an opponent with a name', () => {
     assert.ok(GAME_BOSSES[t], 'no boss for ' + t);
     assert.ok(BOSS_NAME[t], 'no boss name for ' + t);
     assert.ok(GAME_EXITS[t] && GAME_EXITS[t].length >= 4, 'fewer than four exits for ' + t);
-    assert.ok(GAME_QUICK_TRACK[t] && GAME_QUICK_TRACK[t].length >= 5, 'fewer than five quick-fire lines for ' + t);
+    const img = BOSS_IMG[BOSS_NAME[t]];
+    assert.ok(img, 'no shadow photo key for ' + BOSS_NAME[t]);
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', 'boss-' + img + '.jpg')), 'missing img/fight/boss-' + img + '.jpg');
+  }
+  assert.ok(GAME_PATTERNS.default, 'a default fighting pattern');
+  for (const [name, p] of Object.entries(GAME_PATTERNS)) {
+    assert.ok(Array.isArray(p.seq) && p.seq.length >= 3, name + ' pattern needs at least three moves');
+    for (const m of p.seq) assert.ok(['L', 'R', 'F', 'S'].includes(m), name + ' has an unknown move ' + m);
   }
   assert.strictEqual(JSON.stringify(GAME_TRACKS.slice().sort()), JSON.stringify(Object.keys(GAME_BOSSES).sort()));
 });
@@ -54,7 +64,17 @@ test('every boss line has one right counter and two wrong ones, in all three tie
   }
 });
 
-test('the pace starts slow: single words first, longer lines and a faster clock later', () => {
+test('every boxer people can pick has all five photos, and the gloves exist', () => {
+  for (const n of GAME_BOXERS) for (const pose of ['punch', 'guard', 'corner', 'count', 'down']) {
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', `boxer${n}-${pose}.jpg`)), `missing boxer${n}-${pose}.jpg`);
+  }
+  for (const c of ['red', 'blue', 'white']) assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', `glove-${c}.png`)), 'missing glove ' + c);
+  for (const f of ['bell', 'bell3', 'crowd', 'cheer', 'winner', 'saved', 'down', 'getup', 'ref-1', 'ref-10', 'round-1', 'round-6', 'boss-hit-1', 'boss-down', 'you-m-hit-1', 'you-w-hit-1']) {
+    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'audio', 'fight', f + '.mp3')), 'missing audio/fight/' + f + '.mp3');
+  }
+});
+
+test('the pace starts slow: single words first, longer lines, a shorter wind-up, no clock', () => {
   // Jacques on the demo: "start each rooftop level off slow and the questions
   // are too long - start them off with just a word."
   const words = s => s.trim().split(/\s+/).length;
@@ -65,8 +85,13 @@ test('the pace starts slow: single words first, longer lines and a faster clock 
   assert.strictEqual(gameTier(1).key, 'short');
   assert.strictEqual(gameTier(3).key, 'mid');
   assert.strictEqual(gameTier(5).key, 'long');
-  assert.ok(gameTier(1).clock > gameTier(3).clock && gameTier(3).clock > gameTier(5).clock, 'the clock must tighten');
-  assert.ok(gameTier(1).hit[0] < gameTier(5).hit[0], 'the boss must hit harder later');
+  assert.ok(gameTier(1).tell > gameTier(3).tell && gameTier(3).tell > gameTier(5).tell, 'the wind-up must shorten');
+  assert.ok(gameTier(1).hit < gameTier(5).hit, 'the boss must hit harder later');
+  assert.ok(gameTier(1).arrows && !gameTier(5).arrows, 'dodge arrows are shown early, then taken away');
+  assert.ok(!gameTier(1).feint && gameTier(3).feint && gameTier(5).switch, 'feints arrive mid, the switch late');
+  // Jacques: "no timer, it's added stress". Nothing in the game counts down.
+  const game = block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
+  assert.doesNotMatch(game, /floorClock|setInterval\([^)]*1000\)|Too slow\. That's how it gets in/, 'no countdown clock in the game');
 });
 
 test('every exit has exactly one way out', () => {
@@ -78,18 +103,20 @@ test('every exit has exactly one way out', () => {
   }
 });
 
-test('quick-fire is balanced and every statement is a plain true/false', () => {
-  const all = GAME_QUICK_GENERIC.concat(...Object.values(GAME_QUICK_TRACK));
-  for (const q of all) assert.strictEqual(typeof q.a, 'boolean', q.s);
-  const trues = GAME_QUICK_GENERIC.filter(q => q.a).length;
-  assert.ok(trues >= 8 && GAME_QUICK_GENERIC.length - trues >= 6, 'generic pool must have both answers well represented');
+test('nothing in the game is invented: no "% of people", every card reads from the app', () => {
+  const game = block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
+  assert.doesNotMatch(game, /% of people|people on your track were|house:\[/, 'no made-up crowd numbers');
+  const heals = block('function gameHeals(){', 'function showHeal()');
+  for (const need of ['gameDays()', 'dailySpend', 'S.journals', 'gamePerson()', 'gameLessonToday()']) assert.ok(heals.includes(need), 'heals must read ' + need);
+  const puzzle = block('function gmPuzzleSource(){', 'function showWheel()');
+  assert.ok(puzzle.includes('gmJournalText()') && puzzle.includes('gmSentenceFrom(track)'), 'the puzzle reads the journal and the lessons');
 });
 
 test('house rules: no medical claims, never finished, no pronouns for a supporter\'s person', () => {
-  const text = JSON.stringify({ GAME_BOSSES, GAME_EXITS, GAME_QUICK_GENERIC, GAME_QUICK_TRACK, GAME_RIDES });
+  const text = JSON.stringify({ GAME_BOSSES, GAME_EXITS, GAME_RIDES }) + block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
   assert.doesNotMatch(text, /research shows|studies show|dopamine|brain chem|neuro|rewir|prefrontal|clinically/i);
   assert.doesNotMatch(text, /you(?:'re| are) (?:cured|finished|done with this)/i);
-  const sup = JSON.stringify({ b: GAME_BOSSES['Supporting Someone'], e: GAME_EXITS['Supporting Someone'], q: GAME_QUICK_TRACK['Supporting Someone'] });
+  const sup = JSON.stringify({ b: GAME_BOSSES['Supporting Someone'], e: GAME_EXITS['Supporting Someone'] });
   assert.doesNotMatch(sup, /\b(she|her|hers|he|him|his|husband|wife)\b/i, 'a supporter\'s person is "they"');
   // The supporter's opponent is the voice that blames them; every RIGHT counter must refuse the blame.
   for (const k of ['short', 'mid', 'long']) for (const q of GAME_BOSSES['Supporting Someone'][k]) {
@@ -105,6 +132,8 @@ test('strength is earned in the app and the door says what is missing', () => {
   assert.match(fn, /hint:lesson\?null:'Do today/);
   assert.match(fn, /hint:pledge\?null:'Take the pledge on Home/);
   assert.match(fn, /Math\.min\(120,/, 'strength is capped');
+  const stars = block('function gameStars(){', 'function gameBossHP');
+  for (const need of ['gamePledgeToday()', 'gameJournalToday()', 'gameLessonToday()']) assert.ok(stars.includes(need), 'uppercuts are earned by ' + need);
 });
 
 test('a loss locks the roof until one real thing is done in the app', () => {

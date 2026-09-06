@@ -57,8 +57,11 @@ Standing instructions. These override default behaviour and repo conventions.
 - **The boxing game is removed.** He rejected it three times. Recoverable at
   commit `5623c870` if he ever asks, but do not suggest it.
 - The Game tab opens The Fight of Your Life (code still says 2AM/tower), with The Climb on that screen.
-- **The Fight of Your Life is the buildings game (3 Sep 2026, renamed from 2AM the same day):** 12 quick floors, a boss on the
-  roof (the person's own addiction, by name), strength earned in the app, a
-  parachute/helicopter/jet to the next building, never ends. The 90-floor
-  tower and its vault were removed — he did not like the vault. Buildings 1–2
-  are single words on a slow clock; lines get longer as buildings go up.
+- **The Fight of Your Life (rebuilt 6 Sep 2026, spec in docs/GAME-SPEC.md):** every
+  floor spins a wheel onto one of three shows (Who Wants to Recover, Wheel of
+  Your Addictions, Time to Heal), 12 floors, then a Punch-Out style fight on the
+  roof against the addiction's shadow, by name. No clock anywhere. Nothing
+  invented: every card and puzzle reads the person's own app data. Photos in
+  img/fight, sound in audio/fight (Piper deep male, same as SOS). Boxers 1-2
+  talk in single words; feints and the switch arrive later. A 3D proof exists;
+  real fighters come from Mixamo when Jacques pulls them.

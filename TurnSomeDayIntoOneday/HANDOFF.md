@@ -37,6 +37,20 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   **release** (`github.com/jacqueslm/app/releases/new`, tag it, drop the file in
   the bottom "Attach binaries" box, publish). The `suzie` release holds her
   original FBX files. Drive, Dropbox and Mixamo are blocked from the container.
+- Jacques tested the first cut and called it off-beat and cheap: fighters not
+  touching, dodge dead, the ref sliding. Measured and fixed the same day:
+  every clip in both `.glb` files is now **in place** (the hips keep height but
+  never travel; the converters do this on the way through, `Hips(_\d+)?`
+  because the ref's hip track carries a suffix), the bodies stand 0.9 m apart
+  (a jab reaches 0.73 m from the hips), and reactions fire on the measured
+  contact frame: jab 0.50 s, hook 0.40 s, uppercut 0.47 s into the clip,
+  divided by the play speed. Dodge and block play the instant they are tapped
+  and count if they came during the wind-up or swing; the cue arrow points the
+  way to slip. Suzie walks at 1.35 m/s with her clip at 0.8 so her feet do not
+  slide, and her count numbers land on her pointing: one at 2.4 s, then every
+  0.87 s. The camera drops to the floor for a count. Verified with a tiled
+  frame sequence (`seq.js`/`tile.js` in that session's scratchpad, not in the
+  repo).
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

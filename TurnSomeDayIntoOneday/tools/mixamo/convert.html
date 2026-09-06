@@ -20,6 +20,8 @@ window.convert=async function(){
     c.tracks=c.tracks.filter(t=>{const [bone,prop]=t.name.split('.');if(/Hand(Thumb|Index|Middle|Ring|Pinky)/.test(bone))return false;if(prop==='position'&&!/Hips$/.test(bone))return false;if(prop==='scale')return false;return true;});
     // halve the frame rate on anything longer than two seconds
     if(c.duration>2)c.tracks=c.tracks.map(t=>{const n=t.times.length,keep=[];for(let i=0;i<n;i+=2)keep.push(i);if(!keep.includes(n-1))keep.push(n-1);const vs=t.getValueSize();const times=new Float32Array(keep.length),vals=new Float32Array(keep.length*vs);keep.forEach((k,j)=>{times[j]=t.times[k];for(let v=0;v<vs;v++)vals[j*vs+v]=t.values[k*vs+v];});return new t.constructor(t.name,times,vals);});
+    // in place: the hips keep their height but never travel, the game moves the body
+    for(const t of c.tracks){if(!/Hips(_\d+)?\.position$/.test(t.name))continue;const v=t.values,x0=v[0],z0=v[2];for(let i=0;i<v.length;i+=3){v[i]=x0;v[i+2]=z0;}}
     return c;}
   function take(obj,name){const c=obj.animations&&obj.animations[0];if(!c)return;c.name=name;clips.push(slim(c));names.push(name+' '+c.duration.toFixed(2)+'s '+c.tracks.length+' tracks');}
   take(base,'idle');

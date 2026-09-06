@@ -281,6 +281,14 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   needs its npm packages, which are not installed in this container. The
   photo roof it replaced is in git before this commit; `tools/ring3d/` stays
   as the standalone proof.
+- **The twelve game-show floors are gone.** He said it again on 6 Sep:
+  "the whole question is wacky, the graphics is not fun." `renderTower()` now
+  sends every building straight to `renderRoofDoor()` and `gameNextBuilding()`
+  starts the next building on its roof; the floor strip in the header counts
+  buildings instead of floors. The shows' code (`renderDoor`, `gameSpin`, the
+  three shows) is still in `index.html` but unreachable — **delete it once he
+  confirms he likes the simpler game**. Nothing was lost: the addiction's lines
+  live in the ring now.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

@@ -264,6 +264,23 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   a knockdown, up at eight, and both supers. `call()` throttles to one every
   3.4 s, gives way to whoever else is speaking, and never invents a number.
   Verified headless: seven lines in one round, correct triggers.
+- **The 3D fight is in the app** (version 10.5). `game3d.html` at the app root
+  is the same fight with the blobs taken out: three.js moved to
+  `js/ring3d-three.js` and every model and sound loads from `img/fight/` and
+  `audio/fight/`, so it is **724 KB instead of 15.6 MB and opens in 2.5 s**.
+  The app's roof screen (`startFight` in `index.html`) now mounts it in a
+  full-screen iframe (`#g2-3d`) and hands it, by postMessage, the person's own
+  opponent and its lines from `GAME_BOSSES` at the building's tier, their
+  boxer (1-9 mapped onto the five 3D bodies), glove colour, building, place
+  and name, plus supporter lines built from their last journal entries, their
+  person's name and their day count. It posts back `{type:'fight-over',
+  result, how, round, youHP, cards}`; `game3dWon` gives the ride and the next
+  building exactly as the photo fight did, `game3dLost` locks the roof.
+  Verified over http with a stand-in host page: config in, result out, all
+  files 200. **Not yet verified inside the real signed-in app** — the server
+  needs its npm packages, which are not installed in this container. The
+  photo roof it replaced is in git before this commit; `tools/ring3d/` stays
+  as the standalone proof.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

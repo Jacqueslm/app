@@ -68,6 +68,27 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   FAQ allows characters and animations in commercial games and apps, no
   credit; not for resale as files. `helpx.adobe.com` is blocked from the
   container, so this was from memory; he was given the URL to confirm.
+- **The ring is a fight now, on the Unified Rules of Boxing, shortened** (he asked
+  for real rules, 60-second rounds): six rounds of sixty seconds, ten seconds in
+  the corner, ten-point must scoring with a knockdown taking an extra point,
+  mandatory eight count, counted out at ten (the boss, on its fourth trip down
+  in the fight), three-knockdown rule (either side; you always rise at eight),
+  the clock stops for a count and nobody is saved by the bell, then the cards.
+  Sounds ride inside the page as data URIs (bell, round calls, cheer, winner,
+  down, get-up). No male count voice for Suzie. Test the endings with
+  `?secs=45&rounds=2&rest=3` (both endings verified headless, no errors).
+  **Settled 6 Sep: the app stays clockless; only the 3D fight has a clock.**
+  Recorded in CLAUDE.md.
+- Both fighters now punch with both hands: Mixamo's jab, hook, uppercut and
+  dodge are all left-handed, so `tools/mixamo/mirror.html` makes right-handed
+  twins (`right_jab`, `right_hook`, `right_uppercut`, `dodging_right`). The
+  shipped `fighter.glb` has them. Punches alternate hands; the boss throws a
+  left hook you slip left, a right hook or right jab you slip right.
+- Suzie's colour shifted under the amber and blue ring lights; her own picture
+  now lifts her from inside (`emissiveMap`, 0.55) so the lights only shade her.
+- He asked how to get Blender and what it does: blender.org, free, Windows
+  installer; it builds and animates 3D characters, the tool for any move
+  Mixamo does not have (the referee lifting the winner's actual wrist).
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

@@ -1,8 +1,34 @@
 # MASTER STATUS — every request, one place
 
-**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Aug 26, 2026.
+**This file is the running log.** When you open a new conversation with me (or any AI), the first thing it should do is read THIS file + START-HERE.md. Never make me re-explain what's done. Updated: Sep 6, 2026.
 
 Legend: ✅ done+pushed · 🛠 done in files, not pushed · 🔬 research done · ⏳ waiting on you · 🚫 decided no
+
+---
+
+## 🎬 6 SEP 2026 — CONTENT WEEK: FIRST ON-CAMERA SHORT, YOUTUBE LONG-FORM, 20 TRACKS IN
+
+- ✅ **20 music tracks pushed** (`e3ffd6e`, branch `claude/video-creation-6rh8la`).
+  Ten titles + alternate "II" takes → `TurnSomeDayIntoOneday/audio/meditation/`
+  (all registered in the picker) AND `content/score/` for shorts. One upload was
+  a byte-for-byte duplicate and was skipped. Picker category rows are now
+  horizontal scroll strips; add-a-track flow unchanged.
+- **Videos delivered in chat** (`*.mp4` is gitignored — the chat files ARE the copies):
+  - `yt-how-to-stop-drinking.mp4` — 2:40 YouTube long-form, 12 chapters, TTS
+    narration. Title/description/tags/chapters + 1280×720 thumbnail delivered
+    in chat. YouTube "altered content" = **Yes**.
+  - `th-pick-a-day.mp4` — 11.1s, **Jacques on camera, first time**, captioned
+    from his own lines. No AI flag. Future recordings: portrait, not landscape.
+  - `binge-walk-cause-effect.mp4` — 9.6s (recut from 15s after "too long" —
+    shorts default shorter now).
+  - `heart-cause-effect.mp4` — 9.6s healthy→damaged heart, labeled "heavy
+    drinking, over time", no invented statistics.
+- Captions/hashtags/Buffer tags went in chat beside each file. The two
+  synthetic-imagery shorts need Facebook's AI-generated flag; the talking-head
+  doesn't.
+- ⚠ **Do not share/export the 1–6 Sep video-creation chat thread** — a wildcard
+  copy rendered an old upload with Jacques's home address into that thread's
+  history. Deleted from disk, never pushed, but the chat retains the image.
 
 ---
 

@@ -63,7 +63,46 @@ Do not steer him off these; work with them:
 
 ---
 
-## ⭐ CURRENT STATUS (28 Aug 2026) — NEWEST. READ THIS BEFORE THE 24 AUG SECTION.
+## ⭐ CURRENT STATUS (6 Sep 2026) — NEWEST. READ THIS FIRST.
+
+### Content week: his first on-camera short, a YouTube long-form, 20 tracks shipped
+
+**Pushed (`e3ffd6e`): 20 music tracks, in two places at once.** Ten titles plus
+alternate "II" takes, all ~3:04. They live in `TurnSomeDayIntoOneday/audio/meditation/`
+(registered in the app's meditation picker) **and** in `content/score/` — from
+now on, shorts take their background music from `content/score/`, his own
+tracks, not stock. The picker's category rows are now sideways-scrolling strips
+(28 Music chips would have wrapped into a wall on a phone); the add-a-track flow
+is unchanged — drop the file, add one line to `MED_SOUNDS`.
+
+**The videos are in the chat, not the repo** — `*.mp4` is gitignored, so the
+delivered files in the 1–6 Sep conversation are the copies. Four were made:
+
+- **`yt-how-to-stop-drinking.mp4`** — 2:40 YouTube long-form, 12 chapters,
+  Ken Burns cards, TTS narration. Full title/description/tags/chapter stamps
+  and a 1280×720 thumbnail ("20 MINUTES BEFORE IT") were delivered in chat.
+  YouTube's **"altered content" disclosure = Yes** (synthetic voice).
+- **`th-pick-a-day.mp4`** — 11.1s, **Jacques ON CAMERA for the first time**
+  (his webcam recording, his lines as captions). No AI flag needed — it's him.
+  For future recordings: **hold the phone portrait.** Landscape webcam crops
+  to 405px wide for 9:16 and has to be upscaled 2.7×.
+- **`binge-walk-cause-effect.mp4`** — 9.6s (first cut was 15s; he said "too
+  long", so shorts default shorter now).
+- **`heart-cause-effect.mp4`** — 9.6s, healthy heart morphs into the damaged
+  one, labeled "HEAVY DRINKING, OVER TIME" — deliberately no invented numbers
+  or timelines; health claims stay modest.
+
+Captions, hashtags and Buffer tags for each went in the chat next to the file.
+The two synthetic-imagery shorts need Facebook's AI-generated flag; the
+talking-head does not.
+
+**⚠ PRIVACY — about that conversation's history.** A wildcard file-copy pulled
+an old upload containing Jacques's name, home address and email into a rendered
+image mid-chat. It was deleted from disk immediately and never pushed, but the
+rendered image is part of that conversation's history: **do not share or export
+the 1–6 Sep video-creation thread.**
+
+## ⭐ CURRENT STATUS (28 Aug 2026) — READ THIS BEFORE THE 24 AUG SECTION.
 
 ### The headline: THE APP CAN TAKE MONEY. Proven end to end, first time since launch.
 

@@ -175,6 +175,18 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   and the announcer says which. `DAMAGE` in `ring3d.html`, `?building=N`;
   the Temple/Tomb/Monastery buttons set 1/2/3 within the current cycle. The
   app will pass its own building number.
+- **Step 4 done: the corners**, from the published release `trainers` (four
+  characters, no moves; Suzie's clips again, `convert-cast2` settings: mesh
+  to 8%, error 0.05, 96 px skins, so the page stays under 16 MB). Your
+  corner: **Remy** in gym clothes is the trainer, the **soldier** (Ch49) is the
+  cut-man. The addiction's corner: the **clown** (Whiteclown N Hallin) and
+  the masked **wrestler** (Ch43), who come to its corner between rounds and
+  heckle with the temptation lines. Between rounds a row appears: **Water**
+  (+8), **Towel** (+5, clears the red), **A word** (a supporter line; in the
+  app, the person's own journal line or their person's text). One tap each per
+  rest; the row hides when the bell goes. Files `img/fight/trainer.glb`,
+  `cutman.glb`, `clown.glb`, `wrestler.glb`. Every cast body is scaled to
+  1.78 m at load (Remy's file came in at a different unit).
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

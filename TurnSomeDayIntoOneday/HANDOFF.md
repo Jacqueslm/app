@@ -89,6 +89,38 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
 - He asked how to get Blender and what it does: blender.org, free, Windows
   installer; it builds and animates 3D characters, the tool for any move
   Mixamo does not have (the referee lifting the winner's actual wrist).
+- **6 Sep, evening. The ring is a fight now**, on the Unified Rules of Boxing,
+  shortened at his request: six rounds of sixty seconds, ten seconds in the
+  corner, ten-point must (10-9, an even round 10-10, one point more per
+  knockdown), mandatory eight count, counted out at ten (the boss beats the
+  count until its fourth knockdown of the fight; the person always gets up at
+  eight), three-knockdown rule for either side, clock stops for a count, nobody
+  saved by the bell, cards after six. It can end a fight; the lines never end
+  the person. `?secs=&rounds=&rest=` on the URL shorten it for testing.
+  **Settled the same evening: the app itself stays clockless; only this fight
+  has a clock.** Written into CLAUDE.md.
+- Punches landing: Mixamo's jab/hook were made with a half-step forward that
+  the in-place bake removed, so gloves stopped short. `stepIn`/`stepBack` now
+  carry the body 0.3 m along its facing for each punch and bring it back; the
+  fighters also face each other (`faceOff`) instead of standing parallel.
+- **Sound.** Punch thud, slap and whoosh are synthesised in the page with the
+  browser's own audio (nothing downloaded, nothing to license). Grunts, bell,
+  round calls, crowd loop, cheer and winner are the app's own Piper recordings
+  from `audio/fight`, inlined. Piper is not installed in this container.
+- **Crowd.** Two banks of flat silhouettes behind the far ropes: left, red, the
+  temptations rooting for the addiction; right, green, the tools and supporters
+  rooting for the person. Each bank jumps when its side scores. Chant lines
+  flash on that side. In the proof the lines are stand-ins (`TEMPT`, `SUPPORT`);
+  **in the app they must come from the person's own data**: recorded triggers
+  and excuses on the left, their SOS tools and supporters' names on the right.
+- Free, commercial-safe tools he asked about (all checked 6 Sep): Blender
+  (blender.org, GPL, free for commercial work), Mixamo (Adobe, characters and
+  moves free in commercial games, not for resale as files), Piper TTS (MIT,
+  already the app's voice), Audacity (GPL). For sounds: Pixabay CC0 and
+  ZapSplat's CC0 collection need no credit; Mixkit has its own free licence;
+  ElevenLabs' free tier requires attribution. Freesound must be filtered to
+  CC0 per clip. He wants only free-for-commercial-use or public-domain
+  downloads, voices included.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

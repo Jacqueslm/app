@@ -51,6 +51,23 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   0.87 s. The camera drops to the floor for a count. Verified with a tiled
   frame sequence (`seq.js`/`tile.js` in that session's scratchpad, not in the
   repo).
+- **The ref showed as a white ghost on the published preview page** (fine in
+  headless Chromium from disk). The page's rules stop the model loader from
+  unpacking images embedded in the `.glb`, so `ring3d.html` now carries a
+  texture-less copy of her plus her two skin images as plain `data:` PNGs
+  (`REF_TEX`, keyed by mesh name: Body/Pants/Shirt/Coat/Shoe share one, Hair
+  and Eyelashes the other) and puts them on after loading. `img/fight/ref.glb`
+  keeps its textures for the app, which serves from its own origin.
+- Dodge right went left: one duck clip, and the camera swung the other way.
+  Now your body steps 0.3 m the way you tapped and the camera follows.
+- The hand raise is her raising her own arm (Mixamo has no two-person clip).
+  Staged: she walks to your right side, the camera swings to the front, her
+  arm holds up beside your glove while you play `victory`. A real "lifts your
+  wrist" needs a custom two-character animation (Blender), not Mixamo.
+- He asked twice whether the characters are commercial-safe: Adobe's Mixamo
+  FAQ allows characters and animations in commercial games and apps, no
+  credit; not for resale as files. `helpx.adobe.com` is blocked from the
+  container, so this was from memory; he was given the URL to confirm.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

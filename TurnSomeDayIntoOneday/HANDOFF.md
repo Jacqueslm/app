@@ -121,6 +121,19 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   ElevenLabs' free tier requires attribution. Freesound must be filtered to
   CC0 per clip. He wants only free-for-commercial-use or public-domain
   downloads, voices included.
+- **The road he set, 6 Sep, late** (one step at a time, in this order): 1 rings,
+  2 announcer, 3 ring girl with the round card, 4 corner people, 5 a real
+  crowd with faces, 6 a real boxer. His frame for all of it: the fight never
+  ends, the addiction is always on the card, you walk in stronger each time;
+  trauma stays and you get stronger at carrying it. It can lose. It never
+  says you are finished.
+- **Step 1 done: the rings.** The app's four places (Temple, Tomb, Monastery,
+  Rooftop) are venues in `ring3d.html`, each with its own key, rim, fog, floor
+  and ambient colour and the scene photo as the far wall; glove colour red,
+  blue or white on your gloves. Picked on the start screen or by
+  `?place=&glove=`; the app will pass the person's own door choices. He is
+  downloading the announcer for step 2 (man in a suit, T-pose with skin, plus
+  Idle, Talking, Walking, Cheering without skin, release tag `announcer`).
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

@@ -16,7 +16,6 @@ the alert into a bracket in NinjaTrader. Two trades a day, maximum.
 | **[pine/MSB-Companion.pine](pine/MSB-Companion.pine)** | **The eyes.** The second panel: where each side has got to, and which side is bait. |
 | **[BOT-SETUP.md](BOT-SETUP.md)** | Arming autotrade, the safety rails, and the contract roll. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
-| **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
 | **[pine/MSB-Price.pine](pine/MSB-Price.pine)** | The same rules as a strategy, for running against history in TradingView. |
 | **[TURN ON AUTO.bat](TURN%20ON%20AUTO.bat)** + `relay/` | One button: starts the relay and the tunnel, opens the Bot switch page. Arm it and the bot places its own trades in NinjaTrader (Sim101 first). |
 | **Trade Ledger** (link in DAILY-USE.md) | Dollars in, R out. Two bullets a day, three branches, moved-stop flags. |

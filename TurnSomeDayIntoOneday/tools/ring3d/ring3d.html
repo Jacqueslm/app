@@ -6440,7 +6440,7 @@ function loadFighter(n,cb){const f=FIGHTERS[n];if(!f||!MOVES)return;fighterN=n;l
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
 function loadOne(cb){loader.parse(b64buf(GLB),'',g=>cb(g),e=>console.error(e));}
-loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,glove:0x111111});BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();MOVES=g.animations;seatCrowd(ready);loadFighter(+Q.get('fighter')||3,ready);ready();});
+loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,glove:0x111111});BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();MOVES=g.animations;seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
@@ -6713,7 +6713,7 @@ const LIVE=(new URLSearchParams(location.search).get('live')==='1');
 let auto=!LIVE,swingSide=null;
 function autoSet(v){auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
 function autoOff(){if(!LIVE)return goLive(true);if(auto)autoSet(false);}
-function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');location.search=q.toString();}
+function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');q.set('fighter',fighterN);location.search=q.toString();}
 $('auto').onclick=()=>{if(auto)return;goLive(false);};
 // with Auto on it boxes for you, so the whole fight plays through on its own
 async function youAI(){let next=0;

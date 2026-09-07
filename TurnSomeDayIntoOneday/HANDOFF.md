@@ -1065,3 +1065,17 @@ position changed on every cut. No page errors.
 - **The ropes lift and they bend under.** The bottom rope stays where it is and
   they step over it; the top two lift to 1.44 and 1.88 and the fighter bends
   forward (a 0.46 rad tilt) to come through underneath, then straightens up.
+
+## 7 Sep 2026 — stepping over the bottom rope (13.7)
+
+*"her leg didnt lift"* — the fighter walked straight through the bottom rope.
+
+`fighterWalk` used to write the whole position vector, which flattened any
+height a fighter was at. It now carries x and z only and leaves y alone, so a
+fighter can be lifted while they walk. Going through the ropes now rises 0.34
+and bends 0.46 rad at the same time, walks through, then straightens and comes
+back down — the feet clear the bottom rope instead of passing through it.
+
+Honest limit: this lifts the whole body, it is not a leg animation. None of the
+forty Mixamo clips is a climb-through. A real one — hand on the top rope, one
+leg over, head under — needs a clip from Mixamo or a pass in Blender.

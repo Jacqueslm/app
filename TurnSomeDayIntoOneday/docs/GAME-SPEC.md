@@ -207,3 +207,26 @@ All six are built in `tools/ring3d/ring3d.html`.
 The building still picks the venue (Temple / Tomb / Monastery); the boss
 colour is the addiction's, not the building's (the earlier per-building
 damage colours were dropped on this change).
+
+## The levels — settled 7 Sep 2026
+
+Ninety levels, one for every day of the program. Not buildings without end:
+the game ends at ninety, and then it can be walked again from level 1.
+
+- **One level, one fight.** Level *n* is a fight on a roof. Win it and level
+  *n+1* opens. There are no floors and no game shows.
+- **A level is locked until the work is done that day.** The door opens on any
+  one real thing in the app today — today's lesson, a journal line, the pledge,
+  or a craving logged. Nothing done today, no fight. A loss also locks the roof
+  until the same is done.
+- **Your strength is the health bar you carry in**, and every point of it is
+  something done in the app.
+- **It gets harder the whole way up.** Levels 1–30 it speaks in single words,
+  31–60 in short lines, 61–90 in full sentences. Across all ninety its tell
+  gets shorter (1.9 s down to 0.9 s), its punch heavier (11 up to 22), it
+  blocks more and it swings more often.
+- **The scene changes every level.** The three roofs rotate, and the canvas and
+  the house light change with the level, so no two levels look the same.
+- **No quiz.** The addiction used to ask a question with two buttons. It does
+  not any more — it just says the thing it says while it winds up, and reading
+  which side it leans is the whole defence. Slip it and you get the counter.

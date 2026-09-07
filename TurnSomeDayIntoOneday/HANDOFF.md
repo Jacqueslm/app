@@ -1336,3 +1336,35 @@ city models all loaded. No page errors.
 
 The preview's move set is still nine short of the app's. Same trick would carry
 them; not done yet.
+
+## 7 Sep 2026 — through the ropes, not over them, and the whole body in frame (15.2)
+
+Two things Jacques called out.
+
+**"take that climb off them and just open the ring up."** The rope climb is
+gone from both fighters. `ringWalks()` no longer leans them forward, no longer
+lifts them off the canvas, and no longer rides the `climb_down` clip. The ropes
+still part — bottom rope down to the floor, the other two lifted well over head
+height — and each fighter simply walks through the gap upright and the ropes
+close behind. `climb-only.glb` came back out of the standalone preview, which
+dropped it from 15.83 MiB to 15.68 MiB.
+
+**"why his legs cut off."** Measured it in headless Chromium at 390×844, 414×896,
+360×780 and 820×420, all five fighters: on the picker screen the feet landed at
+782–816 px while the control panel starts at 599. Roughly two hundred pixels of
+leg sat behind the buttons.
+
+Two fixes, both in `game3d.html` and mirrored in the preview:
+
+- `liftFrame()` — while the fighter tiles are showing, the picture is lifted
+  into the clear space above the panel with `cam.setViewOffset`, so the action
+  is centred on what you can actually see instead of on the whole canvas. It
+  clears itself the moment the tiles go.
+- `poseFrame()` — before the first bell the camera stands off head-to-toe,
+  working out its own distance from the fighter's real height and the space
+  above the buttons, so a tall fighter gets pushed back rather than cropped.
+  The drift keeps its gentle swing there but stops pushing in and out, which
+  was what shaved the feet off. `poseOff()` hands the camera back at the bell.
+
+Measured after: feet 554–608 against a panel at 599–710, head 127–169, every
+fighter, every screen size. No page errors.

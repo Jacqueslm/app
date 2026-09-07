@@ -1140,3 +1140,24 @@ girl -0.006. The crowd is untouched at 0.422 — they sit on risers.
 They now run at 0.62, 1.12 and 1.62, the posts and pads grew to match, and the
 gate opens to 2.05 and 2.62 so the tallest of them walks through without
 ducking.
+
+## 7 Sep 2026 — the TKO moves to the end, cameras follow, the preview is a real fight (14.3)
+
+- **TKO at the end.** Jacques: *"tko is at the end of the fight if none gets
+  knocked out."* Six rounds with nobody counted out is now announced as a
+  technical knockout on the cards. (In real boxing that is called a decision and
+  a TKO is a stoppage; his call, his game.) The referee no longer waves a fight
+  off mid-round for low health — that experiment is out. The three-knockdown
+  stoppage, which was always in the spec, stays.
+- **No camera points at dead air.** Every camera except the walking ones and the
+  ring card now keeps the middle of the two fighters in frame, easing on to it
+  rather than snapping; between rounds it holds on whoever is on the stool.
+  Measured through a round: never more than 0.21 m off the middle of the two,
+  and 0.00–0.02 m on the shoulder camera.
+- **The addiction stopped losing every preview.** Three reasons, all fixed:
+  a slip paid a free counter *every* time (now 42% of the time, and for less);
+  the preview player read the lean almost perfectly (it now draws a form for the
+  night, 0.28 to 0.78, and reads it that well); and the addiction lost its turn
+  whenever the person was mid-punch, because a swing needs `!busy` — it now
+  waits for an opening instead of skipping. Measured before: 88–0 in landed
+  punches. After: 42–16 at a form of 0.63, with the addiction landing all round.

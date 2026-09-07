@@ -6793,7 +6793,15 @@ function roll(a,ms){rollAmt=a*(Math.random()<.5?-1:1);rollUntil=performance.now(
 function punchIn(){cam.fov=fovBase*.85;cam.updateProjectionMatrix();}
 function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
 // the director: during a round it cuts between the TV view and your shoulder every few seconds unless you picked a camera yourself
-setInterval(()=>{if(!running||downState||performance.now()<manualUntil)return;if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},4000);
+// the director. In the preview it never sits still: it works the whole room,
+// ringside, over the shoulder, down on the canvas, up in the house.
+const AUTOCUTS=['tv','shoulder','low','crowd','corner','tv','shoulder','low'];
+setInterval(()=>{
+  if(performance.now()<manualUntil)return;
+  if(curShot==='walk'||curShot==='entry'||curShot==='girl')return;
+  if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],750);return;}
+  if(!running||downState)return;
+  if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},3400);
 $('cam').onclick=()=>{const order=['tv','shoulder','low','crowd'];shot(order[(order.indexOf(curShot)+1)%order.length],400);manualUntil=performance.now()+15000;};
 function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);

@@ -445,6 +445,26 @@ body.nova-open #mini-player{bottom:160px}
   position:relative;min-height:calc(100vh - 132px);max-width:480px;margin:0 auto;background:var(--g2-ink);color:var(--g2-chalk);display:flex;flex-direction:column;overflow:hidden;font-size:16px;line-height:1.4}
 .g2 button{font:inherit;color:inherit;cursor:pointer}
 /* the 3D fight takes the whole screen so nobody is cut off at the edges */
+.g2-bld{margin:6px 0 14px;padding:16px 0 14px;border-top:2px solid var(--g2-lamp);border-bottom:2px solid var(--g2-lamp)}
+.g2-bld span{display:block;font-family:var(--g2-disp);font-weight:800;text-transform:uppercase;font-size:2.4rem;line-height:.95;letter-spacing:.01em}
+.g2-bld small{display:block;margin-top:6px;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2-dim)}
+.g2-flrs{display:grid;gap:6px;margin-top:10px}
+.g2-flr{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;width:100%;text-align:left;
+  background:rgba(10,13,22,.72);border:1px solid var(--g2-edge);border-radius:4px;padding:11px 12px;color:var(--g2-dim)}
+.g2-flr b{font-family:var(--g2-disp);font-size:1.3rem;color:var(--g2-dim)}
+.g2-flr span{font-size:.92rem}
+.g2-flr i{font-style:normal;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase}
+.g2-flr.done{border-color:rgba(47,208,138,.5)}.g2-flr.done b,.g2-flr.done i{color:var(--g2-you)}
+.g2-flr.here{border-color:var(--g2-lamp);color:var(--g2-chalk);background:rgba(242,169,59,.12)}
+.g2-flr.here b,.g2-flr.here i{color:var(--g2-lamp)}
+.g2-flr.roof{margin-bottom:4px}
+.g2-flr[disabled]{opacity:.55}
+.g2-chute{position:relative;height:120px;margin:4px 0 10px;overflow:hidden}
+.g2-chute i{position:absolute;left:50%;top:-40px;width:64px;height:34px;margin-left:-32px;border-radius:64px 64px 0 0;
+  background:linear-gradient(180deg,var(--g2-lamp),#c8262a);animation:g2fall 2.6s ease-out forwards}
+.g2-chute i::after{content:"";position:absolute;left:50%;top:34px;width:2px;height:34px;margin-left:-1px;background:var(--g2-dim)}
+@keyframes g2fall{from{top:-40px;transform:rotate(-6deg)}to{top:56px;transform:rotate(4deg)}}
+@media (prefers-reduced-motion:reduce){.g2-chute i{animation:none;top:56px}}
 .g2.g2-full{position:fixed;inset:0;width:100%;max-width:none;min-height:0;height:100dvh;margin:0;z-index:60;padding:0}
 .g2-full .g2-photo,.g2-full .g2-grain,.g2-full .g2-glove,.g2-full .g2-red,.g2-full .g2-mini,.g2-full .g2-ref,.g2-full .g2-top,.g2-full .g2-floors{display:none}
 .g2-full .g2-body{padding:0}
@@ -6797,7 +6817,30 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   - No new dependencies. Same file, plain JS, CSS animation, <audio>.
 //   - Art: img/fight (scenes, boss shadows, boxers, gloves). Sound: audio/fight.
 
-const GAME_LEVELS=90;                   // ninety levels, one for every day of the program
+const GAME_FLOORS=10;                   // ten floors, then the roof
+// Every floor carries an element you can see in the ring. The fight page draws it.
+const GAME_ELEMENTS=['Rain','Fire','Wind','Earth','Ash','Ice','Smoke','Lightning','Sand','Shadow'];
+// One building per addiction, each its own kind of place. Anybody can walk into
+// any of them - only the lessons follow the person's own track.
+const GAME_BUILDINGS=[
+ {k:'drink',   name:'The Drink',      kind:'Brewery tower',           track:'Alcohol'},
+ {k:'screen',  name:'The Screen',     kind:'Neon motel block',        track:'Porn & Sex'},
+ {k:'smoke',   name:'The Smoke',      kind:'Cigarette factory',       track:'Smoking'},
+ {k:'hit',     name:'The Hit',        kind:'Boarded-up tenement',     track:'Substances'},
+ {k:'bet',     name:'The Bet',        kind:'Casino tower',            track:'Gambling'},
+ {k:'scroll',  name:'The Scroll',     kind:'Glass tower of screens',  track:'Social media'},
+ {k:'match',   name:'One More Match', kind:'Arcade block',            track:'Gaming'},
+ {k:'binge',   name:'The Binge',      kind:'Diner and cold-store',    track:'Food / Binging'},
+ {k:'cart',    name:'The Cart',       kind:'Shopping mall',           track:'Shopping / Spending'},
+ {k:'inbox',   name:'The Inbox',      kind:'Office tower, all lit',   track:'Work'},
+ {k:'heat',    name:'The Heat',       kind:'Boiler house',            track:'Anger & Control'},
+ {k:'checking',name:'The Checking',   kind:'One window still lit',    track:'Supporting Someone'},
+ {k:'habit',   name:'The Habit',      kind:'Grey block, no sign',     track:'Other'}];
+function gameBuilding(){const g=gameState();return GAME_BUILDINGS[(g.b-1)%GAME_BUILDINGS.length];}
+function gameLap(){return Math.floor((gameState().b-1)/GAME_BUILDINGS.length)+1;}
+// one continuous climb: every floor of every building is a step, forever
+function gameStep(){const g=gameState();return (g.b-1)*11+Math.min(11,g.f);}
+function gameFloorEl(n){return GAME_ELEMENTS[(n-1)%GAME_ELEMENTS.length];}
 // What each addiction says to get a person to engage. Temptation only - the
 // fight has no right answer to click any more, it just talks while it winds up.
 const GAME_TEMPT={
@@ -7189,9 +7232,10 @@ const GAME_RIDES=[
 // word, as levels progress they can become longer." No clock anywhere: the
 // only thing that tightens is the wind-up before its swing (tell, in ms) and
 // what it throws. Buildings 1-2 show dodge arrows; after that you read it.
-function gameTier(b){
-  return b<=30?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
-       :b<=60?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
+function gameTier(){
+  const s=gameStep();
+  return s<=22?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
+       :s<=55?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
        :{key:'long',label:'Full sentences',tell:620,swings:4,feint:true,switch:true,arrows:false,hit:14,given:'line'};
 }
 
@@ -7223,7 +7267,7 @@ const GAME_PATTERNS={
 function gameState(){
   if(!S.bld||typeof S.bld!=='object')S.bld={b:1,f:1,cleared:{},wins:0,losses:0,locked:null,rides:{jet:0,heli:0,chute:0},streak:0,ups:0,upsTotal:0,boxer:1,glove:'red',spun:0};
   const g=S.bld;
-  g.b=Math.max(1,Math.min(GAME_LEVELS,g.b|0));g.f=Math.min(GAME_TOP_FLOOR+1,Math.max(1,g.f|0));
+  g.b=Math.max(1,g.b|0);g.f=Math.max(1,Math.min(GAME_FLOORS+1,g.f|0));g.f=Math.min(GAME_TOP_FLOOR+1,Math.max(1,g.f|0));
   g.cleared=g.cleared||{};g.rides=g.rides||{jet:0,heli:0,chute:0};
   g.ups=g.ups|0;g.upsTotal=g.upsTotal|0;g.spun=g.spun|0;
   if(!GAME_BOXERS.includes(g.boxer))g.boxer=1;if(!GAME_GLOVES.includes(g.glove))g.glove='red';
@@ -7237,8 +7281,9 @@ function gameTrack(){
   const mt=(typeof masterTrack==='function')?masterTrack():null;
   return (mt&&GAME_BOSSES[mt.name])?mt.name:'Other';
 }
-function gameBossName(){return BOSS_NAME[gameTrack()]||'The Habit';}
-function gameBossImg(){return 'img/fight/boss-'+(BOSS_IMG[gameBossName()]||'shadow')+'.jpg';}
+function gameBossName(){return gameBuilding().name;}
+function gameBossImg(){return 'img/fight/boss-'+gameBuilding().k+'.jpg';}
+function gameBldImg(){return 'img/fight/bld-'+gameBuilding().k+'.jpg';}
 function gamePlace(){const g=gameState();return GAME_PLACES[(g.b-1)%GAME_PLACES.length];}
 function gameDays(){
   try{if(!S.startDate)return 0;return Math.max(0,Math.floor((Date.now()-new Date(S.startDate).getTime())/86400000));}catch(e){return 0;}
@@ -7315,9 +7360,9 @@ function gmMiniHide(){const m=gm('g2-mini');if(m)m.hidden=true;}
 function gmTop(){
   const g=gameState();
   const sub=gm('g2-sub'),ups=gm('g2-ups'),fl=gm('g2-floors');
-  if(sub)sub.textContent=`Level ${g.b} of ${GAME_LEVELS} · ${gamePlace().name}`;
+  if(sub)sub.textContent=`Building ${g.b} · ${gameBuilding().name}`;
   if(ups)ups.textContent=g.ups;
-  if(fl)fl.innerHTML=Array.from({length:9},(_,i)=>`<i class="${(i+1)*10<g.b?'done':((i*10<g.b)?'here':'')}"></i>`).join('');
+  if(fl)fl.innerHTML=Array.from({length:GAME_FLOORS},(_,i)=>`<i class="${g.cleared[i+1]?'done':(g.f===i+1?'here':'')}"></i>`).join('')+`<i class="roof ${g.f>GAME_FLOORS?'here':''}"></i>`;
 }
 function gmBody(html){const b=gm('g2-body');if(b)b.innerHTML=html;}
 function gmSlam(t){const s=gm('g2');if(!s)return;const e=document.createElement('div');e.className='g2-slam';e.textContent=t;s.appendChild(e);setTimeout(()=>e.remove(),600);}
@@ -7326,11 +7371,36 @@ function renderTower(){
   gameStop();
   const g=gameState();
   if(!gm('g2'))return;
-  // the game is the fight: every building opens on the roof
-  if(g.f<=GAME_TOP_FLOOR){g.f=GAME_TOP_FLOOR+1;save();}
   gmTop();
-  renderRoofDoor();
+  if(!g.inside)renderApproach();else renderFloors();
 }
+// You land in the street and the building is standing there with its name on it.
+function renderApproach(){
+  const g=gameState(),B=gameBuilding();
+  gmPhoto('scene',gameBldImg());gmMiniHide();
+  gmBody(`<div class="g2-cat">Building ${g.b}${gameLap()>1?` · time ${gameLap()}`:''}</div>
+    <div class="g2-bld"><span>${gmEsc(B.name)}</span><small>${gmEsc(B.kind)}</small></div>
+    <p class="g2-lead">Ten floors and a roof. The same thing waits on every one of them, wearing something different each time. The roof is where it comes from.</p>
+    <button class="g2-big" onclick="gameGoIn()">Go in</button>`);
+}
+function gameGoIn(){const g=gameState();g.inside=true;save();renderFloors();}
+// The climb. One fight a floor, then the roof.
+function renderFloors(){
+  const g=gameState(),B=gameBuilding();
+  gmPhoto('boss',gameBossImg());gmMini('guard');
+  const rows=[];
+  for(let n=GAME_FLOORS;n>=1;n--){
+    const done=!!g.cleared[n],here=g.f===n&&!done;
+    rows.push(`<button class="g2-flr ${done?'done':''} ${here?'here':''}" ${here?'onclick="gameFloorGo('+n+')"':'disabled'}>
+      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}</span><i>${done?'cleared':here?'fight':'locked'}</i></button>`);
+  }
+  const roofReady=Object.keys(g.cleared).length>=GAME_FLOORS;
+  gmBody(`<div class="g2-cat">${gmEsc(B.name)} · ${gmEsc(B.kind)}</div>
+    <button class="g2-flr roof ${roofReady?'here':''}" ${roofReady?'onclick="gameFloorGo(11)"':'disabled'}>
+      <b>&#9650;</b><span>The roof &middot; the source</span><i>${roofReady?'fight':'ten floors first'}</i></button>
+    <div class="g2-flrs">${rows.join('')}</div>`);
+}
+function gameFloorGo(n){const g=gameState();g.f=n;save();gmTop();renderRoofDoor();}
 
 // ─── The door: the front of the building ─────────────────────────────────────
 function renderDoor(){
@@ -7625,29 +7695,26 @@ function gmGrunt(who,down){const k=who==='boss'?(down?'boss-down':'boss-hit-'+(1
 // ─── The rooftop ─────────────────────────────────────────────────────────────
 function gamePattern(){return GAME_PATTERNS[gameBossName()]||GAME_PATTERNS.default;}
 function renderRoofDoor(){
-  const g=gameState(),T=gameTier(g.b),str=gameStrength(),boss=gameBossName();
-  const open=gameLockOpen()&&gameWorkToday();
-  if(open&&g.locked){g.locked=null;save();}
+  const g=gameState(),T=gameTier(),str=gameStrength(),boss=gameBossName();
+  const roof=g.f>GAME_FLOORS;
   gmPhoto('boss',gameBossImg());gmMini('guard');
   const rows=str.parts.map(p=>`<div><span>${gmEsc(p.k)}</span><b>${p.v?'+'+p.v:'—'}</b>${p.hint?`<small>${gmEsc(p.hint)}</small>`:''}</div>`).join('');
-  gmBody(`<div class="g2-cat">Level ${g.b} of ${GAME_LEVELS} · ${gamePlace().name} · ${T.label}</div>
-    <h1 class="g2-h1">${gmEsc(boss)} is <em>waiting.</em></h1>
-    <div class="g2-from" style="text-align:left">Its style: <em>${gmEsc(gamePattern().name)}</em> · it swings from one side, you go the other · swipe or use the arrows</div>
+  gmBody(`<div class="g2-cat">${gmEsc(gameBuilding().name)} · ${roof?'the roof':'floor '+g.f+' · '+gmEsc(gameFloorEl(g.f))} · ${T.label}</div>
+    <h1 class="g2-h1">${roof?`${gmEsc(boss)} <em>itself.</em>`:`${gmEsc(boss)} is <em>waiting.</em>`}</h1>
+    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise.':gmEsc(gameFloorEl(g.f))+' in the ring.'} It swings from one side, you go the other &middot; swipe or use the arrows</div>
     <div class="g2-strength"><b>${str.total}</b><span>Strength · earned in the app</span></div>
     <div class="g2-strrows">${rows}</div>
-    ${open
-      ?`<div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
-        <div class="g2-pick g2-gloves" role="group" aria-label="Your gloves">${GAME_GLOVES.map(c=>`<button class="g2-gl ${c} ${g.glove===c?'on':''}" aria-pressed="${g.glove===c}" onclick="gameState().glove='${c}';save();renderRoofDoor()">${c[0].toUpperCase()+c.slice(1)}</button>`).join('')}</div>
-        <button class="g2-big" onclick="startFight()">Ring the bell</button><div class="g2-note">Sound on. The bell, the ref and the announcer are in this one.</div>`
-      :`<div class="g2-locked">The door is locked. Every level opens the same way: do one real thing in the app today — today’s lesson, a journal line, the pledge, or a craving logged — and it opens.</div>
-        <button class="g2-big" onclick="switchTo('lesson')">Do today’s lesson</button>
-        <button class="g2-ghost" style="margin-top:8px" onclick="switchTo('journal');actBn('bn-tools')">Write one line</button>`}`);
+    <div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
+    <div class="g2-pick g2-gloves" role="group" aria-label="Your gloves">${GAME_GLOVES.map(c=>`<button class="g2-gl ${c} ${g.glove===c?'on':''}" aria-pressed="${g.glove===c}" onclick="gameState().glove='${c}';save();renderRoofDoor()">${c[0].toUpperCase()+c.slice(1)}</button>`).join('')}</div>
+    <button class="g2-big" onclick="startFight()">Ring the bell</button>
+    <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">Back to the stairs</button>`);
 }
+
 // The roof is the 3D fight. It runs in its own page (game3d.html) so the app shell
 // stays light; this hands it the person's own opponent, lines, boxer and gloves and
 // waits to hear how it ended. The photo fight it replaced is in git before this date.
 function game3dLines(){
-  const track=gameTrack(),B=GAME_BOSSES[track]||{};
+  const track=gameBuilding().track,B=GAME_BOSSES[track]||{};
   const out=[];
   for(const k of ['short','mid','long'])for(const q of (B[k]||[]))out.push({line:q.line});
   for(const line of (GAME_TEMPT[track]||GAME_TEMPT['Other']||[]))out.push({line:line});
@@ -7667,13 +7734,13 @@ async function startFight(){
   gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
   gmCrowdLevel(0);
   try{gm('g2').classList.add('g2-full');}catch(e){}
-  gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(BOSS_IMG[gameBossName()]||'habit')}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}"></iframe>`);
+  gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${g.f>GAME_FLOORS?0:g.f}"></iframe>`);
   const f=gm('g2-3d');if(!f)return;
   if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
   f.addEventListener('load',()=>{try{f.contentWindow.postMessage({to:'fightofyourlife',
-    bossKey:BOSS_IMG[gameBossName()]||'habit',bossName:gameBossName(),lines:game3dLines(),
+    bossKey:gameBuilding().k,bossName:gameBossName(),lines:game3dLines(),
     support:game3dSupport(),tempt:game3dLines().map(q=>q.line).slice(0,6),
-    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,name:(S.name||'you')},'*');}catch(e){}});
+    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,floor:(g.f>GAME_FLOORS?0:g.f),name:(S.name||'you')},'*');}catch(e){}});
 }
 function game3dMessage(ev){
   const d=ev&&ev.data;if(!d||d.from!=='fightofyourlife')return;
@@ -7685,27 +7752,46 @@ function game3dMessage(ev){
 function game3dWon(){
   const F=gmFight,g=gameState();
   try{gm('g2').classList.remove('g2-full');}catch(e){}
-  const pct=F.you/F.youMax,ride=GAME_RIDES.find(r=>pct>=r.min)||GAME_RIDES[GAME_RIDES.length-1];
-  g.wins++;g.rides[ride.key]=(g.rides[ride.key]||0)+1;g.lastRide=ride.key;save();
-  if(typeof logActivity==='function')try{logActivity('game_building_cleared',{building:g.b,ride:ride.key});}catch(e){}
-  gmBody(`<div class="g2-reveal up" style="font-size:3.2rem">Winner</div>
+  const roof=g.f>GAME_FLOORS;
+  g.wins++;
+  if(!roof){g.cleared[g.f]=true;g.f=Math.min(GAME_FLOORS+1,g.f+1);}
+  save();
+  if(typeof logActivity==='function')try{logActivity('game_building_cleared',{building:g.b,floor:roof?'roof':g.f});}catch(e){}
+  if(roof)return renderJump();
+  const nextEl=g.f>GAME_FLOORS?'the roof':gameFloorEl(g.f);
+  gmBody(`<div class="g2-reveal up" style="font-size:3rem">Floor clear</div>
   <div class="g2-cat g2-center">${gmEsc(S.name||'You')} · round ${F.round}</div>
-  <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
-  <div class="g2-ride" aria-hidden="true">${ride.icon}</div><div class="g2-cat g2-center">${gmEsc(ride.name)}</div>
-  <p class="g2-lead g2-center">${gmEsc(ride.line)} It ends the fight, not the war. It's already in the next building's elevator.</p>
-  <button class="g2-big" onclick="gameNextBuilding()">${g.b>=GAME_LEVELS?'The last level':'Level '+(g.b+1)+' of '+GAME_LEVELS}</button>`);
+  <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. I am on the next one too.</div>
+  <p class="g2-lead g2-center">It is waiting one floor up, in ${gmEsc(String(nextEl))}. Same thing, different face.</p>
+  <button class="g2-big" onclick="gameFloorGo(${g.f})">${g.f>GAME_FLOORS?'Up to the roof':'Floor '+g.f}</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
+  gmFight=null;gmBusy=false;
+}
+// The roof is done: off the side, under the chute, on to the next one.
+function renderJump(){
+  const g=gameState(),B=gameBuilding();
+  const pct=gmFight?gmFight.you/gmFight.youMax:1,ride=GAME_RIDES.find(r=>pct>=r.min)||GAME_RIDES[GAME_RIDES.length-1];
+  g.rides[ride.key]=(g.rides[ride.key]||0)+1;g.lastRide=ride.key;save();
+  gmBody(`<div class="g2-chute" aria-hidden="true"><i></i></div>
+  <div class="g2-reveal up" style="font-size:2.8rem">${gmEsc(B.name)} is done</div>
+  <div class="g2-cat g2-center">Eleven fights, roof to street</div>
+  <p class="g2-lead g2-center">You go off the side and the chute opens. It is still down there and it will be back &mdash; but not tonight, and not in this building.</p>
+  <button class="g2-big" onclick="gameNextBuilding()">Land at the next one</button>`);
   gmFight=null;gmBusy=false;
 }
 function game3dLost(draw){
   const g=gameState();
   try{gm('g2').classList.remove('g2-full');}catch(e){}
-  if(!draw){g.losses++;g.locked={b:g.b,f:g.f,at:Date.now()};save();}
+  if(!draw)g.losses++;
+  save();
   gmBody(`<div class="g2-reveal" style="font-size:2.6rem">${draw?'Even':'Saved by the bell'}</div>
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
-  <p class="g2-lead g2-center">${draw?'Nobody took it. The roof is still yours to walk back up.':'It took this one. The roof opens again the moment you do one real thing in the app.'}</p>
-  <button class="g2-big" onclick="renderRoofDoor()">Back to the roof</button>`);
+  <p class="g2-lead g2-center">${draw?'Nobody took it. The floor is still there to walk back into.':'It took this one. The floor is still there, and so are you. Go again when you are ready.'}</p>
+  <button class="g2-big" onclick="renderRoofDoor()">Go again</button>
+  <button class="g2-ghost" style="margin-top:8px" onclick="renderFloors()">The stairs</button>`);
   gmFight=null;gmBusy=false;
 }
+
 function gmBars(){const F=gmFight;if(!F)return;const y=gm('g2-ybar'),b=gm('g2-bbar');if(y)y.style.width=(F.you/F.youMax*100)+'%';if(b)b.style.width=(F.hp/F.max*100)+'%';}
 function gmSpeak(t,who){const v=gm('g2-fv');if(v)v.innerHTML=`<small>${who==='you'?'You':(!who||who==='boss')?gmEsc(gameBossName()):gmEsc(who)}</small>${gmEsc(t)}`;}
 function gmTired(){return gmFight&&gmFight.hp/gmFight.max<.35;}
@@ -7901,21 +7987,13 @@ async function gmKnockdown(){
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
   <div class="g2-ride" aria-hidden="true">${ride.icon}</div><div class="g2-cat g2-center">${gmEsc(ride.name)}</div>
   <p class="g2-lead g2-center">${gmEsc(ride.line)} It ends the fight, not the war. It’s already in the next building’s elevator.</p>
-  <button class="g2-big" onclick="gameNextBuilding()">${g.b>=GAME_LEVELS?'The last level':'Level '+(g.b+1)+' of '+GAME_LEVELS}</button>`);
+  <button class="g2-big" onclick="gameNextBuilding()">Building ${g.b+1}</button>`);
   gmFight=null;gmBusy=false;
 }
 function gameNextBuilding(){const g=gameState();
-  if(g.b>=GAME_LEVELS)return renderNinety();
-  g.b++;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
-// Ninety levels, one for every day of the program. The game ends. The person does not.
-function renderNinety(){
-  const g=gameState();
-  gmBody(`<div class="g2-reveal up" style="font-size:2.6rem">Ninety</div>
-  <div class="g2-cat g2-center">Every level, every roof</div>
-  <p class="g2-lead g2-center">Ninety levels, one for every day of the program, and you did the work on each of them or the door would not have opened. It is still there tomorrow, and so are you. Walk it again whenever you want — it will not be the same fight.</p>
-  <button class="g2-big" onclick="gameRestartLevels()">Start again at level 1</button>`);
-}
-function gameRestartLevels(){const g=gameState();g.b=1;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
+  g.b++;g.f=1;g.cleared={};g.inside=false;g.locked=null;g.ups=0;g.used={};save();
+  gmFight=null;gmBusy=false;renderTower();}
+
 function gmSaved(){
   const g=gameState();g.losses++;g.f=GAME_TOP_FLOOR+1;gameLock();save();
   gmBell(2);gmCrowdLevel(0);setTimeout(()=>gmSay('saved'),900);
@@ -14193,7 +14271,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='13.0';
+const APP_VERSION='13.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

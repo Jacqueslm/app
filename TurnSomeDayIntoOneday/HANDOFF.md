@@ -1222,3 +1222,26 @@ In the app the roof door lost its glove picker too and keeps the fighter picker.
 Checked in headless Chromium: preview shows tiles + bell only; live shows
 punches + moves only; fighter 2 comes with blue gloves; no cam, auto or place
 elements exist; no page errors.
+
+## 7 Sep 2026 — the real climb through the ropes (14.7)
+
+Jacques sent *Climbing Down* from Mixamo (FBX Binary 7.7, 3.43 s). Baked into
+`fighter.glb` as `climb_down` and topped up onto all five fighters — 41 clips
+each now. The tool for it is in the scratchpad this time (`work/addclip.html`,
+driven by Playwright over a local server, three@0.170 from npm) because the
+repo's `tools/mixamo/three/` package and the `fighters/` sources were cleared
+with the container; it does the same job as `addmoves-battle` + `topup`.
+
+`fighterWalk` takes an optional clip now: given one it plays that across the
+walk, timed to finish as the walk does, instead of the walk cycle. The rope
+entry uses `climb_down` when the fighter has it — hands up on the top rope,
+legs working, through the gate — with only a small lift and lean underneath,
+and falls back to the old lift-and-bend when it does not.
+
+The preview (`tools/ring3d/ring3d.html`) carries its own copies of the
+fighters with the textures stripped out, and those do not have the clip yet, so
+the preview still uses the fallback. The app has the real thing.
+
+Checked in headless Chromium: both fighters have the clip, both play it through
+the ropes, no page errors. Seen in a frame: hands on the top rope coming
+through.

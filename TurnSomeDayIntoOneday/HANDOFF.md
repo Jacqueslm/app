@@ -1315,3 +1315,24 @@ restored afterwards and the ring is back. No page errors.
 Honest: the lit windows on the towers are hard to see at this distance — the
 city reads as dark blocks against the sky. Worth another pass if Jacques wants
 the city brighter.
+
+## 7 Sep 2026 — the preview catches up (15.1)
+
+The standalone preview carries its own copy of everything inside the file, and
+its shared move set had been left behind at 31 clips — it never got the nine
+battle moves or the climb. It also has a hard ceiling: the artifact must stay
+under 16 MB, and the current 41-clip body would have pushed it over.
+
+So the climb rides in on its own: `climb-only.glb` is the skeleton with no
+meshes at all and one animation on it, 121 KB, built by loading the fighter,
+throwing every mesh away and exporting only the clip. The preview parses it
+before it builds anybody, appends the clips to the move set, and every body in
+there — the addiction included — comes out with the climb. 15.83 MB, inside the
+ceiling.
+
+Checked in headless Chromium against the preview file itself: 32 clips in the
+set, the climb among them, both fighters carrying it, and the ring, chute and
+city models all loaded. No page errors.
+
+The preview's move set is still nine short of the app's. Same trick would carry
+them; not done yet.

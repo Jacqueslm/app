@@ -1161,3 +1161,13 @@ ducking.
   whenever the person was mid-punch, because a swing needs `!busy` — it now
   waits for an opening instead of skipping. Measured before: 88–0 in landed
   punches. After: 42–16 at a form of 0.63, with the addiction landing all round.
+
+## 7 Sep 2026 — no dead air in the introductions either (14.4)
+
+The camera tracking from 14.3 only ran while a round was on, so during the
+introductions and the referee's instructions the preview director could cut to
+the corner or the house camera and point at an empty post. It now holds the
+fighters whenever a fight is on, introductions included. The referee gave the
+instructions to the camera; he now gives them to the fighters, and keeps facing
+them between rounds too. Measured during "Protect yourself at all times": camera
+0.21 m off the pair, referee 0° off.

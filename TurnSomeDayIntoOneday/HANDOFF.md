@@ -995,3 +995,21 @@ the game screens sit behind the sign-in wall and this container has no account.
 **Still to do:** the thirteen building fronts (`img/fight/bld-*.jpg`) are not
 drawn yet; the approach falls back to whatever `gmPhoto` finds. The prompts for
 them are in the chat of 7 Sep.
+
+## 7 Sep 2026 — the rooms and the buildings arrive (13.2)
+
+Jacques generated the artwork from the prompts and sent it up.
+
+- **Ten rooms**, one an element, plus a plain one spare:
+  `img/fight/ring-{rain,fire,wind,earth,ash,ice,smoke,lightning,sand,shadow,plain}.jpg`
+  — 1024 px wide, about 1 MB for the set. `setRingPic()` puts the floor's room on
+  the backdrop wall; the roof keeps the temple/tomb/monastery picture.
+  The preview (`tools/ring3d/ring3d.html`) carries 512 px copies inside itself
+  as data URIs, 331 KB, so it still fits the artifact ceiling.
+- **Thirteen building fronts**: `img/fight/bld-<key>.jpg`, 900 px wide, 2 MB for
+  the set. `renderApproach()` was already asking for them, so the street now has
+  the real building on it with its name across the front.
+
+Checked in headless Chromium at floors 1, 2 and 10: the right room is on the
+wall each time and no page errors. Floor 1 photographs well — the flooded
+warehouse behind, rain falling through the frame, splashes on the canvas.

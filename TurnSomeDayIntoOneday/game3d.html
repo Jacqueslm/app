@@ -268,6 +268,17 @@ function setElement(k){
   if(light)scene.add(light);
   ELEM={objs,light,tick};
 }
+function RINGPIC(k){return ART+'ring-'+k+'.jpg';}
+
+// The room each floor is fought in. Ten photographs, one an element.
+let ringTex={};
+function setRingPic(){
+  const F=(typeof FL==='function')&&FL();
+  if(!F){setPlace(place);return;}
+  const k=F.k;
+  if(!ringTex[k]){ringTex[k]=new T.TextureLoader().load(RINGPIC(k));ringTex[k].colorSpace=T.SRGBColorSpace;}
+  wall.material.map=ringTex[k];wall.material.color.set(0xffffff);wall.material.needsUpdate=true;
+}
 function elemTick(dt){if(ELEM&&ELEM.tick)ELEM.tick(dt);}
 
 const postM=new T.MeshStandardMaterial({color:0x22242c,roughness:.5,metalness:.4});
@@ -373,7 +384,7 @@ loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();setElement(FL()&&FL().k);if(FL())$('bossname').textContent=ADD().name;
+function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
@@ -446,7 +457,7 @@ addEventListener('message',ev=>{const d=ev.data;if(!d||d.to!=='fightofyourlife')
   if(d.glove&&GLOVES[d.glove])setGlove(d.glove);
   if(d.fighter)loadFighter(Math.max(1,Math.min(5,+d.fighter)));
   if(d.building){building=Math.max(1,+d.building);setMood();}
-  if(typeof d.floor!=='undefined'){floorN=Math.max(0,Math.min(10,+d.floor||0));setMood();setElement(FL()&&FL().k);bossLook();}
+  if(typeof d.floor!=='undefined'){floorN=Math.max(0,Math.min(10,+d.floor||0));setMood();setElement(FL()&&FL().k);setRingPic();bossLook();}
   if(d.name){YOUNAME=String(d.name).slice(0,24);const yn=$('youname');if(yn)yn.textContent=YOUNAME;}
   if(d.autostart)setTimeout(()=>{ac();if(fightOver)startFight();},400);
 });

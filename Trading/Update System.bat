@@ -18,6 +18,7 @@ curl -s -o "relay\server.js"          "%BASE%/relay/server.js"            && ech
 curl -s -o "pine\MSB-Price.pine"        "%BASE%/pine/MSB-Price.pine"        && echo   [ok] MSB-PRICE backtester  (re-paste into TradingView if it changed)
 curl -s -o "pine\MSB-Price-Alerts.pine" "%BASE%/pine/MSB-Price-Alerts.pine" && echo   [ok] MSB-PRICE alerts      (re-paste into TradingView if it changed)
 curl -s -o "pine\MSB-Companion.pine"    "%BASE%/pine/MSB-Companion.pine"    && echo   [ok] MSB-EYES companion    (re-paste into TradingView if it changed)
+curl -s -o "pine\MSB-Fast.pine"         "%BASE%/pine/MSB-Fast.pine"         && echo   [ok] MSB-FAST backtester   (the fast-ladder tester)
 curl -s -o "TURN ON AUTO.bat"     "%BASE%/TURN%%20ON%%20AUTO.bat"      && echo   [ok] TURN ON AUTO button
 curl -s -o "YOUR-RULES.md"            "%BASE%/YOUR-RULES.md"              && echo   [ok] your rules
 

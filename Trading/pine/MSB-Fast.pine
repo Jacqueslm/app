@@ -1,0 +1,304 @@
+//@version=6
+// =============================================================================
+//  MSB FAST LADDER — backtest his idea on any chart, in TradingView
+//
+//  This is the setup he described, made testable on the timeframes no data
+//  exists for outside TradingView: the 1-minute and the 5-second.
+//
+//  Long (short is the mirror):
+//    1  the chart is in a downtrend        - lower highs AND lower lows
+//    2  BREAK: a close through the last lower high
+//    3  price runs up, then COMES BACK toward the level it broke
+//    4  the zone: the broken level itself, or 30/50/70% back into the leg
+//    5  the trigger: price turns inside the zone - a close above the previous
+//       bar's high. On a 1m chart that close IS the small structure break a
+//       5-second chart shows a few seconds sooner.
+//    6  stop BEHIND THE ZONE - under the low that made the new high
+//    7  out at the PREVIOUS high, or ride until a lower high prints
+//  The higher timeframe has to agree, or the trade is skipped.
+//
+//  Put it on the chart, open the Strategy Tester, read Net Profit and Profit
+//  Factor. Commission and slippage are ON by default - a fast-chart result
+//  without them is a fantasy, because on a two-point stop the toll booth is
+//  a quarter of the trade.
+//
+//  Defaults are set for MGC (micro gold). For MES/MNQ change the commission
+//  to 0.62 and leave slippage at 1.
+// =============================================================================
+
+strategy("MSB Fast Ladder — backtest", "MSB-FAST", overlay = true,
+     default_qty_type = strategy.fixed, default_qty_value = 1,
+     initial_capital = 50000, currency = currency.USD,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 1.75,
+     slippage = 1, margin_long = 0, margin_short = 0,
+     max_labels_count = 300)
+
+// ─── what shape counts as a swing ────────────────────────────────────────────
+grpS = "Structure"
+pv     = input.int(3, "Swing strength (this chart)", minval = 1, maxval = 20, group = grpS)
+expire = input.int(240, "Setup expires after N bars", minval = 20, group = grpS)
+
+// ─── the higher timeframe that has to agree ──────────────────────────────────
+grpH = "Higher timeframe"
+useHTF = input.bool(true, "Only trade with the higher timeframe", group = grpH)
+htfStr = input.timeframe("60", "Higher timeframe", group = grpH,
+     tooltip = "60 = the 1-hour. On a 1m chart that is his 1H → 1m ladder. Try 15 for a closer one.")
+pvH    = input.int(3, "Swing strength up there", minval = 1, maxval = 20, group = grpH)
+
+// ─── where you get in ────────────────────────────────────────────────────────
+grpE = "Entry"
+zoneMode = input.string("50% into the leg", "Pull back to",
+     options = ["the broken level", "30% into the leg", "50% into the leg", "70% into the leg"], group = grpE,
+     tooltip = "The zone price has to tap before the trigger counts. Measured from the leg that did the breaking.")
+confirm = input.bool(true, "Wait for the turn (close above the previous bar's high)", group = grpE,
+     tooltip = "OFF buys the tap itself. Measured on 15m and 5m data, buying the tap lost badly and waiting for the turn was the single change that helped. Left ON so you can see the difference yourself.")
+
+// ─── where you get out ───────────────────────────────────────────────────────
+grpX = "Exit"
+exitMode = input.string("the previous high", "Target",
+     options = ["the previous high", "ride until a lower high"], group = grpX,
+     tooltip = "The previous high is the one the break just made — never a projected new one. Riding holds until structure turns against you.")
+stopTicks = input.int(4, "Stop buffer (ticks beyond the zone)", minval = 0, group = grpX)
+
+// ─── your rules ──────────────────────────────────────────────────────────────
+grpR = "Your rules"
+maxPerDay = input.int(2, "Max trades per day", minval = 1, maxval = 50, group = grpR)
+useSess = input.bool(true, "Only inside the session window", group = grpR)
+sessStr = input.session("0800-1300", "Window", group = grpR,
+     tooltip = "0800-1300 is gold's. Use 0930-1500 for MES and MNQ.")
+sessTZ  = input.string("America/New_York", "Timezone", group = grpR)
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  The higher timeframe's trend, read the same way as the chart's: two highs
+//  and two lows. Nothing is known before its confirming bars have closed, so
+//  lookahead_off is not optional — it is the difference between a backtest and
+//  a fairy tale.
+// ═════════════════════════════════════════════════════════════════════════════
+f_trend() =>
+    ph = ta.pivothigh(pvH, pvH)
+    pl = ta.pivotlow(pvH, pvH)
+    var float a1 = na
+    var float a2 = na
+    var float b1 = na
+    var float b2 = na
+    if not na(ph)
+        a2 := a1
+        a1 := ph
+    if not na(pl)
+        b2 := b1
+        b1 := pl
+    up   = not na(a2) and not na(b2) and a1 > a2 and b1 > b2
+    down = not na(a2) and not na(b2) and a1 < a2 and b1 < b2
+    up ? 1 : down ? -1 : 0
+
+htfTrend = useHTF ? request.security(syminfo.tickerid, htfStr, f_trend(), lookahead = barmerge.lookahead_off) : 0
+htfUp   = not useHTF or htfTrend ==  1
+htfDown = not useHTF or htfTrend == -1
+
+// ─── the session gate, read off the bar's own clock ──────────────────────────
+f_hm(sess) =>
+    a = str.tonumber(str.substring(sess, 0, 2)) * 100 + str.tonumber(str.substring(sess, 2, 4))
+    b = str.tonumber(str.substring(sess, 5, 7)) * 100 + str.tonumber(str.substring(sess, 7, 9))
+    [a, b]
+[sessFrom, sessTo] = f_hm(sessStr)
+etHM  = hour(time_close, sessTZ) * 100 + minute(time_close, sessTZ)
+etDow = dayofweek(time_close, sessTZ)
+weekday = etDow != dayofweek.saturday and etDow != dayofweek.sunday
+inSess = not useSess or (weekday and etHM > sessFrom and etHM <= sessTo)
+
+var int tookToday = 0
+var int lastDay = na
+if na(lastDay) or dayofmonth != lastDay
+    tookToday := 0
+    lastDay := dayofmonth
+
+// ─── this chart's swings ─────────────────────────────────────────────────────
+ph = ta.pivothigh(pv, pv)
+pl = ta.pivotlow(pv, pv)
+var float h1 = na
+var float h2 = na
+var float l1 = na
+var float l2 = na
+newH = not na(ph)
+newL = not na(pl)
+if newH
+    h2 := h1
+    h1 := ph
+if newL
+    l2 := l1
+    l1 := pl
+
+pct = zoneMode == "the broken level" ? na :
+     zoneMode == "30% into the leg" ? 0.30 :
+     zoneMode == "50% into the leg" ? 0.50 : 0.70
+buf = syminfo.mintick * stopTicks
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  LONG SETUP
+//  phase 0 = broke out, still running · phase 1 = coming back · tag = zone hit
+// ═════════════════════════════════════════════════════════════════════════════
+var int   Lph  = -1
+var float Llvl = na
+var float LlegLo = na
+var float Lhigh = na
+var float Lplo = na
+var bool  Ltag = false
+var int   Lage = 0
+
+if Lph >= 0
+    Lage += 1
+    if Lage > expire
+        Lph := -1
+
+if Lph == 0
+    Lhigh := math.max(Lhigh, high)
+    if close < Llvl
+        Lph := 1
+        Lplo := low
+else if Lph == 1
+    Lhigh := math.max(Lhigh, high)
+    Lplo := math.min(Lplo, low)
+    zone = na(pct) ? Llvl : Lhigh - pct * (Lhigh - LlegLo)
+    if Lplo <= zone
+        Ltag := true
+    if close < LlegLo or close > Lhigh
+        Lph := -1
+
+trigL = Lph == 1 and Ltag and (confirm ? close > high[1] : true)
+entryL = close
+stopL  = LlegLo - buf
+tgtL   = Lhigh
+okL = trigL and inSess and htfUp and tookToday < maxPerDay and
+     strategy.position_size == 0 and entryL > stopL and tgtL > entryL
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  SHORT SETUP — the mirror
+// ═════════════════════════════════════════════════════════════════════════════
+var int   Sph  = -1
+var float Slvl = na
+var float SlegHi = na
+var float Slow = na
+var float Sphi = na
+var bool  Stag = false
+var int   Sage = 0
+
+if Sph >= 0
+    Sage += 1
+    if Sage > expire
+        Sph := -1
+
+if Sph == 0
+    Slow := math.min(Slow, low)
+    if close > Slvl
+        Sph := 1
+        Sphi := high
+else if Sph == 1
+    Slow := math.min(Slow, low)
+    Sphi := math.max(Sphi, high)
+    zoneS = na(pct) ? Slvl : Slow + pct * (SlegHi - Slow)
+    if Sphi >= zoneS
+        Stag := true
+    if close > SlegHi or close < Slow
+        Sph := -1
+
+trigS = Sph == 1 and Stag and (confirm ? close < low[1] : true)
+entryS = close
+stopS  = SlegHi + buf
+tgtS   = Slow
+okS = trigS and inSess and htfDown and tookToday < maxPerDay and
+     strategy.position_size == 0 and entryS < stopS and tgtS < entryS
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  ORDERS
+// ═════════════════════════════════════════════════════════════════════════════
+ride = exitMode == "ride until a lower high"
+
+if okL
+    strategy.entry("L", strategy.long)
+    tookToday += 1
+    Lph := -1
+    Ltag := false
+    label.new(bar_index, low, "LONG", style = label.style_label_up,
+         color = color.new(#26a69a, 20), textcolor = color.white, size = size.tiny)
+
+if okS
+    strategy.entry("S", strategy.short)
+    tookToday += 1
+    Sph := -1
+    Stag := false
+    label.new(bar_index, high, "SHORT", style = label.style_label_down,
+         color = color.new(#ef5350, 20), textcolor = color.white, size = size.tiny)
+
+// The bracket rides with the position. Riding to a lower high means no limit
+// order at all — structure closes the trade instead, below.
+var float posStop = na
+var float posTgt  = na
+if okL
+    posStop := stopL
+    posTgt  := tgtL
+if okS
+    posStop := stopS
+    posTgt  := tgtS
+
+if strategy.position_size > 0
+    if ride
+        strategy.exit("Lx", "L", stop = posStop)
+    else
+        strategy.exit("Lx", "L", stop = posStop, limit = posTgt)
+if strategy.position_size < 0
+    if ride
+        strategy.exit("Sx", "S", stop = posStop)
+    else
+        strategy.exit("Sx", "S", stop = posStop, limit = posTgt)
+
+// Structure exit: out the moment a confirmed swing turns against the position.
+var float ridePivH = na
+var float ridePivL = na
+if okL
+    ridePivH := h1
+if okS
+    ridePivL := l1
+if ride and strategy.position_size > 0 and newH
+    if not na(ridePivH) and ph < ridePivH
+        strategy.close("L", comment = "lower high")
+    else
+        ridePivH := ph
+if ride and strategy.position_size < 0 and newL
+    if not na(ridePivL) and pl > ridePivL
+        strategy.close("S", comment = "higher low")
+    else
+        ridePivL := pl
+
+// ─── arm a fresh setup once nothing is pending on that side ──────────────────
+if Lph == -1 and not na(h2) and not na(l2) and h1 < h2 and l1 < l2 and close > h1
+    Lph := 0
+    Llvl := h1
+    LlegLo := math.min(l1, low)
+    Lhigh := high
+    Lplo := low
+    Ltag := false
+    Lage := 0
+
+if Sph == -1 and not na(h2) and not na(l2) and h1 > h2 and l1 > l2 and close < l1
+    Sph := 0
+    Slvl := l1
+    SlegHi := math.max(h1, high)
+    Slow := low
+    Sphi := high
+    Stag := false
+    Sage := 0
+
+// ─── what it is watching, on screen ──────────────────────────────────────────
+var table dash = table.new(position.bottom_left, 2, 4, bgcolor = color.new(#0e1116, 10),
+     frame_color = color.new(color.gray, 60), frame_width = 1)
+if barstate.islast
+    stTxt(int p, bool t) => p == 0 ? "broke — running" : p == 1 ? (t ? "in the zone" : "coming back") : "watching"
+    table.cell(dash, 0, 0, "MSB FAST", text_color = color.white, bgcolor = #3b82f6, text_size = size.small)
+    table.cell(dash, 1, 0, timeframe.period, text_color = color.white, bgcolor = #3b82f6, text_size = size.small)
+    table.cell(dash, 0, 1, "Long", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 1, stTxt(Lph, Ltag), text_color = Lph >= 0 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 2, "Short", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 2, stTxt(Sph, Stag), text_color = Sph >= 0 ? color.yellow : color.silver, text_size = size.small)
+    table.cell(dash, 0, 3, htfStr + " trend", text_color = color.gray, text_size = size.small)
+    table.cell(dash, 1, 3, not useHTF ? "off" : htfTrend == 1 ? "up" : htfTrend == -1 ? "down" : "sideways — no trades",
+         text_color = htfTrend == 0 and useHTF ? color.gray : color.silver, text_size = size.small)

@@ -1,0 +1,18 @@
+<meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./three/package/build/three.module.js","three/addons/":"./three/package/examples/jsm/"}}</script>
+<script type="module">
+import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const WANT=['big_head_hit','combo_punch','head_hit2','hit_back','punching','side_hit','stunned'];
+const g=await new Promise((res,rej)=>new GLTFLoader().load('../../img/fight/fighter.glb',res,undefined,rej));
+// the body comes off: the preview already has one, it only needs the moves
+const kill=[];g.scene.traverse(o=>{if(o.isMesh||o.isSkinnedMesh)kill.push(o);});
+for(const m of kill)m.parent&&m.parent.remove(m);
+// fingers and scale go too, and anything longer than two seconds is halved
+function slim(c){c.tracks=c.tracks.filter(t=>{const [b,p]=t.name.split('.');if(/Hand(Thumb|Index|Middle|Ring|Pinky)/.test(b))return false;if(p==='scale')return false;if(p==='position'&&!/Hips(_\d+)?$/.test(b))return false;return true;});
+  if(c.duration>1.6)c.tracks=c.tracks.map(t=>{const n=t.times.length,keep=[];for(let i=0;i<n;i+=2)keep.push(i);if(keep[keep.length-1]!==n-1)keep.push(n-1);const vs=t.getValueSize(),times=new Float32Array(keep.length),vals=new Float32Array(keep.length*vs);keep.forEach((k,j)=>{times[j]=t.times[k];for(let v=0;v<vs;v++)vals[j*vs+v]=t.values[k*vs+v];});return new t.constructor(t.name,times,vals);});
+  return c;}
+const clips=g.animations.filter(c=>WANT.includes(c.name)).map(slim);
+const glb=await new Promise((res,rej)=>new GLTFExporter().parse(g.scene,res,rej,{binary:true,animations:clips}));
+const u8=new Uint8Array(glb);let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+window.B64=btoa(s);window.LOG='clips '+clips.length+': '+clips.map(c=>c.name).join(',')+' | bytes '+u8.length;window.DONE=true;
+</script>

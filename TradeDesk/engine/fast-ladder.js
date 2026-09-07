@@ -104,9 +104,10 @@ function run(opt) {
   return trades;
 }
 
-// Cost in R: a round turn plus a tick of slippage each side, over the stop.
+// Cost in R: his real commission ($0.39 a contract each way) plus a tick of
+// slippage each way, over the stop distance.
 const perPoint = I.tick === 0.10 ? 10 : 5;          // MGC $10/pt, MES $5/pt
-const RT = 3.50 + 2 * I.tick * perPoint;
+const RT = 0.78 + 2 * I.tick * perPoint;
 const cost = r => Math.min(0.6, RT / (r * perPoint));
 
 function stats(tr) {

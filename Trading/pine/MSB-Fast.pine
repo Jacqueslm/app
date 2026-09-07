@@ -22,14 +22,14 @@
 //  without them is a fantasy, because on a two-point stop the toll booth is
 //  a quarter of the trade.
 //
-//  Defaults are set for MGC (micro gold). For MES/MNQ change the commission
-//  to 0.62 and leave slippage at 1.
+//  Commission is his real rate: $0.39 a contract each way. Slippage is one
+//  tick each way, which is the honest assumption for a market entry.
 // =============================================================================
 
 strategy("MSB Fast Ladder — backtest", "MSB-FAST", overlay = true,
      default_qty_type = strategy.fixed, default_qty_value = 1,
      initial_capital = 50000, currency = currency.USD,
-     commission_type = strategy.commission.cash_per_contract, commission_value = 1.75,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 0.39,
      slippage = 1, margin_long = 0, margin_short = 0,
      max_labels_count = 300)
 

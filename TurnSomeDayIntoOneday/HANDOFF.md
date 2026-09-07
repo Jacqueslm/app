@@ -1126,3 +1126,17 @@ particular characters, not the person playing.
 
 Checked by reading every line the fight actually said through a walk-in and a
 round: none gendered.
+
+## 7 Sep 2026 — feet on the canvas, and taller ropes (14.2)
+
+*"why he floating"* — he was. Every body is scaled to 1.8 m at load, but these
+models do not all have their feet at their own origin, so the taller ones stood
+in the air above the canvas. `skinned()` now measures the bottom of the body
+after scaling and drops it so it touches the floor. Measured after the change:
+you 0.000, the addiction 0.001, the referee 0.000, the announcer 0.000, the ring
+girl -0.006. The crowd is untouched at 0.422 — they sit on risers.
+
+*"raise the ropes higher"* — with bodies that size the ropes sat at the waist.
+They now run at 0.62, 1.12 and 1.62, the posts and pads grew to match, and the
+gate opens to 2.05 and 2.62 so the tallest of them walks through without
+ducking.

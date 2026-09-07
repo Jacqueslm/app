@@ -320,8 +320,8 @@ function setRingPic(){
 function elemTick(dt){if(ELEM&&ELEM.tick)ELEM.tick(dt);}
 
 const postM=new T.MeshStandardMaterial({color:0x22242c,roughness:.5,metalness:.4});
-[[-2.6,-2.6,0xc8262a],[2.6,-2.6,0xf0f0f0],[-2.6,2.6,0x2f5fd6],[2.6,2.6,0xc8262a]].forEach(([x,z,c])=>{const p=new T.Mesh(new T.CylinderGeometry(.06,.06,1.5,12),postM);p.position.set(x,.75,z);scene.add(p);
-  const pad=new T.Mesh(new T.CylinderGeometry(.13,.13,1.15,14),new T.MeshStandardMaterial({color:c,roughness:.75,emissive:c,emissiveIntensity:.18}));pad.position.set(x,.62,z);scene.add(pad);});
+[[-2.6,-2.6,0xc8262a],[2.6,-2.6,0xf0f0f0],[-2.6,2.6,0x2f5fd6],[2.6,2.6,0xc8262a]].forEach(([x,z,c])=>{const p=new T.Mesh(new T.CylinderGeometry(.06,.06,1.92,12),postM);p.position.set(x,.96,z);scene.add(p);
+  const pad=new T.Mesh(new T.CylinderGeometry(.13,.13,1.5,14),new T.MeshStandardMaterial({color:c,roughness:.75,emissive:c,emissiveIntensity:.18}));pad.position.set(x,.78,z);scene.add(pad);});
 // the seats: two rows a side behind the far ropes, monsters left in red light, people right in green
 const seatMat=new T.MeshStandardMaterial({color:0x101019,roughness:1});const SEATPOS={L:[],R:[]};
 [['L',-1],['R',1]].forEach(([k,sgn])=>{for(let row=0;row<2;row++){for(let i=0;i<6;i++){const p=[-0.5+sgn*(1.05+i*0.62+(row%2)*0.28),row*0.5,-4.5-row*0.8];SEATPOS[k].push(p);}
@@ -331,14 +331,14 @@ function crowdTick(dt){for(const s of SEATS)s.mixer.update(dt);}
 function crowdReact(k,mood){for(const s of SEATS){if(s.side!==k||Math.random()<.12)continue;const pick=mood==='cheer'?['cheering_while_sitting','sitting_clap','sitting_yell']:['sitting_disapproval','sitting_disbelief','sitting_yell'];s.play(pick[Math.floor(Math.random()*pick.length)]);}}
 function crowdChat(){for(const s of SEATS){if(Math.random()<.5)continue;s.play(Math.random()<.5?'sitting_talking':'sitting_laughing');}}
 function crowdJump(k,amt){if(amt>=.5){crowdReact(k,'cheer');crowdReact(k==='L'?'R':'L','boo');}}
-const ROPES={N:[],S:[],W:[],E:[]},ROPE_Y=[.5,.9,1.3];
+const ROPES={N:[],S:[],W:[],E:[]},ROPE_Y=[.62,1.12,1.62];
 [0xd23a3a,0xf0f0f0,0x2f5fd6].forEach((c,i)=>{const y=ROPE_Y[i],m=new T.MeshStandardMaterial({color:c,roughness:.8});[[0,-2.6,0,'N'],[0,2.6,0,'S'],[-2.6,0,Math.PI/2,'W'],[2.6,0,Math.PI/2,'E']].forEach(([x,z,ry,side])=>{const r=new T.Mesh(new T.CylinderGeometry(.03,.03,5.2,8),m);r.rotation.z=Math.PI/2;r.rotation.y=ry;r.position.set(x,y,z);scene.add(r);ROPES[side].push(r);});});
 // somebody holds the ropes open so a fighter steps through them instead of walking through the ring
 const TWEENS=[];
 function tweenRX(o,to,ms){for(let i=TWEENS.length-1;i>=0;i--)if(TWEENS[i].o===o&&TWEENS[i].rx)TWEENS.splice(i,1);TWEENS.push({o:o,rx:true,from:o.rotation.x,to:to,t:0,ms:ms||300});}
 function tweenY(o,to,ms){for(let i=TWEENS.length-1;i>=0;i--)if(TWEENS[i].o===o)TWEENS.splice(i,1);TWEENS.push({o:o,from:o.position.y,to:to,t:0,ms:ms||400});}
 function tweenTick(dt){for(let i=TWEENS.length-1;i>=0;i--){const w=TWEENS[i];w.t+=dt*1000;const k=Math.min(1,w.t/w.ms),e=1-Math.pow(1-k,3);const v=w.from+(w.to-w.from)*e;if(w.rx)w.o.rotation.x=v;else if(w.rz)w.o.rotation.z=v;else w.o.position.y=v;if(k>=1)TWEENS.splice(i,1);}}
-function partRopes(side,open,ms){const rs=ROPES[side]||[];const to=open?[.04,1.58,2.02]:ROPE_Y;rs.forEach((r,i)=>tweenY(r,to[i],ms||450));}
+function partRopes(side,open,ms){const rs=ROPES[side]||[];const to=open?[.04,2.05,2.62]:ROPE_Y;rs.forEach((r,i)=>tweenY(r,to[i],ms||450));}
 // the ref: Suzie from Mixamo, with her own idle, walk, count, talk, wave and hand raise baked in
 // (img/fight/ref.glb, made with tools/mixamo). She stands at ringside, walks
 // over when somebody is down, bends and counts. The photo referee stays in
@@ -430,7 +430,9 @@ let ANN=null,GIRL=null,REFCLIPS=null,card=null,cardHand=null,cardFront=true;cons
 function retarget(clips,root){const bones=new Set();let hips='';root.traverse(o=>{if(!o.isSkinnedMesh)return;o.skeleton.bones.forEach(b=>{if(!b.userData.sk){b.userData.sk=true;b.name=b.name+'_b';}bones.add(b.name);if(/Hips_b$/.test(b.name)&&!hips)hips=b.name;});});const prefix=hips.replace(/Hips_b$/,'');return clips.map(c=>{const tracks=c.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i),prop=t.name.slice(i+1),nb=bone.replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix)+'_b';if(!bones.has(nb))return null;return new t.constructor(nb+'.'+prop,t.times,t.values);}).filter(Boolean);return new T.AnimationClip(c.name,c.duration,tracks);});}
 function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
   // every fighter stands the same height in the ring, whatever size they were drawn
-  root.updateMatrixWorld(true);const h=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;if(h>0.2)root.scale.multiplyScalar(1.8/h);const tl=new T.TextureLoader();const imgs={};for(const k in (tex&&tex.images)||{}){const t=tl.load(tex.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}
+  root.updateMatrixWorld(true);const h=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;if(h>0.2)root.scale.multiplyScalar(1.8/h);
+  // and stands ON the canvas: these bodies do not all have their feet at their own origin
+  if(!noGloves){root.updateMatrixWorld(true);const low=new T.Box3().setFromObject(root).min.y;if(isFinite(low))root.position.y-=low;}const tl=new T.TextureLoader();const imgs={};for(const k in (tex&&tex.images)||{}){const t=tl.load(tex.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material,k=tex&&tex.by[o.name];if(k&&imgs[k]){m.map=imgs[k];m.color.set(0xffffff);m.emissiveMap=imgs[k];m.emissive.set(0xffffff);m.emissiveIntensity=.4;m.roughness=.85;m.metalness=0;m.needsUpdate=true;}}});
   const mixer=new T.AnimationMixer(root),acts={};retarget(clips,root).forEach(c=>{acts[c.name]=mixer.clipAction(c);});
   root.updateMatrixWorld(true);if(!noGloves)root.traverse(o=>{if(o.isBone&&/(Left|Right)Hand_b$/.test(o.name))gloves.push(fitGlove(o,gloveColor));});

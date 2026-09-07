@@ -1196,3 +1196,29 @@ which Jacques may want for a photo mode.
 
 Checked by driving the whole flow again in a headless browser: approach, the
 stairs, the door, a floor won, the roof won, the next building. No page errors.
+
+## 7 Sep 2026 — the fight screen, decluttered (14.6)
+
+Jacques: *"take away the buttons pair each fighter automatically with gloves take
+the location off … make fighters choice only be chosen at the beginning of a
+fight then those disappear cam button needs to go just punches blocks and
+dodges … its too clutter clean it up."*
+
+Two states now, nothing else:
+- **Before the bell** (the preview): five fighter tiles, each with the colour of
+  the gloves that come with it, and one button — Ring the bell. Tapping a tile
+  restarts the preview with that fighter and carries the pick into the live
+  fight.
+- **In a fight:** the punch row and the dodge/block row. The corner row still
+  appears between rounds. That is all.
+
+Gone: the Temple/Tomb/Monastery row (the room belongs to the level — the roof
+takes the place the app sends, and the standalone page rotates it by building),
+the seven-colour glove row (`FIGHTER_GLOVE`: 1 red, 2 blue, 3 black, 4 gold,
+5 green), the Cam button (drag still swings the camera), the Auto button (the
+preview simply plays until the bell), and the "3D proof" strip along the bottom.
+In the app the roof door lost its glove picker too and keeps the fighter picker.
+
+Checked in headless Chromium: preview shows tiles + bell only; live shows
+punches + moves only; fighter 2 comes with blue gloves; no cam, auto or place
+elements exist; no page errors.

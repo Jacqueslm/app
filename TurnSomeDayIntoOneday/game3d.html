@@ -22,7 +22,7 @@
   .sup.full b{animation:supflash .5s ease-in-out infinite alternate}@keyframes supflash{from{color:#fff}to{color:var(--lamp)}}
   .hud .rd{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;text-align:center;padding:0 6px;background:rgba(10,12,20,.8);border:1px solid rgba(255,255,255,.25);clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 100%,0 100%)}
   #clk{display:block;font-size:1.55rem;line-height:1.05;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 10px rgba(255,255,255,.35)}
-  #rdn{display:block;font-size:.55rem;letter-spacing:.16em;color:var(--lamp)}.row.one{grid-template-columns:1fr}.row.four{grid-template-columns:repeat(4,1fr)}.row.six{grid-template-columns:repeat(5,1fr)}.row.gl{grid-template-columns:repeat(4,1fr)}.row.gl button{font-size:.6rem;padding:8px 1px}.row.punch{grid-template-columns:repeat(4,1fr)}.row.punch button{padding:12px 2px;font-size:1rem}.row.six button{font-size:.56rem;letter-spacing:.02em;padding:9px 1px}#auto.on{background:rgba(242,169,59,.22);border-color:var(--lamp);color:var(--lamp)}
+  #rdn{display:block;font-size:.55rem;letter-spacing:.16em;color:var(--lamp)}.row.one{grid-template-columns:1fr}.row.four{grid-template-columns:repeat(4,1fr)}.row.six{grid-template-columns:repeat(5,1fr)}.row.pick{grid-template-columns:repeat(5,1fr)}.row.pick button{font-size:.58rem;letter-spacing:.02em;padding:8px 1px}.row.pick i{display:block;width:14px;height:14px;border-radius:50%;margin:0 auto 5px;border:1px solid rgba(255,255,255,.35)}.row.gl{grid-template-columns:repeat(4,1fr)}.row.gl button{font-size:.6rem;padding:8px 1px}.row.punch{grid-template-columns:repeat(4,1fr)}.row.punch button{padding:12px 2px;font-size:1rem}.row.six button{font-size:.56rem;letter-spacing:.02em;padding:9px 1px}#auto.on{background:rgba(242,169,59,.22);border-color:var(--lamp);color:var(--lamp)}
   #fighters button.on{background:rgba(242,169,59,.25)}.row.four button,#gloves button{font-size:.9rem;padding:9px 4px}#places button.on,#gloves button.on{background:rgba(242,169,59,.25)}
   .bar.sp{height:4px;margin-top:3px}.bar.sp i{background:linear-gradient(90deg,#f2a93b,#fff1d6);transition:width .25s}
   .talk{position:absolute;left:12px;right:12px;top:118px;z-index:6;background:rgba(7,10,20,.85);border:2px solid var(--lamp);border-radius:12px;padding:8px 10px}.talk .tline{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:1.25rem;color:var(--lamp);margin-bottom:6px}.talk .tbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.talk button{padding:9px 6px;font-size:.95rem;text-transform:none;letter-spacing:0;border-color:var(--chalk)}
@@ -59,13 +59,11 @@
   <div class="red" id="red"></div>
   <div class="chant L" id="cl"></div><div class="chant R" id="cr"></div>
   <div class="ctl">
-    <div class="row punch"><button class="p" id="jl">Jab</button><button class="p" id="cb">1-2</button><button class="p" id="hk">Hook</button><button class="p" id="up">Uppercut</button></div>
-    <div class="row"><button class="d" id="dl">◀ Dodge</button><button class="d" id="bl">🛡 Block</button><button class="d" id="dr">Dodge ▶</button></div>
-    <div class="row" id="places"><button data-p="temple">Temple</button><button data-p="tomb">Tomb</button><button data-p="monastery">Monastery</button></div>
-    <div class="row six" id="fighters"><button data-f="1">Fighter 1</button><button data-f="2">Fighter 2</button><button data-f="3">Fighter 3</button><button data-f="4">Fighter 4</button><button data-f="5">Fighter 5</button></div>
-    <div class="row gl" id="gloves"><button data-g="red" style="border-color:#c8262a;color:#e24b4a">Red</button><button data-g="blue" style="border-color:#2f5fd6;color:#6b8cff">Blue</button><button data-g="white" style="border-color:#eee;color:#eee">White</button><button data-g="black" style="border-color:#5a5a66;color:#c9cbd6">Black</button><button data-g="gold" style="border-color:#d7a13a;color:#e8bb5c">Gold</button><button data-g="green" style="border-color:#2f9e5c;color:#4fd08a">Green</button><button data-g="pink" style="border-color:#e0559a;color:#ff8ec2">Pink</button></div>
+    <div class="row punch" id="punchrow"><button class="p" id="jl">Jab</button><button class="p" id="cb">1-2</button><button class="p" id="hk">Hook</button><button class="p" id="up">Uppercut</button></div>
+    <div class="row" id="moverow"><button class="d" id="dl">&#9664; Dodge</button><button class="d" id="bl">&#128737; Block</button><button class="d" id="dr">Dodge &#9654;</button></div>
     <div class="row" id="corner" hidden><button class="d" id="cw">Water</button><button class="d" id="ct">Towel</button><button class="d" id="cd">A word</button></div>
-    <div class="row" id="camrow"><button id="cam">Cam</button><button id="auto" class="on">Auto</button><button class="x" id="go">Bell</button></div>
+    <div class="row pick" id="fighters"><button data-f="1"><i style="background:#c8262a"></i>Fighter 1</button><button data-f="2"><i style="background:#2f5fd6"></i>Fighter 2</button><button data-f="3"><i style="background:#141418"></i>Fighter 3</button><button data-f="4"><i style="background:#d7a13a"></i>Fighter 4</button><button data-f="5"><i style="background:#2f9e5c"></i>Fighter 5</button></div>
+    <div class="row one" id="bellrow"><button class="x" id="go">Ring the bell</button></div>
   </div>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
@@ -464,15 +462,16 @@ async function toCorners(){stools.you.visible=stools.boss.visible=true;await Pro
   for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}}
 async function toMarks(){for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;F.idle();}stools.you.visible=stools.boss.visible=false;await Promise.all([fighterWalk(YOU,MARK.you,1.5),fighterWalk(BOSS,MARK.boss,1.5)]);youHome.copy(YOU.root.position);YOU.home=null;BOSS.home=null;faceOff();}
 function loadCast(key,cb){loader.load(ART+key+'.glb',g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
-function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const top=new T.Box3().setFromObject(YOU.root).max.y;camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
+function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const top=new T.Box3().setFromObject(YOU.root).max.y;camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
 function loadOne(cb){loader.load(ART+'fighter.glb',g=>cb(g),undefined,e=>console.error(e));}
 loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,glove:0x111111});BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();MOVES=g.animations;seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
-const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
+const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
+const FIGHTER_GLOVE={1:'red',2:'blue',3:'black',4:'gold',5:'green'};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
+function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery'][(Math.max(1,building)-1)%3]);$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
@@ -681,7 +680,7 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   refPlay('talking',{loop:true,fade:.2});for(const l of ['Protect yourself at all times.','Obey my commands.','Touch gloves.']){say(l,'Referee');await wait(2000);}refIdle();
   YOU.play('lead_jab',{speed:.55});BOSS.play('lead_jab',{speed:.55});await wait(1300);YOU.idle();BOSS.idle();refWalk(ref.userData.home);
   await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);}
-async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;$('go').hidden=true;$('places').hidden=true;$('gloves').hidden=true;$('fighters').hidden=true;ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
+async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
   await ringWalks();
   await nextRound();ai();youAI();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
@@ -804,8 +803,9 @@ async function decision(how){running=false;fightOver=true;result=how;downState=f
   if(you||draw){snd('cheer');if(you&&how!=='ko')BOSS.play('defeat',{fade:.4});else BOSS.idle();await refWalk(new T.Vector3(-.72,0,.3));ref.rotation.y=Math.PI;cam.position.set(-0.25,1.5,-1.9);look.set(-0.45,1.35,0.3);YOU.play('victory',{loop:true,fade:.4});
     if(you)snd('winner');const raise=refPlay('hand_raising',{fade:.2});await wait(1700);if(raise)raise.paused=true;await wait(3000);if(raise)raise.paused=false;await wait(1200);refIdle();}
   else{BOSS.idle();YOU.idle();await wait(2500);}
-  $('go').textContent='Again';$('go').hidden=false;$('places').hidden=false;$('gloves').hidden=false;$('fighters').hidden=false;}
-document.querySelectorAll('#places button').forEach(b=>b.onclick=()=>{building={temple:1,tomb:2,monastery:3}[b.dataset.p]+3*Math.floor((building-1)/3);setMood();setPlace(b.dataset.p);});document.querySelectorAll('#gloves button').forEach(b=>b.onclick=()=>setGlove(b.dataset.g));document.querySelectorAll('#fighters button').forEach(b=>b.onclick=()=>{if(fightOver)loadFighter(+b.dataset.f);});
+  $('go').textContent='Again';showControls(false);}
+// pick a fighter: the preview starts over with them, and the pick carries into the live fight
+document.querySelectorAll('#fighters button').forEach(b=>b.onclick=()=>{const n=+b.dataset.f;if(n===fighterN)return;fighterN=n;if(!LIVE)goLive(false);else if(fightOver)loadFighter(n);});
 $('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
 $('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
 const LIVE=(new URLSearchParams(location.search).get('live')==='1');
@@ -815,8 +815,9 @@ let auto=!LIVE,swingSide=null;
 let autoSkill=0.28+Math.random()*0.5;
 function autoSet(v){if(v)autoSkill=0.28+Math.random()*0.5;auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
 function autoOff(){if(!LIVE)return goLive(true);if(auto)autoSet(false);}
+// in a fight: punches, blocks and dodges. before one: your fighter and the bell. nothing else.
+function showControls(fighting){$('punchrow').hidden=!fighting;$('moverow').hidden=!fighting;$('fighters').hidden=fighting;$('bellrow').hidden=fighting;}
 function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');q.set('fighter',fighterN);location.search=q.toString();}
-$('auto').onclick=()=>{if(auto)return;goLive(false);};
 // with Auto on it boxes for you, so the whole fight plays through on its own
 async function youAI(){let next=0;
   while(!fightOver){await wait(170);
@@ -910,7 +911,6 @@ setInterval(()=>{
   if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],750);return;}
   if(!running||downState)return;
   if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},3400);
-$('cam').onclick=()=>{const order=['tv','shoulder','low','crowd'];shot(order[(order.indexOf(curShot)+1)%order.length],400);manualUntil=performance.now()+15000;};
 function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
   sparkTick(dt0);sweatTick(dt0);trailTick(dt0);tweenTick(dt0);elemTick(dt0);shaftTick();if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
@@ -923,4 +923,3 @@ function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   camDrift(dt0);if(performance.now()<kickUntil)cam.position.add(kick);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(orbit(cam.position,_l));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
-<div class="note">3D proof · real fighter from Mixamo · six fighters and the ref from Mixamo · punch sounds made in the page</div>

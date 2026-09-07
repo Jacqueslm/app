@@ -4,7 +4,7 @@
   :root{--lamp:#f2a93b;--hit:#e24b4a;--you:#2fd08a;--chalk:#eef1ff;--dim:#a9b1d6;--ink:#070a14}
   [hidden]{display:none!important}
   html,body{height:100%;margin:0;background:#000;color:var(--chalk);font-family:'Barlow','Helvetica Neue',Arial,sans-serif}
-  #stage{position:relative;max-width:480px;margin:0 auto;height:100dvh;overflow:hidden;background:var(--ink)}
+  #stage{position:relative;max-width:none;width:100%;margin:0 auto;height:100dvh;overflow:hidden;background:var(--ink)}
   canvas{display:block;width:100%;height:100%}
   .hud{position:absolute;left:0;right:0;top:0;padding:10px 8px 0;display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:start;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk);background:linear-gradient(180deg,rgba(0,0,0,.72),transparent);z-index:5}
   .hud .side{min-width:0}.hud .side .nm{font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:.8rem;letter-spacing:.1em;color:#fff;text-shadow:0 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -81,8 +81,10 @@ const ART=BASE+'img/fight/',AUDIO=BASE+'audio/fight/';
 // models load from img/fight/
 const canvas=$('c'),R=new T.WebGLRenderer({canvas,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
 const scene=new T.Scene();scene.background=new T.Color(0x05070d);scene.fog=new T.FogExp2(0x05070d,.075);
-const cam=new T.PerspectiveCamera(48,1,.1,60);const camBase=new T.Vector3(0.85,1.75,2.55);/* raised per fighter for a tall head or a hat when they load */cam.position.copy(camBase);const LOOK=new T.Vector3(-0.15,1.1,-0.45),look=LOOK.clone();
-function size(){const w=canvas.clientWidth,h=canvas.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}size();addEventListener('resize',size);
+const cam=new T.PerspectiveCamera(48,1,.1,60);let fovBase=48;
+// a tall phone frame crops the sides, so widen the lens until roughly the same width is always in shot
+function fitFov(){const a=Math.max(.4,cam.aspect||1),hf=68*Math.PI/180;const v=2*Math.atan(Math.tan(hf/2)/a)*180/Math.PI;fovBase=Math.max(46,Math.min(68,v));cam.fov=fovBase;cam.updateProjectionMatrix();}const camBase=new T.Vector3(0.85,1.75,2.55);/* raised per fighter for a tall head or a hat when they load */cam.position.copy(camBase);const LOOK=new T.Vector3(-0.15,1.1,-0.45),look=LOOK.clone();
+function size(){const w=canvas.clientWidth,h=canvas.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;fitFov();}size();addEventListener('resize',size);
 const amb=new T.AmbientLight(0x223055,.6);scene.add(amb);
 const spot=new T.SpotLight(0xfff1d6,60,14,.55,.45,1.6);spot.position.set(0,6,0);spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.target.position.set(0,0,-1);scene.add(spot,spot.target);
 const rim=new T.PointLight(0xf2a93b,140,12,1.6);rim.position.set(0,1.4,-4);scene.add(rim);
@@ -122,8 +124,8 @@ const postM=new T.MeshStandardMaterial({color:0x22242c,roughness:.5,metalness:.4
   const pad=new T.Mesh(new T.CylinderGeometry(.13,.13,1.15,14),new T.MeshStandardMaterial({color:c,roughness:.75,emissive:c,emissiveIntensity:.18}));pad.position.set(x,.62,z);scene.add(pad);});
 // the seats: two rows a side behind the far ropes, monsters left in red light, people right in green
 const seatGeo=new T.BoxGeometry(.5,.42,.5),seatMat=new T.MeshStandardMaterial({color:0x14141a,roughness:1});const SEATPOS={L:[],R:[]};
-[['L',-1],['R',1]].forEach(([k,sgn])=>{for(let row=0;row<2;row++)for(let i=0;i<6;i++){const p=[-0.5+sgn*(0.65+i*0.55+(row%2)*0.25),row*0.5,-3.8-row*0.75];SEATPOS[k].push(p);const m=new T.Mesh(seatGeo,seatMat);m.position.set(p[0],p[1]+.21,p[2]);scene.add(m);}
-  const l=new T.PointLight(k==='L'?0xff3b30:0x2fd08a,12,7,1.5);l.position.set(-0.5+sgn*2.3,3.2,-4.2);scene.add(l);});
+[['L',-1],['R',1]].forEach(([k,sgn])=>{for(let row=0;row<2;row++)for(let i=0;i<6;i++){const p=[-0.5+sgn*(1.05+i*0.62+(row%2)*0.28),row*0.5,-4.5-row*0.8];SEATPOS[k].push(p);const m=new T.Mesh(seatGeo,seatMat);m.position.set(p[0],p[1]+.21,p[2]);scene.add(m);}
+  const l=new T.PointLight(k==='L'?0xff3b30:0x2fd08a,12,7,1.5);l.position.set(-0.5+sgn*2.9,3.2,-4.9);scene.add(l);});
 function crowdTick(dt){for(const s of SEATS)s.mixer.update(dt);}
 function crowdReact(k,mood){for(const s of SEATS){if(s.side!==k||Math.random()<.12)continue;const pick=mood==='cheer'?['cheering_while_sitting','sitting_clap','sitting_yell']:['sitting_disapproval','sitting_disbelief','sitting_yell'];s.play(pick[Math.floor(Math.random()*pick.length)]);}}
 function crowdChat(){for(const s of SEATS){if(Math.random()<.5)continue;s.play(Math.random()<.5?'sitting_talking':'sitting_laughing');}}
@@ -347,22 +349,22 @@ function follow(F,color,power){followWho=F;walkSpot.color.set(color||0xffffff);w
 function followOff(){followWho=null;walkSpot.intensity=0;}
 async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;
   // yours
-  spot.intensity=34;crowdOn(.62);YOU.root.position.set(-0.4,0,9.4);T2.root.position.set(-1.15,0,10.7);C2.root.position.set(-1.9,0,11.2);SHOTS.aisle={pos:()=>new T.Vector3(1.55,1.65,2.2),look:()=>new T.Vector3(-0.4,1.1,5.4)};shot('aisle',0);
+  spot.intensity=34;crowdOn(.62);aisleOn(-0.4,9.9,2.2,0x6fa8ff);YOU.root.position.set(-0.4,0,9.4);T2.root.position.set(-1.15,0,10.7);C2.root.position.set(-1.9,0,11.2);camWalk(YOU,'front',0);
   follow(YOU,0xdff0ff,150);say('Making his way to the ring…','Announcer');roar();chant('R',SUPPORT);await wait(1600);
-  say('From the roof of '+PLACES[place].name.replace('The ','the ')+'.','Announcer');
+  say('From the roof of '+PLACES[place].name.replace('The ','the ')+'.','Announcer');camWalk(YOU,'back',900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,5.2),0.72),castWalk(T2,new T.Vector3(-1.15,0,6.6),0.72),castWalk(C2,new T.Vector3(-1.9,0,7.1),0.72)]);
   roar();say('In the blue corner: '+YOUNAME+'.','Announcer');await wait(1900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
   await fighterWalk(YOU,CORNERPOS.you,0.95,new T.Vector3(0,0,0));castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
-  followOff();const a=ADD();spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);SHOTS.far={pos:()=>new T.Vector3(1.6,1.65,-2.3),look:()=>new T.Vector3(-0.6,1.1,-5.6)};shot('far',0);
-  follow(BOSS,ADD().glow,170);say('And his opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);
+  followOff();const a=ADD();aisleOff();aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
+  follow(BOSS,ADD().glow,170);say('And his opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-1.35,0,-6.8),0.66),castWalk(W,new T.Vector3(-2.1,0,-7.3),0.66)]);
-  boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);
+  boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
   await fighterWalk(BOSS,CORNERPOS.boss,0.9,new T.Vector3(0,0,0));castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
-  followOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
+  followOff();camWalkOff();aisleOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(cam.position);
   ANN.play('talking',{loop:true,fade:.2});for(const l of ['Six rounds on the roof of '+PLACES[place].name.replace('The ','the ')+'.','In the blue corner: '+YOUNAME+'.','In the red corner: '+a.name+'.']){say(l,'Announcer');await wait(2400);}
   const arm=ANN.play('hand_raising',{fade:.2});await wait(1500);if(arm)arm.paused=true;await wait(1200);if(arm)arm.paused=false;ANN.idle();castWalk(ANN,ANN.home,1.5);
@@ -517,12 +519,27 @@ function camDrift(dt){if(dragging){manualUntil=performance.now()+9000;orbTarget.
 let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40)doDodge(dx>0?'R':'L');});
 // the shots. A ringside TV view is the main one, over your shoulder for exchanges, a low corner camera for a knockdown, the house from the back at the bell.
 const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>new T.Vector3(2.35,1.22,0.1),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
-let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1,fovBase=48;
+let walkCam=null;
+const runnerMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
+const runner=new T.Mesh(new T.PlaneGeometry(1.8,9),runnerMat);runner.rotation.x=-Math.PI/2;runner.position.set(-0.5,.014,0);runner.visible=false;scene.add(runner);
+const runnerLights=[];for(let i=0;i<4;i++){const l=new T.PointLight(0xffffff,0,7,2);l.position.set(-.5,1.7,0);l.visible=false;scene.add(l);runnerLights.push(l);}
+function aisleOn(x,z0,z1,color){runner.position.set(x,.014,(z0+z1)/2);runner.scale.set(1,Math.abs(z1-z0)/9,1);runnerMat.color.set(color);runner.visible=true;runnerLights.forEach((l,i)=>{l.color.set(color);l.intensity=10;l.visible=true;l.position.set(x,1.7,z0+(z1-z0)*(i+.5)/4);});}
+function aisleOff(){runner.visible=false;runnerLights.forEach(l=>{l.visible=false;l.intensity=0;});}
+function walkPos(){if(!walkCam)return camBase.clone();const p=walkCam.F.root.position,s=walkCam.s,sway=Math.sin(performance.now()/1500);
+  if(walkCam.mode==='front')return new T.Vector3(p.x+sway*0.55,1.46+Math.sin(performance.now()/2100)*.07,p.z-s*2.4);
+  return new T.Vector3(p.x+0.5+sway*0.3,1.98,p.z+s*2.1);}
+function walkLook(){if(!walkCam)return LOOK.clone();const p=walkCam.F.root.position,s=walkCam.s;
+  if(walkCam.mode==='front')return new T.Vector3(p.x,1.24,p.z);
+  return new T.Vector3(p.x-s*0.08,1.32,p.z-s*1.7);}
+function camWalk(F,mode,ms){walkCam={F:F,mode:mode,s:Math.sign(F.root.position.z)||1};SHOTS.walk={pos:walkPos,look:walkLook};shot('walk',ms||0);}
+function camWalkOff(){walkCam=null;}
+let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1;
 function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre();if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
-function camTick(dt){if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
+function camTick(dt){if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
+  if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
 let rollAmt=0,rollUntil=0;
 function roll(a,ms){rollAmt=a*(Math.random()<.5?-1:1);rollUntil=performance.now()+ms;}
-function punchIn(){cam.fov=41;cam.updateProjectionMatrix();}
+function punchIn(){cam.fov=fovBase*.85;cam.updateProjectionMatrix();}
 function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
 // the director: during a round it cuts between the TV view and your shoulder every few seconds unless you picked a camera yourself
 setInterval(()=>{if(!running||downState||performance.now()<manualUntil)return;if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},4000);
@@ -532,7 +549,7 @@ function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   sparkTick(dt0);trailTick(dt0);if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible&&cardHand){const h=new T.Vector3();cardHand.getWorldPosition(h);const toCam=cam.position.clone().sub(h).setY(0).normalize();card.position.copy(h).add(new T.Vector3(0,0.22,0)).addScaledVector(toCam,0.16);card.lookAt(cam.position);}crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
-  camDrift(dt0);const _p=cam.position.clone();cam.position.copy(orbit(cam.position,look));cam.lookAt(look);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
+  camDrift(dt0);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(orbit(cam.position,_l));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
 <div class="note">3D proof · real fighter from Mixamo · six fighters and the ref from Mixamo · punch sounds made in the page</div>

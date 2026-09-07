@@ -823,3 +823,35 @@ the server between full runs.
 
 Store-billing tests stand in a fake `androidpublisher` and assert on the actual
 HTTP calls — that is how acknowledgement is verified without a device.
+
+## 7 Sep 2026 — the entrances, and a wider screen (10.9)
+
+Three things Jacques asked for after 10.8, all in `game3d.html` and mirrored in
+`tools/ring3d/ring3d.html`:
+
+1. **The crowd was standing in front of the addiction's walk-in.** The old
+   entrance camera sat at a fixed point beyond the seats (`SHOTS.far`) and
+   looked back down the aisle, so the front two rows were between the lens and
+   the fighter. Gone. There is now a camera man who walks with each fighter —
+   `camWalk(F,'front'|'back')`, `walkPos()`, `walkLook()`, a `SHOTS.walk` that
+   is recomputed every frame. `front` is a head-on hero shot 2.4 m ahead of
+   them; `back` rides 2.1 m behind their shoulder looking down the aisle at the
+   ring. Nothing can get between the camera and the fighter in either.
+   The seats also moved: wider apart and 0.7 m further back, so the aisle is a
+   real corridor.
+2. **The aisle is lit.** A glowing runner on the floor plus four travelling
+   lights (`aisleOn`/`aisleOff`), blue for you and the addiction's own colour
+   for it, so the walk-in is not a walk through a black room.
+3. **Nobody is cut off at the edges.** Two parts. In the fight page, the lens
+   now widens itself on a tall phone (`fitFov()` holds roughly a constant
+   *width* in shot, 46°–68° vertical) and the aim drops slightly so the sky
+   does not eat the top of the frame. In the app, the fight now takes the whole
+   screen: `#g2` gets `g2-full` while the 3D fight is mounted (fixed, inset 0,
+   full width) and drops it again on the win or loss screen. It was a 480 px
+   column before.
+
+Checked in headless Chromium at 390×844: your walk, the addiction's walk from
+three angles, the centre-ring introductions, and the round itself. The full
+screen class was measured on a 820×900 window — 430×768 before, 820×900 after.
+The signed-in app on the live site was not tested from here; the container
+cannot reach turnsomedayintodayone.com.

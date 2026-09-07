@@ -444,6 +444,10 @@ body.nova-open #mini-player{bottom:160px}
 .g2{--g2-ink:#070a14;--g2-edge:#2a3350;--g2-lamp:#f2a93b;--g2-hit:#e24b4a;--g2-you:#2fd08a;--g2-chalk:#eef1ff;--g2-dim:#a9b1d6;--g2-disp:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
   position:relative;min-height:calc(100vh - 132px);max-width:480px;margin:0 auto;background:var(--g2-ink);color:var(--g2-chalk);display:flex;flex-direction:column;overflow:hidden;font-size:16px;line-height:1.4}
 .g2 button{font:inherit;color:inherit;cursor:pointer}
+/* the 3D fight takes the whole screen so nobody is cut off at the edges */
+.g2.g2-full{position:fixed;inset:0;width:100%;max-width:none;min-height:0;height:100dvh;margin:0;z-index:60;padding:0}
+.g2-full .g2-photo,.g2-full .g2-grain,.g2-full .g2-glove,.g2-full .g2-red,.g2-full .g2-mini,.g2-full .g2-ref,.g2-full .g2-top,.g2-full .g2-floors{display:none}
+.g2-full .g2-body{padding:0}
 .g2-photo{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;transform-origin:50% 60%}
 .g2-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,20,.15) 0%,rgba(7,10,20,.25) 45%,rgba(7,10,20,.92) 100%)}
 .g2-photo.boss{animation:g2sway 3.2s ease-in-out infinite alternate}
@@ -7637,6 +7641,7 @@ async function startFight(){
   const g=gameState(),track=gameTrack(),str=gameStrength();
   gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
   gmCrowdLevel(0);
+  try{gm('g2').classList.add('g2-full');}catch(e){}
   gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(BOSS_IMG[gameBossName()]||'habit')}&fighter=${((g.boxer-1)%5)+1}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}"></iframe>`);
   const f=gm('g2-3d');if(!f)return;
   if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
@@ -7654,6 +7659,7 @@ function game3dMessage(ev){
 }
 function game3dWon(){
   const F=gmFight,g=gameState();
+  try{gm('g2').classList.remove('g2-full');}catch(e){}
   const pct=F.you/F.youMax,ride=GAME_RIDES.find(r=>pct>=r.min)||GAME_RIDES[GAME_RIDES.length-1];
   g.wins++;g.rides[ride.key]=(g.rides[ride.key]||0)+1;g.lastRide=ride.key;save();
   if(typeof logActivity==='function')try{logActivity('game_building_cleared',{building:g.b,ride:ride.key});}catch(e){}
@@ -7667,6 +7673,7 @@ function game3dWon(){
 }
 function game3dLost(draw){
   const g=gameState();
+  try{gm('g2').classList.remove('g2-full');}catch(e){}
   if(!draw){g.losses++;g.locked={b:g.b,f:g.f,at:Date.now()};save();}
   gmBody(`<div class="g2-reveal" style="font-size:2.6rem">${draw?'Even':'Saved by the bell'}</div>
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
@@ -14150,7 +14157,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='10.8';
+const APP_VERSION='10.9';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -1030,3 +1030,16 @@ same order, and all thirteen get used.
 Checked in headless Chromium: Rust, Void and Metal all build their effect and
 load their room, and building 2 floor 1 comes up Fire, which is the rotation
 working. No page errors.
+
+## 7 Sep 2026 — the camera never sits still in the preview (13.4)
+
+The director used to cut only during a round, and only every third tick. In the
+preview it now cuts every 3.4 seconds through the whole room — ringside, over
+the shoulder, down on the canvas, up in the house, in the corner — and it keeps
+cutting between rounds and in the corner, not just while the bell is going. It
+stands off during the ring walks and the rope entries, where the walking cameras
+are in charge, and while somebody is down. A live fight is unchanged.
+
+Checked in headless Chromium: through 42 seconds of preview the camera moved
+through tv, shoulder, low, crowd and corner and back round, and the camera
+position changed on every cut. No page errors.

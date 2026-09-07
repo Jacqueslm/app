@@ -711,8 +711,13 @@ async function bossSpecial(){if(!running||busy||downState)return;busy=true;bsp=0
 function ding(){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(1320,t);o.frequency.exponentialRampToValueAtTime(1980,t+.08);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.4);}catch(e){}}
 // it does not wait politely: the gaps shorten as the fight goes on and it doubles up on you
 async function ai(){while(!fightOver){const gap=Math.max(430,1500-round*130-560*ease(step()-1))+Math.random()*700;await wait(gap);
+  if(!running||downState)continue;
+  // it waits for its turn instead of losing it: without this the person can keep it busy all round
+  for(let i=0;i<50&&busy&&running&&!downState;i++)await wait(90);
   if(running&&!busy&&!downState){await bossSwing();
-    if(running&&!downState&&Math.random()<0.45+round*0.06){await wait(320+Math.random()*260);if(running&&!busy&&!downState)await bossSwing();}}}}
+    if(running&&!downState&&Math.random()<0.45+round*0.06){await wait(320+Math.random()*260);
+      for(let i=0;i<20&&busy&&running&&!downState;i++)await wait(90);
+      if(running&&!busy&&!downState)await bossSwing();}}}}
 // your punch: your body throws it, its body takes it
 // the glove that connects lights up for a moment
 function flashGlove(F,i,color){const g=F&&F.gloves&&F.gloves[i];if(!g)return;const m=g.material;if(!m.userData.base)m.userData.base=m.color.getHex();m.emissive=m.emissive||new T.Color();m.emissive.setHex(color);m.emissiveIntensity=3.2;m.needsUpdate=true;clearTimeout(g.userData.t);g.userData.t=setTimeout(()=>{m.emissive.setHex(0x000000);m.emissiveIntensity=1;m.needsUpdate=true;},260);}
@@ -727,7 +732,7 @@ function land(kind,dmg,blocked){if(kind==='up'||kind==='combo2')punchIn();flashG
   const at=glovePos(YOU).lerp(BOSS.root.position.clone().setY(1.35),.35);hitFx(at,ADD().glow,big||power);sparks(at,power?0xfff0c0:0xffc487,power||big);impactRing(at,power?0xfff4d0:0xffd9a0,power||big);sweat(headAt(BOSS),power?14:big?9:5);
   sparks(at.clone().setY(at.y+.12),0xffffff,power);camKick(YOU.root.position,BOSS.root.position,power?.2:big?.13:.07);if(power)roll(0.13,900);if(!power)freeze(big?90:50);if(!inSuper)ysp=Math.min(100,ysp+(power?18:big?12:7));BOSS.play({up:'big_head_hit',hook:'head_hit2',combo2:'side_hit'}[kind]||'stomach_hit',{speed:1.6});shake=kind==='up'?.09:.05;
   bossHP=Math.max(0,bossHP-dmg);landed.you+=dmg;bars();
-  if(bossHP>0&&bossHP<=9&&downsFight.boss>=1&&!fightOver){setTimeout(()=>refStops('boss'),700);}slam({up:'WHAM',hook:'CRACK',combo2:'BANG'}[kind]||'JAB');thud(kind==='combo2'?'hook':kind);snd('boss-hit-'+(1+Math.floor(Math.random()*4)));crowdJump('R',kind==='up'?.9:.5);if(kind!=='jab'){swell();chant('R',SUPPORT);}}
+  slam({up:'WHAM',hook:'CRACK',combo2:'BANG'}[kind]||'JAB');thud(kind==='combo2'?'hook':kind);snd('boss-hit-'+(1+Math.floor(Math.random()*4)));crowdJump('R',kind==='up'?.9:.5);if(kind!=='jab'){swell();chant('R',SUPPORT);}}
 // the one-two lands twice: the left at 0.40 s and the right at 0.67 s of the clip
 async function punch(kind){if(!running||busy||downState||!YOU)return;busy=true;
   if(kind==='combo'){YOU.play('jab_cross',{speed:1.3});stepIn(YOU,.3,400/1.3);await wait(400/1.3);land('jab',7,bossBlocks());await wait(270/1.3);land('combo2',10,bossBlocks());await wait(420);YOU.idle();stepBack(YOU,300);if(bossHP<=0){busy=false;return knockdown();}await wait(200);BOSS.idle();busy=false;return;}
@@ -752,12 +757,14 @@ async function bossSwing(){if(!running||busy||downState||!BOSS)return;busy=true;
   await wait(contact);
   const dodged=dodge===side,blocked=!dodged&&block;const dmgHit=hitDmg();
   if(dodged){slam('MISS');whoosh();crowdJump('R',.4);await wait(300);
-    // slip it and it is wide open: the counter is the reward for reading it
-    slam('COUNTER');ding();call(['Slipped it and made it pay.','Straight back at it.','Read it all the way.'],true);
-    YOU.play('right_hook',{speed:1.4});stepIn(YOU,.3,400/1.4);await wait(400/1.4);land('hook',13,false);ysp=Math.min(100,ysp+14);bars();await wait(400);YOU.idle();stepBack(YOU,300);
-    if(bossHP<=0){BOSS.idle();busy=false;return knockdown();}}
+    // slip it and sometimes it is wide open. Not every time, or it is not a fight
+    if(Math.random()<0.42){
+      slam('COUNTER');ding();call(['Slipped it and made it pay.','Straight back at it.','Read it all the way.'],true);
+      YOU.play('right_hook',{speed:1.4});stepIn(YOU,.3,400/1.4);await wait(400/1.4);land('hook',9,false);ysp=Math.min(100,ysp+12);bars();await wait(400);YOU.idle();stepBack(YOU,300);
+      if(bossHP<=0){BOSS.idle();busy=false;return knockdown();}}
+    else await wait(260);}
   else if(blocked){youHP=Math.max(0,youHP-6);landed.boss+=6;bsp=Math.min(100,bsp+8);bars();slam('BLOCKED');thud('block');shake=.05;$('red').style.opacity=.4;setTimeout(()=>$('red').style.opacity=0,400);await wait(450);}
-  else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;if(youHP>0&&youHP<=9&&downsFight.you>=1&&!fightOver)setTimeout(()=>refStops('you'),700);bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(600);}
+  else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(600);}
   BOSS.idle();YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':'Sit down.',ADD().name);
   if(dodged)call(['Slipped it.','Not there.','Made it miss.']);else if(blocked)call(['Blocked.','Took it on the gloves.']);else if(youHP<=28)call(['Hands up. Hands up.','That one landed.','Needs the bell.'],true);
   busy=false;
@@ -792,7 +799,7 @@ async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam
 // the end: a knockout, a stoppage, or the cards after six. It can end a fight. It never ends you.
 async function decision(how){running=false;fightOver=true;result=how;downState=false;busy=false;crowdOn(.25);setTimeout(()=>crowdOn(0),9000);for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;}stools.you.visible=stools.boss.visible=false;
   const you=how==='ko'||how==='tko'||(how==='cards'&&cards.you>cards.boss),draw=how==='cards'&&cards.you===cards.boss;
-  const line={ko:'It is counted out. Knockout, round '+round+'.',tko:'Three knockdowns this round. The referee stops it. TKO, round '+round+'.',stopped:'Three knockdowns this round. The referee stops it, round '+round+'. You walk out on your feet. Same time tomorrow.',cards:draw?'The cards are even, '+cards.you+'-'+cards.boss+'. A draw. Same time tomorrow.':you?'On the cards, '+cards.you+'-'+cards.boss+'. Your fight.':'On the cards, '+cards.boss+'-'+cards.you+'. It takes this one. You went the distance with it. Same time tomorrow.'}[how];
+  const line={ko:'It is counted out. Knockout, round '+round+'.',tko:'Three knockdowns this round. The referee stops it. TKO, round '+round+'.',stopped:'Three knockdowns this round. The referee stops it, round '+round+'. You walk out on your feet. Same time tomorrow.',cards:draw?'The cards are even, '+cards.you+'-'+cards.boss+'. A draw. Same time tomorrow.':you?'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.you+'-'+cards.boss+'. Your fight.':'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.boss+'-'+cards.you+'. It takes this one. You went the distance with it. Same time tomorrow.'}[how];
   say(line,'Announcer');announce([line],you);tellParent({type:'fight-over',result:how==='stopped'?'lost':(you?'won':(draw?'draw':'lost')),how,round,youHP:Math.round(youHP),cards});
   if(you||draw){snd('cheer');if(you&&how!=='ko')BOSS.play('defeat',{fade:.4});else BOSS.idle();await refWalk(new T.Vector3(-.72,0,.3));ref.rotation.y=Math.PI;cam.position.set(-0.25,1.5,-1.9);look.set(-0.45,1.35,0.3);YOU.play('victory',{loop:true,fade:.4});
     if(you)snd('winner');const raise=refPlay('hand_raising',{fade:.2});await wait(1700);if(raise)raise.paused=true;await wait(3000);if(raise)raise.paused=false;await wait(1200);refIdle();}
@@ -803,7 +810,10 @@ $('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){s
 $('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
 const LIVE=(new URLSearchParams(location.search).get('live')==='1');
 let auto=!LIVE,swingSide=null;
-function autoSet(v){auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
+// the preview is a fight, not a demo reel: it draws a form for the night, so
+// some previews the addiction reads it right and wins
+let autoSkill=0.28+Math.random()*0.5;
+function autoSet(v){if(v)autoSkill=0.28+Math.random()*0.5;auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
 function autoOff(){if(!LIVE)return goLive(true);if(auto)autoSet(false);}
 function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');q.set('fighter',fighterN);location.search=q.toString();}
 $('auto').onclick=()=>{if(auto)return;goLive(false);};
@@ -816,7 +826,7 @@ async function youAI(){let next=0;
     if(swingSide&&performance.now()-swingAt<tellMs()-260){// it is winding up: read it and pick a side
       await wait(200+Math.random()*500);
       if(!auto)continue;
-      if(Math.random()<.6)doDodge(swingSide);else if(Math.random()<.6)doDodge(Math.random()<.5?'L':'R');else doBlock();
+      if(Math.random()<autoSkill*0.8)doDodge(swingSide);else if(Math.random()<.3)doDodge(Math.random()<.5?'L':'R');else doBlock();
       await wait(700);
       continue;}
     if(busy||performance.now()<next)continue;
@@ -825,7 +835,7 @@ async function youAI(){let next=0;
     else if(r<.85)doDodge(Math.random()<.5?'L':'R');
     else doBlock();
     // leave it room to come back at you, or it never gets a turn
-    next=performance.now()+(r<.6?1500:700)+Math.random()*900;}}
+    next=performance.now()+(r<.6?1500:700)+Math.random()*900+(1-autoSkill)*900;}}
 let swingAt=0,guardTimer=null;
 const youHome=new T.Vector3();
 function doDodge(dir){if(!YOU||downState||!running)return;dodge=dir;YOU.play(dir==='L'?'dodging':'dodging_right',{speed:2.2,fade:.08});const dx=dir==='L'?-.3:.3;YOU.root.position.x=youHome.x+dx;if(curShot==='shoulder')cam.position.x=camBase.x+dx*.6;clearTimeout(guardTimer);guardTimer=setTimeout(()=>{if(!busy){YOU.idle();YOU.root.position.x=youHome.x;if(curShot==='shoulder')cam.position.x=camBase.x;}},650);}
@@ -878,8 +888,14 @@ function camWalkOff(){walkCam=null;}
 function entryShot(side,ms){SHOTS.entry=side==='N'?{pos:()=>new T.Vector3(0.15,1.4,0.5),look:()=>new T.Vector3(1.15,1.05,-2.35)}:{pos:()=>new T.Vector3(0.05,1.4,-0.4),look:()=>new T.Vector3(-1.35,1.05,2.35)};camWalkOff();shot('entry',ms||700);}
 let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1;
 function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre();if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
+function actionLook(){
+  if(YOU&&BOSS){const m=YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5);m.y=1.2;return m;}
+  return LOOK.clone();}
 function camTick(dt){if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
-  if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
+  if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(!camTo&&!walkCam&&curShot!=='tv'&&curShot!=='walk'&&curShot!=='entry'&&curShot!=='girl'&&curShot!=='girlclose'){
+    const t=(running||downState)?actionLook():((YOU&&!$('corner').hidden)?YOU.root.position.clone().setY(1.25):null);
+    if(t)look.lerp(t,Math.min(1,dt*2.0));}
+  if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
 let rollAmt=0,rollUntil=0;
 function roll(a,ms){rollAmt=a*(Math.random()<.5?-1:1);rollUntil=performance.now()+ms;}
 function punchIn(){cam.fov=fovBase*.85;cam.updateProjectionMatrix();}

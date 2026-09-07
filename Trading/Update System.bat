@@ -12,15 +12,13 @@ if not exist "relay" mkdir "relay"
 if not exist "ninjatrader" mkdir "ninjatrader"
 
 curl -s -o "DAILY-USE.md"             "%BASE%/DAILY-USE.md"               && echo   [ok] daily-use guide
-curl -s -o "PLAYBOOK.md"              "%BASE%/PLAYBOOK.md"                && echo   [ok] playbook
+curl -s -o "README.md"                "%BASE%/README.md"                  && echo   [ok] readme
 curl -s -o "BOT-SETUP.md"             "%BASE%/BOT-SETUP.md"               && echo   [ok] bot setup guide
 curl -s -o "relay\server.js"          "%BASE%/relay/server.js"            && echo   [ok] alert relay + autotrade bot
-curl -s -o "ninjatrader\MSBPure.cs"   "%BASE%/ninjatrader/MSBPure.cs"      && echo   [ok] ninjatrader strategy
 curl -s -o "pine\MSB-Price.pine"        "%BASE%/pine/MSB-Price.pine"        && echo   [ok] MSB-PRICE backtester  (re-paste into TradingView if it changed)
 curl -s -o "pine\MSB-Price-Alerts.pine" "%BASE%/pine/MSB-Price-Alerts.pine" && echo   [ok] MSB-PRICE alerts      (re-paste into TradingView if it changed)
 curl -s -o "pine\MSB-Companion.pine"    "%BASE%/pine/MSB-Companion.pine"    && echo   [ok] MSB-EYES companion    (re-paste into TradingView if it changed)
-curl -s -o "pine\MSB-Pure.pine"       "%BASE%/pine/MSB-Pure.pine"         && echo   [ok] old Pure backtester
-curl -s -o "pine\MSB-Pure-Alerts.pine" "%BASE%/pine/MSB-Pure-Alerts.pine" && echo   [ok] old Pure watcher
+curl -s -o "pine\MSB-Fast.pine"         "%BASE%/pine/MSB-Fast.pine"         && echo   [ok] MSB-FAST backtester   (the fast-ladder tester)
 curl -s -o "TURN ON AUTO.bat"     "%BASE%/TURN%%20ON%%20AUTO.bat"      && echo   [ok] TURN ON AUTO button
 curl -s -o "YOUR-RULES.md"            "%BASE%/YOUR-RULES.md"              && echo   [ok] your rules
 
@@ -29,6 +27,11 @@ del /q "pine\MSB-Indicator.pine" "pine\MSB-Scout.pine" "pine\MSB-Strategy.pine" 
 REM The grader and the file journal are retired: one ledger, one link. The
 REM two launchers they needed go with them - TURN ON AUTO does all of it.
 del /q "trade-grader.html" "journal.html" "Start Trade Grader.bat" "Start Phone Link.bat" >nul 2>&1
+REM The previous-generation scripts and the prop-firm guide are not part of the
+REM live system and were only ever clutter in this folder.
+del /q "PLAYBOOK.md" "PROP-FIRMS.md" "GETTING-STARTED.md" >nul 2>&1
+del /q "pine\MSB-Pure.pine" "pine\MSB-Pure-Alerts.pine" >nul 2>&1
+rmdir /s /q "ninjatrader" >nul 2>&1
 
 REM Last of all, this updater refreshes itself so next run knows about any
 REM newly added files. The swap happens after this window is done reading

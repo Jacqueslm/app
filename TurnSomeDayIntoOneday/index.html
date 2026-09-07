@@ -3870,7 +3870,8 @@ function restartLessonProgram(){
 }
 
 function completeLessonForToday(){
-  (S.lessonDoneDates=S.lessonDoneDates||{})[new Date().toDateString()]=true;// earns today's Climb step
+  (S.lessonDoneDates=S.lessonDoneDates||{})[new Date().toDateString()]=true;
+  climbAutoStep(); // Jacques, 6 Sep 2026: the stairs climb by themselves when a lesson is done
   const lesson=getTodayLesson();
   if(!lesson)return;
   const phaseHandoff=(lesson.day===30||lesson.day===60)&&!!phaseLessonFor(lesson.day+1);
@@ -6386,7 +6387,12 @@ function openAvatarSheet(){
   x.fillStyle=g;x.fillRect(0,0,220,260);
   drawHiker(x,110,225,2,0,false,0);
 }
-function closeAvatarSheet(){document.getElementById('avatar-sheet').classList.remove('open');}
+function closeAvatarSheet(){document.getElementById('avatar-sheet').classList.remove('open');
+  // a step earned before the climber was chosen plays now, on the mountain
+  const open=document.getElementById('climb-overlay')&&document.getElementById('climb-overlay').style.display==='block';
+  if(open&&S.climbPending){S.climbPending=false;save();setTimeout(climbPlayHop,500);}
+  else if(open&&climbEarnable().ok){setTimeout(climbStep,500);}
+}
 // ─── RIDE THE WAVE (SOS) ─────────────────────────────────────────────────────
 // A craving, drawn honestly: it rises, it peaks, it always passes. Hold the
 // screen breathing in, release breathing out; the rider stays up when the
@@ -7415,20 +7421,56 @@ function openClimb(){
   if(!S.avatar||!S.avatar.skin){setTimeout(openAvatarSheet,400);}
   const c=document.getElementById('climb-canvas');
   c.width=c.clientWidth*devicePixelRatio;c.height=c.clientHeight*devicePixelRatio;
-  climbCam=climbCamTarget=climbSteps();
+  // A step earned while the mountain was closed plays now: start one stone
+  // down, then the climber takes it in front of you.
+  const pending=!!S.climbPending;
+  climbCam=climbCamTarget=pending?Math.max(0,climbSteps()-1):climbSteps();
   bindClimbGestures(c);
   updateClimbCTA();
   cancelAnimationFrame(climbAnim);
   const loop=()=>{drawClimb();climbAnim=requestAnimationFrame(loop);};loop();
+  const firstVisit=!S.avatar||!S.avatar.skin;
+  if(firstVisit){/* the hop plays when the climber sheet closes, see closeAvatarSheet */}
+  else if(pending){S.climbPending=false;save();setTimeout(climbPlayHop,700);}
+  else if(climbEarnable().ok){setTimeout(climbStep,700);} // lesson done before this update: take it now
   logActivity('climb_open',{});
+}
+function climbPlayHop(){
+  climbHop=1;climbCelebrate=([7,15,30,45,60,75,90].includes(S.climbSteps))?2:1;
+  climbCamTarget=S.climbSteps;
+  climbChime(climbCelebrate>1);
+  showClimbLine(climbLineFor(S.climbSteps));
+  if(navigator.vibrate)try{navigator.vibrate(climbCelebrate>1?[30,40,80]:20);}catch(x){}
+  setTimeout(()=>{climbCelebrate=0;updateClimbCTA();},climbCelebrate>1?3500:1800);
 }
 function closeClimb(){cancelAnimationFrame(climbAnim);document.getElementById('climb-overlay').style.display='none';}
 function updateClimbCTA(){
   const b=document.getElementById('climb-cta'),e=climbEarnable();
   const n=climbSteps();
   document.getElementById('climb-sub').textContent=n>=90?('Summit reached — the ridge continues · step '+n):('Step '+n+' of 90 · your pace');
-  if(e.ok){b.disabled=false;b.textContent='Take today\'s step';b.style.opacity=1;}
-  else{b.disabled=true;b.textContent=e.why;b.style.opacity=.75;}
+  // No button to press. The step comes from the lesson.
+  b.disabled=true;b.style.opacity=.8;
+  const today=new Date().toDateString();
+  if(S.climbLastStep===today)b.textContent='Today\'s step taken · your lesson climbed it';
+  else b.textContent='Finish today\'s lesson and the step takes itself';
+}
+// The step takes itself the moment today's lesson is done. If The Climb is
+// not open at the time, the hop is saved up and plays the next time it opens.
+function climbAutoStep(){
+  climbSeed();
+  const e=climbEarnable();if(!e.ok)return false;
+  const open=document.getElementById('climb-overlay')&&document.getElementById('climb-overlay').style.display==='block';
+  if(open){climbStep();return true;}
+  S.climbSteps=(S.climbSteps||0)+1;S.climbLastStep=new Date().toDateString();S.climbPending=true;save();
+  climbToast(S.climbSteps);
+  return true;
+}
+function climbToast(n){
+  let t=document.getElementById('climb-toast');
+  if(!t){t=document.createElement('button');t.id='climb-toast';t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:9000;background:#1c2a47;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:11px 16px;font:600 .9rem/1.2 inherit;box-shadow:0 10px 30px rgba(0,0,0,.4);display:flex;gap:10px;align-items:center;opacity:0;transition:opacity .4s';t.onclick=()=>{t.style.opacity=0;openClimb();};document.body.appendChild(t);}
+  t.innerHTML='<span style="font-size:1.2rem">🏔️</span><span>Step '+n+' of 90 taken · your lesson climbed it<br><small style="opacity:.75;font-weight:400">Tap to watch</small></span>';
+  t.style.display='flex';requestAnimationFrame(()=>t.style.opacity=1);
+  clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.style.display='none',450);},6000);
 }
 function climbStep(){
   const e=climbEarnable();if(!e.ok)return;

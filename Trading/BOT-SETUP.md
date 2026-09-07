@@ -56,10 +56,9 @@ That is the exact pattern YOUR-RULES was written to stop, so:
 - **1 contract** — it takes the full 1R and is done, rather than riding to T2
   against the original stop.
 
-If you want break-even after 1R, run **`ninjatrader/MSBPure.cs`** instead. It lives
-inside NinjaTrader, sees its own fills, and moves the stop itself. TradingView and
-the relay drop out of the order path entirely — fewer things that have to be
-running at 09:30.
+The relay cannot move a stop to break-even — it writes the order file and never
+hears about the fill. If that ever matters more than simplicity, it needs a
+NinjaScript that sees its own fills; there isn't one in the folder today.
 
 ---
 

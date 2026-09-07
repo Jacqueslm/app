@@ -138,8 +138,9 @@ a decent sample, that symbol is off your list — that result just saved you a y
 
 ### Stage 2 — Bar replay (1–2 weeks, 50 setups)
 
-TradingView bar-replay, indicator on, grader open, no money. Log all 50 in the grader —
-**including every one you reject.**
+TradingView bar-replay, both panels on, no money. Log all 50 in the **ledger** —
+**including every one you reject**, tagged *my own* so the branch scoreboard can compare them
+to what the bot signalled.
 
 This stage exists for one reason: to retrain your eye so that step ⑤, the wait, feels like the
 entry instead of step ②, the break. Two years of discretionary trading has built a reflex to act
@@ -151,15 +152,17 @@ NinjaTrader sim, connected through TradingView exactly as you'll trade live. Rea
 brackets, real session hours. You are testing your execution now, not the rules.
 
 **The pass mark isn't profit — it's zero rule breaks across 30 trades.** If you took a trade the
-grader rejected, you are not ready for stage 4 regardless of what the P&L says, because that's the
-habit that will express itself at the worst possible moment.
+bot never signalled, or spent a third bullet, you are not ready for stage 4 regardless of what
+the P&L says, because that's the habit that will express itself at the worst possible moment.
+The ledger flags both: a loss bigger than one risk means a stop was moved.
 
 ### Stage 4 — Live, one contract, 30 trades
 
-One contract. Not "one until I'm confident." Whatever the grader says, for thirty trades. Then
-review expectancy by grade and by symbol before you touch the size.
+One contract. Not "one until I'm confident." Whatever the alert's `qty` says, for thirty trades.
+Then review the ledger's three branches — **bot signal**, **hand-off**, **my own** — before you
+touch the size.
 
-**If your B-grades have negative expectancy over that sample, stop taking B-grades.** That single
+**If "my own" has negative expectancy over that sample, stop taking your own.** That single
 finding is worth more than any amount of tweaking the indicator.
 
 ### Along the way
@@ -204,9 +207,10 @@ with things that are real: a market in a range cannot make higher highs and high
 timeframes at once, so chop fails the test by construction rather than by threshold.
 
 **What was genuinely lost, and you should know it:** the news blackout lived in the old
-indicator, and there is no replacement. Nothing in this system watches the calendar now. That box
-in the grader is yours, every day — and on FOMC days it is the only thing standing between you
-and a structurally perfect trade into a Fed statement.
+indicator, and there is no replacement. Nothing in this system watches the calendar now — not
+the panels, not the relay. The calendar is yours, every day, and on FOMC days it is the only
+thing standing between you and a structurally perfect trade into a Fed statement. If the bot is
+ARMED and a Fed statement is coming, hit **KILL** on the Bot switch page before it does.
 
 ## Built around you, not a hypothetical trader
 

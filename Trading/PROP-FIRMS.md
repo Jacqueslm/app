@@ -109,11 +109,11 @@ When it's on:
    evaluations.
 3. The dashboard shows the guard live: `$2,500 → cap $312/trade`.
 
-The grader has the same guard: turn on Prop mode there, enter your cushion and remaining
-target, and it will cap the position size, warn you when your cushion is inside the trap zone
-(fewer than 4 trades of survivable risk left), and tell you honestly how many trades the target
-is likely to take at your logged expectancy — so the "pass this week" voice has to argue with
-arithmetic instead of with you.
+The same guard lives on the Bot switch page now that the grader is retired: set **Balance** to
+your remaining cushion rather than the account's headline number, and every contract count the
+relay computes shrinks with it. Pair that with **Max lots**, which is a hard ceiling no
+arithmetic can talk its way past — so the "pass this week" voice has to argue with the size box
+instead of with you.
 
 ## 6. The rules that pass evals, in one list
 

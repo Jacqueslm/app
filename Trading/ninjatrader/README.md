@@ -1,5 +1,10 @@
 # The bot — MSBPure for NinjaTrader 8
 
+> **⚠ PREVIOUS GENERATION — not the live system.**
+> Today the relay writes the orders and NinjaTrader just fills them; you never install a
+> NinjaScript. See **[../DAILY-USE.md](../DAILY-USE.md)** and **[../BOT-SETUP.md](../BOT-SETUP.md)**.
+> This strategy is kept because it is the only path that can move a stop to break-even after 1R.
+
 This one places the orders. It runs inside NinjaTrader, sees your data, and
 submits entry, stop and both targets by itself. TradingView is not involved.
 

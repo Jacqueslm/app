@@ -125,23 +125,27 @@ invisible without measuring it.
 
 ---
 
-## 4. One trade a day
+## 4. Two bullets a day
 
-You said you like to trade once a day if an entry shows itself. That's now enforced, not
-suggested — after the first alert fires, the system goes quiet until tomorrow.
+You said you like to trade once a day if an entry shows itself. The system now allows two —
+the chart says **Bullets 2 / 2**, the relay stops at two, and the ledger shows **Done for
+today** at two. Three tools, one rule, and it is enforced rather than suggested.
 
-**Why this suits you better than a rule about "being selective":**
+**Why a bullet count beats a rule about "being selective":**
 
-You have one bullet. That fact alone does the work that willpower can't — you cannot take a
-mediocre setup at 10:15 and *also* take the good one at 14:00, so the cost of impulsiveness
-becomes immediate and visible instead of showing up on a monthly statement.
+You have two bullets. That fact alone does the work that willpower can't — spend them on
+mediocre setups at 10:15 and the good one at 14:00 finds you with an empty magazine, so the
+cost of impulsiveness becomes immediate and visible instead of showing up on a monthly
+statement. Two is not permission to take a second trade; it is the ceiling, and most good
+days spend nothing.
 
 Two things follow from it:
 
 - **Zero-trade days are correct outcomes, not failures.** "If an entry shows itself" means
   sometimes it doesn't. A day with no trade is the system working exactly as designed.
-- **Set the minimum grade to A+ while you're establishing this.** With one bullet, spend it well.
-  Drop to B only once your journal shows your B-grades actually make money.
+- **The bot's room filter is the grade.** It only fires when the target is worth at least 1.5×
+  the risk; measured across 845 trades in three markets, that filter *is* the edge — taking
+  every occurrence is dead break-even. You do not need to judge quality; it already did.
 
 ---
 

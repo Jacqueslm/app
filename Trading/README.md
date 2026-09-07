@@ -1,24 +1,35 @@
 # Market Structure Bridge — your trading system
 
-Daily bias → 4H bridge → 1H execution → 15m management. MNQ, MES, MGC.
+**One pattern, on the 1-hour chart. MES, MNQ, MGC.** A high, a higher low, a higher high;
+a pullback that prints a lower high; price breaks the higher low — the shakeout — and then
+closes back above the lower high. That close is the trade. Short is the mirror.
 
-Read them in this order.
+Two boxes sit on every chart: **MSB PRICE** decides, **MSB EYES** describes. The relay turns
+the alert into a bracket in NinjaTrader. Two trades a day, maximum.
 
-**New here? → [GETTING-STARTED.md](GETTING-STARTED.md) is the click-by-click walkthrough.**
+**Start with [DAILY-USE.md](DAILY-USE.md)** — the morning routine and what each alert means.
 
 | File | What it is |
 |---|---|
-| **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
-| **[DAILY-USE.md](DAILY-USE.md)** | Already set up? The morning routine, what to do when an alert fires, and the phone workflow |
-| **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
+| **[DAILY-USE.md](DAILY-USE.md)** | **Start here.** The morning routine, what each alert means, two bullets a day, and the phone. |
+| **[pine/MSB-Price-Alerts.pine](pine/MSB-Price-Alerts.pine)** | **The bot.** Goes on the 1H chart. Finds the pattern, draws the panel, fires the two alerts. |
+| **[pine/MSB-Companion.pine](pine/MSB-Companion.pine)** | **The eyes.** The second panel: where each side has got to, and which side is bait. |
+| **[BOT-SETUP.md](BOT-SETUP.md)** | Arming autotrade, the safety rails, and the contract roll. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
 | **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
-| **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Backtests in one click, and it is the only path that can move a stop to break-even. |
-| **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Dashboard, chart labels, and the alert that carries the trade plan. |
-| **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | **The backtester.** Same rules as the watcher, run against history. |
+| **[pine/MSB-Price.pine](pine/MSB-Price.pine)** | The same rules as a strategy, for running against history in TradingView. |
 | **[TURN ON AUTO.bat](TURN%20ON%20AUTO.bat)** + `relay/` | One button: starts the relay and the tunnel, opens the Bot switch page. Arm it and the bot places its own trades in NinjaTrader (Sim101 first). |
 | **Trade Ledger** (link in DAILY-USE.md) | Dollars in, R out. Two bullets a day, three branches, moved-stop flags. |
 | **Bot Decoder** (link in DAILY-USE.md) | Every word the two panels can print, in the order you read them. |
+
+### The previous generation — kept, not used
+
+`pine/MSB-Pure.pine`, `pine/MSB-Pure-Alerts.pine`, `ninjatrader/MSBPure.cs`, `PLAYBOOK.md` and
+`GETTING-STARTED.md` describe the four-timeframe version (Daily → 4H → 1H → 15m, one trade a
+day, the NinjaScript placing its own orders). That system is not what runs now. It is kept
+because MSBPure.cs is still the only path that can move a stop to break-even, and if that ever
+matters more than simplicity, it is there. **Nothing in those files describes what is on your
+chart today.**
 
 Plus a **`trade-checker` agent** — in this project, ask Claude *"grade this MNQ long, entry 20,450,
 stop 20,410, daily's bullish"* and it reads the playbook and gives you a verdict. It will not

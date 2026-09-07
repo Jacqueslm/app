@@ -1289,3 +1289,29 @@ paints it. The ropes are untouched — they still hang, part and shut as the gat
 
 Checked in headless Chromium: model loads, 1,616 triangles, canvas material
 found and tinted, old pipes and circle all hidden, no page errors.
+
+## 7 Sep 2026 — the jump off the roof, built in Blender (15.0)
+
+`tools/blender/jump.py` builds two more models: `chute.glb` (a canopy with a
+vent band, ten lines and a harness bar, 249 verts, 31 KB) and `city.glb` (46
+towers with lit faces around a clear middle to fall through, 476 verts, 44 KB).
+
+Win on a roof and the fight does not cut to a card any more. The arena goes
+dark, the HUD and the controls fade out, and you go off the side: the canopy
+opens above you, the city comes up underneath, and you drift down and forward
+for six seconds while the camera hangs beside you. Then the arena comes back and
+the result is posted to the app as before, so the win screen and the next
+building still work the way they did.
+
+`jumpOut()` hides every top-level object except the fighter, the chute, the city
+and the lights, adds a moon and a hemisphere light, pulls the arena fog back from
+0.075 to 0.006 so the city can be seen at all, and puts every bit of it back
+afterwards. Floors are unaffected — this only runs when `floorN===0`, the roof.
+
+Checked in headless Chromium on a roof knockout: both models load, the sequence
+runs from 34 m down to 7 m with the city and canopy visible, everything is
+restored afterwards and the ring is back. No page errors.
+
+Honest: the lit windows on the towers are hard to see at this distance — the
+city reads as dark blocks against the sky. Worth another pass if Jacques wants
+the city brighter.

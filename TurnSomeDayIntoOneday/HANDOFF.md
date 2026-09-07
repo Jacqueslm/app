@@ -1043,3 +1043,25 @@ are in charge, and while somebody is down. A live fight is unchanged.
 Checked in headless Chromium: through 42 seconds of preview the camera moved
 through tv, shoulder, low, crowd and corner and back round, and the camera
 position changed on every cut. No page errors.
+
+## 7 Sep 2026 — four fixes from watching it (13.5 / 13.6)
+
+- **The preview picks a fighter.** With no fighter set it used to open on the
+  same one every time; it now draws one of the five, and ringing the bell carries
+  that fighter into the live fight. The app's own pick still wins.
+- **The referee watches the fighters.** He stood at a fixed angle facing nothing.
+  During a round he now turns to keep the midpoint between the two in front of
+  him, easing round rather than snapping, and stands off while he is walking or
+  counting. Measured: zero degrees off across five samples of a live round.
+- **Everybody got out of the ring.** The announcer, the ring girl, the trainer,
+  the cut man and the addiction's two were all standing inside the ropes, which
+  are at ±2.6. They now stand outside, near the corner they belong to, facing in.
+  Measured during a round: you, the addiction and the referee inside; all six
+  others outside. The corner men still come in between rounds, as they should.
+- **The ring girl does one lap, not three.** She used to walk to a mark, walk to
+  the middle, raise her arm and only then have the card, then walk two more legs
+  to get out. She now carries the card in, holds it up in the middle, and walks
+  straight back out.
+- **The ropes lift and they bend under.** The bottom rope stays where it is and
+  they step over it; the top two lift to 1.44 and 1.88 and the fighter bends
+  forward (a 0.46 rad tilt) to come through underneath, then straightens up.

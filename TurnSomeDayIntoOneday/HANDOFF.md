@@ -1245,3 +1245,27 @@ the preview still uses the fallback. The app has the real thing.
 Checked in headless Chromium: both fighters have the clip, both play it through
 the ropes, no page errors. Seen in a frame: hands on the top rope coming
 through.
+
+## 7 Sep 2026 — the punches hesitate no more (14.8)
+
+*"why are my punches hesitating and slow when i hit the button"* — three real
+causes, all in the code:
+
+1. **The addiction's wind-up held the whole ring.** `bossSwing` set `busy` the
+   moment it started leaning, and every control checks `busy`, so for the length
+   of the tell — 1.9 s early on — a press did nothing at all. The tell is now
+   free: only the swing itself takes the ring, and it waits up to 0.7 s for you
+   to finish a punch before it does.
+2. **A press during anything was thrown away.** `punch()` returned on the spot
+   if the ring was held. It now remembers the press and throws it the moment the
+   ring clears, if that is within 0.8 s.
+3. **The hands hung about after contact.** 380 ms of hold after a punch landed,
+   cut to 240, the step back cut with it, and the little hit-stop dropped
+   entirely on ordinary shots (kept for the big ones and the power punch). The
+   addiction's own swing also gives the ring back sooner: the miss, block and
+   hit waits came down by roughly 40%.
+
+Honest about the measurement: this container renders the fight at about four
+frames a second, so a press-to-punch time measured here is mostly the machine,
+not the game. What it does show is that presses are no longer swallowed — every
+press in a live round produced a punch, and the fight still lands normally.

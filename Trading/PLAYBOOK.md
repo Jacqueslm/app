@@ -1,5 +1,10 @@
 # Market Structure Bridge — Trading Playbook
 
+> **⚠ PREVIOUS GENERATION — not the live system.**
+> This describes the four-timeframe MSB Pure system (Daily → 4H → 1H → 15m, one trade a day).
+> What actually runs today is the 1-hour MSB PRICE + MSB EYES pair with the relay placing the
+> orders — see **[DAILY-USE.md](DAILY-USE.md)**. Kept for reference; do not follow it as setup.
+
 Your system, written down. MNQ / MES / MGC. Daily bias → 4H bridge → 1H execution → 15m management.
 
 This is the rulebook. The indicator and the grader both enforce what's written here. If the

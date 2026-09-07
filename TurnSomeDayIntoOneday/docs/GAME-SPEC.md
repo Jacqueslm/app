@@ -14,10 +14,17 @@ history before this date.
 
 ## Core idea in one sentence
 
-You climb buildings at night. Every floor starts with a wheel that lands on one
-of three game shows. Twelve floors, then the thing you are fighting waits on the
-roof, by name, as a shadow in the ring. Beat it and a ride takes you to the next
-building. It never ends. Your strength comes from the work you do in the app.
+You go up to the roof of a building at night and fight the thing you are
+fighting, by name, as a shadow in the ring. Beat it and a ride takes you to the
+next building. It never ends. Your strength comes from the work you do in the
+app.
+
+**The twelve game-show floors are gone (6 Sep 2026, evening).** Jacques, twice:
+"the questions on all levels are wack", then "the whole question is wacky, the
+graphics is not fun". Every building now opens on the roof. The addiction's own
+lines from `GAME_BOSSES` were not lost — they moved *into* the ring, said while
+it winds up, with two answers and a counter for the right one. The show code in
+`index.html` is unreachable and can be deleted; it is in git before this date.
 
 ---
 
@@ -39,8 +46,11 @@ building. It never ends. Your strength comes from the work you do in the app.
 5. **A relapse costs nothing in here.** The building stands where it stood.
 6. **Strength is earned in the app, never in the game.** No taps, coins or
    grinding make you stronger. The door lists exactly what is missing.
-7. **No clock. Anywhere.** Jacques: "no timer, it's added stress." The only
-   thing that tightens is the wind-up before the boss swings. Tests enforce it.
+7. **No clock. Anywhere in the app.** Jacques: "no timer, it's added stress." The
+   only thing that tightens is the wind-up before the boss swings. Tests enforce
+   it. One exception, settled 6 Sep: the 3D roof fight (`tools/ring3d/`) runs real
+   boxing rules, six rounds of sixty seconds with a round clock. The floors,
+   the door and everything else stay clockless.
 8. **Nothing invented.** Every card behind a door, every corner line, every
    puzzle word is read from what this person actually did: days, money kept,
    journal lines, the person they named, today's lesson. No "% of people".
@@ -154,3 +164,46 @@ exists; strength and the lock read the app; the house rules on words.
 3D fighters. A Three.js proof exists (shadow boxer, gloves, ref) built from
 shapes; real fighters and moves come from Mixamo when Jacques pulls them.
 The same rules drive them.
+
+
+---
+
+## The roof, the Rumble cut (concept change, 6 Sep 2026, evening)
+
+Jacques on the first 3D fight: "change of concept, I don't like it, I want
+more talking, more interaction, different camera views like Big Rumble
+Boxing, better visual and sound effects, the addictions like the images
+with the glow." The reference is the arcade boxing style of *Ready 2 Rumble*
+and *Big Rumble Boxing: Creed Champions*: personality, taunts, a power meter
+that spells a word, TV-style cameras with slow-motion knockdowns, announcer
+calls, exaggerated hits. Adapted to the app's rules (nothing invented, never
+finished, no clock in the app, free):
+
+1. **The addiction looks like the boss pictures.** A black shape lit from
+   behind in its own colour, with its own thing in the ring: The Drink amber
+   with a glass on the canvas; The Screen blue with a phone glowing in its
+   glove; The Bet red with chips on the floor; The Smoke an ember at the
+   mouth; The Cart bags; The Scroll and The Checking a phone; One More Match
+   and The Inbox a glowing slab. Thirteen named in `ADDICTIONS`; a new one
+   gets a colour and a prop the same way; unknown falls back to The Habit.
+   The glow and backlight stay behind it from whatever camera is up.
+2. **It talks and you talk back.** Its lines come from `GAME_BOSSES`
+   (short/mid/long, with the right answer and the wrongs). It says one while
+   it winds up; two answers appear; the right one slips and counters, the
+   wrong one eats the punch. Nothing invented.
+3. **Cameras.** TV side view as the main shot, over the shoulder for
+   exchanges, low corner camera in slow motion for a knockdown, the house
+   from the back at the bell, a punch-in and shake on big hits, a **Cam**
+   button to flip views. Built: `SHOTS`, `shot()`, `slowMo()`, `punchIn()`.
+4. **The DAY ONE meter.** Ready 2 Rumble spells RUMBLE. This spells DAY ONE
+   on landed punches and right answers, then a flurry with slow motion and
+   the house up.
+5. **Announcer calls** ("Big right hand.", "It's hurt."), corner talk, crowd
+   chants both sides.
+6. **Sound** layered in the page: thud, slap, whoosh, a ding on a right
+   answer, a riser on the flurry, crowd swells. Nothing to license.
+
+All six are built in `tools/ring3d/ring3d.html`.
+The building still picks the venue (Temple / Tomb / Monastery); the boss
+colour is the addiction's, not the building's (the earlier per-building
+damage colours were dropped on this change).

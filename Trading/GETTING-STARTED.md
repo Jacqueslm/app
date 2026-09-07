@@ -1,5 +1,10 @@
 # Getting started — step by step
 
+> **⚠ PREVIOUS GENERATION — not the live system.**
+> This describes the four-timeframe MSB Pure system (Daily → 4H → 1H → 15m, one trade a day).
+> What actually runs today is the 1-hour MSB PRICE + MSB EYES pair with the relay placing the
+> orders — see **[DAILY-USE.md](DAILY-USE.md)**. Kept for reference; do not follow it as setup.
+
 **First, what this is:** an indicator plus a decision system — **not a bot.** It never places a
 trade. The indicator watches the charts and alerts you when your full sequence appears; the
 grader sizes the trade and gives the verdict; **you** click the button in the trading panel.

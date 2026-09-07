@@ -51,11 +51,11 @@ try {
   if (!Array.isArray(signals)) signals = [];
 } catch {}
 function recordSignal(text) {
-  const m = text.match(/^(\S+)\s+MSB PURE dir (-?1)(?:\.0+)?\s*\|/);
+  const m = text.match(/^(\S+)\s+MSB (PURE|FAST) dir (-?1)(?:\.0+)?\s*\|/);
   if (!m) return;
   const num = re => { const g = text.match(re); return g ? parseFloat(g[1]) : null; };
   signals.push({
-    t: Date.now(), tk: m[1], dir: +m[2],
+    t: Date.now(), tk: m[1], src: m[2], dir: +m[3],
     entry: num(/entry\s+([\d.]+)/i), stop: num(/stop\s+([\d.]+)/i),
     t1: num(/T1\s+([\d.]+)/), t2: num(/T2\s+([\d.]+)/),
     room: num(/room\s+([\d.]+)/i), qty: num(/qty\s+([\d.]+)/i)
@@ -122,8 +122,11 @@ function withBanner(html) {
 }
 
 // ═══ AUTOTRADE — the TradingView bot ═════════════════════════════════════════
-// When an "MSB PURE" alert arrives, write an order file into NinjaTrader's
-// incoming folder (the ATI). NinjaTrader places the bracket: market entry,
+// When an "MSB PURE" or "MSB FAST" alert arrives, write an order file into
+// NinjaTrader's incoming folder (the ATI). PURE is the trap bot; FAST is his
+// pullback ladder, on sim by his call. Both go through the same rails, and
+// they share ONE magazine — two bullets a day is a rule about him, not about
+// a strategy, so the second system does not get its own. NinjaTrader places the bracket: market entry,
 // then two OCO pairs — half at T1, half at T2, both protected by the stop.
 //
 // OFF until you switch it on from the /bot page, and only a sim account can
@@ -136,7 +139,7 @@ function withBanner(html) {
 // only ever block a trade, never invent one, and every decision is printed
 // and written to alerts.log so you can audit what the bot did and why.
 //   · kill switch   — /bot page (phone-friendly). DISARMED survives restarts.
-//   · one a day     — maxPerDay, counted in state.json, restart-proof.
+//   · two a day     — maxPerDay, counted in state.json, restart-proof, both systems.
 //   · duplicates    — the same alert text inside dupWindowMin places once.
 //   · session gate  — orders only inside that instrument's ET window, Mon–Fri.
 //   · sanity        — stop/T1/T2 on the correct side, risk within maxRiskPts.
@@ -284,10 +287,12 @@ let oifSeq = 0;
 function roundTick(px, tick) { return (Math.round(px / tick) * tick).toFixed(tick < 0.25 ? 1 : 2); }
 
 // "MNQ1! MSB PURE dir 1 | entry 29940.00 | stop 29900.00 | risk 40.00 pts | T1 29980.00 | T2 30140.00 | room 5.0R"
+// "MES1! MSB FAST dir -1 | entry 6480.00 | stop 6486.00 | risk 6.00 pts | T1 6470.00 | T2 6470.00 | room 1.7R"
 function tryAutotrade(text) {
   if (!auto.enabled) return;
-  const m = text.match(/^(\S+)\s+MSB PURE dir (-?1)(?:\.0+)?\s*\|/);
-  if (!m) return;                                   // not a PURE signal — ignore
+  const m = text.match(/^(\S+)\s+MSB (PURE|FAST) dir (-?1)(?:\.0+)?\s*\|/);
+  if (!m) return;                                   // not a PURE / FAST signal — ignore
+  const src = m[2];                                 // which system is asking
 
   // ── the rails, in order ────────────────────────────────────────────────────
   if (state.killed) { decide(false, "KILL SWITCH is on — no orders until you re-arm at /bot"); return; }
@@ -305,7 +310,8 @@ function tryAutotrade(text) {
   if (dup) { decide(false, "duplicate of an alert " + Math.round((Date.now() - dup.t) / 60000) + " min ago — placed once, not twice"); return; }
 
   if (state.placed.length >= (auto.maxPerDay || 1)) {
-    decide(false, "bullet already spent — " + state.placed.length + "/" + (auto.maxPerDay || 1) + " trade(s) placed today. This one is tomorrow's.");
+    decide(false, src + ": bullet already spent — " + state.placed.length + "/" + (auto.maxPerDay || 1) +
+      " trade(s) placed today (" + state.placed.map(p => p.src || "PURE").join(", ") + "). This one is tomorrow's.");
     return;
   }
 
@@ -327,7 +333,7 @@ function tryAutotrade(text) {
   }
 
   const num = re => { const g = text.match(re); return g ? parseFloat(g[1]) : NaN; };
-  const entrySide = m[2] === "1";
+  const entrySide = m[3] === "1";
   const entry = num(/entry\s+([\d.]+)/i);
   const stop = num(/stop\s+([\d.]+)/i);
   const t1   = num(/T1\s+([\d.]+)/);
@@ -394,9 +400,9 @@ function tryAutotrade(text) {
   const file = path.join(dir, "oif" + (++oifSeq) + "." + id + ".txt");
   try {
     fs.writeFileSync(file, lines.join("\r\n") + "\r\n");
-    state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty });
+    state.placed.push({ t: Date.now(), inst: inst.name, dir: buy, qty, src });
     saveState();
-    decide(true, "AUTOTRADE → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
+    decide(true, src + " → " + auto.account + "  " + inst.name + "  " + buy + " " + qty +
       "  stop " + S + "  T1 " + P1 + (half > 0 ? "  T2 " + P2 : "  (1 lot — full exit at 1R)") +
       "   risking $" + (qty * riskPts * perPt).toFixed(0) +
       " of $" + riskUsd.toFixed(0) + " (" + (auto.riskPct || 0) + "% of " + (auto.balance || 0) + ")" +
@@ -459,10 +465,13 @@ ${auto.account}${live ? " — REAL MONEY" : " — sim"}</span>
 <p>Risk: <b>${auto.riskPct || 0}%</b> of <b>$${(auto.balance || 0).toLocaleString()}</b>
 = <b>$${Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100).toLocaleString()}</b> per trade.
 Contracts are computed from that and the stop distance in the alert.</p>
-<p style="font-size:13px;color:#f0a020">⚠ This path cannot move a stop to break-even — it writes an
-order file and never hears about the fill. Trades of 2+ contracts take half at 1R and let the rest
-run to T2 against the <i>original</i> stop. For break-even after 1R, run the NinjaScript
-(ninjatrader/MSBPure.cs) instead, which sees its own fills.</p>
+<p style="font-size:13px;color:#8b96a5">Two systems feed this page — <b>PURE</b> (the trap bot) and
+<b>FAST</b> (your pullback ladder) — and they share the two bullets. Every trade obeys the same rules:
+NY window only, stop and targets placed with the entry, contracts from the risk number, never more
+than the cap.${used ? " Today: " + (state.placed || []).map(p => (p.src || "PURE") + " " + p.dir + " " + p.inst).join(", ") + "." : ""}</p>
+<p style="font-size:13px;color:#f0a020">⚠ The relay cannot move a stop to break-even — it writes an
+order file and never hears about the fill. Trades of 2+ contracts take half at T1 and let the rest
+run to T2 against the <i>original</i> stop.</p>
 <form method="POST" action="/bot/${secret}/arm">
 <button style="background:${auto.enabled ? "#546e7a" : "#26a69a"};color:#fff">
 ${auto.enabled ? "TURN AUTOTRADE OFF" : "TURN AUTOTRADE ON — " + auto.account}</button></form>
@@ -662,7 +671,7 @@ server.listen(PORT, () => {
               " = $" + Math.round((auto.balance || 0) * (auto.riskPct || 0) / 100) +
               "   (contracts computed from the stop distance)");
   console.log("  Never more than:  " + auto.maxContracts + " contracts — the ceiling, whatever the maths says");
-  if (armed) console.log("  ⚠ No break-even on this path — it cannot see fills. Use ninjatrader/MSBPure.cs for that.");
+  if (armed) console.log("  Two systems can fire: PURE (the trap) and FAST (the ladder). Same rails, same two bullets.");
   for (const [tk, i] of Object.entries(auto.instruments)) {
     const cs = contractStatus(i.name);
     if (cs === "expired") console.log("  ⚠ " + tk + " → " + i.name + " looks EXPIRED — it will roll itself on the next start.");

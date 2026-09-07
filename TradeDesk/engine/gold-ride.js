@@ -92,8 +92,11 @@ const HS = structure(h, 3, 3);
 const map = alignIndex(c.map(x => x.t + 15 * 60e3), h, 4 * HOUR);
 const htf = i => { const j = map[i]; return j >= 0 ? HS.trend[j] : 0; };
 
-// MGC: $10 a point, ~$3 round trip with slippage of a tick each side ≈ $5 total
-const COST = riskPts => Math.min(0.5, 5 / (riskPts * 10));
+// His real cost: $0.39 a contract each way = $0.78, plus slippage. MGC moves
+// $1 a tick, so a tick each way is $2. Shown three ways because the answer
+// turned out to depend on it.
+const SLIP = +(process.env.SLIP ?? 2);              // dollars of slippage, round trip
+const COST = riskPts => Math.min(0.5, (0.78 + SLIP) / (riskPts * 10));
 
 function agg(tr) {
   const n = tr.length; if (!n) return {n: 0};

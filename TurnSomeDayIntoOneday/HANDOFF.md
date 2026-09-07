@@ -26,12 +26,280 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   tell, dodge/block, knockdown with the ref (her photo on a board) walking over
   and counting. Open it in a browser as is. Published for him as an artifact.
 
+**Done 6 Sep, later that day (local commits, not pushed unless he said push):**
+- The ref is **Suzie** from Mixamo (he picked her over Megan: white shirt, black
+  trousers). `img/fight/ref.glb`, 2.6 MB, moves: idle, counting, walking, talking,
+  waving, hand_raising. Converter and notes in `tools/mixamo/convert-ref.*` and the README.
+- She is in `tools/ring3d/ring3d.html` in place of the photo board: stands at
+  ringside, walks over with her own walk when somebody is down, bends and
+  counts, then walks to you and raises her arm for the winner. Verified headless: no errors, screenshots checked.
+- Big files reach a chat only through GitHub: a zip over 25 MB goes on a
+  **release** (`github.com/jacqueslm/app/releases/new`, tag it, drop the file in
+  the bottom "Attach binaries" box, publish). The `suzie` release holds her
+  original FBX files. Drive, Dropbox and Mixamo are blocked from the container.
+- Jacques tested the first cut and called it off-beat and cheap: fighters not
+  touching, dodge dead, the ref sliding. Measured and fixed the same day:
+  every clip in both `.glb` files is now **in place** (the hips keep height but
+  never travel; the converters do this on the way through, `Hips(_\d+)?`
+  because the ref's hip track carries a suffix), the bodies stand 0.9 m apart
+  (a jab reaches 0.73 m from the hips), and reactions fire on the measured
+  contact frame: jab 0.50 s, hook 0.40 s, uppercut 0.47 s into the clip,
+  divided by the play speed. Dodge and block play the instant they are tapped
+  and count if they came during the wind-up or swing; the cue arrow points the
+  way to slip. Suzie walks at 1.35 m/s with her clip at 0.8 so her feet do not
+  slide, and her count numbers land on her pointing: one at 2.4 s, then every
+  0.87 s. The camera drops to the floor for a count. Verified with a tiled
+  frame sequence (`seq.js`/`tile.js` in that session's scratchpad, not in the
+  repo).
+- **The ref showed as a white ghost on the published preview page** (fine in
+  headless Chromium from disk). The page's rules stop the model loader from
+  unpacking images embedded in the `.glb`, so `ring3d.html` now carries a
+  texture-less copy of her plus her two skin images as plain `data:` PNGs
+  (`REF_TEX`, keyed by mesh name: Body/Pants/Shirt/Coat/Shoe share one, Hair
+  and Eyelashes the other) and puts them on after loading. `img/fight/ref.glb`
+  keeps its textures for the app, which serves from its own origin.
+- Dodge right went left: one duck clip, and the camera swung the other way.
+  Now your body steps 0.3 m the way you tapped and the camera follows.
+- The hand raise is her raising her own arm (Mixamo has no two-person clip).
+  Staged: she walks to your right side, the camera swings to the front, her
+  arm holds up beside your glove while you play `victory`. A real "lifts your
+  wrist" needs a custom two-character animation (Blender), not Mixamo.
+- He asked twice whether the characters are commercial-safe: Adobe's Mixamo
+  FAQ allows characters and animations in commercial games and apps, no
+  credit; not for resale as files. `helpx.adobe.com` is blocked from the
+  container, so this was from memory; he was given the URL to confirm.
+- **The ring is a fight now, on the Unified Rules of Boxing, shortened** (he asked
+  for real rules, 60-second rounds): six rounds of sixty seconds, ten seconds in
+  the corner, ten-point must scoring with a knockdown taking an extra point,
+  mandatory eight count, counted out at ten (the boss, on its fourth trip down
+  in the fight), three-knockdown rule (either side; you always rise at eight),
+  the clock stops for a count and nobody is saved by the bell, then the cards.
+  Sounds ride inside the page as data URIs (bell, round calls, cheer, winner,
+  down, get-up). No male count voice for Suzie. Test the endings with
+  `?secs=45&rounds=2&rest=3` (both endings verified headless, no errors).
+  **Settled 6 Sep: the app stays clockless; only the 3D fight has a clock.**
+  Recorded in CLAUDE.md.
+- Both fighters now punch with both hands: Mixamo's jab, hook, uppercut and
+  dodge are all left-handed, so `tools/mixamo/mirror.html` makes right-handed
+  twins (`right_jab`, `right_hook`, `right_uppercut`, `dodging_right`). The
+  shipped `fighter.glb` has them. Punches alternate hands; the boss throws a
+  left hook you slip left, a right hook or right jab you slip right.
+- Suzie's colour shifted under the amber and blue ring lights; her own picture
+  now lifts her from inside (`emissiveMap`, 0.55) so the lights only shade her.
+- He asked how to get Blender and what it does: blender.org, free, Windows
+  installer; it builds and animates 3D characters, the tool for any move
+  Mixamo does not have (the referee lifting the winner's actual wrist).
+- **6 Sep, evening. The ring is a fight now**, on the Unified Rules of Boxing,
+  shortened at his request: six rounds of sixty seconds, ten seconds in the
+  corner, ten-point must (10-9, an even round 10-10, one point more per
+  knockdown), mandatory eight count, counted out at ten (the boss beats the
+  count until its fourth knockdown of the fight; the person always gets up at
+  eight), three-knockdown rule for either side, clock stops for a count, nobody
+  saved by the bell, cards after six. It can end a fight; the lines never end
+  the person. `?secs=&rounds=&rest=` on the URL shorten it for testing.
+  **Settled the same evening: the app itself stays clockless; only this fight
+  has a clock.** Written into CLAUDE.md.
+- Punches landing: Mixamo's jab/hook were made with a half-step forward that
+  the in-place bake removed, so gloves stopped short. `stepIn`/`stepBack` now
+  carry the body 0.3 m along its facing for each punch and bring it back; the
+  fighters also face each other (`faceOff`) instead of standing parallel.
+- **Sound.** Punch thud, slap and whoosh are synthesised in the page with the
+  browser's own audio (nothing downloaded, nothing to license). Grunts, bell,
+  round calls, crowd loop, cheer and winner are the app's own Piper recordings
+  from `audio/fight`, inlined. Piper is not installed in this container.
+- **Crowd.** Two banks of flat silhouettes behind the far ropes: left, red, the
+  temptations rooting for the addiction; right, green, the tools and supporters
+  rooting for the person. Each bank jumps when its side scores. Chant lines
+  flash on that side. In the proof the lines are stand-ins (`TEMPT`, `SUPPORT`);
+  **in the app they must come from the person's own data**: recorded triggers
+  and excuses on the left, their SOS tools and supporters' names on the right.
+- Free, commercial-safe tools he asked about (all checked 6 Sep): Blender
+  (blender.org, GPL, free for commercial work), Mixamo (Adobe, characters and
+  moves free in commercial games, not for resale as files), Piper TTS (MIT,
+  already the app's voice), Audacity (GPL). For sounds: Pixabay CC0 and
+  ZapSplat's CC0 collection need no credit; Mixkit has its own free licence;
+  ElevenLabs' free tier requires attribution. Freesound must be filtered to
+  CC0 per clip. He wants only free-for-commercial-use or public-domain
+  downloads, voices included.
+- **The road he set, 6 Sep, late** (one step at a time, in this order): 1 rings,
+  2 announcer, 3 ring girl with the round card, 4 corner people, 5 a real
+  crowd with faces, 6 a real boxer. His frame for all of it: the fight never
+  ends, the addiction is always on the card, you walk in stronger each time;
+  trauma stays and you get stronger at carrying it. It can lose. It never
+  says you are finished.
+- **Step 1 done: the rings.** The app's four places (Temple, Tomb, Monastery,
+  Rooftop) are venues in `ring3d.html`, each with its own key, rim, fog, floor
+  and ambient colour and the scene photo as the far wall; glove colour red,
+  blue or white on your gloves. Picked on the start screen or by
+  `?place=&glove=`; the app will pass the person's own door choices. He is
+  downloading the announcer for step 2 (man in a suit, T-pose with skin, plus
+  Idle, Talking, Walking, Cheering without skin, release tag `announcer`).
+- **Step 6 came early: six fighters with skin.** Jacques had already put six
+  Mixamo characters on a draft release tagged `Fighters` (a draft is
+  downloadable with the session's `GITHUB_TOKEN` through the API assets URL;
+  the public link does not work for drafts). Converted with
+  `tools/mixamo/convert-fighter.*`: the shadow's thirteen moves plus mirrors
+  are renamed onto each body's bones (prefix `mixamorig`, `mixamorig1`, and so
+  on) and saved as `img/fight/fighter1..6.glb` (1 = blue goblin, 2 = woman in
+  yellow, 3 = man in black, 4 = Claire, 5 = Kaya with the mushroom hat,
+  6 = the motion-capture man). In `ring3d.html` the bodies ride without moves
+  and get them from the shadow at load, skins as plain images; the page is
+  10 MB, under the 16 MB limit. Every fighter is scaled to stand 1.8 m. Picker
+  row 1–6 before the bell, `?fighter=`; the app will pass the door's choice.
+  The boss stays the black shadow.
+- **Fighters, second pass (his call: Claire and Kaya's arms did not bend, out).**
+  Now five: 1 goblin, 2 woman in yellow, 3 man in black, 4 **Jackie** (Ch29,
+  from the draft release `fightermoves`), 5 motion-capture man. Claire and
+  Kaya deleted from `img/fight`. That release also carried four moves, added
+  to the set with `tools/mixamo/addmoves.html`: `head_hit` (the short head
+  snap, now the reaction to a hook and to the boss's hooks), `jab_cross`
+  (the **1-2** button: left lands at 0.40 s, right at 0.67 s of the clip),
+  `lead_jab2` (spare), `defeat` (the boss slumps when it loses; the person
+  never plays it). Gloves are now sized from each hand, wrist to middle
+  fingertip, and centred on it (`fitGlove`), so no fingers poke out on any
+  body. Three files in that zip had lost their `.fbx` extension.
+- **Steps 2 and 3 done: announcer and ring girl** from the published release
+  `characters` (Ch33, a man in a suit; Peasant Girl). Neither came with moves,
+  so Suzie's six (idle, walking, talking, waving, hand_raising, counting) are
+  renamed onto them at load, `tools/mixamo/convert-cast.*`, files
+  `img/fight/announcer.glb`, `ringgirl.glb`. The announcer walks to ringside
+  centre before round 1: the roof, "In this corner: you", the boss by name,
+  and the damage line; he walks in again to read the cards and puts his arm
+  up on a win. The ring girl walks the round card across between rounds,
+  holds it up with the arm-raise clip; **tap the card and it flips** to the
+  corner's line (raycast on the canvas). Names and days come from the app
+  later; the proof says "you".
+- **The boss wears the damage.** Six kinds cycle with the building number:
+  body (red), money (gold), people (violet), time (blue), mind (grey), trust
+  (amber). The shadow's colour, its glow and the light behind it change,
+  and the announcer says which. `DAMAGE` in `ring3d.html`, `?building=N`;
+  the Temple/Tomb/Monastery buttons set 1/2/3 within the current cycle. The
+  app will pass its own building number.
+- **Step 4 done: the corners**, from the published release `trainers` (four
+  characters, no moves; Suzie's clips again, `convert-cast2` settings: mesh
+  to 8%, error 0.05, 96 px skins, so the page stays under 16 MB). Your
+  corner: **Remy** in gym clothes is the trainer, the **soldier** (Ch49) is the
+  cut-man. The addiction's corner: the **clown** (Whiteclown N Hallin) and
+  the masked **wrestler** (Ch43), who come to its corner between rounds and
+  heckle with the temptation lines. Between rounds a row appears: **Water**
+  (+8), **Towel** (+5, clears the red), **A word** (a supporter line; in the
+  app, the person's own journal line or their person's text). One tap each per
+  rest; the row hides when the bell goes. Files `img/fight/trainer.glb`,
+  `cutman.glb`, `clown.glb`, `wrestler.glb`. Every cast body is scaled to
+  1.78 m at load (Remy's file came in at a different unit).
+- **Step 5 done: a real crowd**, from the published release `crowd` (nineteen
+  characters, twelve seated moves). Jacques: **monsters are the addiction's
+  side, people are the person's.** Six of the nineteen (`character (4)`,
+  `(5)`, `(6)`, `(7)`, `(11)`, `(12)`) are FBX 6.1 files three.js cannot read;
+  re-download those as FBX Binary 7.x if wanted. The thirteen usable bodies
+  are in `img/fight/crowd/c*.glb` (body only, 5% mesh, 64 px skins): monsters
+  c2 ghoul, c4 "The Boss", c5 zombie in a red dress, c6 mushroom-head, c16
+  shadow, c18 masked ninja; people c0, c1, c3, c9, c10, c11, c17. Eight seated
+  moves (`sitting_idle`, `sitting_clap`, `cheering_while_sitting`,
+  `sitting_yell`, `sitting_disapproval`, `sitting_disbelief`,
+  `sitting_talking`, `sitting_laughing`) are baked into `fighter.glb` at a
+  third of their keys (`tools/mixamo/addmoves-crowd.html`); `stand_to_sit`,
+  `standing_clap`, `sitting`, `sitting_and_pointing` were left out for size.
+  The page seats 24: two rows a side on dark blocks behind the far ropes,
+  three monster bodies left under red light, three people right under
+  green, cloned with a small in-page skeleton clone. They idle, cheer or boo
+  on each landed punch (`crowdReact`), chat between rounds (`crowdChat`),
+  and the house comes up on a knockdown. **The page is 15.6 MB against a
+  16 MB limit**: Suzie's page copy was cut to a third of her triangles and
+  four seated moves dropped to fit. Nothing more can go in the preview
+  page; the app serves files from its own origin and has no such limit.
+- **Concept change, 6 Sep evening: the Rumble cut.** He did not like the
+  first full fight: "more talking, more interaction, different camera views
+  like Big Rumble Boxing, better visual and sound, the addictions like the
+  images with the glow." New section at the end of `docs/GAME-SPEC.md`.
+  Built so far: the addiction's look (silhouette, its colour's glow and
+  backlight following the camera, its prop: glass, phone, chips, ember,
+  bags, slab; `ADDICTIONS`, `?boss=drink`) and the camera director (`SHOTS`
+  tv/shoulder/low/crowd/corner, cuts every few seconds in a round, slow
+  motion and a low camera on knockdowns, punch-in on big hits, a **Cam**
+  button). Still to build in this order: it talks and you answer from
+  `GAME_BOSSES`; the DAY ONE meter and flurry; announcer calls; the sound
+  layer. He has Blender installed now, for two-person moves later.
+- **"I want it like Big Rumble Boxing"** (Creed Champions, 2021, Survios):
+  side-on like a TV fight, light and heavy punches, a special and a super per
+  fighter, story through talk between matches. Built on top of the Rumble
+  cut: the **side camera follows the two of them** and leans in when they
+  close (`camTick`), **impact flashes and freeze frames** on every landed
+  punch (`hitFx`, `freeze`), a **DAY ONE meter** under each health bar
+  (`ysp`, `bsp`; yours fills on landed punches and right answers, its on
+  punches it lands), your **super** at a full meter (a pulsing DAY ONE button:
+  slow motion, low camera, speed lines, jab-jab-hook-uppercut, the house up;
+  `superMove`), **its special** at a full meter (aura flares, three punches;
+  block halves them; `bossSpecial`), and **the talk-back**: during its wind-up
+  it says one of its own lines from the app's `GAME_BOSSES` (the Alcohol set
+  is in the page as `LINES.drink`; the app passes the real set per track),
+  two answers appear for 1.9 s, the right one slips and counters (`COUNTER`,
+  a ding), the wrong one eats a harder punch and feeds its meter. Verified
+  headless: counter 74 after a hook and counter, wrong answer 84 and its
+  meter 18, super takes 46, its special 30 (or 12 blocked).
+- **Ring walks, corners and voices (6 Sep, late).** His notes: the announcer
+  never actually spoke, the fighters stayed on their marks between rounds
+  while only the corner team moved, everyone stood in front of the ring girl,
+  and there were no entrances. Researched the real order (ABC referee manual,
+  cutman/cornerman practice) and rebuilt the shell of the fight:
+  **the announcer, the referee and the addiction now speak aloud** through the
+  browser's own speech (`speak()`, no files, nothing to license; announcer low
+  and slow, the addiction lower and slower, the referee a female voice).
+  **Ring walks**: you come up the near aisle with your trainer and cut-man
+  behind you and the house up, it comes up the far aisle in its own colour
+  with the clown and the wrestler; both cameras are fixed at the ring apron
+  looking down the aisle, the way television shoots it (a tracking camera kept
+  catching the crew). Then **introductions at centre ring** and the
+  **referee's instructions** ("Protect yourself at all times. Obey my
+  commands. Touch gloves."), a glove touch, and both go to their corners.
+  **Between rounds the fighters walk to their own corners and sit on stools**
+  (`toCorners`/`toMarks`, the seated clip from the crowd set; the ref's walk
+  is renamed onto both fighters by `giveWalk`), the corner team works from
+  the side, the ring girl crosses an otherwise clear ring, "Seconds out" and
+  the bell. Rest is 14 s by default now. The crowd reacts on nearly every
+  seat rather than a third.
+- **Announcer calls the action** (the last piece of the Rumble cut): a short
+  spoken line over the bottom of the screen on a big punch, a jab working, a
+  slip, a block, a counter, either fighter hurt under 28, ten seconds left,
+  a knockdown, up at eight, and both supers. `call()` throttles to one every
+  3.4 s, gives way to whoever else is speaking, and never invents a number.
+  Verified headless: seven lines in one round, correct triggers.
+- **The 3D fight is in the app** (version 10.5). `game3d.html` at the app root
+  is the same fight with the blobs taken out: three.js moved to
+  `js/ring3d-three.js` and every model and sound loads from `img/fight/` and
+  `audio/fight/`, so it is **724 KB instead of 15.6 MB and opens in 2.5 s**.
+  The app's roof screen (`startFight` in `index.html`) now mounts it in a
+  full-screen iframe (`#g2-3d`) and hands it, by postMessage, the person's own
+  opponent and its lines from `GAME_BOSSES` at the building's tier, their
+  boxer (1-9 mapped onto the five 3D bodies), glove colour, building, place
+  and name, plus supporter lines built from their last journal entries, their
+  person's name and their day count. It posts back `{type:'fight-over',
+  result, how, round, youHP, cards}`; `game3dWon` gives the ride and the next
+  building exactly as the photo fight did, `game3dLost` locks the roof.
+  Verified over http with a stand-in host page: config in, result out, all
+  files 200. **Not yet verified inside the real signed-in app** — the server
+  needs its npm packages, which are not installed in this container. The
+  photo roof it replaced is in git before this commit; `tools/ring3d/` stays
+  as the standalone proof.
+- **The twelve game-show floors are gone.** He said it again on 6 Sep:
+  "the whole question is wacky, the graphics is not fun." `renderTower()` now
+  sends every building straight to `renderRoofDoor()` and `gameNextBuilding()`
+  starts the next building on its roof; the floor strip in the header counts
+  buildings instead of floors. The shows' code (`renderDoor`, `gameSpin`, the
+  three shows) is still in `index.html` but unreachable — **delete it once he
+  confirms he likes the simpler game**. Nothing was lost: the addiction's lines
+  live in the ring now.
+- The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
+  the app itself uses. She goes into the app with step 6 below, when the 3D
+  fight replaces the photo boss on the roof; the app has no 3D engine before
+  then.
+- The fighters have no skin because `fighter.glb` is the grey X Bot stand-in and
+  `convert.html` strips colour on purpose (black shadow boss). He asked why on
+  6 Sep. A skinned fighter needs a Mixamo boxer character downloaded like Suzie
+  and run through `convert-ref.html`, which keeps the colour map.
+
 **What he asked for next, in order:**
-1. **The ref is switching to Megan**, a Mixamo character, so she can move
-   (the photo referee in `img/fight/ref.png` stays as a fallback). Jacques is
-   downloading Megan With Skin plus Idle, Counting/Pointing, Waving, Walking,
-   Talking. Run them through `tools/mixamo/` into `img/fight/ref.glb`, then put
-   her in `tools/ring3d/ring3d.html` in place of the photo board, and in the app.
+1. ~~The ref switches to a Mixamo character~~ done (Suzie).
 2. **Announcer** (photo + clips: standing, talking into mic, arm up for the
    winner) — introduces the person by name, days, boxer, then the boss.
 3. **Round-card woman** (photo with a blank card held up + walking/holding

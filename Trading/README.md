@@ -1,24 +1,31 @@
 # Market Structure Bridge — your trading system
 
-Daily bias → 4H bridge → 1H execution → 15m management. MNQ, MES, MGC.
+**One pattern, on the 1-hour chart. MES, MNQ, MGC.** A high, a higher low, a higher high;
+a pullback that prints a lower high; price breaks the higher low — the shakeout — and then
+closes back above the lower high. That close is the trade. Short is the mirror.
 
-Read them in this order.
+Two boxes sit on every chart: **MSB PRICE** decides, **MSB EYES** describes. The relay turns
+the alert into a bracket in NinjaTrader. Two trades a day, maximum.
 
-**New here? → [GETTING-STARTED.md](GETTING-STARTED.md) is the click-by-click walkthrough.**
+**Start with [DAILY-USE.md](DAILY-USE.md)** — the morning routine and what each alert means.
 
 | File | What it is |
 |---|---|
-| **[GETTING-STARTED.md](GETTING-STARTED.md)** | Every click, in order — setup, alerts, and your first backtest |
-| **[DAILY-USE.md](DAILY-USE.md)** | Already set up? The morning routine, what to do when an alert fires, and the phone workflow |
-| **[PLAYBOOK.md](PLAYBOOK.md)** | The rules. Everything else just enforces this. Read it first. |
+| **[DAILY-USE.md](DAILY-USE.md)** | **Start here.** The morning routine, what each alert means, two bullets a day, and the phone. |
+| **[pine/MSB-Price-Alerts.pine](pine/MSB-Price-Alerts.pine)** | **The bot.** Goes on the 1H chart. Finds the pattern, draws the panel, fires the two alerts. |
+| **[pine/MSB-Companion.pine](pine/MSB-Companion.pine)** | **The eyes.** The second panel: where each side has got to, and which side is bait. |
+| **[BOT-SETUP.md](BOT-SETUP.md)** | Arming autotrade, the safety rails, and the contract roll. |
 | **[YOUR-RULES.md](YOUR-RULES.md)** | The system built around how you actually behave. **The R:R fix lives here.** |
-| **[PROP-FIRMS.md](PROP-FIRMS.md)** | The evaluation trap — trailing drawdown, the overtrading seduction, and the prop mode that beats both. |
-| **[ninjatrader/MSBPure.cs](ninjatrader/MSBPure.cs)** | **The bot.** Runs inside NinjaTrader and places the orders itself. Backtests in one click, and it is the only path that can move a stop to break-even. |
-| **[pine/MSB-Pure-Alerts.pine](pine/MSB-Pure-Alerts.pine)** | **The watcher.** Dashboard, chart labels, and the alert that carries the trade plan. |
-| **[pine/MSB-Pure.pine](pine/MSB-Pure.pine)** | **The backtester.** Same rules as the watcher, run against history. |
+| **[pine/MSB-Price.pine](pine/MSB-Price.pine)** | The same rules as a strategy, for running against history in TradingView. |
 | **[TURN ON AUTO.bat](TURN%20ON%20AUTO.bat)** + `relay/` | One button: starts the relay and the tunnel, opens the Bot switch page. Arm it and the bot places its own trades in NinjaTrader (Sim101 first). |
 | **Trade Ledger** (link in DAILY-USE.md) | Dollars in, R out. Two bullets a day, three branches, moved-stop flags. |
 | **Bot Decoder** (link in DAILY-USE.md) | Every word the two panels can print, in the order you read them. |
+
+### The previous generation — gone
+
+The four-timeframe version (Daily → 4H → 1H → 15m, a NinjaScript placing its own orders) was
+removed by the updater on 7 Sep 2026. Nothing in the folder describes it any more; it is in the
+repo's history if it is ever wanted.
 
 Plus a **`trade-checker` agent** — in this project, ask Claude *"grade this MNQ long, entry 20,450,
 stop 20,410, daily's bullish"* and it reads the playbook and gives you a verdict. It will not
@@ -127,8 +134,9 @@ a decent sample, that symbol is off your list — that result just saved you a y
 
 ### Stage 2 — Bar replay (1–2 weeks, 50 setups)
 
-TradingView bar-replay, indicator on, grader open, no money. Log all 50 in the grader —
-**including every one you reject.**
+TradingView bar-replay, both panels on, no money. Log all 50 in the **ledger** —
+**including every one you reject**, tagged *my own* so the branch scoreboard can compare them
+to what the bot signalled.
 
 This stage exists for one reason: to retrain your eye so that step ⑤, the wait, feels like the
 entry instead of step ②, the break. Two years of discretionary trading has built a reflex to act
@@ -140,15 +148,17 @@ NinjaTrader sim, connected through TradingView exactly as you'll trade live. Rea
 brackets, real session hours. You are testing your execution now, not the rules.
 
 **The pass mark isn't profit — it's zero rule breaks across 30 trades.** If you took a trade the
-grader rejected, you are not ready for stage 4 regardless of what the P&L says, because that's the
-habit that will express itself at the worst possible moment.
+bot never signalled, or spent a third bullet, you are not ready for stage 4 regardless of what
+the P&L says, because that's the habit that will express itself at the worst possible moment.
+The ledger flags both: a loss bigger than one risk means a stop was moved.
 
 ### Stage 4 — Live, one contract, 30 trades
 
-One contract. Not "one until I'm confident." Whatever the grader says, for thirty trades. Then
-review expectancy by grade and by symbol before you touch the size.
+One contract. Not "one until I'm confident." Whatever the alert's `qty` says, for thirty trades.
+Then review the ledger's three branches — **bot signal**, **hand-off**, **my own** — before you
+touch the size.
 
-**If your B-grades have negative expectancy over that sample, stop taking B-grades.** That single
+**If "my own" has negative expectancy over that sample, stop taking your own.** That single
 finding is worth more than any amount of tweaking the indicator.
 
 ### Along the way
@@ -193,9 +203,10 @@ with things that are real: a market in a range cannot make higher highs and high
 timeframes at once, so chop fails the test by construction rather than by threshold.
 
 **What was genuinely lost, and you should know it:** the news blackout lived in the old
-indicator, and there is no replacement. Nothing in this system watches the calendar now. That box
-in the grader is yours, every day — and on FOMC days it is the only thing standing between you
-and a structurally perfect trade into a Fed statement.
+indicator, and there is no replacement. Nothing in this system watches the calendar now — not
+the panels, not the relay. The calendar is yours, every day, and on FOMC days it is the only
+thing standing between you and a structurally perfect trade into a Fed statement. If the bot is
+ARMED and a Fed statement is coming, hit **KILL** on the Bot switch page before it does.
 
 ## Built around you, not a hypothetical trader
 

@@ -1,0 +1,41 @@
+# Seed phrases for the keyword scraper — Turn Someday Into Day One
+# One phrase per line. Lines starting with # are ignored.
+# These are the video-lane seeds from KEYWORDS.md, typed the way people type them.
+
+# HER — partner of someone who drinks (the moat lane)
+how to help an alcoholic husband
+my husband drinks every night
+is my husband an alcoholic
+living with an alcoholic
+when to leave an alcoholic
+loving an alcoholic
+
+# HER — partner of someone watching porn (said safely)
+betrayal trauma
+husband watches porn
+is porn cheating
+
+# HIM — the person themselves
+why do i keep relapsing
+day 1 again
+how to quit drinking on your own
+sober curious
+how to quit vaping
+how to stop doomscrolling
+how to quit porn
+
+# Food / binge
+how to stop binge eating at night
+
+# Anger (keep the broken grammar — that is how it is typed)
+why am i so angry all the time
+how to help a man whos always mad
+
+# Dry drunk / adult children / codependency
+what is a dry drunk
+adult children of alcoholics
+how to stop being codependent
+
+# App-intent terms
+sobriety app
+sober tracker

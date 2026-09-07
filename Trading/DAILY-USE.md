@@ -5,6 +5,11 @@ When the structure completes it fires an alert with the numbers — direction, e
 stop, T1, T2, room and the contract count. Your job is not to find trades. Your
 job is to take the one it hands you, at its size, or pass.
 
+A second system, **MSB FAST** — your pullback ladder, on sim by your call (7 Sep
+2026) — runs on the same 1-hour charts through the same bot. Same rules, same two
+bullets. It is in the ledger as its own chip so the numbers settle which one earns
+its place.
+
 Two boxes sit on every chart. **MSB PRICE** decides. **MSB EYES** describes.
 Every word either one can print, and what to do about it, is on the decoder:
 **https://claude.ai/code/artifact/3fc30878-134e-4724-845a-df31c7f1bdac**
@@ -41,6 +46,9 @@ trade. Get to a screen. Nothing to do yet.
 MES1! MSB PURE dir 1 | entry 6720.00 | stop 6700.00 | risk 20.00 pts | T1 6740.00 | T2 6790.00 | room 3.5R | qty 8
 ```
 
+A **FAST** alert reads the same way, with `MSB FAST` in place of `MSB PURE` and one
+target — the previous high or low — so T1 and T2 are the same number.
+
 - `dir` 1 is long, −1 is short
 - `entry` the close the bot fired on — where you get in
 - `stop` where you get out if wrong — not negotiable
@@ -64,6 +72,21 @@ Then log it in the ledger — four taps and the dollar amount:
 The chart says **Bullets 2 / 2**. The relay stops at two. The ledger shows
 **Done for today** at two. Three tools, one rule. When it says done, it is done —
 the third trade is the one that undoes the first two.
+
+The two bullets are **yours, not each system's**. PURE and FAST draw from the same
+two. If FAST spends both by 10:30, a PURE signal at 14:00 is blocked, and the
+bot page says so. That is the rule working, not a bug.
+
+## Your rules, enforced on both systems
+
+| Rule | Who enforces it |
+|---|---|
+| New York window only | the strategy and the relay, both |
+| Two trades a day, total | the relay (`Bullets` on the bot page) |
+| Stop and targets placed with the entry | the relay writes the whole bracket in one file |
+| Size from the risk number, never more than the cap | the relay (`Max lots` on the bot page) |
+| No trade means no trade | 0 contracts = no order; a bad alert = no order |
+| Never move a stop away from price | **you** — the relay cannot see it. Log every break in the ledger. |
 
 ---
 

@@ -21,14 +21,11 @@ the alert into a bracket in NinjaTrader. Two trades a day, maximum.
 | **Trade Ledger** (link in DAILY-USE.md) | Dollars in, R out. Two bullets a day, three branches, moved-stop flags. |
 | **Bot Decoder** (link in DAILY-USE.md) | Every word the two panels can print, in the order you read them. |
 
-### The previous generation — kept, not used
+### The previous generation — gone
 
-`pine/MSB-Pure.pine`, `pine/MSB-Pure-Alerts.pine`, `ninjatrader/MSBPure.cs`, `PLAYBOOK.md` and
-`GETTING-STARTED.md` describe the four-timeframe version (Daily → 4H → 1H → 15m, one trade a
-day, the NinjaScript placing its own orders). That system is not what runs now. It is kept
-because MSBPure.cs is still the only path that can move a stop to break-even, and if that ever
-matters more than simplicity, it is there. **Nothing in those files describes what is on your
-chart today.**
+The four-timeframe version (Daily → 4H → 1H → 15m, a NinjaScript placing its own orders) was
+removed by the updater on 7 Sep 2026. Nothing in the folder describes it any more; it is in the
+repo's history if it is ever wanted.
 
 Plus a **`trade-checker` agent** — in this project, ask Claude *"grade this MNQ long, entry 20,450,
 stop 20,410, daily's bullish"* and it reads the playbook and gives you a verdict. It will not

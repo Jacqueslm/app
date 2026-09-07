@@ -24,6 +24,12 @@
 //
 //  Commission is his real rate: $0.39 a contract each way. Slippage is one
 //  tick each way, which is the honest assumption for a market entry.
+//
+//  LIVE (his call, 7 Sep 2026, sim only): the same rules as the PRICE bot
+//  apply — the session window, two bullets a day shared with the bot, the
+//  relay's kill switch and contract cap. Each entry carries an alert message
+//  in the relay's format. To trade it: Alert → Condition MSB-FAST →
+//  "Order fills only" → Message {{strategy.order.alert_message}} → Webhook.
 // =============================================================================
 
 strategy("MSB Fast Ladder — backtest", "MSB-FAST", overlay = true,
@@ -57,7 +63,7 @@ confirm = input.bool(true, "Wait for the turn (close above the previous bar's hi
 grpX = "Exit"
 exitMode = input.string("the previous high", "Target",
      options = ["the previous high", "ride until a lower high"], group = grpX,
-     tooltip = "The previous high is the one the break just made — never a projected new one. Riding holds until structure turns against you.")
+     tooltip = "The previous high is the one the break just made — never a projected new one. Riding holds until structure turns against you. The bot only trades the previous-high target — in ride mode the strategy draws on the chart and sends nothing.")
 stopTicks = input.int(4, "Stop buffer (ticks beyond the zone)", minval = 0, group = grpX)
 
 // ─── your rules ──────────────────────────────────────────────────────────────
@@ -213,8 +219,19 @@ okS = trigS and inSess and htfDown and tookToday < maxPerDay and
 // ═════════════════════════════════════════════════════════════════════════════
 ride = exitMode == "ride until a lower high"
 
+// The alert carries the whole bracket in the relay's language — the same
+// sentence the PRICE bot sends, tagged FAST so the relay and the ledger can
+// tell the two systems apart. The relay sizes the trade itself.
+f_msg(int d, float e, float st, float t) =>
+    string fmt = syminfo.mintick < 0.25 ? "#.0" : "#.00"
+    string r   = str.tostring(math.abs(e - st), fmt)
+    string rm  = str.tostring(math.abs(t - e) / math.max(math.abs(e - st), syminfo.mintick), "#.0")
+    ride ? "" : syminfo.ticker + " MSB FAST dir " + str.tostring(d) + " | entry " + str.tostring(e, fmt) +
+         " | stop " + str.tostring(st, fmt) + " | risk " + r + " pts | T1 " + str.tostring(t, fmt) +
+         " | T2 " + str.tostring(t, fmt) + " | room " + rm + "R"
+
 if okL
-    strategy.entry("L", strategy.long)
+    strategy.entry("L", strategy.long, alert_message = f_msg(1, entryL, stopL, tgtL))
     tookToday += 1
     Lph := -1
     Ltag := false
@@ -222,7 +239,7 @@ if okL
          color = color.new(#26a69a, 20), textcolor = color.white, size = size.tiny)
 
 if okS
-    strategy.entry("S", strategy.short)
+    strategy.entry("S", strategy.short, alert_message = f_msg(-1, entryS, stopS, tgtS))
     tookToday += 1
     Sph := -1
     Stag := false

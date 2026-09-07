@@ -158,6 +158,58 @@ function loadRing(){loader.load(RINGGLB(),g=>{
   scene.add(r);ringModel=r;ringFloor.visible=false;for(const o of OLDRING)o.visible=false;setMood();
 },undefined,e=>console.error(e));}
 
+function CHUTEGLB(){return ART+'chute.glb';}function CITYGLB(){return ART+'city.glb';}
+
+// ── off the roof ────────────────────────────────────────────────────────────
+// Win on a roof and you do not walk out: you go off the side under a chute,
+// over the city, on the way to the next building. Both models are from Blender.
+let CHUTE=null,CITY=null;
+function loadJump(){
+  loader.load(CHUTEGLB(),g=>{CHUTE=g.scene;CHUTE.visible=false;CHUTE.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});scene.add(CHUTE);},undefined,e=>console.error(e));
+  loader.load(CITYGLB(),g=>{CITY=g.scene;CITY.visible=false;
+    CITY.traverse(o=>{if(!o.isMesh)return;o.frustumCulled=false;
+      const ms=Array.isArray(o.material)?o.material:[o.material];
+      for(const m of ms){if(m&&m.emissive&&(m.emissive.r+m.emissive.g+m.emissive.b)>.2)m.emissiveIntensity=3.2;}});
+    scene.add(CITY);},undefined,e=>console.error(e));}
+async function jumpOut(){
+  if(!CHUTE||!CITY||!YOU)return;
+  autoCam=false;walkCam=null;curShot='jump';camTo=null;
+  // everything but the fighter, the chute, the city and the lights goes away
+  const keep=new Set([YOU.root,CHUTE,CITY,cam]);
+  const hidden=[];
+  for(const o of scene.children){if(keep.has(o)||o.isLight||o===scene.fog)continue;if(o.visible){o.visible=false;hidden.push(o);}}
+  clearElem();shaftsOff();aisleOff();$('lines').classList.remove('on');
+  CITY.visible=true;CHUTE.visible=true;CITY.position.y=16;
+  // a moon over the city, and the arena haze pulled back so it can be seen at all
+  const moon=new T.DirectionalLight(0xcfe0ff,2.2);moon.position.set(9,26,12);scene.add(moon);
+  const glow=new T.HemisphereLight(0x334466,0x0a0c14,.9);scene.add(glow);
+  const fog0=scene.fog.density;scene.fog.density=.006;
+  amb.intensity=.55;spot.intensity=0;rim.intensity=0;
+  scene.fog.color.set(0x070a12);scene.background.set(0x070a12);
+  // nothing on the screen but the drop
+  const chrome=[document.querySelector('.hud'),document.querySelector('.supers'),document.querySelector('.ctl')].filter(Boolean);
+  for(const e of chrome)e.style.opacity=0;
+  say('Off the side. On to the next one.','Announcer');snd('cheer');whoosh();
+  const H0=34,H1=7;
+  YOU.play('victory',{loop:true,fade:.3});YOU.root.rotation.set(0,0,0);
+  const t0=performance.now(),ms=6200;
+  await new Promise(res=>{(function f(){
+    const t=Math.min(1,(performance.now()-t0)/ms),e=1-Math.pow(1-t,2.2);
+    const h=H0+(H1-H0)*e, sway=Math.sin(t*7)*0.5, drift=t*3.2;
+    YOU.root.position.set(sway,h,drift);
+    YOU.root.rotation.z=Math.sin(t*7)*0.09;
+    CHUTE.position.set(sway*1.15,h+3.1,drift-0.1);
+    CHUTE.rotation.z=Math.sin(t*7+0.5)*0.07;
+    CITY.position.set(0,0,drift);
+    cam.position.set(sway+7.5,h+2.6,drift+8.5);
+    look.set(sway,h+0.2,drift);
+    if(t<1)requestAnimationFrame(f);else res();})();});
+  await wait(600);
+  scene.remove(moon);scene.remove(glow);scene.fog.density=fog0;
+  for(const e of chrome)e.style.opacity='';
+  for(const o of hidden)o.visible=true;
+  CITY.visible=false;CHUTE.visible=false;YOU.root.rotation.set(0,0,0);autoCam=true;setPlace(place);}
+
 function setMood(){const F=(typeof FL==='function')&&FL();const m=F?F.ring:MOODS[(Math.max(1,building)-1)%MOODS.length];canvasMat.color.setHex(m[0]);canvasMat.emissive.setHex(m[1]);ringGlow.color.setHex(m[2]);
   if(ringCanvasMat){ringCanvasMat.color.setHex(m[0]);if(ringCanvasMat.emissive)ringCanvasMat.emissive.setHex(m[1]);}}setMood();
 
@@ -487,7 +539,7 @@ function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotat
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
 const FIGHTER_GLOVE={1:'red',2:'blue',3:'black',4:'gold',5:'green'};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery'][(Math.max(1,building)-1)%3]);loadRing();$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
+function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery'][(Math.max(1,building)-1)%3]);loadRing();loadJump();$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
@@ -819,7 +871,9 @@ async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam
 async function decision(how){running=false;fightOver=true;result=how;downState=false;busy=false;crowdOn(.25);setTimeout(()=>crowdOn(0),9000);for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;}stools.you.visible=stools.boss.visible=false;
   const you=how==='ko'||how==='tko'||(how==='cards'&&cards.you>cards.boss),draw=how==='cards'&&cards.you===cards.boss;
   const line={ko:'It is counted out. Knockout, round '+round+'.',tko:'Three knockdowns this round. The referee stops it. TKO, round '+round+'.',stopped:'Three knockdowns this round. The referee stops it, round '+round+'. You walk out on your feet. Same time tomorrow.',cards:draw?'The cards are even, '+cards.you+'-'+cards.boss+'. A draw. Same time tomorrow.':you?'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.you+'-'+cards.boss+'. Your fight.':'Six rounds, nobody counted out. Technical knockout on the cards, '+cards.boss+'-'+cards.you+'. It takes this one. You went the distance with it. Same time tomorrow.'}[how];
-  say(line,'Announcer');announce([line],you);tellParent({type:'fight-over',result:how==='stopped'?'lost':(you?'won':(draw?'draw':'lost')),how,round,youHP:Math.round(youHP),cards});
+  say(line,'Announcer');announce([line],you);
+  if(you&&floorN===0){await wait(2600);await jumpOut();}
+  tellParent({type:'fight-over',result:how==='stopped'?'lost':(you?'won':(draw?'draw':'lost')),how,round,youHP:Math.round(youHP),cards});
   if(you||draw){snd('cheer');if(you&&how!=='ko')BOSS.play('defeat',{fade:.4});else BOSS.idle();await refWalk(new T.Vector3(-.72,0,.3));ref.rotation.y=Math.PI;cam.position.set(-0.25,1.5,-1.9);look.set(-0.45,1.35,0.3);YOU.play('victory',{loop:true,fade:.4});
     if(you)snd('winner');const raise=refPlay('hand_raising',{fade:.2});await wait(1700);if(raise)raise.paused=true;await wait(3000);if(raise)raise.paused=false;await wait(1200);refIdle();}
   else{BOSS.idle();YOU.idle();await wait(2500);}

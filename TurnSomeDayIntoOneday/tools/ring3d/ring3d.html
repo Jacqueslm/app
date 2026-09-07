@@ -6477,7 +6477,9 @@ function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CRO
     if(--left===0)cb();},e=>console.error(e));}}
 // the walk for a fighter: the ref's walking clip renamed onto its bones (plain names on the shadow, marked names on a skinned body)
 function giveWalk(F,marked){if(!F||!REFCLIPS||F.acts.walk)return;const w=REFCLIPS.find(c=>c.name==='walking');if(!w)return;let clip;if(marked)clip=retarget([w],F.root)[0];else{let hips='';F.root.traverse(o=>{if(o.isBone&&/Hips$/.test(o.name)&&!hips)hips=o.name;});const prefix=hips.replace(/Hips$/,'');const names=new Set();F.root.traverse(o=>{if(o.isBone)names.add(o.name);});clip=new T.AnimationClip('walk',w.duration,w.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i).replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix),prop=t.name.slice(i+1);return names.has(bone)?new t.constructor(bone+'.'+prop,t.times,t.values):null;}).filter(Boolean));}clip.name='walk';F.acts.walk=F.mixer.clipAction(clip);}
-function fighterWalk(F,to,mps,faceAfter){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
+function fighterWalk(F,to,mps,faceAfter,clip){return new Promise(res=>{const root=F.root,from=root.position.clone(),dist=from.distanceTo(to),ms=Math.max(250,dist/mps*1000);root.rotation.y=Math.atan2(to.x-from.x,to.z-from.z);
+  // a named clip rides the walk instead of the walk cycle: the climb through the ropes
+  if(clip&&F.acts[clip])F.play(clip,{fade:.2,speed:Math.max(.5,(F.acts[clip].getClip().duration*1000)/ms)});else if(F.acts.walk)F.play('walk',{loop:true,fade:.15,speed:mps/1.69});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);root.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{if(faceAfter)root.rotation.y=Math.atan2(faceAfter.x-to.x,faceAfter.z-to.z);F.idle();res();}})();});}
 const MARK={you:new T.Vector3(-0.25,0,0.3),boss:new T.Vector3(0,0,-0.55)},CORNERPOS={you:new T.Vector3(-1.85,0,1.85),boss:new T.Vector3(1.85,0,-1.85)};
 const stoolGeo=new T.CylinderGeometry(.20,.17,.50,12),stoolMat=new T.MeshStandardMaterial({color:0x2b2f3a,roughness:.8});const stools={};[['you',CORNERPOS.you],['boss',CORNERPOS.boss]].forEach(([k,p])=>{const m=new T.Mesh(stoolGeo,stoolMat);m.position.set(p.x,.25,p.z);m.visible=false;scene.add(m);stools[k]=m;});
 async function toCorners(){stools.you.visible=stools.boss.visible=true;await Promise.all([fighterWalk(YOU,CORNERPOS.you.clone().add(new T.Vector3(.05,0,-.05)),1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss.clone().add(new T.Vector3(-.05,0,.05)),1.4,new T.Vector3(0,0,0))]);
@@ -6663,8 +6665,8 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   roar();say('In the blue corner: You.','Announcer');await wait(1900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
   await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(560);
-  tweenRX(YOU.root,0.16,280);tweenY(YOU.root,0.10,280);await wait(280);
-  await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
+  {const climb=!!YOU.acts.climb_down;tweenRX(YOU.root,climb?0.06:0.16,280);tweenY(YOU.root,climb?0.02:0.10,280);await wait(280);
+  await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0),climb?'climb_down':null);}
   tweenRX(YOU.root,0,320);tweenY(YOU.root,0,340);partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
   followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
@@ -6673,8 +6675,8 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
   await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(560);
-  tweenRX(BOSS.root,0.16,280);tweenY(BOSS.root,0.10,280);await wait(280);
-  await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0));
+  {const climb=!!BOSS.acts.climb_down;tweenRX(BOSS.root,climb?0.06:0.16,280);tweenY(BOSS.root,climb?0.02:0.10,280);await wait(280);
+  await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0),climb?'climb_down':null);}
   tweenRX(BOSS.root,0,320);tweenY(BOSS.root,0,340);partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();shaftsOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();

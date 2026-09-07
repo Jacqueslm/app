@@ -904,3 +904,37 @@ the far ropes, and the centre-ring introductions.
 
 Checked in headless Chromium: the menu with the Fighter buttons and the gold
 addiction, an auto-played round with both fighters landing, and the corner.
+
+## 7 Sep 2026 — ninety levels, and the buttons are gone (12.0)
+
+Jacques: *"i dont like your level ideals and levels get locked if you dont do
+the work in the app and when the addiciton is saying its temptation that take
+away those buttons … every fight gets difficult the fight scene always change
+its does ends 90 levels like the app 90 day program"*
+
+- **Ninety levels.** `GAME_LEVELS=90`, `g.b` clamped to it, `gameTier` split in
+  thirds (1–30 / 31–60 / 61–90), the door and the top strip read "Level n of
+  90", and clearing 90 goes to `renderNinety()` — the game ends, the person is
+  never told they are finished, and `gameRestartLevels()` walks it again.
+- **Locked without the work.** `gameWorkToday()` — today's lesson, a journal
+  line, the pledge, or a craving logged. The roof door needs it as well as the
+  old post-loss lock.
+- **The two answer buttons are gone.** `askLine()` (question, right answer,
+  wrong answer, `#talk` panel) is now `temptLine()`: the addiction just says the
+  thing it says while it leans. Reading the lean is the whole defence, and
+  slipping it now pays a counter hook, which is what the right answer used to.
+- **Harder every level**, driven off the level number: `tellMs()` 1900 → 900,
+  `hitDmg()` 11 → 22, `bossBlocks()` up to 45%, the swing gap down to 460 ms.
+- **The scene changes.** Six moods for the canvas and the ring light rotate with
+  the level on top of the three roofs.
+- **Every temptation, per addiction.** `GAME_TEMPT` in index.html (13 tracks)
+  and the built-in `LINES` in the fight: what each one actually says to get
+  someone to engage — just one, you've earned it, nobody will know, start again
+  tomorrow, it's how you cope. The ones the app does not name a track for live
+  under Other/The Habit, which covers vaping, caffeine, streaming, picking,
+  spending, the phone at night. No medical claims, nothing that blames anyone.
+
+Checked in headless Chromium: index.html loads clean with GAME_LEVELS 90 and 13
+temptation sets, and the fight at levels 1, 2 and 45 shows the tell shortening,
+the damage rising and the canvas colour changing, with an auto-played round
+through the bell and no page errors.

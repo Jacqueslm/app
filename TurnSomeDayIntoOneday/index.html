@@ -6797,6 +6797,23 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 //   - No new dependencies. Same file, plain JS, CSS animation, <audio>.
 //   - Art: img/fight (scenes, boss shadows, boxers, gloves). Sound: audio/fight.
 
+const GAME_LEVELS=90;                   // ninety levels, one for every day of the program
+// What each addiction says to get a person to engage. Temptation only - the
+// fight has no right answer to click any more, it just talks while it winds up.
+const GAME_TEMPT={
+"Alcohol":["One?","Just tonight.","You've earned it.","Friday.","Everyone's having one.","Half a glass.","It takes the edge off.","Nobody's looking.","You're not like them.","Start again tomorrow.","It's a celebration.","You can stop whenever.","One won't touch you.","It's been a week.","You used to be fun.","Water's boring.","You'll sleep better.","Just to take the edge off today."],
+"Porn & Sex":["Five minutes.","Nobody will know.","You're alone anyway.","It's not hurting anyone.","Just looking.","You can't sleep.","One tab.","You're stressed.","Delete it after.","Everybody does it.","It's private.","You're already up.","Nothing else is on.","It's easier than people.","One more, then bed."],
+"Smoking":["One drag.","With the coffee.","You're outside anyway.","After this call.","It's the only break you get.","Just this pack.","Quit Monday.","Bum one, it doesn't count.","Your hands are empty.","It's the ritual, not the smoke.","Vape doesn't count.","A pouch isn't smoking.","One with a drink.","You're stressed, not weak."],
+"Substances":["Just tonight.","You're in pain.","It's only weed.","It was prescribed.","A small one.","You've been clean a while.","You can handle it.","Nobody's checking.","One won't restart anything.","You need to sleep.","It's a party, not a relapse.","Half. Just half.","You're not who you were.","It's medicine tonight."],
+"Gambling":["One bet.","You're due.","Win it back.","Free bet, no risk.","You were so close.","The line is wrong, you saw it.","Small stake.","Last one and I stop.","You know this sport.","It's not gambling, it's a trade.","The chart's about to run.","Double it and you're even.","It's entertainment money.","You've got a system."],
+"Social media":["Just checking.","Two minutes.","You might miss something.","Everyone's up.","One video.","You deserve a break.","See what they said.","You're waiting anyway.","Nothing else to do.","Look who posted.","Refresh once.","You need to know what happened.","Just the news.","One more and you'll sleep."],
+"Gaming":["One more match.","You'll win this one.","The queue's already up.","Don't leave the team.","Ten minutes.","You've nearly ranked.","The event ends tonight.","Just the daily.","One more roll.","You've come too far to stop.","It's how you switch off.","Nobody's waiting on you."],
+"Food / Binging":["You barely ate today.","It's just food.","Start clean Monday.","You've had a day.","Nobody's counting.","Finish it so it's gone.","You're already over.","It's the last time.","Sweet, then sleep.","You need something.","One plate more.","It's not the same as drinking."],
+"Shopping / Spending":["It's on sale.","You work hard.","You need one anyway.","Return it later.","It's only money.","Free delivery ends tonight.","Treat yourself.","It's an investment.","Small amount.","Just add it to the card.","You'll feel better when it comes.","Everyone spends."],
+"Work":["Just one more.","Nobody else will do it.","Get ahead for tomorrow.","Five minutes.","It's not work, it's your thing.","They're waiting on you.","You can rest when it's done.","Answer it now, sleep later.","Nobody works like you.","One last look at the phone.","If you stop it falls apart."],
+"Other":["Once won't matter.","You can stop whenever.","Just this once.","Nobody sees it.","It's how you cope.","One more, then done.","It's not that bad.","Everyone has something.","You're tired, not weak.","It's the only thing that's yours.","Just to get through today.","One little hit of it.","It's a habit, not a problem.","Tomorrow you start clean.","Late is the same as never.","Nothing else works."],
+"Anger & Control":["Say it.","They started it.","You're right, though.","One text.","Set them straight.","You're allowed to be angry.","Have the last word.","They need to hear it.","Slam it, then apologise.","It's not anger, it's honesty.","Make them understand.","Just this once, let go."],
+"Supporting Someone":["Check the phone.","Just look once.","You need to know.","Nobody else is watching.","Count it for them.","Search the room.","Call again.","Ask where they were.","You can fix this.","If you stop watching it all falls apart.","One look, then you'll rest.","You're the only one paying attention.","Wait up.","Just check the bank."]};
 const GAME_TOP_FLOOR=12;                // rooftop is floor 13
 const GAME_TRACKS=['Alcohol','Porn & Sex','Smoking','Substances','Gambling','Social media','Gaming','Food / Binging','Shopping / Spending','Work','Other','Anger & Control','Supporting Someone'];
 const BOSS_NAME={'Alcohol':'The Drink','Porn & Sex':'The Screen','Smoking':'The Smoke','Substances':'The Hit','Gambling':'The Bet','Social media':'The Scroll','Gaming':'One More Match','Food / Binging':'The Binge','Shopping / Spending':'The Cart','Work':'The Inbox','Other':'The Habit','Anger & Control':'The Heat','Supporting Someone':'The Checking'};
@@ -7173,8 +7190,8 @@ const GAME_RIDES=[
 // only thing that tightens is the wind-up before its swing (tell, in ms) and
 // what it throws. Buildings 1-2 show dodge arrows; after that you read it.
 function gameTier(b){
-  return b<=2?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
-       :b<=4?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
+  return b<=30?{key:'short',label:'Single words',tell:1000,swings:2,feint:false,switch:false,arrows:true,hit:8,given:'word'}
+       :b<=60?{key:'mid',label:'Short lines',tell:800,swings:3,feint:true,switch:false,arrows:false,hit:11,given:'line'}
        :{key:'long',label:'Full sentences',tell:620,swings:4,feint:true,switch:true,arrows:false,hit:14,given:'line'};
 }
 
@@ -7206,7 +7223,7 @@ const GAME_PATTERNS={
 function gameState(){
   if(!S.bld||typeof S.bld!=='object')S.bld={b:1,f:1,cleared:{},wins:0,losses:0,locked:null,rides:{jet:0,heli:0,chute:0},streak:0,ups:0,upsTotal:0,boxer:1,glove:'red',spun:0};
   const g=S.bld;
-  g.b=Math.max(1,g.b|0);g.f=Math.min(GAME_TOP_FLOOR+1,Math.max(1,g.f|0));
+  g.b=Math.max(1,Math.min(GAME_LEVELS,g.b|0));g.f=Math.min(GAME_TOP_FLOOR+1,Math.max(1,g.f|0));
   g.cleared=g.cleared||{};g.rides=g.rides||{jet:0,heli:0,chute:0};
   g.ups=g.ups|0;g.upsTotal=g.upsTotal|0;g.spun=g.spun|0;
   if(!GAME_BOXERS.includes(g.boxer))g.boxer=1;if(!GAME_GLOVES.includes(g.glove))g.glove='red';
@@ -7263,6 +7280,8 @@ function gameLock(){
   const today=gameToday();
   gameState().locked={lessons:S.lessonsCompletedCount||0,lessonToday:!!(S.lessonDoneDates||{})[today],journals:(S.journals||[]).length,cravings:(S.cravings||[]).length,pledged:!!(S.pledged&&S.pledgeDate===today),day:today};
 }
+function gameWorkToday(){return gameLessonToday()||gameJournalToday()||gamePledgeToday()||
+  (S.cravings||[]).some(c=>{try{return new Date(c.ts).toDateString()===gameToday();}catch(e){return false;}});}
 function gameLockOpen(){
   const L=gameState().locked;if(!L)return true;
   const today=gameToday();
@@ -7296,9 +7315,9 @@ function gmMiniHide(){const m=gm('g2-mini');if(m)m.hidden=true;}
 function gmTop(){
   const g=gameState();
   const sub=gm('g2-sub'),ups=gm('g2-ups'),fl=gm('g2-floors');
-  if(sub)sub.textContent=`Building ${g.b} · ${gamePlace().name}`;
+  if(sub)sub.textContent=`Level ${g.b} of ${GAME_LEVELS} · ${gamePlace().name}`;
   if(ups)ups.textContent=g.ups;
-  if(fl)fl.innerHTML=Array.from({length:Math.min(12,g.b)},(_,i)=>`<i class="${i+1<g.b?'done':'here'}"></i>`).join('')+`<i class="roof here"></i>`;
+  if(fl)fl.innerHTML=Array.from({length:9},(_,i)=>`<i class="${(i+1)*10<g.b?'done':((i*10<g.b)?'here':'')}"></i>`).join('');
 }
 function gmBody(html){const b=gm('g2-body');if(b)b.innerHTML=html;}
 function gmSlam(t){const s=gm('g2');if(!s)return;const e=document.createElement('div');e.className='g2-slam';e.textContent=t;s.appendChild(e);setTimeout(()=>e.remove(),600);}
@@ -7607,11 +7626,11 @@ function gmGrunt(who,down){const k=who==='boss'?(down?'boss-down':'boss-hit-'+(1
 function gamePattern(){return GAME_PATTERNS[gameBossName()]||GAME_PATTERNS.default;}
 function renderRoofDoor(){
   const g=gameState(),T=gameTier(g.b),str=gameStrength(),boss=gameBossName();
-  const open=gameLockOpen();
+  const open=gameLockOpen()&&gameWorkToday();
   if(open&&g.locked){g.locked=null;save();}
   gmPhoto('boss',gameBossImg());gmMini('guard');
   const rows=str.parts.map(p=>`<div><span>${gmEsc(p.k)}</span><b>${p.v?'+'+p.v:'—'}</b>${p.hint?`<small>${gmEsc(p.hint)}</small>`:''}</div>`).join('');
-  gmBody(`<div class="g2-cat">Roof · Building ${g.b} · ${T.label}</div>
+  gmBody(`<div class="g2-cat">Level ${g.b} of ${GAME_LEVELS} · ${gamePlace().name} · ${T.label}</div>
     <h1 class="g2-h1">${gmEsc(boss)} is <em>waiting.</em></h1>
     <div class="g2-from" style="text-align:left">Its style: <em>${gmEsc(gamePattern().name)}</em> · it swings from one side, you go the other · swipe or use the arrows</div>
     <div class="g2-strength"><b>${str.total}</b><span>Strength · earned in the app</span></div>
@@ -7620,7 +7639,7 @@ function renderRoofDoor(){
       ?`<div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
         <div class="g2-pick g2-gloves" role="group" aria-label="Your gloves">${GAME_GLOVES.map(c=>`<button class="g2-gl ${c} ${g.glove===c?'on':''}" aria-pressed="${g.glove===c}" onclick="gameState().glove='${c}';save();renderRoofDoor()">${c[0].toUpperCase()+c.slice(1)}</button>`).join('')}</div>
         <button class="g2-big" onclick="startFight()">Ring the bell</button><div class="g2-note">Sound on. The bell, the ref and the announcer are in this one.</div>`
-      :`<div class="g2-locked">The door is locked. It opens the moment you do one real thing in the app: today’s lesson, a journal line, the pledge, or a craving logged.</div>
+      :`<div class="g2-locked">The door is locked. Every level opens the same way: do one real thing in the app today — today’s lesson, a journal line, the pledge, or a craving logged — and it opens.</div>
         <button class="g2-big" onclick="switchTo('lesson')">Do today’s lesson</button>
         <button class="g2-ghost" style="margin-top:8px" onclick="switchTo('journal');actBn('bn-tools')">Write one line</button>`}`);
 }
@@ -7628,8 +7647,11 @@ function renderRoofDoor(){
 // stays light; this hands it the person's own opponent, lines, boxer and gloves and
 // waits to hear how it ended. The photo fight it replaced is in git before this date.
 function game3dLines(){
-  const track=gameTrack(),T=gameTier(gameState().b),set=(GAME_BOSSES[track]||{})[T.key]||[];
-  return set.map(q=>({line:q.line,right:q.right,wrong:q.wrong}));
+  const track=gameTrack(),B=GAME_BOSSES[track]||{};
+  const out=[];
+  for(const k of ['short','mid','long'])for(const q of (B[k]||[]))out.push({line:q.line});
+  for(const line of (GAME_TEMPT[track]||GAME_TEMPT['Other']||[]))out.push({line:line});
+  const seen={};return out.filter(q=>q.line&&!seen[q.line]&&(seen[q.line]=1));
 }
 function game3dSupport(){
   const out=[];
@@ -7671,7 +7693,7 @@ function game3dWon(){
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
   <div class="g2-ride" aria-hidden="true">${ride.icon}</div><div class="g2-cat g2-center">${gmEsc(ride.name)}</div>
   <p class="g2-lead g2-center">${gmEsc(ride.line)} It ends the fight, not the war. It's already in the next building's elevator.</p>
-  <button class="g2-big" onclick="gameNextBuilding()">Building ${g.b+1}</button>`);
+  <button class="g2-big" onclick="gameNextBuilding()">${g.b>=GAME_LEVELS?'The last level':'Level '+(g.b+1)+' of '+GAME_LEVELS}</button>`);
   gmFight=null;gmBusy=false;
 }
 function game3dLost(draw){
@@ -7879,10 +7901,21 @@ async function gmKnockdown(){
   <div class="g2-voice"><small>${gmEsc(gameBossName())}</small>Down. Not out. Same time tomorrow.</div>
   <div class="g2-ride" aria-hidden="true">${ride.icon}</div><div class="g2-cat g2-center">${gmEsc(ride.name)}</div>
   <p class="g2-lead g2-center">${gmEsc(ride.line)} It ends the fight, not the war. It’s already in the next building’s elevator.</p>
-  <button class="g2-big" onclick="gameNextBuilding()">Building ${g.b+1}</button>`);
+  <button class="g2-big" onclick="gameNextBuilding()">${g.b>=GAME_LEVELS?'The last level':'Level '+(g.b+1)+' of '+GAME_LEVELS}</button>`);
   gmFight=null;gmBusy=false;
 }
-function gameNextBuilding(){const g=gameState();g.b++;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
+function gameNextBuilding(){const g=gameState();
+  if(g.b>=GAME_LEVELS)return renderNinety();
+  g.b++;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
+// Ninety levels, one for every day of the program. The game ends. The person does not.
+function renderNinety(){
+  const g=gameState();
+  gmBody(`<div class="g2-reveal up" style="font-size:2.6rem">Ninety</div>
+  <div class="g2-cat g2-center">Every level, every roof</div>
+  <p class="g2-lead g2-center">Ninety levels, one for every day of the program, and you did the work on each of them or the door would not have opened. It is still there tomorrow, and so are you. Walk it again whenever you want — it will not be the same fight.</p>
+  <button class="g2-big" onclick="gameRestartLevels()">Start again at level 1</button>`);
+}
+function gameRestartLevels(){const g=gameState();g.b=1;g.f=GAME_TOP_FLOOR+1;g.cleared={};g.locked=null;g.ups=0;g.used={};save();gmFight=null;gmBusy=false;renderTower();}
 function gmSaved(){
   const g=gameState();g.losses++;g.f=GAME_TOP_FLOOR+1;gameLock();save();
   gmBell(2);gmCrowdLevel(0);setTimeout(()=>gmSay('saved'),900);
@@ -14160,7 +14193,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='11.1';
+const APP_VERSION='12.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

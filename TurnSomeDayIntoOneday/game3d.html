@@ -105,6 +105,7 @@ function glowTex(){const c=document.createElement('canvas');c.width=c.height=256
 const auraTex=glowTex();const aura=new T.Sprite(new T.SpriteMaterial({map:auraTex,color:0xf2a93b,blending:T.AdditiveBlending,transparent:true,opacity:.85,depthWrite:false}));aura.scale.set(3.6,3.6,1);aura.position.set(0,1.25,-1.6);scene.add(aura);
 const floorGlow=new T.Mesh(new T.PlaneGeometry(3.2,3.2),new T.MeshBasicMaterial({map:auraTex,color:0xf2a93b,blending:T.AdditiveBlending,transparent:true,opacity:.35,depthWrite:false}));floorGlow.rotation.x=-Math.PI/2;floorGlow.position.set(0,.012,-0.7);scene.add(floorGlow);
 let PROPS=[];function clearProps(){for(const p of PROPS){if(p.parent)p.parent.remove(p);}PROPS=[];}
+function propsShow(v){for(const p of PROPS)p.visible=v;}
 function prop(kind,glow){const mat=(c,e)=>new T.MeshStandardMaterial({color:c,emissive:e||0x000000,emissiveIntensity:1.2,roughness:.4});
   if(kind==='glass'){const g=new T.Group();const glass=new T.Mesh(new T.CylinderGeometry(.05,.045,.11,18,1,true),new T.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.28,roughness:.05,metalness:0,side:T.DoubleSide}));glass.position.y=.055;const liquid=new T.Mesh(new T.CylinderGeometry(.043,.04,.045,18),mat(0xb8681a,glow));liquid.position.y=.024;const light=new T.PointLight(glow,2,1.2,2);light.position.y=.1;g.add(glass,liquid,light);g.position.set(-0.75,0,1.35);return [g];}
   if(kind==='chips'){const arr=[];for(let i=0;i<26;i++){const c=new T.Mesh(new T.CylinderGeometry(.045,.045,.01,14),mat([0xc8262a,0x1c1c22,0x2f5fd6,0xf0f0f0][i%4],i%3?0:glow));c.position.set(-1.4+Math.random()*2.6,.006,-0.2+Math.random()*1.9);c.rotation.y=Math.random()*3;arr.push(c);}return arr;}
@@ -123,14 +124,21 @@ const postM=new T.MeshStandardMaterial({color:0x22242c,roughness:.5,metalness:.4
 [[-2.6,-2.6,0xc8262a],[2.6,-2.6,0xf0f0f0],[-2.6,2.6,0x2f5fd6],[2.6,2.6,0xc8262a]].forEach(([x,z,c])=>{const p=new T.Mesh(new T.CylinderGeometry(.06,.06,1.5,12),postM);p.position.set(x,.75,z);scene.add(p);
   const pad=new T.Mesh(new T.CylinderGeometry(.13,.13,1.15,14),new T.MeshStandardMaterial({color:c,roughness:.75,emissive:c,emissiveIntensity:.18}));pad.position.set(x,.62,z);scene.add(pad);});
 // the seats: two rows a side behind the far ropes, monsters left in red light, people right in green
-const seatGeo=new T.BoxGeometry(.5,.42,.5),seatMat=new T.MeshStandardMaterial({color:0x14141a,roughness:1});const SEATPOS={L:[],R:[]};
-[['L',-1],['R',1]].forEach(([k,sgn])=>{for(let row=0;row<2;row++)for(let i=0;i<6;i++){const p=[-0.5+sgn*(1.05+i*0.62+(row%2)*0.28),row*0.5,-4.5-row*0.8];SEATPOS[k].push(p);const m=new T.Mesh(seatGeo,seatMat);m.position.set(p[0],p[1]+.21,p[2]);scene.add(m);}
-  const l=new T.PointLight(k==='L'?0xff3b30:0x2fd08a,12,7,1.5);l.position.set(-0.5+sgn*2.9,3.2,-4.9);scene.add(l);});
+const seatMat=new T.MeshStandardMaterial({color:0x101019,roughness:1});const SEATPOS={L:[],R:[]};
+[['L',-1],['R',1]].forEach(([k,sgn])=>{for(let row=0;row<2;row++){for(let i=0;i<6;i++){const p=[-0.5+sgn*(1.05+i*0.62+(row%2)*0.28),row*0.5,-4.5-row*0.8];SEATPOS[k].push(p);}
+    const step=new T.Mesh(new T.BoxGeometry(4.6,row*0.5+0.42,0.9),seatMat);step.position.set(-0.5+sgn*3.1,(row*0.5+0.42)/2,-4.5-row*0.8);scene.add(step);}
+  const l=new T.PointLight(k==='L'?0xff3b30:0x2fd08a,7,6.5,1.8);l.position.set(-0.5+sgn*2.9,3.4,-4.9);scene.add(l);});
 function crowdTick(dt){for(const s of SEATS)s.mixer.update(dt);}
 function crowdReact(k,mood){for(const s of SEATS){if(s.side!==k||Math.random()<.12)continue;const pick=mood==='cheer'?['cheering_while_sitting','sitting_clap','sitting_yell']:['sitting_disapproval','sitting_disbelief','sitting_yell'];s.play(pick[Math.floor(Math.random()*pick.length)]);}}
 function crowdChat(){for(const s of SEATS){if(Math.random()<.5)continue;s.play(Math.random()<.5?'sitting_talking':'sitting_laughing');}}
 function crowdJump(k,amt){if(amt>=.5){crowdReact(k,'cheer');crowdReact(k==='L'?'R':'L','boo');}}
-[0xd23a3a,0xf0f0f0,0x2f5fd6].forEach((c,i)=>{const y=.5+i*.4,m=new T.MeshStandardMaterial({color:c,roughness:.8});[[0,-2.6,0],[0,2.6,0],[-2.6,0,Math.PI/2],[2.6,0,Math.PI/2]].forEach(([x,z,ry])=>{const r=new T.Mesh(new T.CylinderGeometry(.03,.03,5.2,8),m);r.rotation.z=Math.PI/2;r.rotation.y=ry;r.position.set(x,y,z);scene.add(r);});});
+const ROPES={N:[],S:[],W:[],E:[]},ROPE_Y=[.5,.9,1.3];
+[0xd23a3a,0xf0f0f0,0x2f5fd6].forEach((c,i)=>{const y=ROPE_Y[i],m=new T.MeshStandardMaterial({color:c,roughness:.8});[[0,-2.6,0,'N'],[0,2.6,0,'S'],[-2.6,0,Math.PI/2,'W'],[2.6,0,Math.PI/2,'E']].forEach(([x,z,ry,side])=>{const r=new T.Mesh(new T.CylinderGeometry(.03,.03,5.2,8),m);r.rotation.z=Math.PI/2;r.rotation.y=ry;r.position.set(x,y,z);scene.add(r);ROPES[side].push(r);});});
+// somebody holds the ropes open so a fighter steps through them instead of walking through the ring
+const TWEENS=[];
+function tweenY(o,to,ms){for(let i=TWEENS.length-1;i>=0;i--)if(TWEENS[i].o===o)TWEENS.splice(i,1);TWEENS.push({o:o,from:o.position.y,to:to,t:0,ms:ms||400});}
+function tweenTick(dt){for(let i=TWEENS.length-1;i>=0;i--){const w=TWEENS[i];w.t+=dt*1000;const k=Math.min(1,w.t/w.ms),e=1-Math.pow(1-k,3);w.o.position.y=w.from+(w.to-w.from)*e;if(k>=1)TWEENS.splice(i,1);}}
+function partRopes(side,open,ms){const rs=ROPES[side]||[];const to=open?[.06,.14,1.74]:ROPE_Y;rs.forEach((r,i)=>tweenY(r,to[i],ms||450));}
 // the ref: Suzie from Mixamo, with her own idle, walk, count, talk, wave and hand raise baked in
 // (img/fight/ref.glb, made with tools/mixamo). She stands at ringside, walks
 // over when somebody is down, bends and counts. The photo referee stays in
@@ -189,7 +197,11 @@ function castFace(F,at){F.root.rotation.y=Math.atan2(at.x-F.root.position.x,at.z
 function cardTex(text,big){const c=document.createElement('canvas');c.width=256;c.height=340;const x=c.getContext('2d');x.fillStyle='#f4efe4';x.fillRect(0,0,256,340);x.strokeStyle='#c8262a';x.lineWidth=14;x.strokeRect(12,12,232,316);x.fillStyle='#141413';x.textAlign='center';if(big){x.font='bold 48px Impact,Arial';x.fillText('ROUND',128,120);x.font='bold 150px Impact,Arial';x.fillText(text,128,270);}else{x.font='bold 30px Arial';const words=text.split(' ');let line='',y=110;for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>210){x.fillText(line,128,y);line=w;y+=38;}else line=t;}x.fillText(line,128,y);}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
 function cloneSkinned(src){const sl=new Map(),cl=new Map();const c=src.clone();(function par(a,b){sl.set(b,a);cl.set(a,b);for(let i=0;i<a.children.length;i++)par(a.children[i],b.children[i]);})(src,c);c.traverse(n=>{if(!n.isSkinnedMesh)return;const sm=sl.get(n),ss=sm.skeleton;n.skeleton=ss.clone();n.bindMatrix.copy(sm.bindMatrix);n.skeleton.bones=ss.bones.map(b=>cl.get(b));n.bind(n.skeleton,n.bindMatrix);});return c;}
 function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CROWD_SIDE[k]){left++;loader.load(ART+'crowd/'+key+'.glb',g=>{const F=skinned(g.scene,null,MOVES,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;const sc=h>0.3?1.75/h:1;const clips=retarget(MOVES,F.root);
-    const idx=CROWD_SIDE[k].indexOf(key);SEATPOS[k].forEach((p,i)=>{if(i%CROWD_SIDE[k].length!==idx)return;const root=cloneSkinned(F.root);root.scale.setScalar(sc);root.position.set(p[0],p[1]+.42,p[2]+.05);root.rotation.y=0;root.traverse(o=>{if(o.isMesh)o.frustumCulled=false;});scene.add(root);
+    const idx=CROWD_SIDE[k].indexOf(key);SEATPOS[k].forEach((p,i)=>{if(i%CROWD_SIDE[k].length!==idx)return;const root=cloneSkinned(F.root);root.scale.setScalar(sc*(0.93+Math.random()*0.14));root.position.set(p[0]+(Math.random()-.5)*.16,p[1]+.42,p[2]+.05+(Math.random()-.5)*.12);
+      root.rotation.y=Math.atan2(-p[0],-p[2])*0.7+(Math.random()-.5)*0.35;
+      root.traverse(o=>{if(!o.isMesh)return;o.frustumCulled=false;/* a crowd sits in the dark, it is not lit like the ring */
+        o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();const ms=Array.isArray(o.material)?o.material:[o.material];
+        for(const m of ms){if(m.color)m.color.multiplyScalar(0.52);if('roughness' in m)m.roughness=Math.min(1,(m.roughness||.7)+.25);if('metalness' in m)m.metalness=0;}});scene.add(root);
       const mixer=new T.AnimationMixer(root),acts={};clips.forEach(c=>{acts[c.name]=mixer.clipAction(c);});const seat={side:k,root,mixer,acts,cur:null};
       seat.play=(n)=>{const a=acts[n];if(!a||(seat.cur===a&&n!=='sitting_idle'))return;const prev=seat.cur;a.reset();a.setLoop(n==='sitting_idle'?T.LoopRepeat:T.LoopOnce,Infinity);a.clampWhenFinished=false;a.timeScale=0.9+Math.random()*0.25;if(prev&&prev!==a)prev.crossFadeTo(a,.3,false);a.play();seat.cur=a;};
       mixer.addEventListener('finished',()=>seat.play('sitting_idle'));seat.play('sitting_idle');if(acts.sitting_idle)acts.sitting_idle.time=Math.random()*3;SEATS.push(seat);});
@@ -217,7 +229,7 @@ loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){
   REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;
   loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-2.0,0,-2.2);F.root.position.copy(F.home);F.root.rotation.y=.5;ready();});
   [['trainer',-2.1,1.3,.9],['cutman',-2.5,0.7,1.1],['clown',1.7,-2.4,-.6],['wrestler',2.3,-2.0,-.9]].forEach(([k,x,z,ry])=>loadCast(k,F=>{CORNER[k]=F;F.home=new T.Vector3(x,0,z);F.root.position.copy(F.home);F.root.rotation.y=ry;ready();}));
-  loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(2.1,0,-1.4);F.root.position.copy(F.home);F.root.rotation.y=-1.2;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
+  loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(-2.45,0,-0.3);F.root.position.copy(F.home);F.root.rotation.y=1.45;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
   ready();},undefined,e=>console.error(e));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 // a punch steps in: the body moves along its facing by `dist` over `ms`, holds, then comes back
@@ -348,21 +360,25 @@ let followWho=null;
 function follow(F,color,power){followWho=F;walkSpot.color.set(color||0xffffff);walkSpot.intensity=power||120;}
 function followOff(){followWho=null;walkSpot.intensity=0;}
 async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;
+  // an empty ring: both fighters are still outside it, and the addiction does not exist yet
+  YOU.root.visible=false;BOSS.root.visible=false;aura.visible=false;floorGlow.visible=false;rim.intensity=0;propsShow(false);
   // yours
-  spot.intensity=34;crowdOn(.62);aisleOn(-0.4,9.9,2.2,0x6fa8ff);YOU.root.position.set(-0.4,0,9.4);T2.root.position.set(-1.15,0,10.7);C2.root.position.set(-1.9,0,11.2);camWalk(YOU,'front',0);
+  spot.intensity=34;crowdOn(.62);aisleOn(-0.4,9.9,2.2,0x6fa8ff);YOU.root.position.set(-0.4,0,9.4);YOU.root.visible=true;T2.root.position.set(-1.15,0,10.7);C2.root.position.set(-1.9,0,11.2);camWalk(YOU,'front',0);
   follow(YOU,0xdff0ff,150);say('Making his way to the ring…','Announcer');roar();chant('R',SUPPORT);await wait(1600);
   say('From the roof of '+PLACES[place].name.replace('The ','the ')+'.','Announcer');camWalk(YOU,'back',900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,5.2),0.72),castWalk(T2,new T.Vector3(-1.15,0,6.6),0.72),castWalk(C2,new T.Vector3(-1.9,0,7.1),0.72)]);
   roar();say('In the blue corner: '+YOUNAME+'.','Announcer');await wait(1900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
-  await fighterWalk(YOU,CORNERPOS.you,0.95,new T.Vector3(0,0,0));castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
+  await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(620);
+  await fighterWalk(YOU,CORNERPOS.you,0.75,new T.Vector3(0,0,0));partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
-  followOff();const a=ADD();aisleOff();aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
+  followOff();const a=ADD();aisleOff();aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And his opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-1.35,0,-6.8),0.66),castWalk(W,new T.Vector3(-2.1,0,-7.3),0.66)]);
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
-  await fighterWalk(BOSS,CORNERPOS.boss,0.9,new T.Vector3(0,0,0));castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
+  await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(620);
+  await fighterWalk(BOSS,CORNERPOS.boss,0.7,new T.Vector3(0,0,0));partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(cam.position);
@@ -522,8 +538,8 @@ const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vecto
 let walkCam=null;
 const runnerMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
 const runner=new T.Mesh(new T.PlaneGeometry(1.8,9),runnerMat);runner.rotation.x=-Math.PI/2;runner.position.set(-0.5,.014,0);runner.visible=false;scene.add(runner);
-const runnerLights=[];for(let i=0;i<4;i++){const l=new T.PointLight(0xffffff,0,7,2);l.position.set(-.5,1.7,0);l.visible=false;scene.add(l);runnerLights.push(l);}
-function aisleOn(x,z0,z1,color){runner.position.set(x,.014,(z0+z1)/2);runner.scale.set(1,Math.abs(z1-z0)/9,1);runnerMat.color.set(color);runner.visible=true;runnerLights.forEach((l,i)=>{l.color.set(color);l.intensity=10;l.visible=true;l.position.set(x,1.7,z0+(z1-z0)*(i+.5)/4);});}
+const runnerLights=[];for(let i=0;i<4;i++){const l=new T.PointLight(0xffffff,0,4.6,2);l.position.set(-.5,1.7,0);l.visible=false;scene.add(l);runnerLights.push(l);}
+function aisleOn(x,z0,z1,color){runner.position.set(x,.014,(z0+z1)/2);runner.scale.set(1,Math.abs(z1-z0)/9,1);runnerMat.color.set(color);runner.visible=true;runnerLights.forEach((l,i)=>{l.color.set(color);l.intensity=8;l.visible=true;l.position.set(x,1.7,z0+(z1-z0)*(i+.5)/4);});}
 function aisleOff(){runner.visible=false;runnerLights.forEach(l=>{l.visible=false;l.intensity=0;});}
 function walkPos(){if(!walkCam)return camBase.clone();const p=walkCam.F.root.position,s=walkCam.s,sway=Math.sin(performance.now()/1500);
   if(walkCam.mode==='front')return new T.Vector3(p.x+sway*0.55,1.46+Math.sin(performance.now()/2100)*.07,p.z-s*2.4);
@@ -533,6 +549,8 @@ function walkLook(){if(!walkCam)return LOOK.clone();const p=walkCam.F.root.posit
   return new T.Vector3(p.x-s*0.08,1.32,p.z-s*1.7);}
 function camWalk(F,mode,ms){walkCam={F:F,mode:mode,s:Math.sign(F.root.position.z)||1};SHOTS.walk={pos:walkPos,look:walkLook};shot('walk',ms||0);}
 function camWalkOff(){walkCam=null;}
+// stepping through the ropes gets its own camera, stood inside the ring where nobody can cross it
+function entryShot(side,ms){SHOTS.entry=side==='N'?{pos:()=>new T.Vector3(0.15,1.4,0.5),look:()=>new T.Vector3(1.15,1.05,-2.35)}:{pos:()=>new T.Vector3(0.05,1.4,-0.4),look:()=>new T.Vector3(-1.35,1.05,2.35)};camWalkOff();shot('entry',ms||700);}
 let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1;
 function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre();if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
 function camTick(dt){if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
@@ -546,7 +564,7 @@ setInterval(()=>{if(!running||downState||performance.now()<manualUntil)return;if
 $('cam').onclick=()=>{const order=['tv','shoulder','low','crowd'];shot(order[(order.indexOf(curShot)+1)%order.length],400);manualUntil=performance.now()+15000;};
 function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
-  sparkTick(dt0);trailTick(dt0);if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
+  sparkTick(dt0);trailTick(dt0);tweenTick(dt0);if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible&&cardHand){const h=new T.Vector3();cardHand.getWorldPosition(h);const toCam=cam.position.clone().sub(h).setY(0).normalize();card.position.copy(h).add(new T.Vector3(0,0.22,0)).addScaledVector(toCam,0.16);card.lookAt(cam.position);}crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
   camDrift(dt0);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(orbit(cam.position,_l));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}

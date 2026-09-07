@@ -855,3 +855,30 @@ three angles, the centre-ring introductions, and the round itself. The full
 screen class was measured on a 820×900 window — 430×768 before, 820×900 after.
 The signed-in app on the live site was not tested from here; the container
 cannot reach turnsomedayintodayone.com.
+
+## 7 Sep 2026 — an empty ring, and stepping through the ropes (11.0)
+
+- **The addiction is no longer waiting in the ring.** Both fighters, the
+  addiction's glow, its floor light and its prop are hidden at the top of
+  `ringWalks()`. Only the announcer, the referee and the ring girl are in there
+  when the show starts. You appear at the head of your aisle when your walk
+  begins; the addiction does not exist until the announcer says "and his
+  opponent".
+- **Nobody walks through the ring any more.** The ropes are kept per side
+  (`ROPES.N/S/E/W`) and `partRopes(side,open)` drops the bottom two and lifts
+  the top one while a fighter steps through, then puts them back. Each fighter
+  stops at the ring edge, the ropes part, and a camera stood inside the ring
+  (`entryShot`) watches them come in — no crowd or corner man can cross that
+  shot.
+- **The crowd reads as a crowd.** One long dark riser a side instead of a crate
+  under every body, every body a slightly different size, angle and place,
+  materials darkened so they sit in shadow instead of being lit like the ring,
+  and the coloured house lights and aisle lights turned down so the front row
+  is not blown out.
+- The ring girl stood in the red corner, which put her in the middle of the
+  addiction's entrance and beside the main TV camera. She now stands on the far
+  side, clear of both corners.
+
+Checked in headless Chromium at 390×844: the empty ring during your walk, you
+stepping through the near ropes, the addiction's walk-in, it stepping through
+the far ropes, and the centre-ring introductions.

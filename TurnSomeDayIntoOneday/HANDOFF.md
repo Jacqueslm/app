@@ -1079,3 +1079,36 @@ back down — the feet clear the bottom rope instead of passing through it.
 Honest limit: this lifts the whole body, it is not a leg animation. None of the
 forty Mixamo clips is a climb-through. A real one — hand on the top rope, one
 leg over, head under — needs a clip from Mixamo or a pass in Blender.
+
+## 7 Sep 2026 — the card looks like a card (14.0)
+
+From three reference photos: hard shafts of light in the dark, the spray off a
+clean shot, a fighter slumped after a knockdown.
+
+- **The entry.** Three hard shafts of light over the ring (`shaftsOn`/`shaftsOff`,
+  additive cones that breathe), white for your walk and the addiction's own
+  colour for its walk, over the dimmed house.
+- **A gate in the ropes.** `partRopes` now drops the bottom rope flat to the
+  canvas (0.04) and lifts the other two to 1.58 and 2.02, so there is a real
+  doorway. They walk through nearly upright and it shuts behind them.
+- **Hits.** An expanding ring of force at the point of impact (`impactRing`), a
+  burst of sweat off the head (`sweat`, droplets with gravity that die on the
+  canvas), and the camera itself takes the punch — `camKick` shoves it along the
+  line of the shot for 170 ms. Longer hit-stop on the ones that land clean.
+- **Knockdowns.** Longer slow motion, a hard freeze, the camera rolls, and the
+  house drops to almost nothing with a single hard spot on whoever is down
+  (`koLights`).
+- **Getting up is not clean.** After the count they come up on the `getting_up`
+  clip and then `stagger()` — a wobble left and right that settles over about a
+  second and a half before the guard comes back.
+- **Sweat and breath through the round.** Under 42 health they drip and you hear
+  them breathing; under 22 it is heavier and faster. The breath is synthesised
+  noise through a bandpass, so there is no file to license.
+- **The referee stops it.** Not only three knockdowns: if somebody has already
+  been down and gets caught again below 9 health, the referee steps in, says
+  "That is enough. It is over," and it is a TKO.
+- **Seven gloves** instead of three: red, blue, white, black, gold, green, pink.
+
+Checked in headless Chromium: the gate opens to 0.04/2.02 on the entry; eleven
+sweat droplets in the air with both fighters tired; the referee stopping a fight
+returns `tko`; the knockdown lights come back up afterwards. No page errors.

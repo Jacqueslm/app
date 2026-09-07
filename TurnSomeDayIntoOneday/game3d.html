@@ -505,11 +505,31 @@ let MOVES=null,fighterN=3;
 const CROWD_SIDE={L:['c18','c2','c5'],R:['c3','c0','c17']};const SEATS=[];
 let ANN=null,GIRL=null,REFCLIPS=null,card=null,cardHand=null,cardFront=true;const CORNER={};let cornerUsed={};
 function retarget(clips,root){const bones=new Set();let hips='';root.traverse(o=>{if(!o.isSkinnedMesh)return;o.skeleton.bones.forEach(b=>{if(!b.userData.sk){b.userData.sk=true;b.name=b.name+'_b';}bones.add(b.name);if(/Hips_b$/.test(b.name)&&!hips)hips=b.name;});});const prefix=hips.replace(/Hips_b$/,'');return clips.map(c=>{const tracks=c.tracks.map(t=>{const i=t.name.lastIndexOf('.'),bone=t.name.slice(0,i),prop=t.name.slice(i+1),nb=bone.replace(/_\d+$/,'').replace(/^mixamorig\d*/,prefix)+'_b';if(!bones.has(nb))return null;return new t.constructor(nb+'.'+prop,t.times,t.values);}).filter(Boolean);return new T.AnimationClip(c.name,c.duration,tracks);});}
+// standing on the canvas: a body is grounded off its own feet, sampled across a turn of the idle
+// so the planted foot lands on the floor. The shift goes on the model inside the root, so every
+// place that puts a fighter at y=0 stays right.
+function groundFeet(F){
+  if(!F||!F.root||F.grounded)return;
+  const bones=[];F.root.traverse(o=>{if(o.isBone&&/Toe|Foot($|_)/i.test(o.name))bones.push(o);});
+  if(!bones.length)return;
+  const y0=F.root.position.y;F.root.position.y=0;
+  let lo=1e9;const v=new T.Vector3();
+  for(let i=0;i<=14;i++){
+    if(F.mixer)F.mixer.update(i?0.07:0.001);
+    F.root.updateMatrixWorld(true);
+    for(const b of bones){b.getWorldPosition(v);if(v.y<lo)lo=v.y;}
+  }
+  F.root.position.y=y0;
+  if(!isFinite(lo)||Math.abs(lo)<0.012){F.grounded=true;return;}
+  for(const c of F.root.children)c.position.y-=lo;
+  F.root.updateMatrixWorld(true);F.grounded=true;
+}
 function skinned(root,tex,clips,gloveColor,noGloves){const gloves=[];
   // every fighter stands the same height in the ring, whatever size they were drawn
   root.updateMatrixWorld(true);const h=new T.Box3().setFromObject(root).getSize(new T.Vector3()).y;if(h>0.2)root.scale.multiplyScalar(1.8/h);
-  // and stands ON the canvas: these bodies do not all have their feet at their own origin
-  if(!noGloves){root.updateMatrixWorld(true);const low=new T.Box3().setFromObject(root).min.y;if(isFinite(low))root.position.y-=low;}const tl=new T.TextureLoader();const imgs={};for(const k in (tex&&tex.images)||{}){const t=tl.load(tex.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}
+  // (a mesh box cannot ground a skinned body — it measures the rest pose, not the pose it stands in.
+  //  groundFeet below does it properly, off the foot bones while the idle is running.)
+  const tl=new T.TextureLoader();const imgs={};for(const k in (tex&&tex.images)||{}){const t=tl.load(tex.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material,k=tex&&tex.by[o.name];if(k&&imgs[k]){m.map=imgs[k];m.color.set(0xffffff);m.emissiveMap=imgs[k];m.emissive.set(0xffffff);m.emissiveIntensity=.4;m.roughness=.85;m.metalness=0;m.needsUpdate=true;}}});
   const mixer=new T.AnimationMixer(root),acts={};retarget(clips,root).forEach(c=>{acts[c.name]=mixer.clipAction(c);});
   root.updateMatrixWorld(true);if(!noGloves)root.traverse(o=>{if(o.isBone&&/(Left|Right)Hand_b$/.test(o.name))gloves.push(fitGlove(o,gloveColor));});
@@ -543,7 +563,7 @@ async function toCorners(){stools.you.visible=stools.boss.visible=true;await Pro
   for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}}
 async function toMarks(){for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;F.idle();}stools.you.visible=stools.boss.visible=false;await Promise.all([fighterWalk(YOU,MARK.you,1.5),fighterWalk(BOSS,MARK.boss,1.5)]);youHome.copy(YOU.root.position);YOU.home=null;BOSS.home=null;faceOff();}
 function loadCast(key,cb){loader.load(ART+key+'.glb',g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
-function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
+function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);/* measured before the feet are grounded: after it, this box hangs below the floor */const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;groundFeet(YOU);camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
 function loadOne(cb){loader.load(ART+'fighter.glb',g=>cb(g),undefined,e=>console.error(e));}
@@ -552,7 +572,7 @@ function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotat
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7a13a,green:0x2f9e5c,pink:0xe0559a};
 const FIGHTER_GLOVE={1:'red',2:'blue',3:'black',4:'gold',5:'green'};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery'][(Math.max(1,building)-1)%3]);loadRing();loadJump();$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
+function ready(){if(++loaded<10)return;tellParent({type:'ready'});groundFeet(BOSS);groundFeet(YOU);giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery'][(Math.max(1,building)-1)%3]);loadRing();loadJump();$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);

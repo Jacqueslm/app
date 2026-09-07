@@ -326,6 +326,26 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   with her (`girl`, `girlclose`), she holds it up, then the fighters take their
   marks, then the bell. The card rides above her hand in world space facing
   the camera, so her fingers never cover the number.
+- **A real battle (10.8).** Nine more Mixamo moves from him (Boxing, Punching,
+  Combo Punch, Big Hit To Head, Head Hit, Side Hit, Getting Hit Backwards,
+  Stunned, **Sitting Drinking**) baked into `fighter.glb` (40 clips) and
+  **added onto all five fighters** with `tools/mixamo/topup.*` — a glb-to-glb
+  top-up, because the original character FBX files had been cleared for disk.
+  Every fighter now has 40 (41 with the ref's walk).
+  - **He sits properly at last.** The seated clip already puts the feet on the
+    canvas with the hips at 0.545 m, so the root belongs at y=0, not 0.42 —
+    that is why he was perched on the top rope. Stool is 0.50 m, top at 0.50.
+  - **Rounds are 30 seconds** (`?secs=` still overrides).
+  - **The addiction blocks**: 12% rising to 34% by the late rounds; a blocked
+    punch does about a fifth and feeds its meter. It also throws far more
+    (gap 1.5 s down to 0.62 s) and doubles up about half the time, and it uses
+    the new punches and reactions; it plays `stunned` when it is hurt.
+  - **The referee faces whoever is down and counts out loud**, one to ten, with
+    "Are you alright? Come on." at eight.
+  - **The entrances are grander and slower**: they start 9-11 m out, walk at
+    0.66-0.8 m/s with two stops and two roars, and a **follow-spot tracks each
+    fighter** up the aisle (the ring light does not reach out there) — white
+    for the person, the addiction's own colour for it.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

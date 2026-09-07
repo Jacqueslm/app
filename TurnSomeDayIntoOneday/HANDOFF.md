@@ -1368,3 +1368,27 @@ Two fixes, both in `game3d.html` and mirrored in the preview:
 
 Measured after: feet 554–608 against a panel at 599–710, head 127–169, every
 fighter, every screen size. No page errors.
+
+## 7 Sep 2026 — the preview gets the battle moves (15.3)
+
+The standalone preview was running on 31 clips while the app runs on 41, so the
+punches and the hits it showed were the plain set. The seven the fight code
+actually calls — `punching`, `combo_punch`, `big_head_hit`, `head_hit2`,
+`side_hit`, `hit_back`, `stunned` — now ride in the same way the climb did:
+`tools/mixamo/movesonly.html` opens `img/fight/fighter.glb`, takes every mesh
+off it, keeps those clips, drops the finger and scale tracks and halves the
+keyframes on anything over 1.6 s, and exports the skeleton with the moves
+attached. 260 KB, embedded as `MOVES7` and merged into the shared set before a
+single body is built. The preview is on 38 clips now; the three it does not
+carry (`boxing_idle`, `climb_down`, `sitting_drinking`) are not called there.
+
+To make the room, the thirteen ring photos and the place backdrops were
+re-encoded at 1024 px wide, quality 58, progressive: 1,155 KB down to 963 KB.
+The file lands at 15.83 MiB, under the artifact's 16 MiB ceiling.
+
+`tools/mixamo/three/` is the three.js source package the workshop pages import.
+It comes from `npm pack three@0.170.0` and is gitignored — pull it back with
+`npm pack three@0.170.0 && tar xzf three-0.170.0.tgz -C tools/mixamo/three`.
+
+Verified in headless Chromium: 38 clips, all seven present on both fighters,
+no page errors.

@@ -291,8 +291,8 @@ if Sph == -1 and not na(h2) and not na(l2) and h1 > h2 and l1 > l2 and close < l
 // ─── what it is watching, on screen ──────────────────────────────────────────
 var table dash = table.new(position.bottom_left, 2, 4, bgcolor = color.new(#0e1116, 10),
      frame_color = color.new(color.gray, 60), frame_width = 1)
+stTxt(int p, bool t) => p == 0 ? "broke — running" : p == 1 ? (t ? "in the zone" : "coming back") : "watching"
 if barstate.islast
-    stTxt(int p, bool t) => p == 0 ? "broke — running" : p == 1 ? (t ? "in the zone" : "coming back") : "watching"
     table.cell(dash, 0, 0, "MSB FAST", text_color = color.white, bgcolor = #3b82f6, text_size = size.small)
     table.cell(dash, 1, 0, timeframe.period, text_color = color.white, bgcolor = #3b82f6, text_size = size.small)
     table.cell(dash, 0, 1, "Long", text_color = color.gray, text_size = size.small)

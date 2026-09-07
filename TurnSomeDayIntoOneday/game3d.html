@@ -335,9 +335,10 @@ const ROPES={N:[],S:[],W:[],E:[]},ROPE_Y=[.5,.9,1.3];
 [0xd23a3a,0xf0f0f0,0x2f5fd6].forEach((c,i)=>{const y=ROPE_Y[i],m=new T.MeshStandardMaterial({color:c,roughness:.8});[[0,-2.6,0,'N'],[0,2.6,0,'S'],[-2.6,0,Math.PI/2,'W'],[2.6,0,Math.PI/2,'E']].forEach(([x,z,ry,side])=>{const r=new T.Mesh(new T.CylinderGeometry(.03,.03,5.2,8),m);r.rotation.z=Math.PI/2;r.rotation.y=ry;r.position.set(x,y,z);scene.add(r);ROPES[side].push(r);});});
 // somebody holds the ropes open so a fighter steps through them instead of walking through the ring
 const TWEENS=[];
+function tweenRX(o,to,ms){for(let i=TWEENS.length-1;i>=0;i--)if(TWEENS[i].o===o&&TWEENS[i].rx)TWEENS.splice(i,1);TWEENS.push({o:o,rx:true,from:o.rotation.x,to:to,t:0,ms:ms||300});}
 function tweenY(o,to,ms){for(let i=TWEENS.length-1;i>=0;i--)if(TWEENS[i].o===o)TWEENS.splice(i,1);TWEENS.push({o:o,from:o.position.y,to:to,t:0,ms:ms||400});}
-function tweenTick(dt){for(let i=TWEENS.length-1;i>=0;i--){const w=TWEENS[i];w.t+=dt*1000;const k=Math.min(1,w.t/w.ms),e=1-Math.pow(1-k,3);w.o.position.y=w.from+(w.to-w.from)*e;if(k>=1)TWEENS.splice(i,1);}}
-function partRopes(side,open,ms){const rs=ROPES[side]||[];const to=open?[.06,.14,1.74]:ROPE_Y;rs.forEach((r,i)=>tweenY(r,to[i],ms||450));}
+function tweenTick(dt){for(let i=TWEENS.length-1;i>=0;i--){const w=TWEENS[i];w.t+=dt*1000;const k=Math.min(1,w.t/w.ms),e=1-Math.pow(1-k,3);const v=w.from+(w.to-w.from)*e;if(w.rx)w.o.rotation.x=v;else w.o.position.y=v;if(k>=1)TWEENS.splice(i,1);}}
+function partRopes(side,open,ms){const rs=ROPES[side]||[];const to=open?[.5,1.44,1.88]:ROPE_Y;rs.forEach((r,i)=>tweenY(r,to[i],ms||450));}
 // the ref: Suzie from Mixamo, with her own idle, walk, count, talk, wave and hand raise baked in
 // (img/fight/ref.glb, made with tools/mixamo). She stands at ringside, walks
 // over when somebody is down, bends and counts. The photo referee stays in
@@ -347,9 +348,10 @@ const refSh=new T.Mesh(new T.CircleGeometry(.28,24),new T.MeshBasicMaterial({col
 let REF=null;
 function refPlay(n,o={}){if(!REF)return;const a=REF.acts[n];if(!a)return;const prev=REF.cur;a.reset();a.setLoop(o.loop?T.LoopRepeat:T.LoopOnce,Infinity);a.clampWhenFinished=!o.loop;a.timeScale=o.speed||1;if(prev&&prev!==a)prev.crossFadeTo(a,o.fade??.2,false);a.play();REF.cur=a;return a;}
 function refIdle(){refPlay('idle',{loop:true,fade:.3});}
+let refLock=0;
 function refFace(target){const dx=target.x-ref.position.x,dz=target.z-ref.position.z;ref.rotation.y=Math.atan2(dx,dz);}
 // her walk clip covers 1.69 m a second at full speed; she walks at 1.35, so the clip runs at 0.8 and the floor moves under her feet at the same rate
-function refWalk(to){return new Promise(res=>{refFace(to);const from=ref.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/1.35*1000);refPlay('walking',{loop:true,fade:.15,speed:.8});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);ref.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{refIdle();res();}})();});}
+function refWalk(to){return new Promise(res=>{refFace(to);const from=ref.position.clone(),dist=from.distanceTo(to),ms=Math.max(300,dist/1.35*1000);refLock=performance.now()+ms+400;refPlay('walking',{loop:true,fade:.15,speed:.8});const t0=performance.now();(function step(){const t=Math.min(1,(performance.now()-t0)/ms);ref.position.lerpVectors(from,to,t);if(t<1)requestAnimationFrame(step);else{refIdle();res();}})();});}
 // her count clip, measured: she bends by 0.5 s, points for one at 2.4 s and every 0.87 s after, ten at 10.2 s, straight again by 13 s
 async function refCount(upto,over){refFace(over);const t0=performance.now();refPlay('counting',{fade:.2});
   const words=['One.','Two.','Three.','Four.','Five.','Six.','Seven.','Eight.','Nine.','Ten.'];
@@ -427,9 +429,9 @@ function ready(){if(++loaded<10)return;tellParent({type:'ready'});giveWalk(BOSS,
 loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
   REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;
-  loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-2.0,0,-2.2);F.root.position.copy(F.home);F.root.rotation.y=.5;ready();});
-  [['trainer',-2.1,1.3,.9],['cutman',-2.5,0.7,1.1],['clown',1.7,-2.4,-.6],['wrestler',2.3,-2.0,-.9]].forEach(([k,x,z,ry])=>loadCast(k,F=>{CORNER[k]=F;F.home=new T.Vector3(x,0,z);F.root.position.copy(F.home);F.root.rotation.y=ry;ready();}));
-  loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(-2.45,0,-0.3);F.root.position.copy(F.home);F.root.rotation.y=1.45;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
+  loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-3.5,0,-1.5);F.root.position.copy(F.home);F.root.rotation.y=1.17;ready();});
+  [['trainer',-3.0,3.0,2.36],['cutman',-3.8,2.4,2.13],['clown',3.0,-3.0,-0.79],['wrestler',3.8,-2.4,-1.01]].forEach(([k,x,z,ry])=>loadCast(k,F=>{CORNER[k]=F;F.home=new T.Vector3(x,0,z);F.root.position.copy(F.home);F.root.rotation.y=ry;ready();}));
+  loadCast('ringgirl',F=>{GIRL=F;F.home=new T.Vector3(1.6,0,3.4);F.root.position.copy(F.home);F.root.rotation.y=-2.7;let hand=null;F.root.traverse(o=>{if(o.isBone&&/RightHand_b$/.test(o.name))hand=o;});if(hand){cardHand=hand;card=new T.Mesh(new T.PlaneGeometry(.30,.40),new T.MeshBasicMaterial({map:cardTex('1',true),side:T.DoubleSide,toneMapped:false,depthTest:false}));card.renderOrder=10;card.visible=false;scene.add(card);}ready();});
   ready();},undefined,e=>console.error(e));
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 // a punch steps in: the body moves along its facing by `dist` over `ms`, holds, then comes back
@@ -547,12 +549,13 @@ async function walkTheCard(n){if(!GIRL||!card)return;card.material.map=cardTex(S
   SHOTS.girl={pos:()=>new T.Vector3(1.75,1.5,2.05),look:()=>GIRL.root.position.clone().setY(1.15)};
   SHOTS.girlclose={pos:()=>new T.Vector3(0.95,1.6,1.75),look:()=>GIRL.root.position.clone().setY(1.55)};
   say('Round '+n+'.','Ring card');
-  await castWalk(GIRL,new T.Vector3(1.75,0,-0.5),1.1);shot('girl',700);
-  await castWalk(GIRL,MARKG,0.85);castFace(GIRL,SHOTS.girlclose.pos());
-  const a=GIRL.play('hand_raising',{fade:.2});await wait(1300);if(a)a.paused=true;card.visible=true;
-  shot('girlclose',900);holdCam(3400);await wait(3400);
-  card.visible=false;if(a)a.paused=false;GIRL.idle();shot('girl',600);
-  await castWalk(GIRL,new T.Vector3(-1.7,0,-1.1),1.1);castWalk(GIRL,GIRL.home,1.7);}
+  // she carries the card in, holds it up in the middle, and goes back out. No laps.
+  card.visible=true;shot('girl',600);partRopes('S',true,400);
+  await castWalk(GIRL,MARKG,1.0);castFace(GIRL,SHOTS.girlclose.pos());
+  const a=GIRL.play('hand_raising',{fade:.2});await wait(900);if(a)a.paused=true;
+  shot('girlclose',900);holdCam(3000);await wait(3000);
+  if(a)a.paused=false;GIRL.idle();shot('girl',600);
+  await castWalk(GIRL,GIRL.home,1.5);card.visible=false;partRopes('S',false,450);}
 // the ring walks: you from the near aisle with your corner behind you and the house up; it from the far aisle in its own light with its two behind it
 function roar(){snd('cheer');swell();crowdReact('R','cheer');crowdReact('L','cheer');}
 function boo(){crowdReact('R','boo');crowdReact('L','cheer');swell();}
@@ -570,16 +573,20 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,5.2),0.72),castWalk(T2,new T.Vector3(-1.15,0,6.6),0.72),castWalk(C2,new T.Vector3(-1.9,0,7.1),0.72)]);
   roar();say('In the blue corner: '+YOUNAME+'.','Announcer');await wait(1900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
-  await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(620);
-  await fighterWalk(YOU,CORNERPOS.you,0.75,new T.Vector3(0,0,0));partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
+  await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(560);
+  tweenRX(YOU.root,0.46,300);
+  await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
+  tweenRX(YOU.root,0,320);partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
   followOff();const a=ADD();aisleOff();aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And his opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-5.4),0.66),castWalk(K,new T.Vector3(-1.35,0,-6.8),0.66),castWalk(W,new T.Vector3(-2.1,0,-7.3),0.66)]);
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
-  await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(620);
-  await fighterWalk(BOSS,CORNERPOS.boss,0.7,new T.Vector3(0,0,0));partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
+  await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(560);
+  tweenRX(BOSS.root,0.46,300);
+  await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0));
+  tweenRX(BOSS.root,0,320);partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(cam.position);
@@ -802,6 +809,10 @@ $('cam').onclick=()=>{const order=['tv','shoulder','low','crowd'];shot(order[(or
 function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
   sparkTick(dt0);trailTick(dt0);tweenTick(dt0);elemTick(dt0);if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
+  if(REF&&running&&!downState&&performance.now()>refLock&&YOU&&BOSS){
+    const m=YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5);
+    const want=Math.atan2(m.x-ref.position.x,m.z-ref.position.z);let d=want-ref.rotation.y;
+    while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;ref.rotation.y+=d*Math.min(1,dt0*2.2);}
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible&&cardHand){const h=new T.Vector3();cardHand.getWorldPosition(h);const toCam=cam.position.clone().sub(h).setY(0).normalize();card.position.copy(h).add(new T.Vector3(0,0.22,0)).addScaledVector(toCam,0.16);card.lookAt(cam.position);}crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
   camDrift(dt0);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(orbit(cam.position,_l));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}

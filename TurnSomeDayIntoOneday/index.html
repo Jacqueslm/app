@@ -6819,7 +6819,7 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 
 const GAME_FLOORS=10;                   // ten floors, then the roof
 // Every floor carries an element you can see in the ring. The fight page draws it.
-const GAME_ELEMENTS=['Rain','Fire','Wind','Earth','Ash','Ice','Smoke','Lightning','Sand','Shadow'];
+const GAME_ELEMENTS=['Rain','Fire','Wind','Earth','Ash','Ice','Smoke','Lightning','Sand','Shadow','Rust','Void','Metal'];
 // One building per addiction, each its own kind of place. Anybody can walk into
 // any of them - only the lessons follow the person's own track.
 const GAME_BUILDINGS=[
@@ -6840,7 +6840,8 @@ function gameBuilding(){const g=gameState();return GAME_BUILDINGS[(g.b-1)%GAME_B
 function gameLap(){return Math.floor((gameState().b-1)/GAME_BUILDINGS.length)+1;}
 // one continuous climb: every floor of every building is a step, forever
 function gameStep(){const g=gameState();return (g.b-1)*11+Math.min(11,g.f);}
-function gameFloorEl(n){return GAME_ELEMENTS[(n-1)%GAME_ELEMENTS.length];}
+// every building deals its ten floors a different hand out of the thirteen rooms
+function gameFloorEl(n){const g=gameState();return GAME_ELEMENTS[((g.b-1)+(n-1))%GAME_ELEMENTS.length];}
 // What each addiction says to get a person to engage. Temptation only - the
 // fight has no right answer to click any more, it just talks while it winds up.
 const GAME_TEMPT={
@@ -14271,7 +14272,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='13.2';
+const APP_VERSION='13.3';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

@@ -48,6 +48,19 @@
   .chant{position:absolute;top:44%;max-width:38%;padding:6px 10px;font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:1.05rem;line-height:1.1;text-transform:uppercase;letter-spacing:.04em;opacity:0;transition:opacity .25s;pointer-events:none;border-radius:6px;background:rgba(0,0,0,.55)}
   .chant.L{left:10px;color:#ff8a80;border-left:3px solid #e24b4a}.chant.R{right:10px;color:#7ff0b0;border-right:3px solid #2fd08a;text-align:right}.chant.on{opacity:1}
   .load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',Impact,sans-serif;font-size:1.6rem;letter-spacing:.1em;color:var(--lamp);background:var(--ink)}
+
+  @media (max-height:820px){
+    .ctl{padding:8px 10px calc(8px + env(safe-area-inset-bottom));gap:6px}
+    .row.pick button{padding:6px 1px;font-size:.52rem}.row.pick i{width:11px;height:11px;margin-bottom:3px}
+    .row.one button{padding:9px 6px;font-size:.95rem}
+    .row.punch button{padding:9px 2px;font-size:.9rem}
+    .row button{padding:9px 4px;font-size:.95rem}
+    .supers{bottom:calc(168px + env(safe-area-inset-bottom))}
+  }
+  @media (max-height:700px){
+    .supers{bottom:calc(148px + env(safe-area-inset-bottom))}
+    .row.pick button{font-size:.48rem;padding:5px 1px}
+  }
   .note{position:absolute;left:0;right:0;bottom:0;background:#000;color:#8a93bd;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:5px}
 </style>
 <div id="stage">
@@ -887,7 +900,7 @@ let posing=true,voW=0,voH=0,voY=-1;
 function freeTop(){const el=document.querySelector('.ctl');return Math.max(200,(el?el.getBoundingClientRect().top:innerHeight)-16);}
 // the buttons sit over the bottom of the picture, so the picture is lifted into the clear space above them
 function liftFrame(){
-  const on=!document.getElementById('fighters').hidden;
+  const on=posing&&fightOver&&!document.getElementById('fighters').hidden;
   const off=on?Math.round((innerHeight-freeTop())/2):-1;
   if(voW===innerWidth&&voH===innerHeight&&voY===off)return;
   voW=innerWidth;voH=innerHeight;voY=off;
@@ -899,7 +912,7 @@ function poseFrame(){
   const free=freeTop(),want=free*0.68,vh=2*Math.tan(cam.fov*Math.PI/360);
   const dist=YOU.bh/(want/innerHeight)/vh+0.45;
   const c=YOU.root.position,mid=YOU.bmid;
-  cam.position.set(c.x+0.39*dist,mid+0.14,c.z+0.92*dist);
+  cam.position.set(c.x+0.39*dist,mid+0.52,c.z+0.92*dist);
   look.set(c.x,mid+(fovBase-48)*0.011,c.z);
 }
 function poseOff(){posing=false;}
@@ -973,8 +986,8 @@ const runnerLights=[];for(let i=0;i<4;i++){const l=new T.PointLight(0xffffff,0,4
 function aisleOn(x,z0,z1,color){runner.position.set(x,.014,(z0+z1)/2);runner.scale.set(1,Math.abs(z1-z0)/9,1);runnerMat.color.set(color);runner.visible=true;runnerLights.forEach((l,i)=>{l.color.set(color);l.intensity=8;l.visible=true;l.position.set(x,1.7,z0+(z1-z0)*(i+.5)/4);});}
 function aisleOff(){runner.visible=false;runnerLights.forEach(l=>{l.visible=false;l.intensity=0;});}
 function walkPos(){if(!walkCam)return camBase.clone();const p=walkCam.F.root.position,s=walkCam.s,sway=Math.sin(performance.now()/1500);
-  if(walkCam.mode==='front')return new T.Vector3(p.x+sway*0.55,1.46+Math.sin(performance.now()/2100)*.07,p.z-s*2.4);
-  return new T.Vector3(p.x+0.5+sway*0.3,1.98,p.z+s*2.1);}
+  if(walkCam.mode==='front')return new T.Vector3(p.x+sway*0.55,1.52+Math.sin(performance.now()/2100)*.07,p.z-s*3.3);
+  return new T.Vector3(p.x+0.75+sway*0.3,2.16,p.z+s*3.7);}/* stood well back: on a tall phone a close shot is all shoulders */
 function walkLook(){if(!walkCam)return LOOK.clone();const p=walkCam.F.root.position,s=walkCam.s;
   if(walkCam.mode==='front')return new T.Vector3(p.x,1.24,p.z);
   return new T.Vector3(p.x-s*0.08,1.32,p.z-s*1.7);}

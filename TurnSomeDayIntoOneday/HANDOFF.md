@@ -1049,9 +1049,9 @@ position changed on every cut. No page errors.
 - **The preview picks a fighter.** With no fighter set it used to open on the
   same one every time; it now draws one of the five, and ringing the bell carries
   that fighter into the live fight. The app's own pick still wins.
-- **The referee watches the fighters.** He stood at a fixed angle facing nothing.
-  During a round he now turns to keep the midpoint between the two in front of
-  him, easing round rather than snapping, and stands off while he is walking or
+- **The referee watches the fighters.** She stood at a fixed angle facing nothing.
+  During a round she now turns to keep the midpoint between the two in front of
+  her, easing round rather than snapping, and stands off while she is walking or
   counting. Measured: zero degrees off across five samples of a live round.
 - **Everybody got out of the ring.** The announcer, the ring girl, the trainer,
   the cut man and the addiction's two were all standing inside the ropes, which
@@ -1168,6 +1168,6 @@ The camera tracking from 14.3 only ran while a round was on, so during the
 introductions and the referee's instructions the preview director could cut to
 the corner or the house camera and point at an empty post. It now holds the
 fighters whenever a fight is on, introductions included. The referee gave the
-instructions to the camera; he now gives them to the fighters, and keeps facing
+instructions to the camera; she now gives them to the fighters, and keeps facing
 them between rounds too. Measured during "Protect yourself at all times": camera
 0.21 m off the pair, referee 0° off.

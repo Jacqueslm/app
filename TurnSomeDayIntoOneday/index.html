@@ -7325,6 +7325,8 @@ function renderDoor(){
   <button class="g2-big" onclick="floorStart()">Floor ${g.f}</button>
   <div class="g2-note">No clock anywhere. Ups are yours for good. Lose a floor and you drop back for reinforcements, never to the ground.</div>`);
 }
+function gameFighter(){const g=gameState();return Math.max(1,Math.min(5,(g.fighter|0)||(((g.boxer-1)%5)+1)));}
+function gameSetFighter(n){const g=gameState();g.fighter=Math.max(1,Math.min(5,n|0));save();renderRoofDoor();}
 function gameSetBoxer(n){const g=gameState();if(GAME_BOXERS.includes(n)){g.boxer=n;save();}renderDoor();}
 function gameSetGlove(c){const g=gameState();if(GAME_GLOVES.includes(c)){g.glove=c;save();}renderDoor();}
 
@@ -7615,7 +7617,8 @@ function renderRoofDoor(){
     <div class="g2-strength"><b>${str.total}</b><span>Strength · earned in the app</span></div>
     <div class="g2-strrows">${rows}</div>
     ${open
-      ?`<div class="g2-pick g2-gloves" role="group" aria-label="Your gloves">${GAME_GLOVES.map(c=>`<button class="g2-gl ${c} ${g.glove===c?'on':''}" aria-pressed="${g.glove===c}" onclick="gameState().glove='${c}';save();renderRoofDoor()">${c[0].toUpperCase()+c.slice(1)}</button>`).join('')}</div>
+      ?`<div class="g2-pick g2-gloves" role="group" aria-label="Your fighter">${[1,2,3,4,5].map(n=>`<button class="g2-gl ${gameFighter()===n?'on':''}" aria-pressed="${gameFighter()===n}" onclick="gameSetFighter(${n})">Fighter ${n}</button>`).join('')}</div>
+        <div class="g2-pick g2-gloves" role="group" aria-label="Your gloves">${GAME_GLOVES.map(c=>`<button class="g2-gl ${c} ${g.glove===c?'on':''}" aria-pressed="${g.glove===c}" onclick="gameState().glove='${c}';save();renderRoofDoor()">${c[0].toUpperCase()+c.slice(1)}</button>`).join('')}</div>
         <button class="g2-big" onclick="startFight()">Ring the bell</button><div class="g2-note">Sound on. The bell, the ref and the announcer are in this one.</div>`
       :`<div class="g2-locked">The door is locked. It opens the moment you do one real thing in the app: today’s lesson, a journal line, the pledge, or a craving logged.</div>
         <button class="g2-big" onclick="switchTo('lesson')">Do today’s lesson</button>
@@ -7642,13 +7645,13 @@ async function startFight(){
   gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
   gmCrowdLevel(0);
   try{gm('g2').classList.add('g2-full');}catch(e){}
-  gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(BOSS_IMG[gameBossName()]||'habit')}&fighter=${((g.boxer-1)%5)+1}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}"></iframe>`);
+  gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(BOSS_IMG[gameBossName()]||'habit')}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}"></iframe>`);
   const f=gm('g2-3d');if(!f)return;
   if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
   f.addEventListener('load',()=>{try{f.contentWindow.postMessage({to:'fightofyourlife',
     bossKey:BOSS_IMG[gameBossName()]||'habit',bossName:gameBossName(),lines:game3dLines(),
     support:game3dSupport(),tempt:game3dLines().map(q=>q.line).slice(0,6),
-    place:gamePlace().k,glove:g.glove,fighter:((g.boxer-1)%5)+1,building:g.b,name:(S.name||'you')},'*');}catch(e){}});
+    place:gamePlace().k,glove:g.glove,fighter:gameFighter(),building:g.b,name:(S.name||'you')},'*');}catch(e){}});
 }
 function game3dMessage(ev){
   const d=ev&&ev.data;if(!d||d.from!=='fightofyourlife')return;
@@ -14157,7 +14160,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='11.0';
+const APP_VERSION='11.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

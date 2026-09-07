@@ -882,3 +882,25 @@ cannot reach turnsomedayintodayone.com.
 Checked in headless Chromium at 390×844: the empty ring during your walk, you
 stepping through the near ropes, the addiction's walk-in, it stepping through
 the far ropes, and the centre-ring introductions.
+
+## 7 Sep 2026 — Auto play, named fighters, colour (11.1)
+
+- **Auto.** `youAI()` in the fight boxes for you: it punches, dodges, blocks,
+  answers the line the addiction throws during its tell, and takes water or a
+  word in the corner. It is ON when the fight opens, so the whole thing plays
+  through by itself. Touching any punch, dodge, block or swipe turns it off and
+  hands the fight back; the Auto button turns it on again. It deliberately
+  leaves gaps between its own actions — without them the addiction never gets a
+  turn, because a swing needs `!busy` (measured: 99–0 with no gaps, roughly
+  74–40 with them).
+- **Fighter 1 to Fighter 5.** The picker in the fight says so instead of bare
+  numbers, and the app's roof door now has the same picker — it had none, and
+  the fighter was derived from the old photo-boxer number. `gameFighter()` and
+  `gameSetFighter()` in index.html; `g.fighter` in the saved game.
+- **The addiction keeps its colour.** `bossLook` painted the body near-black
+  once it was in the ring, so it walked in gold and fought black. The body is
+  now its own glow colour, dark (glow × 0.13) with a low emissive of the same
+  colour, all the way through.
+
+Checked in headless Chromium: the menu with the Fighter buttons and the gold
+addiction, an auto-played round with both fighters landing, and the corner.

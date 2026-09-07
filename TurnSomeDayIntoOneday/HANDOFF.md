@@ -1171,3 +1171,28 @@ fighters whenever a fight is on, introductions included. The referee gave the
 instructions to the camera; she now gives them to the fighters, and keeps facing
 them between rounds too. Measured during "Protect yourself at all times": camera
 0.21 m off the pair, referee 0° off.
+
+## 7 Sep 2026 — the dead game is gone (14.5)
+
+Jacques: *"do 1 first thats it"* — clear out the unreachable code.
+
+Worked it out by reachability rather than by eye: every top-level definition in
+the Game section, then everything the rest of the app or the HTML actually
+refers to (`gm`, `openTower`, `renderTower`, `towerOnRelapse`, `towerStop`),
+then the closure of what those refer to. 54 definitions are live, 80 were not.
+
+Gone: the front door with the floor button, the wheel and the three shows
+(Who Wants to Recover, Wheel of Your Addictions, Time to Heal), the stairs, the
+whole photo fight (its rounds, counters, openings, uppercuts, corner, referee
+count, knockdowns, "saved by the bell"), its sound helpers, the boss patterns,
+the daily lock, the 2D win and loss screens, and the constants only they used.
+631 lines, and `index.html` went from 1.09 MB to 1.04 MB.
+
+Still there on purpose: `GAME_BOXERS` and `gmBoxerImg`, because the little
+photo boxer in the corner of the stairs screen still uses them; the old fight
+CSS and the hidden markup for it (`g2-glove`, `g2-red`, `g2-ref`), which are
+inert and were left rather than risk the layout; and `img/fight/boxer*.jpg`,
+which Jacques may want for a photo mode.
+
+Checked by driving the whole flow again in a headless browser: approach, the
+stairs, the door, a floor won, the roof won, the next building. No page errors.

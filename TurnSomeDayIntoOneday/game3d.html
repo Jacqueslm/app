@@ -712,16 +712,21 @@ $('cw').onclick=()=>cornerTap('water');$('ct').onclick=()=>cornerTap('towel');$(
 async function walkTheCard(n){if(!GIRL||!card)return;card.material.map=cardTex(String(n),true);card.material.needsUpdate=true;cardFront=true;
   const MARKG=new T.Vector3(-0.15,0,0.15);
   // her camera stands inside the ropes on the far side, so nothing is between it and her
-  SHOTS.girl={pos:()=>new T.Vector3(1.75,1.5,2.05),look:()=>GIRL.root.position.clone().setY(1.15)};
-  SHOTS.girlclose={pos:()=>new T.Vector3(0.95,1.6,1.75),look:()=>GIRL.root.position.clone().setY(1.55)};
+  // her camera stands inside the ring on the opposite side from her, so it looks across the
+  // lit canvas at her instead of backwards into the dark aisle
+  const girlCam=(back,h)=>{const c=new T.Vector3(-0.15,0,0.15),d=GIRL.root.position.clone().sub(c);d.y=0;
+    if(d.lengthSq()<0.09)d.set(0,0,1);d.normalize();
+    return new T.Vector3(c.x-d.x*back+0.35,h,c.z-d.z*back);};
+  SHOTS.girl={pos:()=>girlCam(1.95,1.6),look:()=>GIRL.root.position.clone().setY(1.15)};
+  SHOTS.girlclose={pos:()=>girlCam(1.25,1.62),look:()=>GIRL.root.position.clone().setY(1.5)};
   say('Round '+n+'.','Ring card');
   // she carries the card in, holds it up in the middle, and goes back out. No laps.
-  card.visible=true;shot('girl',600);partRopes('S',true,400);
+  card.visible=true;follow(GIRL,0xfff0d8,110);shot('girl',600);partRopes('S',true,400);
   await castWalk(GIRL,MARKG,1.0);castFace(GIRL,SHOTS.girlclose.pos());
   const a=GIRL.play('hand_raising',{fade:.2});await wait(900);if(a)a.paused=true;
   shot('girlclose',900);holdCam(3000);await wait(3000);
   if(a)a.paused=false;GIRL.idle();shot('girl',600);
-  await castWalk(GIRL,GIRL.home,1.5);card.visible=false;partRopes('S',false,450);}
+  await castWalk(GIRL,GIRL.home,1.5);card.visible=false;followOff();partRopes('S',false,450);}
 // the ring walks: you from the near aisle with your corner behind you and the house up; it from the far aisle in its own light with its two behind it
 function roar(){snd('cheer');swell();crowdReact('R','cheer');crowdReact('L','cheer');}
 function boo(){crowdReact('R','boo');crowdReact('L','cheer');swell();}
@@ -1002,6 +1007,8 @@ function actionLook(){
   return LOOK.clone();}
 function camTick(dt){liftFrame();if(posing&&fightOver&&!document.getElementById('fighters').hidden){poseFrame();return;}
   if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
+  // the card walk: she is moving, so her camera moves with her instead of aiming where she used to be
+  if((curShot==='girl'||curShot==='girlclose')&&!camTo&&GIRL){const S3=SHOTS[curShot];cam.position.lerp(S3.pos(),Math.min(1,dt*3));look.lerp(S3.look(),Math.min(1,dt*4));}
   if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(!camTo&&!walkCam&&curShot!=='tv'&&curShot!=='walk'&&curShot!=='entry'&&curShot!=='girl'&&curShot!=='girlclose'){
     const t=(YOU&&!$('corner').hidden)?YOU.root.position.clone().setY(1.25):((!fightOver||running||downState)?actionLook():null);
     if(t)look.lerp(t,Math.min(1,dt*2.0));}
@@ -1020,6 +1027,10 @@ setInterval(()=>{
   if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],750);return;}
   if(!running||downState)return;
   if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},3400);
+// nothing is ever right up against the lens: if the camera ends a move too close to what it
+// is looking at, it backs off along its own sight line rather than filling the frame with a body
+function camClear(p,l,min){const v=p.clone().sub(l);const d=v.length();if(d>=min)return p;
+  if(d<0.02)v.set(0,0.2,1);v.normalize();return l.clone().add(v.multiplyScalar(min));}
 function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
   sparkTick(dt0);sweatTick(dt0);trailTick(dt0);tweenTick(dt0);elemTick(dt0);shaftTick();if(followWho){const p=followWho.root.position;walkSpot.position.set(p.x,4.6,p.z+0.6);walkSpot.target.position.set(p.x,0.9,p.z);walkSpot.target.updateMatrixWorld();}
@@ -1029,6 +1040,6 @@ function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
     while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;ref.rotation.y+=d*Math.min(1,dt0*2.2);}
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible&&cardHand){const h=new T.Vector3();cardHand.getWorldPosition(h);const toCam=cam.position.clone().sub(h).setY(0).normalize();card.position.copy(h).add(new T.Vector3(0,0.22,0)).addScaledVector(toCam,0.16);card.lookAt(cam.position);}crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
-  camDrift(dt0);if(performance.now()<kickUntil)cam.position.add(kick);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(orbit(cam.position,_l));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
+  camDrift(dt0);if(performance.now()<kickUntil)cam.position.add(kick);const _p=cam.position.clone();const _l=look.clone();_l.y-=(fovBase-48)*0.011;/* a wide lens on a tall phone leaves sky at the top, so aim a little lower and lift everyone up the frame */cam.position.copy(camClear(orbit(cam.position,_l),_l,1.15));cam.lookAt(_l);if(performance.now()<rollUntil){cam.rotateZ(rollAmt*(1-(rollUntil-performance.now())/900));}R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>

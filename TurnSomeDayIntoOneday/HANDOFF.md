@@ -1419,3 +1419,33 @@ fighter is nothing but shoulders. Back shot 2.1 → 3.7 m, front 2.4 → 3.3 m, 
 a little higher.
 
 Version back to 3.0 — `APP_VERSION` and the service worker cache name together.
+
+## 7 Sep 2026 — the black second after the rest (3.1)
+
+Jacques: "keep going black for a second" after the rest period. Measured it by
+polling the shot and the frame weight through three rounds — every dark frame
+was `curShot==='girl'`, the ring-card walk that opens each round.
+
+The cause: `SHOTS.girl` was a fixed point at (1.75, 1.5, 2.05) inside the ring,
+and the ring card starts her walk at her home, (1.6, 0, 3.4). That is 1.35 m
+*behind* the camera, so the shot cut to a lens pointed backwards down an unlit
+aisle with her body right against it. It cleared as she walked past.
+
+Three fixes:
+
+- **Her camera is worked out from where she actually is.** `girlCam(back,h)`
+  stands inside the ring on the opposite side of centre from her, so it always
+  looks across the lit canvas at her — 5.9 m out when she is still in the aisle,
+  2.5 m when she reaches the middle. Never behind her, never against her.
+- **It tracks her.** `camTick` now lerps the girl shots every frame like the TV
+  shot does, instead of aiming where she was when the cut happened.
+- **A light walks in with her.** `follow(GIRL, …)` for the length of the card
+  walk, off at the end.
+
+And a guard for the whole camera, so this class of thing cannot come back:
+`camClear()` runs on every rendered frame and, if the camera has ended up closer
+than 1.15 m to what it is looking at, backs it off along its own sight line.
+
+Measured with the camera forced onto her at three points of the walk — aisle,
+ropes, middle: frames at 108 KB, 143 KB and 174 KB, against roughly 3 KB for the
+black ones before.

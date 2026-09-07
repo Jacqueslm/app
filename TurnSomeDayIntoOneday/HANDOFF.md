@@ -1269,3 +1269,23 @@ Honest about the measurement: this container renders the fight at about four
 frames a second, so a press-to-punch time measured here is mostly the machine,
 not the game. What it does show is that presses are no longer swallowed — every
 press in a live round produced a punch, and the fight still lands normally.
+
+## 7 Sep 2026 — a real ring, built in Blender (14.9)
+
+Blender now runs on this machine as a Python module (`pip install bpy`, 5.0.1),
+so models get built by running a script — no hand modelling, and anyone can
+rebuild them. Script and notes in `tools/blender/`.
+
+`ring.py` builds the ring the fight has been missing: a square canvas on an
+apron with a skirt hanging down, four padded corner posts in red, blue and
+white, steel caps and turnbuckle eyes at each of the three rope heights, and
+steps up on both aisle sides. 1,616 triangles, 100 KB. The canvas surface sits
+at zero so nothing else in the scene had to move, and the posts are at ±2.6
+where the rope code already expects them.
+
+`loadRing()` brings it in, hides the old cylinder posts, pads and the circular
+canvas, and hands its canvas material to `setMood()` so the floor's colour still
+paints it. The ropes are untouched — they still hang, part and shut as the gate.
+
+Checked in headless Chromium: model loads, 1,616 triangles, canvas material
+found and tinted, old pipes and circle all hidden, no page errors.

@@ -289,6 +289,19 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   three shows) is still in `index.html` but unreachable — **delete it once he
   confirms he likes the simpler game**. Nothing was lost: the addiction's lines
   live in the ring now.
+- **The corner, sitting, and a 360 camera (10.6).** His notes: the fighter
+  stood instead of sitting, the trainer did nothing, and he wanted the camera
+  free. Fixed: `fighter1..5.glb` carry 23 boxing moves and no seated one, so
+  `loadFighter` now **merges** their own clips with the seated set from
+  `fighter.glb` (32 in total) — that is why the fighter would not sit. The
+  corner now runs itself: the cut-man brings water (+6) and says so, then the
+  trainer says three lines out loud, drawn from the person's own supporter
+  lines first (journal, their person, day count) and a short `ADVICE` list of
+  plain corner talk after — nothing medical, nothing invented. The three
+  buttons still work on top. **360 camera**: drag anywhere to swing right
+  round the ring, two fingers or the wheel to come in and out, and it
+  re-centres on every cut (`orbit`, `recentre`). Swipe-to-dodge is gone; the
+  dodge buttons remain. Applied to both `game3d.html` and `tools/ring3d/`.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

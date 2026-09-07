@@ -40,7 +40,7 @@
   <div class="talk" id="talk" hidden><div class="tline" id="tline"></div><div class="tbtns"><button id="ta"></button><button id="tb"></button></div></div>
   <div class="fx" id="fx"></div><div class="lines" id="lines"></div>
   <button class="super" id="super" hidden>DAY ONE</button>
-  <div class="voice" id="v"><small>The Drink</small>Twelve floors down, the roof. Ring the bell for the walk-in.</div>
+  <div class="voice" id="v"><small>The Drink</small>The roof. Drag to swing the camera. Ring the bell.</div>
   <div class="red" id="red"></div>
   <div class="chant L" id="cl"></div><div class="chant R" id="cr"></div>
   <div class="ctl">
@@ -6266,12 +6266,25 @@ setInterval(()=>{if(!running||downState)return;timeLeft=Math.max(0,timeLeft-1);c
 async function announce(lines,arm){if(!ANN)return;await castWalk(ANN,new T.Vector3(-1.15,0,-0.95),1.3);castFace(ANN,cam.position);ANN.play('talking',{loop:true,fade:.2});for(const l of lines){say(l,'Announcer');await wait(2300);}if(arm){const a=ANN.play('hand_raising',{fade:.2});await wait(1700);if(a)a.paused=true;await wait(2200);if(a)a.paused=false;await wait(800);}ANN.idle();await castWalk(ANN,ANN.home,1.5);}
 // between rounds your corner comes to you and its corner comes to it. Tap water, towel or a word, once each.
 async function cornersIn(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clown,W=CORNER.wrestler;if(!T2||!C2||!K||!W)return;cornerUsed={};cornerReset();$('corner').hidden=false;shot('corner',700);
-  const a=castWalk(T2,new T.Vector3(-2.35,0,1.55),1.4).then(()=>{castFace(T2,YOU.root.position);T2.play('talking',{loop:true,fade:.2});});
+  const a=castWalk(T2,new T.Vector3(-2.35,0,1.55),1.4).then(()=>{castFace(T2,YOU.root.position);T2.play('talking',{loop:true,fade:.2});cornerTalk();});
   const b=castWalk(C2,new T.Vector3(-2.75,0,2.5),1.4).then(()=>castFace(C2,YOU.root.position));
   const c=castWalk(K,new T.Vector3(1.35,0,-1.35),1.3).then(()=>{castFace(K,BOSS.root.position);K.play('waving',{loop:true,fade:.2});chant('L',TEMPT);});
   const d=castWalk(W,new T.Vector3(2.15,0,-1.15),1.2).then(()=>{castFace(W,BOSS.root.position);W.play('talking',{loop:true,fade:.2});});
   await Promise.all([a,b,c,d]);}
-async function cornersOut(){$('corner').hidden=true;const all=[];for(const k in CORNER){const F=CORNER[k];F.idle();all.push(castWalk(F,F.home,1.5).then(()=>{F.root.rotation.y={trainer:.9,cutman:1.1,clown:-.6,wrestler:-.9}[k];}));}await Promise.all(all);}
+async function cornersOut(){$('corner').hidden=true;clearTimeout(talkTimer);const all=[];for(const k in CORNER){const F=CORNER[k];F.idle();all.push(castWalk(F,F.home,1.5).then(()=>{F.root.rotation.y={trainer:.9,cutman:1.1,clown:-.6,wrestler:-.9}[k];}));}await Promise.all(all);}
+// the corner between rounds: water first, then the trainer talks. Every line is the person's own
+// (their journal, their people, their days) or a plain thing a corner says. Nothing medical, nothing invented.
+const ADVICE=['Water first. Small sips.','Breathe out longer than you breathe in.','You do not have to want it. You just have to not do it.','One round at a time. Same as one day.','Hands up. It only wins when you drop them.','It says the same thing every night. You have heard it before.','Sit. Breathe. The bell is not for a minute.'];
+let talkTimer=null;
+async function cornerTalk(){clearTimeout(talkTimer);
+  const C2=CORNER.cutman,T2=CORNER.trainer;
+  if(C2){castFace(C2,YOU.root.position);C2.play('hand_raising',{fade:.2});say('Water. Small sips.','Cut-man');speak('Water. Small sips.','Corner');youHP=Math.min(100,youHP+6);bars();}
+  await wait(2600);if($('corner').hidden)return;
+  if(C2)C2.idle();
+  const pool=(SUPPORT&&SUPPORT.length?SUPPORT:[]).concat(ADVICE);
+  let i=0;const lines=[];while(lines.length<3&&pool.length){const pick=pool[Math.floor(Math.random()*pool.length)];if(!lines.includes(pick))lines.push(pick);if(++i>30)break;}
+  for(const l of lines){if($('corner').hidden)return;if(T2)T2.play('talking',{loop:true,fade:.2});say(l,'Trainer');speak(l,'Corner');await wait(2800);}
+  if(T2)T2.idle();}
 function cornerReset(){['cw','ct','cd'].forEach(i=>$(i).disabled=false);}
 function cornerTap(what){if(!running&&!fightOver&&!cornerUsed[what]&&!$('corner').hidden){cornerUsed[what]=true;$({water:'cw',towel:'ct',word:'cd'}[what]).disabled=true;
   if(what==='water'){youHP=Math.min(100,youHP+8);bars();say('Water. Small sips.','Corner');if(CORNER.cutman)CORNER.cutman.play('talking',{fade:.2});setTimeout(()=>CORNER.cutman&&CORNER.cutman.idle(),1800);}
@@ -6409,11 +6422,21 @@ function doBlock(){if(!YOU||downState||!running)return;block=true;YOU.play('cent
 $('dl').onpointerdown=e=>{e.preventDefault();doDodge('L')};$('dr').onpointerdown=e=>{e.preventDefault();doDodge('R')};$('bl').onpointerdown=e=>{e.preventDefault();doBlock()};
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function tapCard(e){if(!card||!card.visible)return false;const r=canvas.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);if(!ray.intersectObject(card,false).length)return false;cardFront=!cardFront;card.material.map=cardFront?cardTex(String(round+1),true):cardTex($('v').textContent.replace(/^Corner/,''),false);card.material.needsUpdate=true;return true;}
-let sx=null;canvas.addEventListener('pointerdown',e=>{if(tapCard(e)){sx=null;return;}sx=e.clientX;});canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40)doDodge(dx>0?'R':'L');});
+// 360: drag to swing the camera all the way round the ring, two fingers to come in and out.
+let orbYaw=0,orbPitch=0,orbZoom=1,dragging=false,dragX=0,dragY=0,pinch=0;
+function orbit(pos,look){if(!orbYaw&&!orbPitch&&orbZoom===1)return pos;const v=pos.clone().sub(look);const r=v.length();let th=Math.atan2(v.x,v.z)+orbYaw,ph=Math.asin(Math.max(-1,Math.min(1,v.y/r)))+orbPitch;ph=Math.max(-0.5,Math.min(1.15,ph));const rr=r*orbZoom;return new T.Vector3(look.x+rr*Math.cos(ph)*Math.sin(th),look.y+rr*Math.sin(ph),look.z+rr*Math.cos(ph)*Math.cos(th));}
+canvas.addEventListener('pointerdown',e=>{if(tapCard(e))return;dragging=true;dragX=e.clientX;dragY=e.clientY;canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragX,dy=e.clientY-dragY;dragX=e.clientX;dragY=e.clientY;orbYaw-=dx*0.008;orbPitch+=dy*0.005;orbPitch=Math.max(-0.5,Math.min(1.15,orbPitch));});
+addEventListener('pointerup',()=>{dragging=false;});addEventListener('pointercancel',()=>{dragging=false;});
+canvas.addEventListener('touchmove',e=>{if(e.touches.length!==2)return;const t=e.touches,d=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);if(pinch)orbZoom=Math.max(.45,Math.min(2.2,orbZoom*(pinch/d)));pinch=d;},{passive:true});
+canvas.addEventListener('touchend',()=>{pinch=0;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();orbZoom=Math.max(.45,Math.min(2.2,orbZoom*(1+e.deltaY*0.0012)));},{passive:false});
+function recentre(){orbYaw=0;orbPitch=0;orbZoom=1;}
+let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40)doDodge(dx>0?'R':'L');});
 // the shots. A ringside TV view is the main one, over your shoulder for exchanges, a low corner camera for a knockdown, the house from the back at the bell.
 const SHOTS={corner:{pos:()=>new T.Vector3(0.55,1.75,4.5),look:()=>new T.Vector3(-1.7,0.9,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>new T.Vector3(2.75,1.5,0.1),look:()=>new T.Vector3(-0.1,1.0,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
 let curShot='shoulder',camFrom=null,camTo=null,camT=0,camMs=0,lookFrom=null,lookTo=null,manualUntil=0,autoCut=0,slow=1,fovBase=48;
-function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
+function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre();if(!ms){cam.position.copy(S2.pos());look.copy(S2.look());camTo=null;return;}camFrom=cam.position.clone();camTo=S2.pos();lookFrom=look.clone();lookTo=S2.look();camT=0;camMs=ms;}
 function camTick(dt){if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.35+d*.55,1.45,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}
 function punchIn(){cam.fov=41;cam.updateProjectionMatrix();}
 function slowMo(ms){slow=.3;setTimeout(()=>slow=1,ms);}
@@ -6424,7 +6447,7 @@ function frame(){const dt0=clock.getDelta(),dt=dt0*slow;camTick(dt0);
   if(aura&&BOSS){const pulse=1+Math.sin(performance.now()/650)*.06;aura.scale.set(3.6*pulse,3.6*pulse,1);aura.material.opacity=.75+Math.sin(performance.now()/650)*.1;const bp=BOSS.root.position,dir=bp.clone().sub(cam.position);dir.y=0;dir.normalize();aura.position.set(bp.x+dir.x*1.1,1.25,bp.z+dir.z*1.1);rim.position.set(bp.x+dir.x*2.6,1.5,bp.z+dir.z*2.6);floorGlow.position.set(bp.x+dir.x*.3,.012,bp.z+dir.z*.3);if(YOU){const yp=YOU.root.position;fillYou.position.set(yp.x-dir.x*1.2+0.3,1.9,yp.z-dir.z*1.2);}}for(const p of PROPS)if(p.userData.ember)p.material.color.setHex(Math.random()<.1?0xffc27a:0xff7a2b);if(BOSS)BOSS.mixer.update(dt);if(YOU)YOU.mixer.update(dt);
   if(REF)REF.mixer.update(dt);if(ANN)ANN.mixer.update(dt);if(GIRL)GIRL.mixer.update(dt);for(const k in CORNER)CORNER[k].mixer.update(dt);if(card&&card.visible)card.lookAt(cam.position);crowdTick(dt);
   if(shake>0){const S2=SHOTS[curShot]||SHOTS.shoulder;const base=camTo?cam.position.clone():S2.pos();cam.position.x=base.x+(Math.random()-.5)*shake;cam.position.y=base.y+(Math.random()-.5)*shake;shake*=.85;if(shake<.004){shake=0;if(!camTo)cam.position.copy(S2.pos());}}
-  cam.lookAt(look);R.render(scene,cam);requestAnimationFrame(frame);}
+  const _p=cam.position.clone();cam.position.copy(orbit(cam.position,look));cam.lookAt(look);R.render(scene,cam);cam.position.copy(_p);requestAnimationFrame(frame);}
 requestAnimationFrame(frame);
 </script>
 <div class="note">3D proof · real fighter from Mixamo · six fighters and the ref from Mixamo · punch sounds made in the page</div>

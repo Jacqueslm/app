@@ -1449,3 +1449,25 @@ than 1.15 m to what it is looking at, backs it off along its own sight line.
 Measured with the camera forced onto her at three points of the walk — aisle,
 ropes, middle: frames at 108 KB, 143 KB and 174 KB, against roughly 3 KB for the
 black ones before.
+
+## 7 Sep 2026 — Fighter 1 was standing half a metre off the canvas
+
+The grounding added on 6 Sep measured the wrong thing. `Box3.setFromObject` on a
+skinned body reads the geometry's **rest pose**, not the pose it is actually
+standing in, so it reported every fighter as already grounded while Fighter 1's
+toes were 0.496 m in the air. Measured off the toe bones, before:
+
+    fighter 1  0.496    2  0.027    3  0.113    4  0.076    5  0.095    the addiction 0.000
+
+`groundFeet(F)` replaces it. It steps the mixer through about a second of the
+idle, takes the lowest world Y of every foot and toe bone across those frames
+(the planted foot, not the one lifting), and shifts the model **inside** the
+root by that much. Putting the shift on the children rather than the root
+matters: half a dozen places set a fighter to `y=0` — `toMarks`, the ring walks,
+the decision — and they all stay correct.
+
+`YOU.bh` / `YOU.bmid` are still read before the shift, since afterwards the
+rest-pose box hangs below the floor and would throw the picker framing out.
+
+After: toes at −0.005 to +0.018 on all five, the addiction unchanged, pre-bell
+framing unchanged (feet 566–645 against a panel at 599/670), no page errors.

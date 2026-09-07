@@ -1112,3 +1112,17 @@ clean shot, a fighter slumped after a knockdown.
 Checked in headless Chromium: the gate opens to 0.04/2.02 on the entry; eleven
 sweat droplets in the air with both fighters tired; the referee stopping a fight
 returns `tko`; the knockdown lights come back up afterwards. No page errors.
+
+## 7 Sep 2026 — the announcer stopped saying "he" (14.1)
+
+Five fighters, men and women, and the announcer called every one of them "he":
+*"Making his way to the ring…"* and *"And his opponent…"*. They are now
+*"Making the walk to the ring…"* and *"And the opponent…"*.
+
+Swept the rest of the fight and the game screens in the app: no other spoken or
+written line names a gender for the fighter or the addiction. The only "she" and
+"her" left are code comments about the referee and the ring girl, who are
+particular characters, not the person playing.
+
+Checked by reading every line the fight actually said through a walk-in and a
+round: none gendered.

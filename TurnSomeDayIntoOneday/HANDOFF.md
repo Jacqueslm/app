@@ -1392,3 +1392,30 @@ It comes from `npm pack three@0.170.0` and is gitignored — pull it back with
 
 Verified in headless Chromium: 38 clips, all seven present on both fighters,
 no page errors.
+
+## 7 Sep 2026 — the fight on a real phone (3.0)
+
+Jacques ran it on his phone and it was not mobile friendly. Three things wrong,
+all fixed.
+
+**Half the screen was empty canvas.** The lift added earlier (`liftFrame`,
+`cam.setViewOffset`) was staying on for the whole preview, not just the picker
+pose, so the camera window sat low in the frame and showed a huge stretch of
+bare ring floor under the action. The lift now applies only while the fighter is
+posed before the first bell; the moment the fight starts it clears.
+
+**The app's own chrome sat on the fight.** `.g2-full` is `z-index:60` while the
+bottom tab bar is `100` and the guide button `500`, so both floated over the
+fight's controls — the guide button covered Fighter 5. While a fight is up,
+`body.g2-fighting` hides them, and a small ✕ goes in the top-left corner
+(`gameLeaveFight()`, back to the stairs) so there is still a way out.
+
+**The panel ate the picture.** Below 820 px tall the control panel tightens —
+smaller tiles, shorter bell, and the SUPER bars sit just above it instead of at
+a fixed 206 px. 134 px on a 915 px screen, down from about 245.
+
+The walking cameras were also stood further back: on a tall phone 2.1 m behind a
+fighter is nothing but shoulders. Back shot 2.1 → 3.7 m, front 2.4 → 3.3 m, both
+a little higher.
+
+Version back to 3.0 — `APP_VERSION` and the service worker cache name together.

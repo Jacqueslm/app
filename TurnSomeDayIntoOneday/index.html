@@ -468,6 +468,9 @@ body.nova-open #mini-player{bottom:160px}
 .g2.g2-full{position:fixed;inset:0;width:100%;max-width:none;min-height:0;height:100dvh;margin:0;z-index:60;padding:0}
 .g2-full .g2-photo,.g2-full .g2-grain,.g2-full .g2-glove,.g2-full .g2-red,.g2-full .g2-mini,.g2-full .g2-ref,.g2-full .g2-top,.g2-full .g2-floors{display:none}
 .g2-full .g2-body{padding:0}
+/* the fight takes the whole phone: the tab bar and the guide button would sit on the buttons, so they step aside and a way out goes in the corner */
+body.g2-fighting .bnav,body.g2-fighting #guide-fab{display:none}
+.g2-exit{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;z-index:70;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(7,10,20,.6);color:#fff;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .g2-photo{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;transform-origin:50% 60%}
 .g2-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,20,.15) 0%,rgba(7,10,20,.25) 45%,rgba(7,10,20,.92) 100%)}
 .g2-photo.boss{animation:g2sway 3.2s ease-in-out infinite alternate}
@@ -7319,8 +7322,8 @@ async function startFight(){
   const g=gameState(),track=gameTrack(),str=gameStrength();
   gmFight={round:0,you:str.total,youMax:str.total,building:g.b};
   gmCrowdLevel(0);
-  try{gm('g2').classList.add('g2-full');}catch(e){}
-  gmBody(`<iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${g.f>GAME_FLOORS?0:g.f}"></iframe>`);
+  try{gm('g2').classList.add('g2-full');document.body.classList.add('g2-fighting');}catch(e){}
+  gmBody(`<button class="g2-exit" title="Leave the fight" onclick="gameLeaveFight()">&#10005;</button><iframe id="g2-3d" title="The fight" allow="autoplay" src="/game3d.html?boss=${encodeURIComponent(gameBuilding().k)}&fighter=${gameFighter()}&glove=${encodeURIComponent(g.glove)}&place=${encodeURIComponent(gamePlace().k)}&building=${g.b}&floor=${g.f>GAME_FLOORS?0:g.f}"></iframe>`);
   const f=gm('g2-3d');if(!f)return;
   if(!window.__g3d){window.__g3d=true;addEventListener('message',game3dMessage);}
   f.addEventListener('load',()=>{try{f.contentWindow.postMessage({to:'fightofyourlife',
@@ -7335,9 +7338,13 @@ function game3dMessage(ev){
   F.round=d.round||1;F.you=Math.max(0,Math.round((d.youHP||0)/100*F.youMax));
   if(d.result==='won')game3dWon();else game3dLost(d.result==='draw');
 }
+// stepping out of the fight without a result: back to the stairs
+function gameLeaveFight(){
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
+  gmFight=null;gmBusy=false;renderFloors();}
 function game3dWon(){
   const F=gmFight,g=gameState();
-  try{gm('g2').classList.remove('g2-full');}catch(e){}
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
   const roof=g.f>GAME_FLOORS;
   g.wins++;
   if(!roof){g.cleared[g.f]=true;g.f=Math.min(GAME_FLOORS+1,g.f+1);}
@@ -7367,7 +7374,7 @@ function renderJump(){
 }
 function game3dLost(draw){
   const g=gameState();
-  try{gm('g2').classList.remove('g2-full');}catch(e){}
+  try{gm('g2').classList.remove('g2-full');document.body.classList.remove('g2-fighting');}catch(e){}
   if(!draw)g.losses++;
   save();
   gmBody(`<div class="g2-reveal" style="font-size:2.6rem">${draw?'Even':'Saved by the bell'}</div>
@@ -13681,7 +13688,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='15.1';
+const APP_VERSION='3.0';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',

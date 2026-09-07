@@ -1,0 +1,19 @@
+<meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./three/package/build/three.module.js","three/addons/":"./three/package/examples/jsm/"}}</script>
+<script type="module">
+import * as T from 'three';import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const g=await new Promise((res,rej)=>new GLTFLoader().load('fighter-both.glb',res,undefined,rej));
+const L=new FBXLoader();const log=[];
+function slim(c){c.tracks=c.tracks.filter(t=>{const [bone,prop]=t.name.split('.');if(/Hand(Thumb|Index|Middle|Ring|Pinky)/.test(bone))return false;if(prop==='position'&&!/Hips$/.test(bone))return false;if(prop==='scale')return false;return true;});
+  if(c.duration>2)c.tracks=c.tracks.map(t=>{const n=t.times.length,keep=[];for(let i=0;i<n;i+=2)keep.push(i);if(!keep.includes(n-1))keep.push(n-1);const vs=t.getValueSize();const times=new Float32Array(keep.length),vals=new Float32Array(keep.length*vs);keep.forEach((k,j)=>{times[j]=t.times[k];for(let v=0;v<vs;v++)vals[j*vs+v]=t.values[k*vs+v];});return new t.constructor(t.name,times,vals);});
+  // the moves were downloaded on another character: their bone prefix becomes the shadow's
+  c.tracks=c.tracks.map(t=>new t.constructor(t.name.replace(/^mixamorig\d*/,'mixamorig'),t.times,t.values));
+  for(const t of c.tracks){if(!/Hips(_\d+)?\.position$/.test(t.name))continue;const v=t.values,x0=v[0],z0=v[2];for(let i=0;i<v.length;i+=3){v[i]=x0;v[i+2]=z0;}}return c;}
+for(const [f,name] of [['Head Hit','head_hit'],['Jab Cross','jab_cross'],['Lead Jab','lead_jab2'],['Defeat','defeat']]){const o=await new Promise((res,rej)=>L.load('./moves/'+f+'.fbx',res,undefined,rej));const c=o.animations[0];c.name=name;
+  // per-hand peak times before slimming, for the contact frames
+  o.scale.setScalar(0.01);const mx=new T.AnimationMixer(o);mx.clipAction(c).play();const bone=re=>{let b=null;o.traverse(x=>{if(!b&&x.isBone&&re.test(x.name))b=x;});return b;};const H=bone(/Hips$/),Lh=bone(/LeftHand$/),Rh=bone(/RightHand$/);let bl={t:0,z:-9},br={t:0,z:-9};for(let t=0;t<=c.duration;t+=1/30){mx.setTime(t);o.updateMatrixWorld(true);const P=b=>{const v=new T.Vector3();b.getWorldPosition(v);return v;};const h=P(H),l=P(Lh).z-h.z,r=P(Rh).z-h.z;if(l>bl.z)bl={t:+t.toFixed(2),z:+l.toFixed(2)};if(r>br.z)br={t:+t.toFixed(2),z:+r.toFixed(2)};}
+  mx.stopAllAction();g.animations.push(slim(c));log.push(name+' '+c.duration.toFixed(2)+'s left peak '+JSON.stringify(bl)+' right peak '+JSON.stringify(br));}
+const glb=await new Promise((res,rej)=>new GLTFExporter().parse(g.scene,res,rej,{binary:true,animations:g.animations}));
+const u8=new Uint8Array(glb);let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+window.B64=btoa(s);window.LOG=log.join('\n')+'\nclips: '+g.animations.map(a=>a.name+'('+a.tracks.length+')').join(',');window.DONE=true;
+</script>

@@ -1,0 +1,17 @@
+<meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./three/package/build/three.module.js","three/addons/":"./three/package/examples/jsm/"}}</script>
+<script type="module">
+import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
+const g=await new Promise((res,rej)=>new GLTFLoader().load((new URLSearchParams(location.search).get('f')||'fighter.glb'),res,undefined,rej));
+// a right-handed copy of a left-handed move: swap every Left bone for its Right twin and reflect the turn across the body's centre line
+function mirror(c,name){const tracks=c.tracks.map(t=>{const nm=t.name.replace(/Left|Right/,m=>m==='Left'?'Right':'Left');const v=t.values.slice();
+  if(t.name.endsWith('.quaternion')){for(let i=0;i<v.length;i+=4){v[i+1]=-v[i+1];v[i+2]=-v[i+2];}}
+  else if(t.name.endsWith('.position')){for(let i=0;i<v.length;i+=3)v[i]=-v[i];}
+  return new t.constructor(nm,t.times.slice(),v);});return new T.AnimationClip(name,c.duration,tracks);}
+const want={lead_jab:'right_jab',hook:'right_hook',uppercut:'right_uppercut',dodging:'dodging_right',left_block:'left_block_m',right_block:'right_block_m'};
+const extra=[];for(const c of g.animations)if(want[c.name])extra.push(mirror(c,want[c.name]));
+g.animations.push(...extra);
+const glb=await new Promise((res,rej)=>new GLTFExporter().parse(g.scene,res,rej,{binary:true,animations:g.animations}));
+const u8=new Uint8Array(glb);let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+window.B64=btoa(s);window.LOG=g.animations.map(a=>a.name).join(',');window.DONE=true;
+</script>

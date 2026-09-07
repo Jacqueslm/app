@@ -60,7 +60,9 @@ Standing instructions. These override default behaviour and repo conventions.
 - **The Fight of Your Life (rebuilt 6 Sep 2026, spec in docs/GAME-SPEC.md):** every
   floor spins a wheel onto one of three shows (Who Wants to Recover, Wheel of
   Your Addictions, Time to Heal), 12 floors, then a Punch-Out style fight on the
-  roof against the addiction's shadow, by name. No clock anywhere. Nothing
+  roof against the addiction's shadow, by name. No clock anywhere in the app;
+  the one exception, settled 6 Sep, is the 3D fight itself, which runs real
+  boxing rules with a sixty-second round clock (`tools/ring3d/`). Nothing
   invented: every card and puzzle reads the person's own app data. Photos in
   img/fight, sound in audio/fight (Piper deep male, same as SOS). Boxers 1-2
   talk in single words; feints and the switch arrive later. A 3D proof exists;

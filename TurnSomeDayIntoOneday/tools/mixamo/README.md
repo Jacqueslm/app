@@ -6,6 +6,13 @@ left/right/center_block, dodging, stomach_hit, taking_punch, knocked_out,
 getting_up, victory). 1.1 MB. Made 6 Sep 2026 from FBX files Jacques pulled
 from mixamo.com (free Adobe account).
 
+Mixamo's jab, hook, uppercut and dodge are all left-handed. `mirror.html`
+makes right-handed twins (`right_jab`, `right_hook`, `right_uppercut`,
+`dodging_right`, and mirrored blocks) by swapping every Left bone for its Right
+twin and reflecting each turn across the centre line; open it with
+`?f=fighter.glb` next to the file and save `window.B64`. The shipped
+`fighter.glb` already has them.
+
 To rebuild it, or add a move:
 
 1. On mixamo.com pick the character, then each animation, and Download as
@@ -23,3 +30,36 @@ position tracks except the hips; halves the frame rate on clips over two
 seconds; strips textures and UVs (the game lights it as a black shadow or a
 colour); welds and simplifies the mesh with meshoptimizer to about 7,600
 vertices keeping skin weights.
+
+## The ref — `img/fight/ref.glb`
+
+Suzie from Mixamo (the woman in the white shirt and black trousers), with six
+moves baked in: `idle` (Standing Idle), `counting` (13.9 s: standing, bends and points for the count,
+stands back up), `walking` (1 s loop), `talking`, `waving`, `hand_raising` (she raises her own
+arm, 4 s). 2.6 MB. Made 6 Sep
+2026 from the zip Jacques put on the GitHub release tagged `suzie`.
+
+She keeps her skin, unlike the fighter: `convert-ref.html` keeps each
+material's colour map, shrunk to 512 px and shared between the body parts, and
+drops the normal, specular and gloss maps. Mesh cut to about 15,800 vertices.
+
+To rebuild her, or add a move:
+
+1. Put `character.fbx` (the character download, T-pose, FBX Binary, with skin)
+   and each animation `.fbx` (Without Skin, 30 fps) in `mix/` next to
+   `convert-ref.html`, with the same `three/` folder as above (the simplifier
+   import is the `.module.js` build).
+2. Edit `FILES` in `convert-ref.js` and run `node convert-ref.js`. It writes
+   `ref.glb` next to itself.
+
+`Standing Idle` is renamed `idle` on the way through so the game code can ask
+for it by the same name it uses for the fighters.
+
+## Fighters with skin
+
+`convert-fighter.html` / `convert-fighter.js` take a Mixamo character FBX
+(with skin) from a `fighters/` folder and put the shadow's moves on it from
+`fighter-both.glb` (the thirteen boxing clips and their mirrors), renaming the
+bone prefix to match. Textures shrink to 160 px, the mesh to about a sixth.
+Output `img/fight/fighter1..6.glb`. The ring page carries body-only copies
+and puts the moves on at load.

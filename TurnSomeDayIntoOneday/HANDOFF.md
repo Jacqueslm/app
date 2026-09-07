@@ -1013,3 +1013,20 @@ Jacques generated the artwork from the prompts and sent it up.
 Checked in headless Chromium at floors 1, 2 and 10: the right room is on the
 wall each time and no page errors. Floor 1 photographs well — the flooded
 warehouse behind, rain falling through the frame, splashes on the canvas.
+
+## 7 Sep 2026 — thirteen rooms, and every building deals a different hand (13.3)
+
+Three more rooms arrived: a foggy dungeon (**Rust**), a worn jail cell (**Void**)
+and an abandoned hospital (**Metal**). Each got its own effect —
+rust is a wet brown haze with flakes coming off the walls; void has nothing
+falling at all, the room empties and what is left is pulled inward under a heavy
+veil; metal throws cold blue-white sparks off the walls.
+
+Thirteen rooms and ten floors, so the floors now rotate: floor *n* of building
+*b* is room *(b + n)*. Building 1 opens in Rain, building 2 opens in Fire,
+building 11 in Rust — no two buildings climb through the same ten rooms in the
+same order, and all thirteen get used.
+
+Checked in headless Chromium: Rust, Void and Metal all build their effect and
+load their room, and building 2 floor 1 comes up Fire, which is the rotation
+working. No page errors.

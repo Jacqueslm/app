@@ -530,7 +530,7 @@ async function toCorners(){stools.you.visible=stools.boss.visible=true;await Pro
   for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}}
 async function toMarks(){for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;F.idle();}stools.you.visible=stools.boss.visible=false;await Promise.all([fighterWalk(YOU,MARK.you,1.5),fighterWalk(BOSS,MARK.boss,1.5)]);youHome.copy(YOU.root.position);YOU.home=null;BOSS.home=null;faceOff();}
 function loadCast(key,cb){loader.load(ART+key+'.glb',g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
-function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const top=new T.Box3().setFromObject(YOU.root).max.y;camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
+function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
 function loadOne(cb){loader.load(ART+'fighter.glb',g=>cb(g),undefined,e=>console.error(e));}
@@ -727,9 +727,8 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   roar();say('In the blue corner: '+YOUNAME+'.','Announcer');await wait(1900);
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.4,0,3.0),0.8),castWalk(T2,new T.Vector3(-1.15,0,4.4),0.8),castWalk(C2,new T.Vector3(-1.9,0,4.9),0.8)]);roar();await wait(900);
   await fighterWalk(YOU,new T.Vector3(-1.05,0,3.15),0.9,new T.Vector3(-1.05,0,0));entryShot('S',800);partRopes('S',true,420);await wait(560);
-  {const climb=!!YOU.acts.climb_down;tweenRX(YOU.root,climb?0.06:0.16,280);tweenY(YOU.root,climb?0.02:0.10,280);await wait(280);
-  await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0),climb?'climb_down':null);}
-  tweenRX(YOU.root,0,320);tweenY(YOU.root,0,340);partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
+  await fighterWalk(YOU,CORNERPOS.you,0.62,new T.Vector3(0,0,0));
+  partRopes('S',false,500);castWalk(T2,T2.home,1.4);castWalk(C2,C2.home,1.4);YOU.play('victory',{loop:true,fade:.3});roar();await wait(2600);
   // its
   followOff();const a=ADD();aisleOff();shaftsOn(a.glow,.2);aisleOn(-0.6,-9.9,-2.4,a.glow);spot.intensity=16;spot.color.set(a.glow);aura.scale.set(6.5,6.5,1);BOSS.root.position.set(-0.6,0,-9.6);BOSS.root.visible=true;aura.visible=true;floorGlow.visible=true;rim.intensity=140;propsShow(true);K.root.position.set(-1.35,0,-10.9);W.root.position.set(-2.1,0,-11.4);camWalk(BOSS,'front',0);
   follow(BOSS,ADD().glow,170);say('And the opponent…','Announcer');boo();chant('L',TEMPT);await wait(1800);camWalk(BOSS,'back',1000);
@@ -737,9 +736,8 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   boo();say('In the red corner: '+a.name+'.','Announcer');await wait(2000);camWalk(BOSS,'back',900);
   await Promise.all([fighterWalk(BOSS,new T.Vector3(-0.6,0,-3.1),0.78),castWalk(K,new T.Vector3(-1.35,0,-4.5),0.78),castWalk(W,new T.Vector3(-2.1,0,-5.0),0.78)]);boo();await wait(1000);
   await fighterWalk(BOSS,new T.Vector3(0.55,0,-3.15),0.85,new T.Vector3(0.55,0,0));entryShot('N',800);partRopes('N',true,420);await wait(560);
-  {const climb=!!BOSS.acts.climb_down;tweenRX(BOSS.root,climb?0.06:0.16,280);tweenY(BOSS.root,climb?0.02:0.10,280);await wait(280);
-  await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0),climb?'climb_down':null);}
-  tweenRX(BOSS.root,0,320);tweenY(BOSS.root,0,340);partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
+  await fighterWalk(BOSS,CORNERPOS.boss,0.58,new T.Vector3(0,0,0));
+  partRopes('N',false,500);castWalk(K,K.home,1.3);castWalk(W,W.home,1.3);const q=(LINES[addictionKey]||LINES.drink)[0];say(q.line,a.name);aura.scale.set(3.6,3.6,1);await wait(2400);
   // introductions at centre ring, then the referee's instructions
   followOff();camWalkOff();aisleOff();shaftsOff();spot.intensity=60;spot.color.set(PLACES[place].key);shot('tv',900);YOU.idle();
   await Promise.all([fighterWalk(YOU,new T.Vector3(-0.6,0,0.2),1.3,BOSS.root.position),fighterWalk(BOSS,new T.Vector3(0.6,0,-0.2),1.3,YOU.root.position),castWalk(ANN,new T.Vector3(0.05,0,-0.75),1.4),refWalk(new T.Vector3(0.05,0,0.7))]);castFace(ANN,cam.position);refFace(actionLook());
@@ -748,7 +746,7 @@ async function ringWalks(){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   refPlay('talking',{loop:true,fade:.2});for(const l of ['Protect yourself at all times.','Obey my commands.','Touch gloves.']){say(l,'Referee');await wait(2000);}refIdle();
   YOU.play('lead_jab',{speed:.55});BOSS.play('lead_jab',{speed:.55});await wait(1300);YOU.idle();BOSS.idle();refWalk(ref.userData.home);
   await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);}
-async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
+async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;poseOff();fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
   await ringWalks();
   await nextRound();ai();youAI();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
@@ -884,6 +882,28 @@ $('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){s
 $('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
 const LIVE=(new URLSearchParams(location.search).get('live')==='1');
 let auto=!LIVE,swingSide=null;
+// the picker screen: stand the fighter head to toe in the clear space above the controls
+let posing=true,voW=0,voH=0,voY=-1;
+function freeTop(){const el=document.querySelector('.ctl');return Math.max(200,(el?el.getBoundingClientRect().top:innerHeight)-16);}
+// the buttons sit over the bottom of the picture, so the picture is lifted into the clear space above them
+function liftFrame(){
+  const on=!document.getElementById('fighters').hidden;
+  const off=on?Math.round((innerHeight-freeTop())/2):-1;
+  if(voW===innerWidth&&voH===innerHeight&&voY===off)return;
+  voW=innerWidth;voH=innerHeight;voY=off;
+  if(off<0)cam.clearViewOffset();else cam.setViewOffset(innerWidth,innerHeight,0,off,innerWidth,innerHeight);
+  cam.updateProjectionMatrix();
+}
+function poseFrame(){
+  if(!YOU||!YOU.bh)return;
+  const free=freeTop(),want=free*0.68,vh=2*Math.tan(cam.fov*Math.PI/360);
+  const dist=YOU.bh/(want/innerHeight)/vh+0.45;
+  const c=YOU.root.position,mid=YOU.bmid;
+  cam.position.set(c.x+0.39*dist,mid+0.14,c.z+0.92*dist);
+  look.set(c.x,mid+(fovBase-48)*0.011,c.z);
+}
+function poseOff(){posing=false;}
+
 // the preview is a fight, not a demo reel: it draws a form for the night, so
 // some previews the addiction reads it right and wins
 let autoSkill=0.28+Math.random()*0.5;
@@ -936,9 +956,10 @@ function camDrift(dt){if(dragging){manualUntil=performance.now()+9000;orbTarget.
   driftT+=dt;
   const manual=performance.now()<manualUntil;
   if(!manual&&autoCam&&performance.now()>holdUntil){
-    orbTarget.yaw=Math.sin(driftT*0.10)*0.20+Math.sin(driftT*0.043)*0.09;
-    orbTarget.pitch=0.03+Math.sin(driftT*0.077)*0.05;
-    orbTarget.zoom=0.93+Math.sin(driftT*0.055)*0.09;
+    const pz=posing&&fightOver;/* on the picker the swing stays gentle and the push in and out stops, so nobody gets cropped */
+    orbTarget.yaw=(Math.sin(driftT*0.10)*0.20+Math.sin(driftT*0.043)*0.09)*(pz?0.4:1);
+    orbTarget.pitch=pz?0:0.03+Math.sin(driftT*0.077)*0.05;
+    orbTarget.zoom=pz?1:0.93+Math.sin(driftT*0.055)*0.09;
   }else if(!manual){orbTarget.yaw=0;orbTarget.pitch=0;orbTarget.zoom=1;}
   const k=Math.min(1,dt*(manual?0.55:1.1));
   orbYaw+=(orbTarget.yaw-orbYaw)*k;orbPitch+=(orbTarget.pitch-orbPitch)*k;orbZoom+=(orbTarget.zoom-orbZoom)*k;}
@@ -966,7 +987,8 @@ function shot(name,ms){const S2=SHOTS[name];if(!S2)return;curShot=name;recentre(
 function actionLook(){
   if(YOU&&BOSS){const m=YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5);m.y=1.2;return m;}
   return LOOK.clone();}
-function camTick(dt){if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
+function camTick(dt){liftFrame();if(posing&&fightOver&&!document.getElementById('fighters').hidden){poseFrame();return;}
+  if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
   if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(!camTo&&!walkCam&&curShot!=='tv'&&curShot!=='walk'&&curShot!=='entry'&&curShot!=='girl'&&curShot!=='girlclose'){
     const t=(YOU&&!$('corner').hidden)?YOU.root.position.clone().setY(1.25):((!fightOver||running||downState)?actionLook():null);
     if(t)look.lerp(t,Math.min(1,dt*2.0));}

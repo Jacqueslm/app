@@ -6248,7 +6248,8 @@ loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
 const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
-function ready(){if(++loaded<10)return;giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();}
+function ready(){if(++loaded<10)return;giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||'temple');setGlove(Q.get('glove')||'red');$('load').remove();clockShow();
+  setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
 loader.parse(b64buf(REF_GLB),'',g=>{const root=g.scene;const tl=new T.TextureLoader();const imgs={},skins={};for(const k in REF_TEX.images){const t=tl.load(REF_TEX.images[k]);t.colorSpace=T.SRGBColorSpace;t.flipY=false;imgs[k]=t;}for(const n in REF_TEX.by)skins[n]=imgs[REF_TEX.by[n]];
   root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;const m=o.material;if(skins[o.name]){m.map=skins[o.name];m.color.set(0xffffff);m.emissiveMap=skins[o.name];m.emissive.set(0xffffff);m.emissiveIntensity=.55;m.roughness=1;m.metalness=0;m.needsUpdate=true;}}});ref.add(root);const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>acts[c.name]=mixer.clipAction(c));REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;
   loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-2.0,0,-2.2);F.root.position.copy(F.home);F.root.rotation.y=.5;ready();});
@@ -6510,12 +6511,14 @@ async function decision(how){running=false;fightOver=true;result=how;downState=f
   else{BOSS.idle();YOU.idle();await wait(2500);}
   $('go').textContent='Again';$('go').hidden=false;$('places').hidden=false;$('gloves').hidden=false;$('fighters').hidden=false;}
 document.querySelectorAll('#places button').forEach(b=>b.onclick=()=>{building={temple:1,tomb:2,monastery:3}[b.dataset.p]+3*Math.floor((building-1)/3);setMood();setPlace(b.dataset.p);});document.querySelectorAll('#gloves button').forEach(b=>b.onclick=()=>setGlove(b.dataset.g));document.querySelectorAll('#fighters button').forEach(b=>b.onclick=()=>{if(fightOver)loadFighter(+b.dataset.f);});
-$('go').onclick=()=>{ac();if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
+$('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
 $('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
-let auto=true,swingSide=null;
+const LIVE=(new URLSearchParams(location.search).get('live')==='1');
+let auto=!LIVE,swingSide=null;
 function autoSet(v){auto=v;const b=$('auto');if(b)b.classList.toggle('on',auto);}
-function autoOff(){if(auto)autoSet(false);}
-$('auto').onclick=()=>{ac();autoSet(!auto);};
+function autoOff(){if(!LIVE)return goLive(true);if(auto)autoSet(false);}
+function goLive(live){const q=new URLSearchParams(location.search);if(live)q.set('live','1');else q.delete('live');location.search=q.toString();}
+$('auto').onclick=()=>{if(auto)return;goLive(false);};
 // with Auto on it boxes for you, so the whole fight plays through on its own
 async function youAI(){let next=0;
   while(!fightOver){await wait(170);

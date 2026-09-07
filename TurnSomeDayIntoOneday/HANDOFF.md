@@ -938,3 +938,25 @@ Checked in headless Chromium: index.html loads clean with GAME_LEVELS 90 and 13
 temptation sets, and the fight at levels 1, 2 and 45 shows the tell shortening,
 the damage rising and the canvas colour changing, with an auto-played round
 through the bell and no page errors.
+
+## 7 Sep 2026 — Auto is a preview, not a fight (12.1)
+
+Settled: *"auto is just a preview not a fight it stops as soon as the user rings
+the bell."*
+
+- The fight page opens in **preview**: it starts itself and boxes both sides, so
+  the person watches a real fight play out without touching anything.
+- **Ringing the bell ends the preview** and opens the same page with `?live=1`,
+  which starts the fight with Auto off and the person in the controls. Touching
+  any punch, dodge or block during the preview does the same thing — your fight
+  starts.
+- The Auto button now only goes back to the preview; it can never take a live
+  fight over.
+- Done as a reload rather than an in-place restart on purpose: the ring walks
+  are a long chain of awaits with no way to cancel them cleanly, and a reload
+  guarantees the live fight starts from nothing. The models come from the
+  browser cache, and the app re-posts its settings on the iframe's load event.
+
+Checked in headless Chromium: the page with no parameter comes up with auto on
+and the preview running; `?live=1` comes up with auto off and the fight running.
+No page errors either way.

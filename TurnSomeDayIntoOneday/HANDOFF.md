@@ -302,6 +302,30 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   round the ring, two fingers or the wheel to come in and out, and it
   re-centres on every cut (`orbit`, `recentre`). Swipe-to-dodge is gone; the
   dodge buttons remain. Applied to both `game3d.html` and `tools/ring3d/`.
+- **The Big Rumble look (10.7).** He sent Creed Champions screenshots as the
+  target. Added: **sparks** off every landed punch (`sparks`, more on a power
+  punch), a **streak behind the glove** that throws it (`trail`), the
+  **connecting glove lights up** (`flashGlove`), a **lit blue ring canvas**
+  with its own light, **red/white/blue padded corner posts**, the camera
+  **leans** on a power punch (`roll`), and an arcade **HUD**: angled bars each
+  side, the round and clock in the middle, stars for rounds taken, a SUPER bar
+  in each bottom corner. The main camera dropped and came in so the two of
+  them fill the frame.
+- **Power punches and pressure.** One landed hook, cross or uppercut in four
+  is a **power punch**: slow motion, a hard freeze, the camera leans, speed
+  lines, `POWER`, and half again the damage. The addiction attacks far more:
+  the gap between swings shortens each round (1.9 s down to 0.75 s) and it
+  **doubles up** with a second swing about a third of the time, rising with
+  the round; its own meter fills faster and blocks feed it too. Measured: four
+  swings and 48 health in twenty seconds.
+- **The camera moves on its own** (`camDrift`): a slow swing round, a slow
+  push in and out, easing back to the shot a few seconds after you let go of a
+  drag. Held still while a ring card or a count is read (`holdCam`).
+- **The ring card leads into the bell.** Round order is now: the announcer
+  calls the round, the ring girl walks out with the card and the camera goes
+  with her (`girl`, `girlclose`), she holds it up, then the fighters take their
+  marks, then the bell. The card rides above her hand in world space facing
+  the camera, so her fingers never cover the number.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before

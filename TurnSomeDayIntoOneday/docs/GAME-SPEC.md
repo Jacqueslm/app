@@ -230,3 +230,34 @@ the game ends at ninety, and then it can be walked again from level 1.
 - **No quiz.** The addiction used to ask a question with two buttons. It does
   not any more — it just says the thing it says while it winds up, and reading
   which side it leans is the whole defence. Slip it and you get the counter.
+
+## The mission — settled 7 Sep 2026, replaces the ninety levels
+
+**A building is an addiction.** Thirteen of them, one per addiction the app
+tracks, each its own kind of place: a brewery tower, a neon motel, a cigarette
+factory, a boarded-up tenement, a casino, a glass tower of screens, an arcade,
+a diner and cold-store, a mall, an office tower with every window lit, a boiler
+house, a block with one window still lit, and a grey block with no sign.
+
+**The game never ends.** Thirteen buildings, then round again, harder. It gets
+harder forever but flattens as it climbs, so it never becomes unbeatable.
+
+**The game is part of the app, not aligned to it.** Anybody can walk into any
+building and fight any addiction. Only the lessons follow the person's own
+track. Nothing is locked behind the day's work any more; strength carried in is
+still earned in the app.
+
+**Ten floors and a roof, eleven fights.**
+- Every floor is a different ring with its own element **in** it, not on a
+  badge: rain that falls and splashes, fire off the floor, wind streaking
+  across, earth, ash, ice, smoke, lightning that strikes and shakes the room,
+  sand, shadow. Floor *n* always carries element *n*.
+- On a floor the opponent is the same addiction wearing that element's colour,
+  with the glow behind it.
+- **The roof is the source** — the addiction itself, no element, its own colour.
+- Rounds are unchanged: six of thirty seconds, the roof keeps the walk-ins, the
+  announcer and the corner.
+
+**Between buildings:** off the roof under a parachute, land in the street, and
+walk up to the next building with its name across the front. `img/fight/bld-*.jpg`
+holds the thirteen fronts.

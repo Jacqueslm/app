@@ -960,3 +960,38 @@ the bell."*
 Checked in headless Chromium: the page with no parameter comes up with auto on
 and the preview running; `?live=1` comes up with auto off and the fight running.
 No page errors either way.
+
+## 7 Sep 2026 — the mission: buildings, floors, elements (13.0 / 13.1)
+
+New concept, replacing the ninety levels. Spec in docs/GAME-SPEC.md.
+
+**In the fight page (13.0).** `FLOORS` (ten elements), `floorN` from `?floor=`
+or postMessage, `setElement()` building each one live in the ring out of points
+and lines — rain that falls and splashes on the canvas, fire climbing, wind
+streaks, drifting earth, ash, ice with a frost sheen, smoke, lightning that
+flashes and shakes the room, blown sand, rising shadow with a veil over the
+arena. The ring takes the floor's colours and the addiction wears them; the roof
+keeps the addiction's own colour. Difficulty is one continuous curve —
+`step()` counts every floor of every building and `ease()` flattens it, so
+`tellMs` runs 1.9s down towards 0.9s, `hitDmg` 10 up towards 26, the guard up to
+46% and the swing gap down to 430ms, forever, without becoming unbeatable.
+
+**In the app (13.1).** `GAME_BUILDINGS` (thirteen, each with its kind and the
+track its temptations come from), `GAME_ELEMENTS`, `GAME_FLOORS=10`.
+Screens: `renderApproach()` — the street, the building, its name across the
+front; `gameGoIn()`; `renderFloors()` — the stairs, ten floors and the roof,
+cleared/here/locked; `gameFloorGo(n)`; `renderRoofDoor()` now the door of
+whichever floor you are on; `game3dWon()` clears a floor and moves you up;
+`renderJump()` — the chute, after the roof; `gameNextBuilding()` lands you in
+the next street. The opponent now comes from the building, not the person's
+track, and the temptations come with it.
+
+Checked by driving the flow in a headless browser and reading what each screen
+rendered: approach shows The Drink, the stairs show eleven, the door reads
+"floor 1 · Rain", a win reads "Floor clear", the roof win reads "The Drink is
+done", and the next building is The Screen. No page errors. Not seen by eye —
+the game screens sit behind the sign-in wall and this container has no account.
+
+**Still to do:** the thirteen building fronts (`img/fight/bld-*.jpg`) are not
+drawn yet; the approach falls back to whatever `gmPhoto` finds. The prompts for
+them are in the chat of 7 Sep.

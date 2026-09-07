@@ -28,8 +28,9 @@ REM two launchers they needed go with them - TURN ON AUTO does all of it.
 del /q "trade-grader.html" "journal.html" "Start Trade Grader.bat" "Start Phone Link.bat" >nul 2>&1
 REM The previous-generation scripts and the prop-firm guide are not part of the
 REM live system and were only ever clutter in this folder.
-del /q "PLAYBOOK.md" "PROP-FIRMS.md" "pine\MSB-Pure.pine" "pine\MSB-Pure-Alerts.pine" >nul 2>&1
-rmdir /q "ninjatrader" >nul 2>&1
+del /q "PLAYBOOK.md" "PROP-FIRMS.md" "GETTING-STARTED.md" >nul 2>&1
+del /q "pine\MSB-Pure.pine" "pine\MSB-Pure-Alerts.pine" >nul 2>&1
+rmdir /s /q "ninjatrader" >nul 2>&1
 
 REM Last of all, this updater refreshes itself so next run knows about any
 REM newly added files. The swap happens after this window is done reading

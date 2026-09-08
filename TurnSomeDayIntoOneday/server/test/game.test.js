@@ -131,6 +131,36 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
     'the replay check comes before anything is counted');
 });
 
+test('every element fights differently, and none of them is unwinnable', () => {
+  const m = FIGHT3D.match(/const FLOORS=\[([\s\S]*?)\n\s*\/\/ The roof has no element/);
+  assert.ok(m, 'FLOORS still carries the per-element styles');
+  const styles = [...m[1].matchAll(/\{k:'(\w+)'[\s\S]*?st:\{tell:([\d.]+),dmg:([\d.]+),chin:([\d.]+),gap:([\d.]+),feint:([\d.]+),how:'([^']+)'/g)];
+  assert.equal(styles.length, 13, 'all thirteen elements have a style');
+  for (const [, k, tell, dmg, chin, gap, feint, how] of styles) {
+    for (const [name, v] of [['tell', +tell], ['dmg', +dmg], ['chin', +chin], ['gap', +gap]]) {
+      assert.ok(v >= 0.55 && v <= 1.5, `${k} ${name} is ${v} - a floor is a different fight, never an unwinnable one`);
+    }
+    assert.ok(+feint >= 0 && +feint <= 0.4, `${k} feints ${feint} of the time - over 0.4 is unreadable`);
+    assert.ok(how.length > 8, `${k} must say how it fights, so nobody walks into Ice expecting Lightning`);
+  }
+  // The three numbers have to actually reach the fight, or the styles are decoration.
+  assert.match(FIGHT3D, /function tellMs\(\)\{return \(1900-1000\*ease\(step\(\)-1\)\)\*STY\(\)\.tell/);
+  assert.match(FIGHT3D, /function hitDmg\(\)\{return Math\.round\(\(10\+16\*ease\(step\(\)-1\)\)\*STY\(\)\.dmg\)/);
+  assert.match(FIGHT3D, /dmg=Math\.max\(2,Math\.round\(dmg\*STY\(\)\.chin\)\)/);
+  assert.match(FIGHT3D, /\*STY\(\)\.gap;await wait\(gap\)/);
+  // A feint never comes twice running - the follow-up is called with fast=true,
+  // and that path skips the feint check.
+  assert.match(FIGHT3D, /if\(!fast&&Math\.random\(\)<STY\(\)\.feint\)/);
+  assert.match(FIGHT3D, /return bossSwing\(true\);/);
+  // and the words match the numbers, screen for screen
+  const how3d = Object.fromEntries(styles.map(([, k, , , , , , how]) => [k, how]));
+  const app = GAME.match(/const GAME_ELEMENT_HOW=\{([\s\S]*?)\};/);
+  assert.ok(app, 'the app tells people how the element fights');
+  for (const [, name, line] of app[1].matchAll(/(\w+):'([^']+)'/g)) {
+    assert.equal(how3d[name.toLowerCase()], line, `${name} reads differently in the app than it fights`);
+  }
+});
+
 test('a cleared floor can be walked back into, and it changes nothing', () => {
   const floors = block('function renderFloors(){', 'function gameFloorGo(');
   assert.match(floors, /done\?'gameFloorReplay\('\+n\+'\)'/, 'a cleared floor is tappable again');

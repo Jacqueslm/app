@@ -1,0 +1,51 @@
+{
+  "packageId": "com.turnsomedayintodayone.app",
+  "host": "www.turnsomedayintodayone.com",
+  "name": "Turn Someday Into Day One",
+  "launcherName": "Day One",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#0f0c29",
+  "themeColorDark": "#0f0c29",
+  "navigationColor": "#0f0c29",
+  "navigationColorDark": "#0f0c29",
+  "navigationDividerColor": "#0f0c29",
+  "navigationDividerColorDark": "#0f0c29",
+  "backgroundColor": "#0f0c29",
+  "enableNotifications": true,
+  "startUrl": "/app?src=play",
+  "iconUrl": "https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/icons/icon-512.png",
+  "maskableIconUrl": "https://raw.githubusercontent.com/Jacqueslm/app/main/TurnSomeDayIntoOneday/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android-upload.keystore",
+    "alias": "upload"
+  },
+  "appVersionName": "1.0.2",
+  "appVersionCode": 3,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://www.turnsomedayintodayone.com/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": true
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://www.turnsomedayintodayone.com/",
+  "minSdkVersion": 23,
+  "compileSdkVersion": 36,
+  "targetSdkVersion": 36,
+  "appVersion": "1.0.2",
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": ""
+}

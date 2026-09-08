@@ -56,7 +56,7 @@ Standing instructions. These override default behaviour and repo conventions.
   reviewed. Researched 31 Aug; changing it was the wrong call.
 - **The boxing game is removed.** He rejected it three times. Recoverable at
   commit `5623c870` if he ever asks, but do not suggest it.
-- The Game tab opens The Fight of Your Life (code still says 2AM/tower), with The Climb on that screen.
+- The Fight tab (was "Game", renamed 6 Sep) opens The Fight of Your Life (code still says 2AM/tower). The Climb is on Today under the lesson and in Tools, not on the fight screen; a finished lesson takes the step by itself.
 - **The Fight of Your Life (rebuilt 6 Sep 2026, spec in docs/GAME-SPEC.md):** every
   floor spins a wheel onto one of three shows (Who Wants to Recover, Wheel of
   Your Addictions, Time to Heal), 12 floors, then a Punch-Out style fight on the

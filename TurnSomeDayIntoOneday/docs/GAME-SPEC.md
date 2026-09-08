@@ -1,7 +1,7 @@
 # GAME-SPEC.md — "The Fight of Your Life"
 
-The recovery game inside Turn Someday Into Day One. The Game tab opens it, with
-The Climb on the same screen. Code identifiers still say `tower`, `2AM`, `gm`,
+The recovery game inside Turn Someday Into Day One. The Fight tab opens it (the
+tab was "Game" until 6 Sep). The Climb lives on Today and in Tools. Code identifiers still say `tower`, `2AM`, `gm`,
 `g2-`.
 
 **Rewritten 6 Sep 2026.** Jacques on the 3 Sep version: "the game is wack, the

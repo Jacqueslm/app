@@ -2,7 +2,7 @@
 
 ## Where the game is, 6 Sep 2026 (read this first if you are continuing the game work)
 
-Jacques is rebuilding **The Fight of Your Life** (the Game tab) with the person
+Jacques is rebuilding **The Fight of Your Life** (The Fight tab) with the person
 in this chat, one preview at a time. He is not a developer. Short replies, plain
 words, one step at a time, never push unless he says "push", commit locally.
 

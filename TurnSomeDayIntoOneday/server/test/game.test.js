@@ -157,6 +157,10 @@ test('the supporter gets their own opponent, never their person\'s habit', () =>
 test('the vault and the ninety-floor tower are gone from the page', () => {
   assert.doesNotMatch(APP, /renderTowerVault|TOWER_FLOORS|TOWER_ARTIFACTS|id="s-vault"|tw-door/);
   assert.match(APP, /id="s-tower"/);
-  assert.match(APP, /id="tw-climb-link"/, 'The Climb stays on the Game screen');
+  // 6 Sep: The Climb moved off the fight screen. It lives on Today, under the
+  // lesson that takes its step, and in Tools.
+  assert.doesNotMatch(APP, /id="tw-climb-link"/, 'The Climb is no longer on the fight screen');
+  assert.match(APP, /id="home-climb"[^>]*onclick="openClimb\(\)"/, 'The Climb is on Today');
+  assert.match(APP, /<span>The Fight<\/span>/, 'the tab is called The Fight');
   assert.doesNotMatch(APP, /whole 2AM tower|all 90 floors|ninety floors/i);
 });

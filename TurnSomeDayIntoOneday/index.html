@@ -436,7 +436,7 @@ body.nova-open #mini-player{bottom:160px}
 .reset-btn{width:100%;background:var(--s2);border:0.5px solid #E24B4A;border-radius:12px;padding:13px;font-size:.875rem;color:#E24B4A;cursor:pointer;font-family:var(--f);font-weight:500}
 .usage{font-size:.75rem;color:var(--ts);line-height:1.5}/* BOTTOM NAV */ .bnav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);padding:6px 0 max(14px,env(safe-area-inset-bottom));position:fixed;bottom:0;width:100%;max-width:430px;z-index:100} .bn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;user-select:none} .bn i{font-size:1.3125rem;color:var(--tm)} .bn.on i{color:var(--accent)} .bn span{font-size:.5625rem;color:var(--tm)} .bn.on span{color:var(--accent)} .bn-badge{position:absolute;top:-2px;right:-4px;background:#E24B4A;color:#fff;font-size:.5625rem;border-radius:10px;padding:1px 4px;min-width:14px;text-align:center} .bn-rel{position:relative;display:inline-block}
 /* UTILS */ .btn-full{width:100%;background:var(--brand);color:var(--green);border:none;border-radius:12px;padding:13px;font-size:.875rem;font-weight:500;cursor:pointer;font-family:var(--f)} .nova-promo{background:var(--acc);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin:0 16px 16px}
-/* THE FIGHT OF YOUR LIFE (the Game tab). Its own night palette in both app
+/* THE FIGHT OF YOUR LIFE (The Fight tab). Its own night palette in both app
    themes: the game is set at night whatever the rest of the app is doing.
    One photo behind everything (img/fight), the HUD on top, the body at the
    bottom. Classes are g2-* so nothing here collides with the rest of the app. */
@@ -605,7 +605,6 @@ body.nova-open #mini-player{bottom:160px}
 .g2-cornerbox{background:rgba(7,10,20,.85);border:1px solid var(--g2-you);border-radius:6px;padding:14px;font-size:1.05rem;line-height:1.35;color:var(--g2-chalk)}
 .g2-cornerbox small{display:block;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2-you);margin-bottom:6px}
 .g2-ride{font-size:4rem;text-align:center;line-height:1.1;margin:6px 0 2px}
-#tw-climb-link{display:block;width:calc(100% - 32px);max-width:448px;margin:12px auto 0;background:transparent;border:1px solid #2a3350;color:#a9b1d6;font-family:'Barlow Condensed','Arial Narrow',Impact,sans-serif;font-weight:700;font-size:.9rem;letter-spacing:.14em;text-transform:uppercase;padding:12px;border-radius:4px}
 #gm-foot{max-width:448px;margin:10px auto 0;padding:0 16px;font-size:.66rem;letter-spacing:.06em;color:#8a93bd;text-align:center}
 @media (prefers-reduced-motion: reduce){.g2-spinner{transition-duration:.01s}.g2-photo.boss{animation:none}}
  </style> <script>
@@ -1295,6 +1294,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
           </div>
         </div>
+        <div class="setting-row" id="home-climb" onclick="openClimb()" style="margin-top:10px">
+          <i class="ti ti-mountain" style="color:#534AB7"></i>
+          <div class="setting-row-txt"><p>The Climb</p><span id="home-climb-sub">Your 90 steps up the mountain · today’s lesson takes the step</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
       </div>
     </div>
 
@@ -1570,11 +1574,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
-    <!-- THE FIGHT OF YOUR LIFE. Spec: docs/GAME-SPEC.md (rewritten 6 Sep 2026).
-         Twelve floors of game shows - Who Wants to Recover, Wheel of Your
-         Addictions, Time to Heal - then the roof: the thing this person is
-         fighting, by name, as a shadow in the ring. Then a ride to the next
-         building. Never ends. Code still says tower/2AM in places. -->
+    <!-- THE FIGHT OF YOUR LIFE (The Fight tab). Spec: docs/GAME-SPEC.md.
+         Every building opens on the roof: the thing this person is fighting,
+         by name, as a shadow in the ring. Then a ride to the next building.
+         Never ends. The Climb lives on Today and in Tools, not here.
+         Code still says tower/2AM/gm in places. -->
     <div id="s-tower" class="scr">
       <div class="g2" id="g2">
         <div class="g2-photo" id="g2-photo"></div>
@@ -1587,7 +1591,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="g2-floors" id="g2-floors"></div>
         <div class="g2-body" id="g2-body"></div>
       </div>
-      <button id="tw-climb-link" onclick="openClimb()">THE CLIMB · 90 STEPS</button>
       <div id="gm-foot">Your strength is earned in the app, not in here. Do the work, walk in strong.</div>
     </div>
     <!-- TOOLS (hub) -->
@@ -1646,7 +1649,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div class="setting-row" onclick="openTower()">
           <i class="ti ti-building" style="color:#534AB7"></i>
-          <div class="setting-row-txt"><p>The Fight of Your Life</p><span>Twelve floors, then the thing you’re fighting waits on the roof. Your strength comes from the work you do here</span></div>
+          <div class="setting-row-txt"><p>The Fight of Your Life</p><span>The thing you’re fighting waits on the roof, by name. Your strength comes from the work you do here</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openFilm()">
@@ -2076,7 +2079,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="bnav">
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
-    <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-building"></i><span>Game</span></div>
+    <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-glove"></i><span>The Fight</span></div>
     <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
@@ -3174,6 +3177,7 @@ const ICON_PATHS={
 'ti-mountain':'<path d="M3 20h18L14 7l-3.2 5.6L8.6 10z"/><path d="M10.8 12.6l1.6 2.4"/>',
 'ti-bolt':'<path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12z"/>',
 'ti-building':'<path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20"/><path d="M8 8h3M8 12h3M8 16h3"/>',
+'ti-glove':'<path d="M7 12V7a3 3 0 0 1 6 0v1h1.5a2.5 2.5 0 0 1 0 5H13v5a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6z"/><path d="M7 14h6"/>',
 'ti-alert-triangle':'<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none"/>',
 'ti-arrow-right':'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/>',
 'ti-award':'<circle cx="12" cy="8" r="6"/><path d="M9 13l-2 9 5-3 5 3-2-9"/>',
@@ -3722,8 +3726,13 @@ function renderLessonExtras(day){
   }
   host.innerHTML=html;
 }
+function renderHomeClimb(){
+  const el=document.getElementById('home-climb-sub');if(!el)return;
+  const n=Math.min(999,S.climbSteps||0),today=new Date().toDateString();
+  el.textContent=(n?'Step '+n+' of 90':'Your 90 steps up the mountain')+(S.climbLastStep===today?' · today’s step taken by your lesson':' · today’s lesson takes the next step');
+}
 function renderTodayLesson(){
-  updateHomeFaithCard();
+  updateHomeFaithCard();renderHomeClimb();
   const switchRow=document.getElementById('lesson-track-switch-row');
   if(switchRow){
     switchRow.style.display=S.selectedAddictions.length>1?'flex':'none';
@@ -5010,7 +5019,7 @@ const NAV_TOUR_STEPS=[
   {screen:'tools',tab:'bn-tools',target:'#bn-tools',step:'2 of 7',title:'Tools — everything for right now',
    body:'Craving help, breathing, urge surfing, journal, and progress live under this tab. Tap it whenever you need a tool fast.'},
   {screen:'tower',tab:'bn-game',target:'#bn-game',step:'3 of 7',title:'The Fight of Your Life',
-   body:'Buildings you climb at night. Twelve floors of game shows, then the thing you\'re fighting waits on the roof. No clock. Your strength comes from the work you do in the app.'},
+   body:'Buildings at night. The thing you\'re fighting waits on the roof, by name, and you fight it. Your strength comes from the work you do in the app.'},
   {screen:'nova',tab:'bn-nova',target:'#bn-nova',step:'4 of 7',title:'Friendly — your AI companion',
    body:'A private ear that\'s here any time, free. Talk it out and it helps you make sense of the moment.'},
   {screen:'profile',tab:'bn-plans',target:'#bn-plans',step:'5 of 7',title:'Profile — your plan and settings',
@@ -6753,7 +6762,7 @@ function updateStoryBtn(id){const b=document.getElementById('story-btn-'+id);
   if(b)b.textContent=(storyAudio&&storyPlayingId===id&&!storyAudio.paused)?'❚❚ Pause':'▶ Listen';}
 function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=storyPlayingId;storyAudio=null;storyPlayingId=null;if(old)updateStoryBtn(old);}}
 
-// ─── THE FIGHT OF YOUR LIFE (the Game tab) ───────────────────────────────────
+// ─── THE FIGHT OF YOUR LIFE (The Fight tab) ───────────────────────────────────
 // Jacques, 6 Sep 2026, rebuilt from the 2AM buildings: "the game is wack, the
 // fight is ok but the questions on all levels are wack." Game shows, no clock,
 // photos, real sound, and a fight that plays like Punch-Out.
@@ -7980,7 +7989,7 @@ function climbToast(n){
   let t=document.getElementById('climb-toast');
   if(!t){t=document.createElement('button');t.id='climb-toast';t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));z-index:9000;background:#1c2a47;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:11px 16px;font:600 .9rem/1.2 inherit;box-shadow:0 10px 30px rgba(0,0,0,.4);display:flex;gap:10px;align-items:center;opacity:0;transition:opacity .4s';t.onclick=()=>{t.style.opacity=0;openClimb();};document.body.appendChild(t);}
   t.innerHTML='<span style="font-size:1.2rem">🏔️</span><span>Step '+n+' of 90 taken · your lesson climbed it<br><small style="opacity:.75;font-weight:400">Tap to watch</small></span>';
-  t.style.display='flex';requestAnimationFrame(()=>t.style.opacity=1);
+  t.style.display='flex';requestAnimationFrame(()=>t.style.opacity=1);if(typeof renderHomeClimb==='function')renderHomeClimb();
   clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.style.display='none',450);},6000);
 }
 function climbStep(){
@@ -12976,6 +12985,7 @@ function switchTo(id,opts){
   if(id==='tools'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
+  if(id==='home'&&typeof renderHomeClimb==='function')renderHomeClimb();
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
@@ -14798,7 +14808,7 @@ const HELP_INDEX=[
   {name:'Profile & settings',sub:'Your account, PIN, reminders, updates — all settings',k:'profile page settings preferences options menu account section',go:()=>{switchTo('profile');actBn('bn-plans');}},
   {name:'Today screen',sub:'Your day counter, pledge, and daily lesson',k:'today home main screen front day counter start',go:()=>{switchTo('home');actBn('bn-home');}},
   {name:'Tools',sub:'All the free recovery tools in one place',k:'tools toolbox exercises coping techniques',go:()=>{switchTo('tools');actBn('bn-tools');}},
-  {name:'The Fight of Your Life (the Game tab)',sub:'Buildings of twelve floors, and the thing you\'re fighting waits on every roof',k:'game games 2am fight life tower building buildings floors night play boss rooftop roof punch',go:()=>openTower()},
+  {name:'The Fight of Your Life (The Fight tab)',sub:'The thing you\'re fighting waits on the roof of every building',k:'game games 2am fight life tower building buildings floors night play boss rooftop roof punch',go:()=>openTower()},
   {name:'The Climb',sub:'Your 90 steps up the mountain',k:'climb mountain steps 90 ninety progress journey game',go:()=>openClimb()},
   {name:'I\'m having a craving right now',sub:'Opens the SOS help screen',k:'sos craving urge emergency panic tempted relapse help now',go:()=>openSOS()},
   {name:'Talk me through it',sub:'Hands-free voice guide — just listen and breathe',k:'voice talk guide listen audio speak calm hands free',go:()=>startVoiceGuide()},
@@ -15470,7 +15480,7 @@ const GUIDE_FAQ=[
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
-  {q:'What is the Game tab?',k:'game tab play 2am fight life tower climb mountain floors building buildings boss roof rooftop punch what is',a:"It holds <b>The Fight of Your Life</b> — buildings you climb at night. Twelve quick floors, each a test under a minute: spot the voice, quick fire, finish a line from a lesson you’ve done, find the exit. Then the roof, where the thing you’re fighting waits by name — pick the right counter and you punch, pick the wrong one and it hits you. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, sits on the same screen.",go:'The Fight of Your Life (the Game tab)'},
+    {q:'What is The Fight tab?',k:'game tab play fight life tower climb mountain building buildings boss roof rooftop punch what is the fight',a:"It opens <b>The Fight of Your Life</b> — buildings at night. On every roof the thing you’re fighting waits, by name, as a shadow in the ring. It says its line, you pick your counter; then it’s punches, dodges and blocks, with the bell, the ref and the crowd. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, lives on Today under your lesson and in Tools — each finished lesson takes a step by itself.",go:'The Fight of Your Life (The Fight tab)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
   {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},

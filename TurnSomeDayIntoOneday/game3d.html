@@ -906,6 +906,7 @@ async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   bossHP=100;youHP=Math.min(100,youHP+25);bars();landed={you:0,boss:0};downs={you:0,boss:0};timeLeft=ROUND_SECS;clockShow();
   // The round-N recording says it. The announcer used to say it again over the top,
   // and the ring card a third time - all three at once (Jacques, 8 Sep 2026).
+  orbYaw=0;orbPitch=0;orbZoom=1;recentre();manualUntil=0;
   snd('round-'+round);
   await walkTheCard(round);
   await toMarks();shot('tv',700);await wait(500);snd('bell');roar();crowdOn(.35);running=true;}
@@ -1177,9 +1178,18 @@ const ray=new T.Raycaster(),ndc=new T.Vector2();
 function tapCard(e){if(!card||!card.visible)return false;const r=canvas.getBoundingClientRect();ndc.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);if(!ray.intersectObject(card,false).length)return false;cardFront=!cardFront;card.material.map=cardFront?cardTex(String(round+1),true):cardTex($('v').textContent.replace(/^Corner/,''),false);card.material.needsUpdate=true;return true;}
 // 360: drag to swing the camera all the way round the ring, two fingers to come in and out.
 let orbYaw=0,orbPitch=0,orbZoom=1,dragging=false,dragX=0,dragY=0,pinch=0;
+// The swing round the ring was unlimited, and a horizontal drag is also how you
+// dodge - so a few dodges the same way walked the camera round behind the
+// addiction and left the fight being watched from its shoulder, backwards.
+// (Jacques's wife's iPhone, 8 Sep 2026.) Look around all you like on the picker;
+// once the bell has gone the view stays on the side of the ring you fight from.
+function yawLimit(){return (running||downState)?0.5:Math.PI;}
+function clampYaw(y){const L=yawLimit();return Math.max(-L,Math.min(L,y));}
 function orbit(pos,look){if(!orbYaw&&!orbPitch&&orbZoom===1)return pos;const v=pos.clone().sub(look);const r=v.length();let th=Math.atan2(v.x,v.z)+orbYaw,ph=Math.asin(Math.max(-1,Math.min(1,v.y/r)))+orbPitch;ph=Math.max(-0.5,Math.min(1.15,ph));const rr=r*orbZoom;return new T.Vector3(look.x+rr*Math.cos(ph)*Math.sin(th),look.y+rr*Math.sin(ph),look.z+rr*Math.cos(ph)*Math.cos(th));}
 canvas.addEventListener('pointerdown',e=>{if(tapCard(e))return;dragging=true;dragX=e.clientX;dragY=e.clientY;canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);});
-canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragX,dy=e.clientY-dragY;dragX=e.clientX;dragY=e.clientY;orbYaw-=dx*0.008;orbPitch+=dy*0.005;orbPitch=Math.max(-0.5,Math.min(1.15,orbPitch));manualUntil=performance.now()+9000;});
+canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragX,dy=e.clientY-dragY;dragX=e.clientX;dragY=e.clientY;orbYaw=clampYaw(orbYaw-dx*0.008);orbPitch+=dy*0.005;orbPitch=Math.max(-0.5,Math.min(1.15,orbPitch));
+  // nine seconds is a third of a round to spend pointed the wrong way
+  manualUntil=performance.now()+((running||downState)?2200:9000);});
 addEventListener('pointerup',()=>{dragging=false;});addEventListener('pointercancel',()=>{dragging=false;});
 canvas.addEventListener('touchmove',e=>{if(e.touches.length!==2)return;const t=e.touches,d=Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);if(pinch)orbZoom=Math.max(.45,Math.min(2.2,orbZoom*(pinch/d)));pinch=d;},{passive:true});
 canvas.addEventListener('touchend',()=>{pinch=0;});
@@ -1189,7 +1199,8 @@ function recentre(){orbTarget.yaw=0;orbTarget.pitch=0;orbTarget.zoom=1;driftT=Ma
 // a few seconds after you stop dragging. Held still only while a card or a count is being read.
 const orbTarget={yaw:0,pitch:0,zoom:1};let driftT=0,holdUntil=0,autoCam=true;
 function holdCam(ms){holdUntil=performance.now()+ms;}
-function camDrift(dt){if(dragging){manualUntil=performance.now()+9000;orbTarget.yaw=orbYaw;orbTarget.pitch=orbPitch;orbTarget.zoom=orbZoom;return;}
+function camDrift(dt){orbYaw=clampYaw(orbYaw);orbTarget.yaw=clampYaw(orbTarget.yaw);
+  if(dragging){manualUntil=performance.now()+((running||downState)?2200:9000);orbTarget.yaw=orbYaw;orbTarget.pitch=orbPitch;orbTarget.zoom=orbZoom;return;}
   driftT+=dt;
   const manual=performance.now()<manualUntil;
   if(!manual&&autoCam&&performance.now()>holdUntil){

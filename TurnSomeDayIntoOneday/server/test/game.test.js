@@ -131,6 +131,20 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
     'the replay check comes before anything is counted');
 });
 
+test('the camera cannot end up behind the addiction mid-round', () => {
+  // A horizontal drag is also how you dodge, so an unlimited swing meant a few
+  // dodges the same way left the fight being watched from its opponent's shoulder.
+  assert.match(FIGHT3D, /function yawLimit\(\)\{return \(running\|\|downState\)\?0\.5:Math\.PI;\}/,
+    'penned in during the action, free on the picker');
+  assert.match(FIGHT3D, /orbYaw=clampYaw\(orbYaw-dx\*0\.008\)/, 'the drag itself is clamped');
+  assert.match(FIGHT3D, /function camDrift\(dt\)\{orbYaw=clampYaw\(orbYaw\)/, 'and so is anything already banked');
+  // every bell puts the view back where it belongs
+  const round = FIGHT3D.slice(FIGHT3D.indexOf('async function nextRound()'), FIGHT3D.indexOf('async function endRound()'));
+  assert.match(round, /orbYaw=0;orbPitch=0;orbZoom=1;recentre\(\);manualUntil=0;/);
+  // and a wrong-way drag is not held for a third of the round
+  assert.match(FIGHT3D, /manualUntil=performance\.now\(\)\+\(\(running\|\|downState\)\?2200:9000\)/);
+});
+
 test('nobody is counted out, and nobody is stood up for', () => {
   const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
   // The app must never stand a person up on its own, and never count them out.

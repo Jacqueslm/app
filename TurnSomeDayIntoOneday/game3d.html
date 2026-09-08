@@ -743,8 +743,14 @@ async function stagger(F){
 // the lights go down on a knockdown and come back up when they are on their feet
 let koLightSaved=null;
 function koLights(F,on){
-  if(on){koLightSaved={amb:amb.intensity,key:spot.intensity,rim:rim.intensity};
-    amb.intensity=.16;spot.intensity=8;rim.intensity=40;crowdOn(.9);
+  // Only save the room's real lighting if we have not already dimmed it. This used
+  // to overwrite unconditionally, so a second knockdown - or the referee stepping in
+  // during one - saved the ALREADY dark values as "normal", and every restore after
+  // that put the room back to almost nothing. The screen went black and stayed black
+  // while the clock and the bars carried on. Waiting on a tap to get up made it far
+  // easier to hit, because the dim now lasts as long as the person needs. (8 Sep 2026)
+  if(on){if(!koLightSaved)koLightSaved={amb:amb.intensity,key:spot.intensity,rim:rim.intensity};
+    amb.intensity=.42;spot.intensity=26;rim.intensity=60;crowdOn(.9);
     follow(F,0xffffff,220);shaftsOn(0xdfe9ff,.2);}
   else{if(koLightSaved){amb.intensity=koLightSaved.amb;spot.intensity=koLightSaved.key;rim.intensity=koLightSaved.rim;koLightSaved=null;}
     followOff();shaftsOff();crowdOn(.15);}}
@@ -1124,6 +1130,7 @@ async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam
   downs.you++;downsFight.you++;
   YOU.play('knocked_out',{speed:1.2});shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(YOU,true);
   await wait(2100);await refWalk(new T.Vector3(.55,0,-.15));
+  shot('down',900);
   const at=await refCountToTap(YOU.root.position);
   refIdle();
   snd('getup');call(at<=3?'Straight back up.':at<=6?'Up at '+at+'.':'Up, and on his feet.',true);
@@ -1263,7 +1270,17 @@ function tvPos(a,b,mid,d){
   const back=port?(2.35+d*0.35):(1.15+d*0.3), off=port?1.45:(2.05+d*0.5);
   return mid.clone().setY(port?1.42:1.2).addScaledVector(toYou,back).addScaledVector(side,off);
 }
-const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
+// The count ran on the 'low' corner camera, which sits almost exactly where you
+// stand - so the moment the whole thing is about, you on the canvas deciding to get
+// up, played with you off the edge of the frame. This stands off whoever fell.
+function downPos(F){
+  const p=F.root.position,away=new T.Vector3(p.x,0,p.z);
+  if(away.lengthSq()<0.04)away.set(0.6,0,1);
+  away.normalize();
+  return new T.Vector3(p.x,1.15,p.z).addScaledVector(away,2.3);
+}
+const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},
+  down:{pos:()=>YOU?downPos(YOU):new T.Vector3(-1.7,1.15,1.9),look:()=>YOU?YOU.root.position.clone().setY(0.55):new T.Vector3(0,0.55,0)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
 let walkCam=null;
 const runnerMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
 const runner=new T.Mesh(new T.PlaneGeometry(1.8,9),runnerMat);runner.rotation.x=-Math.PI/2;runner.position.set(-0.5,.014,0);runner.visible=false;scene.add(runner);

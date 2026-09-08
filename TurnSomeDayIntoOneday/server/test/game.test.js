@@ -156,6 +156,21 @@ test('the camera cannot end up behind the addiction mid-round', () => {
   assert.match(FIGHT3D, /manualUntil=performance\.now\(\)\+\(\(running\|\|downState\)\?2200:9000\)/);
 });
 
+test('the ring lights always come back up', () => {
+  const ko = FIGHT3D.slice(FIGHT3D.indexOf('function koLights('), FIGHT3D.indexOf('// sparks:'));
+  // Saving unconditionally meant a second knockdown banked the already-dark values
+  // as "normal", and every restore after that left the screen black for good.
+  assert.match(ko, /if\(!koLightSaved\)koLightSaved=\{/, 'the room is only remembered once');
+  assert.doesNotMatch(ko, /if\(on\)\{koLightSaved=\{/, 'never overwrite a saved room');
+  assert.match(ko, /koLightSaved=null;/, 'and it is cleared on the way back up');
+});
+
+test('you can see yourself on the canvas while the count runs', () => {
+  const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
+  assert.match(down, /shot\('down',900\);/, 'the count has its own camera');
+  assert.match(FIGHT3D, /down:\{pos:\(\)=>YOU\?downPos\(YOU\)/, 'and it is built from where they fell');
+});
+
 test('nobody is counted out, and nobody is stood up for', () => {
   const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
   // The app must never stand a person up on its own, and never count them out.

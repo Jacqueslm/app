@@ -110,7 +110,7 @@
   </div>
   <button class="getup" id="getup" hidden>GET UP</button>
   <button class="skipwalk" id="skipwalk" hidden>Skip the walk-in</button>
-  <div class="ver" aria-hidden="true">3.0.2</div>
+  <div class="ver" aria-hidden="true">3.3</div>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
 <script>
@@ -127,7 +127,7 @@ const ART=BASE+'img/fight/',AUDIO=BASE+'audio/fight/';
 // files cache-first, and the six fighter models were re-exported this month - so a
 // phone that had the old ones kept using them, and the new code stood the old model
 // up facing the wrong way. A new address is never in an old cache. (iPhone, 8 Sep 2026)
-const AV='?v=3.0.2';
+const AV='?v=3.3';
 // models load from img/fight/
 const canvas=$('c'),R=new T.WebGLRenderer({canvas,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
 const scene=new T.Scene();scene.background=new T.Color(0x05070d);scene.fog=new T.FogExp2(0x05070d,.075);

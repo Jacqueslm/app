@@ -38,6 +38,7 @@
 html,body{min-height:100%;background:var(--brand);font-family:var(--f)}
 body{display:flex;justify-content:center}
 .app{width:100%;max-width:430px;background:var(--s0);min-height:100dvh;display:flex;flex-direction:column}
+.shell{flex:1;display:flex;flex-direction:column}
 .hdr{background:var(--brand);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
 .hdr a{color:#8892c0;text-decoration:none;font-size:22px;line-height:1;padding:4px 6px 4px 0}
 .hdr h1{font-size:17px;font-weight:600;flex:1}
@@ -75,7 +76,7 @@ textarea::placeholder{color:var(--tm)}
 .err.show{display:block}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.mtabs{background:var(--brand);display:flex;flex-wrap:wrap;gap:8px;padding:2px 14px 12px;justify-content:center}
+.mtabs{display:none}
 .mtabs::-webkit-scrollbar{display:none}
 .mtabs button{border:0.5px solid rgba(255,255,255,0.18);background:transparent;color:#8892c0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:500;font-family:var(--f);cursor:pointer;white-space:nowrap}
 .mtabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -161,14 +162,54 @@ body.simple-only #view-simple{display:flex !important}
 .lightbox .lb-dl:hover{background:#7d6dff}
 .lightbox .lb-dl:disabled{opacity:.6;cursor:default}
 .lib-item img,.lib-item video{cursor:zoom-in}
+
+/* ---- Studio shell, 8 Sep 2026: one nav, five places, tools grouped ---- */
+.hdr h1 small{font-size:11px;font-weight:500;color:#8892c0;margin-left:8px}
+#snav{display:flex;background:var(--s2);border-top:0.5px solid var(--bdr);position:fixed;left:0;right:0;bottom:0;z-index:6;padding:6px 4px calc(6px + env(safe-area-inset-bottom));justify-content:center}
+#snav button{flex:1;max-width:96px;border:none;background:transparent;color:var(--tm);font-family:var(--f);font-size:11px;font-weight:600;padding:6px 2px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+#snav button i{font-style:normal;font-size:20px;line-height:1}
+#snav button.on{color:var(--accent);background:var(--acc)}
+#snav button .due-dot{display:none;position:absolute;top:4px;right:14px;width:8px;height:8px;border-radius:50%;background:#ff5f57}
+#snav button.has-due .due-dot{display:block}
+.body{padding-bottom:calc(env(safe-area-inset-bottom) + 84px)}
+.subseg{display:none;background:var(--s1);border-radius:12px;padding:4px;gap:4px}
+.subseg.on{display:flex}
+.subseg button{flex:1;border:none;background:transparent;color:var(--tm);font-family:var(--f);font-size:14px;font-weight:600;padding:10px;border-radius:9px;cursor:pointer}
+.subseg button.on{background:var(--s2);color:var(--tp);box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+.stages{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;position:sticky;top:calc(env(safe-area-inset-top) + 58px);z-index:4;background:var(--s0);padding:6px 0;margin:-6px 0}
+.stages::-webkit-scrollbar{display:none}
+.stages button{border:0.5px solid var(--bdr2);background:var(--s2);color:var(--ts);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;font-family:var(--f);cursor:pointer;white-space:nowrap}
+.stages button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#view-seq[data-stage="start"] > .card:not([data-stage="start"]),#view-seq[data-stage="build"] > .card:not([data-stage="build"]),#view-seq[data-stage="words"] > .card:not([data-stage="words"]),#view-seq[data-stage="export"] > .card:not([data-stage="export"]),#view-seq[data-stage="more"] > .card:not([data-stage="more"]){display:none !important}
+.stage-hint{font-size:12px;color:var(--tm);line-height:1.5;padding:0 4px}
+#mode-toggle{display:none !important}
+/* Fold-up cards: the title is the button. Closed shows the title only. */
+.card.fold > h3{cursor:pointer;position:relative;user-select:none;margin:-14px;padding:14px 44px 14px 14px;border-radius:14px;line-height:1.4}
+.card.fold > h3::after{content:"›";position:absolute;right:16px;top:50%;margin-top:-13px;font-size:20px;line-height:26px;color:var(--tm);transform:rotate(90deg);transition:transform .15s}
+.card.fold.closed > h3::after{transform:none}
+.card.fold.closed > :not(h3){display:none !important}
+.card.fold.closed{gap:0}
+.card.fold > h3 .usage{font-weight:400}
+@media(min-width:860px){
+  .app{max-width:none}
+  .shell{flex-direction:row;align-items:flex-start}
+  #snav{position:sticky;top:0;bottom:auto;left:auto;right:auto;flex-direction:column;width:190px;flex-shrink:0;border-top:none;border-right:0.5px solid var(--bdr);min-height:calc(100dvh - 58px);padding:14px 10px;gap:4px;justify-content:flex-start;background:var(--s1)}
+  #snav button{max-width:none;flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:10px;font-size:14px;padding:10px 12px}
+  #snav button i{font-size:18px}
+  #snav button .due-dot{top:8px;right:10px}
+  .body{max-width:760px;width:100%;margin:0 auto;padding:22px 26px 60px}
+  .lib-grid{grid-template-columns:repeat(4,1fr)}
+  #s-thumbs{grid-template-columns:repeat(5,1fr) !important}
+  .stages{top:58px}
+}
+@media(min-width:1180px){.body{max-width:860px}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="hdr">
-    <h1>🎬 Studio</h1>
+    <h1>🎬 Studio <small title="If this number doesn't match what Claude says is latest, your browser is running old files">b0879</small></h1>
     <span class="ai-badge" id="ai-badge">AI READY</span>
-    <span class="usage" style="font-size:10px;color:var(--tm)" title="If this number doesn't match what Claude says is latest, your browser is running old files">b0879</span>
     <span id="zoom-ctl" style="margin-left:auto;display:flex;align-items:center;gap:4px">
       <button id="theme-toggle" title="Switch light / dark" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:15px;cursor:pointer;margin-right:6px">🌙</button>
       <button id="zoom-out" title="Make everything smaller" style="width:30px;height:30px;border-radius:8px;border:0.5px solid var(--bdr2);background:transparent;color:var(--ts);font-size:16px;cursor:pointer">A−</button>
@@ -185,7 +226,19 @@ body.simple-only #view-simple{display:flex !important}
     <button data-view="social">📅 Post<span class="due-dot"></span></button>
     <button data-view="art">⚙ Settings</button>
   </div>
+  <div class="shell">
+  <nav id="snav" aria-label="Studio">
+    <button data-go="media" class="on"><i>🖼</i>My Media</button>
+    <button data-go="scenes"><i>✨</i>Create</button>
+    <button data-go="seq"><i>🎬</i>Make video</button>
+    <button data-go="social"><i>📅</i>Post<span class="due-dot"></span></button>
+    <button data-go="art"><i>⚙</i>Settings</button>
+  </nav>
   <div class="body">
+  <div class="subseg" id="create-seg">
+    <button data-view="scenes" class="on">✨ AI Scenes</button>
+    <button data-view="chars">🧑 Characters</button>
+  </div>
   <div class="view" id="view-simple">
     <div class="card" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Make my video</h3>
@@ -370,7 +423,7 @@ body.simple-only #view-simple{display:flex !important}
 
     <p class="note" id="foot-note">Everything is generated on your device — nothing you type here is uploaded.</p>
     </details>
-    <div class="card">
+    <div class="card" id="diag-card">
       <h3>Diagnostics <span class="usage" id="diag-count"></span></h3>
       <p class="usage">If something breaks, the error is logged here automatically — screenshot this list and send it along when asking for help.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -380,7 +433,7 @@ body.simple-only #view-simple{display:flex !important}
       <div id="diag-list" class="row" style="flex-direction:column;align-items:stretch;gap:6px;margin-top:8px"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="backup-card">
       <h3>Storage &amp; Backup</h3>
       <p class="usage" id="stor-total">…</p>
       <div id="stor-list" class="row"></div>
@@ -497,10 +550,18 @@ body.simple-only #view-simple{display:flex !important}
     </div>
   </div>
 
-  <div class="view" id="view-seq">
+  <div class="view" id="view-seq" data-stage="start">
     <div class="banner" id="seq-banner" style="display:none"></div>
+    <div class="stages" id="seq-stages">
+      <button data-stage="start" class="on">1 · Start</button>
+      <button data-stage="build">2 · Build</button>
+      <button data-stage="words">3 · Words</button>
+      <button data-stage="export">4 · Export</button>
+      <button data-stage="more">More</button>
+    </div>
+    <p class="stage-hint" id="seq-stage-hint">Tell the crew what you want, or make a quick video from pictures and a song. Tap a title to open it.</p>
 
-    <div class="card" id="crew-card" style="border-color:var(--accent);border-width:1.5px">
+    <div class="card" id="crew-card" data-stage="start" style="border-color:var(--accent);border-width:1.5px">
       <h3>🎬 Make my video <span class="usage">— your words + pictures → the crew does the rest. Song optional.</span></h3>
 
       <p class="usage" style="margin:0"><b>1. Your song</b> <span class="usage">(skip it for a narrated story)</span></p>
@@ -573,7 +634,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="crew-status"></p>
       <p class="usage">Needs a song (and lyrics or 🪄 auto-captions). The Director reads your song's structure, casts your images into scenes, picks camera moves and pacing per section, and hands you the plan. Nothing generates or renders until you press the Producer button.</p>
     </div>
-    <div class="card" id="crew-room-card">
+    <div class="card" id="crew-room-card" data-stage="start">
       <h3>🎧 Crew Room <span class="usage">— talk to any crew member one-on-one</span></h3>
       <div id="crew-chat-setup" style="display:none">
         <p class="usage">Your crew can give you real creative advice. This uses an Anthropic key (from <b>console.anthropic.com</b>) — a chat costs a fraction of a cent. Paste it once:</p>
@@ -592,7 +653,7 @@ body.simple-only #view-simple{display:flex !important}
         <p class="usage" id="crew-chat-note" style="margin:4px 0 0"></p>
       </div>
     </div>
-    <div class="card" id="voice-card">
+    <div class="card" id="voice-card" data-stage="start">
       <h3>🎙 Voice — narrate your story <span class="usage">— the narrators are free</span></h3>
       <div id="voice-off" style="display:none"><p class="usage">Voice needs either the free speech add-on (run “Update my app” in Settings) or your fal.ai key.</p></div>
       <div id="voice-on" style="display:none">
@@ -624,12 +685,12 @@ body.simple-only #view-simple{display:flex !important}
         <button class="btn2" id="voice-use" style="width:100%;margin-top:6px;display:none">🎬 Use in video (narration + captions)</button>
       </div>
     </div>
-    <div class="card" id="pipe-card">
+    <div class="card" id="pipe-card" data-stage="start">
       <h3>🚀 One-Click Pipeline <span class="usage">— song in, finished video and shorts out, you approve each step</span></h3>
       <div id="pipe-steps" class="row" style="gap:6px"></div>
       <p class="usage">Each step lights up when the one before it is done. Nothing is generated without you pressing its button — every checkpoint is yours.</p>
     </div>
-    <div class="card" style="border-color:var(--accent);border-width:1.5px">
+    <div class="card" id="quick-card" data-stage="start">
       <h3>🎬 Quick Video <span class="usage">— pictures + song → finished video</span></h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn2" id="qk-add-imgs" style="flex:1">1️⃣ &nbsp;Add pictures or videos from this device</button>
@@ -696,7 +757,7 @@ body.simple-only #view-simple{display:flex !important}
 
     <button class="btn2 quiet" id="mode-toggle" style="width:100%">🛠 Show studio tools</button>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="motion-card" data-stage="build">
       <h3>Stills → Motion <span class="usage">(Ken Burns camera moves, free)</span></h3>
       <select class="input" id="kb-image"></select>
       <div id="kb-preview-wrap" style="position:relative;display:none">
@@ -750,7 +811,7 @@ body.simple-only #view-simple{display:flex !important}
       <div class="progress-line" id="kb-prog"><div></div></div>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="timeline-card" data-stage="build">
       <h3>Timeline <span class="usage" id="seq-total"></span></h3>
       <div style="display:flex;gap:6px;margin-bottom:6px">
         <button class="btn2 quiet" id="seq-undo" title="Undo last change (Ctrl+Z)" disabled>↩ Undo</button>
@@ -785,7 +846,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage">Drag items to reorder (or use the arrows). Stills sit on the timeline with a hold time — or give them a camera move above first.</p>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="music-card" data-stage="build">
       <h3>Music <span class="usage">(add several songs — they play in order)</span></h3>
       <div id="mus-list" class="row"></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -808,14 +869,14 @@ body.simple-only #view-simple{display:flex !important}
       </div>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="titles-card" data-stage="build">
       <h3>Text &amp; titles</h3>
       <div id="ovl-list" class="row"></div>
       <button class="btn2 quiet" id="ovl-add">+ Add text</button>
       <p class="usage">Whatever font, size, color and position you set last is remembered — every new text starts that way. Press <b>↧ same look for all</b> on any text to push its look onto all the others. <a href="#" id="ovl-look-reset">Back to Studio's default look</a>.</p>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="photo-card" data-stage="build">
       <h3>📷 Photo tools <span class="usage">— most are free</span></h3>
       <select class="input" id="pt-image"></select>
       <div id="pt-preview-wrap" style="position:relative;display:none">
@@ -856,7 +917,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="pt-note"></p>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="output-card" data-stage="export">
       <h3>Output</h3>
       <div class="chips" id="seq-formats"></div>
       <div class="chips" id="seq-res"></div>
@@ -895,7 +956,7 @@ body.simple-only #view-simple{display:flex !important}
       <div class="progress-line" id="seq-prog"><div></div></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="lyrics-card" data-stage="words">
       <h3>🎤 Lyrics &amp; Captions</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="input" id="cp-title" placeholder="Song title" style="flex:1;min-width:120px">
@@ -938,7 +999,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage">Captions burn in at the bottom of the video and are included in full renders and shorts automatically. <b>Talking head?</b> Paste the lines you actually said — you don't need the speech model for words you already wrote. Auto-spread is instant; Tap-to-sync is exact (your song <em>or your own clip</em> plays, tap once per line).</p>
     </div>
 
-    <div class="card" id="wm-card">
+    <div class="card" id="wm-card" data-stage="words">
       <h3>🏷 Brand watermark <span class="usage">— your @handle on every video (free)</span></h3>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px"><input type="checkbox" id="wm-on"> Add my brand to renders &amp; shorts</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
@@ -956,7 +1017,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage">A small, subtle tag or logo stays on screen the whole video — so when your clips get reshared, they're always tied to you. A logo (like Synborn Studios) is used if you upload one; otherwise your @handle.</p>
     </div>
 
-    <div class="card">
+    <div class="card" id="story-card" data-stage="words">
       <h3>🎬 Storyboard <span class="usage">— your lyrics become a shot list</span></h3>
       <p class="usage">Uses the lyrics pasted above. Splits your song into scenes and writes an image prompt for each — press Generate on any scene to make it.</p>
       <input class="input" id="sb-style" placeholder="Visual style (optional): black-and-white film, cyberpunk night, dreamy pastel…">
@@ -973,7 +1034,7 @@ body.simple-only #view-simple{display:flex !important}
       <p class="usage" id="sb-queue-status" style="display:none"></p>
     </div>
 
-    <div class="card">
+    <div class="card" id="shorts-card" data-stage="export">
       <h3>Shorts Generator <span class="usage">(9:16, 1080p, batch)</span></h3>
       <button class="gen-btn" id="sh-auto" style="width:100%">⚡ Auto shorts — find the hook, cut 15s + 30s, render</button>
       <p class="usage" style="margin:0">One tap does the whole job: Studio listens for your chorus or drop, plans the cuts so each one opens on it, and renders them. The list appears below — tweak anything, or just download.</p>
@@ -1018,7 +1079,7 @@ body.simple-only #view-simple{display:flex !important}
       <button class="dl-btn" id="sh-dl-all" style="display:none">Download all shorts</button>
     </div>
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="guide-card" data-stage="more">
       <h3>📖 Guide &amp; help</h3>
       <p class="usage">The complete Studio guide — every tab, tool, fix, the money-safety layers, and the ideal video-to-post flow. Open it any time.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1029,7 +1090,7 @@ body.simple-only #view-simple{display:flex !important}
 
     
 
-    <div class="card adv-card" id="recover-card">
+    <div class="card adv-card" id="recover-card" data-stage="more">
       <h3>💸 Recover paid clips <span class="usage" id="recover-open"></span></h3>
       <p class="usage">Every AI generation is now saved here the moment it's sent — so if a clip you paid for didn't land in your library (tab closed, page refreshed, long render), tap below and Studio pulls in anything fal already finished. This never costs anything.</p>
       <p class="usage" id="recover-total" style="margin:6px 0"></p>
@@ -1061,7 +1122,7 @@ body.simple-only #view-simple{display:flex !important}
 
     
 
-    <div class="card adv-card">
+    <div class="card adv-card" id="project-card" data-stage="more">
       <h3>Project</h3>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input class="input" id="proj-name" placeholder="Project name" style="flex:1;min-width:120px">
@@ -1130,7 +1191,7 @@ body.simple-only #view-simple{display:flex !important}
       <div class="err" id="week-err" style="display:none;white-space:pre-wrap"></div>
     </div>
 
-    <div class="card">
+    <div class="card" id="tele-card">
       <h3>🎤 Teleprompter</h3>
       <p class="usage" style="margin:0">Write it once, read it steady. Put this screen right behind your camera so your eyes stay on the lens — slow speed, short lines, and it still sounds like you.</p>
       <input class="input" id="tp-title" placeholder="Script name (e.g. The Symptoms)">
@@ -1180,7 +1241,7 @@ body.simple-only #view-simple{display:flex !important}
         <p class="usage" id="webcam-rec-note" style="margin:6px 0 0">Records your camera and your mic audio — no screen capture. Pick a countdown so you can get set, open the teleprompter behind your camera, then hit record (or snap a still). Background blur/swap fetches a small on-device model the first time, so it needs internet once.</p>
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="sched-card">
       <h3>📅 Schedule a post</h3>
       <p class="usage" style="margin:0">No platform lets a brand-new app auto-post for real yet — TikTok/Instagram/YouTube all require a weeks-long review first. So this queue does everything up to the tap: pick the clip, write the caption once, and it tells you the second it's time to post — you do the one tap, which also gets more reach than any API post does anyway.</p>
       <label class="lbl">Clip</label>
@@ -1226,6 +1287,7 @@ body.simple-only #view-simple{display:flex !important}
   </div>
 </div>
 </div>
+</div><!-- /shell -->
 <div class="lightbox" id="lightbox">
   <button class="lb-close" aria-label="Close">✕</button>
   <button class="lb-dl" id="lb-dl" aria-label="Download">⬇ Download</button>
@@ -2147,7 +2209,74 @@ $('#mtabs').onclick = (e) => {
   st.view = btn.dataset.view;
   document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b === btn));
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('on', v.id === `view-${st.view}`));
+  syncNav();
 };
+/* ---- Studio shell (8 Sep 2026): one nav, five places. #mtabs stays as the
+   switch every "go to tab" call already uses; the visible nav drives it. ---- */
+const NAV_OF = { media: 'media', scenes: 'scenes', chars: 'scenes', seq: 'seq', social: 'social', art: 'art' };
+function syncNav() {
+  const v = st.view || 'media';
+  document.querySelectorAll('#snav button').forEach((b) => b.classList.toggle('on', b.dataset.go === NAV_OF[v]));
+  const seg = $('#create-seg');
+  if (seg) {
+    seg.classList.toggle('on', v === 'scenes' || v === 'chars');
+    seg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
+  }
+  const social = document.querySelector('#mtabs button[data-view="social"]');
+  document.querySelector('#snav button[data-go="social"]')?.classList.toggle('has-due', !!social?.classList.contains('has-due'));
+  window.scrollTo({ top: 0 });
+}
+function goView(view) { document.querySelector(`#mtabs button[data-view="${view}"]`)?.click(); }
+$('#snav').onclick = (e) => { const b = e.target.closest('button'); if (b) goView(b.dataset.go); };
+$('#create-seg').onclick = (e) => { const b = e.target.closest('button'); if (b) goView(b.dataset.view); };
+// Make video is four steps. Each chip shows only that step's cards.
+const STAGE_HINT = {
+  start: 'Tell the crew what you want, or make a quick video from pictures and a song. Tap a title to open it.',
+  build: 'Move your pictures, order the clips, add music, titles and photo fixes.',
+  words: 'Lyrics, captions, a shot list from your words, your handle on every video.',
+  export: 'Render the finished video, or cut it into shorts.',
+  more: 'Help, paid clips that did not arrive, and saving or loading the whole project.',
+};
+function setStage(stg) {
+  const v = $('#view-seq'); if (!v) return;
+  v.dataset.stage = stg;
+  document.querySelectorAll('#seq-stages button').forEach((b) => b.classList.toggle('on', b.dataset.stage === stg));
+  const h = $('#seq-stage-hint'); if (h) h.textContent = STAGE_HINT[stg] || '';
+}
+$('#seq-stages').onclick = (e) => { const b = e.target.closest('button'); if (b) { setStage(b.dataset.stage); window.scrollTo({ top: 0 }); } };
+// Fold-up cards: the title is the button. A few stay open so the page has a
+// front; everything else opens on a tap and remembers.
+const FOLD_OPEN = new Set(['crew-card', 'timeline-card', 'quick-card', 'output-card', 'scenes-form', 'falkey-card', 'chars-form', 'buffer-card', 'send-card', 'week-card', 'settings-card']);
+function foldState() { try { return JSON.parse(localStorage.getItem('tsid-studio-folds') || '{}'); } catch (_) { return {}; } }
+function initFolds() {
+  const saved = foldState();
+  document.querySelectorAll('#view-seq > .card, #view-social > .card, #view-art > .card, #view-scenes > .card, #view-chars > .card').forEach((c, i) => {
+    const h = c.querySelector(':scope > h3'); if (!h) return;
+    if (!c.id) c.id = `card-${i}`;
+    c.classList.add('fold');
+    const open = c.id in saved ? saved[c.id] : FOLD_OPEN.has(c.id);
+    c.classList.toggle('closed', !open);
+    h.onclick = (e) => { if (e.target.closest('button,a,input')) return; c.classList.toggle('closed'); const st2 = foldState(); st2[c.id] = !c.classList.contains('closed'); try { localStorage.setItem('tsid-studio-folds', JSON.stringify(st2)); } catch (_) {} };
+  });
+}
+initFolds();
+// Open a card wherever it is: right tab, right step, unfolded, on screen.
+function revealCard(el) {
+  const card = typeof el === 'string' ? $(el) : el?.closest?.('.card');
+  if (!card) return;
+  const view = card.closest('.view');
+  if (view && !view.classList.contains('on')) goView(view.id.replace('view-', ''));
+  if (view && view.id === 'view-seq' && card.dataset.stage && view.dataset.stage !== card.dataset.stage) setStage(card.dataset.stage);
+  card.classList.remove('closed');
+}
+// Every "scroll me into view" call in Studio now opens the fold it lives in.
+(function () {
+  const orig = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function (opts) {
+    try { const c = this.closest('.card.fold'); if (c) revealCard(c); } catch (_) {}
+    return orig.call(this, opts);
+  };
+})();
 
 /* ---------------- boot: config + data ---------------- */
 async function bootStudio() {
@@ -2534,6 +2663,7 @@ function renderDueBanner() {
   const navBtn = document.querySelector('#mtabs button[data-view="social"]');
   const due = (st.socialPosts || []).filter((p) => p.status === 'due');
   navBtn?.classList.toggle('has-due', due.length > 0);
+  document.querySelector('#snav button[data-go="social"]')?.classList.toggle('has-due', due.length > 0);
   if (!banner) return;
   if (!due.length) { banner.style.display = 'none'; return; }
   banner.style.display = 'block';
@@ -2684,7 +2814,7 @@ function renderMediaPage() {
     play.onclick = () => { if (audio.paused) { audio.play().catch(() => {}); play.textContent = '⏸ Pause'; } else { audio.pause(); play.textContent = '▶ Play'; } };
     audio.onended = () => { play.textContent = '▶ Play'; };
     const use = document.createElement('button'); use.textContent = '🎬 Use in video'; use.className = 'btn2'; use.style.cssText = 'padding:5px 10px;font-size:12px';
-    use.onclick = () => { addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); document.querySelector('#mtabs button[data-view="seq"]').click(); };
+    use.onclick = () => { addMusicUnique(a.id); renderMusicList(); updateQkMusicLabel && updateQkMusicLabel(); persistDraft(); document.querySelector('#mtabs button[data-view="seq"]').click(); revealCard('#music-card'); $('#music-card').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     const master = document.createElement('button'); master.textContent = '✨ Master'; master.className = 'btn2'; master.style.cssText = 'padding:5px 10px;font-size:12px';
     master.title = 'FREE — repair, even out & loudness-master to a release-ready 48kHz/24-bit WAV';
     master.onclick = (e) => freeTransform(a.id, 'remaster', e.target, '✨ Master');
@@ -4375,6 +4505,7 @@ function armVoiceUse(assetId) {
     updateQkMusicLabel && updateQkMusicLabel();
     persistDraft();
     document.querySelector('#mtabs button[data-view="seq"]').click();
+    revealCard('#music-card'); $('#music-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 }
 
@@ -4948,6 +5079,7 @@ function renderLibrary() {
       $('#kb-image').value = String(a.id);
       kbSelectImage();
       document.querySelector('#mtabs button[data-view="seq"]').click();
+      revealCard('#motion-card'); $('#motion-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 'motion');
     if (a.kind === 'video') btn('Loop', '', () => { st.loopTarget = st.loopTarget === a.id ? null : a.id; st.animTarget = null; st.singTarget = null; renderLibrary(); }, 'motion');
     if (a.kind === 'video') btn('Slow-mo', '', (e) => freeTransform(a.id, 'slowmo', e.target, 'Slow-mo'), 'motion');
@@ -8951,13 +9083,9 @@ function persistQkDraft() {
 // Simple mode (default): ONLY the crew card ("Make my video") shows. Everything
 // else — Quick Video, pipeline, storyboard, shorts — is one tap away.
 function applySimpleMode() {
-  const simple = localStorage.getItem('tsid-studio-simple') !== '0';
-  document.querySelectorAll('#view-seq > .card').forEach((c) => {
-    // the crew IS the front page — planning, Crew Room, and Voice stay up
-    if (c.id === 'crew-card' || c.id === 'crew-room-card' || c.id === 'voice-card') { c.style.display = ''; return; }
-    c.style.display = simple ? 'none' : '';
-  });
-  $('#mode-toggle').textContent = simple ? '🛠 Show all studio tools' : '✨ Back to simple mode';
+  // Retired 8 Sep 2026: the four steps (Start / Build / Words / Export) do
+  // this job now. Every card stays in the page; nothing is hidden by mode.
+  document.querySelectorAll('#view-seq > .card').forEach((c) => { c.style.display = ''; });
   // keep the crew card's own song label + lyrics box current
   if (typeof crewSongLabel === 'function') crewSongLabel();
   if ($('#crew-lyrics') && $('#lyr-text') && !$('#crew-lyrics').value && $('#lyr-text').value) $('#crew-lyrics').value = $('#lyr-text').value;

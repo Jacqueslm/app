@@ -59,20 +59,20 @@ function run(D, opt) {
       const L = open.dir === 1, half = useT1 ? 0.5 : 0;
       if (L ? c.l <= open.stop : c.h >= open.stop) {
         open.R += open.t1 ? 0 : -1;
-        trades.push({R: open.R, how: open.t1 ? 'BE' : 'stop', t: open.tIn, feat: open.feat}); open = null;
+        trades.push({R: open.R, how: open.t1 ? 'BE' : 'stop', t: open.tIn, feat: open.feat, risk: open.risk}); open = null;
       } else {
         const hitT1 = half && !open.t1 && (L ? c.h >= open.T1 : c.l <= open.T1);
         const hitT2 = L ? c.h >= open.T2 : c.l <= open.T2;
-        if (hitT1 && hitT2) { open.R += half + (1 - half) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat}); open = null; }
+        if (hitT1 && hitT2) { open.R += half + (1 - half) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat, risk: open.risk}); open = null; }
         else {
           if (hitT1) { open.t1 = true; open.R += half; open.stop = open.entry; }
-          if (open && hitT2 && (open.t1 || !half)) { open.R += (open.t1 ? 1 - half : 1) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat}); open = null; }
+          if (open && hitT2 && (open.t1 || !half)) { open.R += (open.t1 ? 1 - half : 1) * open.room; trades.push({R: open.R, how: 'T2', t: open.tIn, feat: open.feat, risk: open.risk}); open = null; }
         }
       }
       if (open && et.hm >= sessTo) {
         const px = c.c, r = (open.dir === 1 ? px - open.entry : open.entry - px) / open.risk;
         open.R += (open.t1 ? (useT1 ? 0.5 : 1) : 1) * r;
-        trades.push({R: open.R, how: 'EOD', t: open.tIn, feat: open.feat}); open = null;
+        trades.push({R: open.R, how: 'EOD', t: open.tIn, feat: open.feat, risk: open.risk}); open = null;
       }
     }
 
@@ -127,7 +127,7 @@ function run(D, opt) {
                       T1: up ? entry + risk : entry - risk, T2: tgt};
               s.on = 0;
               // the flush bar itself can hit the stop after filling us
-              if (up ? c.l <= stop : c.h >= stop) { open.R = -1; trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat}); open = null; }
+              if (up ? c.l <= stop : c.h >= stop) { open.R = -1; trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat, risk: open.risk}); open = null; }
             }
           }
         }
@@ -150,7 +150,7 @@ function run(D, opt) {
             // going through the stop, that is a loss on this very bar —
             // crediting the target here instead would be fantasy.
             if (open && (up ? c.l <= open.stop : c.h >= open.stop)) {
-              trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat});
+              trades.push({R: -1, how: 'stop', t: c.t, feat: open.feat, risk: open.risk});
               open = null;
             }
           }

@@ -13,9 +13,15 @@
 //    5  the trigger: price turns inside the zone - a close above the previous
 //       bar's high. On a 1m chart that close IS the small structure break a
 //       5-second chart shows a few seconds sooner.
-//    6  stop BEHIND THE ZONE - under the low that made the new high
-//    7  out at the PREVIOUS high, or ride until a lower high prints
+//    6  stop BEHIND THE ZONE - a few ticks under the low that made the turn
+//    7  as soon as price is in profit the stop moves to break-even
+//    8  each new higher high moves the stop behind the leg that made it
+//    9  out at the PREVIOUS high (or ride until a lower high prints)
 //  The higher timeframe has to agree, or the trade is skipped.
+//
+//  Rebuilt 8 Sep 2026 to his exact words. The old version put the stop at
+//  the bottom of the whole run, which made every trade risk more than it
+//  could make; that is kept as an option so the two can be compared.
 //
 //  Put it on the chart, open the Strategy Tester, read Net Profit and Profit
 //  Factor. Commission and slippage are ON by default - a fast-chart result
@@ -56,15 +62,24 @@ grpE = "Entry"
 zoneMode = input.string("50% into the leg", "Pull back to",
      options = ["the broken level", "30% into the leg", "50% into the leg", "70% into the leg"], group = grpE,
      tooltip = "The zone price has to tap before the trigger counts. Measured from the leg that did the breaking.")
-confirm = input.bool(true, "Wait for the turn (close above the previous bar's high)", group = grpE,
-     tooltip = "OFF buys the tap itself. Measured on 15m and 5m data, buying the tap lost badly and waiting for the turn was the single change that helped. Left ON so you can see the difference yourself.")
+entryMode = input.string("close back above the low it just broke", "Trigger, once in the zone",
+     options = ["close back above the low it just broke", "close above the previous bar's high", "the tap itself"], group = grpE,
+     tooltip = "His words: in the zone the small chart breaks a low, then price gets back above it — that reclaim is the entry. On a 1m chart the candle that wicks under the last pullback low and closes back above it is that moment. The second option is the plain turn; the third buys the tap (it lost badly when measured).")
 
 // ─── where you get out ───────────────────────────────────────────────────────
 grpX = "Exit"
 exitMode = input.string("the previous high", "Target",
      options = ["the previous high", "ride until a lower high"], group = grpX,
      tooltip = "The previous high is the one the break just made — never a projected new one. Riding holds until structure turns against you. The bot only trades the previous-high target — in ride mode the strategy draws on the chart and sends nothing.")
-stopTicks = input.int(4, "Stop buffer (ticks beyond the zone)", minval = 0, group = grpX)
+stopMode = input.string("behind the turn (his rule)", "Stop goes",
+     options = ["behind the turn (his rule)", "the leg low (old version)"], group = grpX,
+     tooltip = "Behind the turn = a few ticks under the lowest low of the pullback, the low that made the turn. The leg low is the bottom of the whole run - the old, wide stop.")
+stopTicks = input.int(4, "Stop buffer (ticks)", minval = 0, group = grpX)
+beOn    = input.bool(true, "Move the stop to break-even once in profit", group = grpX)
+beTicks = input.int(0, "  ...in profit by (ticks, on a close)", minval = 0, group = grpX,
+     tooltip = "0 = the first candle that closes above the entry price moves the stop to entry. His words: as soon as price is in profit.")
+trailOn = input.bool(true, "Trail the stop behind each new higher high's leg", group = grpX,
+     tooltip = "Every time a new higher high confirms, the stop moves to just under the low of the leg that made it. Never moves down.")
 
 // ─── your rules ──────────────────────────────────────────────────────────────
 grpR = "Your rules"
@@ -148,6 +163,7 @@ var float Llvl = na
 var float LlegLo = na
 var float Lhigh = na
 var float Lplo = na
+var float Lbrk = na        // the last pullback low that got broken - the reclaim level
 var bool  Ltag = false
 var int   Lage = 0
 
@@ -161,18 +177,23 @@ if Lph == 0
     if close < Llvl
         Lph := 1
         Lplo := low
+        Lbrk := na
 else if Lph == 1
     Lhigh := math.max(Lhigh, high)
-    Lplo := math.min(Lplo, low)
+    if low < Lplo
+        Lbrk := Lplo
+        Lplo := low
     zone = na(pct) ? Llvl : Lhigh - pct * (Lhigh - LlegLo)
     if Lplo <= zone
         Ltag := true
     if close < LlegLo or close > Lhigh
         Lph := -1
 
-trigL = Lph == 1 and Ltag and (confirm ? close > high[1] : true)
+reclaimL = entryMode == "close back above the low it just broke"
+turnL    = entryMode == "close above the previous bar's high"
+trigL = Lph == 1 and Ltag and (reclaimL ? (not na(Lbrk) and close > Lbrk and close > open) : turnL ? close > high[1] : true)
 entryL = close
-stopL  = LlegLo - buf
+stopL  = (stopMode == "behind the turn (his rule)" ? Lplo : LlegLo) - buf
 tgtL   = Lhigh
 okL = trigL and inSess and htfUp and tookToday < maxPerDay and
      strategy.position_size == 0 and entryL > stopL and tgtL > entryL
@@ -185,6 +206,7 @@ var float Slvl = na
 var float SlegHi = na
 var float Slow = na
 var float Sphi = na
+var float Sbrk = na
 var bool  Stag = false
 var int   Sage = 0
 
@@ -198,18 +220,21 @@ if Sph == 0
     if close > Slvl
         Sph := 1
         Sphi := high
+        Sbrk := na
 else if Sph == 1
     Slow := math.min(Slow, low)
-    Sphi := math.max(Sphi, high)
+    if high > Sphi
+        Sbrk := Sphi
+        Sphi := high
     zoneS = na(pct) ? Slvl : Slow + pct * (SlegHi - Slow)
     if Sphi >= zoneS
         Stag := true
     if close > SlegHi or close < Slow
         Sph := -1
 
-trigS = Sph == 1 and Stag and (confirm ? close < low[1] : true)
+trigS = Sph == 1 and Stag and (reclaimL ? (not na(Sbrk) and close < Sbrk and close < open) : turnL ? close < low[1] : true)
 entryS = close
-stopS  = SlegHi + buf
+stopS  = (stopMode == "behind the turn (his rule)" ? Sphi : SlegHi) + buf
 tgtS   = Slow
 okS = trigS and inSess and htfDown and tookToday < maxPerDay and
      strategy.position_size == 0 and entryS < stopS and tgtS < entryS
@@ -248,14 +273,49 @@ if okS
 
 // The bracket rides with the position. Riding to a lower high means no limit
 // order at all — structure closes the trade instead, below.
-var float posStop = na
-var float posTgt  = na
+var float posStop  = na
+var float posTgt   = na
+var float posEntry = na
+var float lastHi   = na     // the highest confirmed swing since entry (long) / lowest (short)
+var float runLo    = na     // lowest low since that swing - the leg that will make the next high
+var float runHi    = na
+var bool  beDone   = false
 if okL
-    posStop := stopL
-    posTgt  := tgtL
+    posStop  := stopL
+    posTgt   := tgtL
+    posEntry := entryL
+    lastHi   := high
+    runLo    := low
+    beDone   := false
 if okS
-    posStop := stopS
-    posTgt  := tgtS
+    posStop  := stopS
+    posTgt   := tgtS
+    posEntry := entryS
+    lastHi   := low
+    runHi    := high
+    beDone   := false
+
+// His rules once in: break-even the moment a candle closes in profit, and
+// every new higher high drags the stop up behind the leg that made it.
+// The stop only ever moves toward price, never away.
+if strategy.position_size > 0 and not okL
+    runLo := math.min(runLo, low)
+    if beOn and not beDone and close >= posEntry + beTicks * syminfo.mintick
+        posStop := math.max(posStop, posEntry)
+        beDone  := true
+    if trailOn and newH and ph > lastHi
+        posStop := math.max(posStop, runLo - buf)
+        lastHi  := ph
+        runLo   := low
+if strategy.position_size < 0 and not okS
+    runHi := math.max(runHi, high)
+    if beOn and not beDone and close <= posEntry - beTicks * syminfo.mintick
+        posStop := math.min(posStop, posEntry)
+        beDone  := true
+    if trailOn and newL and pl < lastHi
+        posStop := math.min(posStop, runHi + buf)
+        lastHi  := pl
+        runHi   := high
 
 if strategy.position_size > 0
     if ride

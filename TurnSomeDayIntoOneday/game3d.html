@@ -36,6 +36,10 @@
   .voice small{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
   .ctl{position:absolute;left:0;right:0;bottom:0;padding:12px 14px calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent)}
   .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  /* five punches across a phone: the row keeps the same height, the words get smaller */
+  .row.punch{grid-template-columns:repeat(5,1fr);gap:6px}
+  .row.punch button{font-size:.86rem;padding:12px 2px;letter-spacing:.02em}
+  @media (max-width:380px){.row.punch button{font-size:.76rem}}
   button{font:inherit;color:var(--chalk);background:rgba(7,10,20,.78);border:2px solid #2a3350;border-radius:8px;padding:12px 6px;font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:1.1rem;text-transform:uppercase;letter-spacing:.06em;touch-action:manipulation;user-select:none;-webkit-user-select:none}
   button.p{border-color:var(--lamp);color:var(--lamp)}button.d{border-color:var(--you);color:var(--you)}button.x{border-color:var(--hit);color:var(--hit)}
   .slam{position:absolute;left:0;right:0;top:36%;text-align:center;font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;font-size:5rem;color:#fff;text-shadow:0 0 30px var(--lamp),0 4px 0 #000;animation:slam .6s ease-out forwards;pointer-events:none}
@@ -84,7 +88,7 @@
   <div class="red" id="red"></div>
   <div class="chant L" id="cl"></div><div class="chant R" id="cr"></div>
   <div class="ctl">
-    <div class="row punch" id="punchrow"><button class="p" id="jl">Jab</button><button class="p" id="cb">1-2</button><button class="p" id="hk">Hook</button><button class="p" id="up">Uppercut</button></div>
+    <div class="row punch" id="punchrow"><button class="p" id="jl">Jab</button><button class="p" id="cb">1-2</button><button class="p" id="hk">Hook</button><button class="p" id="up">Upper</button><button class="p" id="bd">Body</button></div>
     <div class="row" id="moverow"><button class="d" id="dl">&#9664; Dodge</button><button class="d" id="bl">&#128737; Block</button><button class="d" id="dr">Dodge &#9654;</button></div>
     <div class="row" id="corner" hidden><button class="d" id="cw">Water</button><button class="d" id="ct">Towel</button><button class="d" id="cd">A word</button></div>
     <div class="row pick" id="places"><button data-p="temple">Temple</button><button data-p="tomb">Tomb</button><button data-p="monastery">Monastery</button><button data-p="rooftop">Rooftop</button></div>
@@ -731,7 +735,7 @@ addEventListener('message',ev=>{const d=ev.data;if(!d||d.to!=='fightofyourlife')
 let YOUNAME='you';
 function temptLine(){const set=LINES[addictionKey]||LINES.habit;const q=set[Math.floor(Math.random()*set.length)];say(q.line,ADD().name);return q;}
 // it gets harder every level: a shorter tell, a heavier punch, a busier guard
-function tellMs(){return (1900-1000*ease(step()-1))*STY().tell;}  // 1.9s towards 0.9s, then the element's own timing
+function tellMs(){return (1900-1000*ease(step()-1))*STY().tell*(guardIsDown()?1.28:1);}  // 1.9s towards 0.9s, the element's own timing, and slower while its hands are down
 function hitDmg(){return Math.round((10+16*ease(step()-1))*STY().dmg);}   // 10 towards 26, times what this one hits for
 let VOICES=null;function pickVoice(kind){try{if(!VOICES)VOICES=speechSynthesis.getVoices();const en=VOICES.filter(v=>/^en/i.test(v.lang));const female=en.find(v=>/female|zira|samantha|karen|moira|tessa|fiona|victoria|susan|hazel|libby|sonia|aria|jenny/i.test(v.name));const male=en.find(v=>/male|david|daniel|george|ryan|guy|mark|james|alex|fred|rishi|thomas/i.test(v.name)&&!/female/i.test(v.name));if(kind==='ref')return female||en[0]||null;return male||en[0]||null;}catch(e){return null;}}
 function speak(text,who){try{if(!('speechSynthesis' in window)||!text||text==='…')return;const u=new SpeechSynthesisUtterance(text.replace(/\s+/g,' '));const boss=who===ADD().name;u.rate=who==='Announcer'?.92:boss?.82:1;u.pitch=who==='Announcer'?.7:boss?.45:who==='Referee'?1.05:.95;u.volume=1;const v=pickVoice(who==='Referee'?'ref':'man');if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
@@ -872,7 +876,7 @@ async function walkIn(out){const T2=CORNER.trainer,C2=CORNER.cutman,K=CORNER.clo
   YOU.play('lead_jab',{speed:.55});BOSS.play('lead_jab',{speed:.55});await wait(1300);YOU.idle();BOSS.idle();refWalk(ref.userData.home);
   if(out())return;
   await Promise.all([fighterWalk(YOU,CORNERPOS.you,1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss,1.4,new T.Vector3(0,0,0))]);await wait(400);}
-async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;poseOff();fightOver=false;result=null;round=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
+async function startFight(){if(!fightOver||!YOU||!BOSS||!REF)return;poseOff();fightOver=false;result=null;round=0;comboEnd();guardDownUntil=0;youHP=100;cards={you:0,boss:0};downsFight={you:0,boss:0};tkoGuard=false;showControls(LIVE);ysp=0;bsp=0;roundsWon.you=0;roundsWon.boss=0;$('bossname').textContent=ADD().name;
   await ringWalks();
   await nextRound();ai();youAI();}
 async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
@@ -883,7 +887,7 @@ async function nextRound(){round++;if(round>ROUNDS)return decision('cards');
   await walkTheCard(round);
   await toMarks();shot('tv',700);await wait(500);snd('bell');roar();crowdOn(.35);running=true;}
 // the bell: the round is scored ten-point must and the corner gets its ten seconds
-async function endRound(){if(!running||fightOver)return;running=false;snd('bell');crowdOn(.15);$('super').hidden=true;
+async function endRound(){if(!running||fightOver)return;running=false;comboEnd();guardDownUntil=0;snd('bell');crowdOn(.15);$('super').hidden=true;
   while(busy)await wait(100);
   const y=landed.you,b=landed.boss;let sy=10,sb=10;
   if(y>b)sb=9;else if(b>y)sy=9;
@@ -915,7 +919,12 @@ async function ai(){while(!fightOver){const gap=(Math.max(430,1500-round*130-560
 // the glove that connects lights up for a moment
 function flashGlove(F,i,color){const g=F&&F.gloves&&F.gloves[i];if(!g)return;const m=g.material;if(!m.userData.base)m.userData.base=m.color.getHex();m.emissive=m.emissive||new T.Color();m.emissive.setHex(color);m.emissiveIntensity=3.2;m.needsUpdate=true;clearTimeout(g.userData.t);g.userData.t=setTimeout(()=>{m.emissive.setHex(0x000000);m.emissiveIntensity=1;m.needsUpdate=true;},260);}
 // it can get its gloves up too: a block takes most of the sting out and it answers straight back
-function bossBlocks(){return !downState&&Math.random()<Math.min(0.46,0.08+round*0.035+0.22*ease(step()-1));}
+// Go to the body and the hands come down. That is the whole point of a body shot:
+// it takes less off the head bar than a hook, but for the next few seconds it stops
+// blocking and its wind-up drags. Hit the body, then hit the head.
+let guardDownUntil=0;
+function guardIsDown(){return performance.now()<guardDownUntil;}
+function bossBlocks(){return !downState&&!guardIsDown()&&Math.random()<Math.min(0.46,0.08+round*0.035+0.22*ease(step()-1));}
 function land(kind,dmg,blocked){dmg=Math.max(2,Math.round(dmg*STY().chin));if(kind==='up'||kind==='combo2')punchIn();flashGlove(YOU,hand[kind]==='L'?0:1,blocked?0x8899aa:0x9fe8ff);
   if(blocked){BOSS.play('center_block',{speed:1.5});bossHP=Math.max(0,bossHP-Math.max(2,Math.round(dmg*0.22)));landed.you+=2;bsp=Math.min(100,bsp+9);bars();slam('BLOCKED');thud('block');call(['It got the gloves up.','Blocked by it.','It read that one.']);return;}
   if(kind==='up')call(['Big uppercut.','Up the middle.','That one hurt it.']);else if(kind==='hook'||kind==='combo2')call(['Big right hand.','Caught it clean.','Right on the button.']);else if(Math.random()<.35)call(['Jab working.','Keeping it off.','Good jab.']);const big=kind==='up'||kind==='combo2'||kind==='hook';
@@ -929,16 +938,38 @@ function land(kind,dmg,blocked){dmg=Math.max(2,Math.round(dmg*STY().chin));if(ki
 // the one-two lands twice: the left at 0.40 s and the right at 0.67 s of the clip
 let queued=null,queuedAt=0;
 setInterval(()=>{if(queued&&running&&!busy&&!downState){const k=queued;queued=null;punch(k);}if(queued&&performance.now()-queuedAt>800)queued=null;},50);
+// Punches thrown on top of each other are a combination, the way they are in a real
+// fight: keep it going and each one lands harder. Stop, and the count is gone. Four
+// deep is the ceiling, so it never turns into holding one button.
+// The window opens when a punch finishes, not when it starts - one punch takes most
+// of a second to throw, so counting from the start meant no two could ever chain.
+let comboN=0,comboUntil=0,comboLast='';
+function comboStep(kind){
+  const now=performance.now();
+  comboN=(now<comboUntil&&kind!==comboLast)?Math.min(4,comboN+1):0;
+  comboLast=kind;
+  return 1+comboN*0.14;
+}
+function comboArm(){comboUntil=performance.now()+640;}
+function comboEnd(){comboN=0;comboLast='';comboUntil=0;}
 async function punch(kind){if(!running||downState||!YOU)return;if(busy){queued=kind;queuedAt=performance.now();return;}busy=true;
-  if(kind==='combo'){YOU.play('jab_cross',{speed:1.3});stepIn(YOU,.3,400/1.3);await wait(400/1.3);land('jab',7,bossBlocks());await wait(270/1.3);land('combo2',10,bossBlocks());await wait(420);YOU.idle();stepBack(YOU,300);if(bossHP<=0){busy=false;return knockdown();}await wait(200);BOSS.idle();busy=false;return;}
-  hand[kind]=hand[kind]==='L'?'R':'L';const clip={jab:['lead_jab','right_jab'],hook:['hook','right_hook'],up:['uppercut','right_uppercut']}[kind][hand[kind]==='L'?0:1],at={jab:500,hook:400,up:470}[kind]/1.3,dmg={jab:9,hook:12,up:16}[kind];
+  const chain=comboStep(kind);
+  if(kind==='combo'){YOU.play('jab_cross',{speed:1.3});stepIn(YOU,.3,400/1.3);await wait(400/1.3);land('jab',Math.round(7*chain),bossBlocks());await wait(270/1.3);land('combo2',Math.round(10*chain),bossBlocks());await wait(420);YOU.idle();stepBack(YOU,300);if(bossHP<=0){busy=false;return knockdown();}await wait(200);BOSS.idle();comboArm();busy=false;return;}
+  hand[kind]=hand[kind]==='L'?'R':'L';const clip={jab:['lead_jab','right_jab'],hook:['hook','right_hook'],up:['uppercut','right_uppercut'],body:['hook','right_hook']}[kind][hand[kind]==='L'?0:1],at={jab:500,hook:400,up:470,body:420}[kind]/1.3,dmg={jab:9,hook:12,up:16,body:7}[kind];
   YOU.play(clip,{speed:1.3});trail(YOU,hand[kind]==='L'?0:1,GLOVES[glove]||0xc8262a,at+320);stepIn(YOU,{jab:.3,hook:.28,up:.3}[kind],at);
   await wait(at);
-  land(kind,dmg,bossBlocks());
+  if(kind==='body'){
+    // the ribs, not the chin: less off the bar, but its hands come down for six seconds
+    land('body',Math.round(dmg*chain),bossBlocks());
+    if(!downState&&bossHP>0){guardDownUntil=performance.now()+6000;BOSS.play('stomach_hit',{speed:1.3});
+      slam('TO THE BODY');call(['To the body. The hands are coming down.','Digging to the ribs.','That is where it lives.'],true);
+      ysp=Math.min(100,ysp+9);bars();}
+  }else land(kind,Math.round(dmg*chain),bossBlocks());
+  if(comboN>=2)slam(comboN>=4?'FOUR STRAIGHT':comboN>=3?'COMBINATION':'ON TOP OF IT');
   await wait(240);YOU.idle();stepBack(YOU,240);
   if(bossHP>0&&bossHP<=28){call(['It is hurt.','It is holding on.','It has nothing left.'],true);if(Math.random()<.5)BOSS.play('stunned',{speed:1.1});}
   if(bossHP<=0){busy=false;return knockdown();}
-  await wait(260);BOSS.idle();busy=false;}
+  await wait(260);BOSS.idle();comboArm();busy=false;}
 // its swing: it winds up (the tell), then throws. Slip the way the arrow points, or block.
 async function bossSwing(fast){if(!running||busy||downState||!BOSS)return;dodge=null;block=false;swingAt=performance.now();
   const side=Math.random()<.5?'L':'R';swingSide=side;if(!fast)temptLine();
@@ -977,13 +1008,14 @@ async function bossSwing(fast){if(!running||busy||downState||!BOSS)return;dodge=
     else await wait(120);}
   else if(blocked){youHP=Math.max(0,youHP-6);landed.boss+=6;bsp=Math.min(100,bsp+8);bars();slam('BLOCKED');thud('block');shake=.05;$('red').style.opacity=.4;setTimeout(()=>$('red').style.opacity=0,400);await wait(260);}
   else{const react=['big_head_hit','side_hit','head_hit','hit_back'][Math.floor(Math.random()*4)];YOU.play(react,{speed:1.5});shake=.12;youHP=Math.max(0,youHP-dmgHit);landed.boss+=dmgHit;bsp=Math.min(100,bsp+24);const at2=glovePos(BOSS).lerp(YOU.root.position.clone().setY(1.35),.35);hitFx(at2,0xff6a5a,true);sparks(at2,ADD().glow,true);impactRing(at2,0xff8a70,true);sweat(headAt(YOU),12);camKick(BOSS.root.position,YOU.root.position,.16);freeze(120);bars();thud('hook');snd('you-m-hit-'+(1+Math.floor(Math.random()*3)));crowdJump('L',.8);swell();chant('L',TEMPT);$('red').style.opacity=1;setTimeout(()=>$('red').style.opacity=0,450);await wait(360);}
+  if(!dodged)comboEnd();   // it landed or you covered up: the count is gone
   BOSS.idle();YOU.idle();stepBack(BOSS,300);if(curShot==='shoulder')cam.position.x=camBase.x;YOU.root.position.x=youHome.x;dodge=null;block=false;say(dodged?'Lucky.':blocked?'Cover up all you like.':'Sit down.',ADD().name);
   if(dodged)call(['Slipped it.','Not there.','Made it miss.']);else if(blocked)call(['Blocked.','Took it on the gloves.']);else if(youHP<=28)call(['Hands up. Hands up.','That one landed.','Needs the bell.'],true);
   busy=false;
   if(youHP<=0)meDown();else if(bsp>=100&&running)bossSpecial();}
 // it goes down: the mandatory eight. It beats the count unless this is its fourth trip to the canvas,
 // and three in one round is the referee's stoppage
-async function knockdown(){if(downState)return;downState=true;busy=true;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
+async function knockdown(){if(downState)return;downState=true;busy=true;comboEnd();guardDownUntil=0;slam('DOWN');snd('boss-down');call('Down it goes.',true);snd('cheer');crowdJump('R',1);chant('R',SUPPORT);
   downs.boss++;downsFight.boss++;
   BOSS.play('knocked_out',{speed:1.2});YOU.play('victory',{loop:true,fade:.4});
   shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(BOSS,true);
@@ -1026,7 +1058,7 @@ document.querySelectorAll('#places button').forEach(b=>b.onclick=()=>setPlace(b.
 // pick a fighter: the preview starts over with them, and the pick carries into the live fight
 document.querySelectorAll('#fighters button').forEach(b=>b.onclick=()=>{const n=+b.dataset.f;if(n===fighterN)return;fighterN=n;if(!LIVE)goLive(false);else if(fightOver)loadFighter(n);});
 $('go').onclick=()=>{ac();if(!LIVE)return goLive(true);if(fightOver){if(round){shot('shoulder',0);refWalk(ref.userData.home);}startFight();}};
-$('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};
+$('jl').onpointerdown=e=>{e.preventDefault();autoOff();punch('jab')};$('cb').onpointerdown=e=>{e.preventDefault();autoOff();punch('combo')};$('hk').onpointerdown=e=>{e.preventDefault();autoOff();punch('hook')};$('up').onpointerdown=e=>{e.preventDefault();autoOff();punch('up')};$('bd').onpointerdown=e=>{e.preventDefault();autoOff();punch('body')};
 const LIVE=(new URLSearchParams(location.search).get('live')==='1');
 let auto=!LIVE,swingSide=null;
 // the picker screen: stand the fighter head to toe in the clear space above the controls

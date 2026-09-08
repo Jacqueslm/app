@@ -32,12 +32,12 @@ test('every guide answer button goes somewhere that exists', () => {
   assert.deepEqual(dead, [], `dead guide buttons: ${dead.join(', ')}`);
 });
 
-test('the guide bot knows about the Game tab', () => {
-  // The Game tab shipped without ever being added to the guide, so "what is
-  // the game tab" had no answer and no destination.
-  assert.match(APP, /\{q:'What is the Game tab\?'/);
-  assert.ok(helpNames().has('The Fight of Your Life (the Game tab)'), 'and it is a destination you can be sent to');
-  assert.ok(helpNames().has('The Climb'), 'so is The Climb, which lives on the same screen');
+test('the guide bot knows about The Fight tab', () => {
+  // The tab shipped without ever being added to the guide, so "what is the
+  // game tab" had no answer and no destination. Renamed The Fight on 6 Sep.
+  assert.match(APP, /\{q:'What is The Fight tab\?'/);
+  assert.ok(helpNames().has('The Fight of Your Life (The Fight tab)'), 'and it is a destination you can be sent to');
+  assert.ok(helpNames().has('The Climb'), 'so is The Climb, on Today and in Tools');
 });
 
 test('the guide bot does not point at anything that was removed', () => {

@@ -470,7 +470,9 @@ body.nova-open #mini-player{bottom:160px}
 .g2-full .g2-photo,.g2-full .g2-grain,.g2-full .g2-glove,.g2-full .g2-red,.g2-full .g2-mini,.g2-full .g2-ref,.g2-full .g2-top,.g2-full .g2-floors{display:none}
 .g2-full .g2-body{padding:0}
 /* the fight takes the whole phone: the tab bar and the guide button would sit on the buttons, so they step aside and a way out goes in the corner */
-body.g2-fighting .bnav,body.g2-fighting #guide-fab{display:none}
+body.g2-fighting .bnav,body.g2-fighting #guide-fab,body.g2-fighting .hdr{display:none}
+body.g2-fighting .screens{overflow:visible;-webkit-overflow-scrolling:auto;padding-bottom:0}
+body.g2-fighting .app{overflow:visible}
 .g2-exit{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:10px;z-index:70;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(7,10,20,.6);color:#fff;font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 .g2-photo{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;transform-origin:50% 60%}
 .g2-photo::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,20,.15) 0%,rgba(7,10,20,.25) 45%,rgba(7,10,20,.92) 100%)}

@@ -1,24 +1,30 @@
-// The Fight of Your Life. Jacques, 6 Sep 2026: game shows on the floors, a
-// Punch-Out fight on the roof, no clock anywhere, nothing invented.
+// The Fight of Your Life. Rebuilt again after 6 Sep 2026: one building per
+// addiction, ten floors and a roof, the fight itself in 3D on its own page
+// (game3d.html), a parachute out. This check was rewritten on 8 Sep to match.
 //
 // What this file guards:
-//   - every track the app offers has an opponent, in all three tiers, with a
-//     shadow photo and a fighting pattern
-//   - every line has exactly one right counter and two wrong ones
+//   - every track the app offers has a building, an opponent in all three
+//     tiers, its own temptation lines, and its two photos
+//   - every boss line has exactly one right counter and two wrong ones
 //   - the pace starts slow (single words, long wind-up, dodge arrows) and
-//     tightens; there is no clock
+//     tightens; the app shell has no clock (the 3D ring's round clock is the
+//     one settled exception)
 //   - strength is earned in the app, and the door says what is missing
-//   - a loss locks the roof until one real thing is done in the app
+//   - the roof opens only after ten floors; leaving a fight costs nothing;
+//     a relapse costs nothing
+//   - the fight is handed this person's own things, never invented ones
 //   - the house rules: no medical claims, never "finished", no pronouns for
-//     a supporter's person, the supporter's opponent never blames them, and
-//     no invented numbers ("% of people") anywhere in the game
+//     a supporter's person, the supporter's opponent never blames them
 const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const APP = fs.readFileSync(path.join(__dirname, '..', '..', 'index.html'), 'utf8');
+const ROOT = path.join(__dirname, '..', '..');
+const APP = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const FIGHT3D = fs.readFileSync(path.join(ROOT, 'game3d.html'), 'utf8');
+const exists = (...p) => fs.existsSync(path.join(ROOT, ...p));
 
 // Pull the game's data tables out of the page and evaluate them on their own.
 function block(startMarker, endMarker) {
@@ -26,29 +32,35 @@ function block(startMarker, endMarker) {
   const b = APP.indexOf(endMarker, a); assert.ok(b > a, 'missing ' + endMarker);
   return APP.slice(a, b);
 }
-const src = block('const GAME_TOP_FLOOR=', '// ─── State ───');
-const ctx = {};
-vm.runInNewContext(src + '\nthis.GAME_TRACKS=GAME_TRACKS;this.BOSS_NAME=BOSS_NAME;this.GAME_BOSSES=GAME_BOSSES;this.GAME_EXITS=GAME_EXITS;this.GAME_RIDES=GAME_RIDES;this.gameTier=gameTier;this.BOSS_IMG=BOSS_IMG;this.GAME_PATTERNS=GAME_PATTERNS;this.GAME_BOXERS=GAME_BOXERS;this.GAME_SHOWS=typeof GAME_SHOWS!=="undefined"?GAME_SHOWS:null;', ctx);
-const { GAME_TRACKS, BOSS_NAME, GAME_BOSSES, GAME_EXITS, GAME_RIDES, gameTier, BOSS_IMG, GAME_PATTERNS, GAME_BOXERS } = ctx;
+const GAME = block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
+const src = block('const GAME_FLOORS=', 'function gameState(){');
+const ctx = { S: { bld: { b: 1, f: 1 } } };
+vm.runInNewContext(src + `
+function gameState(){return S.bld;}
+this.GAME_FLOORS=GAME_FLOORS;this.GAME_ELEMENTS=GAME_ELEMENTS;this.GAME_BUILDINGS=GAME_BUILDINGS;
+this.GAME_TEMPT=GAME_TEMPT;this.GAME_BOSSES=GAME_BOSSES;this.GAME_RIDES=GAME_RIDES;
+this.GAME_PLACES=GAME_PLACES;this.GAME_BOXERS=GAME_BOXERS;this.GAME_GLOVES=GAME_GLOVES;
+this.tierAt=function(b,f){S.bld={b:b,f:f||1};return gameTier();};`, ctx);
+const { GAME_FLOORS, GAME_ELEMENTS, GAME_BUILDINGS, GAME_TEMPT, GAME_BOSSES, GAME_RIDES, GAME_PLACES, GAME_BOXERS, GAME_GLOVES, tierAt } = ctx;
 
-const LESSON_TRACKS = Object.keys(JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'lessons.json'), 'utf8')));
+const LESSON_TRACKS = Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'lessons.json'), 'utf8')));
+const HABIT_TRACKS = LESSON_TRACKS.filter(t => t !== 'Together'); // a couples programme, not a habit
 
-test('every track in the app has an opponent with a name', () => {
-  for (const t of LESSON_TRACKS) {
-    if (t === 'Together') continue; // a couples programme, not a habit
+test('every track in the app has a building, an opponent, temptation lines and two photos', () => {
+  for (const t of HABIT_TRACKS) {
+    const b = GAME_BUILDINGS.find(x => x.track === t);
+    assert.ok(b, 'no building for ' + t);
+    assert.ok(b.k && b.name && b.kind, b.track + ' needs a key, a name and a kind of place');
     assert.ok(GAME_BOSSES[t], 'no boss for ' + t);
-    assert.ok(BOSS_NAME[t], 'no boss name for ' + t);
-    assert.ok(GAME_EXITS[t] && GAME_EXITS[t].length >= 4, 'fewer than four exits for ' + t);
-    const img = BOSS_IMG[BOSS_NAME[t]];
-    assert.ok(img, 'no shadow photo key for ' + BOSS_NAME[t]);
-    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', 'boss-' + img + '.jpg')), 'missing img/fight/boss-' + img + '.jpg');
+    assert.ok(Array.isArray(GAME_TEMPT[t]) && GAME_TEMPT[t].length >= 10, 'fewer than ten temptations for ' + t);
+    assert.ok(exists('img', 'fight', 'boss-' + b.k + '.jpg'), 'missing img/fight/boss-' + b.k + '.jpg');
+    assert.ok(exists('img', 'fight', 'bld-' + b.k + '.jpg'), 'missing img/fight/bld-' + b.k + '.jpg');
   }
-  assert.ok(GAME_PATTERNS.default, 'a default fighting pattern');
-  for (const [name, p] of Object.entries(GAME_PATTERNS)) {
-    assert.ok(Array.isArray(p.seq) && p.seq.length >= 3, name + ' pattern needs at least three moves');
-    for (const m of p.seq) assert.ok(['L', 'R', 'F', 'S'].includes(m), name + ' has an unknown move ' + m);
-  }
-  assert.strictEqual(JSON.stringify(GAME_TRACKS.slice().sort()), JSON.stringify(Object.keys(GAME_BOSSES).sort()));
+  // (the tables come out of a separate realm, so compare as text)
+  const tracks = JSON.stringify(Array.from(GAME_BUILDINGS, b => b.track).sort());
+  assert.strictEqual(tracks, JSON.stringify(Object.keys(GAME_BOSSES).sort()), 'buildings and bosses are the same list');
+  assert.strictEqual(tracks, JSON.stringify(Object.keys(GAME_TEMPT).sort()), 'buildings and temptations are the same list');
+  assert.strictEqual(new Set(GAME_BUILDINGS.map(b => b.k)).size, GAME_BUILDINGS.length, 'building keys are unique');
 });
 
 test('every boss line has one right counter and two wrong ones, in all three tiers', () => {
@@ -64,17 +76,23 @@ test('every boss line has one right counter and two wrong ones, in all three tie
   }
 });
 
-test('every boxer people can pick has all five photos, and the gloves exist', () => {
+test('the art and the sound are on disk: rings, fighters, ref, boxers, gloves, the bell', () => {
+  assert.strictEqual(GAME_FLOORS, 10, 'ten floors, then the roof');
+  for (const el of GAME_ELEMENTS) assert.ok(exists('img', 'fight', 'ring-' + el.toLowerCase() + '.jpg'), 'missing ring for ' + el);
+  for (const p of GAME_PLACES) assert.ok(exists('img', 'fight', p.k + '.jpg'), 'missing scene ' + p.k);
+  for (const n of [1, 2, 3, 4, 5]) assert.ok(exists('img', 'fight', `fighter${n}.glb`), `missing fighter${n}.glb`);
+  for (const f of ['ref.glb', 'ring.glb', 'chute.glb', 'city.glb']) assert.ok(exists('img', 'fight', f), 'missing ' + f);
   for (const n of GAME_BOXERS) for (const pose of ['punch', 'guard', 'corner', 'count', 'down']) {
-    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', `boxer${n}-${pose}.jpg`)), `missing boxer${n}-${pose}.jpg`);
+    assert.ok(exists('img', 'fight', `boxer${n}-${pose}.jpg`), `missing boxer${n}-${pose}.jpg`);
   }
-  for (const c of ['red', 'blue', 'white']) assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'img', 'fight', `glove-${c}.png`)), 'missing glove ' + c);
+  for (const c of ['red', 'blue', 'white']) assert.ok(exists('img', 'fight', `glove-${c}.png`), 'missing glove ' + c);
+  assert.ok(GAME_GLOVES.includes('red'), 'red gloves are the default');
   for (const f of ['bell', 'bell3', 'crowd', 'cheer', 'winner', 'saved', 'down', 'getup', 'ref-1', 'ref-10', 'round-1', 'round-6', 'boss-hit-1', 'boss-down', 'you-m-hit-1', 'you-w-hit-1']) {
-    assert.ok(fs.existsSync(path.join(__dirname, '..', '..', 'audio', 'fight', f + '.mp3')), 'missing audio/fight/' + f + '.mp3');
+    assert.ok(exists('audio', 'fight', f + '.mp3'), 'missing audio/fight/' + f + '.mp3');
   }
 });
 
-test('the pace starts slow: single words first, longer lines, a shorter wind-up, no clock', () => {
+test('the pace starts slow: single words first, longer lines, a shorter wind-up, no clock in the app', () => {
   // Jacques on the demo: "start each rooftop level off slow and the questions
   // are too long - start them off with just a word."
   const words = s => s.trim().split(/\s+/).length;
@@ -82,67 +100,66 @@ test('the pace starts slow: single words first, longer lines, a shorter wind-up,
     for (const q of tiers.short) assert.ok(words(q.line) <= 3, `${t} short line too long: "${q.line}"`);
     for (const q of tiers.mid) assert.ok(words(q.line) <= 6, `${t} mid line too long: "${q.line}"`);
   }
-  assert.strictEqual(gameTier(1).key, 'short');
-  assert.strictEqual(gameTier(3).key, 'mid');
-  assert.strictEqual(gameTier(5).key, 'long');
-  assert.ok(gameTier(1).tell > gameTier(3).tell && gameTier(3).tell > gameTier(5).tell, 'the wind-up must shorten');
-  assert.ok(gameTier(1).hit < gameTier(5).hit, 'the boss must hit harder later');
-  assert.ok(gameTier(1).arrows && !gameTier(5).arrows, 'dodge arrows are shown early, then taken away');
-  assert.ok(!gameTier(1).feint && gameTier(3).feint && gameTier(5).switch, 'feints arrive mid, the switch late');
-  // Jacques: "no timer, it's added stress". Nothing in the game counts down.
-  const game = block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
-  assert.doesNotMatch(game, /floorClock|setInterval\([^)]*1000\)|Too slow\. That's how it gets in/, 'no countdown clock in the game');
+  const early = tierAt(1, 1), mid = tierAt(3, 1), late = tierAt(6, 1);
+  assert.strictEqual(early.key, 'short');
+  assert.strictEqual(tierAt(2, 11).key, 'short', 'the whole of building two is still single words');
+  assert.strictEqual(mid.key, 'mid');
+  assert.strictEqual(late.key, 'long');
+  assert.ok(early.tell > mid.tell && mid.tell > late.tell, 'the wind-up must shorten');
+  assert.ok(early.hit < late.hit, 'the boss must hit harder later');
+  assert.ok(early.arrows && !late.arrows, 'dodge arrows are shown early, then taken away');
+  assert.ok(!early.feint && mid.feint && late.switch, 'feints arrive mid, the switch late');
+  // Jacques: "no timer, it's added stress". The app shell counts nothing down.
+  // The one settled exception (6 Sep) is the round clock inside the 3D ring.
+  assert.doesNotMatch(GAME, /floorClock|timeLeft|ROUND_SECS|Too slow\. That's how it gets in/, 'no countdown clock in the app shell');
+  assert.match(FIGHT3D, /ROUND_SECS/, 'the ring keeps real boxing rounds');
 });
 
-test('every exit has exactly one way out', () => {
-  for (const [t, scenes] of Object.entries(GAME_EXITS)) {
-    for (const sc of scenes) {
-      assert.strictEqual(sc.moves.length, 3, `${t} "${sc.scene}" needs three moves`);
-      assert.strictEqual(sc.moves.filter(m => m.ok).length, 1, `${t} "${sc.scene}" needs exactly one exit`);
-    }
-  }
+test('the roof opens only after ten floors, and walking out of a fight costs nothing', () => {
+  const floors = block('function renderFloors(){', 'function gameFloorGo(');
+  assert.match(floors, /roofReady=Object\.keys\(g\.cleared\)\.length>=GAME_FLOORS/);
+  assert.match(floors, /roofReady\?'fight':'ten floors first'/);
+  const leave = block('function gameLeaveFight(){', 'function game3dWon(){');
+  assert.doesNotMatch(leave, /losses|cleared|g\.f=/, 'leaving the fight changes no score');
+  assert.match(block('function game3dLost(', 'function gameNextBuilding'), /if\(!draw\)g\.losses\+\+/);
 });
 
-test('nothing in the game is invented: no "% of people", every card reads from the app', () => {
-  const game = block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
-  assert.doesNotMatch(game, /% of people|people on your track were|house:\[/, 'no made-up crowd numbers');
-  const heals = block('function gameHeals(){', 'function showHeal()');
-  for (const need of ['gameDays()', 'dailySpend', 'S.journals', 'gamePerson()', 'gameLessonToday()']) assert.ok(heals.includes(need), 'heals must read ' + need);
-  const puzzle = block('function gmPuzzleSource(){', 'function showWheel()');
-  assert.ok(puzzle.includes('gmJournalText()') && puzzle.includes('gmSentenceFrom(track)'), 'the puzzle reads the journal and the lessons');
+test('the fight is handed this person\'s own things, never invented ones', () => {
+  const lines = block('function game3dLines(){', 'function game3dSupport(){');
+  assert.ok(lines.includes('GAME_BOSSES[track]') && lines.includes('GAME_TEMPT[track]'), 'its lines are the addiction\'s own');
+  const support = block('function game3dSupport(){', 'async function startFight(){');
+  for (const need of ['S.journal', 'S.partnerName', 'gameDays()']) assert.ok(support.includes(need), 'the corner must read ' + need);
+  const start = block('async function startFight(){', 'function game3dMessage(');
+  for (const need of ['bossKey:', 'bossName:', 'lines:game3dLines()', 'support:game3dSupport()', 'name:(S.name']) assert.ok(start.includes(need), 'the ring is handed ' + need);
+  assert.match(start, /src="\/game3d\.html\?/, 'the fight runs in game3d.html');
+  assert.match(FIGHT3D, /type:\s*'fight-over'/, 'and the ring reports back how it ended');
+  assert.doesNotMatch(GAME + JSON.stringify(GAME_TEMPT), /% of people|people on your track were|house:\[/, 'no made-up crowd numbers');
 });
 
 test('house rules: no medical claims, never finished, no pronouns for a supporter\'s person', () => {
-  const text = JSON.stringify({ GAME_BOSSES, GAME_EXITS, GAME_RIDES }) + block('// ─── THE FIGHT OF YOUR LIFE', 'function towerStop()');
+  const text = JSON.stringify({ GAME_BOSSES, GAME_TEMPT, GAME_RIDES, GAME_BUILDINGS }) + GAME;
   assert.doesNotMatch(text, /research shows|studies show|dopamine|brain chem|neuro|rewir|prefrontal|clinically/i);
   assert.doesNotMatch(text, /you(?:'re| are) (?:cured|finished|done with this)/i);
-  const sup = JSON.stringify({ b: GAME_BOSSES['Supporting Someone'], e: GAME_EXITS['Supporting Someone'] });
+  const sup = JSON.stringify({ b: GAME_BOSSES['Supporting Someone'], t: GAME_TEMPT['Supporting Someone'] });
   assert.doesNotMatch(sup, /\b(she|her|hers|he|him|his|husband|wife)\b/i, 'a supporter\'s person is "they"');
   // The supporter's opponent is the voice that blames them; every RIGHT counter must refuse the blame.
   for (const k of ['short', 'mid', 'long']) for (const q of GAME_BOSSES['Supporting Someone'][k]) {
     assert.doesNotMatch(q.right, /my fault|partly on me|if I'd noticed|missed the signs/i, `supporter counter accepts blame: "${q.right}"`);
   }
-  assert.match(APP, /Down\. Not out\. Same time tomorrow\./, 'the boss never says it is over');
-  assert.match(APP, /It ends the fight, not the war\./);
+  assert.match(GAME, /Down\. Not out\. Same time tomorrow\./, 'the boss never says it is over');
+  assert.match(GAME, /It is still down there and it will be back/, 'a building ends, the fight does not');
+  for (const r of GAME_RIDES) assert.ok(r.key && r.line && typeof r.min === 'number', 'every ride has a key, a line and a floor');
 });
 
 test('strength is earned in the app and the door says what is missing', () => {
-  const fn = block('function gameStrength(){', 'function gameBossHP');
+  const fn = block('function gameStrength(){', 'let gmBusy=');
   for (const need of ['lessonDoneDates', 'journals', 'pledged', 'cravings']) assert.ok(fn.includes(need), 'strength must read ' + need);
   assert.match(fn, /hint:lesson\?null:'Do today/);
   assert.match(fn, /hint:pledge\?null:'Take the pledge on Home/);
   assert.match(fn, /Math\.min\(120,/, 'strength is capped');
-  const stars = block('function gameStars(){', 'function gameBossHP');
-  for (const need of ['gamePledgeToday()', 'gameJournalToday()', 'gameLessonToday()']) assert.ok(stars.includes(need), 'uppercuts are earned by ' + need);
-});
-
-test('a loss locks the roof until one real thing is done in the app', () => {
-  const lock = block('function gameLock(){', '// ─── Rendering');
-  assert.match(lock, /lessonsCompletedCount\|\|0\)>L\.lessons/);
-  assert.match(lock, /journals\|\|\[\]\)\.length>L\.journals/);
-  assert.match(lock, /cravings\|\|\[\]\)\.length>L\.cravings/);
-  assert.match(lock, /S\.pledged&&S\.pledgeDate===today/);
-  assert.match(APP, /function gmSaved\(\)\{[\s\S]*?gameLock\(\);/);
+  const door = block('function renderRoofDoor(){', 'function game3dLines(){');
+  assert.match(door, /Strength · earned in the app/);
+  assert.match(door, /p\.hint\?`<small>/, 'the door prints what is missing');
 });
 
 test('a relapse costs nothing in the game', () => {
@@ -152,10 +169,12 @@ test('a relapse costs nothing in the game', () => {
 test('the supporter gets their own opponent, never their person\'s habit', () => {
   const fn = block('function gameTrack(){', 'function gameBossName');
   assert.match(fn, /S\.userType==='partner'[\s\S]*?return 'Supporting Someone'/);
+  assert.ok(GAME_BUILDINGS.some(b => b.track === 'Supporting Someone' && b.name === 'The Checking'));
 });
 
-test('the vault and the ninety-floor tower are gone from the page', () => {
+test('the vault, the ninety-floor tower and the game shows are gone from the page', () => {
   assert.doesNotMatch(APP, /renderTowerVault|TOWER_FLOORS|TOWER_ARTIFACTS|id="s-vault"|tw-door/);
+  assert.doesNotMatch(APP, /GAME_TOP_FLOOR|function showWheel\(|function showWWR\(|function showHeal\(/, 'the shows were cleared out');
   assert.match(APP, /id="s-tower"/);
   // 6 Sep: The Climb moved off the fight screen. It lives on Today, under the
   // lesson that takes its step, and in Tools.

@@ -1063,7 +1063,14 @@ setInterval(()=>{
   if(curShot==='walk'||curShot==='entry'||curShot==='girl')return;
   if(auto&&!downState){shot(AUTOCUTS[(++autoCut)%AUTOCUTS.length],750);return;}
   if(!running||downState)return;
-  if(++autoCut%3===0)shot(curShot==='tv'?'shoulder':'tv',600);},3400);
+  // Measured 8 Sep 2026: the round used to cut between the ringside camera and the
+  // over-the-shoulder one every few seconds. Ringside you see your own fighter's
+  // face; over the shoulder you are stood behind his head with the addiction hidden
+  // behind him. A third of every round was spent looking at your own man's back,
+  // and it switched while you were trying to read a punch. That is the backwards.
+  // The round stays ringside now. The other cameras still do the walk-in, the
+  // knockdowns and the preview, where nobody is trying to dodge anything.
+  if(curShot!=='tv')shot('tv',600);},3400);
 // nothing is ever right up against the lens: if the camera ends a move too close to what it
 // is looking at, it backs off along its own sight line rather than filling the frame with a body
 function camClear(p,l,min){const v=p.clone().sub(l);const d=v.length();if(d>=min)return p;

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Lean test</title>
+<style>
+:root{--bg:#0d1030;--s1:#171b3d;--bdr:#2a2f5c;--tp:#eef0ff;--ts:#c0caff;--tm:#8892c0;
+      --green:#7ee8a2;--accent:#5b52d4;--red:#e24b4a;--amber:#f5a623}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tp);
+     font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+     padding:16px 14px 40px;max-width:560px;margin:0 auto}
+h1{font-size:1.125rem;margin:0 0 2px}
+.sub{color:var(--tm);font-size:.8125rem;margin:0 0 16px}
+.card{background:var(--s1);border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:12px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:13px 18px;
+       background:var(--accent);color:#fff;width:100%;cursor:pointer}
+button.ghost{background:transparent;color:var(--ts);border:1px solid var(--bdr)}
+button:disabled{opacity:.45}
+button+button{margin-top:8px}
+#stage{position:relative;border-radius:14px;overflow:hidden;background:#000;
+       aspect-ratio:3/4;display:none}
+#cam{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+#marks{position:absolute;inset:0;width:100%;height:100%;transform:scaleX(-1)}
+#call{position:absolute;left:0;right:0;top:14px;text-align:center;font-size:1.5rem;
+      font-weight:800;letter-spacing:.06em;text-shadow:0 2px 12px #000;opacity:0;
+      transition:opacity .09s}
+#call.on{opacity:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--s1);border:1px solid var(--bdr);border-radius:12px;padding:11px 13px}
+.stat b{display:block;font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{color:var(--tm);font-size:.6875rem;text-transform:uppercase;letter-spacing:.08em}
+.good{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+     padding:11px 0;border-bottom:1px solid var(--bdr)}
+.row:last-child{border-bottom:0}
+.row p{margin:0;font-size:.875rem}
+.row small{display:block;color:var(--tm);font-size:.75rem}
+.sw{width:48px;height:28px;border-radius:14px;background:#2a2f5c;position:relative;
+    flex-shrink:0;cursor:pointer;transition:background .15s}
+.sw:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;
+          border-radius:50%;background:#fff;transition:transform .15s}
+.sw.on{background:var(--green)}.sw.on:after{transform:translateX(20px)}
+#gl{width:100%;border-radius:10px;display:none;margin-top:10px;background:#000}
+#msg{color:var(--amber);font-size:.8125rem;margin-top:10px;min-height:1.2em}
+.hd{font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);
+    font-weight:700;margin:22px 0 8px}
+.note{color:var(--tm);font-size:.78125rem;line-height:1.65}
+.note b{color:var(--ts)}
+</style>
+</head>
+<body>
+
+<h1>Lean test</h1>
+<p class="sub">Does body-dodging work on your phone? Two numbers decide it.</p>
+
+<div class="card">
+  <button id="go">Turn the camera on</button>
+  <button id="cal" class="ghost" disabled>Stand straight, then tap this</button>
+  <div id="msg"></div>
+</div>
+
+<div id="stage">
+  <video id="cam" playsinline muted autoplay></video>
+  <canvas id="marks"></canvas>
+  <div id="call"></div>
+</div>
+
+<div class="grid" style="margin-top:12px">
+  <div class="stat"><b id="fps">—</b><span>Frames a second</span></div>
+  <div class="stat"><b id="lag">—</b><span>Lag, ms</span></div>
+</div>
+
+<div class="hd">Load</div>
+<div class="card" style="margin-bottom:0">
+  <div class="row">
+    <div>
+      <p>Add the fight on top</p>
+      <small>Runs the same 3D engine at the same time</small>
+    </div>
+    <div class="sw" id="sw3d"></div>
+  </div>
+  <canvas id="gl" height="150"></canvas>
+</div>
+
+<div class="hd">How to read it</div>
+<p class="note">
+<b>Frames a second</b> — how often your body position is read. Under 15 and a dodge
+lands too late to count.<br><br>
+<b>Lag</b> — how long between moving and the app knowing. Over about 120ms you feel it.<br><br>
+Turn the fight on and watch both. That second reading is the real answer, because in the
+real thing the phone is drawing the ring at the same time.
+</p>
+
+<div class="hd">What this does</div>
+<p class="note">
+The camera picture is read and thrown away in the same instant. Nothing is recorded, nothing
+is saved, nothing leaves your phone. Close the page and the camera is off.<br><br>
+This is a test page. It is not in the app and nothing here changes the app.
+</p>
+
+<script src="/js/ring3d-three.js"></script>
+<script type="module">
+const $=id=>document.getElementById(id);
+const msg=t=>{$('msg').textContent=t||'';};
+
+let landmarker=null,stream=null,running=false,baseline=null;
+let frames=0,fpsAt=performance.now(),lagAvg=0;
+
+// MediaPipe's pose model runs entirely in the browser - the video never goes anywhere.
+// The library and model file are fetched once from Google's CDN, like any script tag.
+async function loadModel(){
+  msg('Loading the body tracker… (first time only, a few seconds)');
+  const V=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
+  const files=await V.FilesetResolver.forVisionTasks(
+    'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  landmarker=await V.PoseLandmarker.createFromOptions(files,{
+    baseOptions:{
+      modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
+      delegate:'GPU'
+    },
+    runningMode:'VIDEO',numPoses:1
+  });
+}
+
+async function start(){
+  $('go').disabled=true;
+  try{
+    await loadModel();
+  }catch(e){
+    $('go').disabled=false;
+    msg('Could not load the body tracker. Check your connection and try again.');
+    return;
+  }
+  msg('Asking for the camera…');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+  }catch(e){
+    $('go').disabled=false;
+    msg('No camera. You have to allow it for this test to run — nothing is recorded.');
+    return;
+  }
+  const v=$('cam');
+  v.srcObject=stream;
+  await v.play();
+  $('stage').style.display='block';
+  $('cal').disabled=false;
+  $('go').textContent='Camera is on';
+  msg('Stand back so your head and hips are both in frame.');
+  running=true;
+  requestAnimationFrame(loop);
+}
+
+// Lean is the shoulders moving sideways OVER the hips - not the whole body sliding,
+// which is just walking. Measured against shoulder width so it reads the same whether
+// you are close to the phone or far from it.
+const L={LSH:11,RSH:12,LHIP:23,RHIP:24};
+function read(p){
+  const a=p[L.LSH],b=p[L.RSH],c=p[L.LHIP],d=p[L.RHIP];
+  if(!a||!b||!c||!d)return null;
+  const shx=(a.x+b.x)/2, shy=(a.y+b.y)/2;
+  const hpx=(c.x+d.x)/2, hpy=(c.y+d.y)/2;
+  const width=Math.hypot(a.x-b.x,a.y-b.y);
+  const torso=Math.hypot(shx-hpx,shy-hpy);
+  if(width<0.02||torso<0.02)return null;
+  return {lean:(shx-hpx)/width, drop:(shy-hpy)/torso, shx,shy,hpx,hpy,width,torso};
+}
+
+let lastCall='',callAt=0;
+function say(t){
+  const el=$('call');
+  if(t){el.textContent=t;el.className='on';
+        el.style.color=t==='DUCK'?'var(--amber)':'var(--green)';callAt=performance.now();}
+  else if(performance.now()-callAt>420){el.className='';}
+}
+
+let lastVideoTime=-1;
+function loop(){
+  if(!running)return;
+  const v=$('cam');
+  if(v.currentTime!==lastVideoTime&&v.videoWidth){
+    lastVideoTime=v.currentTime;
+    const t0=performance.now();
+    let res=null;
+    try{res=landmarker.detectForVideo(v,t0);}catch(e){}
+    const dt=performance.now()-t0;
+    lagAvg=lagAvg?lagAvg*0.85+dt*0.15:dt;
+
+    const cv=$('marks');
+    if(cv.width!==v.videoWidth){cv.width=v.videoWidth;cv.height=v.videoHeight;}
+    const g=cv.getContext('2d');
+    g.clearRect(0,0,cv.width,cv.height);
+
+    const p=res&&res.landmarks&&res.landmarks[0];
+    const r=p?read(p):null;
+    if(r){
+      // the dot is the shoulders; the line is where they should sit over the hips
+      const W=cv.width,H=cv.height;
+      g.strokeStyle='rgba(255,255,255,.35)';g.lineWidth=Math.max(2,W/240);
+      g.beginPath();g.moveTo(r.hpx*W,r.hpy*H);g.lineTo(r.hpx*W,r.shy*H);g.stroke();
+      const off=baseline?r.lean-baseline.lean:r.lean;
+      const dropped=baseline?(r.drop<baseline.drop*0.86):false;
+      g.fillStyle=Math.abs(off)>0.22||dropped?'#7ee8a2':'#5b52d4';
+      g.beginPath();g.arc(r.shx*W,r.shy*H,Math.max(9,W/34),0,7);g.fill();
+      if(baseline){
+        if(dropped)say('DUCK');
+        else if(off>0.22)say('DODGE LEFT');
+        else if(off<-0.22)say('DODGE RIGHT');
+        else say('');
+      }
+    }else{ say(''); }
+
+    frames++;
+    const now=performance.now();
+    if(now-fpsAt>500){
+      const f=frames*1000/(now-fpsAt);
+      const el=$('fps');
+      el.textContent=f.toFixed(0);
+      el.className=f>=22?'good':f>=15?'warn':'bad';
+      const lg=$('lag');
+      lg.textContent=lagAvg.toFixed(0);
+      lg.className=lagAvg<=70?'good':lagAvg<=120?'warn':'bad';
+      frames=0;fpsAt=now;
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+$('go').onclick=start;
+$('cal').onclick=()=>{
+  const v=$('cam');
+  let res=null;
+  try{res=landmarker.detectForVideo(v,performance.now());}catch(e){}
+  const p=res&&res.landmarks&&res.landmarks[0];
+  const r=p?read(p):null;
+  if(!r){msg('Cannot see your shoulders and hips. Step back and try again.');return;}
+  baseline=r;
+  msg('Set. Now lean sideways, or duck.');
+};
+
+// ── the load test ────────────────────────────────────────────────────────────
+// Same three.js build the real fight uses, so the frame cost is the real one.
+let three=null;
+$('sw3d').onclick=function(){
+  const on=!this.classList.contains('on');
+  this.classList.toggle('on',on);
+  $('gl').style.display=on?'block':'none';
+  if(on)startGL(); else stopGL();
+};
+function startGL(){
+  if(three){three.on=true;return;}
+  const T=window.THREE;
+  if(!T){msg('3D engine did not load.');return;}
+  const cv=$('gl');
+  cv.width=cv.clientWidth*(window.devicePixelRatio||1);
+  cv.height=150*(window.devicePixelRatio||1);
+  const rend=new T.WebGLRenderer({canvas:cv,antialias:true});
+  rend.setPixelRatio(window.devicePixelRatio||1);
+  const sc=new T.Scene();
+  const cam=new T.PerspectiveCamera(55,cv.width/cv.height,0.1,100);
+  cam.position.set(0,0,14);
+  sc.add(new T.HemisphereLight(0xffffff,0x223355,1.1));
+  const dl=new T.DirectionalLight(0xffffff,1.4);dl.position.set(4,8,6);sc.add(dl);
+  // roughly the object and light count the ring carries
+  const geo=new T.BoxGeometry(0.7,0.7,0.7);
+  const bits=[];
+  for(let i=0;i<420;i++){
+    const m=new T.Mesh(geo,new T.MeshStandardMaterial({
+      color:new T.Color().setHSL(0.6+Math.random()*0.2,0.6,0.5),roughness:0.5}));
+    m.position.set((Math.random()-0.5)*18,(Math.random()-0.5)*8,(Math.random()-0.5)*10);
+    sc.add(m);bits.push(m);
+  }
+  three={on:true,rend,sc,cam,bits};
+  (function spin(){
+    if(!three)return;
+    requestAnimationFrame(spin);
+    if(!three.on)return;
+    const t=performance.now()*0.001;
+    for(let i=0;i<three.bits.length;i++){
+      three.bits[i].rotation.x=t+i;three.bits[i].rotation.y=t*0.7+i;
+    }
+    three.rend.render(three.sc,three.cam);
+  })();
+}
+function stopGL(){ if(three)three.on=false; }
+
+window.addEventListener('pagehide',()=>{
+  running=false;
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+});
+</script>
+</body>
+</html>

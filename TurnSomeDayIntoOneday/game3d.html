@@ -68,6 +68,16 @@
     .skipwalk{bottom:calc(180px + env(safe-area-inset-bottom))}
     .row.pick button{font-size:.48rem;padding:5px 1px}
   }
+  /* Nobody is picked up off the canvas by the app. The count runs, your own lines
+     come up beside it, and this waits for as long as it takes. */
+  .getup{position:absolute;left:50%;transform:translateX(-50%);z-index:12;
+    bottom:calc(232px + env(safe-area-inset-bottom));min-width:62%;
+    background:var(--you,#2fd08a);color:#04120b;border:0;border-radius:10px;
+    padding:18px 22px;font-family:'Barlow Condensed',Impact,sans-serif;font-weight:800;
+    font-size:2rem;letter-spacing:.1em;box-shadow:0 0 44px rgba(47,208,138,.55);
+    animation:getup .7s ease-in-out infinite alternate}
+  .getup[hidden]{display:none}
+  @keyframes getup{from{transform:translateX(-50%) scale(.97)}to{transform:translateX(-50%) scale(1.04)}}
   /* The walk-in runs about forty seconds. Worth watching once; not every time. */
   /* Sits above the control panel, not over the HUD - top left is the round clock
      and the fighter's name, and the skip button was landing straight on them. */
@@ -95,6 +105,7 @@
     <div class="row pick" id="fighters"><button data-f="1"><i style="background:#c8262a"></i>Fighter 1</button><button data-f="2"><i style="background:#2f5fd6"></i>Fighter 2</button><button data-f="3"><i style="background:#141418"></i>Fighter 3</button><button data-f="4"><i style="background:#d7a13a"></i>Fighter 4</button><button data-f="5"><i style="background:#2f9e5c"></i>Fighter 5</button></div>
     <div class="row one" id="bellrow"><button class="x" id="go">Ring the bell</button></div>
   </div>
+  <button class="getup" id="getup" hidden>GET UP</button>
   <button class="skipwalk" id="skipwalk" hidden>Skip the walk-in</button>
   <div class="load" id="load">LOADING THE ROOF…</div>
 </div>
@@ -1031,15 +1042,50 @@ async function knockdown(){if(downState)return;downState=true;busy=true;comboEnd
   downState=false;busy=false;if(timeLeft===0)endRound();}
 // you go down: the mandatory eight, and you are up at eight. Three in a round and the referee stops it,
 // on your feet, walking out
+// Jacques, 8 Sep 2026: you get yourself up. The app used to stand you up at eight
+// on its own, which is the one thing it must never do - it can end a fight, a floor
+// or a day, and it can never tell somebody they are finished, or finish anything for
+// them. So the count runs, the lines from your own journal come up on your side of
+// the ring, and it waits. The referee reaches nine and stays there. There is no ten
+// here. Get up early and you carry more into the next round; take your time and you
+// still get up, because you always get up.
+function refCountToTap(over){
+  return new Promise(resolve=>{
+    const btn=$('getup');
+    const words=['One.','Two.','Three.','Four.','Five.','Six.','Seven.','Eight.','Nine.'];
+    let n=0,done=false,t=null;
+    refFace(over);refPlay('counting',{fade:.2});
+    btn.hidden=false;
+    const finish=()=>{if(done)return;done=true;clearTimeout(t);btn.hidden=true;btn.onpointerdown=null;resolve(n);};
+    btn.onpointerdown=e=>{e.preventDefault();finish();};
+    const tick=()=>{
+      if(done)return;
+      if(n<9){
+        n++;refFace(over);count(n);say(words[n-1],'Referee');
+        if(n===3||n===6)chant('R',SUPPORT);
+        t=setTimeout(tick,n===1?2400:870);
+      }else{
+        // nine, and it stops there. It will not count anybody out for taking a moment.
+        say('Come on. Come on.','Referee');chant('R',SUPPORT);
+        t=setTimeout(tick,2600);
+      }
+    };
+    t=setTimeout(tick,600);
+  });
+}
 async function meDown(){if(busy&&!downState)return;busy=true;downState=true;slam('DOWN');snd('down');call('You are down. Get up.',true);crowdJump('L',1);chant('L',TEMPT);
   downs.you++;downsFight.you++;
   YOU.play('knocked_out',{speed:1.2});shot('low',0);slowMo(2100);punchIn();freeze(240);roll(.16,1100);koLights(YOU,true);
   await wait(2100);await refWalk(new T.Vector3(.55,0,-.15));
-  await refCount(8,YOU.root.position);
-  snd('getup');call('Up at eight.',true);YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
-  await stagger(YOU);youHP=30;bars();shot('tv',800);
+  const at=await refCountToTap(YOU.root.position);
+  refIdle();
+  snd('getup');call(at<=3?'Straight back up.':at<=6?'Up at '+at+'.':'Up, and on his feet.',true);
+  say('…you got up.','Corner');
+  YOU.play('getting_up',{speed:1.2});await wait(4200);koLights(YOU,false);
+  // up early and you carry more into the next round. Late and you are still up.
+  await stagger(YOU);youHP=Math.max(26,44-at*2);bars();shot('tv',800);
   if(downs.you>=3){koLights(YOU,false);refWalk(ref.userData.home);return decision('stopped');}
-  refWalk(ref.userData.home);downState=false;busy=false;say('…you got up. Hands up.','Corner');if(timeLeft===0)endRound();}
+  refWalk(ref.userData.home);downState=false;busy=false;say('Hands up.','Corner');if(timeLeft===0)endRound();}
 // the end: a knockout, a stoppage, or the cards after six. It can end a fight. It never ends you.
 async function decision(how){running=false;fightOver=true;result=how;downState=false;busy=false;crowdOn(.25);setTimeout(()=>crowdOn(0),9000);for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;}stools.you.visible=stools.boss.visible=false;
   const you=how==='ko'||how==='tko'||(how==='cards'&&cards.you>cards.boss),draw=how==='cards'&&cards.you===cards.boss;

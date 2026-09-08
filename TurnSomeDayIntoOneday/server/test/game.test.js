@@ -131,6 +131,20 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
     'the replay check comes before anything is counted');
 });
 
+test('nobody is counted out, and nobody is stood up for', () => {
+  const down = FIGHT3D.slice(FIGHT3D.indexOf('async function meDown('), FIGHT3D.indexOf('async function decision('));
+  // The app must never stand a person up on its own, and never count them out.
+  assert.doesNotMatch(down, /refCount\(/, 'the fixed count would stand them up at eight by itself');
+  assert.match(down, /await refCountToTap\(/, 'the count waits for the person to get up');
+  const counter = FIGHT3D.slice(FIGHT3D.indexOf('function refCountToTap('), FIGHT3D.indexOf('async function meDown('));
+  assert.ok(!/'Ten\.'/.test(counter), 'there is no ten in this count');
+  assert.match(counter, /if\(n<9\)/, 'the count stops at nine');
+  assert.match(counter, /Come on\. Come on\./, 'and holds there for as long as it takes');
+  assert.match(counter, /chant\('R',SUPPORT\)/, 'their own lines come up while it waits');
+  // Getting up sooner is worth more, and getting up late is still getting up.
+  assert.match(down, /youHP=Math\.max\(26,44-at\*2\)/);
+});
+
 test('every element fights differently, and none of them is unwinnable', () => {
   const m = FIGHT3D.match(/const FLOORS=\[([\s\S]*?)\n\s*\/\/ The roof has no element/);
   assert.ok(m, 'FLOORS still carries the per-element styles');

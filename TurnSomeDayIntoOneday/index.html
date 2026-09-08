@@ -1819,6 +1819,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Delete my account &amp; erase everything</button>
         <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
       </div>
+    </div>
+
     <div id="s-partner" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0" id="partner-sec-hd">For the one who loves you</div>
@@ -12388,17 +12390,12 @@ function shareMyMilestone(){
     navigator.share({text}).catch(()=>{});
     return;
   }
-  const sub=document.getElementById('share-row-sub');
+  // The row this used to write into went with the Progress cleanup, so say it
+  // plainly instead of silently succeeding.
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>{
-      if(sub){
-        const original=sub.textContent;
-        sub.textContent='Copied to clipboard';
-        setTimeout(()=>{sub.textContent=original;},2000);
-      }
-    }).catch(()=>{
-      if(sub)sub.textContent='Could not copy — try again';
-    });
+    navigator.clipboard.writeText(text)
+      .then(()=>appInfo('Copied','Your milestone is on the clipboard — paste it wherever you like.'))
+      .catch(()=>appInfo('Could not copy','Try again, or take a screenshot instead.'));
   }
 }
 

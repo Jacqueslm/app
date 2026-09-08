@@ -1308,8 +1308,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </a>
       </div>
       <div class="sec">
-        <div class="sec-hd">Right now</div>
-        <div class="setting-row" onclick="openBreathe()">
+        <div class="setting-row" style="margin-top:0" onclick="openBreathe()">
           <i class="ti ti-wind" style="color:#4A9EE2"></i>
           <div class="setting-row-txt"><p>Meditation room</p><span>Sit down, however long you have</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
@@ -1891,7 +1890,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <div id="guide-msgs"></div>
     <div id="guide-input-row">
-      <input id="guide-input" placeholder="e.g. how do I cancel?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
+      <input id="guide-input" placeholder="e.g. where is my journal?" autocomplete="off" onkeydown="if(event.key==='Enter')guideSend()">
       <button id="guide-send" onclick="guideSend()"><i class="ti ti-send"></i></button>
     </div>
   </div>
@@ -13685,8 +13684,8 @@ const GUIDE_FAQ=[
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
     {q:'What is The Fight tab?',k:'game tab play fight life tower climb mountain building buildings boss roof rooftop punch what is the fight',a:"It opens <b>The Fight of Your Life</b> — buildings at night. On every roof the thing you’re fighting waits, by name, as a shadow in the ring. It says its line, you pick your counter; then it’s punches, dodges and blocks, with the bell, the ref and the crowd. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, lives on Today under your lesson and in Tools — each finished lesson takes a step by itself.",go:'The Fight of Your Life (The Fight tab)'},
-  {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
-  {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
+  {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Syncing needs a connection.",go:null},
+  {q:'Is Friendly a real therapist?',friendly:true,k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. It is there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminders & notifications'},
@@ -13695,8 +13694,8 @@ const GUIDE_FAQ=[
   {q:'How do updates work?',k:'update updates version new automatic install latest how',a:"The app updates itself — when it opens it checks for a new version and installs it automatically, then asks for one restart. You can also update manually in Profile → App updates.",go:'Profile & settings'},
   {q:'How do I get my data out?',k:'export data download backup copy mine take',a:"Your data is yours. Use <b>Export my data</b> in Profile to download everything the app has saved about you.",go:'Export my data'},
   {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Every one of them is free to read.",go:'Lesson Packs'},
-  {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
-  {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
+  {q:'Can Friendly talk out loud?',friendly:true,k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. The voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes the <i>writing</i> even when it can't change the sound.",go:'Talk to Friendly'},
+  {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.",go:'Delete my account'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
   {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Profile & settings'},
@@ -13724,7 +13723,7 @@ function toggleGuideBot(){
   if(open){
     if(!guideGreeted){
       guideGreeted=true;
-      guideBotSay(`Hi${S.name?' '+escapeHtml(S.name):''} — I'm your app guide. Ask me things like <b>"how do I cancel"</b>, <b>"where is my journal"</b>, or <b>"set a PIN"</b> and I'll take you straight there.`);
+      guideBotSay(`Hi${S.name?' '+escapeHtml(S.name):''} — I'm your app guide. Ask me things like <b>"where is my journal"</b>, <b>"fix my day counter"</b>, or <b>"set a PIN"</b> and I'll take you straight there.`);
     }
     setTimeout(()=>document.getElementById('guide-input').focus(),150);
   }
@@ -13767,7 +13766,7 @@ function guideSend(){
   // cancel" deserves the explanation with a button, not just the button.
   // Whole words only. "pro" used to score inside "program", so "what do I get
   // with pro" answered with how the Bootcamp works instead of what Pro is.
-  const faqScored=GUIDE_FAQ.map((f,i)=>{const qw=' '+f.q.toLowerCase().replace(/[?!.,']/g,' ')+' ';const kw=' '+f.k+' ';return {i,score:words.reduce((s,w)=>s
+  const faqScored=GUIDE_FAQ.map((f,i)=>{if(f.friendly&&!friendlyAllowed)return {i,score:0};const qw=' '+f.q.toLowerCase().replace(/[?!.,']/g,' ')+' ';const kw=' '+f.k+' ';return {i,score:words.reduce((s,w)=>s
     +(qw.includes(' '+w+' ')?3:(qw.includes(' '+w)?1:0))
     +(kw.includes(' '+w+' ')?1:0),0)};})
     .filter(x=>x.score>1).sort((a,b)=>b.score-a.score);

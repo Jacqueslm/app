@@ -926,12 +926,11 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- MAIN APP --> <div id="main-app" style="display:none;flex-direction:column;height:100dvh">
-<div class="hdr"> <div style="display:flex;align-items:center;gap:10px"> <i class="ti ti-arrow-left" id="hdr-back" onclick="goBackScreen()" style="font-size:1.375rem;color:#a0a8d0;cursor:pointer;display:none;padding:4px" title="Back"></i> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> </div> <div style="display:flex;gap:12px;align-items:center"> <div class="tier-chip" id="tier-badge" onclick="switchTo('plans');actBn('bn-plans')">Free</div> <i class="ti ti-bell" style="font-size:1.25rem;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
+<div class="hdr"> <div style="display:flex;align-items:center;gap:10px"> <i class="ti ti-arrow-left" id="hdr-back" onclick="goBackScreen()" style="font-size:1.375rem;color:#a0a8d0;cursor:pointer;display:none;padding:4px" title="Back"></i> <div> <div class="app-name">Turn Someday Into Day One</div> <div class="scr-title" id="scr-title">My recovery</div> </div> </div> <div style="display:flex;gap:12px;align-items:center"> <i class="ti ti-bell" style="font-size:1.25rem;color:#a0a8d0;cursor:pointer" title="Reminder settings" onclick="switchTo('reminder-settings');actBn('bn-plans')"></i> </div> </div> <div class="screens" id="screens">
 
 <!-- HOME -->
 <div id="s-home" class="scr on">
   <div class="hero">
-    <div class="tier-chip" id="home-chip" onclick="switchTo('plans');actBn('bn-plans')"><i class="ti ti-sparkles" style="font-size:.75rem"></i> <span id="home-chip-txt">Free plan</span></div>
     <div style="font-size:.8125rem;color:#8892c0;margin-bottom:4px" id="days-term-lbl">Days sober</div>
     <div class="days-big" id="dayCount">0</div>
     <div style="font-size:.8125rem;color:#6672a0;margin-bottom:0" id="since-lbl">Since today</div>
@@ -1198,43 +1197,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
     </div>
 
-    <div id="s-rooms" class="scr">
-      <div class="sec">
-        <div style="background:var(--acc);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:.75rem;color:var(--acc-t);line-height:1.5">
-          Stories are split into rooms by focus area, so you're reading from people working on the same thing you are. Every program runs 90 days with continuous support beyond — this room is here for the whole road, not just the first month. Curated stories are built into the app and available offline; anything you write is private to you, saves offline instantly, and isn't shown to other users.
-        </div>
-        <div id="your-rooms-wrap" style="display:none">
-          <div class="sec-hd" style="margin-bottom:8px">Your rooms</div>
-          <div id="your-rooms-list" style="margin-bottom:18px"></div>
-        </div>
-        <div class="sec-hd" style="margin-bottom:8px">All rooms</div>
-        <div id="all-rooms-list"></div>
-      </div>
-    </div>
-
     <!-- COMMUNITY (single room) -->
     <div id="s-community" class="scr">
       <div class="sec" style="padding-bottom:0">
-        <div class="setting-row" style="border-radius:10px;margin-bottom:12px" onclick="switchTo('rooms');actBn('bn-plans')">
-          <i class="ti ti-chevron-right" style="transform:rotate(180deg)"></i>
-          <div class="setting-row-txt"><p id="room-title">Room</p><span id="room-sub"></span></div>
-        </div>
-      </div>
-      <!-- LIVE ROOM: real people, one moderated feed. Posts only - no replies,
-           no DMs, no profiles. Every post passes the AI moderator before anyone
-           sees it, and the room keeps Jacques's hours. -->
-      <div class="sec" style="padding-top:0;padding-bottom:0">
-        <div id="live-room-banner" style="border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:.75rem;line-height:1.5;display:none"></div>
-        <div class="compose" id="live-compose" style="display:none;margin:0 0 10px">
-          <input id="liveInput" maxlength="500" placeholder="Say it to the room…" onkeydown="if(event.key==='Enter'){submitLivePost();event.preventDefault()}">
-          <button onclick="submitLivePost()"><i class="ti ti-send" style="font-size:.9375rem"></i></button>
-        </div>
-        <div id="live-room-note" style="display:none;font-size:.71875rem;color:var(--tm);line-height:1.5;margin-bottom:10px"></div>
-        <div id="live-feed"></div>
-        <div id="mod-queue-wrap" style="display:none;margin-top:14px">
-          <div class="sec-hd" style="margin-bottom:8px">Moderation (only you see this)</div>
-          <div id="mod-queue"></div>
-        </div>
       </div>
       <div class="sec" style="padding-top:6px;padding-bottom:0"><div class="sec-hd">Your private reflections</div></div>
       <div class="compose">
@@ -1309,16 +1274,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
             <div id="lesson-extras"></div>
             <button class="log-btn" id="lessonCompleteBtn" style="margin-top:18px" onclick="completeLessonForToday()">Mark as done</button>
             <button class="ob-btn outline" id="lessonBackBtn" style="margin-top:8px;display:none" onclick="viewLessonDay(null)">Back to today's lesson</button>
-          </div>
-          <div id="lesson-locked" style="display:none">
-            <div style="font-size:.9375rem;font-weight:600;color:var(--tp)" id="lockedTitle"></div>
-            <div style="position:relative;margin-top:10px;max-height:80px;overflow:hidden">
-              <div id="lockedTeaser" style="font-size:.8125rem;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none"></div>
-              <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
-            </div>
-            <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">BREAK IT finishes here, then REBUILD (days 31–60) and KEEP IT (days 61–90). All of it is free.</div>
-            <div class="mini-pricing-row" style="font-size:.71875rem;color:var(--tm);text-align:center;margin-top:10px"></div>
-            <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
           </div>
         </div>
         <div class="setting-row" id="home-climb" onclick="openClimb()" style="margin-top:10px">
@@ -1403,22 +1358,22 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd">See how far you have come</div>
         <div class="setting-row" onclick="openClimb()">
           <i class="ti ti-mountain"></i>
-          <div class="setting-row-txt"><p>The Climb</p><span>Your 90 steps up the mountain — one for every day you show up</span></div>
+          <div class="setting-row-txt"><p>The Climb</p><span>Your steps up the mountain</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openFilm()">
           <i class="ti ti-movie"></i>
-          <div class="setting-row-txt"><p>Your film</p><span>A short video of your own numbers, made on this phone</span></div>
+          <div class="setting-row-txt"><p>Your film</p><span>Your months, cut together</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
           <i class="ti ti-chart-dots"></i>
-          <div class="setting-row-txt"><p>Patterns &amp; weekly reports</p><span>What your days have in common, and the week in writing</span></div>
+          <div class="setting-row-txt"><p>Patterns and weekly reports</p><span>What your week looked like</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="shareMyMilestone()">
           <i class="ti ti-share"></i>
-          <div class="setting-row-txt"><p>Share my milestone</p><span>Inspire someone else</span></div>
+          <div class="setting-row-txt"><p>Share my milestone</p><span>Make a card to send</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
@@ -1444,27 +1399,32 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd">Right now</div>
         <div class="setting-row" onclick="startVoiceGuide()">
           <i class="ti ti-headphones" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>Talk me through it</p><span>Hands-free — a calm voice walks you through it, nothing to read</span></div>
+          <div class="setting-row-txt"><p>Talk me through it</p><span>A voice, step by step</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openBreathe()">
           <i class="ti ti-wind" style="color:#4A9EE2"></i>
-          <div class="setting-row-txt"><p>Breathe with me</p><span>Calm down, ride the urge out, or sit quiet for a while</span></div>
+          <div class="setting-row-txt"><p>Meditation room</p><span>Pick how long you have</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="open5to1()">
           <i class="ti ti-hand-stop" style="color:#F5A623"></i>
-          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Back in the room, one sense at a time</span></div>
+          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Name what is around you</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openTriggeredFlow()">
           <i class="ti ti-alert-triangle" style="color:#E24B4A"></i>
-          <div class="setting-row-txt"><p>I'm triggered</p><span>Name it and get something to do instead</span></div>
+          <div class="setting-row-txt"><p>I'm triggered</p><span>Say what set it off</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openSlippedFlow()">
           <i class="ti ti-lifebuoy" style="color:#9B7BE2"></i>
-          <div class="setting-row-txt"><p>I slipped</p><span>No judgment. Here is what comes next</span></div>
+          <div class="setting-row-txt"><p>I slipped</p><span>Start the next hour</span></div>
+          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+        </div>
+        <div class="setting-row" id="toolkit-friendly-row" onclick="switchTo('nova');actBn('bn-nova')">
+          <i class="ti ti-message-circle" style="color:var(--accent)"></i>
+          <div class="setting-row-txt"><p>Talk to Friendly</p><span>Someone awake at 2am</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
@@ -1472,32 +1432,21 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="sec-hd">Keep for the hard days</div>
         <div class="setting-row" onclick="openProTool('emergency')">
           <i class="ti ti-shield" style="color:#E24B4A"></i>
-          <div class="setting-row-txt"><p>Your emergency plan</p><span>The person you call and the steps you take, written down</span></div>
+          <div class="setting-row-txt"><p>Your emergency plan</p><span>Written before you needed it</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openProTool('scripts')">
           <i class="ti ti-file-text" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>What to say</p><span>Lines for the moments that catch you out</span></div>
+          <div class="setting-row-txt"><p>What to say</p><span>Lines for the hard conversation</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openProTool('reminders')">
           <i class="ti ti-bell" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Daily check-in</p><span>A real question when you open the app</span></div>
+          <div class="setting-row-txt"><p>Daily check-in</p><span>Two minutes, once a day</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">People</div>
-        <div class="setting-row" onclick="switchTo('nova');actBn('bn-nova')">
-          <i class="ti ti-message-circle" style="color:var(--accent)"></i>
-          <div class="setting-row-txt"><p>Talk to Friendly</p><span>Someone to say it out loud to, right now</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
-          <i class="ti ti-heart" style="color:#E24B4A"></i>
-          <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help them understand — and fight this together</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
       </div>
     </div>
 
@@ -1638,51 +1587,46 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="margin-top:0" id="tools-sec-hd">When you need it</div></div>
       <div class="setting-row" onclick="switchTo('relapse-toolkit');actBn('bn-tools')">
         <i class="ti ti-hand-stop"></i>
-        <div class="setting-row-txt"><p id="toolkit-row-title">When it's hard</p><span id="toolkit-row-sub">Breathe, ground yourself, name it, or reach someone</span></div>
+        <div class="setting-row-txt"><p id="toolkit-row-title">When it's hard</p><span id="toolkit-row-sub">Right now, one screen</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="tools-craving-row" onclick="switchTo('craving');actBn('bn-tools')">
         <i class="ti ti-activity"></i>
-        <div class="setting-row-txt"><p>Craving tracker</p><span>Log intensity, triggers, and trends</span></div>
+        <div class="setting-row-txt"><p>Craving tracker</p><span>Note the urge, watch the pattern</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('journal');actBn('bn-tools')">
         <i class="ti ti-notebook"></i>
-        <div class="setting-row-txt"><p>Journal</p><span>Write freely, or use guided prompts</span></div>
+        <div class="setting-row-txt"><p>Journal</p><span>Write it down</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Read and listen</div></div>
       <div class="setting-row" onclick="openLessonLibrary()">
         <i class="ti ti-book"></i>
-        <div class="setting-row-txt"><p>Lesson Library</p><span>Every lesson in the app — all tracks, the Spiritual Path, Together, and every pack</span></div>
+        <div class="setting-row-txt"><p>Lesson Library</p><span>Every day, every track</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('stories');actBn('bn-tools')">
         <i class="ti ti-headphones"></i>
-        <div class="setting-row-txt"><p>Stories</p><span>Narrated stories of falling and coming back — ten on the shelf</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="switchTo('rooms');actBn('bn-tools')">
-        <i class="ti ti-users"></i>
-        <div class="setting-row-txt"><p>Rooms</p><span>A new set of written reflections every day. No comments, no messaging</span></div>
+        <div class="setting-row-txt"><p>Stories</p><span>Other people, same fight</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" id="timeline-row" onclick="switchTo('timeline');actBn('bn-tools')">
         <i class="ti ti-clock"></i>
-        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>What to expect, stage by stage</span></div>
+        <div class="setting-row-txt"><p>Withdrawal timeline</p><span>Where you are in the first weeks</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
       <div class="sec" style="padding-bottom:0"><div class="sec-hd">Look back</div></div>
       <div class="setting-row" onclick="switchTo('progress');actBn('bn-tools')">
         <i class="ti ti-chart-line"></i>
-        <div class="setting-row-txt"><p>Progress</p><span>Days, hours, savings, milestones and your weekly reports</span></div>
+        <div class="setting-row-txt"><p>Progress</p><span>Days, patterns, milestones</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="switchTo('partner');actBn('bn-tools')">
         <i class="ti ti-heart"></i>
-        <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Help them understand — and fight this together</span></div>
+        <div class="setting-row-txt"><p class="partner-row-title">For the one who loves you</p><span class="partner-row-sub">Their side of the app</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
     </div>
@@ -1708,90 +1652,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
 
     <!-- PLANS -->
-    <div id="s-plans" class="scr">
-      <div id="grace-banner" style="display:none;margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:var(--acc);color:var(--acc-t);font-size:.78125rem;line-height:1.6"></div>
-      <div class="tier-banner">
-        <div style="font-size:1.25rem;font-weight:500;margin-bottom:6px">Go deeper, whenever you're ready</div>
-        <div style="font-size:.84375rem;color:#c0caff;line-height:1.6;margin-bottom:12px">An app for you <em>and</em> the one who supports you. Twelve recovery tracks, a 35-day track for the person who loves someone in it, the Spiritual Path, and Together — a 90-day relationship program the two of you work side by side, on one phone.</div>
-        <div style="font-size:.8125rem;color:#8892c0;line-height:1.6;margin-bottom:16px" id="plans-soft-copy">Everything you need to do the work is free: every lesson, day 1 to 90, on every track, the Spiritual Path, Together, The Fight of Your Life, the journal and the reports. Pro adds two things: Friendly, your AI companion, with up to 30 chats a day, and the live rooms, a moderated community where members post anonymously about the work they are doing. No pressure either way.</div>
-        <div style="font-size:.8125rem;color:#c0caff;line-height:2;margin-bottom:18px" id="plans-benefits-list">
-          <div>✓ Friendly — the AI companion, up to 30 chats a day</div>
-          <div id="plans-pro-together">✓ The live rooms — real people on the same road, 6am–10pm Central</div>
-        </div>
-        <button class="ob-btn" style="margin-bottom:8px" id="plans-continue-btn" onclick="scrollToPricingCards()">Continue with Pro</button>
-        <!-- This button sits on the tier banner, which is the brand navy in BOTH
-             themes. var(--ts)/var(--bdr) are theme tokens: in light mode they
-             resolve to dark grey on 10%-black, so the button rendered as
-             rgb(74,74,70) on navy and read as blank space - the free option was
-             effectively hidden on the pricing screen. Fixed light-on-dark
-             values, because the surface under it never changes. -->
-        <button class="ob-btn outline" style="margin-top:0;margin-bottom:18px;color:#c0caff;border-color:rgba(255,255,255,0.35)" id="plans-stayfree-btn" onclick="stayFreeForNow()">Stay Free for Now</button>
-        <div class="tier-toggle">
-          <button class="on" id="mbtn" onclick="setBill('m')">Monthly</button>
-          <button id="abtn" onclick="setBill('a')">Yearly · save 50%</button>
-          <button id="lbtn" onclick="setBill('l')">Lifetime</button>
-        </div>
-        <!-- Founding Lifetime cap. Dormant until the count is low enough to state
-             or the seats are gone - a number, quietly, with no urgency styling. -->
-        <div id="lifetime-note" style="display:none;font-size:.71875rem;color:var(--tm);text-align:center;margin-top:8px"></div>
-      </div>
-      <div class="tier-cards" id="pricing-cards">
-        <div class="tc-card">
-          <div class="tc-icon" style="background:var(--ok)"><i class="ti ti-seedling" style="font-size:1.125rem;color:#0F6E56"></i></div>
-          <div class="tc-name">Free</div>
-          <div class="tc-price">$0<span>/mo</span></div>
-          <div class="fl">
-            <div class="feat y"><i class="ti ti-check"></i>Every lesson — days 1 to 90, every track</div>
-            <div class="feat y"><i class="ti ti-check"></i>The Fight of Your Life — the game, every building, every roof</div>
-            <div class="feat n"><i class="ti ti-x"></i>Friendly and the live rooms (Pro)</div>
-            <div class="feat y"><i class="ti ti-check"></i>Every tool: Urge Surfing, Panic Mode &amp; Emergency Plan</div>
-            <div class="feat y"><i class="ti ti-check"></i>Weekly reports, analytics &amp; pattern detection</div>
-            <div class="feat y"><i class="ti ti-check"></i>Smart reminders &amp; Habit Coach</div>
-            <div class="feat y"><i class="ti ti-check"></i>Guided journal prompts &amp; insights</div>
-            <div class="feat y"><i class="ti ti-check"></i>Advanced streaks</div>
-            <div class="feat y"><i class="ti ti-check"></i>Supporting Someone — a 35-day track for the person who loves them, all of it</div>
-            <div class="feat y"><i class="ti ti-check"></i>Together — the 90-day program you work as a couple, all of it</div>
-            <div class="feat y"><i class="ti ti-check"></i>Partner self-check</div>
-            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-letter">Partner letter — help them understand</span></div>
-            <div class="feat y"><i class="ti ti-check"></i>Spiritual Path — faith and recovery, all of it</div>
-            <div class="feat y"><i class="ti ti-check"></i>SOS toolkit — breathing, grounding, "I slipped"</div>
-            <div class="feat y"><i class="ti ti-check"></i>Meditation room with 11 sounds &amp; tracks</div>
-            <div class="feat y"><i class="ti ti-check"></i>"Talk me through it" hands-free voice guide</div>
-            <div class="feat y"><i class="ti ti-check"></i>Lessons read aloud, with narrator speed</div>
-            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-counter">Sobriety counter &amp; milestones</span></div>
-            <div class="feat y"><i class="ti ti-check"></i>Journal (plain text + mood)</div>
-            <div class="feat y"><i class="ti ti-check"></i><span id="plans-free-tracker">Craving tracker &amp; withdrawal timeline</span></div>
-            <div class="feat y"><i class="ti ti-check"></i>Shareable progress cards</div>
-            <div class="feat y"><i class="ti ti-check"></i>App lock (PIN) &amp; in-app guide</div>
-            <div class="feat y"><i class="ti ti-check"></i>Lesson history, reminders, restart &amp; switch categories</div>
-          </div>
-          <button class="tc-btn free" id="free-cta" onclick="selectFree()">Current plan</button>
-        </div>
-        <div class="tc-card pro">
-          <div class="pop-badge">Most popular</div>
-          <div class="tc-icon" style="background:var(--acc)"><i class="ti ti-sparkles" style="font-size:1.125rem;color:var(--accent)"></i></div>
-          <div class="tc-name">Pro</div>
-          <div class="tc-price" id="pro-price">$9.99<span>/mo</span></div>
-          <div style="font-size:.71875rem;color:var(--tm);margin-top:-6px;margin-bottom:10px" id="pro-price-sub">Billed monthly. Cancel anytime.</div>
-          <div class="fl">
-            <div class="feat y"><i class="ti ti-check"></i>Everything in Free — every tool, nothing held back</div>
-            <div class="feat y"><i class="ti ti-check"></i>Friendly — the AI companion, up to 30 chats a day</div>
-            <div class="feat y"><i class="ti ti-check"></i>The live rooms — one moderated feed per focus area, open 6am–10pm Central</div>
-          </div>
-          <button class="tc-btn pro-btn" id="pro-cta" onclick="selectPro()">Upgrade to Pro</button>
-        </div>
-      </div>
-      <div id="sub-status-section" style="display:none;margin:4px 16px 8px;padding:14px;border-radius:12px;background:var(--s1);border:0.5px solid var(--bdr)">
-        <div style="font-size:.8125rem;font-weight:500;color:var(--tp);margin-bottom:4px" id="sub-status-title">Pro plan</div>
-        <div style="font-size:.75rem;color:var(--ts);line-height:1.6;margin-bottom:10px" id="sub-status-detail"></div>
-        <button class="ob-btn outline" style="margin-top:0;color:var(--ts);border-color:var(--bdr)" id="sub-status-btn" onclick="handleSubStatusAction()"></button>
-      </div>
-      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--accent);cursor:pointer" onclick="restorePurchases()">Restore purchases</div>
-      <div style="padding:0 16px 10px;text-align:center;font-size:.75rem;color:var(--tm)">Every lesson and The Fight of Your Life, the game, are free, always. Pro is two things: Friendly (up to 30 chats a day) and the live rooms.</div>
-      <div style="padding:0 16px 24px;text-align:center;font-size:.71875rem;color:var(--tm);line-height:1.6">Monthly and yearly include 7 days free — you're not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again after that. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</div>
-    </div>
-
-    <!-- PROFILE -->
     <div id="s-profile" class="scr">
       <div class="profile-hero">
         <div class="profile-av" id="prof-av" onclick="openProfilePhotoPicker()" style="cursor:pointer;position:relative;background-size:cover;background-position:center">
@@ -1801,7 +1661,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <input type="file" id="profile-photo-input" accept="image/*" style="display:none" onchange="handleProfilePhotoSelected(this)">
         <div class="profile-name" id="prof-name">Your Name</div>
         <div class="profile-since" id="prof-since">Sober since today</div>
-        <div style="margin-top:10px"><span style="background:var(--green-dim);border:0.5px solid rgba(126,232,162,0.3);border-radius:20px;padding:4px 14px;font-size:.75rem;color:var(--green)" id="prof-tier-chip">Free plan</span></div>
         <div style="margin-top:6px;font-size:.75rem;color:var(--accent);cursor:pointer;display:none" id="remove-photo-link" onclick="removeProfilePhoto()">Remove photo</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
@@ -1829,18 +1688,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <div class="setting-row" id="cost-row" onclick="openCostModal()">
         <i class="ti ti-coin"></i>
         <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Subscription</div></div>
-      <div class="setting-row" onclick="switchTo('plans');actBn('bn-plans')">
-        <i class="ti ti-sparkles"></i>
-        <div class="setting-row-txt"><p>Subscription</p><span id="sub-label">Free plan</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="restorePurchases()">
-        <i class="ti ti-cloud"></i>
-        <div class="setting-row-txt"><p>Restore purchases</p><span>Sync your Pro status from your account</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div class="setting-row" onclick="openReviewModal()">
@@ -2084,7 +1931,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-glove"></i><span>The Fight</span></div>
-    <div class="bn" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
+    <div class="bn" id="bn-nova" style="display:none" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
@@ -2185,7 +2032,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- SOS MODAL -->
 <div class="sos-modal" id="breathe-pick" onclick="if(event.target===this)closeBreathe()">
   <div class="sos-sheet">
-    <div class="sos-title">Breathe with me</div>
+    <div class="sos-title">Meditation room</div>
     <div class="sos-sub">However long you have.</div>
     <div class="sos-opt" onclick="pickBreathe('calm')">
       <i class="ti ti-wind" style="color:#4A9EE2"></i>
@@ -2231,7 +2078,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     </div>
     <div class="sos-opt" onclick="closeSOS();openBreathe()">
       <i class="ti ti-wind" style="color:#1D9E75"></i>
-      <div class="sos-opt-info"><p>Breathe with me</p><span>A minute to calm down, three to ride it out, or sit quiet</span></div>
+      <div class="sos-opt-info"><p>Meditation room</p><span>Pick how long you have</span></div>
     </div>
     <div class="sos-opt" id="sos-craving-opt" onclick="logCravingFromSOS()">
       <i class="ti ti-activity" style="color:#BA7517"></i>
@@ -2298,21 +2145,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 </div>
 
 <!-- GENERIC PRO-TOOL PREVIEW (locked-tool teaser for free users) -->
-<div class="sos-modal" id="pro-tool-preview-modal" onclick="if(event.target===this)closeProToolPreview()">
-  <div class="sos-sheet">
-    <div class="sos-title" id="ptp-title" style="color:var(--accent)">Pro tool</div>
-    <div class="sos-sub" id="ptp-teaser" style="margin-bottom:14px"></div>
-    <div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:16px;border:0.5px solid var(--bdr)">
-      <div id="ptp-mock" style="padding:20px;background:var(--s1);filter:blur(4px);user-select:none;pointer-events:none"></div>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15)">
-        <i class="ti ti-lock" style="font-size:1.5rem;color:#fff"></i>
-      </div>
-    </div>
-    <div class="mini-pricing-row" style="font-size:.71875rem;color:var(--tm);text-align:center;margin-bottom:10px"></div>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="closeProToolPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
-    <button class="sos-close" onclick="closeProToolPreview()">Go back</button>
-  </div>
-</div>
 
 <!-- CUSTOM LESSON PACK PREVIEW (Free) -->
 <!-- PACK / PROGRAM COMPLETE — congratulations card -->
@@ -2326,22 +2158,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   </div>
 </div>
 
-<div class="sos-modal" id="pack-preview-modal" onclick="if(event.target===this)closePackPreview()">
-  <div class="sos-sheet">
-    <div class="sos-title" id="pp-title" style="color:var(--accent)">Pack</div>
-    <div class="sos-sub" id="pp-description" style="margin-bottom:14px"></div>
-    <div style="position:relative;border-radius:12px;overflow:hidden;margin-bottom:16px;border:0.5px solid var(--bdr);max-height:180px">
-      <div id="pp-lesson-list" style="padding:14px;background:var(--s1);filter:blur(4px);user-select:none;pointer-events:none;max-height:180px;overflow:hidden"></div>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15)">
-        <i class="ti ti-lock" style="font-size:1.5rem;color:#fff"></i>
-      </div>
-    </div>
-    <div class="sos-sub" style="margin-bottom:12px">Custom lesson packs help you go deeper into relationships, trauma, anxiety, confidence, and more.</div>
-    <div class="mini-pricing-row" style="font-size:.71875rem;color:var(--tm);text-align:center;margin-bottom:10px"></div>
-    <button class="ob-btn" style="margin-bottom:8px" onclick="closePackPreview();switchTo('plans');actBn('bn-plans')">Continue with Pro</button>
-    <button class="sos-close" onclick="closePackPreview()">Go back</button>
-  </div>
-</div>
 
 <!-- 5-4-3-2-1 SENSORY GROUNDING (Free) -->
 <div id="grounding54321-overlay" style="display:none;position:fixed;inset:0;background:var(--brand);z-index:1000;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;padding:32px">
@@ -2770,19 +2586,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
 <!-- GENERIC CONFIRM MODAL -->
 <!-- ROOM TOUR - once, on first opening a live room -->
-<div class="sos-modal" id="room-tour-modal" onclick="if(event.target===this)closeRoomTour()">
-  <div class="sos-sheet">
-    <div class="sos-title" style="color:var(--accent)">How this room works</div>
-    <div style="text-align:left;font-size:.8125rem;line-height:1.65;color:var(--ts);margin-top:6px">
-      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Real people, one feed.</strong> Everyone here is working the same thing you are. You post, it stands. No replies, no DMs, no profiles — nobody can pile on and nobody can reach you.</p>
-      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Every post is checked first.</strong> A moderator reads every post before the room sees it. Honest struggle, anger, relapse — all welcome. Selling, cruelty, and graphic detail never make it in.</p>
-      <p style="margin:0 0 10px"><strong style="color:var(--tp)">You're a first name and a day count.</strong> That's all the room knows about you.</p>
-      <p style="margin:0 0 10px"><strong style="color:var(--tp)">Open 6am–10pm Central.</strong> Overnight the room sleeps — the SOS tools never do, and 988 is there any hour.</p>
-      <p style="margin:0"><strong style="color:var(--tp)">See something wrong?</strong> Tap Report. Two reports hide a post until a human looks.</p>
-    </div>
-    <button class="ob-btn" style="margin-top:14px" onclick="closeRoomTour()">Got it</button>
-  </div>
-</div>
 
 <!-- LESSON READER (library) -->
 <div class="sos-modal" id="lesson-reader-modal" onclick="if(event.target===this)closeLibraryReader()">
@@ -3063,7 +2866,6 @@ let S = {
   reminderStartHour:9,reminderEndHour:21,
   novaDisclaimerDismissed:false,fontSize:'default',
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
-  isPro:false,proPlan:'',proSince:'',proRenewsAt:'',proCancelled:false,proGraceUntil:'',lastProGraceNudgeDate:'',
   pledged:false,pledgeDate:'',
   chatsLeft:FREE_CHAT_DAILY_LIMIT,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',communityPosts:[],darkMode:false,
@@ -3425,13 +3227,12 @@ function renderLessonLibrary(){
     `<div class="sec-hd" style="margin:14px 0 8px">${escapeHtml(g.name)}</div>`+
     `<div class="card" style="padding:0 14px">`+
     g.items.map(l=>{
-      const locked=isLessonLocked(l.day);
       return `<div class="setting-row" style="cursor:pointer" onclick="openLibraryLesson('${escapeHtml(g.name).replace(/'/g,"&#39;")}',${l.day})">
         <div class="setting-row-txt" style="min-width:0">
           <p style="white-space:normal">${escapeHtml(l.title)}</p>
-          <span>Day ${l.day}${locked?' \u00b7 Pro':''}</span>
+          <span>Day ${l.day}</span>
         </div>
-        <i class="ti ti-${locked?'lock':'chevron-right'}" style="font-size:${locked?'.9375':'1.125'}rem;color:var(--tm)"></i>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>`;
     }).join('')+`</div>`
   ).join('')
@@ -3442,15 +3243,6 @@ function openLibraryLesson(group,day){
   if(!LESSON_INDEX)LESSON_INDEX=buildLessonIndex();
   const l=LESSON_INDEX.find(x=>x.group===group&&x.day===day);
   if(!l)return;
-  if(isLessonLocked(day)){
-    // Same gate as everywhere else. Say what it is, do not pretend it is broken.
-    appConfirm(
-      `\u201c${l.title}\u201d is day ${day}. Every lesson in the app is free, so this one should open - Pro is only Friendly and the live rooms.`,
-      ()=>{switchTo('plans');actBn('bn-plans');},
-      {okText:'See Pro',cancelText:'Not now'}
-    );
-    return;
-  }
   openLibraryReader(l);
 }
 function openLibraryReader(l){
@@ -3465,7 +3257,6 @@ function closeLibraryReader(){document.getElementById('lesson-reader-modal').cla
 // dead at day 16 and asked for a card, which is the exact shape of the
 // complaint in his own scrape of 2,500 competitor reviews: people do not quit
 // because the app is bad, they quit at the card. Nothing is locked now.
-const FREE_LESSON_CAP=90;
 // Journey phase — gives the user a predictable sense of where they are in the
 // program (Feature 16: no dead ends, always know what's next), without adding
 // extra screens or clutter.
@@ -3488,9 +3279,6 @@ function journeyPhaseLabelText(day){
 }
 let viewingDay=null; // null = showing the current track's lesson day; otherwise re-reading a specific past/locked day
 
-function isLessonLocked(day){
-  return !S.isPro&&day>FREE_LESSON_CAP;
-}
 
 function getLessonForDay(day){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
@@ -3538,7 +3326,7 @@ function updateLessonPromo(){
   const lesson=getTodayLesson();
   if(lesson){
     title.textContent=`Day ${lesson.day}: ${lesson.title}`;
-    sub.textContent=isLessonLocked(lesson.day)?'Part of the Pro program':`Your ${S.currentAddiction||'recovery'} program`;
+    sub.textContent=`Your ${S.currentAddiction||'recovery'} program`;
   }else{
     title.textContent="Today's lesson";
     sub.textContent=(LESSON_PACKS[S.currentAddiction]||[]).length?'All caught up for now':'Coming soon for this focus area';
@@ -3767,7 +3555,6 @@ function renderTodayLesson(){
   renderTrackLinkNote();
   const day=viewingDay||getLessonDayFor(S.currentAddiction);
   const normalEl=document.getElementById('lesson-normal');
-  const lockedEl=document.getElementById('lesson-locked');
   const titleEl=document.getElementById('lessonTitle');
   const metaEl=document.getElementById('lessonMeta');
   const bodyEl=document.getElementById('lessonBody');
@@ -3778,17 +3565,7 @@ function renderTodayLesson(){
   const actionBox=document.getElementById('lesson-action-box');
   const reflectBox=document.getElementById('lesson-reflect-box');
 
-  if(isLessonLocked(day)){
-    normalEl.style.display='none';
-    lockedEl.style.display='block';
-    const lesson=getLessonForDay(day);
-    document.getElementById('lockedTitle').textContent=lesson?`Day ${lesson.day}: ${lesson.title}`:`Day ${day}`;
-    document.getElementById('lockedTeaser').textContent=lesson?lesson.content.slice(0,140)+'…':'';
-    renderLessonList();
-    return;
-  }
   normalEl.style.display='block';
-  lockedEl.style.display='none';
 
   const lesson=getLessonForDay(day);
   if(!lesson){
@@ -3856,10 +3633,9 @@ function renderLessonList(){
   const pack=LESSON_PACKS[S.currentAddiction]||[];
   const trackDay=getLessonDayFor(S.currentAddiction);
   const rows=pack.map(l=>{
-    const locked=isLessonLocked(l.day);
     const completed=l.day<trackDay;
     const current=l.day===trackDay;
-    const icon=locked?'<i class="ti ti-lock" style="font-size:.875rem;color:var(--tm)"></i>':completed?'<i class="ti ti-check" style="font-size:.875rem;color:var(--green)"></i>':'';
+    const icon=completed?'<i class="ti ti-check" style="font-size:.875rem;color:var(--green)"></i>':'';
     return `<div class="setting-row" style="padding:10px 0" onclick="viewLessonDay(${l.day})">
       <div class="setting-row-txt" style="flex:1"><p style="font-size:.8125rem;${current?'font-weight:600':''}">Day ${l.day}: ${l.title}</p></div>
       ${icon}
@@ -4379,17 +4155,6 @@ function openCongratsCard(sub){
   if(typeof celebrationBurst==='function')celebrationBurst('large');
 }
 function closeCongratsCard(){document.getElementById('congrats-modal').classList.remove('open');}
-function showPackPreview(packKey){
-  const meta=getPackMeta(packKey);
-  if(!meta)return;
-  document.getElementById('pp-title').textContent=meta.title;
-  document.getElementById('pp-description').textContent=meta.description;
-  document.getElementById('pp-lesson-list').innerHTML=meta.lessons.map(l=>`<div style="font-size:.8125rem;color:var(--ts);padding:6px 0;border-bottom:0.5px solid var(--bdr)">Day ${l.day}: ${l.title}</div>`).join('');
-  document.getElementById('pack-preview-modal').classList.add('open');
-}
-function closePackPreview(){
-  document.getElementById('pack-preview-modal').classList.remove('open');
-}
 function renderPackList(){
   const wrap=document.getElementById('pack-list-content');
   if(!wrap)return;
@@ -4443,20 +4208,6 @@ function renderPackLesson(){
   document.getElementById('pack-lesson-title-bar').textContent=meta.title;
   if(!lesson){
     wrap.innerHTML=`<div class="card"><div class="sec-hd" style="margin-top:0">Pack complete</div><div style="font-size:.8125rem;color:var(--ts);line-height:1.6">You've completed every lesson in this pack. Nice work seeing it through.</div></div>`;
-    return;
-  }
-  // Every pack is free in full since 1 Sep 2026, same cap as the main program.
-  if(!S.isPro&&day>FREE_LESSON_CAP){
-    wrap.innerHTML=`<div class="card">
-      <div class="sec-hd" style="margin-top:0">Day ${lesson.day} of ${meta.lessons.length}: ${lesson.title}</div>
-      <div style="position:relative;margin-top:10px;max-height:80px;overflow:hidden">
-        <div style="font-size:.8125rem;color:var(--ts);line-height:1.6;filter:blur(3px);user-select:none">${lesson.content.slice(0,140)}…</div>
-        <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, var(--s2))"></div>
-      </div>
-      <div style="font-size:.8125rem;line-height:1.6;margin-top:12px;background:var(--acc);padding:12px;border-radius:10px;color:var(--acc-t)">You have finished every pack. All of it, every day, free.</div>
-      <button class="log-btn" style="margin-top:10px" onclick="switchTo('plans');actBn('bn-plans')">Upgrade to Pro</button>
-    </div>`;
-    renderIcons(wrap);
     return;
   }
   wrap.innerHTML=`<div class="card">
@@ -5344,8 +5095,6 @@ function initApp(){
   // read as "the God thing doesn't work."
   updateHomeFaithCard();
   renderDailyQuote();
-  handleCheckoutReturn();
-  syncBillingStatus(true);
   document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
   maybeAutoUpdate();
   updateSpeedBtns();
@@ -5355,8 +5104,6 @@ function initApp(){
   // Post-setup: the welcome message shows (and speaks) once, then the tour.
   if(!S.welcomeShown)setTimeout(showWelcomeOverlay,600);
   else maybeStartNavTour();
-  renderMiniPricingRows();
-  loadLifetimeAvailability();
   applyPlayBuildUI();
   applyDarkMode();
   applyDiscretionMode();
@@ -5393,6 +5140,7 @@ function initApp(){
   // init Friendly welcome - voiced for who's actually sitting there: the person in
   // recovery, the one carrying someone else's, or the one doing both.
   renderQuickChips();
+  applyFriendlyAccess();
   if(document.getElementById('chatArea').children.length===0){
     const days=getDays();
     let greeting;
@@ -5608,7 +5356,6 @@ function renderClockChips(){
 function updateStats(){
   updateRecoveryTermLabels();
   applySupporterUI();
-  evaluateProSubscription();
   renderClockChips();
   const start=S.startDate?new Date(S.startDate):new Date();
   const diff=Date.now()-start.getTime();
@@ -5712,7 +5459,6 @@ function updateStats(){
   document.querySelectorAll('.nova-day').forEach(el=>el.textContent=days);
 
   // home chip
-  document.getElementById('home-chip-txt').textContent=(S.isPro?'Pro plan':'Free plan');
 
   // journey phase (predictability - always know what stage you're in)
   const phaseLbl=document.getElementById('journey-phase-lbl');
@@ -8778,29 +8524,6 @@ const ROOM_AV_CLASSES=['av-t','av-c','av-b','av-o'];
 
 let currentRoom=null;
 
-function renderRoomsList(){
-  const yourWrap=document.getElementById('your-rooms-wrap');
-  const yourList=document.getElementById('your-rooms-list');
-  const allList=document.getElementById('all-rooms-list');
-  const mine=S.selectedAddictions||[];
-  const rowHtml=(name)=>{
-    const emoji=CATEGORY_EMOJI[name]||'✨';
-    const desc=CATEGORY_DESCRIPTIONS[name]||CATEGORY_DESCRIPTIONS['Other'];
-    return `<div class="setting-row" onclick="openRoom('${name.replace(/'/g,"\\'")}')">
-      <div style="font-size:1.25rem">${emoji}</div>
-      <div class="setting-row-txt"><p>${name==='Other'?'Other / general recovery':name}</p><span>${desc}</span></div>
-      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-    </div>`;
-  };
-  if(mine.length){
-    yourWrap.style.display='block';
-    yourList.innerHTML=mine.map(rowHtml).join('');
-  }else{
-    yourWrap.style.display='none';
-  }
-  allList.innerHTML=Object.keys(CATEGORY_EMOJI).filter(name=>!mine.includes(name)).map(rowHtml).join('');
-  renderIcons(document.getElementById('s-rooms'));
-}
 
 // ─── LIVE ROOM ───────────────────────────────────────────────────────────────
 // Real people, one moderated feed, posts only. Every post is judged by the AI
@@ -8808,149 +8531,11 @@ function renderRoomsList(){
 // is unreachable), the room keeps Jacques's hours, and two reports hide a live
 // post until a human looks. No replies, no DMs, no profiles - a post stands
 // alone, so nobody can be piled on and nobody can be preyed on.
-async function loadLiveRoom(){
-  const banner=document.getElementById('live-room-banner');
-  const compose=document.getElementById('live-compose');
-  const note=document.getElementById('live-room-note');
-  const feed=document.getElementById('live-feed');
-  if(!banner)return;
-  if(!S.accountEmail){
-    banner.style.display='block';
-    banner.style.background='var(--s1)';banner.style.color='var(--tm)';
-    banner.textContent='The live room is for signed-in members — sign in from Profile and you can read and post here.';
-    compose.style.display='none';feed.innerHTML='';return;
-  }
-  // The live rooms are Pro. The pitch names what's actually behind the door -
-  // real people on the same road - because that, not "advanced tools", is what
-  // someone at day 12 would pay for. The server enforces this regardless.
-  if(!S.isPro){
-    banner.style.display='block';
-    banner.style.background='var(--s1)';banner.style.color='var(--ts)';
-    banner.innerHTML='<strong>The live room is part of Pro.</strong> Real people working the same thing you are — one moderated feed, open 6am–10pm Central, no replies, no DMs, nobody can reach you. <span style="color:var(--accent);font-weight:600;cursor:pointer" onclick="switchTo(\'plans\');actBn(\'bn-plans\')">See Pro</span>';
-    compose.style.display='none';note.style.display='none';feed.innerHTML='';return;
-  }
-  // First open: say how the room works BEFORE the first post, once.
-  if(!S.roomTourDone){maybeShowRoomTour();}
-  try{
-    const res=await fetch('/api/rooms/feed?room='+encodeURIComponent(currentRoom||'Other'));
-    if(res.status===403){S.isPro=false;save();loadLiveRoom();return;}
-    if(!res.ok)throw new Error('feed');
-    const data=await res.json();
-    banner.style.display='block';
-    if(data.open){
-      banner.style.background='var(--green-dim)';banner.style.color='var(--green)';
-      banner.innerHTML='<strong>The room is open.</strong> Real people, one feed, no replies — say it and let it stand. Open '+data.hours+'. Every post is checked before it appears.';
-      compose.style.display='flex';
-    }else{
-      banner.style.background='var(--s1)';banner.style.color='var(--tm)';
-      banner.innerHTML='<strong>The room is closed overnight</strong> (open '+data.hours+'). You can still read. The SOS tools on Home never close — and if tonight is heavier than an urge, call or text 988, free, 24/7.';
-      compose.style.display='none';
-    }
-    note.style.display='block';
-    note.textContent='Posts show a first name and day count only. See something wrong? Tap Report — two reports hide a post until a human reviews it.';
-    feed.innerHTML=(data.posts||[]).map(p=>
-      '<div class="card" style="padding:12px 14px;margin-bottom:8px">'
-      +'<div style="font-size:.71875rem;color:var(--tm);margin-bottom:5px;display:flex;justify-content:space-between"><span>'+escapeHtml(p.display_name)+'</span>'
-      +'<span style="cursor:pointer" onclick="reportLivePost('+p.id+')" title="Report this post">Report</span></div>'
-      +'<div style="font-size:.84375rem;line-height:1.55;color:var(--tp);white-space:pre-wrap">'+escapeHtml(p.body)+'</div></div>'
-    ).join('')||'<div style="font-size:.78125rem;color:var(--tm);padding:8px 2px">Nothing here yet today. Someone has to go first.</div>';
-    loadModQueue();
-  }catch(e){
-    banner.style.display='block';banner.style.background='var(--s1)';banner.style.color='var(--tm)';
-    banner.textContent='The live room is not reachable right now — your private reflections below still work.';
-    compose.style.display='none';
-  }
-}
 // ─── ROOM TOUR ───────────────────────────────────────────────────────────────
 // Shown once, the first time a Pro member opens a live room. The rules are the
 // feature: someone who knows nobody can reply or DM them will say things they
 // would never say in a comment section.
-function maybeShowRoomTour(){
-  const el=document.getElementById('room-tour-modal');
-  if(!el)return;
-  el.classList.add('open');
-}
-function closeRoomTour(){
-  S.roomTourDone=true;save();
-  document.getElementById('room-tour-modal').classList.remove('open');
-}
-function liveDisplayName(){
-  const first=(S.name||'Someone').trim().split(/\s+/)[0];
-  return first+' \u00b7 day '+getDays();
-}
-async function submitLivePost(){
-  const inp=document.getElementById('liveInput');
-  const text=(inp.value||'').trim();
-  if(!text)return;
-  // Moderation is server-side and always has been: /api/rooms/post runs every
-  // post past the AI moderator in server/rooms.js before anyone sees it, and
-  // answers with crisis / blocked / held, each handled below.
-  //
-  // A `typeof roomTextBlocked === 'function'` guard used to sit here, above a
-  // comment claiming a client-side language gate ran first "same rule as
-  // private posts". Neither existed - roomTextBlocked is defined nowhere in
-  // this file and there is no private-post path at all; both are leftovers from
-  // a removed feature. The guard could therefore never be true, so it changed
-  // nothing, but the comment claimed protection the code did not provide.
-  // Removed 28 Aug 2026. Do not add a word filter here: the moderator prompt
-  // deliberately allows profanity, anger and despair, and a crude local
-  // blocklist would silence exactly the people this room is for.
-  inp.disabled=true;
-  try{
-    const res=await fetch('/api/rooms/post',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({room:currentRoom||'Other',body:text,displayName:liveDisplayName()})});
-    const d=await res.json().catch(()=>({}));
-    if(d.crisis){appInfo("Before anything else",d.message);inp.value='';}
-    else if(d.blocked){appInfo("That one can't go up",d.message);}
-    else if(d.held){appInfo('Almost there',d.message);inp.value='';}
-    else if(res.ok){inp.value='';loadLiveRoom();}
-    else{appInfo('The room',d.error||'That did not go through — try again.');}
-  }catch(e){appInfo('The room','No connection right now — your words are still in the box.');}
-  inp.disabled=false;
-}
-async function reportLivePost(id){
-  try{
-    await fetch('/api/rooms/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id})});
-    appInfo('Reported','Thank you. Two reports hide a post until a human looks at it.');
-  }catch(e){}
-}
-// Owner-only: the held/reported queue, right inside the room.
-async function loadModQueue(){
-  const wrap=document.getElementById('mod-queue-wrap');
-  if(!wrap)return;
-  try{await appIsOwnerReady;}catch(e){}
-  if(!window.appIsOwner){wrap.style.display='none';return;}
-  try{
-    const res=await fetch('/api/rooms/mod-queue');
-    if(!res.ok){wrap.style.display='none';return;}
-    const {queue=[]}=await res.json();
-    wrap.style.display=queue.length?'block':'none';
-    document.getElementById('mod-queue').innerHTML=queue.map(q=>
-      '<div class="card" style="padding:12px 14px;margin-bottom:8px;border-left:3px solid '+(q.crisis?'#E24B4A':'var(--accent)')+'">'
-      +'<div style="font-size:.6875rem;color:var(--tm);margin-bottom:4px">'+escapeHtml(q.room)+' \u00b7 '+escapeHtml(q.display_name)+' \u00b7 '+escapeHtml(q.status)+(q.report_count?' \u00b7 '+q.report_count+' reports':'')+'</div>'
-      +'<div style="font-size:.8125rem;color:var(--tp);white-space:pre-wrap;margin-bottom:6px">'+escapeHtml(q.body)+'</div>'
-      +(q.ai_reason?'<div style="font-size:.6875rem;color:var(--tm);margin-bottom:8px">Moderator: '+escapeHtml(q.ai_reason)+'</div>':'')
-      +'<div style="display:flex;gap:8px">'
-      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:.75rem;width:auto" onclick="modAct('+q.id+',\'approve\')">Approve</button>'
-      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:.75rem;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'remove\')">Remove</button>'
-      +'<button class="ob-btn outline" style="margin:0;padding:7px 10px;font-size:.75rem;width:auto;color:#E24B4A;border-color:#E24B4A" onclick="modAct('+q.id+',\'ban\')">Ban</button>'
-      +'</div></div>'
-    ).join('');
-  }catch(e){wrap.style.display='none';}
-}
-async function modAct(id,action){
-  try{
-    await fetch('/api/rooms/mod-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({postId:id,action})});
-    loadLiveRoom();
-  }catch(e){}
-}
 
-function openRoom(category){
-  currentRoom=category;
-  switchTo('community');
-  actBn('bn-plans');
-  loadLiveRoom();
-}
 
 // Rooms stay safe by design: a post that attacks, hates, or discriminates
 // against people — or drops to raw abuse — is locked out at the door, with an
@@ -9204,7 +8789,7 @@ const PARTNER_SECTION_COPY={
   base:{
     head:'For the one who loves you',
     rowTitle:'For the one who loves you',
-    rowSub:'Help your partner understand — and fight this together',
+    rowSub:'Their side of the app',
     intro:"Most people don't fail recovery because they're weak — they fail because they're unsupported. And most partners don't fail to support — they fail to understand, because nobody ever explained it to them. This page fixes that, for both of you.",
     label:'5 things every partner should know',
     list:`<b style="color:var(--tp)">1.</b> Addiction isn't about how much they love you — it stops feeling like a choice, and it's a pattern that formed long before you.<br>
@@ -9216,7 +8801,7 @@ const PARTNER_SECTION_COPY={
   supporter:{
     head:'For you',
     rowTitle:'For you',
-    rowSub:"You're the one who loves them. This part is yours.",
+    rowSub:'This part is yours',
     intro:"Most people who love someone through this don't fail because they're weak. They fail because nobody ever told them what they're actually dealing with — so they take the lying personally, fight the wrong battles, and burn out carrying weight that was never theirs. That ends here. This section isn't about fixing them. It's about keeping you whole while you decide what you can carry.",
     label:'5 things to hold onto',
     list:`<b style="color:var(--tp)">1.</b> The lying isn't about your worth. People in active addiction lie to everyone — mostly themselves. It's the addiction protecting itself, not a measure of what you deserve.<br>
@@ -11538,29 +11123,17 @@ The app, screen by screen (answer questions about it precisely - never invent fe
 - TODAY tab: day counter (days since start date), daily pledge, today's lesson, milestone strip, "share my progress" card, SOS button (guided breathing, 5-4-3-2-1 grounding, "Talk me through it" audio guide - all free, always).
 - LESSONS: the program is THE 90-DAY BOOTCAMP, three phases on every recovery track: days 1-30 BREAK IT (written per track), days 31-60 REBUILD and days 61-90 KEEP IT & GIVE IT (shared phases, personalised to the track). 14 tracks (Porn & Sex, Alcohol, Smoking, Substances, Gambling, Social media, Gaming, Food/Binging, Shopping/Spending, Work, Anger & Control, Other, Supporting Someone, Together for couples). Supporting Someone is its own 35-day track (no phases - it is written for the supporter, not the person recovering). Together is its own 90-day RELATIONSHIP programme, rebuilt 29 Aug 2026: it is for ANY couple repairing a relationship, not only couples touched by addiction, and it does not use the shared phases. Every day is done by the two of them side by side on ONE phone - never separately - and every day has two parts, a TOGETHER action and a FOR THEM act of service. It covers the daily ten minutes, phones out of the room, dates twice a month, weekly game night, eye contact, kissing, hugging, massage and touch, chores done unasked, arguing and repair, money, and a permanent calendar of rhythms at the end. When faith is on, a faith line is woven inside every day's lesson. Each track keeps its own slip clock - a slip on one never resets another. Plus packs: the 30-day Spiritual Path (God as you understand God, no denomination) and nine 7-day packs (anxiety, sleep, confidence, trauma, depression, relationships, intimacy, discipline, relapse-proofing) and build-your-own. Lessons are narrated: six voices (Warm, Soft, Gentle, Clear, Male, Deep - Deep is a deeper American male voice), speed control, full-screen read-along player. The founder's own voice was removed on 26 Aug 2026 over a licence - if anyone asks for it, say plainly that it is no longer in the app. Tracks that share a mechanism (e.g. Porn + Food) point at each other.
 - TOOLS tab: Lesson Library (every lesson in the app, searchable, tap to read), journal (private, with insights), craving logger, urge surfing, panic mode, emergency plan, recovery scripts, distraction generator, pattern detection, weekly reports, advanced streaks, analytics, habit coach, Rooms (each focus area has a live community feed - real people, posts only, no replies or DMs, a first name and day count on every post, open 6am-10pm Central, every post AI-moderated before it appears, Report on every post - plus daily written reflections and a private space), withdrawal timeline, letters.
-- FRIENDLY tab (you): Pro only, up to 30 chats/day. Free members see an upgrade note and always-free SOS tools. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile and shapes how you write; on phones with one installed voice all presences sound alike out loud.
-- PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, plan & billing (Restore purchases re-finds a paid plan by the email that paid, even on a fresh account), export data, erase history (keeps account), delete account (erases everything; a paid plan is never charged again and keeps its remaining paid days).
-- PRICING, the truth: FREE is everything above INCLUDING every lesson day 1-90 on every track, the Spiritual Path, Together, and The Fight of Your Life (the game). PRO is exactly two things - Friendly (up to 30 chats/day) and the live community rooms (one moderated feed per focus area, open 6am-10pm Central). $9.99/month or $59.99/year, both with a 7-day free trial; Founding Lifetime $149.99, first 50 members only. Lessons stopped being paid on 1 Sep 2026; never tell anyone a lesson day is behind Pro.
+- FRIENDLY tab (you): private - only a few accounts have it at all. The "AI voice" switch in your header reads your replies aloud (off by default). Your presence (female/male/neutral) is picked in Profile.
+- PROFILE: name, gender, Friendly's presence, focus areas, lesson track switcher, text size, reminders, export data, erase history (keeps account), delete account.
+- PRICING, the truth: the whole app is FREE. There is no paid plan, no trial, nothing to buy. Every lesson day 1-90 on every track, the Spiritual Path, Together, The Fight of Your Life, every tool, the journal, insights and reports - all free. If somebody asks what it costs: nothing.
 - The app works offline; anything written syncs when signed in. Android app on Google Play; also runs in any browser at turnsomedayintodayone.com.`;
 
-const SYSTEM_FREE_ADDENDUM=`
+const SYSTEM_ADDENDUM=`
 
-You are running in Friendly Free mode. In this mode:
-- EVERY lesson day, 1 to 90, on every track - plus the Spiritual Path, Together, and The Fight of Your Life (the game) - is FREE as of 1 Sep 2026. So is pattern analysis, weekly reports, emotional trend analysis, journal insights, streak and habit coaching and analytics. Answer all of it fully and warmly; never withhold a lesson, never call a lesson day a paid extra, never suggest upgrading to continue a programme.
-- The only things this person does not have are Friendly itself beyond this conversation, and the live rooms.
-- Friendly itself is Pro-only (up to 30 chats a day). Do not bring pricing up unless they ask.
-- EXCEPTION that overrides the line above: if the user sounds like they're struggling right now - distress, a craving, an urge, a slip, a hard night, crisis - do NOT mention Friendly Pro or upgrading at all in that reply, even if they asked for a Pro-level feature. Support them fully with what's free, and when it fits, point them to the free SOS tools on the Home screen: guided breathing, grounding, and "Talk me through it".`;
+The app is free. There is nothing to sell and nothing to upgrade to - never
+mention a price, a plan, a trial or an upgrade, because none exist. If somebody
+asks what it costs, it costs nothing.`;
 
-const SYSTEM_PRO_ADDENDUM=`
-
-You are running in Friendly Pro mode - the user has unlocked full coaching. In this mode you may, when it's genuinely useful:
-- Go deeper: real emotional analysis, pattern recognition across their triggers, moods, and slips, long-form support, remembering and naming patterns you notice across the conversation.
-- Reference and connect any lesson from Days 1-30 to what they're actually experiencing, and offer personalized next actions.
-- Help identify triggers, emotional cycles, vulnerable times of day, and pattern loops, and offer real prevention strategies - grounded in what they've actually told you, never generic.
-- Adapt your tone and examples to their specific focus area(s) and the behavioral-blueprint answers they gave during onboarding.
-- Offer a real weekly-style check-in (mood trend, craving trend, progress highlights) when it's relevant or asked for.
-- The app already generates a real Weekly Report for them (lessons completed, emotional patterns, trigger analysis, risk indicators, progress highlights, recommendations) - when asked to explain it or give recommendations, walk through it like a coach reading real data with them, not a generic summary.
-Stay calm, wise, grounded, and human throughout - never clinical, never repetitive, never a checklist. You are a real coach and a real presence, not a feature list.`;
 
 // ─── HOW THE TRACKS RELATE ───────────────────────────────────────────────────
 // Every track is its own 30 days and none of them mention each other, so
@@ -11598,7 +11171,7 @@ function activeTrackLinks(tracks){
 }
 
 function buildSystemPrompt(){
-  return SYSTEM_BASE+SYSTEM_APP_MAP+(S.isPro?SYSTEM_PRO_ADDENDUM:SYSTEM_FREE_ADDENDUM);
+  return SYSTEM_BASE+SYSTEM_APP_MAP+SYSTEM_ADDENDUM;
 }
 
 // What Friendly already knows about this person: recent journal entries,
@@ -11954,28 +11527,10 @@ const PRO_TOOLS={
 };
 function openProJournalWhenPro(){switchTo('journal');actBn('bn-tools');}
 function openProTool(key){
-  // EVERY tool in here is free now (Jacques, 17 Aug 2026). Pro is exactly two
-  // things and nothing else. First, every lesson past day 15 - isLessonLocked
-  // is simply `day > FREE_LESSON_CAP`, which no longer fires - the cap is 90
-  // track, 16-35 on Supporting Someone, and 16-30 on Together, the Spiritual
-  // Path and the 7-day packs. (This comment said "16-30" flat, which quietly
-  // understated the paid half of a 90-day program by sixty days.) Second,
-  // Friendly, which is Pro-only at 30 chats a day - FREE_CHAT_DAILY_LIMIT is
-  // 0, not 3; Jacques made Friendly Pro-only on 24 Aug. Those gates live where
-  // they belong - isLessonLocked, renderPackLesson, renderCouples and the chat
-  // cap - not here.
-  // The name openProTool is kept only because a dozen onclick handlers use it.
+  // The app is free (Jacques, 8 Sep 2026). Nothing in here is gated - this is a
+  // plain dispatcher, kept under its old name only because a dozen onclick
+  // handlers call it.
   window[PRO_TOOLS[key].open]();
-}
-function showProToolPreview(key){
-  const t=PRO_TOOLS[key];
-  document.getElementById('ptp-title').textContent=t.title;
-  document.getElementById('ptp-teaser').textContent=typeof t.teaser==='function'?t.teaser():t.teaser;
-  document.getElementById('ptp-mock').innerHTML=t.mock;
-  document.getElementById('pro-tool-preview-modal').classList.add('open');
-}
-function closeProToolPreview(){
-  document.getElementById('pro-tool-preview-modal').classList.remove('open');
 }
 
 function setNovaMode(isLive){
@@ -12188,13 +11743,6 @@ function novaNudge(text){
   systemNotify('Friendly',text);
   showNovaBadge();
 }
-function maybeNovaProNudge(text){
-  if(S.isPro)return;
-  const today=new Date().toDateString();
-  if(S.lastProNudgeDate===today)return;
-  S.lastProNudgeDate=today;
-  novaNudge(text);
-}
 function showTyping(show){
   const t=document.getElementById('novaTyping');
   const area=document.getElementById('chatArea');
@@ -12260,14 +11808,13 @@ async function sendMsg(){
   const text=inp.value.trim();if(!text)return;
   const today=new Date().toDateString();
   if(S.chatDate!==today){S.chatsLeft=FREE_CHAT_DAILY_LIMIT;S.chatDate=today;}
-  if(!S.isPro&&S.chatsLeft<=0){
-    // Never answer distress with a price. The free door stays open and named.
+  if(S.chatsLeft<=0){
     addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
-      ?"Friendly conversations are part of Pro — but I'm not leaving you with nothing: the SOS button on Home is free and always open — guided breathing, grounding, and \"Talk me through it\". If this is heavier than an urge, call or text 988 — free, confidential, 24/7."
-      :"Friendly is part of Pro — upgrade on the Plans page to talk any time. Everything on the SOS button stays free and always open: guided breathing, grounding, and \"Talk me through it\". 💜");
+      ?"That is today's chats — I am back tomorrow. Right now, When it's hard on Tools is open: breathing, grounding, a voice to talk you through it. And 988 is there any hour, free."
+      :"That is today's chats — I am back tomorrow. When it's hard on Tools is open any time.");
     return;
   }
-  if(!S.isPro){S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();save();}
+  S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();save();
   inp.value='';inp.style.height='auto';
   addBubble('user',text);
   S.chatHistory.push({role:'user',content:text,at:Date.now()});
@@ -12333,14 +11880,10 @@ Address the interactions of their unique blueprint and assign structured daily r
       ],messages:msgs})
     });
     if(res.status===429){
-      const reply=S.isPro
-        ?"Looks like you've reached today's 30-chat Pro limit. I'll be here again tomorrow — that's rare to hit, but it resets at midnight. 💜"
-        :"Friendly is part of Pro — upgrade on the Plans page to talk any time. If you need something right now, the SOS tools on Home are free and always open: guided breathing, grounding, and \"Talk me through it\". 💜";
+      const reply="That is today's chats. I am here again tomorrow.";
       S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
-      if(!S.isPro){
-        S.chatsLeft=0;
-        document.getElementById('chatsLeft').textContent=0;
-      }
+      S.chatsLeft=0;
+      document.getElementById('chatsLeft').textContent=0;
       save();showTyping(false);addBubble('nova',reply);
       return;
     }
@@ -12372,7 +11915,7 @@ Address the interactions of their unique blueprint and assign structured daily r
     // session happened - only a canned local reply. Refund it so three flaky
     // attempts at 2am don't burn the day's free chats without a single answer.
     // (A 429 real-limit hit returns earlier and never reaches here.)
-    if(!S.isPro){S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();}
+    S.chatsLeft++;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();
     const reply=localFallbackReply(text);
     S.chatHistory.push({role:'assistant',content:reply,at:Date.now()});
     if(S.chatHistory.length>30)S.chatHistory=S.chatHistory.slice(-30);
@@ -12383,7 +11926,7 @@ Address the interactions of their unique blueprint and assign structured daily r
 // ─── NAVIGATION ──────────────────────────────────────────────────────────────
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
-  rooms:'s-rooms',community:'s-community',timeline:'s-timeline',progress:'s-progress',
+  community:'s-community',timeline:'s-timeline',progress:'s-progress',
   plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
   insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
@@ -12397,8 +11940,8 @@ const SCREEN_MAP={
   'lesson-library':'s-lesson-library'
 };
 const TITLES={
-  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',rooms:'Rooms',community:'Room',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
-const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',rooms:'bn-plans',community:'bn-plans',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
+  'lesson-library':'Lesson Library',home:'Today',nova:'Friendly — AI recovery companion',journal:'Journal',craving:'Craving tracker',community:'Reflections',timeline:'Withdrawal timeline',progress:'Progress',plans:'Plans',profile:'Profile',lesson:"Today's lesson",'relapse-toolkit':"When it's hard",'weekly-reports':'Insights','reminder-settings':'Reminder Settings',streaks:'Insights',analytics:'Insights',insights:'Insights',stories:'Stories','pack-list':'Lesson Packs','pack-lesson':'Lesson Pack','habit-coach':'Insights',tools:'Tools',tower:'The Fight of Your Life',vault:'The Vault'};
+const SCREEN_TO_BN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',community:'bn-tools',craving:'bn-tools',timeline:'bn-tools',progress:'bn-tools','relapse-toolkit':'bn-tools',streaks:'bn-tools',analytics:'bn-tools','habit-coach':'bn-tools','weekly-reports':'bn-tools',tools:'bn-tools',stories:'bn-tools',profile:'bn-plans',plans:'bn-plans','pack-list':'bn-plans','pack-lesson':'bn-plans','reminder-settings':'bn-plans',tower:'bn-game'};
 function bnForScreen(id){return SCREEN_TO_BN[id]||'bn-plans';}
 let preUpgradeScreen='home';
 // In-app back: every screen change records where it came from, the header
@@ -12420,7 +11963,7 @@ function goBackScreen(){
 // Which bottom-nav tab each screen belongs to, so back also fixes the
 // highlight instead of leaving the wrong tab lit.
 const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'bn-tools',
-  rooms:'bn-tools',community:'bn-tools',timeline:'bn-tools',progress:'bn-tools',
+  community:'bn-tools',timeline:'bn-tools',progress:'bn-tools',
   plans:'bn-plans',profile:'bn-plans',lesson:'bn-home','relapse-toolkit':'bn-tools',
   'weekly-reports':'bn-tools','reminder-settings':'bn-plans',streaks:'bn-tools',
   analytics:'bn-tools','pack-list':'bn-tools','pack-lesson':'bn-tools',
@@ -12471,7 +12014,6 @@ function switchTo(id,opts){
   if(id==='craving'){renderCravings();}
   if(id==='home'){renderMilestones();}
   if(id==='lesson'){viewingDay=null;renderTodayLesson();loadLessonAudioManifest();}
-  if(id==='rooms'){renderRoomsList();}
   if(id==='nova'){maybeShowNovaDisclaimer();}
   if(id==='community'){renderCommunityPosts();}
   if(id==='stories'){renderStories();}
@@ -12481,325 +12023,33 @@ function switchTo(id,opts){
   if(id==='nova'){try{updateNovaVoiceToggle();}catch(e){}}
   if(id==='pack-list'){renderPackList();}
   if(id==='pack-lesson'){renderPackLesson();}
-  if(id==='plans'){renderPlansScreen();}
   if(id==='tools'||id==='progress'){renderMilestones();}
   if(id==='partner'){updateTogetherSection();}
   if(id==='tower'){renderTower();}
   if(id==='home'&&typeof renderHomeClimb==='function')renderHomeClimb();
+}
+// Friendly is private (Jacques, 8 Sep 2026): an allowlist on the server, not a
+// price. Everyone else never sees it - no tab, no row, no "unlock" state - so
+// the bar is four tabs: Today, Tools, The Fight, Profile.
+let friendlyAllowed=false;
+async function applyFriendlyAccess(){
+  try{
+    const r=await fetch('/api/friendly/access');
+    friendlyAllowed=r.ok&&!!(await r.json()).allowed;
+  }catch(e){friendlyAllowed=false;}
+  const tab=document.getElementById('bn-nova');
+  if(tab)tab.style.display=friendlyAllowed?'':'none';
+  const row=document.getElementById('toolkit-friendly-row');
+  if(row)row.style.display=friendlyAllowed?'':'none';
+  if(!friendlyAllowed&&document.getElementById('s-nova')&&document.getElementById('s-nova').classList.contains('on')){
+    switchTo('home');actBn('bn-home');
+  }
 }
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
   if(id){const el=document.getElementById(id);if(el)el.classList.add('on');}
 }
 
-// ─── PLANS / PRICING (one Pro plan, three billing options) ───────────────────
-const PRO_PRICE_MONTHLY=9.99,PRO_PRICE_YEARLY=59.99,PRO_PRICE_LIFETIME=149.99;
-const YEARLY_SAVE_PCT=Math.round((1-(PRO_PRICE_YEARLY/12)/PRO_PRICE_MONTHLY)*100);
-// Yearly is pre-selected: annual subscribers stick around roughly 3x longer than
-// monthly ones, so the default should be the plan that's best for both sides.
-let currentBillSelection='a';
-function billTypeToPlan(t){return t==='a'?'yearly':t==='l'?'lifetime':'monthly';}
-function setBill(type){
-  currentBillSelection=type;
-  document.getElementById('mbtn').classList.toggle('on',type==='m');
-  document.getElementById('abtn').classList.toggle('on',type==='a');
-  document.getElementById('lbtn').classList.toggle('on',type==='l');
-  const priceEl=document.getElementById('pro-price');
-  const subEl=document.getElementById('pro-price-sub');
-  if(type==='a'){
-    priceEl.innerHTML=`$${(PRO_PRICE_YEARLY/12).toFixed(2)}<span>/mo</span>`;
-    if(subEl)subEl.textContent=`7-day free trial, then $${PRO_PRICE_YEARLY}/yr — save ${YEARLY_SAVE_PCT}% vs monthly`;
-  }else if(type==='l'){
-    priceEl.innerHTML=`$${PRO_PRICE_LIFETIME}<span> one-time</span>`;
-    if(subEl)subEl.textContent='One-time payment. Yours for good, no renewals.';
-  }else{
-    priceEl.innerHTML=`$${PRO_PRICE_MONTHLY}<span>/mo</span>`;
-    if(subEl)subEl.textContent='7-day free trial, then billed monthly. Cancel anytime in two taps.';
-  }
-}
-// ─── GOOGLE PLAY BUILD: FREE TIER ONLY ───────────────────────────────────────
-// Google Play requires that digital goods sold inside a Play-distributed app go
-// through Play Billing. Rather than run a second billing system or enrol in the
-// external-offers program, the Android wrapper ships free-tier only: no
-// prices, no upgrade buttons, and no link out to a payment page. Pro is sold on
-// the web alone. Existing Pro accounts still work here - only BUYING is gone.
-//
-// Detection is belt-and-braces because a single signal can fail: the TWA's own
-// launch URL carries ?src=play (set in the Bubblewrap manifest), and Chrome sets
-// the referrer to android-app://<package> on a TWA launch. Either one latches
-// the flag into localStorage, so it survives in-app navigation that drops the
-// query string.
-//
-// The latch is Android-only. The Play build can only ever exist inside the
-// Play-installed Android wrapper, but the start URL with ?src=play is easy to
-// open anywhere - pasted on a PC while testing, shared in a chat, followed from
-// a doc. Before this check, one such visit latched a desktop browser into Play
-// mode forever: every Upgrade tap ended in "In-app purchases are not available
-// on this device" and Stripe was unreachable. So a non-Android browser never
-// latches, and one that already latched (from the earlier build) is cleaned up
-// and put back on the web path.
-const PLAY_PACKAGE='com.turnsomedayintodayone.app';
-// THE LATCH MUST NOT OUTLIVE THE APP SESSION, and this is why.
-//
-// A Trusted Web Activity is Chrome. It shares one storage jar with the browser
-// for this origin, so a flag the Android shell wrote into localStorage is read
-// back by every ordinary Chrome tab on that phone, for good. That turned one
-// launch of the Play app into a permanent verdict: the site decided it was the
-// Play build, routed Upgrade to Google billing, and `create-checkout-session`
-// refused Stripe by policy. On 28 Aug Jacques could not buy Pro on his phone by
-// any route - not in the app, not on the website - and Stripe's dashboard
-// showed no checkout session had been created since 30 July. Every Android
-// owner of this app was in the same position: install once, and the website
-// stops selling to you.
-//
-// So the latch now lives in sessionStorage, which is scoped to one browsing
-// context. The shell's own window keeps it for as long as the app is open; a
-// separate Chrome tab starts clean and gets Stripe. The legacy localStorage key
-// is deleted wherever it is found, because it is the poison.
-//
-// Policy is still safe. The shell's start URL carries ?src=play and its launch
-// sets an `android-app://` referrer, so a real app launch always presents a
-// signal at the very first navigation - it never has to rely on remembering.
-const PLAY_LATCH_KEY='tsid_play_build';      // legacy, localStorage - only ever deleted now
-const PLAY_SESSION_KEY='tsid_play_session';  // current, sessionStorage
-let playLatch=null;
-function forgetLegacyPlayLatch(){
-  try{localStorage.removeItem(PLAY_LATCH_KEY);}catch(e){}
-}
-function readPlayLatch(){
-  try{
-    const raw=sessionStorage.getItem(PLAY_SESSION_KEY);
-    if(!raw)return null;
-    const v=JSON.parse(raw);
-    return (v&&v.how)?v:null;
-  }catch(e){return null;}
-}
-function writePlayLatch(how){
-  const v={how:how,at:new Date().toISOString().slice(0,16)};
-  // Kept in memory too: a private window can throw on write, and the flag still
-  // has to hold for the rest of this page's life.
-  try{sessionStorage.setItem(PLAY_SESSION_KEY,JSON.stringify(v));}catch(e){}
-  return v;
-}
-// The launch signals only exist on the very first navigation, so they are read
-// once here and kept for the life of the page.
-const launchReferrer=(function(){try{return document.referrer||'';}catch(e){return '';}})();
-const launchFromParam=(function(){try{return new URLSearchParams(location.search).get('src')==='play';}catch(e){return false;}})();
-const launchFromShell=launchReferrer.startsWith('android-app://'+PLAY_PACKAGE);
-function detectPlayBuild(){
-  forgetLegacyPlayLatch();
-  try{
-    if(!/\bAndroid\b/.test(navigator.userAgent||'')){
-      playLatch=null;
-      return false;
-    }
-    // Signals from this navigation outrank anything remembered.
-    if(launchFromShell){playLatch=writePlayLatch('referrer');return true;}
-    if(launchFromParam){playLatch=writePlayLatch('param');return true;}
-    const stored=readPlayLatch();
-    if(stored){playLatch=stored;return true;}
-  }catch(e){}
-  return false;
-}
-let playBuild=detectPlayBuild();
-function isPlayBuild(){return playBuild;}
-// The Play build sells Pro through Google Play Billing rather than Stripe, so
-// nothing is hidden any more - the whole pricing surface is shown, and only the
-// checkout mechanism differs. What must never happen is a Play user reaching
-// Stripe: that is the policy violation, and the server refuses it independently.
-function applyPlayBuildUI(){
-  if(!isPlayBuild())return;
-  document.body.classList.add('play-build');
-  // Only a Play install can leave a Play rating, so the row appears only there.
-  const rr=document.getElementById('rate-app-row');
-  if(rr)rr.style.display='';
-}
-
-// ─── IN-APP PURCHASE (GOOGLE PLAY, LATER APPLE) ──────────────────────────────
-// Product IDs are configured in the store console and must match the server's
-// map exactly - a mismatch is an unknown product, never a guessed plan.
-const STORE_PRODUCTS={monthly:'pro_monthly',yearly:'pro_yearly',lifetime:'pro_lifetime'};
-// The Digital Goods API is the bridge a Trusted Web Activity uses to reach the
-// store it was installed from. Absent in a normal browser, which is exactly how
-// the web build keeps using Stripe without any extra branching.
-function storeBillingAvailable(){
-  return typeof window!=='undefined'&&'getDigitalGoodsService'in window;
-}
-function currentStoreSource(){
-  // One place to teach this about Apple later; everything downstream is generic.
-  return isPlayBuild()?'play':null;
-}
-async function becomeProViaStore(plan){
-  const productId=STORE_PRODUCTS[plan];
-  const source=currentStoreSource();
-  if(!productId||!source){appInfo('Upgrade unavailable','That plan is not available here right now.');return;}
-  if(!storeBillingAvailable()){
-    appInfo('Upgrade unavailable','In-app purchases are not available on this device. You can also upgrade on our website.');
-    return;
-  }
-  // Asked fresh rather than read from the last sync: this is the last moment
-  // before the store takes real money, and a stale "ready" here costs a
-  // customer a payment that cannot be honored.
-  // Three outcomes, told apart on purpose. The old version collapsed all of
-  // them into "temporarily unavailable": r.ok?r.json():null turned a 401 into
-  // a null, so somebody whose session had simply expired was told the SHOP was
-  // broken and had no idea to sign in. The catch swallowed the real error too,
-  // and it wrapped the sold-out branch as well, so a throw in there reported
-  // itself as a network failure.
-  let ready=null;
-  try{
-    const res=await fetch('/api/billing/status');
-    if(res.status===401){
-      appInfo('Please sign in first',"Your session expired, so nothing has been charged. Sign in and tap upgrade again.");
-      try{openAuthModal();}catch(e){}
-      return;
-    }
-    if(!res.ok){
-      appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged.\n\nDetails for support: billing status returned "+res.status+".");
-      return;
-    }
-    ready=await res.json();
-  }catch(e){
-    appInfo('Upgrade unavailable',"We could not reach the server, so nothing has been charged. Please try again.\n\nDetails for support: "+((e&&e.name)||'error')+': '+((e&&e.message)||'no message'));
-    return;
-  }
-  if(!ready||!ready.storeBillingReady){
-    appInfo('Upgrade unavailable',"Purchases are temporarily unavailable — nothing has been charged. Please try again later.\n\nDetails for support: storeBillingReady was false — the server's Play service account is probably not configured.");
-    return;
-  }
-  // The Founding 50 is checked here as well as on the server. The server check
-  // is the authority, but it only runs after the store has already charged the
-  // card - seat 51 would pay and then be told it was sold out.
-  if(plan==='lifetime'&&ready.lifetimeSoldOut){
-    lifetimeAvail=lifetimeAvail||{};lifetimeAvail.soldOut=true;
-    applyLifetimeAvailability&&applyLifetimeAvailability();
-    const soldMsg=(lifetimeAvail&&lifetimeAvail.soldOutMessage)||'Founding Lifetime — all 50 are gone. Lifetime is closed for good.';
-    appInfo('Founding Lifetime is gone',soldMsg+' Nothing has been charged.');
-    return;
-  }
-  // Every step below is labelled because this whole block used to end in one
-  // generic "could not complete that purchase". That message told Jacques
-  // nothing and told us less: it is thrown by the store handshake, by a
-  // missing product, by the payment sheet and by the network alike, so a
-  // screenshot of it could not be acted on and the bug sat open for weeks
-  // while two conversations guessed at different causes. The step name and
-  // the real error now travel with the message so one screenshot is enough.
-  let step='opening the store connection';
-  try{
-    const service=await window.getDigitalGoodsService('https://play.google.com/billing');
-    step='asking the store about '+productId;
-    const details=await service.getDetails([productId]);
-    if(!details||!details.length){
-      appInfo('Upgrade unavailable','That plan is not in the store yet.\n\nDetails for support: getDetails returned nothing for '+productId+'. Usually the product is not active in Play Console, or this Google account is not on the tester list.');
-      return;
-    }
-    const item=details[0];
-    step='building the payment sheet';
-    const request=new PaymentRequest(
-      [{supportedMethods:'https://play.google.com/billing',data:{sku:productId}}],
-      {total:{label:item.title||'Pro',amount:{currency:item.price.currency,value:item.price.value}}}
-    );
-    step='showing the payment sheet';
-    const response=await request.show();
-    step='confirming with our server';
-    const purchaseToken=response.details&&response.details.purchaseToken;
-    // The store says it took the money; the server still asks the store itself
-    // before granting anything, because a token from a device proves nothing.
-    const verify=await fetch('/api/billing/store/verify',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({source,productId,purchaseToken})
-    });
-    const data=await verify.json().catch(()=>({}));
-    if(!verify.ok){
-      await response.complete('fail');
-      appInfo(data.soldOut?'Founding Lifetime':'Upgrade unavailable',data.error||'Could not confirm that purchase.');
-      return;
-    }
-    await response.complete('success');
-    await syncBillingStatus(true);
-    appInfo('You\'re Pro','Your purchase is confirmed. Everything is unlocked.');
-  }catch(e){
-    // A user dismissing the store sheet lands here too - say nothing then.
-    if(e&&(e.name==='AbortError'||/cancel/i.test(e.message||'')))return;
-    const why=((e&&e.name)?e.name+': ':'')+((e&&e.message)||String(e));
-    // Reported before it is shown, so the owner's error log sees every failed
-    // purchase without anyone photographing their screen. Fire-and-forget: a
-    // dead network must not add a second failure on top of the first.
-    try{fetch('/api/diagnostics/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'Store purchase failed while '+step,detail:why+' \u00b7 '+storeDiagnostics()})}).catch(()=>{});}catch(_){}
-    appInfo('Upgrade unavailable','Could not complete that purchase, and nothing has been charged.\n\nDetails for support: failed while '+step+'.\n'+why+'\n\n'+storeDiagnostics());
-  }
-}
-// Read verbatim into the failure dialog so a photo of the screen is a usable
-// bug report. Nothing here is private - it is which browser is underneath the
-// app and whether the Play bridge answered.
-function storeDiagnostics(){
-  const bits=[];
-  try{
-    bits.push('bridge='+(('getDigitalGoodsService'in window)?'present':'missing'));
-    // Which host is answering matters: assetlinks.json is only honoured on the
-    // exact origin the shell declares, and a redirect between them is a
-    // verification failure rather than a detour.
-    bits.push('host='+location.host);
-    // The decisive one. launch=shell means the Android app opened this page and
-    // any failure after it is the app's. launch=param or launch=stored means
-    // nothing proves the Play app is involved at all, and a purchase failure
-    // here says nothing about whether Play billing works.
-    bits.push('launch='+(launchFromShell?'shell':(launchFromParam?'param':'none')));
-    bits.push('latch='+(playLatch?(playLatch.how+(playLatch.at?'@'+playLatch.at:'')):'none'));
-    bits.push('display='+((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)?'standalone':'browser'));
-    const m=(navigator.userAgent||'').match(/(SamsungBrowser|EdgA|OPR|Chrome)\/([0-9]+)/);
-    bits.push('engine='+(m?m[1]+' '+m[2]:'unknown'));
-    bits.push('app='+APP_VERSION);
-  }catch(e){}
-  return bits.join(' · ');
-}
-
-// ─── FOUNDING LIFETIME CAP ───────────────────────────────────────────────────
-// The server owns both the cap and the threshold at which the remaining count
-// becomes public, so this screen and the landing page can never disagree. Until
-// the fetch lands, everything here stays in its default (available) state; the
-// server refuses an over-cap checkout regardless of what this screen shows, so
-// the worst a failed fetch can do is look out of date.
-let lifetimeAvail=null;
-async function loadLifetimeAvailability(){
-  try{
-    const res=await fetch('/api/lifetime-availability');
-    if(!res.ok)return;
-    lifetimeAvail=await res.json();
-    applyLifetimeAvailability();
-  }catch(e){/* offline or self-hosted without the route - leave defaults */}
-}
-function lifetimeSoldOut(){return !!(lifetimeAvail&&lifetimeAvail.soldOut);}
-function applyLifetimeAvailability(){
-  const note=document.getElementById('lifetime-note');
-  const lbtn=document.getElementById('lbtn');
-  if(!lifetimeAvail){if(note)note.style.display='none';return;}
-  if(lbtn)lbtn.style.display=lifetimeAvail.soldOut?'none':'';
-  // A man mid-decision on the Lifetime tab when the last seat goes shouldn't be
-  // left looking at a price he can no longer buy.
-  if(lifetimeAvail.soldOut&&currentBillSelection==='l')setBill('a');
-  if(note){
-    if(lifetimeAvail.soldOut){
-      note.textContent=lifetimeAvail.soldOutMessage;
-      note.style.display='block';
-    }else if(lifetimeAvail.showCount){
-      note.textContent=`Founding Lifetime — only ${lifetimeAvail.remaining} of ${lifetimeAvail.limit} left.`;
-      note.style.display='block';
-    }else{
-      note.style.display='none';
-    }
-  }
-  renderMiniPricingRows();
-  applyLifetimeFaq();
-}
-// Once the seats are gone these two stop quoting a price nobody can pay. Both are
-// clause removals, not rewrites - the rest of each string is untouched.
-function renderMiniPricingRows(){
-  const lifetimePart=lifetimeSoldOut()?'':` · Lifetime $${PRO_PRICE_LIFETIME} one-time`;
-  const text=`Monthly $${PRO_PRICE_MONTHLY} · Yearly $${(PRO_PRICE_YEARLY/12).toFixed(2)}/mo (save ${YEARLY_SAVE_PCT}%)${lifetimePart}`;
-  document.querySelectorAll('.mini-pricing-row').forEach(el=>{el.textContent=text;});
-}
-let lifetimeFaqApplied=false;
 // Written in the words supporters actually type, so they surface on a search for
 // the thing being felt rather than the thing being named. Shown on the supporter
 // and both paths only - a recovering user searching the guide should not be
@@ -12822,200 +12072,6 @@ function applySupporterFaq(){
   SUPPORTER_FAQ.forEach(f=>{if(!GUIDE_FAQ.some(g=>g.q===f.q))GUIDE_FAQ.unshift(f);});
   supporterFaqApplied=true;
 }
-function applyLifetimeFaq(){
-  if(lifetimeFaqApplied||!lifetimeSoldOut())return;
-  const entry=GUIDE_FAQ.find(f=>f.q==='How much does the app cost?');
-  if(!entry)return;
-  entry.a="The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b> or <b>$59.99/year</b> (about half price). Both start with a 7-day free trial.";
-  lifetimeFaqApplied=true;
-}
-function scrollToPricingCards(){
-  const el=document.getElementById('pricing-cards');
-  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
-}
-function stayFreeForNow(){
-  switchTo(preUpgradeScreen);actBn(bnForScreen(preUpgradeScreen));
-}
-function selectFree(){
-  if(S.isPro){cancelProSubscription();return;}
-  S.isPro=false;S.chatsLeft=FREE_CHAT_DAILY_LIMIT;save();updateTierUI();
-  stayFreeForNow();
-}
-async function becomePro(plan){
-  plan=plan||billTypeToPlan(currentBillSelection);
-  // A Play install buys through Google, never Stripe. This is the policy line,
-  // and the server enforces it again independently of what happens here.
-  if(isPlayBuild()){
-    if(!S.accountEmail){
-      appInfo('Sign in required','Create a free account first so your purchase can be restored on any device.');
-      return;
-    }
-    return becomeProViaStore(plan);
-  }
-  if(!S.accountEmail){
-    appInfo('Sign in required','Create a free account first so your Pro purchase can be linked to you and restored on any device. Go to Profile > Account & Sync, then come back to upgrade.');
-    return;
-  }
-  try{
-    const res=await fetch('/api/billing/create-checkout-session',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-TSID-Client':isPlayBuild()?'play':'web'},
-      body:JSON.stringify({plan})
-    });
-    const data=await res.json();
-    if(res.ok&&data.url){
-      window.location.href=data.url;
-    }else if(data.soldOut){
-      // The seat went while he was on this screen. Refresh the surface so it
-      // matches what the server just told him, then say it plainly.
-      loadLifetimeAvailability();
-      appInfo('Founding Lifetime',data.error);
-    }else{
-      appInfo('Upgrade unavailable',data.error||'Could not start checkout right now. Please try again in a moment.');
-    }
-  }catch(e){
-    appInfo('Upgrade unavailable','Could not reach the server to start checkout. Please try again in a moment.');
-  }
-}
-function selectPro(){
-  becomePro(billTypeToPlan(currentBillSelection));
-}
-async function openBillingPortal(){
-  try{
-    const res=await fetch('/api/billing/create-portal-session',{method:'POST'});
-    const data=await res.json();
-    if(res.ok&&data.url){
-      window.location.href=data.url;
-    }else if(data&&data.managedBy==='play'){
-      // Belt and braces: the client should already have routed here.
-      if(data.storeProductId)S.storeProductId=data.storeProductId;
-      S.billingSource='play';save();
-      openPlaySubscriptions();
-    }else{
-      appInfo('Billing',data.error||'Could not open billing management right now. Please try again in a moment.');
-    }
-  }catch(e){
-    appInfo('Billing','Could not reach the server to manage billing. Please try again in a moment.');
-  }
-}
-// Where a subscription is billed decides where it is managed. This used to send
-// everybody to Stripe's portal, so a member who paid through Google Play tapped
-// Cancel on their own active plan and was told "No billing account found yet.
-// Upgrade to Pro first." Google also requires that a subscriber can reach their
-// subscription management, so it was a policy problem as well as a wrong answer.
-function billedByPlay(){return (S.billingSource||'stripe')==='play';}
-function openPlaySubscriptions(){
-  const sku=S.storeProductId?('sku='+encodeURIComponent(S.storeProductId)+'&'):'';
-  window.location.href='https://play.google.com/store/account/subscriptions?'+sku+'package='+PLAY_PACKAGE;
-}
-function manageProBilling(){
-  if(billedByPlay()){openPlaySubscriptions();return;}
-  openBillingPortal();
-}
-function cancelProSubscription(){
-  if(S.proPlan==='lifetime'){
-    appInfo('Lifetime Pro','Lifetime Pro is a one-time purchase that never renews, so there\'s nothing to cancel — it\'s yours for good.');
-    return;
-  }
-  manageProBilling();
-}
-function resumeProSubscription(){
-  manageProBilling();
-}
-async function restorePurchases(){
-  if(!S.accountEmail){
-    appInfo('Restore purchases','Restore purchases works once you\'re signed in, so your Pro status can sync from your account. Sign in from Profile > Account & Sync, then try again.');
-    return;
-  }
-  await syncBillingStatus(true);
-  appInfo('Restore purchases',S.isPro?'Your Pro subscription was found and restored on this device.':'No active Pro subscription was found for this account.');
-}
-// Server-verified billing status - the client never decides isPro on its own; it only ever
-// reflects what /api/billing/status (backed by real Stripe subscription/payment state) reports.
-let lastBillingSyncAt=0;
-async function syncBillingStatus(force){
-  if(!S.accountEmail)return;
-  const now=Date.now();
-  if(!force&&now-lastBillingSyncAt<120000)return;
-  lastBillingSyncAt=now;
-  try{
-    // force=true also asks the server to double-check with Stripe itself, so a
-    // just-finished checkout activates Pro even with no webhooks configured.
-    const res=await fetch('/api/billing/status'+(force?'?refresh=1':''));
-    if(!res.ok)return;
-    const data=await res.json();
-    S.isPro=!!data.isPro;
-    if(data.plan&&data.plan!=='free')S.proPlan=data.plan;
-    // The server is the authority on this; it decides where Cancel goes.
-    if(data.billingSource)S.billingSource=data.billingSource;
-    if(data.storeProductId)S.storeProductId=data.storeProductId;
-    S.proRenewsAt=data.currentPeriodEnd||'';
-    S.proCancelled=!!data.cancelAtPeriodEnd;
-    S.proGraceUntil='';
-    save();updateTierUI();
-    if(document.getElementById('pro-price'))renderPlansScreen();
-  }catch(e){/* offline - keep last known local state until the next sync succeeds */}
-}
-function evaluateProSubscription(){
-  syncBillingStatus();
-}
-function handleCheckoutReturn(){
-  const params=new URLSearchParams(window.location.search);
-  const checkout=params.get('checkout');
-  if(!checkout)return;
-  history.replaceState(null,'',window.location.pathname);
-  if(checkout==='success'){
-    syncBillingStatus(true).then(()=>{
-      appInfo('Welcome to Pro',S.isPro?'Payment confirmed — Pro is now active on your account.':'Payment received. It can take a few seconds to confirm — check Profile > Plans shortly if Pro isn\'t showing yet.');
-    });
-  }
-}
-function renderPlansScreen(){
-  setBill(currentBillSelection);
-  applyLifetimeAvailability();
-  loadLifetimeAvailability();
-  const graceBanner=document.getElementById('grace-banner');
-  const statusSection=document.getElementById('sub-status-section');
-  const statusTitle=document.getElementById('sub-status-title');
-  const statusDetail=document.getElementById('sub-status-detail');
-  const statusBtn=document.getElementById('sub-status-btn');
-  if(!graceBanner||!statusSection)return;
-  const inGrace=S.isPro&&S.proGraceUntil&&new Date()<=new Date(S.proGraceUntil);
-  if(inGrace){
-    const graceDate=new Date(S.proGraceUntil).toLocaleDateString(undefined,{month:'long',day:'numeric'});
-    graceBanner.style.display='block';
-    graceBanner.textContent=`We couldn't confirm your last renewal. Pro stays active until ${graceDate} — update your billing anytime before then to keep it going.`;
-  }else{
-    graceBanner.style.display='none';
-  }
-  if(S.isPro){
-    statusSection.style.display='block';
-    const planLabel=S.proPlan==='yearly'?'Yearly':S.proPlan==='lifetime'?'Lifetime':S.proPlan==='comp'?'Complimentary':'Monthly';
-    statusTitle.textContent=`Pro plan — ${planLabel}`;
-    if(S.proPlan==='comp'){
-      // No Stripe subscription behind this one, so there is nothing to cancel.
-      statusDetail.textContent='Complimentary access. Nothing to pay and nothing to renew.';
-      statusBtn.style.display='none';
-    }else if(S.proPlan==='lifetime'){
-      statusDetail.textContent='One-time payment. Permanent access, no renewals.';
-      statusBtn.style.display='none';
-    }else if(S.proCancelled){
-      const d=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'';
-      statusDetail.textContent=`Cancelling — you'll keep Pro until ${d}, then move to Free. You can resume anytime before then.`;
-      statusBtn.style.display='block';statusBtn.textContent='Resume subscription';
-    }else{
-      const d=S.proRenewsAt?new Date(S.proRenewsAt).toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}):'';
-      statusDetail.textContent=`Renews ${d}.`;
-      statusBtn.style.display='block';statusBtn.textContent='Cancel subscription';
-    }
-  }else{
-    statusSection.style.display='none';
-  }
-}
-function handleSubStatusAction(){
-  if(S.proCancelled)resumeProSubscription();
-  else cancelProSubscription();
-}
 // Pull today's Pro chat count from the server and show it in the meter bar.
 // Only Pro uses this - Free is counted on the client. If the fetch fails
 // (offline), the bar just shows the daily cap rather than a wrong number.
@@ -13027,48 +12083,14 @@ async function updateChatMeter(){
     if(!r.ok)throw new Error();
     const d=await r.json();
     const left=Math.max(0,d.remaining);
-    if(S.isPro){
-      barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' Friendly chats left today';
-    }else{
-      // The server owns the daily quota (it resets at UTC midnight, not the
-      // device clock) - so the free meter follows the server, never local time.
-      S.chatsLeft=left;S.chatDate=new Date().toDateString();
-      const el=document.getElementById('chatsLeft');if(el)el.textContent=left;
-      save();
-    }
+    // The server owns the daily quota - it resets at UTC midnight, not on the
+    // device clock - so the meter follows the server, never local time.
+    S.chatsLeft=left;S.chatDate=new Date().toDateString();
+    const el=document.getElementById('chatsLeft');if(el)el.textContent=left;
+    save();
+    barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' chats left today';
   }catch(e){
-    if(S.isPro)barTxt.innerHTML='Up to <strong>'+PRO_CHAT_DAILY_LIMIT+'</strong> Friendly chats a day';
-  }
-}
-function updateTierUI(){
-  const badge=document.getElementById('tier-badge');
-  const novaLbl=document.getElementById('nova-tier-lbl');
-  const limitBar=document.getElementById('limitBar');
-  const subLbl=document.getElementById('sub-label');
-  const profChip=document.getElementById('prof-tier-chip');
-  const freeCta=document.getElementById('free-cta');
-  const proCta=document.getElementById('pro-cta');
-  if(S.isPro){
-    badge.textContent='Pro';badge.style.background='rgba(83,74,183,0.2)';badge.style.borderColor='rgba(83,74,183,0.4)';badge.style.color='#AFA9EC';
-    if(novaLbl)novaLbl.textContent='Pro · '+PRO_CHAT_DAILY_LIMIT+'/day';
-    // Pro now sees a live "X of 30 left today" meter too (no upgrade button).
-    // The actual number comes from the server via updateChatMeter().
-    if(limitBar)limitBar.style.display='flex';
-    updateChatMeter();
-    if(subLbl)subLbl.textContent='Pro plan';
-    if(profChip){profChip.textContent='Pro plan';profChip.style.color='#AFA9EC';profChip.style.borderColor='rgba(83,74,183,0.4)';profChip.style.background='rgba(83,74,183,0.2)';}
-    if(freeCta)freeCta.textContent=S.proPlan==='lifetime'?'Lifetime plan':S.proPlan==='comp'?'Complimentary plan':'Cancel subscription';
-    if(proCta){proCta.textContent='Current plan ✓';proCta.style.background='var(--ok)';proCta.style.color='var(--ok-t)';}
-  }else{
-    badge.textContent='Free';badge.style.background='var(--green-dim)';badge.style.borderColor='rgba(126,232,162,0.3)';badge.style.color='var(--green)';
-    if(novaLbl)novaLbl.textContent='Free · Pro only';
-    if(limitBar)limitBar.style.display='flex';
-    // Restore the free meter text (Pro rewrites it). No upgrade button here.
-    const barTxt=document.getElementById('limitBarText');if(barTxt)barTxt.innerHTML='Friendly is a <strong>Pro</strong> feature — <a href="#" onclick="switchTo(\'plans\');actBn(\'bn-plans\');return false" style="color:var(--accent)">upgrade to talk</a>';
-    if(subLbl)subLbl.textContent='Free plan';
-    if(profChip){profChip.textContent='Free plan';profChip.style.color='var(--green)';profChip.style.borderColor='rgba(126,232,162,0.3)';profChip.style.background='var(--green-dim)';}
-    if(freeCta)freeCta.textContent='Current plan';
-    if(proCta){proCta.textContent='Upgrade to Pro';proCta.style.background='var(--accent)';proCta.style.color='#fff';}
+    barTxt.innerHTML='Up to <strong>'+PRO_CHAT_DAILY_LIMIT+'</strong> chats a day';
   }
 }
 
@@ -14321,9 +13343,6 @@ const HELP_INDEX=[
   {name:'Talk to Friendly',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
   {name:'My progress & stats',baseName:'My progress & stats',supporterSub:'Your days, streak, and milestones',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
   {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},
-  {name:'Upgrade to Pro / see pricing',sub:'Plans, prices, and the free trial',k:'pro upgrade price pricing plan subscribe trial pay',go:()=>{switchTo('plans');actBn('bn-plans');}},
-  {name:'Cancel or change my subscription',sub:'Opens secure billing management',k:'cancel subscription refund billing stop paying manage payment card',go:()=>openBillingPortal()},
-  {name:'Restore my purchases',sub:'Re-sync Pro from your account',k:'restore purchase pro missing bought',go:()=>restorePurchases()},
   {name:'Account & sync',sub:'Your email, password, and synced data',k:'account email password sync sign in login',go:()=>openAuthModal()},
   {name:'Log out',sub:'Sign out on this device',k:'logout log out sign out exit',go:()=>logOutFromProfile()},
   {name:'Log out on all devices',sub:'Signs out every other phone or computer',k:'logout all devices everywhere security stolen',go:()=>logOutEverywhere()},
@@ -14337,7 +13356,6 @@ const HELP_INDEX=[
   // baseName never changes, so guideGoName() can still resolve FAQ buttons that
   // reference this entry by its original name after applySupporterUI() renames it.
   {name:'For the one who loves you',baseName:'For the one who loves you',supporterName:'For you',supporterSub:"You're the one who loves them. This part is yours.",sub:'Help your partner understand — and fight this together',k:'partner spouse wife husband girlfriend boyfriend couple couples relationship together support understand family letter',go:()=>{switchTo('partner');actBn('bn-tools');}},
-  {name:'Rooms',sub:'Live community feed (6am-10pm Central) plus daily written reflections. No comments, no messaging.',k:'rooms community stories others people live feed post',go:()=>{switchTo('rooms');actBn('bn-tools');}},
   {name:'Spiritual Path',sub:'30 days on faith and recovery — God as you understand God',k:'spiritual god faith prayer pray religious religion church higher power spirit',go:()=>openPack('spiritual')},
   {name:'Lesson Packs',sub:'Relationships, trauma, anxiety, confidence — or build your own',k:'lesson packs pack custom deeper relationships trauma anxiety confidence build your own',go:()=>openLessonPacksScreen()},
   {name:'Share my milestone',sub:'A card for your day count — nothing names the habit',k:'share milestone card post day count image proud show',go:()=>shareMyMilestone()},
@@ -14811,22 +13829,6 @@ function renderCouples(){
     const showDay=couplesViewDay||(finished?pack.length:done+1);
     const l=pack[showDay-1];
     const isCurrent=!finished&&showDay===done+1;
-    // Free in full since 1 Sep 2026, same cap as every lesson track.
-    if(!S.isPro&&!couplesViewDay&&!finished&&done+1>FREE_LESSON_CAP){
-      html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 90-day program · day ${done+1} of ${pack.length}</div>`;
-      html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
-        <div style="font-size:.9375rem;font-weight:650;color:var(--tp)">You two did every day together.</div>
-        <div style="font-size:.8125rem;color:var(--ts);line-height:1.65;margin-top:8px">Every day of Together is free — re-read any of them whenever you like.</div>
-      </div>`;
-      html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${pack.slice(0,done).map(p=>`<span onclick="couplesViewDay=${p.day};renderCouples()" style="font-size:.71875rem;color:var(--ts);background:var(--s1);border:1px solid var(--bdr);border-radius:99px;padding:4px 10px;cursor:pointer">✓ ${p.day}</span>`).join('')}</div>`;
-      el.innerHTML=html+`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:6px 0 8px">Anytime exercises</div>`+COUPLES_EXERCISES.map(e=>
-        `<div class="card" style="padding:14px 16px;margin-bottom:10px">
-          <div style="font-size:.875rem;font-weight:600;color:var(--tp)">${escapeHtml(e.t)}</div>
-          <div style="font-size:.78125rem;color:var(--tm);margin:4px 0 8px;line-height:1.5">${escapeHtml(e.w)}</div>
-          <div style="font-size:.8125rem;color:var(--ts);line-height:1.7">${e.s.map((st,i)=>`<b style="color:var(--tp)">${i+1}.</b> ${escapeHtml(st)}`).join('<br>')}</div>
-        </div>`).join('');
-      return;
-    }
     html+=`<div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);margin:2px 0 8px">The 90-day program · ${finished?'complete — re-read anytime':`day ${done+1} of ${pack.length}`}</div>`;
     html+=`<div class="card" style="padding:14px 16px;margin-bottom:10px;border:1px solid var(--accent)">
       <div style="font-size:.6875rem;color:var(--tm);margin-bottom:2px">Day ${l.day}${isCurrent?' · today':''}</div>
@@ -14972,18 +13974,12 @@ function buildGuideIndex(){
 // so none of them ever burn a Friendly chat. Each can carry a take-me-there button.
 const GUIDE_FAQ=[
   {q:'How does the program work?',k:'program how work works lesson lessons bootcamp 90 ninety day days system phases phase start journey plan long',a:"It's a <b>90-day system</b> — the 90-Day Bootcamp. One lesson a day, three phases: <b>BREAK IT</b> (days 1–30, written for your specific habit), <b>REBUILD</b> (days 31–60 — sleep, money, trust, the evening routine), and <b>KEEP IT &amp; GIVE IT</b> (days 61–90 — your relapse signature, your worst-day plan, and helping the next person). Every day, 1 to 90, is free. Every focus area keeps its own clock — a slip on one never erases another — and if you chose the faith path, it's woven into every day.",go:'Today screen'},
-  {q:'How does the free trial work?',k:'trial free 7 seven day days charge charged card billed start when',a:"Pro starts with a <b>7-day free trial</b> on the Monthly and Yearly plans. Your card isn't charged until day 8 — cancel any time during the trial and you pay nothing at all.",go:'Upgrade to Pro / see pricing'},
-  {q:'What do I get with Pro?',k:'pro include includes get benefits features worth upgrade what',a:"Two things, and that's it: <b>Friendly</b>, the AI companion, with 30 chats a day, and the <b>live rooms</b> — real people working the same thing you are, one moderated feed per focus area. <b>Everything else is free forever</b> — every lesson day 1 to 90 on every track, the Spiritual Path, Together, 2AM (the game), the day counter, SOS and breathing, the journal typed or spoken, weekly reports, analytics and pattern detection, smart reminders, the habit coach, and building your own packs. Friendly is part of Pro, so the free plan does not include chats — but the SOS set, breathing, Talk me through it and 988 are always free and never behind a paywall.",go:'Upgrade to Pro / see pricing'},
-  {q:'How much does the app cost?',k:'cost price pricing much money pay expensive dollar',a:"The core app is <b>free forever</b>. Pro is optional: <b>$9.99/month</b>, <b>$59.99/year</b> (about half price), or <b>$149.99 once</b> for lifetime. Both subscriptions start with a 7-day free trial.",go:'Upgrade to Pro / see pricing'},
-  {q:'How do I cancel my subscription?',k:'cancel stop unsubscribe refund quit subscription paying',a:"Cancelling is one tap, no tricks: open billing management, hit cancel, and you keep Pro until the time you already paid for runs out. Nothing else changes and your data stays.",go:'Cancel or change my subscription'},
-  {q:'Do you give refunds?',k:'refund money back return cancel charge final sales policy',a:"No — all sales are final and payments are non-refundable. Monthly and yearly include 7 days free, so you're never charged for something you haven't tried, and you can cancel during the trial without paying anything. Founding Lifetime is a one-time purchase with no trial, limited to 50 and never offered again once they're gone. Cancelling stops future billing and you keep Pro until the period you paid for ends. If you bought through Google Play or the App Store, their refund policy applies instead of ours."},
   {q:'My day counter is wrong — how do I fix it?',k:'day counter wrong fix streak date incorrect start reset',a:"Use <b>Reset Recovery</b> in Profile — it corrects your start date and streak only. Your journal, cravings, and lifetime progress are untouched.",go:'Fix my start date / streak'},
   {q:'I slipped — do I lose everything?',k:'slipped slip relapse relapsed lose everything start over failed ruined',a:"No. A slip is a data point, not a verdict — your lifetime progress, journal, and everything you've learned stay. Tap <b>I slipped</b> in the SOS screen: no judgment, just what to do next.",go:"I'm having a craving right now"},
   {q:'Is my journal private?',k:'journal private privacy secret read see data who safe secure',a:"Yes. Your journal lives in your own account and nobody else can read it. For extra privacy on a shared phone or computer, turn on <b>App lock</b> so the app needs your PIN to open.",go:'App lock (PIN)'},
     {q:'What is The Fight tab?',k:'game tab play fight life tower climb mountain building buildings boss roof rooftop punch what is the fight',a:"It opens <b>The Fight of Your Life</b> — buildings at night. On every roof the thing you’re fighting waits, by name, as a shadow in the ring. It says its line, you pick your counter; then it’s punches, dodges and blocks, with the bell, the ref and the crowd. Your strength is earned in the app: today’s lesson, a journal line, the pledge, cravings you logged. Win and a parachute, helicopter or jet takes you to the next building. It never ends, and it never tells you you’re finished. <b>The Climb</b>, your 90 steps up the mountain, lives on Today under your lesson and in Tools — each finished lesson takes a step by itself.",go:'The Fight of Your Life (The Fight tab)'},
   {q:'Does the app work offline?',k:'offline internet connection wifi without airplane',a:"Most of it, yes — the day counter, SOS tools, breathing, voice guide, journal, and lessons all work without internet. Friendly and syncing need a connection.",go:null},
   {q:'Is Friendly a real therapist?',k:'nova real therapist human ai person licensed doctor',a:"No — Friendly is an AI companion, not a licensed therapist or a crisis service. She's there for the day-to-day. If you're in crisis, call or text <b>988</b> — free, confidential, 24/7.",go:'Crisis helpline — 988'},
-  {q:'How many Friendly chats do I get?',k:'nova chats limit many day free number sessions',a:"Friendly is a <b>Pro feature</b> — up to <b>30 chats a day</b>, resetting at midnight. The SOS tools stay free for everyone.",go:'Talk to Friendly'},
   {q:'What is the daily pledge?',k:'pledge daily promise commit tap what why',a:"It's a one-tap promise to yourself: <i>today, I stay clean</i>. It sounds small, but making the choice consciously every morning is one of the strongest habits in recovery — one day at a time, made real.",go:'Today screen'},
   {q:'How is money saved calculated?',k:'money saved calculated dollars amount how number savings',a:"It multiplies your clean days by what the habit was costing you per day (set during your setup). It's an estimate — the point is seeing the cost of the old life add up in your favor.",go:'My progress & stats'},
   {q:'How do I get reminders on my phone?',k:'reminders notifications phone nudge daily sound push get',a:"Turn on <b>Daily lesson reminder</b> in Profile, then tap <b>Reminder sound</b> and allow notifications when your browser asks. On iPhone, add the app to your Home Screen first.",go:'Reminders & notifications'},
@@ -14994,12 +13990,10 @@ const GUIDE_FAQ=[
   {q:'Where can I read every lesson?',k:'lesson library all lessons read search find every track pack spiritual together browse',a:"Tools > <b>Lesson Library</b>. Every lesson in the app — all twelve recovery tracks, Supporting Someone, Together, the Spiritual Path and every pack — in one searchable list. Every one of them is free to read.",go:'Lesson Packs'},
   {q:'Can Friendly talk out loud?',k:'ai voice speak aloud read replies hear friendly talking sound audio',a:"Yes. On the Friendly screen, tap the <b>AI voice</b> switch in the header. Off by default so nothing talks unasked; switched on, every reply is read out loud. Her voice follows the presence you picked in Profile — and if your phone only has one voice installed, the presence still shapes how she <i>writes</i> even when it can't change how she sounds.",go:'Talk to Friendly'},
   {q:'How do I delete my account?',k:'delete account remove erase everything permanently close',a:"In Profile, under <b>Danger zone</b>. It erases your account and every bit of data permanently — there's no undo, so export your data first if you want a copy.<br><br>If you're on Pro: you won't be charged again, and the time you already paid for stays yours until it runs out. Sign up again with the same email and <b>Restore purchases</b> brings it back.",go:'Delete my account'},
-  {q:"I'm Pro but the app says Free",k:'pro missing lost gone locked out restore purchases subscription not showing deleted account',a:"Tap <b>Restore purchases</b> in Profile (or on the Plans screen) while signed in with the email address you paid with. It asks the payment system directly, and it can find your plan even if this is a brand new account on the same email.",go:'Restore my purchases'},
   {q:'Who made this app?',k:'who made this app founder creator story why built jacques',a:"It was built by someone who fought addiction for <b>38 years</b> — porn, food, anger — and turned his someday into Day One at age 50. This app is everything he wished he'd had, built from the inside.",go:null},
   {q:'My partner doesn\'t understand what I\'m going through',k:'partner spouse wife husband girlfriend boyfriend understand support alone family relationship couple couples',a:"That's one of the hardest parts of recovery — most people fail not because they're weak, but because they're unsupported. There's a whole page for this: a letter the app writes from your journey that says what's hard to say out loud, five truths every partner should know, and exercises for the two of you.",go:'For the one who loves you'},
   {q:"I'm not the addict — I'm the one living with one. Is this app for me?",k:'partner spouse wife husband not the addict for me supporting someone love struggling family member codependent al-anon',a:"Yes, and not as an afterthought. Pick <b>I love someone who's struggling</b> on the first setup screen, or add <b>💛 Supporting someone I love</b> in Focus areas. You get your own 35-day track built for you, not for them — the rejection that wasn't about you, the anger you learned to predict, boundaries, recognizing abuse, and getting your own life back.",go:'Profile & settings'},
   {q:'Is what I\'m living with abuse?',k:'abuse abusive emotional physical mental gaslighting control violence hit hurt scared afraid safety domestic dv hotline',a:"Days 15 to 21 of the <b>Supporting someone I love</b> track walk through exactly this — emotional, mental, physical, financial and sexual — and how to tell abuse apart from addiction. Addiction never excuses abuse. If you want to talk to a real person right now, free and confidential 24/7: <b>1-800-799-7233</b>, or text <b>START</b> to <b>88788</b>. If you're in danger, call 911.",go:'Profile & settings'},
-  {q:'Are the people in the Rooms real? Can I reply to them?',k:'rooms real people fake stories reply comment message contact dm chat others users community',a:"Straight answer: the stories are <b>written reflections</b>, not live posts, and the names aren't real people. A new set appears in each room every day. <b>There is no commenting, replying or messaging — on purpose.</b> Recovery spaces online turn toxic fast, and this app is built to keep that out. You can like a story to keep it; nothing is sent and nobody can reach you. Anything you write in a room stays private to your account.",go:'Rooms'},
   {q:"I'm the one with the temper — is there anything here for me?",k:'anger angry temper rage outburst yelling shouting road rage abusive hurt my family scared them lose it snap',a:"Yes. Add <b>🔥 Anger / outbursts</b> in Focus areas for a 30-day track on it: what's underneath the anger, the 90-second surge, mapping your triggers, leaving the room at a 6 instead of an 8, road rage, what fear does to a house, real apologies, and repair. It's honest — it names the line between a temper and a pattern of control, and tells you when an app isn't enough.",go:'Profile & settings'},
   {q:'Is abuse treated as an addiction in this app?',k:'abuse abusive addiction is abuse an addiction category excuse control',a:"No, and that's deliberate. Calling abuse an addiction hands people an excuse — \"I couldn't help it\" — and that excuse keeps families stuck. What's here instead is two honest tracks: <b>🔥 Anger / outbursts</b> for the person doing the damage, and <b>💛 Supporting someone I love</b> for the person absorbing it, including how to recognize emotional, mental and physical abuse. Addiction never excuses abuse.",go:'Profile & settings'},
   {q:'What does one day at a time mean?',k:'one day at time meaning philosophy motto slogan',a:"You don't have to promise forever — forever is too heavy to lift. You only have to get through <b>today</b>. String enough todays together and forever takes care of itself.",go:null},
@@ -15117,9 +14111,7 @@ async function hardResetApp(){
   // had already bought - and nothing on screen warned them. It now stops at the
   // end of the period they paid for, and signing up again with the same email
   // brings those remaining days back.
-  const paidNote=S.isPro
-    ? '\n\nYour Pro plan: you will not be charged again, and the time you have already paid for stays yours until it runs out. If you sign up again with this same email address, Restore purchases brings it back.'
-    : '';
+  const paidNote='';
   appConfirm('Erase EVERYTHING and start over? This deletes your account and all of its data — journal, streaks, chats, lessons, settings. There is no undo and no recovery.'+paidNote,()=>{
     appPassword('This is permanent','Enter your password (or PIN) to confirm you want to erase everything.',async(password)=>{
       try{

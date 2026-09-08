@@ -1213,7 +1213,23 @@ function camDrift(dt){orbYaw=clampYaw(orbYaw);orbTarget.yaw=clampYaw(orbTarget.y
   orbYaw+=(orbTarget.yaw-orbYaw)*k;orbPitch+=(orbTarget.pitch-orbPitch)*k;orbZoom+=(orbTarget.zoom-orbZoom)*k;}
 let sx=null;canvas.addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>40){autoOff();doDodge(dx>0?'R':'L');}});
 // the shots. A ringside TV view is the main one, over your shoulder for exchanges, a low corner camera for a knockdown, the house from the back at the bell.
-const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>new T.Vector3(2.35,1.22,0.1),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
+// The ringside camera used to stand at a fixed +x, broadside to the ring. Two
+// problems on a phone: the boss stands on the +x side of you, so the shot looked
+// past its back at your own fighter - the fight watched backwards - and a portrait
+// screen is far too narrow to hold two fighters standing side by side, so one of
+// them went off the edge. It is built off the line between them now: mostly behind
+// you and a little to the side on a tall screen, broadside on a wide one. You are
+// always the one nearest the lens, and both of you are always in frame.
+function tvPos(a,b,mid,d){
+  const toYou=a.clone().sub(b);toYou.y=0;
+  if(toYou.lengthSq()<0.01)toYou.set(0,0,1);
+  toYou.normalize();
+  const side=new T.Vector3(toYou.z,0,-toYou.x);        // perpendicular, on the usual side
+  const port=cam.aspect<0.85;
+  const back=port?(2.35+d*0.35):(1.15+d*0.3), off=port?1.45:(2.05+d*0.5);
+  return mid.clone().setY(port?1.42:1.2).addScaledVector(toYou,back).addScaledVector(side,off);
+}
+const SHOTS={corner:{pos:()=>new T.Vector3(-0.15,1.15,3.55),look:()=>new T.Vector3(-1.78,0.72,1.85)},shoulder:{pos:()=>camBase.clone(),look:()=>LOOK.clone()},tv:{pos:()=>(YOU&&BOSS)?tvPos(YOU.root.position,BOSS.root.position,YOU.root.position.clone().add(BOSS.root.position).multiplyScalar(.5),YOU.root.position.distanceTo(BOSS.root.position)):new T.Vector3(1.95,1.22,1.25),look:()=>new T.Vector3(-0.05,1.05,-0.15)},low:{pos:()=>new T.Vector3(-1.7,0.5,1.9),look:()=>new T.Vector3(0,0.9,-0.55)},crowd:{pos:()=>new T.Vector3(0.3,2.7,4.6),look:()=>new T.Vector3(-0.2,1.0,-1.6)}};
 let walkCam=null;
 const runnerMat=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false});
 const runner=new T.Mesh(new T.PlaneGeometry(1.8,9),runnerMat);runner.rotation.x=-Math.PI/2;runner.position.set(-0.5,.014,0);runner.visible=false;scene.add(runner);
@@ -1239,7 +1255,8 @@ function camTick(dt){liftFrame();if(posing&&fightOver&&!document.getElementById(
   if(curShot==='walk'&&walkCam&&!camTo){cam.position.lerp(walkPos(),Math.min(1,dt*3.5));look.lerp(walkLook(),Math.min(1,dt*5));}
   // the card walk: she is moving, so her camera moves with her instead of aiming where she used to be
   if((curShot==='girl'||curShot==='girlclose')&&!camTo&&GIRL){const S3=SHOTS[curShot];cam.position.lerp(S3.pos(),Math.min(1,dt*3));look.lerp(S3.look(),Math.min(1,dt*4));}
-  if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);const want=new T.Vector3(2.05+d*.5,1.2,mid.z+.05);cam.position.lerp(want,Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.0,mid.z),Math.min(1,dt*3));}if(!camTo&&!walkCam&&curShot!=='tv'&&curShot!=='walk'&&curShot!=='entry'&&curShot!=='girl'&&curShot!=='girlclose'){
+  if(curShot==='tv'&&!camTo&&YOU&&BOSS){const a=YOU.root.position,b=BOSS.root.position,mid=a.clone().add(b).multiplyScalar(.5),d=a.distanceTo(b);
+    cam.position.lerp(tvPos(a,b,mid,d),Math.min(1,dt*3));look.lerp(new T.Vector3(mid.x-.05,1.05,mid.z),Math.min(1,dt*3));}if(!camTo&&!walkCam&&curShot!=='tv'&&curShot!=='walk'&&curShot!=='entry'&&curShot!=='girl'&&curShot!=='girlclose'){
     const t=(YOU&&!$('corner').hidden)?YOU.root.position.clone().setY(1.25):((!fightOver||running||downState)?actionLook():null);
     if(t)look.lerp(t,Math.min(1,dt*2.0));}
   if(camTo){camT+=dt*1000;const t=Math.min(1,camT/camMs),e=1-Math.pow(1-t,3);cam.position.lerpVectors(camFrom,camTo,e);look.lerpVectors(lookFrom,lookTo,e);if(t>=1)camTo=null;}if(Math.abs(cam.fov-fovBase)>.01){cam.fov+=(fovBase-cam.fov)*Math.min(1,dt*6);cam.updateProjectionMatrix();}}

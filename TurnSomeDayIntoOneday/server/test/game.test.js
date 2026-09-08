@@ -131,6 +131,17 @@ test('the roof opens only after ten floors, and walking out of a fight costs not
     'the replay check comes before anything is counted');
 });
 
+test('the ringside camera is on your side of the ring, and fits a phone', () => {
+  const tv = FIGHT3D.slice(FIGHT3D.indexOf('function tvPos('), FIGHT3D.indexOf('const SHOTS={corner:'));
+  // Built off the line between the two of them, not a fixed +x that the boss stands on.
+  assert.match(tv, /toYou=a\.clone\(\)\.sub\(b\)/, 'the shot is placed from you, not from a fixed corner');
+  assert.match(tv, /addScaledVector\(toYou,back\)/, 'and it stands behind you');
+  // A portrait phone cannot hold two fighters side by side, so it comes round.
+  assert.match(tv, /port=cam\.aspect<0\.85/);
+  assert.match(tv, /back=port\?/, 'a tall screen gets more of a behind-you angle');
+  assert.doesNotMatch(FIGHT3D, /tv:\{pos:\(\)=>new T\.Vector3\(2\.35/, 'the old fixed broadside shot is gone');
+});
+
 test('the camera cannot end up behind the addiction mid-round', () => {
   // A horizontal drag is also how you dodge, so an unlimited swing meant a few
   // dodges the same way left the fight being watched from its opponent's shoulder.

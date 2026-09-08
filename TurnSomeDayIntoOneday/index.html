@@ -860,7 +860,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <h3 style="color:var(--tp);margin:16px 0 6px">Who else sees it</h3>
       <p style="margin-bottom:8px">Two outside services are used, and only for the specific job each does:</p>
       <p style="margin-bottom:8px">• <b>Anthropic</b> processes the messages you send to Friendly, in order to generate Friendly's replies. This only happens for the message itself — sent when you chat, nothing else is shared. Friendly is only available when the app operator has configured this connection.</p>
-      <p style="margin-bottom:8px">• <b>Stripe</b> processes payment if you subscribe to a paid plan. Your card details go directly to Stripe — this app never sees or stores your full card number.</p>
       <p style="margin-bottom:8px">Your journal, craving logs, and personal notes are never sent to either of these services unless you paste them into a message to Friendly yourself.</p>
       <p style="margin-bottom:8px">We do not sell data. There is no advertising network or analytics tracker collecting your activity in this app.</p>
 
@@ -895,14 +894,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <h3 style="color:var(--tp);margin:16px 0 6px">Your account</h3>
       <p style="margin-bottom:8px">You're responsible for keeping your password or PIN confidential and for anything that happens under your account. You must be at least 18 years old to use this app.</p>
 
-      <h3 style="color:var(--tp);margin:16px 0 6px">Subscriptions &amp; billing</h3>
-      <p style="margin-bottom:8px">Paid plans are billed through Stripe on a recurring basis until cancelled. You can manage or cancel your subscription from Profile.</p>
+      <h3 style="color:var(--tp);margin:16px 0 6px">What it costs</h3>
+      <p style="margin-bottom:8px">Nothing. The app is free — every lesson, every tool, the journal, the reports and the game. There is no paid plan, no trial, no subscription, and nothing to cancel.</p>
 
-      <h3 style="color:var(--tp);margin:16px 0 6px">Refunds</h3>
-      <p style="margin-bottom:8px">Monthly and yearly plans include 7 days free — you are not charged until the trial ends. Founding Lifetime is a one-time purchase with no trial. Either way, <strong>all sales are final and payments are non-refundable.</strong> Cancelling stops future billing and you keep Pro until the period you paid for ends.</p>
-      <p style="margin-bottom:8px">Purchases made through Google Play or the App Store follow their refund policies, not this one.</p>
-      <p style="margin-bottom:8px">Founding Lifetime is limited to 50 purchases. Once those are gone it is not offered again, at any price.</p>
-      <p style="margin-bottom:8px">Every tool in this app is free to use without paying anything. Days 1&ndash;15 of every program, the SOS toolkit, the journal, the partner track and the meditation room cost nothing and never will.</p>
+      <p style="margin-bottom:8px">Every tool in this app is free to use. Every lesson day, on every track, opens from the start.</p>
 
       <h3 style="color:var(--tp);margin:16px 0 6px">Acceptable use</h3>
       <p style="margin-bottom:8px">Don't use this app to harm others, attempt to break or abuse the service, or use Friendly's responses as a substitute for emergency care.</p>
@@ -1334,7 +1329,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         </div>
         <div class="setting-row" onclick="shareMyMilestone()">
           <i class="ti ti-share"></i>
-          <div class="setting-row-txt"><p>Share my milestone</p><span>Make a card to send</span></div>
+          <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Make a card to send</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
       </div>
@@ -5042,7 +5037,6 @@ function initApp(){
   // spiritual question promises quietly vanished on the next app open, which
   // read as "the God thing doesn't work."
   updateHomeFaithCard();
-  renderDailyQuote();
   document.getElementById('autoupd-toggle').classList.toggle('on',S.autoUpdate!==false);
   maybeAutoUpdate();
   updateSpeedBtns();
@@ -5171,27 +5165,14 @@ function updateUserUI(){
   const init=n[0].toUpperCase();
   const profAvInitial=document.getElementById('prof-av-initial');
   const profAv=document.getElementById('prof-av');
-  const composeAv=document.getElementById('compose-av');
   if(profAvInitial)profAvInitial.textContent=init;
   if(profAv)profAv.style.backgroundImage=S.profilePhoto?`url(${S.profilePhoto})`:'';
   if(profAvInitial)profAvInitial.style.display=S.profilePhoto?'none':'';
-  if(composeAv){
-    if(S.profilePhoto){
-      composeAv.textContent='';
-      composeAv.style.backgroundImage=`url(${S.profilePhoto})`;
-      composeAv.style.backgroundSize='cover';
-      composeAv.style.backgroundPosition='center';
-    }else{
-      composeAv.style.backgroundImage='';
-      composeAv.textContent=init;
-    }
-  }
   const removeLink=document.getElementById('remove-photo-link');
   if(removeLink)removeLink.style.display=S.profilePhoto?'block':'none';
   if(document.getElementById('prof-name'))document.getElementById('prof-name').textContent=n;
   const sd=S.startDate?new Date(S.startDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'today';
   if(document.getElementById('prof-since'))document.getElementById('prof-since').textContent=`${capitalize(recoveryTerm())} since ${sd}`;
-  updateTierUI();
 }
 
 function openProfilePhotoPicker(){
@@ -9110,7 +9091,6 @@ document.addEventListener('visibilitychange',()=>{
   // Phones sit open for days at a time. Without this, the line on Home stays on
   // whatever day the app was last cold-started - so "today" quietly means last
   // Tuesday.
-  if(!document.hidden)renderDailyQuote();
   if(!document.hidden && speaking){
     try{ if(window.speechSynthesis&&speechSynthesis.paused)speechSynthesis.resume(); }catch(e){}
   }
@@ -9850,11 +9830,6 @@ function dailyLineIndex(){
   sessionLineIdx=i;
   try{save();}catch(e){}
   return i;
-}
-function renderDailyQuote(){
-  const el=document.getElementById('daily-quote-txt');
-  if(!el)return;
-  el.textContent=DAILY_LINES[dailyLineIndex()];
 }
 function updateHomeFaithCard(){
   const el=document.getElementById('home-faith-card');
@@ -11750,9 +11725,9 @@ Address the interactions of their unique blueprint and assign structured daily r
 const SCREEN_MAP={
   home:'s-home',nova:'s-nova',journal:'s-journal',craving:'s-craving',
   timeline:'s-timeline',progress:'s-progress',
-  plans:'s-plans',profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
+  profile:'s-profile',lesson:'s-lesson','relapse-toolkit':'s-relapse-toolkit',
   'weekly-reports':'s-insights','reminder-settings':'s-reminder-settings',streaks:'s-insights',
-  insights:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
+  insights:'s-insights',analytics:'s-insights',stories:'s-stories','pack-list':'s-pack-list','pack-lesson':'s-pack-lesson',
   'habit-coach':'s-insights',tools:'s-tools',partner:'s-partner',
   tower:'s-tower',
   // The Lesson Library was in TITLES but never here, so switchTo looked up

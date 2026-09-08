@@ -48,9 +48,7 @@
       "url": "https://www.turnsomedayintodayone.com/",
       "description": "A free recovery app for breaking a habit you've fought for years — drinking, porn, gambling, food and more — with a private check-in, a plan written before you need it, someone to talk to at the hour it hits, and a section built for the person who loves someone struggling.",
       "offers": [
-        { "@type": "Offer", "price": "0", "priceCurrency": "USD", "description": "Free plan" },
-        { "@type": "Offer", "price": "9.99", "priceCurrency": "USD", "description": "Pro monthly" },
-        { "@type": "Offer", "price": "59.99", "priceCurrency": "USD", "description": "Pro yearly" }
+        { "@type": "Offer", "price": "0", "priceCurrency": "USD", "description": "Free" }
       ],
       "author": { "@type": "Organization", "name": "Turn Someday Into Day One" }
     },
@@ -217,7 +215,7 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
     <h2 class="section-h">What's inside</h2>
     <div class="cards">
       <div class="card"><b>The 90-Day Bootcamp</b><span>BREAK IT · REBUILD · KEEP IT. A lesson a day, written by somebody who lived it — 13 tracks, from drinking to porn to spending.</span></div>
-      <div class="card"><b>Friendly</b> <span>Someone to talk to at 2am who isn't your wife, your pastor, or a forum full of 22-year-olds. Part of Pro.</span></div>
+      <div class="card"><b>Friendly</b> <span>Someone to talk to at 2am who isn't your wife, your pastor, or a forum full of 22-year-olds.</span></div>
       <div class="card"><b>Your relapse plan</b><span>Written by you, on a good day, for a bad one.</span></div>
       <div class="card"><b>Day counter that doesn't shame you</b><span>Reset without starting over emotionally.</span></div>
       <div class="card"><b>The partner section</b><span>The part nobody else built.</span></div>
@@ -266,32 +264,15 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
   </section>
 
   <section id="pricing">
-    <h2 class="section-h">Start free. Pay when it's working.</h2>
+    <h2 class="section-h">It's free.</h2>
     <div class="plans">
-      <div class="plan">
-        <div class="plan-name">Free</div>
+      <div class="plan featured">
+        <div class="plan-name">Everything</div>
         <div class="plan-price">$0</div>
-        <div class="plan-desc">Every lesson, day 1 to 90, on every track. Every tool, the journal, the full SOS kit, and the whole 2AM tower. No card.</div>
-      </div>
-      <div class="plan">
-        <div class="plan-name">Pro</div>
-        <div class="plan-price">$9.99<span>/mo</span></div>
-        <div class="plan-desc">Friendly, your AI companion — up to 30 chats a day — and the live rooms. 7-day free trial.</div>
-      </div>
-      <div class="plan">
-        <div class="plan-name">Pro Yearly</div>
-        <div class="plan-price">$59.99<span>/yr</span></div>
-        <div class="plan-desc">Same thing, half price. 7-day free trial.</div>
-      </div>
-      <div class="plan featured" id="plan-lifetime">
-        <div class="plan-name">Founding Lifetime</div>
-        <div class="plan-price" id="lifetime-price">$149.99<span> once</span></div>
-        <div class="plan-desc" id="lifetime-desc">Pay once, keep it forever, including everything I add. Limited to the first 50 members.</div>
-        <!-- Dormant until the server says the count is low enough to state. -->
-        <div class="plan-desc" id="lifetime-remaining" style="display:none"></div>
+        <div class="plan-desc">Every lesson, day 1 to 90, on every track. The Spiritual Path, Together, every pack. Every tool, the journal, the full SOS kit, the Climb, and The Fight of Your Life. No trial, no upgrade, nothing held back.</div>
       </div>
     </div>
-    <p class="fine">Trial reminder: I email you on day 5 before anything is charged. No surprises.</p>
+    <p class="fine">No card, no subscription, nothing to cancel.</p>
   </section>
 
   <section id="faq">
@@ -364,26 +345,6 @@ h2{font-size:23px;line-height:1.28;font-weight:700;margin-bottom:14px}
   </div>
 </div>
 <script>
-// Founding Lifetime availability is fetched, never baked into this file - a
-// static page would go stale the moment a seat sold. Until it lands the card
-// shows its normal state; the server refuses an over-cap checkout regardless,
-// so a failed fetch can only ever make this card look out of date.
-(function(){
-  fetch('/api/lifetime-availability').then(function(r){return r.ok?r.json():null;}).then(function(a){
-    if(!a)return;
-    if(a.soldOut){
-      var price=document.getElementById('lifetime-price');
-      var desc=document.getElementById('lifetime-desc');
-      if(price)price.textContent='Sold out';
-      if(desc)desc.textContent=a.soldOutMessage;
-      return;
-    }
-    if(a.showCount){
-      var rem=document.getElementById('lifetime-remaining');
-      if(rem){rem.textContent='Only '+a.remaining+' of '+a.limit+' left.';rem.style.display='';}
-    }
-  }).catch(function(){});
-})();
 function sendToHer(){
   const url='https://www.turnsomedayintodayone.com/for-her';
   const btn=document.getElementById('send-her-btn');

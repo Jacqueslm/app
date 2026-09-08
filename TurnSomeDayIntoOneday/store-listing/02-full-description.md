@@ -47,11 +47,9 @@ IF YOU ARE IN CRISIS
 
 This app is not an emergency service. If you are in danger or thinking about harming yourself, please contact your local emergency number. In the US you can call or text 988 for the Suicide & Crisis Lifeline — free, confidential, and available 24/7.
 
-WHAT COSTS MONEY
+WHAT IT COSTS
 
-The app is free to download and the core of it is free to keep using — the sober day counter, the first half of every program, the SOS tools, reminders, insights and weekly reports, and the journal you can type or speak into. No card required to start and no time limit on the free version.
-
-Pro is an optional subscription for two things: Friendly, an AI companion to talk to at any hour, and the live community rooms. Every lesson, all ninety days on every track, and The Fight of Your Life, the game, are free with no card. Both plans start with a 7-day free trial. Cancel any time in two taps.
+Nothing. The whole app is free — every lesson day on every track, the Spiritual Path, Together, every pack, every tool, the journal, the reports, the Climb and The Fight of Your Life. No subscription, no trial, no in-app purchases.
 
 WHO MADE THIS
 
@@ -97,11 +95,10 @@ One person, addicted for 38 years and free at 50, who needed this first and coul
 
 ## What I deliberately left out, and why
 
-- **In-app purchases are disclosed, without listing prices.** Play requires an
-  accurate description of what costs money; it does not require the numbers, and
-  leaving them out means the listing never goes stale when pricing changes. The
-  cancellation line is there on purpose - it is the single most common worry
-  about app subscriptions, and answering it up front converts.
+- **Nothing costs money (8 Sep 2026).** The app is free, with no subscription
+  and no in-app purchases, so the listing says so plainly. Deactivate the three
+  products in the Play Console and clear the in-app-purchases flag on the
+  listing, or the store keeps advertising something the app no longer has.
 - **No "recovery", "addiction", "sobriety", "relapse"** in the marketing register.
   They are accurate words and you may want them back — but paired with a health
   category they read as clinical claims. Your call; flagging the trade-off.

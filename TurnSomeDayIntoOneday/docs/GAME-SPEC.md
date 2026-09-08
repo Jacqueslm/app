@@ -1,7 +1,7 @@
 # GAME-SPEC.md — "The Fight of Your Life"
 
-The recovery game inside Turn Someday Into Day One. The Game tab opens it, with
-The Climb on the same screen. Code identifiers still say `tower`, `2AM`, `gm`,
+The recovery game inside Turn Someday Into Day One. The Fight tab opens it (the
+tab was "Game" until 6 Sep). The Climb lives on Today and in Tools. Code identifiers still say `tower`, `2AM`, `gm`,
 `g2-`.
 
 **Rewritten 6 Sep 2026.** Jacques on the 3 Sep version: "the game is wack, the
@@ -207,3 +207,57 @@ All six are built in `tools/ring3d/ring3d.html`.
 The building still picks the venue (Temple / Tomb / Monastery); the boss
 colour is the addiction's, not the building's (the earlier per-building
 damage colours were dropped on this change).
+
+## The levels — settled 7 Sep 2026
+
+Ninety levels, one for every day of the program. Not buildings without end:
+the game ends at ninety, and then it can be walked again from level 1.
+
+- **One level, one fight.** Level *n* is a fight on a roof. Win it and level
+  *n+1* opens. There are no floors and no game shows.
+- **A level is locked until the work is done that day.** The door opens on any
+  one real thing in the app today — today's lesson, a journal line, the pledge,
+  or a craving logged. Nothing done today, no fight. A loss also locks the roof
+  until the same is done.
+- **Your strength is the health bar you carry in**, and every point of it is
+  something done in the app.
+- **It gets harder the whole way up.** Levels 1–30 it speaks in single words,
+  31–60 in short lines, 61–90 in full sentences. Across all ninety its tell
+  gets shorter (1.9 s down to 0.9 s), its punch heavier (11 up to 22), it
+  blocks more and it swings more often.
+- **The scene changes every level.** The three roofs rotate, and the canvas and
+  the house light change with the level, so no two levels look the same.
+- **No quiz.** The addiction used to ask a question with two buttons. It does
+  not any more — it just says the thing it says while it winds up, and reading
+  which side it leans is the whole defence. Slip it and you get the counter.
+
+## The mission — settled 7 Sep 2026, replaces the ninety levels
+
+**A building is an addiction.** Thirteen of them, one per addiction the app
+tracks, each its own kind of place: a brewery tower, a neon motel, a cigarette
+factory, a boarded-up tenement, a casino, a glass tower of screens, an arcade,
+a diner and cold-store, a mall, an office tower with every window lit, a boiler
+house, a block with one window still lit, and a grey block with no sign.
+
+**The game never ends.** Thirteen buildings, then round again, harder. It gets
+harder forever but flattens as it climbs, so it never becomes unbeatable.
+
+**The game is part of the app, not aligned to it.** Anybody can walk into any
+building and fight any addiction. Only the lessons follow the person's own
+track. Nothing is locked behind the day's work any more; strength carried in is
+still earned in the app.
+
+**Ten floors and a roof, eleven fights.**
+- Every floor is a different ring with its own element **in** it, not on a
+  badge: rain that falls and splashes, fire off the floor, wind streaking
+  across, earth, ash, ice, smoke, lightning that strikes and shakes the room,
+  sand, shadow. Floor *n* always carries element *n*.
+- On a floor the opponent is the same addiction wearing that element's colour,
+  with the glow behind it.
+- **The roof is the source** — the addiction itself, no element, its own colour.
+- Rounds are unchanged: six of thirty seconds, the roof keeps the walk-ins, the
+  announcer and the corner.
+
+**Between buildings:** off the roof under a parachute, land in the street, and
+walk up to the next building with its name across the front. `img/fight/bld-*.jpg`
+holds the thirteen fronts.

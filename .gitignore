@@ -70,3 +70,6 @@ content/endcard-template.html
 *.sqlite-wal
 *.sqlite-shm
 TurnSomeDayIntoOneday/server/backups/
+
+# the three.js source package the Mixamo workshop imports — fetched with npm pack, not kept in git
+TurnSomeDayIntoOneday/tools/mixamo/three/

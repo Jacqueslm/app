@@ -2,7 +2,7 @@
 
 ## Where the game is, 6 Sep 2026 (read this first if you are continuing the game work)
 
-Jacques is rebuilding **The Fight of Your Life** (the Game tab) with the person
+Jacques is rebuilding **The Fight of Your Life** (The Fight tab) with the person
 in this chat, one preview at a time. He is not a developer. Short replies, plain
 words, one step at a time, never push unless he says "push", commit locally.
 
@@ -289,6 +289,63 @@ talk, bell, ref count, announcer, crowd, grunts, get up before ten. Art in
   three shows) is still in `index.html` but unreachable — **delete it once he
   confirms he likes the simpler game**. Nothing was lost: the addiction's lines
   live in the ring now.
+- **The corner, sitting, and a 360 camera (10.6).** His notes: the fighter
+  stood instead of sitting, the trainer did nothing, and he wanted the camera
+  free. Fixed: `fighter1..5.glb` carry 23 boxing moves and no seated one, so
+  `loadFighter` now **merges** their own clips with the seated set from
+  `fighter.glb` (32 in total) — that is why the fighter would not sit. The
+  corner now runs itself: the cut-man brings water (+6) and says so, then the
+  trainer says three lines out loud, drawn from the person's own supporter
+  lines first (journal, their person, day count) and a short `ADVICE` list of
+  plain corner talk after — nothing medical, nothing invented. The three
+  buttons still work on top. **360 camera**: drag anywhere to swing right
+  round the ring, two fingers or the wheel to come in and out, and it
+  re-centres on every cut (`orbit`, `recentre`). Swipe-to-dodge is gone; the
+  dodge buttons remain. Applied to both `game3d.html` and `tools/ring3d/`.
+- **The Big Rumble look (10.7).** He sent Creed Champions screenshots as the
+  target. Added: **sparks** off every landed punch (`sparks`, more on a power
+  punch), a **streak behind the glove** that throws it (`trail`), the
+  **connecting glove lights up** (`flashGlove`), a **lit blue ring canvas**
+  with its own light, **red/white/blue padded corner posts**, the camera
+  **leans** on a power punch (`roll`), and an arcade **HUD**: angled bars each
+  side, the round and clock in the middle, stars for rounds taken, a SUPER bar
+  in each bottom corner. The main camera dropped and came in so the two of
+  them fill the frame.
+- **Power punches and pressure.** One landed hook, cross or uppercut in four
+  is a **power punch**: slow motion, a hard freeze, the camera leans, speed
+  lines, `POWER`, and half again the damage. The addiction attacks far more:
+  the gap between swings shortens each round (1.9 s down to 0.75 s) and it
+  **doubles up** with a second swing about a third of the time, rising with
+  the round; its own meter fills faster and blocks feed it too. Measured: four
+  swings and 48 health in twenty seconds.
+- **The camera moves on its own** (`camDrift`): a slow swing round, a slow
+  push in and out, easing back to the shot a few seconds after you let go of a
+  drag. Held still while a ring card or a count is read (`holdCam`).
+- **The ring card leads into the bell.** Round order is now: the announcer
+  calls the round, the ring girl walks out with the card and the camera goes
+  with her (`girl`, `girlclose`), she holds it up, then the fighters take their
+  marks, then the bell. The card rides above her hand in world space facing
+  the camera, so her fingers never cover the number.
+- **A real battle (10.8).** Nine more Mixamo moves from him (Boxing, Punching,
+  Combo Punch, Big Hit To Head, Head Hit, Side Hit, Getting Hit Backwards,
+  Stunned, **Sitting Drinking**) baked into `fighter.glb` (40 clips) and
+  **added onto all five fighters** with `tools/mixamo/topup.*` — a glb-to-glb
+  top-up, because the original character FBX files had been cleared for disk.
+  Every fighter now has 40 (41 with the ref's walk).
+  - **He sits properly at last.** The seated clip already puts the feet on the
+    canvas with the hips at 0.545 m, so the root belongs at y=0, not 0.42 —
+    that is why he was perched on the top rope. Stool is 0.50 m, top at 0.50.
+  - **Rounds are 30 seconds** (`?secs=` still overrides).
+  - **The addiction blocks**: 12% rising to 34% by the late rounds; a blocked
+    punch does about a fifth and feeds its meter. It also throws far more
+    (gap 1.5 s down to 0.62 s) and doubles up about half the time, and it uses
+    the new punches and reactions; it plays `stunned` when it is hurt.
+  - **The referee faces whoever is down and counts out loud**, one to ten, with
+    "Are you alright? Come on." at eight.
+  - **The entrances are grander and slower**: they start 9-11 m out, walk at
+    0.66-0.8 m/s with two stops and two roars, and a **follow-spot tracks each
+    fighter** up the aisle (the ring light does not reach out there) — white
+    for the person, the addiction's own colour for it.
 - The photo referee (`img/fight/ref.png`, `.g2-ref`, `gmRefCount`) is still what
   the app itself uses. She goes into the app with step 6 below, when the 3D
   fight replaces the photo boss on the roof; the app has no 3D engine before
@@ -766,3 +823,651 @@ the server between full runs.
 
 Store-billing tests stand in a fake `androidpublisher` and assert on the actual
 HTTP calls — that is how acknowledgement is verified without a device.
+
+## 7 Sep 2026 — the entrances, and a wider screen (10.9)
+
+Three things Jacques asked for after 10.8, all in `game3d.html` and mirrored in
+`tools/ring3d/ring3d.html`:
+
+1. **The crowd was standing in front of the addiction's walk-in.** The old
+   entrance camera sat at a fixed point beyond the seats (`SHOTS.far`) and
+   looked back down the aisle, so the front two rows were between the lens and
+   the fighter. Gone. There is now a camera man who walks with each fighter —
+   `camWalk(F,'front'|'back')`, `walkPos()`, `walkLook()`, a `SHOTS.walk` that
+   is recomputed every frame. `front` is a head-on hero shot 2.4 m ahead of
+   them; `back` rides 2.1 m behind their shoulder looking down the aisle at the
+   ring. Nothing can get between the camera and the fighter in either.
+   The seats also moved: wider apart and 0.7 m further back, so the aisle is a
+   real corridor.
+2. **The aisle is lit.** A glowing runner on the floor plus four travelling
+   lights (`aisleOn`/`aisleOff`), blue for you and the addiction's own colour
+   for it, so the walk-in is not a walk through a black room.
+3. **Nobody is cut off at the edges.** Two parts. In the fight page, the lens
+   now widens itself on a tall phone (`fitFov()` holds roughly a constant
+   *width* in shot, 46°–68° vertical) and the aim drops slightly so the sky
+   does not eat the top of the frame. In the app, the fight now takes the whole
+   screen: `#g2` gets `g2-full` while the 3D fight is mounted (fixed, inset 0,
+   full width) and drops it again on the win or loss screen. It was a 480 px
+   column before.
+
+Checked in headless Chromium at 390×844: your walk, the addiction's walk from
+three angles, the centre-ring introductions, and the round itself. The full
+screen class was measured on a 820×900 window — 430×768 before, 820×900 after.
+The signed-in app on the live site was not tested from here; the container
+cannot reach turnsomedayintodayone.com.
+
+## 7 Sep 2026 — an empty ring, and stepping through the ropes (11.0)
+
+- **The addiction is no longer waiting in the ring.** Both fighters, the
+  addiction's glow, its floor light and its prop are hidden at the top of
+  `ringWalks()`. Only the announcer, the referee and the ring girl are in there
+  when the show starts. You appear at the head of your aisle when your walk
+  begins; the addiction does not exist until the announcer says "and his
+  opponent".
+- **Nobody walks through the ring any more.** The ropes are kept per side
+  (`ROPES.N/S/E/W`) and `partRopes(side,open)` drops the bottom two and lifts
+  the top one while a fighter steps through, then puts them back. Each fighter
+  stops at the ring edge, the ropes part, and a camera stood inside the ring
+  (`entryShot`) watches them come in — no crowd or corner man can cross that
+  shot.
+- **The crowd reads as a crowd.** One long dark riser a side instead of a crate
+  under every body, every body a slightly different size, angle and place,
+  materials darkened so they sit in shadow instead of being lit like the ring,
+  and the coloured house lights and aisle lights turned down so the front row
+  is not blown out.
+- The ring girl stood in the red corner, which put her in the middle of the
+  addiction's entrance and beside the main TV camera. She now stands on the far
+  side, clear of both corners.
+
+Checked in headless Chromium at 390×844: the empty ring during your walk, you
+stepping through the near ropes, the addiction's walk-in, it stepping through
+the far ropes, and the centre-ring introductions.
+
+## 7 Sep 2026 — Auto play, named fighters, colour (11.1)
+
+- **Auto.** `youAI()` in the fight boxes for you: it punches, dodges, blocks,
+  answers the line the addiction throws during its tell, and takes water or a
+  word in the corner. It is ON when the fight opens, so the whole thing plays
+  through by itself. Touching any punch, dodge, block or swipe turns it off and
+  hands the fight back; the Auto button turns it on again. It deliberately
+  leaves gaps between its own actions — without them the addiction never gets a
+  turn, because a swing needs `!busy` (measured: 99–0 with no gaps, roughly
+  74–40 with them).
+- **Fighter 1 to Fighter 5.** The picker in the fight says so instead of bare
+  numbers, and the app's roof door now has the same picker — it had none, and
+  the fighter was derived from the old photo-boxer number. `gameFighter()` and
+  `gameSetFighter()` in index.html; `g.fighter` in the saved game.
+- **The addiction keeps its colour.** `bossLook` painted the body near-black
+  once it was in the ring, so it walked in gold and fought black. The body is
+  now its own glow colour, dark (glow × 0.13) with a low emissive of the same
+  colour, all the way through.
+
+Checked in headless Chromium: the menu with the Fighter buttons and the gold
+addiction, an auto-played round with both fighters landing, and the corner.
+
+## 7 Sep 2026 — ninety levels, and the buttons are gone (12.0)
+
+Jacques: *"i dont like your level ideals and levels get locked if you dont do
+the work in the app and when the addiciton is saying its temptation that take
+away those buttons … every fight gets difficult the fight scene always change
+its does ends 90 levels like the app 90 day program"*
+
+- **Ninety levels.** `GAME_LEVELS=90`, `g.b` clamped to it, `gameTier` split in
+  thirds (1–30 / 31–60 / 61–90), the door and the top strip read "Level n of
+  90", and clearing 90 goes to `renderNinety()` — the game ends, the person is
+  never told they are finished, and `gameRestartLevels()` walks it again.
+- **Locked without the work.** `gameWorkToday()` — today's lesson, a journal
+  line, the pledge, or a craving logged. The roof door needs it as well as the
+  old post-loss lock.
+- **The two answer buttons are gone.** `askLine()` (question, right answer,
+  wrong answer, `#talk` panel) is now `temptLine()`: the addiction just says the
+  thing it says while it leans. Reading the lean is the whole defence, and
+  slipping it now pays a counter hook, which is what the right answer used to.
+- **Harder every level**, driven off the level number: `tellMs()` 1900 → 900,
+  `hitDmg()` 11 → 22, `bossBlocks()` up to 45%, the swing gap down to 460 ms.
+- **The scene changes.** Six moods for the canvas and the ring light rotate with
+  the level on top of the three roofs.
+- **Every temptation, per addiction.** `GAME_TEMPT` in index.html (13 tracks)
+  and the built-in `LINES` in the fight: what each one actually says to get
+  someone to engage — just one, you've earned it, nobody will know, start again
+  tomorrow, it's how you cope. The ones the app does not name a track for live
+  under Other/The Habit, which covers vaping, caffeine, streaming, picking,
+  spending, the phone at night. No medical claims, nothing that blames anyone.
+
+Checked in headless Chromium: index.html loads clean with GAME_LEVELS 90 and 13
+temptation sets, and the fight at levels 1, 2 and 45 shows the tell shortening,
+the damage rising and the canvas colour changing, with an auto-played round
+through the bell and no page errors.
+
+## 7 Sep 2026 — Auto is a preview, not a fight (12.1)
+
+Settled: *"auto is just a preview not a fight it stops as soon as the user rings
+the bell."*
+
+- The fight page opens in **preview**: it starts itself and boxes both sides, so
+  the person watches a real fight play out without touching anything.
+- **Ringing the bell ends the preview** and opens the same page with `?live=1`,
+  which starts the fight with Auto off and the person in the controls. Touching
+  any punch, dodge or block during the preview does the same thing — your fight
+  starts.
+- The Auto button now only goes back to the preview; it can never take a live
+  fight over.
+- Done as a reload rather than an in-place restart on purpose: the ring walks
+  are a long chain of awaits with no way to cancel them cleanly, and a reload
+  guarantees the live fight starts from nothing. The models come from the
+  browser cache, and the app re-posts its settings on the iframe's load event.
+
+Checked in headless Chromium: the page with no parameter comes up with auto on
+and the preview running; `?live=1` comes up with auto off and the fight running.
+No page errors either way.
+
+## 7 Sep 2026 — the mission: buildings, floors, elements (13.0 / 13.1)
+
+New concept, replacing the ninety levels. Spec in docs/GAME-SPEC.md.
+
+**In the fight page (13.0).** `FLOORS` (ten elements), `floorN` from `?floor=`
+or postMessage, `setElement()` building each one live in the ring out of points
+and lines — rain that falls and splashes on the canvas, fire climbing, wind
+streaks, drifting earth, ash, ice with a frost sheen, smoke, lightning that
+flashes and shakes the room, blown sand, rising shadow with a veil over the
+arena. The ring takes the floor's colours and the addiction wears them; the roof
+keeps the addiction's own colour. Difficulty is one continuous curve —
+`step()` counts every floor of every building and `ease()` flattens it, so
+`tellMs` runs 1.9s down towards 0.9s, `hitDmg` 10 up towards 26, the guard up to
+46% and the swing gap down to 430ms, forever, without becoming unbeatable.
+
+**In the app (13.1).** `GAME_BUILDINGS` (thirteen, each with its kind and the
+track its temptations come from), `GAME_ELEMENTS`, `GAME_FLOORS=10`.
+Screens: `renderApproach()` — the street, the building, its name across the
+front; `gameGoIn()`; `renderFloors()` — the stairs, ten floors and the roof,
+cleared/here/locked; `gameFloorGo(n)`; `renderRoofDoor()` now the door of
+whichever floor you are on; `game3dWon()` clears a floor and moves you up;
+`renderJump()` — the chute, after the roof; `gameNextBuilding()` lands you in
+the next street. The opponent now comes from the building, not the person's
+track, and the temptations come with it.
+
+Checked by driving the flow in a headless browser and reading what each screen
+rendered: approach shows The Drink, the stairs show eleven, the door reads
+"floor 1 · Rain", a win reads "Floor clear", the roof win reads "The Drink is
+done", and the next building is The Screen. No page errors. Not seen by eye —
+the game screens sit behind the sign-in wall and this container has no account.
+
+**Still to do:** the thirteen building fronts (`img/fight/bld-*.jpg`) are not
+drawn yet; the approach falls back to whatever `gmPhoto` finds. The prompts for
+them are in the chat of 7 Sep.
+
+## 7 Sep 2026 — the rooms and the buildings arrive (13.2)
+
+Jacques generated the artwork from the prompts and sent it up.
+
+- **Ten rooms**, one an element, plus a plain one spare:
+  `img/fight/ring-{rain,fire,wind,earth,ash,ice,smoke,lightning,sand,shadow,plain}.jpg`
+  — 1024 px wide, about 1 MB for the set. `setRingPic()` puts the floor's room on
+  the backdrop wall; the roof keeps the temple/tomb/monastery picture.
+  The preview (`tools/ring3d/ring3d.html`) carries 512 px copies inside itself
+  as data URIs, 331 KB, so it still fits the artifact ceiling.
+- **Thirteen building fronts**: `img/fight/bld-<key>.jpg`, 900 px wide, 2 MB for
+  the set. `renderApproach()` was already asking for them, so the street now has
+  the real building on it with its name across the front.
+
+Checked in headless Chromium at floors 1, 2 and 10: the right room is on the
+wall each time and no page errors. Floor 1 photographs well — the flooded
+warehouse behind, rain falling through the frame, splashes on the canvas.
+
+## 7 Sep 2026 — thirteen rooms, and every building deals a different hand (13.3)
+
+Three more rooms arrived: a foggy dungeon (**Rust**), a worn jail cell (**Void**)
+and an abandoned hospital (**Metal**). Each got its own effect —
+rust is a wet brown haze with flakes coming off the walls; void has nothing
+falling at all, the room empties and what is left is pulled inward under a heavy
+veil; metal throws cold blue-white sparks off the walls.
+
+Thirteen rooms and ten floors, so the floors now rotate: floor *n* of building
+*b* is room *(b + n)*. Building 1 opens in Rain, building 2 opens in Fire,
+building 11 in Rust — no two buildings climb through the same ten rooms in the
+same order, and all thirteen get used.
+
+Checked in headless Chromium: Rust, Void and Metal all build their effect and
+load their room, and building 2 floor 1 comes up Fire, which is the rotation
+working. No page errors.
+
+## 7 Sep 2026 — the camera never sits still in the preview (13.4)
+
+The director used to cut only during a round, and only every third tick. In the
+preview it now cuts every 3.4 seconds through the whole room — ringside, over
+the shoulder, down on the canvas, up in the house, in the corner — and it keeps
+cutting between rounds and in the corner, not just while the bell is going. It
+stands off during the ring walks and the rope entries, where the walking cameras
+are in charge, and while somebody is down. A live fight is unchanged.
+
+Checked in headless Chromium: through 42 seconds of preview the camera moved
+through tv, shoulder, low, crowd and corner and back round, and the camera
+position changed on every cut. No page errors.
+
+## 7 Sep 2026 — four fixes from watching it (13.5 / 13.6)
+
+- **The preview picks a fighter.** With no fighter set it used to open on the
+  same one every time; it now draws one of the five, and ringing the bell carries
+  that fighter into the live fight. The app's own pick still wins.
+- **The referee watches the fighters.** She stood at a fixed angle facing nothing.
+  During a round she now turns to keep the midpoint between the two in front of
+  her, easing round rather than snapping, and stands off while she is walking or
+  counting. Measured: zero degrees off across five samples of a live round.
+- **Everybody got out of the ring.** The announcer, the ring girl, the trainer,
+  the cut man and the addiction's two were all standing inside the ropes, which
+  are at ±2.6. They now stand outside, near the corner they belong to, facing in.
+  Measured during a round: you, the addiction and the referee inside; all six
+  others outside. The corner men still come in between rounds, as they should.
+- **The ring girl does one lap, not three.** She used to walk to a mark, walk to
+  the middle, raise her arm and only then have the card, then walk two more legs
+  to get out. She now carries the card in, holds it up in the middle, and walks
+  straight back out.
+- **The ropes lift and they bend under.** The bottom rope stays where it is and
+  they step over it; the top two lift to 1.44 and 1.88 and the fighter bends
+  forward (a 0.46 rad tilt) to come through underneath, then straightens up.
+
+## 7 Sep 2026 — stepping over the bottom rope (13.7)
+
+*"her leg didnt lift"* — the fighter walked straight through the bottom rope.
+
+`fighterWalk` used to write the whole position vector, which flattened any
+height a fighter was at. It now carries x and z only and leaves y alone, so a
+fighter can be lifted while they walk. Going through the ropes now rises 0.34
+and bends 0.46 rad at the same time, walks through, then straightens and comes
+back down — the feet clear the bottom rope instead of passing through it.
+
+Honest limit: this lifts the whole body, it is not a leg animation. None of the
+forty Mixamo clips is a climb-through. A real one — hand on the top rope, one
+leg over, head under — needs a clip from Mixamo or a pass in Blender.
+
+## 7 Sep 2026 — the card looks like a card (14.0)
+
+From three reference photos: hard shafts of light in the dark, the spray off a
+clean shot, a fighter slumped after a knockdown.
+
+- **The entry.** Three hard shafts of light over the ring (`shaftsOn`/`shaftsOff`,
+  additive cones that breathe), white for your walk and the addiction's own
+  colour for its walk, over the dimmed house.
+- **A gate in the ropes.** `partRopes` now drops the bottom rope flat to the
+  canvas (0.04) and lifts the other two to 1.58 and 2.02, so there is a real
+  doorway. They walk through nearly upright and it shuts behind them.
+- **Hits.** An expanding ring of force at the point of impact (`impactRing`), a
+  burst of sweat off the head (`sweat`, droplets with gravity that die on the
+  canvas), and the camera itself takes the punch — `camKick` shoves it along the
+  line of the shot for 170 ms. Longer hit-stop on the ones that land clean.
+- **Knockdowns.** Longer slow motion, a hard freeze, the camera rolls, and the
+  house drops to almost nothing with a single hard spot on whoever is down
+  (`koLights`).
+- **Getting up is not clean.** After the count they come up on the `getting_up`
+  clip and then `stagger()` — a wobble left and right that settles over about a
+  second and a half before the guard comes back.
+- **Sweat and breath through the round.** Under 42 health they drip and you hear
+  them breathing; under 22 it is heavier and faster. The breath is synthesised
+  noise through a bandpass, so there is no file to license.
+- **The referee stops it.** Not only three knockdowns: if somebody has already
+  been down and gets caught again below 9 health, the referee steps in, says
+  "That is enough. It is over," and it is a TKO.
+- **Seven gloves** instead of three: red, blue, white, black, gold, green, pink.
+
+Checked in headless Chromium: the gate opens to 0.04/2.02 on the entry; eleven
+sweat droplets in the air with both fighters tired; the referee stopping a fight
+returns `tko`; the knockdown lights come back up afterwards. No page errors.
+
+## 7 Sep 2026 — the announcer stopped saying "he" (14.1)
+
+Five fighters, men and women, and the announcer called every one of them "he":
+*"Making his way to the ring…"* and *"And his opponent…"*. They are now
+*"Making the walk to the ring…"* and *"And the opponent…"*.
+
+Swept the rest of the fight and the game screens in the app: no other spoken or
+written line names a gender for the fighter or the addiction. The only "she" and
+"her" left are code comments about the referee and the ring girl, who are
+particular characters, not the person playing.
+
+Checked by reading every line the fight actually said through a walk-in and a
+round: none gendered.
+
+## 7 Sep 2026 — feet on the canvas, and taller ropes (14.2)
+
+*"why he floating"* — he was. Every body is scaled to 1.8 m at load, but these
+models do not all have their feet at their own origin, so the taller ones stood
+in the air above the canvas. `skinned()` now measures the bottom of the body
+after scaling and drops it so it touches the floor. Measured after the change:
+you 0.000, the addiction 0.001, the referee 0.000, the announcer 0.000, the ring
+girl -0.006. The crowd is untouched at 0.422 — they sit on risers.
+
+*"raise the ropes higher"* — with bodies that size the ropes sat at the waist.
+They now run at 0.62, 1.12 and 1.62, the posts and pads grew to match, and the
+gate opens to 2.05 and 2.62 so the tallest of them walks through without
+ducking.
+
+## 7 Sep 2026 — the TKO moves to the end, cameras follow, the preview is a real fight (14.3)
+
+- **TKO at the end.** Jacques: *"tko is at the end of the fight if none gets
+  knocked out."* Six rounds with nobody counted out is now announced as a
+  technical knockout on the cards. (In real boxing that is called a decision and
+  a TKO is a stoppage; his call, his game.) The referee no longer waves a fight
+  off mid-round for low health — that experiment is out. The three-knockdown
+  stoppage, which was always in the spec, stays.
+- **No camera points at dead air.** Every camera except the walking ones and the
+  ring card now keeps the middle of the two fighters in frame, easing on to it
+  rather than snapping; between rounds it holds on whoever is on the stool.
+  Measured through a round: never more than 0.21 m off the middle of the two,
+  and 0.00–0.02 m on the shoulder camera.
+- **The addiction stopped losing every preview.** Three reasons, all fixed:
+  a slip paid a free counter *every* time (now 42% of the time, and for less);
+  the preview player read the lean almost perfectly (it now draws a form for the
+  night, 0.28 to 0.78, and reads it that well); and the addiction lost its turn
+  whenever the person was mid-punch, because a swing needs `!busy` — it now
+  waits for an opening instead of skipping. Measured before: 88–0 in landed
+  punches. After: 42–16 at a form of 0.63, with the addiction landing all round.
+
+## 7 Sep 2026 — no dead air in the introductions either (14.4)
+
+The camera tracking from 14.3 only ran while a round was on, so during the
+introductions and the referee's instructions the preview director could cut to
+the corner or the house camera and point at an empty post. It now holds the
+fighters whenever a fight is on, introductions included. The referee gave the
+instructions to the camera; she now gives them to the fighters, and keeps facing
+them between rounds too. Measured during "Protect yourself at all times": camera
+0.21 m off the pair, referee 0° off.
+
+## 7 Sep 2026 — the dead game is gone (14.5)
+
+Jacques: *"do 1 first thats it"* — clear out the unreachable code.
+
+Worked it out by reachability rather than by eye: every top-level definition in
+the Game section, then everything the rest of the app or the HTML actually
+refers to (`gm`, `openTower`, `renderTower`, `towerOnRelapse`, `towerStop`),
+then the closure of what those refer to. 54 definitions are live, 80 were not.
+
+Gone: the front door with the floor button, the wheel and the three shows
+(Who Wants to Recover, Wheel of Your Addictions, Time to Heal), the stairs, the
+whole photo fight (its rounds, counters, openings, uppercuts, corner, referee
+count, knockdowns, "saved by the bell"), its sound helpers, the boss patterns,
+the daily lock, the 2D win and loss screens, and the constants only they used.
+631 lines, and `index.html` went from 1.09 MB to 1.04 MB.
+
+Still there on purpose: `GAME_BOXERS` and `gmBoxerImg`, because the little
+photo boxer in the corner of the stairs screen still uses them; the old fight
+CSS and the hidden markup for it (`g2-glove`, `g2-red`, `g2-ref`), which are
+inert and were left rather than risk the layout; and `img/fight/boxer*.jpg`,
+which Jacques may want for a photo mode.
+
+Checked by driving the whole flow again in a headless browser: approach, the
+stairs, the door, a floor won, the roof won, the next building. No page errors.
+
+## 7 Sep 2026 — the fight screen, decluttered (14.6)
+
+Jacques: *"take away the buttons pair each fighter automatically with gloves take
+the location off … make fighters choice only be chosen at the beginning of a
+fight then those disappear cam button needs to go just punches blocks and
+dodges … its too clutter clean it up."*
+
+Two states now, nothing else:
+- **Before the bell** (the preview): five fighter tiles, each with the colour of
+  the gloves that come with it, and one button — Ring the bell. Tapping a tile
+  restarts the preview with that fighter and carries the pick into the live
+  fight.
+- **In a fight:** the punch row and the dodge/block row. The corner row still
+  appears between rounds. That is all.
+
+Gone: the Temple/Tomb/Monastery row (the room belongs to the level — the roof
+takes the place the app sends, and the standalone page rotates it by building),
+the seven-colour glove row (`FIGHTER_GLOVE`: 1 red, 2 blue, 3 black, 4 gold,
+5 green), the Cam button (drag still swings the camera), the Auto button (the
+preview simply plays until the bell), and the "3D proof" strip along the bottom.
+In the app the roof door lost its glove picker too and keeps the fighter picker.
+
+Checked in headless Chromium: preview shows tiles + bell only; live shows
+punches + moves only; fighter 2 comes with blue gloves; no cam, auto or place
+elements exist; no page errors.
+
+## 7 Sep 2026 — the real climb through the ropes (14.7)
+
+Jacques sent *Climbing Down* from Mixamo (FBX Binary 7.7, 3.43 s). Baked into
+`fighter.glb` as `climb_down` and topped up onto all five fighters — 41 clips
+each now. The tool for it is in the scratchpad this time (`work/addclip.html`,
+driven by Playwright over a local server, three@0.170 from npm) because the
+repo's `tools/mixamo/three/` package and the `fighters/` sources were cleared
+with the container; it does the same job as `addmoves-battle` + `topup`.
+
+`fighterWalk` takes an optional clip now: given one it plays that across the
+walk, timed to finish as the walk does, instead of the walk cycle. The rope
+entry uses `climb_down` when the fighter has it — hands up on the top rope,
+legs working, through the gate — with only a small lift and lean underneath,
+and falls back to the old lift-and-bend when it does not.
+
+The preview (`tools/ring3d/ring3d.html`) carries its own copies of the
+fighters with the textures stripped out, and those do not have the clip yet, so
+the preview still uses the fallback. The app has the real thing.
+
+Checked in headless Chromium: both fighters have the clip, both play it through
+the ropes, no page errors. Seen in a frame: hands on the top rope coming
+through.
+
+## 7 Sep 2026 — the punches hesitate no more (14.8)
+
+*"why are my punches hesitating and slow when i hit the button"* — three real
+causes, all in the code:
+
+1. **The addiction's wind-up held the whole ring.** `bossSwing` set `busy` the
+   moment it started leaning, and every control checks `busy`, so for the length
+   of the tell — 1.9 s early on — a press did nothing at all. The tell is now
+   free: only the swing itself takes the ring, and it waits up to 0.7 s for you
+   to finish a punch before it does.
+2. **A press during anything was thrown away.** `punch()` returned on the spot
+   if the ring was held. It now remembers the press and throws it the moment the
+   ring clears, if that is within 0.8 s.
+3. **The hands hung about after contact.** 380 ms of hold after a punch landed,
+   cut to 240, the step back cut with it, and the little hit-stop dropped
+   entirely on ordinary shots (kept for the big ones and the power punch). The
+   addiction's own swing also gives the ring back sooner: the miss, block and
+   hit waits came down by roughly 40%.
+
+Honest about the measurement: this container renders the fight at about four
+frames a second, so a press-to-punch time measured here is mostly the machine,
+not the game. What it does show is that presses are no longer swallowed — every
+press in a live round produced a punch, and the fight still lands normally.
+
+## 7 Sep 2026 — a real ring, built in Blender (14.9)
+
+Blender now runs on this machine as a Python module (`pip install bpy`, 5.0.1),
+so models get built by running a script — no hand modelling, and anyone can
+rebuild them. Script and notes in `tools/blender/`.
+
+`ring.py` builds the ring the fight has been missing: a square canvas on an
+apron with a skirt hanging down, four padded corner posts in red, blue and
+white, steel caps and turnbuckle eyes at each of the three rope heights, and
+steps up on both aisle sides. 1,616 triangles, 100 KB. The canvas surface sits
+at zero so nothing else in the scene had to move, and the posts are at ±2.6
+where the rope code already expects them.
+
+`loadRing()` brings it in, hides the old cylinder posts, pads and the circular
+canvas, and hands its canvas material to `setMood()` so the floor's colour still
+paints it. The ropes are untouched — they still hang, part and shut as the gate.
+
+Checked in headless Chromium: model loads, 1,616 triangles, canvas material
+found and tinted, old pipes and circle all hidden, no page errors.
+
+## 7 Sep 2026 — the jump off the roof, built in Blender (15.0)
+
+`tools/blender/jump.py` builds two more models: `chute.glb` (a canopy with a
+vent band, ten lines and a harness bar, 249 verts, 31 KB) and `city.glb` (46
+towers with lit faces around a clear middle to fall through, 476 verts, 44 KB).
+
+Win on a roof and the fight does not cut to a card any more. The arena goes
+dark, the HUD and the controls fade out, and you go off the side: the canopy
+opens above you, the city comes up underneath, and you drift down and forward
+for six seconds while the camera hangs beside you. Then the arena comes back and
+the result is posted to the app as before, so the win screen and the next
+building still work the way they did.
+
+`jumpOut()` hides every top-level object except the fighter, the chute, the city
+and the lights, adds a moon and a hemisphere light, pulls the arena fog back from
+0.075 to 0.006 so the city can be seen at all, and puts every bit of it back
+afterwards. Floors are unaffected — this only runs when `floorN===0`, the roof.
+
+Checked in headless Chromium on a roof knockout: both models load, the sequence
+runs from 34 m down to 7 m with the city and canopy visible, everything is
+restored afterwards and the ring is back. No page errors.
+
+Honest: the lit windows on the towers are hard to see at this distance — the
+city reads as dark blocks against the sky. Worth another pass if Jacques wants
+the city brighter.
+
+## 7 Sep 2026 — the preview catches up (15.1)
+
+The standalone preview carries its own copy of everything inside the file, and
+its shared move set had been left behind at 31 clips — it never got the nine
+battle moves or the climb. It also has a hard ceiling: the artifact must stay
+under 16 MB, and the current 41-clip body would have pushed it over.
+
+So the climb rides in on its own: `climb-only.glb` is the skeleton with no
+meshes at all and one animation on it, 121 KB, built by loading the fighter,
+throwing every mesh away and exporting only the clip. The preview parses it
+before it builds anybody, appends the clips to the move set, and every body in
+there — the addiction included — comes out with the climb. 15.83 MB, inside the
+ceiling.
+
+Checked in headless Chromium against the preview file itself: 32 clips in the
+set, the climb among them, both fighters carrying it, and the ring, chute and
+city models all loaded. No page errors.
+
+The preview's move set is still nine short of the app's. Same trick would carry
+them; not done yet.
+
+## 7 Sep 2026 — through the ropes, not over them, and the whole body in frame (15.2)
+
+Two things Jacques called out.
+
+**"take that climb off them and just open the ring up."** The rope climb is
+gone from both fighters. `ringWalks()` no longer leans them forward, no longer
+lifts them off the canvas, and no longer rides the `climb_down` clip. The ropes
+still part — bottom rope down to the floor, the other two lifted well over head
+height — and each fighter simply walks through the gap upright and the ropes
+close behind. `climb-only.glb` came back out of the standalone preview, which
+dropped it from 15.83 MiB to 15.68 MiB.
+
+**"why his legs cut off."** Measured it in headless Chromium at 390×844, 414×896,
+360×780 and 820×420, all five fighters: on the picker screen the feet landed at
+782–816 px while the control panel starts at 599. Roughly two hundred pixels of
+leg sat behind the buttons.
+
+Two fixes, both in `game3d.html` and mirrored in the preview:
+
+- `liftFrame()` — while the fighter tiles are showing, the picture is lifted
+  into the clear space above the panel with `cam.setViewOffset`, so the action
+  is centred on what you can actually see instead of on the whole canvas. It
+  clears itself the moment the tiles go.
+- `poseFrame()` — before the first bell the camera stands off head-to-toe,
+  working out its own distance from the fighter's real height and the space
+  above the buttons, so a tall fighter gets pushed back rather than cropped.
+  The drift keeps its gentle swing there but stops pushing in and out, which
+  was what shaved the feet off. `poseOff()` hands the camera back at the bell.
+
+Measured after: feet 554–608 against a panel at 599–710, head 127–169, every
+fighter, every screen size. No page errors.
+
+## 7 Sep 2026 — the preview gets the battle moves (15.3)
+
+The standalone preview was running on 31 clips while the app runs on 41, so the
+punches and the hits it showed were the plain set. The seven the fight code
+actually calls — `punching`, `combo_punch`, `big_head_hit`, `head_hit2`,
+`side_hit`, `hit_back`, `stunned` — now ride in the same way the climb did:
+`tools/mixamo/movesonly.html` opens `img/fight/fighter.glb`, takes every mesh
+off it, keeps those clips, drops the finger and scale tracks and halves the
+keyframes on anything over 1.6 s, and exports the skeleton with the moves
+attached. 260 KB, embedded as `MOVES7` and merged into the shared set before a
+single body is built. The preview is on 38 clips now; the three it does not
+carry (`boxing_idle`, `climb_down`, `sitting_drinking`) are not called there.
+
+To make the room, the thirteen ring photos and the place backdrops were
+re-encoded at 1024 px wide, quality 58, progressive: 1,155 KB down to 963 KB.
+The file lands at 15.83 MiB, under the artifact's 16 MiB ceiling.
+
+`tools/mixamo/three/` is the three.js source package the workshop pages import.
+It comes from `npm pack three@0.170.0` and is gitignored — pull it back with
+`npm pack three@0.170.0 && tar xzf three-0.170.0.tgz -C tools/mixamo/three`.
+
+Verified in headless Chromium: 38 clips, all seven present on both fighters,
+no page errors.
+
+## 7 Sep 2026 — the fight on a real phone (3.0)
+
+Jacques ran it on his phone and it was not mobile friendly. Three things wrong,
+all fixed.
+
+**Half the screen was empty canvas.** The lift added earlier (`liftFrame`,
+`cam.setViewOffset`) was staying on for the whole preview, not just the picker
+pose, so the camera window sat low in the frame and showed a huge stretch of
+bare ring floor under the action. The lift now applies only while the fighter is
+posed before the first bell; the moment the fight starts it clears.
+
+**The app's own chrome sat on the fight.** `.g2-full` is `z-index:60` while the
+bottom tab bar is `100` and the guide button `500`, so both floated over the
+fight's controls — the guide button covered Fighter 5. While a fight is up,
+`body.g2-fighting` hides them, and a small ✕ goes in the top-left corner
+(`gameLeaveFight()`, back to the stairs) so there is still a way out.
+
+**The panel ate the picture.** Below 820 px tall the control panel tightens —
+smaller tiles, shorter bell, and the SUPER bars sit just above it instead of at
+a fixed 206 px. 134 px on a 915 px screen, down from about 245.
+
+The walking cameras were also stood further back: on a tall phone 2.1 m behind a
+fighter is nothing but shoulders. Back shot 2.1 → 3.7 m, front 2.4 → 3.3 m, both
+a little higher.
+
+Version back to 3.0 — `APP_VERSION` and the service worker cache name together.
+
+## 7 Sep 2026 — the black second after the rest (3.1)
+
+Jacques: "keep going black for a second" after the rest period. Measured it by
+polling the shot and the frame weight through three rounds — every dark frame
+was `curShot==='girl'`, the ring-card walk that opens each round.
+
+The cause: `SHOTS.girl` was a fixed point at (1.75, 1.5, 2.05) inside the ring,
+and the ring card starts her walk at her home, (1.6, 0, 3.4). That is 1.35 m
+*behind* the camera, so the shot cut to a lens pointed backwards down an unlit
+aisle with her body right against it. It cleared as she walked past.
+
+Three fixes:
+
+- **Her camera is worked out from where she actually is.** `girlCam(back,h)`
+  stands inside the ring on the opposite side of centre from her, so it always
+  looks across the lit canvas at her — 5.9 m out when she is still in the aisle,
+  2.5 m when she reaches the middle. Never behind her, never against her.
+- **It tracks her.** `camTick` now lerps the girl shots every frame like the TV
+  shot does, instead of aiming where she was when the cut happened.
+- **A light walks in with her.** `follow(GIRL, …)` for the length of the card
+  walk, off at the end.
+
+And a guard for the whole camera, so this class of thing cannot come back:
+`camClear()` runs on every rendered frame and, if the camera has ended up closer
+than 1.15 m to what it is looking at, backs it off along its own sight line.
+
+Measured with the camera forced onto her at three points of the walk — aisle,
+ropes, middle: frames at 108 KB, 143 KB and 174 KB, against roughly 3 KB for the
+black ones before.
+
+## 7 Sep 2026 — Fighter 1 was standing half a metre off the canvas
+
+The grounding added on 6 Sep measured the wrong thing. `Box3.setFromObject` on a
+skinned body reads the geometry's **rest pose**, not the pose it is actually
+standing in, so it reported every fighter as already grounded while Fighter 1's
+toes were 0.496 m in the air. Measured off the toe bones, before:
+
+    fighter 1  0.496    2  0.027    3  0.113    4  0.076    5  0.095    the addiction 0.000
+
+`groundFeet(F)` replaces it. It steps the mixer through about a second of the
+idle, takes the lowest world Y of every foot and toe bone across those frames
+(the planted foot, not the one lifting), and shifts the model **inside** the
+root by that much. Putting the shift on the children rather than the root
+matters: half a dozen places set a fighter to `y=0` — `toMarks`, the ring walks,
+the decision — and they all stay correct.
+
+`YOU.bh` / `YOU.bmid` are still read before the shift, since afterwards the
+rest-pose box hangs below the floor and would throw the picker framing out.
+
+After: toes at −0.005 to +0.018 on all five, the addiction unchanged, pre-bell
+framing unchanged (feet 566–645 against a panel at 599/670), no page errors.

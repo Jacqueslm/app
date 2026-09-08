@@ -6,8 +6,6 @@ const rateLimit = require('express-rate-limit');
 
 const crypto = require('crypto');
 const db = require('./db');
-const billing = require('./billing');
-const storeBilling = require('./store-billing');
 const update = require('./update');
 const emailer = require('./email');
 const push = require('./push');
@@ -54,21 +52,19 @@ const GEMINI_MAX_TOKENS = Number(process.env.GEMINI_MAX_TOKENS || 4096);
 // without them. Overridable if Friendly ever needs to think harder.
 const GEMINI_THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || 'LOW';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Friendly is Pro-only (Jacques, 24 Aug 2026). Zero free chats server-side -
-// the client copy points free users to the always-free SOS tools and 988.
-const FREE_CHAT_LIMIT = 0;
-const PRO_CHAT_LIMIT = 30;
-
-// Stripe webhook signature verification needs the raw request body, so this route is
-// registered with express.raw() before the global express.json() middleware below.
-app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  try {
-    await billing.handleWebhookEvent(req.body, req.headers['stripe-signature']);
-    res.json({ received: true });
-  } catch (err) {
-    res.status(400).json({ error: `Webhook error: ${err.message}` });
-  }
-});
+// The app is free (Jacques, 8 Sep 2026). Friendly is not a paid feature, it is a
+// private one: an allowlist of emails, checked here rather than in the client so
+// nobody reaches /api/chat by calling it directly. Adding somebody is an edit to
+// FRIENDLY_EMAILS in the environment, not a deploy.
+const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 30);
+const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
+  .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
+function isFriendlyAllowed(user) {
+  const email = user && user.email && String(user.email).toLowerCase();
+  if (!email) return false;
+  if (DIAG_OWNER_EMAIL && email === String(DIAG_OWNER_EMAIL).toLowerCase()) return true;
+  return FRIENDLY_EMAILS.includes(email);
+}
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
@@ -600,22 +596,14 @@ const chatLimiter = rateLimit({
   message: { error: 'Slow down a moment — too many messages at once. Try again in a few minutes.' },
 });
 
-// Authenticated but still abusable: state sync writes a 2MB row, and the
-// billing endpoints each fan out to Stripe/Google. Generous ceilings that
-// normal use never touches, so a loop can't burn disk or an external API quota.
+// Authenticated but still abusable: state sync writes a 2MB row. A generous
+// ceiling that normal use never touches, so a loop can't burn disk.
 const stateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 40,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Syncing too often — give it a moment.' },
-});
-const billingLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many billing checks — try again in a few minutes.' },
 });
 
 // Secure comes off the request, not off NODE_ENV. The host sets NODE_ENV, and
@@ -930,7 +918,7 @@ function requireOwner(req, res) {
 }
 app.get('/api/admin/stats', requireAuth, (req, res) => {
   if (!requireOwner(req, res)) return;
-  res.json(db.getAdminStats({ freeChatLimit: FREE_CHAT_LIMIT, windowDays: 30 }));
+  res.json(db.getAdminStats({ freeChatLimit: 0, windowDays: 30 }));
 });
 // A page route, not an API one: requireAuth would render its JSON error as the
 // page body, so a logged-out visit is sent to the app to sign in instead, and a
@@ -1148,9 +1136,6 @@ app.delete('/api/account', requireAuth, async (req, res) => {
   if (!user || !verifyPassword(password || '', user.password_hash)) {
     return res.status(401).json({ error: 'Incorrect password.' });
   }
-  if (billing.isConfigured()) {
-    await billing.cancelStripeSubscriptionForUser(user);
-  }
   db.deleteUser(req.userId);
   res.clearCookie(COOKIE_NAME);
   res.json({ ok: true });
@@ -1159,66 +1144,6 @@ app.delete('/api/account', requireAuth, async (req, res) => {
 function getOrigin(req) {
   return req.headers.origin || `${req.protocol}://${req.get('host')}`;
 }
-
-app.post('/api/billing/create-checkout-session', requireAuth, async (req, res) => {
-  // A Play install must buy through Google, never Stripe - that is the Play
-  // policy line. The client routes there already; this refuses independently, so
-  // no code path inside the Android wrapper can reach Stripe even if the client
-  // is stale, tampered with, or wrong.
-  if (req.get('X-TSID-Client') === 'play') {
-    return res.status(403).json({
-      error: 'Purchases in the Android app go through Google Play.',
-      usePlayBilling: true,
-    });
-  }
-  if (!billing.isConfigured()) {
-    return res.status(503).json({ error: 'Billing is not available on this server right now.' });
-  }
-  const { plan } = req.body || {};
-  const user = db.getUserById(req.userId);
-  if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  try {
-    const url = await billing.createCheckoutSession(user, plan, getOrigin(req));
-    res.json({ url });
-  } catch (err) {
-    // A sold-out cap is a different kind of "no" from a broken checkout, and the
-    // client shows a different screen for it.
-    if (err && err.code === 'lifetime_sold_out') {
-      return res.status(409).json({ error: err.message, soldOut: true });
-    }
-    res.status(400).json({ error: err.message || 'Could not start checkout.' });
-  }
-});
-
-// An in-app purchase made through an app store. The client sends the receipt;
-// this asks the store directly whether it is real, because a purchase token
-// from a device is meaningless on its own. Store-agnostic by design - Apple
-// will use this same route.
-app.post('/api/billing/store/verify', billingLimiter, requireAuth, async (req, res) => {
-  const { source, productId, purchaseToken } = req.body || {};
-  const user = db.getUserById(req.userId);
-  if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  try {
-    // The Founding 50 is a promise about how many people get lifetime, not about
-    // how they paid, so a store lifetime purchase counts against the same cap.
-    const mapping = storeBilling.planForProduct(productId);
-    if (mapping && mapping.plan === 'lifetime' && user.plan !== 'lifetime'
-        && db.countLifetimeSold() >= billing.LIFETIME_CAP) {
-      return res.status(409).json({
-        error: 'Founding Lifetime — all 50 are gone. Lifetime is closed for good.',
-        soldOut: true,
-      });
-    }
-    const result = await storeBilling.redeemPurchase({
-      userId: req.userId, source, productId, purchaseToken,
-    });
-    res.json({ ok: true, ...result });
-  } catch (err) {
-    const status = err.code === 'token_already_used' ? 409 : 400;
-    try { db.logError('store_billing', err.message, `${source}/${productId}`); } catch (_) {}
-    res.status(status).json({ error: err.message || 'Could not confirm that purchase.' });
-  }
-});
 
 // Public on purpose: the landing page asks this while logged out. It publishes
 // only what the pricing surfaces are allowed to show, and showCount is decided
@@ -1234,69 +1159,6 @@ app.get('/privacy', (req, res) => {
 // exactly the person who cannot find the in-app button.
 app.get('/delete-account', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'delete-account.html'));
-});
-
-app.get('/api/lifetime-availability', (req, res) => {
-  try {
-    res.json(billing.getLifetimeAvailability());
-  } catch (e) {
-    res.status(503).json({ error: 'Unavailable.' });
-  }
-});
-
-app.post('/api/billing/create-portal-session', requireAuth, async (req, res) => {
-  if (!billing.isConfigured()) {
-    return res.status(503).json({ error: 'Billing is not available on this server right now.' });
-  }
-  const user = db.getUserById(req.userId);
-  if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  // A Play subscriber has no Stripe customer, so the portal cannot help them and
-  // its error reads as nonsense to somebody looking at their own active plan.
-  if ((user.billing_source || 'stripe') === 'play') {
-    return res.status(409).json({
-      error: 'This subscription is billed by Google Play, so it is managed in the Play Store.',
-      managedBy: 'play',
-      storeProductId: user.store_product_id || null,
-    });
-  }
-  try {
-    const url = await billing.createPortalSession(user, getOrigin(req));
-    res.json({ url });
-  } catch (err) {
-    res.status(400).json({ error: err.message || 'Could not open billing management.' });
-  }
-});
-
-app.get('/api/billing/status', billingLimiter, requireAuth, async (req, res) => {
-  let user = db.getUserById(req.userId);
-  if (!user) return res.status(401).json({ error: 'Not signed in.' });
-  // ?refresh=1 asks Stripe directly instead of waiting for a webhook - a home
-  // install has no public URL Stripe can reach, so this is how Pro activates.
-  if (req.query.refresh === '1' && billing.isConfigured()) {
-    await billing.refreshFromStripe(user);
-    user = db.getUserById(req.userId) || user;
-  }
-  // storeBillingReady tells the client whether a purchase can actually be
-  // honored. Without it, a misconfigured server takes the customer's money in
-  // the store and then fails verification - they have paid and got nothing.
-  // Better to refuse before the payment sheet opens than to refund afterwards.
-  // lifetimeSoldOut travels with this for the same reason storeBillingReady
-  // does: on a store purchase the money is taken before the server is asked
-  // anything, so every reason a purchase could be refused has to be knowable
-  // before the payment sheet opens.
-  res.json({
-    ...billing.getBillingStatus(user),
-    storeBillingReady: storeBilling.isPlayConfigured(),
-    lifetimeSoldOut: user.plan !== 'lifetime' && billing.getLifetimeAvailability().soldOut,
-    // Where this subscription is actually billed. Without it the app sent every
-    // cancel request to the Stripe portal, so a member who paid through Google
-    // Play was told "No billing account found yet. Upgrade to Pro first." while
-    // looking at their own active plan. Play also requires that a subscriber can
-    // reach their subscription management, so that dead end was a policy risk
-    // as well as a bad answer.
-    billingSource: user.billing_source || 'stripe',
-    storeProductId: user.store_product_id || null,
-  });
 });
 
 // ─── WEB PUSH ────────────────────────────────────────────────────────────────
@@ -1352,10 +1214,19 @@ app.post('/api/push/test', requireAuth, async (req, res) => {
 // the same server-side number the cap is enforced against, so it never drifts.
 app.get('/api/chat/usage', requireAuth, (req, res) => {
   const user = db.getUserById(req.userId);
-  const isPro = !!(user && billing.getBillingStatus(user).isPro);
-  const limit = isPro ? PRO_CHAT_LIMIT : FREE_CHAT_LIMIT;
   const used = db.getChatCount(req.userId, todayUTC());
-  res.json({ used, limit, remaining: Math.max(0, limit - used), isPro });
+  res.json({
+    allowed: isFriendlyAllowed(user),
+    used,
+    limit: CHAT_LIMIT,
+    remaining: Math.max(0, CHAT_LIMIT - used),
+  });
+});
+
+// Does this account get Friendly at all? The app asks once on load and hides
+// the tab, the toolkit row and the search entry when the answer is no.
+app.get('/api/friendly/access', requireAuth, (req, res) => {
+  res.json({ allowed: isFriendlyAllowed(db.getUserById(req.userId)) });
 });
 
 // Config health for the AI, with no secrets in it - booleans and a model name
@@ -1364,16 +1235,6 @@ app.get('/api/chat/usage', requireAuth, (req, res) => {
 // anyone) are both INVISIBLE from the app: the chat just falls back to canned
 // replies and the diagnostics panel 403s. Signed-in only; open it in a phone
 // browser to see in one line which of the two it is.
-// Live rooms - AI-moderated community, Jacques's curfew, owner override.
-require('./rooms').register(app, {
-  requireAuth,
-  isOwnerRequest,
-  // A ref, not the value: the key can be rotated in the env without the rooms
-  // module holding a stale copy.
-  GEMINI_API_KEY_REF: () => GEMINI_API_KEY,
-  GEMINI_MODEL,
-});
-
 app.get('/api/ai-status', requireAuth, (req, res) => {
   const provider = GEMINI_API_KEY ? 'gemini' : (ANTHROPIC_API_KEY ? 'anthropic' : 'none');
   const user = db.getUserById(req.userId);
@@ -1411,13 +1272,12 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
   // Server-side daily limit for signed-in users. Only a server-confirmed paid plan (never a
   // client-reported isPro flag, which the client fully controls) can bypass this.
   const user = db.getUserById(req.userId);
-  const isPro = user && billing.getBillingStatus(user).isPro;
-  const used = db.getChatCount(req.userId, todayUTC());
-  if (!isPro && used >= FREE_CHAT_LIMIT) {
-    return res.status(429).json({ error: `Friendly is a Pro feature. Upgrade for up to ${PRO_CHAT_LIMIT} chats a day.` });
+  if (!isFriendlyAllowed(user)) {
+    return res.status(403).json({ error: 'Not available on this account.' });
   }
-  if (isPro && used >= PRO_CHAT_LIMIT) {
-    return res.status(429).json({ error: `You've reached today's ${PRO_CHAT_LIMIT}-chat Pro limit. It resets tomorrow.` });
+  const used = db.getChatCount(req.userId, todayUTC());
+  if (used >= CHAT_LIMIT) {
+    return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
   }
 
   try {

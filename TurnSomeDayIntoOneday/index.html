@@ -763,49 +763,14 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 <!-- STEP 2: DYNAMIC BEHAVIORAL BLUEPRINT -->
 <div class="ob-step" id="obs2">
   <div style="font-size:.9375rem;color:#c0caff;margin-bottom:6px;font-weight:500;text-align:left">Let's understand your patterns</div>
-  <p style="font-size:.75rem;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so Friendly can tailor your plan to how this actually shows up for you.</p>
+  <p style="font-size:.75rem;color:#8892c0;text-align:left;margin-bottom:16px">A few quick questions so your plan matches how this actually shows up for you.</p>
   <div id="dynamic-behavior-questions"></div>
   <button class="ob-btn" onclick="showVoiceStep()">Analyze Root Causes</button>
   <button class="ob-btn outline" onclick="obBack(1)">Back</button>
 </div>
 
-<!-- STEP 2.5: VOICE & PERSONA COMFORT SELECTION -->
-<div class="ob-step" id="obs2_5">
-  <div style="font-size:.9375rem;color:#c0caff;margin-bottom:6px;font-weight:500; text-align: left;">Choose Friendly's Presence</div>
-  <p style="font-size:.75rem; color:#8892c0; text-align: left; margin-bottom: 20px;">
-    Select the voice and presence you feel most secure opening up to. Trust is everything—you can change this at any time.
-  </p>
-
-  <div class="voice-selection-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
-    <div class="voice-card" id="vc-female" onclick="selectVoice('female')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 1.5rem;">👩‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: .8125rem; font-weight: 600; color: #fff;">Friendly (Female Presence)</div>
-        <div style="font-size: .6875rem; color: #8892c0;">Deeply perceptive, warm, and protective therapeutic tone.</div>
-      </div>
-    </div>
-    <div class="voice-card" id="vc-male" onclick="selectVoice('male')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 1.5rem;">👨‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: .8125rem; font-weight: 600; color: #fff;">Friendly (Male Presence)</div>
-        <div style="font-size: .6875rem; color: #8892c0;">Grounding, steady, and firmly analytical protective tone.</div>
-      </div>
-    </div>
-    <div class="voice-card" id="vc-neutral" onclick="selectVoice('neutral')" style="display: flex; align-items: center; gap: 14px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer;">
-      <div style="font-size: 1.5rem;">🧑‍💼</div>
-      <div style="text-align: left;">
-        <div style="font-size: .8125rem; font-weight: 600; color: #fff;">Friendly (Neutral Presence)</div>
-        <div style="font-size: .6875rem; color: #8892c0;">Blended, objective, hyper-focused environmental coach.</div>
-      </div>
-    </div>
-  </div>
-
-  <button class="ob-btn" onclick="obNext(3)">Confirm Presence &amp; Continue</button>
-  <button class="ob-btn outline" onclick="obBack(2)">Back</button>
-</div>
-
 <!-- STEP 3: COMMITMENT DATE & COST -->
-<div class="ob-step" id="obs3"> <div style="font-size:.9375rem;color:#c0caff;margin-bottom:6px;font-weight:500" id="ob-date-label">When did you start your journey?</div> <div style="font-size:.8125rem;color:#6672a0;margin-bottom:20px">This sets your counter</div> <div class="ob-label">Start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:.6875rem;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack('2_5')">Back</button> </div>
+<div class="ob-step" id="obs3"> <div style="font-size:.9375rem;color:#c0caff;margin-bottom:6px;font-weight:500" id="ob-date-label">When did you start your journey?</div> <div style="font-size:.8125rem;color:#6672a0;margin-bottom:20px">This sets your counter</div> <div class="ob-label">Start date</div> <input class="ob-input" id="ob-date" type="date"> <div style="font-size:.6875rem;color:#6672a0;margin-top:10px">You can add daily cost and time tracking later, in Profile.</div> <button class="ob-btn" style="margin-top:14px" onclick="obNext(4)">Continue</button> <button class="ob-btn outline" onclick="obBack(2)">Back</button> </div>
 
 <!-- STEP 4: READY / PERSONALIZED SUMMARY -->
 <div class="ob-step" id="obs4"> <div style="font-size:2rem;margin-bottom:12px">🌱</div> <h1 style="margin-bottom:12px">You've already taken<br>the hardest step.</h1> <p id="ob-ready-msg">Welcome. Day One starts right now.</p> <div id="root-cause-preview" style="font-size:.75rem;color:#8892c0;text-align:left;line-height:1.6;margin-top:16px;background:rgba(255,255,255,0.05);border-radius:10px;padding:14px"></div> <button class="ob-btn" style="margin-top:8px" onclick="finishOnboard()">Begin my recovery</button> <button class="ob-btn outline" onclick="obBack(3)">Back</button> </div> </div>
@@ -1344,19 +1309,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       <div class="sec">
         <div class="sec-hd">Right now</div>
-        <div class="setting-row" onclick="startVoiceGuide()">
-          <i class="ti ti-headphones" style="color:#1D9E75"></i>
-          <div class="setting-row-txt"><p>Talk me through it</p><span>A voice, step by step</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
         <div class="setting-row" onclick="openBreathe()">
           <i class="ti ti-wind" style="color:#4A9EE2"></i>
-          <div class="setting-row-txt"><p>Meditation room</p><span>Pick how long you have</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-        <div class="setting-row" onclick="open5to1()">
-          <i class="ti ti-hand-stop" style="color:#F5A623"></i>
-          <div class="setting-row-txt"><p>5-4-3-2-1 grounding</p><span>Name what is around you</span></div>
+          <div class="setting-row-txt"><p>Meditation room</p><span>Sit down, however long you have</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
         <div class="setting-row" onclick="openTriggeredFlow()">
@@ -1975,9 +1930,19 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
   <div class="sos-sheet">
     <div class="sos-title">Meditation room</div>
     <div class="sos-sub">However long you have.</div>
+    <div class="sos-opt" onclick="pickBreathe('voice')">
+      <i class="ti ti-headphones" style="color:#1D9E75"></i>
+      <div class="sos-opt-info"><p>Talk me through it</p><span>A voice, step by step</span></div>
+      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+    </div>
     <div class="sos-opt" onclick="pickBreathe('calm')">
       <i class="ti ti-wind" style="color:#4A9EE2"></i>
       <div class="sos-opt-info"><p>Calm down</p><span>About a minute — in, hold, out</span></div>
+      <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+    </div>
+    <div class="sos-opt" onclick="pickBreathe('ground')">
+      <i class="ti ti-hand-stop" style="color:#F5A623"></i>
+      <div class="sos-opt-info"><p>5-4-3-2-1 grounding</p><span>Name what is around you</span></div>
       <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
     </div>
     <div class="sos-opt" onclick="pickBreathe('wave')">
@@ -3515,7 +3480,7 @@ function renderTodayLesson(){
       ?"Ninety days. The bootcamp is complete. From here the program is the weekly honesty ritual, your forever rules, and the card in your pocket — plus the Habit Coach, Advanced Streaks, and Long-Term Stability Pack whenever you want them."
       :hasTrack
         ?"You've completed every lesson available for this focus area so far. Check back soon for more."
-        :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. In the meantime, Friendly AI and your other tools are ready whenever you need them.`;
+        :`We're still building out the daily lesson program for ${S.currentAddiction||'this focus area'}. Your tools are all here in the meantime.`;
     actionEl.textContent='';
     reflectionEl.textContent='';
     actionBox.style.display='none';
@@ -4168,9 +4133,10 @@ function renderPackLesson(){
     <button class="log-btn" style="margin-bottom:8px" onclick="saveLessonReflection('pack-reflect-input','pack-reflect-saved')">Save to my journal</button>
     <div id="pack-reflect-saved" style="display:none;font-size:.75rem;color:var(--green);margin-bottom:8px">Saved to your journal ✓</div>
     <button class="log-btn" onclick="completePackLessonToday()">Mark as done</button>
-    <button class="ob-btn outline" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Friendly to guide this reflection</button>
+    <button class="ob-btn outline friendly-door" data-friendly="1" style="margin-top:8px;color:var(--accent);border-color:var(--accent)" onclick="discussPackLessonWithNova()">Ask Friendly to guide this reflection</button>
   </div>`;
   renderIcons(wrap);
+  if(typeof syncFriendlyDoors==='function')syncFriendlyDoors(wrap);
   if(typeof updateSpeedBtns==='function')updateSpeedBtns();
   if(typeof updateLessonVoiceBtns==='function')updateLessonVoiceBtns();
 }
@@ -4370,7 +4336,7 @@ function obNext(n){
     S.startDate=dt&&dt!==todayStr?new Date(dt+'T00:00:00').toISOString():new Date().toISOString();
     document.getElementById('ob-ready-msg').textContent=`Welcome, ${S.name}. Your custom track is compiled.`;
     const blueprintVals=Object.values(S.behavioralBlueprint);
-    const triggerSentence=blueprintVals.length?`Friendly has registered your personal triggers, including: "${blueprintVals.join(' and ')}". `:'';
+    const triggerSentence=blueprintVals.length?`Your plan has your own triggers in it, including: "${blueprintVals.join(' and ')}". `:'';
     const isPartner=S.userType==='partner';
     const partnerFocusSentence=isPartner&&(S.partnerFocus||[]).length
       ?`You're carrying someone's struggle with <strong>${S.partnerFocus.join(' and ')}</strong> — this plan stays pointed at you, not them.<br><br>`
@@ -4408,7 +4374,7 @@ function obBack(n){
 // trap for the rest of onboarding. Once disarmed, the next back exited the SPA
 // and lost every unsaved answer (name/gender/focus aren't persisted until the
 // end). Now the map is complete, and underflow never disarms mid-flow.
-const OB_PREV_STEP={1:0,'1_5':1,2:'1_5','2_5':2,3:'2_5',4:3};
+const OB_PREV_STEP={1:0,'1_5':1,2:'1_5',3:2,4:3};
 let obBackTrapArmed=false;
 function handleOnboardingPopstate(){
   if(document.getElementById('onboarding').style.display!=='flex')return;
@@ -4691,21 +4657,10 @@ function showVoiceStep(){
   const partnerWeight=getBehaviorAnswer('behavior-partner-weight');if(partnerWeight)S.behavioralBlueprint.partnerWeight=partnerWeight;
   const partnerCost=getBehaviorAnswer('behavior-partner-cost');if(partnerCost)S.behavioralBlueprint.partnerCost=partnerCost;
 
-  document.querySelectorAll('.ob-step').forEach(step=>step.classList.remove('on'));
-  document.getElementById('obs2_5').classList.add('on');
-  if(document.getElementById('od2'))document.getElementById('od2').classList.remove('on');
-  obStep='2_5';
-  selectVoice(S.novaVoice);
-}
-
-function selectVoice(variant){
-  S.novaVoice=variant;
-  ['female','male','neutral'].forEach(v=>{
-    document.getElementById('vc-'+v).style.borderColor='rgba(255,255,255,0.1)';
-    document.getElementById('vc-'+v).style.background='rgba(255,255,255,0.03)';
-  });
-  document.getElementById('vc-'+variant).style.borderColor='var(--green)';
-  document.getElementById('vc-'+variant).style.background='rgba(126,232,162,0.12)';
+  // The voice step used to sit here. Friendly is not part of signing up any
+  // more, so nobody is asked to pick a voice for something they may never see.
+  // The setting still exists in Profile for the accounts that do have it.
+  obNext(3);
 }
 
 function finishOnboard(){
@@ -8727,13 +8682,54 @@ function takePledge(){
   else{btn.textContent='Pledge';btn.className='pill pill-g';sub.textContent=pledgeSubText();}
 }
 
+// ─── PLAY INSTALL ─────────────────────────────────────────────────────────────
+// Only somebody who installed from Google Play can leave a Play rating, so the
+// rating row and the one-time ask appear there and nowhere else. This used to
+// carry the whole Play Billing branch; that went with billing on 8 Sep 2026 and
+// took these two with it, leaving initApp calling a function that no longer
+// existed - it threw, and every line after it in initApp stopped running.
+// The launch signals only exist on the first navigation, so they are read once
+// and held in sessionStorage for the life of this browsing context. A separate
+// Chrome tab starts clean, which is correct: it is not a Play install.
+const PLAY_PACKAGE='com.turnsomedayintodayone.app';
+const PLAY_SESSION_KEY='tsid_play_session';
+function detectPlayBuild(){
+  try{
+    if(!/\bAndroid\b/.test(navigator.userAgent||''))return false;
+    const fromShell=(document.referrer||'').startsWith('android-app://'+PLAY_PACKAGE);
+    const fromParam=new URLSearchParams(location.search).get('src')==='play';
+    if(fromShell||fromParam){
+      try{sessionStorage.setItem(PLAY_SESSION_KEY,'1');}catch(e){}
+      return true;
+    }
+    try{return sessionStorage.getItem(PLAY_SESSION_KEY)==='1';}catch(e){return false;}
+  }catch(e){return false;}
+}
+const playBuild=detectPlayBuild();
+function isPlayBuild(){return playBuild;}
+function applyPlayBuildUI(){
+  if(!isPlayBuild())return;
+  document.body.classList.add('play-build');
+  const rr=document.getElementById('rate-app-row');
+  if(rr)rr.style.display='';
+}
+
 // ─── SOS ──────────────────────────────────────────────────────────────────────
 // Breathing was four rows saying much the same thing. One row now, three lengths behind it.
 function openBreathe(){const el=document.getElementById('breathe-pick');if(el)el.classList.add('open');}
 // Named apart from closeBreathe: that one belongs to the breathing overlay further down,
 // and being declared later it used to win, so picking a length never closed this sheet.
 function closeBreathePick(){const el=document.getElementById('breathe-pick');if(el)el.classList.remove('open');}
-function pickBreathe(k){closeBreathePick();if(k==='calm')breathe();else if(k==='wave')openWave();else openMeditation();}
+// Everything you do sitting still is in this one room (Jacques, 8 Sep 2026) - the
+// voice guide and the grounding exercise used to be their own rows beside it.
+function pickBreathe(k){
+  closeBreathePick();
+  if(k==='voice')startVoiceGuide();
+  else if(k==='calm')breathe();
+  else if(k==='ground')open5to1();
+  else if(k==='wave')openWave();
+  else openMeditation();
+}
 // One door for a hard moment. The red button used to open a pop-up that repeated most of
 // the toolkit; now both land on the same list, so nothing is hidden inside something else.
 function openSOS(){closeSOS();switchTo('relapse-toolkit');actBn('bn-tools');}
@@ -11755,6 +11751,14 @@ async function applyFriendlyAccess(){
     if(n&&n.classList.contains('on')){switchTo('home');actBn('bn-home');}
   }
 }
+// Screens built after the access check has already run (a pack lesson, say)
+// insert their own doors. They arrive hidden, so this only ever reveals one,
+// and only for an account the server already said yes to.
+function syncFriendlyDoors(root){
+  (root||document).querySelectorAll('[data-friendly]').forEach(el=>{
+    el.classList.toggle('friendly-door',!friendlyAllowed);
+  });
+}
 function actBn(id){
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('on'));
   if(id){const el=document.getElementById(id);if(el)el.classList.add('on');}
@@ -12429,7 +12433,7 @@ function updateProfileEditUI(){
 }
 // Kept in step with the service worker cache version in sw.js - when one moves,
 // the other moves, so "App version" in Profile matches what's actually cached.
-const APP_VERSION='3.0';
+const APP_VERSION='3.0.1';
 const CATEGORY_EMOJI={
   'Porn & Sex':'🔞',Alcohol:'🍺',Smoking:'🚬',Substances:'💊',Gambling:'🎰',
   'Social media':'📱',Gaming:'🎮','Food / Binging':'🍽️','Shopping / Spending':'🛍️',
@@ -13043,7 +13047,7 @@ const HELP_INDEX=[
   {name:'Write in my journal',sub:'Your private journal',k:'journal write diary note feelings',go:()=>{switchTo('journal');actBn('bn-tools');}},
   {name:'Today\'s lesson',sub:'Your daily recovery lesson',k:'lesson learn course daily program',go:()=>{switchTo('lesson');actBn('bn-home');}},
   {name:'Listen to today\'s lesson',sub:'The lesson read aloud — hands-free',k:'listen audio hear read aloud voice speak lesson multitask',go:()=>{switchTo('lesson');actBn('bn-home');setTimeout(()=>toggleLessonAudio(),400);}},
-  {name:'Talk to Friendly',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',go:()=>{switchTo('nova');actBn('bn-nova');}},
+  {name:'Talk to Friendly',sub:'Your AI recovery companion',k:'nova chat ai companion therapist talk',friendly:true,go:()=>{switchTo('nova');actBn('bn-nova');}},
   {name:'My progress & stats',baseName:'My progress & stats',supporterSub:'Your days, streak, and milestones',sub:'Days clean, money saved, milestones',k:'progress stats days streak counter money saved milestones',go:()=>{switchTo('progress');actBn('bn-home');}},
   {name:'Share my progress card',sub:'A picture of your streak to post or send',k:'share card picture post social progress',go:()=>shareProgressCard()},
   {name:'Account & sync',sub:'Your email, password, and synced data',k:'account email password sync sign in login',go:()=>openAuthModal()},
@@ -13755,7 +13759,7 @@ function guideSend(){
   // flagged hideForSupporter never surface for a supporter, same as the screens
   // and rows they point to being hidden - she shouldn't get a shortcut to what's
   // not shown to her.
-  const scored=HELP_INDEX.map((h,i)=>({i,score:(h.hideForSupporter&&S.userType==='partner')?0:words.reduce((s,w)=>s
+  const scored=HELP_INDEX.map((h,i)=>({i,score:(h.friendly&&!friendlyAllowed)||(h.hideForSupporter&&S.userType==='partner')?0:words.reduce((s,w)=>s
     +(h.name.toLowerCase().includes(w)?3:0)
     +((h.sub+' '+h.k).toLowerCase().includes(w)?1:0),0)}))
     .filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
@@ -13775,10 +13779,12 @@ function guideSend(){
   if(scored.length){
     guideBotSay('Here you go — tap one and I\'ll take you there:'+
       scored.map(s=>`<button class="gb-go" onclick="guideGo(${s.i})">→ ${escapeHtml(HELP_INDEX[s.i].name)}</button>`).join(''));
-  }else{
+  }else if(friendlyAllowed){
     const novaIdx=HELP_INDEX.findIndex(h=>h.name.indexOf('Friendly')>=0);
     guideBotSay('I couldn\'t find that in the app — I only know my way around the menus. For anything deeper, Friendly\'s the one to ask.'+
       `<button class="gb-go" onclick="guideGo(${novaIdx})">→ Talk to Friendly</button>`);
+  }else{
+    guideBotSay('I couldn\'t find that one — I only know my way around the menus. Try a plainer word, like <em>lesson</em>, <em>journal</em> or <em>breathe</em>.');
   }
 }
 
@@ -13796,14 +13802,14 @@ function renderHelpResults(){
   const q=document.getElementById('help-search').value.trim().toLowerCase();
   const words=q.split(/\s+/).filter(Boolean);
   const list=words.length
-    ?HELP_INDEX.filter(h=>{const hay=(h.name+' '+h.sub+' '+h.k).toLowerCase();return words.every(w=>hay.includes(w));})
-    :HELP_INDEX.slice(0,7);
+    ?HELP_INDEX.filter(h=>!(h.friendly&&!friendlyAllowed)&&(()=>{const hay=(h.name+' '+h.sub+' '+h.k).toLowerCase();return words.every(w=>hay.includes(w));})())
+    :HELP_INDEX.filter(h=>!(h.friendly&&!friendlyAllowed)).slice(0,7);
   document.getElementById('help-results').innerHTML=list.length
     ?list.map(h=>{
       const i=HELP_INDEX.indexOf(h);
       return `<div class="sos-opt" onclick="helpGo(${i})"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><div class="sos-opt-info"><p>${escapeHtml(h.name)}</p><span>${escapeHtml(h.sub)}</span></div></div>`;
     }).join('')
-    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word like <em>lesson</em>, <em>voice</em>, or <em>pro</em>.</div>';
+    :'<div class="sos-sub" style="padding:14px 0">Nothing matched — try a simpler word like <em>lesson</em>, <em>journal</em>, or <em>breathe</em>.</div>';
 }
 
 // Erase absolutely everything: account + synced data on the server, plus every

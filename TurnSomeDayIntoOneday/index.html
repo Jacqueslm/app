@@ -1625,7 +1625,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div style="margin-top:6px;font-size:.75rem;color:var(--accent);cursor:pointer;display:none" id="remove-photo-link" onclick="removeProfilePhoto()">Remove photo</div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Personalize</div></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">You</div></div>
       <div class="setting-row" onclick="openNameModal()">
         <i class="ti ti-pencil"></i>
         <div class="setting-row-txt"><p>Name</p><span id="name-row-sub">Not set</span></div>
@@ -1636,7 +1636,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Choose gender</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openVoiceModal()">
+      <div class="setting-row" id="profile-voice-row" onclick="openVoiceModal()">
         <i class="ti ti-handshake"></i>
         <div class="setting-row-txt"><p>Friendly's presence</p><span id="voice-row-sub">Neutral</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
@@ -1651,13 +1651,6 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Daily cost &amp; time</p><span>Set your daily spend and hours lost, for the Saved stat</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="openReviewModal()">
-        <i class="ti ti-message-2"></i>
-        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line about whether this helped — it goes on the reviews page</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Focus areas</div></div>
       <div class="setting-row" onclick="openCategorySwitcher()">
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Focus areas</p><span id="category-row-sub">Not set</span></div>
@@ -1669,38 +1662,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Help</div></div>
-      <div class="setting-row" onclick="openHelpFinder()">
-        <i class="ti ti-lifebuoy" style="color:#1D9E75"></i>
-        <div class="setting-row-txt"><p>Find anything</p><span>Type what you're looking for — get taken straight there</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Settings</div></div>
-      <div class="setting-row" onclick="openAuthModal()">
-        <i class="ti ti-cloud"></i>
-        <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <!-- Jacques, 29 Aug 2026: "some people will want to rate it just by looking
-           around". The one-time prompt fires on its own terms and never again;
-           this is here whenever somebody feels like it. Hidden unless the app
-           came from Play, because nobody else can leave a Play rating. -->
-      <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
-        <i class="ti ti-star"></i>
-        <div class="setting-row-txt"><p>Rate this app</p><span>A line on Google Play is how the next person finds it</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="logOutFromProfile()">
-        <i class="ti ti-logout"></i>
-        <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
-      <div class="setting-row" onclick="logOutEverywhere()">
-        <i class="ti ti-devices"></i>
-        <div class="setting-row-txt"><p>Log out on all devices</p><span>Signs out every other phone or computer — this one stays in</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Reminders</div></div>
       <div class="setting-row" onclick="toggleNotif()">
         <i class="ti ti-bell"></i>
         <div class="setting-row-txt"><p>Daily lesson reminder</p><span>A nudge in-app if you haven't done today's lesson yet</span></div>
@@ -1728,16 +1690,18 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Send me a test reminder</p><span>Proves reminders reach this phone with the app closed</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="toggleNovaDisclaimer()">
-        <i class="ti ti-alert-triangle"></i>
-        <div class="setting-row-txt"><p>Friendly safety reminder</p><span>Brief disclaimer shown when opening Friendly</span></div>
-        <div class="toggle-sw on" id="nova-disclaimer-toggle"><div class="toggle-knob"></div></div>
-      </div>
       <div class="setting-row" onclick="openProTool('smartReminders')">
         <i class="ti ti-bell" style="color:var(--accent)"></i>
         <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
+      <div class="setting-row" id="profile-friendly-row" onclick="toggleNovaDisclaimer()">
+        <i class="ti ti-alert-triangle"></i>
+        <div class="setting-row-txt"><p>Friendly safety reminder</p><span>Brief disclaimer shown when opening Friendly</span></div>
+        <div class="toggle-sw on" id="nova-disclaimer-toggle"><div class="toggle-knob"></div></div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">How it looks</div></div>
       <div class="setting-row" onclick="toggleDark()">
         <i class="ti ti-moon"></i>
         <div class="setting-row-txt"><p>Dark mode</p><span>Follows system setting by default</span></div>
@@ -1748,11 +1712,8 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Text size</p><span id="fontsize-row-sub">Default</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" onclick="startNavTour()">
-        <i class="ti ti-compass"></i>
-        <div class="setting-row-txt"><p>How to use this app</p><span>Take the 30-second tour of the screens</span></div>
-        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Privacy</div></div>
       <div class="setting-row" onclick="toggleAppLock()">
         <i class="ti ti-lock"></i>
         <div class="setting-row-txt"><p>App lock</p><span id="app-lock-sub">Require a PIN to open the app</span></div>
@@ -1763,27 +1724,25 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Discretion mode</p><span id="discretion-sub">Home screen shows a neutral name — nobody can tell what this app is by glancing at your phone</span></div>
         <div class="toggle-sw" id="discretion-toggle"><div class="toggle-knob"></div></div>
       </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">Help</div></div>
+      <div class="setting-row" onclick="startNavTour()">
+        <i class="ti ti-compass"></i>
+        <div class="setting-row-txt"><p>How to use this app</p><span>Take the 30-second tour of the screens</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="openHelpFinder()">
+        <i class="ti ti-lifebuoy" style="color:#1D9E75"></i>
+        <div class="setting-row-txt"><p>Find anything</p><span>Type what you're looking for — get taken straight there</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" onclick="window.location.href='tel:988'">
         <i class="ti ti-phone" style="color:#E24B4A"></i>
         <div class="setting-row-txt"><p style="color:#E24B4A">Crisis helpline</p><span>988 Suicide & Crisis Lifeline</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec">
-        <button class="reset-btn" onclick="resetApp()">Reset Recovery</button>
-        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Corrects your start date and streak. Nothing else changes.</div>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec">
-        <div class="sec-hd" style="color:#E24B4A">Danger zone</div>
-        <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
-        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
-        <button class="reset-btn" style="margin-top:14px" onclick="eraseMyHistory()">Erase my history, keep my account</button>
-        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Deletes every journal entry, your craving and mood logs, lesson progress, milestone history, emergency plan and letter drafts. You stay signed in and your day count and lifetime total are kept.</div>
-        <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Delete my account &amp; erase everything</button>
-        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
-      </div>
-      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
       <div id="owner-updates-wrap"><div class="sec" style="padding-bottom:0"><div class="sec-hd">App updates <span id="upd-hosted-note" style="display:none;color:var(--tm);font-weight:400">— hosted, updates arrive automatically</span></div></div>
       <div class="setting-row" onclick="toggleAutoUpdate()">
         <i class="ti ti-refresh"></i>
@@ -1807,10 +1766,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       </div>
       </div>
       <div style="height:8px;background:var(--s0)"></div>
-      <!-- Heading AND body live inside #owner-diag-sec. They used to be two
-           separate blocks with only the heading gated, so a non-owner saw an
-           orphaned "If something breaks..." panel with no title, and the owner
-           gate looked broken from both sides. -->
+      <!-- Heading AND body live inside #owner-diag-sec: with only the heading
+           gated, a non-owner saw an orphaned "If something breaks..." panel
+           with no title, and the owner gate looked broken from both sides. -->
       <div id="owner-diag-sec">
         <div class="sec" style="padding-bottom:0"><div class="sec-hd">Diagnostics <span id="diag-count"></span></div></div>
         <div class="sec">
@@ -1823,8 +1781,16 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div id="diag-msg" style="font-size:.75rem;color:var(--green);margin-top:8px;display:none"></div>
         </div>
       </div>
-      <div style="height:8px;background:var(--s0)"></div>
-      <div class="sec" style="padding-bottom:0"><div class="sec-hd">About</div></div>
+      <div class="setting-row" onclick="openReviewModal()">
+        <i class="ti ti-message-2"></i>
+        <div class="setting-row-txt"><p>Leave a review</p><span id="review-row-sub">A line about whether this helped — it goes on the reviews page</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" id="rate-app-row" style="display:none" onclick="goRateApp()">
+        <i class="ti ti-star"></i>
+        <div class="setting-row-txt"><p>Rate this app</p><span>A line on Google Play is how the next person finds it</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
       <div class="setting-row" onclick="openLegalOverlay('privacy')">
         <i class="ti ti-shield"></i>
         <div class="setting-row-txt"><p>Privacy Policy</p><span>What's collected and how it's used</span></div>
@@ -1839,9 +1805,35 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <i class="ti ti-info-circle"></i>
         <div class="setting-row-txt"><p>Turn Someday Into Day One</p><span>Version <span id="app-version-txt"></span></span></div>
       </div>
-    </div>
-
-    <!-- TOGETHER: for the partner of someone in recovery -->
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd" style="color:#E24B4A">Account</div></div>
+      <div class="setting-row" onclick="openAuthModal()">
+        <i class="ti ti-cloud"></i>
+        <div class="setting-row-txt"><p id="account-row-title">Account &amp; Sync</p><span id="account-row-sub">Not signed in — data stays on this device only</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="logOutFromProfile()">
+        <i class="ti ti-logout"></i>
+        <div class="setting-row-txt"><p>Log out</p><span>Sign out of this account on this device</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="setting-row" onclick="logOutEverywhere()">
+        <i class="ti ti-devices"></i>
+        <div class="setting-row-txt"><p>Log out on all devices</p><span>Signs out every other phone or computer — this one stays in</span></div>
+        <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
+      </div>
+      <div class="sec">
+        <button class="reset-btn" onclick="resetApp()">Reset Recovery</button>
+        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Corrects your start date and streak. Nothing else changes.</div>
+      </div>
+      <div class="sec">
+        <button class="reset-btn" onclick="restartOnboarding()">Restart setup</button>
+        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Clears your name, focus areas, and preferences and re-runs onboarding. Journal, cravings, and lifetime progress are kept.</div>
+        <button class="reset-btn" style="margin-top:14px" onclick="eraseMyHistory()">Erase my history, keep my account</button>
+        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Deletes every journal entry, your craving and mood logs, lesson progress, milestone history, emergency plan and letter drafts. You stay signed in and your day count and lifetime total are kept.</div>
+        <button class="reset-btn" style="margin-top:14px" onclick="hardResetApp()">Delete my account &amp; erase everything</button>
+        <div style="font-size:.71875rem;color:var(--tm);margin-top:6px">Deletes your account and every bit of data — journal, streaks, chats, settings. A true blank slate. This cannot be undone.</div>
+      </div>
     <div id="s-partner" class="scr">
       <div class="sec">
         <div class="sec-hd" style="margin-top:0" id="partner-sec-hd">For the one who loves you</div>
@@ -11869,8 +11861,10 @@ async function applyFriendlyAccess(){
   }catch(e){friendlyAllowed=false;}
   const tab=document.getElementById('bn-nova');
   if(tab)tab.style.display=friendlyAllowed?'':'none';
-  const row=document.getElementById('toolkit-friendly-row');
-  if(row)row.style.display=friendlyAllowed?'':'none';
+  for(const id of ['toolkit-friendly-row','profile-friendly-row','profile-voice-row']){
+    const row=document.getElementById(id);
+    if(row)row.style.display=friendlyAllowed?'':'none';
+  }
   if(!friendlyAllowed&&document.getElementById('s-nova')&&document.getElementById('s-nova').classList.contains('on')){
     switchTo('home');actBn('bn-home');
   }

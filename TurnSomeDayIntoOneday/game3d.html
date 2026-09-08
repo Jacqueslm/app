@@ -662,16 +662,38 @@ function primeSpeech(){
   }catch(e){}
 }
 // any first touch counts, not only the bell - the preview talks before anyone taps it
-['pointerdown','touchstart','click'].forEach(ev=>addEventListener(ev,()=>{try{ac();primeSpeech();}catch(e){}},{once:true,capture:true}));
+['pointerdown','touchstart','click'].forEach(ev=>addEventListener(ev,()=>{try{ac();primeSpeech();sfxPrime();}catch(e){}},{once:true,capture:true}));
 function thud(kind){try{const c=ac(),t=c.currentTime,g=c.createGain();g.connect(c.destination);const f={jab:150,hook:110,up:85,block:220}[kind]||120;const o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.3,t+.13);const og=c.createGain();og.gain.setValueAtTime(kind==='up'?1:kind==='block'?.5:.8,t);og.gain.exponentialRampToValueAtTime(.001,t+.17);o.connect(og);og.connect(g);o.start(t);o.stop(t+.2);const len=Math.floor(c.sampleRate*.08),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);const n=c.createBufferSource();n.buffer=buf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=kind==='block'?2600:1100;bp.Q.value=.7;const ng=c.createGain();ng.gain.setValueAtTime(kind==='block'?.6:.4,t);ng.gain.exponentialRampToValueAtTime(.001,t+.1);n.connect(bp);bp.connect(ng);ng.connect(g);n.start(t);}catch(e){}}
 function whoosh(){try{const c=ac(),t=c.currentTime,len=Math.floor(c.sampleRate*.25),buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/len);const n=c.createBufferSource();n.buffer=buf;const bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.setValueAtTime(600,t);bp.frequency.exponentialRampToValueAtTime(2400,t+.2);bp.Q.value=1.5;const g=c.createGain();g.gain.value=.35;n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);}catch(e){}}
-let crowd=null;function crowdOn(v){try{if(!crowd){crowd=new Audio(SND.crowd);crowd.loop=true;crowd.volume=0;}crowd.volume=v;if(v>0)crowd.play().catch(()=>{});}catch(e){}}
-function swell(){if(!crowd)return;crowd.volume=Math.min(1,crowd.volume+.35);setTimeout(()=>{if(crowd)crowd.volume=running?.35:.15;},900);}
+// The crowd is a looping source on the same engine. iPhones ignore volume on a
+// media player - it was always at full there - so its level is a gain node now.
+let crowd=null,crowdGain=null,crowdLevel=0;
+function crowdOn(v){try{const c=ac();crowdLevel=v;
+  if(!crowdGain){crowdGain=c.createGain();crowdGain.gain.value=0;crowdGain.connect(c.destination);}
+  if(!crowd){
+    if(SFX.buf.crowd){crowd=c.createBufferSource();crowd.buffer=SFX.buf.crowd;crowd.loop=true;crowd.connect(crowdGain);crowd.start();}
+    else{sfxLoad('crowd');if(SFX.want.crowd)SFX.want.crowd.then(()=>{if(!crowd&&SFX.buf.crowd&&crowdLevel>0)crowdOn(crowdLevel);});}
+  }
+  crowdGain.gain.setTargetAtTime(v,c.currentTime,.08);}catch(e){}}
+function swell(){if(!crowdGain)return;try{const c=ac();crowdGain.gain.setTargetAtTime(Math.min(1,crowdLevel+.35),c.currentTime,.05);
+  setTimeout(()=>{if(crowdGain){crowdLevel=running?.35:.15;crowdGain.gain.setTargetAtTime(crowdLevel,ac().currentTime,.2);}},900);}catch(e){}}
 // the chants. In the proof these are stand-ins: in the app the left side chants the person's own recorded
 // triggers and excuses, the right side their own SOS tools and the names of their supporters.
 const TEMPT=['One won\'t hurt.','You\'ve earned it.','Nobody would know.','Just tonight.','Everyone else is.'],SUPPORT=['Breathe.','Hands up.','Day one, again.','You\'ve got this.','Call somebody.','Water. Walk. Wait.'];
 let chantT=null;function chant(side,arr){const el=$(side==='L'?'cl':'cr');el.textContent=arr[Math.floor(Math.random()*arr.length)];el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800);}
-function snd(n){try{const a=new Audio(SND[n]);a.volume=.9;a.play().catch(()=>{});}catch(e){}}
+// An iPhone lets a sound play only if the player playing it was started by a tap.
+// snd() made a brand-new player for every bell, hit and round call, none of them
+// tapped, so on an iPhone the only thing that ever came out was the crowd - the one
+// player that got unlocked once and kept going. Everything goes through the one
+// audio engine now, which the first touch unlocks for good. (8 Sep 2026)
+const SFX={buf:{},want:{}};
+function sfxLoad(n){if(SFX.buf[n]||SFX.want[n]||!SND[n])return;
+  SFX.want[n]=fetch(SND[n]).then(r=>r.arrayBuffer()).then(b=>ac().decodeAudioData(b)).then(d=>{SFX.buf[n]=d;}).catch(()=>{delete SFX.want[n];});}
+function sfxPrime(){for(const n in SND)sfxLoad(n);}
+function snd(n,vol){
+  const play=()=>{try{const c=ac(),s=c.createBufferSource(),g=c.createGain();s.buffer=SFX.buf[n];g.gain.value=vol==null?.9:vol;s.connect(g);g.connect(c.destination);s.start();}catch(e){}};
+  if(SFX.buf[n]){play();return;}
+  sfxLoad(n);if(SFX.want[n])SFX.want[n].then(()=>{if(SFX.buf[n])play();});}
 // the fight, on the Unified Rules of Boxing, shortened: six rounds of sixty seconds with
 // ten seconds in the corner (a real round is three minutes with a minute's rest).
 // Ten-point must: the round's winner gets 10, the loser 9, an even round 10-10, and every
@@ -845,7 +867,11 @@ function snapToCorners(){
   YOU.root.visible=true;BOSS.root.visible=true;
   aura.visible=true;aura.scale.set(3.6,3.6,1);floorGlow.visible=true;rim.intensity=140;propsShow(true);
   YOU.root.position.copy(CORNERPOS.you);BOSS.root.position.copy(CORNERPOS.boss);
-  for(const F of [YOU,BOSS]){F.root.position.y=0;F.root.lookAt(0,F.root.position.y,0);F.idle();}
+  // NOT lookAt: that points a model's -Z at the target, and every fighter in here
+  // faces along +Z (faceOff uses atan2(dx,dz)). lookAt turned both of them a full
+  // half-turn, so skipping the walk-in started the round with the fight backwards.
+  for(const F of [YOU,BOSS]){F.root.position.y=0;F.idle();}
+  faceOff();
   for(const C of [T2,C2,K,W,ANN])if(C&&C.home){C.root.position.copy(C.home);C.idle&&C.idle();}
   refWalk(ref.userData.home);refIdle();
   shot('tv',0);

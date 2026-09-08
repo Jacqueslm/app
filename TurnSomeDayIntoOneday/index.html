@@ -1259,8 +1259,9 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
 
     <!-- PROGRESS -->
     <div id="s-progress" class="scr">
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">How far you have come</div></div>
       <div class="sec">
-        <div class="sec-hd">Your journey</div>
         <div class="prog-ring-wrap">
           <div class="prog-ring">
             <svg width="130" height="130" viewBox="0 0 130 130">
@@ -1278,12 +1279,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           </div>
         </div>
       </div>
-      <div class="sec" style="padding-top:0" id="milestone-share-sec">
-        <div class="sec-hd">Share a milestone</div>
-        <div class="card" style="padding:6px 14px" id="milestone-share-list"></div>
-      </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Lifetime progress <span style="font-weight:400;color:var(--tm);font-size:.6875rem">— never resets, even after a setback</span></div>
         <div class="card" style="display:flex;justify-content:space-around;text-align:center">
           <div class="ps" style="align-items:center"><div class="ps-n" id="prog-total-days">0</div><div class="ps-l" id="prog-total-days-lbl">Total sober days</div></div>
           <div class="ps" style="align-items:center;display:none" id="prog-hours-back-wrap"><div class="ps-n" id="prog-hours-back">0</div><div class="ps-l">Hours won back</div></div>
@@ -1291,17 +1287,10 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="ps" style="align-items:center" id="prog-cravings-survived-wrap"><div class="ps-n" id="prog-cravings-survived">0</div><div class="ps-l">Cravings survived</div></div>
         </div>
       </div>
+      <div class="sec" style="padding-top:10px;padding-bottom:0"><div style="font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm)">This week</div></div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">This week</div>
         <div class="week-grid" id="weekGrid"></div>
       </div>
-      <div class="sec" style="padding-top:0">
-        <div class="sec-hd">Insights</div>
-        <div id="insightCards"></div>
-      </div>
-      <!-- Milestone offer: appears on the day a milestone is reached and on later
-      visits until it is shared or dismissed. An offer, never an interruption -
-      no modal, no blocking, and "Not now" means never for that milestone. -->
       <div id="milestone-offer" style="display:none;margin:12px 16px 0;background:var(--ok);border-radius:12px;padding:14px 16px">
       <div style="display:flex;align-items:center;gap:12px">
       <div style="width:38px;height:38px;border-radius:50%;background:#0F6E56;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-award" style="font-size:1.1875rem;color:#fff"></i></div>
@@ -1315,34 +1304,39 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <button class="log-btn" style="flex:1;margin:0;background:none;border:1px solid rgba(15,110,86,0.35);color:#0F6E56" onclick="dismissOfferedMilestone()">Not now</button>
       </div>
       </div>
+      <div class="sec" style="padding-top:10px;padding-bottom:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tm)" onclick="toggleHomeMilestones()">
+          <span>Milestones</span>
+          <span id="milestones-toggle-lbl" style="font-size:.75rem;color:var(--accent);font-weight:400;letter-spacing:0;text-transform:none">Show all</span>
+        </div>
+      </div>
       <div class="sec" style="padding-top:0">
-        <div class="sec-hd">See how far you have come</div>
+        <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
+      </div>
+      <div class="sec" style="padding-top:0" id="milestone-share-sec">
+        <div class="card" style="padding:6px 14px" id="milestone-share-list"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
         <div class="setting-row" onclick="openFilm()">
           <i class="ti ti-movie"></i>
           <div class="setting-row-txt"><p>Your film</p><span>Your months, cut together</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
+      </div>
+      <div style="height:8px;background:var(--s0)"></div>
+      <div class="sec" style="padding-bottom:0"><div class="sec-hd">What we have noticed</div></div>
+      <div class="sec" style="padding-top:0">
+        <div id="insightCards"></div>
+      </div>
+      <div class="sec" style="padding-top:0">
         <div class="setting-row" onclick="switchTo('insights');actBn('bn-tools')">
           <i class="ti ti-chart-dots"></i>
           <div class="setting-row-txt"><p>Patterns and weekly reports</p><span>What your week looked like</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" onclick="shareMyMilestone()">
-          <i class="ti ti-share"></i>
-          <div class="setting-row-txt"><p>Share my milestone</p><span id="share-row-sub">Make a card to send</span></div>
-          <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
-        </div>
-      </div>
-      <div class="sec" style="padding-top:0">
-        <div class="sec-hd" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleHomeMilestones()">
-          <span>Milestones</span>
-          <span id="milestones-toggle-lbl" style="font-size:.75rem;color:var(--accent);font-weight:400">Show all</span>
-        </div>
-        <div class="card" style="padding:0 14px;display:none" id="home-milestones"></div>
       </div>
     </div>
 
-    <!-- RELAPSE TOOLKIT -->
     <div id="s-relapse-toolkit" class="scr">
       <div style="padding:14px 0 4px">
         <a href="tel:988" class="crisis-bar">

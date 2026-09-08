@@ -56,7 +56,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // private one: an allowlist of emails, checked here rather than in the client so
 // nobody reaches /api/chat by calling it directly. Adding somebody is an edit to
 // FRIENDLY_EMAILS in the environment, not a deploy.
-const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 30);
+// 0 means no cap. Friendly is a handful of accounts now, not a paid tier, so
+// the daily limit exists only as a runaway-cost brake if it is ever needed.
+const CHAT_LIMIT = Number(process.env.CHAT_LIMIT || 0);
 const FRIENDLY_EMAILS = String(process.env.FRIENDLY_EMAILS || '')
   .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
 function isFriendlyAllowed(user) {
@@ -1218,8 +1220,8 @@ app.get('/api/chat/usage', requireAuth, (req, res) => {
   res.json({
     allowed: isFriendlyAllowed(user),
     used,
-    limit: CHAT_LIMIT,
-    remaining: Math.max(0, CHAT_LIMIT - used),
+    limit: CHAT_LIMIT,                       // 0 = no cap
+    remaining: CHAT_LIMIT > 0 ? Math.max(0, CHAT_LIMIT - used) : null,
   });
 });
 
@@ -1276,7 +1278,7 @@ app.post('/api/chat', chatLimiter, requireAuth, async (req, res) => {
     return res.status(403).json({ error: 'Not available on this account.' });
   }
   const used = db.getChatCount(req.userId, todayUTC());
-  if (used >= CHAT_LIMIT) {
+  if (CHAT_LIMIT > 0 && used >= CHAT_LIMIT) {
     return res.status(429).json({ error: `That is today's ${CHAT_LIMIT} chats. It resets tomorrow.` });
   }
 

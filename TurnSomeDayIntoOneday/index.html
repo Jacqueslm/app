@@ -253,6 +253,7 @@ body.mini-on .app.fs-bigger .screens{padding-bottom:330px}
    is written as separate lines on purpose. Scoped to this id so every other
    .sos-sub on the page keeps collapsing whitespace as before. */
 #info-modal-msg{white-space:pre-line}
+/* Friendly is private: every way in is hidden until the server says this account is on the list, so a failed check can never leak it. */ .friendly-door{display:none!important}
 .sos-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--s1);border-radius:12px;margin-bottom:10px;cursor:pointer;border:0.5px solid var(--bdr)}
 .sos-opt-crisis{background:rgba(226,75,74,0.1);border-color:rgba(226,75,74,0.4)}
 .crisis-bar{display:flex;align-items:center;gap:12px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.35);border-radius:12px;padding:12px 14px;text-decoration:none;margin:0 16px 4px}
@@ -1368,7 +1369,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
           <div class="setting-row-txt"><p>I slipped</p><span>Start the next hour</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
         </div>
-        <div class="setting-row" id="toolkit-friendly-row" onclick="switchTo('nova');actBn('bn-nova')">
+        <div class="setting-row friendly-door" data-friendly="1" id="toolkit-friendly-row" onclick="switchTo('nova');actBn('bn-nova')">
           <i class="ti ti-message-circle" style="color:var(--accent)"></i>
           <div class="setting-row-txt"><p>Talk to Friendly</p><span>Someone awake at 2am</span></div>
           <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
@@ -1621,7 +1622,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Gender identity</p><span id="gender-row-sub">Choose gender</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" id="profile-voice-row" onclick="openVoiceModal()">
+      <div class="setting-row friendly-door" data-friendly="1" id="profile-voice-row" onclick="openVoiceModal()">
         <i class="ti ti-handshake"></i>
         <div class="setting-row-txt"><p>Friendly's presence</p><span id="voice-row-sub">Neutral</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
@@ -1680,7 +1681,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
         <div class="setting-row-txt"><p>Smart Reminders</p><span>Personalized urge, risk, and check-in reminders</span></div>
         <i class="ti ti-chevron-right" style="font-size:1.125rem;color:var(--tm)"></i>
       </div>
-      <div class="setting-row" id="profile-friendly-row" onclick="toggleNovaDisclaimer()">
+      <div class="setting-row friendly-door" data-friendly="1" id="profile-friendly-row" onclick="toggleNovaDisclaimer()">
         <i class="ti ti-alert-triangle"></i>
         <div class="setting-row-txt"><p>Friendly safety reminder</p><span>Brief disclaimer shown when opening Friendly</span></div>
         <div class="toggle-sw on" id="nova-disclaimer-toggle"><div class="toggle-knob"></div></div>
@@ -1871,7 +1872,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div class="bn on" id="bn-home" onclick="switchTo('home');actBn('bn-home')"><i class="ti ti-home"></i><span>Today</span></div>
     <div class="bn" id="bn-tools" onclick="switchTo('tools');actBn('bn-tools')"><i class="ti ti-hand-stop"></i><span>Tools</span></div>
     <div class="bn" id="bn-game" onclick="openTower();actBn('bn-game')"><i class="ti ti-glove"></i><span>The Fight</span></div>
-    <div class="bn" id="bn-nova" style="display:none" onclick="switchTo('nova');actBn('bn-nova')">
+    <div class="bn friendly-door" data-friendly="1" id="bn-nova" onclick="switchTo('nova');actBn('bn-nova')">
       <div class="bn-rel"><i class="ti ti-handshake"></i><span class="bn-badge" id="nova-badge" style="display:none">1</span></div><span>Friendly</span>
     </div>
     <div class="bn" id="bn-plans" onclick="switchTo('profile');actBn('bn-plans')"><i class="ti ti-user-circle"></i><span>Profile</span></div>
@@ -2004,7 +2005,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
       <i class="ti ti-headphones" style="color:#1D9E75"></i>
       <div class="sos-opt-info"><p>Talk me through it</p><span>Hands-free — a calm voice guides you, nothing to read</span></div>
     </div>
-    <div class="sos-opt" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
+    <div class="sos-opt friendly-door" data-friendly="1" onclick="switchTo('nova');actBn('bn-nova');closeSOS()">
       <i class="ti ti-handshake" style="color:var(--accent)"></i>
       <div class="sos-opt-info"><p>Talk to Friendly</p><span id="sos-nova-sub">Your AI recovery companion, right now</span></div>
     </div>
@@ -2079,7 +2080,7 @@ function tsidUtm(){try{return JSON.parse(sessionStorage.getItem('tsid_utm')||'nu
     <div id="slip-which" style="display:none;margin:0 0 14px"></div>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();switchTo('journal');actBn('bn-tools');openJour()">Write about it in your journal</button>
     <button class="ob-btn" style="margin-bottom:8px" onclick="closeSlippedFlow();resetApp(true,slipPick)">Reset my date &amp; restart</button>
-    <button class="ob-btn outline" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Friendly</button>
+    <button class="ob-btn outline friendly-door" data-friendly="1" style="margin-top:0;margin-bottom:8px;color:var(--ts);border-color:var(--bdr)" onclick="closeSlippedFlow();switchTo('nova');actBn('bn-nova')">Talk to Friendly</button>
     <button class="sos-close" onclick="closeSlippedFlow()">Close for now</button>
   </div>
 </div>
@@ -2792,8 +2793,10 @@ function escapeHtml(s){
 // strategy if everyone stays free." The always-free door stays the SOS set -
 // breathing, grounding, Talk me through it, 988 - never a chatbot paywall in
 // a crisis: the zero-chat replies below name those and the crisis line.
-const FREE_CHAT_DAILY_LIMIT=0;
-const PRO_CHAT_DAILY_LIMIT=30;
+// Friendly is private, not paid (8 Sep 2026), so there is no daily cap. These
+// were 0 and 30: free got zero chats, which is what everyone had after the
+// paid tier went - the app said 'that is today's chats' on the first message.
+const CHAT_DAILY_LIMIT=0; // 0 = no limit
 // The reviews page's "Write one in the app" button lands here as ?review=1;
 // the modal opens once the user is signed in and past onboarding.
 let pendingReviewOpen=!!(new URLSearchParams(window.location.search).get('review')==='1');
@@ -2807,7 +2810,7 @@ let S = {
   novaDisclaimerDismissed:false,fontSize:'default',
   notifiedMilestones:[],lastProNudgeDate:'',seenMilestones:[],lastDailyWinDay:0,
   pledged:false,pledgeDate:'',
-  chatsLeft:FREE_CHAT_DAILY_LIMIT,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
+  chatsLeft:0,chatHistory:[],chatDate:'',voiceJournalActive:false,faithPath:'',novaSpeakReplies:false,
   currentAddiction:'',currentDay:1,lessonProgress:{},notifiedDay30Tracks:[],longestStreak:0,longestStreakDate:'',darkMode:false,
   streakHistory:[],notifiedProMilestones:[],
   notifiedHabitCelebrations:[],lastHabitAlertDate:'',
@@ -5068,7 +5071,7 @@ function initApp(){
   renderTodayMood();
   // reset daily chat limit
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=FREE_CHAT_DAILY_LIMIT;S.chatDate=today;save();}
+  if(S.chatDate!==today){S.chatsLeft=0;S.chatDate=today;save();}
   document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();
   // init Friendly welcome - voiced for who's actually sitting there: the person in
   // recovery, the one carrying someone else's, or the one doing both.
@@ -11517,14 +11520,7 @@ async function sendMsg(){
   const inp=document.getElementById('chatInput');
   const text=inp.value.trim();if(!text)return;
   const today=new Date().toDateString();
-  if(S.chatDate!==today){S.chatsLeft=FREE_CHAT_DAILY_LIMIT;S.chatDate=today;}
-  if(S.chatsLeft<=0){
-    addBubble('nova',DISTRESS_RE.test(text)||CRISIS_RE.test(text)
-      ?"That is today's chats — I am back tomorrow. Right now, When it's hard on Tools is open: breathing, grounding, a voice to talk you through it. And 988 is there any hour, free."
-      :"That is today's chats — I am back tomorrow. When it's hard on Tools is open any time.");
-    return;
-  }
-  S.chatsLeft--;document.getElementById('chatsLeft').textContent=S.chatsLeft;updateChatMeter();save();
+  if(S.chatDate!==today){S.chatsLeft=0;S.chatDate=today;}
   inp.value='';inp.style.height='auto';
   addBubble('user',text);
   S.chatHistory.push({role:'user',content:text,at:Date.now()});
@@ -11680,6 +11676,9 @@ const BN_FOR_SCREEN={home:'bn-home',nova:'bn-nova',journal:'bn-tools',craving:'b
   'habit-coach':'bn-tools',tools:'bn-tools',partner:'bn-tools',tower:'bn-game'};
 function switchTo(id,opts){
   if(id==='analytics'||id==='weekly-reports'||id==='habit-coach'||id==='streaks')id='insights';
+  // Friendly is private. This is the gate that matters: the tour, the search
+  // index, the slip flow and eight other call sites all arrive through here.
+  if(id==='nova'&&!friendlyAllowed)id='home';
   // Leaving the screen ends any dictation on it. A mic left listening in the
   // background is both a battery drain and a privacy problem.
   try{stopDictation();}catch(e){}
@@ -11746,14 +11745,14 @@ async function applyFriendlyAccess(){
     const r=await fetch('/api/friendly/access');
     friendlyAllowed=r.ok&&!!(await r.json()).allowed;
   }catch(e){friendlyAllowed=false;}
-  const tab=document.getElementById('bn-nova');
-  if(tab)tab.style.display=friendlyAllowed?'':'none';
-  for(const id of ['toolkit-friendly-row','profile-friendly-row','profile-voice-row']){
-    const row=document.getElementById(id);
-    if(row)row.style.display=friendlyAllowed?'':'none';
-  }
-  if(!friendlyAllowed&&document.getElementById('s-nova')&&document.getElementById('s-nova').classList.contains('on')){
-    switchTo('home');actBn('bn-home');
+  // Six doors, one class. Hidden in CSS by default, so if this never runs or the
+  // request fails, Friendly stays out of sight rather than half-showing.
+  document.querySelectorAll('[data-friendly]').forEach(el=>{
+    el.classList.toggle('friendly-door',!friendlyAllowed);
+  });
+  if(!friendlyAllowed){
+    const n=document.getElementById('s-nova');
+    if(n&&n.classList.contains('on')){switchTo('home');actBn('bn-home');}
   }
 }
 function actBn(id){
@@ -11793,6 +11792,7 @@ async function updateChatMeter(){
     const r=await fetch('/api/chat/usage');
     if(!r.ok)throw new Error();
     const d=await r.json();
+    if(d.remaining===null||d.limit===0){barTxt.textContent='';return;}
     const left=Math.max(0,d.remaining);
     // The server owns the daily quota - it resets at UTC midnight, not on the
     // device clock - so the meter follows the server, never local time.
@@ -11801,7 +11801,7 @@ async function updateChatMeter(){
     save();
     barTxt.innerHTML='<strong>'+left+'</strong> of '+d.limit+' chats left today';
   }catch(e){
-    barTxt.innerHTML='Up to <strong>'+PRO_CHAT_DAILY_LIMIT+'</strong> chats a day';
+    barTxt.textContent='';
   }
 }
 

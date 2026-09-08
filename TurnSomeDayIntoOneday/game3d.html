@@ -129,20 +129,46 @@ const DAMAGE=[{k:'body',line:'Tonight it comes for your body.',color:0x2a0606,em
 let building=Math.max(1,+new URLSearchParams(location.search).get('building')||1);function damage(){return DAMAGE[(building-1)%DAMAGE.length];}
 // Ten floors, ten elements. Every floor is the same addiction wearing a
 // different face: its own colour, its own weather in the ring, its own glow.
+// The element used to be paint: thirteen skins on one identical fight, so floor
+// three of building one boxed the same as floor eight of building fourteen.
+// Each one now has its own timing, and the person is told which before the bell.
+//   tell  how long the wind-up lasts before the glove comes  (>1 slower, <1 faster)
+//   dmg   what its punch takes off you
+//   chin  what your punch takes off it  (<1 means it will not go down easily)
+//   gap   the pause between its swings  (<1 means it comes at you more often)
+//   feint how often it winds up and does not throw
+// Nothing here goes past about half again either way - a floor is a different
+// fight, never an unwinnable one.
 const FLOORS=[
- {k:'rain',    name:'Rain',      c:0x4f8ef7, ring:[0x1d3f6b,0x0b2036,0x8fc4ff]},
- {k:'fire',    name:'Fire',      c:0xff6a1f, ring:[0x5e2410,0x2a0d05,0xffb066]},
- {k:'wind',    name:'Wind',      c:0x9fe8d6, ring:[0x1c4a44,0x0a1f1c,0xbdfff0]},
- {k:'earth',   name:'Earth',     c:0xb07a3c, ring:[0x4a3320,0x1d130a,0xe0b57a]},
- {k:'ash',     name:'Ash',       c:0x9aa0ad, ring:[0x30343d,0x14161b,0xd6dae2]},
- {k:'ice',     name:'Ice',       c:0x8fd8ff, ring:[0x1f4f66,0x0a2330,0xcdefff]},
- {k:'smoke',   name:'Smoke',     c:0x7d7f8c, ring:[0x2a2c33,0x101116,0xc2c4cc]},
- {k:'lightning',name:'Lightning',c:0xd9c2ff, ring:[0x2f2a5c,0x120f28,0xe8dcff]},
- {k:'sand',    name:'Sand',      c:0xe0b45c, ring:[0x5a4520,0x241a0b,0xffdc9b]},
- {k:'shadow',  name:'Shadow',    c:0x6b5bd6, ring:[0x241f4a,0x0c0a1c,0x9b8cff]},
- {k:'rust',    name:'Rust',      c:0xc0703a, ring:[0x50331d,0x1e120a,0xe8a768]},
- {k:'void',    name:'Void',      c:0x4a4f63, ring:[0x191c26,0x090a0e,0x8d94ad]},
- {k:'metal',   name:'Metal',     c:0xbfd0dd, ring:[0x2f3a44,0x121820,0xe2f0ff]}];
+ {k:'rain',    name:'Rain',      c:0x4f8ef7, ring:[0x1d3f6b,0x0b2036,0x8fc4ff],
+  st:{tell:1.00,dmg:1.00,chin:1.00,gap:1.00,feint:0.05,how:'Steady. It just keeps coming.'}},
+ {k:'fire',    name:'Fire',      c:0xff6a1f, ring:[0x5e2410,0x2a0d05,0xffb066],
+  st:{tell:0.80,dmg:1.20,chin:1.15,gap:0.90,feint:0.05,how:'Fast and heavy, and it leaves itself open.'}},
+ {k:'wind',    name:'Wind',      c:0x9fe8d6, ring:[0x1c4a44,0x0a1f1c,0xbdfff0],
+  st:{tell:0.78,dmg:0.80,chin:1.05,gap:0.72,feint:0.10,how:'Quick and light. A lot of them.'}},
+ {k:'earth',   name:'Earth',     c:0xb07a3c, ring:[0x4a3320,0x1d130a,0xe0b57a],
+  st:{tell:1.32,dmg:1.30,chin:0.82,gap:1.15,feint:0.05,how:'Slow, heavy, hard to move.'}},
+ {k:'ash',     name:'Ash',       c:0x9aa0ad, ring:[0x30343d,0x14161b,0xd6dae2],
+  st:{tell:1.10,dmg:0.85,chin:0.85,gap:0.92,feint:0.12,how:'Dull and grinding. It wears you down.'}},
+ {k:'ice',     name:'Ice',       c:0x8fd8ff, ring:[0x1f4f66,0x0a2330,0xcdefff],
+  st:{tell:1.42,dmg:1.38,chin:0.88,gap:1.20,feint:0.05,how:'You will see it coming. It still hurts.'}},
+ {k:'smoke',   name:'Smoke',     c:0x7d7f8c, ring:[0x2a2c33,0x101116,0xc2c4cc],
+  st:{tell:0.95,dmg:0.95,chin:1.00,gap:0.95,feint:0.36,how:'You cannot read it. Half of it is a lie.'}},
+ {k:'lightning',name:'Lightning',c:0xd9c2ff, ring:[0x2f2a5c,0x120f28,0xe8dcff],
+  st:{tell:0.58,dmg:0.78,chin:1.10,gap:0.70,feint:0.08,how:'Barely a warning. Hands up early.'}},
+ {k:'sand',    name:'Sand',      c:0xe0b45c, ring:[0x5a4520,0x241a0b,0xffdc9b],
+  st:{tell:1.05,dmg:0.82,chin:0.72,gap:0.85,feint:0.10,how:'It will not go down. Go the distance.'}},
+ {k:'shadow',  name:'Shadow',    c:0x6b5bd6, ring:[0x241f4a,0x0c0a1c,0x9b8cff],
+  st:{tell:0.90,dmg:1.05,chin:0.95,gap:0.82,feint:0.28,how:'It sells one and throws the other.'}},
+ {k:'rust',    name:'Rust',      c:0xc0703a, ring:[0x50331d,0x1e120a,0xe8a768],
+  st:{tell:1.18,dmg:0.95,chin:0.72,gap:1.05,feint:0.10,how:'Old and slow and it takes forever.'}},
+ {k:'void',    name:'Void',      c:0x4a4f63, ring:[0x191c26,0x090a0e,0x8d94ad],
+  st:{tell:0.62,dmg:1.25,chin:0.90,gap:0.88,feint:0.20,how:'Almost no wind-up, and it takes a lot.'}},
+ {k:'metal',   name:'Metal',     c:0xbfd0dd, ring:[0x2f3a44,0x121820,0xe2f0ff],
+  st:{tell:1.05,dmg:1.15,chin:0.75,gap:1.00,feint:0.14,how:'Clean and hard, and it blocks well.'}}];
+// The roof has no element and no disguise, so it fights straight - and hits hardest.
+const ROOF_STYLE={tell:0.85,dmg:1.20,chin:0.85,gap:0.85,feint:0.22,how:'The source. No element, no disguise.'};
+function STY(){const F=FL();return (F&&F.st)||ROOF_STYLE;}
 let floorN=Math.max(0,Math.min(10,+(new URLSearchParams(location.search).get('floor'))||0));
 function FL(){return floorN>0?FLOORS[((Math.max(1,building)-1)+(floorN-1))%FLOORS.length]:null;}
 // how hard: every floor of every building is one step up, and it never stops
@@ -705,8 +731,8 @@ addEventListener('message',ev=>{const d=ev.data;if(!d||d.to!=='fightofyourlife')
 let YOUNAME='you';
 function temptLine(){const set=LINES[addictionKey]||LINES.habit;const q=set[Math.floor(Math.random()*set.length)];say(q.line,ADD().name);return q;}
 // it gets harder every level: a shorter tell, a heavier punch, a busier guard
-function tellMs(){return 1900-1000*ease(step()-1);}          // 1.9s down towards 0.9s
-function hitDmg(){return Math.round(10+16*ease(step()-1));}   // 10 up towards 26
+function tellMs(){return (1900-1000*ease(step()-1))*STY().tell;}  // 1.9s towards 0.9s, then the element's own timing
+function hitDmg(){return Math.round((10+16*ease(step()-1))*STY().dmg);}   // 10 towards 26, times what this one hits for
 let VOICES=null;function pickVoice(kind){try{if(!VOICES)VOICES=speechSynthesis.getVoices();const en=VOICES.filter(v=>/^en/i.test(v.lang));const female=en.find(v=>/female|zira|samantha|karen|moira|tessa|fiona|victoria|susan|hazel|libby|sonia|aria|jenny/i.test(v.name));const male=en.find(v=>/male|david|daniel|george|ryan|guy|mark|james|alex|fred|rishi|thomas/i.test(v.name)&&!/female/i.test(v.name));if(kind==='ref')return female||en[0]||null;return male||en[0]||null;}catch(e){return null;}}
 function speak(text,who){try{if(!('speechSynthesis' in window)||!text||text==='…')return;const u=new SpeechSynthesisUtterance(text.replace(/\s+/g,' '));const boss=who===ADD().name;u.rate=who==='Announcer'?.92:boss?.82:1;u.pitch=who==='Announcer'?.7:boss?.45:who==='Referee'?1.05:.95;u.volume=1;const v=pickVoice(who==='Referee'?'ref':'man');if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
 if('speechSynthesis' in window)speechSynthesis.onvoiceschanged=()=>{VOICES=null;};
@@ -877,7 +903,7 @@ async function bossSpecial(){if(!running||busy||downState)return;busy=true;bsp=0
   $('lines').classList.remove('on');slow=1;rim.intensity=180;aura.scale.set(3.6,3.6,1);BOSS.idle();YOU.idle();stepBack(BOSS,300);shot('tv',700);busy=false;if(youHP<=0)meDown();}
 function ding(){try{const c=ac(),t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(1320,t);o.frequency.exponentialRampToValueAtTime(1980,t+.08);g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.4);}catch(e){}}
 // it does not wait politely: the gaps shorten as the fight goes on and it doubles up on you
-async function ai(){while(!fightOver){const gap=Math.max(430,1500-round*130-560*ease(step()-1))+Math.random()*700;await wait(gap);
+async function ai(){while(!fightOver){const gap=(Math.max(430,1500-round*130-560*ease(step()-1))+Math.random()*700)*STY().gap;await wait(gap);
   if(!running||downState)continue;
   // it waits for its turn instead of losing it: without this the person can keep it busy all round
   for(let i=0;i<50&&busy&&running&&!downState;i++)await wait(90);
@@ -890,7 +916,7 @@ async function ai(){while(!fightOver){const gap=Math.max(430,1500-round*130-560*
 function flashGlove(F,i,color){const g=F&&F.gloves&&F.gloves[i];if(!g)return;const m=g.material;if(!m.userData.base)m.userData.base=m.color.getHex();m.emissive=m.emissive||new T.Color();m.emissive.setHex(color);m.emissiveIntensity=3.2;m.needsUpdate=true;clearTimeout(g.userData.t);g.userData.t=setTimeout(()=>{m.emissive.setHex(0x000000);m.emissiveIntensity=1;m.needsUpdate=true;},260);}
 // it can get its gloves up too: a block takes most of the sting out and it answers straight back
 function bossBlocks(){return !downState&&Math.random()<Math.min(0.46,0.08+round*0.035+0.22*ease(step()-1));}
-function land(kind,dmg,blocked){if(kind==='up'||kind==='combo2')punchIn();flashGlove(YOU,hand[kind]==='L'?0:1,blocked?0x8899aa:0x9fe8ff);
+function land(kind,dmg,blocked){dmg=Math.max(2,Math.round(dmg*STY().chin));if(kind==='up'||kind==='combo2')punchIn();flashGlove(YOU,hand[kind]==='L'?0:1,blocked?0x8899aa:0x9fe8ff);
   if(blocked){BOSS.play('center_block',{speed:1.5});bossHP=Math.max(0,bossHP-Math.max(2,Math.round(dmg*0.22)));landed.you+=2;bsp=Math.min(100,bsp+9);bars();slam('BLOCKED');thud('block');call(['It got the gloves up.','Blocked by it.','It read that one.']);return;}
   if(kind==='up')call(['Big uppercut.','Up the middle.','That one hurt it.']);else if(kind==='hook'||kind==='combo2')call(['Big right hand.','Caught it clean.','Right on the button.']);else if(Math.random()<.35)call(['Jab working.','Keeping it off.','Good jab.']);const big=kind==='up'||kind==='combo2'||kind==='hook';
   // a power punch: the clean one. Slow motion, the ring shakes, it takes half again as much.
@@ -914,12 +940,27 @@ async function punch(kind){if(!running||downState||!YOU)return;if(busy){queued=k
   if(bossHP<=0){busy=false;return knockdown();}
   await wait(260);BOSS.idle();busy=false;}
 // its swing: it winds up (the tell), then throws. Slip the way the arrow points, or block.
-async function bossSwing(){if(!running||busy||downState||!BOSS)return;dodge=null;block=false;swingAt=performance.now();
-  const side=Math.random()<.5?'L':'R';swingSide=side;temptLine();
+async function bossSwing(fast){if(!running||busy||downState||!BOSS)return;dodge=null;block=false;swingAt=performance.now();
+  const side=Math.random()<.5?'L':'R';swingSide=side;if(!fast)temptLine();
   const cue=document.createElement('div');cue.className='cue '+side;cue.innerHTML=`<b>${side==='L'?'\u25c0':'\u25b6'}</b>`;$('stage').appendChild(cue);
   // the tell: it leans, the light behind it flares, and it says the thing it always says
   const face=BOSS.root.rotation.y,lean=side==='L'?.3:-.3;BOSS.root.rotation.y=face+lean;rim.intensity=260;
-  await wait(tellMs());if(!running||downState){cue.remove();rim.intensity=140;swingSide=null;return;}
+  await wait(fast?Math.max(240,tellMs()*0.42):tellMs());
+  if(!running||downState){cue.remove();rim.intensity=140;swingSide=null;return;}
+  // The feint. Until now the wind-up never lied, so a lean was always a punch and
+  // there was nothing to read - only a side to copy. Some of them sell it and pull
+  // out, and if you already moved you are standing in the wrong place when the real
+  // one comes. Never twice in a row: a feint is a trick, not a wall.
+  if(!fast&&Math.random()<STY().feint){
+    cue.remove();rim.intensity=140;BOSS.root.rotation.y=face;swingSide=null;
+    // it pulls back out of the shot it just sold - the slip clip, on the side it sold
+    slam('FEINT');whoosh();BOSS.play(side==='L'?'dodging':'dodging_right',{speed:1.25});
+    call(['It sold that one.','Bought the feint.','It did not throw it.']);
+    dodge=null;block=false;
+    await wait(340+Math.random()*220);
+    if(!running||downState){BOSS.idle();return;}
+    return bossSwing(true);   // and now the real one, with barely any warning
+  }
   // the swing itself is the only part that holds the ring; while you are mid-punch it waits a beat
   for(let i=0;i<12&&busy;i++)await wait(60);busy=true;cue.remove();rim.intensity=140;BOSS.root.rotation.y=face;
   // its glove arrives at 0.40 s of the hook and 0.50 s of the jab, played at 1.4

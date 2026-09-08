@@ -6444,6 +6444,22 @@ function stopStory(){if(storyAudio){try{storyAudio.pause();}catch(e){}const old=
 
 const GAME_FLOORS=10;                   // ten floors, then the roof
 // Every floor carries an element you can see in the ring. The fight page draws it.
+// How each element boxes. The fight page holds the real numbers; this is the
+// same thing in words, so nobody walks into Ice expecting Lightning.
+const GAME_ELEMENT_HOW={
+  Rain:'Steady. It just keeps coming.',
+  Fire:'Fast and heavy, and it leaves itself open.',
+  Wind:'Quick and light. A lot of them.',
+  Earth:'Slow, heavy, hard to move.',
+  Ash:'Dull and grinding. It wears you down.',
+  Ice:'You will see it coming. It still hurts.',
+  Smoke:'You cannot read it. Half of it is a lie.',
+  Lightning:'Barely a warning. Hands up early.',
+  Sand:'It will not go down. Go the distance.',
+  Shadow:'It sells one and throws the other.',
+  Rust:'Old and slow and it takes forever.',
+  Void:'Almost no wind-up, and it takes a lot.',
+  Metal:'Clean and hard, and it blocks well.'};
 const GAME_ELEMENTS=['Rain','Fire','Wind','Earth','Ash','Ice','Smoke','Lightning','Sand','Shadow','Rust','Void','Metal'];
 // One building per addiction, each its own kind of place. Anybody can walk into
 // any of them - only the lessons follow the person's own track.
@@ -6888,7 +6904,7 @@ function renderFloors(){
     const done=!!g.cleared[n],here=g.f===n&&!done;
     const go=here?'gameFloorGo('+n+')':done?'gameFloorReplay('+n+')':'';
     rows.push(`<button class="g2-flr ${done?'done':''} ${here?'here':''}" ${go?'onclick="'+go+'"':'disabled'}>
-      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}</span><i>${done?'cleared &middot; go again':here?'fight':'locked'}</i></button>`);
+      <b>${n}</b><span>${gmEsc(gameFloorEl(n))}${here?'<small style="display:block;font-size:.7rem;opacity:.75">'+gmEsc(GAME_ELEMENT_HOW[gameFloorEl(n)]||'')+'</small>':''}</span><i>${done?'cleared &middot; go again':here?'fight':'locked'}</i></button>`);
   }
   const roofReady=Object.keys(g.cleared).length>=GAME_FLOORS;
   gmBody(`<div class="g2-cat">${gmEsc(B.name)} · ${gmEsc(B.kind)}</div>
@@ -6936,7 +6952,7 @@ function renderRoofDoor(){
   const rows=str.parts.map(p=>`<div><span>${gmEsc(p.k)}</span><b>${p.v?'+'+p.v:'—'}</b>${p.hint?`<small>${gmEsc(p.hint)}</small>`:''}</div>`).join('');
   gmBody(`<div class="g2-cat">${gmEsc(gameBuilding().name)} · ${roof?'the roof':'floor '+F+' · '+gmEsc(gameFloorEl(F))} · ${T.label}</div>
     <h1 class="g2-h1">${roof?`${gmEsc(boss)} <em>itself.</em>`:`${gmEsc(boss)} is <em>waiting.</em>`}</h1>
-    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise.':gmEsc(gameFloorEl(F))+' in the ring.'} It swings from one side, you go the other &middot; swipe or use the arrows</div>
+    <div class="g2-from" style="text-align:left">${roof?'The source. No element, no disguise. It fights straight, and it hits hardest.':gmEsc(gameFloorEl(F))+' in the ring. '+gmEsc(GAME_ELEMENT_HOW[gameFloorEl(F)]||'')} It swings from one side, you go the other &middot; swipe or use the arrows. Some of them sell a punch they never throw.</div>
     ${again?'<div class="g2-from" style="text-align:left">You have already cleared this one. Go as many rounds as you want &mdash; nothing here counts against you.</div>':''}
     <div class="g2-strength"><b>${str.total}</b><span>Strength · earned in the app</span></div>
     <div class="g2-strrows">${rows}</div>

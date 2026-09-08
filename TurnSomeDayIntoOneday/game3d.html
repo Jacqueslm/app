@@ -123,6 +123,11 @@ try{if(window.parent!==window)document.body.classList.add('embed');}catch(e){doc
 // the app serves these from its own root; opened straight from tools/ring3d they come from two levels up
 const BASE=(new URLSearchParams(location.search).get('base'))||(/\/tools\/ring3d\//.test(location.pathname)?'../../':'');
 const ART=BASE+'img/fight/',AUDIO=BASE+'audio/fight/';
+// Every model carries the build number in its address. The offline cache serves
+// files cache-first, and the six fighter models were re-exported this month - so a
+// phone that had the old ones kept using them, and the new code stood the old model
+// up facing the wrong way. A new address is never in an old cache. (iPhone, 8 Sep 2026)
+const AV='?v=3.0.2';
 // models load from img/fight/
 const canvas=$('c'),R=new T.WebGLRenderer({canvas,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
 const scene=new T.Scene();scene.background=new T.Color(0x05070d);scene.fog=new T.FogExp2(0x05070d,.075);
@@ -218,7 +223,7 @@ const ringFloor=new T.Mesh(new T.CircleGeometry(2.95,40),canvasMat);ringFloor.ro
 const ringGlow=new T.PointLight(0xbcd8ff,26,7,1.9);ringGlow.position.set(0,2.6,0.2);scene.add(ringGlow);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
 // no two levels look the same: the canvas and the house light change with the level
 const MOODS=[[0x2b5f9e,0x14324f,0xbcd8ff],[0x7a2f4a,0x3a1424,0xffc2d4],[0x2f6f52,0x123326,0xbdf0d6],[0x6b4b9e,0x281a44,0xd8c6ff],[0x9e6a2b,0x40280d,0xffd9a8],[0x2b4f9e,0x101f42,0xc0d0ff]];
-function RINGGLB(){return ART+'ring.glb';}
+function RINGGLB(){return ART+'ring.glb'+AV;}
 
 // The ring itself, built in Blender: a square canvas on an apron with a skirt,
 // padded corner posts, turnbuckles and steps up. The old pipes stay in the scene
@@ -231,7 +236,7 @@ function loadRing(){loader.load(RINGGLB(),g=>{
   scene.add(r);ringModel=r;ringFloor.visible=false;for(const o of OLDRING)o.visible=false;setMood();
 },undefined,e=>console.error(e));}
 
-function CHUTEGLB(){return ART+'chute.glb';}function CITYGLB(){return ART+'city.glb';}
+function CHUTEGLB(){return ART+'chute.glb'+AV;}function CITYGLB(){return ART+'city.glb'+AV;}
 
 // ── off the roof ────────────────────────────────────────────────────────────
 // Win on a roof and you do not walk out: you go off the side under a chute,
@@ -602,7 +607,7 @@ function castFace(F,at){F.root.rotation.y=Math.atan2(at.x-F.root.position.x,at.z
 // the round card: white, the round number, and the corner's line on the back
 function cardTex(text,big){const c=document.createElement('canvas');c.width=256;c.height=340;const x=c.getContext('2d');x.fillStyle='#f4efe4';x.fillRect(0,0,256,340);x.strokeStyle='#c8262a';x.lineWidth=14;x.strokeRect(12,12,232,316);x.fillStyle='#141413';x.textAlign='center';if(big){x.font='bold 48px Impact,Arial';x.fillText('ROUND',128,120);x.font='bold 150px Impact,Arial';x.fillText(text,128,270);}else{x.font='bold 30px Arial';const words=text.split(' ');let line='',y=110;for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>210){x.fillText(line,128,y);line=w;y+=38;}else line=t;}x.fillText(line,128,y);}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;}
 function cloneSkinned(src){const sl=new Map(),cl=new Map();const c=src.clone();(function par(a,b){sl.set(b,a);cl.set(a,b);for(let i=0;i<a.children.length;i++)par(a.children[i],b.children[i]);})(src,c);c.traverse(n=>{if(!n.isSkinnedMesh)return;const sm=sl.get(n),ss=sm.skeleton;n.skeleton=ss.clone();n.bindMatrix.copy(sm.bindMatrix);n.skeleton.bones=ss.bones.map(b=>cl.get(b));n.bind(n.skeleton,n.bindMatrix);});return c;}
-function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CROWD_SIDE[k]){left++;loader.load(ART+'crowd/'+key+'.glb',g=>{const F=skinned(g.scene,null,MOVES,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;const sc=h>0.3?1.75/h:1;const clips=retarget(MOVES,F.root);
+function seatCrowd(cb){let left=0;for(const k in CROWD_SIDE)for(const key of CROWD_SIDE[k]){left++;loader.load(ART+'crowd/'+key+'.glb'+AV,g=>{const F=skinned(g.scene,null,MOVES,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;const sc=h>0.3?1.75/h:1;const clips=retarget(MOVES,F.root);
     const idx=CROWD_SIDE[k].indexOf(key);SEATPOS[k].forEach((p,i)=>{if(i%CROWD_SIDE[k].length!==idx)return;const root=cloneSkinned(F.root);root.scale.setScalar(sc*(0.93+Math.random()*0.14));root.position.set(p[0]+(Math.random()-.5)*.16,p[1]+.42,p[2]+.05+(Math.random()-.5)*.12);
       root.rotation.y=Math.atan2(-p[0],-p[2])*0.7+(Math.random()-.5)*0.35;
       root.traverse(o=>{if(!o.isMesh)return;o.frustumCulled=false;/* a crowd sits in the dark, it is not lit like the ring */
@@ -622,11 +627,11 @@ const stoolGeo=new T.CylinderGeometry(.20,.17,.50,12),stoolMat=new T.MeshStandar
 async function toCorners(){stools.you.visible=stools.boss.visible=true;await Promise.all([fighterWalk(YOU,CORNERPOS.you.clone().add(new T.Vector3(.05,0,-.05)),1.4,new T.Vector3(0,0,0)),fighterWalk(BOSS,CORNERPOS.boss.clone().add(new T.Vector3(-.05,0,.05)),1.4,new T.Vector3(0,0,0))]);
   for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.set(CORNERPOS[k].x,0,CORNERPOS[k].z);F.root.rotation.y=Math.atan2(-CORNERPOS[k].x,-CORNERPOS[k].z);F.play('sitting_idle',{loop:true,fade:.3});}}
 async function toMarks(){for(const [F,k] of [[YOU,'you'],[BOSS,'boss']]){F.root.position.y=0;F.idle();}stools.you.visible=stools.boss.visible=false;await Promise.all([fighterWalk(YOU,MARK.you,1.5),fighterWalk(BOSS,MARK.boss,1.5)]);youHome.copy(YOU.root.position);YOU.home=null;BOSS.home=null;faceOff();}
-function loadCast(key,cb){loader.load(ART+key+'.glb',g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
-function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb',g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);/* measured before the feet are grounded: after it, this box hangs below the floor */const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;groundFeet(YOU);camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
+function loadCast(key,cb){loader.load(ART+key+'.glb'+AV,g=>{const F=skinned(g.scene,null,g.animations&&g.animations.length?g.animations:REFCLIPS,0,true);F.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(F.root),h=bb.max.y-bb.min.y;if(h>0.3)F.root.scale.multiplyScalar(1.78/h);scene.add(F.root);F.idle();cb(F);},undefined,e=>console.error(e));}
+function loadFighter(n,cb){if(!MOVES)return;fighterN=n;loader.load(ART+'fighter'+n+'.glb'+AV,g=>{const old=YOU;const own=(g.animations||[]);const have=new Set(own.map(c=>c.name));const all=own.concat((MOVES||[]).filter(c=>!have.has(c.name)));YOU=skinned(g.scene,null,all,GLOVES[glove]||0xc8262a);YOU.root.position.set(-0.25,0,0.3);youHome.copy(YOU.root.position);YOU.home=null;scene.add(YOU.root);if(old){scene.remove(old.root);}if(BOSS)faceOff();YOU.idle();if(REFCLIPS)giveWalk(YOU,true);YOU.root.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(YOU.root);/* measured before the feet are grounded: after it, this box hangs below the floor */const top=bb.max.y;YOU.bh=Math.max(1.2,bb.max.y-bb.min.y);YOU.bmid=(bb.max.y+bb.min.y)/2;groundFeet(YOU);camBase.set(0.85,Math.max(1.75,top+0.35),2.55);if(fightOver){cam.position.copy(camBase);}setGlove(FIGHTER_GLOVE[n]||'red');document.querySelectorAll('#fighters button').forEach(b=>b.classList.toggle('on',+b.dataset.f===n));if(cb)cb();},undefined,e=>console.error(e));}
 // clone helper for skinned meshes (SkeletonUtils is not in the bundle): load the model twice instead
 let loaded=0;const loader=new GLTFLoader();
-function loadOne(cb){loader.load(ART+'fighter.glb',g=>cb(g),undefined,e=>console.error(e));}
+function loadOne(cb){loader.load(ART+'fighter.glb'+AV,g=>cb(g),undefined,e=>console.error(e));}
 loadOne(g=>{BOSS=fighter(g.scene,g.animations,{color:0x07070a,emissive:0x120c04,glove:0x111111});BOSS.root.position.set(0,0,-0.55);scene.add(BOSS.root);BOSS.idle();bossLook();MOVES=g.animations;seatCrowd(ready);loadFighter(+Q.get('fighter')||(1+Math.floor(Math.random()*5)),ready);ready();});
 function faceOff(){const y=YOU.root.position,b=BOSS.root.position;YOU.root.rotation.y=Math.atan2(b.x-y.x,b.z-y.z);BOSS.root.rotation.y=Math.atan2(y.x-b.x,y.z-b.z);}
 // your gloves: the colour you picked on the door
@@ -634,7 +639,7 @@ const GLOVES={red:0xc8262a,blue:0x2f5fd6,white:0xeeeeee,black:0x141418,gold:0xd7
 const FIGHTER_GLOVE={1:'red',2:'blue',3:'black',4:'gold',5:'green'};let glove='red';function setGlove(c){if(!GLOVES[c])return;glove=c;if(YOU)YOU.gloves.forEach(m=>m.material.color.set(GLOVES[c]));document.querySelectorAll('#gloves button').forEach(b=>b.classList.toggle('on',b.dataset.g===c));}
 function ready(){if(++loaded<10)return;tellParent({type:'ready'});groundFeet(BOSS);groundFeet(YOU);giveWalk(BOSS,false);giveWalk(YOU,true);faceOff();setPlace(Q.get('place')||['temple','tomb','monastery','rooftop'][(Math.max(1,building)-1)%4]);loadRing();loadJump();$('load').remove();clockShow();showControls(LIVE);setElement(FL()&&FL().k);setRingPic();if(FL())$('bossname').textContent=ADD().name;
   setTimeout(()=>{if(fightOver)startFight();},LIVE?700:900);}
-loader.load(ART+'ref.glb',g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
+loader.load(ART+'ref.glb'+AV,g=>{const root=g.scene;root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.frustumCulled=false;}});
   const mixer=new T.AnimationMixer(root),acts={};g.animations.forEach(c=>{acts[c.name]=mixer.clipAction(c);});ref.add(root);
   REF={root,mixer,acts,cur:null};refIdle();REFCLIPS=g.animations;
   loadCast('announcer',F=>{ANN=F;F.home=new T.Vector3(-3.5,0,-1.5);F.root.position.copy(F.home);F.root.rotation.y=1.17;ready();});

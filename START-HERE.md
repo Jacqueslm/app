@@ -325,6 +325,16 @@ Google's email (first production review typically takes days).
   (trigger `trig_01GRVwbDm66yN8joftU5hPxC`, fires ~10:30am daily until
   resolved). Do NOT create a second reminder.
 
+**SUPERSEDED 8 Sep 2026 — billing is OFF.** The app is free, so
+`twa-manifest.json` now has `features.playBilling.enabled: false` and
+`alphaDependencies.enabled: false`, at 1.0.3 / versionCode 4. This is what
+finally clears the "In-app purchases" badge on the store listing: the badge
+follows the billing library inside the .aab, not the Play Console products.
+Those products can never be deleted — once a base plan has been published
+Google only allows deactivating — so deactivated is the end state and the
+badge only lifts once a build without the library is live. **Do not turn
+playBilling back on.** The paragraph below is the record of the 1.0.1 build.
+
 **What the new build contains** (all four in one .aab): Play Billing ON
 (the closed-testing shell had NO billing library — it could never take money),
 `enableNotifications` TRUE (bubblewrap requires it for billing; also the
